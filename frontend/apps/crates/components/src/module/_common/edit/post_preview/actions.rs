@@ -124,14 +124,7 @@ impl PostPreview {
         Mode: ModeExt + 'static,
         Step: StepExt + 'static,
     {
-        let texts_json = get_card_texts_json(raw_data.as_body())?;
-
-        let kind_str = RawData::kind().as_str();
-
-        // needed so that a `"` characters don't end the html attribute
-        let texts_json = texts_json.replace("\"", "&quot;");
-
-        let html = format!("<{kind_str}-print cards=\"{texts_json}\"></{kind_str}-print>");
+        let html = get_html_to_print(raw_data.as_body())?;
 
         let custom_elements_script = web_sys::window()
             .unwrap_ji()
@@ -154,32 +147,38 @@ impl PostPreview {
     }
 }
 
-fn get_card_texts_json(body: Body) -> anyhow::Result<String> {
+fn get_html_to_print(body: Body) -> anyhow::Result<String> {
     match body {
-        ModuleBody::MemoryGame(memory) => {
-            let pairs = memory.content.unwrap_or_default().base.pairs;
+        ModuleBody::MemoryGame(_) | ModuleBody::Matching(_) | ModuleBody::CardQuiz(_) => {
+            let pairs = get_card_pairs(body)?;
             let texts = cards_to_text_singles(pairs)?;
             let json = serde_json::to_string(&texts).unwrap_ji();
-            Ok(json)
+            // needed so that a `"` characters don't end the html attribute
+            let json = json.replace("\"", "&quot;");
+            let html =
+                format!("<module-card-print-single cards=\"{json}\"></module-card-print-single>");
+            Ok(html)
         }
-        ModuleBody::Flashcards(flashcards) => {
-            let pairs = flashcards.content.unwrap_or_default().base.pairs;
+        ModuleBody::Flashcards(_) => {
+            let pairs = get_card_pairs(body)?;
             let texts = cards_to_text_doubles(pairs)?;
             let json = serde_json::to_string(&texts).unwrap_ji();
-            Ok(json)
+            // needed so that a `"` characters don't end the html attribute
+            let json = json.replace("\"", "&quot;");
+            let html =
+                format!("<module-card-print-double cards=\"{json}\"></module-card-print-double>");
+            Ok(html)
         }
-        // ModuleBody::Matching(matching) => {
-        //     let pairs = matching.content.unwrap_or_default().base.pairs;
-        //     let texts = cards_to_text_singles(pairs)?;
-        //     let json = serde_json::to_string(&texts).unwrap_ji();
-        //     Ok(json)
-        // },
-        // ModuleBody::CardQuiz(card_quiz) => {
-        //     let pairs = card_quiz.content.unwrap_or_default().base.pairs;
-        //     let texts = cards_to_text_singles(pairs)?;
-        //     let json = serde_json::to_string(&texts).unwrap_ji();
-        //     Ok(json)
-        // },
+        _ => Err(anyhow::anyhow!("Not a card game")),
+    }
+}
+
+fn get_card_pairs(body: Body) -> anyhow::Result<Vec<CardPair>> {
+    match body {
+        ModuleBody::MemoryGame(memory) => Ok(memory.content.unwrap_or_default().base.pairs),
+        ModuleBody::Flashcards(flashcards) => Ok(flashcards.content.unwrap_or_default().base.pairs),
+        ModuleBody::Matching(matching) => Ok(matching.content.unwrap_or_default().base.pairs),
+        ModuleBody::CardQuiz(card_quiz) => Ok(card_quiz.content.unwrap_or_default().base.pairs),
         _ => Err(anyhow::anyhow!("Not a card game")),
     }
 }

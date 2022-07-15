@@ -51,7 +51,7 @@ where
             .apply(|dom| {
                 log::info!("{:?}", RawData::kind());
                 match RawData::kind() {
-                    ModuleKind::Memory | ModuleKind::Flashcards => {
+                    ModuleKind::Memory | ModuleKind::Flashcards | ModuleKind::Matching | ModuleKind::CardQuiz  => {
                         dom.child(html!("post-preview-action", {
                             .property("slot", "action-print")
                             .property("kind", "print-cards")

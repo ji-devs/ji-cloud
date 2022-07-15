@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 
-@customElement("memory-print")
+@customElement("module-card-print-double")
 export class _ extends LitElement {
     static get styles() {
         return [
@@ -12,12 +12,10 @@ export class _ extends LitElement {
                 .cards {
                     --border: dashed 1px #a1a8ad;
                     text-align: center;
-                    padding: 20px;
                 }
                 .card-wrapper {
                     display: inline-grid;
                     grid-template-rows: 20px 30vw;
-                    width: 45vw;
                     border-right: var(--border);
                     margin-top: 20px;
                 }
@@ -27,21 +25,26 @@ export class _ extends LitElement {
                     transform: translate(10px, -10px) rotate(90deg);
                 }
                 .card {
+                    display: grid;
+                    grid-template-columns: 45vw 1px 45vw;
                     border-top: var(--border);
                     border-bottom: var(--border);
                     border-left: var(--border);
+                }
+                .card-side {
                     display: grid;
                     grid-template-rows: 1fr min-content;
+
                     padding: 8px;
                     break-inside: avoid;
                 }
-                .card .text {
+                .card-side .text {
                     font-size: 40px;
                     color: var(--dark-gray-6);
                     grid-row: 1 / -1;
                     place-self: center;
                 }
-                .card .signature {
+                .card-side .signature {
                     display: flex;
                     align-items: center;
                     column-gap: 5px;
@@ -49,16 +52,19 @@ export class _ extends LitElement {
                     font-weight: 500;
                     color: var(--dark-gray-4);
                 }
-                .card .signature img-ui {
+                .card-side .signature img-ui {
                     height: 10px;
                     filter: grayscale(1);
+                }
+                .divider {
+                    background-color: #a1a8ad;
                 }
             `,
         ];
     }
 
     @property({ type: Array })
-    cards: string[] = [];
+    cards: [string, string][] = [];
 
     render() {
         return html`
@@ -67,9 +73,18 @@ export class _ extends LitElement {
                     <div class="card-wrapper">
                         <fa-icon icon="fa-solid fa-scissors"></fa-icon>
                         <div class="card">
-                            <div class="text">${card}</div>
-                            <div class="signature">
-                                <img-ui path="core/page-header/logo.svg"></img-ui> Jigzi.org
+                            <div class="card-side">
+                                <div class="text">${card[0]}</div>
+                                <div class="signature">
+                                    <img-ui path="core/page-header/logo.svg"></img-ui> Jigzi.org
+                                </div>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="card-side">
+                                <div class="text">${card[1]}</div>
+                                <div class="signature">
+                                    <img-ui path="core/page-header/logo.svg"></img-ui> Jigzi.org
+                                </div>
                             </div>
                         </div>
                     </div>
