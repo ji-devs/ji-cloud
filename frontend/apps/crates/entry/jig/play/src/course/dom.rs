@@ -6,7 +6,11 @@ use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::{course::CourseResponse, jig::JigResponse};
 use std::rc::Rc;
-use utils::{events, jig::JigPlayerOptions, languages::Language};
+use utils::{
+    events,
+    jig::{JigPlayerOptions, ResourceContentExt},
+    languages::Language,
+};
 
 use super::state::CoursePlayer;
 
@@ -57,6 +61,18 @@ impl CoursePlayer {
                     state.render_item(jig, i)
                 })).collect()
             })).to_signal_vec())
+            .children(course.course_data.additional_resources.iter().map(|resource| {
+                html!("a", {
+                    .property("slot", "additional-resources")
+                    .property("target", "_BLANK")
+                    .property("href", resource.resource_content.get_link())
+                    .child(html!("fa-icon", {
+                        .property("icon", "fa-light fa-file")
+                    }))
+                    .text(" ")
+                    .text(&resource.display_name)
+                })
+            }))
             .child_signal(state.active_jig.signal_cloned().map(|active_jig| {
                 active_jig.map(|active_jig| {
                     html!("div", {

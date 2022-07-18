@@ -49,6 +49,14 @@ export class _ extends LitElement {
                 .additional-resources h3 {
                     background-color: var(--light-blue-1);
                 }
+                ::slotted(a[slot=additional-resources]) {
+                    color: var(--main-blue);
+                    font-weight: 500;
+                    text-decoration: none;
+                    font-size: 14px;
+                    display: flex;
+                    column-gap: 6px;
+                }
             `,
         ];
     }
