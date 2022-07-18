@@ -1,5 +1,5 @@
 use super::state::*;
-use components::module::_common::play::prelude::*;
+use components::{module::_common::play::prelude::*, audio::mixer::{AUDIO_MIXER, AudioPath}};
 use shared::domain::module::body::find_answer::Next;
 use std::rc::Rc;
 
@@ -17,8 +17,17 @@ impl PlayState {
         }
     }
 
+    fn play_correct_sound<F: Fn() + 'static>(self: &Rc<Self>, f: F) {
+        AUDIO_MIXER.with(move |mixer| {
+            let audio_path: AudioPath<'_> = mixer.get_random_positive().into();
+            mixer.play_oneshot_on_ended(audio_path, move || {
+                f();
+            });
+        });
+    }
+
     /// Evaluate whether the _question_ is complete. If it is, move on to the next question.
-    pub fn evaluate_end(&self) {
+    pub fn evaluate_end(self: Rc<Self>) {
         // In the next iteration of this, we'll be adding the ability to configure incorrect traces. For that
         // we'll need to probably update the selected_set to include selected trace kinds so that we can filter
         // for only traces which are correct.
@@ -59,19 +68,23 @@ impl PlayState {
             _ => false,
         };
         let next_question = self.game.next_question_index();
+        let state = self.clone();
 
         match (completed_minimum, next_question) {
             // If they've completed the minimum, then we can end this activity
             (true, _) => {
-                self.game
-                    .base
-                    .set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
+                self.play_correct_sound(move || {
+                    state.game
+                        .base
+                        .set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
+                });
             }
             // If they haven't completed the minimum questions, or don't need to, _and_ we can move on to the next
             // question
             (false, Some(next_index)) => {
-                // TODO Add a delay before transitioning to the next question
-                self.game.move_next_question(next_index);
+                self.play_correct_sound(move || {
+                    state.game.move_next_question(next_index);
+                });
             }
             (_, None) => {
                 // No more questions to ask, but the activity is configured so that the student can click continue.

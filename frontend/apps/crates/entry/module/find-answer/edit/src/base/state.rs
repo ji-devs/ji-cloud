@@ -46,6 +46,7 @@ pub struct Base {
     pub backgrounds: Rc<Backgrounds>,
     pub stickers: Rc<Stickers<Sticker>>,
     pub questions: MutableVec<Rc<Question>>,
+    // Optional index of the currently open question.
     pub current_question: Mutable<Option<usize>>,
     pub text_editor: Rc<TextEditor>,
     pub play_settings: Rc<PlaySettings>,

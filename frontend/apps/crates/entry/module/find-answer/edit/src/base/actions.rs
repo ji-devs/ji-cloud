@@ -116,6 +116,10 @@ impl Base {
         self.history.push_modify(move |raw| {
             if let Some(content) = &mut raw.content {
                 content.questions.remove(index);
+
+                if content.questions.is_empty() {
+                    content.question_field = QuestionField::Dynamic(None);
+                }
             }
         });
     }

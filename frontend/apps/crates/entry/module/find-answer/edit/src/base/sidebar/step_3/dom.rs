@@ -320,7 +320,6 @@ pub fn render_question(
             }
         })))
         .child_signal(question.confirm_delete.signal_cloned().map(clone!(state, index, question => move |confirm_delete| {
-            log::info!("CONFIRM {confirm_delete}");
             if confirm_delete {
                 Some(html!("empty-fragment", {
                     .apply(OverlayHandle::lifecycle(clone!(state, index, question => move || {

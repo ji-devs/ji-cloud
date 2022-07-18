@@ -1,10 +1,11 @@
 use components::module::_common::play::prelude::*;
+use once_cell::sync::OnceCell;
 use shared::domain::{
     asset::{Asset, AssetId},
     module::{
         body::{
             _groups::design::{Backgrounds, Sticker, Trace},
-            find_answer::{Mode, ModuleData as RawData, PlaySettings, Question, Step},
+            find_answer::{Mode, ModuleData as RawData, PlaySettings, Question, Step, QuestionField},
             Instructions,
         },
         ModuleId,
@@ -13,6 +14,7 @@ use shared::domain::{
 use utils::prelude::*;
 
 use futures_signals::signal::Mutable;
+use web_sys::HtmlElement;
 use std::rc::Rc;
 
 pub struct Base {
@@ -26,6 +28,9 @@ pub struct Base {
     pub stickers: Vec<Sticker>,
     pub traces: Vec<Trace>, // TODO content.traces, -- REMOVE THIS
     pub questions: Vec<Rc<Question>>,
+    /// List of references to sticker elements. This is used primarily for finding the WYSIWYG renderer for text stickers.
+    pub sticker_refs: Vec<OnceCell<HtmlElement>>,
+    pub question_field: QuestionField,
     pub module_phase: Mutable<ModulePlayPhase>,
 }
 
@@ -42,6 +47,9 @@ impl Base {
 
         let content = raw.content.unwrap_ji();
 
+        // Initially we fill this list with `None`. Once we start rendering stickers, we will update the individual items with their relevant refs.
+        let sticker_refs = (0..content.base.stickers.len()).map(|_| OnceCell::default()).collect();
+
         Rc::new(Self {
             asset_id,
             module_id,
@@ -57,6 +65,8 @@ impl Base {
                 .into_iter()
                 .map(|question| Rc::new(question))
                 .collect(),
+            sticker_refs,
+            question_field: content.question_field,
             module_phase: init_args.play_phase,
         })
     }

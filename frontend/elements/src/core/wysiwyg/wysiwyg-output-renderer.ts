@@ -3,9 +3,9 @@ import {
     html,
     css,
     customElement,
-    internalProperty,
     property,
     PropertyValues,
+    state,
 } from "lit-element";
 import {
     EditorElement,
@@ -44,7 +44,7 @@ export class _ extends LitElement {
         ];
     }
 
-    @internalProperty()
+    @state()
     private value: WysiwygValue = getDefaultValue();
 
     @property()
@@ -78,6 +78,29 @@ export class _ extends LitElement {
         }
 
         return text.join("");
+    }
+
+    /// This will set the value in the first leaf which has text. All other elements and their children will be removed.
+    public set textValue(value: string) {
+        let editor_element: EditorElement | null = null;
+        let editor_text: EditorText | null = null;
+
+        for (const element of this.value.content) {
+            for (const leaf of element.children) {
+                if (leaf.text) {
+                    editor_element = element;
+                    editor_text = leaf;
+                }
+            }
+        }
+
+        if (editor_element && editor_text) {
+            editor_text.text = value;
+            editor_element.children = [editor_text];
+            this.value.content = [editor_element];
+            // LitElement needs a push to tell it that the state has actually been updated.
+            this.requestUpdate();
+        }
     }
 
     // keep the render functions in one line since we're using `white-space: pre-wrap` so every extra new-line or whitespace will be reflected on the output

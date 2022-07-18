@@ -4,4 +4,5 @@ import "@elements/_bundles/_sub-bundles/all";
 import "@elements/_bundles/_sub-bundles/hebrew-buttons";
 import "@elements/module/find-answer/sidebar/question";
 import "@elements/module/find-answer/sidebar/question-container";
+import "@elements/module/find-answer/question-banner";
 import "@elements/core/modals/confirm";
