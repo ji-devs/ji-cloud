@@ -13,6 +13,11 @@ export class _ extends LitElement {
                     min-height: 100vh;
                     padding: 30px 60px;
                 }
+                .course-info-side {
+                    display: grid;
+                    align-content: start;
+                    row-gap: 14px;
+                }
                 ::slotted([slot=thumbnail]) {
                     width: 100%;
                 }
