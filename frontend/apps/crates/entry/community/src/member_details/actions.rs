@@ -168,7 +168,7 @@ impl MemberDetails {
                 Ok(_) => {
                     let mut followings = state.community_state.followings.lock_mut();
                     if let Some(followings) = &mut *followings {
-                        followings.push(state.member_id.0);
+                        followings.push(state.member_id);
                     }
                 },
                 Err(_) => todo!(),
@@ -189,7 +189,7 @@ impl MemberDetails {
                 Ok(_) => {
                     let mut followings = state.community_state.followings.lock_mut();
                     if let Some(followings) = &mut *followings {
-                        let index = followings.iter().position(|followee| followee == &state.member_id.0);
+                        let index = followings.iter().position(|followee| followee == &state.member_id);
                         if let Some(index) = index {
                             followings.remove(index);
                         }

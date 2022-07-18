@@ -4,15 +4,14 @@ use dominator::class;
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::{Mutable, Signal};
 use once_cell::sync::Lazy;
-use shared::domain::user::UserProfile;
+use shared::domain::user::{UserId, UserProfile};
 use utils::{prelude::get_user, routes::Route};
-use uuid::Uuid;
 
 pub struct Community {
     pub q: Mutable<String>,
     pub user: Mutable<Option<UserProfile>>,
-    pub followers: Mutable<Option<Vec<Uuid>>>,
-    pub followings: Mutable<Option<Vec<Uuid>>>,
+    pub followers: Mutable<Option<Vec<UserId>>>,
+    pub followings: Mutable<Option<Vec<UserId>>>,
     pub loader: AsyncLoader,
 }
 
