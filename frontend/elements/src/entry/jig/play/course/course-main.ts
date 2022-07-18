@@ -30,9 +30,13 @@ export class _ extends LitElement {
                 .count-lang-author {
                     display: grid;
                     justify-content: start;
-                    grid-template-columns: repeat(3, auto);
+                    align-items: center;
+                    grid-template-columns: repeat(4, auto);
                     column-gap: 16px;
                     color: var(--dark-gray-6);
+                }
+                .count-lang-author img-ui {
+                    height: 26px;
                 }
                 .items-count {
                     font-size: 18px;
@@ -45,7 +49,6 @@ export class _ extends LitElement {
                 .additional-resources h3 {
                     background-color: var(--light-blue-1);
                 }
-
             `,
         ];
     }
@@ -71,8 +74,8 @@ export class _ extends LitElement {
                 <slot name="thumbnail"></slot>
                 <h2 class="name">${this.name}</h2>
                 <div class="count-lang-author">
+                    <img-ui path="entry/home/search-results/jig-section.png"></img-ui>
                     <span class="items-count">
-                        <img-ui path=""></img-ui>
                         ${this.itemsCount} Jigs
                     </span>
                     <span class="language">
