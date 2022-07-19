@@ -46,7 +46,7 @@ pub enum HomeRoute {
 #[derive(Debug, Clone)]
 pub enum UserRoute {
     NoAuth,
-    Profile,
+    Settings,
     RegisterOauth(OauthData),
     LoginOauth(OauthData),
     Login(LoginQuery),
@@ -305,7 +305,7 @@ impl Route {
                     circle_id,
                 )))
             }
-            ["user", "profile"] => Self::User(UserRoute::Profile),
+            ["user", "settings"] => Self::User(UserRoute::Settings),
             ["user", "login"] => {
                 let query = serde_qs::from_str(&params_string).unwrap_ji();
                 Self::User(UserRoute::Login(query))
@@ -604,7 +604,7 @@ impl From<&Route> for String {
                 DevRoute::Scratch(id, page) => format!("/dev/scratch/{}?page={}", id, page),
             },
             Route::User(route) => match route {
-                UserRoute::Profile => "/user/profile".to_string(),
+                UserRoute::Settings => "/user/settings".to_string(),
                 UserRoute::ContinueRegistration(oauth_profile) => match oauth_profile {
                     None => "/user/continue-registration".to_string(),
                     Some(oauth_profile) => {

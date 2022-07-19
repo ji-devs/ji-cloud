@@ -37,7 +37,7 @@ impl Router {
                 }
                 UserRoute::LoginOauth(data) => Some(OauthPage::render(data, OAuthUrlKind::Login)),
                 UserRoute::Login(query) => Some(LoginPage::new(query).render()),
-                UserRoute::Profile => Some(ProfilePage::new().render()),
+                UserRoute::Settings => Some(ProfilePage::new().render()),
                 UserRoute::RegisterComplete => Some(RegisterCompletePage::render()),
                 UserRoute::ContinueRegistration(oauth_profile) => Some(RegisterPage::render(
                     Some(Step::One(oauth_profile)),
