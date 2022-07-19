@@ -19,10 +19,12 @@ pub struct PublicUser {
     pub given_name: String,
     /// Lastname of User
     pub family_name: String,
-    /// Bio of User
-    pub bio: String,
     /// Profile image of User
     pub profile_image: Option<ImageId>,
+    /// Bio of User
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bio: Option<String>, // only here if language_public is true
     /// Language of User
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -119,6 +121,11 @@ pub struct SearchPublicUserQuery {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub persona: Option<Vec<String>>,
+
+    /// Optionally filter by the user's bio
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bio: Option<String>,
 
     /// The hits per page to be returned
     #[serde(default)]

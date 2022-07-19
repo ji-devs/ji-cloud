@@ -10,7 +10,6 @@ expression: body
       "username": "test2",
       "givenName": "Scrappy",
       "familyName": "Doo",
-      "bio": "",
       "profileImage": null,
       "organization": "test2 org",
       "circles": [
@@ -23,7 +22,6 @@ expression: body
       "username": "test",
       "givenName": "Bobby",
       "familyName": "Tables",
-      "bio": "",
       "profileImage": null,
       "circles": [
         "829606d0-f185-11ec-b9e4-5fadfd7252f6"

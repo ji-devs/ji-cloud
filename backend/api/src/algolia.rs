@@ -127,7 +127,7 @@ struct BatchCircle<'a> {
 struct BatchPublicUser<'a> {
     username: &'a str,
     name: &'a str,
-    bio: &'a str,
+    bio: Option<String>,
     language: Option<String>,
     organization: Option<String>,
     location: Option<String>,
@@ -843,7 +843,7 @@ where course_data.id = any (select live_id from course where course.id = any ($1
      select user_id                                  as "id!",
             username                                 as "username!",
             given_name || ' '::text || family_name   as "creator_name!",
-            bio                                      as "bio!",
+            (select bio from user_profile where user_profile.user_id = "user".id and bio_public is true)      as "bio?",
             (select language from user_profile where user_profile.user_id = "user".id and language_public is true)  as "language?", 
             (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?", 
             (select persona from user_profile where user_profile.user_id = "user".id and persona_public is true)      as "persona?: Vec<String>", 
@@ -867,7 +867,7 @@ limit 100 for no key update skip locked;
             body: match serde_json::to_value(&BatchPublicUser {
                 username: &row.username,
                 name: &row.creator_name,
-                bio : &row.bio,
+                bio : row.bio,
                 language: row.language,
                 organization: row.organization,
                 persona: &row.persona,
@@ -1672,6 +1672,7 @@ impl Client {
         user_id: Option<UserId>,
         language: Option<String>,
         organization: Option<String>,
+        bio: Option<String>,
         persona: Option<Vec<String>>,
         page_limit: u32,
         page: Option<u32>,
@@ -1713,6 +1714,16 @@ impl Client {
                 filter: FacetFilter {
                     facet_name: "organization".to_owned(),
                     value: organization,
+                },
+                invert: false,
+            }))
+        }
+
+        if let Some(bio) = bio {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "bio".to_owned(),
+                    value: bio,
                 },
                 invert: false,
             }))

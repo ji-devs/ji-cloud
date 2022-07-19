@@ -413,6 +413,7 @@ set username               = coalesce($2, username),
     location_public         = coalesce($11, location_public),
     language_public         = coalesce($12, language_public),
     bio                    = coalesce($13, bio),
+    bio_public         = coalesce($14, bio_public),
     updated_at             = coalesce(now(), updated_at)
 where user_id = $1
   and (($2::text is not null and $2 is distinct from username) or
@@ -426,7 +427,9 @@ where user_id = $1
        ($10::bool is not null and $10 is distinct from organization_public) or
        ($11::bool is not null and $11 is distinct from location_public) or
        ($12::bool is not null and $12 is distinct from language_public) or
-       ($13::text is not null and $13 is distinct from bio)
+       ($13::text is not null and $13 is distinct from bio) or
+       ($14::bool is not null and $14 is distinct from bio_public) 
+
     )
     "#,
         user_id.0,
@@ -441,7 +444,8 @@ where user_id = $1
         req.organization_public,
         req.location_public,
         req.language_public,
-        req.bio
+        req.bio,
+        req.bio_public,
     )
     .execute(&mut txn)
     .instrument(tracing::info_span!("update user_profile"))

@@ -132,6 +132,7 @@ async fn patch_profile() -> anyhow::Result<()> {
             organization_public: Some(true),
             persona_public: Some(true),
             location_public: Some(true),
+            bio_public: Some(true),
             language: Some("en_US".to_owned()),
             locale: Some("en_US".to_owned()),
             timezone: None,
