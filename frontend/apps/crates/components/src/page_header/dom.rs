@@ -191,7 +191,7 @@ fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {
         }))
         .child(html!("a", {
             .property("slot", "user-links")
-            .property("href", Route::User(UserRoute::Profile(Default::default())).to_string())
+            .property("href", Route::User(UserRoute::Profile).to_string())
 
             .child(html!("fa-icon", {
                 .property("icon", "fa-light fa-gear")

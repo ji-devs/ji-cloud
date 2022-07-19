@@ -46,7 +46,7 @@ pub enum HomeRoute {
 #[derive(Debug, Clone)]
 pub enum UserRoute {
     NoAuth,
-    Profile(ProfileSection),
+    Profile,
     RegisterOauth(OauthData),
     LoginOauth(OauthData),
     Login(LoginQuery),
@@ -88,18 +88,6 @@ pub enum CommunityCirclesRoute {
 #[derive(Debug, Clone)]
 pub enum KidsRoute {
     StudentCode(Option<String>),
-}
-
-#[derive(Debug, Clone)]
-pub enum ProfileSection {
-    Landing,
-    ChangeEmail,
-}
-
-impl Default for ProfileSection {
-    fn default() -> Self {
-        Self::Landing
-    }
 }
 
 #[derive(Debug, Clone)]
@@ -317,10 +305,7 @@ impl Route {
                     circle_id,
                 )))
             }
-            ["user", "profile"] => Self::User(UserRoute::Profile(ProfileSection::Landing)),
-            ["user", "profile", "change-email"] => {
-                Self::User(UserRoute::Profile(ProfileSection::ChangeEmail))
-            }
+            ["user", "profile"] => Self::User(UserRoute::Profile),
             ["user", "login"] => {
                 let query = serde_qs::from_str(&params_string).unwrap_ji();
                 Self::User(UserRoute::Login(query))
@@ -619,10 +604,7 @@ impl From<&Route> for String {
                 DevRoute::Scratch(id, page) => format!("/dev/scratch/{}?page={}", id, page),
             },
             Route::User(route) => match route {
-                UserRoute::Profile(ProfileSection::Landing) => "/user/profile".to_string(),
-                UserRoute::Profile(ProfileSection::ChangeEmail) => {
-                    "/user/profile/change-email".to_string()
-                }
+                UserRoute::Profile => "/user/profile".to_string(),
                 UserRoute::ContinueRegistration(oauth_profile) => match oauth_profile {
                     None => "/user/continue-registration".to_string(),
                     Some(oauth_profile) => {

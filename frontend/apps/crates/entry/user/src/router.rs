@@ -37,7 +37,7 @@ impl Router {
                 }
                 UserRoute::LoginOauth(data) => Some(OauthPage::render(data, OAuthUrlKind::Login)),
                 UserRoute::Login(query) => Some(LoginPage::new(query).render()),
-                UserRoute::Profile(ProfileSection::Landing) => Some(ProfilePage::new().render()),
+                UserRoute::Profile => Some(ProfilePage::new().render()),
                 UserRoute::RegisterComplete => Some(RegisterCompletePage::render()),
                 UserRoute::ContinueRegistration(oauth_profile) => Some(RegisterPage::render(
                     Some(Step::One(oauth_profile)),
@@ -52,7 +52,6 @@ impl Router {
                 UserRoute::PasswordReset(token) => {
                     Some(PasswordResetPage::render(PasswordResetPage::new(token)))
                 }
-                _ => None,
             },
             _ => None,
         })
