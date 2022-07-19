@@ -15,12 +15,5 @@ pub fn render(state: Rc<Game>) -> Dom {
                 None
             }
         })))
-        // TODO Remove this
-        // .child_signal(state.phase.signal_cloned().map(clone!(state => move |phase| {
-        //     match phase {
-        //         // Phase::ShowHints => Some(render_hints(Hints::new(state.clone()))),
-        //         Phase::Playing => Some(render_playing(PlayState::new(state.clone()))),
-        //     }
-        // })))
     })
 }

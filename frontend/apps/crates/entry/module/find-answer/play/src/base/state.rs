@@ -4,7 +4,7 @@ use shared::domain::{
     asset::{Asset, AssetId},
     module::{
         body::{
-            _groups::design::{Backgrounds, Sticker, Trace},
+            _groups::design::{Backgrounds, Sticker},
             find_answer::{
                 Mode, ModuleData as RawData, PlaySettings, Question, QuestionField, Step,
             },
@@ -28,7 +28,6 @@ pub struct Base {
     pub settings: PlaySettings,
     pub backgrounds: Backgrounds,
     pub stickers: Vec<Sticker>,
-    pub traces: Vec<Trace>, // TODO content.traces, -- REMOVE THIS
     pub questions: Vec<Rc<Question>>,
     /// List of references to sticker elements. This is used primarily for finding the WYSIWYG renderer for text stickers.
     pub sticker_refs: Vec<OnceCell<HtmlElement>>,
@@ -63,7 +62,6 @@ impl Base {
             settings: content.play_settings,
             backgrounds: content.base.backgrounds,
             stickers: content.base.stickers,
-            traces: vec![],
             questions: content
                 .questions
                 .into_iter()
