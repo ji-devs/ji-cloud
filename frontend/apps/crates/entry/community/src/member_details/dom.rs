@@ -46,6 +46,9 @@ impl MemberDetails {
                             if !member.persona.is_empty() {
                                 dom = dom.property("persona", member.persona.join(", "));
                             }
+                            if let Some(bio) = &member.bio {
+                                dom = dom.property("bio", bio)
+                            }
                             dom
                         })
                         .child(html!("profile-image", {
