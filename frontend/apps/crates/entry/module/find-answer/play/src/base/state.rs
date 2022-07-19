@@ -5,7 +5,9 @@ use shared::domain::{
     module::{
         body::{
             _groups::design::{Backgrounds, Sticker, Trace},
-            find_answer::{Mode, ModuleData as RawData, PlaySettings, Question, Step, QuestionField},
+            find_answer::{
+                Mode, ModuleData as RawData, PlaySettings, Question, QuestionField, Step,
+            },
             Instructions,
         },
         ModuleId,
@@ -14,8 +16,8 @@ use shared::domain::{
 use utils::prelude::*;
 
 use futures_signals::signal::Mutable;
-use web_sys::HtmlElement;
 use std::rc::Rc;
+use web_sys::HtmlElement;
 
 pub struct Base {
     pub asset_id: AssetId,
@@ -48,7 +50,9 @@ impl Base {
         let content = raw.content.unwrap_ji();
 
         // Initially we fill this list with `None`. Once we start rendering stickers, we will update the individual items with their relevant refs.
-        let sticker_refs = (0..content.base.stickers.len()).map(|_| OnceCell::default()).collect();
+        let sticker_refs = (0..content.base.stickers.len())
+            .map(|_| OnceCell::default())
+            .collect();
 
         Rc::new(Self {
             asset_id,

@@ -1,5 +1,8 @@
 use super::state::*;
-use components::{module::_common::play::prelude::*, audio::mixer::{AUDIO_MIXER, AudioPath}};
+use components::{
+    audio::mixer::{AudioPath, AUDIO_MIXER},
+    module::_common::play::prelude::*,
+};
 use shared::domain::module::body::find_answer::Next;
 use std::rc::Rc;
 
@@ -74,7 +77,8 @@ impl PlayState {
             // If they've completed the minimum, then we can end this activity
             (true, _) => {
                 self.play_correct_sound(move || {
-                    state.game
+                    state
+                        .game
                         .base
                         .set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
                 });

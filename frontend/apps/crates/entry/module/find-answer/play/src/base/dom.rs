@@ -1,12 +1,17 @@
 use super::state::*;
 use components::{
-    backgrounds::dom::render_backgrounds_raw, module::_common::play::prelude::DomRenderable,
-    stickers::{dom::{render_sticker_raw, StickerRawRenderOptions}, sprite::dom::SpriteRawRenderOptions, text::dom::TextRawRenderOptions, video::dom::VideoRawRenderOptions},
+    backgrounds::dom::render_backgrounds_raw,
+    module::_common::play::prelude::DomRenderable,
+    stickers::{
+        dom::{render_sticker_raw, StickerRawRenderOptions},
+        sprite::dom::SpriteRawRenderOptions,
+        text::dom::TextRawRenderOptions,
+        video::dom::VideoRawRenderOptions,
+    },
 };
 use dominator::{apply_methods, clone, html, Dom};
-use utils::unwrap::UnwrapJiExt;
-use std::rc::Rc;
 use shared::domain::module::body::_groups::design::Sticker as RawSticker;
+use std::rc::Rc;
 
 use super::game::{dom::render as render_game, state::Game};
 

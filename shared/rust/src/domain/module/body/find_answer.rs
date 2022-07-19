@@ -156,6 +156,11 @@ impl QuestionField {
     pub fn is_dynamic(&self) -> bool {
         matches!(self, Self::Dynamic(_))
     }
+
+    /// Whether the current variant is `Text`
+    pub fn is_text(&self) -> bool {
+        matches!(self, Self::Text(_))
+    }
 }
 
 impl Default for QuestionField {
