@@ -7,7 +7,7 @@ use futures_signals::signal::{Signal, SignalExt};
 use js_sys::Reflect;
 use shared::domain::{jig::JigResponse, module::ModuleKind};
 use std::rc::Rc;
-use utils::iframe::{IframeMessageExt, JigPlayerToPlayerPopup};
+use utils::iframe::{AssetPlayerToPlayerPopup, IframeMessageExt};
 use utils::{
     iframe::{IframeAction, ModuleToJigPlayerMessage},
     prelude::SETTINGS,
@@ -292,7 +292,7 @@ fn render_done_popup(state: Rc<JigPlayer>) -> impl Signal<Item = Option<Dom>> {
                                         .property("kind", "exit")
                                         .text("exit")
                                         .event(|_: events::Click| {
-                                            let e = IframeAction::new(JigPlayerToPlayerPopup::Close).try_post_message_to_parent();
+                                            let e = IframeAction::new(AssetPlayerToPlayerPopup::Close).try_post_message_to_parent();
                                             log::info!("{:?}", e);
                                         })
                                     })

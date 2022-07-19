@@ -11,6 +11,7 @@ pub struct PlayerPopup {
     pub player_options: JigPlayerOptions,
     pub open: Mutable<bool>,
     pub callbacks: PreviewPopupCallbacks,
+    pub close_button_shown: Mutable<bool>,
 }
 
 impl PlayerPopup {
@@ -24,6 +25,7 @@ impl PlayerPopup {
             player_options,
             open: Mutable::new(true),
             callbacks,
+            close_button_shown: Mutable::new(true),
         })
     }
 }

@@ -5,7 +5,7 @@ use futures_signals::signal::SignalExt;
 use shared::domain::asset::AssetId;
 use utils::{
     events,
-    iframe::{IframeInit, JigPlayerToPlayerPopup},
+    iframe::{AssetPlayerToPlayerPopup, IframeInit},
     prelude::SETTINGS,
     routes::{AssetPlayRoute, AssetRoute, Route},
     unwrap::UnwrapJiExt,
@@ -20,13 +20,20 @@ impl PlayerPopup {
             .apply_if(slot.is_some(), |dom| {
                 dom.property("slot", slot.unwrap_ji())
             })
-            .child(html!("button", {
-                .property("slot", "close")
-                .text("×")
-                .event(clone!(state => move |_: events::Click| {
-                    (state.callbacks.close)();
-                }))
-            }))
+            .child_signal(state.close_button_shown.signal().map(clone!(state => move |close_button_shown| {
+                match close_button_shown {
+                    false => None,
+                    true => {
+                        Some(html!("button", {
+                            .property("slot", "close")
+                            .text("×")
+                            .event(clone!(state => move |_: events::Click| {
+                                (state.callbacks.close)();
+                            }))
+                        }))
+                    },
+                }
+            })))
             .child_signal(state.open.signal().map(clone!(state => move |open| {
                 match open {
                     false => None,
@@ -49,10 +56,13 @@ impl PlayerPopup {
                                 url
                             })
                             .global_event(clone!(state => move |event: events::Message| {
-                                if let Ok(data) = event.try_serde_data::<IframeInit<JigPlayerToPlayerPopup>>() {
+                                if let Ok(data) = event.try_serde_data::<IframeInit<AssetPlayerToPlayerPopup>>() {
                                     match data.data {
-                                        JigPlayerToPlayerPopup::Close => {
+                                        AssetPlayerToPlayerPopup::Close => {
                                             (state.callbacks.close)();
+                                        },
+                                        AssetPlayerToPlayerPopup::CloseButtonShown(shown) => {
+                                            state.close_button_shown.set_neq(shown);
                                         },
                                     }
                                 }

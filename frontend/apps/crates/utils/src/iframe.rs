@@ -193,6 +193,8 @@ pub enum ModuleToJigEditorMessage {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub enum JigPlayerToPlayerPopup {
+pub enum AssetPlayerToPlayerPopup {
     Close,
+    // used for course player to hide close button when jig is playing since the jig has it's own button
+    CloseButtonShown(bool),
 }

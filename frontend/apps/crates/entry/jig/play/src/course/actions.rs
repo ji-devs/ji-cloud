@@ -10,7 +10,11 @@ use shared::{
     },
     error::EmptyError,
 };
-use utils::{prelude::api_no_auth, unwrap::UnwrapJiExt};
+use utils::{
+    iframe::{AssetPlayerToPlayerPopup, IframeAction, IframeMessageExt},
+    prelude::api_no_auth,
+    unwrap::UnwrapJiExt,
+};
 
 use super::state::CoursePlayer;
 
@@ -57,5 +61,17 @@ impl CoursePlayer {
         api_no_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::GetLive::METHOD, None)
             .await
             .map_err(|_| ())
+    }
+
+    pub fn play_jig(self: &Rc<Self>, jig_id: JigId) {
+        self.active_jig.set(Some(jig_id));
+        let _ = IframeAction::new(AssetPlayerToPlayerPopup::CloseButtonShown(false))
+            .try_post_message_to_parent();
+    }
+
+    pub fn done_playing_jig(self: &Rc<Self>) {
+        self.active_jig.set(None);
+        let _ = IframeAction::new(AssetPlayerToPlayerPopup::CloseButtonShown(true))
+            .try_post_message_to_parent();
     }
 }

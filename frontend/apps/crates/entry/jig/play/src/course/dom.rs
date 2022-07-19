@@ -27,7 +27,7 @@ impl CoursePlayer {
             .child_signal(state.active_jig.signal_cloned().map(clone!(state => move|active_jig| {
                 active_jig.map(|jig_id| {
                     let close = clone!(state => move || {
-                        state.active_jig.set(None);
+                        state.done_playing_jig();
                     });
                     PlayerPopup::new(
                         jig_id.into(),
@@ -104,7 +104,7 @@ impl CoursePlayer {
                 .property("icon", "fa-solid fa-play")
             }))
             .event(clone!(state, jig_id => move |_: events::Click| {
-                state.active_jig.set(Some(jig_id));
+                state.play_jig(jig_id);
             }))
         })
     }
