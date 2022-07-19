@@ -31,7 +31,6 @@ impl MemberDetails {
                     html!("community-member-details", {
                         .property("givenName", &member.given_name)
                         .property("familyName", &member.family_name)
-                        .property("bio", &member.bio)
                         .apply(|mut dom| {
                             if let Some(_location) = &member.location {
                                 // add city
