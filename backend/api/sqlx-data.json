@@ -2421,53 +2421,8 @@
       ]
     }
   },
-  "4ce0b3cd3acb70b250136f3b5d951fb79e8cfec345f875c95582f5b276cbca72": {
-    "query": "update user_audio_upload set processed_at = now(), processing_result = false where audio_id = $1",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "4d327320e1810b7c419009172dc1137243a3d1d67ec65c614afb0101e374c4fc": {
-    "query": "select id as \"id: PdfId\" from user_pdf_library where id = $1",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: PdfId",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
-  "4dcbd40d11584afd1488f437343dc9bdc58897c7e5c1f05dd4be25db788b5e72": {
-    "query": "\ninsert into course_data_age_range(course_data_id, age_range_id)\nselect $2, age_range_id\nfrom course_data_age_range\nwhere course_data_id = $1\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "4de2c77ab5716ea40775229deecb299169d9d3f1d63c9f1cf24b04c5f88b9f17": {
-    "query": "\nwith cte as (\n    select array(select cd.id as \"id!\"\n    from course_data \"cd\"\n          left join course on (draft_id = cd.id or (live_id = cd.id and cd.last_synced_at is not null and published_at is not null))\n          left join course_data_resource \"resource\" on cd.id = resource.course_data_id\n    where (author_id = $1 or $1 is null)\n        and (cd.draft_or_live = $2 or $2 is null)\n        and (cd.privacy_level = any($3) or $3 = array[]::smallint[])\n        and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n    order by coalesce(updated_at, created_at) desc, course.id) as id\n),\ncte1 as (\n    select * from unnest((select distinct id from cte)) with ordinality t(id\n   , ord) order by ord\n)\nselect course.id                                                                as \"course_id: CourseId\",\n    privacy_level                                                               as \"privacy_level: PrivacyLevel\",\n    creator_id,\n    author_id,\n    (select given_name || ' '::text || family_name\n     from user_profile\n     where user_profile.user_id = author_id)                                     as \"author_name\",\n    published_at,\n    likes,\n    plays,\n    display_name                                                                  as \"display_name!\",\n    updated_at,\n    language                                                                      as \"language!\",\n    description                                                                   as \"description!\",\n    translated_description                                                        as \"translated_description!: Json<HashMap<String,String>>\",\n    draft_or_live                                                                 as \"draft_or_live!: DraftOrLive\",\n    other_keywords                                                                as \"other_keywords!\",\n    translated_keywords                                                           as \"translated_keywords!\",\n    (\n        select row(course_data_module.id, kind, is_complete) \n        from course_data_module                \n        where course_data_id = course_data.id and \"index\" = 0 \n        order by \"index\"\n    )                                                   as \"cover?: (ModuleId, ModuleKind, bool)\",\n    array(select row (category_id)\n            from course_data_category\n            where course_data_id = course_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n    array(select row (affiliation_id)\n            from course_data_affiliation\n            where course_data_id = course_data.id)          as \"affiliations!: Vec<(AffiliationId,)>\",\n    array(select row (age_range_id)\n            from course_data_age_range\n            where course_data_id = course_data.id)          as \"age_ranges!: Vec<(AgeRangeId,)>\",\n    array(select row (id, display_name, resource_type_id, resource_content)\n                from course_data_resource \n                where course_data_id = course_data.id\n          )                                          as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n    array(\n        select row(jig_id)\n        from course_data_jig\n        where course_data_jig.course_data_id = course_data.id\n    )                                                     as \"items!: Vec<(JigId,)>\"\nfrom cte1\nleft join course_data on cte1.id = course_data.id\ninner join course on (\n    course_data.id = course.draft_id \n    or (        \n        course_data.id = course.live_id\n        and last_synced_at is not null\n        and course.published_at is not null\n    )\n)\nwhere ord > (1 * $5 * $6)\nlimit $6\n",
+  "4b5b9c5ee607a1bf226912b6cdad849bf6e31b0bbf8615268cc29139f389eadc": {
+    "query": "\nwith cte as (\n    select (array_agg(cd.id))[1]\n    from course_data \"cd\"\n          left join course on (draft_id = cd.id or (live_id = cd.id and cd.last_synced_at is not null and published_at is not null))\n          left join course_data_resource \"resource\" on cd.id = resource.course_data_id\n    where (author_id = $1 or $1 is null)\n        and (cd.draft_or_live = $2 or $2 is null)\n        and (cd.privacy_level = any($3) or $3 = array[]::smallint[])\n        and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n    group by coalesce(updated_at, created_at)\n    order by coalesce(updated_at, created_at) desc),\ncte1 as (\n    select * from unnest((select array_agg(cte.array_agg) from cte)) with ordinality t(id\n   , ord) order by ord\n)\nselect course.id                                                                as \"course_id: CourseId\",\n    privacy_level                                                               as \"privacy_level: PrivacyLevel\",\n    creator_id,\n    author_id,\n    (select given_name || ' '::text || family_name\n     from user_profile\n     where user_profile.user_id = author_id)                                     as \"author_name\",\n    published_at,\n    likes,\n    plays,\n    display_name                                                                  as \"display_name!\",\n    updated_at,\n    language                                                                      as \"language!\",\n    description                                                                   as \"description!\",\n    translated_description                                                        as \"translated_description!: Json<HashMap<String,String>>\",\n    draft_or_live                                                                 as \"draft_or_live!: DraftOrLive\",\n    other_keywords                                                                as \"other_keywords!\",\n    translated_keywords                                                           as \"translated_keywords!\",\n    (\n        select row(course_data_module.id, kind, is_complete) \n        from course_data_module                \n        where course_data_id = course_data.id and \"index\" = 0 \n        order by \"index\"\n    )                                                   as \"cover?: (ModuleId, ModuleKind, bool)\",\n    array(select row (category_id)\n            from course_data_category\n            where course_data_id = course_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n    array(select row (affiliation_id)\n            from course_data_affiliation\n            where course_data_id = course_data.id)          as \"affiliations!: Vec<(AffiliationId,)>\",\n    array(select row (age_range_id)\n            from course_data_age_range\n            where course_data_id = course_data.id)          as \"age_ranges!: Vec<(AgeRangeId,)>\",\n    array(select row (id, display_name, resource_type_id, resource_content)\n                from course_data_resource \n                where course_data_id = course_data.id\n          )                                          as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n    array(\n        select row(jig_id)\n        from course_data_jig\n        where course_data_jig.course_data_id = course_data.id\n    )                                                     as \"items!: Vec<(JigId,)>\"\nfrom cte1\nleft join course_data on cte1.id = course_data.id\ninner join course on (\n    course_data.id = course.draft_id \n    or (        \n        course_data.id = course.live_id\n        and last_synced_at is not null\n        and course.published_at is not null\n    )\n)\nwhere ord > (1 * $5 * $6)\norder by ord asc\nlimit $6\n",
     "describe": {
       "columns": [
         {
@@ -2615,6 +2570,51 @@
         null,
         null
       ]
+    }
+  },
+  "4ce0b3cd3acb70b250136f3b5d951fb79e8cfec345f875c95582f5b276cbca72": {
+    "query": "update user_audio_upload set processed_at = now(), processing_result = false where audio_id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "4d327320e1810b7c419009172dc1137243a3d1d67ec65c614afb0101e374c4fc": {
+    "query": "select id as \"id: PdfId\" from user_pdf_library where id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: PdfId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "4dcbd40d11584afd1488f437343dc9bdc58897c7e5c1f05dd4be25db788b5e72": {
+    "query": "\ninsert into course_data_age_range(course_data_id, age_range_id)\nselect $2, age_range_id\nfrom course_data_age_range\nwhere course_data_id = $1\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": []
     }
   },
   "4fb49fe4ad3204755e0a09d701e36d421c6a6696509bd37c238b1a835e022d7b": {
