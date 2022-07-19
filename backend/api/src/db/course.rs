@@ -413,7 +413,7 @@ pub async fn browse(
     //language=SQL
     r#"
 with cte as (
-    select array(select cd.id as "id!"
+    select (array_agg(cd.id))[1]
     from course_data "cd"
           left join course on (draft_id = cd.id or (live_id = cd.id and cd.last_synced_at is not null and published_at is not null))
           left join course_data_resource "resource" on cd.id = resource.course_data_id
@@ -421,10 +421,10 @@ with cte as (
         and (cd.draft_or_live = $2 or $2 is null)
         and (cd.privacy_level = any($3) or $3 = array[]::smallint[])
         and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])
-    order by coalesce(updated_at, created_at) desc, course.id) as id
-),
+    group by coalesce(updated_at, created_at)
+    order by coalesce(updated_at, created_at) desc),
 cte1 as (
-    select * from unnest((select distinct id from cte)) with ordinality t(id
+    select * from unnest((select array_agg(cte.array_agg) from cte)) with ordinality t(id
    , ord) order by ord
 )
 select course.id                                                                as "course_id: CourseId",
@@ -480,6 +480,7 @@ inner join course on (
     )
 )
 where ord > (1 * $5 * $6)
+order by ord asc
 limit $6
 "#,
     author_id.map(|it| it.0),
