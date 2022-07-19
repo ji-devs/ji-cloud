@@ -182,6 +182,7 @@ pub(crate) async fn public_user_index(
         attributes_for_faceting: Some(vec![
             FacetAttribute::filter_only(Attribute("creator_id".to_owned())),
             FacetAttribute::filter_only(Attribute("creator_name".to_owned())),
+            FacetAttribute::filter_only(Attribute("bio".to_owned())),
             FacetAttribute::filter_only(Attribute("language".to_owned())),
             FacetAttribute::filter_only(Attribute("organization".to_owned())),
             FacetAttribute::filter_only(Attribute("persona".to_owned())),

@@ -10,7 +10,6 @@ expression: body
       "username": "test",
       "givenName": "Bobby",
       "familyName": "Tables",
-      "bio": "",
       "profileImage": null,
       "circles": []
     },
@@ -19,7 +18,6 @@ expression: body
       "username": "test2",
       "givenName": "Scrappy",
       "familyName": "Doo",
-      "bio": "",
       "profileImage": null,
       "organization": "test2 org",
       "circles": []

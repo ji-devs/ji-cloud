@@ -19,12 +19,12 @@ pub async fn get(db: &PgPool, user_id: UserId) -> sqlx::Result<PublicUser> {
             username,
             given_name,
             family_name,
-            bio,
             profile_image_id       as "profile_image?: ImageId",
             (select language from user_profile where user_profile.user_id = "user".id and language_public is true)      as "language?",
             (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?",
             (select array(select language from user_profile where user_profile.user_id = "user".id and persona_public is true))      as "persona!:Vec<String>",
             (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?",
+            (select bio from user_profile where user_profile.user_id = "user".id and bio_public is true)      as "bio?",
             array(select circle.id
                 from circle_member bm
                 inner join circle on bm.id = circle.id
@@ -71,12 +71,12 @@ pub async fn browse_users(
                 username               as "username!",
                 given_name             as "given_name!",
                 family_name            as "family_name!",
-                bio                    as "bio!",
                 profile_image_id       as "profile_image?: ImageId",
                 (select language from user_profile where user_profile.user_id = "user".id and language_public is true)      as "language?",
                 (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?",
                 (select array(select persona from user_profile where user_profile.user_id = "user".id and persona_public is true))      as "persona!: Vec<String>",
                 (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?",
+                (select bio from user_profile where user_profile.user_id = "user".id and bio_public is true)      as "bio?",
                 (select array(select circle.id
                     from circle_member bm
                     inner join circle on bm.id = circle.id
@@ -128,7 +128,7 @@ pub async fn browse_user_resources(
         r#"
         with cte as (
             select distinct jdar.id              as id,
-                    jdar.display_name,
+                   jdar.display_name,
                    resource_type_id,
                    resource_content,
                    author_id,
@@ -281,12 +281,12 @@ pub async fn get_by_ids(db: &PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<PublicUse
                 username               as "username!",
                 given_name             as "given_name!",
                 family_name            as "family_name!",
-                bio                    as "bio!",
                 profile_image_id       as "profile_image?: ImageId",
                 (select language from user_profile where user_profile.user_id = "user".id and language_public is true)      as "language?",
                 (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?",
                 (select array(select persona from user_profile where user_profile.user_id = "user".id and persona_public is true))      as "persona!: Vec<String>",
                 (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?",
+                (select bio from user_profile where user_profile.user_id = "user".id and bio_public is true)      as "bio?",
                 (select array(select circle.id
                     from circle_member bm
                     inner join circle on bm.id = circle.id
@@ -413,12 +413,12 @@ pub async fn browse_followers(
                 username               as "username!",
                 given_name             as "given_name!",
                 family_name            as "family_name!",
-                bio                    as "bio!",
                 profile_image_id       as "profile_image?: ImageId",
                 (select language from user_profile where user_profile.user_id = "user".id and language_public is true)      as "language?",
                 (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?",
                 (select array(select persona from user_profile where user_profile.user_id = "user".id and persona_public is true))      as "persona!: Vec<String>",
                 (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?",
+                (select bio from user_profile where user_profile.user_id = "user".id and bio_public is true)      as "bio?",
                 (select array(select circle.id
                     from circle_member bm
                     left join circle on bm.id = circle.id
@@ -479,12 +479,12 @@ pub async fn browse_following(
                 username               as "username!",
                 given_name             as "given_name!",
                 family_name            as "family_name!",
-                bio                    as "bio!",
                 profile_image_id       as "profile_image?: ImageId",
                 (select language from user_profile where user_profile.user_id = "user".id and language_public is true)      as "language?",
                 (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?",
                 (select array(select persona from user_profile where user_profile.user_id = "user".id and persona_public is true))      as "persona!",
                 (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?",
+                (select bio from user_profile where user_profile.user_id = "user".id and bio_public is true)      as "bio?",
                 array(select circle.id
                     from circle_member bm
                     left join circle on bm.id = circle.id

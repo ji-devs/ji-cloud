@@ -468,6 +468,11 @@ pub struct PatchProfileRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub location_public: Option<bool>,
 
+    /// Publicize user bio
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bio_public: Option<bool>,
+
     /// The organization that the user belongs to.
     ///
     /// Field is updated if `Some(_)` with the inner contents.
