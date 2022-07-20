@@ -21,6 +21,9 @@ use super::state::*;
 
 pub fn render(state: Rc<PlayState>) -> Dom {
     html!("empty-fragment", {
+        // We don't want the cursor to change when the student mouses over an answer trace, or even an incorrect trace.
+        // Make the entire playable area use the pointer cursor.
+        .style("cursor", "pointer")
         .future(state.game.base.module_phase.signal_cloned().dedupe().for_each(clone!(state => move |phase| {
             // Only play audio and update the text if we're in the playing phase.
             if let ModulePlayPhase::Playing = phase {
