@@ -32,7 +32,7 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                 }
 
                 // Update the question sticker if it is set and the question has text
-                if !state.question.question_text.is_empty() && state.game.base.question_field.is_text() {
+                if state.game.base.question_field.is_text() {
                     if let QuestionField::Text(question_index) = state.game.base.question_field {
                         let sticker_ref = state.game.base.sticker_refs.get(question_index).unwrap_ji().get().unwrap_ji();
                         Reflect::set(

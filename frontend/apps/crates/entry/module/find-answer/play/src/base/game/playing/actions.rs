@@ -92,8 +92,7 @@ impl PlayState {
             }
             (_, None) => {
                 // No more questions to ask, but the activity is configured so that the student can click continue.
-                //
-                // Do nothing.
+                self.play_correct_sound(|| {});
             }
         }
     }
