@@ -81,6 +81,8 @@ fn current_question_signal(state: Rc<Step3>) -> impl Signal<Item = Option<(usize
 }
 
 pub fn render(state: Rc<Step3>) -> Dom {
+    state.sidebar.base.continue_next_fn.set(None);
+
     html!("module-sidebar-body", {
         .property("slot", "body")
         .property_signal("dark", empty_signal(state.clone()).map(|is_empty| !is_empty))
