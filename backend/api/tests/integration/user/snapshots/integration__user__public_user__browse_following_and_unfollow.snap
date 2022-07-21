@@ -14,15 +14,6 @@ expression: body
       "language": "en_US",
       "organization": "test1 org",
       "circles": []
-    },
-    {
-      "id": "a641fd6e-e41b-11eb-8176-57df101c2201",
-      "username": "test2",
-      "givenName": "Scrappy",
-      "familyName": "Doo",
-      "profileImage": null,
-      "organization": "test2 org",
-      "circles": []
     }
   ],
   "pages": 1,

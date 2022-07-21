@@ -11,6 +11,7 @@ expression: body
       "givenName": "Bobby",
       "familyName": "Tables",
       "profileImage": null,
+      "persona": [],
       "circles": []
     },
     {
@@ -20,6 +21,7 @@ expression: body
       "familyName": "Doo",
       "profileImage": null,
       "organization": "test2 org",
+      "persona": [],
       "circles": []
     }
   ],

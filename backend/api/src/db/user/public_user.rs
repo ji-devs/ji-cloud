@@ -22,7 +22,7 @@ pub async fn get(db: &PgPool, user_id: UserId) -> sqlx::Result<PublicUser> {
             profile_image_id       as "profile_image?: ImageId",
             (select language from user_profile where user_profile.user_id = "user".id and language_public is true)      as "language?",
             (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?",
-            (select array(select language from user_profile where user_profile.user_id = "user".id and persona_public is true))      as "persona!:Vec<String>",
+            (select language from user_profile where user_profile.user_id = "user".id and persona_public is true)      as "persona?: Vec<String>",
             (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?",
             (select bio from user_profile where user_profile.user_id = "user".id and bio_public is true)      as "bio?",
             array(select circle.id
@@ -55,16 +55,17 @@ pub async fn browse_users(
     let user_data = sqlx::query!(
         r#"
         with cte as (
-            select array(select "user".id  as "id!"
+            select (array_agg("user".id))[1]
             from "user"
             left join user_profile "up" on up.user_id = "user".id 
             left join circle_member "cm" on cm.user_id = "user".id
             left join circle on circle.id = cm.id 
             where cm.id = any($1) or $1 = array[]::uuid[]
-            order by "user".created_at desc) as id
+            group by "user".created_at
+            order by "user".created_at desc
         ),
         cte1 as (
-            select * from unnest((select distinct id from cte)) with ordinality t(id
+            select * from unnest((select array_agg(cte.array_agg) from cte)) with ordinality t(id
            , ord) order by ord
         )
         select  user_id                as "id!: UserId",
@@ -74,7 +75,7 @@ pub async fn browse_users(
                 profile_image_id       as "profile_image?: ImageId",
                 (select language from user_profile where user_profile.user_id = "user".id and language_public is true)      as "language?",
                 (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?",
-                (select array(select persona from user_profile where user_profile.user_id = "user".id and persona_public is true))      as "persona!: Vec<String>",
+                (select persona from user_profile where user_profile.user_id = "user".id and persona_public is true)      as "persona?: Vec<String>",
                 (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?",
                 (select bio from user_profile where user_profile.user_id = "user".id and bio_public is true)      as "bio?",
                 (select array(select circle.id
@@ -82,12 +83,12 @@ pub async fn browse_users(
                     inner join circle on bm.id = circle.id
                     where bm.user_id = "user".id
                 )) as "circles!: Vec<CircleId>"
-            from "user"
-            inner join user_profile on "user".id = user_profile.user_id
-            inner join cte1 on cte1.id = "user".id
-            where ord > (1 * $2 * $3)
-            order by ord
-            limit $3
+        from cte1
+        left join user_profile on cte1.id = user_profile.user_id
+        left join "user" on cte1.id = "user".id
+        where ord > (1 * $2 * $3)
+        order by ord
+        limit $3
             "#,
             &circle_ids[..],
             page as i32,
@@ -156,7 +157,7 @@ pub async fn browse_user_resources(
             select * from unnest(array(select id from (select id from cte union all select id from cte1) resource)) with ordinality t(id
            , ord) order by ord
          )
-          select cte3.id                     as "id!: AddId",
+          select cte3.id                as "id!: AddId",
                  display_name           as "display_name!",
                  resource_type_id       as "resource_type_id!: TypeId",
                  resource_content        as "resource_content!"
@@ -284,7 +285,7 @@ pub async fn get_by_ids(db: &PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<PublicUse
                 profile_image_id       as "profile_image?: ImageId",
                 (select language from user_profile where user_profile.user_id = "user".id and language_public is true)      as "language?",
                 (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?",
-                (select array(select persona from user_profile where user_profile.user_id = "user".id and persona_public is true))      as "persona!: Vec<String>",
+                (select persona from user_profile where user_profile.user_id = "user".id and persona_public is true)      as "persona?: Vec<String>",
                 (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?",
                 (select bio from user_profile where user_profile.user_id = "user".id and bio_public is true)      as "bio?",
                 (select array(select circle.id
@@ -403,20 +404,24 @@ pub async fn browse_followers(
 
     let user_data = sqlx::query!(
         r#"
-        with followers as (
-            select follower_id
+        with follower as (
+            select (array_agg(follower_id))[1]
             from user_follow
             where user_id = $1
-            order by coalesce(followed_at) desc
+            group by followed_at
+            order by followed_at desc
+        ),
+        cte as (
+            select * from unnest((select array_agg(follower.array_agg) from follower)) with ordinality t(id, ord) order by ord
         )
-        select  id         as "id!: UserId",
+        select  "user".id         as "id!: UserId",
                 username               as "username!",
                 given_name             as "given_name!",
                 family_name            as "family_name!",
                 profile_image_id       as "profile_image?: ImageId",
                 (select language from user_profile where user_profile.user_id = "user".id and language_public is true)      as "language?",
                 (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?",
-                (select array(select persona from user_profile where user_profile.user_id = "user".id and persona_public is true))      as "persona!: Vec<String>",
+                (select array(select persona from user_profile where user_profile.user_id = "user".id and persona_public is true))      as "persona?: Vec<String>",
                 (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?",
                 (select bio from user_profile where user_profile.user_id = "user".id and bio_public is true)      as "bio?",
                 (select array(select circle.id
@@ -424,11 +429,12 @@ pub async fn browse_followers(
                     left join circle on bm.id = circle.id
                     where bm.user_id = "user".id or circle.creator_id = "user".id
                 )) as "circles!: Vec<CircleId>"
-            from "user"
-            inner join user_profile on "user".id = user_profile.user_id
-            inner join followers on (followers.follower_id = "user".id)
-            offset $2
-            limit $3
+        from cte
+        left join user_profile on cte.id = user_profile.user_id
+        left join "user" on (cte.id = "user".id)
+        where ord > (1 * $2 * $3)
+        limit $3;
+
             "#,
             user_id.0,
             page as i32,
@@ -470,19 +476,23 @@ pub async fn browse_following(
     let user_data = sqlx::query!(
         r#"
         with following as (
-            select user_id
+            select (array_agg(user_id))[1]
             from user_follow
             where follower_id = $1
-            order by coalesce(followed_at) desc
+            group by followed_at
+            order by followed_at desc
+        ),
+        cte as (
+            select * from unnest((select array_agg(following.array_agg) from following)) with ordinality t(id, ord) order by ord
         )
-        select  id                     as "id!: UserId",
+        select  "user".id                     as "id!: UserId",
                 username               as "username!",
                 given_name             as "given_name!",
                 family_name            as "family_name!",
                 profile_image_id       as "profile_image?: ImageId",
                 (select language from user_profile where user_profile.user_id = "user".id and language_public is true)      as "language?",
                 (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?",
-                (select array(select persona from user_profile where user_profile.user_id = "user".id and persona_public is true))      as "persona!",
+                (select persona from user_profile where user_profile.user_id = "user".id and persona_public is true)      as "persona?: Vec<String>",
                 (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?",
                 (select bio from user_profile where user_profile.user_id = "user".id and bio_public is true)      as "bio?",
                 array(select circle.id
@@ -490,11 +500,11 @@ pub async fn browse_following(
                     left join circle on bm.id = circle.id
                     where bm.user_id = "user".id or circle.creator_id = "user".id
                 ) as "circles!: Vec<CircleId>"
-            from "user"
-            inner join user_profile on "user".id = user_profile.user_id
-            inner join following on (following.user_id = "user".id)
-            offset $2
-            limit $3
+            from cte
+            left join user_profile on cte.id = user_profile.user_id
+            left join "user" on (cte.id = "user".id)
+            where ord > (1 * $2 * $3)
+            limit $3;
             "#,
             user_id.0,
             page as i32,

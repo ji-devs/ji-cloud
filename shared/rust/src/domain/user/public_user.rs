@@ -35,8 +35,8 @@ pub struct PublicUser {
     pub organization: Option<String>, // only here if organization_public is true
     /// Persona of User
     #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub persona: Vec<String>, // only here if persona_public is true
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub persona: Option<Vec<String>>, // only here if persona_public is true
     /// Location of User
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
