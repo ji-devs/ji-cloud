@@ -194,11 +194,10 @@ pub struct Question {
 impl Question {
     /// Convenience method to determine whether a question has been configured correctly
     pub fn is_valid(&self) -> bool {
-        let has_title = !self.title.trim().is_empty();
         let has_question = !self.question_text.is_empty() || self.question_audio.is_some();
         let has_traces = !self.traces.is_empty();
 
-        has_title && has_question && has_traces
+        has_question && has_traces
     }
 }
 
