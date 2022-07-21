@@ -12,6 +12,7 @@ expression: body
       "familyName": "Doo",
       "profileImage": null,
       "organization": "test2 org",
+      "persona": [],
       "circles": []
     }
   ],

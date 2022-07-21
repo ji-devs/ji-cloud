@@ -327,46 +327,6 @@
       ]
     }
   },
-  "0c798d30d84b1eaf31f79263f179b8c3791bee98f698407223bbdc5ebe8f972e": {
-    "query": "\n        with cte as (\n            select distinct jdar.id              as id,\n                   jdar.display_name,\n                   resource_type_id,\n                   resource_content,\n                   author_id,\n                   updated_at,\n                   created_at\n            from jig_data_additional_resource \"jdar\"\n            inner join jig on jig.live_id = jdar.jig_data_id\n            inner join jig_data on jig.live_id = jig_data.id\n            where author_id = $1\n           ),\n           cte1 as (\n              select distinct cdr.id              as id,\n                cdr.display_name,\n                resource_type_id,\n                resource_content,\n                author_id,\n                updated_at,\n                created_at\n          from course_data_resource \"cdr\"\n          inner join course on course.live_id = cdr.course_data_id\n          inner join course_data on course.live_id = course_data.id\n          where author_id = $1\n          ),\n          cte2 as (\n            select * from unnest(array(select id from (select id from cte union all select id from cte1) resource)) with ordinality t(id\n           , ord) order by ord\n         )\n          select cte3.id                     as \"id!: AddId\",\n                 display_name           as \"display_name!\",\n                 resource_type_id       as \"resource_type_id!: TypeId\",\n                 resource_content        as \"resource_content!\"\n         from\n          (select * from cte\n          union all\n          select * from cte1) cte3\n        inner join cte2 on cte2.id = cte3.id\n        where ord > (1 * $2 * $3)\n        order by ord asc\n        limit $3\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id!: AddId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "display_name!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "resource_type_id!: TypeId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 3,
-          "name": "resource_content!",
-          "type_info": "Jsonb"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int4",
-          "Int4"
-        ]
-      },
-      "nullable": [
-        null,
-        null,
-        null,
-        null
-      ]
-    }
-  },
   "0d33ddd6d34bf4755b8ff298de37d678fc3d79222c8d193dc06d1e8fe25b2354": {
     "query": "insert into user_email (user_id, email) values ($1, $2::text)",
     "describe": {
@@ -583,6 +543,86 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "0f5407647e2aa6db908ea33d0fbbfe8da16f0209fa6bcb5c206a1632e284c664": {
+    "query": "\n        select  user_id                as \"id!: UserId\",\n                username               as \"username!\",\n                given_name             as \"given_name!\",\n                family_name            as \"family_name!\",\n                profile_image_id       as \"profile_image?: ImageId\",\n                (select language from user_profile where user_profile.user_id = \"user\".id and language_public is true)      as \"language?\",\n                (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n                (select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\",\n                (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n                (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n                (select array(select circle.id\n                    from circle_member bm\n                    inner join circle on bm.id = circle.id\n                    where bm.user_id = \"user\".id\n                )) as \"circles!: Vec<CircleId>\"\n                from \"user\"\n                inner join user_profile on \"user\".id = user_profile.user_id\n                inner join unnest($1::uuid[])\n                with ordinality t(id, ord) using (id)\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!: UserId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "username!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "given_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "family_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "profile_image?: ImageId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 5,
+          "name": "language?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "organization?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "persona?: Vec<String>",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 8,
+          "name": "location?",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 9,
+          "name": "bio?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 10,
+          "name": "circles!: Vec<CircleId>",
+          "type_info": "UuidArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      },
+      "nullable": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
     }
   },
   "10945eeae4737e692b87e4af7b33a2469fa8b32e898cd72e6716aa7400c506d8": {
@@ -897,6 +937,46 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "1862fe31395b93764f3ffb9a08380d10457db036e7ca6c34ece5148021ff4b93": {
+    "query": "\n        with cte as (\n            select distinct jdar.id              as id,\n                   jdar.display_name,\n                   resource_type_id,\n                   resource_content,\n                   author_id,\n                   updated_at,\n                   created_at\n            from jig_data_additional_resource \"jdar\"\n            inner join jig on jig.live_id = jdar.jig_data_id\n            inner join jig_data on jig.live_id = jig_data.id\n            where author_id = $1\n           ),\n           cte1 as (\n              select distinct cdr.id              as id,\n                cdr.display_name,\n                resource_type_id,\n                resource_content,\n                author_id,\n                updated_at,\n                created_at\n          from course_data_resource \"cdr\"\n          inner join course on course.live_id = cdr.course_data_id\n          inner join course_data on course.live_id = course_data.id\n          where author_id = $1\n          ),\n          cte2 as (\n            select * from unnest(array(select id from (select id from cte union all select id from cte1) resource)) with ordinality t(id\n           , ord) order by ord\n         )\n          select cte3.id                as \"id!: AddId\",\n                 display_name           as \"display_name!\",\n                 resource_type_id       as \"resource_type_id!: TypeId\",\n                 resource_content        as \"resource_content!\"\n         from\n          (select * from cte\n          union all\n          select * from cte1) cte3\n        inner join cte2 on cte2.id = cte3.id\n        where ord > (1 * $2 * $3)\n        order by ord asc\n        limit $3\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!: AddId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "resource_type_id!: TypeId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 3,
+          "name": "resource_content!",
+          "type_info": "Jsonb"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int4",
+          "Int4"
+        ]
+      },
+      "nullable": [
+        null,
+        null,
+        null,
+        null
+      ]
     }
   },
   "190abdc3f0a691d3b3e02b9ec75c214e58b8264734da76ead622688d7b191f68": {
@@ -1626,88 +1706,6 @@
       ]
     }
   },
-  "3182e634c65bfddb5ec5920addcd9187a78bba29dd766a0666fb3ce465549211": {
-    "query": "\n        with following as (\n            select user_id\n            from user_follow\n            where follower_id = $1\n            order by coalesce(followed_at) desc\n        )\n        select  id                     as \"id!: UserId\",\n                username               as \"username!\",\n                given_name             as \"given_name!\",\n                family_name            as \"family_name!\",\n                profile_image_id       as \"profile_image?: ImageId\",\n                (select language from user_profile where user_profile.user_id = \"user\".id and language_public is true)      as \"language?\",\n                (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n                (select array(select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true))      as \"persona!\",\n                (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n                (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n                array(select circle.id\n                    from circle_member bm\n                    left join circle on bm.id = circle.id\n                    where bm.user_id = \"user\".id or circle.creator_id = \"user\".id\n                ) as \"circles!: Vec<CircleId>\"\n            from \"user\"\n            inner join user_profile on \"user\".id = user_profile.user_id\n            inner join following on (following.user_id = \"user\".id)\n            offset $2\n            limit $3\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id!: UserId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "username!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "given_name!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "family_name!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "profile_image?: ImageId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 5,
-          "name": "language?",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 6,
-          "name": "organization?",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 7,
-          "name": "persona!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 8,
-          "name": "location?",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 9,
-          "name": "bio?",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 10,
-          "name": "circles!: Vec<CircleId>",
-          "type_info": "UuidArray"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int8",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true
-      ]
-    }
-  },
   "32bbb9dc2446795abc480d132b14960dc9b5d636d4b95d75400cffae27762155": {
     "query": "\n            select id as \"id: AffiliationId\", display_name, created_at, updated_at from affiliation\n            order by index\n        ",
     "describe": {
@@ -2190,86 +2188,6 @@
       "nullable": []
     }
   },
-  "47b4d2bb79bb85304627a9ed9a68caeab31e8f335f3e5a469620c0aed6c91d2e": {
-    "query": "\n    select  user_id as \"id: UserId\",\n            username,\n            given_name,\n            family_name,\n            profile_image_id       as \"profile_image?: ImageId\",\n            (select language from user_profile where user_profile.user_id = \"user\".id and language_public is true)      as \"language?\",\n            (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n            (select array(select language from user_profile where user_profile.user_id = \"user\".id and persona_public is true))      as \"persona!:Vec<String>\",\n            (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n            (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n            array(select circle.id\n                from circle_member bm\n                inner join circle on bm.id = circle.id\n                where bm.user_id = \"user\".id\n            ) as \"circles!: Vec<CircleId>\"\n        from \"user\"\n            inner join user_profile on \"user\".id = user_profile.user_id\n        where id = $1\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: UserId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "username",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "given_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "family_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "profile_image?: ImageId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 5,
-          "name": "language?",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 6,
-          "name": "organization?",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 7,
-          "name": "persona!:Vec<String>",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 8,
-          "name": "location?",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 9,
-          "name": "bio?",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 10,
-          "name": "circles!: Vec<CircleId>",
-          "type_info": "UuidArray"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        true,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-      ]
-    }
-  },
   "47f87006d700bed96cbf873d8addacbd9c160cf71e5cd0a4543b1fd7754d563d": {
     "query": "\ndelete from user_recent_image\nwhere user_id = $1 and image_id = $2\n            ",
     "describe": {
@@ -2330,6 +2248,88 @@
         false,
         false,
         false,
+        null
+      ]
+    }
+  },
+  "49e3e708429d6b73edc51ab8d6899c1796af0defc1b09de5ccff0cbcf23d5e60": {
+    "query": "\n        with cte as (\n            select (array_agg(\"user\".id))[1]\n            from \"user\"\n            left join user_profile \"up\" on up.user_id = \"user\".id \n            left join circle_member \"cm\" on cm.user_id = \"user\".id\n            left join circle on circle.id = cm.id \n            where cm.id = any($1) or $1 = array[]::uuid[]\n            group by \"user\".created_at\n            order by \"user\".created_at desc\n        ),\n        cte1 as (\n            select * from unnest((select array_agg(cte.array_agg) from cte)) with ordinality t(id\n           , ord) order by ord\n        )\n        select  user_id                as \"id!: UserId\",\n                username               as \"username!\",\n                given_name             as \"given_name!\",\n                family_name            as \"family_name!\",\n                profile_image_id       as \"profile_image?: ImageId\",\n                (select language from user_profile where user_profile.user_id = \"user\".id and language_public is true)      as \"language?\",\n                (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n                (select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\",\n                (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n                (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n                (select array(select circle.id\n                    from circle_member bm\n                    inner join circle on bm.id = circle.id\n                    where bm.user_id = \"user\".id\n                )) as \"circles!: Vec<CircleId>\"\n        from cte1\n        left join user_profile on cte1.id = user_profile.user_id\n        left join \"user\" on cte1.id = \"user\".id\n        where ord > (1 * $2 * $3)\n        order by ord\n        limit $3\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!: UserId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "username!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "given_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "family_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "profile_image?: ImageId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 5,
+          "name": "language?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "organization?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "persona?: Vec<String>",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 8,
+          "name": "location?",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 9,
+          "name": "bio?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 10,
+          "name": "circles!: Vec<CircleId>",
+          "type_info": "UuidArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray",
+          "Int4",
+          "Int4"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        null,
+        null,
+        null,
+        null,
+        null,
         null
       ]
     }
@@ -2848,6 +2848,88 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "59c428c3ee8567737c6e94cd7475acdbedca86067979c30f6dd9af9deb326e43": {
+    "query": "\n        with following as (\n            select (array_agg(user_id))[1]\n            from user_follow\n            where follower_id = $1\n            group by followed_at\n            order by followed_at desc\n        ),\n        cte as (\n            select * from unnest((select array_agg(following.array_agg) from following)) with ordinality t(id, ord) order by ord\n        )\n        select  \"user\".id                     as \"id!: UserId\",\n                username               as \"username!\",\n                given_name             as \"given_name!\",\n                family_name            as \"family_name!\",\n                profile_image_id       as \"profile_image?: ImageId\",\n                (select language from user_profile where user_profile.user_id = \"user\".id and language_public is true)      as \"language?\",\n                (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n                (select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\",\n                (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n                (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n                array(select circle.id\n                    from circle_member bm\n                    left join circle on bm.id = circle.id\n                    where bm.user_id = \"user\".id or circle.creator_id = \"user\".id\n                ) as \"circles!: Vec<CircleId>\"\n            from cte\n            left join user_profile on cte.id = user_profile.user_id\n            left join \"user\" on (cte.id = \"user\".id)\n            where ord > (1 * $2 * $3)\n            limit $3;\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!: UserId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "username!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "given_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "family_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "profile_image?: ImageId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 5,
+          "name": "language?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "organization?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "persona?: Vec<String>",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 8,
+          "name": "location?",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 9,
+          "name": "bio?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 10,
+          "name": "circles!: Vec<CircleId>",
+          "type_info": "UuidArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int4",
+          "Int4"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
     }
   },
   "59c49f0ffacb928c16d48a8a91fc04e16057b123de225183c88bfd1348042e1b": {
@@ -5286,6 +5368,86 @@
       ]
     }
   },
+  "8f8408f6b74c427ab19cb5b32a3e10a4f4a31549bdd4198df9e1238c81d01adb": {
+    "query": "\n    select  user_id as \"id: UserId\",\n            username,\n            given_name,\n            family_name,\n            profile_image_id       as \"profile_image?: ImageId\",\n            (select language from user_profile where user_profile.user_id = \"user\".id and language_public is true)      as \"language?\",\n            (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n            (select language from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\",\n            (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n            (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n            array(select circle.id\n                from circle_member bm\n                inner join circle on bm.id = circle.id\n                where bm.user_id = \"user\".id\n            ) as \"circles!: Vec<CircleId>\"\n        from \"user\"\n            inner join user_profile on \"user\".id = user_profile.user_id\n        where id = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: UserId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "username",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "given_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "family_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "profile_image?: ImageId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 5,
+          "name": "language?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "organization?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "persona?: Vec<String>",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 8,
+          "name": "location?",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 9,
+          "name": "bio?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 10,
+          "name": "circles!: Vec<CircleId>",
+          "type_info": "UuidArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  },
   "8ff3594259d04d0786b415f1e6577c3252ad2779bf0a9336d3ea985d54d78556": {
     "query": "\nselect parent_id, index from category where id = $1 for update\n    ",
     "describe": {
@@ -7033,6 +7195,88 @@
       "nullable": []
     }
   },
+  "beecd8d4d769c5b4e85939d8a5844862be84362eff3efa2c8e26f433b681d3ac": {
+    "query": "\n        with follower as (\n            select (array_agg(follower_id))[1]\n            from user_follow\n            where user_id = $1\n            group by followed_at\n            order by followed_at desc\n        ),\n        cte as (\n            select * from unnest((select array_agg(follower.array_agg) from follower)) with ordinality t(id, ord) order by ord\n        )\n        select  \"user\".id         as \"id!: UserId\",\n                username               as \"username!\",\n                given_name             as \"given_name!\",\n                family_name            as \"family_name!\",\n                profile_image_id       as \"profile_image?: ImageId\",\n                (select language from user_profile where user_profile.user_id = \"user\".id and language_public is true)      as \"language?\",\n                (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n                (select array(select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true))      as \"persona?: Vec<String>\",\n                (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n                (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n                (select array(select circle.id\n                    from circle_member bm\n                    left join circle on bm.id = circle.id\n                    where bm.user_id = \"user\".id or circle.creator_id = \"user\".id\n                )) as \"circles!: Vec<CircleId>\"\n        from cte\n        left join user_profile on cte.id = user_profile.user_id\n        left join \"user\" on (cte.id = \"user\".id)\n        where ord > (1 * $2 * $3)\n        limit $3;\n\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!: UserId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "username!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "given_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "family_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "profile_image?: ImageId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 5,
+          "name": "language?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "organization?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "persona?: Vec<String>",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 8,
+          "name": "location?",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 9,
+          "name": "bio?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 10,
+          "name": "circles!: Vec<CircleId>",
+          "type_info": "UuidArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int4",
+          "Int4"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  },
   "bfd314e70437482954c5dfb3a40ab08990a0bea43779d810e9dd903e87e10c81": {
     "query": "\nupdate jig_admin_data\nset curated = coalesce($2, curated)\nwhere jig_id = $1 and $2 is distinct from curated\n            ",
     "describe": {
@@ -8335,86 +8579,6 @@
       "nullable": []
     }
   },
-  "ebe0b07c7243f12b8d495c999faf858be4685b74d82a4e4b5597c512ce4b1d9a": {
-    "query": "\n        select  user_id                as \"id!: UserId\",\n                username               as \"username!\",\n                given_name             as \"given_name!\",\n                family_name            as \"family_name!\",\n                profile_image_id       as \"profile_image?: ImageId\",\n                (select language from user_profile where user_profile.user_id = \"user\".id and language_public is true)      as \"language?\",\n                (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n                (select array(select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true))      as \"persona!: Vec<String>\",\n                (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n                (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n                (select array(select circle.id\n                    from circle_member bm\n                    inner join circle on bm.id = circle.id\n                    where bm.user_id = \"user\".id\n                )) as \"circles!: Vec<CircleId>\"\n                from \"user\"\n                inner join user_profile on \"user\".id = user_profile.user_id\n                inner join unnest($1::uuid[])\n                with ordinality t(id, ord) using (id)\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id!: UserId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "username!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "given_name!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "family_name!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "profile_image?: ImageId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 5,
-          "name": "language?",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 6,
-          "name": "organization?",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 7,
-          "name": "persona!: Vec<String>",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 8,
-          "name": "location?",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 9,
-          "name": "bio?",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 10,
-          "name": "circles!: Vec<CircleId>",
-          "type_info": "UuidArray"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "UuidArray"
-        ]
-      },
-      "nullable": [
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true
-      ]
-    }
-  },
   "ebf961d5777f0009b3717b25f4328a1d4e8230adc40135440a107f570062e9f6": {
     "query": "\nupdate course_data\nset description = $2,\n    updated_at = now()\nwhere id = $1 and $2 is distinct from description",
     "describe": {
@@ -8668,88 +8832,6 @@
       "nullable": []
     }
   },
-  "f682a9768f2913016f1407176415f70d6eb5b0d451485d1440b004889e7f101a": {
-    "query": "\n        with cte as (\n            select array(select \"user\".id  as \"id!\"\n            from \"user\"\n            left join user_profile \"up\" on up.user_id = \"user\".id \n            left join circle_member \"cm\" on cm.user_id = \"user\".id\n            left join circle on circle.id = cm.id \n            where cm.id = any($1) or $1 = array[]::uuid[]\n            order by \"user\".created_at desc) as id\n        ),\n        cte1 as (\n            select * from unnest((select distinct id from cte)) with ordinality t(id\n           , ord) order by ord\n        )\n        select  user_id                as \"id!: UserId\",\n                username               as \"username!\",\n                given_name             as \"given_name!\",\n                family_name            as \"family_name!\",\n                profile_image_id       as \"profile_image?: ImageId\",\n                (select language from user_profile where user_profile.user_id = \"user\".id and language_public is true)      as \"language?\",\n                (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n                (select array(select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true))      as \"persona!: Vec<String>\",\n                (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n                (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n                (select array(select circle.id\n                    from circle_member bm\n                    inner join circle on bm.id = circle.id\n                    where bm.user_id = \"user\".id\n                )) as \"circles!: Vec<CircleId>\"\n            from \"user\"\n            inner join user_profile on \"user\".id = user_profile.user_id\n            inner join cte1 on cte1.id = \"user\".id\n            where ord > (1 * $2 * $3)\n            order by ord\n            limit $3\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id!: UserId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "username!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "given_name!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "family_name!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "profile_image?: ImageId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 5,
-          "name": "language?",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 6,
-          "name": "organization?",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 7,
-          "name": "persona!: Vec<String>",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 8,
-          "name": "location?",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 9,
-          "name": "bio?",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 10,
-          "name": "circles!: Vec<CircleId>",
-          "type_info": "UuidArray"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "UuidArray",
-          "Int4",
-          "Int4"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        true,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-      ]
-    }
-  },
   "f885c76fd750edde5adbd1d426d6f92c91f336d5ffbbcee318e1f18cf31ca72b": {
     "query": "insert into \"user\" default values returning id",
     "describe": {
@@ -8887,88 +8969,6 @@
       },
       "nullable": [
         null
-      ]
-    }
-  },
-  "fbc1e5e371b1f1742132555b53810ec3409c06345a71b184dfdba2c38ed16e86": {
-    "query": "\n        with followers as (\n            select follower_id\n            from user_follow\n            where user_id = $1\n            order by coalesce(followed_at) desc\n        )\n        select  id         as \"id!: UserId\",\n                username               as \"username!\",\n                given_name             as \"given_name!\",\n                family_name            as \"family_name!\",\n                profile_image_id       as \"profile_image?: ImageId\",\n                (select language from user_profile where user_profile.user_id = \"user\".id and language_public is true)      as \"language?\",\n                (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n                (select array(select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true))      as \"persona!: Vec<String>\",\n                (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n                (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n                (select array(select circle.id\n                    from circle_member bm\n                    left join circle on bm.id = circle.id\n                    where bm.user_id = \"user\".id or circle.creator_id = \"user\".id\n                )) as \"circles!: Vec<CircleId>\"\n            from \"user\"\n            inner join user_profile on \"user\".id = user_profile.user_id\n            inner join followers on (followers.follower_id = \"user\".id)\n            offset $2\n            limit $3\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id!: UserId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "username!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "given_name!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "family_name!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "profile_image?: ImageId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 5,
-          "name": "language?",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 6,
-          "name": "organization?",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 7,
-          "name": "persona!: Vec<String>",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 8,
-          "name": "location?",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 9,
-          "name": "bio?",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 10,
-          "name": "circles!: Vec<CircleId>",
-          "type_info": "UuidArray"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int8",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true
       ]
     }
   },
