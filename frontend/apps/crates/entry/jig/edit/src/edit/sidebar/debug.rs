@@ -28,6 +28,7 @@ pub fn get_jig() -> JigResponse {
         author_name: None,
         published_at: None,
         jig_data: JigData {
+            created_at: chrono::offset::Utc::now(),
             draft_or_live: DraftOrLive::Draft,
             display_name: "hello world".to_string(),
             //TODO - delete me: https://github.com/ji-devs/ji-cloud/issues/835

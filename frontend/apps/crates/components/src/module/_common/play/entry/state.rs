@@ -116,6 +116,8 @@ where
                         author_name: None,
                         published_at: None,
                         jig_data: JigData {
+                            created_at: chrono::offset::Utc::now(),
+                            last_edited: None,
                             draft_or_live: DraftOrLive::Draft,
                             display_name: String::from("debug!"),
                             modules: Vec::new(),
@@ -125,7 +127,6 @@ where
                             categories: Vec::new(),
                             additional_resources: Vec::new(),
                             description: String::from("debug"),
-                            last_edited: None,
                             theme: ThemeId::default(),
                             audio_background: None,
                             audio_effects: AudioEffects::default(),
