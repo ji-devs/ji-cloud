@@ -172,6 +172,10 @@ pub struct UserProfile {
     #[serde(default)]
     pub language_public: bool, // default to false
 
+    /// Allow bio to public
+    #[serde(default)]
+    pub bio_public: bool, // default to false
+
     /// User associated Circles
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
