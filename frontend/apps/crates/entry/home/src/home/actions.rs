@@ -66,10 +66,10 @@ async fn fetch_metadata(state: Rc<Home>) {
 }
 
 async fn fetch_profile(state: Rc<Home>) {
-    match get_user() {
+    match get_user_cloned() {
         Some(profile) => {
             state.is_logged_in.set(true);
-            state.search_selected.set_from_profile(profile);
+            state.search_selected.set_from_profile(&profile);
         }
         None => {}
     }

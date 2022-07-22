@@ -17,7 +17,7 @@ use utils::{
     ages::AgeRangeVecExt,
     events,
     jig::{published_at_string, ResourceContentExt},
-    prelude::get_user,
+    prelude::get_user_cloned,
     routes::{AssetEditRoute, AssetRoute, JigEditRoute, Route},
 };
 
@@ -30,7 +30,7 @@ impl SearchResultsSection {
         let state = self;
 
         // Only set this once, but I don't want to add once_cell crate when it's not really needed.
-        state.user.set(get_user().cloned());
+        state.user.set(get_user_cloned());
 
         html!("home-search-results-section", {
             .property("slot", "sections")

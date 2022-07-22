@@ -3,7 +3,7 @@ use std::rc::Rc;
 use dominator::clone;
 use shared::api::endpoints;
 use utils::{
-    prelude::{get_user, ApiEndpointExt},
+    prelude::{get_user_cloned, ApiEndpointExt},
     routes::{LoginQuery, Route, UserRoute},
     storage::delete_csrf_token,
     unwrap::UnwrapJiExt,
@@ -12,7 +12,7 @@ use utils::{
 use super::state::{LoggedInState, State};
 
 pub fn fetch_profile(state: Rc<State>) {
-    match get_user() {
+    match get_user_cloned() {
         // Some(profile) => state.logged_in.set(LoggedInState::LoggedIn(&profile)),
         Some(profile) => state.logged_in.set(LoggedInState::LoggedIn(profile)),
         None => state.logged_in.set(LoggedInState::LoggedOut),

@@ -9,7 +9,7 @@ use futures_signals::signal::{Signal, SignalExt};
 use shared::domain::user::UserProfile;
 use utils::{
     events,
-    prelude::get_user,
+    prelude::{get_user_cloned, get_user_id},
     routes::{CommunityCirclesRoute, CommunityMembersRoute, CommunityRoute, Route, UserRoute},
     unwrap::UnwrapJiExt,
 };
@@ -113,9 +113,9 @@ impl Community {
             .property("slot", "nav")
             .children(&mut [
                 {
-                    let route = match get_user() {
-                        Some(user) => {
-                            Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(user.id))).to_string()
+                    let route = match get_user_id() {
+                        Some(user_id) => {
+                            Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(user_id))).to_string()
                         },
                         _ => {
                             Route::User(UserRoute::Login(Default::default())).to_string()
@@ -123,7 +123,7 @@ impl Community {
                     };
                     html!("community-nav-item", {
                         .child({
-                            match get_user() {
+                            match get_user_cloned() {
                                 Some(UserProfile { profile_image: Some(image_id), .. }) => {
                                     html!("profile-image", {
                                         .property("imageId", &image_id.0.to_string())

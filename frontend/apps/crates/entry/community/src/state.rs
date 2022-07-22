@@ -5,7 +5,7 @@ use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::{Mutable, Signal};
 use once_cell::sync::Lazy;
 use shared::domain::user::{UserId, UserProfile};
-use utils::{prelude::get_user, routes::Route};
+use utils::{prelude::get_user_cloned, routes::Route};
 
 pub struct Community {
     pub q: Mutable<String>,
@@ -19,7 +19,7 @@ impl Community {
     pub fn new() -> Rc<Self> {
         Rc::new(Self {
             q: Mutable::default(),
-            user: Mutable::new(get_user().cloned()),
+            user: Mutable::new(get_user_cloned()),
             followers: Default::default(),
             followings: Default::default(),
             loader: AsyncLoader::new(),

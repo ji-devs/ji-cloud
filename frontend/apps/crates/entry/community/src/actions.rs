@@ -11,7 +11,7 @@ use shared::{
     error::EmptyError,
 };
 use utils::{
-    prelude::{api_no_auth, get_user},
+    prelude::{api_no_auth, get_user_id},
     routes::{CommunityRoute, CommunitySearchQuery, Route},
 };
 
@@ -31,14 +31,14 @@ impl Community {
     async fn load_members_followers(self: &Rc<Self>) {
         let state = self;
 
-        if let Some(user) = get_user() {
+        if let Some(user_id) = get_user_id() {
             let req = BrowsePublicUserFollowersQuery {
                 page_limit: Some(100),
                 ..Default::default()
             };
 
             let path =
-                endpoints::user::BrowseFollowers::PATH.replace("{user_id}", &user.id.to_string());
+                endpoints::user::BrowseFollowers::PATH.replace("{user_id}", &user_id.to_string());
             let res = api_no_auth::<
                 BrowsePublicUserFollowersResponse,
                 EmptyError,
@@ -59,14 +59,14 @@ impl Community {
     async fn load_members_following(self: &Rc<Self>) {
         let state = self;
 
-        if let Some(user) = get_user() {
+        if let Some(user_id) = get_user_id() {
             let req = BrowsePublicUserFollowingsQuery {
                 page_limit: Some(100),
                 ..Default::default()
             };
 
             let path =
-                endpoints::user::BrowseFollowing::PATH.replace("{user_id}", &user.id.to_string());
+                endpoints::user::BrowseFollowing::PATH.replace("{user_id}", &user_id.to_string());
             let res = api_no_auth::<
                 BrowsePublicUserFollowingResponse,
                 EmptyError,
