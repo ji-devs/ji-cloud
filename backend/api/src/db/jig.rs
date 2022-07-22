@@ -191,55 +191,56 @@ with cte as (
     where id = $1
 )
 select cte.jig_id                                          as "jig_id: JigId",
-       display_name,
-       creator_id                                          as "creator_id: UserId",
-       author_id                                           as "author_id: UserId",
-       (select given_name || ' '::text || family_name
+        display_name,
+        creator_id                                          as "creator_id: UserId",
+        author_id                                           as "author_id: UserId",
+        (select given_name || ' '::text || family_name
         from user_profile
         where user_profile.user_id = author_id)            as "author_name",
-       published_at,
-       updated_at,
-       privacy_level                                       as "privacy_level!: PrivacyLevel",
-       jig_focus                                           as "jig_focus!: JigFocus",
-       language,
-       description,
-       translated_description                              as "translated_description!: Json<HashMap<String, String>>",
-       direction                                           as "direction: TextDirection",
-       display_score,
-       track_assessments,
-       drag_assist,
-       theme                                               as "theme: ThemeId",
-       audio_background                                    as "audio_background: AudioBackground",
-       liked_count,
-       play_count,
-       locked,
-       other_keywords,
-       translated_keywords,
-       rating                                               as "rating?: JigRating",
-       blocked                                              as "blocked",
-       curated,
-       array(select row (unnest(audio_feedback_positive))) as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
-       array(select row (unnest(audio_feedback_negative))) as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
-       array(
+        created_at,
+        updated_at,
+        published_at,
+        privacy_level                                       as "privacy_level!: PrivacyLevel",
+        jig_focus                                           as "jig_focus!: JigFocus",
+        language,
+        description,
+        translated_description                              as "translated_description!: Json<HashMap<String, String>>",
+        direction                                           as "direction: TextDirection",
+        display_score,
+        track_assessments,
+        drag_assist,
+        theme                                               as "theme: ThemeId",
+        audio_background                                    as "audio_background: AudioBackground",
+        liked_count,
+        play_count,
+        locked,
+        other_keywords,
+        translated_keywords,
+        rating                                               as "rating?: JigRating",
+        blocked                                              as "blocked",
+        curated,
+        array(select row (unnest(audio_feedback_positive))) as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
+        array(select row (unnest(audio_feedback_negative))) as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
+        array(
                 select row (jig_data_module.id, kind, is_complete)
                 from jig_data_module
-                where jig_data_id = jig_data.id 
+                where jig_data_id = jig_data.id
                 order by "index"
-       )                                               as "modules!: Vec<(ModuleId, ModuleKind, bool)>",
-       array(select row (category_id)
-             from jig_data_category
-             where jig_data_id = cte.draft_or_live_id)     as "categories!: Vec<(CategoryId,)>",
-       array(select row (affiliation_id)
-             from jig_data_affiliation
-             where jig_data_id = cte.draft_or_live_id)     as "affiliations!: Vec<(AffiliationId,)>",
-       array(select row (age_range_id)
-             from jig_data_age_range
-             where jig_data_id = cte.draft_or_live_id)     as "age_ranges!: Vec<(AgeRangeId,)>",
-       array(
-             select row (jdar.id, jdar.display_name, resource_type_id, resource_content)
-             from jig_data_additional_resource "jdar"
-             where jdar.jig_data_id = cte.draft_or_live_id
-       )                                                    as "additional_resource!: Vec<(AddId, String, TypeId, Value)>"
+        )                                               as "modules!: Vec<(ModuleId, ModuleKind, bool)>",
+        array(select row (category_id)
+                from jig_data_category
+                where jig_data_id = cte.draft_or_live_id)     as "categories!: Vec<(CategoryId,)>",
+        array(select row (affiliation_id)
+                from jig_data_affiliation
+                where jig_data_id = cte.draft_or_live_id)     as "affiliations!: Vec<(AffiliationId,)>",
+        array(select row (age_range_id)
+                from jig_data_age_range
+                where jig_data_id = cte.draft_or_live_id)     as "age_ranges!: Vec<(AgeRangeId,)>",
+        array(
+                select row (jdar.id, jdar.display_name, resource_type_id, resource_content)
+                from jig_data_additional_resource "jdar"
+                where jdar.jig_data_id = cte.draft_or_live_id
+    )                                                    as "additional_resource!: Vec<(AddId, String, TypeId, Value)>"
 from jig_data
          inner join cte on cte.draft_or_live_id = jig_data.id
 "#,
@@ -258,6 +259,7 @@ from jig_data
         plays: row.play_count,
         jig_focus: row.jig_focus,
         jig_data: JigData {
+            created_at: row.created_at,
             draft_or_live,
             display_name: row.display_name,
             language: row.language,
@@ -377,6 +379,7 @@ from jig
         r#"
 select id,
        display_name                                                                  as "display_name!",
+       created_at                                                                    as "created_at!",
        updated_at,
        language                                                                      as "language!",
        description                                                                   as "description!",
@@ -392,7 +395,7 @@ select id,
        array(
                 select row (jig_data_module.id, kind, is_complete)
                 from jig_data_module
-                where jig_data_id = jig_data.id 
+                where jig_data_id = jig_data.id
                 order by "index"
        )                                               as "modules!: Vec<(ModuleId, ModuleKind, bool)>",
        array(select row (category_id)
@@ -436,6 +439,7 @@ from jig_data
             plays: jig_row.play_count,
             jig_focus: jig_row.jig_focus,
             jig_data: JigData {
+                created_at: jig_data_row.created_at,
                 draft_or_live,
                 display_name: jig_data_row.display_name,
                 language: jig_data_row.language,
@@ -552,7 +556,7 @@ with cte as (
         and (blocked = $4 or $4 is null)
         and (jd.privacy_level = any($5) or $5 = array[]::smallint[])
         and (resource.resource_type_id = any($8) or $8 = array[]::uuid[])
-    order by case when $9 = 0 then created_at  
+    order by case when $9 = 0 then created_at
         when $9 = 1 then published_at
         else coalesce(updated_at, created_at)
   end desc, jig_id
@@ -570,6 +574,8 @@ select jig.id                                              as "jig_id: JigId",
     (select given_name || ' '::text || family_name
         from user_profile
      where user_profile.user_id = author_id)            as "author_name",
+    created_at,
+    updated_at,
     published_at,
     liked_count,
     (
@@ -578,7 +584,6 @@ select jig.id                                              as "jig_id: JigId",
          where jig_play_count.jig_id = jig.id
     )                                                   as "play_count!",
    display_name                                                                  as "display_name!",
-   updated_at,
    language                                                                      as "language!",
    description                                                                   as "description!",
    translated_description                                                        as "translated_description!: Json<HashMap<String,String>>",
@@ -594,7 +599,7 @@ select jig.id                                              as "jig_id: JigId",
    array(
            select row (jig_data_module.id, kind, is_complete)
            from jig_data_module
-           where jig_data_id = jig_data.id 
+           where jig_data_id = jig_data.id
            order by "index"
     )                                               as "modules!: Vec<(ModuleId, ModuleKind, bool)>",
    array(select row (category_id)
@@ -658,6 +663,7 @@ limit $7
             plays: jig_data_row.play_count,
             jig_focus: jig_data_row.jig_focus,
             jig_data: JigData {
+                created_at: jig_data_row.created_at,
                 draft_or_live: jig_data_row.draft_or_live,
                 display_name: jig_data_row.display_name,
                 language: jig_data_row.language,

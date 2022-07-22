@@ -80,6 +80,12 @@ pub struct JigCreateRequest {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct JigData {
+    /// When the JIG was first created.
+    pub created_at: DateTime<Utc>,
+
+    /// When the jig was last edited
+    pub last_edited: Option<DateTime<Utc>>,
+
     /// Whether the JIG data is the live copy or the draft.
     pub draft_or_live: DraftOrLive,
 
@@ -110,9 +116,6 @@ pub struct JigData {
 
     /// Description of the jig.
     pub description: String,
-
-    /// When the jig was last edited
-    pub last_edited: Option<DateTime<Utc>>,
 
     /// Default player settings for this jig.
     pub default_player_settings: JigPlayerSettings,
