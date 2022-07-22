@@ -42,8 +42,8 @@ impl MemberDetails {
                             if let Some(organization) = &member.organization {
                                 dom = dom.property("organization", organization)
                             }
-                            if !member.persona.is_empty() {
-                                dom = dom.property("persona", member.persona.join(", "));
+                            if let Some(persona) = &member.persona {
+                                dom = dom.property("persona", persona.join(", "));
                             }
                             if let Some(bio) = &member.bio {
                                 dom = dom.property("bio", bio)
