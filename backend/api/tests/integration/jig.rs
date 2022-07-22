@@ -47,6 +47,7 @@ async fn create_default() -> anyhow::Result<()> {
     insta::assert_json_snapshot!(
         body, {
             ".**.id" => "[id]",
+            ".**.createdAt" => "[created_at]",
             ".**.lastEdited" => "[last_edited]",
             ".**.feedbackPositive" => "[audio]",
             ".**.feedbackNegative" => "[audio]"
@@ -67,6 +68,7 @@ async fn create_default() -> anyhow::Result<()> {
     insta::assert_json_snapshot!(
         body, {
             ".**.id" => "[id]",
+            ".**.createdAt" => "[created_at]",
             ".**.lastEdited" => "[last_edited]",
             ".**.feedbackPositive" => "[audio]",
             ".**.feedbackNegative" => "[audio]"

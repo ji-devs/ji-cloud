@@ -1,7 +1,6 @@
 ---
 source: tests/integration/jig.rs
 expression: body
-
 ---
 {
   "jigs": [
@@ -15,6 +14,8 @@ expression: body
       "plays": 0,
       "jigFocus": "modules",
       "jigData": {
+        "createdAt": "2021-03-04T00:46:26.134651Z",
+        "lastEdited": "[last_edited]",
         "draftOrLive": "live",
         "displayName": "name",
         "modules": [
@@ -53,7 +54,6 @@ expression: body
           }
         ],
         "description": "test description",
-        "lastEdited": "[last_edited]",
         "defaultPlayerSettings": {
           "direction": "ltr",
           "displayScore": true,
@@ -88,6 +88,8 @@ expression: body
       "plays": 0,
       "jigFocus": "modules",
       "jigData": {
+        "createdAt": "2021-03-04T00:46:26.134651Z",
+        "lastEdited": "[last_edited]",
         "draftOrLive": "live",
         "displayName": "name",
         "modules": [
@@ -126,7 +128,6 @@ expression: body
           }
         ],
         "description": "test description",
-        "lastEdited": "[last_edited]",
         "defaultPlayerSettings": {
           "direction": "ltr",
           "displayScore": true,
@@ -161,6 +162,8 @@ expression: body
       "plays": 0,
       "jigFocus": "modules",
       "jigData": {
+        "createdAt": "2021-03-04T00:46:26.134651Z",
+        "lastEdited": "[last_edited]",
         "draftOrLive": "draft",
         "displayName": "name",
         "modules": [
@@ -199,7 +202,6 @@ expression: body
           }
         ],
         "description": "test description",
-        "lastEdited": "[last_edited]",
         "defaultPlayerSettings": {
           "direction": "ltr",
           "displayScore": true,
@@ -234,6 +236,8 @@ expression: body
       "plays": 0,
       "jigFocus": "modules",
       "jigData": {
+        "createdAt": "2021-03-04T00:46:26.134651Z",
+        "lastEdited": "[last_edited]",
         "draftOrLive": "draft",
         "displayName": "name",
         "modules": [
@@ -272,7 +276,6 @@ expression: body
           }
         ],
         "description": "test description",
-        "lastEdited": "[last_edited]",
         "defaultPlayerSettings": {
           "direction": "ltr",
           "displayScore": true,
@@ -307,6 +310,8 @@ expression: body
       "plays": 0,
       "jigFocus": "modules",
       "jigData": {
+        "createdAt": "2021-03-04T00:46:26.134651Z",
+        "lastEdited": "[last_edited]",
         "draftOrLive": "draft",
         "displayName": "name",
         "modules": [
@@ -322,7 +327,6 @@ expression: body
         "categories": [],
         "additionalResources": [],
         "description": "test description",
-        "lastEdited": "[last_edited]",
         "defaultPlayerSettings": {
           "direction": "ltr",
           "displayScore": true,
@@ -357,6 +361,8 @@ expression: body
       "plays": 0,
       "jigFocus": "modules",
       "jigData": {
+        "createdAt": "2021-03-04T00:46:26.134651Z",
+        "lastEdited": "[last_edited]",
         "draftOrLive": "live",
         "displayName": "name",
         "modules": [
@@ -372,7 +378,6 @@ expression: body
         "categories": [],
         "additionalResources": [],
         "description": "test description",
-        "lastEdited": "[last_edited]",
         "defaultPlayerSettings": {
           "direction": "ltr",
           "displayScore": true,
@@ -407,6 +412,8 @@ expression: body
       "plays": 0,
       "jigFocus": "modules",
       "jigData": {
+        "createdAt": "2021-03-06T00:46:26.134651Z",
+        "lastEdited": "[last_edited]",
         "draftOrLive": "draft",
         "displayName": "draft name",
         "modules": [],
@@ -416,7 +423,6 @@ expression: body
         "categories": [],
         "additionalResources": [],
         "description": "draft test description",
-        "lastEdited": "[last_edited]",
         "defaultPlayerSettings": {
           "direction": "rtl",
           "displayScore": false,
@@ -451,6 +457,8 @@ expression: body
       "plays": 0,
       "jigFocus": "modules",
       "jigData": {
+        "createdAt": "2021-03-04T00:46:26.134651Z",
+        "lastEdited": "[last_edited]",
         "draftOrLive": "live",
         "displayName": "name",
         "modules": [],
@@ -460,7 +468,6 @@ expression: body
         "categories": [],
         "additionalResources": [],
         "description": "test description",
-        "lastEdited": "[last_edited]",
         "defaultPlayerSettings": {
           "direction": "ltr",
           "displayScore": true,
