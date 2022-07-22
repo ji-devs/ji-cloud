@@ -5,7 +5,7 @@ use futures::join;
 use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{
-        asset::DraftOrLive,
+        asset::{DraftOrLive, OrderBy},
         jig::{JigBrowseQuery, JigFocus, JigId, JigResponse, JigSearchQuery},
     },
     error::EmptyError,
@@ -62,6 +62,7 @@ impl Curation {
             page: Some(self.active_page.get()),
             jig_focus: Some(JigFocus::Modules),
             draft_or_live: Some(DraftOrLive::Live),
+            order_by: Some(self.order_by.get()),
             ..Default::default()
         };
 
@@ -89,6 +90,14 @@ impl Curation {
                 total_pages: res.pages,
             },
         }
+    }
+
+    pub fn set_order_by(self: &Rc<Self>, order_by: OrderBy) {
+        let state = self;
+        state.loader.load(clone!(state => async move {
+            state.order_by.set(order_by);
+            state.load_jigs().await;
+        }));
     }
 
     pub fn go_to_page(self: &Rc<Self>, page: u32) {

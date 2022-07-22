@@ -2,22 +2,26 @@ use crate::curation::EditableJig;
 
 use super::state::*;
 use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
-use dominator::{clone, html, with_node, Dom};
+use dominator::{clone, html, Dom};
 use futures_signals::{
     map_ref,
     signal::{Signal, SignalExt},
     signal_vec::SignalVecExt,
 };
 use shared::domain::{
-    asset::DraftOrLive,
+    asset::{DraftOrLive, OrderBy},
     meta::{AffiliationId, AgeRangeId},
 };
 use std::rc::Rc;
 use utils::{events, languages::Language, routes::AdminCurationRoute};
-use web_sys::HtmlSelectElement;
 
 impl CurationTable {
     pub fn render(self: Rc<Self>) -> Dom {
+        let order_by_options = vec![
+            OrderBy::PublishedAt,
+            OrderBy::CreatedAt,
+        ];
+
         let state = self;
         html!("admin-curation-table", {
             .child(html!("input-search", {
@@ -27,61 +31,84 @@ impl CurationTable {
                     state.search_jigs(e.query());
                 }))
             }))
-            .child(html!("button", {
-                .property("slot", "pagination")
-                .property("title", "Previous")
-                .property_signal("disabled", state.curation_state.active_page.signal().map(|active_page| {
-                    active_page == 0
-                }))
-                .text("<")
-                .event(clone!(state => move |_: events::Click| {
-                    let active_page = state.curation_state.active_page.get();
-                    state.curation_state.go_to_page(active_page - 1);
+            .child(html!("table-order-by", {
+                .property("slot", "controls")
+                .child(html!("input-select", {
+                    .property_signal("value", state.curation_state.order_by.signal().map(|order_by| {
+                        format!("{}", order_by)
+                    }))
+                    .children(order_by_options.iter().map(|option| {
+                        html!("input-select-option", {
+                            .text(&format!("{}", option).to_string())
+                            .property_signal("selected", state.curation_state.order_by.signal().map(clone!(option => move |order_by| {
+                                order_by == option
+                            })))
+                            .event(clone!(state, option => move |evt: events::CustomSelectedChange| {
+                                if evt.selected() {
+                                    state.curation_state.set_order_by(option);
+                                }
+                            }))
+                        })
+                    }))
                 }))
             }))
-            .child_signal(state.curation_state.total_pages.signal().map(clone!(state => move |total_pages| {
-                total_pages.map(|total_pages| {
-                    html!("select" => HtmlSelectElement, {
-                        .with_node!(elem => {
-                            .property("slot", "pagination")
+            .child(html!("table-pagination", {
+                .property("slot", "controls")
+                .child(html!("fa-button", {
+                    .property("slot", "back")
+                    .property("title", "Previous")
+                    .property("icon", "fa-solid fa-chevron-left")
+                    .property_signal("disabled", state.curation_state.active_page.signal().map(|active_page| {
+                        active_page == 0
+                    }))
+                    .event(clone!(state => move |_: events::Click| {
+                        let active_page = state.curation_state.active_page.get();
+                        state.curation_state.go_to_page(active_page - 1);
+                    }))
+                }))
+                .child(html!("fa-button", {
+                    .property("slot", "next")
+                    .property("title", "Next")
+                    .property("icon", "fa-solid fa-chevron-right")
+                    .property_signal("disabled", map_ref! {
+                        let total_pages = state.curation_state.total_pages.signal(),
+                        let active_page = state.curation_state.active_page.signal() => {
+                            match total_pages {
+                                None => true,
+                                Some(total_pages) => {
+                                    // active_page is 0 indexed in the code side, so need to add 1 for display
+                                    *active_page == total_pages - 1
+                                }
+                            }
+                        }
+                    })
+                    .event(clone!(state => move |_: events::Click| {
+                        let active_page = state.curation_state.active_page.get();
+                        state.curation_state.go_to_page(active_page + 1);
+                    }))
+                }))
+                .child_signal(state.curation_state.total_pages.signal().map(clone!(state => move |total_pages| {
+                    total_pages.map(|total_pages| {
+                        html!("input-select", {
                             .property_signal("value", state.curation_state.active_page.signal().map(|active_page| {
-                                active_page + 1
-                            }))
-                            .event(clone!(state => move |_: events::Change| {
-                                let page = elem.value().parse::<u32>();
-                                if let Ok(page) = page {
-                                    state.curation_state.go_to_page(page - 1);
-                                };
+                                format!("{}", active_page + 1)
                             }))
                             .children((0..total_pages).map(|page| {
-                                html!("option", {
-                                    .text(&(page + 1).to_string())
+                                html!("input-select-option", {
+                                    .text(&format!("{}", page + 1).to_string())
+                                    .property_signal("selected", state.curation_state.active_page.signal().map(clone!(page => move |active_page| {
+                                        page == active_page
+                                    })))
+                                    .event(clone!(state, page => move |evt: events::CustomSelectedChange| {
+                                        if evt.selected() {
+                                            state.curation_state.go_to_page(page);
+                                        }
+                                    }))
                                 })
                             }))
                         })
                     })
-                })
-            })))
-            .child(html!("button", {
-                .property("slot", "pagination")
-                .property("title", "Next")
-                .property_signal("disabled", map_ref! {
-                    let total_pages = state.curation_state.total_pages.signal(),
-                    let active_page = state.curation_state.active_page.signal() => {
-                        match total_pages {
-                            None => true,
-                            Some(total_pages) => {
-                                // active_page is 0 indexed in the code side, so need to add 1 for display
-                                *active_page == total_pages - 1
-                            }
-                        }
-                    }
-                })
-                .text(">")
-                .event(clone!(state => move |_: events::Click| {
-                    let active_page = state.curation_state.active_page.get();
-                    state.curation_state.go_to_page(active_page + 1);
-                }))
+                })))
             }))
             .children_signal_vec(state.curation_state.jigs.signal_vec_cloned().map(clone!(state => move |jig: Rc<EditableJig>| {
                 let jig_id = jig.id;
