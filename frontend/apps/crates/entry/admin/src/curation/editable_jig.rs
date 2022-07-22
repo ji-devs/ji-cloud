@@ -44,6 +44,7 @@ pub struct EditableJig {
     pub blocked: Mutable<bool>,
     pub jig_focus: JigFocus,
     pub author_name: String,
+    pub created_at: DateTime<Utc>,
     pub published_at: Option<DateTime<Utc>>,
     pub loader: AsyncLoader,
 }
@@ -68,6 +69,7 @@ impl From<JigResponse> for EditableJig {
             blocked: Mutable::new(jig.admin_data.blocked),
             jig_focus: jig.jig_focus,
             author_name: jig.author_name.unwrap_or_default(),
+            created_at: jig.jig_data.created_at,
             published_at: jig.published_at,
             loader: AsyncLoader::new(),
         }

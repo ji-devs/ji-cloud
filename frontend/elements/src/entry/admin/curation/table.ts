@@ -51,6 +51,7 @@ export class _ extends LitElement {
         "Author",
         "Rating",
         // "Author's Badge",
+        "Created",
         "Last published",
         "Language",
         // "Curators",

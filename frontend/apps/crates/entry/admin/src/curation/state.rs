@@ -2,7 +2,10 @@ use std::{cell::RefCell, rc::Rc};
 
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::{signal::Mutable, signal_vec::MutableVec};
-use shared::domain::{meta::{Affiliation, AgeRange}, asset::OrderBy};
+use shared::domain::{
+    asset::OrderBy,
+    meta::{Affiliation, AgeRange},
+};
 use utils::routes::AdminCurationRoute;
 
 use super::EditableJig;
