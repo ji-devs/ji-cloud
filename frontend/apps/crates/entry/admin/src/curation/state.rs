@@ -2,7 +2,7 @@ use std::{cell::RefCell, rc::Rc};
 
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::{signal::Mutable, signal_vec::MutableVec};
-use shared::domain::meta::{Affiliation, AgeRange};
+use shared::domain::{meta::{Affiliation, AgeRange}, asset::OrderBy};
 use utils::routes::AdminCurationRoute;
 
 use super::EditableJig;
@@ -16,6 +16,7 @@ pub struct Curation {
     pub affiliations: Mutable<Vec<Affiliation>>,
     pub active_page: Mutable<u32>,
     pub total_pages: Mutable<Option<u32>>,
+    pub order_by: Mutable<OrderBy>,
 }
 
 impl Curation {
@@ -29,6 +30,7 @@ impl Curation {
             affiliations: Mutable::new(Vec::new()),
             active_page: Mutable::new(0),
             total_pages: Mutable::new(None),
+            order_by: Mutable::new(OrderBy::PublishedAt),
         })
     }
 }

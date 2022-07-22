@@ -374,15 +374,17 @@ impl<'de> serde::Deserialize<'de> for UserOrMe {
 }
 
 /// Sort browse results by timestamp
-#[derive(Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Debug, Display)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[serde(rename_all = "camelCase")]
 #[repr(i16)]
 pub enum OrderBy {
     /// Order Asset results by timestamp created_at
+    #[strum(serialize = "Created")]
     CreatedAt = 0,
 
     /// Order Asset results by timestamp published_at
+    #[strum(serialize = "Published")]
     PublishedAt = 1,
 }
 

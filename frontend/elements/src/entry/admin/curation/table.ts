@@ -6,18 +6,17 @@ export class _ extends LitElement {
         css`
             .controls {
                 display: flex;
-                justify-content: space-between;
+                align-items: center;
+                grid-gap: 18px;
                 padding: 10px;
             }
-            .pagination {
-                display: grid;
-                grid-template-columns: repeat(3, auto);
-                column-gap: 6px;
+            .filter-controls {
+                display: flex;
+                grid-gap: 18px;
                 justify-items: center;
-                margin: 0 auto;
-                max-width: 200px;
+                align-items: center;
             }
-            ::slotted(button[slot=pagination]) {
+            ::slotted(button[slot=controls]) {
                 border: none;
                 border-radius: 50%;
                 height: 40px;
@@ -27,7 +26,7 @@ export class _ extends LitElement {
                 font-size: 30px;
                 cursor: pointer;
             }
-            ::slotted(select[slot=pagination]) {
+            ::slotted(select[slot=controls]) {
                 font-size: 20px;
             }
             .table {
@@ -52,7 +51,7 @@ export class _ extends LitElement {
         "Author",
         "Rating",
         // "Author's Badge",
-        "Date",
+        "Last published",
         "Language",
         // "Curators",
         "Age Ranges",
@@ -68,8 +67,8 @@ export class _ extends LitElement {
             </style>
             <div class="controls">
                 <slot name="search"></slot>
-                <div class="pagination">
-                    <slot name="pagination"></slot>
+                <div class="filter-controls">
+                    <slot name="controls"></slot>
                 </div>
             </div>
             <div class="table">
