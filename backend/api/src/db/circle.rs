@@ -193,15 +193,16 @@ pub async fn browse(
     let circle_data = sqlx::query!(
         r#"
         with cte as (
-            select array(select circle.id  as "id!"
+            select (array_agg(circle.id))[1]
             from circle
             left join circle_member "cm" on cm.id = circle.id
             where (creator_id = $1 or $1 is null)
             and (cm.user_id = any($2) or $2 = array[]::uuid[])
-            order by created_at desc) as id
+            group by created_at
+            order by created_at desc
         ),
         cte1 as (
-            select * from unnest((select distinct id from cte)) with ordinality t(id
+            select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id
            , ord) order by ord
         )
         select  circle.id            as "circle_id!: CircleId",
@@ -212,8 +213,8 @@ pub async fn browse(
                 creator_id          as "creator_id!: UserId",
                 created_at,
                 updated_at   
-        from "circle"
-            inner join cte1 on cte1.id = "circle".id
+        from cte1
+            left join circle on cte1.id = circle.id
             where ord > (1 * $3 * $4)
             order by ord 
             limit $4

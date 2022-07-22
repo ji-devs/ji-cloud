@@ -14,16 +14,6 @@ expression: body
       "image": "8a2469b4-ffaa-11eb-86a5-330f321d2a3f",
       "createdAt": "[created_at]",
       "lastEdited": "[last_edited]"
-    },
-    {
-      "id": "57a1eaaa-f182-11ec-a96e-13f3929f5b22",
-      "displayName": "circle test",
-      "createdBy": "1f241e1b-b537-493f-a230-075cb16315be",
-      "description": "Test",
-      "memberCount": 1,
-      "image": "89125d88-ffaa-11eb-86a5-9fd50ab8d8df",
-      "createdAt": "[created_at]",
-      "lastEdited": "[last_edited]"
     }
   ],
   "pages": 1,
