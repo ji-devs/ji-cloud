@@ -21,6 +21,7 @@ expression: body
   "organization_public": true,
   "persona_public": true,
   "language_public": true,
+  "bio_public": true,
   "scopes": [
     "Admin"
   ],
