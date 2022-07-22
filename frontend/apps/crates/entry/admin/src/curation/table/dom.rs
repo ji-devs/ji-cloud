@@ -17,10 +17,7 @@ use utils::{events, languages::Language, routes::AdminCurationRoute};
 
 impl CurationTable {
     pub fn render(self: Rc<Self>) -> Dom {
-        let order_by_options = vec![
-            OrderBy::PublishedAt,
-            OrderBy::CreatedAt,
-        ];
+        let order_by_options = vec![OrderBy::PublishedAt, OrderBy::CreatedAt];
 
         let state = self;
         html!("admin-curation-table", {
@@ -180,6 +177,9 @@ impl CurationTable {
                                     None => 0,
                                 }
                             }))
+                        }),
+                        html!("span", {
+                            .text(&jig.created_at.format("%b %e, %Y").to_string())
                         }),
                         html!("span", {
                             .text(&match jig.published_at {
