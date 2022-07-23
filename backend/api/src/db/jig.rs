@@ -1020,9 +1020,9 @@ pub async fn filtered_count(
         //language=SQL
         r#"
         with cte as (
-            select array_agg(jig.id)
-            from jig_data "jd"
-                  inner join jig on (draft_id = jd.id or (live_id = jd.id and jd.last_synced_at is not null and published_at is not null))
+            select (array_agg(jig.id))[1]
+            from jig 
+                  inner join jig_data jd on (draft_id = jd.id or (live_id = jd.id and jd.last_synced_at is not null and published_at is not null))
                   left join jig_admin_data "admin" on admin.jig_id = jig.id
                   left join jig_data_additional_resource "resource" on jd.id = resource.jig_data_id
             where (jd.draft_or_live = $1 or $1 is null)
@@ -1033,7 +1033,7 @@ pub async fn filtered_count(
                 and (resource.resource_type_id = any($6) or $6 = array[]::uuid[])
             group by updated_at, created_at, jig.published_at, admin.jig_id, jig_id
         )
-            select count(*) as "count!" from unnest(array((select cte.array_agg[1] from cte))) with ordinality t(id
+            select count(*) as "count!" from unnest(array((select cte.array_agg from cte))) with ordinality t(id
            , ord)
         "#,
         draft_or_live.map(|it| it as i16),
@@ -1058,7 +1058,6 @@ select count(*) as "count!: i64"
 from jig_data
 inner join jig on jig.live_id = jig_data.id
 where (privacy_level = coalesce($1, privacy_level))
-and (jig_focus = coalesce($1, jig_focus))
 "#,
         privacy_level as i16,
     )

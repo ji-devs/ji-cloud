@@ -10,6 +10,7 @@ mod image;
 mod jig;
 mod locale;
 mod meta;
+mod resource;
 mod service;
 mod session;
 mod user;

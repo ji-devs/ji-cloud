@@ -67,7 +67,11 @@ pub mod course;
 /// Additional Resource endpoints
 pub mod additional_resource;
 
+/// Resource endpoints
+pub mod resource;
+
 /// Circle endpoints
 pub mod circle;
+
 /// Module endpoints
 pub mod module;

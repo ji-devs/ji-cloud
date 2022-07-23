@@ -1,6 +1,8 @@
 use core::settings::EmailClientSettings;
 use sendgrid::v3::{Content, Email, Message, Personalization, SGMap, Sender};
-use shared::domain::{jig::report::JigReportEmail, session::OAuthProvider};
+use shared::domain::{
+    jig::report::JigReportEmail, resource::report::ResourceReportEmail, session::OAuthProvider,
+};
 use tracing::instrument;
 
 use crate::error;
@@ -149,7 +151,7 @@ Please try logging in with your {} account.
         Ok(())
     }
 
-    pub async fn send_report_email(
+    pub async fn send_jig_report_email(
         &self,
         report: JigReportEmail,
         link: String,
@@ -181,6 +183,47 @@ Please try logging in with your {} account.
 
         let message = Message::new(self.sender_email.clone())
             .add_personalization(Personalization::new(self.jigzi_info_email.clone()))
+            .set_subject(&subject)
+            .add_content(content.set_content_type("text/plain").set_value(value));
+
+        self.client.send(&message).await?;
+
+        Ok(())
+    }
+
+    pub async fn send_resource_report_email(
+        &self,
+        to: Email,
+        report: ResourceReportEmail,
+        link: String,
+    ) -> anyhow::Result<()> {
+        let subject = format!("URGENT: Resource Report '{}'", report.report_type.as_str());
+
+        let (reporter_email, reporter_name): (String, String) =
+            if let (Some(email), Some(name)) = (report.reporter_email, report.reporter_name) {
+                (email, name)
+            } else {
+                ("Unknown".to_string(), "Unknown".to_string())
+            };
+
+        let value = format!(
+            r#"{} with email {} has reported "{}" for the following reason: "{}".
+
+            URL: {}
+            Created by: {}
+               "#,
+            reporter_name,
+            reporter_email,
+            report.display_name,
+            report.report_type.as_str(),
+            link,
+            report.creator_name,
+        );
+
+        let content = Content::new();
+
+        let message = Message::new(self.sender_email.clone())
+            .add_personalization(Personalization::new(to))
             .set_subject(&subject)
             .add_content(content.set_content_type("text/plain").set_value(value));
 

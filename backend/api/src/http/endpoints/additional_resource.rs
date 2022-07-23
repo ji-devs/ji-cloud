@@ -54,6 +54,18 @@ async fn create(
             )
             .await?
         }
+        AssetId::ResourceId(resource_id) => {
+            db::resource::authz(&*db, user_id, Some(resource_id)).await?;
+
+            db::resource::additional_resource::create(
+                &*db,
+                resource_id,
+                req.display_name,
+                req.resource_type_id,
+                req.resource_content,
+            )
+            .await?
+        }
     };
 
     Ok((Json(CreateResponse { id }), http::StatusCode::CREATED))
@@ -100,6 +112,20 @@ async fn update(
                 )
                 .await?;
             }
+            AssetId::ResourceId(resource_id) => {
+                db::resource::authz(&*db, user_id, Some(resource_id)).await?;
+
+                db::resource::additional_resource::update(
+                    &*db,
+                    resource_id,
+                    DraftOrLive::Draft,
+                    additional_resource_id,
+                    req.display_name,
+                    req.resource_type_id,
+                    req.resource_content,
+                )
+                .await?;
+            }
         }
     } else {
         return Err(error::Auth::InternalServerError(anyhow::anyhow!(
@@ -136,6 +162,15 @@ async fn get_draft(
                 db::course::additional_resource::get(
                     &db,
                     course_id,
+                    DraftOrLive::Draft,
+                    additional_resource_id,
+                )
+                .await?
+            }
+            AssetId::ResourceId(resource_id) => {
+                db::resource::additional_resource::get(
+                    &db,
+                    resource_id,
                     DraftOrLive::Draft,
                     additional_resource_id,
                 )
@@ -187,6 +222,15 @@ async fn get_live(
                 )
                 .await?
             }
+            AssetId::ResourceId(resource_id) => {
+                db::resource::additional_resource::get(
+                    &db,
+                    resource_id,
+                    DraftOrLive::Live,
+                    additional_resource_id,
+                )
+                .await?
+            }
         }
     } else {
         return Err(error::NotFound::InternalServerError(anyhow::anyhow!(
@@ -225,6 +269,16 @@ async fn delete(
 
                 db::course::additional_resource::delete(&*db, course_id, additional_resource_id)
                     .await?;
+            }
+            AssetId::ResourceId(resource_id) => {
+                db::resource::authz(&*db, user_id, Some(resource_id)).await?;
+
+                db::resource::additional_resource::delete(
+                    &*db,
+                    resource_id,
+                    additional_resource_id,
+                )
+                .await?;
             }
         }
     } else {

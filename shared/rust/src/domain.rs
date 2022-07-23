@@ -46,6 +46,7 @@ pub mod media;
 pub mod meta;
 pub mod module;
 pub mod pdf;
+pub mod resource;
 pub mod search;
 pub mod ser;
 pub mod session;

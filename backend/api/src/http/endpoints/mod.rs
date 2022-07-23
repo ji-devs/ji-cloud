@@ -12,6 +12,7 @@ pub mod media;
 pub mod meta;
 pub mod module;
 pub mod pdf;
+pub mod resource;
 pub mod scheduler;
 pub mod search;
 pub mod session;
