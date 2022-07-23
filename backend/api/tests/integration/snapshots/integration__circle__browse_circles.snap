@@ -14,46 +14,6 @@ expression: body
       "image": "89fa4c10-ffaa-11eb-86a5-870d6a01dc37",
       "createdAt": "[created_at]",
       "lastEdited": "[last_edited]"
-    },
-    {
-      "id": "829606d0-f185-11ec-b9e4-5fadfd7252f6",
-      "displayName": "circle test1",
-      "createdBy": "7b96a41c-e406-11eb-8176-efd86dd7f444",
-      "description": "Test1",
-      "memberCount": 2,
-      "image": "89fa4c10-ffaa-11eb-86a5-870d6a01dc37",
-      "createdAt": "[created_at]",
-      "lastEdited": "[last_edited]"
-    },
-    {
-      "id": "a3126bec-f185-11ec-b9e4-5fa4e257b5a1",
-      "displayName": "circle test2",
-      "createdBy": "1f241e1b-b537-493f-a230-075cb16315be",
-      "description": "Test2",
-      "memberCount": 2,
-      "image": "8a2469b4-ffaa-11eb-86a5-330f321d2a3f",
-      "createdAt": "[created_at]",
-      "lastEdited": "[last_edited]"
-    },
-    {
-      "id": "a3126bec-f185-11ec-b9e4-5fa4e257b5a1",
-      "displayName": "circle test2",
-      "createdBy": "1f241e1b-b537-493f-a230-075cb16315be",
-      "description": "Test2",
-      "memberCount": 2,
-      "image": "8a2469b4-ffaa-11eb-86a5-330f321d2a3f",
-      "createdAt": "[created_at]",
-      "lastEdited": "[last_edited]"
-    },
-    {
-      "id": "57a1eaaa-f182-11ec-a96e-13f3929f5b22",
-      "displayName": "circle test",
-      "createdBy": "1f241e1b-b537-493f-a230-075cb16315be",
-      "description": "Test",
-      "memberCount": 1,
-      "image": "89125d88-ffaa-11eb-86a5-9fd50ab8d8df",
-      "createdAt": "[created_at]",
-      "lastEdited": "[last_edited]"
     }
   ],
   "pages": 1,

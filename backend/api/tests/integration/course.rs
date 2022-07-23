@@ -1,6 +1,5 @@
 use http::StatusCode;
 use serde_json::json;
-use shared::domain::{course::CourseId, CreateResponse};
 
 use crate::{
     fixture::Fixture,
@@ -140,8 +139,6 @@ async fn update_and_publish_browse() -> anyhow::Result<()> {
 
     insta::assert_json_snapshot!(
         body, {
-            // Really just need to redact the module ID because it is recreated for the live data,
-            // but I couldn't get a selector working correctly... So redacting all IDs.
             ".**.id" => "[id]",
             ".**.lastEdited" => "[last_edited]",
             ".**.publishedAt" => "[published_at]"
