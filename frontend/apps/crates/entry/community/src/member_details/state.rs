@@ -17,6 +17,7 @@ pub struct MemberDetails {
     pub connections: Mutable<Connections>,
     pub play_jig: Mutable<Option<JigId>>,
     pub community_state: Rc<Community>,
+    pub(super) active_popup: Mutable<Option<ActivePopup>>,
 }
 
 impl MemberDetails {
@@ -29,6 +30,7 @@ impl MemberDetails {
             connections: Mutable::new(Connections::Followers(None)),
             play_jig: Mutable::new(None),
             community_state,
+            active_popup: Mutable::new(None),
         })
     }
 }
@@ -44,4 +46,11 @@ pub enum Creations {
 pub enum Connections {
     Followers(Option<Vec<PublicUser>>),
     Following(Option<Vec<PublicUser>>),
+}
+
+#[derive(Clone, Copy, Debug)]
+pub(super) enum ActivePopup {
+    About,
+    Bio,
+    Image,
 }

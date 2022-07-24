@@ -6,7 +6,7 @@ use components::{
 };
 use dominator::{clone, html, with_node, Dom, EventOptions};
 use futures_signals::signal::{Signal, SignalExt};
-use shared::domain::user::UserProfile;
+use shared::domain::user::{UserId, UserProfile};
 use utils::{
     events,
     prelude::{get_user_cloned, get_user_id},
@@ -109,11 +109,12 @@ impl Community {
     }
 
     fn render_nav(self: &Rc<Self>) -> Dom {
+        let user_id = get_user_id();
         html!("nav", {
             .property("slot", "nav")
             .children(&mut [
                 {
-                    let route = match get_user_id() {
+                    let route = match user_id {
                         Some(user_id) => {
                             Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(user_id))).to_string()
                         },
@@ -138,6 +139,9 @@ impl Community {
                         })
                         .property("label", "My profile")
                         .property("href", &route)
+                        .property_signal("active", Community::route_signal().map(move |route| {
+                            matches!(route, Route::Community(CommunityRoute::Members(route)) if is_current_users_page(&user_id, &route))
+                        }))
                         .apply(move |dom| dominator::on_click_go_to_url!(dom, {
                             route
                         }))
@@ -164,9 +168,9 @@ impl Community {
                     html!("community-nav-item", {
                         .property("label", "Members")
                         .property("href", &route)
-                        .property_signal("active", Community::route_signal().map(|route| {
-                            matches!(route, Route::Community(CommunityRoute::Members(_)))
-                        }))
+                        .property_signal("active", Community::route_signal().map(clone!(user_id => move |route| {
+                            matches!(route, Route::Community(CommunityRoute::Members(route)) if !is_current_users_page(&user_id, &route))
+                        })))
                         .child(html!("fa-icon", {
                             .property("icon", "fa-thin fa-people-group")
                         }))
@@ -194,5 +198,12 @@ impl Community {
                 },
             ])
         })
+    }
+}
+
+fn is_current_users_page(user_id: &Option<UserId>, member_route: &CommunityMembersRoute) -> bool {
+    match (user_id, member_route) {
+        (Some(user_id), CommunityMembersRoute::Member(active_user)) => user_id == active_user,
+        _ => false,
     }
 }

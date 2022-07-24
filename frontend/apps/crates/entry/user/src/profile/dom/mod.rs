@@ -20,7 +20,7 @@ use crate::{
         dom::options_popup::PopupCallbacks,
         state::{ActivePopup, ResetPasswordStatus},
     },
-    strings::register::step_2::{STR_LOCATION_PLACEHOLDER, STR_PERSONA_OPTIONS},
+    strings::register::step_2::STR_LOCATION_PLACEHOLDER,
 };
 
 use super::state::ProfilePage;
@@ -149,13 +149,21 @@ impl ProfilePage {
                         }))
                     })
                 }),
+
+
+
+
+
+
+
+
                 html!("input-select", {
                     .property("slot", "persona")
                     .property("multiple", true)
                     .property_signal("value", state.user.persona.signal_vec_cloned().to_signal_cloned().map(|persona| {
                         persona.join(", ")
                     }))
-                    .children(STR_PERSONA_OPTIONS.iter().map(|persona| {
+                    .children(["fdsa"].iter().map(|persona| {
                         html!("input-select-option", {
                             .text(persona)
                             .property_signal(
@@ -236,6 +244,13 @@ impl ProfilePage {
                         .property("path", "core/inputs/pencil-blue-darker.svg")
                     }))
                 }),
+
+
+
+
+
+
+
                 html!("empty-fragment", {
                     .style("display", "contents")
                     .property("slot", "age-groups")

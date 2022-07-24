@@ -7,14 +7,17 @@ use shared::{
     domain::{
         asset::{DraftOrLive, UserOrMe},
         jig::{JigBrowseQuery, JigFocus},
-        user::public_user::{
-            BrowsePublicUserFollowersQuery, BrowsePublicUserFollowersResponse,
-            BrowsePublicUserFollowingResponse, BrowsePublicUserFollowingsQuery, PublicUser,
+        user::{
+            public_user::{
+                BrowsePublicUserFollowersQuery, BrowsePublicUserFollowersResponse,
+                BrowsePublicUserFollowingResponse, BrowsePublicUserFollowingsQuery, PublicUser,
+            },
+            PatchProfileRequest, UserProfile,
         },
     },
     error::EmptyError,
 };
-use utils::prelude::{api_no_auth, api_with_auth_empty, ApiEndpointExt};
+use utils::prelude::{api_no_auth, api_with_auth_empty, get_user_mutable, ApiEndpointExt};
 
 use super::{Connections, Creations, MemberDetails};
 
@@ -198,5 +201,59 @@ impl MemberDetails {
                 Err(_) => todo!(),
             }
         }));
+    }
+
+    pub fn save_profile_changes(self: &Rc<Self>, updated_profile: UserProfile) {
+        let state = self;
+        state.active_popup.set(None);
+        state.loader.load(clone!(state => async move {
+            let req = PatchProfileRequest {
+                username: Some(updated_profile.username.clone()),
+                given_name: Some(updated_profile.given_name.clone()),
+                family_name: Some(updated_profile.family_name.clone()),
+                profile_image: Some(updated_profile.profile_image.clone()),
+                bio: Some(updated_profile.bio.clone()),
+                language: Some(updated_profile.language.clone()),
+                locale: Some(updated_profile.locale.clone()),
+                timezone: Some(updated_profile.timezone.clone()),
+                opt_into_edu_resources: Some(updated_profile.opt_into_edu_resources.clone()),
+                organization_public: Some(updated_profile.organization_public),
+                persona_public: Some(updated_profile.persona_public),
+                language_public: Some(updated_profile.language_public),
+                location_public: Some(updated_profile.location_public),
+                bio_public: Some(updated_profile.bio_public),
+                organization: Some(updated_profile.organization.clone()),
+                persona: Some(updated_profile.persona.clone()),
+                subjects: Some(updated_profile.subjects.clone()),
+                age_ranges: Some(updated_profile.age_ranges.clone()),
+                affiliations: Some(updated_profile.affiliations.clone()),
+                location: Some(updated_profile.location.clone()),
+            };
+
+            let res = endpoints::user::PatchProfile::api_with_auth_empty(Some(req)).await;
+            if let Err(_err) = res {
+                todo!()
+            }
+            get_user_mutable().set(Some(updated_profile.clone()));
+            let public_user = user_to_public_user(updated_profile);
+            state.member.set(Some(public_user))
+        }));
+    }
+}
+
+fn user_to_public_user(user: UserProfile) -> PublicUser {
+    // includes fields not marked as public
+    PublicUser {
+        id: user.id,
+        username: user.username,
+        given_name: user.given_name,
+        family_name: user.family_name,
+        profile_image: user.profile_image,
+        organization: user.organization,
+        circles: user.circles,
+        bio: Some(user.bio),
+        language: Some(user.language),
+        persona: Some(user.persona),
+        location: user.location,
     }
 }

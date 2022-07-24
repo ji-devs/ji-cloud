@@ -11,6 +11,7 @@ export class DialogOverlay extends LitElement {
                     background: rgb(216 231 250 / .9);
                     display: grid;
                     place-content: center;
+                    position: fixed;
                 }
             `,
         ];

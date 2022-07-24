@@ -1,6 +1,7 @@
 use std::rc::Rc;
 
 use components::{
+    dialog::Dialog,
     module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback},
     player_popup::{PlayerPopup, PreviewPopupCallbacks},
 };
@@ -10,12 +11,17 @@ use shared::domain::{asset::DraftOrLive, jig::JigResponse, user::public_user::Pu
 use utils::{
     events,
     jig::{JigPlayerOptions, ResourceContentExt},
+    prelude::{get_user_cloned, get_user_id},
     routes::{CommunityMembersRoute, CommunityRoute, Route},
+    unwrap::UnwrapJiExt,
 };
 use wasm_bindgen::JsValue;
 use web_sys::HtmlElement;
 
-use super::{Connections, Creations, MemberDetails};
+use super::{
+    callbacks::EditProfileCallbacks, component::Component, edit_about::EditAbout,
+    edit_bio::EditBio, edit_image::EditImage, ActivePopup, Connections, Creations, MemberDetails,
+};
 
 const STR_FOLLOWING: &str = "Following";
 const STR_FOLLOW: &str = "Follow";
@@ -24,6 +30,11 @@ impl MemberDetails {
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self;
         state.load_data();
+
+        let is_current_user = match get_user_id() {
+            Some(user_id) => user_id == state.member_id,
+            None => false,
+        };
 
         html!("div", {
             .child_signal(state.member.signal_ref(clone!(state => move |member| {
@@ -68,6 +79,67 @@ impl MemberDetails {
                         })
                     })
                 })
+            })))
+            .apply_if(is_current_user, clone!(state => move |dom| {
+                dom.children(&mut [
+                    html!("button", {
+                        .text("about")
+                        .event(clone!(state => move |_: events::Click| {
+                            state.active_popup.set(Some(ActivePopup::About))
+                        }))
+                    }),
+                    html!("button", {
+                        .text("Bio")
+                        .event(clone!(state => move |_: events::Click| {
+                            state.active_popup.set(Some(ActivePopup::Bio))
+                        }))
+                    }),
+                    html!("button", {
+                        .text("Image")
+                        .event(clone!(state => move |_: events::Click| {
+                            state.active_popup.set(Some(ActivePopup::Image))
+                        }))
+                    }),
+                ])
+            }))
+            .child_signal(state.active_popup.signal().map(clone!(state => move |active_popup| {
+                active_popup.map(clone!(state => move |active_popup| {
+                    Dialog::render(
+                        clone!(state => move || {
+                            let callbacks = EditProfileCallbacks {
+                                save_changes: Box::new(clone!(state => move|user| {
+                                    state.save_profile_changes(user);
+                                })),
+                                close: Box::new(clone!(state => move || {
+                                    state.active_popup.set(None);
+                                }))
+                            };
+                            match active_popup {
+                                ActivePopup::About => {
+                                    EditAbout::new(
+                                        get_user_cloned().unwrap_ji(),
+                                        callbacks
+                                    ).render()
+                                },
+                                ActivePopup::Bio => {
+                                    EditBio::new(
+                                        get_user_cloned().unwrap_ji(),
+                                        callbacks
+                                    ).render()
+                                },
+                                ActivePopup::Image => {
+                                    EditImage::new(
+                                        get_user_cloned().unwrap_ji(),
+                                        callbacks
+                                    ).render()
+                                },
+                            }
+                        }),
+                        Some(Box::new(clone!(state => move || {
+                            state.active_popup.set(None);
+                        })))
+                    )
+                }))
             })))
             .child_signal(state.play_jig.signal_cloned().map(clone!(state => move|play_jig| {
                 play_jig.map(|jig_id| {
