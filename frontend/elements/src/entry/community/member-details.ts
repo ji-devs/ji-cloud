@@ -30,12 +30,24 @@ export class _ extends LitElement {
                     align-items: start;
                     column-gap: 32px;
                 }
-                .top ::slotted(profile-image) {
-                    display: inline-block;
+                .top .profile-image {
+                    display: inline-grid;
                     height: 120px;
                     width: 120px;
+                }
+                .top .profile-image ::slotted([slot=profile-image]) {
+                    height: 100%;
+                    width: 100%;
                     border-radius: 50%;
                     overflow: hidden;
+                    grid-row: 1;
+                    grid-column: 1;
+                }
+                .top .profile-image ::slotted([slot=edit-profile-image]) {
+                    grid-row: 1;
+                    grid-column: 1;
+                    justify-self: end;
+                    font-size: 14px;
                 }
                 .top h1 {
                     font-size: 40px;
@@ -58,6 +70,12 @@ export class _ extends LitElement {
                 .about {
                     font-size: 14px;
                     color: #383838;
+                }
+                .about header {
+                    display: grid;
+                    grid-template-columns: auto auto;
+                    justify-content: space-between;
+                    align-items: center;
                 }
                 .about .info-line {
                     display: grid;
@@ -111,12 +129,18 @@ export class _ extends LitElement {
     render() {
         return html`
             <div class="top">
-                <slot name="profile-image"></slot>
+                <div class="profile-image">
+                    <slot name="profile-image"></slot>
+                    <slot name="edit-profile-image"></slot>
+                </div>
                 <h1>${this.givenName} ${this.familyName}</h1>
                 <slot name="follow"></slot>
             </div>
             <section class="about">
-                <h3>${STR_ABOUT}</h3>
+                <header>
+                    <h3>${STR_ABOUT}</h3>
+                    <slot name="edit-about"></slot>
+                </header>
                 ${
                     this.city ? html`
                         <p class="info-line">
@@ -150,7 +174,10 @@ export class _ extends LitElement {
                     ` : nothing
                 }
                 <hr>
-                <h3>${STR_BIO}</h3>
+                <header>
+                    <h3>${STR_BIO}</h3>
+                    <slot name="edit-bio"></slot>
+                </header>
                 ${
                     this.bio ? html`
                         <p>

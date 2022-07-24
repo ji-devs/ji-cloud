@@ -77,31 +77,37 @@ impl MemberDetails {
                         .apply(|dom| {
                             state.connections_mixin(dom)
                         })
+                        .apply_if(is_current_user, clone!(state => move |dom| {
+                            dom.children(&mut [
+                                html!("fa-button", {
+                                    .property("slot", "edit-profile-image")
+                                    .property("icon", "fa-light fa-pen")
+                                    .text("Image")
+                                    .event(clone!(state => move |_: events::Click| {
+                                        state.active_popup.set(Some(ActivePopup::Image))
+                                    }))
+                                }),
+                                html!("fa-button", {
+                                    .property("slot", "edit-about")
+                                    .property("icon", "fa-light fa-pen")
+                                    .text("about")
+                                    .event(clone!(state => move |_: events::Click| {
+                                        state.active_popup.set(Some(ActivePopup::About))
+                                    }))
+                                }),
+                                html!("fa-button", {
+                                    .property("slot", "edit-bio")
+                                    .property("icon", "fa-light fa-pen")
+                                    .text("Bio")
+                                    .event(clone!(state => move |_: events::Click| {
+                                        state.active_popup.set(Some(ActivePopup::Bio))
+                                    }))
+                                }),
+                            ])
+                        }))
                     })
                 })
             })))
-            .apply_if(is_current_user, clone!(state => move |dom| {
-                dom.children(&mut [
-                    html!("button", {
-                        .text("about")
-                        .event(clone!(state => move |_: events::Click| {
-                            state.active_popup.set(Some(ActivePopup::About))
-                        }))
-                    }),
-                    html!("button", {
-                        .text("Bio")
-                        .event(clone!(state => move |_: events::Click| {
-                            state.active_popup.set(Some(ActivePopup::Bio))
-                        }))
-                    }),
-                    html!("button", {
-                        .text("Image")
-                        .event(clone!(state => move |_: events::Click| {
-                            state.active_popup.set(Some(ActivePopup::Image))
-                        }))
-                    }),
-                ])
-            }))
             .child_signal(state.active_popup.signal().map(clone!(state => move |active_popup| {
                 active_popup.map(clone!(state => move |active_popup| {
                     Dialog::render(
