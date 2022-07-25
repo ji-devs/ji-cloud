@@ -692,14 +692,6 @@ where id = $1
     Ok(())
 }
 
-pub async fn index_course_jigs(
-    conn: &mut PgConnection,
-    id: Uuid,
-    jig_ids: Option<&[JigId]>,
-) -> Result<(), error::UpdateWithMetadata> {
-    Ok(())
-}
-
 pub async fn delete(pool: &PgPool, id: CourseId) -> Result<(), error::Delete> {
     let mut txn = pool.begin().await?;
 
