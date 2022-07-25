@@ -40,7 +40,9 @@ pub async fn get(
 ) -> Result<Json<<user::GetPublicUser as ApiEndpoint>::Res>, error::NotFound> {
     let user_id = path.into_inner();
 
-    let user: PublicUser = db::user::public_user::get(&db, user_id).await?;
+    let user = db::user::public_user::get(&db, user_id)
+        .await?
+        .ok_or(error::NotFound::ResourceNotFound)?;
 
     Ok(Json(user))
 }

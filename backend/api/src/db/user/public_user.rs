@@ -11,18 +11,17 @@ use shared::domain::{
 use sqlx::PgPool;
 use uuid::Uuid;
 
-pub async fn get(db: &PgPool, user_id: UserId) -> sqlx::Result<PublicUser> {
-    let res = sqlx::query_as!(
-        PublicUser,
+pub async fn get(db: &PgPool, user_id: UserId) -> anyhow::Result<Option<PublicUser>> {
+    let profile = sqlx::query!(
         r#"
-    select  user_id as "id: UserId",
-            username,
-            given_name,
-            family_name,
+    select  user_id as "id!: UserId",
+            username   as "username!",
+            given_name  as "given_name!",
+            family_name as "family_name!",
             profile_image_id       as "profile_image?: ImageId",
             (select language from user_profile where user_profile.user_id = "user".id and language_public is true)      as "language?",
             (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?",
-            (select language from user_profile where user_profile.user_id = "user".id and persona_public is true)      as "persona?: Vec<String>",
+            (select persona from user_profile where user_profile.user_id = "user".id and persona_public is true)      as "persona?: Vec<String>",
             (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?",
             (select bio from user_profile where user_profile.user_id = "user".id and bio_public is true)      as "bio?",
             array(select circle.id
@@ -36,8 +35,22 @@ pub async fn get(db: &PgPool, user_id: UserId) -> sqlx::Result<PublicUser> {
         "#,
         user_id.0
     )
-    .fetch_one(db)
+    .fetch_optional(db)
     .await?;
+
+    let res = profile.map(|row| PublicUser {
+        id: row.id,
+        username: row.username,
+        given_name: row.given_name,
+        family_name: row.family_name,
+        bio: row.bio,
+        profile_image: row.profile_image,
+        language: row.language,
+        organization: row.organization,
+        persona: row.persona,
+        location: row.location,
+        circles: row.circles,
+    });
 
     Ok(res)
 }

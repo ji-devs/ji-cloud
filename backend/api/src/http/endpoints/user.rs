@@ -1048,10 +1048,6 @@ pub fn configure(cfg: &mut ServiceConfig) {
             DeleteFont::PATH,
             DeleteFont::METHOD.route().to(font::delete),
         )
-        .route(
-            GetPublicUser::PATH,
-            GetPublicUser::METHOD.route().to(public_user::get),
-        )
         .route(Search::PATH, Search::METHOD.route().to(public_user::search))
         .route(
             BrowsePublicUser::PATH,
@@ -1074,6 +1070,10 @@ pub fn configure(cfg: &mut ServiceConfig) {
             BrowseCourses::METHOD
                 .route()
                 .to(public_user::browse_user_courses),
+        )
+        .route(
+            GetPublicUser::PATH,
+            GetPublicUser::METHOD.route().to(public_user::get),
         )
         .route(
             BrowseFollowers::PATH,
