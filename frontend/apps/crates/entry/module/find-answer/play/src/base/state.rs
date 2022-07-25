@@ -1,4 +1,5 @@
-use components::module::_common::play::prelude::*;
+use components::{module::_common::play::prelude::*, instructions::player::InstructionsPlayer};
+use dominator::clone;
 use once_cell::sync::OnceCell;
 use shared::domain::{
     asset::{Asset, AssetId},
@@ -8,7 +9,6 @@ use shared::domain::{
             find_answer::{
                 Mode, ModuleData as RawData, PlaySettings, Question, QuestionField, Step,
             },
-            Instructions,
         },
         ModuleId,
     },
@@ -16,7 +16,7 @@ use shared::domain::{
 use utils::prelude::*;
 
 use futures_signals::signal::Mutable;
-use std::rc::Rc;
+use std::{rc::Rc, cell::RefCell};
 use web_sys::HtmlElement;
 
 pub struct Base {
@@ -24,7 +24,6 @@ pub struct Base {
     pub module_id: ModuleId,
     pub asset: Asset,
     pub theme_id: ThemeId,
-    pub instructions: Instructions,
     pub settings: PlaySettings,
     pub backgrounds: Backgrounds,
     pub stickers: Vec<Sticker>,
@@ -33,6 +32,10 @@ pub struct Base {
     pub sticker_refs: Vec<OnceCell<HtmlElement>>,
     pub question_field: QuestionField,
     pub module_phase: Mutable<ModulePlayPhase>,
+    /// Custom instructions player so that we can handle the on_ended event.
+    pub instructions_player: Rc<InstructionsPlayer>,
+    /// Whether the instructions player has completed playback.
+    pub instructions_finished: Mutable<bool>,
 }
 
 impl Base {
@@ -53,12 +56,13 @@ impl Base {
             .map(|_| OnceCell::default())
             .collect();
 
-        Rc::new(Self {
+        let base_ref: Rc<RefCell<Option<Rc<Self>>>> = Rc::new(RefCell::new(None));
+
+        let base = Rc::new(Self {
             asset_id,
             module_id,
             asset,
             theme_id,
-            instructions: content.base.instructions,
             settings: content.play_settings,
             backgrounds: content.base.backgrounds,
             stickers: content.base.stickers,
@@ -70,15 +74,21 @@ impl Base {
             sticker_refs,
             question_field: content.question_field,
             module_phase: init_args.play_phase,
-        })
+            instructions_player: InstructionsPlayer::new(content.base.instructions, Some(clone!(base_ref => move || {
+                if let Some(base_ref) = &*base_ref.borrow() {
+                    base_ref.instructions_finished.set_neq(true);
+                }
+            }))),
+            instructions_finished: Mutable::new(false),
+        });
+
+        *base_ref.borrow_mut() = Some(base.clone());
+
+        base
     }
 }
 
 impl BaseExt for Base {
-    fn get_instructions(&self) -> Option<Instructions> {
-        Some(self.instructions.clone())
-    }
-
     fn play_phase(&self) -> Mutable<ModulePlayPhase> {
         self.module_phase.clone()
     }
