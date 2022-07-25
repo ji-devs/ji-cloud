@@ -5241,86 +5241,6 @@
       ]
     }
   },
-  "8f8408f6b74c427ab19cb5b32a3e10a4f4a31549bdd4198df9e1238c81d01adb": {
-    "query": "\n    select  user_id as \"id: UserId\",\n            username,\n            given_name,\n            family_name,\n            profile_image_id       as \"profile_image?: ImageId\",\n            (select language from user_profile where user_profile.user_id = \"user\".id and language_public is true)      as \"language?\",\n            (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n            (select language from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\",\n            (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n            (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n            array(select circle.id\n                from circle_member bm\n                inner join circle on bm.id = circle.id\n                where bm.user_id = \"user\".id\n            ) as \"circles!: Vec<CircleId>\"\n        from \"user\"\n            inner join user_profile on \"user\".id = user_profile.user_id\n        where id = $1\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: UserId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "username",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "given_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "family_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "profile_image?: ImageId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 5,
-          "name": "language?",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 6,
-          "name": "organization?",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 7,
-          "name": "persona?: Vec<String>",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 8,
-          "name": "location?",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 9,
-          "name": "bio?",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 10,
-          "name": "circles!: Vec<CircleId>",
-          "type_info": "UuidArray"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        true,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-      ]
-    }
-  },
   "8ff3594259d04d0786b415f1e6577c3252ad2779bf0a9336d3ea985d54d78556": {
     "query": "\nselect parent_id, index from category where id = $1 for update\n    ",
     "describe": {
@@ -6183,6 +6103,86 @@
       },
       "nullable": [
         false
+      ]
+    }
+  },
+  "a62eb4a9d082f38e93f43449d1867c3889de2e4c4951f807fd1e7d6e5464d514": {
+    "query": "\n    select  user_id as \"id!: UserId\",\n            username   as \"username!\",\n            given_name  as \"given_name!\",\n            family_name as \"family_name!\",\n            profile_image_id       as \"profile_image?: ImageId\",\n            (select language from user_profile where user_profile.user_id = \"user\".id and language_public is true)      as \"language?\",\n            (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n            (select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\",\n            (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n            (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n            array(select circle.id\n                from circle_member bm\n                inner join circle on bm.id = circle.id\n                where bm.user_id = \"user\".id\n            ) as \"circles!: Vec<CircleId>\"\n        from \"user\"\n            inner join user_profile on \"user\".id = user_profile.user_id\n        where id = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!: UserId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "username!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "given_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "family_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "profile_image?: ImageId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 5,
+          "name": "language?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "organization?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "persona?: Vec<String>",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 8,
+          "name": "location?",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 9,
+          "name": "bio?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 10,
+          "name": "circles!: Vec<CircleId>",
+          "type_info": "UuidArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
       ]
     }
   },
