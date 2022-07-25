@@ -468,6 +468,7 @@ select course.id                                                                
         select row(jig_id)
         from course_data_jig
         where course_data_jig.course_data_id = course_data.id
+        order by "index"
     )                                                     as "items!: Vec<(JigId,)>"
 from cte1
 left join course_data on cte1.id = course_data.id
@@ -688,6 +689,14 @@ where id = $1
 
     txn.commit().await?;
 
+    Ok(())
+}
+
+pub async fn index_course_jigs(
+    conn: &mut PgConnection,
+    id: Uuid,
+    jig_ids: Option<&[JigId]>,
+) -> Result<(), error::UpdateWithMetadata> {
     Ok(())
 }
 
