@@ -48,6 +48,7 @@ impl CoursePlayer {
             .property("language", language)
             .property("author", &course.author_name.to_owned().unwrap_or_default())
             .property("itemsCount", course.course_data.items.len())
+            .property("hasAdditionalResources", !course.course_data.additional_resources.is_empty())
             .child(
                 ModuleThumbnail::new(
                     course.id.into(),

@@ -60,6 +60,9 @@ export class _ extends LitElement {
                     color: var(--dark-gray-6);
                     margin: 0;
                 }
+                :host(:not([hasAdditionalResources])) .additional-resources {
+                    display: none;
+                }
                 .additional-resources h3 {
                     background-color: var(--light-blue-1);
                 }
@@ -89,6 +92,9 @@ export class _ extends LitElement {
 
     @property({ type: Number })
     itemsCount: number = 0;
+
+    @property({ type: Boolean, reflect: true })
+    hasAdditionalResources: boolean = false;
 
     render() {
         return html`
