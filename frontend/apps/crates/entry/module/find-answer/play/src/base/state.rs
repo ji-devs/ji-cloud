@@ -1,4 +1,4 @@
-use components::{module::_common::play::prelude::*, instructions::player::InstructionsPlayer};
+use components::{instructions::player::InstructionsPlayer, module::_common::play::prelude::*};
 use dominator::clone;
 use once_cell::sync::OnceCell;
 use shared::domain::{
@@ -16,7 +16,7 @@ use shared::domain::{
 use utils::prelude::*;
 
 use futures_signals::signal::Mutable;
-use std::{rc::Rc, cell::RefCell};
+use std::{cell::RefCell, rc::Rc};
 use web_sys::HtmlElement;
 
 pub struct Base {
@@ -74,11 +74,14 @@ impl Base {
             sticker_refs,
             question_field: content.question_field,
             module_phase: init_args.play_phase,
-            instructions_player: InstructionsPlayer::new(content.base.instructions, Some(clone!(base_ref => move || {
-                if let Some(base_ref) = &*base_ref.borrow() {
-                    base_ref.instructions_finished.set_neq(true);
-                }
-            }))),
+            instructions_player: InstructionsPlayer::new(
+                content.base.instructions,
+                Some(clone!(base_ref => move || {
+                    if let Some(base_ref) = &*base_ref.borrow() {
+                        base_ref.instructions_finished.set_neq(true);
+                    }
+                })),
+            ),
             instructions_finished: Mutable::new(false),
         });
 
