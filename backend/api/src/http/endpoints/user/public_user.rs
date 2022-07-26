@@ -93,8 +93,6 @@ pub async fn browse(
     _auth: Option<TokenUser>,
     query: Option<Query<<user::BrowsePublicUser as ApiEndpoint>::Req>>,
 ) -> Result<Json<<user::BrowsePublicUser as ApiEndpoint>::Res>, error::NotFound> {
-    println!("query before: {:?}", query);
-
     let query = query.map_or_else(Default::default, Query::into_inner);
 
     let page_limit = page_limit(query.page_limit)

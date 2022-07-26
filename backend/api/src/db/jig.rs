@@ -540,14 +540,13 @@ pub async fn browse(
 
     let privacy_level: Vec<i16> = privacy_level.iter().map(|x| *x as i16).collect();
 
-    //TODO: purge junk jig data from with draft_or_live is NULL
     let jig_data = sqlx::query!(
     //language=SQL
     r#"
 with cte as (
     select array(select jd.id as "id!"
     from jig_data "jd"
-          left join jig on (draft_id = jd.id or (live_id = jd.id and jd.last_synced_at is not null))
+          inner join jig on (draft_id = jd.id or (live_id = jd.id and jd.last_synced_at is not null and published_at is not null))
           left join jig_admin_data "admin" on admin.jig_id = jig.id
           left join jig_data_additional_resource "resource" on jd.id = resource.jig_data_id
     where (jd.draft_or_live = $3 or $3 is null)
@@ -623,7 +622,7 @@ select jig.id                                              as "jig_id: JigId",
    blocked                                    as "blocked!",
    curated                                    as "curated!"
 from cte1
-left join jig_data on cte1.id = jig_data.id
+inner join jig_data on cte1.id = jig_data.id
 inner join jig on (
     jig_data.id = jig.draft_id
     or (

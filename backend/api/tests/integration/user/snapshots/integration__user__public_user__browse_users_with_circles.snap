@@ -23,6 +23,7 @@ expression: body
       "givenName": "Bobby",
       "familyName": "Tables",
       "profileImage": null,
+      "organization": "test org",
       "circles": [
         "829606d0-f185-11ec-b9e4-5fadfd7252f6"
       ]

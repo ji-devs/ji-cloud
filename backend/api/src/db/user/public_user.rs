@@ -68,11 +68,10 @@ pub async fn browse_users(
     let user_data = sqlx::query!(
         r#"
         with cte as (
-            select (array_agg("user".id))[1]
-            from "user"
-            left join user_profile "up" on up.user_id = "user".id 
-            left join circle_member "cm" on cm.user_id = "user".id
-            left join circle on circle.id = cm.id 
+            select (array_agg(up.user_id))[1]
+            from user_profile "up"
+            inner join "user" on up.user_id = "user".id 
+            left join circle_member "cm" on cm.user_id = up.user_id
             where cm.id = any($1) or $1 = array[]::uuid[]
             group by "user".created_at
             order by "user".created_at desc
@@ -97,8 +96,8 @@ pub async fn browse_users(
                     where bm.user_id = "user".id
                 )) as "circles!: Vec<CircleId>"
         from cte1
-        left join user_profile on cte1.id = user_profile.user_id
-        left join "user" on cte1.id = "user".id
+        inner join user_profile on cte1.id = user_profile.user_id
+        inner join "user" on cte1.id = "user".id
         where ord > (1 * $2 * $3)
         order by ord
         limit $3
@@ -443,8 +442,8 @@ pub async fn browse_followers(
                     where bm.user_id = "user".id or circle.creator_id = "user".id
                 )) as "circles!: Vec<CircleId>"
         from cte
-        left join user_profile on cte.id = user_profile.user_id
-        left join "user" on (cte.id = "user".id)
+        inner join user_profile on cte.id = user_profile.user_id
+        inner join "user" on (cte.id = "user".id)
         where ord > (1 * $2 * $3)
         limit $3;
 
@@ -514,8 +513,8 @@ pub async fn browse_following(
                     where bm.user_id = "user".id or circle.creator_id = "user".id
                 ) as "circles!: Vec<CircleId>"
             from cte
-            left join user_profile on cte.id = user_profile.user_id
-            left join "user" on (cte.id = "user".id)
+            inner join user_profile on cte.id = user_profile.user_id
+            inner join "user" on (cte.id = "user".id)
             where ord > (1 * $2 * $3)
             limit $3;
             "#,
@@ -553,12 +552,17 @@ pub async fn total_user_count(db: &PgPool, circles: Vec<CircleId>) -> anyhow::Re
 
     let user = sqlx::query!(
         r#"
-        select count(*)             as "count!: i64"
-            from "user"
-        left join user_profile "up" on up.user_id = "user".id 
-        left join circle_member "cm" on cm.user_id = "user".id
-        left join circle on circle.id = cm.id 
-        where cm.id = any($1) or $1 = array[]::uuid[]
+        with cte as (
+            select (array_agg(up.user_id))[1]
+            from user_profile "up"
+            inner join "user" on up.user_id = "user".id 
+            left join circle_member "cm" on cm.user_id = up.user_id
+            where cm.id = any($1) or $1 = array[]::uuid[]
+            group by "user".created_at
+            order by "user".created_at desc
+        )
+            select count(*) as "count!" from unnest((select array_agg(cte.array_agg) from cte)) with ordinality t(id
+           , ord)        
         "#,
         &circle_ids[..]
     )

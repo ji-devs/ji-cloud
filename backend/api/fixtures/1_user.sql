@@ -19,9 +19,13 @@ insert into "session" (user_id, token, scope_mask) values ('1f241e1b-b537-493f-a
                                                           ('a641fd6e-e41b-11eb-8176-57df101c2201', 'L6gfXvgZeUBt8pdmLBnsGPEWUe3qGCK2_DF', 4); -- user 2
 
 insert into "user_profile" (user_id, username, created_at, given_name, family_name, language, locale,
-                    opt_into_edu_resources, over_18, timezone, organization)
+                    opt_into_edu_resources, over_18, timezone, organization, language_public, organization_public)
 values ('1f241e1b-b537-493f-a230-075cb16315be', 'test',
-        '2020-08-08T00:11:21Z'::timestamptz, 'Bobby', 'Tables', 'en_US', 'en_US', true, true, 'US/Pacific', 'test org');
+        '2020-08-08T00:11:21Z'::timestamptz, 'Bobby', 'Tables', 'en_US', 'en_US', true, true, 'US/Pacific', 'test org', false, true),
+        ('7b96a41c-e406-11eb-8176-efd86dd7f444', 'test1',
+        '2020-08-08T00:11:21Z'::timestamptz, 'Post', 'Gres', 'en_US', 'en_US', true, true, 'US/Pacific', 'test1 org', true, true),
+        ('a641fd6e-e41b-11eb-8176-57df101c2201', 'test2',
+        '2020-08-08T00:11:21Z'::timestamptz, 'Scrappy', 'Doo', 'en_US', 'en_US', true, true, 'US/Pacific', 'test2 org', false, true);
 
 -- 1 is "Admin"
 insert into "user_scope" (user_id, scope)
@@ -30,5 +34,4 @@ values ('1f241e1b-b537-493f-a230-075cb16315be', 1);
 
 -- additional resource test
 insert into "user_image_library" (id)
-values('a974ce0e-ef6e-11eb-ad5a-bf4be1413928')
-
+values('a974ce0e-ef6e-11eb-ad5a-bf4be1413928');
