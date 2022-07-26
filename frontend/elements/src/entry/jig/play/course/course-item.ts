@@ -15,15 +15,20 @@ export class _ extends LitElement {
                     background-color: #fff;
                 }
                 .index {
-                    height: 40px;
-                    width: 40px;
-                    border-radius: 50%;
-                    border: solid 1px var(--dark-blue-1);
                     color: var(--dark-blue-1);
                     font-size: 16px;
                     font-weight: bold;
                     display: inline-grid;
                     place-content: center;
+                    width: 10px;
+                }
+                @media (min-width: 1920px) {
+                    .index {
+                        width: 40px;
+                        height: 40px;
+                        border-radius: 50%;
+                        border: solid 1px var(--dark-blue-1);
+                    }
                 }
                 ::slotted([slot=thumbnail]) {
                     width: 190px;
@@ -38,6 +43,14 @@ export class _ extends LitElement {
                 .name {
                     font-size: 18px;
                     font-weight: 600;
+                }
+                .description {
+                    display: none;
+                }
+                @media (min-width: 1920px) {
+                    .description {
+                        display: block;
+                    }
                 }
                 ::slotted([slot=play-button]) {
                     height: 40px;

@@ -7,16 +7,30 @@ export class _ extends LitElement {
             css`
                 :host {
                     display: grid;
-                    grid-template-columns: 4fr 6fr;
                     column-gap: 48px;
                     background-color: var(--light-blue-1);
                     min-height: 100vh;
-                    padding: 30px 60px;
+                }
+                @media (min-width: 1920px) {
+                    :host {
+                        padding: 30px 60px;
+                        grid-template-columns: 4fr 6fr;
+                    }
                 }
                 .course-info-side {
                     display: grid;
                     align-content: start;
                     row-gap: 14px;
+                    justify-content: center;
+                    text-align: center;
+                    padding: 10px;
+                }
+                @media (min-width: 1920px) {
+                    .course-info-side {
+                        justify-content: auto;
+                        text-align: left;
+                        padding: 0;
+                    }
                 }
                 ::slotted([slot=thumbnail]) {
                     width: 100%;
