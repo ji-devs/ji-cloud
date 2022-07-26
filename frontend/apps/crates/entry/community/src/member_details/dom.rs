@@ -5,14 +5,17 @@ use components::{
     module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback},
     player_popup::{PlayerPopup, PreviewPopupCallbacks},
 };
-use dominator::{clone, html, Dom, DomBuilder};
+use dominator::{clone, html, link, Dom, DomBuilder};
 use futures_signals::signal::{Signal, SignalExt};
-use shared::domain::{asset::DraftOrLive, jig::JigResponse, user::public_user::PublicUser};
+use shared::{
+    domain::{asset::DraftOrLive, jig::JigResponse, user::public_user::PublicUser},
+    media::MediaLibrary,
+};
 use utils::{
     events,
     jig::{JigPlayerOptions, ResourceContentExt},
     prelude::{get_user_cloned, get_user_id},
-    routes::{CommunityMembersRoute, CommunityRoute, Route},
+    routes::{CommunityCirclesRoute, CommunityMembersRoute, CommunityRoute, Route},
     unwrap::UnwrapJiExt,
 };
 use wasm_bindgen::JsValue;
@@ -70,6 +73,34 @@ impl MemberDetails {
                                 }
                             })
                         }))
+                        .children_signal_vec(state.circles.signal_ref(move |circles| {
+                            circles.iter().map(move |circle| {
+                                link!(Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::Circle(circle.id))).to_string(), {
+                                    .property("slot", "circles")
+                                    .property("title", &circle.display_name)
+                                    .child(html!("img-ji", {
+                                        .style("height", "90px")
+                                        .style("width", "90px")
+                                        .style("box-shadow", "0 0 8px 0 rgba(0, 0, 0, 0.06)")
+                                        .style("border", "solid 1px var(--light-gray-1)")
+                                        .style("border-radius", "50%")
+                                        .style("overflow", "hidden")
+                                        .property("lib", MediaLibrary::User.to_str())
+                                        .apply(|dom| match circle.image {
+                                            Some(image) => dom.property("id", &image.0.to_string()),
+                                            None => dom,
+                                        })
+                                    }))
+                                    .child(html!("span", {
+                                        .style("white-space", "nowrap")
+                                        .style("overflow", "hidden")
+                                        .style("text-overflow", "ellipsis")
+                                        .style("max-width", "100%")
+                                        .text(&circle.display_name)
+                                    }))
+                                })
+                            }).collect()
+                        }).to_signal_vec())
                         .child_signal(state.follow_button_signal())
                         .apply(|dom| {
                             state.creations_mixin(dom)

@@ -88,6 +88,24 @@ export class _ extends LitElement {
                     font-size: 22px;
                     text-align: center;
                 }
+                .circles-wrapper {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 24px;
+                    justify-content: space-between;
+                }
+                .circles-wrapper ::slotted([slot=circles]) {
+                    height: 120px;
+                    width: 90px;
+                    display: grid;
+                    justify-items: center;
+                    grid-template-rows: 90px 20px;
+                    line-height: 20px;
+                    font-size: 14px;
+                    text-decoration: none;
+                    color: var(--dark-gray-6);
+                    align-content: space-between;
+                }
                 .right-sections {
                     display: grid;
                     gap: inherit;
@@ -187,6 +205,9 @@ export class _ extends LitElement {
                 }
                 <hr>
                 <h3>${STR_CIRCLE}</h3>
+                <div class="circles-wrapper">
+                    <slot name="circles"></slot>
+                </div>
             </section>
             <div class="right-sections">
                 <section class="creations">

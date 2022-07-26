@@ -57,10 +57,16 @@ export class _ extends LitElement {
                     row-gap: 30px;
                 }
                 ::slotted([slot=circles]) {
+                    height: 120px;
+                    width: 90px;
                     display: grid;
                     justify-items: center;
+                    grid-template-rows: 90px 20px;
+                    line-height: 20px;
+                    font-size: 14px;
                     text-decoration: none;
                     color: var(--dark-gray-6);
+                    align-content: space-between;
                 }
                 ::slotted([slot=circles-link]) {
                     justify-self: center;

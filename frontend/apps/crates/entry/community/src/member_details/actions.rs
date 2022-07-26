@@ -6,6 +6,7 @@ use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{
         asset::{DraftOrLive, UserOrMe},
+        circle::CircleBrowseQuery,
         jig::{JigBrowseQuery, JigFocus},
         user::{
             public_user::{
@@ -27,6 +28,7 @@ impl MemberDetails {
         state.loader.load(clone!(state => async move {
             join!(
                 state.load_member(),
+                state.load_circles(),
                 state.load_members_jigs(),
                 state.load_members_followers(),
             );
@@ -47,6 +49,22 @@ impl MemberDetails {
         {
             Ok(member) => {
                 state.member.set(Some(member));
+            }
+            Err(_) => todo!(),
+        }
+    }
+
+    async fn load_circles(self: &Rc<Self>) {
+        let state = self;
+
+        let req = CircleBrowseQuery {
+            users: vec![state.member_id],
+            ..Default::default()
+        };
+
+        match endpoints::circle::Browse::api_no_auth(Some(req)).await {
+            Ok(res) => {
+                state.circles.set(res.circles);
             }
             Err(_) => todo!(),
         }

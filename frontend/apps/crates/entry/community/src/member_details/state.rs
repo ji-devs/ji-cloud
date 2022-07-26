@@ -3,6 +3,7 @@ use std::rc::Rc;
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::{
+    circle::Circle,
     jig::{JigId, JigResponse},
     user::{public_user::PublicUser, UserId},
 };
@@ -12,6 +13,7 @@ use crate::state::Community;
 pub struct MemberDetails {
     pub member_id: UserId,
     pub member: Mutable<Option<PublicUser>>,
+    pub circles: Mutable<Vec<Circle>>,
     pub loader: AsyncLoader,
     pub creations: Mutable<Creations>,
     pub connections: Mutable<Connections>,
@@ -25,6 +27,7 @@ impl MemberDetails {
         Rc::new(Self {
             member_id,
             member: Mutable::new(None),
+            circles: Mutable::new(vec![]),
             loader: AsyncLoader::new(),
             creations: Mutable::new(Creations::Jigs(None)),
             connections: Mutable::new(Connections::Followers(None)),

@@ -85,6 +85,7 @@ impl CommunityLanding {
     fn render_circle(self: &Rc<Self>, circle: &Circle) -> Dom {
         link!(Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::Circle(circle.id))).to_string(), {
             .property("slot", "circles")
+            .property("title", &circle.display_name)
             .child(html!("img-ji", {
                 .style("height", "90px")
                 .style("width", "90px")
@@ -99,6 +100,13 @@ impl CommunityLanding {
                 })
             }))
             .text(&circle.display_name)
+            .child(html!("span", {
+                .style("white-space", "nowrap")
+                .style("overflow", "hidden")
+                .style("text-overflow", "ellipsis")
+                .style("max-width", "100%")
+                .text(&circle.display_name)
+            }))
         })
     }
 }
