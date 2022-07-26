@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use awsm_web::loaders::helpers::AsyncLoader;
+use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::{image::ImageId, user::UserProfile};
 use web_sys::File;

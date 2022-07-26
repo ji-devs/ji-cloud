@@ -30,3 +30,6 @@ import "@elements/entry/community/list-member-header";
 import "@elements/entry/community/asset";
 import "@elements/entry/community/nav-item";
 import "@elements/entry/community/create-circle";
+
+
+import "@elements/entry/community/private-public-switch";

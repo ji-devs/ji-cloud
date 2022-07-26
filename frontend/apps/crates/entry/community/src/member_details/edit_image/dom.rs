@@ -9,80 +9,97 @@ use crate::member_details::component::Component;
 
 use super::{EditImage, ImageIfOrFile};
 
+const STR_HEADING: &str = "Add/Edit image";
+
 impl Component for Rc<EditImage> {
     fn styles() -> &'static str {
-        r#"
-            :host {
-                background: white;
-                padding: 30px;
-                border-radius: 16px;
-                box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
-            }
-        "#
+        include_str!("./styles.css")
     }
 
     fn dom(&self, dom: DomBuilder<ShadowRoot>) -> DomBuilder<ShadowRoot> {
         let state = self;
 
-        dom.child_signal(
-            state
-                .image
-                .signal_cloned()
-                .map(clone!(state => move |image| {
-                    Some(match image {
-                        Some(image) => {
-                            html!("div", {
-                                .child(match image {
-                                    ImageIfOrFile::ImageId(image_id) => {
-                                        html!("profile-image", {
-                                            .property("imageId", &image_id.0.to_string())
-                                        })
-                                    },
-                                    ImageIfOrFile::File(file) => {
-                                        html!("img", {
-                                            .property("src", file_to_object_url(&file))
-                                        })
-                                    },
-                                })
-                                .child(html!("delete-rect", {
-                                    .text("Delete")
-                                    .event(clone!(state => move |_: events::Click| {
-                                        state.image.set(None);
-                                    }))
-                                }))
-                            })
-                        },
-                        None => {
-                            // html!("fa-icon", {
-                            //     .property("icon", "fa-thin fa-user-tie-hair")
-                            // })
-                            html!("input-file", {
-                                .text("upload")
-                                .event(clone!(state => move |evt: events::CustomFile| {
-                                    let file = evt.file();
-                                    state.image.set(Some(ImageIfOrFile::File(file)))
-                                }))
-                            })
-                        },
-                    })
-                })),
-        )
-        .children(&mut [
-            html!("button-rect", {
-                .text("Apply")
-                .property("slot", "submit")
-                .event(clone!(state => move |_: events::Click| {
-                    state.apply_changes();
-                }))
-            }),
-            html!("fa-button", {
+        dom.child(html!("popup-body", {
+            .child(html!("fa-button", {
                 .property("slot", "close")
                 .property("icon", "fa-regular fa-xmark")
                 .event(clone!(state => move |_: events::Click| {
                     (state.callbacks.close)();
                 }))
-            }),
-        ])
+            }))
+            .child(html!("h3", {
+                .property("slot", "heading")
+                .text(STR_HEADING)
+            }))
+            .child(html!("div", {
+                .property("slot", "body")
+                .class("body")
+                .class("field-grid")
+                .child_signal(
+                    state
+                        .image
+                        .signal_cloned()
+                        .map(clone!(state => move |image| {
+                            Some(match image {
+                                Some(image) => {
+                                    html!("div", {
+                                        .class("has-image")
+                                        .child(match image {
+                                            ImageIfOrFile::ImageId(image_id) => {
+                                                html!("profile-image", {
+                                                    .property("imageId", &image_id.0.to_string())
+                                                })
+                                            },
+                                            ImageIfOrFile::File(file) => {
+                                                html!("img", {
+                                                    .property("src", file_to_object_url(&file))
+                                                })
+                                            },
+                                        })
+                                        .child(html!("button-rect", {
+                                            .text("Delete")
+                                            .property("color", "blue")
+                                            .property("kind", "text")
+                                            .event(clone!(state => move |_: events::Click| {
+                                                state.image.set(None);
+                                            }))
+                                        }))
+                                    })
+                                },
+                                None => {
+                                    html!("input-file", {
+                                        .event(clone!(state => move |evt: events::CustomFile| {
+                                            let file = evt.file();
+                                            state.image.set(Some(ImageIfOrFile::File(file)))
+                                        }))
+                                        .children(&mut [
+                                            html!("fa-icon", {
+                                                .property("icon", "fa-light fa-cloud-arrow-up")
+                                            }),
+                                            html!("p", {
+                                                .class("pick-file-message")
+                                                .text("Drag & drop or browse an image")
+                                            }),
+                                            html!("p", {
+                                                .class("file-size")
+                                                .text("Maximum image size: 5 MB")
+                                            }),
+                                        ])
+                                    })
+                                },
+                            })
+                        }))
+                )
+                .child(html!("button-rect", {
+                    .text("Apply")
+                    .property("slot", "submit")
+                    .property_signal("disabled", state.loader.is_loading())
+                    .event(clone!(state => move |_: events::Click| {
+                        state.apply_changes();
+                    }))
+                }))
+            }))
+        }))
     }
 }
 

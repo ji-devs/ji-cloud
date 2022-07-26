@@ -55,7 +55,7 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <label @drop="${this.onDrop}" @dragover="${this.onDragOver}">
+            <label @drop="${this.onDrop}" @dragover="${this.onDragOver}" part="wrapper">
                 <slot></slot>
                 <input type="file" @change="${this.onChange}" accept=${this.accept} />
             </label>

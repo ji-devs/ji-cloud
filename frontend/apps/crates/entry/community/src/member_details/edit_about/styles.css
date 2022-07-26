@@ -1,0 +1,33 @@
+:host {
+    display: grid;
+    row-gap: 24px;
+    max-width: 800px;
+    width: 90vw;
+}
+popup-body {
+    border-radius: 16px;
+    box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+}
+fa-button {
+    justify-self: end;
+    font-size: 18px;
+}
+.field-grid {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-auto-rows: 68px;
+    gap: 40px;
+    align-items: center;
+    padding: 30px;
+}
+.field-grid p fa-icon {
+    color: var(--light-red-4);
+}
+.field-grid p {
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0;
+}
+button-rect {
+    margin: 0 auto 30px auto;
+}
