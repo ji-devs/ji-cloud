@@ -11,6 +11,7 @@ expression: body
       "givenName": "Bobby",
       "familyName": "Tables",
       "profileImage": null,
+      "organization": "test org",
       "persona": [],
       "circles": []
     },
