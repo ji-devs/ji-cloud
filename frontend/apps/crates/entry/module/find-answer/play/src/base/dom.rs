@@ -1,13 +1,14 @@
 use super::state::*;
 use components::{
     backgrounds::dom::render_backgrounds_raw,
+    instructions::player::InstructionsPlayer,
     module::_common::play::prelude::{DomRenderable, ModulePlayPhase},
     stickers::{
         dom::{render_sticker_raw, StickerRawRenderOptions},
         sprite::dom::SpriteRawRenderOptions,
         text::dom::TextRawRenderOptions,
         video::dom::VideoRawRenderOptions,
-    }, instructions::player::InstructionsPlayer,
+    },
 };
 use dominator::{apply_methods, clone, html, Dom};
 use futures_signals::signal::SignalExt;

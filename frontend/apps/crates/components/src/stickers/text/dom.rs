@@ -96,10 +96,10 @@ pub fn render_sticker_text<T: AsSticker>(
                         }
                     }))
                     .after_inserted(clone!(text => move |elem| {
-                        text.editor.renderer_ref.set(Some(elem));
+                        text.renderer_ref.set(Some(elem));
                     }))
                     .after_removed(clone!(text => move |_elem| {
-                        text.editor.renderer_ref.set(None);
+                        text.renderer_ref.set(None);
                     }))
                 }))
             } else {

@@ -24,7 +24,7 @@ impl DomRenderable for Main {
                     if is_empty {
                         if let Some(selected) = selected {
                             if let Some(Sticker::Text(text)) = state.base.stickers.list.lock_ref().get(selected) {
-                                let text = text.editor.get_text_value();
+                                let text = text.get_text_value();
                                 state.base.add_question(text, Some(selected));
                                 state.base.current_question.set(Some(0));
                             }
