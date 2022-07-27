@@ -316,7 +316,7 @@ select  id,
             select row(jig_id)
             from course_data_jig
             where course_data_jig.course_data_id = course_data.id
-        )                                                     as "items!: Vec<JigId>"
+        )                                                     as "items!: Vec<(JigId,)>"
 from course_data
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
@@ -384,7 +384,7 @@ from course_data
                 other_keywords: course_data_row.other_keywords,
                 translated_keywords: course_data_row.translated_keywords,
                 translated_description: course_data_row.translated_description.0,
-                items: course_data_row.items,
+                items: course_data_row.items.into_iter().map(|(it,)| it).collect(),
             },
         })
         .collect();
