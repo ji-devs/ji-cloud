@@ -12,9 +12,10 @@ use super::{
     jig::JigId,
     meta::{AffiliationId, AgeRangeId, ResourceTypeId},
     module::LiteModule,
+    user::UserId,
 };
 
-/// Wrapper type around [`Uuid`], represents the ID of a Course.
+/// Wrapper type around [`UserId`], represents the ID of a Course.
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
@@ -121,10 +122,10 @@ pub struct CourseResponse {
     pub published_at: Option<DateTime<Utc>>,
 
     /// The ID of the Course's original creator ([`None`] if unknown).
-    pub creator_id: Option<Uuid>,
+    pub creator_id: Option<UserId>,
 
     /// The current author
-    pub author_id: Option<Uuid>,
+    pub author_id: Option<UserId>,
 
     /// The author's name, as "{given_name} {family_name}".
     pub author_name: Option<String>,
@@ -151,7 +152,7 @@ pub struct CourseUpdateDraftDataRequest {
     /// The current author
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
-    pub author_id: Option<Uuid>,
+    pub author_id: Option<UserId>,
 
     /// Description of the Course.
     #[serde(skip_serializing_if = "Option::is_none")]

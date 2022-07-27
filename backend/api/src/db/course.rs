@@ -149,8 +149,8 @@ with cte as (
 )
 select cte.course_id                                          as "course_id: CourseId",
        display_name,
-       creator_id,
-       author_id,
+       creator_id                                             as "creator_id?: UserId",
+       author_id                                              as "author_id?: UserId",
        (select given_name || ' '::text || family_name
         from user_profile
         where user_profile.user_id = author_id)            as "author_name",
@@ -256,8 +256,8 @@ pub async fn get_by_ids(
         //language=SQL
         r#"
 select course.id                                       as "id!: CourseId",
-       creator_id,
-       author_id                                as "author_id",
+       creator_id                               as "creator_id?: UserId",
+       author_id                                as "author_id?: UserId",
        (select given_name || ' '::text || family_name
         from user_profile
         where user_profile.user_id = author_id) as "author_name",
@@ -429,8 +429,8 @@ cte1 as (
 )
 select course.id                                                                as "course_id: CourseId",
     privacy_level                                                               as "privacy_level: PrivacyLevel",
-    creator_id,
-    author_id,
+    creator_id                                                                  as "creator_id?: UserId",
+    author_id                                                                   as "author_id?: UserId",
     (select given_name || ' '::text || family_name
      from user_profile
      where user_profile.user_id = author_id)                                     as "author_name",
