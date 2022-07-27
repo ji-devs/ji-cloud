@@ -15,7 +15,7 @@ use shared::{
                 BrowsePublicUserFollowersResponse as BrowseFollowersResponse,
                 BrowsePublicUserFollowingResponse as BrowseFollowingsResponse,
                 BrowsePublicUserResourcesResponse as BrowseResourcesResponse,
-                BrowsePublicUserResponse, PublicUser, SearchPublicUserResponse,
+                BrowsePublicUserResponse, SearchPublicUserResponse,
             },
             UserId,
         },
