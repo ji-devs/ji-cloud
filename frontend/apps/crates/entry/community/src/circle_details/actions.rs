@@ -4,7 +4,7 @@ use dominator::clone;
 use futures::join;
 use shared::{
     api::{endpoints, ApiEndpoint},
-    domain::{circle::{Circle, BrowseMembersResponse}, user::public_user::UserBrowseQuery},
+    domain::{circle::Circle, user::public_user::UserBrowseQuery},
     error::EmptyError,
 };
 use utils::{
@@ -51,7 +51,7 @@ impl CircleDetails {
         match endpoints::user::BrowsePublicUser::api_no_auth(Some(req)).await {
             Ok(res) => {
                 state.members.lock_mut().extend(res.users);
-            },
+            }
             Err(_) => todo!(),
         }
     }

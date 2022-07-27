@@ -3,7 +3,7 @@ use futures_signals::signal::Mutable;
 use shared::domain::user::UserProfile;
 use strum_macros::EnumIter;
 use utils::{
-    routes::{AssetRoute, HomeRoute, Route, CommunityRoute},
+    routes::{AssetRoute, CommunityRoute, HomeRoute, Route},
     storage,
     unwrap::UnwrapJiExt,
 };
