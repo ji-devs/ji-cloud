@@ -544,7 +544,7 @@ pub async fn browse(
     //language=SQL
     r#"
 with cte as (
-    select array(select jd.id as "id!"
+    select array_agg(jd.id)
     from jig_data "jd"
           inner join jig on (draft_id = jd.id or (live_id = jd.id and jd.last_synced_at is not null and published_at is not null))
           left join jig_admin_data "admin" on admin.jig_id = jig.id
@@ -555,14 +555,14 @@ with cte as (
         and (blocked = $4 or $4 is null)
         and (jd.privacy_level = any($5) or $5 = array[]::smallint[])
         and (resource.resource_type_id = any($8) or $8 = array[]::uuid[])
+    group by updated_at, created_at, jig.published_at, admin.jig_id
     order by case when $9 = 0 then created_at
         when $9 = 1 then published_at
         else coalesce(updated_at, created_at)
   end desc, jig_id
-) as id
 ),
 cte1 as (
-    select * from unnest((select distinct id from cte)) with ordinality t(id
+    select * from unnest(array((select cte.array_agg[1] from cte))) with ordinality t(id
    , ord) order by ord
 )
 select jig.id                                              as "jig_id: JigId",
