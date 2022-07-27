@@ -88,6 +88,9 @@ pub fn render(state: Rc<Step3>) -> Dom {
         .property_signal("dark", empty_signal(state.clone()).map(|is_empty| !is_empty))
         .child_signal(empty_signal(state.clone()).map(clone!(state => move |is_empty| {
             if is_empty {
+                // Make sure that the tab_kind is reset so that we can display the correct Jiggling text.
+                state.sidebar.tab_kind.set(None);
+
                 Some(html!("sidebar-empty", {
                     .property("imagePath", "module/_common/edit/sidebar/illustration-trace-area.svg")
                     .child(html!("div", {
@@ -269,8 +272,8 @@ pub fn render_question(
                     .after_removed(clone!(state => move |_| {
                         // Make sure that we're always in the initial phase when rendering a question body
                         state.sidebar.base.phase.set(Phase::Layout);
-                        // Make sure that the Question tab is always the first tab set
-                        state.sidebar.tab_kind.set(Some(MenuTabKind::Question));
+                        // Reset the tabs when a question is minimized
+                        state.sidebar.tab_kind.set(None);
                     }))
                     .style("display", "contents")
                     .child_signal(
