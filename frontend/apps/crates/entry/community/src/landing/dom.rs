@@ -78,7 +78,7 @@ impl CommunityLanding {
                     }
                 })
             }))
-            .text(&member.given_name)
+            .text(&format!("{} {}", member.given_name, member.family_name))
         })
     }
 
@@ -99,7 +99,6 @@ impl CommunityLanding {
                     None => dom,
                 })
             }))
-            .text(&circle.display_name)
             .child(html!("span", {
                 .style("white-space", "nowrap")
                 .style("overflow", "hidden")
