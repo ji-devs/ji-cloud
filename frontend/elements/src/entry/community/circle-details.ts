@@ -98,9 +98,8 @@ export class _ extends LitElement {
                     font-weight: 400;
                 }
                 .members-section .members {
-                    background-color: #ffffff;
-                    border-radius: 16px;
-                    border: solid 1px var(--light-orange-3);
+                    display: grid;
+                    row-gap: 10px;
                 }
             `,
         ];

@@ -4,11 +4,11 @@ use dominator::clone;
 use futures::join;
 use shared::{
     api::{endpoints, ApiEndpoint},
-    domain::circle::Circle,
+    domain::{circle::{Circle, BrowseMembersResponse}, user::public_user::UserBrowseQuery},
     error::EmptyError,
 };
 use utils::{
-    prelude::{api_no_auth, api_with_auth_empty},
+    prelude::{api_no_auth, api_with_auth_empty, ApiEndpointExt},
     unwrap::UnwrapJiExt,
 };
 
@@ -41,19 +41,19 @@ impl CircleDetails {
     }
 
     async fn load_circle_members(self: &Rc<Self>) {
-        // let state = self;
+        let state = self;
 
-        // let path = endpoints::circle::BrowseMembers::PATH.replace("{id}", &state.circle_id.0.to_string());
-        // match api_no_auth::<BrowseMembersResponse, EmptyError, ()>(
-        //     &path,
-        //     endpoints::circle::BrowseMembers::METHOD,
-        //     None
-        // ).await {
-        //     Ok(res) => {
-        //         state.members.lock_mut().extend(res.members);
-        //     },
-        //     Err(_) => todo!(),
-        // }
+        let req = UserBrowseQuery {
+            circles: vec![state.circle_id],
+            ..Default::default()
+        };
+
+        match endpoints::user::BrowsePublicUser::api_no_auth(Some(req)).await {
+            Ok(res) => {
+                state.members.lock_mut().extend(res.users);
+            },
+            Err(_) => todo!(),
+        }
     }
 
     pub fn join_circle(self: &Rc<Self>) {

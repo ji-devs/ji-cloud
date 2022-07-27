@@ -108,7 +108,6 @@ impl CircleDetails {
         html!("community-list-member", {
             .property("slot", "members")
             .class(&*MEMBER_LIST_GRID_COLUMNS)
-            .property("slot", "items")
             .property("name", &format!("{} {}", member.given_name, member.family_name))
             // .property("city", "New York")
             // .property("state", "NY")
