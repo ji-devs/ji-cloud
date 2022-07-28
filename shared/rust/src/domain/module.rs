@@ -65,7 +65,7 @@ pub enum ModuleKind {
     /// ResourceCover user for resources and course cover
     ResourceCover = 12,
 
-    /// Find the Answer
+    /// Answer This (Previously "Find the Answer")
     FindAnswer = 13,
 }
 
