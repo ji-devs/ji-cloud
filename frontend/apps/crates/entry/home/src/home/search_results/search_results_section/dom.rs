@@ -8,8 +8,8 @@ use futures_signals::{
     signal_vec::SignalVecExt,
 };
 use shared::domain::{
-    asset::DraftOrLive,
-    jig::{JigFocus, JigResponse},
+    asset::{Asset, AssetId, AssetType, DraftOrLive},
+    jig::JigFocus,
     meta::ResourceTypeId,
 };
 use std::rc::Rc;
@@ -18,7 +18,7 @@ use utils::{
     asset::{published_at_string, ResourceContentExt},
     events,
     prelude::get_user_cloned,
-    routes::{AssetEditRoute, AssetRoute, JigEditRoute, Route},
+    routes::{AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, Route},
 };
 
 use super::state::SearchResultsSection;
@@ -34,13 +34,10 @@ impl SearchResultsSection {
 
         html!("home-search-results-section", {
             .property("slot", "sections")
-            .property("kind", match state.focus {
-                JigFocus::Modules => "jigs",
-                JigFocus::Resources => "resources",
-            })
+            .property("kind", state.asset_type.as_str())
             .property_signal("resultsCount", state.total.signal())
             .children_signal_vec(state.list.signal_vec_cloned().map(clone!(state => move |jig| {
-                state.render_result(&jig)
+                state.render_result(jig)
             })))
             .child_signal(state.all_loaded_signal().map(clone!(state => move |all_loaded| {
                 match all_loaded {
@@ -54,8 +51,7 @@ impl SearchResultsSection {
                             .text(STR_LOAD_MORE)
                             .event(clone!(state => move |_: events::Click| {
                                 state.loader.load(clone!(state => async move {
-                                    let req = state.home_state.search_selected.to_search_request();
-                                    state.load_items(req).await;
+                                    state.load_items().await;
                                 }));
                             }))
                         }))
@@ -65,25 +61,22 @@ impl SearchResultsSection {
         })
     }
 
-    fn render_result(self: &Rc<Self>, jig: &JigResponse) -> Dom {
+    fn render_result(self: &Rc<Self>, asset: Rc<Asset>) -> Dom {
         let state = self;
-        let jig_ages = jig.jig_data.age_ranges.clone();
-        let share_jig = ShareAsset::new(jig.id.into());
+        let jig_ages = asset.age_ranges().clone();
+        let share_jig = ShareAsset::new(asset.id());
 
         html!("home-search-result", {
             .property("slot", "results")
-            .property("title", &jig.jig_data.display_name)
-            .property("playedCount", jig.plays)
-            .property("likedCount", jig.likes)
-            .property("author", &jig.author_name.clone().unwrap_or_default())
-            .property("language", &jig.jig_data.language)
+            .property("title", asset.display_name())
+            .property("playedCount", asset.plays())
+            .property("likedCount", asset.likes())
+            .property("author", asset.author_name().clone().unwrap_or_default())
+            .property("language", asset.language())
             .property_signal("flipped", share_jig.active_popup.signal_cloned().map(|active_popup| active_popup.is_some()))
-            .property("kind", match state.focus {
-                JigFocus::Modules => "jig",
-                JigFocus::Resources => "resource",
-            })
+            .property("kind", state.asset_type.as_str())
             .property("publishedAt", {
-                match jig.published_at {
+                match asset.published_at() {
                     Some(publish_at) => published_at_string(publish_at, false),
                     None => String::new(),
                 }
@@ -97,23 +90,22 @@ impl SearchResultsSection {
                     .property("to", range.1)
                 }))
             }))
-            .property("description", jig.jig_data.description.clone())
+            .property("description", asset.description().clone())
             .child(ModuleThumbnail::render(
                 Rc::new(ModuleThumbnail {
-                    asset_id: jig.id.into(),
-                    module: jig.jig_data.modules.first().cloned(),
+                    asset_id: asset.id(),
+                    module: asset.cover().cloned(),
                     fallback: ThumbnailFallback::Asset,
                     draft_or_live: DraftOrLive::Live
                 }),
                 Some("image")
             ))
-            .apply_if(!jig.jig_data.categories.is_empty(), clone!(state => move |dom| {
+            .apply_if(!asset.categories().is_empty(), clone!(state, asset => move |dom| {
                 dom.child(html!("home-search-result-details", {
                     .property("slot", "categories")
                     .child(html!("div", {
-                        .children(jig.jig_data.categories.iter().map(|category_id| {
+                        .children(asset.categories().iter().map(|category_id| {
                             html!("home-search-result-category", {
-                                .property("filled", matches!(state.focus, JigFocus::Modules))
                                 .property_signal("label", {
                                     state.home_state.search_options.category_label_lookup.signal_cloned().map(clone!(category_id => move |category_label_lookup| {
                                         match category_label_lookup.get(&category_id) {
@@ -128,11 +120,11 @@ impl SearchResultsSection {
                 }))
             }))
             .property("showAdditionalResources", {
-                !jig.jig_data.additional_resources.is_empty()
+                !asset.additional_resources().is_empty()
                 &&
-                jig.jig_focus.is_modules()
+                !state.asset_type.is_resource()
             })
-            .children(jig.jig_data.additional_resources.iter().map(|resource| {
+            .children(asset.additional_resources().iter().map(|resource| {
                 html!("a", {
                     .property("slot", "additional-resources")
                     .property("target", "_BLANK")
@@ -148,8 +140,8 @@ impl SearchResultsSection {
             .apply(|dom| {
                 let user_id = state.user.get_cloned().map(|user| user.id);
 
-                match jig.jig_focus {
-                    JigFocus::Modules => {
+                match state.asset_type {
+                    AssetType::Jig | AssetType::Course => {
                         dom
                             .child(share_jig.render(
                                 html!("button-icon-label", {
@@ -162,7 +154,7 @@ impl SearchResultsSection {
                                 }),
                                 Some("actions"),
                             ))
-                            .apply_if(jig.author_id == user_id, move |dom| {
+                            .apply_if(asset.author_id() == &user_id, clone!(asset => move |dom| {
                                 dom.child(html!("button-icon-label", {
                                     .property("slot", "actions")
                                     .property("labelColor", "dark-blue")
@@ -171,14 +163,24 @@ impl SearchResultsSection {
                                     .property("gapOverride", "0px")
                                     .property("label", "Edit")
                                     .property("href", {
-                                        String::from(Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
-                                            jig.id,
-                                            jig.jig_focus,
-                                            JigEditRoute::Landing
-                                        ))))
+                                        match asset.id() {
+                                            AssetId::JigId(jig_id) => {
+                                                Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
+                                                    jig_id,
+                                                    JigFocus::Modules,
+                                                    JigEditRoute::Landing
+                                                )))
+                                            },
+                                            AssetId::CourseId(course_id) => {
+                                                Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
+                                                    course_id,
+                                                    CourseEditRoute::Landing
+                                                )))
+                                            },
+                                        }.to_string()
                                     })
                                 }))
-                            })
+                            }))
                             .child(html!("button-rect-icon", {
                                 .property("slot", "play-button")
                                 .property("color", "red")
@@ -187,10 +189,10 @@ impl SearchResultsSection {
                                 .property("iconBeforePath", "search/cards/play.svg")
                                 .text("Play")
                                 .event({
-                                    let jig_id = jig.id;
+                                    let asset_id = asset.id();
                                     clone!(state => move |_: events::Click| {
                                         // if get_user().is_some() {
-                                            state.home_state.play_jig.set(Some(jig_id));
+                                            state.home_state.play_asset.set(Some(asset_id));
                                         // } else {
                                         //     state.home_state.play_login_popup_shown.set(true);
                                         // }
@@ -198,9 +200,9 @@ impl SearchResultsSection {
                                 })
                             }))
                     },
-                    JigFocus::Resources => {
+                    AssetType::Resource => {
                         dom.child({
-                            match jig.jig_data.additional_resources.get(0) {
+                            match asset.additional_resources().get(0) {
                                 Some(resource) => {
                                     html!("button-rect", {
                                         .property("slot", "play-button")

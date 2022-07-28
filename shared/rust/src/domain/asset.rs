@@ -21,9 +21,11 @@ use crate::domain::{
 };
 
 use super::{
+    additional_resource::AdditionalResource,
     course::{CourseId, CourseResponse},
     jig::{JigId, JigResponse},
     module::body::ThemeId,
+    user::UserId,
 };
 
 /// AssetType
@@ -293,12 +295,45 @@ impl Asset {
         }
     }
 
-    // pub fn additional_resources(&self) -> &Vec<AdditionalResource> {
-    //     match self {
-    //         Self::Jig(_) => todo!(),
-    //         Self::Course(_) => todo!(),
-    //     }
-    // }
+    /// get likes
+    pub fn likes(&self) -> i64 {
+        match self {
+            Self::Jig(jig) => jig.likes,
+            Self::Course(course) => course.likes,
+        }
+    }
+
+    /// get plays
+    pub fn plays(&self) -> i64 {
+        match self {
+            Self::Jig(jig) => jig.plays,
+            Self::Course(course) => course.plays,
+        }
+    }
+
+    /// get author_id
+    pub fn author_id(&self) -> &Option<UserId> {
+        match self {
+            Self::Jig(jig) => &jig.author_id,
+            Self::Course(course) => &course.author_id,
+        }
+    }
+
+    /// get author_name
+    pub fn author_name(&self) -> &Option<String> {
+        match self {
+            Self::Jig(jig) => &jig.author_name,
+            Self::Course(course) => &course.author_name,
+        }
+    }
+
+    /// get additional_resources
+    pub fn additional_resources(&self) -> &Vec<AdditionalResource> {
+        match self {
+            Self::Jig(jig) => &jig.jig_data.additional_resources,
+            Self::Course(course) => &course.course_data.additional_resources,
+        }
+    }
 
     /// get translated_description
     pub fn translated_description(&self) -> &HashMap<String, String> {

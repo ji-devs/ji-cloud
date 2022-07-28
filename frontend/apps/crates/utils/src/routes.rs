@@ -2,10 +2,12 @@ use crate::asset::{CoursePlayerOptions, JigPlayerOptions};
 use serde::{Deserialize, Serialize};
 use shared::domain::{
     asset::{AssetId, AssetType, DraftOrLive},
+    category::CategoryId,
     circle::CircleId,
     course::CourseId,
     image::{ImageId, ImageSearchQuery},
-    jig::{JigFocus, JigId, JigSearchQuery},
+    jig::{JigFocus, JigId},
+    meta::{AffiliationId, AgeRangeId},
     module::{ModuleId, ModuleKind},
     session::OAuthUserProfile,
     user::{UserId, UserScope},
@@ -40,7 +42,37 @@ pub enum Route {
 #[derive(Debug, Clone)]
 pub enum HomeRoute {
     Home,
-    Search(Option<Box<JigSearchQuery>>),
+    Search(Option<Box<SearchQueryParams>>),
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct SearchQueryParams {
+    #[serde(default)]
+    #[serde(skip_serializing_if = "String::is_empty")]
+    pub q: String,
+
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub language: Option<String>,
+
+    #[serde(default)]
+    #[serde(serialize_with = "shared::domain::ser::csv_encode_uuids")]
+    #[serde(deserialize_with = "shared::domain::ser::from_csv")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub age_ranges: Vec<AgeRangeId>,
+
+    #[serde(default)]
+    #[serde(serialize_with = "shared::domain::ser::csv_encode_uuids")]
+    #[serde(deserialize_with = "shared::domain::ser::from_csv")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub affiliations: Vec<AffiliationId>,
+
+    #[serde(default)]
+    #[serde(serialize_with = "shared::domain::ser::csv_encode_uuids")]
+    #[serde(deserialize_with = "shared::domain::ser::from_csv")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub categories: Vec<CategoryId>,
 }
 
 #[derive(Debug, Clone)]
@@ -269,7 +301,7 @@ impl Route {
         match paths {
             [""] => Self::Home(HomeRoute::Home),
             ["home", "search"] => {
-                let search: JigSearchQuery = serde_qs::from_str(&params_string).unwrap_ji();
+                let search: SearchQueryParams = serde_qs::from_str(&params_string).unwrap_ji();
                 Self::Home(HomeRoute::Search(Some(Box::new(search))))
             }
             ["kids"] => Self::Kids(KidsRoute::StudentCode(None)),

@@ -56,7 +56,7 @@ async fn fetch_total_jigs_count(state: Rc<Home>) {
     {
         Err(_) => {}
         Ok(res) => {
-            state.total_jigs_count.set(res.total_count);
+            state.total_assets_count.set(res.total_count);
         }
     };
 }
@@ -81,12 +81,13 @@ async fn search_async(state: Rc<Home>) {
         .mode
         .set(HomePageMode::Search(Rc::clone(&search_state)));
 
-    let req = state.search_selected.to_search_request();
-    Route::Home(HomeRoute::Search(Some(Box::new(req.clone())))).push_state();
+    let query_params = state.search_selected.to_query_params();
+    Route::Home(HomeRoute::Search(Some(Box::new(query_params)))).push_state();
 
     join!(
-        search_state.jigs.load_items(req.clone()),
-        search_state.resources.load_items(req),
+        search_state.jigs.load_items(),
+        search_state.resources.load_items(),
+        search_state.courses.load_items(),
     );
 
     search_state.loading.set(false);

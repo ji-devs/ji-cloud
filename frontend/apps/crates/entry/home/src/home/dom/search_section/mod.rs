@@ -26,7 +26,7 @@ pub fn render(state: Rc<Home>, auto_search: bool) -> Dom {
 
     html!("home-search-section", {
         .property_signal("mode", state.mode.signal_cloned().map(|mode| mode.to_string()))
-        .property_signal("resultsCount", state.total_jigs_count.signal().map(|x| x as f64))
+        .property_signal("resultsCount", state.total_assets_count.signal().map(|x| x as f64))
         // .child(html!("home-search-section-help", {
         //     .property("slot", "help")
         // }))

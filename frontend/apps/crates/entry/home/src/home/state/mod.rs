@@ -2,9 +2,10 @@ use std::{iter, rc::Rc};
 
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
-use shared::domain::jig::{JigId, JigSearchQuery};
+use shared::domain::asset::AssetId;
 
 use components::page_header::state::PageLinks;
+use utils::routes::SearchQueryParams;
 
 use super::search_results::SearchResults;
 use strum_macros::Display;
@@ -22,18 +23,18 @@ pub struct Home {
     pub whats_new: Vec<WhatsNewItem>,
     pub parents_testimonials: Vec<Testimonial>,
     pub teachers_testimonials: Vec<Testimonial>,
-    pub total_jigs_count: Mutable<u64>,
+    pub total_assets_count: Mutable<u64>,
     pub play_login_popup_shown: Mutable<bool>,
-    pub play_jig: Mutable<Option<JigId>>,
+    pub play_asset: Mutable<Option<AssetId>>,
 }
 
 impl Home {
     pub fn new() -> Rc<Self> {
         Rc::new(Self::new_with_search_selected(SearchSelected::default()))
     }
-    pub fn new_search(query_params: Option<JigSearchQuery>) -> Rc<Self> {
+    pub fn new_search(query_params: Option<SearchQueryParams>) -> Rc<Self> {
         let search_selected = match query_params {
-            Some(query_params) => SearchSelected::from_search_request(query_params),
+            Some(query_params) => SearchSelected::from_query_params(query_params),
             None => SearchSelected::default(),
         };
         Rc::new(Self::new_with_search_selected(search_selected))
@@ -49,9 +50,9 @@ impl Home {
             whats_new: Self::get_whats_new(),
             parents_testimonials: Self::get_parents_testimonials(),
             teachers_testimonials: Self::get_teachers_testimonials(),
-            total_jigs_count: Mutable::new(0),
+            total_assets_count: Mutable::new(0),
             play_login_popup_shown: Mutable::new(false),
-            play_jig: Mutable::new(None),
+            play_asset: Mutable::new(None),
         }
     }
 

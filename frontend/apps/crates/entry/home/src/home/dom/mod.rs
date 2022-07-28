@@ -42,10 +42,10 @@ impl Home {
                 }),
                 page_footer::dom::render(None),
             ])
-            .child_signal(state.play_jig.signal_cloned().map(clone!(state => move|play_jig| {
+            .child_signal(state.play_asset.signal_cloned().map(clone!(state => move|play_jig| {
                 play_jig.map(|jig_id| {
                     let close = clone!(state => move || {
-                        state.play_jig.set(None);
+                        state.play_asset.set(None);
                     });
                     PlayerPopup::new_default_player_options(
                         jig_id.into(),

@@ -13,6 +13,7 @@ use shared::{
     },
     domain::{
         category::{Category, CategoryId, CategoryResponse, CategoryTreeScope, GetCategoryRequest},
+        course::CourseSearchQuery,
         jig::JigSearchQuery,
         meta::{Affiliation, AffiliationId, AgeRange, AgeRangeId, MetadataResponse, ResourceType},
         user::UserProfile,
@@ -60,7 +61,7 @@ impl SearchSelected {
         }
     }
 
-    pub fn from_search_request(search: JigSearchQuery) -> Self {
+    pub fn from_query_params(search: SearchQueryParams) -> Self {
         Self {
             affiliations: Mutable::new(HashSet::from_iter(search.affiliations)),
             categories: Mutable::new(HashSet::from_iter(search.categories)),
@@ -70,9 +71,42 @@ impl SearchSelected {
         }
     }
 
-    pub fn to_search_request(&self) -> JigSearchQuery {
-        log::info!("{:?}", self);
+    pub fn to_query_params(&self) -> SearchQueryParams {
+        SearchQueryParams {
+            q: self.query.get_cloned(),
+            age_ranges: self.age_ranges.get_cloned().into_iter().collect(),
+            affiliations: self.affiliations.get_cloned().into_iter().collect(),
+            categories: self.categories.get_cloned().into_iter().collect(),
+            language: self.language.get_cloned(),
+        }
+    }
+
+    pub fn to_jig_search_request(&self) -> JigSearchQuery {
         JigSearchQuery {
+            q: self.query.get_cloned(),
+            age_ranges: self.age_ranges.get_cloned().into_iter().collect(),
+            affiliations: self.affiliations.get_cloned().into_iter().collect(),
+            categories: self.categories.get_cloned().into_iter().collect(),
+            page: Some(0),
+            language: self.language.get_cloned(),
+            ..Default::default()
+        }
+    }
+
+    pub fn to_resource_search_request(&self) -> JigSearchQuery {
+        JigSearchQuery {
+            q: self.query.get_cloned(),
+            age_ranges: self.age_ranges.get_cloned().into_iter().collect(),
+            affiliations: self.affiliations.get_cloned().into_iter().collect(),
+            categories: self.categories.get_cloned().into_iter().collect(),
+            page: Some(0),
+            language: self.language.get_cloned(),
+            ..Default::default()
+        }
+    }
+
+    pub fn to_course_search_request(&self) -> CourseSearchQuery {
+        CourseSearchQuery {
             q: self.query.get_cloned(),
             age_ranges: self.age_ranges.get_cloned().into_iter().collect(),
             affiliations: self.affiliations.get_cloned().into_iter().collect(),

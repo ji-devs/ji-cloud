@@ -4,7 +4,7 @@ use futures_signals::{
     map_ref,
     signal::{Mutable, Signal},
 };
-use shared::domain::jig::JigFocus;
+use shared::domain::asset::AssetType;
 
 use super::{super::state::Home, search_results_section::SearchResultsSection};
 
@@ -14,6 +14,7 @@ pub struct SearchResults {
     pub query: String,
     pub jigs: Rc<SearchResultsSection>,
     pub resources: Rc<SearchResultsSection>,
+    pub courses: Rc<SearchResultsSection>,
 }
 
 impl SearchResults {
@@ -23,8 +24,9 @@ impl SearchResults {
         Rc::new(Self {
             loading: Mutable::new(loading),
             query,
-            jigs: SearchResultsSection::new(Rc::clone(&home_state), JigFocus::Modules),
-            resources: SearchResultsSection::new(Rc::clone(&home_state), JigFocus::Resources),
+            jigs: SearchResultsSection::new(Rc::clone(&home_state), AssetType::Jig),
+            resources: SearchResultsSection::new(Rc::clone(&home_state), AssetType::Resource),
+            courses: SearchResultsSection::new(Rc::clone(&home_state), AssetType::Course),
         })
     }
 

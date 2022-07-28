@@ -34,9 +34,11 @@ impl SearchResults {
             .property_signal("loading", state.loading.signal())
             .property_signal("jigCount", state.jigs.total.signal())
             .property_signal("resourceCount", state.resources.total.signal())
+            .property_signal("courseCount", state.courses.total.signal())
             .property("query", &state.query)
-            .child_signal(search_results_signal(state.jigs.clone()))
-            .child_signal(search_results_signal(state.resources.clone()))
+            .child_signal(search_results_signal(Rc::clone(&state.jigs)))
+            .child_signal(search_results_signal(Rc::clone(&state.resources)))
+            .child_signal(search_results_signal(Rc::clone(&state.courses)))
         })
     }
 }

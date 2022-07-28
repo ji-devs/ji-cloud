@@ -8,7 +8,7 @@ const STR_DESCRIPTION = "Description";
 const STR_ADDITIONAL_RESOURCES = "Additional resources";
 const STR_SEE_ALL = "See more JIGs by this author";
 
-type Kind = "jig" | "resource";
+type Kind = "jig" | "resource" | "course";
 
 @customElement("home-search-result")
 export class _ extends LitElement {
@@ -123,7 +123,8 @@ export class _ extends LitElement {
                     align-items: center;
                     justify-content: center;
                 }
-                :host([kind=jig]) .main .author-section {
+                :host([kind=jig]) .main .author-section,
+                :host([kind=course]) .main .author-section {
                     color: var(--main-blue);
                     border-top: solid 1px var(--light-blue-2);
                 }
@@ -147,7 +148,8 @@ export class _ extends LitElement {
                     grid-template-rows: 1fr auto;
                     transform: rotateY(180deg);
                 }
-                :host([kind=jig]) .hover {
+                :host([kind=jig]) .hover,
+                :host([kind=course]) .hover {
                     background-color: var(--light-orange-1);
                     color: var(--dark-gray-5);
                 }
@@ -161,7 +163,8 @@ export class _ extends LitElement {
                     overflow: auto;
                     scrollbar-width: thin;
                 }
-                :host([kind=jig]) .hover {
+                :host([kind=jig]) .hover,
+                :host([kind=course]) .hover {
                     scrollbar-color: var(--light-gray-2) transparent;
                 }
                 :host([kind=resource]) .hover {
@@ -177,7 +180,8 @@ export class _ extends LitElement {
                 .hover .scrollable-content::-webkit-scrollbar-thumb {
                     border-radius: 4px;
                 }
-                :host([kind=jig]) .scrollable-content::-webkit-scrollbar-thumb {
+                :host([kind=jig]) .scrollable-content::-webkit-scrollbar-thumb,
+                :host([kind=course]) .scrollable-content::-webkit-scrollbar-thumb {
                     background-color: var(--light-blue-5);
                 }
                 :host([kind=resource]) .scrollable-content::-webkit-scrollbar-thumb {
@@ -188,10 +192,12 @@ export class _ extends LitElement {
                     font-size: 16px;
                     font-weight: 600;
                 }
-                :host([kind=jig]) .hover .title {
+                :host([kind=jig]) .hover .title,
+                :host([kind=course]) .hover .title {
                     color: var(--dark-blue-4);
                 }
-                :host([kind=jig]) .hover home-search-result-details:not(:last-child) {
+                :host([kind=jig]) .hover home-search-result-details:not(:last-child),
+                :host([kind=course]) .hover home-search-result-details:not(:last-child) {
                     border-bottom: solid 1px var(--light-orange-3);
                 }
                 :host([kind=resource]) .hover home-search-result-details:not(:last-child) {
@@ -201,7 +207,8 @@ export class _ extends LitElement {
                 ::slotted(home-search-result-details) {
                     --closed-height: 36px;
                 }
-                :host([kind=jig]) ::slotted(home-search-result-details) {
+                :host([kind=jig]) ::slotted(home-search-result-details),
+                :host([kind=course]) ::slotted(home-search-result-details) {
                     border-bottom: solid 1px var(--light-orange-3);
                 }
                 :host([kind=resource]) ::slotted(home-search-result-details) {
@@ -252,7 +259,8 @@ export class _ extends LitElement {
                     padding: 10px 0;
                     border-bottom: solid 1px #3f9c6f;
                 }
-                :host([kind=jig]) .hover .author-section {
+                :host([kind=jig]) .hover .author-section,
+                :host([kind=course]) .hover .author-section {
                     border-bottom: solid 1px var(--light-orange-3);
                 }
                 .hover .author-section .left-side {
@@ -264,10 +272,10 @@ export class _ extends LitElement {
                     height: 82px;
                     box-shadow: 0 3px 12px 0 rgba(0, 0, 0, 0.12);
                     display: grid;
-                    place-content:
+                    place-content: center;
                     display: grid;
                     grid-template-columns: 50% 50%;
-                    padding: 0 24px; center;
+                    padding: 0 24px;
                 }
                 .hover .extra-actions {
                     margin-right: auto;
@@ -454,9 +462,9 @@ export class _ extends LitElement {
                                 </a> -->
                             </div>
                             <div class="published-at">
-                                ${this.kind === "jig"
-                                    ? html`<img-ui path="entry/home/search-results/clock.svg"></img-ui>`
-                                    : html`<img-ui path="entry/home/search-results/time.svg"></img-ui>`
+                                ${this.kind === "resource"
+                                    ? html`<img-ui path="entry/home/search-results/time.svg"></img-ui>`
+                                    : html`<img-ui path="entry/home/search-results/clock.svg"></img-ui>`
                                 }
 
                                 ${this.publishedAt}

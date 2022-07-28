@@ -1,3 +1,5 @@
+//! Serialization helpers
+
 use serde::de::{DeserializeOwned, Visitor};
 use std::{
     fmt::{self, Write},
@@ -13,7 +15,7 @@ use uuid::Uuid;
 /// For example in json `{"v": null}` and `{}` are different things, in the first one, `v` is `null`, but in the second, v is `undefined`.
 ///
 /// [`Option<T>`]: Option
-pub(super) fn deserialize_optional_field<'de, T, D>(
+pub fn deserialize_optional_field<'de, T, D>(
     deserializer: D,
 ) -> Result<Option<Option<T>>, D::Error>
 where
@@ -27,7 +29,7 @@ where
 ///
 /// ## Note:
 /// * Algolia takes CSV format arrays: https://www.algolia.com/doc/rest-api/search/#arrays
-pub(super) fn csv_encode_uuids<T: Into<Uuid> + Copy, S>(
+pub fn csv_encode_uuids<T: Into<Uuid> + Copy, S>(
     uuids: &[T],
     serializer: S,
 ) -> Result<S::Ok, S::Error>
@@ -60,7 +62,7 @@ where
 ///
 /// In most cases for this project, i16 is used instead of u16 because PostgreSQL does not have
 /// unsigned integer types.
-pub(super) fn csv_encode_i16_indices<T: Into<i16> + Copy, S>(
+pub fn csv_encode_i16_indices<T: Into<i16> + Copy, S>(
     values: &[T],
     serializer: S,
 ) -> Result<S::Ok, S::Error>
@@ -86,7 +88,11 @@ where
     serializer.serialize_str(&out)
 }
 
-pub(super) fn from_csv<'de, D, T>(deserializer: D) -> Result<Vec<T>, D::Error>
+/// Deserializes a slice of hyphenated UUIDs into CSV format
+///
+/// ## Note:
+/// * Algolia takes CSV format arrays: https://www.algolia.com/doc/rest-api/search/#arrays
+pub fn from_csv<'de, D, T>(deserializer: D) -> Result<Vec<T>, D::Error>
 where
     D: serde::Deserializer<'de>,
     T: DeserializeOwned,

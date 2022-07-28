@@ -12,13 +12,8 @@ export class _ extends LitElement {
                     font-size: 14px;
                     border-radius: 16px;
                     border: solid 1px var(--white);
-                    color: var(--white);
-                }
-
-                :host([filled]) {
-                    border: solid 1px var(--light-orange-3);
-                    background-color: var(--white);
                     color: var(--dark-gray-5);
+                    background-color: var(--white);
                 }
             `,
         ];
@@ -26,9 +21,6 @@ export class _ extends LitElement {
 
     @property()
     label: string = "";
-
-    @property({ type: Boolean, reflect: true })
-    filled: boolean = false;
 
     render() {
         return html` ${this.label} `;

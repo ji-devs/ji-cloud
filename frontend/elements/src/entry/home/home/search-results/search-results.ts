@@ -11,6 +11,7 @@ const STR_LOADING = "So many great JIGs and resources to sift through...";
 const KINDS: {[key: string]: string[]} = {
     jigs: ["JIG", "JIGs"],
     resources: ["Resource", "Resources"],
+    courses: ["Course", "Courses"],
 };
 const STR_AND = "and";
 
@@ -66,6 +67,9 @@ export class _ extends LitElement {
     @property({ type: Number })
     resourceCount: number = 0;
 
+    @property({ type: Number })
+    courseCount: number = 0;
+
     private scrollToResults(event: MouseEvent) {
         event.preventDefault();
         const slot = this.shadowRoot!.querySelector("slot") as HTMLSlotElement;
@@ -94,12 +98,17 @@ export class _ extends LitElement {
 
         addResultCount("jigs", this.jigCount);
         addResultCount("resources", this.resourceCount);
-        if (this.jigCount > 0 && this.resourceCount > 0) {
-            // If we're rendering both sets of results then add STR_AND between
-            // them.
-            // NOTE: If at some point we want to include more than two results
-            // sections, then we will need to update this logic to handle it.
-            results.splice(1, 0, html` ${STR_AND} `);
+        addResultCount("courses", this.courseCount);
+
+        // If we're rendering more than one set of results then add STR_AND
+        // before the last result.
+        // If we're rendering three set of results then add a comma after
+        // the first result.
+        if (results.length >= 3) {
+            results.splice(1, 0, html`, `);
+        }
+        if (results.length >= 2) {
+            results.splice(-1, 0, html` ${STR_AND} `);
         }
 
         return html`

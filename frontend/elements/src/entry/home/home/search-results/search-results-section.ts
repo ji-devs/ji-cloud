@@ -1,17 +1,17 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 
-export type Kind = "jigs" | "resources" | "learning-paths";
+export type Kind = "jig" | "resource" | "course";
 
 const STR_JIGS = "JIGs";
 const STR_RESOURCES = "Resource Library";
-const STR_LEARNING_PATH = "Learning Paths";
+const STR_COURSES = "Courses";
 
 const IMAGE_LOOKUP: {
     [key in Kind]: string;
 } = {
-    ["jigs"]: "jig-section.png",
-    ["resources"]: "resources.webp",
-    ["learning-paths"]: "learning-paths.svg",
+    ["jig"]: "jig-section.png",
+    ["resource"]: "resources.webp",
+    ["course"]: "course-section.svg",
 };
 
 @customElement("home-search-results-section")
@@ -22,11 +22,11 @@ export class _ extends LitElement {
                 :host {
                     display: grid;
                     row-gap: 48px;
-                    padding: 5px 50px;
+                    padding: 5px 60px;
                     max-width: 1800px;
                     margin: 0 auto;
                 }
-                :host([kind=resources]) {
+                :host([kind=resource]) {
                     background-color: var(--green-2);
                 }
                 .top-line {
@@ -95,7 +95,7 @@ export class _ extends LitElement {
     }
 
     @property({ reflect: true })
-    kind: Kind = "jigs";
+    kind: Kind = "jig";
 
     @property({ type: Number })
     resultsCount: number = 0;
@@ -109,9 +109,9 @@ export class _ extends LitElement {
                     ></img-ui>
                     <h2>
                         ${
-                            this.kind === "jigs" ? STR_JIGS
-                                : this.kind === "resources" ? STR_RESOURCES
-                                : STR_LEARNING_PATH
+                            this.kind === "jig" ? STR_JIGS
+                                : this.kind === "resource" ? STR_RESOURCES
+                                : STR_COURSES
                         }
                         <span class="results-count">
                             (${this.resultsCount})
