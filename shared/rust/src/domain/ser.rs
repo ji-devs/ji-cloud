@@ -15,9 +15,7 @@ use uuid::Uuid;
 /// For example in json `{"v": null}` and `{}` are different things, in the first one, `v` is `null`, but in the second, v is `undefined`.
 ///
 /// [`Option<T>`]: Option
-pub fn deserialize_optional_field<'de, T, D>(
-    deserializer: D,
-) -> Result<Option<Option<T>>, D::Error>
+pub fn deserialize_optional_field<'de, T, D>(deserializer: D) -> Result<Option<Option<T>>, D::Error>
 where
     D: serde::Deserializer<'de>,
     T: serde::Deserialize<'de>,
