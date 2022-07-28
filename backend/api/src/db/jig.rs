@@ -991,23 +991,28 @@ pub async fn filtered_count(
     let jig_data = sqlx::query!(
         //language=SQL
         r#"
-select count(distinct jig_data.id) as "count!: i64"
-from jig_data
-left join jig on (draft_id = jig_data.id or (live_id = jig_data.id and last_synced_at is not null))
-left join jig_admin_data "admin" on admin.jig_id = jig.id
-left join jig_data_additional_resource "resource" on jig_data.id = resource.jig_data_id
-where (author_id = $1 or $1 is null)
-    and (jig_data.draft_or_live = $3 or $3 is null)
-    and (jig_focus = $2 or $2 is null)
-    and (jig_data.privacy_level = any($4) or $4 = array[]::smallint[])
-    and (blocked = $5 or $5 is null)
-    and (resource.resource_type_id = any($6) or $6 = array[]::uuid[])
-"#,
+        with cte as (
+            select array_agg(jd.id)
+            from jig_data "jd"
+                  inner join jig on (draft_id = jd.id or (live_id = jd.id and jd.last_synced_at is not null and published_at is not null))
+                  left join jig_admin_data "admin" on admin.jig_id = jig.id
+                  left join jig_data_additional_resource "resource" on jd.id = resource.jig_data_id
+            where (jd.draft_or_live = $1 or $1 is null)
+                and (author_id = $2 or $2 is null)
+                and (jig_focus = $3 or $3 is null)
+                and (blocked = $4 or $4 is null)
+                and (jd.privacy_level = any($5) or $5 = array[]::smallint[])
+                and (resource.resource_type_id = any($6) or $6 = array[]::uuid[])
+            group by updated_at, created_at, jig.published_at, admin.jig_id, jig_id
+        )
+            select count(*) as "count!" from unnest(array((select cte.array_agg[1] from cte))) with ordinality t(id
+           , ord)
+        "#,
+        draft_or_live.map(|it| it as i16),
         author_id.map(|it| it.0),
         jig_focus.map(|it| it as i16),
-        draft_or_live.map(|it| it as i16),
-        &privacy_level[..],
         blocked,
+        &privacy_level[..],
         &resource_types[..]
     )
     .fetch_one(db)
@@ -1017,23 +1022,28 @@ where (author_id = $1 or $1 is null)
     let jig = sqlx::query!(
         //language=SQL
         r#"
-select count(distinct jig.id) as "count!: i64"
-from jig
-left join jig_admin_data "admin" on admin.jig_id = jig.id
-left join jig_data on (draft_id = jig_data.id or (live_id = jig_data.id and last_synced_at is not null))
-left join jig_data_additional_resource "resource" on jig_data.id = resource.jig_data_id
-where (author_id = $1 or $1 is null)
-    and (jig_data.draft_or_live = $3 or $3 is null)
-    and (jig_focus = $2 or $2 is null)
-    and (jig_data.privacy_level = any($4) or $4 = array[]::smallint[])
-    and (blocked = $5 or $5 is null)
-    and (resource.resource_type_id = any($6) or $6 = array[]::uuid[])
-"#,
+        with cte as (
+            select array_agg(jig.id)
+            from jig_data "jd"
+                  inner join jig on (draft_id = jd.id or (live_id = jd.id and jd.last_synced_at is not null and published_at is not null))
+                  left join jig_admin_data "admin" on admin.jig_id = jig.id
+                  left join jig_data_additional_resource "resource" on jd.id = resource.jig_data_id
+            where (jd.draft_or_live = $1 or $1 is null)
+                and (author_id = $2 or $2 is null)
+                and (jig_focus = $3 or $3 is null)
+                and (blocked = $4 or $4 is null)
+                and (jd.privacy_level = any($5) or $5 = array[]::smallint[])
+                and (resource.resource_type_id = any($6) or $6 = array[]::uuid[])
+            group by updated_at, created_at, jig.published_at, admin.jig_id, jig_id
+        )
+            select count(*) as "count!" from unnest(array((select cte.array_agg[1] from cte))) with ordinality t(id
+           , ord)
+        "#,
+        draft_or_live.map(|it| it as i16),
         author_id.map(|it| it.0),
         jig_focus.map(|it| it as i16),
-        draft_or_live.map(|it| it as i16),
-        &privacy_level[..],
         blocked,
+        &privacy_level[..],
         &resource_types[..]
     )
     .fetch_one(db)
