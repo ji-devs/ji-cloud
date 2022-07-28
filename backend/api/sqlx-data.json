@@ -67,6 +67,29 @@
       "nullable": []
     }
   },
+  "01f309bf7b365f7a02bcf07daa18d2e8eb5fc93e52a5667459af4b04ae13b66e": {
+    "query": "\n        with cte as (\n            select (array_agg(cd.id))[1]\n            from course_data \"cd\"\n                  inner join course on (draft_id = cd.id or (live_id = cd.id and cd.last_synced_at is not null and published_at is not null))\n                  left join course_data_resource \"resource\" on cd.id = resource.course_data_id\n            where (author_id = $1 or $1 is null)\n                and (cd.draft_or_live = $2 or $2 is null)\n                and (cd.privacy_level = any($3) or $3 = array[]::smallint[])\n                and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n            group by coalesce(updated_at, created_at)\n        )\n        select count(*) as \"count!\" from unnest(array(select cte.array_agg from cte)) with ordinality t(id, ord) \n    ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count!",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int2Array",
+          "UuidArray"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "028a39dbccbe063de367c06c73959dee25793addad0a13388cd4d464a2496005": {
     "query": "\nselect draft_id, live_id from course where id = $1\n",
     "describe": {
@@ -167,6 +190,46 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "05d18fc3ce0c0d8d1aff470f3a96f24d8c064c255a0c74da1220fad096268310": {
+    "query": "\n        with cte as (\n            select jdar.id              as id,\n                   jdar.display_name,\n                   resource_type_id,\n                   resource_content,\n                   author_id,\n                   updated_at,\n                   created_at\n            from jig_data_additional_resource \"jdar\"\n            inner join jig on jig.live_id = jdar.jig_data_id\n            inner join jig_data on jig.live_id = jig_data.id\n            where author_id = $1 and jig.published_at is not null\n           ),\n           cte1 as (\n              select cdr.id              as id,\n                cdr.display_name,\n                resource_type_id,\n                resource_content,\n                author_id,\n                updated_at,\n                created_at\n          from course_data_resource \"cdr\"\n          inner join course on course.live_id = cdr.course_data_id\n          inner join course_data on course.live_id = course_data.id\n          where author_id = $1 and course.published_at is not null\n          ),\n          cte2 as (\n            select *\n            from unnest(array(\n                select\n                (array_agg(id))[1] as id\n                from (select id, updated_at, created_at from cte union all select id, updated_at, created_at from cte1)\n                resource\n                group by resource.updated_at, resource.created_at\n                order by coalesce(resource.updated_at, created_at))) with ordinality t(id\n                , ord) order by ord\n         )\n          select cte3.id                as \"id!: AddId\",\n                 display_name           as \"display_name!\",\n                 resource_type_id       as \"resource_type_id!: TypeId\",\n                 resource_content        as \"resource_content!\"\n         from\n          (select * from cte\n          union all\n          select * from cte1) cte3\n        inner join cte2 on cte2.id = cte3.id\n        where ord > (1 * $2 * $3)\n        order by ord asc\n        limit $3\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!: AddId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "resource_type_id!: TypeId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 3,
+          "name": "resource_content!",
+          "type_info": "Jsonb"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int4",
+          "Int4"
+        ]
+      },
+      "nullable": [
+        null,
+        null,
+        null,
+        null
+      ]
     }
   },
   "07c23d4be4038602fadd286c040a438b0366a8308e634d0ef4f5325c7b07b225": {
@@ -1158,46 +1221,6 @@
       "nullable": []
     }
   },
-  "1862fe31395b93764f3ffb9a08380d10457db036e7ca6c34ece5148021ff4b93": {
-    "query": "\n        with cte as (\n            select distinct jdar.id              as id,\n                   jdar.display_name,\n                   resource_type_id,\n                   resource_content,\n                   author_id,\n                   updated_at,\n                   created_at\n            from jig_data_additional_resource \"jdar\"\n            inner join jig on jig.live_id = jdar.jig_data_id\n            inner join jig_data on jig.live_id = jig_data.id\n            where author_id = $1\n           ),\n           cte1 as (\n              select distinct cdr.id              as id,\n                cdr.display_name,\n                resource_type_id,\n                resource_content,\n                author_id,\n                updated_at,\n                created_at\n          from course_data_resource \"cdr\"\n          inner join course on course.live_id = cdr.course_data_id\n          inner join course_data on course.live_id = course_data.id\n          where author_id = $1\n          ),\n          cte2 as (\n            select * from unnest(array(select id from (select id from cte union all select id from cte1) resource)) with ordinality t(id\n           , ord) order by ord\n         )\n          select cte3.id                as \"id!: AddId\",\n                 display_name           as \"display_name!\",\n                 resource_type_id       as \"resource_type_id!: TypeId\",\n                 resource_content        as \"resource_content!\"\n         from\n          (select * from cte\n          union all\n          select * from cte1) cte3\n        inner join cte2 on cte2.id = cte3.id\n        where ord > (1 * $2 * $3)\n        order by ord asc\n        limit $3\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id!: AddId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "display_name!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "resource_type_id!: TypeId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 3,
-          "name": "resource_content!",
-          "type_info": "Jsonb"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int4",
-          "Int4"
-        ]
-      },
-      "nullable": [
-        null,
-        null,
-        null,
-        null
-      ]
-    }
-  },
   "190abdc3f0a691d3b3e02b9ec75c214e58b8264734da76ead622688d7b191f68": {
     "query": "\nupdate circle\nset image = $2,\n    updated_at = now()\nwhere id = $1 and $2 is distinct from image",
     "describe": {
@@ -1518,88 +1541,6 @@
       "nullable": []
     }
   },
-  "28c3cae595fef6f28c3d773262cbaa2f5d167c949ce9337de8e1e25fb9747b3d": {
-    "query": "\n        with cte as (\n            select (array_agg(up.user_id))[1]\n            from user_profile \"up\"\n            inner join \"user\" on up.user_id = \"user\".id \n            left join circle_member \"cm\" on cm.user_id = up.user_id\n            where cm.id = any($1) or $1 = array[]::uuid[]\n            group by \"user\".created_at\n            order by \"user\".created_at desc\n        ),\n        cte1 as (\n            select * from unnest((select array_agg(cte.array_agg) from cte)) with ordinality t(id\n           , ord) order by ord\n        )\n        select  user_id                as \"id!: UserId\",\n                username               as \"username!\",\n                given_name             as \"given_name!\",\n                family_name            as \"family_name!\",\n                profile_image_id       as \"profile_image?: ImageId\",\n                (select language from user_profile where user_profile.user_id = \"user\".id and language_public is true)      as \"language?\",\n                (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n                (select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\",\n                (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n                (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n                (select array(select circle.id\n                    from circle_member bm\n                    inner join circle on bm.id = circle.id\n                    where bm.user_id = \"user\".id\n                )) as \"circles!: Vec<CircleId>\"\n        from cte1\n        inner join user_profile on cte1.id = user_profile.user_id\n        inner join \"user\" on cte1.id = \"user\".id\n        where ord > (1 * $2 * $3)\n        order by ord\n        limit $3\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id!: UserId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "username!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "given_name!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "family_name!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "profile_image?: ImageId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 5,
-          "name": "language?",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 6,
-          "name": "organization?",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 7,
-          "name": "persona?: Vec<String>",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 8,
-          "name": "location?",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 9,
-          "name": "bio?",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 10,
-          "name": "circles!: Vec<CircleId>",
-          "type_info": "UuidArray"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "UuidArray",
-          "Int4",
-          "Int4"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        true,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-      ]
-    }
-  },
   "28e8b119696b894d29a2f61140c73ba068dfc4e8dea0449e80a7b228dbef8c88": {
     "query": "\nselect course.id                                       as \"id!: CourseId\",\n       creator_id                               as \"creator_id?: UserId\",\n       author_id                                as \"author_id?: UserId\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id) as \"author_name\",\n       live_id                                  as \"live_id!\",\n       draft_id                                 as \"draft_id!\",\n       published_at,\n       likes                                    as \"likes!\",\n       plays                                    as \"plays!\"\nfrom course\n         inner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\n    ",
     "describe": {
@@ -1665,6 +1606,31 @@
         true,
         true,
         true
+      ]
+    }
+  },
+  "295a014d312c05700673ef4fc7b222e19589f1a1947f677f62eec03121120d27": {
+    "query": "\n        with cte as (\n            select array_agg(jig.id)\n            from jig_data \"jd\"\n                  inner join jig on (draft_id = jd.id or (live_id = jd.id and jd.last_synced_at is not null and published_at is not null))\n                  left join jig_admin_data \"admin\" on admin.jig_id = jig.id\n                  left join jig_data_additional_resource \"resource\" on jd.id = resource.jig_data_id\n            where (jd.draft_or_live = $1 or $1 is null)\n                and (author_id = $2 or $2 is null)\n                and (jig_focus = $3 or $3 is null)\n                and (blocked = $4 or $4 is null)\n                and (jd.privacy_level = any($5) or $5 = array[]::smallint[])\n                and (resource.resource_type_id = any($6) or $6 = array[]::uuid[])\n            group by updated_at, created_at, jig.published_at, admin.jig_id, jig_id\n        )\n            select count(*) as \"count!\" from unnest(array((select cte.array_agg[1] from cte))) with ordinality t(id\n           , ord)\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count!",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int2",
+          "Uuid",
+          "Int2",
+          "Bool",
+          "Int2Array",
+          "UuidArray"
+        ]
+      },
+      "nullable": [
+        null
       ]
     }
   },
@@ -1899,31 +1865,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "393f95d2043398ff3307695a8616e0d5075cb7e500ecd3efdb49ddd30b7991ed": {
-    "query": "\nselect count(distinct jig.id) as \"count!: i64\"\nfrom jig\nleft join jig_admin_data \"admin\" on admin.jig_id = jig.id\nleft join jig_data on (draft_id = jig_data.id or (live_id = jig_data.id and last_synced_at is not null))\nleft join jig_data_additional_resource \"resource\" on jig_data.id = resource.jig_data_id\nwhere (author_id = $1 or $1 is null)\n    and (jig_data.draft_or_live = $3 or $3 is null)\n    and (jig_focus = $2 or $2 is null)\n    and (jig_data.privacy_level = any($4) or $4 = array[]::smallint[])\n    and (blocked = $5 or $5 is null)\n    and (resource.resource_type_id = any($6) or $6 = array[]::uuid[])\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "count!: i64",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Int2",
-          "Int2Array",
-          "Bool",
-          "UuidArray"
-        ]
-      },
-      "nullable": [
-        null
-      ]
     }
   },
   "399f537a8091d51635c2cd32bf16449c26317d1f56c576064968a2bfd57953e0": {
@@ -2183,6 +2124,26 @@
       "nullable": []
     }
   },
+  "420d4bf39de1178348d773dec9763d6d8f0b1f1378a53165e2d184785395df30": {
+    "query": "\n        with cte as (\n            select jdar.id              as id,\n                   jdar.display_name,\n                   resource_type_id,\n                   resource_content,\n                   author_id,\n                   updated_at,\n                   created_at\n            from jig_data_additional_resource \"jdar\"\n            inner join jig on jig.live_id = jdar.jig_data_id\n            inner join jig_data on jig.live_id = jig_data.id\n            where author_id = $1 and jig.published_at is not null\n        ),\n        cte1 as (\n              select cdr.id              as id,\n                cdr.display_name,\n                resource_type_id,\n                resource_content,\n                author_id,\n                updated_at,\n                created_at\n          from course_data_resource \"cdr\"\n          inner join course on course.live_id = cdr.course_data_id\n          inner join course_data on course.live_id = course_data.id\n          where author_id = $1 and course.published_at is not null\n        )\n        select count(id) as \"count!\"\n        from unnest(array(\n        select\n        (array_agg(id))[1] as id\n        from (select id, updated_at, created_at from cte union all select id, updated_at, created_at from cte1)\n        resource\n        group by resource.updated_at, resource.created_at)) with ordinality t(id, ord)\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count!",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "43fe8702f219dcd783e0f253f7dfe3c1786829a7dc2d043a8e79eb3deaf061e9": {
     "query": "\nupdate user_font\nset index = index - 1\nwhere index > $2 and user_id = $1\n        ",
     "describe": {
@@ -2330,26 +2291,6 @@
       "parameters": {
         "Left": [
           "Uuid"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
-  "4a3ecf713ea60d35b621a7be6d20601f78927448d21a1456162b96708807cbab": {
-    "query": "\n        with cte as (\n            select (array_agg(up.user_id))[1]\n            from user_profile \"up\"\n            inner join \"user\" on up.user_id = \"user\".id \n            left join circle_member \"cm\" on cm.user_id = up.user_id\n            where cm.id = any($1) or $1 = array[]::uuid[]\n            group by \"user\".created_at\n            order by \"user\".created_at desc\n        )\n            select count(*) as \"count!\" from unnest((select array_agg(cte.array_agg) from cte)) with ordinality t(id\n           , ord)        \n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "count!",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "UuidArray"
         ]
       },
       "nullable": [
@@ -2527,6 +2468,26 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "5486fe6499a2253171fa11aaa873fe04f3136bd0f50e203ec4961bd1cff1d76e": {
+    "query": "\n        with cte as (\n            select (array_agg(up.user_id))[1]\n            from user_profile \"up\"\n            inner join \"user\" on up.user_id = \"user\".id \n            left join circle_member \"cm\" on cm.user_id = up.user_id\n            where cm.id = any($1) or $1 = array[]::uuid[]\n            group by \"user\".created_at\n        )\n            select count(*) as \"count!\" from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n           , ord)        \n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count!",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      },
+      "nullable": [
+        null
+      ]
     }
   },
   "553077643f8e2943593651973afe7e2e6710791e2b5d00fba06fd31e09fea9f5": {
@@ -2951,8 +2912,8 @@
       ]
     }
   },
-  "5f18382764098f6d71b51ba2f87e9832a74792090f31a86842f4f70d9d5e8d47": {
-    "query": "\n        with following as (\n            select (array_agg(user_id))[1]\n            from user_follow\n            where follower_id = $1\n            group by followed_at\n            order by followed_at desc\n        ),\n        cte as (\n            select * from unnest((select array_agg(following.array_agg) from following)) with ordinality t(id, ord) order by ord\n        )\n        select  \"user\".id                     as \"id!: UserId\",\n                username               as \"username!\",\n                given_name             as \"given_name!\",\n                family_name            as \"family_name!\",\n                profile_image_id       as \"profile_image?: ImageId\",\n                (select language from user_profile where user_profile.user_id = \"user\".id and language_public is true)      as \"language?\",\n                (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n                (select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\",\n                (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n                (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n                array(select circle.id\n                    from circle_member bm\n                    left join circle on bm.id = circle.id\n                    where bm.user_id = \"user\".id or circle.creator_id = \"user\".id\n                ) as \"circles!: Vec<CircleId>\"\n            from cte\n            inner join user_profile on cte.id = user_profile.user_id\n            inner join \"user\" on (cte.id = \"user\".id)\n            where ord > (1 * $2 * $3)\n            limit $3;\n            ",
+  "5f239e51f117d2b090ca45f30eb96503e9eb59f7e0709b75e1cc6e26d7356e15": {
+    "query": "\n        with follower as (\n            select (array_agg(follower_id))[1]\n            from user_follow\n            where user_id = $1\n            group by followed_at\n            order by followed_at desc\n        ),\n        cte as (\n            select * from unnest(array(select follower.array_agg from follower)) with ordinality t(id, ord) order by ord\n        )\n        select  \"user\".id         as \"id!: UserId\",\n                username               as \"username!\",\n                given_name             as \"given_name!\",\n                family_name            as \"family_name!\",\n                profile_image_id       as \"profile_image?: ImageId\",\n                (select language from user_profile where user_profile.user_id = \"user\".id and language_public is true)      as \"language?\",\n                (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n                (select array(select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true))      as \"persona?: Vec<String>\",\n                (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n                (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n                (select array(select circle.id\n                    from circle_member bm\n                    left join circle on bm.id = circle.id\n                    where bm.user_id = \"user\".id or circle.creator_id = \"user\".id\n                )) as \"circles!: Vec<CircleId>\"\n        from cte\n        inner join user_profile on cte.id = user_profile.user_id\n        inner join \"user\" on (cte.id = \"user\".id)\n        where ord > (1 * $2 * $3)\n        limit $3;\n\n            ",
     "describe": {
       "columns": [
         {
@@ -3463,6 +3424,29 @@
       ]
     }
   },
+  "6c7f17877da203d1ee82282925d613ceae5f2545131a7b38a84af6eee00d3064": {
+    "query": "\n        with cte as (\n            select (array_agg(course.id))[1]\n            from course_data \"cd\"\n                  inner join course on (draft_id = cd.id or (live_id = cd.id and cd.last_synced_at is not null and published_at is not null))\n                  left join course_data_resource \"resource\" on cd.id = resource.course_data_id\n            where (author_id = $1 or $1 is null)\n                and (cd.draft_or_live = $2 or $2 is null)\n                and (cd.privacy_level = any($3) or $3 = array[]::smallint[])\n                and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n            group by coalesce(updated_at, created_at)\n        )\n        select count(*) as \"count!\" from unnest(array(select cte.array_agg from cte)) with ordinality t(id, ord) \n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count!",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int2Array",
+          "UuidArray"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "6cd2ae3f3a7df867e81bc9018b79dd4e1d64f4729ba071f42a70651492b89a8c": {
     "query": "\nselect size as \"size: ImageSize\"\nfrom user_image_library\ninner join user_image_upload on user_image_library.id = user_image_upload.image_id\nwhere (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)\nfor no key update of user_image_upload\nfor share of user_image_library\nskip locked\n        ",
     "describe": {
@@ -3966,31 +3950,6 @@
       ]
     }
   },
-  "75e02a67b94a983658f9fd56de48e3eb99738391c236ba6cbba1e1d6b42ad4fb": {
-    "query": "\nselect count(distinct jig_data.id) as \"count!: i64\"\nfrom jig_data\nleft join jig on (draft_id = jig_data.id or (live_id = jig_data.id and last_synced_at is not null))\nleft join jig_admin_data \"admin\" on admin.jig_id = jig.id\nleft join jig_data_additional_resource \"resource\" on jig_data.id = resource.jig_data_id\nwhere (author_id = $1 or $1 is null)\n    and (jig_data.draft_or_live = $3 or $3 is null)\n    and (jig_focus = $2 or $2 is null)\n    and (jig_data.privacy_level = any($4) or $4 = array[]::smallint[])\n    and (blocked = $5 or $5 is null)\n    and (resource.resource_type_id = any($6) or $6 = array[]::uuid[])\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "count!: i64",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Int2",
-          "Int2Array",
-          "Bool",
-          "UuidArray"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
   "760185608bd03a9a30aba9100ecc18e170aed0b1008c5f51ad0c7c6f564b090e": {
     "query": "select user_id from user_auth_google where google_id = $1",
     "describe": {
@@ -4077,6 +4036,88 @@
       "nullable": []
     }
   },
+  "79e1fc7aa89153c11f3b022a523bf21cad9d8df55ea381f3502f1fe9d17e8b19": {
+    "query": "\n        with following as (\n            select (array_agg(user_id))[1]\n            from user_follow\n            where follower_id = $1\n            group by followed_at\n            order by followed_at desc\n        ),\n        cte as (\n            select * from unnest(array(select following.array_agg from following)) with ordinality t(id, ord) order by ord\n        )\n        select  \"user\".id                     as \"id!: UserId\",\n                username               as \"username!\",\n                given_name             as \"given_name!\",\n                family_name            as \"family_name!\",\n                profile_image_id       as \"profile_image?: ImageId\",\n                (select language from user_profile where user_profile.user_id = \"user\".id and language_public is true)      as \"language?\",\n                (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n                (select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\",\n                (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n                (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n                array(select circle.id\n                    from circle_member bm\n                    left join circle on bm.id = circle.id\n                    where bm.user_id = \"user\".id or circle.creator_id = \"user\".id\n                ) as \"circles!: Vec<CircleId>\"\n            from cte\n            inner join user_profile on cte.id = user_profile.user_id\n            inner join \"user\" on (cte.id = \"user\".id)\n            where ord > (1 * $2 * $3)\n            limit $3;\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!: UserId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "username!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "given_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "family_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "profile_image?: ImageId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 5,
+          "name": "language?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "organization?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "persona?: Vec<String>",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 8,
+          "name": "location?",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 9,
+          "name": "bio?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 10,
+          "name": "circles!: Vec<CircleId>",
+          "type_info": "UuidArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int4",
+          "Int4"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  },
   "7a3746ec8866c890e58cd4e3cd5a876235b1b9b116d9f5fbb7aab1187000c86f": {
     "query": "insert into web_media_upload (media_id, uploaded_at) values ($1, now())",
     "describe": {
@@ -4087,6 +4128,31 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "7a4f9a0fc2356d8b14120cc1f16f1fe173879135a2c1d99a73683ba0ada51395": {
+    "query": "\n        with cte as (\n            select array_agg(jd.id)\n            from jig_data \"jd\"\n                  inner join jig on (draft_id = jd.id or (live_id = jd.id and jd.last_synced_at is not null and published_at is not null))\n                  left join jig_admin_data \"admin\" on admin.jig_id = jig.id\n                  left join jig_data_additional_resource \"resource\" on jd.id = resource.jig_data_id\n            where (jd.draft_or_live = $1 or $1 is null)\n                and (author_id = $2 or $2 is null)\n                and (jig_focus = $3 or $3 is null)\n                and (blocked = $4 or $4 is null)\n                and (jd.privacy_level = any($5) or $5 = array[]::smallint[])\n                and (resource.resource_type_id = any($6) or $6 = array[]::uuid[])\n            group by updated_at, created_at, jig.published_at, admin.jig_id, jig_id\n        )\n            select count(*) as \"count!\" from unnest(array((select cte.array_agg[1] from cte))) with ordinality t(id\n           , ord)\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count!",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int2",
+          "Uuid",
+          "Int2",
+          "Bool",
+          "Int2Array",
+          "UuidArray"
+        ]
+      },
+      "nullable": [
+        null
+      ]
     }
   },
   "7bd8eff40b8bb4649064764c88f6087f405f0727abb476003a960c379a8e3bc7": {
@@ -4613,6 +4679,88 @@
       "nullable": []
     }
   },
+  "8415b25f9064e7c098197a5e921d1581729084a299bf4cce561a568ec39edd55": {
+    "query": "\n        with cte as (\n            select (array_agg(up.user_id))[1]\n            from user_profile \"up\"\n            inner join \"user\" on up.user_id = \"user\".id \n            left join circle_member \"cm\" on cm.user_id = up.user_id\n            where cm.id = any($1) or $1 = array[]::uuid[]\n            group by \"user\".created_at\n            order by \"user\".created_at desc\n        ),\n        cte1 as (\n            select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n           , ord) order by ord\n        )\n        select  user_id                as \"id!: UserId\",\n                username               as \"username!\",\n                given_name             as \"given_name!\",\n                family_name            as \"family_name!\",\n                profile_image_id       as \"profile_image?: ImageId\",\n                (select language from user_profile where user_profile.user_id = \"user\".id and language_public is true)      as \"language?\",\n                (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n                (select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\",\n                (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n                (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n                (select array(select circle.id\n                    from circle_member bm\n                    inner join circle on bm.id = circle.id\n                    where bm.user_id = \"user\".id\n                )) as \"circles!: Vec<CircleId>\"\n        from cte1\n        inner join user_profile on cte1.id = user_profile.user_id\n        inner join \"user\" on cte1.id = \"user\".id\n        where ord > (1 * $2 * $3)\n        order by ord\n        limit $3\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!: UserId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "username!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "given_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "family_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "profile_image?: ImageId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 5,
+          "name": "language?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "organization?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "persona?: Vec<String>",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 8,
+          "name": "location?",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 9,
+          "name": "bio?",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 10,
+          "name": "circles!: Vec<CircleId>",
+          "type_info": "UuidArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray",
+          "Int4",
+          "Int4"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  },
   "84519449aef6978269fca20ecf493b800916711dc260fff2b2fdc537842fc947": {
     "query": "with recursive path(id, index, parent_id) as (\n    select id, ord, null::uuid\n    from category\n             inner join unnest(\n            $1::uuid[]) with ordinality t(id, ord)\n                        using (id)\n    union all\n    select c.id, c.index, p.id\n    from path p\n             inner join category c on (c.parent_id = p.id)\n)\nselect distinct id as \"id!\",\n       path.index::int2 as \"index!\",\n       path.parent_id,\n       name,\n       created_at,\n       updated_at,\n       user_scopes\n\nfrom path\n         inner join category using (id);\n",
     "describe": {
@@ -5112,29 +5260,6 @@
       "nullable": [
         false,
         false
-      ]
-    }
-  },
-  "8d9da8ad852c46dd681bc088429b06a6b67b1bb92d1283c6569a3fd9e8cdf5e6": {
-    "query": "\nselect count(distinct course_data.id) as \"count!: i64\"\nfrom course_data\nleft join course on (draft_id = course_data.id or (live_id = course_data.id and last_synced_at is not null and published_at is not null))\nleft join course_data_resource \"resource\" on course_data.id = resource.course_data_id\nwhere (author_id = $1 or $1 is null)\n    and (course_data.draft_or_live = $2 or $2 is null)\n    and (course_data.privacy_level = any($3) or $3 = array[]::smallint[])\n    and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "count!: i64",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Int2Array",
-          "UuidArray"
-        ]
-      },
-      "nullable": [
-        null
       ]
     }
   },
@@ -5652,157 +5777,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "a0adf878a0f0da1606d8af268b78b7ca04fe2f7bc5cd3ece0e1f2442910b3aff": {
-    "query": "\nwith cte as (\n    select (array_agg(cd.id))[1]\n    from course_data \"cd\"\n          left join course on (draft_id = cd.id or (live_id = cd.id and cd.last_synced_at is not null and published_at is not null))\n          left join course_data_resource \"resource\" on cd.id = resource.course_data_id\n    where (author_id = $1 or $1 is null)\n        and (cd.draft_or_live = $2 or $2 is null)\n        and (cd.privacy_level = any($3) or $3 = array[]::smallint[])\n        and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n    group by coalesce(updated_at, created_at)\n    order by coalesce(updated_at, created_at) desc),\ncte1 as (\n    select * from unnest((select array_agg(cte.array_agg) from cte)) with ordinality t(id\n   , ord) order by ord\n)\nselect course.id                                                                as \"course_id: CourseId\",\n    privacy_level                                                               as \"privacy_level: PrivacyLevel\",\n    creator_id                                                                  as \"creator_id?: UserId\",\n    author_id                                                                   as \"author_id?: UserId\",\n    (select given_name || ' '::text || family_name\n     from user_profile\n     where user_profile.user_id = author_id)                                     as \"author_name\",\n    published_at,\n    likes,\n    plays,\n    display_name                                                                  as \"display_name!\",\n    updated_at,\n    language                                                                      as \"language!\",\n    description                                                                   as \"description!\",\n    translated_description                                                        as \"translated_description!: Json<HashMap<String,String>>\",\n    draft_or_live                                                                 as \"draft_or_live!: DraftOrLive\",\n    other_keywords                                                                as \"other_keywords!\",\n    translated_keywords                                                           as \"translated_keywords!\",\n    (\n        select row(course_data_module.id, kind, is_complete) \n        from course_data_module                \n        where course_data_id = course_data.id and \"index\" = 0 \n        order by \"index\"\n    )                                                   as \"cover?: (ModuleId, ModuleKind, bool)\",\n    array(select row (category_id)\n            from course_data_category\n            where course_data_id = course_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n    array(select row (affiliation_id)\n            from course_data_affiliation\n            where course_data_id = course_data.id)          as \"affiliations!: Vec<(AffiliationId,)>\",\n    array(select row (age_range_id)\n            from course_data_age_range\n            where course_data_id = course_data.id)          as \"age_ranges!: Vec<(AgeRangeId,)>\",\n    array(select row (id, display_name, resource_type_id, resource_content)\n                from course_data_resource \n                where course_data_id = course_data.id\n          )                                          as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n    array(\n        select row(jig_id)\n        from course_data_jig\n        where course_data_jig.course_data_id = course_data.id\n        order by \"index\"\n    )                                                     as \"items!: Vec<(JigId,)>\"\nfrom cte1\nleft join course_data on cte1.id = course_data.id\ninner join course on (\n    course_data.id = course.draft_id \n    or (        \n        course_data.id = course.live_id\n        and last_synced_at is not null\n        and course.published_at is not null\n    )\n)\nwhere ord > (1 * $5 * $6)\norder by ord asc\nlimit $6\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "course_id: CourseId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "privacy_level: PrivacyLevel",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 2,
-          "name": "creator_id?: UserId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 3,
-          "name": "author_id?: UserId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 4,
-          "name": "author_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 5,
-          "name": "published_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 6,
-          "name": "likes",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 7,
-          "name": "plays",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 8,
-          "name": "display_name!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 9,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 10,
-          "name": "language!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 11,
-          "name": "description!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 12,
-          "name": "translated_description!: Json<HashMap<String,String>>",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 13,
-          "name": "draft_or_live!: DraftOrLive",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 14,
-          "name": "other_keywords!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 15,
-          "name": "translated_keywords!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 16,
-          "name": "cover?: (ModuleId, ModuleKind, bool)",
-          "type_info": "Record"
-        },
-        {
-          "ordinal": 17,
-          "name": "categories!: Vec<(CategoryId,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 18,
-          "name": "affiliations!: Vec<(AffiliationId,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 19,
-          "name": "age_ranges!: Vec<(AgeRangeId,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 20,
-          "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 21,
-          "name": "items!: Vec<(JigId,)>",
-          "type_info": "RecordArray"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Int2Array",
-          "UuidArray",
-          "Int4",
-          "Int4"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        true,
-        true,
-        null,
-        true,
-        false,
-        false,
-        false,
-        true,
-        false,
-        false,
-        false,
-        true,
-        false,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-      ]
     }
   },
   "a0f81385b9713d0c508a0a5e6658939c1edf5149c2440bd55c07e788dfc2ed2a": {
@@ -7257,88 +7231,6 @@
       ]
     }
   },
-  "bc0ede57f3fff8e37e332a61a20fb15a2e6a0f16ff0bd1cda855ce4c8b857c6d": {
-    "query": "\n        with follower as (\n            select (array_agg(follower_id))[1]\n            from user_follow\n            where user_id = $1\n            group by followed_at\n            order by followed_at desc\n        ),\n        cte as (\n            select * from unnest((select array_agg(follower.array_agg) from follower)) with ordinality t(id, ord) order by ord\n        )\n        select  \"user\".id         as \"id!: UserId\",\n                username               as \"username!\",\n                given_name             as \"given_name!\",\n                family_name            as \"family_name!\",\n                profile_image_id       as \"profile_image?: ImageId\",\n                (select language from user_profile where user_profile.user_id = \"user\".id and language_public is true)      as \"language?\",\n                (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n                (select array(select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true))      as \"persona?: Vec<String>\",\n                (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n                (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n                (select array(select circle.id\n                    from circle_member bm\n                    left join circle on bm.id = circle.id\n                    where bm.user_id = \"user\".id or circle.creator_id = \"user\".id\n                )) as \"circles!: Vec<CircleId>\"\n        from cte\n        inner join user_profile on cte.id = user_profile.user_id\n        inner join \"user\" on (cte.id = \"user\".id)\n        where ord > (1 * $2 * $3)\n        limit $3;\n\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id!: UserId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "username!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "given_name!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "family_name!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "profile_image?: ImageId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 5,
-          "name": "language?",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 6,
-          "name": "organization?",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 7,
-          "name": "persona?: Vec<String>",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 8,
-          "name": "location?",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 9,
-          "name": "bio?",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 10,
-          "name": "circles!: Vec<CircleId>",
-          "type_info": "UuidArray"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int4",
-          "Int4"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        true,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-      ]
-    }
-  },
   "bc21f8f797f16dc69c0c07c7f6c75b37743ba4390cec28d58997ba840f5abf5e": {
     "query": "\n        with cte as (\n            select (array_agg(circle.id))[1]\n            from circle\n            left join circle_member \"cm\" on cm.id = circle.id\n            where (creator_id = $1 or $1 is null)\n            and (cm.user_id = any($2) or $2 = array[]::uuid[])\n            group by created_at\n            order by created_at desc\n        ),\n        cte1 as (\n            select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n           , ord) order by ord\n        )\n        select  circle.id            as \"circle_id!: CircleId\",\n                display_name        as \"display_name!\",\n                description         as \"description!\",\n                image               as \"image?: ImageId\",\n                member_count        as \"member_count!\",\n                creator_id          as \"creator_id!: UserId\",\n                created_at,\n                updated_at   \n        from cte1\n            left join circle on cte1.id = circle.id\n            where ord > (1 * $3 * $4)\n            order by ord \n            limit $4\n            ",
     "describe": {
@@ -7702,29 +7594,6 @@
         null,
         null,
         null,
-        null
-      ]
-    }
-  },
-  "c67c2bac7353d837bdc2c140d929c0bab082bd0f27f7cd0a2bb55d17dc017a7b": {
-    "query": "\nselect count(distinct course.id) as \"count!: i64\"\nfrom course\nleft join course_data on (draft_id = course_data.id or (live_id = course_data.id and last_synced_at is not null and published_at is not null))\nleft join course_data_resource \"resource\" on course_data.id = resource.course_data_id\nwhere (author_id = $1 or $1 is null)\n    and (course_data.draft_or_live = $2 or $2 is null)\n    and (course_data.privacy_level = any($3) or $3 = array[]::smallint[])\n    and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "count!: i64",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Int2Array",
-          "UuidArray"
-        ]
-      },
-      "nullable": [
         null
       ]
     }
@@ -8741,22 +8610,153 @@
       ]
     }
   },
-  "f12fedbf6dc6311b9b3627643fcf30f391fa5f55dd97683ebe04d8b9cb4209d6": {
-    "query": "\n        with cte as (\n            select distinct jdar.id             as \"id\",\n                   updated_at,\n                   created_at\n            from jig_data_additional_resource \"jdar\"\n            inner join jig on jig.live_id = jdar.jig_data_id\n            inner join jig_data on jig.live_id = jig_data.id\n            where author_id = $1\n           ),\n           cte1 as (\n              select  distinct cdr.id          as \"id\",\n                      updated_at,\n                      created_at\n          from course_data_resource \"cdr\"\n          inner join course on course.live_id = cdr.course_data_id\n          inner join course_data on course.live_id = course_data.id\n          where author_id = $1\n          )\n          select count(id)                     as \"count!: i64\"\n         from\n          (select * from cte\n          union all\n          select * from cte1) resources",
+  "efdee8a126edf3f601328ad615c74a033dd50e740894cf3a7ead4c90a408b024": {
+    "query": "\nwith cte as (\n    select (array_agg(cd.id))[1]\n    from course_data \"cd\"\n          left join course on (draft_id = cd.id or (live_id = cd.id and cd.last_synced_at is not null and published_at is not null))\n          left join course_data_resource \"resource\" on cd.id = resource.course_data_id\n    where (author_id = $1 or $1 is null)\n        and (cd.draft_or_live = $2 or $2 is null)\n        and (cd.privacy_level = any($3) or $3 = array[]::smallint[])\n        and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n    group by coalesce(updated_at, created_at)\n    order by coalesce(updated_at, created_at) desc\n),\ncte1 as (\n    select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n   , ord) order by ord\n)\nselect course.id                                                                as \"course_id: CourseId\",\n    privacy_level                                                               as \"privacy_level: PrivacyLevel\",\n    creator_id                                                                  as \"creator_id?: UserId\",\n    author_id                                                                   as \"author_id?: UserId\",\n    (select given_name || ' '::text || family_name\n     from user_profile\n     where user_profile.user_id = author_id)                                     as \"author_name\",\n    published_at,\n    likes,\n    plays,\n    display_name                                                                  as \"display_name!\",\n    updated_at,\n    language                                                                      as \"language!\",\n    description                                                                   as \"description!\",\n    translated_description                                                        as \"translated_description!: Json<HashMap<String,String>>\",\n    draft_or_live                                                                 as \"draft_or_live!: DraftOrLive\",\n    other_keywords                                                                as \"other_keywords!\",\n    translated_keywords                                                           as \"translated_keywords!\",\n    (\n        select row(course_data_module.id, kind, is_complete) \n        from course_data_module                \n        where course_data_id = course_data.id and \"index\" = 0 \n        order by \"index\"\n    )                                                   as \"cover?: (ModuleId, ModuleKind, bool)\",\n    array(select row (category_id)\n            from course_data_category\n            where course_data_id = course_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n    array(select row (affiliation_id)\n            from course_data_affiliation\n            where course_data_id = course_data.id)          as \"affiliations!: Vec<(AffiliationId,)>\",\n    array(select row (age_range_id)\n            from course_data_age_range\n            where course_data_id = course_data.id)          as \"age_ranges!: Vec<(AgeRangeId,)>\",\n    array(select row (id, display_name, resource_type_id, resource_content)\n                from course_data_resource \n                where course_data_id = course_data.id\n          )                                          as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n    array(\n        select row(jig_id)\n        from course_data_jig\n        where course_data_jig.course_data_id = course_data.id\n        order by \"index\"\n    )                                                     as \"items!: Vec<(JigId,)>\"\nfrom cte1\ninner join course_data on cte1.id = course_data.id\ninner join course on (\n    course_data.id = course.draft_id \n    or (        \n        course_data.id = course.live_id\n        and last_synced_at is not null\n        and course.published_at is not null\n    )\n)\nwhere ord > (1 * $5 * $6)\norder by ord asc\nlimit $6\n",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
-          "name": "count!: i64",
+          "name": "course_id: CourseId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "privacy_level: PrivacyLevel",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 2,
+          "name": "creator_id?: UserId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 3,
+          "name": "author_id?: UserId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 4,
+          "name": "author_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "published_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 6,
+          "name": "likes",
           "type_info": "Int8"
+        },
+        {
+          "ordinal": 7,
+          "name": "plays",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 8,
+          "name": "display_name!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 9,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 10,
+          "name": "language!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 11,
+          "name": "description!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 12,
+          "name": "translated_description!: Json<HashMap<String,String>>",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 13,
+          "name": "draft_or_live!: DraftOrLive",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 14,
+          "name": "other_keywords!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 15,
+          "name": "translated_keywords!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 16,
+          "name": "cover?: (ModuleId, ModuleKind, bool)",
+          "type_info": "Record"
+        },
+        {
+          "ordinal": 17,
+          "name": "categories!: Vec<(CategoryId,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 18,
+          "name": "affiliations!: Vec<(AffiliationId,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 19,
+          "name": "age_ranges!: Vec<(AgeRangeId,)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 20,
+          "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 21,
+          "name": "items!: Vec<(JigId,)>",
+          "type_info": "RecordArray"
         }
       ],
       "parameters": {
         "Left": [
-          "Uuid"
+          "Uuid",
+          "Int2",
+          "Int2Array",
+          "UuidArray",
+          "Int4",
+          "Int4"
         ]
       },
       "nullable": [
+        false,
+        false,
+        true,
+        true,
+        null,
+        true,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null,
         null
       ]
     }

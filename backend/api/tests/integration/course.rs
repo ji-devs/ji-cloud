@@ -7,6 +7,70 @@ use crate::{
 };
 
 #[actix_rt::test]
+async fn get() -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[
+            Fixture::MetaKinds,
+            Fixture::User,
+            Fixture::Jig,
+            Fixture::Course,
+        ],
+        &[],
+    )
+    .await;
+
+    let port = app.port();
+
+    let client = reqwest::Client::new();
+
+    let course_id = "3a6a3660-f3ec-11ec-b8ef-071747fa2a0d".to_string();
+
+    let resp = client
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/course/{}/draft",
+            port, course_id
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.lastEdited" => "[last_edited]",
+        }
+    );
+
+    let resp = client
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/course/{}/live",
+            port, course_id
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.lastEdited" => "[last_edited]",
+        }
+    );
+
+    app.stop(false).await;
+
+    Ok(())
+}
+
+#[actix_rt::test]
 async fn update_and_publish_browse() -> anyhow::Result<()> {
     let app = initialize_server(
         &[
@@ -133,7 +197,46 @@ async fn update_and_publish_browse() -> anyhow::Result<()> {
 }
 
 #[actix_rt::test]
-async fn jig_index() -> anyhow::Result<()> {
+async fn browse_simple() -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[
+            Fixture::MetaKinds,
+            Fixture::User,
+            Fixture::Jig,
+            Fixture::Course,
+        ],
+        &[],
+    )
+    .await;
+
+    let port = app.port();
+
+    let client = reqwest::Client::new();
+
+    let resp = client
+        .get(&format!("http://0.0.0.0:{}/v1/course/browse", port))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    let body: serde_json::Value = resp.json().await?;
+
+    app.stop(false).await;
+
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.lastEdited" => "[last_edited]",
+        }
+    );
+
+    Ok(())
+}
+
+#[actix_rt::test]
+async fn course_jig_index() -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::MetaKinds,

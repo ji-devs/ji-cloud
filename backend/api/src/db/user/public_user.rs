@@ -77,7 +77,7 @@ pub async fn browse_users(
             order by "user".created_at desc
         ),
         cte1 as (
-            select * from unnest((select array_agg(cte.array_agg) from cte)) with ordinality t(id
+            select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id
            , ord) order by ord
         )
         select  user_id                as "id!: UserId",
@@ -140,7 +140,7 @@ pub async fn browse_user_resources(
     let resources = sqlx::query!(
         r#"
         with cte as (
-            select distinct jdar.id              as id,
+            select jdar.id              as id,
                    jdar.display_name,
                    resource_type_id,
                    resource_content,
@@ -150,10 +150,10 @@ pub async fn browse_user_resources(
             from jig_data_additional_resource "jdar"
             inner join jig on jig.live_id = jdar.jig_data_id
             inner join jig_data on jig.live_id = jig_data.id
-            where author_id = $1
+            where author_id = $1 and jig.published_at is not null
            ),
            cte1 as (
-              select distinct cdr.id              as id,
+              select cdr.id              as id,
                 cdr.display_name,
                 resource_type_id,
                 resource_content,
@@ -163,11 +163,18 @@ pub async fn browse_user_resources(
           from course_data_resource "cdr"
           inner join course on course.live_id = cdr.course_data_id
           inner join course_data on course.live_id = course_data.id
-          where author_id = $1
+          where author_id = $1 and course.published_at is not null
           ),
           cte2 as (
-            select * from unnest(array(select id from (select id from cte union all select id from cte1) resource)) with ordinality t(id
-           , ord) order by ord
+            select *
+            from unnest(array(
+                select
+                (array_agg(id))[1] as id
+                from (select id, updated_at, created_at from cte union all select id, updated_at, created_at from cte1)
+                resource
+                group by resource.updated_at, resource.created_at
+                order by coalesce(resource.updated_at, created_at))) with ordinality t(id
+                , ord) order by ord
          )
           select cte3.id                as "id!: AddId",
                  display_name           as "display_name!",
@@ -424,7 +431,7 @@ pub async fn browse_followers(
             order by followed_at desc
         ),
         cte as (
-            select * from unnest((select array_agg(follower.array_agg) from follower)) with ordinality t(id, ord) order by ord
+            select * from unnest(array(select follower.array_agg from follower)) with ordinality t(id, ord) order by ord
         )
         select  "user".id         as "id!: UserId",
                 username               as "username!",
@@ -495,7 +502,7 @@ pub async fn browse_following(
             order by followed_at desc
         ),
         cte as (
-            select * from unnest((select array_agg(following.array_agg) from following)) with ordinality t(id, ord) order by ord
+            select * from unnest(array(select following.array_agg from following)) with ordinality t(id, ord) order by ord
         )
         select  "user".id                     as "id!: UserId",
                 username               as "username!",
@@ -559,9 +566,8 @@ pub async fn total_user_count(db: &PgPool, circles: Vec<CircleId>) -> anyhow::Re
             left join circle_member "cm" on cm.user_id = up.user_id
             where cm.id = any($1) or $1 = array[]::uuid[]
             group by "user".created_at
-            order by "user".created_at desc
         )
-            select count(*) as "count!" from unnest((select array_agg(cte.array_agg) from cte)) with ordinality t(id
+            select count(*) as "count!" from unnest(array(select cte.array_agg from cte)) with ordinality t(id
            , ord)        
         "#,
         &circle_ids[..]
@@ -576,28 +582,39 @@ pub async fn total_resource_count(db: &PgPool, user_id: UserId) -> sqlx::Result<
     let total_resource = sqlx::query!(
         r#"
         with cte as (
-            select distinct jdar.id             as "id",
+            select jdar.id              as id,
+                   jdar.display_name,
+                   resource_type_id,
+                   resource_content,
+                   author_id,
                    updated_at,
                    created_at
             from jig_data_additional_resource "jdar"
             inner join jig on jig.live_id = jdar.jig_data_id
             inner join jig_data on jig.live_id = jig_data.id
-            where author_id = $1
-           ),
-           cte1 as (
-              select  distinct cdr.id          as "id",
-                      updated_at,
-                      created_at
+            where author_id = $1 and jig.published_at is not null
+        ),
+        cte1 as (
+              select cdr.id              as id,
+                cdr.display_name,
+                resource_type_id,
+                resource_content,
+                author_id,
+                updated_at,
+                created_at
           from course_data_resource "cdr"
           inner join course on course.live_id = cdr.course_data_id
           inner join course_data on course.live_id = course_data.id
-          where author_id = $1
-          )
-          select count(id)                     as "count!: i64"
-         from
-          (select * from cte
-          union all
-          select * from cte1) resources"#,
+          where author_id = $1 and course.published_at is not null
+        )
+        select count(id) as "count!"
+        from unnest(array(
+        select
+        (array_agg(id))[1] as id
+        from (select id, updated_at, created_at from cte union all select id, updated_at, created_at from cte1)
+        resource
+        group by resource.updated_at, resource.created_at)) with ordinality t(id, ord)
+            "#,
         user_id.0
     )
     .fetch_one(db)
