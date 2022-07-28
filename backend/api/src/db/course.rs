@@ -800,7 +800,7 @@ select draft_id, live_id from course where id = $1
     .map(|it| (it.draft_id, it.live_id))
 }
 
-/// Clones a copy of the jig data and modules, preserving the module's stable IDs
+/// Clones a copy of the course data and modules, preserving the module's stable IDs
 pub async fn clone_data(
     txn: &mut PgConnection,
     from_data_id: &Uuid,
@@ -833,6 +833,20 @@ returning id
     .id;
 
     update_draft_or_live(txn, new_id, draft_or_live).await?;
+
+    sqlx::query!(
+        //language=SQL
+        r#"
+ insert into course_data_module ("index", course_data_id, kind, is_complete, contents)
+ select "index", $2 as "course_id", kind, is_complete, contents
+ from course_data_module
+ where course_data_id = $1
+            "#,
+        from_data_id,
+        new_id,
+    )
+    .execute(&mut *txn)
+    .await?;
 
     sqlx::query!(
         //language=SQL

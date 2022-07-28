@@ -358,3 +358,95 @@ async fn course_jig_index() -> anyhow::Result<()> {
 
     Ok(())
 }
+
+#[actix_rt::test]
+async fn publish_modules() -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[
+            Fixture::MetaKinds,
+            Fixture::User,
+            Fixture::Jig,
+            Fixture::Course,
+        ],
+        &[],
+    )
+    .await;
+
+    let port = app.port();
+
+    let client = reqwest::Client::new();
+
+    let course_id = "3a6a3660-f3ec-11ec-b8ef-071747fa2a0d".to_string();
+
+    let resp = client
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/course/{}/draft",
+            port, course_id
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.lastEdited" => "[last_edited]",
+        }
+    );
+
+    let resp = client
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/course/{}/live",
+            port, course_id
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.lastEdited" => "[last_edited]",
+        }
+    );
+
+    let _resp = client
+        .put(&format!(
+            "http://0.0.0.0:{}/v1/course/{}/draft/publish",
+            port, course_id
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    let resp = client
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/course/{}/live",
+            port, course_id
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.id" => "[id]",
+            ".**.lastEdited" => "[last_edited]",
+            ".**.publishedAt" => "[published_at]"
+        }
+    );
+
+    app.stop(false).await;
+
+    Ok(())
+}

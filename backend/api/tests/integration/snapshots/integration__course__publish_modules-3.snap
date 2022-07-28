@@ -4,25 +4,25 @@ expression: body
 
 ---
 {
-  "id": "3a6a3660-f3ec-11ec-b8ef-071747fa2a0d",
-  "publishedAt": "2022-06-24T18:35:33.636556Z",
+  "id": "[id]",
+  "publishedAt": "[published_at]",
   "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
   "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
   "authorName": "Bobby Tables",
   "likes": 0,
   "plays": 0,
   "courseData": {
-    "draftOrLive": "draft",
+    "draftOrLive": "live",
     "displayName": "course name1",
-    "language": "en-us",
-    "description": "asdasdasd",
+    "language": "en",
+    "description": "draft test description",
     "lastEdited": "[last_edited]",
     "privacyLevel": "public",
     "otherKeywords": "",
     "translatedKeywords": "",
     "translatedDescription": {},
     "cover": {
-      "id": "ce6e6eb0-0ea6-11ed-9785-2712225b9473",
+      "id": "[id]",
       "kind": "Cover",
       "is_complete": true
     },
