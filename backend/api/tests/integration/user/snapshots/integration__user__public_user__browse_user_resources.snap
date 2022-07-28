@@ -10,14 +10,8 @@ expression: body
       "displayName": "link test",
       "resourceTypeId": "a91aca34-519e-11ec-ab46-175eaaf1ff23",
       "link": "url://url.url.url/urlese"
-    },
-    {
-      "id": "286b82fa-1dd9-11ec-8426-2b6953011bae",
-      "displayName": "link test",
-      "resourceTypeId": "a91aca34-519e-11ec-ab46-175eaaf1ff23",
-      "link": "url://url.url.url/url"
     }
   ],
   "pages": 1,
-  "totalResourceCount": 2
+  "totalResourceCount": 1
 }
