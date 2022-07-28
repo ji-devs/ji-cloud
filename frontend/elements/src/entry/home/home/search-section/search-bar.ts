@@ -62,7 +62,7 @@ export class _ extends LitElement {
                         border-radius: 12px;
                         padding: 10px;
                         row-gap: 22px;
-                        grid-template-columns: auto auto;
+                        grid-template-columns: 50% 50%;
                         grid-template-rows: repeat(3, auto);
                         height: unset;
                     }
