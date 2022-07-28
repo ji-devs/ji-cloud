@@ -179,7 +179,7 @@ pub struct JigPlayerOptions {
     #[serde(default)]
     pub is_student: bool,
 
-    #[serde(default = "DraftOrLive::live")]
+    #[serde(default)]
     pub draft_or_live: DraftOrLive,
 }
 
