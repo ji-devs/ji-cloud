@@ -21,7 +21,11 @@ expression: body
     "otherKeywords": "",
     "translatedKeywords": "",
     "translatedDescription": {},
-    "cover": null,
+    "cover": {
+      "id": "ce6e6eb0-0ea6-11ed-9785-2712225b9473",
+      "kind": "Cover",
+      "is_complete": true
+    },
     "ageRanges": [],
     "affiliations": [],
     "categories": [],

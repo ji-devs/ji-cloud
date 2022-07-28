@@ -1,5 +1,6 @@
-insert into course_data (id, display_name, created_at, updated_at, language, last_synced_at, description,  privacy_level, 
-                      draft_or_live, translated_description)
+insert into 
+        course_data (id, display_name, created_at, 
+                updated_at, language, last_synced_at, description,  privacy_level, draft_or_live, translated_description)
 values ('566ed564-f3ec-11ec-b8ef-93b44835e7e4', 'course name1', '2021-03-04 00:46:26.134651+00', -- live
         '2021-03-04 00:46:26.134651+00', 'en', '2021-03-04 00:46:26.134651+00', 'live test description', 0, 1, '{}'::jsonb),
        ('db817a2c-f3ec-11ec-b8ef-37027ca902ea', 'course name2', '2021-03-04 00:46:26.134651+00', -- live
@@ -30,3 +31,15 @@ values ('566ed564-f3ec-11ec-b8ef-93b44835e7e4', '0cc084bc-7c83-11eb-9f77-e3218df
        ('e1aa3b64-f3ec-11ec-b8ef-2f4e066962a2', '3a71522a-cd77-11eb-8dc1-af3e35f7c743'),
        ('566ed564-f3ec-11ec-b8ef-93b44835e7e4', '3a71522a-cd77-11eb-8dc1-af3e35f7c743'),
        ('5d02edc0-f3ec-11ec-b8ef-27feb720b1bb', '3a71522a-cd77-11eb-8dc1-af3e35f7c743');
+
+
+insert into course_data_module (id, 
+        course_data_id, index, kind, is_complete, contents, created_at)
+values ('ce6e6eb0-0ea6-11ed-9785-2712225b9473', 
+        '5d02edc0-f3ec-11ec-b8ef-27feb720b1bb', 0, 0, true, '{}', '2021-03-04 00:47:26.134651+00'), -- draft
+       ('1cce16aa-0ea7-11ed-9785-0f0a17e25479', 
+        'e1aa3b64-f3ec-11ec-b8ef-2f4e066962a2', 0, 0, true, '{}', '2021-03-04 00:47:26.134651+00'), -- draft 
+       ('266cbba8-0ea7-11ed-9785-0b828c5e915c', 
+        'f9d0133a-f3ec-11ec-b8ef-3323861c2ef0', 0, 0, true, '{}', '2021-03-04 00:47:26.134651+00'); -- draft
+
+

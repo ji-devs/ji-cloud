@@ -23,7 +23,11 @@ expression: body
         "otherKeywords": "",
         "translatedKeywords": "",
         "translatedDescription": {},
-        "cover": null,
+        "cover": {
+          "id": "[id]",
+          "kind": "Cover",
+          "is_complete": true
+        },
         "ageRanges": [],
         "affiliations": [],
         "categories": [],
@@ -52,7 +56,11 @@ expression: body
         "otherKeywords": "",
         "translatedKeywords": "",
         "translatedDescription": {},
-        "cover": null,
+        "cover": {
+          "id": "[id]",
+          "kind": "Cover",
+          "is_complete": true
+        },
         "ageRanges": [],
         "affiliations": [],
         "categories": [],
