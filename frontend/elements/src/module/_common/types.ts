@@ -41,22 +41,22 @@ export const STR_MODULE_DISPLAY_NAME: { [key in ModuleKind]: string } = {
     video: "Video Player",
     "card-quiz": "Multiple Choice",
     "drag-drop": "Drag & Drop",
-    "find-answer": "Find the Answer",
+    "find-answer": "Answer This",
 };
 
 export const STR_MODULE_CHOOSE_HEADER: { [key in ModuleKind]: string } = {
     cover: "", //not used
     "resource-cover": "",
-    flashcards: "Create a Set of Flashcards",
+    flashcards: "Create a set of Flashcards",
     matching: "Create a Matching Game",
     memory: "Create a Memory Game",
-    "card-quiz": "Create a Multiple Choice Activity",
-    "tapping-board": "Create a Listen & Learn Activity",
+    "card-quiz": "Create a Multiple Choice activity",
+    "tapping-board": "Create a Listen & Learn activity",
     poster: "Create a Talking Poster",
-    "drag-drop": "Create a Drag & Drop Activity",
-    tracing: "Create a Tracing Activity",
-    video: "Create a Video Activity",
-    "find-answer": "Create a Find the Answer Activity",
+    "drag-drop": "Create a Drag & Drop activity",
+    tracing: "Create a Tracing activity",
+    video: "Create a Video activity",
+    "find-answer": "Create a Answer This activity",
 };
 
 export type JigFocus = "modules" | "resources";

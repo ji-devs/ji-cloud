@@ -36,7 +36,7 @@ pub mod card_quiz;
 /// Matching
 pub mod matching;
 
-/// Find the Answer
+/// Answer This (Previously Find the Answer)
 pub mod find_answer;
 
 /// Legacy
@@ -82,7 +82,7 @@ pub enum Body {
     /// Module is a Resource Cover.
     ResourceCover(resource_cover::ModuleData),
 
-    /// Module is a Find the Answer, and has Find the Answer's body.
+    /// Module is a Answer This (Find the Answer), and has Answer This's (Find the Answer)'s body.
     FindAnswer(find_answer::ModuleData),
 
     /// Module is a legacy, and has a legacy's body.
@@ -278,7 +278,7 @@ pub trait BodyConvert {
     }
     /// Resource Cover
     fn convert_to_find_answer(&self) -> Result<find_answer::ModuleData, &'static str> {
-        Err("cannot convert to find the answer!")
+        Err("cannot convert to answer this!")
     }
     /// Video
     fn convert_to_video(&self) -> Result<video::ModuleData, &'static str> {
