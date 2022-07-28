@@ -3,7 +3,7 @@ use std::rc::Rc;
 use futures_signals::signal::Mutable;
 use shared::domain::{asset::AssetId, jig::JigFocus};
 use utils::{
-    jig::JigPlayerOptions,
+    asset::JigPlayerOptions,
     routes::{AssetEditRoute, CourseEditRoute, JigEditRoute},
     storage,
     unwrap::UnwrapJiExt,

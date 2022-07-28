@@ -10,7 +10,7 @@ use shared::domain::asset::{Asset, DraftOrLive};
 use std::rc::Rc;
 use strum::IntoEnumIterator;
 use utils::ages::AgeRangeVecExt;
-use utils::jig::published_at_string;
+use utils::asset::published_at_string;
 use utils::prelude::*;
 
 const STR_DELETE: &str = "Delete";

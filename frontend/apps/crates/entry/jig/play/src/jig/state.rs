@@ -7,7 +7,7 @@ use shared::domain::{
     jig::{JigId, JigPlayerSettings, JigResponse},
     module::ModuleId,
 };
-use utils::jig::JigPlayerOptions;
+use utils::asset::JigPlayerOptions;
 use web_sys::HtmlIFrameElement;
 
 use super::timer::Timer;

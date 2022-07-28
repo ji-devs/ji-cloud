@@ -7,7 +7,7 @@ use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::{asset::DraftOrLive, jig::JigRating};
 use std::rc::Rc;
-use utils::{events, jig::JigPlayerOptions, routes::AdminCurationRoute, unwrap::UnwrapJiExt};
+use utils::{asset::JigPlayerOptions, events, routes::AdminCurationRoute, unwrap::UnwrapJiExt};
 use web_sys::{HtmlInputElement, HtmlTextAreaElement};
 
 mod affiliation;

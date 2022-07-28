@@ -7,8 +7,8 @@ use futures_signals::signal::SignalExt;
 use shared::domain::{course::CourseResponse, jig::JigResponse};
 use std::rc::Rc;
 use utils::{
+    asset::{JigPlayerOptions, ResourceContentExt},
     events,
-    jig::{JigPlayerOptions, ResourceContentExt},
     languages::Language,
 };
 

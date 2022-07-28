@@ -8,8 +8,8 @@ use futures_signals::{
 use shared::domain::jig::JigResponse;
 use utils::{
     ages::AgeRangeVecExt,
+    asset::{published_at_string, ResourceContentExt},
     events,
-    jig::{published_at_string, ResourceContentExt},
 };
 
 use super::{super::state::State, report};

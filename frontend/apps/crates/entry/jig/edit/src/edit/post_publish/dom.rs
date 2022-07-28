@@ -2,8 +2,8 @@ use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::jig::JigFocus;
 use utils::{
+    asset::JigPlayerOptions,
     events,
-    jig::JigPlayerOptions,
     routes::{AssetRoute, Route},
 };
 

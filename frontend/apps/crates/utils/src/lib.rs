@@ -2,6 +2,7 @@
 
 pub mod ages;
 pub mod api_helpers;
+pub mod asset;
 pub mod clipboard;
 pub mod colors;
 pub mod drag;
@@ -14,7 +15,6 @@ pub mod iframe;
 pub mod image;
 pub mod image_effects;
 pub mod init;
-pub mod jig;
 pub mod languages;
 pub mod logging;
 pub mod math;

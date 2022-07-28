@@ -1,4 +1,4 @@
-use crate::jig::JigPlayerOptions;
+use crate::asset::JigPlayerOptions;
 use serde::{Deserialize, Serialize};
 use shared::domain::{
     asset::{AssetId, AssetType, DraftOrLive},

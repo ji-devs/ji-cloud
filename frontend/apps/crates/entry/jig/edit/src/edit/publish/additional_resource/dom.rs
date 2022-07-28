@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use dominator::{clone, html, Dom};
 use futures_signals::signal::{Signal, SignalExt};
-use utils::{events, jig::ResourceContentExt};
+use utils::{asset::ResourceContentExt, events};
 
 use super::state::AdditionalResourceComponent;
 

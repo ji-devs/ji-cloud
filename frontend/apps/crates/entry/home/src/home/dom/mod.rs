@@ -2,7 +2,7 @@ use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 
 use std::rc::Rc;
-use utils::{events, jig::JigPlayerOptions};
+use utils::{asset::JigPlayerOptions, events};
 
 use components::{
     overlay::handle::OverlayHandle,

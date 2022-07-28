@@ -18,7 +18,7 @@ use shared::{
     error::EmptyError,
 };
 use std::rc::Rc;
-use utils::{iframe::ModuleToJigEditorMessage, jig::JigPlayerOptions, prelude::*};
+use utils::{asset::JigPlayerOptions, iframe::ModuleToJigEditorMessage, prelude::*};
 
 pub async fn load_jig(jig_id: JigId, jig_mutable: Mutable<Option<Asset>>) {
     let path = endpoints::jig::GetDraft::PATH.replace("{id}", &jig_id.0.to_string());

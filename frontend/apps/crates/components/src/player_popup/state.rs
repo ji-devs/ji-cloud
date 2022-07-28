@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use futures_signals::signal::Mutable;
 use shared::domain::asset::AssetId;
-use utils::jig::JigPlayerOptions;
+use utils::asset::JigPlayerOptions;
 
 use super::PreviewPopupCallbacks;
 

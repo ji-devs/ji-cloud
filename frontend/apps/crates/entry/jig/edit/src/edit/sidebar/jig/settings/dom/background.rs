@@ -12,7 +12,7 @@ use crate::edit::sidebar::jig::settings::{
 };
 use futures_signals::signal::{Mutable, MutableLockMut, SignalExt};
 use shared::domain::jig::AudioBackground;
-use utils::{events, jig::JigAudioExt};
+use utils::{asset::JigAudioExt, events};
 
 use super::super::state::State;
 

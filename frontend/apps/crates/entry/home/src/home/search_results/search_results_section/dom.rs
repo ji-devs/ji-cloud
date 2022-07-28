@@ -15,8 +15,8 @@ use shared::domain::{
 use std::rc::Rc;
 use utils::{
     ages::AgeRangeVecExt,
+    asset::{published_at_string, ResourceContentExt},
     events,
-    jig::{published_at_string, ResourceContentExt},
     prelude::get_user_cloned,
     routes::{AssetEditRoute, AssetRoute, JigEditRoute, Route},
 };

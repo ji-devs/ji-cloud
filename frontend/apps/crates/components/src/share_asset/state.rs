@@ -3,7 +3,7 @@ use std::rc::Rc;
 use awsm_web::loaders::helpers::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::asset::AssetId;
-use utils::jig::JigPlayerOptions;
+use utils::asset::JigPlayerOptions;
 use utils::routes::{AssetRoute, Route};
 
 use utils::prelude::*;

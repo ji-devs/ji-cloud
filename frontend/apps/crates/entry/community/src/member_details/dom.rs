@@ -12,8 +12,8 @@ use shared::{
     media::MediaLibrary,
 };
 use utils::{
+    asset::{JigPlayerOptions, ResourceContentExt},
     events,
-    jig::{JigPlayerOptions, ResourceContentExt},
     prelude::{get_user_cloned, get_user_id},
     routes::{CommunityCirclesRoute, CommunityMembersRoute, CommunityRoute, Route},
     unwrap::UnwrapJiExt,

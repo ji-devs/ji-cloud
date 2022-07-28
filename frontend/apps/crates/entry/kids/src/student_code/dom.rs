@@ -3,7 +3,7 @@ use std::rc::Rc;
 use components::player_popup::{PlayerPopup, PreviewPopupCallbacks};
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
-use utils::{events, jig::JigPlayerOptions};
+use utils::{asset::JigPlayerOptions, events};
 
 use crate::student_code::actions::submit_code;
 
