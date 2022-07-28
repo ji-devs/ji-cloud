@@ -56,7 +56,7 @@ export const STR_MODULE_CHOOSE_HEADER: { [key in ModuleKind]: string } = {
     "drag-drop": "Create a Drag & Drop activity",
     tracing: "Create a Tracing activity",
     video: "Create a Video activity",
-    "find-answer": "Create a Answer This activity",
+    "find-answer": "Create an Answer This activity",
 };
 
 export type JigFocus = "modules" | "resources";
