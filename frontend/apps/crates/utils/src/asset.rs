@@ -213,6 +213,30 @@ impl From<JigPlayerSettings> for JigPlayerOptions {
     }
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+pub struct CoursePlayerOptions {
+    #[serde(default)]
+    pub draft_or_live: DraftOrLive,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub enum AssetPlayerOptions {
+    Jig(JigPlayerOptions),
+    Course(CoursePlayerOptions),
+}
+
+impl From<JigPlayerOptions> for AssetPlayerOptions {
+    fn from(player_option: JigPlayerOptions) -> Self {
+        AssetPlayerOptions::Jig(player_option)
+    }
+}
+
+impl From<CoursePlayerOptions> for AssetPlayerOptions {
+    fn from(player_option: CoursePlayerOptions) -> Self {
+        AssetPlayerOptions::Course(player_option)
+    }
+}
+
 pub trait ResourceContentExt {
     fn get_link(&self) -> String;
 }

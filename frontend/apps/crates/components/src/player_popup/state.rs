@@ -2,13 +2,13 @@ use std::rc::Rc;
 
 use futures_signals::signal::Mutable;
 use shared::domain::asset::AssetId;
-use utils::asset::JigPlayerOptions;
+use utils::asset::{AssetPlayerOptions, CoursePlayerOptions, JigPlayerOptions};
 
 use super::PreviewPopupCallbacks;
 
 pub struct PlayerPopup {
     pub asset_id: AssetId,
-    pub player_options: JigPlayerOptions,
+    pub player_options: AssetPlayerOptions,
     pub open: Mutable<bool>,
     pub callbacks: PreviewPopupCallbacks,
     pub close_button_shown: Mutable<bool>,
@@ -17,9 +17,26 @@ pub struct PlayerPopup {
 impl PlayerPopup {
     pub fn new(
         asset_id: AssetId,
-        player_options: JigPlayerOptions,
+        player_options: AssetPlayerOptions,
         callbacks: PreviewPopupCallbacks,
     ) -> Rc<Self> {
+        Rc::new(Self {
+            asset_id,
+            player_options,
+            open: Mutable::new(true),
+            callbacks,
+            close_button_shown: Mutable::new(true),
+        })
+    }
+
+    pub fn new_default_player_options(
+        asset_id: AssetId,
+        callbacks: PreviewPopupCallbacks,
+    ) -> Rc<Self> {
+        let player_options = match asset_id {
+            AssetId::JigId(_) => JigPlayerOptions::default().into(),
+            AssetId::CourseId(_) => CoursePlayerOptions::default().into(),
+        };
         Rc::new(Self {
             asset_id,
             player_options,

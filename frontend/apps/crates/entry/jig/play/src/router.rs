@@ -21,8 +21,8 @@ impl Router {
                 utils::routes::AssetPlayRoute::Jig(jig_id, module_id, player_options) => {
                     JigPlayer::new(jig_id, module_id, player_options).render()
                 }
-                utils::routes::AssetPlayRoute::Course(course_id) => {
-                    CoursePlayer::new(course_id).render()
+                utils::routes::AssetPlayRoute::Course(course_id, player_options) => {
+                    CoursePlayer::new(course_id, player_options).render()
                 }
             }),
             _ => None,

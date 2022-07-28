@@ -6,11 +6,7 @@ use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::{course::CourseResponse, jig::JigResponse};
 use std::rc::Rc;
-use utils::{
-    asset::{JigPlayerOptions, ResourceContentExt},
-    events,
-    languages::Language,
-};
+use utils::{asset::ResourceContentExt, events, languages::Language};
 
 use super::state::CoursePlayer;
 
@@ -29,9 +25,8 @@ impl CoursePlayer {
                     let close = clone!(state => move || {
                         state.done_playing_jig();
                     });
-                    PlayerPopup::new(
+                    PlayerPopup::new_default_player_options(
                         jig_id.into(),
-                        JigPlayerOptions::default(),
                         PreviewPopupCallbacks::new(close)
                     ).render(None)
                 })
@@ -54,7 +49,7 @@ impl CoursePlayer {
                     course.id.into(),
                     course.course_data.cover.clone(),
                     ThumbnailFallback::Asset,
-                    state.draft_or_live,
+                    state.player_options.draft_or_live,
                 ).render(Some("thumbnail"))
             )
             .children_signal_vec(state.jigs.signal_ref(clone!(state => move |jigs| {
@@ -97,7 +92,7 @@ impl CoursePlayer {
                     jig_id.into(),
                     jig.jig_data.modules.get(0).cloned(),
                     ThumbnailFallback::Asset,
-                    state.draft_or_live,
+                    state.player_options.draft_or_live,
                 ).render(Some("thumbnail"))
             )
             .child(html!("fa-button", {

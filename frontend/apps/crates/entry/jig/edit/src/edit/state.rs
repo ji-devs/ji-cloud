@@ -3,7 +3,7 @@ use std::rc::Rc;
 use futures_signals::signal::Mutable;
 use shared::domain::{asset::AssetId, jig::JigFocus};
 use utils::{
-    asset::JigPlayerOptions,
+    asset::AssetPlayerOptions,
     routes::{AssetEditRoute, CourseEditRoute, JigEditRoute},
     storage,
     unwrap::UnwrapJiExt,
@@ -14,7 +14,7 @@ pub struct AssetEditState {
     pub jig_focus: JigFocus,
     pub asset_id: AssetId,
     pub show_onboarding: Mutable<bool>,
-    pub(super) play_jig: Mutable<Option<AssetPlayerSettings>>,
+    pub(super) play_jig: Mutable<Option<AssetPlayerOptions>>,
 }
 
 impl AssetEditState {
@@ -50,10 +50,4 @@ impl AssetEditState {
             route,
         ));
     }
-}
-
-#[derive(Clone)]
-pub(super) enum AssetPlayerSettings {
-    Jig(JigPlayerOptions),
-    Course,
 }

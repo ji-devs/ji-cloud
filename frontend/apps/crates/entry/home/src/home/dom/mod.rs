@@ -2,7 +2,7 @@ use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 
 use std::rc::Rc;
-use utils::{asset::JigPlayerOptions, events};
+use utils::events;
 
 use components::{
     overlay::handle::OverlayHandle,
@@ -47,9 +47,8 @@ impl Home {
                     let close = clone!(state => move || {
                         state.play_jig.set(None);
                     });
-                    PlayerPopup::new(
+                    PlayerPopup::new_default_player_options(
                         jig_id.into(),
-                        JigPlayerOptions::default(),
                         PreviewPopupCallbacks::new(close)
                     ).render(None)
                 })

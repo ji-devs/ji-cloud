@@ -1,13 +1,9 @@
 use std::rc::Rc;
 
 use super::{
-    super::edit::publish::Publish,
-    course::jig_selection::state::JigSelection,
-    module_iframe::ModuleIframe,
-    post_publish::PostPublish,
-    selection::dom::SelectionDom,
-    sidebar::dom::SidebarDom,
-    state::{AssetEditState, AssetPlayerSettings},
+    super::edit::publish::Publish, course::jig_selection::state::JigSelection,
+    module_iframe::ModuleIframe, post_publish::PostPublish, selection::dom::SelectionDom,
+    sidebar::dom::SidebarDom, state::AssetEditState,
 };
 use components::{
     overlay::handle::OverlayHandle,
@@ -15,7 +11,7 @@ use components::{
 };
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
-use utils::prelude::*;
+use utils::{asset::AssetPlayerOptions, prelude::*};
 
 const STR_YT_VIDEO_ID: &str = "x4FYtTpQAt0";
 
@@ -114,24 +110,23 @@ impl AssetEditState {
             .child_signal(state.play_jig.signal_cloned().map(clone!(state => move|play_jig| {
                 play_jig.map(|settings| {
                     match settings {
-                        AssetPlayerSettings::Jig(settings) => {
+                        AssetPlayerOptions::Jig(settings) => {
                             let close = clone!(state => move || {
                                 state.play_jig.set(None);
                             });
                             PlayerPopup::new(
                                 state.asset_id,
-                                settings,
+                                settings.into(),
                                 PreviewPopupCallbacks::new(close)
                             ).render(None)
                         },
-                        AssetPlayerSettings::Course => {
+                        AssetPlayerOptions::Course(settings) => {
                             let close = clone!(state => move || {
                                 state.play_jig.set(None);
                             });
                             PlayerPopup::new(
                                 state.asset_id,
-                                // TODO: use course setting once added
-                                Default::default(),
+                                settings.into(),
                                 PreviewPopupCallbacks::new(close)
                             ).render(None)
                         },

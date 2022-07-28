@@ -2,12 +2,10 @@ use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::jig::JigFocus;
 use utils::{
-    asset::JigPlayerOptions,
+    asset::{AssetPlayerOptions, JigPlayerOptions},
     events,
     routes::{AssetRoute, Route},
 };
-
-use crate::edit::state::AssetPlayerSettings;
 
 use super::{actions, state::*};
 use std::rc::Rc;
@@ -54,7 +52,7 @@ fn render_modules_focused_actions(state: &Rc<PostPublish>) -> Vec<Dom> {
             .property("kind", "play-jig")
             .property("slot", "actions")
             .event(clone!(state => move |_: events::Click| {
-                let settings = AssetPlayerSettings::Jig(JigPlayerOptions::default());
+                let settings = AssetPlayerOptions::Jig(JigPlayerOptions::default());
                 state.asset_edit_state.play_jig.set(Some(settings));
             }))
         }),

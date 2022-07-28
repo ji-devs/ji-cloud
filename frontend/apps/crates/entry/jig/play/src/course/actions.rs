@@ -5,6 +5,7 @@ use futures::future::try_join_all;
 use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{
+        asset::DraftOrLive,
         course::CourseResponse,
         jig::{JigId, JigResponse},
     },
@@ -22,18 +23,16 @@ impl CoursePlayer {
     pub fn load_course(self: &Rc<Self>) {
         let state = self;
         state.loader.load(clone!(state => async move {
-            // let course = match state.player_options.draft {
-            //     false => {
-            //         let path = endpoints::course::GetLive::PATH.replace("{id}", &state.course_id.0.to_string());
-            //         api_no_auth::<CourseResponse, EmptyError, ()>(&path, endpoints::course::GetLive::METHOD, None).await
-            //     },
-            //     true => {
-            //         let path = endpoints::course::GetDraft::PATH.replace("{id}", &state.course_id.0.to_string());
-            //         api_no_auth::<CourseResponse, EmptyError, ()>(&path, endpoints::course::GetDraft::METHOD, None).await
-            //     },
-            // };
-            let path = endpoints::course::GetDraft::PATH.replace("{id}", &state.course_id.0.to_string());
-            let course = api_no_auth::<CourseResponse, EmptyError, ()>(&path, endpoints::course::GetDraft::METHOD, None).await;
+            let course = match state.player_options.draft_or_live {
+                DraftOrLive::Live => {
+                    let path = endpoints::course::GetLive::PATH.replace("{id}", &state.course_id.0.to_string());
+                    api_no_auth::<CourseResponse, EmptyError, ()>(&path, endpoints::course::GetLive::METHOD, None).await
+                },
+                DraftOrLive::Draft => {
+                    let path = endpoints::course::GetDraft::PATH.replace("{id}", &state.course_id.0.to_string());
+                    api_no_auth::<CourseResponse, EmptyError, ()>(&path, endpoints::course::GetDraft::METHOD, None).await
+                },
+            };
 
             match course {
                 Ok(course) => {

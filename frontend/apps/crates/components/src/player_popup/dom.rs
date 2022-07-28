@@ -4,6 +4,7 @@ use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::asset::AssetId;
 use utils::{
+    asset::AssetPlayerOptions,
     events,
     iframe::{AssetPlayerToPlayerPopup, IframeInit},
     prelude::SETTINGS,
@@ -43,9 +44,16 @@ impl PlayerPopup {
                             .property("slot", "iframe")
                             .property("allow", "autoplay; fullscreen")
                             .property("src", {
-                                let url = match state.asset_id {
-                                    AssetId::JigId(jig_id) => Route::Asset(AssetRoute::Play(AssetPlayRoute::Jig(jig_id, None, state.player_options.clone()))),
-                                    AssetId::CourseId(course_id) => Route::Asset(AssetRoute::Play(AssetPlayRoute::Course(course_id))),
+                                let url = match (state.asset_id, &state.player_options) {
+                                    (AssetId::JigId(jig_id), AssetPlayerOptions::Jig(player_options)) => {
+                                        Route::Asset(AssetRoute::Play(AssetPlayRoute::Jig(jig_id, None, player_options.clone())))
+                                    },
+                                    (AssetId::CourseId(course_id), AssetPlayerOptions::Course(player_options)) => {
+                                        Route::Asset(AssetRoute::Play(AssetPlayRoute::Course(course_id, player_options.clone())))
+                                    },
+                                    _ => {
+                                        panic!("Invalid asset id/player_options combinations")
+                                    }
                                 }.to_string();
 
                                 let url = unsafe {

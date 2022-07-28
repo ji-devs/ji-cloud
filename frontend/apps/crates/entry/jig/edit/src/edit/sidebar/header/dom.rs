@@ -1,19 +1,22 @@
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
-use shared::domain::{asset::Asset, jig::JigFocus};
+use shared::domain::{
+    asset::{Asset, DraftOrLive},
+    jig::JigFocus,
+};
 use std::rc::Rc;
 use web_sys::HtmlInputElement;
 
-use crate::edit::{
-    sidebar::{jig::actions::get_player_settings, state::SidebarSetting},
-    state::AssetPlayerSettings,
-};
+use crate::edit::sidebar::{jig::actions::get_player_settings, state::SidebarSetting};
 
 use super::super::{
     actions as sidebar_actions, course::settings as course_settings, jig::settings as jig_settings,
     state::State as SidebarState,
 };
-use utils::prelude::*;
+use utils::{
+    asset::{AssetPlayerOptions, CoursePlayerOptions},
+    prelude::*,
+};
 
 const STR_MY_JIGS: &str = "My JIGs";
 const STR_SEARCH_PLACEHOLDER: &str = "My JIG’s name";
@@ -81,11 +84,15 @@ impl HeaderDom {
                         match &sidebar_state.settings {
                             SidebarSetting::Jig(jig) => {
                                 let settings = get_player_settings(Rc::clone(jig));
-                                let settings = AssetPlayerSettings::Jig(settings);
+                                let settings = AssetPlayerOptions::Jig(settings);
                                 sidebar_state.asset_edit_state.play_jig.set(Some(settings));
                             },
                             SidebarSetting::Course(_course) => {
-                                sidebar_state.asset_edit_state.play_jig.set(Some(AssetPlayerSettings::Course));
+                                let settings = CoursePlayerOptions {
+                                    draft_or_live: DraftOrLive::Draft
+                                };
+                                let settings = AssetPlayerOptions::Course(settings);
+                                sidebar_state.asset_edit_state.play_jig.set(Some(settings));
                             }
                         }
                     }))

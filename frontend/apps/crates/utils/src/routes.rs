@@ -1,4 +1,4 @@
-use crate::asset::JigPlayerOptions;
+use crate::asset::{CoursePlayerOptions, JigPlayerOptions};
 use serde::{Deserialize, Serialize};
 use shared::domain::{
     asset::{AssetId, AssetType, DraftOrLive},
@@ -206,7 +206,7 @@ pub enum CourseEditRoute {
 #[derive(Debug, Clone)]
 pub enum AssetPlayRoute {
     Jig(JigId, Option<ModuleId>, JigPlayerOptions),
-    Course(CourseId),
+    Course(CourseId, CoursePlayerOptions),
 }
 
 #[derive(Debug, Clone)]
@@ -490,9 +490,14 @@ impl Route {
                 )))
             }
 
-            ["asset", "play", "course", course_id] => Self::Asset(AssetRoute::Play(
-                AssetPlayRoute::Course(CourseId(Uuid::from_str(course_id).unwrap_ji())),
-            )),
+            ["asset", "play", "course", course_id] => {
+                let search: CoursePlayerOptions = serde_qs::from_str(&params_string).unwrap_ji();
+
+                Self::Asset(AssetRoute::Play(AssetPlayRoute::Course(
+                    CourseId(Uuid::from_str(course_id).unwrap_ji()),
+                    search,
+                )))
+            }
 
             ["jig", play_or_edit] | ["jig", play_or_edit, _] | ["jig", play_or_edit, _, _] => {
                 let url: String = url.pathname();
@@ -705,8 +710,9 @@ impl From<&Route> for String {
                             format!("/asset/play/jig/{}?{}", jig_id.0, query)
                         }
                     }
-                    AssetPlayRoute::Course(course_id) => {
-                        format!("/asset/play/course/{}", course_id.0)
+                    AssetPlayRoute::Course(course_id, player_settings) => {
+                        let query = serde_qs::to_string(&player_settings).unwrap_ji();
+                        format!("/asset/play/course/{}?{}", course_id.0, query)
                     }
                 },
             },

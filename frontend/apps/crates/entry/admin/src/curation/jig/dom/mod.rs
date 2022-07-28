@@ -7,7 +7,7 @@ use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::{asset::DraftOrLive, jig::JigRating};
 use std::rc::Rc;
-use utils::{asset::JigPlayerOptions, events, routes::AdminCurationRoute, unwrap::UnwrapJiExt};
+use utils::{events, routes::AdminCurationRoute, unwrap::UnwrapJiExt};
 use web_sys::{HtmlInputElement, HtmlTextAreaElement};
 
 mod affiliation;
@@ -153,9 +153,8 @@ impl CurationJig {
                         let on_close = clone!(state => move|| {
                             state.player_open.set(false);
                         });
-                        Some(PlayerPopup::new(
+                        Some(PlayerPopup::new_default_player_options(
                             state.jig_id.into(),
-                            JigPlayerOptions::default(),
                             PreviewPopupCallbacks::new(Box::new(on_close)),
                         ).render(Some("player")))
                     }

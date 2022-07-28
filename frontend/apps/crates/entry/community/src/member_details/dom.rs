@@ -12,7 +12,7 @@ use shared::{
     media::MediaLibrary,
 };
 use utils::{
-    asset::{JigPlayerOptions, ResourceContentExt},
+    asset::ResourceContentExt,
     events,
     prelude::{get_user_cloned, get_user_id},
     routes::{CommunityCirclesRoute, CommunityMembersRoute, CommunityRoute, Route},
@@ -183,9 +183,8 @@ impl MemberDetails {
                     let close = clone!(state => move || {
                         state.play_jig.set(None);
                     });
-                    PlayerPopup::new(
+                    PlayerPopup::new_default_player_options(
                         jig_id.into(),
-                        JigPlayerOptions::default(),
                         PreviewPopupCallbacks::new(close)
                     ).render(None)
                 })
