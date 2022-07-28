@@ -408,7 +408,6 @@ pub async fn browse(
 
     let privacy_level: Vec<i16> = privacy_level.iter().map(|x| *x as i16).collect();
 
-    //TODO: purge junk jig data from with draft_or_live is NULL
     let course_data = sqlx::query!(
     //language=SQL
     r#"
@@ -422,9 +421,10 @@ with cte as (
         and (cd.privacy_level = any($3) or $3 = array[]::smallint[])
         and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])
     group by coalesce(updated_at, created_at)
-    order by coalesce(updated_at, created_at) desc),
+    order by coalesce(updated_at, created_at) desc
+),
 cte1 as (
-    select * from unnest((select array_agg(cte.array_agg) from cte)) with ordinality t(id
+    select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id
    , ord) order by ord
 )
 select course.id                                                                as "course_id: CourseId",
@@ -471,7 +471,7 @@ select course.id                                                                
         order by "index"
     )                                                     as "items!: Vec<(JigId,)>"
 from cte1
-left join course_data on cte1.id = course_data.id
+inner join course_data on cte1.id = course_data.id
 inner join course on (
     course_data.id = course.draft_id 
     or (        
@@ -735,16 +735,19 @@ pub async fn filtered_count(
     let course_data = sqlx::query!(
         //language=SQL
         r#"
-select count(distinct course_data.id) as "count!: i64"
-from course_data
-left join course on (draft_id = course_data.id or (live_id = course_data.id and last_synced_at is not null and published_at is not null))
-left join course_data_resource "resource" on course_data.id = resource.course_data_id
-where (author_id = $1 or $1 is null)
-    and (course_data.draft_or_live = $2 or $2 is null)
-    and (course_data.privacy_level = any($3) or $3 = array[]::smallint[])
-    and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])
-
-"#,
+        with cte as (
+            select (array_agg(cd.id))[1]
+            from course_data "cd"
+                  inner join course on (draft_id = cd.id or (live_id = cd.id and cd.last_synced_at is not null and published_at is not null))
+                  left join course_data_resource "resource" on cd.id = resource.course_data_id
+            where (author_id = $1 or $1 is null)
+                and (cd.draft_or_live = $2 or $2 is null)
+                and (cd.privacy_level = any($3) or $3 = array[]::smallint[])
+                and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])
+            group by coalesce(updated_at, created_at)
+        )
+        select count(*) as "count!" from unnest(array(select cte.array_agg from cte)) with ordinality t(id, ord) 
+    "#,
         author_id.map(|it| it.0),
         draft_or_live.map(|it| it as i16),
         &privacy_level[..],
@@ -756,14 +759,18 @@ where (author_id = $1 or $1 is null)
     let course = sqlx::query!(
         //language=SQL
         r#"
-select count(distinct course.id) as "count!: i64"
-from course
-left join course_data on (draft_id = course_data.id or (live_id = course_data.id and last_synced_at is not null and published_at is not null))
-left join course_data_resource "resource" on course_data.id = resource.course_data_id
-where (author_id = $1 or $1 is null)
-    and (course_data.draft_or_live = $2 or $2 is null)
-    and (course_data.privacy_level = any($3) or $3 = array[]::smallint[])
-    and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])
+        with cte as (
+            select (array_agg(course.id))[1]
+            from course_data "cd"
+                  inner join course on (draft_id = cd.id or (live_id = cd.id and cd.last_synced_at is not null and published_at is not null))
+                  left join course_data_resource "resource" on cd.id = resource.course_data_id
+            where (author_id = $1 or $1 is null)
+                and (cd.draft_or_live = $2 or $2 is null)
+                and (cd.privacy_level = any($3) or $3 = array[]::smallint[])
+                and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])
+            group by coalesce(updated_at, created_at)
+        )
+        select count(*) as "count!" from unnest(array(select cte.array_agg from cte)) with ordinality t(id, ord) 
 "#,
         author_id.map(|it| it.0),
         draft_or_live.map(|it| it as i16),
