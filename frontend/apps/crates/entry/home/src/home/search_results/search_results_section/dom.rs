@@ -91,15 +91,14 @@ impl SearchResultsSection {
                 }))
             }))
             .property("description", asset.description().clone())
-            .child(ModuleThumbnail::render(
-                Rc::new(ModuleThumbnail {
-                    asset_id: asset.id(),
-                    module: asset.cover().cloned(),
-                    fallback: ThumbnailFallback::Asset,
-                    draft_or_live: DraftOrLive::Live
-                }),
-                Some("image")
-            ))
+            .child(
+                ModuleThumbnail::new(
+                    asset.id(),
+                    asset.cover().cloned(),
+                    ThumbnailFallback::Asset,
+                    DraftOrLive::Live
+                ).render(Some("image"))
+            )
             .apply_if(!asset.categories().is_empty(), clone!(state, asset => move |dom| {
                 dom.child(html!("home-search-result-details", {
                     .property("slot", "categories")

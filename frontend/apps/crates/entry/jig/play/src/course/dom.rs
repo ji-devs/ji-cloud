@@ -45,7 +45,7 @@ impl CoursePlayer {
             .property("itemsCount", course.course_data.items.len())
             .property("hasAdditionalResources", !course.course_data.additional_resources.is_empty())
             .child(
-                ModuleThumbnail::new(
+                ModuleThumbnail::new_hight_res(
                     course.id.into(),
                     course.course_data.cover.clone(),
                     ThumbnailFallback::Asset,

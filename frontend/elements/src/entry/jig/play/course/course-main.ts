@@ -33,7 +33,8 @@ export class _ extends LitElement {
                     }
                 }
                 ::slotted([slot=thumbnail]) {
-                    width: 100%;
+                    max-height: 50vh;
+                    aspect-ratio: 16 / 9;
                 }
                 .name {
                     font-size: 32px;
@@ -43,11 +44,16 @@ export class _ extends LitElement {
                 }
                 .count-lang-author {
                     display: grid;
-                    justify-content: start;
                     align-items: center;
                     grid-template-columns: repeat(4, auto);
                     column-gap: 16px;
                     color: var(--dark-gray-6);
+                    justify-content: center;
+                }
+                @media (min-width: 1920px) {
+                    .count-lang-author {
+                        justify-content: start;
+                    }
                 }
                 .count-lang-author img-ui {
                     height: 26px;

@@ -10,6 +10,7 @@ pub struct ModuleThumbnail {
     pub module: Option<LiteModule>,
     pub fallback: ThumbnailFallback,
     pub draft_or_live: DraftOrLive,
+    pub hight_res: bool,
 }
 
 impl ModuleThumbnail {
@@ -24,6 +25,22 @@ impl ModuleThumbnail {
             module,
             fallback,
             draft_or_live,
+            hight_res: false,
+        })
+    }
+
+    pub fn new_hight_res(
+        asset_id: AssetId,
+        module: Option<LiteModule>,
+        fallback: ThumbnailFallback,
+        draft_or_live: DraftOrLive,
+    ) -> Rc<Self> {
+        Rc::new(ModuleThumbnail {
+            asset_id,
+            module,
+            fallback,
+            draft_or_live,
+            hight_res: true,
         })
     }
 }

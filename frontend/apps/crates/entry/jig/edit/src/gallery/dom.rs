@@ -188,15 +188,14 @@ impl Gallery {
                                     },
                                 }
                             })
-                            .child(ModuleThumbnail::render(
-                                Rc::new(ModuleThumbnail {
-                                    asset_id: jig.id(),
-                                    module: jig.cover().cloned(),
-                                    fallback: ThumbnailFallback::Asset,
-                                    draft_or_live: DraftOrLive::Draft
-                                }),
-                                Some("thumbnail")
-                            ))
+                            .child(
+                                ModuleThumbnail::new(
+                                    jig.id(),
+                                    jig.cover().cloned(),
+                                    ThumbnailFallback::Asset,
+                                    DraftOrLive::Draft
+                                ).render(Some("thumbnail"))
+                            )
                             .children(&mut [
                                 html!("menu-line", {
                                     .property("slot", "menu-content")

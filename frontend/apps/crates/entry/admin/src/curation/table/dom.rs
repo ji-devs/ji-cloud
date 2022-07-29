@@ -117,15 +117,12 @@ impl CurationTable {
                         .style("padding", "0")
                         .children((0..3).filter_map(|i| {
                             jig.modules.get(i).map(|module| {
-                                ModuleThumbnail::render(
-                                    Rc::new(ModuleThumbnail {
-                                        asset_id: jig.id.into(),
-                                        module: Some(module.clone()),
-                                        fallback: ThumbnailFallback::Asset,
-                                        draft_or_live: DraftOrLive::Live,
-                                    }),
-                                    None
-                                )
+                                ModuleThumbnail::new(
+                                    jig.id.into(),
+                                    Some(module.clone()),
+                                    ThumbnailFallback::Asset,
+                                    DraftOrLive::Live,
+                                ).render(None)
                             })
                         }))
                     }))

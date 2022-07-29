@@ -130,15 +130,14 @@ impl CurationJig {
                     ])
                 }),
             ])
-            .child(ModuleThumbnail::render(
-                Rc::new(ModuleThumbnail {
-                    asset_id: state.jig_id.into(),
-                    module: state.jig.modules.get(0).cloned(),
-                    fallback: ThumbnailFallback::Asset,
-                    draft_or_live: DraftOrLive::Live,
-                }),
-                Some("player")
-            ))
+            .child(
+                ModuleThumbnail::new(
+                    state.jig_id.into(),
+                    state.jig.modules.get(0).cloned(),
+                    ThumbnailFallback::Asset,
+                    DraftOrLive::Live,
+                ).render(Some("player"))
+            )
             .child(html!("fa-button", {
                 .property("slot", "player")
                 .property("icon", "fa-duotone fa-circle-play")

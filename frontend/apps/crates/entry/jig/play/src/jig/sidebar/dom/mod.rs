@@ -89,15 +89,14 @@ pub fn render(state: Rc<State>) -> Dom {
                                 .event(clone!(state => move |_: events::Click| {
                                     state.player_state.active_module.set(i);
                                 }))
-                                .child(ModuleThumbnail::render_live(
-                                    Rc::new(ModuleThumbnail {
-                                        asset_id: state.player_state.jig_id.into(),
-                                        module: Some(module.clone()),
-                                        fallback: ThumbnailFallback::Module,
-                                        draft_or_live: state.player_state.player_options.draft_or_live
-                                    }),
-                                    Some("window")
-                                ))
+                                .child(
+                                    ModuleThumbnail::new(
+                                        state.player_state.jig_id.into(),
+                                        Some(module.clone()),
+                                        ThumbnailFallback::Module,
+                                        state.player_state.player_options.draft_or_live
+                                    ).render_live(Some("window"))
+                                )
                             })
                         }).collect::<Vec<Dom>>())
                     }))

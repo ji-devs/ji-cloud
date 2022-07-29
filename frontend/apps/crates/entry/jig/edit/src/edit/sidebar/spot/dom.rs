@@ -141,15 +141,14 @@ impl ItemDom {
                                     match (&*module, route) {
                                         (Some(module), AssetEditRoute::Jig(_, _, JigEditRoute::Module(module_id))) if module_id == &module.id => None,
                                         (Some(module), _) => {
-                                            Some(ModuleThumbnail::render_live(
-                                                Rc::new(ModuleThumbnail {
-                                                    asset_id: state.sidebar.asset.id(),
-                                                    module: Some((**module).clone()),
-                                                    fallback: ThumbnailFallback::Module,
-                                                    draft_or_live: DraftOrLive::Draft,
-                                                }),
-                                                Some("thumbnail")
-                                            ))
+                                            Some(
+                                                ModuleThumbnail::new(
+                                                    state.sidebar.asset.id(),
+                                                    Some((**module).clone()),
+                                                    ThumbnailFallback::Module,
+                                                    DraftOrLive::Draft,
+                                                ).render_live(Some("thumbnail"))
+                                            )
                                         },
                                         _ => None,
                                     }

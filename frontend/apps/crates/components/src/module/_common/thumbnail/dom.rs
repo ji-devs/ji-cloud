@@ -19,6 +19,9 @@ impl ModuleThumbnail {
                 state.on_image_load_error();
             }))
             .property("jigId", state.asset_id.uuid().to_string())
+            .apply_if(state.hight_res, |dom| {
+                dom.property("size", "full")
+            })
             .apply(clone!(state => move |dom| {
                 match &state.module {
                     Some(module) => dom.property("moduleId", module.id.0.to_string()),
@@ -58,6 +61,9 @@ impl ModuleThumbnail {
                 state.on_image_load_error();
             }))
             .property("jigId", state.asset_id.uuid().to_string())
+            .apply_if(state.hight_res, |dom| {
+                dom.property("size", "full")
+            })
             .apply(clone!(state => move |dom| {
                 match &state.module {
                     None => dom,

@@ -85,15 +85,12 @@ fn render_page(state: Rc<Publish>) -> Dom {
         //     dom
         // })
         .children(&mut [
-            ModuleThumbnail::render_live(
-                Rc::new(ModuleThumbnail {
-                    asset_id: state.asset.id(),
-                    module: state.asset.cover().clone(),
-                    fallback: ThumbnailFallback::Asset,
-                    draft_or_live: DraftOrLive::Draft,
-                }),
-                Some("img")
-            ),
+            ModuleThumbnail::new(
+                state.asset.id(),
+                state.asset.cover().clone(),
+                ThumbnailFallback::Asset,
+                DraftOrLive::Draft,
+            ).render_live(Some("img")),
             html!("fa-icon", {
                 .property("icon", "fa-thin fa-pen")
                 .property("slot", "edit-cover")
