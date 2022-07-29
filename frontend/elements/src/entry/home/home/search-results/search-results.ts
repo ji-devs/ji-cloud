@@ -9,9 +9,9 @@ const STR_FOR = "for";
 const STR_LOADING = "So many great JIGs and resources to sift through...";
 
 const KINDS: {[key: string]: string[]} = {
-    jigs: ["JIG", "JIGs"],
-    resources: ["Resource", "Resources"],
-    courses: ["Course", "Courses"],
+    jig: ["JIG", "JIGs"],
+    resource: ["Resource", "Resources"],
+    course: ["Course", "Courses"],
 };
 const STR_AND = "and";
 
@@ -96,9 +96,9 @@ export class _ extends LitElement {
             }
         }
 
-        addResultCount("jigs", this.jigCount);
-        addResultCount("resources", this.resourceCount);
-        addResultCount("courses", this.courseCount);
+        addResultCount("jig", this.jigCount);
+        addResultCount("resource", this.resourceCount);
+        addResultCount("course", this.courseCount);
 
         // If we're rendering more than one set of results then add STR_AND
         // before the last result.
