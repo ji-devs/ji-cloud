@@ -1,4 +1,4 @@
-import { LitElement, html, css, customElement } from "lit-element";
+import { LitElement, html, css, customElement, property } from "lit-element";
 
 const CSS_RULE_WEBKIT = `
     :root::-webkit-scrollbar {
@@ -13,6 +13,8 @@ const CSS_RULE_FIREFOX = `
 
 const stylesheet = document.createElement("style");
 document.head.appendChild(stylesheet);
+
+export type Size = "aspect-ratio" | "full-screen";
 
 @customElement("player-popup")
 export class _ extends LitElement {
@@ -29,16 +31,22 @@ export class _ extends LitElement {
                     background-color: #ececec;
                 }
                 .iframe-wrapper {
-                    max-height: 100vh;
-                    max-width: 100vw;
                     background-color: #ffffff;
                     border: 0;
-                    aspect-ratio: 16 / 9;
                     box-shadow: 0 3px 16px 0 rgba(0, 0, 0, 0.16);
                     position: relative;
                     top: 50%;
                     transform: translateY(-50%);
                     margin: 0 auto;
+                }
+                :host([size=aspect-ratio]) .iframe-wrapper {
+                    max-height: 100vh;
+                    max-width: 100vw;
+                    aspect-ratio: 16 / 9;
+                }
+                :host([size=full-screen]) .iframe-wrapper {
+                    height: 100vh;
+                    width: 100vw;
                 }
                 .iframe-wrapper ::slotted(iframe) {
                     height: 100%;
@@ -66,6 +74,9 @@ export class _ extends LitElement {
             `,
         ];
     }
+
+    @property()
+    size: Size = "aspect-ratio";
 
     connectedCallback() {
         super.connectedCallback();

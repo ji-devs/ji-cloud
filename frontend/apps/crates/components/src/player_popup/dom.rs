@@ -11,13 +11,16 @@ use utils::{
     routes::{AssetPlayRoute, AssetRoute, Route},
     unwrap::UnwrapJiExt,
 };
-
 use super::state::PlayerPopup;
 
 impl PlayerPopup {
     pub fn render(self: Rc<Self>, slot: Option<&str>) -> Dom {
         let state = self;
         html!("player-popup", {
+            .property("size", match state.asset_id {
+                AssetId::JigId(_) => "aspect-ratio",
+                AssetId::CourseId(_) => "full-screen",
+            })
             .apply_if(slot.is_some(), |dom| {
                 dom.property("slot", slot.unwrap_ji())
             })
