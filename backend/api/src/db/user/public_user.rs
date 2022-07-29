@@ -440,7 +440,7 @@ pub async fn browse_followers(
                 profile_image_id       as "profile_image?: ImageId",
                 (select language from user_profile where user_profile.user_id = "user".id and language_public is true)      as "language?",
                 (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?",
-                (select array(select persona from user_profile where user_profile.user_id = "user".id and persona_public is true))      as "persona?: Vec<String>",
+                (select persona from user_profile where user_profile.user_id = "user".id and persona_public is true)      as "persona?: Vec<String>",
                 (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?",
                 (select bio from user_profile where user_profile.user_id = "user".id and bio_public is true)      as "bio?",
                 (select array(select circle.id
