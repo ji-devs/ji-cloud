@@ -18,7 +18,7 @@ impl SearchResultsSection {
                 self.load_resources().await;
             }
             AssetType::Course => {
-                self.load_jigs().await;
+                self.load_courses().await;
             }
         }
     }
