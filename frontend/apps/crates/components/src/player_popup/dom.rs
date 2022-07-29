@@ -1,5 +1,6 @@
 use std::rc::Rc;
 
+use super::state::PlayerPopup;
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::asset::AssetId;
@@ -11,7 +12,6 @@ use utils::{
     routes::{AssetPlayRoute, AssetRoute, Route},
     unwrap::UnwrapJiExt,
 };
-use super::state::PlayerPopup;
 
 impl PlayerPopup {
     pub fn render(self: Rc<Self>, slot: Option<&str>) -> Dom {
