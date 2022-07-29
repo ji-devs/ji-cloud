@@ -75,7 +75,7 @@ export class _ extends LitElement {
         ];
     }
 
-    @property()
+    @property({ reflect: true })
     size: Size = "aspect-ratio";
 
     connectedCallback() {
