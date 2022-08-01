@@ -1,13 +1,14 @@
 use components::{instructions::player::InstructionsPlayer, module::_common::play::prelude::*};
 use dominator::clone;
 use once_cell::sync::OnceCell;
+use rand::prelude::*;
 use shared::domain::{
     asset::{Asset, AssetId},
     module::{
         body::{
             _groups::design::{Backgrounds, Sticker},
             find_answer::{
-                Mode, ModuleData as RawData, PlaySettings, Question, QuestionField, Step,
+                Mode, ModuleData as RawData, Ordering, PlaySettings, Question, QuestionField, Step,
             },
         },
         ModuleId,
@@ -58,6 +59,17 @@ impl Base {
 
         let base_ref: Rc<RefCell<Option<Rc<Self>>>> = Rc::new(RefCell::new(None));
 
+        let mut questions: Vec<Rc<Question>> = content
+            .questions
+            .into_iter()
+            .map(|question| Rc::new(question))
+            .collect();
+
+        if let Ordering::Randomize = content.play_settings.ordering {
+            let mut rng = thread_rng();
+            questions.shuffle(&mut rng);
+        }
+
         let base = Rc::new(Self {
             asset_id,
             module_id,
@@ -66,11 +78,7 @@ impl Base {
             settings: content.play_settings,
             backgrounds: content.base.backgrounds,
             stickers: content.base.stickers,
-            questions: content
-                .questions
-                .into_iter()
-                .map(|question| Rc::new(question))
-                .collect(),
+            questions,
             sticker_refs,
             question_field: content.question_field,
             module_phase: init_args.play_phase,
@@ -94,5 +102,9 @@ impl Base {
 impl BaseExt for Base {
     fn play_phase(&self) -> Mutable<ModulePlayPhase> {
         self.module_phase.clone()
+    }
+
+    fn get_timer_minutes(&self) -> Option<u32> {
+        self.settings.time_limit
     }
 }

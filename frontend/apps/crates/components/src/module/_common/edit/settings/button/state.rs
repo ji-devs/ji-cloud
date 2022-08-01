@@ -138,6 +138,8 @@ pub enum SettingsButtonKind {
     TimeLimit,
     TimeLimitOff,
     VideoCaptions,
+    /// Special type for overriding the label
+    Custom(&'static str, &'static str),
 }
 
 impl SettingsButtonKind {
@@ -167,6 +169,7 @@ impl SettingsButtonKind {
             Self::TimeLimit => "time-limit",
             Self::TimeLimitOff => "time-limit-off",
             Self::VideoCaptions => "video-captions",
+            Self::Custom(id, _) => id,
         }
     }
 }
