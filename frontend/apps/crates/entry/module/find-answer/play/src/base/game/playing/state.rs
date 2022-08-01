@@ -21,6 +21,9 @@ pub struct PlayState {
     pub traces: Vec<Rc<PlayTrace>>,
     /// Set of traces already selected by the student.
     pub selected_set: Mutable<HashSet<usize>>,
+    /// Flag indicating whether the question has already ended. When true, subsequent taps on the answer traces will
+    /// not trigger any logic.
+    pub ended: Mutable<bool>,
 }
 
 impl PlayState {
@@ -36,6 +39,7 @@ impl PlayState {
             question,
             traces,
             selected_set: Mutable::new(HashSet::new()),
+            ended: Mutable::new(false),
         })
     }
 }
@@ -64,19 +68,21 @@ impl PlayTrace {
     }
 
     pub fn select(&self, play_state: Rc<PlayState>) {
-        if self.audio.is_none() && self.text.is_none() {
-            self.phase.set(PlayPhase::IdleSelected);
-            play_state.evaluate_end();
-        } else if let Some(bounds) = self.inner.calc_bounds(true) {
-            let bubble = TraceBubble::new(
-                bounds,
-                self.audio.clone(),
-                self.text.clone(),
-                Some(clone!(play_state => move || {
-                    play_state.clone().evaluate_end();
-                })),
-            );
-            self.phase.set(PlayPhase::Playing(bubble));
+        if !play_state.ended.get() {
+            if self.audio.is_none() && self.text.is_none() {
+                self.phase.set(PlayPhase::IdleSelected);
+                play_state.evaluate_end();
+            } else if let Some(bounds) = self.inner.calc_bounds(true) {
+                let bubble = TraceBubble::new(
+                    bounds,
+                    self.audio.clone(),
+                    self.text.clone(),
+                    Some(clone!(play_state => move || {
+                        play_state.clone().evaluate_end();
+                    })),
+                );
+                self.phase.set(PlayPhase::Playing(bubble));
+            }
         }
     }
 

@@ -42,6 +42,9 @@ impl PlayState {
             return;
         }
 
+        // At this point, we know that the student has selected all the traces and that this question is done.
+        self.ended.set(true);
+
         // We need to know how many questions have been completed so that if the settings have the
         // activity ending after _n_ questions, we can move on to the next activity.
         let n_questions_completed = match self.game.question.get_cloned() {
