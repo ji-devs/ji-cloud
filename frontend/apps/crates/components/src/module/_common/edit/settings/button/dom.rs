@@ -26,6 +26,13 @@ where
     html!("module-settings-button", {
         .property("kind", state.kind.as_str_id())
         .property_signal("active", (state.active_signal) ())
+        .apply(clone!(state => move |dom| {
+            if let SettingsButtonKind::Custom(_, label) = state.kind {
+                dom.property("label", label)
+            } else {
+                dom
+            }
+        }))
         .apply_if(state.on_click.is_some(), |dom| {
             dom.event(clone!(state => move |evt:events::Click| {
                 // Prevents clicks inside the settings bubble from toggling the state of the

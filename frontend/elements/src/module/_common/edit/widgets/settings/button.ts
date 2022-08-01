@@ -174,6 +174,9 @@ export class _ extends LitElement {
     @property()
     kind: Kind = "attempts";
 
+    @property()
+    label?: string;
+
     @property({ type: Boolean, reflect: true })
     hover: boolean = false;
 
@@ -206,7 +209,7 @@ export class _ extends LitElement {
     }
 
     render() {
-        const { kind, hover, active, num } = this;
+        const { kind, hover, active, num, label } = this;
 
         return html`
             <div class="icon-and-label">
@@ -214,7 +217,7 @@ export class _ extends LitElement {
                     ${renderImage(kind, hover, active)}
                     ${!isNaN(num) ? renderNumber(num, hover, active) : nothing}
                 </div>
-                <div class="label">${STR_LABEL[kind]}</div>
+                <div class="label">${label ?? STR_LABEL[kind]}</div>
             </div>
             ${active
                 ? html`<div class="bubble"><slot name="bubble"></slot></div>`
