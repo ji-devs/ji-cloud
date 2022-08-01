@@ -188,6 +188,7 @@ select cte.course_id                                          as "course_id: Cou
            select row(jig_id)
            from course_data_jig
            where course_data_id = cte.draft_or_live_id
+           order by "index"
        )                                                     as "items!: Vec<(JigId,)>"
 from course_data
          inner join cte on cte.draft_or_live_id = course_data.id
@@ -316,6 +317,7 @@ select  id,
             select row(jig_id)
             from course_data_jig
             where course_data_jig.course_data_id = course_data.id
+            order by "index"
         )                                                     as "items!: Vec<(JigId,)>"
 from course_data
          inner join unnest($1::uuid[])
@@ -907,8 +909,8 @@ where course_data_id = $1
     sqlx::query!(
         //language=SQL
         r#"
-insert into course_data_jig(course_data_id, jig_id)
-select $2, jig_id
+insert into course_data_jig(course_data_id, jig_id, index)
+select $2, jig_id, index
 from course_data_jig
 where course_data_id = $1
         "#,
