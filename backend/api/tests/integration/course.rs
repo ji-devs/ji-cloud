@@ -276,8 +276,7 @@ async fn course_jig_index() -> anyhow::Result<()> {
             port
         ))
         .json(&json!({
-            "description": "asdasdasd",
-            "language": "en-us",
+            "items": ["0cc084bc-7c83-11eb-9f77-e3218dffb008", "19becb2b-bff7-4c1b-bb2c-16f2e098d3d3", "3a71522a-cd77-11eb-8dc1-af3e35f7c743"]
         }))
         .login()
         .send()
@@ -334,7 +333,7 @@ async fn course_jig_index() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/course/browse?authorId=1f241e1b-b537-493f-a230-075cb16315be&draftOrLive=draft",
+            "http://0.0.0.0:{}/v1/course/3a6a3660-f3ec-11ec-b8ef-071747fa2a0d/live",
             port
         ))
         .login()

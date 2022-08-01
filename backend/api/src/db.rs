@@ -122,6 +122,7 @@ async fn recycle_metadata<'a, T: Metadata>(
 
     for meta in meta.chunks(i16::MAX as usize - 1) {
         let query = generate_metadata_insert(table, T::TABLE, meta.len());
+
         let mut query = sqlx::query(&query).bind(id);
 
         for meta in meta {
