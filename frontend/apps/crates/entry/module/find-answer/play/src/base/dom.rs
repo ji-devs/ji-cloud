@@ -12,8 +12,13 @@ use components::{
 };
 use dominator::{apply_methods, clone, html, Dom};
 use futures_signals::signal::SignalExt;
-use shared::domain::module::body::_groups::design::Sticker as RawSticker;
+use js_sys::Reflect;
+use shared::domain::module::body::{
+    _groups::design::Sticker as RawSticker, find_answer::QuestionField,
+};
 use std::rc::Rc;
+use utils::unwrap::UnwrapJiExt;
+use wasm_bindgen::JsValue;
 
 use super::game::{dom::render as render_game, state::Game};
 
@@ -48,6 +53,17 @@ impl DomRenderable for Base {
                                             apply_methods!(dom, {
                                                 .after_inserted(clone!(state => move |elem| {
                                                     if let Some(sticker_ref) = state.sticker_refs.get(index) {
+                                                        // If this is the question field sticker, then clear its content.
+                                                        if let QuestionField::Text(question_index) = state.question_field {
+                                                            if question_index == index {
+                                                                Reflect::set(
+                                                                    &elem,
+                                                                    &JsValue::from_str("textValue"),
+                                                                    &JsValue::from_str(" ") // This is weird. If we use "", then subsequent calls to set textValue don't work correctly.
+                                                                ).unwrap_ji();
+                                                            }
+                                                        }
+
                                                         let _ = sticker_ref.set(elem);
                                                     }
                                                 }))
