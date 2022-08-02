@@ -7,6 +7,7 @@ use super::{
     video::ext::*,
 };
 use dominator::clone;
+use futures_signals::signal_vec::VecDiff;
 use shared::domain::module::body::{
     Image,
     _groups::design::{
@@ -68,12 +69,18 @@ impl<T: AsSticker> Stickers<T> {
         if let Some(target_index) = target_index {
             self.list.lock_mut().move_from_to(curr, target_index);
             self.select_index(target_index);
+            self.call_change();
+            self.call_index_change(VecDiff::Move {
+                old_index: curr,
+                new_index: target_index,
+            });
         }
     }
 
     pub fn delete_index(&self, index: usize) {
         self.list.lock_mut().remove(index);
         self.call_change();
+        self.call_index_change(VecDiff::RemoveAt { index });
         /*
         self.get_history().push_modify(|game_data| {
             game_data.pairs.remove(pair_index);
@@ -159,6 +166,12 @@ impl<T: AsSticker> Stickers<T> {
     pub fn call_change(&self) {
         if let Some(on_change) = self.callbacks.on_change.as_ref() {
             on_change(&*self.list.lock_ref());
+        }
+    }
+
+    pub fn call_index_change(&self, diff: VecDiff<T>) {
+        if let Some(on_index_change) = self.callbacks.on_index_change.as_ref() {
+            on_index_change(diff);
         }
     }
 }

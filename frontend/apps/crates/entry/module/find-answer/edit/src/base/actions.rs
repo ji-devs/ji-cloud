@@ -59,6 +59,10 @@ impl Base {
             ..Default::default()
         }));
 
+        if let Some(index) = question_field_index {
+            self.question_field.set(QuestionField::Text(index));
+        }
+
         self.history.push_modify(move |raw| {
             if let Some(content) = &mut raw.content {
                 let question_text = question_text.unwrap_or_default();
@@ -68,10 +72,7 @@ impl Base {
                     ..Default::default()
                 };
                 content.questions.push(raw_question);
-
-                if let Some(index) = question_field_index {
-                    content.question_field = QuestionField::Text(index);
-                }
+                content.question_field = self.question_field.get_cloned();
             }
         });
     }
@@ -112,14 +113,14 @@ impl Base {
 
     pub fn delete_question(&self, index: usize) {
         self.questions.lock_mut().remove(index);
+        if self.questions.lock_ref().is_empty() {
+            self.question_field.set(QuestionField::Dynamic(None));
+        }
 
         self.history.push_modify(move |raw| {
             if let Some(content) = &mut raw.content {
                 content.questions.remove(index);
-
-                if content.questions.is_empty() {
-                    content.question_field = QuestionField::Dynamic(None);
-                }
+                content.question_field = self.question_field.get_cloned();
             }
         });
     }

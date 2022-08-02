@@ -11,13 +11,14 @@ use components::{
     traces::edit::{TracesEdit, TracesEditCallbacks},
 };
 use dominator::clone;
+use futures_signals::signal_vec::VecDiff;
 use futures_signals::{
     signal::{Mutable, ReadOnlyMutable},
     signal_vec::MutableVec,
 };
 use shared::domain::asset::AssetId;
 use shared::domain::module::body::_groups::design::Trace;
-use shared::domain::module::body::find_answer::{Ordering, Question as RawQuestion};
+use shared::domain::module::body::find_answer::{Ordering, Question as RawQuestion, QuestionField};
 use shared::domain::{
     jig::JigId,
     module::{
@@ -46,6 +47,7 @@ pub struct Base {
     pub backgrounds: Rc<Backgrounds>,
     pub stickers: Rc<Stickers<Sticker>>,
     pub questions: MutableVec<Rc<Question>>,
+    pub question_field: Mutable<QuestionField>,
     // Optional index of the currently open question.
     pub current_question: Mutable<Option<usize>>,
     pub text_editor: Rc<TextEditor>,
@@ -208,8 +210,7 @@ impl Base {
             }))),
         ));
 
-        let stickers = Stickers::new(
-            text_editor.clone(),
+        let mut stickers_callbacks =
             StickersCallbacks::new(Some(clone!(history => move |stickers:&[Sticker]| {
                 history.push_modify(|raw| {
                     if let Some(content) = &mut raw.content {
@@ -221,8 +222,59 @@ impl Base {
                             .collect();
                     }
                 });
-            }))),
-        );
+            })));
+
+        stickers_callbacks.set_on_index_change(clone!(_self_ref, history => move |diff| {
+            if let Some(_self) = _self_ref.borrow().as_ref() {
+                if let QuestionField::Text(field_index) = _self.question_field.get_cloned() {
+                    let modify_history = match diff {
+                        VecDiff::RemoveAt { index } => {
+                            if index == field_index {
+                                // The sticker that was the field has been removed.
+                                _self.question_field.set(QuestionField::Dynamic(None));
+                                true
+                            } else if index < field_index {
+                                // The sticker that was removed is before the field index, so decrease the value.
+                                _self.question_field.set(QuestionField::Text(field_index - 1));
+                                true
+                            } else {
+                                false
+                            }
+                        }
+                        VecDiff::Move { old_index, new_index } => {
+                            if old_index == field_index {
+                                // The sticker that was moved, is the question sticker.
+                                _self.question_field.set(QuestionField::Text(new_index));
+                                true
+                            } else if old_index < field_index && new_index >= field_index {
+                                // In the move operation, old_index is the index of the value _removed_, and new_index
+                                // is the index of the value _inserted_.
+                                //
+                                // If the original index was before the field index, and the new index is the same or higher
+                                //  than field index, decrease the value.
+                                _self.question_field.set(QuestionField::Text(field_index - 1));
+                                true
+                            } else {
+                                false
+                            }
+                        }
+                        _ => {
+                            false
+                        }
+                    };
+
+                    if modify_history {
+                        history.push_modify(|raw| {
+                            if let Some(content) = &mut raw.content {
+                                content.question_field = _self.question_field.get_cloned();
+                            }
+                        });
+                    }
+                }
+            }
+        }));
+
+        let stickers = Stickers::new(text_editor.clone(), stickers_callbacks);
 
         stickers.replace_all(
             content
@@ -247,6 +299,7 @@ impl Base {
             backgrounds,
             stickers,
             questions: Question::from_raw_vec(content.questions),
+            question_field: Mutable::new(content.question_field),
             current_question: Mutable::new(None),
             play_settings: Rc::new(PlaySettings::new(content.play_settings)),
             continue_next_fn: Mutable::new(None),
