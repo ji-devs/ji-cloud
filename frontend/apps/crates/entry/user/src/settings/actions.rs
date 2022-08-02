@@ -16,11 +16,11 @@ use shared::{
 };
 use wasm_bindgen_futures::spawn_local;
 
-use super::state::{ProfilePage, ResetPasswordStatus};
+use super::state::{SettingsPage, ResetPasswordStatus};
 use utils::{fetch::api_with_auth, prelude::*, unwrap::UnwrapJiExt};
 use web_sys::File;
 
-impl ProfilePage {
+impl SettingsPage {
     pub fn send_reset_password(self: &Rc<Self>) {
         let state = self;
 

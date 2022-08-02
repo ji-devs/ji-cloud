@@ -6,7 +6,7 @@ use crate::{
     email::verify::VerifyEmailPage,
     login::LoginPage,
     oauth::dom::OauthPage,
-    profile::state::ProfilePage,
+    settings::state::SettingsPage,
     register::{
         dom::RegisterPage, pages::complete::dom::CompletePage as RegisterCompletePage, state::Step,
     },
@@ -37,7 +37,7 @@ impl Router {
                 }
                 UserRoute::LoginOauth(data) => Some(OauthPage::render(data, OAuthUrlKind::Login)),
                 UserRoute::Login(query) => Some(LoginPage::new(query).render()),
-                UserRoute::Settings => Some(ProfilePage::new().render()),
+                UserRoute::Settings => Some(SettingsPage::new().render()),
                 UserRoute::RegisterComplete => Some(RegisterCompletePage::render()),
                 UserRoute::ContinueRegistration(oauth_profile) => Some(RegisterPage::render(
                     Some(Step::One(oauth_profile)),

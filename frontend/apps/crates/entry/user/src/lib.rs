@@ -10,7 +10,7 @@ mod email_handler;
 mod login;
 mod oauth;
 mod password_handler;
-mod profile;
+mod settings;
 mod register;
 mod reset_password;
 mod router;

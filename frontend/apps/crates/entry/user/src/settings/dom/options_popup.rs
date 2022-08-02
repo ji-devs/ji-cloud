@@ -8,21 +8,21 @@ use futures_signals::{
 use shared::domain::meta::MetadataResponse;
 use utils::events;
 
-use crate::profile::state::ActivePopup;
+use crate::settings::state::ActivePopup;
 
-use super::super::state::{ProfilePage, ProfilePageUser};
+use super::super::state::{SettingsPage, SettingsPageUser};
 
 const STR_DONE: &str = "Done";
 
 pub struct PopupCallbacks<I, S> {
     pub get_options_list: Box<dyn Fn(&MetadataResponse) -> &Vec<S>>,
-    pub get_selected_list: Box<dyn Fn(&ProfilePageUser) -> &MutableVec<I>>,
+    pub get_selected_list: Box<dyn Fn(&SettingsPageUser) -> &MutableVec<I>>,
     pub get_id_from_struct: Box<dyn Fn(&S) -> &I>,
     pub get_display_name: Box<dyn Fn(&S) -> &str>,
 }
 
 pub fn render<I, S>(
-    state: Rc<ProfilePage>,
+    state: Rc<SettingsPage>,
     header: &str,
     subheader: &str,
     callbacks: PopupCallbacks<I, S>,

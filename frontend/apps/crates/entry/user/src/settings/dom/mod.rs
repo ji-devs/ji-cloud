@@ -16,14 +16,14 @@ use wasm_bindgen::JsValue;
 use web_sys::{HtmlElement, HtmlInputElement};
 
 use crate::{
-    profile::{
+    settings::{
         dom::options_popup::PopupCallbacks,
         state::{ActivePopup, ResetPasswordStatus},
     },
     strings::register::step_2::STR_LOCATION_PLACEHOLDER,
 };
 
-use super::state::ProfilePage;
+use super::state::SettingsPage;
 
 mod options_popup;
 
@@ -41,7 +41,7 @@ const STR_SUBJECT_SUBHEADER: &str = "Which subjects are you interested in?";
 const STR_AGE_HEADER: &str = "Relevant Age Group";
 const STR_AGE_SUBHEADER: &str = "Which age group are you interested in?";
 
-impl ProfilePage {
+impl SettingsPage {
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self;
 

@@ -9,18 +9,18 @@ use shared::domain::{
 };
 use uuid::Uuid;
 
-pub struct ProfilePage {
-    pub user: ProfilePageUser,
+pub struct SettingsPage {
+    pub user: SettingsPageUser,
     pub active_popup: Mutable<ActivePopup>,
     pub reset_password_status: Mutable<ResetPasswordStatus>,
     pub loader: AsyncLoader,
     pub metadata: Mutable<Option<MetadataResponse>>,
 }
 
-impl ProfilePage {
+impl SettingsPage {
     pub fn new() -> Rc<Self> {
         Rc::new(Self {
-            user: ProfilePageUser::empty(),
+            user: SettingsPageUser::empty(),
             active_popup: Mutable::new(ActivePopup::None),
             reset_password_status: Mutable::new(ResetPasswordStatus::default()),
             loader: AsyncLoader::new(),
@@ -51,7 +51,7 @@ pub enum ActivePopup {
 }
 
 #[derive(Debug)]
-pub struct ProfilePageUser {
+pub struct SettingsPageUser {
     pub id: Mutable<UserId>,
     pub username: Mutable<String>,
     pub email: Mutable<String>,
@@ -68,7 +68,7 @@ pub struct ProfilePageUser {
     pub persona: MutableVec<String>,
 }
 
-impl ProfilePageUser {
+impl SettingsPageUser {
     pub fn empty() -> Self {
         Self {
             id: Mutable::new(UserId(Uuid::from_u128(0))),
