@@ -4,7 +4,7 @@ use dominator::{clone, html, with_node, DomBuilder};
 use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
 use utils::{
     events,
-    languages::{Language, EMAIL_LANGUAGES},
+    languages::{Language, JIG_LANGUAGES},
     unwrap::UnwrapJiExt,
 };
 use web_sys::{HtmlInputElement, ShadowRoot};
@@ -15,8 +15,8 @@ use super::EditAbout;
 
 pub const STR_HEADING: &str = "Edit your details";
 pub const STR_LOCATION: &str = "Location";
-pub const STR_ORGANIZATION: &str = "Organization";
-pub const STR_PERSONA: &str = "Persona";
+pub const STR_ORGANIZATION: &str = "Where I work";
+pub const STR_PERSONA: &str = "What I do";
 pub const STR_LANGUAGE: &str = "Language";
 pub const STR_PERSONA_OPTIONS: &[&str] = &[
     "Teacher",
@@ -174,7 +174,7 @@ impl Component for Rc<EditAbout> {
                         .property_signal("value", state.language.signal_cloned().map(|code| {
                             Language::code_to_display_name(&code)
                         }))
-                        .children(EMAIL_LANGUAGES.iter().map(|lang| {
+                        .children(JIG_LANGUAGES.iter().map(|lang| {
                             html!("input-select-option", {
                                 .text(lang.display_name())
                                 .event(clone!(state => move |_: events::CustomSelectedChange| {

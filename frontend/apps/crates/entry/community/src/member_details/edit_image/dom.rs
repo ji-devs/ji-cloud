@@ -9,7 +9,10 @@ use crate::member_details::component::Component;
 
 use super::{EditImage, ImageIfOrFile};
 
-const STR_HEADING: &str = "Add/Edit image";
+const STR_HEADING: &str = "Profile picture";
+const STR_LABEL_PRIMARY: &str = "Upload or drag image here";
+const STR_LABEL_SECONDARY: &str = "Stretches to fit. Max 5 MB";
+const STR_SAVE: &str = "Save";
 
 impl Component for Rc<EditImage> {
     fn styles() -> &'static str {
@@ -78,11 +81,11 @@ impl Component for Rc<EditImage> {
                                             }),
                                             html!("p", {
                                                 .class("pick-file-message")
-                                                .text("Drag & drop or browse an image")
+                                                .text(STR_LABEL_PRIMARY)
                                             }),
                                             html!("p", {
                                                 .class("file-size")
-                                                .text("Maximum image size: 5 MB")
+                                                .text(STR_LABEL_SECONDARY)
                                             }),
                                         ])
                                     })
@@ -91,7 +94,7 @@ impl Component for Rc<EditImage> {
                         }))
                 )
                 .child(html!("button-rect", {
-                    .text("Apply")
+                    .text(STR_SAVE)
                     .property("slot", "submit")
                     .property_signal("disabled", state.loader.is_loading())
                     .event(clone!(state => move |_: events::Click| {

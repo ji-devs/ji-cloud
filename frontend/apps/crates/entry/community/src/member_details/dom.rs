@@ -14,6 +14,7 @@ use shared::{
 use utils::{
     asset::ResourceContentExt,
     events,
+    languages::Language,
     prelude::{get_user_cloned, get_user_id},
     routes::{CommunityCirclesRoute, CommunityMembersRoute, CommunityRoute, Route},
     unwrap::UnwrapJiExt,
@@ -51,7 +52,7 @@ impl MemberDetails {
                                 // dom = dom.property("city", city)
                             }
                             if let Some(language) = &member.language {
-                                dom = dom.property("language", language)
+                                dom = dom.property("language", Language::code_to_display_name(&language))
                             }
                             if let Some(organization) = &member.organization {
                                 dom = dom.property("organization", organization)
