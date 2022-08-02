@@ -13,44 +13,54 @@ use crate::domain::{
 pub struct PublicUser {
     /// User Id
     pub id: UserId,
+
     /// Username of User
     pub username: String,
+
     /// First name of User
     pub given_name: String,
+
     /// Lastname of User
     pub family_name: String,
+
     /// Profile image of User
     pub profile_image: Option<ImageId>,
+
     /// Bio of User
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bio: Option<String>, // only here if language_public is true
+
     /// Language of User
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub language: Option<String>, // only here if language_public is true
+
     /// Organization of User
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub organization: Option<String>, // only here if organization_public is true
+
     /// Persona of User
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub persona: Option<Vec<String>>, // only here if persona_public is true
+
     /// Location of User
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub location: Option<serde_json::Value>, // only here if location_public is true
-    /// Circles associated of User
+
+    /// Circles associated with User
     #[serde(default)]
     pub circles: Vec<CircleId>,
 }
 
-/// Query for [`Browse`](crate::api::endpoints::user::Browse).
+/// Query for [`Browse`](crate::api::endpoints::user::public_user::Browse).
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct UserBrowseQuery {
-    /// The page number of the Courses to get.
+    /// The page number
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub page: Option<u32>,
@@ -58,7 +68,7 @@ pub struct UserBrowseQuery {
     /// The hits per page to be returned
     pub page_limit: Option<u32>,
 
-    /// The hits per page to be returned
+    /// Circle's that has user joined
     #[serde(default)]
     #[serde(serialize_with = "csv_encode_uuids")]
     #[serde(deserialize_with = "from_csv")]
@@ -74,11 +84,11 @@ pub struct BrowsePublicUserResponse {
     pub users: Vec<PublicUser>,
     /// Pages
     pub pages: u32,
-    /// number of users
+    /// Number of users with profiles
     pub total_user_count: u64,
 }
 
-/// Query for [`Browse`](crate::api::endpoints::user::Search).
+/// Query for [`Browse`](crate::api::endpoints::user::public_user::Search).
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct SearchPublicUserQuery {
@@ -92,7 +102,7 @@ pub struct SearchPublicUserQuery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub page: Option<u32>,
 
-    /// Optionally filter by user's id
+    /// Optionally filter by User's Id
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub user_id: Option<UserOrMe>,
@@ -139,13 +149,13 @@ pub struct SearchPublicUserQuery {
 pub struct SearchPublicUserResponse {
     /// User Id
     pub users: Vec<PublicUser>,
-    /// Pages
+    /// Number of pages
     pub pages: u32,
-    /// number of users
+    /// Number of User profiles
     pub total_user_count: u64,
 }
 
-/// Query for [`Browse`](crate::api::endpoints::user::BrowseUserJigs).
+/// Query for [`Browse`](crate::api::endpoints::user::public_user::BrowseUserJigs).
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct BrowsePublicUserJigsQuery {
@@ -160,11 +170,11 @@ pub struct BrowsePublicUserJigsQuery {
     pub page_limit: Option<u32>,
 }
 
-/// Query for [`Browse`](crate::api::endpoints::user::BrowseUserResources).
+/// Query for [`Browse`](crate::api::endpoints::user::public_user::BrowseUserResources).
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct BrowsePublicUserResourcesQuery {
-    /// The page number of the User Jigs to fetch.
+    /// The page number of the User Resources to fetch.
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub page: Option<u32>,
@@ -175,21 +185,21 @@ pub struct BrowsePublicUserResourcesQuery {
     pub page_limit: Option<u32>,
 }
 
-/// Browse User's Additional Resources
+/// Response for Browsing a User's Additional Resources
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct BrowsePublicUserResourcesResponse {
-    /// the resources returned.
+    /// The Additional Resources returned
     pub resources: Vec<AdditionalResource>,
 
     /// The number of pages found.
     pub pages: u32,
 
-    /// The total number of resources found
+    /// The total number of additional resources belonging to user
     pub total_resource_count: u64,
 }
 
-/// Query for [`Browse`](crate::api::endpoints::user::BrowseUserCourses).
+/// Query for [`Browse`](crate::api::endpoints::user::public_user::BrowseUserCourses).
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct BrowsePublicUserCoursesQuery {
@@ -204,7 +214,7 @@ pub struct BrowsePublicUserCoursesQuery {
     pub page_limit: Option<u32>,
 }
 
-/// Query for [`Browse`](crate::api::endpoints::user::BrowseFollowers).
+/// Query for [`Browse`](crate::api::endpoints::user::public_user::BrowseFollowers).
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct BrowsePublicUserFollowersQuery {
@@ -223,7 +233,7 @@ pub struct BrowsePublicUserFollowersQuery {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct BrowsePublicUserFollowersResponse {
-    /// the followers returned.
+    /// The follower profiles returned
     pub followers: Vec<PublicUser>,
 
     /// The number of pages found.
@@ -233,11 +243,11 @@ pub struct BrowsePublicUserFollowersResponse {
     pub total_follower_count: u64,
 }
 
-/// Query for [`Browse`](crate::api::endpoints::user::BrowseFollowing).
+/// Query for [`Browse`](crate::api::endpoints::user::public_user::BrowseFollowing).
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct BrowsePublicUserFollowingsQuery {
-    /// The page number of the User Followers to fetch.
+    /// The page number of the Public User Followers to fetch.
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub page: Option<u32>,
@@ -252,7 +262,7 @@ pub struct BrowsePublicUserFollowingsQuery {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct BrowsePublicUserFollowingResponse {
-    /// the followings returned.
+    /// The Public User Profiles of followings
     pub followings: Vec<PublicUser>,
 
     /// The number of pages found.

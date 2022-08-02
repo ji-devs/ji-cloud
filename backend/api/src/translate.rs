@@ -281,7 +281,6 @@ limit 50 for no key update skip locked;
         log::info!("reached update JIG translation");
         let mut txn = self.db.begin().await?;
 
-        // todo: allow for some way to do a partial update (for example, by having a channel for queueing partial updates)
         let descriptions: Vec<_> = sqlx::query!(
             //language=SQL
             r#"
@@ -303,7 +302,6 @@ limit 50 for no key update skip locked;
         .try_collect()
         .await?;
 
-        // todo: allow for some way to do a partial update (for example, by having a channel for queueing partial updates)
         let display_names: Vec<_> = sqlx::query!(
             //language=SQL
             r#"

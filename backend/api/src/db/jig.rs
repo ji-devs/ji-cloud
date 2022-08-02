@@ -93,11 +93,8 @@ values ($1, 0)
     Ok(JigId(jig.id))
 }
 
-/// If `default_module_stable_ids` is `Some` is given, then insert the default modules with those stable IDs.
-///
-/// Otherwise if `None`, then create new stable ids and return them as a part of the response.
 pub async fn create_jig_data(
-    txn: &mut PgConnection, // FIXME does this work?
+    txn: &mut PgConnection,
     display_name: &str,
     categories: &[CategoryId],
     age_ranges: &[AgeRangeId],
@@ -1084,7 +1081,7 @@ select draft_id, live_id from jig where id = $1
     .map(|it| (it.draft_id, it.live_id))
 }
 
-/// Clones a copy of the jig data and modules, preserving the module's stable IDs
+/// Clones a copy of the jig data and modules
 pub async fn clone_data(
     txn: &mut PgConnection,
     from_data_id: &Uuid,
