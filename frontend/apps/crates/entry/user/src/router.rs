@@ -6,11 +6,11 @@ use crate::{
     email::verify::VerifyEmailPage,
     login::LoginPage,
     oauth::dom::OauthPage,
-    settings::state::SettingsPage,
     register::{
         dom::RegisterPage, pages::complete::dom::CompletePage as RegisterCompletePage, state::Step,
     },
     reset_password::PasswordResetPage,
+    settings::state::SettingsPage,
 };
 use dominator::{html, Dom};
 use futures_signals::signal::{Signal, SignalExt};

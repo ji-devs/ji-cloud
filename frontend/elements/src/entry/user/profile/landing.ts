@@ -4,13 +4,10 @@ import {
     css,
     customElement,
     property,
-    queryAll,
     query,
 } from "lit-element";
 
 const STR_BASIC_INFO = "Basic info";
-const STR_PROFILE_IMAGE = "Profile image";
-const STR_LOCATION = "Location";
 const STR_JIGZI_FILTERS = "Jigzi Filters";
 const STR_MY_PROFILE = "My Profile";
 
@@ -19,9 +16,7 @@ const STR_PASSWORD = "Password";
 const STR_FIRST_NAME = "First name";
 const STR_FAMILY_NAME = "Family name";
 const STR_USER_NAME = "Username";
-const STR_PERSONA = "I am a...";
 const STR_PREFERRED_LANGUAGE = "Preferred language of communication";
-const STR_SCHOOL_ORGANIZATION = "School/Organization";
 const STR_RELEVANT_AGE_GROUPS = "Relevant age groups";
 const STR_RELEVANT_SUBJECTS = "Relevant subjects";
 const STR_AFFILIATION = "Affiliation";
@@ -131,12 +126,6 @@ export class _ extends LitElement {
                     display: grid;
                     row-gap: 40px;
                 }
-                section#basic-info .right-side {
-                    display: grid;
-                    row-gap: 40px;
-                    justify-content: center;
-                    align-content: start;
-                }
                 section#basic-info .password-wrapper {
                     display: flex;
                     justify-content: space-between;
@@ -158,29 +147,6 @@ export class _ extends LitElement {
                     justify-items: center;
                     row-gap: 16px;
                     width: 156px;
-                }
-                ::slotted([slot="editable-profile-image"]) {
-                    grid-row: 1;
-                    grid-column: 1;
-                    overflow: hidden;
-                    border-radius: 50%;
-                    height: 156px;
-                }
-                ::slotted([slot="profile-image-edit"]) {
-                    grid-row: 1;
-                    grid-column: 1;
-                    place-self: end;
-                    height: 40px;
-                    width: 40px;
-                    border-radius: 50%;
-                    background-color: var(--light-blue-5);
-                    display: inline-grid;
-                    place-content: center;
-
-                    /* todo delete */
-                    color: white;
-                    font-size: 22px;
-                    transform: scaleX(-1);
                 }
                 ::slotted(dialog-overlay) {
                     background-color: #00000080;
@@ -252,9 +218,6 @@ export class _ extends LitElement {
                     <a @click="${this.scrollToSection}" href="#basic-info"
                         >${STR_BASIC_INFO}</a
                     >
-                    <a @click="${this.scrollToSection}" href="#location"
-                        >${STR_LOCATION}</a
-                    >
                     <a
                         @click="${this.scrollToSection}"
                         href="#jigzi-filters"
@@ -292,33 +255,10 @@ export class _ extends LitElement {
                                 <slot name="username"></slot>
                             </label>
                             <label>
-                                <span>${STR_PERSONA}</span>
-                                <slot name="persona"></slot>
+                                <span>${STR_PREFERRED_LANGUAGE}</span>
+                                <slot name="preferred-language"></slot>
                             </label>
                         </div>
-                        <div class="right-side">
-                            <h2>${STR_PROFILE_IMAGE}</h2>
-                            <div class="profile-image-wrapper">
-                                <slot name="editable-profile-image"></slot>
-                                <slot name="profile-image-edit"></slot>
-                                <slot name="profile-image-delete"></slot>
-                            </div>
-                        </div>
-                    </section>
-                    <section id="location">
-                        <h2>${STR_LOCATION}</h2>
-                        <label>
-                            <span>${STR_LOCATION}</span>
-                            <slot name="location"></slot>
-                        </label>
-                        <label>
-                            <span>${STR_SCHOOL_ORGANIZATION}</span>
-                            <slot name="school-organization"></slot>
-                        </label>
-                        <label>
-                            <span>${STR_PREFERRED_LANGUAGE}</span>
-                            <slot name="preferred-language"></slot>
-                        </label>
                     </section>
                     <section id="jigzi-filters">
                         <h2>${STR_JIGZI_FILTERS}</h2>

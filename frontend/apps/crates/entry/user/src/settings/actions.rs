@@ -1,24 +1,17 @@
 use std::rc::Rc;
 
-use components::image::upload::upload_image;
 use dominator::clone;
 use futures::future::join;
 use gloo_timers::future::TimeoutFuture;
 use shared::{
     api::endpoints::{self, meta, user, ApiEndpoint},
-    domain::{
-        image::{user::UserImageCreateRequest, ImageId, ImageSize},
-        meta::MetadataResponse,
-        user::ResetPasswordRequest,
-    },
+    domain::{meta::MetadataResponse, user::ResetPasswordRequest},
     error::EmptyError,
-    media::MediaLibrary,
 };
 use wasm_bindgen_futures::spawn_local;
 
-use super::state::{SettingsPage, ResetPasswordStatus};
+use super::state::{ResetPasswordStatus, SettingsPage};
 use utils::{fetch::api_with_auth, prelude::*, unwrap::UnwrapJiExt};
-use web_sys::File;
 
 impl SettingsPage {
     pub fn send_reset_password(self: &Rc<Self>) {
@@ -91,36 +84,4 @@ impl SettingsPage {
             }
         }));
     }
-
-    pub fn set_profile_image(self: &Rc<Self>, file: File) {
-        let state = self;
-        state.loader.load(clone!(state => async move {
-            match upload_profile_image(file).await {
-                Err(err) => {
-                    log::error!("{}", err);
-                },
-                Ok(image_id) => {
-                    state.user.profile_image.set(Some(image_id));
-                    state.save_profile();
-                },
-            }
-        }));
-    }
-}
-
-async fn upload_profile_image(file: File) -> Result<ImageId, Box<dyn std::error::Error>> {
-    let req = UserImageCreateRequest {
-        size: ImageSize::UserProfile,
-    };
-
-    let image_id = endpoints::image::user::Create::api_with_auth(Some(req))
-        .await
-        .map_err(|_err| "Error creating image in db")?
-        .id;
-
-    upload_image(image_id, MediaLibrary::User, &file, None)
-        .await
-        .map_err(|_err| "Error uploading image")?;
-
-    Ok(image_id)
 }

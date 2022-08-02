@@ -10,10 +10,10 @@ mod email_handler;
 mod login;
 mod oauth;
 mod password_handler;
-mod settings;
 mod register;
 mod reset_password;
 mod router;
+mod settings;
 mod strings;
 
 use wasm_bindgen::prelude::*;

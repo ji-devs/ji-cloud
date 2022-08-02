@@ -15,12 +15,9 @@ use utils::{
 use wasm_bindgen::JsValue;
 use web_sys::{HtmlElement, HtmlInputElement};
 
-use crate::{
-    settings::{
-        dom::options_popup::PopupCallbacks,
-        state::{ActivePopup, ResetPasswordStatus},
-    },
-    strings::register::step_2::STR_LOCATION_PLACEHOLDER,
+use crate::settings::{
+    dom::options_popup::PopupCallbacks,
+    state::{ActivePopup, ResetPasswordStatus},
 };
 
 use super::state::SettingsPage;
@@ -28,7 +25,6 @@ use super::state::SettingsPage;
 mod options_popup;
 
 const STR_EDIT: &str = " Edit";
-const STR_REMOVE_IMAGE: &str = "remove image";
 
 const STR_RESET_PASSWORD_SENT: &str = "We just sent you a reset password email!";
 
@@ -60,33 +56,6 @@ impl SettingsPage {
                             Some(image_id) => JsValue::from_str(&image_id.0.to_string()),
                             None => JsValue::UNDEFINED,
                         }
-                    }))
-                }),
-                html!("profile-image", {
-                    .property("slot", "editable-profile-image")
-                    .property_signal("imageId", state.user.profile_image.signal_ref(|profile_image| {
-                        match profile_image {
-                            Some(image_id) => JsValue::from_str(&image_id.0.to_string()),
-                            None => JsValue::UNDEFINED,
-                        }
-                    }))
-                }),
-                html!("input-file", {
-                    .property("slot", "profile-image-edit")
-                    .text("✎")
-                    .event(clone!(state => move |evt: events::CustomFile| {
-                        state.set_profile_image(evt.file());
-                    }))
-                }),
-                html!("button-rect", {
-                    .visible_signal(state.user.profile_image.signal_ref(|image| image.is_some()))
-                    .property("kind", "text")
-                    .property("color", "blue")
-                    .property("slot", "profile-image-delete")
-                    .text(STR_REMOVE_IMAGE)
-                    .event(clone!(state => move |_: events::Click| {
-                        state.user.profile_image.set(None);
-                        state.save_profile();
                     }))
                 }),
                 html!("input-wrapper", {
@@ -149,70 +118,6 @@ impl SettingsPage {
                         }))
                     })
                 }),
-
-
-
-
-
-
-
-
-                html!("input-select", {
-                    .property("slot", "persona")
-                    .property("multiple", true)
-                    .property_signal("value", state.user.persona.signal_vec_cloned().to_signal_cloned().map(|persona| {
-                        persona.join(", ")
-                    }))
-                    .children(["fdsa"].iter().map(|persona| {
-                        html!("input-select-option", {
-                            .text(persona)
-                            .property_signal(
-                                "selected",
-                                state.user.persona.signal_vec_cloned().to_signal_cloned().map(move |p| {
-                                    p.iter().any(|p| p == persona)
-                                })
-                            )
-                            .event(clone!(state => move |evt: events::CustomSelectedChange| {
-                                let pos = state.user.persona.lock_ref().iter().position(|p| p == persona);
-
-                                if evt.selected() {
-                                    if pos.is_none() {
-                                        // Only add the selection if it doesn't exist yet and the
-                                        // event is selected.
-                                        state.user.persona.lock_mut().push_cloned(persona.to_string());
-                                    }
-                                } else if let Some(pos) = pos {
-                                    // Only remove the selection if it does exist and the event
-                                    // is not selected.
-                                    state.user.persona.lock_mut().remove(pos);
-                                }
-
-                                state.save_profile();
-                            }))
-                        })
-                    }))
-                }),
-                html!("input-wrapper", {
-                    .property("slot", "location")
-                    .child(html!("input-location", {
-                        .property("placeholder", STR_LOCATION_PLACEHOLDER)
-                        .property_signal("locationAsString", state.user.location.signal_cloned().map(|location| {
-                            location.unwrap_or_default()
-                                .as_str()
-                                .unwrap_or_default()
-                                .to_owned()
-                        }))
-                        .event(clone!(state => move |evt: events::GoogleLocation| {
-                            let raw = serde_json::to_value(evt.raw_json()).unwrap_ji();
-                            state.user.location.set(Some(raw));
-                            state.save_profile();
-                        }))
-                    }))
-                    .child(html!("img-ui", {
-                        .property("slot", "icon")
-                        .property("path", "core/inputs/pencil-blue-darker.svg")
-                    }))
-                }),
                 html!("input-select", {
                     .property("slot", "preferred-language")
                     .property_signal("value", state.user.language.signal_cloned().map(|code| {
@@ -228,29 +133,6 @@ impl SettingsPage {
                         })
                     }))
                 }),
-                html!("input-wrapper", {
-                    .property("slot", "school-organization")
-                    .child(html!("input" => HtmlInputElement, {
-                        .with_node!(elem => {
-                            .property_signal("value", state.user.organization.signal_cloned().map(|i| i.unwrap_or_default()))
-                            .event(clone!(state => move |_: events::Input| {
-                                state.user.organization.set(Some(elem.value()));
-                                state.save_profile();
-                            }))
-                        })
-                    }))
-                    .child(html!("img-ui", {
-                        .property("slot", "icon")
-                        .property("path", "core/inputs/pencil-blue-darker.svg")
-                    }))
-                }),
-
-
-
-
-
-
-
                 html!("empty-fragment", {
                     .style("display", "contents")
                     .property("slot", "age-groups")
