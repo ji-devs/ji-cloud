@@ -13,7 +13,7 @@ impl SearchResultsSection {
     pub async fn load_resources(self: &Rc<Self>) {
         let mut req = self.home_state.search_selected.to_resource_search_request();
 
-        req.jig_focus = Some(JigFocus::Modules);
+        req.jig_focus = Some(JigFocus::Resources);
 
         req.page = Some(self.next_page.get());
 
