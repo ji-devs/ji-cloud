@@ -25,6 +25,7 @@ use super::ApiEndpoint;
 /// 4. Finalize draft changes by calling [`Publish`]
 ///
 /// # Authorization
+/// * TokenUser
 /// * One of `Admin`, `AdminJig`, or `ManageSelfJig`
 pub struct Create;
 impl ApiEndpoint for Create {
@@ -38,7 +39,8 @@ impl ApiEndpoint for Create {
 /// Get a Course's live data by ID.
 ///
 /// # Authorization
-/// * None
+/// * Creator ID of Course
+/// * One of `Admin`, `AdminJig`,, or `ManageSelfJig` for owned Courses
 ///
 /// # Errors
 ///
@@ -54,6 +56,7 @@ impl ApiEndpoint for GetLive {
 /// Get a Course's draft data by ID.
 ///
 /// # Authorization
+/// * Creator ID of Course
 /// * One of `Admin`, `AdminJig`,, or `ManageSelfJig` for owned Courses
 ///
 /// # Errors
@@ -91,7 +94,8 @@ impl ApiEndpoint for UpdateDraftData {
 /// Publish a Course draft to live by copying over the Coursedata.
 ///
 /// # Authorization
-/// * None
+/// * Creator ID of Course
+/// * One of `Admin`, `AdminJig`, or `ManageSelfJig`
 pub struct Publish;
 impl ApiEndpoint for Publish {
     type Req = ();
@@ -104,7 +108,7 @@ impl ApiEndpoint for Publish {
 /// Browse Courses. Returns the draft data copies in the response.
 ///
 /// # Authorization
-/// * One of `Admin`, `AdminJig`, or `ManageSelfJig`
+/// * None
 pub struct Browse;
 impl ApiEndpoint for Browse {
     type Req = CourseBrowseQuery;
@@ -130,6 +134,7 @@ impl ApiEndpoint for Search {
 /// Delete a Course.
 ///
 /// # Authorization
+/// * Creator ID of Course
 /// * One of `Admin`, `AdminJig`, or `ManageSelfJig` for owned Courses
 pub struct Delete;
 impl ApiEndpoint for Delete {
