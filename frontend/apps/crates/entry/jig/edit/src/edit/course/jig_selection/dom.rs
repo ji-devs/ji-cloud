@@ -17,12 +17,26 @@ impl JigSelection {
             .style("overflow", "auto")
             .property("slot", "main")
             .children_signal_vec(state.jigs.signal_vec_cloned().map(clone!(state => move|jig| {
-                state.render_jig(&jig, html!("button", {
-                    .text("X")
-                    .event(clone!(state, jig => move |_: events::Click| {
-                        state.remove_jig(&jig.id);
-                    }))
-                }))
+                state.render_jig(&jig, vec![
+                    html!("button", {
+                        .text("X")
+                        .event(clone!(state, jig => move |_: events::Click| {
+                            state.remove_jig(&jig.id);
+                        }))
+                    }),
+                    html!("button", {
+                        .text("↥")
+                        .event(clone!(state, jig => move |_: events::Click| {
+                            state.move_up_jig(&jig.id);
+                        }))
+                    }),
+                    html!("button", {
+                        .text("↧")
+                        .event(clone!(state, jig => move |_: events::Click| {
+                            state.move_down_jig(&jig.id);
+                        }))
+                    }),
+                ])
             })))
             .children(&mut [
                 html!("hr"),
@@ -55,23 +69,23 @@ impl JigSelection {
                 })
             ])
             .children_signal_vec(state.search_results.signal_vec_cloned().map(clone!(state => move |jig| {
-                state.render_jig(&jig, html!("button", {
+                state.render_jig(&jig, vec![html!("button", {
                     .text("+")
                     .event(clone!(state, jig => move |_: events::Click| {
                         state.add_jig(Rc::clone(&jig));
                     }))
-                }))
+                })])
             })))
         })
     }
 
-    fn render_jig(self: &Rc<Self>, jig: &JigResponse, action: Dom) -> Dom {
+    fn render_jig(self: &Rc<Self>, jig: &JigResponse, actions: Vec<Dom>) -> Dom {
         html!("p", {
             .text(&jig.jig_data.display_name)
             .child(html!("br"))
             .text("by: ")
             .text(&jig.author_name.clone().unwrap_or_default())
-            .child(action)
+            .children(actions)
         })
     }
 }

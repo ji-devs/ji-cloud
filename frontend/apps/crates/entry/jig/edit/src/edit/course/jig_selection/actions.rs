@@ -85,6 +85,20 @@ impl JigSelection {
         self.save_course();
     }
 
+    pub fn move_up_jig(self: &Rc<Self>, jig_id: &JigId) {
+        let mut jigs = self.jigs.lock_mut();
+        let pos = jigs.iter().position(|jig| &jig.id == jig_id).unwrap();
+        jigs.move_from_to(pos, pos - 1);
+        self.save_course();
+    }
+
+    pub fn move_down_jig(self: &Rc<Self>, jig_id: &JigId) {
+        let mut jigs = self.jigs.lock_mut();
+        let pos = jigs.iter().position(|jig| &jig.id == jig_id).unwrap();
+        jigs.move_from_to(pos, pos + 1);
+        self.save_course();
+    }
+
     async fn get_jig(self: &Rc<Self>, jig_id: &JigId) -> JigResponse {
         let path = endpoints::jig::GetLive::PATH.replace("{id}", &jig_id.0.to_string());
 
