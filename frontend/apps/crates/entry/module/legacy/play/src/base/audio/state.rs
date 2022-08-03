@@ -3,6 +3,7 @@ use components::audio::mixer::AudioHandle;
 use std::cell::RefCell;
 use std::rc::Rc;
 pub struct AudioManager {
+    // TODO: delete?
     pub clip: Rc<RefCell<Option<AudioHandle>>>,
     pub bg: Rc<RefCell<Option<AudioHandle>>>,
 }

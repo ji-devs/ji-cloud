@@ -31,6 +31,8 @@ pub struct JigPlayer {
     pub player_options: JigPlayerOptions,
     pub bg_audio_handle: Rc<RefCell<Option<AudioHandle>>>,
     pub bg_audio_playing: Mutable<bool>,
+    /// audio handles for module audio, not background audio
+    pub audio_handles: RefCell<Vec<AudioHandle>>,
 }
 
 impl JigPlayer {
@@ -56,6 +58,7 @@ impl JigPlayer {
             player_options,
             bg_audio_handle: Rc::new(RefCell::new(None)),
             bg_audio_playing: Mutable::new(true),
+            audio_handles: Default::default()
         })
     }
 }

@@ -7,7 +7,7 @@ use utils::{drag::Drag, prelude::*, resize::get_resize_info};
 use dominator::clone;
 
 use crate::debug::*;
-use components::audio::mixer::{AudioPath, AudioSourceExt, AUDIO_MIXER};
+use components::audio::mixer::{AudioPath, AudioSourceExt, IFRAME_AUDIO_MIXER};
 use components::collision::stickers_traces::pixels::{debug_render_hit_trace, get_hit_index};
 use components::instructions::player::InstructionsPlayer;
 use wasm_bindgen_futures::spawn_local;
@@ -108,7 +108,7 @@ impl PlayState {
                     item.play_audio_effect(AudioEffect::Correct);
                 } else {
                     // Play JIG positive feedback sound
-                    AUDIO_MIXER.with(|mixer| {
+                    IFRAME_AUDIO_MIXER.with(|mixer| {
                         let positive_audio: AudioPath<'_> = mixer.get_random_positive().into();
                         mixer.play_oneshot_on_ended(positive_audio, move || {
                             // Once the positive feedback effect has played, we can show/play the
@@ -154,13 +154,13 @@ impl AudioEffect {
 impl InteractiveItem {
     pub fn try_play_user_audio(&self) {
         if let Some(audio) = self.audio.as_ref() {
-            AUDIO_MIXER.with(|mixer| {
+            IFRAME_AUDIO_MIXER.with(|mixer| {
                 mixer.play_oneshot(audio.as_source());
             });
         }
     }
     pub fn play_audio_effect(&self, effect: AudioEffect) {
-        AUDIO_MIXER.with(|mixer| {
+        IFRAME_AUDIO_MIXER.with(|mixer| {
             mixer.play_oneshot(effect.as_path());
         });
     }

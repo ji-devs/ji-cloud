@@ -1,6 +1,6 @@
 use super::state::*;
 use components::{
-    audio::mixer::{AudioPath, AUDIO_MIXER},
+    audio::mixer::{AudioPath, IFRAME_AUDIO_MIXER},
     module::_common::play::prelude::*,
 };
 use shared::domain::module::body::find_answer::Next;
@@ -30,7 +30,7 @@ impl PlayState {
     }
 
     fn play_correct_sound<F: Fn() + 'static>(self: &Rc<Self>, f: F) {
-        AUDIO_MIXER.with(move |mixer| {
+        IFRAME_AUDIO_MIXER.with(move |mixer| {
             let audio_path: AudioPath<'_> = mixer.get_random_positive().into();
             mixer.play_oneshot_on_ended(audio_path, move || {
                 f();

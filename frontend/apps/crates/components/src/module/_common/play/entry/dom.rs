@@ -9,7 +9,7 @@ use utils::{events::ModuleResizeEvent, iframe::*, prelude::*, resize::*};
 
 use super::{ending::*, loading::dom::render_loading, state::*};
 use crate::{
-    audio::mixer::AUDIO_MIXER, instructions::player::InstructionsPlayer,
+    audio::mixer::{AUDIO_MIXER, IFRAME_AUDIO_MIXER}, instructions::player::InstructionsPlayer,
     module::_common::play::prelude::*, overlay::container::OverlayContainer,
 };
 use shared::domain::module::body::{BodyExt, ModeExt, StepExt};
@@ -161,13 +161,20 @@ where
                     if let Ok(msg) = evt.try_serde_data::<IframeAction<JigToModulePlayerMessage>>() {
                         match msg.data {
                             JigToModulePlayerMessage::Play => {
-                                AUDIO_MIXER.with(|mixer| mixer.play_all());
+                                // AUDIO_MIXER.with(|mixer| mixer.play_all());
+                                // handled on jig player
                             },
                             JigToModulePlayerMessage::Pause => {
-                                AUDIO_MIXER.with(|mixer| mixer.pause_all());
+                                // AUDIO_MIXER.with(|mixer| mixer.pause_all());
+                                // handled on jig player
                             },
                             JigToModulePlayerMessage::TimerDone => {
                             }
+                            JigToModulePlayerMessage::AudioDone { random_id } => {
+                                IFRAME_AUDIO_MIXER.with(|mixer| {
+                                    mixer.done_playing(random_id);
+                                });
+                            },
                         }
                     } else {
                         log::info!("hmmm got other iframe message...");

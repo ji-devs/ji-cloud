@@ -1,6 +1,6 @@
 use super::state::*;
 use components::{
-    audio::mixer::{AudioPath, AudioSourceExt, AUDIO_MIXER},
+    audio::mixer::{AudioPath, AudioSourceExt, IFRAME_AUDIO_MIXER},
     module::_groups::cards::{lookup::Side, play::card::dom::FLIPPED_AUDIO_EFFECT},
 };
 use gloo_timers::future::TimeoutFuture;
@@ -34,7 +34,7 @@ impl Game {
     pub fn flip(state: Rc<Self>) {
         if state.gate.get() == Gate::Waiting {
             // Play card flipping sound effect
-            AUDIO_MIXER.with(clone!(state => move |mixer| {
+            IFRAME_AUDIO_MIXER.with(clone!(state => move |mixer| {
                 mixer.play_oneshot_on_ended(
                     // Then play the cards audio clip
                     AudioPath::new_cdn(FLIPPED_AUDIO_EFFECT.to_string()),
@@ -97,6 +97,6 @@ pub(super) fn get_current(base: &Base, deck: &mut Vec<CardPair>) -> Option<Curre
 
 fn play_card_audio(card: &Card) {
     if let Some(audio) = &card.audio {
-        AUDIO_MIXER.with(|mixer| mixer.play_oneshot(audio.as_source()));
+        IFRAME_AUDIO_MIXER.with(|mixer| mixer.play_oneshot(audio.as_source()));
     }
 }

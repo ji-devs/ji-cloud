@@ -4,7 +4,7 @@ use super::{
     state::{can_load_liked_status, JigPlayer},
     timer::Timer,
 };
-use awsm_web::audio::{AudioClipOptions, AudioHandle};
+use awsm_web::audio::{AudioClipOptions, AudioHandle, AudioSource};
 use components::{
     audio::mixer::{AudioSourceExt, AUDIO_MIXER},
     module::_common::prelude::ModuleId,
@@ -268,6 +268,22 @@ pub fn on_iframe_message(state: Rc<JigPlayer>, message: ModuleToJigPlayerMessage
         ModuleToJigPlayerMessage::JumpToId(module_id) => {
             navigate_to_module(state, &module_id);
         }
+        ModuleToJigPlayerMessage::PlayAudio { audio_path, is_loop, random_id } => {
+            log::info!("{audio_path:?}, {random_id}");
+            let source = AudioSource::Url(audio_path);
+
+            let audio_handle = AUDIO_MIXER.with(clone!(state => move |mixer| {
+                mixer.add_source(source, AudioClipOptions {
+                    auto_play: true,
+                    is_loop,
+                    on_ended: Some(clone!(state => move|| {
+                        sent_iframe_message(Rc::clone(&state), JigToModulePlayerMessage::AudioDone { random_id: random_id.clone() });
+                    })),
+                })
+            }));
+
+            state.audio_handles.borrow_mut().push(audio_handle);
+        },
     };
 }
 

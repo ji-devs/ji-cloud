@@ -1,5 +1,5 @@
 use components::{
-    audio::mixer::{AudioSourceExt, AUDIO_MIXER},
+    audio::mixer::{AudioSourceExt, IFRAME_AUDIO_MIXER},
     module::_common::play::prelude::ModulePlayPhase,
     traces::{
         bubble::TraceBubble,
@@ -30,7 +30,7 @@ pub fn render(state: Rc<PlayState>) -> Dom {
             if let ModulePlayPhase::Playing = phase {
                 // Play audio if we have any for this question
                 if let Some(audio) = &state.question.question_audio {
-                    AUDIO_MIXER.with(|mixer| {
+                    IFRAME_AUDIO_MIXER.with(|mixer| {
                         mixer.play_oneshot(audio.as_source());
                     });
                 }

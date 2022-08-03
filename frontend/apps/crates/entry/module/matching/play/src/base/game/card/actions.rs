@@ -1,6 +1,6 @@
 use super::{super::state::*, state::*};
 use components::audio::mixer::{
-    play_random_negative, play_random_positive, AudioSourceExt, AUDIO_MIXER,
+    AudioSourceExt, IFRAME_AUDIO_MIXER, AudioPath,
 };
 use std::rc::Rc;
 use utils::math::BoundsF64;
@@ -86,7 +86,23 @@ pub fn start_drag(state: Rc<CardBottom>, elem: HtmlElement, x: i32, y: i32) {
             .set(Some(Rc::new(CardDrag::new((*state).clone(), elem, x, y))));
 
         if let Some(audio) = &state.card.audio {
-            AUDIO_MIXER.with(|mixer| mixer.play_oneshot(audio.as_source()));
+            IFRAME_AUDIO_MIXER.with(|mixer| mixer.play_oneshot(audio.as_source()));
         }
     }
+}
+
+/// Utility function to play a random positive audio effect.
+pub fn play_random_positive() {
+    IFRAME_AUDIO_MIXER.with(|mixer| {
+        let path: AudioPath<'_> = mixer.get_random_positive().into();
+        mixer.play_oneshot(path)
+    });
+}
+
+/// Utility function to play a random negative audio effect.
+pub fn play_random_negative() {
+    IFRAME_AUDIO_MIXER.with(|mixer| {
+        let path: AudioPath<'_> = mixer.get_random_negative().into();
+        mixer.play_oneshot(path)
+    });
 }

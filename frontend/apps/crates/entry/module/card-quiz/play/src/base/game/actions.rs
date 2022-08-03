@@ -3,7 +3,7 @@ use super::state::*;
 use std::sync::atomic::Ordering;
 
 use components::{
-    audio::mixer::{AudioMixer, AudioPath, AudioSourceExt, AUDIO_MIXER},
+    audio::mixer::{IframeAudioMixer, AudioPath, AudioSourceExt, IFRAME_AUDIO_MIXER},
     module::_common::play::prelude::*,
     module::_groups::cards::play::card::dom::FLIPPED_AUDIO_EFFECT,
 };
@@ -88,7 +88,7 @@ impl Game {
                     if let Some(current) = current {
                         let card_id = current.others.iter().find(|card_id| card_id.pair_id == pair_id);
                         if let Some(card_id) = card_id {
-                            let play_feedback = |mixer: &AudioMixer| {
+                            let play_feedback = |mixer: &IframeAudioMixer| {
                                 let audio_path: AudioPath<'_> = mixer.get_random_positive().into();
 
                                 mixer.play_oneshot(audio_path);
@@ -96,13 +96,13 @@ impl Game {
 
                             // Play the card audio first if it exists and then the feedback effect.
                             if let Some(audio) = &card_id.card.audio {
-                                AUDIO_MIXER.with(move |mixer| {
+                                IFRAME_AUDIO_MIXER.with(move |mixer| {
                                     mixer.play_oneshot_on_ended(audio.as_source(), move || {
-                                        AUDIO_MIXER.with(play_feedback);
+                                        IFRAME_AUDIO_MIXER.with(play_feedback);
                                     })
                                 });
                             } else {
-                                AUDIO_MIXER.with(play_feedback);
+                                IFRAME_AUDIO_MIXER.with(play_feedback);
                             }
                         }
                     }
@@ -111,7 +111,7 @@ impl Game {
                     TimeoutFuture::new(crate::config::SUCCESS_TIME).await;
                     Self::next(state);
                 } else {
-                    AUDIO_MIXER.with(|mixer| {
+                    IFRAME_AUDIO_MIXER.with(|mixer| {
                         let audio_path = AudioPath::new_cdn(FLIPPED_AUDIO_EFFECT.to_string());
 
                         // Play the negative effect and then the card audio
@@ -121,7 +121,7 @@ impl Game {
                                 let card_id = current.others.iter().find(|card_id| card_id.pair_id == pair_id);
                                 if let Some(card_id) = card_id {
                                     if let Some(audio) = &card_id.card.audio {
-                                        AUDIO_MIXER.with(|mixer| {
+                                        IFRAME_AUDIO_MIXER.with(|mixer| {
                                             mixer.play_oneshot(audio.as_source())
                                         });
                                     }

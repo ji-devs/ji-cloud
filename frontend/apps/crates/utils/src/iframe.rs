@@ -169,8 +169,12 @@ impl<T: DeserializeOwned> From<JsValue> for IframeAction<T> {
 #[derive(Debug, Serialize, Deserialize)]
 pub enum JigToModulePlayerMessage {
     TimerDone,
+    // TODO: remove play and pause? might need for video
     Play,
     Pause,
+    AudioDone {
+        random_id: String
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -181,6 +185,11 @@ pub enum ModuleToJigPlayerMessage {
     Next,
     JumpToIndex(usize),
     JumpToId(ModuleId),
+    PlayAudio {
+        audio_path: String,
+        is_loop: bool,
+        random_id: String
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]

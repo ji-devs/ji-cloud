@@ -1,6 +1,6 @@
 use super::state::*;
 use crate::base::actions::NavigationTarget;
-use components::audio::mixer::{AudioPath, AUDIO_MIXER};
+use components::audio::mixer::{AudioPath, IFRAME_AUDIO_MIXER};
 use gloo_timers::callback::Timeout;
 use std::{rc::Rc, sync::atomic::Ordering};
 
@@ -45,7 +45,7 @@ impl QuestionItem {
 
         let url = match state.answer_filename.as_ref() {
             Some(x) => state.base.activity_media_url(x),
-            None => AudioPath::from(AUDIO_MIXER.with(|mixer| mixer.get_random_positive())).url(),
+            None => AudioPath::from(IFRAME_AUDIO_MIXER.with(|mixer| mixer.get_random_positive())).url(),
         };
 
         state.stop_asking();
@@ -62,7 +62,7 @@ impl QuestionItem {
 
         let url = match state.wrong_filename.as_ref() {
             Some(x) => state.base.activity_media_url(x),
-            None => AudioPath::from(AUDIO_MIXER.with(|mixer| mixer.get_random_negative())).url(),
+            None => AudioPath::from(IFRAME_AUDIO_MIXER.with(|mixer| mixer.get_random_negative())).url(),
         };
 
         state.stop_asking();

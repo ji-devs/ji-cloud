@@ -1,13 +1,25 @@
 use super::state::InstructionsPlayer;
-use crate::audio::mixer::{AudioSourceExt, AUDIO_MIXER};
+use crate::audio::mixer::{AudioSourceExt, IFRAME_AUDIO_MIXER};
 use dominator::clone;
 use std::rc::Rc;
 use std::sync::atomic::Ordering;
 
 impl InstructionsPlayer {
     pub fn play_audio(state: Rc<Self>) {
-        *state.audio.borrow_mut() = state.data.audio.as_ref().map(|audio| {
-            AUDIO_MIXER.with(|mixer| {
+        // *state.audio.borrow_mut() = state.data.audio.as_ref().map(|audio| { //
+        //     AUDIO_MIXER.with(|mixer| {
+        //         mixer.play_on_ended(
+        //             audio.as_source(),
+        //             false,
+        //             clone!(state => move || {
+        //                 state.on_audio_ended();
+        //             }),
+        //         )
+        //     })
+        // });
+
+        state.data.audio.as_ref().map(|audio| {
+            IFRAME_AUDIO_MIXER.with(|mixer| {
                 mixer.play_on_ended(
                     audio.as_source(),
                     false,
