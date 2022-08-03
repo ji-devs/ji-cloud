@@ -20,6 +20,15 @@ impl PlayState {
         }
     }
 
+    pub fn incorrect_choice(_state: Rc<Self>, _incorrect_index: Option<usize>) {
+        AUDIO_MIXER.with(move |mixer| {
+            let audio_path: AudioPath<'_> = mixer.get_random_negative().into();
+            mixer.play_oneshot_on_ended(audio_path, move || {
+                // TODO once the advanced mdoal has been added, negative feedback audio can be added here.
+            });
+        });
+    }
+
     fn play_correct_sound<F: Fn() + 'static>(self: &Rc<Self>, f: F) {
         AUDIO_MIXER.with(move |mixer| {
             let audio_path: AudioPath<'_> = mixer.get_random_positive().into();
