@@ -13,6 +13,7 @@ use futures_signals::{
 };
 use js_sys::Reflect;
 use shared::domain::module::body::find_answer::QuestionField;
+use web_sys::HtmlElement;
 use std::rc::Rc;
 use utils::{prelude::*, resize::resize_info_signal};
 use wasm_bindgen::JsValue;
@@ -78,6 +79,22 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                     PlayState::select(state.clone(), index);
                 }))
         )))
+        .event(clone!(state => move |evt: events::Click| {
+            // Check for incorrect choice.
+            if !state.ended.get() {
+                if let Some(target) = evt.target() {
+                    let target: JsValue = target.into();
+                    let element: HtmlElement = target.into();
+                    let tag_name = element.tag_name().to_lowercase();
+                    let tag_name = tag_name.as_str();
+                    // SVGs created for traces are either path, ellipse or rect. So check that the student hasn't
+                    // clicked on any of those types of SVG to determine whether they clicked in the wrong place.
+                    if tag_name != "path" && tag_name != "ellipse" && tag_name != "rect" {
+                        PlayState::incorrect_choice(state.clone(), None);
+                    }
+                }
+            }
+        }))
         .child(html!("overlay-container", {
             .children_signal_vec(
                 resize_info_signal()
