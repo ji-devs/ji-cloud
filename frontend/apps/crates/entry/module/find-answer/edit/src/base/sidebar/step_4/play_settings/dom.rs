@@ -35,35 +35,35 @@ pub fn render(state: Rc<State>) -> Dom {
                     )),
                 ],
             ),
-            (
-                LineKind::Attempts,
-                vec![
-                    Some(SettingsButton::new_click(
-                        SettingsButtonKind::NoLimit,
-                        clone!(state => move || {
-                            state.base.play_settings.has_attempts_limit.signal_ref(|flag| !flag)
-                        }),
-                        clone!(state => move || {
-                            state.set_has_attempts_limit(false);
-                        }),
-                    )),
-                    Some(SettingsButton::new_value_click(
-                        SettingsButtonKind::Attempts,
-                        clone!(state => move || {
-                            state.base.play_settings.has_attempts_limit.signal()
-                        }),
-                        SettingsValue::new(
-                            state.base.play_settings.n_attempts.get(),
-                            clone!(state => move |value| {
-                                state.set_attempts_limit(value);
-                            }),
-                        ),
-                        clone!(state => move || {
-                            state.set_has_attempts_limit(true);
-                        }),
-                    )),
-                ],
-            ),
+            // (
+            //     LineKind::Attempts,
+            //     vec![
+            //         Some(SettingsButton::new_click(
+            //             SettingsButtonKind::NoLimit,
+            //             clone!(state => move || {
+            //                 state.base.play_settings.has_attempts_limit.signal_ref(|flag| !flag)
+            //             }),
+            //             clone!(state => move || {
+            //                 state.set_has_attempts_limit(false);
+            //             }),
+            //         )),
+            //         Some(SettingsButton::new_value_click(
+            //             SettingsButtonKind::Attempts,
+            //             clone!(state => move || {
+            //                 state.base.play_settings.has_attempts_limit.signal()
+            //             }),
+            //             SettingsValue::new(
+            //                 state.base.play_settings.n_attempts.get(),
+            //                 clone!(state => move |value| {
+            //                     state.set_attempts_limit(value);
+            //                 }),
+            //             ),
+            //             clone!(state => move || {
+            //                 state.set_has_attempts_limit(true);
+            //             }),
+            //         )),
+            //     ],
+            // ),
             (
                 LineKind::TimeLimit,
                 vec![
