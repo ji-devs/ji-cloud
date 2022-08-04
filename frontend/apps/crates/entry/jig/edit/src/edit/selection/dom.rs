@@ -20,7 +20,6 @@ static MODULE_KINDS: &[ModuleKind] = &[
     //ModuleKind::Tracing,
     ModuleKind::Video,
     //ModuleKind::VisualQuiz,
-    #[cfg(any(feature = "local", feature = "sandbox"))]
     ModuleKind::FindAnswer,
 ];
 
