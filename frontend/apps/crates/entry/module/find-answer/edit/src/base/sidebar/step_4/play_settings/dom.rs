@@ -109,10 +109,7 @@ pub fn render(state: Rc<State>) -> Dom {
                         }),
                     )),
                     Some(SettingsButton::new_click(
-                        SettingsButtonKind::Custom(
-                            SettingsButtonKind::ContinueAll.as_str_id(),
-                            "answering all questions",
-                        ),
+                        SettingsButtonKind::ContinueAll,
                         clone!(state => move || {
                             state.base.play_settings.next.signal_ref(|curr| {
                                 std::mem::discriminant(curr) == std::mem::discriminant(&Next::SelectAll)
@@ -123,10 +120,7 @@ pub fn render(state: Rc<State>) -> Dom {
                         }),
                     )),
                     Some(SettingsButton::new_value_click(
-                        SettingsButtonKind::Custom(
-                            SettingsButtonKind::ContinueSome.as_str_id(),
-                            "answering a minimum",
-                        ),
+                        SettingsButtonKind::ContinueSome,
                         clone!(state => move || {
                             state.base.play_settings.next.signal_ref(|curr| {
                                 std::mem::discriminant(curr) == std::mem::discriminant(&Next::SelectSome(0))

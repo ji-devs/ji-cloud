@@ -26,14 +26,6 @@ impl DomRenderable for Base {
     fn render(state: Rc<Base>) -> Dom {
         html!("empty-fragment", {
             .property("slot", "main")
-            .child_signal(state.module_phase.signal_cloned().map(clone!(state => move |phase| {
-                // Only play audio and update the text if we're in the playing phase.
-                if let ModulePlayPhase::Playing = phase {
-                    Some(InstructionsPlayer::render(state.instructions_player.clone()))
-                } else {
-                    None
-                }
-            })))
             .child(render_backgrounds_raw(&state.backgrounds, state.theme_id, None))
             .child(
                 // This is similar to render_stickers_raw_vec, but we need to have a reference to the text stickers so that we can update their content based on the sticker index when each question changes, if a sticker is marked as a question field.
@@ -85,6 +77,14 @@ impl DomRenderable for Base {
             .child_signal(state.instructions_finished.signal_cloned().map(clone!(state => move |finished| {
                 if finished {
                     Some(render_game(Game::new(state.clone())))
+                } else {
+                    None
+                }
+            })))
+            .child_signal(state.module_phase.signal_cloned().map(clone!(state => move |phase| {
+                // Only play audio and update the text if we're in the playing phase.
+                if let ModulePlayPhase::Playing = phase {
+                    Some(InstructionsPlayer::render(state.instructions_player.clone()))
                 } else {
                     None
                 }
