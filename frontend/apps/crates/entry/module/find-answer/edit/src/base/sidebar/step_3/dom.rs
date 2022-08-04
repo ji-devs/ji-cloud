@@ -91,20 +91,12 @@ pub fn render(state: Rc<Step3>) -> Dom {
                 // Make sure that the tab_kind is reset so that we can display the correct Jiggling text.
                 state.sidebar.tab_kind.set(None);
 
-                Some(html!("sidebar-empty", {
-                    .property("imagePath", "module/_common/edit/sidebar/illustration-trace-area.svg")
+                Some(html!("questions-empty", {
                     .child(html!("div", {
-                        .child(html!("p", {
-                            .text("Select the question if it's already on your page")
-                        }))
-                        .child(html!("p", {
-                            .text("or")
-                        }))
-                        .child(html!("button-main", {
+                        .child(html!("button-icon", {
                             .property("size", "medium")
                             .property("color", "blue")
-                            .property("kind", "text")
-                            .text("add a question")
+                            .property("icon", "circle-+-blue")
                             .event(clone!(state => move|_: events::Click| {
                                 state.sidebar.base.add_default_question();
                                 state.sidebar.base.current_question.set(Some(0))
@@ -122,17 +114,23 @@ pub fn render(state: Rc<Step3>) -> Dom {
                 }))
             }
         })))
-        .child(html!("button-icon-label", {
-            .property("slot", "action")
-            .property("icon", "circle-+-blue")
-            .property("label", "Add a question")
-            .property("labelcolor", "blue")
-            .event(clone!(state => move|_: events::Click| {
-                state.sidebar.base.add_default_question();
-                let index = state.sidebar.base.questions.lock_ref().len() - 1;
-                state.sidebar.base.current_question.set(Some(index));
-            }))
-        }))
+        .child_signal(empty_signal(state.clone()).map(clone!(state => move |is_empty| {
+            if !is_empty {
+                Some(html!("button-icon-label", {
+                    .property("slot", "action")
+                    .property("icon", "circle-+-blue")
+                    .property("label", "Add a question")
+                    .property("labelcolor", "blue")
+                    .event(clone!(state => move|_: events::Click| {
+                        state.sidebar.base.add_default_question();
+                        let index = state.sidebar.base.questions.lock_ref().len() - 1;
+                        state.sidebar.base.current_question.set(Some(index));
+                    }))
+                }))
+            } else {
+                None
+            }
+        })))
     })
 }
 
