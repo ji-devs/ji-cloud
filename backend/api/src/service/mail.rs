@@ -14,6 +14,8 @@ pub struct Client {
 
     sender_email: Email,
 
+    jigzi_info_email: Email,
+
     signup_verify_template: Option<String>,
 
     password_reset_template: Option<String>,
@@ -28,6 +30,7 @@ impl Client {
         Client {
             client: Sender::new(settings.api_key),
             sender_email: Email::new(settings.sender_email).set_name(SENDER_NAME),
+            jigzi_info_email: Email::new(settings.jigzi_info_email),
             signup_verify_template: settings.signup_verify_template,
             password_reset_template: settings.password_reset_template,
             email_reset_template: settings.email_reset_template,
@@ -148,7 +151,6 @@ Please try logging in with your {} account.
 
     pub async fn send_report_email(
         &self,
-        to: Email,
         report: JigReportEmail,
         link: String,
     ) -> anyhow::Result<()> {
@@ -178,7 +180,7 @@ Please try logging in with your {} account.
         let content = Content::new();
 
         let message = Message::new(self.sender_email.clone())
-            .add_personalization(Personalization::new(to))
+            .add_personalization(Personalization::new(self.jigzi_info_email.clone()))
             .set_subject(&subject)
             .add_content(content.set_content_type("text/plain").set_value(value));
 

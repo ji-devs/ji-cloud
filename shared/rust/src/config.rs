@@ -140,6 +140,15 @@ impl RemoteTarget {
         }
     }
 
+    pub fn info_email(&self) -> String {
+        match self {
+            Self::Local => {
+                env_var("LOCAL_MEDIA_URL").unwrap_or("http://localhost:4102".to_string())
+            }
+            Self::Sandbox | Self::Release => "https://media.jicloud.org".to_string(),
+        }
+    }
+
     pub fn legacy_url(&self) -> String {
         match self {
             Self::Local => {

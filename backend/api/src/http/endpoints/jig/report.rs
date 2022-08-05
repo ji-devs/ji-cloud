@@ -1,6 +1,5 @@
 use actix_web::web::{Data, Json, Path, ServiceConfig};
 use core::settings::RuntimeSettings;
-use sendgrid::v3::Email;
 use shared::{
     api::{endpoints::jig::report, ApiEndpoint},
     domain::{
@@ -48,7 +47,6 @@ async fn create(
         &mail,
         jig_id,
         report_info,
-        &config.remote_target().jigzi_info_email(),
         &config.remote_target().pages_url(),
     )
     .await?;
@@ -77,13 +75,11 @@ async fn send_report(
     mail: &mail::Client,
     jig_id: JigId,
     report: JigReportEmail,
-    email_address: &str,
     pages_url: &str,
 ) -> Result<(), error::ReportError> {
     let email_link = format!("{}/jig/play/{}", pages_url, jig_id.0);
 
-    mail.send_report_email(Email::new(email_address), report, email_link)
-        .await?;
+    mail.send_report_email(report, email_link).await?;
 
     Ok(())
 }
