@@ -13,10 +13,10 @@ use futures_signals::{
 };
 use js_sys::Reflect;
 use shared::domain::module::body::find_answer::QuestionField;
-use web_sys::HtmlElement;
 use std::rc::Rc;
 use utils::{prelude::*, resize::resize_info_signal};
 use wasm_bindgen::JsValue;
+use web_sys::HtmlElement;
 
 use super::state::*;
 
