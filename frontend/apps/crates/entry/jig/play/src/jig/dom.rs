@@ -8,6 +8,7 @@ use js_sys::Reflect;
 use shared::domain::{jig::JigResponse, module::ModuleKind};
 use std::rc::Rc;
 use utils::iframe::{AssetPlayerToPlayerPopup, IframeMessageExt};
+use utils::js_wrappers::is_iframe;
 use utils::{
     iframe::{IframeAction, ModuleToJigPlayerMessage},
     prelude::SETTINGS,
@@ -382,10 +383,4 @@ fn render_time_indicator(state: Rc<JigPlayer>) -> impl Signal<Item = Option<Dom>
             }
         }
     }))
-}
-
-pub fn is_iframe() -> bool {
-    let window = web_sys::window().unwrap_ji();
-    let top = window.top().unwrap_ji().unwrap_ji();
-    window != top
 }

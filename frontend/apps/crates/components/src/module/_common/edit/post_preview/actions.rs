@@ -24,11 +24,12 @@ use shared::{
 };
 use utils::{
     iframe::{IframeAction, IframeMessageExt, ModuleToJigEditorMessage},
+    js_wrappers::set_event_listener_once,
     prelude::*,
 };
-use wasm_bindgen::{convert::FromWasmAbi, prelude::Closure, JsCast, JsValue};
+use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen_futures::spawn_local;
-use web_sys::{EventTarget, HtmlIFrameElement, Window};
+use web_sys::{HtmlIFrameElement, Window};
 
 use futures_channel::oneshot;
 
@@ -327,25 +328,3 @@ where
         Future::poll(Pin::new(&mut self.rx), cx).map(|t| t.unwrap_ji())
     }
 }
-
-// might be worth putting in utils
-fn set_event_listener_once<E>(source: &EventTarget, event_name: &str, callback: Box<dyn FnOnce(E)>)
-where
-    E: FromWasmAbi + 'static,
-{
-    let closure = Closure::once(callback);
-    let _ = source.add_event_listener_with_callback(event_name, closure.as_ref().unchecked_ref());
-
-    closure.forget();
-}
-
-// might be worth putting in utils
-// fn set_event_listener<E>(source: &EventTarget, event_name: &str, callback: Box<dyn Fn(E)>)
-// where
-//     E: FromWasmAbi + 'static,
-// {
-//     let closure = Closure::wrap(callback);
-//     let _ = source.add_event_listener_with_callback(event_name, closure.as_ref().unchecked_ref());
-
-//     closure.forget();
-// }
