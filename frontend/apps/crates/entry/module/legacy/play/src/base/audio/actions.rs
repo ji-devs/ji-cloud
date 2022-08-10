@@ -1,5 +1,6 @@
 use super::*;
-use components::audio::mixer::{AudioPath, AudioSource, AUDIO_MIXER};
+use awsm_web::audio::AudioSource;
+use components::audio::mixer::{AudioPath, AUDIO_MIXER};
 use gloo_timers::callback::Timeout;
 
 impl AudioManager {

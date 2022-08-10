@@ -4,9 +4,9 @@ use super::{
     state::{can_load_liked_status, JigPlayer},
     timer::Timer,
 };
-use awsm_web::audio::{AudioClipOptions, AudioHandle};
+use awsm_web::audio::AudioClipOptions;
 use components::{
-    audio::mixer::{AudioSourceExt, AUDIO_MIXER},
+    audio::mixer::{AudioHandle, AudioSourceExt, AUDIO_MIXER},
     module::_common::prelude::ModuleId,
 };
 use dominator::clone;
@@ -218,12 +218,12 @@ pub fn toggle_paused(state: Rc<JigPlayer>) {
         }
     }
 
-    // let iframe know that paused
-    let iframe_message = match paused {
-        false => JigToModulePlayerMessage::Play,
-        true => JigToModulePlayerMessage::Pause,
-    };
-    sent_iframe_message(Rc::clone(&state), iframe_message);
+    AUDIO_MIXER.with(|mixer| {
+        match paused {
+            true => mixer.pause_all(),
+            false => mixer.play_all(),
+        };
+    });
 }
 
 pub fn sent_iframe_message(state: Rc<JigPlayer>, data: JigToModulePlayerMessage) {

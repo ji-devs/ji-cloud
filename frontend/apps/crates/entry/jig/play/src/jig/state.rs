@@ -1,6 +1,7 @@
 use std::{cell::RefCell, rc::Rc};
 
-use awsm_web::{audio::AudioHandle, loaders::helpers::AsyncLoader};
+use awsm_web::loaders::helpers::AsyncLoader;
+use components::audio::mixer::AudioHandle;
 use futures_signals::signal::Mutable;
 use serde::{Deserialize, Serialize};
 use shared::domain::{
