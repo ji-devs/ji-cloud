@@ -17,6 +17,17 @@ pub fn render_sticker_text_menu<T: AsSticker>(
     html!("div", {
         .children(&mut [
             html!("menu-line", {
+                .property("icon", "edit")
+                .event(clone!(stickers, index, text => move |_evt:events::Click| {
+                    text.transform.close_menu();
+                    if let Some(index) = index.get() {
+                        if let Some(text_sticker) = stickers.get_as_text(index) {
+                            text_sticker.is_editing.set_neq(true);
+                        }
+                    }
+                }))
+            }),
+            html!("menu-line", {
                 .property("icon", "duplicate")
                 .event(clone!(stickers, index, text => move |_evt:events::Click| {
                     text.transform.close_menu();
