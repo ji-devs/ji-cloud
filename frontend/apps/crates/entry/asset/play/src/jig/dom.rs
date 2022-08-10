@@ -1,5 +1,6 @@
 use super::{actions, sidebar};
 use components::overlay::handle::OverlayHandle;
+use components::audio::mixer::audio_iframe_messenger;
 use components::share_asset::ShareAsset;
 use dominator::{clone, html, with_node, Dom};
 use dominator_helpers::{events::Message, signals::DefaultSignal};
@@ -212,6 +213,7 @@ impl JigPlayer {
                         .after_inserted(clone!(state => move|element| {
                             *state.iframe.borrow_mut() = Some(element);
                         }))
+                        .apply(audio_iframe_messenger)
                     }))
                 } else {
                     None

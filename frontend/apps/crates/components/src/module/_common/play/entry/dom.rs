@@ -152,10 +152,8 @@ where
                     if let Ok(msg) = evt.try_serde_data::<IframeAction<JigToModulePlayerMessage>>() {
                         match msg.data {
                             JigToModulePlayerMessage::Play => {
-                                AUDIO_MIXER.with(|mixer| mixer.play_all());
                             },
                             JigToModulePlayerMessage::Pause => {
-                                AUDIO_MIXER.with(|mixer| mixer.pause_all());
                             },
                             JigToModulePlayerMessage::TimerDone => {
                             },
