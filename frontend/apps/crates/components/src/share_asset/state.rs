@@ -3,7 +3,7 @@ use std::rc::Rc;
 use awsm_web::loaders::helpers::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::asset::AssetId;
-use utils::asset::JigPlayerOptions;
+use utils::asset::{JigPlayerOptions, CoursePlayerOptions};
 use utils::routes::{AssetRoute, Route};
 
 use utils::prelude::*;
@@ -34,14 +34,14 @@ impl ShareAsset {
     }
 
     pub fn embed_code(&self) -> String {
-        let link = self.jig_link(true);
+        let link = self.asset_link(true);
         format!(
             r#"<iframe src="{}" width="960" height="540"></iframe>"#,
             link
         )
     }
 
-    pub fn jig_link(&self, is_student: bool) -> String {
+    pub(super) fn asset_link(&self, is_student: bool) -> String {
         let url = match self.asset_id {
             AssetId::JigId(jig_id) => Route::Asset(AssetRoute::Play(AssetPlayRoute::Jig(
                 jig_id,
@@ -50,10 +50,13 @@ impl ShareAsset {
                     is_student,
                     ..Default::default()
                 },
+            ))),
+            AssetId::CourseId(course_id) => Route::Asset(AssetRoute::Play(AssetPlayRoute::Course(
+                course_id,
+                CoursePlayerOptions::default(),
             )))
-            .to_string(),
-            AssetId::CourseId(_) => todo!(),
-        };
+            
+        }.to_string();
         let origin = web_sys::window()
             .unwrap_ji()
             .location()
