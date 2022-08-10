@@ -14,6 +14,9 @@ pub fn render_sticker_sprite_menu<T: AsSticker>(
     sprite: Rc<Sprite>,
 ) -> Dom {
     html!("div", {
+        .style("display", "flex")
+        .style("flex-direction", "column")
+        .style("grid-gap", "10px")
         .children(&mut [
             html!("menu-line", {
                 .property("icon", "duplicate")
