@@ -10,8 +10,8 @@ mod debug;
 mod router;
 mod state;
 
-use std::rc::Rc;
 use components::audio::mixer::AUDIO_MIXER;
+use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 
 use router::Router;

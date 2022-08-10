@@ -1,9 +1,9 @@
-use std::rc::Rc;
-
 use super::state::PlayerPopup;
+use crate::audio::mixer::audio_iframe_messenger;
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::asset::AssetId;
+use std::rc::Rc;
 use utils::{
     asset::AssetPlayerOptions,
     events,
@@ -12,6 +12,7 @@ use utils::{
     routes::{AssetPlayRoute, AssetRoute, Route},
     unwrap::UnwrapJiExt,
 };
+use web_sys::HtmlIFrameElement;
 
 impl PlayerPopup {
     pub fn render(self: Rc<Self>, slot: Option<&str>) -> Dom {
@@ -42,8 +43,9 @@ impl PlayerPopup {
                 match open {
                     false => None,
                     true => {
-                        Some(html!("iframe", {
+                        Some(html!("iframe" => HtmlIFrameElement, {
                             .style("border", "0")
+                            .apply(audio_iframe_messenger)
                             .property("slot", "iframe")
                             .property("allow", "autoplay; fullscreen")
                             .property("src", {

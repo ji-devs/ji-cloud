@@ -1,3 +1,4 @@
+use components::audio::mixer::audio_iframe_messenger;
 use dominator::{clone, html, Dom};
 
 use utils::prelude::*;
@@ -17,6 +18,7 @@ impl ModuleIframe {
             .style("width", "100%")
             .style("height", "100%")
             .style("border", "none")
+            .apply(audio_iframe_messenger)
             .property_signal("src", state.module_kind.signal().map(clone!(state => move |module_kind| {
                 match module_kind {
                     None => String::new(),

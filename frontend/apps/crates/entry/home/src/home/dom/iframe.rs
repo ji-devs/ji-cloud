@@ -1,3 +1,4 @@
+use components::audio::mixer::audio_iframe_messenger;
 use dominator::{clone, html, Dom};
 use dominator_helpers::events::Message;
 use futures_signals::signal::{Mutable, SignalExt};
@@ -28,6 +29,7 @@ impl Iframe {
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self;
         html!("iframe" => HtmlIFrameElement, {
+            .apply(audio_iframe_messenger)
             .style("width", "100%")
             .style("border", "none")
             .style_signal("height", state.height.signal()

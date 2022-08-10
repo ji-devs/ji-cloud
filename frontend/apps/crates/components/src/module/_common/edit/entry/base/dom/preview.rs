@@ -1,3 +1,5 @@
+use crate::audio::mixer::audio_iframe_messenger;
+
 use super::super::{
     super::{
         super::post_preview::{dom::render_post_preview, state::PostPreview},
@@ -127,6 +129,7 @@ where
         .style("height", "100%")
         .style("border", "none")
         .property("src", url.clone())
+        .apply(audio_iframe_messenger)
         .with_node!(elem => {
             .global_event(clone!(state, url => move |evt:Message| {
 

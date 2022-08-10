@@ -8,8 +8,8 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 mod home;
 mod router;
 
-use std::rc::Rc;
 use components::audio::mixer::AUDIO_MIXER;
+use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 
 use router::Router;
