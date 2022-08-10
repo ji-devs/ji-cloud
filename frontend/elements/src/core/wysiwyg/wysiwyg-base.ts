@@ -6,7 +6,7 @@ import {
     property,
     PropertyValues,
     css,
-    internalProperty,
+    state,
 } from "lit-element";
 import React, { useMemo } from "react";
 import ReactDOM from "react-dom";
@@ -82,7 +82,7 @@ export class _ extends LitElement {
         return v;
     }
 
-    @internalProperty()
+    @state()
     private value: WysiwygValue = this.createValue();
 
     public set valueAsString(v: string) {
@@ -96,6 +96,14 @@ export class _ extends LitElement {
 
     firstUpdated() {
         this.reactRender();
+        // Focus the editor field.
+        //
+        // Note: This is different from calling reFocus which uses the _blurSelection property.
+        (
+            this.shadowRoot!.querySelector(
+                "[contenteditable=true]"
+            ) as HTMLElement
+        ).focus();
     }
 
     updated(changedProperties: PropertyValues) {
@@ -278,7 +286,7 @@ export class _ extends LitElement {
 
             eventData[key] = controlValue;
         }
-        
+
         this.dispatchEvent(
             new CustomEvent("wysiwyg-controls-change", {
                 detail: eventData,
