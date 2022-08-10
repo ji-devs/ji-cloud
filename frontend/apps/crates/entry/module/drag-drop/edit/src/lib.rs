@@ -12,6 +12,7 @@ mod router;
 mod state;
 mod strings;
 
+use components::audio::mixer::AUDIO_MIXER;
 use router::Router;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
@@ -28,4 +29,6 @@ pub async fn main_js() {
     router::render(router.clone());
 
     std::mem::forget(Box::new(router));
+
+    AUDIO_MIXER.with(|_mixer| {})
 }

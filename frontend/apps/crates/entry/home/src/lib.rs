@@ -9,6 +9,7 @@ mod home;
 mod router;
 
 use std::rc::Rc;
+use components::audio::mixer::AUDIO_MIXER;
 use wasm_bindgen::prelude::*;
 
 use router::Router;
@@ -25,4 +26,6 @@ pub async fn main_js() {
     dominator::append_dom(&dominator::get_id("root"), Router::render());
 
     std::mem::forget(Box::new(router));
+
+    AUDIO_MIXER.with(|_mixer| {})
 }

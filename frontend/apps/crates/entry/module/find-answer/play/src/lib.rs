@@ -11,6 +11,7 @@ mod debug;
 mod router;
 mod state;
 
+use components::audio::mixer::AUDIO_MIXER;
 use router::Router;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
@@ -27,4 +28,6 @@ pub async fn main_js() {
     router::render(router);
 
     //std::mem::forget(Box::new(router));
+
+    AUDIO_MIXER.with(|_mixer| {})
 }
