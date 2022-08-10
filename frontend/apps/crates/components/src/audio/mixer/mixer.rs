@@ -1,32 +1,389 @@
-use awsm_web::audio::AudioMixer as AwsmAudioMixer;
+use awsm_web::audio::{AudioClipOptions, AudioSource};
+use dominator::{clone, DomBuilder};
+use gloo_timers::callback::Timeout;
 use rand::prelude::*;
+use serde::{Deserialize, Serialize};
 use shared::domain::jig::{self, AudioFeedbackNegative, AudioFeedbackPositive, JigData};
 use shared::domain::module::body::Audio;
-use std::cell::RefCell;
-use std::rc::Rc;
-use utils::{path, prelude::*};
-
 use std::borrow::Cow;
-use std::ops::Deref;
+use std::cell::RefCell;
+use std::collections::HashMap;
+use std::rc::Rc;
+use utils::js_wrappers::{is_iframe, set_event_listener};
+use utils::{path, prelude::*};
+use web_sys::{HtmlIFrameElement, MessageEvent};
 
-pub use awsm_web::audio::{
-    AudioClip, AudioClipOptions, AudioHandle, AudioSource, Id, WeakAudioHandle,
-};
+use super::{mixer_iframe::AudioMixerIframe, mixer_top::AudioMixerTop};
 
 thread_local! {
-    pub static AUDIO_MIXER:AudioMixer = AudioMixer {
-        inner: Rc::new(AwsmAudioMixer::new(None)),
-        settings: Rc::new(RefCell::new(AudioSettings::default())),
-        rng: RefCell::new(thread_rng()),
+    pub static AUDIO_MIXER:AudioMixer = AudioMixer::new()
+}
+
+pub enum AudioMixerKind {
+    Top(AudioMixerTop),
+    Iframe(AudioMixerIframe),
+}
+
+fn setup_iframe_to_parent_listener() {
+    let window = web_sys::window().unwrap_ji();
+    set_event_listener(
+        &window,
+        "message",
+        Box::new(|evt: MessageEvent| {
+            if let Ok(m) =
+                serde_wasm_bindgen::from_value::<IframeAction<AudioMessageToTop>>(evt.data())
+            {
+                AUDIO_MIXER.with(|mixer| {
+                    mixer.run_audio_message(m.data);
+                })
+            };
+        }),
+    );
+}
+
+pub struct AudioMixer {
+    kind: AudioMixerKind,
+    settings: Rc<RefCell<AudioSettings>>,
+    rng: RefCell<ThreadRng>,
+    callbacks: RefCell<HashMap<AudioHandleId, Box<dyn FnMut()>>>,
+    context_available: RefCell<bool>,
+
+    // having a channel would probably be better here, but wasted to much time on this already
+    iframes: RefCell<Vec<HtmlIFrameElement>>,
+}
+
+/// Public interface
+impl AudioMixer {
+    pub fn context_available(&self) -> bool {
+        *self.context_available.borrow()
+    }
+
+    pub fn set_from_jig(&self, jig: &JigData) {
+        let mut settings = (*self.settings).borrow_mut();
+        settings.reset_from_jig(jig);
+    }
+
+    pub fn get_random_positive(&self) -> AudioFeedbackPositive {
+        let settings = self.settings.borrow();
+        let effects = settings.positive.iter();
+        let chosen_effect = effects.choose(&mut *self.rng.borrow_mut());
+        *chosen_effect.unwrap_ji()
+    }
+
+    pub fn get_random_negative(&self) -> AudioFeedbackNegative {
+        let settings = self.settings.borrow();
+        let effects = settings.negative.iter();
+        let chosen_effect = effects.choose(&mut *self.rng.borrow_mut());
+        *chosen_effect.unwrap_ji()
+    }
+
+    // TODO: update all 4 pub play calls to not use Into<AudioSource>
+
+    /// Oneshots are AudioClips because they drop themselves
+    /// They're intended solely to be kicked off and not being held anywhere
+    pub fn play_oneshot<A: Into<AudioSource>>(&self, audio: A) {
+        let path = match audio.into() {
+            AudioSource::Url(audio_path) => audio_path,
+            AudioSource::Buffer(_) => todo!(),
+        };
+        let handle_id = AudioHandleId::new();
+        let audio_message = PlayAudioMessage {
+            handle_id: handle_id.clone(),
+            path,
+            auto_play: true,
+            is_loop: false,
+        };
+        self.stash_callback_and_play(audio_message, move || {
+            AUDIO_MIXER.with(clone!(handle_id => move |mixer| {
+                // mixer.audio_handle_dropped(handle_id.clone());
+                mixer.run_audio_message(AudioMessageToTop::HandleDropped(handle_id.clone()));
+            }));
+        });
+    }
+
+    pub fn play_oneshot_on_ended<F, A>(&self, audio: A, mut on_ended: F)
+    where
+        F: FnMut() + 'static,
+        A: Into<AudioSource>,
+    {
+        let path = match audio.into() {
+            AudioSource::Url(audio_path) => audio_path,
+            AudioSource::Buffer(_) => todo!(),
+        };
+        let handle_id = AudioHandleId::new();
+        let audio_message = PlayAudioMessage {
+            handle_id: handle_id.clone(),
+            path,
+            auto_play: true,
+            is_loop: false,
+        };
+        self.stash_callback_and_play(
+            audio_message,
+            clone!(handle_id => move || {
+                AUDIO_MIXER.with(clone!(handle_id => move |mixer| {
+                    mixer.run_audio_message(AudioMessageToTop::HandleDropped(handle_id.clone()));
+                }));
+                (on_ended)();
+            }),
+        );
+    }
+
+    /// Play a clip and get a Handle to hold (simple API around add_source)
+    pub fn play<A: Into<AudioSource>>(&self, audio: A, is_loop: bool) -> AudioHandle {
+        let path = match audio.into() {
+            AudioSource::Url(audio_path) => audio_path,
+            AudioSource::Buffer(_) => todo!(),
+        };
+        let handle = AudioHandle::new();
+        let audio_message = PlayAudioMessage {
+            handle_id: handle.id().clone(),
+            path,
+            auto_play: true,
+            is_loop,
+        };
+        self.stash_callback_and_play(audio_message, || {});
+        handle
+    }
+
+    pub fn play_on_ended<F, A>(&self, audio: A, is_loop: bool, on_ended: F) -> AudioHandle
+    where
+        F: FnMut() + 'static,
+        A: Into<AudioSource>,
+    {
+        let path = match audio.into() {
+            AudioSource::Url(audio_path) => audio_path,
+            AudioSource::Buffer(_) => todo!(),
+        };
+        let handle = AudioHandle::new();
+        let audio_message = PlayAudioMessage {
+            handle_id: handle.id().clone(),
+            path,
+            auto_play: true,
+            is_loop,
+        };
+        self.stash_callback_and_play(audio_message, on_ended);
+        handle
+    }
+
+    /// Add a source with various options and get a Handle to hold
+    pub fn add_source<F, A: Into<AudioSource>>(
+        &self,
+        audio: A,
+        mut options: AudioClipOptions<F>,
+    ) -> AudioHandle
+    where
+        F: FnMut() + 'static,
+    {
+        let path = match audio.into() {
+            AudioSource::Url(audio_path) => audio_path,
+            AudioSource::Buffer(_) => todo!(),
+        };
+        let handle = AudioHandle::new();
+        let audio_message = PlayAudioMessage {
+            handle_id: handle.id().clone(),
+            path,
+            auto_play: options.auto_play,
+            is_loop: options.is_loop,
+        };
+        self.stash_callback_and_play(audio_message, move || {
+            if let Some(on_ended) = &mut options.on_ended {
+                (*on_ended)();
+            }
+        });
+        handle
+    }
+
+    pub fn play_all(&self) {
+        self.run_audio_message(AudioMessageToTop::PlayAll);
+    }
+
+    pub fn pause_all(&self) {
+        self.run_audio_message(AudioMessageToTop::PauseAll);
     }
 }
 
-//inherently cloneable, conceptually like it's wrapped in Rc itself
-#[derive(Clone)]
-pub struct AudioMixer {
-    inner: Rc<AwsmAudioMixer>,
-    settings: Rc<RefCell<AudioSettings>>,
-    rng: RefCell<ThreadRng>,
+/// Private methods
+impl AudioMixer {
+    fn new() -> Self {
+        log::info!("initializing AUDIO_MIXER");
+
+        setup_iframe_to_parent_listener();
+
+        // once initialized broadcast context available
+        // don't think this is the best way of doing this, but this is what I can come up with at the moment
+        Timeout::new(0, move || {
+            AUDIO_MIXER.with(|mixer| {
+                mixer.run_audio_message(AudioMessageToTop::BroadcastContextAvailable);
+            })
+        })
+        .forget();
+
+        Self {
+            kind: match is_iframe() {
+                true => AudioMixerKind::Iframe(AudioMixerIframe::new()),
+                false => AudioMixerKind::Top(AudioMixerTop::new()),
+            },
+            callbacks: Default::default(),
+            context_available: RefCell::new(false),
+            settings: Default::default(),
+            rng: RefCell::new(thread_rng()),
+            iframes: Default::default(),
+        }
+    }
+
+    fn stash_callback_and_play<F>(&self, audio_message: PlayAudioMessage, on_ended: F)
+    where
+        F: FnMut() + 'static,
+    {
+        let id = audio_message.handle_id.clone();
+        self.run_audio_message(AudioMessageToTop::Play(audio_message));
+
+        let mut callbacks = self.callbacks.borrow_mut();
+        callbacks.insert(id.clone(), Box::new(on_ended));
+    }
+
+    pub(super) fn done_playing(&self, audio_handle_id: AudioHandleId) {
+        let callback = self.callbacks.borrow_mut().remove(&audio_handle_id);
+
+        match callback {
+            Some(mut callback) => {
+                (callback)();
+            }
+            None => {
+                let message = AudioMessageFromTop::DonePlaying(audio_handle_id.clone());
+                self.message_all_iframes(message);
+            }
+        }
+    }
+
+    pub(super) fn message_all_iframes(&self, message: AudioMessageFromTop) {
+        self.iframes.borrow().iter().for_each(move |iframe| {
+            let message = IframeAction::new(message.clone());
+
+            // might be a good idea to add iframe IDs in all messages and only send the the relevant iframe
+            let _ = iframe
+                .content_window()
+                .unwrap_ji()
+                .post_message(&message.into(), "*");
+        });
+    }
+
+    // would probably have named this handle_audio_message, but can make it look like it's related to AudioHandle
+    pub(super) fn run_audio_message(&self, message: AudioMessageToTop) {
+        match &self.kind {
+            AudioMixerKind::Top(top) => {
+                top.run_audio_message(message);
+            }
+            AudioMixerKind::Iframe(iframe) => {
+                iframe.run_audio_message(message);
+            }
+        };
+    }
+
+    pub(super) fn set_context_available(&self, available: bool) {
+        log::info!("set_context_available");
+        *self.context_available.borrow_mut() = available;
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq, Hash)]
+pub(super) struct AudioHandleId(String);
+
+impl AudioHandleId {
+    pub fn new() -> Self {
+        Self(js_sys::Math::random().to_string())
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, PartialEq, Eq, Hash)]
+pub struct AudioHandle(AudioHandleId);
+
+impl AudioHandle {
+    pub fn new() -> Self {
+        Self(AudioHandleId::new())
+    }
+    pub(super) fn id(&self) -> AudioHandleId {
+        self.0.clone()
+    }
+    pub fn pause(&self) {
+        AUDIO_MIXER.with(|mixer| {
+            mixer.run_audio_message(AudioMessageToTop::PlayHandleCalled(self.id()));
+        });
+    }
+    pub fn play(&self) {
+        AUDIO_MIXER.with(|mixer| {
+            mixer.run_audio_message(AudioMessageToTop::PauseHandleCalled(self.id()));
+        });
+    }
+}
+
+impl Drop for AudioHandle {
+    fn drop(&mut self) {
+        AUDIO_MIXER.with(|mixer| {
+            // mixer.audio_handle_dropped(self.id().clone());
+            mixer.run_audio_message(AudioMessageToTop::HandleDropped(self.id().clone()));
+        })
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub(super) enum AudioMessageToTop {
+    Play(PlayAudioMessage),
+    PauseHandleCalled(AudioHandleId),
+    PlayHandleCalled(AudioHandleId),
+    PauseAll,
+    PlayAll,
+    HandleDropped(AudioHandleId),
+
+    /// ask top to broadcast if the context is available
+    BroadcastContextAvailable,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub(super) struct PlayAudioMessage {
+    pub path: String,
+    pub auto_play: bool,
+    pub is_loop: bool,
+    pub handle_id: AudioHandleId,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub(super) enum AudioMessageFromTop {
+    DonePlaying(AudioHandleId),
+    ContextAvailable(bool),
+}
+
+/// Utility function to play a random positive audio effect.
+pub fn play_random_positive() {
+    AUDIO_MIXER.with(|mixer| {
+        let path: AudioPath<'_> = mixer.get_random_positive().into();
+        mixer.play_oneshot(path)
+    });
+}
+
+/// Utility function to play a random negative audio effect.
+pub fn play_random_negative() {
+    AUDIO_MIXER.with(|mixer| {
+        let path: AudioPath<'_> = mixer.get_random_negative().into();
+        mixer.play_oneshot(path)
+    });
+}
+
+pub fn audio_iframe_messenger(dom: DomBuilder<HtmlIFrameElement>) -> DomBuilder<HtmlIFrameElement> {
+    dom.after_inserted(move |iframe| {
+        AUDIO_MIXER.with(|mixer| {
+            mixer.iframes.borrow_mut().push(iframe);
+        })
+    })
+    .after_removed(move |iframe| {
+        AUDIO_MIXER.with(|mixer| {
+            let mut iframes = mixer.iframes.borrow_mut();
+            let pos = iframes.iter().position(|i| i == &iframe);
+            if let Some(pos) = pos {
+                iframes.swap_remove(pos);
+            }
+        })
+    })
 }
 
 pub struct AudioSettings {
@@ -233,93 +590,4 @@ impl From<jig::AudioFeedbackNegative> for AudioPath<'_> {
             jig::AudioFeedbackNegative::Whir => "module/feedback-negative/whir.mp3",
         }))
     }
-}
-
-impl AudioMixer {
-    pub fn set_from_jig(&self, jig: &JigData) {
-        let mut settings = (*self.settings).borrow_mut();
-        settings.reset_from_jig(jig);
-    }
-
-    pub fn get_random_positive(&self) -> AudioFeedbackPositive {
-        let settings = self.settings.borrow();
-        let effects = settings.positive.iter();
-        let chosen_effect = effects.choose(&mut *self.rng.borrow_mut());
-        *chosen_effect.unwrap_ji()
-    }
-
-    pub fn get_random_negative(&self) -> AudioFeedbackNegative {
-        let settings = self.settings.borrow();
-        let effects = settings.negative.iter();
-        let chosen_effect = effects.choose(&mut *self.rng.borrow_mut());
-        *chosen_effect.unwrap_ji()
-    }
-
-    /// Oneshots are AudioClips because they drop themselves
-    /// They're intended solely to be kicked off and not being held anywhere
-    /// However, if necessary, they can still be killed imperatively
-    pub fn play_oneshot<A: Into<AudioSource>>(&self, audio: A) -> WeakAudioHandle {
-        self.inner.play_oneshot(audio.into()).unwrap_ji()
-    }
-
-    pub fn play_oneshot_on_ended<F, A>(&self, audio: A, on_ended: F) -> WeakAudioHandle
-    where
-        F: FnMut() + 'static,
-        A: Into<AudioSource>,
-    {
-        self.inner
-            .play_oneshot_on_ended(audio.into(), on_ended)
-            .unwrap_ji()
-    }
-
-    /// Play a clip and get a Handle to hold (simple API around add_source)
-    pub fn play<A: Into<AudioSource>>(&self, audio: A, is_loop: bool) -> AudioHandle {
-        self.inner.play(audio.into(), is_loop).unwrap_ji()
-    }
-
-    pub fn play_on_ended<F, A>(&self, audio: A, is_loop: bool, on_ended: F) -> AudioHandle
-    where
-        F: FnMut() + 'static,
-        A: Into<AudioSource>,
-    {
-        self.inner
-            .play_on_ended(audio.into(), is_loop, on_ended)
-            .unwrap_ji()
-    }
-
-    /// Add a source with various options and get a Handle to hold
-    pub fn add_source<F, A: Into<AudioSource>>(
-        &self,
-        audio: A,
-        options: AudioClipOptions<F>,
-    ) -> AudioHandle
-    where
-        F: FnMut() + 'static,
-    {
-        self.inner.add_source(audio.into(), options).unwrap_ji()
-    }
-}
-
-impl Deref for AudioMixer {
-    type Target = AwsmAudioMixer;
-
-    fn deref(&self) -> &Self::Target {
-        &self.inner
-    }
-}
-
-/// Utility function to play a random positive audio effect.
-pub fn play_random_positive() {
-    AUDIO_MIXER.with(|mixer| {
-        let path: AudioPath<'_> = mixer.get_random_positive().into();
-        mixer.play_oneshot(path)
-    });
-}
-
-/// Utility function to play a random negative audio effect.
-pub fn play_random_negative() {
-    AUDIO_MIXER.with(|mixer| {
-        let path: AudioPath<'_> = mixer.get_random_negative().into();
-        mixer.play_oneshot(path)
-    });
 }

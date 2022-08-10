@@ -4,8 +4,10 @@ use super::{
     state::{can_load_liked_status, Instructions, JigPlayer},
     timer::Timer,
 };
-use awsm_web::audio::{AudioClipOptions, AudioHandle};
-use components::audio::mixer::{AudioSourceExt, AUDIO_MIXER};
+use awsm_web::audio::AudioClipOptions;
+use components::{
+    audio::mixer::{AudioHandle, AudioSourceExt, AUDIO_MIXER},
+};
 use dominator::clone;
 use futures_signals::signal::SignalExt;
 use shared::{
@@ -278,13 +280,12 @@ pub fn set_paused(state: Rc<JigPlayer>, paused: bool) {
         }
     }
 
-    // let iframe know that paused
-    let iframe_message = match paused {
-        false => JigToModulePlayerMessage::Play,
-        true => JigToModulePlayerMessage::Pause,
-    };
-
-    send_iframe_message(Rc::clone(&state), iframe_message);
+    AUDIO_MIXER.with(|mixer| {
+        match paused {
+            true => mixer.pause_all(),
+            false => mixer.play_all(),
+        };
+    });
 }
 
 pub fn send_iframe_message(state: Rc<JigPlayer>, data: JigToModulePlayerMessage) {

@@ -169,6 +169,7 @@ impl<T: DeserializeOwned> From<JsValue> for IframeAction<T> {
 #[derive(Debug, Serialize, Deserialize)]
 pub enum JigToModulePlayerMessage {
     TimerDone,
+    // remove play and pause? might need for video
     Play,
     Pause,
     InstructionsDone,

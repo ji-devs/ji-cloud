@@ -80,7 +80,7 @@ pub fn render(state: Rc<State>, tab: FeedbackTab) -> Dom {
                     })).collect::<Vec<Dom>>())
                     .after_removed(clone!(audio_handles => move |_| {
                         for audio_handle in audio_handles.iter() {
-                            match audio_handle.get_cloned() {
+                            match &*audio_handle.lock_ref() {
                                 None => {},
                                 Some(audio_handle) => {
                                     audio_handle.pause();
@@ -98,7 +98,7 @@ pub fn render(state: Rc<State>, tab: FeedbackTab) -> Dom {
                     })).collect::<Vec<Dom>>())
                     .after_removed(clone!(audio_handles => move |_| {
                         for audio_handle in audio_handles.iter() {
-                            match audio_handle.get_cloned() {
+                            match &*audio_handle.lock_ref() {
                                 None => {},
                                 Some(audio_handle) => {
                                     audio_handle.pause();

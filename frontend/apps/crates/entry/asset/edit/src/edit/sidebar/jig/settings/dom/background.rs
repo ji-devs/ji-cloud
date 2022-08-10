@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
-use awsm_web::audio::{AudioClipOptions, AudioHandle};
-use components::audio::mixer::{AudioSourceExt, AUDIO_MIXER};
+use awsm_web::audio::AudioClipOptions;
+use components::audio::mixer::{AudioHandle, AudioSourceExt, AUDIO_MIXER};
 use dominator::{clone, html, with_node, Dom};
 use web_sys::HtmlInputElement;
 
@@ -53,7 +53,7 @@ pub fn render(state: Rc<State>) -> Dom {
         })).collect::<Vec<Dom>>())
         .after_removed(clone!(audio_handles => move |_| {
             for audio_handle in audio_handles.iter() {
-                match audio_handle.get_cloned() {
+                match &*audio_handle.lock_ref() {
                     None => {},
                     Some(audio_handle) => {
                         audio_handle.pause();
