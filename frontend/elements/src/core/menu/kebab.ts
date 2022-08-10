@@ -26,6 +26,13 @@ export class _ extends LitElement {
                 .menu-container.visible {
                     display: block;
                 }
+
+                .menu {
+                    display: flex;
+                    flex-direction: column;
+                    grid-gap: 10px;
+                }
+
                 #button {
                     width: 32px;
                     height: 32px;

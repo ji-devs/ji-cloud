@@ -18,6 +18,7 @@ export class _ extends LitElement {
                 .advanced {
                     display: flex;
                     flex-direction: column;
+                    grid-gap: 10px;
                 }
                 .separator {
                     display: block;

@@ -13,6 +13,9 @@ pub fn render_sticker_video_menu<T: AsSticker>(
     video: Rc<Video>,
 ) -> Dom {
     html!("div", {
+        .style("display", "flex")
+        .style("flex-direction", "column")
+        .style("grid-gap", "10px")
         .children(&mut [
             html!("menu-line", {
                 .property("icon", "move-forward")
