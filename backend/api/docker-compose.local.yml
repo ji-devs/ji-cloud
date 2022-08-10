@@ -1,0 +1,28 @@
+# Use postgres/example user/password credentials
+version: '3.9'
+
+services:
+
+  db:
+    image: postgres:12
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=ji-jicloud-dev
+
+  app:
+    build:
+      context: ../../
+      dockerfile: backend/api/Dockerfile.local
+    environment:
+      - DATABASE_URL=postgres://postgres:password@db/
+    depends_on:
+      - db
+    # Volume paths are not relative to the context, they're relative to $PWD of the host when docker-compose is called.
+    volumes:
+      - ../../.env:/app/.env
+      - ../../shared/rust:/app/shared/rust:rw
+      - ../core:/app/backend/core:rw
+      - ../api:/app/backend/api:rw
+      - ../api/docker/volumes/target:/app/backend/api/target
+    working_dir: /app/backend/api
