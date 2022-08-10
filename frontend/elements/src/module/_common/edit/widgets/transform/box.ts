@@ -378,7 +378,8 @@ export class TransformBox extends LitElement {
             const [x, y] = dotPositions[menuButtonDot];
 
             let style = `left: calc(${x}px - ${MENU_BUTTON_RADIUS}px);`;
-            style += ` top: calc(${y}px - ${MENU_BUTTON_RADIUS}px);`;
+            // Move the menu button up by 1.5x it's diameter
+            style += ` top: calc(${RECT_STROKE_SIZE}px - ${MENU_BUTTON_RADIUS * 3}px);`;
 
             return !isTransforming && hasMenu && !buttonHack
                 ? html`<div id="menu-btn" style="${style}">
