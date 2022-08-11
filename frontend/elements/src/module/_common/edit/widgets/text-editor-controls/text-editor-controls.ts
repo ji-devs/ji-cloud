@@ -62,6 +62,10 @@ export class _ extends LitElement {
                         grid-column: unset;
                     }
                 }
+                ::slotted(input-select) {
+                    /* use background color of sidebar */
+                    --background-color: #e9eff8;
+                }
                 ::slotted(anchored-overlay[slot="colors"]) {
                     display: block;
                 }

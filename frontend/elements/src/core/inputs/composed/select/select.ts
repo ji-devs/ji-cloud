@@ -18,6 +18,7 @@ export class _ extends LitElement {
             css`
                 :host {
                     display: block;
+                    --background-color: #fff;
                 }
                 :host([open]) {
                     box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.16);
@@ -33,6 +34,9 @@ export class _ extends LitElement {
                     box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.16);
                     background-color: white;
                     padding-bottom: 8px;
+                }
+                input-wrapper {
+                    --background-color: inherit;
                 }
                 .label-placeholder {
                     overflow: hidden;
