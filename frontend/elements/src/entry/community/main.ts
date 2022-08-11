@@ -1,6 +1,7 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 
 const STR_COMMUNITY = "Community";
+const STR_PINCUS_PARTNERSHIP = "in partnership with the Pincus Fund.";
 
 @customElement("community-main")
 export class _ extends LitElement {
@@ -61,6 +62,17 @@ export class _ extends LitElement {
                     padding: 40px 30px;
                     background-color: #fff6d9;
                 }
+                .pincus {
+                    display: grid;
+                    justify-items: center;
+                    margin-top: 80px;
+                    row-gap: 30px;
+                }
+                .pincus h4 {
+                    font-size: 18px;
+                    font-weight: normal;
+                    color: #383838;
+                }
             `,
         ];
     }
@@ -78,6 +90,12 @@ export class _ extends LitElement {
             <main>
                 <div class="width-holder">
                     <slot></slot>
+                </div>
+                <div class="pincus">
+                    <h4>${STR_PINCUS_PARTNERSHIP}</h4>
+                    <a href="https://www.pincusfund.org/" target="_BLANK">
+                        <img-ui path="entry/community/pincus-logo.webp"></img-ui>
+                    </a>
                 </div>
             </main>
         `;
