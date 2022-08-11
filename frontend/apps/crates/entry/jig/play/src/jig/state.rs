@@ -5,6 +5,7 @@ use futures_signals::signal::Mutable;
 use serde::{Deserialize, Serialize};
 use shared::domain::{
     jig::{JigId, JigPlayerSettings, JigResponse},
+    meta::ResourceType,
     module::ModuleId,
 };
 use utils::asset::JigPlayerOptions;
@@ -31,6 +32,7 @@ pub struct JigPlayer {
     pub player_options: JigPlayerOptions,
     pub bg_audio_handle: Rc<RefCell<Option<AudioHandle>>>,
     pub bg_audio_playing: Mutable<bool>,
+    pub resource_types: Mutable<Vec<ResourceType>>,
 }
 
 impl JigPlayer {
@@ -56,6 +58,7 @@ impl JigPlayer {
             player_options,
             bg_audio_handle: Rc::new(RefCell::new(None)),
             bg_audio_playing: Mutable::new(true),
+            resource_types: Default::default(),
         })
     }
 }

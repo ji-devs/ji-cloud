@@ -12,7 +12,10 @@ use components::{
 use dominator::clone;
 use futures_signals::signal::SignalExt;
 use shared::{
-    api::{endpoints::jig, ApiEndpoint},
+    api::{
+        endpoints::{self, jig},
+        ApiEndpoint,
+    },
     domain::{
         asset::DraftOrLive,
         jig::{AudioBackground, JigLikedResponse, JigResponse},
@@ -21,7 +24,7 @@ use shared::{
 };
 use utils::{
     iframe::{IframeAction, JigToModulePlayerMessage, ModuleToJigPlayerMessage},
-    prelude::{api_no_auth, api_no_auth_empty, api_with_auth, SETTINGS},
+    prelude::{api_no_auth, api_no_auth_empty, api_with_auth, ApiEndpointExt, SETTINGS},
     routes::{HomeRoute, Route},
     unwrap::UnwrapJiExt,
 };
@@ -125,7 +128,14 @@ pub fn navigate_to_module(state: Rc<JigPlayer>, module_id: &ModuleId) {
     }
 }
 
-pub fn load_jig(state: Rc<JigPlayer>) {
+pub fn load_data(state: Rc<JigPlayer>) {
+    state.loader.load(clone!(state => async move {
+        load_resource_types(Rc::clone(&state)).await;
+        load_jig(Rc::clone(&state)).await;
+    }));
+}
+
+async fn load_jig(state: Rc<JigPlayer>) {
     state.loader.load(clone!(state => async move {
         let (jig, jig_liked) = match state.player_options.draft_or_live {
             DraftOrLive::Live => {
@@ -172,6 +182,15 @@ pub fn load_jig(state: Rc<JigPlayer>) {
             },
         }
     }));
+}
+
+async fn load_resource_types(state: Rc<JigPlayer>) {
+    match endpoints::meta::Get::api_with_auth(None).await {
+        Err(_) => todo!(),
+        Ok(meta) => {
+            state.resource_types.set(meta.resource_types);
+        }
+    };
 }
 
 fn init_audio(state: &JigPlayer, background_audio: AudioBackground) {

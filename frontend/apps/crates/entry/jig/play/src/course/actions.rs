@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use dominator::clone;
 use futures::future::try_join_all;
+use futures::join;
 use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{
@@ -13,38 +14,67 @@ use shared::{
 };
 use utils::{
     iframe::{AssetPlayerToPlayerPopup, IframeAction, IframeMessageExt},
-    prelude::api_no_auth,
+    prelude::{api_no_auth, ApiEndpointExt},
     unwrap::UnwrapJiExt,
 };
 
 use super::state::CoursePlayer;
 
 impl CoursePlayer {
-    pub fn load_course(self: &Rc<Self>) {
+    pub fn load_data(self: &Rc<Self>) {
         let state = self;
         state.loader.load(clone!(state => async move {
-            let course = match state.player_options.draft_or_live {
-                DraftOrLive::Live => {
-                    let path = endpoints::course::GetLive::PATH.replace("{id}", &state.course_id.0.to_string());
-                    api_no_auth::<CourseResponse, EmptyError, ()>(&path, endpoints::course::GetLive::METHOD, None).await
-                },
-                DraftOrLive::Draft => {
-                    let path = endpoints::course::GetDraft::PATH.replace("{id}", &state.course_id.0.to_string());
-                    api_no_auth::<CourseResponse, EmptyError, ()>(&path, endpoints::course::GetDraft::METHOD, None).await
-                },
-            };
-
-            match course {
-                Ok(course) => {
-                    let jig_ids = course.course_data.items.clone();
-                    state.course.set(Some(course));
-                    state.load_jigs(jig_ids).await;
-                },
-                Err(_) => {
-                    todo!();
-                },
-            }
+            join!(
+                state.load_course(),
+                state.load_resource_types(),
+            );
         }));
+    }
+
+    async fn load_course(self: &Rc<Self>) {
+        let state = self;
+        let course = match state.player_options.draft_or_live {
+            DraftOrLive::Live => {
+                let path = endpoints::course::GetLive::PATH
+                    .replace("{id}", &state.course_id.0.to_string());
+                api_no_auth::<CourseResponse, EmptyError, ()>(
+                    &path,
+                    endpoints::course::GetLive::METHOD,
+                    None,
+                )
+                .await
+            }
+            DraftOrLive::Draft => {
+                let path = endpoints::course::GetDraft::PATH
+                    .replace("{id}", &state.course_id.0.to_string());
+                api_no_auth::<CourseResponse, EmptyError, ()>(
+                    &path,
+                    endpoints::course::GetDraft::METHOD,
+                    None,
+                )
+                .await
+            }
+        };
+
+        match course {
+            Ok(course) => {
+                let jig_ids = course.course_data.items.clone();
+                state.course.set(Some(course));
+                state.load_jigs(jig_ids).await;
+            }
+            Err(_) => {
+                todo!();
+            }
+        }
+    }
+
+    async fn load_resource_types(self: &Rc<Self>) {
+        match endpoints::meta::Get::api_with_auth(None).await {
+            Err(_) => todo!(),
+            Ok(meta) => {
+                self.resource_types.set(meta.resource_types);
+            }
+        };
     }
 
     async fn load_jigs(self: &Rc<Self>, jig_ids: Vec<JigId>) {

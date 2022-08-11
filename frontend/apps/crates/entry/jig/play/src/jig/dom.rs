@@ -23,7 +23,7 @@ use super::state::JigPlayer;
 impl JigPlayer {
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self;
-        actions::load_jig(state.clone());
+        actions::load_data(state.clone());
 
         html!("jig-play-landing", {
             .property_signal("rtl", state.jig.signal_cloned().map(|jig| {

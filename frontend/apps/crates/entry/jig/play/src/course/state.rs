@@ -5,6 +5,7 @@ use futures_signals::signal::Mutable;
 use shared::domain::{
     course::{CourseId, CourseResponse},
     jig::{JigId, JigResponse},
+    meta::ResourceType,
 };
 use utils::asset::CoursePlayerOptions;
 
@@ -16,6 +17,7 @@ pub struct CoursePlayer {
     pub played_jigs: Mutable<HashSet<JigId>>,
     pub player_options: CoursePlayerOptions,
     pub active_jig: Mutable<Option<JigId>>,
+    pub resource_types: Mutable<Vec<ResourceType>>,
 }
 
 impl CoursePlayer {
@@ -28,6 +30,7 @@ impl CoursePlayer {
             played_jigs: Mutable::new(HashSet::new()),
             player_options,
             active_jig: Mutable::new(None),
+            resource_types: Default::default(),
         })
     }
 }

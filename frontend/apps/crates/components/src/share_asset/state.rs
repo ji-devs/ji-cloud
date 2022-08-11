@@ -3,7 +3,7 @@ use std::rc::Rc;
 use awsm_web::loaders::helpers::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::asset::AssetId;
-use utils::asset::{JigPlayerOptions, CoursePlayerOptions};
+use utils::asset::{CoursePlayerOptions, JigPlayerOptions};
 use utils::routes::{AssetRoute, Route};
 
 use utils::prelude::*;
@@ -54,9 +54,9 @@ impl ShareAsset {
             AssetId::CourseId(course_id) => Route::Asset(AssetRoute::Play(AssetPlayRoute::Course(
                 course_id,
                 CoursePlayerOptions::default(),
-            )))
-            
-        }.to_string();
+            ))),
+        }
+        .to_string();
         let origin = web_sys::window()
             .unwrap_ji()
             .location()

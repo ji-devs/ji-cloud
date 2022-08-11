@@ -5,7 +5,7 @@ use futures_signals::{
     map_ref,
     signal::{Signal, SignalExt},
 };
-use shared::domain::jig::JigResponse;
+use shared::domain::{jig::JigResponse, meta::ResourceTypeId};
 use utils::{
     ages::AgeRangeVecExt,
     asset::{published_at_string, ResourceContentExt},
@@ -103,6 +103,7 @@ fn render_jig_info(state: Rc<State>, jig: &JigResponse) -> Dom {
                 }))
                 .text(" ")
                 .text(&resource.display_name)
+                .text_signal(resource_type_name_signal(Rc::clone(&state), resource.resource_type_id))
             })
         }))
         .child(html!("button-rect", {
@@ -112,4 +113,24 @@ fn render_jig_info(state: Rc<State>, jig: &JigResponse) -> Dom {
         }))
         .children_signal_vec(report::render(Rc::clone(&state)).to_signal_vec())
     })
+}
+
+fn resource_type_name_signal(
+    state: Rc<State>,
+    resource_type_id: ResourceTypeId,
+) -> impl Signal<Item = String> {
+    state
+        .player_state
+        .resource_types
+        .signal_cloned()
+        .map(move |resource_types| {
+            let resource_type = resource_types
+                .iter()
+                .find(|resource_type| resource_type_id == resource_type.id);
+
+            match resource_type {
+                None => String::new(),
+                Some(resource_type) => resource_type.display_name.to_owned(),
+            }
+        })
 }

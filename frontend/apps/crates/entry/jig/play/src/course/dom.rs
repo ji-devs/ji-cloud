@@ -3,8 +3,8 @@ use components::{
     player_popup::{PlayerPopup, PreviewPopupCallbacks},
 };
 use dominator::{clone, html, Dom};
-use futures_signals::signal::SignalExt;
-use shared::domain::{course::CourseResponse, jig::JigResponse};
+use futures_signals::signal::{Signal, SignalExt};
+use shared::domain::{course::CourseResponse, jig::JigResponse, meta::ResourceTypeId};
 use std::rc::Rc;
 use utils::{asset::ResourceContentExt, events, languages::Language};
 
@@ -13,7 +13,7 @@ use super::state::CoursePlayer;
 impl CoursePlayer {
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self;
-        state.load_course();
+        state.load_data();
         html!("div", {
             .child_signal(state.course.signal_ref(clone!(state => move|course| {
                 course.as_ref().map(|course| {
@@ -66,7 +66,7 @@ impl CoursePlayer {
                         .property("icon", "fa-light fa-file")
                     }))
                     .text(" ")
-                    .text(&resource.display_name)
+                    .text_signal(state.resource_type_name_signal(resource.resource_type_id))
                 })
             }))
             .child_signal(state.active_jig.signal_cloned().map(|active_jig| {
@@ -103,5 +103,26 @@ impl CoursePlayer {
                 state.play_jig(jig_id);
             }))
         })
+    }
+
+    fn resource_type_name_signal(
+        self: &Rc<Self>,
+        resource_type_id: ResourceTypeId,
+    ) -> impl Signal<Item = String> {
+        let state = Rc::clone(self);
+
+        state
+            .resource_types
+            .signal_cloned()
+            .map(move |resource_types| {
+                let resource_type = resource_types
+                    .iter()
+                    .find(|resource_type| resource_type_id == resource_type.id);
+
+                match resource_type {
+                    None => String::new(),
+                    Some(resource_type) => resource_type.display_name.to_owned(),
+                }
+            })
     }
 }
