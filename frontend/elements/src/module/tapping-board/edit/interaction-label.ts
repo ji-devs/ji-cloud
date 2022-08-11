@@ -20,9 +20,6 @@ export class _ extends LitElement {
                 .main-content {
                     border-radius: 16px;
                     background-color: var(--white);
-                    border-width: 2px;
-                    display: grid;
-                    place-items: center;
                 }
                 .actions {
                     padding: 0;
