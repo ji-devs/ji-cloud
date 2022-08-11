@@ -42,26 +42,23 @@ export class _ extends LitElement {
                 .first {
                     grid-template-columns: 1fr min-content;
                 }
-                .second {
-                    grid-template-columns: 3fr 2fr;
+                .second, .third {
+                    justify-content: stretch;
                 }
-                .third {
+                .fourth {
                     grid-template-columns: 1fr 1fr;
                 }
-                .third .alignment {
+                .fourth .alignment {
                     grid-column: 1 / -1;
                 }
                 @media (min-width: 1920px) {
                     .first {
                         grid-template-columns: 1fr 1fr;
                     }
-                    .second {
-                        grid-template-columns: 1fr 1fr;
-                    }
-                    .third {
+                    .fourth {
                         grid-template-columns: 124px 124px 200px;
                     }
-                    .third .alignment {
+                    .fourth .alignment {
                         grid-column: unset;
                     }
                 }
@@ -109,9 +106,11 @@ export class _ extends LitElement {
                 </div>
                 <div class="row second">
                     <slot name="font"></slot>
-                    <slot name="weight"></slot>
                 </div>
                 <div class="row third">
+                    <slot name="weight"></slot>
+                </div>
+                <div class="row fourth">
                     <div class="button-collection">
                         <slot name="bold"></slot>
                         <slot name="italic"></slot>
