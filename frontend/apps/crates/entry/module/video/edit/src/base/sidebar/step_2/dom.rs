@@ -37,6 +37,7 @@ pub fn render(state: Rc<Step2>) -> Dom {
         }))));
 
     html!("empty-fragment", {
+        .style("display", "contents")
         .future(tab.for_each(clone!(state => move |(is_empty, kind)| {
             state.sidebar.tab_kind.set(Some(kind));
 
