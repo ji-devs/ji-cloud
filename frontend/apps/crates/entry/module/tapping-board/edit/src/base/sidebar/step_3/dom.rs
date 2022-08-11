@@ -3,7 +3,7 @@ use std::rc::Rc;
 
 use components::{
     audio::input::AudioInput,
-    tabs::{MenuTab, MenuTabKind},
+    tabs::{MenuTab, MenuTabKind}, hebrew_buttons::HebrewButtons,
 };
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::{Mutable, SignalExt};
@@ -48,6 +48,7 @@ pub fn render(state: Rc<Step3>) -> Dom {
                                     render_tab(state.clone(), MenuTabKind::Label, selected_tab.clone()),
                                     html!("module-sidebar-body", {
                                         .property("slot", "body")
+                                        .style("overflow", "inherit") // Inherit overflow otherwise the Hebrew controls will be hidden
                                         .child_signal(
                                             //based on the selected tab kind, create and render the tab state
                                             state
@@ -105,8 +106,11 @@ fn render_tab(
 fn render_tab_body(state: Rc<Step3>, tab: Tab) -> Dom {
     match tab {
         Tab::Label(index, text_state) => {
-            html!("div", {
+            html!("tapping-board-interaction-label", {
                 .child(html!("input-wrapper", {
+                    .child({
+                        HebrewButtons::short().render(Some("hebrew-inputs"))
+                    })
                     .property("label", crate::strings::step_3::STR_LABEL)
                     .child(html!("textarea" => HtmlTextAreaElement, {
                         .with_node!(elem => {
@@ -130,8 +134,19 @@ fn render_tab_body(state: Rc<Step3>, tab: Tab) -> Dom {
                         })
                     }))
                 }))
-                .child(html!("button", {
-                    .text("Preview")
+                .child_signal(text_state.signal_cloned().map(clone!(text_state => move |text| {
+                    text.map(|_text| {
+                        html!("interaction-delete-action", {
+                            .property("slot", "delete")
+                            .event(clone!(text_state => move |_evt:events::Click| {
+                                text_state.set_neq(None);
+                            }))
+                        })
+                    })
+                })))
+                .child(html!("interaction-preview-action", {
+                    .property("slot", "main-action")
+                    .property_signal("disabled", text_state.signal_cloned().map(|text| text.is_none()))
                     .event(clone!(state => move |_evt:events::Click| {
                         state.start_preview(index)
                     }))
