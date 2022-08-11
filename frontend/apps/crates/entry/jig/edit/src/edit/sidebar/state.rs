@@ -101,7 +101,7 @@ impl State {
             .collect();
 
         if add_cover {
-            modules.push(SidebarSpot::new_jig_module(None));
+            modules.insert(0, SidebarSpot::new_jig_module(None));
         };
 
         modules
