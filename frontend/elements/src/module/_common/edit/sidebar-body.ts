@@ -17,11 +17,6 @@ export class _ extends LitElement {
                 :host([dark]) {
                     background-color: #e9eff8;
                 }
-                @media (min-width: 1920px) {
-                    :host {
-                        padding: 0 32px;
-                    }
-                }
 
                 section {
                     box-sizing: border-box;
