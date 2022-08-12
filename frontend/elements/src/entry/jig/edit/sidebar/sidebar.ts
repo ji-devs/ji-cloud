@@ -111,9 +111,7 @@ export class _ extends LitElement {
                     <slot name="header"></slot>
                 </header>
                 <div class="side-head collapsing-phase">
-                    <img-ui
-                        path="entry/jig/jiggling/yellow/face-small.png"
-                    ></img-ui>
+                    <slot name="side-head"></slot>
                 </div>
                 <section class="collapsing-phase">
                     <div class="cover-module collapsing-phase">

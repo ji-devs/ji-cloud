@@ -94,6 +94,15 @@ impl SidebarDom {
                     matches!(route, AssetEditRoute::Jig(_, _, JigEditRoute::Landing))
                 }))
                 .property_signal("loading", state.loader.is_loading())
+                .child(html!("button-empty", {
+                    .property("slot", "side-head")
+                    .child(html!("img-ui", {
+                        .property("path", "entry/jig/jiggling/yellow/face-small.png")
+                    }))
+                    .event(clone!(state => move |_ :events::Click| {
+                        state.collapsed.set(false);
+                    }))
+                }))
                 .child(HeaderDom::render(state.clone()))
                 .child(html!("jig-edit-sidebar-publish", {
                     .property("slot", "publish")
