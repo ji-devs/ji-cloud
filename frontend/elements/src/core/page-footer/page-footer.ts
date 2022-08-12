@@ -224,37 +224,24 @@ export class _ extends LitElement {
                             <h4>${STR_JIGS_TITLE}</h4>
                             <ul>
                                 <li>
-                                    <a href="${searchLink(STR_JIGS_HEBREW)}"
-                                        >${STR_JIGS_HEBREW}</a
-                                    >
+                                    <a href="${searchLink(STR_JIGS_HEBREW)}">${STR_JIGS_HEBREW}</a>
                                 </li>
                                 <li>
-                                    <a
-                                        href="${searchLink(
-                                            STR_JIGS_JEWISH_HOLIDAYS
-                                        )}"
-                                        >${STR_JIGS_JEWISH_HOLIDAYS}</a
-                                    >
+                                    <a href="${searchLink(
+                        STR_JIGS_JEWISH_HOLIDAYS
+                    )}">${STR_JIGS_JEWISH_HOLIDAYS}</a>
                                 </li>
                                 <li>
-                                    <a href="${searchLink(STR_JIGS_TORAH)}"
-                                        >${STR_JIGS_TORAH}</a
-                                    >
+                                    <a href="${searchLink(STR_JIGS_TORAH)}">${STR_JIGS_TORAH}</a>
                                 </li>
                                 <li>
-                                    <a href="${searchLink(STR_JIGS_J_STEM)}"
-                                        >${STR_JIGS_J_STEM}</a
-                                    >
+                                    <a href="${searchLink(STR_JIGS_J_STEM)}">${STR_JIGS_J_STEM}</a>
                                 </li>
                                 <li>
-                                    <a href="${searchLink(STR_JIGS_ISRAEL)}"
-                                        >${STR_JIGS_ISRAEL}</a
-                                    >
+                                    <a href="${searchLink(STR_JIGS_ISRAEL)}">${STR_JIGS_ISRAEL}</a>
                                 </li>
                                 <li>
-                                    <a href="${searchLink(STR_JIGS_SONGS)}"
-                                        >${STR_JIGS_SONGS}</a
-                                    >
+                                    <a href="${searchLink(STR_JIGS_SONGS)}">${STR_JIGS_SONGS}</a>
                                 </li>
                             </ul>
                         </div>
@@ -262,25 +249,23 @@ export class _ extends LitElement {
                             <h4>${STR_PRODUCT_TITLE}</h4>
                             <ul>
                                 <li>
-                                    <a href="${COMING_SOON_ALERT}"
-                                        >${STR_PRODUCT_MANAGE_CLASSROOM}</a
-                                    >
+                                    <a href="${COMING_SOON_ALERT}">
+                                        ${STR_PRODUCT_MANAGE_CLASSROOM}
+                                    </a>
                                 </li>
                                 <li>
-                                    <a href="/jig/edit/gallery"
-                                        >${STR_PRODUCT_CREATE_ACTIVITIES}</a
-                                    >
+                                    <a href="/asset/edit/jig-gallery">
+                                        ${STR_PRODUCT_CREATE_ACTIVITIES}
+                                    </a>
                                 </li>
                                 <li>
-                                    <a href="${COMING_SOON_ALERT}"
-                                        >${STR_PRODUCT_JOIN_COMMUNITY}</a
-                                    >
+                                    <a href="/community">
+                                        ${STR_PRODUCT_JOIN_COMMUNITY}
+                                    </a>
                                 </li>
                                 <li>
-                                    <a
-                                        href="https://www.jewishinteractive.org/flipbook/index.html?page=1"
-                                        target="_blank"
-                                    >${STR_JIGZI_ROADMAP}</a>
+                                    <a href="https://www.jewishinteractive.org/flipbook/index.html?page=1"
+                                        target="_blank">${STR_JIGZI_ROADMAP}</a>
                                 </li>
                             </ul>
                         </div>
@@ -288,31 +273,27 @@ export class _ extends LitElement {
                             <h4>${STR_HELP_TITLE}</h4>
                             <ul>
                                 <li>
-                                    <a href="mailto:jigzy@jewishinteractive.org"
-                                        >${STR_HELP_SUPPORT}</a
-                                    >
+                                    <a href="mailto:info@jigzi.org">${STR_HELP_SUPPORT}</a>
                                 </li>
                                 <li>
-                                    <a href="${COMING_SOON_ALERT}"
-                                        >${STR_HELP_TOUR}</a
-                                    >
+                                    <a href="${COMING_SOON_ALERT}">
+                                        ${STR_HELP_TOUR}
+                                    </a>
                                 </li>
                                 <li>
-                                    <a
-                                        href="https://www.jewishinteractive.org/pd-ji/"
-                                        target="_blank"
-                                        >${STR_HELP_TUTORIALS}</a
-                                    >
+                                    <a href="https://www.jewishinteractive.org/pd-ji/" target="_blank">
+                                        ${STR_HELP_TUTORIALS}
+                                    </a>
                                 </li>
                                 <li>
-                                    <a href="${COMING_SOON_ALERT}"
-                                        >${STR_HELP_WEBINARS}</a
-                                    >
+                                    <a href="https://www.jewishinteractive.org/jigzi-demo-sessions/" target="_blank">
+                                        ${STR_HELP_WEBINARS}
+                                    </a>
                                 </li>
                                 <li>
-                                    <a @click="${this.accessibilityClicked}"
-                                        >${STR_HELP_ACCESSIBILITY}</a
-                                    >
+                                    <a @click="${this.accessibilityClicked}">
+                                        ${STR_HELP_ACCESSIBILITY}
+                                    </a>
                                 </li>
                             </ul>
                         </div>
@@ -320,71 +301,51 @@ export class _ extends LitElement {
                             <h4>${STR_CONTACT_TITLE}</h4>
                             <dl>
                                 <dd>
-                                    <a href="mailto:${STR_CONTACT_EMAIL}"
-                                        >${STR_CONTACT_EMAIL}</a
-                                    >
+                                    <a href="mailto:${STR_CONTACT_EMAIL}">
+                                        ${STR_CONTACT_EMAIL}
+                                    </a>
                                 </dd>
                                 <dt>${STR_CONTACT_US}</dt>
                                 <dd>
                                     ${STR_CONTACT_TEL}
-                                    <a href="tel:+1-703-517-5182"
-                                        >+1 (703) 517-5182</a
-                                    >
+                                    <a href="tel:+1 866-601-8000">
+                                        +1 (866) 601-8000
+                                    </a>
                                 </dd>
                                 <dt>${STR_CONTACT_UK}</dt>
                                 <dd>
                                     ${STR_CONTACT_TEL}
-                                    <a href="tel:+44 (0)79 6641 4417"
-                                        >+44 (0)79 6641 4417</a
-                                    >
+                                    <a href="tel:+44 (0)79 6641 4417">
+                                        +44 (0)79 6641 4417
+                                    </a>
                                 </dd>
                                 <dt>${STR_CONTACT_SOUTH_AFRICA}</dt>
                                 <dd>
                                     ${STR_CONTACT_TEL}
-                                    <a href="tel:+27 (79) 886 5326"
-                                        >+27 (79) 886 5326</a
-                                    >
+                                    <a href="tel:+27 (79) 886 5326">
+                                        +27 (79) 886 5326
+                                    </a>
                                 </dd>
                                 <dt>${STR_CONTACT_ISRAEL}</dt>
                                 <dd>
                                     ${STR_CONTACT_TEL}
                                     <a href="tel: +972 (0) 54-597 9555">
-                                        +972 (0) 54-597 9555</a
-                                    >
+                                        +972 (0) 54-597 9555
+                                    </a>
                                 </dd>
                             </dl>
                             <div class="social">
-                                <a
-                                    href="https://www.facebook.com/JewishInteractive"
-                                    target="_blank"
-                                >
-                                    <img-ui
-                                        path="entry/home/footer/social-icon-facebook.svg"
-                                    ></img-ui>
+                                <a href="https://www.facebook.com/JewishInteractive" target="_blank">
+                                    <img-ui path="entry/home/footer/social-icon-facebook.svg"></img-ui>
                                 </a>
-                                <a
-                                    href="https://www.instagram.com/jewishinteractive"
-                                    target="_blank"
-                                >
-                                    <img-ui
-                                        path="entry/home/footer/social-icon-instagram.svg"
-                                    ></img-ui>
+                                <a href="https://www.instagram.com/jewishinteractive" target="_blank">
+                                    <img-ui path="entry/home/footer/social-icon-instagram.svg"></img-ui>
                                 </a>
-                                <a
-                                    href="https://www.youtube.com/user/JewishInteractive"
-                                    target="_blank"
-                                >
-                                    <img-ui
-                                        path="entry/home/footer/social-icon-youtube.svg"
-                                    ></img-ui>
+                                <a href="https://www.youtube.com/user/JewishInteractive" target="_blank">
+                                    <img-ui path="entry/home/footer/social-icon-youtube.svg"></img-ui>
                                 </a>
-                                <a
-                                    href="https://www.linkedin.com/company/jewish-interactive"
-                                    target="_blank"
-                                >
-                                    <img-ui
-                                        path="entry/home/footer/social-icon-linkdin.svg"
-                                    ></img-ui>
+                                <a href="https://www.linkedin.com/company/jewish-interactive" target="_blank">
+                                    <img-ui path="entry/home/footer/social-icon-linkdin.svg"></img-ui>
                                 </a>
                             </div>
                         </div>
@@ -397,112 +358,64 @@ export class _ extends LitElement {
                         <div class="column">
                             <h4>${STR_ABOUT_TITLE}</h4>
                             ${STR_ABOUT_TEXT.split("\n").map((text) => {
-                                return html`<p>${text}</p>`;
-                            })}
-                            <a
-                                href="https://www.jewishinteractive.org/donate/"
-                                class="donate-link"
-                            >
-                                <button-rect color="blue" bold
-                                    >${STR_DONATE}</button-rect
-                                >
+        return html`<p>${text}</p>`;
+        })}
+                            <a href="https://www.jewishinteractive.org/donate/" class="donate-link">
+                                <button-rect color="blue" bold>${STR_DONATE}</button-rect>
                             </a>
                         </div>
                         <div class="column">
                             <h4>${STR_SERVICES_TITLE}</h4>
                             <ul>
                                 <li>
-                                    <a
-                                        href="https://www.jewishinteractive.org/ji-teachers/"
-                                        target="_blank"
-                                        >${STR_SERVICES_TEACHERS}</a
-                                    >
+                                    <a href="https://www.jewishinteractive.org/ji-teachers/"
+                                        target="_blank">${STR_SERVICES_TEACHERS}</a>
                                 </li>
                                 <li>
-                                    <a
-                                        href="https://www.jewishinteractive.org/ji-parents/"
-                                        target="_blank"
-                                        >${STR_SERVICES_PARENTS}</a
-                                    >
+                                    <a href="https://www.jewishinteractive.org/ji-parents/"
+                                        target="_blank">${STR_SERVICES_PARENTS}</a>
                                 </li>
                                 <li>
-                                    <a
-                                        href="https://bytes.jikids.org/"
-                                        target="_blank"
-                                        >${STR_SERVICES_BITES}</a
-                                    >
+                                    <a href="https://bytes.jikids.org/" target="_blank">${STR_SERVICES_BITES}</a>
                                 </li>
                                 <li>
-                                    <a
-                                        href="https://www.jewishinteractive.org/ji-prime-initiatives/"
-                                        target="_blank"
-                                        >${STR_SERVICES_PRIME}</a
-                                    >
+                                    <a href="https://www.jewishinteractive.org/ji-prime-initiatives/"
+                                        target="_blank">${STR_SERVICES_PRIME}</a>
                                 </li>
                                 <li>
-                                    <a
-                                        href="https://www.jewishinteractive.org/ji-tap-schools/"
-                                        target="_blank"
-                                        >${STR_SERVICES_TAP}</a
-                                    >
+                                    <a href="https://www.jewishinteractive.org/ji-tap-schools/"
+                                        target="_blank">${STR_SERVICES_TAP}</a>
                                 </li>
                                 <li>
-                                    <a
-                                        href="https://www.jewishinteractive.org/ji-studio-5/"
-                                        target="_blank"
-                                        >${STR_SERVICES_STUDIO}</a
-                                    >
+                                    <a href="https://www.jewishinteractive.org/ji-studio-5/"
+                                        target="_blank">${STR_SERVICES_STUDIO}</a>
                                 </li>
                                 <li>
-                                    <a
-                                        href="https://www.jewishinteractive.org/ji-products-services/the-ji-collection/"
-                                        target="_blank"
-                                        >${STR_SERVICES_COLLECTION}</a
-                                    >
+                                    <a href="https://www.jewishinteractive.org/ji-products-services/the-ji-collection/"
+                                        target="_blank">${STR_SERVICES_COLLECTION}</a>
                                 </li>
                                 <li>
-                                    <a
-                                        href="https://www.jewishinteractive.org/ji-products-services/jstem/"
-                                        target="_blank"
-                                        >${STR_SERVICES_J_STEM}</a
-                                    >
+                                    <a href="https://www.jewishinteractive.org/ji-products-services/jstem/"
+                                        target="_blank">${STR_SERVICES_J_STEM}</a>
                                 </li>
                                 <li>
-                                    <a
-                                        href="https://info.jewishinteractive.org/blog"
-                                        target="_blank"
-                                        >${STR_SERVICES_BLOG}</a
-                                    >
+                                    <a href="https://info.jewishinteractive.org/blog" target="_blank">${STR_SERVICES_BLOG}</a>
                                 </li>
                                 <li>
-                                    <a
-                                        href="https://www.jewishinteractive.org/positions-available-at-ji/"
-                                        target="_blank"
-                                        >${STR_SERVICES_JOBS}</a
-                                    >
+                                    <a href="https://www.jewishinteractive.org/positions-available-at-ji/"
+                                        target="_blank">${STR_SERVICES_JOBS}</a>
                                 </li>
                             </ul>
                         </div>
                     </div>
                 </section>
                 <section class="bottom-section">
-                    <a
-                        href="https://www.jewishinteractive.org/privacy-policy/"
-                        target="_blank"
-                        >${STR_PRIVACY}</a
-                    >
+                    <a href="https://www.jewishinteractive.org/privacy-policy/" target="_blank">${STR_PRIVACY}</a>
                     <span>|</span>
-                    <a
-                        href="https://www.jewishinteractive.org/terms-and-conditions/"
-                        target="_blank"
-                        >${STR_TERMS}</a
-                    >
+                    <a href="https://www.jewishinteractive.org/terms-and-conditions/" target="_blank">${STR_TERMS}</a>
                     <span>|</span>
-                    <a
-                        href="https://www.jewishinteractive.org/jewish-interactive-child-protection-policy/"
-                        target="_blank"
-                        >${STR_CHILD_PROTECTION}</a
-                    >
+                    <a href="https://www.jewishinteractive.org/jewish-interactive-child-protection-policy/"
+                        target="_blank">${STR_CHILD_PROTECTION}</a>
                 </section>
             </div>
             <div class="horizontal-slider"></div>
