@@ -211,7 +211,7 @@ export class _ extends LitElement {
             </section>
             <div class="right-sections">
                 <section class="creations">
-                    <h3>${this.givenName}${STR_CREATIONS}</h3>
+                    <h3>${this.givenName} ${this.familyName}${STR_CREATIONS}</h3>
                     <div class="creation-tabs">
                         <slot name="creation-tabs"></slot>
                     </div>
@@ -220,7 +220,7 @@ export class _ extends LitElement {
                     </div>
                 </section>
                 <section class="connections">
-                    <h3>${this.givenName}${STR_NETWORK}</h3>
+                    <h3>${this.givenName} ${this.familyName}${STR_NETWORK}</h3>
                     <div class="connection-tabs">
                         <slot name="connection-tabs"></slot>
                     </div>
