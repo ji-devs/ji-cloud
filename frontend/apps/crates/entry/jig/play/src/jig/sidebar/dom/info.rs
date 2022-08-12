@@ -97,6 +97,7 @@ fn render_jig_info(state: Rc<State>, jig: &JigResponse) -> Dom {
             html!("a", {
                 .property("slot", "additional-resources")
                 .property("target", "_BLANK")
+                .property("title", &resource.display_name)
                 .property("href", resource.resource_content.get_link())
                 .child(html!("fa-icon", {
                     .property("icon", "fa-light fa-file")
