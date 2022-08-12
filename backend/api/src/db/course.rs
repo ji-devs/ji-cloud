@@ -165,9 +165,9 @@ select cte.course_id                                          as "course_id: Cou
        other_keywords,
        translated_keywords,
        (
-            select row(course_data_module.id, kind, is_complete) 
-            from course_data_module                
-            where course_data_id = cte.draft_or_live_id and "index" = 0 
+            select row(course_data_module.id, kind, is_complete)
+            from course_data_module
+            where course_data_id = cte.draft_or_live_id and "index" = 0
             order by "index"
         )                                                   as "cover?: (ModuleId, ModuleKind, bool)",
        array(select row (category_id)
@@ -268,8 +268,9 @@ select course.id                                       as "id!: CourseId",
        likes                                    as "likes!",
        plays                                    as "plays!"
 from course
-         inner join unnest($1::uuid[])
+inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
+order by ord asc
     "#,
         ids,
     )
@@ -288,15 +289,15 @@ select  id,
         display_name                                       as "display_name!",
         updated_at,
         privacy_level                                      as "privacy_level!: PrivacyLevel",
-        language                                           as "language!",           
+        language                                           as "language!",
         description                                         as "description!",
         translated_description                              as "translated_description!: Json<HashMap<String, String>>",
         other_keywords                             as "other_keywords!",
         translated_keywords                        as "translated_keywords!",
         (
-            select row(course_data_module.id, kind, is_complete) 
-            from course_data_module                
-            where course_data_id = course_data.id and "index" = 0 
+            select row(course_data_module.id, kind, is_complete)
+            from course_data_module
+            where course_data_id = course_data.id and "index" = 0
             order by "index"
         )                                                   as "cover?: (ModuleId, ModuleKind, bool)",
         array(select row (category_id)
@@ -320,8 +321,9 @@ select  id,
             order by "index"
         )                                                     as "items!: Vec<(JigId,)>"
 from course_data
-         inner join unnest($1::uuid[])
+inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
+order by ord asc
 "#,
         &course_data_ids
     )
@@ -448,9 +450,9 @@ select course.id                                                                
     other_keywords                                                                as "other_keywords!",
     translated_keywords                                                           as "translated_keywords!",
     (
-        select row(course_data_module.id, kind, is_complete) 
-        from course_data_module                
-        where course_data_id = course_data.id and "index" = 0 
+        select row(course_data_module.id, kind, is_complete)
+        from course_data_module
+        where course_data_id = course_data.id and "index" = 0
         order by "index"
     )                                                   as "cover?: (ModuleId, ModuleKind, bool)",
     array(select row (category_id)
@@ -463,7 +465,7 @@ select course.id                                                                
             from course_data_age_range
             where course_data_id = course_data.id)          as "age_ranges!: Vec<(AgeRangeId,)>",
     array(select row (id, display_name, resource_type_id, resource_content)
-                from course_data_resource 
+                from course_data_resource
                 where course_data_id = course_data.id
           )                                          as "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
     array(
@@ -475,8 +477,8 @@ select course.id                                                                
 from cte1
 inner join course_data on cte1.id = course_data.id
 inner join course on (
-    course_data.id = course.draft_id 
-    or (        
+    course_data.id = course.draft_id
+    or (
         course_data.id = course.live_id
         and last_synced_at is not null
         and course.published_at is not null
@@ -748,7 +750,7 @@ pub async fn filtered_count(
                 and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])
             group by coalesce(updated_at, created_at)
         )
-        select count(*) as "count!" from unnest(array(select cte.array_agg from cte)) with ordinality t(id, ord) 
+        select count(*) as "count!" from unnest(array(select cte.array_agg from cte)) with ordinality t(id, ord)
     "#,
         author_id.map(|it| it.0),
         draft_or_live.map(|it| it as i16),
@@ -772,7 +774,7 @@ pub async fn filtered_count(
                 and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])
             group by coalesce(updated_at, created_at)
         )
-        select count(*) as "count!" from unnest(array(select cte.array_agg from cte)) with ordinality t(id, ord) 
+        select count(*) as "count!" from unnest(array(select cte.array_agg from cte)) with ordinality t(id, ord)
 "#,
         author_id.map(|it| it.0),
         draft_or_live.map(|it| it as i16),
