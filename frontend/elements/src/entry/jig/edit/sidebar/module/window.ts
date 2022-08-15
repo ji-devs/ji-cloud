@@ -45,6 +45,7 @@ export class _ extends LitElement {
                 }
                 :host([state="active"]) .wrapper {
                     border: solid var(--light-blue-5) 3px;
+                    background-color: var(--white);
                 }
                 :host([incomplete]) .wrapper {
                     border: solid var(--light-red-4) 3px;
