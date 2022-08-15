@@ -77,30 +77,6 @@ async fn create_default() -> anyhow::Result<()> {
     Ok(())
 }
 
-// requires algolia
-// #[actix_rt::test]
-// async fn delete() -> anyhow::Result<()> {
-//     let app = initialize_server(&[Fixture::User, Fixture::Resource]).await;
-
-//     let port = app.port();
-
-//     let client = reqwest::Client::new();
-
-//     let resp = client
-//         .delete(&format!(
-//             "http://0.0.0.0:{}/v1/resource/0cc084bc-7c83-11eb-9f77-e3218dffb008",
-//             port
-//         ))
-//         .login()
-//         .send()
-//         .await?
-//         .error_for_status()?;
-
-//     assert_eq!(resp.status(), StatusCode::NO_CONTENT);
-
-//     Ok(())
-// }
-
 #[actix_rt::test]
 async fn create_with_params() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Resource], &[]).await;
@@ -344,18 +320,14 @@ async fn browse_order_by() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(
-        body, {
-            ".**.lastEdited" => "[last_edited]"
-        }
-    );
+    insta::assert_json_snapshot!(body);
 
     let resp = client
-        .get(&format!("http://0.0.0.0:{}/v1/resource/browse", port))
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/resource/browse?orderBy=createdAt",
+            port
+        ))
         .login()
-        .json(&json!({
-            "orderBy": "createdAt",
-        }))
         .send()
         .await?
         .error_for_status()?;
@@ -364,18 +336,14 @@ async fn browse_order_by() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(
-        body, {
-            ".**.lastEdited" => "[last_edited]"
-        }
-    );
+    insta::assert_json_snapshot!(body);
 
     let resp = client
-        .get(&format!("http://0.0.0.0:{}/v1/resource/browse", port))
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/resource/browse?orderBy=publishedAt",
+            port
+        ))
         .login()
-        .json(&json!({
-            "orderBy": "publishedAt",
-        }))
         .send()
         .await?
         .error_for_status()?;
@@ -386,28 +354,15 @@ async fn browse_order_by() -> anyhow::Result<()> {
 
     app.stop(false).await;
 
-    insta::assert_json_snapshot!(
-        body, {
-            ".**.lastEdited" => "[last_edited]"
-        }
-    );
+    insta::assert_json_snapshot!(body);
 
     Ok(())
 }
 
 // todo: test-exhaustiveness: create a `ResourceBrowse` Fixture, actually test the cases (paging, resource count, etc)
-#[ignore]
 #[actix_rt::test]
 async fn browse_own_simple() -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::MetaKinds,
-            Fixture::UserDefaultPerms,
-            Fixture::Resource,
-        ],
-        &[],
-    )
-    .await;
+    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Resource], &[]).await;
 
     let port = app.port();
 
@@ -489,9 +444,11 @@ async fn update_and_publish() -> anyhow::Result<()> {
 
     let client = reqwest::Client::new();
 
+    let resource_id = "d8067526-1518-11ed-87fa-ebaf880b6d9c".to_string();
+
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/resource/19becb2b-bff7-4c1b-bb2c-16f2e098d3d3/draft",
+            "http://0.0.0.0:{}/v1/resource/{resource_id}/draft",
             port
         ))
         .login()
@@ -509,7 +466,7 @@ async fn update_and_publish() -> anyhow::Result<()> {
 
     let resp = client
         .patch(&format!(
-            "http://0.0.0.0:{}/v1/resource/19becb2b-bff7-4c1b-bb2c-16f2e098d3d3",
+            "http://0.0.0.0:{}/v1/resource/{resource_id}",
             port
         ))
         .json(&json!({
@@ -526,7 +483,7 @@ async fn update_and_publish() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/resource/19becb2b-bff7-4c1b-bb2c-16f2e098d3d3/draft",
+            "http://0.0.0.0:{}/v1/resource/{resource_id}/draft",
             port
         ))
         .login()
@@ -544,7 +501,7 @@ async fn update_and_publish() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/resource/19becb2b-bff7-4c1b-bb2c-16f2e098d3d3/live",
+            "http://0.0.0.0:{}/v1/resource/{resource_id}/live",
             port
         ))
         .login()
@@ -562,7 +519,7 @@ async fn update_and_publish() -> anyhow::Result<()> {
 
     let _resp = client
         .put(&format!(
-            "http://0.0.0.0:{}/v1/resource/19becb2b-bff7-4c1b-bb2c-16f2e098d3d3/draft/publish",
+            "http://0.0.0.0:{}/v1/resource/{resource_id}/draft/publish",
             port
         ))
         .login()
@@ -572,7 +529,7 @@ async fn update_and_publish() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/resource/19becb2b-bff7-4c1b-bb2c-16f2e098d3d3/live",
+            "http://0.0.0.0:{}/v1/resource/{resource_id}/live",
             port
         ))
         .login()

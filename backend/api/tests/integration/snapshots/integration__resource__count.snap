@@ -1,0 +1,8 @@
+---
+source: tests/integration/resource.rs
+expression: body
+
+---
+{
+  "totalCount": 3
+}

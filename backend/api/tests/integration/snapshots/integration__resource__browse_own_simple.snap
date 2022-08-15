@@ -1,0 +1,164 @@
+---
+source: tests/integration/resource.rs
+expression: body
+
+---
+{
+  "resources": [
+    {
+      "id": "2f8d91d0-1519-11ed-87fa-eb1826fcf343",
+      "publishedAt": "2022-06-23T17:57:33.149359Z",
+      "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorName": "Bobby Tables",
+      "likes": 0,
+      "plays": 0,
+      "resourceData": {
+        "draftOrLive": "draft",
+        "displayName": "resource2",
+        "cover": {
+          "id": "8fd39a64-151c-11ed-b60c-cf8efe275b73",
+          "kind": "Cover",
+          "is_complete": false
+        },
+        "ageRanges": [],
+        "affiliations": [],
+        "language": "he",
+        "categories": [],
+        "description": "draft test description",
+        "createdAt": "2021-03-06T00:46:26.134651Z",
+        "lastEdited": "[last_edited]",
+        "privacyLevel": "unlisted",
+        "locked": false,
+        "otherKeywords": "",
+        "translatedKeywords": "",
+        "translatedDescription": {},
+        "additionalResources": []
+      },
+      "adminData": {
+        "rating": null,
+        "blocked": false,
+        "curated": false
+      }
+    },
+    {
+      "id": "2f8d91d0-1519-11ed-87fa-eb1826fcf343",
+      "publishedAt": "2022-06-23T17:57:33.149359Z",
+      "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorName": "Bobby Tables",
+      "likes": 0,
+      "plays": 0,
+      "resourceData": {
+        "draftOrLive": "live",
+        "displayName": "resource2",
+        "cover": {
+          "id": "e3378be8-151c-11ed-b60c-971f972f35d8",
+          "kind": "Cover",
+          "is_complete": true
+        },
+        "ageRanges": [],
+        "affiliations": [],
+        "language": "en",
+        "categories": [],
+        "description": "test description",
+        "createdAt": "2021-03-04T00:46:26.134651Z",
+        "lastEdited": "[last_edited]",
+        "privacyLevel": "public",
+        "locked": false,
+        "otherKeywords": "",
+        "translatedKeywords": "",
+        "translatedDescription": {},
+        "additionalResources": []
+      },
+      "adminData": {
+        "rating": null,
+        "blocked": false,
+        "curated": false
+      }
+    },
+    {
+      "id": "af827e00-1519-11ed-87fa-7b1aa26c85a8",
+      "publishedAt": "2022-06-22T17:57:33.149359Z",
+      "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorName": "Bobby Tables",
+      "likes": 0,
+      "plays": 0,
+      "resourceData": {
+        "draftOrLive": "live",
+        "displayName": "resource3",
+        "cover": null,
+        "ageRanges": [],
+        "affiliations": [],
+        "language": "en",
+        "categories": [],
+        "description": "test description",
+        "createdAt": "2021-03-04T00:46:26.134651Z",
+        "lastEdited": "[last_edited]",
+        "privacyLevel": "public",
+        "locked": false,
+        "otherKeywords": "",
+        "translatedKeywords": "",
+        "translatedDescription": {},
+        "additionalResources": []
+      },
+      "adminData": {
+        "rating": null,
+        "blocked": false,
+        "curated": false
+      }
+    },
+    {
+      "id": "d8067526-1518-11ed-87fa-ebaf880b6d9c",
+      "publishedAt": "2022-06-24T17:57:33.149359Z",
+      "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorName": "Bobby Tables",
+      "likes": 0,
+      "plays": 0,
+      "resourceData": {
+        "draftOrLive": "live",
+        "displayName": "resource1",
+        "cover": {
+          "id": "a6b248f8-1dd7-11ec-8426-975953035335",
+          "kind": "Cover",
+          "is_complete": true
+        },
+        "ageRanges": [],
+        "affiliations": [],
+        "language": "en",
+        "categories": [],
+        "description": "test description",
+        "createdAt": "2021-03-04T00:46:26.134651Z",
+        "lastEdited": "[last_edited]",
+        "privacyLevel": "public",
+        "locked": false,
+        "otherKeywords": "",
+        "translatedKeywords": "",
+        "translatedDescription": {},
+        "additionalResources": [
+          {
+            "id": "286b828c-1dd9-11ec-8426-571b03b2d3df",
+            "displayName": "link test",
+            "resourceTypeId": "a91aca34-519e-11ec-ab46-175eaaf1ff23",
+            "link": "url://url.url.url/urlese"
+          },
+          {
+            "id": "286b82fa-1dd9-11ec-8426-2b6953011bae",
+            "displayName": "link test",
+            "resourceTypeId": "a91aca34-519e-11ec-ab46-175eaaf1ff23",
+            "link": "url://url.url.url/url"
+          }
+        ]
+      },
+      "adminData": {
+        "rating": null,
+        "blocked": false,
+        "curated": false
+      }
+    }
+  ],
+  "pages": 1,
+  "totalResourceCount": 4
+}

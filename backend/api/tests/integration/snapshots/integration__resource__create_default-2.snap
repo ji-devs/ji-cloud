@@ -1,0 +1,37 @@
+---
+source: tests/integration/resource.rs
+expression: body
+
+---
+{
+  "id": "[id]",
+  "publishedAt": null,
+  "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+  "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+  "authorName": "Bobby Tables",
+  "likes": 0,
+  "plays": 0,
+  "resourceData": {
+    "draftOrLive": "draft",
+    "displayName": "",
+    "cover": null,
+    "ageRanges": [],
+    "affiliations": [],
+    "language": "en_US",
+    "categories": [],
+    "description": "",
+    "createdAt": "[created_at]",
+    "lastEdited": "[last_edited]",
+    "privacyLevel": "unlisted",
+    "locked": false,
+    "otherKeywords": "",
+    "translatedKeywords": "",
+    "translatedDescription": {},
+    "additionalResources": []
+  },
+  "adminData": {
+    "rating": null,
+    "blocked": false,
+    "curated": false
+  }
+}
