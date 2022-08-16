@@ -8,6 +8,7 @@ use crate::{
 };
 
 mod cover;
+mod curation;
 
 #[actix_rt::test]
 async fn create_default() -> anyhow::Result<()> {

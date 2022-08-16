@@ -1,6 +1,7 @@
 ---
 source: tests/integration/jig.rs
 expression: body
+
 ---
 {
   "id": "[id]",
@@ -10,7 +11,6 @@ expression: body
   "authorName": "Bobby Tables",
   "likes": 0,
   "plays": 0,
-  "jigFocus": "modules",
   "jigData": {
     "createdAt": "2021-03-06T00:46:26.134651Z",
     "lastEdited": "[last_edited]",

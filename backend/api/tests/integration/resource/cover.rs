@@ -19,8 +19,7 @@ async fn update_no_modules_changes() -> anyhow::Result<()> {
     let _resp = client
         .patch(&format!(
             "http://0.0.0.0:{}/v1/resource/{}",
-            port,
-            resource_id
+            port, resource_id
         ))
         .json(&json! {{
             "displayName": "test Resource",
@@ -33,8 +32,7 @@ async fn update_no_modules_changes() -> anyhow::Result<()> {
     let resp = client
         .get(&format!(
             "http://0.0.0.0:{}/v1/resource/{}/draft",
-            port,
-            resource_id
+            port, resource_id
         ))
         .login()
         .send()

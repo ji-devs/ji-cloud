@@ -1,0 +1,28 @@
+---
+source: tests/integration/resource/curation.rs
+expression: body
+
+---
+{
+  "resourceId": "d8067526-1518-11ed-87fa-ebaf880b6d9c",
+  "fieldsDone": {
+    "displayName": false,
+    "language": false,
+    "categories": false,
+    "description": false,
+    "ageRanges": false,
+    "affiliations": false,
+    "additionalResources": false
+  },
+  "curationStatus": "new",
+  "comments": [
+    {
+      "id": "[id]",
+      "resourceId": "d8067526-1518-11ed-87fa-ebaf880b6d9c",
+      "value": "test comment",
+      "createdAt": "[created_at]",
+      "authorId": "1f241e1b-b537-493f-a230-075cb16315be"
+    }
+  ],
+  "reports": []
+}
