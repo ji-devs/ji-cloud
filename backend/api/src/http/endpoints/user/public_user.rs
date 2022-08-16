@@ -143,7 +143,6 @@ pub async fn browse_user_jigs(
     let browse_future = db::jig::browse(
         &db,
         Some(user_id),
-        None,
         Some(DraftOrLive::Live),
         privacy_level.to_owned(),
         Some(false),
@@ -158,7 +157,6 @@ pub async fn browse_user_jigs(
         privacy_level.to_owned(),
         Some(false),
         Some(user_id),
-        None,
         Some(DraftOrLive::Live),
         resource_types.to_owned(),
     );

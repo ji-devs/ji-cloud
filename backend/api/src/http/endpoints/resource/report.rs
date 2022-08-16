@@ -18,7 +18,7 @@ use crate::{
 };
 use uuid::Uuid;
 
-/// Create a new resource report and send the report to info@resourcezi.org
+/// Create a new resource report and send the report email to admin
 async fn create(
     config: Data<RuntimeSettings>,
     db: Data<PgPool>,

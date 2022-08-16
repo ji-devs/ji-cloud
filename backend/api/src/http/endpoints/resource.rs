@@ -318,57 +318,57 @@ async fn clone(
     Ok(HttpResponse::Created().json(CreateResponse { id }))
 }
 
-// /// Search for resources.
-// #[instrument(skip_all)]
-// async fn search(
-//     db: Data<PgPool>,
-//     claims: Option<TokenUser>,
-//     algolia: ServiceData<crate::algolia::Client>,
-//     query: Option<Query<<resource::Search as ApiEndpoint>::Req>>,
-// ) -> Result<Json<<resource::Search as ApiEndpoint>::Res>, error::Service> {
-//     let query = query.map_or_else(Default::default, Query::into_inner);
+/// Search for resources.
+#[instrument(skip_all)]
+async fn search(
+    db: Data<PgPool>,
+    claims: Option<TokenUser>,
+    algolia: ServiceData<crate::algolia::Client>,
+    query: Option<Query<<resource::Search as ApiEndpoint>::Req>>,
+) -> Result<Json<<resource::Search as ApiEndpoint>::Res>, error::Service> {
+    let query = query.map_or_else(Default::default, Query::into_inner);
 
-//     let page_limit = page_limit(query.page_limit)
-//         .await
-//         .map_err(|e| error::Service::InternalServerError(e))?;
+    let page_limit = page_limit(query.page_limit)
+        .await
+        .map_err(|e| error::Service::InternalServerError(e))?;
 
-//     let (author_id, privacy_level, blocked) = auth_claims(
-//         &*db,
-//         claims,
-//         query.author_id,
-//         query.privacy_level,
-//         query.blocked,
-//     )
-//     .await?;
+    let (author_id, privacy_level, blocked) = auth_claims(
+        &*db,
+        claims,
+        query.author_id,
+        query.privacy_level,
+        query.blocked,
+    )
+    .await?;
 
-//     let (ids, pages, total_hits) = algolia
-//         .search_resource(
-//             &query.q,
-//             query.page,
-//             query.language,
-//             &query.age_ranges,
-//             &query.affiliations,
-//             &query.resource_types,
-//             &query.categories,
-//             author_id,
-//             query.author_name,
-//             query.other_keywords,
-//             query.translated_keywords,
-//             &privacy_level,
-//             page_limit,
-//             blocked,
-//         )
-//         .await?
-//         .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
+    let (ids, pages, total_hits) = algolia
+        .search_resource(
+            &query.q,
+            query.page,
+            query.language,
+            &query.age_ranges,
+            &query.affiliations,
+            &query.resource_types,
+            &query.categories,
+            author_id,
+            query.author_name,
+            query.other_keywords,
+            query.translated_keywords,
+            &privacy_level,
+            page_limit,
+            blocked,
+        )
+        .await?
+        .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
 
-//     let resources: Vec<_> = db::resource::get_by_ids(db.as_ref(), &ids, DraftOrLive::Live).await?;
+    let resources: Vec<_> = db::resource::get_by_ids(db.as_ref(), &ids, DraftOrLive::Live).await?;
 
-//     Ok(Json(ResourceSearchResponse {
-//         resources,
-//         pages,
-//         total_resource_count: total_hits,
-//     }))
-// }
+    Ok(Json(ResourceSearchResponse {
+        resources,
+        pages,
+        total_resource_count: total_hits,
+    }))
+}
 
 /// Update a Resource's admin data.
 async fn update_admin_data(

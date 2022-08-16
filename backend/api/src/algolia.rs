@@ -19,8 +19,9 @@ use shared::{
         circle::CircleId,
         course::CourseId,
         image::{ImageId, ImageSize},
-        jig::{JigFocus, JigId},
+        jig::JigId,
         meta::{AffiliationId, AgeRangeId, ImageStyleId, ImageTagIndex, ResourceTypeId},
+        resource::ResourceId,
         user::UserId,
     },
     media::MediaGroupKind,
@@ -52,7 +53,35 @@ struct BatchJig<'a> {
     author_name: Option<String>,
     #[serde(rename = "_tags")]
     tags: Vec<&'static str>,
-    jig_focus: &'a str,
+    locked: &'a bool,
+    other_keywords: &'a str,
+    translated_keywords: &'a str,
+    rating: Option<i16>,
+    likes: &'a i64,
+    plays: &'a i64,
+    published_at: Option<DateTime<Utc>>,
+    translated_name: &'a Vec<String>,
+    translated_description: &'a Vec<String>,
+    blocked: &'a bool,
+}
+
+#[derive(Serialize)]
+struct BatchResource<'a> {
+    name: &'a str,
+    language: &'a str,
+    description: &'a str,
+    age_ranges: &'a [Uuid],
+    age_range_names: &'a [String],
+    affiliations: &'a [Uuid],
+    affiliation_names: &'a [String],
+    resource_types: &'a [Uuid],
+    resource_type_names: &'a [String],
+    categories: &'a [Uuid],
+    category_names: &'a [String],
+    author_id: Option<Uuid>,
+    author_name: Option<String>,
+    #[serde(rename = "_tags")]
+    tags: Vec<&'static str>,
     locked: &'a bool,
     other_keywords: &'a str,
     translated_keywords: &'a str,
@@ -148,6 +177,7 @@ enum AlgoliaIndices {
     CourseIndex,
     CircleIndex,
     PublicUserIndex,
+    ResourceIndex,
 }
 
 impl AlgoliaIndices {
@@ -158,6 +188,7 @@ impl AlgoliaIndices {
             Self::CourseIndex => migration::COURSE_INDEX,
             Self::CircleIndex => migration::CIRCLE_INDEX,
             Self::PublicUserIndex => migration::PUBLIC_USER_INDEX,
+            Self::ResourceIndex => migration::RESOURCE_INDEX,
         }
     }
 }
@@ -170,6 +201,7 @@ pub struct Manager {
     pub inner: Inner,
     pub media_index: String,
     pub jig_index: String,
+    pub resource_index: String,
     pub course_index: String,
     pub circle_index: String,
     pub public_user_index: String,
@@ -177,41 +209,53 @@ pub struct Manager {
 
 impl Manager {
     pub fn new(settings: Option<AlgoliaSettings>, db: PgPool) -> anyhow::Result<Option<Self>> {
-        let (app_id, key, media_index, jig_index, course_index, circle_index, public_user_index) =
-            match settings {
-                Some(settings) => match (
-                    settings.management_key,
-                    settings.media_index,
-                    settings.jig_index,
-                    settings.course_index,
-                    settings.circle_index,
-                    settings.public_user_index,
-                ) {
-                    (
-                        Some(key),
-                        Some(media_index),
-                        Some(jig_index),
-                        Some(course_index),
-                        Some(circle_index),
-                        Some(public_user_index),
-                    ) => (
-                        settings.application_id,
-                        key,
-                        media_index,
-                        jig_index,
-                        course_index,
-                        circle_index,
-                        public_user_index,
-                    ),
-                    _ => return Ok(None),
-                },
-                None => return Ok(None),
-            };
+        let (
+            app_id,
+            key,
+            media_index,
+            jig_index,
+            resource_index,
+            course_index,
+            circle_index,
+            public_user_index,
+        ) = match settings {
+            Some(settings) => match (
+                settings.management_key,
+                settings.media_index,
+                settings.jig_index,
+                settings.resource_index,
+                settings.course_index,
+                settings.circle_index,
+                settings.public_user_index,
+            ) {
+                (
+                    Some(key),
+                    Some(media_index),
+                    Some(jig_index),
+                    Some(resource_index),
+                    Some(course_index),
+                    Some(circle_index),
+                    Some(public_user_index),
+                ) => (
+                    settings.application_id,
+                    key,
+                    media_index,
+                    jig_index,
+                    resource_index,
+                    course_index,
+                    circle_index,
+                    public_user_index,
+                ),
+                _ => return Ok(None),
+            },
+            None => return Ok(None),
+        };
 
         Ok(Some(Self {
             inner: Inner::new(AppId::new(app_id), ApiKey(key))?,
             media_index,
             jig_index,
+            resource_index,
             course_index,
             circle_index,
             public_user_index,
@@ -222,7 +266,7 @@ impl Manager {
     pub async fn spawn_cron_jobs(&self) -> anyhow::Result<()> {
         log::info!("reached updates for spawning jobs");
 
-        for count in 0..5 {
+        for count in 0..6 {
             let res = match count {
                 0 => self
                     .update_images()
@@ -230,14 +274,18 @@ impl Manager {
                     .context("update images task errored"),
                 1 => self.update_jigs().await.context("update jigs task errored"),
                 2 => self
+                    .update_resources()
+                    .await
+                    .context("update resources task errored"),
+                3 => self
                     .update_courses()
                     .await
                     .context("update courses task errored"),
-                3 => self
+                4 => self
                     .update_circles()
                     .await
                     .context("update circles task errored"),
-                4 => self
+                5 => self
                     .update_public_users()
                     .await
                     .context("update public users task errored"),
@@ -271,6 +319,7 @@ impl Manager {
             or (index_name = $5 and index_hash <> $6)
             or (index_name = $7 and index_hash <> $8)
             or (index_name = $9 and index_hash <> $10)
+            or (index_name = $11 and index_hash <> $12)
             "#,
             AlgoliaIndices::MediaIndex.as_str(),
             migration::MEDIA_HASH.to_owned(),
@@ -282,6 +331,8 @@ impl Manager {
             migration::CIRCLE_HASH.to_owned(),
             AlgoliaIndices::PublicUserIndex.as_str(),
             migration::PUBLIC_USER_HASH.to_owned(),
+            AlgoliaIndices::ResourceIndex.as_str(),
+            migration::RESOURCE_HASH.to_owned(),
         )
         .fetch_all(&mut txn)
         .await?
@@ -296,6 +347,9 @@ impl Manager {
                 }
                 migration::JIG_INDEX => {
                     migration::jig_index(&mut txn, &self.inner, &self.jig_index).await?
+                }
+                migration::RESOURCE_INDEX => {
+                    migration::resource_index(&mut txn, &self.inner, &self.resource_index).await?
                 }
                 migration::COURSE_INDEX => {
                     migration::course_index(&mut txn, &self.inner, &self.course_index).await?
@@ -333,6 +387,18 @@ impl Manager {
 
     async fn batch_jigs(&self, batch: BatchWriteRequests) -> anyhow::Result<Vec<Uuid>> {
         let resp = self.inner.batch(&self.jig_index, &batch).await?;
+
+        let ids: Result<Vec<_>, _> = resp
+            .object_ids
+            .into_iter()
+            .map(|id| Uuid::parse_str(&id))
+            .collect();
+
+        Ok(ids?)
+    }
+
+    async fn batch_resources(&self, batch: BatchWriteRequests) -> anyhow::Result<Vec<Uuid>> {
+        let resp = self.inner.batch(&self.resource_index, &batch).await?;
 
         let ids: Result<Vec<_>, _> = resp
             .object_ids
@@ -422,7 +488,6 @@ select jig.id,
                        inner join jig_data_category on category.id = jig_data_category.category_id
               where jig_data_category.jig_data_id = jig_data.id))                                                   as "category_names!",
        privacy_level                                                                                                as "privacy_level!: PrivacyLevel",
-       jig_focus                                                                                                    as "jig_focus!: JigFocus",
        author_id                                                                                                    as "author_id",
        locked                                                                                                       as "locked!",
        other_keywords                                                                                               as "other_keywords!",
@@ -485,7 +550,6 @@ limit 100 for no key update skip locked;
                 category_names: &row.category_names,
                 author_id: row.author_id,
                 author_name: row.author_name,
-                jig_focus: &row.jig_focus.as_str(),
                 tags,
                 locked: &row.locked,
                 other_keywords: &row.other_keywords,
@@ -535,6 +599,160 @@ where jig_data.id = any (select live_id from jig where jig.id = any ($1))
         txn.commit().await?;
 
         log::info!("completed update jigs");
+
+        Ok(true)
+    }
+
+    async fn update_resources(&self) -> anyhow::Result<bool> {
+        log::info!("reached update resources");
+        let mut txn = self.db.begin().await?;
+
+        // todo: allow for some way to do a partial update (for example, by having a channel for queueing partial updates)
+        let requests: Vec<_> = sqlx::query!(
+            //language=SQL
+            r#"
+select resource.id,
+       display_name                                                                                                 as "name",
+       language                                                                                                     as "language!",
+       description                                                                                                  as "description!",
+       translated_description                                                                                       as "translated_description!: Json<HashMap<String, String>>",
+       translated_name                                                                                              as "translated_name!: Json<HashMap<String, String>>",
+       array((select affiliation_id
+              from resource_data_affiliation
+              where resource_data_id = resource_data.id))                                                                     as "affiliations!",
+       array((select affiliation.display_name
+              from affiliation
+                       inner join resource_data_affiliation on affiliation.id = resource_data_affiliation.affiliation_id
+              where resource_data_affiliation.resource_data_id = resource_data.id))                                                as "affiliation_names!",
+        array((select resource_type_id
+                from resource_data_resource
+                where resource_data_id = resource_data.id))                                                                     as "resource_types!",
+        array((select resource_type.display_name
+              from resource_type
+                        inner join resource_data_resource on resource_type.id = resource_data_resource.resource_type_id
+             where resource_data_resource.resource_data_id = resource_data.id))                                         as "resource_type_names!",
+       array((select age_range_id
+              from resource_data_age_range
+              where resource_data_id = resource_data.id))                                                                     as "age_ranges!",
+       array((select age_range.display_name
+              from age_range
+                       inner join resource_data_age_range on age_range.id = resource_data_age_range.age_range_id
+              where resource_data_age_range.resource_data_id = resource_data.id))                                                  as "age_range_names!",
+       array((select category_id
+              from resource_data_category
+              where resource_data_id = resource_data.id))                                                                     as "categories!",
+       array((select name
+              from category
+                       inner join resource_data_category on category.id = resource_data_category.category_id
+              where resource_data_category.resource_data_id = resource_data.id))                                                   as "category_names!",
+       privacy_level                                                                                                as "privacy_level!: PrivacyLevel",
+       author_id                                                                                                    as "author_id",
+       locked                                                                                                       as "locked!",
+       other_keywords                                                                                               as "other_keywords!",
+       translated_keywords                                                                                          as "translated_keywords!",
+       (select given_name || ' '::text || family_name
+        from user_profile
+        where user_profile.user_id = resource.author_id)                                                                 as "author_name",
+        rating                                                                                                      as "rating",
+        likes                                                                                                as "likes!",
+        plays                                                                                               as "plays!",
+        published_at                                                                                                as "published_at",
+        blocked                                                                                                     as "blocked!"
+from resource
+         inner join resource_data on live_id = resource_data.id
+         inner join resource_admin_data "rad" on rad.resource_id = resource.id
+where ((last_synced_at is null and published_at is not null)
+   or (updated_at is not null and last_synced_at < updated_at)
+    or (published_at < now() is true and last_synced_at < published_at))
+limit 100 for no key update skip locked;
+     "#
+        )
+        .fetch(&mut txn)
+        .map_ok(|row| {
+            let mut tags = Vec::new();
+
+            tags.push(row.privacy_level.as_str());
+
+            if row.author_id.is_some() {
+                tags.push(HAS_AUTHOR_TAG);
+            }
+
+            let mut translation_description: Vec<String> = Vec::new();
+
+            for value in row.translated_description.0.values() {
+                translation_description.push(value.to_string());
+            }
+
+            let mut translation_name: Vec<String> = Vec::new();
+
+            for value in row.translated_name.0.values() {
+                translation_name.push(value.to_string());
+            }
+
+            algolia::request::BatchWriteRequest::UpdateObject {
+            body: match serde_json::to_value(&BatchResource {
+                name: &row.name,
+                language: &row.language,
+                description: &row.description,
+                age_ranges: &row.age_ranges,
+                age_range_names: &row.age_range_names,
+                affiliations: &row.affiliations,
+                affiliation_names: &row.affiliation_names,
+                resource_types: &row.resource_types,
+                resource_type_names: &row.resource_type_names,
+                categories: &row.categories,
+                category_names: &row.category_names,
+                author_id: row.author_id,
+                author_name: row.author_name,
+                tags,
+                locked: &row.locked,
+                other_keywords: &row.other_keywords,
+                translated_keywords: &row.translated_keywords,
+                rating: row.rating,
+                likes: &row.likes,
+                plays: &row.plays,
+                published_at: row.published_at,
+                translated_name: &translation_name,
+                translated_description: &translation_description,
+                blocked: &row.blocked
+            })
+            .expect("failed to serialize BatchResource to json")
+            {
+                serde_json::Value::Object(map) => map,
+                _ => panic!("failed to serialize BatchResource to json map"),
+            },
+            object_id: row.id.to_string(),
+        }})
+        .try_collect()
+        .await?;
+
+        if requests.is_empty() {
+            log::warn!("Request is empty");
+            return Ok(true);
+        }
+
+        log::debug!("Updating a batch of {} resources(s)", requests.len());
+
+        let request = algolia::request::BatchWriteRequests { requests };
+        let ids = self.batch_resources(request).await?;
+
+        log::debug!("Updated a batch of {} resources(s)", ids.len());
+
+        sqlx::query!(
+            //language=SQL
+            r#"
+update resource_data
+set last_synced_at = now()
+where resource_data.id = any (select live_id from resource where resource.id = any ($1))
+"#,
+            &ids
+        )
+        .execute(&mut txn)
+        .await?;
+
+        txn.commit().await?;
+
+        log::info!("completed update resources");
 
         Ok(true)
     }
@@ -1014,6 +1232,24 @@ limit 100 for no key update skip locked;
         Ok(())
     }
 
+    pub async fn delete_resource(&self, id: ResourceId) {
+        if let Err(e) = self.try_delete_resource(id).await {
+            log::warn!(
+                "failed to delete resource with id {} from algolia: {}",
+                id.0.to_hyphenated(),
+                e
+            );
+        }
+    }
+
+    pub async fn try_delete_resource(&self, ResourceId(id): ResourceId) -> anyhow::Result<()> {
+        self.inner
+            .delete_object(&self.resource_index, &id.to_string())
+            .await?;
+
+        Ok(())
+    }
+
     pub async fn delete_circle(&self, id: CircleId) {
         if let Err(e) = self.try_delete_circle(id).await {
             log::warn!(
@@ -1227,6 +1463,7 @@ pub struct Client {
     inner: Inner,
     media_index: String,
     jig_index: String,
+    resource_index: String,
     course_index: String,
     circle_index: String,
     public_user_index: String,
@@ -1237,37 +1474,48 @@ impl Client {
         if let Some(settings) = settings {
             let app_id = algolia::AppId::new(settings.application_id);
 
-            let (inner, media_index, jig_index, course_index, circle_index, public_user_index) =
-                match (
-                    settings.backend_search_key,
-                    settings.media_index,
-                    settings.jig_index,
-                    settings.course_index,
-                    settings.circle_index,
-                    settings.public_user_index,
-                ) {
-                    (
-                        Some(key),
-                        Some(media_index),
-                        Some(jig_index),
-                        Some(course_index),
-                        Some(circle_index),
-                        Some(public_user_index),
-                    ) => (
-                        Inner::new(app_id, ApiKey(key))?,
-                        media_index,
-                        jig_index,
-                        course_index,
-                        circle_index,
-                        public_user_index,
-                    ),
-                    _ => return Ok(None),
-                };
+            let (
+                inner,
+                media_index,
+                jig_index,
+                resource_index,
+                course_index,
+                circle_index,
+                public_user_index,
+            ) = match (
+                settings.backend_search_key,
+                settings.media_index,
+                settings.jig_index,
+                settings.resource_index,
+                settings.course_index,
+                settings.circle_index,
+                settings.public_user_index,
+            ) {
+                (
+                    Some(key),
+                    Some(media_index),
+                    Some(jig_index),
+                    Some(resource_index),
+                    Some(course_index),
+                    Some(circle_index),
+                    Some(public_user_index),
+                ) => (
+                    Inner::new(app_id, ApiKey(key))?,
+                    media_index,
+                    jig_index,
+                    resource_index,
+                    course_index,
+                    circle_index,
+                    public_user_index,
+                ),
+                _ => return Ok(None),
+            };
 
             Ok(Some(Self {
                 inner,
                 media_index,
                 jig_index,
+                resource_index,
                 course_index,
                 circle_index,
                 public_user_index,
@@ -1375,7 +1623,6 @@ impl Client {
         categories: &[CategoryId],
         author_id: Option<UserId>,
         author_name: Option<String>,
-        jig_focus: Option<JigFocus>,
         other_keywords: Option<String>,
         translated_keywords: Option<String>,
         privacy_level: &[PrivacyLevel],
@@ -1404,16 +1651,6 @@ impl Client {
                 filter: FacetFilter {
                     facet_name: "author_name".to_owned(),
                     value: author_name,
-                },
-                invert: false,
-            }))
-        }
-
-        if let Some(jig_focus) = jig_focus {
-            and_filters.filters.push(Box::new(CommonFilter {
-                filter: FacetFilter {
-                    facet_name: "jig_focus".to_owned(),
-                    value: jig_focus.as_str().to_owned(),
                 },
                 invert: false,
             }))
@@ -1468,6 +1705,125 @@ impl Client {
             .inner
             .search(
                 &self.jig_index,
+                SearchQuery::<'_, String, AndFilter> {
+                    query: Some(query),
+                    page,
+                    get_ranking_info: true,
+                    filters: Some(and_filters),
+                    optional_filters: None,
+                    hits_per_page: Some(page_limit as u16),
+                    sum_or_filters_scores: false,
+                },
+            )
+            .instrument(tracing::info_span!("perform algolia search"))
+            .await?;
+
+        let pages = results.page_count.try_into()?;
+        let total_hits = results.hit_count as u64;
+
+        let results = results
+            .hits
+            .into_iter()
+            .map(|hit| hit.object_id.parse())
+            .collect::<Result<Vec<_>, _>>()?;
+
+        Ok(Some((results, pages, total_hits)))
+    }
+
+    #[instrument(skip_all)]
+    pub async fn search_resource(
+        &self,
+        query: &str,
+        page: Option<u32>,
+        language: Option<String>,
+        age_ranges: &[AgeRangeId],
+        affiliations: &[AffiliationId],
+        resource_types: &[ResourceTypeId],
+        categories: &[CategoryId],
+        author_id: Option<UserId>,
+        author_name: Option<String>,
+        other_keywords: Option<String>,
+        translated_keywords: Option<String>,
+        privacy_level: &[PrivacyLevel],
+        page_limit: u32,
+        blocked: Option<bool>,
+    ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
+        let mut and_filters = algolia::filter::AndFilter { filters: vec![] };
+
+        if let Some(author_id) = author_id {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: TagFilter(HAS_AUTHOR_TAG.to_owned()),
+                invert: false,
+            }));
+
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "author_id".to_owned(),
+                    value: author_id.0.to_string(),
+                },
+                invert: false,
+            }))
+        }
+
+        if let Some(author_name) = author_name {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "author_name".to_owned(),
+                    value: author_name,
+                },
+                invert: false,
+            }))
+        }
+
+        if let Some(language) = language {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "language".to_owned(),
+                    value: language,
+                },
+                invert: false,
+            }))
+        }
+
+        if let Some(other_keywords) = other_keywords {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "other_keywords".to_owned(),
+                    value: other_keywords,
+                },
+                invert: false,
+            }))
+        }
+        if let Some(translated_keywords) = translated_keywords {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "translated_keywords".to_owned(),
+                    value: translated_keywords,
+                },
+                invert: false,
+            }))
+        }
+
+        if let Some(blocked) = blocked {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "blocked".to_owned(),
+                    value: blocked.to_string(),
+                },
+                invert: false,
+            }))
+        }
+
+        filters_for_privacy(&mut and_filters.filters, privacy_level);
+        filters_for_ids_or(&mut and_filters.filters, "age_ranges", age_ranges);
+        filters_for_ids_or(&mut and_filters.filters, "affiliations", affiliations);
+        filters_for_ids_or(&mut and_filters.filters, "resource_types", resource_types);
+        filters_for_ids_or(&mut and_filters.filters, "categories", categories);
+
+        let results: SearchResponse = self
+            .inner
+            .search(
+                &self.resource_index,
                 SearchQuery::<'_, String, AndFilter> {
                     query: Some(query),
                     page,

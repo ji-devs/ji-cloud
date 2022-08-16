@@ -77,7 +77,6 @@ async fn create(
         &language,
         &req.description,
         &req.default_player_settings,
-        &req.jig_focus,
     )
     .await
     .map_err(|e| match e {
@@ -202,7 +201,6 @@ async fn browse(
     let browse_future = db::jig::browse(
         db.as_ref(),
         author_id,
-        query.jig_focus,
         query.draft_or_live,
         privacy_level.to_owned(),
         blocked,
@@ -217,7 +215,6 @@ async fn browse(
         privacy_level.to_owned(),
         blocked,
         author_id,
-        query.jig_focus,
         query.draft_or_live,
         resource_types.to_owned(),
     );
@@ -361,7 +358,6 @@ async fn search(
             &query.categories,
             author_id,
             query.author_name,
-            query.jig_focus,
             query.other_keywords,
             query.translated_keywords,
             &privacy_level,
@@ -446,6 +442,18 @@ async fn unlike(
 /// Add a play to a jig
 async fn play(db: Data<PgPool>, path: web::Path<JigId>) -> Result<HttpResponse, error::NotFound> {
     db::jig::jig_play(&*db, path.into_inner()).await?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
+/// remove all resources
+/// NOTE: remove function after deletion of resources
+async fn remove_resource(
+    db: Data<PgPool>,
+    _auth: TokenUserWithScope<ScopeAdmin>,
+    algolia: ServiceData<crate::algolia::Manager>,
+) -> Result<HttpResponse, error::Delete> {
+    db::jig::delete_resources(&*db, algolia).await?;
 
     Ok(HttpResponse::NoContent().finish())
 }
@@ -583,5 +591,9 @@ pub fn configure(cfg: &mut ServiceConfig) {
         .route(jig::Play::PATH, jig::Play::METHOD.route().to(play))
         .route(jig::Like::PATH, jig::Like::METHOD.route().to(like))
         .route(jig::Liked::PATH, jig::Liked::METHOD.route().to(liked))
-        .route(jig::Unlike::PATH, jig::Unlike::METHOD.route().to(unlike));
+        .route(jig::Unlike::PATH, jig::Unlike::METHOD.route().to(unlike))
+        .route(
+            jig::RemoveResource::PATH,
+            jig::RemoveResource::METHOD.route().to(remove_resource),
+        );
 }

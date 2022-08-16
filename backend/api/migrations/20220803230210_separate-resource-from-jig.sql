@@ -202,7 +202,7 @@ with cte as (
 )
 insert into resource_data(id, draft_or_live, display_name, language, description, privacy_level,
                           other_keywords, translated_keywords, translated_name, translated_description,
-                          locked, last_synced_at, created_at, updated_at)
+                          locked, created_at, updated_at)
 select cte.id,
        draft_or_live,
        display_name,
@@ -214,7 +214,6 @@ select cte.id,
        translated_name,
        translated_description,
        locked,
-       last_synced_at,
        created_at,
        updated_at
 from cte
@@ -341,9 +340,3 @@ select  jig_id,
         jcd.updated_at
 from jig_curation_data jcd
 inner join "resource" r on r.id = jcd.jig_id;
-
-delete from jig using resource
-where jig.id = resource.id;
-
-delete from jig_data using resource_data
-where jig_data.id = resource_data.id;

@@ -279,3 +279,19 @@ impl ApiEndpoint for JigAdminDataUpdate {
     const PATH: &'static str = "/v1/jig/{id}/admin";
     const METHOD: Method = Method::Patch;
 }
+
+/// Remove resource from jigs algolia
+///
+/// # NOTE
+/// * remove after resources are separated
+///
+/// # Authorization
+/// * Admin
+pub struct RemoveResource;
+impl ApiEndpoint for RemoveResource {
+    type Req = ();
+    type Res = ();
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/jig/resource";
+    const METHOD: Method = Method::Delete;
+}

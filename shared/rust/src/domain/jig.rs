@@ -70,10 +70,6 @@ pub struct JigCreateRequest {
     /// Default player settings for this jig.
     #[serde(default)]
     pub default_player_settings: JigPlayerSettings,
-
-    /// Primary material for jig
-    #[serde(default)]
-    pub jig_focus: JigFocus,
 }
 
 /// The over-the-wire representation of a JIG's data. This can either be the live copy or the draft copy.
@@ -518,9 +514,6 @@ pub struct JigResponse {
     /// Number of plays Jig
     pub plays: i64,
 
-    /// Number of plays Jig
-    pub jig_focus: JigFocus,
-
     /// The data of the requested JIG.
     pub jig_data: JigData,
 
@@ -595,11 +588,6 @@ pub struct JigUpdateDraftDataRequest {
     #[serde(default)]
     pub privacy_level: Option<PrivacyLevel>,
 
-    /// Optionally jig_focus by resource or modules.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub jig_focus: Option<JigFocus>,
-
     /// Additional keywords for searches
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
@@ -624,11 +612,6 @@ pub struct JigBrowseQuery {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub page: Option<u32>,
-
-    /// Optionally jig_focus by resource or modules.
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub jig_focus: Option<JigFocus>,
 
     /// Optionally browse by draft or live.
     #[serde(default)]
@@ -749,11 +732,6 @@ pub struct JigSearchQuery {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub author_name: Option<String>,
-
-    /// Optionally jig_focus by resource or modules
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub jig_focus: Option<JigFocus>,
 
     /// Optionally search for jigs using keywords
     #[serde(default)]

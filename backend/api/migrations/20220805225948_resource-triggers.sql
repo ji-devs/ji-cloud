@@ -1,3 +1,8 @@
+
+insert into algolia_index_settings(index_name)
+values
+('resource_index');
+
 --
 -- function: update_resource_admin() 
 -- trigger: add_resource_admin
