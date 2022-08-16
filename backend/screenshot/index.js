@@ -204,6 +204,13 @@ function doScreenshot(url) {
       //removing this seems to be okay:
       //await page.waitFor(5000);
       await page.evaluateHandle("document.fonts.ready");
+
+      let crashed = await page.evaluate(() => {
+        return Boolean(document.body.querySelector("panic-message"));
+      });
+      if (crashed)
+        throw new Error(`Page crashed, found <panic-message>, url: ${url}`)
+
       const imageBuffer = await page.screenshot({
         type: "jpeg",
         quality: 90,
@@ -213,6 +220,13 @@ function doScreenshot(url) {
       }
       return imageBuffer;
     })
+    // can be useful in development as it doesn't require imageMagick
+    // .then((fullBuffer) => {
+    //   return {
+    //     fullBuffer,
+    //     thumbBuffer: fullBuffer
+    //   }
+    // })
     .then((fullBuffer) => {
       return gmToBuffer(gm(fullBuffer).resize(THUMB_WIDTH, THUMB_HEIGHT)).then(
         (thumbBuffer) => {
