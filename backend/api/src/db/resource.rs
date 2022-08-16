@@ -726,34 +726,34 @@ where id = $1
     Ok(())
 }
 
-// pub async fn delete(pool: &PgPool, id: ResourceId) -> Result<(), error::Delete> {
-//     let mut txn = pool.begin().await?;
+pub async fn delete(pool: &PgPool, id: ResourceId) -> Result<(), error::Delete> {
+    let mut txn = pool.begin().await?;
 
-//     let (draft_id, live_id) = get_draft_and_live_ids(&mut txn, id)
-//         .await
-//         .ok_or(error::Delete::ResourceNotFound)?;
+    let (draft_id, live_id) = get_draft_and_live_ids(&mut txn, id)
+        .await
+        .ok_or(error::Delete::ResourceNotFound)?;
 
-//     sqlx::query!(
-//         //language=SQL
-//         r#"
-// with del_data as (
-//     delete from resource_data
-//         where id is not distinct from $1 or id is not distinct from $2)
-// delete
-// from resource
-// where id is not distinct from $3
+    sqlx::query!(
+        //language=SQL
+        r#"
+with del_data as (
+    delete from resource_data
+        where id is not distinct from $1 or id is not distinct from $2)
+delete
+from resource
+where id is not distinct from $3
 
-// "#,
-//         draft_id,
-//         live_id,
-//         id.0,
-//     )
-//     .execute(&mut txn)
-//     .await?;
+"#,
+        draft_id,
+        live_id,
+        id.0,
+    )
+    .execute(&mut txn)
+    .await?;
 
-//     txn.commit().await?;
-//     Ok(())
-// }
+    txn.commit().await?;
+    Ok(())
+}
 
 // `None` here means do not filter.
 #[instrument(skip(db))]

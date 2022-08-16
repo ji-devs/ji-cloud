@@ -1,4 +1,4 @@
-use crate::{service::ServiceData, translate::translate_text};
+use crate::translate::translate_text;
 use anyhow::Context;
 use serde_json::value::Value;
 use shared::domain::{
@@ -1415,41 +1415,25 @@ where jig_id = $1 and user_id = $2
     Ok(())
 }
 
-pub async fn delete_resources(
-    db: &PgPool,
-    algolia: ServiceData<crate::algolia::Manager>,
-) -> Result<(), error::Delete> {
-    let mut resp = sqlx::query!(
+pub async fn get_jig_resources(db: &PgPool) -> Result<Vec<JigId>, error::Delete> {
+    let jig_ids = sqlx::query!(
         //language=SQL
         r#"
 select id as "id: JigId"
 from jig
 where jig_focus = 1
-limit 100
+limit 150
 "#,
     )
     .fetch_all(db)
     .await?
     .into_iter()
-    .map(|it| it);
+    .map(|it| it.id)
+    .collect::<Vec<JigId>>();
 
-    loop {
-        match resp.next() {
-            Some(id) => match id {
-                jig_id => {
-                    algolia.try_delete_jig(jig_id.id).await?;
+    println!("inside");
 
-                    delete(&*db, jig_id.id).await?;
-                }
-            },
-            None => {
-                log::warn!("Done with delete");
-                break;
-            }
-        }
-    }
-
-    Ok(())
+    Ok(jig_ids)
 }
 
 pub async fn jig_is_liked(db: &PgPool, user_id: UserId, id: JigId) -> sqlx::Result<bool> {

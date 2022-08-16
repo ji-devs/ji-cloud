@@ -79,7 +79,7 @@ async fn send_report(
 ) -> Result<(), error::ReportError> {
     let email_link = format!("{}/jig/play/{}", pages_url, jig_id.0);
 
-    mail.send_report_email(report, email_link).await?;
+    mail.send_jig_report_email(report, email_link).await?;
 
     Ok(())
 }

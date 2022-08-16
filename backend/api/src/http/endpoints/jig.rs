@@ -448,12 +448,19 @@ async fn play(db: Data<PgPool>, path: web::Path<JigId>) -> Result<HttpResponse, 
 
 /// remove all resources
 /// NOTE: remove function after deletion of resources
-async fn remove_resource(
+pub async fn remove_resource(
     db: Data<PgPool>,
     _auth: TokenUserWithScope<ScopeAdmin>,
+    _path: web::Path<JigId>,
     algolia: ServiceData<crate::algolia::Manager>,
 ) -> Result<HttpResponse, error::Delete> {
-    db::jig::delete_resources(&*db, algolia).await?;
+    let resource_ids: Vec<JigId> = db::jig::get_jig_resources(&*db).await?;
+
+    for ids in resource_ids {
+        db::jig::delete(&*db, ids).await?;
+
+        algolia.delete_jig(ids).await;
+    }
 
     Ok(HttpResponse::NoContent().finish())
 }

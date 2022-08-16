@@ -292,6 +292,6 @@ impl ApiEndpoint for RemoveResource {
     type Req = ();
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/resource";
+    const PATH: &'static str = "/v1/jig/{id}/resources";
     const METHOD: Method = Method::Delete;
 }

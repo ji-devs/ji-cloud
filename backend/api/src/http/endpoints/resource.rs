@@ -150,24 +150,24 @@ async fn update_draft(
     Ok(HttpResponse::NoContent().finish())
 }
 
-// /// Delete a resource.
-// async fn delete(
-//     db: Data<PgPool>,
-//     claims: TokenUser,
-//     path: web::Path<ResourceId>,
-//     algolia: ServiceData<crate::algolia::Manager>,
-// ) -> Result<HttpResponse, error::Delete> {
-//     let id = path.into_inner();
-//     let user_id = claims.user_id();
+/// Delete a resource.
+async fn delete(
+    db: Data<PgPool>,
+    claims: TokenUser,
+    path: web::Path<ResourceId>,
+    algolia: ServiceData<crate::algolia::Manager>,
+) -> Result<HttpResponse, error::Delete> {
+    let id = path.into_inner();
+    let user_id = claims.user_id();
 
-//     db::resource::authz(&*db, user_id, Some(id)).await?;
+    db::resource::authz(&*db, user_id, Some(id)).await?;
 
-//     db::resource::delete(&*db, id).await?;
+    db::resource::delete(&*db, id).await?;
 
-//     algolia.delete_resource(id).await;
+    algolia.delete_resource(id).await;
 
-//     Ok(HttpResponse::NoContent().finish())
-// }
+    Ok(HttpResponse::NoContent().finish())
+}
 
 #[instrument(skip(db, claims))]
 async fn browse(
@@ -539,23 +539,27 @@ pub fn configure(cfg: &mut ServiceConfig) {
         resource::Browse::PATH,
         resource::Browse::METHOD.route().to(browse),
     )
-    // .route(
-    //     resource::Search::PATH,
-    //     resource::Search::METHOD.route().to(search),
-    // )
+    .route(
+        resource::Search::PATH,
+        resource::Search::METHOD.route().to(search),
+    )
     .route(
         resource::UpdateDraftData::PATH,
         resource::UpdateDraftData::METHOD.route().to(update_draft),
     )
-    // .route(
-    //     resource::Delete::PATH,
-    //     resource::Delete::METHOD.route().to(delete),
-    // )
+    .route(
+        resource::Delete::PATH,
+        resource::Delete::METHOD.route().to(delete),
+    )
     .route(
         resource::ResourceAdminDataUpdate::PATH,
         resource::ResourceAdminDataUpdate::METHOD
             .route()
             .to(update_admin_data),
+    )
+    .route(
+        resource::Unlike::PATH,
+        resource::Unlike::METHOD.route().to(unlike),
     )
     .route(
         resource::Count::PATH,
