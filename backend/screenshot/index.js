@@ -93,14 +93,12 @@ function queueScreenshot(location, project, baseUrl, endpoint, finalUrl) {
           };
         });
       })
-      .then(
-        (resp) => {
-          respondJson(resp);
-        },
-        (err) => {
-          respondError(err);
-        }
-      );
+      .then((resp) => {
+        respondJson(resp);
+      })
+      .catch((err) => {
+        respondError(err);
+      });
   });
 }
 
@@ -110,14 +108,12 @@ function makeShowScreenshot(baseUrl) {
 
     getScreenshotUrl(req, baseUrl)
       .then((url) => doScreenshot(url))
-      .then(
-        ({ fullBuffer, thumbBuffer }) => {
-          respondBuffer({ contentType: "image/jpeg", data: thumbBuffer });
-        },
-        (err) => {
-          respondError(err);
-        }
-      );
+      .then(({ fullBuffer, thumbBuffer }) => {
+        respondBuffer({ contentType: "image/jpeg", data: thumbBuffer });
+      })
+      .catch((err) => {
+        respondError(err);
+      });
   });
 }
 
@@ -161,19 +157,16 @@ function makeSaveScreenshot(baseUrl, bucketName, finalUrl) {
             });
         })
       )
-      .then(
-        (data) => {
-          respondJson(
-            Object.assign(data, {
-              saved: true,
-            })
-          );
-        },
-        (err) => {
-          respondError(err);
-        }
-      )
-      .catch((err) => {});
+      .then((data) => {
+        respondJson(
+          Object.assign(data, {
+            saved: true,
+          })
+        );
+      })
+      .catch((err) => {
+        respondError(err);
+      });
   });
 }
 
@@ -201,7 +194,7 @@ function doScreenshot(url) {
       await page.setRequestInterception(true);
       page.on('request', req => {
         // block HubSpot so that it doesn't show the cookies banner
-        if(req.url().startsWith("https://js.hs-scripts.com")) {
+        if (req.url().startsWith("https://js.hs-scripts.com")) {
           req.abort();
         } else {
           req.continue();
