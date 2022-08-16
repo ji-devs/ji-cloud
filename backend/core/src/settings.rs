@@ -263,6 +263,11 @@ pub struct EmailClientSettings {
     /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
     pub sender_email: String,
 
+    /// Email INFO client sender email address.
+    /// Is optional. If missing, all mailing services will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
+    pub jigzi_info_email: String,
+
     /// Email client template ID for verifying emails at signup.
     /// Is optional. If missing, email verification (at signup) will be disabled,
     /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
@@ -622,6 +627,10 @@ impl SettingsManager {
 
         let sender_email = self.get_varying_secret(keys::email::SENDER_EMAIL).await?;
 
+        let jigzi_info_email = self
+            .get_varying_secret(keys::email::EMAIL_INFO_ADDRESS)
+            .await?;
+
         let signup_verify_template = self
             .get_varying_secret(keys::email::SIGNUP_VERIFY_TEMPLATE)
             .await?;
@@ -638,14 +647,18 @@ impl SettingsManager {
             .get_varying_secret(keys::email::EMAIL_WELCOME_JIGZI_TEMPLATE)
             .await?;
 
-        let (api_key, sender_email) = match (api_key, sender_email) {
-            (Some(api_key), Some(sender_email)) => (api_key, sender_email),
-            _ => return Ok(None),
-        };
+        let (api_key, sender_email, jigzi_info_email) =
+            match (api_key, sender_email, jigzi_info_email) {
+                (Some(api_key), Some(sender_email), Some(jigzi_info_email)) => {
+                    (api_key, sender_email, jigzi_info_email)
+                }
+                _ => return Ok(None),
+            };
 
         Ok(Some(EmailClientSettings {
             api_key,
             sender_email,
+            jigzi_info_email,
             signup_verify_template,
             password_reset_template,
             email_reset_template,

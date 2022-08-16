@@ -54,6 +54,11 @@ pub mod email {
     /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
     pub const SENDER_EMAIL: &str = "EMAIL_SENDER_ADDRESS";
 
+    /// Email INFO client RECEIVER email address for Admin alerts.
+    /// Is optional. If missing, all mailing services will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
+    pub const EMAIL_INFO_ADDRESS: &str = "EMAIL_INFO_ADDRESS";
+
     /// Email client template ID for verifying emails at signup.
     /// Is optional. If missing, email verification (at signup) will be disabled,
     /// all related routes will return "501 - Not Implemented" and a warning will be emitted.

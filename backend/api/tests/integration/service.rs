@@ -28,6 +28,7 @@ pub struct TestServicesSettings {
 impl TestServicesSettings {
     const TEST_SENDGRID_API_KEY: &'static str = "TEST_SENDGRID_API_KEY";
     const TEST_SENDER_EMAIL: &'static str = "TEST_SENDER_EMAIL";
+    const TEST_EMAIL_INFO_ADDRESS: &'static str = "TEST_JIGZI_INFO_EMAIL";
     const TEST_SIGNUP_VERIFY_TEMPLATE: &'static str = "TEST_SIGNUP_VERIFY_TEMPLATE";
     const TEST_SIGNUP_PASSWORD_RESET_TEMPLATE: &'static str = "TEST_SIGNUP_PASSWORD_RESET_TEMPLATE";
     const TEST_EMAIL_RESET_TEMPLATE: &'static str = "TEST_EMAIL_RESET_TEMPLATE";
@@ -124,11 +125,23 @@ impl TestServicesSettings {
             .await
             .ok();
 
+        let google_jigzi_info_email = self
+            .get_gcp_managed_secret(Self::TEST_EMAIL_INFO_ADDRESS)
+            .await
+            .ok();
+
         let env_sender_email = req_env("TEST_SENDER_EMAIL").ok();
 
         let sender_email = match google_sender_email {
             Some(google_sender_email) => Some(google_sender_email),
             None => env_sender_email,
+        };
+
+        let env_jigzi_info_email = req_env("TEST_JIGZI_INFO_EMAIL").ok();
+
+        let jigzi_info_email = match google_jigzi_info_email {
+            Some(google_jigzi_info_email) => Some(google_jigzi_info_email),
+            None => env_jigzi_info_email,
         };
 
         let google_signup_verify_template = self
@@ -188,14 +201,18 @@ impl TestServicesSettings {
             welcome_jigzi_template
         );
 
-        let (api_key, sender_email) = match (api_key, sender_email) {
-            (Some(api_key), Some(sender_email)) => (api_key, sender_email),
-            _ => return None,
-        };
+        let (api_key, sender_email, jigzi_info_email) =
+            match (api_key, sender_email, jigzi_info_email) {
+                (Some(api_key), Some(sender_email), Some(jigzi_info_email)) => {
+                    (api_key, sender_email, jigzi_info_email)
+                }
+                _ => return None,
+            };
 
         let settings = EmailClientSettings {
             api_key,
             sender_email,
+            jigzi_info_email,
             signup_verify_template,
             password_reset_template,
             email_reset_template,
