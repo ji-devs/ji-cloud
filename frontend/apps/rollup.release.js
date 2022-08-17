@@ -24,6 +24,7 @@ export default {
     plugins: [
         rust({
             serverPath: `${URL_FRONTEND_RELEASE}/${APP_NAME}/js/`,
+            wasmBindgenArgs: ["--reference-types"],
             cargoArgs: ["--features", "release"],
             debug: false,
         }),
