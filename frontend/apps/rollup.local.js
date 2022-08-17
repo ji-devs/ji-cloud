@@ -44,7 +44,7 @@ export default {
             serverPath: "/js/",
             debug: true,
             watchPatterns,
-            wasmBindgenArgs: ["--reference-types"],
+            // wasmBindgenArgs: ["--reference-types"],
             cargoArgs: ["--features", "local quiet"],
             watch: true,
         }),
