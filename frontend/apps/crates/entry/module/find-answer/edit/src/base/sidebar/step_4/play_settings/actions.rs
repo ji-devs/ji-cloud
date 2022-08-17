@@ -12,6 +12,8 @@ impl State {
         })
     }
 
+    // TODO: Once attempt limits functionality has been implemented, remove this `allow`
+    #[allow(dead_code)]
     pub fn set_has_attempts_limit(&self, flag: bool) {
         self.base.play_settings.has_attempts_limit.set_neq(flag);
 
@@ -27,6 +29,8 @@ impl State {
         })
     }
 
+    // TODO: Once attempt limits functionality has been implemented, remove this `allow`
+    #[allow(dead_code)]
     pub fn set_attempts_limit(&self, n_attempts: u8) {
         self.base.play_settings.n_attempts.set_neq(n_attempts);
 
