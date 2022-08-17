@@ -1,6 +1,7 @@
 use components::{
     module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback},
     player_popup::{PlayerPopup, PreviewPopupCallbacks},
+    share_asset::ShareAsset,
 };
 use dominator::{clone, html, Dom};
 use futures_signals::signal::{Signal, SignalExt};
@@ -9,6 +10,8 @@ use std::rc::Rc;
 use utils::{asset::ResourceContentExt, events, languages::Language};
 
 use super::state::CoursePlayer;
+
+const STR_SHARE_COURSE: &str = "Share course";
 
 impl CoursePlayer {
     pub fn render(self: Rc<Self>) -> Dom {
@@ -70,6 +73,25 @@ impl CoursePlayer {
                     .text_signal(state.resource_type_name_signal(resource.resource_type_id))
                 })
             }))
+            .child(html!("fa-button", {
+                .property("slot", "play")
+                .property("icon", "fa-solid fa-circle-play")
+                .event(clone!(state => move |_: events::Click| {
+                    let jigs = state.jigs.lock_mut();
+                    let jig_id = jigs.first().map(|jig| jig.id);
+                    state.active_jig.set(jig_id);
+
+                }))
+            }))
+            .child(ShareAsset::new(state.course_id.into()).render(
+                html!("button-empty", {
+                    .child(html!("fa-icon", {
+                        .property("icon", "fa-light fa-share-nodes")
+                    }))
+                    .text(STR_SHARE_COURSE)
+                }),
+                Some("share")
+            ))
             .child_signal(state.active_jig.signal_cloned().map(|active_jig| {
                 active_jig.map(|active_jig| {
                     html!("div", {

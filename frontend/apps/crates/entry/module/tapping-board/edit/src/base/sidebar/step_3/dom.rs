@@ -3,7 +3,8 @@ use std::rc::Rc;
 
 use components::{
     audio::input::AudioInput,
-    tabs::{MenuTab, MenuTabKind}, hebrew_buttons::HebrewButtons,
+    hebrew_buttons::HebrewButtons,
+    tabs::{MenuTab, MenuTabKind},
 };
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::{Mutable, SignalExt};

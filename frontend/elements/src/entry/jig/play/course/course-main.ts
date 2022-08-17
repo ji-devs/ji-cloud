@@ -7,6 +7,7 @@ export class _ extends LitElement {
             css`
                 :host {
                     display: grid;
+                    align-items: start;
                     column-gap: 48px;
                     background-color: var(--light-blue-1);
                     min-height: 100vh;
@@ -80,6 +81,37 @@ export class _ extends LitElement {
                     display: flex;
                     column-gap: 6px;
                 }
+                @media (min-width: 1920px) {
+                    .course-items {
+                        border-radius: 12px;
+                        overflow: hidden;
+                    }
+                }
+                .items-header {
+                    background-color: var(--light-blue-3);
+                    padding: 24px 20px;
+                    display: grid;
+                    grid-template-columns: auto auto;
+                    align-items: center;
+                    justify-content: space-between;
+                }
+                .items-header ::slotted([slot=play]) {
+                    height: 64px;
+                    width: 64px;
+                    border-radius: 50%;
+                    background-color: #fff;
+                    color: var(--dark-blue-8);
+                    display: grid;
+                    place-content: center;
+                    font-size: 64px;
+                }
+                .items-header ::slotted([slot=share]) {
+                    color: var(--main-blue);
+                    font-size: 20px;
+                    font-weight: 500;
+                    display: flex;
+                    column-gap: 10px;
+                }
             `,
         ];
     }
@@ -127,6 +159,10 @@ export class _ extends LitElement {
                 </div>
             </div>
             <div class="course-items">
+                <div class="items-header">
+                    <slot name="play"></slot>
+                    <slot name="share"></slot>
+                </div>
                 <slot name="items"></slot>
             </div>
         `;
