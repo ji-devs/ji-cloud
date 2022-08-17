@@ -4,13 +4,17 @@ mod routes;
 use crate::templates::direct;
 use actix_web::{
     dev::{MessageBody, Service, ServiceRequest, ServiceResponse},
+    http,
     web::{self, Data},
+    HttpResponse,
 };
 use core::{
     config::JSON_BODY_LIMIT,
     http::{get_addr, get_tcp_fd},
     settings::RuntimeSettings,
 };
+use futures::future::{self, Either};
+use regex::Regex;
 use sentry::types::protocol::v7::value::Value as JsonValue;
 
 // todo: dedup this with api
@@ -58,6 +62,31 @@ pub async fn run(settings: RuntimeSettings) -> anyhow::Result<()> {
     let server = actix_web::HttpServer::new(move || {
         actix_web::App::new()
             .app_data(Data::new(settings.clone()))
+            .wrap_fn(|req, srv| {
+                // Check whether the request originates from www.<host>. If it does, return a redirect response with the
+                // correct URL in the Location header.
+                // Note from Ty: I don't like doing this, but in the absense of a load balancer, and GCP cloud runs
+                // inflexible hosts management, this is necessary.
+                let request_host = req.connection_info().host().to_owned();
+
+                let regex = Regex::new(r"^(?:www\.)+(?P<host>.*)$").unwrap();
+                if let Some(captures) = regex.captures(&request_host) {
+                    if let Some(host_capture) = captures.name("host").map(|host| host.as_str()) {
+                        let uri = req.uri();
+                        let request_scheme = req.connection_info().scheme().to_owned();
+
+                        let url = format!("{request_scheme}://{host_capture}{uri}");
+
+                        return Either::Right(future::ready(Ok(req.into_response(
+                            HttpResponse::MovedPermanently()
+                                .append_header((http::header::LOCATION, url))
+                                .finish(),
+                        ))));
+                    }
+                }
+
+                Either::Left(srv.call(req))
+            })
             .wrap(cors::get(local_insecure))
             .wrap(actix_web::middleware::Logger::default())
             .wrap_fn(log_ise)
