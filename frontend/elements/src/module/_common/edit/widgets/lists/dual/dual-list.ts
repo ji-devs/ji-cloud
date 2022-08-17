@@ -1,7 +1,6 @@
 import { LitElement, html, css, customElement } from "lit-element";
 
 const STR_ADD_WORDS = "Add Your Words";
-const STR_INPUT_FOOTER = "2 to 14 words";
 
 @customElement("sidebar-widget-dual-list")
 export class _ extends LitElement {
@@ -65,18 +64,6 @@ export class _ extends LitElement {
                     }
                 }
 
-                .input-footer {
-                    font-size: 16px;
-                    text-align: center;
-                    color: var(--light-blue-5);
-                    margin-top: 12px;
-                }
-                @media (min-width: 1920px) {
-                    .input-footer {
-                        margin-top: 24px;
-                    }
-                }
-
                 .done-btn {
                     display: flex;
                     justify-content: flex-end;
@@ -101,7 +88,6 @@ export class _ extends LitElement {
                     <slot name="left"></slot>
                     <slot name="right"></slot>
                 </div>
-                <div class="input-footer">${STR_INPUT_FOOTER}</div>
                 <div class="done-btn">
                     <slot name="done-btn"></slot>
                 </div>
