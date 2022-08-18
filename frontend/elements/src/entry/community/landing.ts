@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement } from "lit-element";
 
 const STR_WELCOME_NEW_MEMBERS = "Welcome new members";
-const STR_NEW_CIRCLES = "New circles";
+const STR_NEW_CIRCLES = "Join a new circle";
 
 @customElement("community-landing")
 export class _ extends LitElement {

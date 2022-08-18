@@ -17,7 +17,7 @@ use super::CircleDetails;
 // const STR_INVITE: &str = "Invite";
 const STR_MEMBER: &str = "Member";
 const STR_JOIN: &str = "Join";
-const STR_SEARCH_MEMBER: &str = "Search member";
+const STR_SEARCH_MEMBER: &str = "search";
 
 impl CircleDetails {
     pub fn render(self: Rc<Self>) -> Dom {

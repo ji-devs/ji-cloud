@@ -14,7 +14,7 @@ use crate::member_details::component::Component;
 use super::EditAbout;
 
 pub const STR_HEADING: &str = "Edit your details";
-pub const STR_LOCATION: &str = "Location";
+pub const STR_LOCATION: &str = "Where I live";
 pub const STR_ORGANIZATION: &str = "Where I work";
 pub const STR_PERSONA: &str = "What I do";
 pub const STR_LANGUAGE: &str = "Language";
@@ -193,7 +193,7 @@ impl Component for Rc<EditAbout> {
                 ])
             }))
             .child(html!("button-rect", {
-                .text("Apply")
+                .text("Save")
                 .property("slot", "body")
                 .event(clone!(state => move |_: events::Click| {
                     let user = state.get_user_profile_from_fields();

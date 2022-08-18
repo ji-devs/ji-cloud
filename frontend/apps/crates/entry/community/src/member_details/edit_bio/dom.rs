@@ -8,8 +8,9 @@ use crate::member_details::component::Component;
 
 use super::EditBio;
 
-const STR_HEADING: &str = "Add/Edit bio";
 pub const STR_BIO: &str = "Bio";
+pub const STR_MY_BIO: &str = "My bio";
+pub const STR_BIO_PLACEHOLDER: &str = "Tell the community about yourself";
 
 impl Component for Rc<EditBio> {
     fn styles() -> &'static str {
@@ -29,7 +30,7 @@ impl Component for Rc<EditBio> {
             }))
             .child(html!("h3", {
                 .property("slot", "heading")
-                .text(STR_HEADING)
+                .text(STR_BIO)
             }))
             .child(html!("div", {
                 .property("slot", "body")
@@ -39,8 +40,9 @@ impl Component for Rc<EditBio> {
                     .children(&mut [
                         html!("input-wrapper", {
                             .property("slot", "organization")
-                            .property("label", STR_BIO)
+                            .property("label", STR_MY_BIO)
                             .child(html!("textarea" => HtmlTextAreaElement, {
+                                .property("placeholder", STR_BIO_PLACEHOLDER)
                                 .with_node!(elem => {
                                     .property_signal("value", state.bio.signal_cloned())
                                     .event(clone!(state => move |_: events::Input| {
@@ -57,7 +59,7 @@ impl Component for Rc<EditBio> {
                             }))
                         }),
                         html!("button-rect", {
-                            .text("Apply")
+                            .text("Save")
                             .property("slot", "submit")
                             .event(clone!(state => move |_: events::Click| {
                                 let user = state.get_user_profile_from_fields();
