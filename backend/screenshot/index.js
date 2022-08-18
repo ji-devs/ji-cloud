@@ -190,35 +190,42 @@ function doScreenshot(url) {
       },
     })
     .then(async (browser) => {
-      const page = await browser.newPage();
-      await page.setRequestInterception(true);
-      page.on('request', req => {
-        // block HubSpot so that it doesn't show the cookies banner
-        if (req.url().startsWith("https://js.hs-scripts.com")) {
-          req.abort();
-        } else {
-          req.continue();
+      try {
+        const page = await browser.newPage();
+        await page.setRequestInterception(true);
+        page.on('request', req => {
+          // block HubSpot so that it doesn't show the cookies banner
+          if (req.url().startsWith("https://js.hs-scripts.com")) {
+            req.abort();
+          } else {
+            req.continue();
+          }
+        });
+        await page.goto(url, { waitUntil: "networkidle0" });
+        //removing this seems to be okay:
+        //await page.waitFor(5000);
+        await page.evaluateHandle("document.fonts.ready");
+
+        let crashed = await page.evaluate(() => {
+          return Boolean(document.body.querySelector("panic-message"));
+        });
+        if (crashed)
+          throw new Error(`Page crashed, found <panic-message>, url: ${url}`)
+
+        const imageBuffer = await page.screenshot({
+          type: "jpeg",
+          quality: 90,
+        });
+        if (!DEBUG_BROWSER_OPEN) {
+          await browser.close();
         }
-      });
-      await page.goto(url, { waitUntil: "networkidle0" });
-      //removing this seems to be okay:
-      //await page.waitFor(5000);
-      await page.evaluateHandle("document.fonts.ready");
-
-      let crashed = await page.evaluate(() => {
-        return Boolean(document.body.querySelector("panic-message"));
-      });
-      if (crashed)
-        throw new Error(`Page crashed, found <panic-message>, url: ${url}`)
-
-      const imageBuffer = await page.screenshot({
-        type: "jpeg",
-        quality: 90,
-      });
-      if (!DEBUG_BROWSER_OPEN) {
-        await browser.close();
+        return imageBuffer;
+      } catch (error) {
+        if (!DEBUG_BROWSER_OPEN) {
+          await browser.close();
+        }
+        throw error;
       }
-      return imageBuffer;
     })
     // can be useful in development as it doesn't require imageMagick
     // .then((fullBuffer) => {
