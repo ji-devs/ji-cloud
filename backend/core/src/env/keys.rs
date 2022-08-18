@@ -105,6 +105,11 @@ pub mod algolia {
     pub const JIG_INDEX: &str = "ALGOLIA_JIG_INDEX";
 
     /// The index to use for indexing and backend searches.
+    /// Is optional. If missing, *resource* indexing will be disabled,
+    /// search related routes will return a "501 - Not Implemented" and a warning will be emitted.
+    pub const RESOURCE_INDEX: &str = "ALGOLIA_RESOURCE_INDEX";
+
+    /// The index to use for indexing and backend searches.
     /// Is optional. If missing, *Course* indexing will be disabled,
     /// search related routes will return a "501 - Not Implemented" and a warning will be emitted.
     pub const COURSE_INDEX: &str = "ALGOLIA_COURSE_INDEX";

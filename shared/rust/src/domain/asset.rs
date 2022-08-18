@@ -15,7 +15,6 @@ use uuid::Uuid;
 
 use crate::domain::{
     category::CategoryId,
-    // learning_path::AdditionalResource,
     meta::{AffiliationId, AgeRangeId},
     module::LiteModule,
 };
@@ -25,6 +24,7 @@ use super::{
     course::{CourseId, CourseResponse},
     jig::{JigId, JigResponse},
     module::body::ThemeId,
+    resource::{ResourceId, ResourceResponse},
     user::UserId,
 };
 
@@ -72,8 +72,8 @@ impl AssetType {
     pub fn to_asset_id(&self, uuid: Uuid) -> AssetId {
         match self {
             AssetType::Jig => JigId(uuid).into(),
-            AssetType::Resource => JigId(uuid).into(),
             AssetType::Course => CourseId(uuid).into(),
+            AssetType::Resource => ResourceId(uuid).into(),
         }
     }
 }
@@ -83,6 +83,7 @@ impl From<&AssetId> for AssetType {
         match asset_id {
             AssetId::JigId(_) => AssetType::Jig,
             AssetId::CourseId(_) => AssetType::Course,
+            AssetId::ResourceId(_) => AssetType::Resource,
         }
     }
 }
@@ -93,8 +94,8 @@ impl TryFrom<&str> for AssetType {
     fn try_from(s: &str) -> Result<Self, Self::Error> {
         match s {
             "jig" => Ok(Self::Jig),
-            "resource" => Ok(Self::Resource),
             "course" => Ok(Self::Course),
+            "resource" => Ok(Self::Resource),
             _ => Err(()),
         }
     }
@@ -109,6 +110,9 @@ pub enum AssetId {
 
     /// Course ID
     CourseId(CourseId),
+
+    /// Resource ID
+    ResourceId(ResourceId),
 }
 
 impl From<JigId> for AssetId {
@@ -120,6 +124,12 @@ impl From<JigId> for AssetId {
 impl From<CourseId> for AssetId {
     fn from(course_id: CourseId) -> Self {
         Self::CourseId(course_id)
+    }
+}
+
+impl From<ResourceId> for AssetId {
+    fn from(resource_id: ResourceId) -> Self {
+        Self::ResourceId(resource_id)
     }
 }
 
@@ -140,11 +150,20 @@ impl AssetId {
         }
     }
 
+    /// get resource id value as ref
+    pub fn unwrap_resource(&self) -> &ResourceId {
+        match self {
+            Self::ResourceId(resource_id) => resource_id,
+            _ => panic!(),
+        }
+    }
+
     /// get the id uuid
     pub fn uuid(&self) -> &Uuid {
         match self {
             Self::JigId(jig_id) => &jig_id.0,
             Self::CourseId(course_id) => &course_id.0,
+            Self::ResourceId(resource_id) => &resource_id.0,
         }
     }
 
@@ -157,6 +176,11 @@ impl AssetId {
     pub fn is_course_id(&self) -> bool {
         matches!(self, Self::CourseId(_))
     }
+
+    /// check if resource
+    pub fn is_resource_id(&self) -> bool {
+        matches!(self, Self::ResourceId(_))
+    }
 }
 
 /// Asset
@@ -168,6 +192,9 @@ pub enum Asset {
 
     /// Course ID associated with the module.
     Course(CourseResponse),
+
+    /// Resource ID associated with the module.
+    Resource(ResourceResponse),
 }
 
 impl From<JigResponse> for Asset {
@@ -179,6 +206,12 @@ impl From<JigResponse> for Asset {
 impl From<CourseResponse> for Asset {
     fn from(course: CourseResponse) -> Self {
         Self::Course(course)
+    }
+}
+
+impl From<ResourceResponse> for Asset {
+    fn from(resource: ResourceResponse) -> Self {
+        Self::Resource(resource)
     }
 }
 
@@ -204,6 +237,7 @@ impl Asset {
         match self {
             Self::Jig(jig) => jig.id.into(),
             Self::Course(course) => course.id.into(),
+            Self::Resource(resource) => resource.id.into(),
         }
     }
 
@@ -212,6 +246,7 @@ impl Asset {
         match self {
             Self::Jig(jig) => jig.published_at,
             Self::Course(course) => course.published_at,
+            Self::Resource(resource) => resource.published_at,
         }
     }
 
@@ -220,6 +255,7 @@ impl Asset {
         match self {
             Self::Jig(jig) => &jig.jig_data.display_name,
             Self::Course(course) => &course.course_data.display_name,
+            Self::Resource(resource) => &resource.resource_data.display_name,
         }
     }
 
@@ -228,6 +264,7 @@ impl Asset {
         match self {
             Self::Jig(jig) => &jig.jig_data.language,
             Self::Course(course) => &course.course_data.language,
+            Self::Resource(resource) => &resource.resource_data.language,
         }
     }
 
@@ -236,6 +273,7 @@ impl Asset {
         match self {
             Self::Jig(jig) => &jig.jig_data.description,
             Self::Course(course) => &course.course_data.description,
+            Self::Resource(resource) => &resource.resource_data.description,
         }
     }
 
@@ -244,6 +282,7 @@ impl Asset {
         match self {
             Self::Jig(jig) => jig.jig_data.modules.first(),
             Self::Course(course) => course.course_data.cover.as_ref(),
+            Self::Resource(resource) => resource.resource_data.cover.as_ref(),
         }
     }
 
@@ -252,6 +291,7 @@ impl Asset {
         match self {
             Self::Jig(jig) => &jig.jig_data.privacy_level,
             Self::Course(course) => &course.course_data.privacy_level,
+            Self::Resource(resource) => &resource.resource_data.privacy_level,
         }
     }
 
@@ -260,6 +300,7 @@ impl Asset {
         match self {
             Self::Jig(jig) => &jig.jig_data.other_keywords,
             Self::Course(course) => &course.course_data.other_keywords,
+            Self::Resource(resource) => &resource.resource_data.other_keywords,
         }
     }
 
@@ -268,6 +309,7 @@ impl Asset {
         match self {
             Self::Jig(jig) => &jig.jig_data.translated_keywords,
             Self::Course(course) => &course.course_data.translated_keywords,
+            Self::Resource(resource) => &resource.resource_data.translated_keywords,
         }
     }
 
@@ -276,6 +318,7 @@ impl Asset {
         match self {
             Self::Jig(jig) => &jig.jig_data.age_ranges,
             Self::Course(course) => &course.course_data.age_ranges,
+            Self::Resource(resource) => &resource.resource_data.age_ranges,
         }
     }
 
@@ -284,6 +327,7 @@ impl Asset {
         match self {
             Self::Jig(jig) => &jig.jig_data.affiliations,
             Self::Course(course) => &course.course_data.affiliations,
+            Self::Resource(resource) => &resource.resource_data.affiliations,
         }
     }
 
@@ -292,6 +336,7 @@ impl Asset {
         match self {
             Self::Jig(jig) => &jig.jig_data.categories,
             Self::Course(course) => &course.course_data.categories,
+            Self::Resource(resource) => &resource.resource_data.categories,
         }
     }
 
@@ -300,6 +345,7 @@ impl Asset {
         match self {
             Self::Jig(jig) => jig.likes,
             Self::Course(course) => course.likes,
+            Self::Resource(resource) => resource.likes,
         }
     }
 
@@ -308,6 +354,7 @@ impl Asset {
         match self {
             Self::Jig(jig) => jig.plays,
             Self::Course(course) => course.plays,
+            Self::Resource(resource) => resource.plays,
         }
     }
 
@@ -316,6 +363,7 @@ impl Asset {
         match self {
             Self::Jig(jig) => &jig.author_id,
             Self::Course(course) => &course.author_id,
+            Self::Resource(resource) => &resource.author_id,
         }
     }
 
@@ -324,6 +372,7 @@ impl Asset {
         match self {
             Self::Jig(jig) => &jig.author_name,
             Self::Course(course) => &course.author_name,
+            Self::Resource(resource) => &resource.author_name,
         }
     }
 
@@ -332,6 +381,7 @@ impl Asset {
         match self {
             Self::Jig(jig) => &jig.jig_data.additional_resources,
             Self::Course(course) => &course.course_data.additional_resources,
+            Self::Resource(resource) => &resource.resource_data.additional_resources,
         }
     }
 
@@ -340,6 +390,7 @@ impl Asset {
         match self {
             Self::Jig(jig) => &jig.jig_data.translated_description,
             Self::Course(course) => &course.course_data.translated_description,
+            Self::Resource(resource) => &resource.resource_data.translated_description,
         }
     }
 
@@ -348,6 +399,7 @@ impl Asset {
         match self {
             Self::Jig(jig) => jig.jig_data.theme,
             Self::Course(_) => ThemeId::default(),
+            Self::Resource(_) => ThemeId::default(),
         }
     }
 }

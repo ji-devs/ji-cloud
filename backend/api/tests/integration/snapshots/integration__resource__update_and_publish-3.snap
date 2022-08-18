@@ -1,0 +1,54 @@
+---
+source: tests/integration/resource.rs
+expression: body
+
+---
+{
+  "id": "d8067526-1518-11ed-87fa-ebaf880b6d9c",
+  "publishedAt": "2022-06-24T17:57:33.149359Z",
+  "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+  "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+  "authorName": "Bobby Tables",
+  "likes": 0,
+  "plays": 0,
+  "resourceData": {
+    "draftOrLive": "live",
+    "displayName": "resource1",
+    "cover": {
+      "id": "a6b248f8-1dd7-11ec-8426-975953035335",
+      "kind": "Cover",
+      "is_complete": true
+    },
+    "ageRanges": [],
+    "affiliations": [],
+    "language": "en-us",
+    "categories": [],
+    "description": "test description",
+    "createdAt": "2021-03-04T00:46:26.134651Z",
+    "lastEdited": "[last_edited]",
+    "privacyLevel": "public",
+    "locked": false,
+    "otherKeywords": "",
+    "translatedKeywords": "",
+    "translatedDescription": {},
+    "additionalResources": [
+      {
+        "id": "286b828c-1dd9-11ec-8426-571b03b2d3df",
+        "displayName": "link test",
+        "resourceTypeId": "a91aca34-519e-11ec-ab46-175eaaf1ff23",
+        "link": "url://url.url.url/urlese"
+      },
+      {
+        "id": "286b82fa-1dd9-11ec-8426-2b6953011bae",
+        "displayName": "link test",
+        "resourceTypeId": "a91aca34-519e-11ec-ab46-175eaaf1ff23",
+        "link": "url://url.url.url/url"
+      }
+    ]
+  },
+  "adminData": {
+    "rating": null,
+    "blocked": false,
+    "curated": false
+  }
+}

@@ -36,6 +36,10 @@ async fn create(
             db::course::authz(&*db, user_id, Some(course_id)).await?;
             db::course::module::create(&*db, course_id, req.body, is_complete).await?
         }
+        AssetId::ResourceId(resource_id) => {
+            db::resource::authz(&*db, user_id, Some(resource_id)).await?;
+            db::resource::module::create(&*db, resource_id, req.body, is_complete).await?
+        }
     };
 
     Ok(HttpResponse::Created().json(CreateResponse { id }))
@@ -49,13 +53,14 @@ async fn get_live(
     let asset = path.0;
     let module_id = path.1;
 
-    println!("Asset: {:?}", asset);
-
     let module = match asset {
-        AssetType::Jig | AssetType::Resource => db::jig::module::get_live(&db, module_id)
+        AssetType::Jig => db::jig::module::get_live(&db, module_id)
             .await?
             .ok_or(error::NotFound::ResourceNotFound)?,
         AssetType::Course => db::course::module::get_live(&db, module_id)
+            .await?
+            .ok_or(error::NotFound::ResourceNotFound)?,
+        AssetType::Resource => db::resource::module::get_live(&db, module_id)
             .await?
             .ok_or(error::NotFound::ResourceNotFound)?,
     };
@@ -72,10 +77,13 @@ async fn get_draft(
     let module_id = path.1;
 
     let module = match asset {
-        AssetType::Jig | AssetType::Resource => db::jig::module::get_draft(&db, module_id)
+        AssetType::Jig => db::jig::module::get_draft(&db, module_id)
             .await?
             .ok_or(error::NotFound::ResourceNotFound)?,
         AssetType::Course => db::course::module::get_draft(&db, module_id)
+            .await?
+            .ok_or(error::NotFound::ResourceNotFound)?,
+        AssetType::Resource => db::resource::module::get_draft(&db, module_id)
             .await?
             .ok_or(error::NotFound::ResourceNotFound)?,
     };
@@ -120,6 +128,19 @@ async fn update(
             )
             .await?
         }
+        AssetId::ResourceId(resource_id) => {
+            db::resource::authz(&*db, user_id, Some(resource_id)).await?;
+
+            db::resource::module::update(
+                &*db,
+                resource_id,
+                module_id,
+                req.body.as_ref(),
+                req.index,
+                req.is_complete,
+            )
+            .await?
+        }
     };
 
     if !exists {
@@ -149,6 +170,11 @@ async fn delete(
             db::course::authz(&*db, user_id, Some(course_id)).await?;
 
             db::course::module::delete(&*db, course_id, module_id).await?;
+        }
+        AssetId::ResourceId(resource_id) => {
+            db::resource::authz(&*db, user_id, Some(resource_id)).await?;
+
+            db::resource::module::delete(&*db, resource_id, module_id).await?;
         }
     };
 

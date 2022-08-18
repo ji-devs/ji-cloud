@@ -7,7 +7,7 @@ use shared::domain::{
     category::CategoryId,
     jig::{
         AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive, JigAdminData,
-        JigData, JigFocus, JigId, JigPlayerSettings, JigRating, JigResponse, TextDirection,
+        JigData, JigId, JigPlayerSettings, JigRating, JigResponse, TextDirection,
     },
     meta::{AffiliationId, AgeRangeId, ResourceTypeId as TypeId},
     module::{body::ThemeId, LiteModule, ModuleId, ModuleKind},
@@ -36,7 +36,6 @@ pub async fn create(
     language: &str,
     description: &str,
     default_player_settings: &JigPlayerSettings,
-    jig_focus: &JigFocus,
 ) -> Result<JigId, CreateJigError> {
     let mut txn = pool.begin().await?;
 
@@ -68,11 +67,10 @@ pub async fn create(
 
     let jig = sqlx::query!(
         //language=SQL
-        r#"insert into jig (creator_id, author_id, live_id, draft_id, jig_focus) values ($1, $1, $2, $3, $4) returning id"#,
+        r#"insert into jig (creator_id, author_id, live_id, draft_id) values ($1, $1, $2, $3) returning id"#,
         creator_id.0,
         live_id,
         draft_id,
-        (*jig_focus) as i16,
     )
     .fetch_one(&mut txn)
     .await?;
@@ -180,8 +178,7 @@ with cte as (
            published_at,
            rating,
            blocked,
-           curated,
-           jig_focus
+           curated
     from jig
     left join jig_play_count on jig_play_count.jig_id = jig.id
     left join jig_admin_data "admin" on admin.jig_id = jig.id
@@ -198,7 +195,6 @@ select cte.jig_id                                          as "jig_id: JigId",
         updated_at,
         published_at,
         privacy_level                                       as "privacy_level!: PrivacyLevel",
-        jig_focus                                           as "jig_focus!: JigFocus",
         language,
         description,
         translated_description                              as "translated_description!: Json<HashMap<String, String>>",
@@ -254,7 +250,6 @@ from jig_data
         author_name: row.author_name,
         likes: row.liked_count,
         plays: row.play_count,
-        jig_focus: row.jig_focus,
         jig_data: JigData {
             created_at: row.created_at,
             draft_or_live,
@@ -353,8 +348,7 @@ select jig.id                                       as "id!: JigId",
        )                                        as "play_count!",
        rating                                   as "rating?: JigRating",
        blocked                                  as "blocked!",
-       curated                                  as "curated!",
-       jig_focus                                as "jig_focus!: JigFocus"
+       curated                                  as "curated!"
 from jig
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
@@ -434,7 +428,6 @@ from jig_data
             author_name: jig_row.author_name,
             likes: jig_row.liked_count,
             plays: jig_row.play_count,
-            jig_focus: jig_row.jig_focus,
             jig_data: JigData {
                 created_at: jig_data_row.created_at,
                 draft_or_live,
@@ -524,7 +517,6 @@ from jig_data
 pub async fn browse(
     db: &sqlx::Pool<sqlx::Postgres>,
     author_id: Option<UserId>,
-    jig_focus: Option<JigFocus>,
     draft_or_live: Option<DraftOrLive>,
     privacy_level: Vec<PrivacyLevel>,
     blocked: Option<bool>,
@@ -546,15 +538,14 @@ with cte as (
           inner join jig on (draft_id = jd.id or (live_id = jd.id and jd.last_synced_at is not null and published_at is not null))
           left join jig_admin_data "admin" on admin.jig_id = jig.id
           left join jig_data_additional_resource "resource" on jd.id = resource.jig_data_id
-    where (jd.draft_or_live = $3 or $3 is null)
-        and (author_id = $1 or $1 is null)
-        and (jig_focus = $2 or $2 is null)
-        and (blocked = $4 or $4 is null)
-        and (jd.privacy_level = any($5) or $5 = array[]::smallint[])
-        and (resource.resource_type_id = any($8) or $8 = array[]::uuid[])
+    where (author_id = $1 or $1 is null) 
+        and (jd.draft_or_live = $2 or $2 is null)
+        and (blocked = $3 or $3 is null)
+        and (jd.privacy_level = any($4) or $4 = array[]::smallint[])
+        and (resource.resource_type_id = any($5) or $5 = array[]::uuid[])
     group by updated_at, created_at, jig.published_at, admin.jig_id
-    order by case when $9 = 0 then created_at
-        when $9 = 1 then published_at
+    order by case when $6 = 0 then created_at
+        when $6 = 1 then published_at
         else coalesce(updated_at, created_at)
   end desc, jig_id
 ),
@@ -564,7 +555,6 @@ cte1 as (
 )
 select jig.id                                              as "jig_id: JigId",
     privacy_level                                       as "privacy_level: PrivacyLevel",
-    jig_focus                                           as "jig_focus!: JigFocus",
     creator_id                                          as "creator_id?: UserId",
     author_id                                           as "author_id?: UserId",
     (select given_name || ' '::text || family_name
@@ -629,19 +619,18 @@ inner join jig on (
     )
 )
 left join jig_admin_data "admin" on admin.jig_id = jig.id
-where ord > (1 * $6 * $7)
+where ord > (1 * $7 * $8)
 order by ord asc
-limit $7
+limit $8
 "#,
     author_id.map(|x| x.0),
-    jig_focus.map(|it| it as i16),
     draft_or_live.map(|it| it as i16),
     blocked,
     &privacy_level[..],
+    &resource_types[..],
+    order_by.map(|it| it as i32),
     page,
     page_limit as i32,
-    &resource_types[..],
-    order_by.map(|it| it as i32)
 )
     .fetch_all(&mut txn)
     .instrument(tracing::info_span!("query jig_data"))
@@ -657,7 +646,6 @@ limit $7
             author_name: jig_data_row.author_name,
             likes: jig_data_row.liked_count,
             plays: jig_data_row.play_count,
-            jig_focus: jig_data_row.jig_focus,
             jig_data: JigData {
                 created_at: jig_data_row.created_at,
                 draft_or_live: jig_data_row.draft_or_live,
@@ -979,7 +967,6 @@ pub async fn filtered_count(
     privacy_level: Vec<PrivacyLevel>,
     blocked: Option<bool>,
     author_id: Option<UserId>,
-    jig_focus: Option<JigFocus>,
     draft_or_live: Option<DraftOrLive>,
     resource_types: Vec<Uuid>,
 ) -> sqlx::Result<(u64, u64)> {
@@ -996,10 +983,9 @@ pub async fn filtered_count(
                   left join jig_data_additional_resource "resource" on jd.id = resource.jig_data_id
             where (jd.draft_or_live = $1 or $1 is null)
                 and (author_id = $2 or $2 is null)
-                and (jig_focus = $3 or $3 is null)
-                and (blocked = $4 or $4 is null)
-                and (jd.privacy_level = any($5) or $5 = array[]::smallint[])
-                and (resource.resource_type_id = any($6) or $6 = array[]::uuid[])
+                and (blocked = $3 or $3 is null)
+                and (jd.privacy_level = any($4) or $4 = array[]::smallint[])
+                and (resource.resource_type_id = any($5) or $5 = array[]::uuid[])
             group by updated_at, created_at, jig.published_at, admin.jig_id, jig_id
         )
             select count(*) as "count!" from unnest(array((select cte.array_agg[1] from cte))) with ordinality t(id
@@ -1007,7 +993,6 @@ pub async fn filtered_count(
         "#,
         draft_or_live.map(|it| it as i16),
         author_id.map(|it| it.0),
-        jig_focus.map(|it| it as i16),
         blocked,
         &privacy_level[..],
         &resource_types[..]
@@ -1020,25 +1005,23 @@ pub async fn filtered_count(
         //language=SQL
         r#"
         with cte as (
-            select array_agg(jig.id)
-            from jig_data "jd"
-                  inner join jig on (draft_id = jd.id or (live_id = jd.id and jd.last_synced_at is not null and published_at is not null))
+            select (array_agg(jig.id))[1]
+            from jig 
+                  inner join jig_data jd on (draft_id = jd.id or (live_id = jd.id and jd.last_synced_at is not null and published_at is not null))
                   left join jig_admin_data "admin" on admin.jig_id = jig.id
                   left join jig_data_additional_resource "resource" on jd.id = resource.jig_data_id
             where (jd.draft_or_live = $1 or $1 is null)
-                and (author_id = $2 or $2 is null)
-                and (jig_focus = $3 or $3 is null)
-                and (blocked = $4 or $4 is null)
-                and (jd.privacy_level = any($5) or $5 = array[]::smallint[])
-                and (resource.resource_type_id = any($6) or $6 = array[]::uuid[])
+              and (author_id = $2 or $2 is null)
+              and (blocked = $3 or $3 is null)
+              and (jd.privacy_level = any($4) or $4 = array[]::smallint[])
+              and (resource.resource_type_id = any($5) or $5 = array[]::uuid[])
             group by updated_at, created_at, jig.published_at, admin.jig_id, jig_id
         )
-            select count(*) as "count!" from unnest(array((select cte.array_agg[1] from cte))) with ordinality t(id
+            select count(*) as "count!" from unnest(array((select cte.array_agg from cte))) with ordinality t(id
            , ord)
         "#,
         draft_or_live.map(|it| it as i16),
         author_id.map(|it| it.0),
-        jig_focus.map(|it| it as i16),
         blocked,
         &privacy_level[..],
         &resource_types[..]
@@ -1058,7 +1041,6 @@ select count(*) as "count!: i64"
 from jig_data
 inner join jig on jig.live_id = jig_data.id
 where (privacy_level = coalesce($1, privacy_level))
-and (jig_focus = coalesce($1, jig_focus))
 "#,
         privacy_level as i16,
     )
@@ -1216,8 +1198,8 @@ pub async fn clone_jig(
     let new_jig = sqlx::query!(
         //language=SQL
         r#"
-insert into jig (creator_id, author_id, parents, live_id, draft_id, jig_focus)
-select creator_id, $2, array_append(parents, $1), $3, $4, jig_focus
+insert into jig (creator_id, author_id, parents, live_id, draft_id)
+select creator_id, $2, array_append(parents, $1), $3, $4
 from jig
 where id = $1
 returning id as "id!: JigId"
@@ -1431,6 +1413,27 @@ where jig_id = $1 and user_id = $2
     .map_err(|_| anyhow::anyhow!("Must like jig prior to unlike"))?;
 
     Ok(())
+}
+
+pub async fn get_jig_resources(db: &PgPool) -> Result<Vec<JigId>, error::Delete> {
+    let jig_ids = sqlx::query!(
+        //language=SQL
+        r#"
+select id as "id: JigId"
+from jig
+where jig_focus = 1
+limit 150
+"#,
+    )
+    .fetch_all(db)
+    .await?
+    .into_iter()
+    .map(|it| it.id)
+    .collect::<Vec<JigId>>();
+
+    println!("inside");
+
+    Ok(jig_ids)
 }
 
 pub async fn jig_is_liked(db: &PgPool, user_id: UserId, id: JigId) -> sqlx::Result<bool> {
