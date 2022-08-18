@@ -294,6 +294,7 @@ pub enum NotFound {
     ResourceNotFound,
     Forbidden,
     InternalServerError(anyhow::Error),
+    BadRequest,
 }
 
 impl From<Auth> for NotFound {
@@ -322,6 +323,7 @@ impl Into<actix_web::Error> for NotFound {
             .into(),
             Self::Forbidden => BasicError::new(http::StatusCode::FORBIDDEN).into(),
             Self::InternalServerError(e) => ise(e),
+            Self::BadRequest => BasicError::new(http::StatusCode::BAD_REQUEST).into(),
         }
     }
 }
