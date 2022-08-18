@@ -142,59 +142,6 @@ pub struct JigData {
     pub translated_description: HashMap<String, String>,
 }
 
-/// Access level for the jig.
-#[derive(Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[serde(rename_all = "camelCase")]
-#[repr(i16)]
-pub enum JigFocus {
-    /// Jig focuses on modules
-    Modules = 0,
-
-    /// Jig focuses on Resources
-    Resources = 1,
-}
-
-impl JigFocus {
-    /// Represents the privacy level as a `str`. Relevant for Algolia tag filtering.
-    pub fn as_str(&self) -> &'static str {
-        match self {
-            Self::Modules => "modules",
-            Self::Resources => "resources",
-        }
-    }
-
-    /// check if is modules
-    pub fn is_modules(&self) -> bool {
-        self == &Self::Modules
-    }
-
-    /// check if is resources
-    pub fn is_resources(&self) -> bool {
-        self == &Self::Resources
-    }
-}
-
-impl TryFrom<&str> for JigFocus {
-    type Error = anyhow::Error;
-
-    fn try_from(s: &str) -> Result<Self, Self::Error> {
-        match s {
-            "modules" => Ok(Self::Modules),
-            "resources" => Ok(Self::Resources),
-            s => Err(anyhow::format_err!(
-                "\"{}\" is not a valid JigFocus variant",
-                s
-            )),
-        }
-    }
-}
-
-impl Default for JigFocus {
-    fn default() -> Self {
-        Self::Modules
-    }
-}
 
 /// These fields can be edited by admin and can be viewed by everyone
 #[derive(Serialize, Deserialize, Clone, Debug)]
