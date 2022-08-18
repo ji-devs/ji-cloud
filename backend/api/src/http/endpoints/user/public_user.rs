@@ -266,9 +266,7 @@ pub async fn follow(
     let (user_id, follower_id) = (path.into_inner(), claims.user_id());
 
     if user_id == follower_id {
-        return Err(error::NotFound::InternalServerError(anyhow::anyhow!(
-            "User cannot follow self"
-        )));
+        return Err(error::NotFound::BadRequest);
     }
 
     db::user::public_user::follow(&db, user_id, follower_id).await?;

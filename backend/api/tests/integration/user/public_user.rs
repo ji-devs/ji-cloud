@@ -425,3 +425,34 @@ async fn browse_following_and_unfollow() -> anyhow::Result<()> {
 
     Ok(())
 }
+
+#[actix_rt::test]
+async fn follow_self_error() -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::User, Fixture::MetaKinds, Fixture::PublicUser],
+        &[],
+    )
+    .await;
+
+    let port = app.port();
+
+    let client = reqwest::Client::new();
+
+    // Also, the current user logged in
+    let follower_id = "1f241e1b-b537-493f-a230-075cb16315be".to_string();
+
+    let resp = client
+        .post(&format!(
+            "http://0.0.0.0:{}/v1/user/{follower_id}/follow",
+            port
+        ))
+        .login()
+        .send()
+        .await?;
+
+    assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
+
+    app.stop(false).await;
+
+    Ok(())
+}

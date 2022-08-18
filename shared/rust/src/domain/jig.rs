@@ -142,7 +142,6 @@ pub struct JigData {
     pub translated_description: HashMap<String, String>,
 }
 
-
 /// These fields can be edited by admin and can be viewed by everyone
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
