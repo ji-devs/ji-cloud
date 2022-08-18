@@ -16,13 +16,8 @@ use utils::{
 use super::state::PostPublish;
 
 pub fn create_jig(state: Rc<PostPublish>) {
-    let jig_focus = state.asset_edit_state.jig_focus;
-
     state.loader.load(async move {
-        let req = JigCreateRequest {
-            jig_focus,
-            ..Default::default()
-        };
+        let req = JigCreateRequest::default();
 
         match api_with_auth::<CreateResponse<JigId>, EmptyError, _>(
             jig::Create::PATH,
@@ -34,7 +29,6 @@ pub fn create_jig(state: Rc<PostPublish>) {
             Ok(resp) => {
                 let url: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                     resp.id,
-                    jig_focus,
                     JigEditRoute::Landing,
                 )))
                 .into();

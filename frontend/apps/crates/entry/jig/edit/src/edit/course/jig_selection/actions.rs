@@ -6,7 +6,7 @@ use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{
         course::{CourseResponse, CourseUpdateDraftDataRequest},
-        jig::{JigFocus, JigId, JigResponse, JigSearchQuery},
+        jig::{JigId, JigResponse, JigSearchQuery},
     },
     error::EmptyError,
 };
@@ -112,7 +112,6 @@ impl JigSelection {
         state.loader.load(clone!(state => async move {
             let req = JigSearchQuery {
                 q: String::from(state.input.borrow().clone()),
-                jig_focus: Some(JigFocus::Modules),
                 ..Default::default()
             };
 

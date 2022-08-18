@@ -139,7 +139,7 @@ impl ItemDom {
                             match &module.item {
                                 SidebarSpotItem::Jig(module) => {
                                     match (&*module, route) {
-                                        (Some(module), AssetEditRoute::Jig(_, _, JigEditRoute::Module(module_id))) if module_id == &module.id => None,
+                                        (Some(module), AssetEditRoute::Jig(_, JigEditRoute::Module(module_id))) if module_id == &module.id => None,
                                         (Some(module), _) => {
                                             Some(
                                                 ModuleThumbnail::new(

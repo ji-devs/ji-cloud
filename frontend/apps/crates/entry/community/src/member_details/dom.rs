@@ -8,7 +8,10 @@ use components::{
 use dominator::{clone, html, link, Dom, DomBuilder};
 use futures_signals::signal::{Signal, SignalExt};
 use shared::{
-    domain::{asset::DraftOrLive, jig::JigResponse, user::public_user::PublicUser},
+    domain::{
+        asset::DraftOrLive, jig::JigResponse, resource::ResourceResponse,
+        user::public_user::PublicUser,
+    },
     media::MediaLibrary,
 };
 use utils::{
@@ -323,8 +326,8 @@ impl MemberDetails {
         })
     }
 
-    fn render_resource(self: &Rc<Self>, jig: &JigResponse) -> Dom {
-        let link = match jig.jig_data.additional_resources.first() {
+    fn render_resource(self: &Rc<Self>, resource: &ResourceResponse) -> Dom {
+        let link = match resource.resource_data.additional_resources.first() {
             Some(resource) => resource.resource_content.get_link(),
             None => {
                 // should not be here
@@ -334,13 +337,13 @@ impl MemberDetails {
 
         html!("community-asset", {
             .child(ModuleThumbnail::new(
-                jig.id.into(),
-                jig.jig_data.modules.get(0).cloned(),
+                resource.id.into(),
+                resource.resource_data.cover.clone(),
                 ThumbnailFallback::Asset,
                 DraftOrLive::Live,
             ).render(Some("thumbnail")))
             .property("slot", "creation-assets")
-            .property("name", &jig.jig_data.display_name)
+            .property("name", &resource.resource_data.display_name)
             .property("href", link)
         })
     }

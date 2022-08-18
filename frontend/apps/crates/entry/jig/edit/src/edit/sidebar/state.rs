@@ -51,6 +51,7 @@ impl State {
         let mut modules = match &jig {
             Asset::Jig(jig) => Self::get_jig_spots(jig),
             Asset::Course(course) => Self::get_course_spots(course),
+            Asset::Resource(_) => unimplemented!(),
         };
 
         modules.push(Rc::new(SidebarSpot::new_empty(&jig)));
@@ -65,6 +66,7 @@ impl State {
             Asset::Course(course) => {
                 SidebarSetting::Course(Rc::new(CourseSettingsState::new(course)))
             }
+            Asset::Resource(_) => unimplemented!(),
         };
 
         Self {
@@ -170,6 +172,7 @@ impl SidebarSpot {
         let item = match asset {
             Asset::Jig(_) => SidebarSpotItem::Jig(None),
             Asset::Course(_) => SidebarSpotItem::Course(None),
+            Asset::Resource(_) => unimplemented!(),
         };
         Self {
             item,

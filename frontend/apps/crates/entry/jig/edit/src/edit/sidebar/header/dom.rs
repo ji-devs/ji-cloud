@@ -1,9 +1,6 @@
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
-use shared::domain::{
-    asset::{Asset, DraftOrLive},
-    jig::JigFocus,
-};
+use shared::domain::asset::{Asset, DraftOrLive};
 use std::rc::Rc;
 use web_sys::HtmlInputElement;
 
@@ -30,7 +27,7 @@ impl HeaderDom {
             .property_signal("collapsed", sidebar_state.collapsed.signal())
             .property_signal("isModulePage", sidebar_state.asset_edit_state.route.signal_cloned().map(|route| {
                 // TODO: change?
-                matches!(route, AssetEditRoute::Jig(_, _, JigEditRoute::Landing))
+                matches!(route, AssetEditRoute::Jig(_, JigEditRoute::Landing))
             }))
             .apply(|dom| {
                 match &sidebar_state.settings {
@@ -108,7 +105,6 @@ impl HeaderDom {
                             let jig = sidebar_state.asset.unwrap_jig();
                             let url = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                                 jig.id,
-                                JigFocus::Modules,
                                 JigEditRoute::Landing
                             ))).to_string();
                             dominator::routing::go_to_url(&url);

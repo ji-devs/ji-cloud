@@ -137,7 +137,6 @@ where
                             translated_keywords: String::from(""),
                             translated_description: HashMap::new(),
                         },
-                        jig_focus: JigFocus::Modules,
                         likes: 0,
                         plays: 0,
                     }))
@@ -163,6 +162,7 @@ where
                                 .await
                                 .map(|course| Asset::Course(course))
                         },
+                        AssetId::ResourceId(_) => unimplemented!()
                     };
 
                     match resp {

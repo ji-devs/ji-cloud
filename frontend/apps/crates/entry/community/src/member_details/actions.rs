@@ -7,7 +7,8 @@ use shared::{
     domain::{
         asset::{DraftOrLive, UserOrMe},
         circle::CircleBrowseQuery,
-        jig::{JigBrowseQuery, JigFocus},
+        jig::JigBrowseQuery,
+        resource::ResourceBrowseQuery,
         user::{
             public_user::{
                 BrowsePublicUserFollowersQuery, BrowsePublicUserFollowersResponse,
@@ -87,7 +88,6 @@ impl MemberDetails {
         let req = JigBrowseQuery {
             author_id: Some(UserOrMe::User(state.member_id.0)),
             draft_or_live: Some(DraftOrLive::Live),
-            jig_focus: Some(JigFocus::Modules),
             ..Default::default()
         };
 
@@ -100,15 +100,16 @@ impl MemberDetails {
     async fn load_members_resources(self: &Rc<Self>) {
         let state = self;
 
-        let req = JigBrowseQuery {
+        let req = ResourceBrowseQuery {
             author_id: Some(UserOrMe::User(state.member_id.0)),
             draft_or_live: Some(DraftOrLive::Live),
-            jig_focus: Some(JigFocus::Resources),
             ..Default::default()
         };
 
-        match endpoints::jig::Browse::api_no_auth(Some(req)).await {
-            Ok(res) => state.creations.set(Creations::Resources(Some(res.jigs))),
+        match endpoints::resource::Browse::api_no_auth(Some(req)).await {
+            Ok(res) => state
+                .creations
+                .set(Creations::Resources(Some(res.resources))),
             Err(_) => todo!(),
         }
     }

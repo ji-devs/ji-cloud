@@ -3,16 +3,14 @@ use dominator::clone;
 use futures::join;
 use shared::{
     api::endpoints,
-    domain::{
-        asset::{AssetId, AssetType},
-        jig::JigFocus,
-    },
+    domain::asset::{AssetId, AssetType},
 };
 use std::rc::Rc;
 use utils::prelude::*;
 
 mod course_actions;
 mod jig_actions;
+mod resource_actions;
 
 impl Gallery {
     pub fn load_data(self: &Rc<Self>) {
@@ -35,7 +33,7 @@ impl Gallery {
 
         let res = match state.asset_type {
             AssetType::Jig => jig_actions::load_jigs(state, is_published).await,
-            AssetType::Resource => jig_actions::load_jigs(state, is_published).await,
+            AssetType::Resource => resource_actions::load_resources(state, is_published).await,
             AssetType::Course => course_actions::load_courses(state, is_published).await,
         };
 
@@ -80,7 +78,7 @@ impl Gallery {
 
             let assets = match state.asset_type {
                 AssetType::Jig => jig_actions::search_jigs(q, is_published).await,
-                AssetType::Resource => jig_actions::search_jigs(q, is_published).await,
+                AssetType::Resource => resource_actions::search_resources(q, is_published).await,
                 AssetType::Course => course_actions::search_courses(q, is_published).await,
             };
 
@@ -100,8 +98,8 @@ impl Gallery {
         let state = Rc::clone(self);
         state.loader.load(clone!(state => async move {
             match state.asset_type {
-                AssetType::Jig => jig_actions::create_jig(JigFocus::Modules).await,
-                AssetType::Resource => jig_actions::create_jig(JigFocus::Resources).await,
+                AssetType::Jig => jig_actions::create_jig().await,
+                AssetType::Resource => resource_actions::create_resource().await,
                 AssetType::Course => course_actions::create_course().await,
             };
         }));
@@ -112,6 +110,7 @@ impl Gallery {
         state.loader.load(clone!(state => async move {
             let asset = match asset_id {
                 AssetId::JigId(jig_id) => jig_actions::copy_jig(jig_id).await,
+                AssetId::ResourceId(resource_id) => resource_actions::copy_resource(resource_id).await,
                 AssetId::CourseId(course_id) => course_actions::copy_course(course_id).await,
             };
             state.assets.lock_mut().push_cloned(asset.unwrap_ji());
@@ -124,6 +123,9 @@ impl Gallery {
             let result = match asset_id {
                 AssetId::JigId(jig_id) => {
                     jig_actions::delete_jig(jig_id).await
+                },
+                AssetId::ResourceId(resource_id) => {
+                    resource_actions::delete_resource(resource_id).await
                 },
                 AssetId::CourseId(course_id) => {
                     course_actions::delete_course(course_id).await

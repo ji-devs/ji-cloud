@@ -1,14 +1,11 @@
 use super::super::state::Gallery;
-use components::module::_common::prelude::ModuleId;
 use shared::{
     api::endpoints::{self, ApiEndpoint},
     domain::{
         asset::{Asset, DraftOrLive, UserOrMe},
         jig::{
-            JigBrowseQuery, JigBrowseResponse, JigCreateRequest, JigFocus, JigId, JigResponse,
-            JigSearchQuery,
+            JigBrowseQuery, JigBrowseResponse, JigCreateRequest, JigId, JigResponse, JigSearchQuery,
         },
-        module::{ModuleBody, ModuleCreateRequest, ModuleKind},
         CreateResponse,
     },
     error::{EmptyError, MetadataNotFound},
@@ -24,7 +21,6 @@ pub async fn load_jigs(
         page: Some(*state.next_page.lock_ref()),
         is_published,
         author_id: Some(UserOrMe::Me),
-        jig_focus: Some(state.get_jig_focus()),
         draft_or_live: Some(DraftOrLive::Draft),
         ..Default::default()
     };
@@ -47,7 +43,6 @@ pub async fn search_jigs(q: String, is_published: Option<bool>) -> Result<Vec<As
         q,
         is_published,
         author_id: Some(UserOrMe::Me),
-        jig_focus: Some(JigFocus::Modules),
         ..Default::default()
     };
 
@@ -57,11 +52,8 @@ pub async fn search_jigs(q: String, is_published: Option<bool>) -> Result<Vec<As
         .map_err(|_| ())
 }
 
-pub async fn create_jig(jig_focus: JigFocus) {
-    let req = JigCreateRequest {
-        jig_focus,
-        ..Default::default()
-    };
+pub async fn create_jig() {
+    let req = JigCreateRequest::default();
 
     match api_with_auth::<CreateResponse<JigId>, MetadataNotFound, _>(
         endpoints::jig::Create::PATH,
@@ -71,40 +63,14 @@ pub async fn create_jig(jig_focus: JigFocus) {
     .await
     {
         Ok(resp) => {
-            if jig_focus.is_resources() {
-                add_cover(&resp.id).await;
-            }
             let url = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                 resp.id,
-                JigFocus::Modules,
                 JigEditRoute::Landing,
             )))
             .to_string();
             dominator::routing::go_to_url(&url);
         }
         Err(_) => todo!(""),
-    }
-}
-
-async fn add_cover(jig_id: &JigId) {
-    let req = ModuleCreateRequest {
-        body: ModuleBody::new(ModuleKind::ResourceCover),
-        parent_id: (*jig_id).into(),
-    };
-
-    // let path = endpoints::module::Create::PATH.replace("{id}", &jig_id.0.to_string());
-
-    match api_with_auth::<CreateResponse<ModuleId>, EmptyError, _>(
-        endpoints::module::Create::PATH,
-        endpoints::module::Create::METHOD,
-        Some(req),
-    )
-    .await
-    {
-        Ok(_) => {}
-        Err(_) => {
-            todo!()
-        }
     }
 }
 

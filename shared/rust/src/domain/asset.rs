@@ -224,6 +224,14 @@ impl Asset {
         }
     }
 
+    /// get resource value as ref
+    pub fn unwrap_resource(&self) -> &ResourceResponse {
+        match self {
+            Self::Resource(resource) => resource,
+            _ => panic!(),
+        }
+    }
+
     /// get course value as ref
     pub fn unwrap_course(&self) -> &CourseResponse {
         match self {

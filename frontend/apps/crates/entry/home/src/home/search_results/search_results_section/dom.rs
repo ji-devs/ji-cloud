@@ -9,7 +9,6 @@ use futures_signals::{
 };
 use shared::domain::{
     asset::{Asset, AssetId, AssetType, DraftOrLive},
-    jig::JigFocus,
     meta::ResourceTypeId,
 };
 use std::rc::Rc;
@@ -166,7 +165,6 @@ impl SearchResultsSection {
                                             AssetId::JigId(jig_id) => {
                                                 Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                                                     jig_id,
-                                                    JigFocus::Modules,
                                                     JigEditRoute::Landing
                                                 )))
                                             },
@@ -176,6 +174,7 @@ impl SearchResultsSection {
                                                     CourseEditRoute::Landing
                                                 )))
                                             },
+                                            AssetId::ResourceId(_) => unreachable!(),
                                         }.to_string()
                                     })
                                 }))

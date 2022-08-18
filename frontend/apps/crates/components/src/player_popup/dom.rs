@@ -20,6 +20,7 @@ impl PlayerPopup {
             .property("size", match state.asset_id {
                 AssetId::JigId(_) => "aspect-ratio",
                 AssetId::CourseId(_) => "full-screen",
+                AssetId::ResourceId(_) => unreachable!(),
             })
             .apply_if(slot.is_some(), |dom| {
                 dom.property("slot", slot.unwrap_ji())

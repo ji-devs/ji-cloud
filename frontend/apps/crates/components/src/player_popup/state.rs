@@ -36,6 +36,7 @@ impl PlayerPopup {
         let player_options = match asset_id {
             AssetId::JigId(_) => JigPlayerOptions::default().into(),
             AssetId::CourseId(_) => CoursePlayerOptions::default().into(),
+            AssetId::ResourceId(_) => unreachable!(),
         };
         Rc::new(Self {
             asset_id,

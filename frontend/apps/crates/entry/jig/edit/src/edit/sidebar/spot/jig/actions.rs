@@ -4,7 +4,7 @@ use crate::edit::sidebar::state::{SidebarSpot, SidebarSpotItem};
 use dominator::clone;
 use shared::{
     api::{endpoints, ApiEndpoint},
-    domain::{jig::*, module::*, CreateResponse},
+    domain::{module::*, CreateResponse},
     error::EmptyError,
 };
 use std::rc::Rc;
@@ -19,16 +19,11 @@ pub fn edit(state: Rc<SpotState>) {
             .sidebar
             .asset_edit_state
             .route
-            .set_neq(AssetEditRoute::Jig(
-                jig_id,
-                JigFocus::Modules,
-                JigEditRoute::Module(module_id),
-            ));
+            .set_neq(AssetEditRoute::Jig(jig_id, JigEditRoute::Module(module_id)));
         state.sidebar.collapsed.set(true);
 
         Route::push_state(Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
             jig_id,
-            JigFocus::Modules,
             JigEditRoute::Module(module_id),
         ))));
     }
@@ -113,7 +108,6 @@ pub fn assign_kind(state: Rc<SpotState>, kind: ModuleKind) {
                         state.sidebar.asset_edit_state.set_route_jig(JigEditRoute::Module(id));
                         Route::push_state(Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                             jig_id,
-                            JigFocus::Modules,
                             JigEditRoute::Module(id)
                         ))));
                     },

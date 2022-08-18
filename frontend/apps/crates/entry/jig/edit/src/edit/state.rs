@@ -1,24 +1,23 @@
 use std::rc::Rc;
 
 use futures_signals::signal::Mutable;
-use shared::domain::{asset::AssetId, jig::JigFocus};
+use shared::domain::asset::AssetId;
 use utils::{
     asset::AssetPlayerOptions,
-    routes::{AssetEditRoute, CourseEditRoute, JigEditRoute},
+    routes::{AssetEditRoute, CourseEditRoute, JigEditRoute, ResourceEditRoute},
     storage,
     unwrap::UnwrapJiExt,
 };
 
 pub struct AssetEditState {
     pub route: Mutable<AssetEditRoute>,
-    pub jig_focus: JigFocus,
     pub asset_id: AssetId,
     pub show_onboarding: Mutable<bool>,
     pub(super) play_jig: Mutable<Option<AssetPlayerOptions>>,
 }
 
 impl AssetEditState {
-    pub fn new(asset_id: AssetId, jig_focus: JigFocus, route: AssetEditRoute) -> Rc<Self> {
+    pub fn new(asset_id: AssetId, route: AssetEditRoute) -> Rc<Self> {
         let show_onboarding = storage::get_local_storage()
             .unwrap_ji()
             .get_item("onboarding")
@@ -27,7 +26,6 @@ impl AssetEditState {
 
         Rc::new(Self {
             asset_id,
-            jig_focus,
             route: Mutable::new(route),
             play_jig: Mutable::new(None),
             show_onboarding: Mutable::new(show_onboarding),
@@ -38,7 +36,15 @@ impl AssetEditState {
         assert!(&self.asset_id.is_jig_id());
         self.route.set(AssetEditRoute::Jig(
             *self.asset_id.unwrap_jig(),
-            self.jig_focus,
+            // self.jig_focus,
+            route,
+        ));
+    }
+
+    pub fn set_route_resource(&self, route: ResourceEditRoute) {
+        assert!(&self.asset_id.is_resource_id());
+        self.route.set(AssetEditRoute::Resource(
+            *self.asset_id.unwrap_resource(),
             route,
         ));
     }

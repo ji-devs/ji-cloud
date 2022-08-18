@@ -51,6 +51,9 @@ impl ShareAsset {
                     ..Default::default()
                 },
             ))),
+            AssetId::ResourceId(_) => {
+                todo!()
+            }
             AssetId::CourseId(course_id) => Route::Asset(AssetRoute::Play(AssetPlayRoute::Course(
                 course_id,
                 CoursePlayerOptions::default(),

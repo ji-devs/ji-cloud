@@ -7,14 +7,13 @@ use shared::{
     domain::{
         asset::{AssetId, PrivacyLevel},
         category::{Category, CategoryId, CategoryResponse, CategoryTreeScope, GetCategoryRequest},
-        jig::JigFocus,
         meta::MetadataResponse,
     },
     error::EmptyError,
 };
 use utils::{
     prelude::{api_with_auth, UnwrapJiExt},
-    routes::{CourseEditRoute, JigEditRoute},
+    routes::{CourseEditRoute, JigEditRoute, ResourceEditRoute},
 };
 
 use crate::edit::publish::editable_assets::EditableAsset;
@@ -24,12 +23,16 @@ use super::state::Publish;
 
 mod course_actions;
 mod jig_actions;
+mod resource_actions;
 
 impl Publish {
     pub async fn load_new(asset_edit_state: Rc<AssetEditState>) -> Self {
         let asset: Pin<Box<dyn Future<Output = Result<EditableAsset, ()>>>> =
             match asset_edit_state.asset_id {
                 AssetId::JigId(jig_id) => Box::pin(jig_actions::load_jig(jig_id)),
+                AssetId::ResourceId(resource_id) => {
+                    Box::pin(resource_actions::load_resource(resource_id))
+                }
                 AssetId::CourseId(course_id) => Box::pin(course_actions::load_course(course_id)),
             };
         let categories = load_categories();
@@ -48,15 +51,6 @@ impl Publish {
         if asset.published_at().is_none() {
             set_default_values(&asset, &meta);
         }
-
-        // ensure the correct jig focus is set
-        #[allow(irrefutable_let_patterns)] // TODO: remove once enum has another option
-        if let EditableAsset::Jig(jig) = &asset {
-            assert_eq!(
-                asset_edit_state.jig_focus, jig.jig_focus,
-                "Jig focus doesn't match the route"
-            );
-        };
 
         Self::new(
             asset,
@@ -82,6 +76,10 @@ impl Publish {
 
                 self.asset_edit_state.set_route_jig(route);
             }
+            EditableAsset::Resource(_) => {
+                self.asset_edit_state
+                    .set_route_resource(ResourceEditRoute::Cover(cover_module_id.unwrap_ji()));
+            }
             EditableAsset::Course(_) => {
                 self.asset_edit_state
                     .set_route_course(CourseEditRoute::Cover(cover_module_id.unwrap_ji()));
@@ -101,10 +99,8 @@ impl Publish {
     // used to disable button
     pub fn is_ready_to_publish(self: &Rc<Self>) -> bool {
         match &self.asset {
-            EditableAsset::Jig(jig) => match jig.jig_focus {
-                JigFocus::Modules => jig.modules.iter().all(|m| m.is_complete),
-                JigFocus::Resources => jig.cover.is_some(),
-            },
+            EditableAsset::Jig(jig) => jig.modules.iter().all(|m| m.is_complete),
+            EditableAsset::Resource(resource) => resource.cover.is_some(),
             EditableAsset::Course(course) => course.cover.is_some(),
         }
     }
@@ -125,6 +121,12 @@ impl Publish {
                         .unwrap_ji();
                     state.asset_edit_state.set_route_jig(JigEditRoute::PostPublish);
                 },
+                EditableAsset::Resource(resource) => {
+                    resource_actions::save_and_publish_resource(resource)
+                        .await
+                        .unwrap_ji();
+                    state.asset_edit_state.set_route_resource(ResourceEditRoute::PostPublish);
+                }
                 EditableAsset::Course(course) => {
                     course_actions::save_and_publish_course(course)
                         .await

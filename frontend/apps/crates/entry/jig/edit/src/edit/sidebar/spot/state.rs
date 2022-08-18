@@ -62,7 +62,7 @@ impl State {
                         None => "empty",
                         Some(this_module) => {
                             match route {
-                                AssetEditRoute::Jig(_, _, JigEditRoute::Module(active_module_id)) if active_module_id == &this_module.id => "active",
+                                AssetEditRoute::Jig(_, JigEditRoute::Module(active_module_id)) if active_module_id == &this_module.id => "active",
                                 _ => "thumbnail",
                             }
                         }
@@ -104,7 +104,7 @@ impl State {
                     SidebarSpotItem::Jig(Some(module)) => {
                         matches!(
                             route,
-                            AssetEditRoute::Jig(_, _, JigEditRoute::Module(module_id)) if module_id == &module.id
+                            AssetEditRoute::Jig(_, JigEditRoute::Module(module_id)) if module_id == &module.id
                         )
                     }
                     _ => false

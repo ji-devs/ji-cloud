@@ -30,7 +30,6 @@ pub async fn save_and_publish_jig(jig: &EditableJig) -> Result<(), ()> {
 
     let url: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
         jig.id,
-        jig.jig_focus,
         JigEditRoute::PostPublish,
     )))
     .into();

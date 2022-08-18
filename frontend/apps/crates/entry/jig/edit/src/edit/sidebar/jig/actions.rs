@@ -8,7 +8,7 @@ use shared::{
     api::endpoints::{self, ApiEndpoint},
     domain::{
         asset::{Asset, AssetType, DraftOrLive},
-        jig::{JigFocus, JigId, JigResponse, JigUpdateDraftDataRequest},
+        jig::{JigId, JigResponse, JigUpdateDraftDataRequest},
         module::{
             LiteModule, ModuleCreateRequest, ModuleId, ModuleKind, ModuleResponse,
             ModuleUpdateRequest,
@@ -31,10 +31,6 @@ pub async fn load_jig(jig_id: JigId, jig_mutable: Mutable<Option<Asset>>) {
     .await
     {
         Ok(resp) => {
-            assert!(
-                resp.jig_focus.is_modules(),
-                "only module focused jigs should be here"
-            );
             jig_mutable.set(Some(resp.into()));
         }
         Err(_) => {
@@ -50,7 +46,6 @@ pub fn navigate_to_publish(state: Rc<State>, jig: &JigResponse) {
     let jig_id = jig.id;
     Route::push_state(Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
         jig_id,
-        jig.jig_focus,
         JigEditRoute::Publish,
     ))));
 }
@@ -146,7 +141,7 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
             let jig_id = state.asset.unwrap_jig().id;
             Route::push_state(Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                 jig_id,
-                JigFocus::Modules,
+                // JigFocus::Modules,
                 JigEditRoute::Landing,
             ))));
         }
@@ -178,6 +173,7 @@ pub fn use_module_as(state: Rc<State>, target_kind: ModuleKind, source_module_id
             let asset_type = match state.asset {
                 Asset::Jig(_) => AssetType::Jig,
                 Asset::Course(_) => AssetType::Course,
+                Asset::Resource(_) => unimplemented!(),
             };
             let path = endpoints::module::GetDraft::PATH
                 .replace("{asset_type}",asset_type.as_str())

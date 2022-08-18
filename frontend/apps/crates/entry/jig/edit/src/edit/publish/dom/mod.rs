@@ -7,7 +7,7 @@ use futures_signals::{
 use shared::domain::asset::{DraftOrLive, PrivacyLevel};
 use utils::{
     events,
-    routes::{AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, Route},
+    routes::{AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, ResourceEditRoute, Route},
 };
 use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement};
 
@@ -221,8 +221,14 @@ fn render_page(state: Rc<Publish>) -> Dom {
                             state.asset_edit_state.set_route_jig(JigEditRoute::Landing);
                             Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                                 jig.id,
-                                jig.jig_focus,
                                 JigEditRoute::Landing
+                            ))).to_string()
+                        },
+                        EditableAsset::Resource(resource) => {
+                            state.asset_edit_state.set_route_resource(ResourceEditRoute::Landing);
+                            Route::Asset(AssetRoute::Edit(AssetEditRoute::Resource(
+                                resource.id,
+                                ResourceEditRoute::Landing
                             ))).to_string()
                         },
                         EditableAsset::Course(course) => {

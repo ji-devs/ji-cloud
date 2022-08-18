@@ -39,19 +39,15 @@ impl AssetEditState {
                     async {}
                 })))
                 */
-                .apply_if(!state.jig_focus.is_resources(), |dom| {
+                .apply_if(!state.asset_id.is_resource_id(), |dom| {
                     dom.child(SidebarDom::render(state.asset_id, state.clone()))
                 })
                 .child_signal(state.route.signal_cloned().map(clone!(state => move |route| {
                     match route {
-                        AssetEditRoute::Jig(_jig_id, _jig_focus, jig_edit_route) => {
+                        AssetEditRoute::Jig(_jig_id, jig_edit_route) => {
                             match jig_edit_route {
                                 JigEditRoute::Landing => {
-                                    if state.jig_focus.is_resources() {
-                                        Some(Publish::render(Rc::clone(&state)))
-                                    } else {
-                                        Some(SelectionDom::render(state.clone()))
-                                    }
+                                    Some(SelectionDom::render(state.clone()))
                                 },
                                 JigEditRoute::Module(module_id) => {
                                     Some(ModuleIframe::new(state.asset_id, module_id).render())
@@ -65,6 +61,22 @@ impl AssetEditState {
                                         Rc::clone(&state)
                                     ).render())
                                 }
+                            }
+                        },
+                        AssetEditRoute::Resource(_resource_id, resource_edit_route) => {
+                            match resource_edit_route {
+                                ResourceEditRoute::Landing => {
+                                    Some(Publish::render(Rc::clone(&state)))
+                                },
+                                ResourceEditRoute::Cover(cover_id) => {
+                                    Some(ModuleIframe::new(state.asset_id, cover_id).render())
+                                },
+                                ResourceEditRoute::PostPublish => {
+                                    Some(PostPublish::new(
+                                        state.asset_id,
+                                        Rc::clone(&state)
+                                    ).render())
+                                },
                             }
                         },
                         AssetEditRoute::Course(course_id, course_edit_route) => {

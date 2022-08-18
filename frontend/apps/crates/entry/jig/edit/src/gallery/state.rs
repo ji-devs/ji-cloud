@@ -4,7 +4,6 @@ use dominator_helpers::futures::AsyncLoader;
 use futures_signals::{signal::Mutable, signal_vec::MutableVec};
 use shared::domain::{
     asset::{Asset, AssetId, AssetType},
-    jig::JigFocus,
     meta::AgeRange,
 };
 use strum_macros::{Display, EnumIter, EnumString};
@@ -55,14 +54,6 @@ impl Gallery {
             age_ranges: Mutable::new(vec![]),
             confirm_delete: Mutable::new(None),
         })
-    }
-
-    pub(super) fn get_jig_focus(&self) -> JigFocus {
-        match self.asset_type {
-            AssetType::Jig => JigFocus::Modules,
-            AssetType::Resource => JigFocus::Resources,
-            _ => panic!("Not a jig or resource"),
-        }
     }
 
     /// a displayable string for the asset type

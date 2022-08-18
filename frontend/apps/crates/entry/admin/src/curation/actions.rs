@@ -6,7 +6,7 @@ use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{
         asset::{DraftOrLive, OrderBy},
-        jig::{JigBrowseQuery, JigFocus, JigId, JigResponse, JigSearchQuery},
+        jig::{JigBrowseQuery, JigId, JigResponse, JigSearchQuery},
     },
     error::EmptyError,
 };
@@ -60,7 +60,6 @@ impl Curation {
     async fn load_jigs_browse(&self) -> JigListResponse {
         let req = JigBrowseQuery {
             page: Some(self.active_page.get()),
-            jig_focus: Some(JigFocus::Modules),
             draft_or_live: Some(DraftOrLive::Live),
             order_by: Some(self.order_by.get()),
             ..Default::default()
@@ -79,7 +78,6 @@ impl Curation {
         let req = JigSearchQuery {
             q: query,
             page: Some(self.active_page.get()),
-            jig_focus: Some(JigFocus::Modules),
             ..Default::default()
         };
 

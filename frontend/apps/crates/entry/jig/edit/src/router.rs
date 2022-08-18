@@ -1,5 +1,5 @@
 use components::overlay::container::OverlayContainer;
-use shared::domain::{asset::AssetType, jig::JigFocus};
+use shared::domain::asset::AssetType;
 use utils::routes::{AssetEditRoute, AssetRoute, Route};
 
 use crate::{edit::AssetEditState, gallery::state::Gallery};
@@ -24,12 +24,15 @@ impl Router {
                 AssetRoute::ResourceGallery => Some(Gallery::new(AssetType::Resource).render()),
                 AssetRoute::CourseGallery => Some(Gallery::new(AssetType::Course).render()),
                 AssetRoute::Edit(route) => match route {
-                    AssetEditRoute::Jig(jig_id, focus, _) => {
-                        Some(AssetEditState::new(jig_id.into(), focus, route).render())
+                    AssetEditRoute::Jig(jig_id, _) => {
+                        Some(AssetEditState::new(jig_id.into(), route).render())
                     }
-                    AssetEditRoute::Course(course_id, _) => Some(
-                        AssetEditState::new(course_id.into(), JigFocus::Modules, route).render(),
-                    ),
+                    AssetEditRoute::Resource(resource_id, _) => {
+                        Some(AssetEditState::new(resource_id.into(), route).render())
+                    }
+                    AssetEditRoute::Course(course_id, _) => {
+                        Some(AssetEditState::new(course_id.into(), route).render())
+                    }
                 },
                 _ => None,
             },

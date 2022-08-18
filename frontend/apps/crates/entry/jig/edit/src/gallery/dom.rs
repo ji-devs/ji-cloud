@@ -152,8 +152,13 @@ impl Gallery {
                                     Asset::Jig(jig) => {
                                         String::from(Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                                             jig.id,
-                                            jig.jig_focus,
                                             JigEditRoute::Landing
+                                        ))))
+                                    },
+                                    Asset::Resource(resource) => {
+                                        String::from(Route::Asset(AssetRoute::Edit(AssetEditRoute::Resource(
+                                            resource.id,
+                                            ResourceEditRoute::Landing
                                         ))))
                                     },
                                     Asset::Course(course) => {

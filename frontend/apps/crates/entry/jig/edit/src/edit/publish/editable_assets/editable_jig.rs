@@ -7,7 +7,6 @@ use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::MutableVec;
 use shared::domain::additional_resource::AdditionalResource;
 use shared::domain::asset::PrivacyLevel;
-use shared::domain::jig::JigFocus;
 use shared::domain::meta::AffiliationId;
 use shared::domain::{
     category::CategoryId,
@@ -23,7 +22,6 @@ pub struct EditableJig {
     pub cover: Option<LiteModule>,
     pub modules: Vec<LiteModule>,
     pub published_at: Option<DateTime<Utc>>,
-    pub jig_focus: JigFocus,
     pub display_name: Mutable<String>,
     pub description: Mutable<String>,
     pub age_ranges: Mutable<HashSet<AgeRangeId>>,
@@ -51,7 +49,6 @@ impl From<JigResponse> for EditableJig {
             )),
             privacy_level: Mutable::new(jig.jig_data.privacy_level),
             published_at: jig.published_at,
-            jig_focus: jig.jig_focus,
         }
     }
 }
@@ -73,7 +70,6 @@ impl EditableJig {
             )),
             privacy_level: Mutable::new(jig.jig_data.privacy_level),
             published_at: jig.published_at,
-            jig_focus: jig.jig_focus,
         }
     }
 

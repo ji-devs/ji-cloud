@@ -4,7 +4,6 @@ use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::{
     category::{Category, CategoryId},
-    jig::JigFocus,
     meta::{Affiliation, AgeRange, ResourceType},
 };
 use utils::languages::{Language, JIG_LANGUAGES};
@@ -60,10 +59,8 @@ impl Publish {
     /// a displayable string for the asset type
     pub fn asset_type_name(&self) -> &'static str {
         match &self.asset {
-            EditableAsset::Jig(jig) => match jig.jig_focus {
-                JigFocus::Modules => STR_JIG,
-                JigFocus::Resources => STR_RESOURCE,
-            },
+            EditableAsset::Jig(_) => STR_JIG,
+            EditableAsset::Resource(_) => STR_RESOURCE,
             EditableAsset::Course(_) => STR_COURSE,
         }
     }

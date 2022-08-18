@@ -14,6 +14,7 @@ pub fn navigate_to_publish(state: Rc<State>) {
         Asset::Course(course) => {
             course_actions::navigate_to_publish(Rc::clone(&state), course);
         }
+        Asset::Resource(_) => unimplemented!(),
     }
 }
 
@@ -53,7 +54,8 @@ pub fn update_display_name(state: Rc<State>, value: String) {
             Asset::Jig(jig) => {
                 jig_actions::update_display_name(jig.id, value).await;
             },
-            Asset::Course(_) => todo!()
+            Asset::Course(_) => todo!(),
+            Asset::Resource(_) => unimplemented!(),
         }
     }));
 }

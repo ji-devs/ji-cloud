@@ -5,10 +5,7 @@ use std::collections::HashMap;
 
 use shared::domain::{
     asset::{DraftOrLive, PrivacyLevel},
-    jig::{
-        AudioEffects, JigAdminData, JigData, JigFocus, JigId, JigPlayerSettings, JigRating,
-        JigResponse,
-    },
+    jig::{AudioEffects, JigAdminData, JigData, JigId, JigPlayerSettings, JigRating, JigResponse},
     module::{LiteModule, ModuleId, ModuleKind},
 };
 use utils::themes::ThemeId;
@@ -71,7 +68,6 @@ pub fn get_jig() -> JigResponse {
             translated_keywords: String::from(""),
             translated_description: HashMap::new(),
         },
-        jig_focus: JigFocus::Modules,
         likes: 0,
         plays: 0,
     }

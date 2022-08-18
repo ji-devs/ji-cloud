@@ -54,6 +54,7 @@ impl SidebarDom {
                             course_actions::load_course(course_id, asset.clone()).await;
                         }
                     },
+                    AssetId::ResourceId(_) => unimplemented!(),
                 };
             }))
             .child_signal(asset.signal_cloned().map(clone!(asset_edit_state => move |asset| {
@@ -82,7 +83,7 @@ impl SidebarDom {
                     state.asset_edit_state.route.signal_cloned().for_each(clone!(state => move |route| {
                         let should_collapse = !matches!(
                             route,
-                            AssetEditRoute::Course(_, _) | AssetEditRoute::Jig(_, _, JigEditRoute::Landing)
+                            AssetEditRoute::Course(_, _) | AssetEditRoute::Jig(_, JigEditRoute::Landing)
                         );
                         state.collapsed.set(should_collapse);
                         ready(())
@@ -91,7 +92,7 @@ impl SidebarDom {
                 .property_signal("collapsed", state.collapsed.signal())
                 .property_signal("isModulePage", state.asset_edit_state.route.signal_cloned().map(|route| {
                     // TODO: change?
-                    matches!(route, AssetEditRoute::Jig(_, _, JigEditRoute::Landing))
+                    matches!(route, AssetEditRoute::Jig(_, JigEditRoute::Landing))
                 }))
                 .property_signal("loading", state.loader.is_loading())
                 .child(html!("button-empty", {
@@ -113,7 +114,7 @@ impl SidebarDom {
                     .property_signal("selected", state.asset_edit_state.route.signal_cloned().map(|route| {
                         matches!(
                             route,
-                            AssetEditRoute::Jig(_, _, JigEditRoute::Publish) | AssetEditRoute::Course(_, CourseEditRoute::Publish)
+                            AssetEditRoute::Jig(_, JigEditRoute::Publish) | AssetEditRoute::Course(_, CourseEditRoute::Publish)
                         )
                     }))
                     .event(clone!(state => move |_ :events::Click| {

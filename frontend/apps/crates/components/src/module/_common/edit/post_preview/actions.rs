@@ -10,7 +10,6 @@ use js_sys::Reflect;
 use shared::{
     api::endpoints::{self, ApiEndpoint},
     domain::{
-        jig::JigFocus,
         module::{
             body::{
                 Body, BodyExt, ModeExt, StepExt,
@@ -42,7 +41,6 @@ impl PostPreview {
 
             let route: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                 *self.asset_id.unwrap_jig(), // TODO: handle all types of assets
-                JigFocus::Modules,           // only module focused jigs are should be here
                 JigEditRoute::Landing,
             )))
             .into();
@@ -58,7 +56,6 @@ impl PostPreview {
 
             let route: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                 *self.asset_id.unwrap_jig(), // TODO: handle all types of assets
-                JigFocus::Modules,           // only module focused jigs are should be here
                 JigEditRoute::Landing,
             )))
             .into();
@@ -105,7 +102,6 @@ impl PostPreview {
                         log::info!("Couldn't post message to parent... redirect!");
                         let route: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                             *(asset_id.unwrap_jig()), // TODO: handle all types of assets
-                            JigFocus::Modules,        // only module focused jigs are should be here
                             JigEditRoute::Module(module_id),
                         )))
                         .into();
