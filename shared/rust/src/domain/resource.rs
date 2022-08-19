@@ -130,13 +130,13 @@ pub struct ResourceCreateRequest {
     pub description: String,
 
     /// This Resource's age ranges.
-    #[serde(skip_serializing_if = "Vec::is_empty")]
     #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub age_ranges: Vec<AgeRangeId>,
 
     /// This Resource's affiliations.
-    #[serde(skip_serializing_if = "Vec::is_empty")]
     #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub affiliations: Vec<AffiliationId>,
 
     /// The language the Resource uses.
@@ -144,11 +144,12 @@ pub struct ResourceCreateRequest {
     /// If None, uses the user's language.
     ///
     /// NOTE: in the format `en`, `eng`, `en-US`, `eng-US` or `eng-USA`. To be replaced with a struct that enforces this.
-    pub language: Option<String>,
+    #[serde(default)]
+    pub language: String,
 
     /// The Resource's categories.
-    #[serde(skip_serializing_if = "Vec::is_empty")]
     #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub categories: Vec<CategoryId>,
 }
 
@@ -157,50 +158,50 @@ pub struct ResourceCreateRequest {
 #[serde(rename_all = "camelCase")]
 pub struct ResourceUpdateDraftDataRequest {
     /// The Resource's name.
-    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub display_name: Option<String>,
 
     /// The language the Resource uses.
     ///
     /// NOTE: in the format `en`, `eng`, `en-US`, `eng-US` or `eng-USA`. To be replaced with a struct that enforces this.
-    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub language: Option<String>,
 
     /// The Resource's categories.
-    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub categories: Option<Vec<CategoryId>>,
 
     /// The Resource's age ranges.
-    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub age_ranges: Option<Vec<AgeRangeId>>,
 
     /// The Resource's affiliations.
-    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub affiliations: Option<Vec<AffiliationId>>,
 
     /// The current author
-    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub author_id: Option<UserId>,
 
     /// Description of the Resource.
-    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 
     /// Privacy level for the Resource.
-    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub privacy_level: Option<PrivacyLevel>,
 
     /// Additional keywords for searches
-    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub other_keywords: Option<String>,
 }
 

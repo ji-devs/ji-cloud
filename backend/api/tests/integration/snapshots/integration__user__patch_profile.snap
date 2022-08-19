@@ -1,7 +1,6 @@
 ---
 source: tests/integration/user.rs
 expression: body
-
 ---
 {
   "id": "1f241e1b-b537-493f-a230-075cb16315be",
@@ -11,8 +10,12 @@ expression: body
   "given_name": "name",
   "family_name": "nameson",
   "profile_image": null,
-  "language": "en_US",
-  "locale": "en_US",
+  "language_app": "en",
+  "language_emails": "en",
+  "language_spoken": [
+    "en",
+    "he"
+  ],
   "opt_into_edu_resources": false,
   "over_18": true,
   "timezone": "US/Pacific",
@@ -20,7 +23,7 @@ expression: body
   "location_public": true,
   "organization_public": true,
   "persona_public": true,
-  "language_public": true,
+  "language_spoken_public": true,
   "bio_public": true,
   "scopes": [
     "Admin"

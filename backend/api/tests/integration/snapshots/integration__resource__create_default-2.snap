@@ -1,7 +1,6 @@
 ---
 source: tests/integration/resource.rs
 expression: body
-
 ---
 {
   "id": "[id]",
@@ -17,7 +16,7 @@ expression: body
     "cover": null,
     "ageRanges": [],
     "affiliations": [],
-    "language": "en_US",
+    "language": "",
     "categories": [],
     "description": "",
     "createdAt": "[created_at]",

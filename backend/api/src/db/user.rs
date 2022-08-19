@@ -51,11 +51,12 @@ select user_id as "id: UserId",
     family_name,
     profile_image_id       as "profile_image?: ImageId",
     (select case when exists(select * from user_auth_google where user_id = $1) = true then 1 else 0 end)     as "is_oauth!: bool",           
-    language,
-    locale,
+    language_spoken         as "language_spoken!: Vec<String>",
+    language_app,
+    language_emails,
     bio,    
     location_public, 
-    language_public, 
+    language_spoken_public, 
     persona_public, 
     bio_public,
     organization_public, 
@@ -100,14 +101,15 @@ where id = $1"#,
         given_name: row.given_name,
         family_name: row.family_name,
         profile_image: row.profile_image,
-        language: row.language,
+        language_app: row.language_app,
+        language_emails: row.language_emails,
+        language_spoken: row.language_spoken,
         bio: row.bio,
         location_public: row.location_public,
         organization_public: row.organization_public,
         persona_public: row.persona_public,
-        language_public: row.language_public,
+        language_spoken_public: row.language_spoken_public,
         bio_public: row.bio_public,
-        locale: row.locale,
         opt_into_edu_resources: row.opt_into_edu_resources,
         over_18: row.over_18,
         timezone: Tz::from_str(&row.timezone).map_err(|e| anyhow::anyhow!(e))?,
@@ -142,7 +144,9 @@ select user_id              as "id!: UserId",
     given_name              as "given_name!",
     family_name             as "family_name!",
     profile_image_id        as "profile_image?: ImageId",
-    language                as "language!",
+    language_app            as "language_app!",
+    language_emails         as "language_emails!",
+    language_spoken         as "language_spoken!: Vec<String>",
     user_profile.created_at as "created_at!",
     user_profile.updated_at,
     organization,
@@ -218,7 +222,9 @@ where
                 given_name: row.given_name,
                 family_name: row.family_name,
                 profile_image: row.profile_image,
-                language: row.language,
+                language_app: row.language_app,
+                language_emails: row.language_emails,
+                language_spoken: row.language_spoken,
                 created_at: row.created_at,
                 updated_at: row.updated_at,
                 organization: row.organization,
@@ -254,22 +260,23 @@ pub async fn upsert_profile(
         //language=SQL
         r#"
 insert into user_profile
-    (user_id, username, over_18, given_name, family_name, profile_image_id, language, locale, timezone, opt_into_edu_resources, organization, persona, location)
+    (user_id, username, over_18, given_name, family_name, profile_image_id, language_app, language_emails, language_spoken, timezone, opt_into_edu_resources, organization, persona, location)
 values
-    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
 on conflict (user_id) do update
 set
     over_18 = $3,
     given_name = $4,
     family_name = $5,
     profile_image_id = $6,
-    language = $7,
-    locale = $8,
-    timezone = $9,
-    opt_into_edu_resources = $10,
-    organization = $11,
-    persona = $12,
-    location = $13
+    language_app = $7,
+    language_emails = $8,
+    language_spoken = $9,
+    timezone = $10,
+    opt_into_edu_resources = $11,
+    organization = $12,
+    persona = $13,
+    location = $14
 "#,
         user_id.0,
         &req.username,
@@ -277,8 +284,9 @@ set
         &req.given_name,
         &req.family_name,
         profile_image_id.map(|it| it.0),
-        &req.language,
-        &req.locale,
+        &req.language_app,
+        &req.language_emails,
+        &req.language_spoken[..],
         req.timezone.name(),
         req.opt_into_edu_resources,
         req.organization.as_deref(),
@@ -399,6 +407,23 @@ where user_id = $1 and persona is distinct from $2
         .await?;
     }
 
+    if let Some(language_spoken) = req.language_spoken {
+        sqlx::query!(
+            //language=SQL
+            r#"
+update user_profile
+set language_spoken = $2,
+    updated_at = now()
+where user_id = $1 and language_spoken is distinct from $2
+        "#,
+            user_id.0,
+            &language_spoken
+        )
+        .execute(&mut txn)
+        .instrument(tracing::info_span!("update language spoken"))
+        .await?;
+    }
+
     sqlx::query!(
         //language=SQL
         r#"
@@ -406,46 +431,45 @@ update user_profile
 set username               = coalesce($2, username),
     given_name             = coalesce($3, given_name),
     family_name            = coalesce($4, family_name),
-    language               = coalesce($5, language),
-    locale                 = coalesce($6, locale),
+    language_app           = coalesce($5, language_app),   
+    language_emails        = coalesce($6, language_emails),
     timezone               = coalesce($7, timezone),
     opt_into_edu_resources = coalesce($8, opt_into_edu_resources),
     persona_public         = coalesce($9, persona_public),
     organization_public    = coalesce($10, organization_public),
-    location_public         = coalesce($11, location_public),
-    language_public         = coalesce($12, language_public),
+    location_public        = coalesce($11, location_public),
+    language_spoken_public = coalesce($12, language_spoken_public),
     bio                    = coalesce($13, bio),
-    bio_public         = coalesce($14, bio_public),
+    bio_public             = coalesce($14, bio_public),
     updated_at             = coalesce(now(), updated_at)
 where user_id = $1
   and (($2::text is not null and $2 is distinct from username) or
        ($3::text is not null and $3 is distinct from given_name) or
        ($4::text is not null and $4 is distinct from family_name) or
-       ($5::text is not null and $5 is distinct from language) or
-       ($6::text is not null and $6 is distinct from locale) or
+       ($5::text is not null and $5 is distinct from language_app) or
+       ($6::text is not null and $6 is distinct from language_emails) or
        ($7::text is not null and $7 is distinct from timezone) or
        ($8::bool is not null and $8 is distinct from opt_into_edu_resources) or
        ($9::bool is not null and $9 is distinct from persona_public) or
        ($10::bool is not null and $10 is distinct from organization_public) or
        ($11::bool is not null and $11 is distinct from location_public) or
-       ($12::bool is not null and $12 is distinct from language_public) or
+       ($12::bool is not null and $12 is distinct from language_spoken_public) or
        ($13::text is not null and $13 is distinct from bio) or
        ($14::bool is not null and $14 is distinct from bio_public) 
-
     )
     "#,
         user_id.0,
         req.username,
         req.given_name,
         req.family_name,
-        req.language,
-        req.locale,
+        req.language_app,
+        req.language_emails,
         req.timezone.map(|it| it.to_string()),
         req.opt_into_edu_resources,
         req.persona_public,
         req.organization_public,
         req.location_public,
-        req.language_public,
+        req.language_spoken_public,
         req.bio,
         req.bio_public,
     )

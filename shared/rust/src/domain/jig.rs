@@ -53,10 +53,9 @@ pub struct JigCreateRequest {
 
     /// The language the jig uses.
     ///
-    /// If None, uses the user's language.
-    ///
     /// NOTE: in the format `en`, `eng`, `en-US`, `eng-US` or `eng-USA`. To be replaced with a struct that enforces this.
-    pub language: Option<String>,
+    #[serde(default)]
+    pub language: String,
 
     /// The jig's categories.
     #[serde(skip_serializing_if = "Vec::is_empty")]

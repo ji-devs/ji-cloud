@@ -68,7 +68,7 @@ pub async fn search(
             query.username,
             query.name,
             user_id,
-            query.language,
+            query.language_spoken,
             query.organization,
             query.bio,
             query.persona,
