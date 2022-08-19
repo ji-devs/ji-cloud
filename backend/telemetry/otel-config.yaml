@@ -1,0 +1,22 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+
+processors:
+  batch:
+
+exporters:
+  otlp:
+    endpoint: "api.honeycomb.io:443"
+    headers:
+      "x-honeycomb-team": "${HONEYCOMB_WRITE_KEY}"
+      "x-honeycomb-dataset": "${HONEYCOMB_DATASET}"
+      "x-honeycomb-samplerate": ${HONEYCOMB_SAMPLE_RATE}"
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]

@@ -1,0 +1,13 @@
+version: '3.3'
+services:
+  opentelemetry:
+    image: otel/opentelemetry-collector-contrib:0.45.0
+    command: --config /etc/otel/config.yaml
+    environment:
+      - HONEYCOMB_WRITE_KEY=${HONEYCOMB_WRITE_KEY}
+      - HONEYCOMB_DATASET=${HONEYCOMB_DATASET}
+    ports:
+      - "4317:4317"
+    volumes:
+      - "./otel-config.yaml:/etc/otel/config.yaml"
+    restart: always

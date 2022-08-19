@@ -15,7 +15,7 @@ use std::thread;
 
 use anyhow::Context;
 use core::{
-    env::env_bool,
+    env::{env_bool, req_env},
     settings::{self, SettingsManager},
 };
 use sentry_tracing::EventFilter;
@@ -71,7 +71,18 @@ async fn main() -> anyhow::Result<()> {
 
         let tracing_subscriber = Registry::default().with(env_filter).with(sentry_layer);
 
-        if env_bool("ENABLE_TRACING_LOGS") {
+        if let Ok(collector_host) = req_env("OTLP_COLLECTOR_HOST") {
+            let otlp_exporter = opentelemetry_otlp::new_exporter().tonic();
+            let otlp_tracer = opentelemetry_otlp::new_pipeline()
+                .tracing()
+                .with_exporter(otlp_exporter)
+                .install_simple()?;
+            let telemetry = tracing_opentelemetry::layer().with_tracer(otlp_tracer);
+
+            let tracing_subscriber = tracing_subscriber.with(telemetry);
+            tracing::subscriber::set_global_default(tracing_subscriber)
+                .expect("Unable to set global subscriber");
+        } else if env_bool("ENABLE_TRACING_LOGS") {
             tracing::subscriber::set_global_default(tracing_subscriber.with(fmt_layer))
                 .expect("Unable to set global subscriber");
         } else {
