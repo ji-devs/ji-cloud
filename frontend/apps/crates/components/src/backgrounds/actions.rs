@@ -13,8 +13,8 @@ impl Backgrounds {
         self.call_change();
     }
 
-    pub fn set_layer(&self, layer: Layer, bg: Background) {
-        self.get_layer(layer).set(Some(bg));
+    pub fn set_layer(&self, layer: Layer, bg: Option<Background>) {
+        self.get_layer(layer).set(bg);
         self.call_change();
     }
 

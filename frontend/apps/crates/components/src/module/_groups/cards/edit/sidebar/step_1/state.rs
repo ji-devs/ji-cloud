@@ -20,10 +20,7 @@ use crate::{
 use dominator::clone;
 use futures_signals::signal::Mutable;
 use once_cell::sync::OnceCell;
-use shared::{
-    config as shared_config,
-    domain::module::body::{Image, _groups::cards::Mode},
-};
+use shared::{config as shared_config, domain::module::body::_groups::cards::Mode};
 use std::rc::Rc;
 
 pub struct Step1<RawData: RawDataExt, E: ExtraExt> {
@@ -114,7 +111,7 @@ impl Tab {
                     ..ImageSearchOptions::default()
                 };
 
-                let callbacks = ImageSearchCallbacks::new(None::<fn(Image)>);
+                let callbacks = ImageSearchCallbacks::new(None::<fn(_)>);
                 let state = ImageSearchState::new(opts, callbacks);
 
                 Self::Image(Rc::new(state))

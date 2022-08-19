@@ -40,7 +40,7 @@ pub async fn web_to_image(url: Url) -> Result<Image, ()> {
         .map_err(|_| ())?;
 
     if !matches!(res.kind, MediaKind::Image) {
-        unreachable!("Only images here");
+        unreachable!("Only images here but found: {:?}", res.kind);
     }
 
     wait_for_upload_ready(&res.id, MediaLibrary::Web, None).await;
@@ -54,9 +54,15 @@ pub async fn web_to_image(url: Url) -> Result<Image, ()> {
 impl State {
     pub fn set_selected(&self, image: Image) {
         if let Some(on_select) = self.callbacks.on_select.as_ref() {
-            on_select(image.clone());
+            on_select(Some(image.clone()));
         }
         add_recent(self, &image);
+    }
+
+    pub fn clear_selected(&self) {
+        if let Some(on_select) = self.callbacks.on_select.as_ref() {
+            on_select(None);
+        }
     }
 }
 

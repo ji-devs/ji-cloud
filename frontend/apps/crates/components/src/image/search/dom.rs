@@ -68,6 +68,15 @@ pub fn render_loaded(state: Rc<State>, action: Option<Dom>) -> Dom {
             }))
         })
         .children(render_controls(state.clone()))
+        .apply_if(state.options.kind != ImageSearchKind::Sticker, clone!(state => move |dom| {
+            dom.child(html!("img-ui", {
+                .property("slot", "images")
+                .property("path", "module/_common/edit/widgets/sidebar/image-select/clear-image.svg")
+                .event(clone!(state => move |_: events::Click| {
+                    state.clear_selected();
+                }))
+            }))
+        }))
         .children_signal_vec(state.recent_list.signal_vec_cloned().map(clone!(state => move |image| {
             render_image(Rc::clone(&state), image, "recent")
         })))

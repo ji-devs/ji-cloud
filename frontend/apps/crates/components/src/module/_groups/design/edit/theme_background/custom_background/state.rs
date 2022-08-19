@@ -44,7 +44,7 @@ where
             None,
             Some(String::from(STR_FILL_COLOR)),
             Some(clone!(state => move |color| {
-                state.base.get_backgrounds().set_layer(Layer::One, Background::Color(color));
+                state.base.get_backgrounds().set_layer(Layer::One, Some(Background::Color(color)));
             })),
         ));
 
@@ -81,9 +81,11 @@ impl Tab {
                     ..ImageSearchOptions::default()
                 };
 
-                let callbacks = ImageSearchCallbacks::new(Some(clone!(base => move |image| {
-                    base.get_backgrounds().set_layer(Layer::One, Background::Image(image));
-                })));
+                let callbacks = ImageSearchCallbacks::new(Some(
+                    clone!(base => move |image: Option<_>| {
+                        base.get_backgrounds().set_layer(Layer::One, image.map(|image| Background::Image(image)));
+                    }),
+                ));
                 let state = ImageSearchState::new(opts, callbacks);
 
                 Self::BackgroundImage(Rc::new(state))
@@ -94,9 +96,11 @@ impl Tab {
                     ..ImageSearchOptions::default()
                 };
 
-                let callbacks = ImageSearchCallbacks::new(Some(clone!(base => move |image| {
-                    base.get_backgrounds().set_layer(Layer::Two, Background::Image(image));
-                })));
+                let callbacks = ImageSearchCallbacks::new(Some(
+                    clone!(base => move |image: Option<_>| {
+                            base.get_backgrounds().set_layer(Layer::Two, image.map(|image| Background::Image(image)));
+                    }),
+                ));
                 let state = ImageSearchState::new(opts, callbacks);
 
                 Self::Overlay(Rc::new(state))

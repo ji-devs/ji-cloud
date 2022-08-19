@@ -13,6 +13,7 @@ use dominator::clone;
 use futures_signals::signal::{Mutable, SignalExt};
 use shared::domain::module::body::Audio;
 use std::rc::Rc;
+use utils::unwrap::UnwrapJiExt;
 
 pub struct Step2 {
     pub tab: Mutable<Tab>,
@@ -57,10 +58,12 @@ impl Tab {
                     ..ImageSearchOptions::default()
                 };
 
-                let callbacks = ImageSearchCallbacks::new(Some(clone!(base => move |image| {
-                    log::info!("{:?}", image);
-                    Stickers::add_sprite(base.stickers.clone(), image);
-                })));
+                let callbacks = ImageSearchCallbacks::new(Some(
+                    clone!(base => move |image: Option<_>| {
+                        let image = image.expect_ji("ImageSearchKind::Sticker should never call on_select with `None`");
+                        Stickers::add_sprite(base.stickers.clone(), image);
+                    }),
+                ));
                 let state = ImageSearchState::new(opts, callbacks);
 
                 Self::Image(Rc::new(state))

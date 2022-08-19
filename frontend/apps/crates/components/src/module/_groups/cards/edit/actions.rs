@@ -120,8 +120,8 @@ impl<RawData: RawDataExt, E: ExtraExt> CardsBase<RawData, E> {
         });
     }
 
-    pub fn set_bg(&self, background: Background) {
-        let bg = Some(background);
+    pub fn set_bg(&self, background: Option<Background>) {
+        let bg = background;
         self.background.set(bg.clone());
 
         self.history.push_modify(move |raw| {
