@@ -2,17 +2,18 @@ use std::rc::Rc;
 
 use components::image::upload::upload_image;
 use dominator::clone;
+use futures::join;
 use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{
-        circle::{Circle, CircleCreateRequest},
+        circle::{Circle, CircleCreateRequest, CircleId},
         image::{user::UserImageCreateRequest, ImageId, ImageSize},
     },
     error::EmptyError,
     media::MediaLibrary,
 };
 use utils::{
-    prelude::{api_with_auth, ApiEndpointExt},
+    prelude::{api_with_auth, api_with_auth_empty, ApiEndpointExt},
     unwrap::UnwrapJiExt,
 };
 use web_sys::File;
@@ -48,16 +49,15 @@ impl CreateCircle {
             image: Some(image_id),
         };
 
-        let id = endpoints::circle::Create::api_with_auth(Some(req))
+        let circle_id = endpoints::circle::Create::api_with_auth(Some(req))
             .await?
             .id;
 
-        let path = endpoints::circle::Get::PATH.replace("{id}", &id.0.to_string());
-        let circle =
-            api_with_auth::<Circle, EmptyError, ()>(&path, endpoints::circle::Get::METHOD, None)
-                .await?;
+        let (circle, join_res) = join!(get_circle(&circle_id), join_circle(&circle_id),);
 
-        Ok(circle)
+        join_res?;
+
+        Ok(circle?)
     }
 }
 
@@ -76,4 +76,19 @@ async fn upload_circle_image(file: File) -> anyhow::Result<ImageId> {
         .map_err(|_err| anyhow::anyhow!("Error uploading image"))?;
 
     Ok(image_id)
+}
+
+async fn get_circle(circle_id: &CircleId) -> anyhow::Result<Circle> {
+    let path = endpoints::circle::Get::PATH.replace("{id}", &circle_id.0.to_string());
+    let circle =
+        api_with_auth::<Circle, EmptyError, ()>(&path, endpoints::circle::Get::METHOD, None)
+            .await?;
+    Ok(circle)
+}
+
+async fn join_circle(circle_id: &CircleId) -> anyhow::Result<()> {
+    let path = endpoints::circle::JoinCircle::PATH.replace("{id}", &circle_id.0.to_string());
+    api_with_auth_empty::<EmptyError, ()>(&path, endpoints::circle::JoinCircle::METHOD, None)
+        .await?;
+    Ok(())
 }
