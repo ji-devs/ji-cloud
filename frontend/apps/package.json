@@ -11,7 +11,7 @@
     },
     "dependencies": {
         "@rollup/plugin-node-resolve": "^13.1.1",
-        "@wasm-tool/rollup-plugin-rust": "2.2",
+        "@wasm-tool/rollup-plugin-rust": "1.0.7",
         "cross-env": "^7.0.3",
         "firebase": "^9.6.1",
         "rollup": "^2.61.1",
