@@ -2,7 +2,7 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 import "../../core/page-footer/page-footer";
 
 const STR_COMMUNITY = "Community";
-const STR_PINCUS_PARTNERSHIP = "in partnership with the Pincus Fund.";
+const STR_PINCUS_PARTNERSHIP = "In partnership with the Pincus Fund";
 
 @customElement("community-main")
 export class _ extends LitElement {
