@@ -16,7 +16,6 @@ export class _ extends LitElement {
                     justify-content: start;
                     column-gap: 8px;
                     border-radius: 12px;
-                    border: solid 0px var(--dark-blue-3);
                     color: var(--dark-blue-3);
                     background-color: var(--light-blue-1);
                     padding: 16px;
@@ -24,6 +23,10 @@ export class _ extends LitElement {
                     width: 100%;
                     font-size: 16px;
                     font-weight: 500;
+                    transition: color .3s;
+                }
+                button:hover {
+                    color: var(--main-blue);
                 }
             `,
         ];

@@ -5,7 +5,7 @@ const STR_PLAYED = "Plays";
 const STR_LIKED = "Likes";
 const STR_JI_TEAM = "Ji Team";
 const STR_DESCRIPTION = "Description";
-const STR_ADDITIONAL_RESOURCES = "Additional resources";
+const STR_ADDITIONAL_RESOURCES = "Teacher resources";
 const STR_SEE_ALL = "See more JIGs by this author";
 
 type Kind = "jig" | "resource" | "course";

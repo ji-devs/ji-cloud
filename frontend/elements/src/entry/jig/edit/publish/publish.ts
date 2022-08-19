@@ -128,6 +128,10 @@ export class _ extends LitElement {
                     display: grid;
                     row-gap: 16px;
                 }
+                .additional-resources h4 {
+                    margin: 0;
+                    font-weight: 300;
+                }
                 .publish {
                     display: grid;
                     grid-auto-flow: column;
@@ -186,6 +190,7 @@ export class _ extends LitElement {
                             ${
                                 !this.resourceOnTop ? html`
                                     <div class="column-4 additional-resources">
+                                        <h4>Add resources for teachers to use with this ${this.assetDisplayName}.</h4>
                                         <slot name="resources"></slot>
                                     </div>
                                 ` : nothing

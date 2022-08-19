@@ -154,7 +154,7 @@ export class _ extends LitElement {
                 </div>
                 <p class="description">${this.description}</p>
                 <div class="additional-resources">
-                    <h3>Additional resources</h3>
+                    <h3>Teacher resources</h3>
                     <slot name="additional-resources"></slot>
                 </div>
             </div>

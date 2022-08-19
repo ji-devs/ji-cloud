@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/images/ui";
 
-const STR_ADD_RESOURCES = "Add resources";
+const STR_ADD_RESOURCE = "Add resource";
 
 @customElement("jig-edit-publish-resource-add")
 export class _ extends LitElement {
@@ -41,7 +41,7 @@ export class _ extends LitElement {
         return html`
             <popup-body>
                 <slot slot="close" name="close"></slot>
-                <h2 slot="heading">${STR_ADD_RESOURCES}</h2>
+                <h2 slot="heading">${STR_ADD_RESOURCE}</h2>
                 <div class="body" slot="body">
                     <slot name="options"></slot>
                 </div>

@@ -5,7 +5,7 @@ import { nothing } from "lit-html";
 const STR_JI_TEAM = "Ji Team";
 const STR_LIKED = "Likes";
 const STR_PLAYED = "Plays";
-const STR_ADDITIONAL_RESOURCES = "Additional resources";
+const STR_ADDITIONAL_RESOURCES = "Teacher resources";
 const STR_COURSES = "Courses";
 const STR_COURSES_SUBHEADING = "This JIG is a apart of the following courses:";
 
