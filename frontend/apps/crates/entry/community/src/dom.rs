@@ -142,7 +142,8 @@ impl Community {
                         .property_signal("active", Community::route_signal().map(move |route| {
                             matches!(route, Route::Community(CommunityRoute::Members(route)) if is_current_users_page(&user_id, &route))
                         }))
-                        .apply(move |dom| dominator::on_click_go_to_url!(dom, {
+                        // only use local router if logged in, otherwise full redirect
+                        .apply_if(user_id.is_some(), move |dom| dominator::on_click_go_to_url!(dom, {
                             route
                         }))
                     })
