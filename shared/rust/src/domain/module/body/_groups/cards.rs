@@ -19,6 +19,10 @@ pub struct BaseContent {
     /// The instructions for the module.
     pub instructions: Instructions,
 
+    /// The feedback for the module.
+    #[serde(default)]
+    pub feedback: Instructions,
+
     /// The mode the module uses.
     pub mode: Mode,
 

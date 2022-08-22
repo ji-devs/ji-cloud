@@ -62,6 +62,7 @@ where
 pub enum Tab<SettingsState> {
     Settings(Rc<SettingsState>),
     Instructions(Rc<InstructionsEditorState>),
+    Feedback(Rc<InstructionsEditorState>),
 }
 
 //the generic makes the auto derive break
@@ -70,6 +71,7 @@ impl<SettingsState> Clone for Tab<SettingsState> {
         match self {
             Self::Settings(state) => Self::Settings(state.clone()),
             Self::Instructions(state) => Self::Instructions(state.clone()),
+            Self::Feedback(state) => Self::Feedback(state.clone()),
         }
     }
 }
@@ -110,6 +112,29 @@ impl<SettingsState> Tab<SettingsState> {
 
                 Self::Instructions(Rc::new(state))
             }
+            MenuTabKind::Feedback => {
+                let callbacks = InstructionsEditorCallbacks::new(
+                    clone!(base => move |feedback, also_history| {
+                        if also_history {
+                            base.history.push_modify(|raw| {
+                                if let Some(content) = raw.get_content_mut() {
+                                    content.feedback = feedback;
+                                }
+                            });
+                        } else {
+                            base.history.save_current_modify(|raw| {
+                                if let Some(content) = raw.get_content_mut() {
+                                    content.feedback = feedback;
+                                }
+                            });
+                        }
+                    }),
+                );
+
+                let state = InstructionsEditorState::new(base.feedback.clone(), callbacks);
+
+                Self::Feedback(Rc::new(state))
+            }
 
             _ => unimplemented!("unsupported tab kind!"),
         }
@@ -119,12 +144,14 @@ impl<SettingsState> Tab<SettingsState> {
         match self {
             Self::Settings(_) => MenuTabKind::PlaySettings,
             Self::Instructions(_) => MenuTabKind::Instructions,
+            Self::Feedback(_) => MenuTabKind::Feedback,
         }
     }
     pub fn as_index(&self) -> usize {
         match self {
             Self::Settings(_) => 0,
             Self::Instructions(_) => 1,
+            Self::Feedback(_) => 2,
         }
     }
 }

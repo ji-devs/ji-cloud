@@ -71,6 +71,7 @@ pub struct CardsBase<RawData: RawDataExt, E: ExtraExt> {
     pub step: ReadOnlyMutable<Step>,
     pub theme_id: Mutable<ThemeId>,
     pub instructions: Mutable<Instructions>,
+    pub feedback: Mutable<Instructions>,
     pub mode: Mode,
     pub module_kind: ModuleKind,
     pub tooltips: Tooltips,
@@ -138,6 +139,7 @@ impl<RawData: RawDataExt, E: ExtraExt> CardsBase<RawData, E> {
 
         let mode = content.mode;
         let instructions = Mutable::new(content.instructions);
+        let feedback = Mutable::new(content.feedback);
 
         let background = Mutable::new(content.background);
 
@@ -148,6 +150,7 @@ impl<RawData: RawDataExt, E: ExtraExt> CardsBase<RawData, E> {
             step: step.read_only(),
             theme_id,
             instructions,
+            feedback,
             mode,
             tooltips: Tooltips::new(),
             pairs,
