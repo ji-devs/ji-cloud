@@ -24,6 +24,7 @@ pub fn render(state: Rc<Step4>) -> Dom {
         .children(&mut [
             render_tab(state.clone(), MenuTabKind::PlaySettings),
             render_tab(state.clone(), MenuTabKind::Instructions),
+            render_tab(state.clone(), MenuTabKind::Feedback),
             html!("module-sidebar-body", {
                 .property("slot", "body")
                 .child_signal(state.tab.signal_cloned().map(|tab| {
@@ -34,6 +35,9 @@ pub fn render(state: Rc<Step4>) -> Dom {
                         Tab::Instructions(state) => {
                             Some(render_instructions(state))
                         },
+                        Tab::Feedback(state) => {
+                            Some(render_instructions(state))
+                        }
                     }
                 }))
             })

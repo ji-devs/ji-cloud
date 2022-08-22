@@ -40,6 +40,7 @@ pub struct Base {
     pub step: ReadOnlyMutable<Step>,
     pub theme_id: Mutable<ThemeId>,
     pub instructions: Mutable<Instructions>,
+    pub feedback: Mutable<Instructions>,
     pub jig_id: JigId,
     pub module_id: ModuleId,
     // FindAnswer-specific
@@ -170,6 +171,7 @@ impl Base {
         let _self_ref: Rc<RefCell<Option<Rc<Self>>>> = Rc::new(RefCell::new(None));
 
         let instructions = Mutable::new(content.base.instructions);
+        let feedback = Mutable::new(content.base.feedback);
 
         let stickers_ref: Rc<RefCell<Option<Rc<Stickers<Sticker>>>>> = Rc::new(RefCell::new(None));
 
@@ -294,6 +296,7 @@ impl Base {
             history,
             step: step.read_only(),
             instructions,
+            feedback,
             text_editor,
             phase: Mutable::new(Phase::Layout),
             backgrounds,
