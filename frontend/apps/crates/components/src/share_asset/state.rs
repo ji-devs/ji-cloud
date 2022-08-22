@@ -56,7 +56,10 @@ impl ShareAsset {
             }
             AssetId::CourseId(course_id) => Route::Asset(AssetRoute::Play(AssetPlayRoute::Course(
                 course_id,
-                CoursePlayerOptions::default(),
+                CoursePlayerOptions {
+                    is_student,
+                    ..Default::default()
+                },
             ))),
         }
         .to_string();

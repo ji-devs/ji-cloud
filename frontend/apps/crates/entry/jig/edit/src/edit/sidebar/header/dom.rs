@@ -86,7 +86,8 @@ impl HeaderDom {
                             },
                             SidebarSetting::Course(_course) => {
                                 let settings = CoursePlayerOptions {
-                                    draft_or_live: DraftOrLive::Draft
+                                    draft_or_live: DraftOrLive::Draft,
+                                    is_student: false
                                 };
                                 let settings = AssetPlayerOptions::Course(settings);
                                 sidebar_state.asset_edit_state.play_jig.set(Some(settings));

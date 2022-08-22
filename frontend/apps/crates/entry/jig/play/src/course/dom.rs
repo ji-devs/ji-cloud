@@ -7,7 +7,11 @@ use dominator::{clone, html, Dom};
 use futures_signals::signal::{Signal, SignalExt};
 use shared::domain::{course::CourseResponse, jig::JigResponse, meta::ResourceTypeId};
 use std::rc::Rc;
-use utils::{asset::ResourceContentExt, events, languages::Language};
+use utils::{
+    asset::{AssetPlayerOptions, JigPlayerOptions, ResourceContentExt},
+    events,
+    languages::Language,
+};
 
 use super::state::CoursePlayer;
 
@@ -28,8 +32,13 @@ impl CoursePlayer {
                     let close = clone!(state => move || {
                         state.done_playing_jig();
                     });
-                    PlayerPopup::new_default_player_options(
+                    let options = AssetPlayerOptions::Jig(JigPlayerOptions {
+                        is_student: state.player_options.is_student,
+                        ..Default::default()
+                    });
+                    PlayerPopup::new(
                         jig_id.into(),
+                        options,
                         PreviewPopupCallbacks::new(close)
                     ).render(None)
                 })
