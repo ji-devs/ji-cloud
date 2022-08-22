@@ -9,6 +9,7 @@ use shared::{
 };
 use utils::{
     prelude::{api_no_auth, api_with_auth_empty, ApiEndpointExt},
+    routes::{CommunityCirclesRoute, CommunityRoute, Route},
     unwrap::UnwrapJiExt,
 };
 
@@ -85,6 +86,22 @@ impl CircleDetails {
                     let index = user.circles.iter().position(|circle| *circle == state.circle_id).unwrap();
                     user.circles.remove(index);
                     state.community_state.user.set(Some(user));
+                }
+                Err(_) => todo!(),
+            }
+        }));
+    }
+
+    pub fn delete_circle(self: &Rc<Self>) {
+        let state = self;
+
+        state.loader.load(clone!(state => async move {
+            let path = endpoints::circle::Delete::PATH.replace("{id}", &state.circle_id.0.to_string());
+            match api_with_auth_empty::<EmptyError, ()>(&path, endpoints::circle::Delete::METHOD, None).await
+            {
+                Ok(_) => {
+                    let route = Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::List));
+                    dominator::routing::go_to_url(&route.to_string());
                 }
                 Err(_) => todo!(),
             }

@@ -2,9 +2,16 @@ use std::rc::Rc;
 
 use dominator::{clone, html, Dom};
 use futures_signals::signal_vec::SignalVecExt;
-use shared::{domain::user::public_user::PublicUser, media::MediaLibrary};
+use shared::{
+    domain::{
+        circle::Circle,
+        user::{public_user::PublicUser, UserId},
+    },
+    media::MediaLibrary,
+};
 use utils::{
     events,
+    prelude::get_user_id,
     routes::{CommunityMembersRoute, CommunityRoute, Route},
 };
 use wasm_bindgen::JsValue;
@@ -16,8 +23,16 @@ use super::CircleDetails;
 // const STR_CONTACT_ADMIN: &str = "Contact admin";
 // const STR_INVITE: &str = "Invite";
 const STR_MEMBER: &str = "Member";
+const STR_DELETE_CIRCLE: &str = "Delete circle";
 const STR_JOIN: &str = "Join";
 const STR_SEARCH_MEMBER: &str = "search";
+
+fn user_id_is_circle_author(user_id: &Option<UserId>, circle: &Circle) -> bool {
+    match user_id {
+        Some(user_id) => user_id == &circle.created_by,
+        None => todo!(),
+    }
+}
 
 impl CircleDetails {
     pub fn render(self: Rc<Self>) -> Dom {
@@ -60,6 +75,21 @@ impl CircleDetails {
                                 .property("placeholder", STR_SEARCH_MEMBER)
                             }),
                         ])
+                        .apply_if(
+                            user_id_is_circle_author(&get_user_id(), circle),
+                            clone!(state => move |dom| {
+                                dom.child(html!("button-rect", {
+                                    .property("slot", "actions")
+                                    .property("kind", "outline")
+                                    .property("size", "small")
+                                    .property("color", "red")
+                                    .text(STR_DELETE_CIRCLE)
+                                    .event(clone!(state => move |_: events::Click| {
+                                        state.delete_circle();
+                                    }))
+                                }))
+                            })
+                        )
                         .child_signal(state.community_state.user.signal_ref(clone!(state => move |user| {
                             let is_member = match user {
                                 Some(user) => user.circles.iter().any(|circle| circle == &state.circle_id),
