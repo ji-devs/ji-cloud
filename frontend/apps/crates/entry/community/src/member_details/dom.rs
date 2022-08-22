@@ -105,7 +105,9 @@ impl MemberDetails {
                                 })
                             }).collect()
                         }).to_signal_vec())
-                        .child_signal(state.follow_button_signal())
+                        .apply_if(!is_current_user, clone!(state => move |dom| {
+                            dom.child_signal(state.follow_button_signal())
+                        }))
                         .apply(|dom| {
                             state.creations_mixin(dom)
                         })
