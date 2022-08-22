@@ -42,6 +42,7 @@ pub fn next_kind(kind: &MenuTabKind) -> Option<MenuTabKind> {
 pub enum Tab {
     Settings(Rc<PlaySettingsState>),
     Instructions(Rc<InstructionsEditorState>),
+    Feedback(Rc<InstructionsEditorState>),
 }
 
 impl Tab {
@@ -71,6 +72,29 @@ impl Tab {
 
                 Self::Instructions(Rc::new(state))
             }
+            MenuTabKind::Feedback => {
+                let callbacks = InstructionsEditorCallbacks::new(
+                    clone!(base => move |feedback, also_history| {
+                        if also_history {
+                            base.history.push_modify(|raw| {
+                                if let Some(content) = raw.content.as_mut() {
+                                    content.base.feedback = feedback;
+                                }
+                            });
+                        } else {
+                            base.history.save_current_modify(|raw| {
+                                if let Some(content) = raw.content.as_mut() {
+                                    content.base.feedback = feedback;
+                                }
+                            });
+                        }
+                    }),
+                );
+
+                let state = InstructionsEditorState::new(base.feedback.clone(), callbacks);
+
+                Self::Feedback(Rc::new(state))
+            }
 
             _ => unimplemented!("unsupported tab kind!"),
         }
@@ -80,6 +104,7 @@ impl Tab {
         match self {
             Self::Settings(_) => MenuTabKind::PlaySettings,
             Self::Instructions(_) => MenuTabKind::Instructions,
+            Self::Feedback(_) => MenuTabKind::Feedback,
         }
     }
 }
