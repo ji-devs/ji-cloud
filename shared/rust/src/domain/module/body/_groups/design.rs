@@ -10,6 +10,10 @@ pub struct BaseContent {
     /// The instructions for the module.
     pub instructions: Instructions,
 
+    /// The feedback for the module.
+    #[serde(default)]
+    pub feedback: Instructions,
+
     /// The module's theme.
     pub theme: ThemeId,
 
@@ -24,6 +28,7 @@ impl Default for BaseContent {
     fn default() -> Self {
         Self {
             instructions: Default::default(),
+            feedback: Default::default(),
             theme: Default::default(),
             backgrounds: Default::default(),
             stickers: vec![Sticker::Text(Default::default())],
