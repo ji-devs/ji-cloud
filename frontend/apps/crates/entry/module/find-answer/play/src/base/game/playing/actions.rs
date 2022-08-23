@@ -1,8 +1,10 @@
 use super::state::*;
 use components::{
     audio::mixer::{AudioPath, AUDIO_MIXER},
+    instructions::player::InstructionsPlayer,
     module::_common::play::prelude::*,
 };
+use dominator::clone;
 use shared::domain::module::body::find_answer::Next;
 use std::rc::Rc;
 
@@ -83,29 +85,42 @@ impl PlayState {
             _ => false,
         };
         let next_question = self.game.next_question_index();
-        let state = self.clone();
+        let state = self;
 
         match (completed_minimum, next_question) {
             // If they've completed the minimum, then we can end this activity
             (true, _) => {
-                self.play_correct_sound(move || {
-                    state
-                        .game
-                        .base
-                        .set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
-                });
+                state.play_correct_sound(clone!(state => move || {
+                    state.play_instructions_and_then(clone!(state => move || {
+                        state
+                            .game
+                            .base
+                            .set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
+                    }))
+                }));
             }
             // If they haven't completed the minimum questions, or don't need to, _and_ we can move on to the next
             // question
             (false, Some(next_index)) => {
-                self.play_correct_sound(move || {
+                state.play_correct_sound(clone!(state => move || {
                     state.game.move_next_question(next_index);
-                });
+                }));
             }
             (_, None) => {
                 // No more questions to ask, but the activity is configured so that the student can click continue.
-                self.play_correct_sound(|| {});
+                state.play_correct_sound(clone!(state => move || {
+                    state.play_instructions_and_then(|| {})
+                }));
             }
         }
+    }
+
+    fn play_instructions_and_then<F: Fn() + 'static>(self: &Rc<Self>, f: F) {
+        let state = self;
+
+        state.feedback_player.set(Some(InstructionsPlayer::new(
+            state.game.base.feedback.clone(),
+            Some(f),
+        )));
     }
 }

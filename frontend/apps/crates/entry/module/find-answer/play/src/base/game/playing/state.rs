@@ -1,4 +1,5 @@
 use crate::base::game::state::*;
+use components::instructions::player::InstructionsPlayer;
 use components::traces::{bubble::TraceBubble, utils::TraceExt};
 use dominator::clone;
 use futures_signals::signal::Mutable;
@@ -24,6 +25,8 @@ pub struct PlayState {
     /// Flag indicating whether the question has already ended. When true, subsequent taps on the answer traces will
     /// not trigger any logic.
     pub ended: Mutable<bool>,
+    /// Feedback to be played when the activity ends
+    pub feedback_player: Mutable<Option<Rc<InstructionsPlayer>>>,
 }
 
 impl PlayState {
@@ -40,6 +43,7 @@ impl PlayState {
             traces,
             selected_set: Mutable::new(HashSet::new()),
             ended: Mutable::new(false),
+            feedback_player: Mutable::new(None),
         })
     }
 }
