@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/popups/popup-body";
 
-const STR_EMBED_HEADER = "Embed this JIG";
+const STR_EMBED_HEADER = "Embed this";
 const STR_EMBED_CODE = "Embed code:";
 
 @customElement("share-jig-embed")
@@ -47,12 +47,15 @@ export class _ extends LitElement {
     @property()
     value: string = "";
 
+    @property()
+    assetTypeName: string = "";
+
     render() {
         return html`
             <popup-body>
                 <slot slot="back" name="back"></slot>
                 <slot slot="close" name="close"></slot>
-                <h3 slot="heading">${STR_EMBED_HEADER}</h3>
+                <h3 slot="heading">${STR_EMBED_HEADER} ${this.assetTypeName}</h3>
                 <div slot="body" class="body">
                     <label>
                         ${STR_EMBED_CODE}

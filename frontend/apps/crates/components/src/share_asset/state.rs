@@ -71,6 +71,14 @@ impl ShareAsset {
 
         format!("{}{}", origin, url)
     }
+
+    pub(super) fn asset_type_name(&self) -> &'static str {
+        match self.asset_id {
+            AssetId::JigId(_) => "JIG",
+            AssetId::CourseId(_) => "course",
+            AssetId::ResourceId(_) => "resource",
+        }
+    }
 }
 
 #[derive(Clone)]

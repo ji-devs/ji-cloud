@@ -25,9 +25,10 @@ const STR_EMBED_COPY_CODE_LABEL: &str = "Copy code";
 const STR_EMBED_COPIED_CODE_LABEL: &str = "Embed code copied";
 const STR_CLASSROOM: &str = "Share to Google Classroom";
 const STR_STUDENTS_LABEL: &str = "Share with students";
-const STR_EMBED_LABEL: &str = "Embed this JIG";
-const STR_COPY_LABEL: &str = "Copy JIG link";
-const STR_COPIED_LABEL: &str = "JIG link copied";
+const STR_EMBED_LABEL: &str = "Embed this ";
+const STR_COPY_LABEL_1: &str = "Copy ";
+const STR_COPY_LABEL_2: &str = " link";
+const STR_COPIED_LABEL: &str = " link copied";
 
 impl ShareAsset {
     pub fn render(self: Rc<Self>, anchor: Dom, slot: Option<&str>) -> Dom {
@@ -110,19 +111,19 @@ impl ShareAsset {
                 }),
                 html!("share-jig-option", {
                     .property("kind", "embed")
-                    .text(STR_EMBED_LABEL)
+                    .text(&format!("{STR_EMBED_LABEL}{}", state.asset_type_name()))
                     .event(clone!(state => move |_: events::Click| {
                         state.active_popup.set(Some(ActivePopup::ShareEmbed));
                     }))
                 }),
                 html!("share-jig-option", {
                     .property("kind", "copy")
-                    .text_signal(state.link_copied.signal().map(|copied| {
+                    .text_signal(state.link_copied.signal().map(clone!(state => move |copied| {
                         match copied {
-                            false => STR_COPY_LABEL,
-                            true => STR_COPIED_LABEL,
+                            false => format!("{}{}{}", STR_COPY_LABEL_1, state.asset_type_name(), STR_COPY_LABEL_2),
+                            true => format!("{}{STR_COPIED_LABEL}", state.asset_type_name()),
                         }
-                    }))
+                    })))
                     .event(clone!(state => move|_: events::Click| {
                         clipboard::write_text(&state.asset_link(false));
                         ShareAsset::set_copied_mutable(state.link_copied.clone());
@@ -225,6 +226,7 @@ impl ShareAsset {
         let state = Rc::clone(self);
         html!("share-jig-embed", {
             .property("slot", "overlay")
+            .property("assetTypeName", state.asset_type_name())
             .property("value", state.embed_code())
             .children(&mut [
                 html!("button-empty", {
