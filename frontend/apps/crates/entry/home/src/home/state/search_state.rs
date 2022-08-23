@@ -16,6 +16,7 @@ use shared::{
         course::CourseSearchQuery,
         jig::JigSearchQuery,
         meta::{Affiliation, AffiliationId, AgeRange, AgeRangeId, MetadataResponse, ResourceType},
+        resource::ResourceSearchQuery,
         user::UserProfile,
     },
     error::EmptyError,
@@ -93,8 +94,8 @@ impl SearchSelected {
         }
     }
 
-    pub fn to_resource_search_request(&self) -> JigSearchQuery {
-        JigSearchQuery {
+    pub fn to_resource_search_request(&self) -> ResourceSearchQuery {
+        ResourceSearchQuery {
             q: self.query.get_cloned(),
             age_ranges: self.age_ranges.get_cloned().into_iter().collect(),
             affiliations: self.affiliations.get_cloned().into_iter().collect(),

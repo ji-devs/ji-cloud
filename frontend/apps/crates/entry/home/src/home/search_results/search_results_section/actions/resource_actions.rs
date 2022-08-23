@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use shared::{
     api::{endpoints, ApiEndpoint},
-    domain::jig::{JigSearchQuery, JigSearchResponse},
+    domain::resource::{ResourceSearchQuery, ResourceSearchResponse},
     error::EmptyError,
 };
 use utils::prelude::api_no_auth;
@@ -15,9 +15,9 @@ impl SearchResultsSection {
 
         req.page = Some(self.next_page.get());
 
-        match api_no_auth::<JigSearchResponse, EmptyError, JigSearchQuery>(
-            endpoints::jig::Search::PATH,
-            endpoints::jig::Search::METHOD,
+        match api_no_auth::<ResourceSearchResponse, EmptyError, ResourceSearchQuery>(
+            endpoints::resource::Search::PATH,
+            endpoints::resource::Search::METHOD,
             Some(req),
         )
         .await
@@ -25,11 +25,11 @@ impl SearchResultsSection {
             Err(_) => todo!(),
             Ok(res) => {
                 let mut resources = self.list.lock_mut();
-                res.jigs.into_iter().for_each(|resource| {
+                res.resources.into_iter().for_each(|resource| {
                     resources.push_cloned(Rc::new(resource.into()));
                 });
 
-                self.total.set(res.total_jig_count);
+                self.total.set(res.total_resource_count);
 
                 let mut last_page_loaded = self.next_page.lock_mut();
                 *last_page_loaded += 1;
