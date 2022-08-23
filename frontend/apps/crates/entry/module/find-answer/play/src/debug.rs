@@ -72,6 +72,7 @@ impl DebugSettings {
                                 text: Some("Heya World!".to_string()),
                                 ..Instructions::default()
                             },
+                            feedback: Instructions::default(),
                             stickers: init_data
                                 .stickers
                                 .iter()

@@ -62,6 +62,7 @@ impl DebugSettings {
                         base: BaseContent {
                             theme: ThemeId::Chalkboard,
                             instructions: Instructions::default(),
+                            feedback: Instructions::default(),
                             stickers: init_data
                                 .stickers
                                 .iter()
