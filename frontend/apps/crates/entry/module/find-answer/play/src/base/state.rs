@@ -10,6 +10,7 @@ use shared::domain::{
             find_answer::{
                 Mode, ModuleData as RawData, Ordering, PlaySettings, Question, QuestionField, Step,
             },
+            Instructions,
         },
         ModuleId,
     },
@@ -37,6 +38,8 @@ pub struct Base {
     pub instructions_player: Rc<InstructionsPlayer>,
     /// Whether the instructions player has completed playback.
     pub instructions_finished: Mutable<bool>,
+    /// Feedback to play when the activity ends
+    pub feedback: Instructions,
 }
 
 impl Base {
@@ -91,6 +94,7 @@ impl Base {
                 })),
             ),
             instructions_finished: Mutable::new(false),
+            feedback: content.base.feedback,
         });
 
         *base_ref.borrow_mut() = Some(base.clone());
