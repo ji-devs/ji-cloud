@@ -1,7 +1,6 @@
 ---
 source: tests/integration/jig/module.rs
 expression: body
-
 ---
 {
   "module": {
@@ -15,6 +14,10 @@ expression: body
               "steps_completed": []
             },
             "instructions": {
+              "text": null,
+              "audio": null
+            },
+            "feedback": {
               "text": null,
               "audio": null
             },
