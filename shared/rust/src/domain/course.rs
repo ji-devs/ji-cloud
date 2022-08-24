@@ -47,10 +47,9 @@ pub struct CourseCreateRequest {
 
     /// The language the Course uses.
     ///
-    /// If None, uses the user's language.
-    ///
     /// NOTE: in the format `en`, `eng`, `en-US`, `eng-US` or `eng-USA`. To be replaced with a struct that enforces this.
-    pub language: Option<String>,
+    #[serde(default)]
+    pub language: String,
 
     /// The Course's categories.
     #[serde(skip_serializing_if = "Vec::is_empty")]

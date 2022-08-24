@@ -1,7 +1,6 @@
 ---
 source: tests/integration/jig.rs
 expression: body
-
 ---
 {
   "id": "[id]",
@@ -19,7 +18,7 @@ expression: body
     "modules": [],
     "ageRanges": [],
     "affiliations": [],
-    "language": "en_US",
+    "language": "",
     "categories": [],
     "additionalResources": [],
     "description": "",

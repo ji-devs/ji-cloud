@@ -46,19 +46,6 @@ async fn create(
 
     let req = req.map_or_else(CourseCreateRequest::default, Json::into_inner);
 
-    let language = match req.language {
-        Some(lang) => lang,
-        None => {
-            sqlx::query!(
-                "select language from user_profile where user_id = $1",
-                creator_id.0
-            )
-            .fetch_one(db)
-            .await?
-            .language
-        }
-    };
-
     let id = db::course::create(
         &*db,
         &req.display_name,
@@ -66,7 +53,7 @@ async fn create(
         &req.age_ranges,
         &req.affiliations,
         creator_id,
-        &language,
+        &req.language,
         &req.description,
     )
     .await

@@ -138,11 +138,14 @@ pub struct UserProfile {
     /// ID to the user's profile image in the user image library.
     pub profile_image: Option<ImageId>,
 
-    /// The user's preferred language.
-    pub language: String,
+    /// The user's preferred application language.
+    pub language_app: String,
 
-    /// The user's preferred locale.
-    pub locale: String,
+    /// The user's preferred email language.
+    pub language_emails: String,
+
+    /// The user's preferred language.
+    pub language_spoken: Vec<String>,
 
     /// Does the user want educational resources sent to them?
     pub opt_into_edu_resources: bool,
@@ -156,23 +159,23 @@ pub struct UserProfile {
     /// Bio for User
     pub bio: String,
 
-    /// Allow location to public
+    /// Allow location to be public
     #[serde(default)]
     pub location_public: bool,
 
-    /// Allow location to public
+    /// Allow organization to be public
     #[serde(default)]
     pub organization_public: bool, // default to false
 
-    /// Allow location to public
+    /// Allow persona to be public
     #[serde(default)]
     pub persona_public: bool, // default to false
 
-    /// Allow location to public
+    /// Allow language_spoken to be public
     #[serde(default)]
-    pub language_public: bool, // default to false
+    pub language_spoken_public: bool, // default to false
 
-    /// Allow bio to public
+    /// Allow bio to be public
     #[serde(default)]
     pub bio_public: bool, // default to false
 
@@ -240,8 +243,12 @@ pub struct UserProfileExport {
     pub family_name: String,
     /// ID to the user's profile image in the user image library.
     pub profile_image: Option<ImageId>,
+    /// The user's preferred application language.
+    pub language_app: String,
+    /// The user's preferred email language.
+    pub language_emails: String,
     /// The user's preferred language.
-    pub language: String,
+    pub language_spoken: Vec<String>,
     /// When the user was created.
     pub created_at: DateTime<Utc>,
     /// When the user was last updated.
@@ -356,12 +363,14 @@ pub struct CreateProfileRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub profile_image_url: Option<String>,
 
-    // todo: create a struct that enforces format like `en_us`
-    /// the language the user prefers to communicate with.
-    pub language: String,
+    /// The user's preferred application language.
+    pub language_app: String,
 
-    /// The locale that should be used for the user.
-    pub locale: String,
+    /// The user's preferred email language.
+    pub language_emails: String,
+
+    /// The user's preferred language.
+    pub language_spoken: Vec<String>,
 
     /// the timezone that the user uses.
     pub timezone: chrono_tz::Tz,
@@ -432,15 +441,18 @@ pub struct PatchProfileRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bio: Option<String>,
 
-    // todo: create a struct that enforces format like `en_us`
-    /// the language the user prefers to communicate with.
+    /// the language the user prefers the application to be in.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub language: Option<String>,
+    pub language_app: Option<String>,
 
-    /// The locale that should be used for the user.
+    /// the language the user prefers emails to be in.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub language_emails: Option<String>,
+
+    /// the languages the user prefers.
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub locale: Option<String>,
+    pub language_spoken: Option<Vec<String>>,
 
     /// the timezone that the user uses.
     #[serde(default)]
@@ -465,7 +477,7 @@ pub struct PatchProfileRequest {
     /// Publicize user lanuage
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub language_public: Option<bool>,
+    pub language_spoken_public: Option<bool>,
 
     /// Publicize user location
     #[serde(default)]
