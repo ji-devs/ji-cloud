@@ -136,6 +136,7 @@ where
     Step: StepExt + 'static,
 {
     let instructions = base.get_instructions();
+    let feedback_player = base.get_feedback_player();
     let is_screenshot = utils::screenshot::is_screenshot_url();
 
     html!("empty-fragment", {
@@ -154,7 +155,9 @@ where
                     }
                 })))
         }))
-
+        .child_signal(feedback_player.signal_cloned().map(|feedback_player| {
+            feedback_player.map(InstructionsPlayer::render)
+        }))
         .apply_if(jig_player, |dom| {
             dom
                 .global_event(|evt:dominator_helpers::events::Message| {

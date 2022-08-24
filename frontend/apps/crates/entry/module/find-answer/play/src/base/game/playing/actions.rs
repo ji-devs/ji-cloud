@@ -118,9 +118,13 @@ impl PlayState {
     fn play_instructions_and_then<F: Fn() + 'static>(self: &Rc<Self>, f: F) {
         let state = self;
 
-        state.feedback_player.set(Some(InstructionsPlayer::new(
-            state.game.base.feedback.clone(),
-            Some(f),
-        )));
+        state
+            .game
+            .base
+            .feedback_player
+            .set(Some(InstructionsPlayer::new(
+                state.game.base.feedback.clone(),
+                Some(f),
+            )));
     }
 }

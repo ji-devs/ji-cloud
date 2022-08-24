@@ -17,7 +17,7 @@ use shared::domain::{
 };
 use utils::prelude::*;
 
-use futures_signals::signal::Mutable;
+use futures_signals::signal::{Mutable, ReadOnlyMutable};
 use std::{cell::RefCell, rc::Rc};
 use web_sys::HtmlElement;
 
@@ -40,6 +40,7 @@ pub struct Base {
     pub instructions_finished: Mutable<bool>,
     /// Feedback to play when the activity ends
     pub feedback: Instructions,
+    pub feedback_player: Mutable<Option<Rc<InstructionsPlayer>>>,
 }
 
 impl Base {
@@ -95,6 +96,7 @@ impl Base {
             ),
             instructions_finished: Mutable::new(false),
             feedback: content.base.feedback,
+            feedback_player: Mutable::new(None),
         });
 
         *base_ref.borrow_mut() = Some(base.clone());
@@ -106,6 +108,10 @@ impl Base {
 impl BaseExt for Base {
     fn play_phase(&self) -> Mutable<ModulePlayPhase> {
         self.module_phase.clone()
+    }
+
+    fn get_feedback_player(&self) -> ReadOnlyMutable<Option<Rc<InstructionsPlayer>>> {
+        self.feedback_player.read_only()
     }
 
     fn get_timer_minutes(&self) -> Option<u32> {

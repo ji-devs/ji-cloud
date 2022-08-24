@@ -10,10 +10,10 @@ use shared::domain::{
     },
 };
 
-use futures_signals::signal::Mutable;
+use futures_signals::signal::{Mutable, ReadOnlyMutable};
 use std::rc::Rc;
 
-use components::module::_common::play::prelude::*;
+use components::{instructions::player::InstructionsPlayer, module::_common::play::prelude::*};
 use utils::prelude::*;
 
 use super::game::state::Game;
@@ -25,6 +25,8 @@ pub struct Base {
     pub theme_id: ThemeId,
     pub background: Option<Background>,
     pub instructions: Instructions,
+    pub feedback: Instructions,
+    pub feedback_player: Mutable<Option<Rc<InstructionsPlayer>>>,
     pub settings: PlayerSettings,
     pub raw_pairs: Vec<CardPair>,
     pub phase: Mutable<Phase>,
@@ -58,6 +60,8 @@ impl Base {
             theme_id,
             background: content.base.background,
             instructions: content.base.instructions,
+            feedback: content.base.feedback,
+            feedback_player: Mutable::new(None),
             settings: content.player_settings,
             raw_pairs: content.base.pairs,
             module_phase: init_args.play_phase,
@@ -73,6 +77,10 @@ impl Base {
 impl BaseExt for Base {
     fn get_instructions(&self) -> Option<Instructions> {
         Some(self.instructions.clone())
+    }
+
+    fn get_feedback_player(&self) -> ReadOnlyMutable<Option<Rc<InstructionsPlayer>>> {
+        self.feedback_player.read_only()
     }
 
     fn get_timer_minutes(&self) -> Option<u32> {
