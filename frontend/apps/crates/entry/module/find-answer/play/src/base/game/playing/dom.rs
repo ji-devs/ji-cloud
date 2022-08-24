@@ -1,6 +1,5 @@
 use components::{
     audio::mixer::{AudioSourceExt, AUDIO_MIXER},
-    instructions::player::InstructionsPlayer,
     module::_common::play::prelude::ModulePlayPhase,
     traces::{
         bubble::TraceBubble,
@@ -23,9 +22,6 @@ use super::state::*;
 
 pub fn render(state: Rc<PlayState>) -> Dom {
     html!("empty-fragment", {
-        .child_signal(state.feedback_player.signal_cloned().map(|feedback| {
-            feedback.map(InstructionsPlayer::render)
-        }))
         // We don't want the cursor to change when the student mouses over an answer trace, or even an incorrect trace.
         // Make the entire playable area use the pointer cursor.
         .style("cursor", "pointer")

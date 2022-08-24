@@ -1,7 +1,8 @@
 use crate::audio::mixer::AUDIO_MIXER;
+use crate::instructions::player::InstructionsPlayer;
 use dominator::{clone, Dom, DomHandle};
 use dominator_helpers::futures::AsyncLoader;
-use futures_signals::signal::Mutable;
+use futures_signals::signal::{Mutable, ReadOnlyMutable};
 use shared::domain::asset::{Asset, AssetId, AssetType, DraftOrLive, PrivacyLevel};
 use shared::domain::course::CourseResponse;
 use shared::domain::module::body::Instructions;
@@ -392,9 +393,15 @@ pub trait DomRenderable {
 
 pub trait BaseExt: DomRenderable {
     fn play(_state: Rc<Self>) {}
+
     fn get_instructions(&self) -> Option<Instructions> {
         None
     }
+
+    fn get_feedback_player(&self) -> ReadOnlyMutable<Option<Rc<InstructionsPlayer>>> {
+        Mutable::new(None).read_only()
+    }
+
     fn get_timer_minutes(&self) -> Option<u32> {
         None
     }
@@ -402,5 +409,6 @@ pub trait BaseExt: DomRenderable {
     fn set_play_phase(&self, phase: ModulePlayPhase) {
         self.play_phase().set_neq(phase);
     }
+
     fn play_phase(&self) -> Mutable<ModulePlayPhase>;
 }
