@@ -11,6 +11,7 @@ use std::rc::Rc;
 pub fn render<RawData, E, GetSettingsStateFn, SettingsState, RenderSettingsFn>(
     state: Rc<Step3<RawData, E, GetSettingsStateFn, SettingsState>>,
     render_settings: RenderSettingsFn,
+    has_feedback: bool,
 ) -> Dom
 where
     RawData: RawDataExt,
@@ -32,32 +33,38 @@ where
             }
         }))));
 
+    let mut tabs = vec![
+        render_tab(state.clone(), MenuTabKind::PlaySettings),
+        render_tab(state.clone(), MenuTabKind::Instructions),
+    ];
+
+    if has_feedback {
+        tabs.push(render_tab(state.clone(), MenuTabKind::Feedback));
+    }
+
+    tabs.push(html!("module-sidebar-body", {
+        .property("slot", "body")
+        .child_signal(state.tab.signal_cloned().map(clone!(render_settings => move |tab| {
+            match tab {
+                Tab::Settings(state) => {
+                    Some(render_settings(state))
+                },
+                Tab::Instructions(state) => {
+                    Some(render_instructions(state))
+                },
+                Tab::Feedback(state) => {
+                    Some(render_instructions(state))
+                }
+            }
+        })))
+    }));
+
     html!("menu-tabs", {
         .future(state.tab.signal_ref(|tab| tab.kind()).dedupe().for_each(clone!(state => move |kind| {
             state.tab_kind.set(Some(kind));
             async move {}
         })))
-        .children(&mut [
-            render_tab(state.clone(), MenuTabKind::PlaySettings),
-            render_tab(state.clone(), MenuTabKind::Instructions),
-            render_tab(state.clone(), MenuTabKind::Feedback),
-            html!("module-sidebar-body", {
-                .property("slot", "body")
-                .child_signal(state.tab.signal_cloned().map(clone!(render_settings => move |tab| {
-                    match tab {
-                        Tab::Settings(state) => {
-                            Some(render_settings(state))
-                        },
-                        Tab::Instructions(state) => {
-                            Some(render_instructions(state))
-                        },
-                        Tab::Feedback(state) => {
-                            Some(render_instructions(state))
-                        }
-                    }
-                })))
-            })
-        ])
+        .children(tabs)
     })
 }
 
