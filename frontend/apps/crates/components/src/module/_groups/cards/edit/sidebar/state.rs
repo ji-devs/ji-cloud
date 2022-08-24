@@ -18,6 +18,8 @@ where
     pub get_settings: GetSettingsStateFn,
     pub render_settings: RenderSettingsStateFn,
     pub tab_kind: Mutable<Option<MenuTabKind>>,
+    /// Whether this card activity type should show the feedback tab
+    pub has_feedback: bool,
 }
 
 impl<RawData, E, GetSettingsStateFn, RenderSettingsStateFn, SettingsState>
@@ -33,12 +35,14 @@ where
         base: Rc<CardsBase<RawData, E>>,
         get_settings: GetSettingsStateFn,
         render_settings: RenderSettingsStateFn,
+        has_feedback: bool,
     ) -> Self {
         Self {
             base,
             get_settings,
             render_settings,
             tab_kind: Mutable::new(None),
+            has_feedback,
         }
     }
 }

@@ -35,7 +35,8 @@ where
                     Step::Three => Some(
                         render_step_3(
                             Step3::new(state.base.clone(), state.get_settings.clone(), state.tab_kind.clone()),
-                            state.render_settings.clone()
+                            state.render_settings.clone(),
+                            state.has_feedback,
                         )
                     ),
                     _ => None
