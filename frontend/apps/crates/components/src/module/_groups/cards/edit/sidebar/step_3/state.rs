@@ -1,7 +1,7 @@
 use crate::{
     instructions::editor::{
         callbacks::Callbacks as InstructionsEditorCallbacks,
-        state::State as InstructionsEditorState,
+        state::{InstructionsType, State as InstructionsEditorState},
     },
     module::_groups::cards::edit::state::*,
     tabs::MenuTabKind,
@@ -108,7 +108,11 @@ impl<SettingsState> Tab<SettingsState> {
                     }),
                 );
 
-                let state = InstructionsEditorState::new(base.instructions.clone(), callbacks);
+                let state = InstructionsEditorState::new(
+                    base.instructions.clone(),
+                    callbacks,
+                    InstructionsType::Instructions,
+                );
 
                 Self::Instructions(Rc::new(state))
             }
@@ -131,7 +135,11 @@ impl<SettingsState> Tab<SettingsState> {
                     }),
                 );
 
-                let state = InstructionsEditorState::new(base.feedback.clone(), callbacks);
+                let state = InstructionsEditorState::new(
+                    base.feedback.clone(),
+                    callbacks,
+                    InstructionsType::Feedback,
+                );
 
                 Self::Feedback(Rc::new(state))
             }

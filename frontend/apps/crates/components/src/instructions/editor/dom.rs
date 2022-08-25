@@ -8,9 +8,6 @@ use crate::audio::input::{AudioInput, AudioInputCallbacks, AudioInputOptions};
 use futures_signals::signal::SignalExt;
 use shared::domain::module::body::Audio;
 
-pub const STR_INSTRUCTIONS_LABEL: &str = "Written instructions";
-pub const STR_INSTRUCTIONS_PLACEHOLDER: &str = "Type instructions";
-
 pub fn render(state: Rc<State>) -> Dom {
     html!("div", {
         .children(&mut [
@@ -32,11 +29,11 @@ pub fn render_text(state: Rc<State>) -> Dom {
         (state.callbacks.save)(lock.clone(), push_history);
     }
     html!("input-wrapper", {
-        .property("label", STR_INSTRUCTIONS_LABEL)
+        .property("label", state.instructions_text.label)
         .child(html!("textarea" => HtmlTextAreaElement, {
             .with_node!(elem => {
                 .text_signal(state.text_signal())
-                .property("placeholder", STR_INSTRUCTIONS_PLACEHOLDER)
+                .property("placeholder", state.instructions_text.placeholder)
                 .property("rows", 4)
                 //Input saves every character
                 //Change also pushes history

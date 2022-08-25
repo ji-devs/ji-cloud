@@ -2,7 +2,7 @@ use crate::base::state::Base;
 use components::{
     instructions::editor::{
         callbacks::Callbacks as InstructionsEditorCallbacks,
-        state::State as InstructionsEditorState,
+        state::{InstructionsType, State as InstructionsEditorState},
     },
     tabs::MenuTabKind,
 };
@@ -68,7 +68,11 @@ impl Tab {
                     }),
                 );
 
-                let state = InstructionsEditorState::new(base.instructions.clone(), callbacks);
+                let state = InstructionsEditorState::new(
+                    base.instructions.clone(),
+                    callbacks,
+                    InstructionsType::Instructions,
+                );
 
                 Self::Instructions(Rc::new(state))
             }
@@ -91,7 +95,11 @@ impl Tab {
                     }),
                 );
 
-                let state = InstructionsEditorState::new(base.feedback.clone(), callbacks);
+                let state = InstructionsEditorState::new(
+                    base.feedback.clone(),
+                    callbacks,
+                    InstructionsType::Feedback,
+                );
 
                 Self::Feedback(Rc::new(state))
             }
