@@ -2,7 +2,7 @@ insert into "user" (id, created_at) values ('1f241e1b-b537-493f-a230-075cb16315b
 
 insert into user_email (user_id, email, created_at) values ('1f241e1b-b537-493f-a230-075cb16315be', 'test@test.test', '2020-08-08T00:11:21Z'::timestamptz);
 
-insert into "user_profile" (user_id, username, created_at, given_name, family_name, language_spoken,
+insert into "user_profile" (user_id, username, created_at, given_name, family_name, languages_spoken,
                     opt_into_edu_resources, over_18, timezone, organization)
 values ('1f241e1b-b537-493f-a230-075cb16315be', 'test',
         '2020-08-08T00:11:21Z'::timestamptz, 'Bobby', 'Tables', '{en_US}', true, true, 'US/Pacific-New', 'test org');
