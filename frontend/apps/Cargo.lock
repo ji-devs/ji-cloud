@@ -143,6 +143,7 @@ dependencies = [
  "futures-signals",
  "gloo-timers",
  "htmlescape",
+ "itertools",
  "js-sys",
  "log",
  "once_cell",

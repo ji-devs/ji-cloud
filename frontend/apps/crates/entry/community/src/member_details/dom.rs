@@ -1,5 +1,9 @@
 use std::rc::Rc;
 
+use super::{
+    callbacks::EditProfileCallbacks, component::Component, edit_about::EditAbout,
+    edit_bio::EditBio, edit_image::EditImage, ActivePopup, Connections, Creations, MemberDetails,
+};
 use components::{
     dialog::Dialog,
     module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback},
@@ -7,6 +11,7 @@ use components::{
 };
 use dominator::{clone, html, link, Dom, DomBuilder};
 use futures_signals::signal::{Signal, SignalExt};
+use itertools::Itertools;
 use shared::{
     domain::{
         asset::DraftOrLive, jig::JigResponse, resource::ResourceResponse,
@@ -24,11 +29,6 @@ use utils::{
 };
 use wasm_bindgen::JsValue;
 use web_sys::HtmlElement;
-
-use super::{
-    callbacks::EditProfileCallbacks, component::Component, edit_about::EditAbout,
-    edit_bio::EditBio, edit_image::EditImage, ActivePopup, Connections, Creations, MemberDetails,
-};
 
 const STR_FOLLOWING: &str = "Following";
 const STR_FOLLOW: &str = "Follow";
@@ -54,8 +54,11 @@ impl MemberDetails {
                                 // add city
                                 // dom = dom.property("city", city)
                             }
-                            if let Some(language) = &member.language {
-                                dom = dom.property("language", Language::code_to_display_name(&language))
+                            if let Some(language_spoken) = &member.language_spoken {
+                                if language_spoken.len() > 0 {
+                                    let languages = language_spoken.iter().map(|l| Language::code_to_display_name(l)).join(", ");
+                                    dom = dom.property("language", languages)
+                                }
                             }
                             if let Some(organization) = &member.organization {
                                 dom = dom.property("organization", organization)

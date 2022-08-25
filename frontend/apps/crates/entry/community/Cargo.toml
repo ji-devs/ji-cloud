@@ -63,6 +63,7 @@ discard = "1.0.4"
 gloo-timers = { version = "0.2.1", features = ["futures"] }
 url = "2.2.2"
 anyhow = "1.0.57"
+itertools = "0.10.1"
 
 
 [features]

@@ -1,6 +1,7 @@
-use std::rc::Rc;
+use std::{collections::HashSet, rc::Rc};
 
 use futures_signals::{signal::Mutable, signal_vec::MutableVec};
+use itertools::Itertools;
 use shared::domain::user::UserProfile;
 
 use crate::member_details::callbacks::EditProfileCallbacks;
@@ -14,8 +15,8 @@ pub struct EditAbout {
     pub organization_public: Mutable<bool>,
     pub persona: MutableVec<String>,
     pub persona_public: Mutable<bool>,
-    pub language: Mutable<String>,
-    pub language_public: Mutable<bool>,
+    pub language_spoken: Mutable<HashSet<String>>,
+    pub language_spoken_public: Mutable<bool>,
 }
 
 impl EditAbout {
@@ -28,8 +29,8 @@ impl EditAbout {
             organization_public: Mutable::new(user.organization_public),
             persona: MutableVec::new_with_values(user.persona.clone()),
             persona_public: Mutable::new(user.persona_public),
-            language: Mutable::new(user.language.clone()),
-            language_public: Mutable::new(user.language_public),
+            language_spoken: Mutable::new(HashSet::from_iter(user.language_spoken.clone())),
+            language_spoken_public: Mutable::new(user.language_spoken_public),
             user,
         })
     }
@@ -43,8 +44,8 @@ impl EditAbout {
         user.organization_public = self.organization_public.get();
         user.persona = self.persona.lock_ref().to_vec();
         user.persona_public = self.persona_public.get();
-        user.language = self.language.get_cloned();
-        user.language_public = self.language_public.get();
+        user.language_spoken = self.language_spoken.get_cloned().into_iter().collect_vec();
+        user.language_spoken_public = self.language_spoken_public.get();
 
         user
     }

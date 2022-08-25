@@ -2,12 +2,14 @@ use std::rc::Rc;
 
 use dominator::{clone, html, Dom};
 use futures_signals::{map_ref, signal::Signal, signal_vec::SignalVecExt};
+use itertools::Itertools;
 use shared::{
     domain::{circle::Circle, user::public_user::PublicUser},
     media::MediaLibrary,
 };
 use utils::{
     events,
+    languages::Language,
     routes::{CommunityCirclesRoute, CommunityMembersRoute, CommunityRoute, Route},
 };
 use wasm_bindgen::JsValue;
@@ -46,8 +48,11 @@ impl CommunitySearch {
             // .property("city", "New York")
             // .property("state", "NY")
             .apply(|mut dom| {
-                if let Some(language) = &member.language {
-                    dom = dom.property("language", language);
+                if let Some(language_spoken) = &member.language_spoken {
+                    if language_spoken.len() > 0 {
+                        let languages = language_spoken.iter().map(|l| Language::code_to_display_name(l)).join(", ");
+                        dom = dom.property("language", languages);
+                    };
                 };
                 dom
             })

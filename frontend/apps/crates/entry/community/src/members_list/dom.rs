@@ -2,9 +2,11 @@ use std::rc::Rc;
 
 use dominator::{class, clone, html, pseudo, with_node, Dom};
 use futures_signals::{map_ref, signal::SignalExt};
+use itertools::Itertools;
 use shared::domain::user::public_user::PublicUser;
 use utils::{
     events,
+    languages::Language,
     routes::{CommunityMembersRoute, CommunityRoute, Route},
 };
 use wasm_bindgen::JsValue;
@@ -116,8 +118,11 @@ impl MembersList {
             // .property("city", "New York")
             // .property("state", "NY")
             .apply(|mut dom| {
-                if let Some(language) = &member.language {
-                    dom = dom.property("language", language);
+                if let Some(languages_spoken) = &member.language_spoken {
+                    if languages_spoken.len() > 0 {
+                        let languages = languages_spoken.iter().map(|l| Language::code_to_display_name(l)).join(", ");
+                        dom = dom.property("language", languages);
+                    }
                 };
                 dom
             })

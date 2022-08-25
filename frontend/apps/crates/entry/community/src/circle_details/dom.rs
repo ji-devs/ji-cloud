@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use dominator::{clone, html, Dom};
 use futures_signals::signal_vec::SignalVecExt;
+use itertools::Itertools;
 use shared::{
     domain::{
         circle::Circle,
@@ -11,6 +12,7 @@ use shared::{
 };
 use utils::{
     events,
+    languages::Language,
     prelude::get_user_id,
     routes::{CommunityMembersRoute, CommunityRoute, Route},
 };
@@ -142,9 +144,12 @@ impl CircleDetails {
             // .property("city", "New York")
             // .property("state", "NY")
             .apply(|mut dom| {
-                if let Some(language) = &member.language {
-                    dom = dom.property("language", language);
-                };
+                if let Some(languages_spoken) = &member.language_spoken {
+                    if languages_spoken.len() > 0 {
+                        let languages = languages_spoken.iter().map(|l| Language::code_to_display_name(l)).join(", ");
+                        dom = dom.property("language", languages);
+                    };
+                }
                 dom
             })
             .apply(move |dom| dominator::on_click_go_to_url!(dom, {

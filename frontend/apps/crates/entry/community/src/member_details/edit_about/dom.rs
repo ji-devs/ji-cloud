@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use dominator::{clone, html, with_node, DomBuilder};
 use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
+use itertools::Itertools;
 use utils::{
     events,
     languages::{Language, JIG_LANGUAGES},
@@ -171,23 +172,33 @@ impl Component for Rc<EditAbout> {
                     html!("input-select", {
                         .property("slot", "language")
                         .property("label", STR_LANGUAGE)
-                        .property_signal("value", state.language.signal_cloned().map(|code| {
-                            Language::code_to_display_name(&code)
+                        .property("multiple", true)
+                        .property_signal("value", state.language_spoken.signal_ref(|language_spoken| {
+                            language_spoken.iter().map(|l| Language::code_to_display_name(l)).join(", ")
                         }))
                         .children(JIG_LANGUAGES.iter().map(|lang| {
                             html!("input-select-option", {
                                 .text(lang.display_name())
+                                .property_signal("selected", state.language_spoken.signal_cloned().map(clone!(lang => move |language_spoken| {
+                                    language_spoken.contains(lang.code())
+                                })))
                                 .event(clone!(state => move |_: events::CustomSelectedChange| {
-                                    state.language.set(lang.code().to_string());
+                                    let mut language_spoken = state.language_spoken.lock_mut();
+                                    let lang = lang.code().to_string();
+                                    if language_spoken.contains(&lang) {
+                                        language_spoken.remove(&lang);
+                                    } else {
+                                        language_spoken.insert(lang);
+                                    }
                                 }))
                             })
                         }))
                     }),
                     html!("community-private-public-switch", {
                         .property("type", "checkbox")
-                        .property_signal("isPublic", state.language_public.signal())
+                        .property_signal("isPublic", state.language_spoken_public.signal())
                         .event(clone!(state => move |evt: events::CustomToggle| {
-                            state.language_public.set_neq(evt.value());
+                            state.language_spoken_public.set_neq(evt.value());
                         }))
                     }),
                 ])

@@ -120,14 +120,17 @@ impl SettingsPage {
                 }),
                 html!("input-select", {
                     .property("slot", "preferred-language")
-                    .property_signal("value", state.user.language.signal_cloned().map(|code| {
+                    .property_signal("value", state.user.language_emails.signal_cloned().map(|code| {
                         Language::code_to_display_name(&code)
                     }))
                     .children(EMAIL_LANGUAGES.iter().map(|lang| {
                         html!("input-select-option", {
                             .text(lang.display_name())
+                            .property_signal("selected", state.user.language_emails.signal_ref(clone!(lang => move |language_emails| {
+                                language_emails == lang.code()
+                            })))
                             .event(clone!(state => move |_: events::CustomSelectedChange| {
-                                state.user.language.set(lang.code().to_string());
+                                state.user.language_emails.set(lang.code().to_string());
                                 state.save_profile();
                             }))
                         })
