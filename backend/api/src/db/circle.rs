@@ -13,15 +13,9 @@ pub async fn create(
     conn: &mut PgConnection,
     display_name: &str,
     description: &str,
-    image: Option<ImageId>,
+    image_id: ImageId,
     creator_id: UserId,
 ) -> sqlx::Result<CircleId> {
-    let image_id = if let Some(id) = image {
-        Some(id.0)
-    } else {
-        None
-    };
-
     let id: CircleId = sqlx::query!(
         r#"
 insert into circle (display_name, description, image, creator_id) values ($1, $2, $3, $4)
@@ -29,7 +23,7 @@ returning id as "id: CircleId"
         "#,
         display_name,
         description,
-        image_id,
+        image_id.0,
         creator_id.0,
     )
     .fetch_one(&mut *conn)
@@ -124,7 +118,7 @@ pub async fn get_one(db: &PgPool, id: CircleId) -> anyhow::Result<Option<Circle>
 select id            as "circle_id: CircleId",
        display_name,
        description,
-       image         as "image?: ImageId",
+       image         as "image!: ImageId",
        member_count,
        creator_id    as "creator_id: UserId",
        created_at,
@@ -208,7 +202,7 @@ pub async fn browse(
         select  circle.id            as "circle_id!: CircleId",
                 display_name        as "display_name!",
                 description         as "description!",
-                image               as "image?: ImageId",
+                image               as "image!: ImageId",
                 member_count        as "member_count!",
                 creator_id          as "creator_id!: UserId",
                 created_at,
@@ -255,7 +249,7 @@ pub async fn get_by_ids(db: &PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Circle>> 
 select  id            as "circle_id!: CircleId",
         display_name  as "display_name!",
         description   as "description!",
-        image         as "image?: ImageId",
+        image         as "image!: ImageId",
         member_count  as "member_count!: u32",
         creator_id    as "creator_id!: UserId",
         created_at    as "created_at!",
