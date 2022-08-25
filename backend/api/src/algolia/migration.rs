@@ -173,7 +173,7 @@ pub(crate) async fn public_user_index(
                 .single(Attribute("username".to_owned()))
                 .single(Attribute("name".to_owned()))
                 .single(Attribute("bio".to_owned()))
-                .single(Attribute("language_spoken".to_owned()))
+                .single(Attribute("languages_spoken".to_owned()))
                 .single(Attribute("organization".to_owned()))
                 .single(Attribute("persona".to_owned()))
                 .single(Attribute("location".to_owned()))
@@ -183,7 +183,7 @@ pub(crate) async fn public_user_index(
             FacetAttribute::filter_only(Attribute("creator_id".to_owned())),
             FacetAttribute::filter_only(Attribute("creator_name".to_owned())),
             FacetAttribute::filter_only(Attribute("bio".to_owned())),
-            FacetAttribute::filter_only(Attribute("language_spoken".to_owned())),
+            FacetAttribute::filter_only(Attribute("languages_spoken".to_owned())),
             FacetAttribute::filter_only(Attribute("organization".to_owned())),
             FacetAttribute::filter_only(Attribute("persona".to_owned())),
             FacetAttribute::filter_only(Attribute("location".to_owned())),

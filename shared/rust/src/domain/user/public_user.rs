@@ -34,7 +34,7 @@ pub struct PublicUser {
     /// Language spoken of User
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub language_spoken: Option<Vec<String>>, // only here if language_spoken_public is true
+    pub languages_spoken: Option<Vec<String>>, // only here if languages_spoken_public is true
 
     /// Organization of User
     #[serde(default)]
@@ -120,7 +120,7 @@ pub struct SearchPublicUserQuery {
     /// Optionally filter by the user's spoken language(s)
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub language_spoken: Option<Vec<String>>,
+    pub languages_spoken: Option<Vec<String>>,
 
     /// Optionally filter by the user's organization
     #[serde(default)]

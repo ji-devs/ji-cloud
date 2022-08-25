@@ -12,7 +12,7 @@ expression: body
   "profile_image": null,
   "language_app": "en",
   "language_emails": "en",
-  "language_spoken": [
+  "languages_spoken": [
     "en",
     "he"
   ],
@@ -23,7 +23,7 @@ expression: body
   "location_public": true,
   "organization_public": true,
   "persona_public": true,
-  "language_spoken_public": true,
+  "languages_spoken_public": true,
   "bio_public": true,
   "scopes": [
     "Admin"

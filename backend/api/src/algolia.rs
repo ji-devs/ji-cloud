@@ -157,7 +157,7 @@ struct BatchPublicUser<'a> {
     username: &'a str,
     name: &'a str,
     bio: Option<String>,
-    language_spoken: &'a Option<Vec<String>>,
+    languages_spoken: &'a Option<Vec<String>>,
     organization: Option<String>,
     location: Option<String>,
     persona: &'a Option<Vec<String>>,
@@ -1062,7 +1062,7 @@ where course_data.id = any (select live_id from course where course.id = any ($1
             username                                 as "username!",
             given_name || ' '::text || family_name   as "creator_name!",
             (select bio from user_profile where user_profile.user_id = "user".id and bio_public is true)      as "bio?",
-            (select language_spoken from user_profile where user_profile.user_id = "user".id and language_spoken_public is true)  as "language_spoken?: Vec<String>", 
+            (select languages_spoken from user_profile where user_profile.user_id = "user".id and languages_spoken_public is true)  as "languages_spoken?: Vec<String>", 
             (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?", 
             (select persona from user_profile where user_profile.user_id = "user".id and persona_public is true)      as "persona?: Vec<String>", 
             (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?: String", 
@@ -1086,7 +1086,7 @@ limit 100 for no key update skip locked;
                 username: &row.username,
                 name: &row.creator_name,
                 bio : row.bio,
-                language_spoken: &row.language_spoken,
+                languages_spoken: &row.languages_spoken,
                 organization: row.organization,
                 persona: &row.persona,
                 location: row.location,
@@ -2026,7 +2026,7 @@ impl Client {
         username: Option<String>,
         name: Option<String>,
         user_id: Option<UserId>,
-        language_spoken: Option<Vec<String>>,
+        languages_spoken: Option<Vec<String>>,
         organization: Option<String>,
         bio: Option<String>,
         persona: Option<Vec<String>>,
@@ -2085,11 +2085,11 @@ impl Client {
             }))
         }
 
-        if let Some(language_spoken) = language_spoken {
+        if let Some(languages_spoken) = languages_spoken {
             and_filters.filters.push(Box::new(CommonFilter {
                 filter: FacetFilter {
-                    facet_name: "language_spoken".to_owned(),
-                    value: language_spoken.into_iter().map(|x| x).collect(),
+                    facet_name: "languages_spoken".to_owned(),
+                    value: languages_spoken.into_iter().map(|x| x).collect(),
                 },
                 invert: false,
             }))

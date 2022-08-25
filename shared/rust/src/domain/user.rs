@@ -145,7 +145,7 @@ pub struct UserProfile {
     pub language_emails: String,
 
     /// The user's preferred language.
-    pub language_spoken: Vec<String>,
+    pub languages_spoken: Vec<String>,
 
     /// Does the user want educational resources sent to them?
     pub opt_into_edu_resources: bool,
@@ -171,9 +171,9 @@ pub struct UserProfile {
     #[serde(default)]
     pub persona_public: bool, // default to false
 
-    /// Allow language_spoken to be public
+    /// Allow languages_spoken to be public
     #[serde(default)]
-    pub language_spoken_public: bool, // default to false
+    pub languages_spoken_public: bool, // default to false
 
     /// Allow bio to be public
     #[serde(default)]
@@ -248,7 +248,7 @@ pub struct UserProfileExport {
     /// The user's preferred email language.
     pub language_emails: String,
     /// The user's preferred language.
-    pub language_spoken: Vec<String>,
+    pub languages_spoken: Vec<String>,
     /// When the user was created.
     pub created_at: DateTime<Utc>,
     /// When the user was last updated.
@@ -370,7 +370,7 @@ pub struct CreateProfileRequest {
     pub language_emails: String,
 
     /// The user's preferred language.
-    pub language_spoken: Vec<String>,
+    pub languages_spoken: Vec<String>,
 
     /// the timezone that the user uses.
     pub timezone: chrono_tz::Tz,
@@ -452,7 +452,7 @@ pub struct PatchProfileRequest {
     /// the languages the user prefers.
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub language_spoken: Option<Vec<String>>,
+    pub languages_spoken: Option<Vec<String>>,
 
     /// the timezone that the user uses.
     #[serde(default)]
@@ -477,7 +477,7 @@ pub struct PatchProfileRequest {
     /// Publicize user lanuage
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub language_spoken_public: Option<bool>,
+    pub languages_spoken_public: Option<bool>,
 
     /// Publicize user location
     #[serde(default)]

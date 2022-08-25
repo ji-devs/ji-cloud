@@ -18,8 +18,8 @@ insert into "session" (user_id, token, scope_mask) values ('1f241e1b-b537-493f-a
                                                           ('7b96a41c-e406-11eb-8176-efd86dd7f444', 'Sa84_qiKlh7WbOxeR9lofYJngysK_unF', 2), -- user 1
                                                           ('a641fd6e-e41b-11eb-8176-57df101c2201', 'L6gfXvgZeUBt8pdmLBnsGPEWUe3qGCK2_DF', 4); -- user 2
 
-insert into "user_profile" (user_id, username, created_at, given_name, family_name, language_spoken,
-                    opt_into_edu_resources, over_18, timezone, organization, language_spoken_public, organization_public)
+insert into "user_profile" (user_id, username, created_at, given_name, family_name, languages_spoken,
+                    opt_into_edu_resources, over_18, timezone, organization, languages_spoken_public, organization_public)
 values ('1f241e1b-b537-493f-a230-075cb16315be', 'test',
         '2020-08-08T00:11:21Z'::timestamptz, 'Bobby', 'Tables', '{en_US}', true, true, 'US/Pacific', 'test org', false, true),
         ('7b96a41c-e406-11eb-8176-efd86dd7f444', 'test1',
