@@ -33,7 +33,7 @@ pub struct Circle {
     pub member_count: u32,
 
     /// Image of Circle
-    pub image: Option<ImageId>,
+    pub image: ImageId,
 
     /// When Circle was created
     pub created_at: DateTime<Utc>,
@@ -45,7 +45,7 @@ pub struct Circle {
 /// Request to create a new Circle.
 ///
 /// This creates the draft and live [Circle Data](Circle Data) copies with the requested info.
-#[derive(Serialize, Deserialize, Debug, Default)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct CircleCreateRequest {
     /// The Circle's name.
@@ -55,9 +55,7 @@ pub struct CircleCreateRequest {
     pub description: String,
 
     /// Image of the Circle
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub image: Option<ImageId>,
+    pub image: ImageId,
 }
 
 /// Request for updating a Circle's draft data.
@@ -68,11 +66,6 @@ pub struct CircleUpdateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub display_name: Option<String>,
-
-    /// The current author to be updated
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub creator_id: Option<UserId>,
 
     /// Description of the Circle to be updated.
     #[serde(skip_serializing_if = "Option::is_none")]
