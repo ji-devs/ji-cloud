@@ -141,10 +141,7 @@ impl CirclesList {
             .child(html!("img-ji", {
                 .property("slot", "img")
                 .property("lib", MediaLibrary::User.to_str())
-                .apply(|dom| match circle.image {
-                    Some(image) => dom.property("id", &image.0.to_string()),
-                    None => dom,
-                })
+                .property("id", &circle.image.0.to_string())
             }))
             .child(html!("community-list-circle-status", {
                 .property("slot", "status")

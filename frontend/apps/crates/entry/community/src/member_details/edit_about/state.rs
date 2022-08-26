@@ -15,8 +15,8 @@ pub struct EditAbout {
     pub organization_public: Mutable<bool>,
     pub persona: MutableVec<String>,
     pub persona_public: Mutable<bool>,
-    pub language_spoken: Mutable<HashSet<String>>,
-    pub language_spoken_public: Mutable<bool>,
+    pub languages_spoken: Mutable<HashSet<String>>,
+    pub languages_spoken_public: Mutable<bool>,
 }
 
 impl EditAbout {
@@ -29,8 +29,8 @@ impl EditAbout {
             organization_public: Mutable::new(user.organization_public),
             persona: MutableVec::new_with_values(user.persona.clone()),
             persona_public: Mutable::new(user.persona_public),
-            language_spoken: Mutable::new(HashSet::from_iter(user.language_spoken.clone())),
-            language_spoken_public: Mutable::new(user.language_spoken_public),
+            languages_spoken: Mutable::new(HashSet::from_iter(user.languages_spoken.clone())),
+            languages_spoken_public: Mutable::new(user.languages_spoken_public),
             user,
         })
     }
@@ -44,8 +44,8 @@ impl EditAbout {
         user.organization_public = self.organization_public.get();
         user.persona = self.persona.lock_ref().to_vec();
         user.persona_public = self.persona_public.get();
-        user.language_spoken = self.language_spoken.get_cloned().into_iter().collect_vec();
-        user.language_spoken_public = self.language_spoken_public.get();
+        user.languages_spoken = self.languages_spoken.get_cloned().into_iter().collect_vec();
+        user.languages_spoken_public = self.languages_spoken_public.get();
 
         user
     }

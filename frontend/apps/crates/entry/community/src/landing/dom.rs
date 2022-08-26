@@ -94,10 +94,7 @@ impl CommunityLanding {
                 .style("border-radius", "50%")
                 .style("overflow", "hidden")
                 .property("lib", MediaLibrary::User.to_str())
-                .apply(|dom| match circle.image {
-                    Some(image) => dom.property("id", &image.0.to_string()),
-                    None => dom,
-                })
+                .property("id", &circle.image.0.to_string())
             }))
             .child(html!("span", {
                 .style("white-space", "nowrap")

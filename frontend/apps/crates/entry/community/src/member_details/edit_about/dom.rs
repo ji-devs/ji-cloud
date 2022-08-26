@@ -173,22 +173,22 @@ impl Component for Rc<EditAbout> {
                         .property("slot", "language")
                         .property("label", STR_LANGUAGE)
                         .property("multiple", true)
-                        .property_signal("value", state.language_spoken.signal_ref(|language_spoken| {
-                            language_spoken.iter().map(|l| Language::code_to_display_name(l)).join(", ")
+                        .property_signal("value", state.languages_spoken.signal_ref(|languages_spoken| {
+                            languages_spoken.iter().map(|l| Language::code_to_display_name(l)).join(", ")
                         }))
                         .children(JIG_LANGUAGES.iter().map(|lang| {
                             html!("input-select-option", {
                                 .text(lang.display_name())
-                                .property_signal("selected", state.language_spoken.signal_cloned().map(clone!(lang => move |language_spoken| {
-                                    language_spoken.contains(lang.code())
+                                .property_signal("selected", state.languages_spoken.signal_cloned().map(clone!(lang => move |languages_spoken| {
+                                    languages_spoken.contains(lang.code())
                                 })))
                                 .event(clone!(state => move |_: events::CustomSelectedChange| {
-                                    let mut language_spoken = state.language_spoken.lock_mut();
+                                    let mut languages_spoken = state.languages_spoken.lock_mut();
                                     let lang = lang.code().to_string();
-                                    if language_spoken.contains(&lang) {
-                                        language_spoken.remove(&lang);
+                                    if languages_spoken.contains(&lang) {
+                                        languages_spoken.remove(&lang);
                                     } else {
-                                        language_spoken.insert(lang);
+                                        languages_spoken.insert(lang);
                                     }
                                 }))
                             })
@@ -196,9 +196,9 @@ impl Component for Rc<EditAbout> {
                     }),
                     html!("community-private-public-switch", {
                         .property("type", "checkbox")
-                        .property_signal("isPublic", state.language_spoken_public.signal())
+                        .property_signal("isPublic", state.languages_spoken_public.signal())
                         .event(clone!(state => move |evt: events::CustomToggle| {
-                            state.language_spoken_public.set_neq(evt.value());
+                            state.languages_spoken_public.set_neq(evt.value());
                         }))
                     }),
                 ])

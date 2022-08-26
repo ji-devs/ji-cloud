@@ -52,10 +52,7 @@ impl CircleDetails {
                             html!("img-ji", {
                                 .property("slot", "img")
                                 .property("lib", MediaLibrary::User.to_str())
-                                .apply(|dom| match circle.image {
-                                    Some(image) => dom.property("id", &image.0.to_string()),
-                                    None => dom,
-                                })
+                                .property("id", &circle.image.0.to_string())
                             }),
                             // html!("button-rect", {
                             //     .property("slot", "actions")
@@ -144,7 +141,7 @@ impl CircleDetails {
             // .property("city", "New York")
             // .property("state", "NY")
             .apply(|mut dom| {
-                if let Some(languages_spoken) = &member.language_spoken {
+                if let Some(languages_spoken) = &member.languages_spoken {
                     if languages_spoken.len() > 0 {
                         let languages = languages_spoken.iter().map(|l| Language::code_to_display_name(l)).join(", ");
                         dom = dom.property("language", languages);

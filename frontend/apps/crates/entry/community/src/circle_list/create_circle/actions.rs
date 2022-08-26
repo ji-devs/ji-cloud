@@ -46,7 +46,7 @@ impl CreateCircle {
         let req = CircleCreateRequest {
             display_name: state.name.get_cloned().unwrap_or_default(),
             description: state.description.get_cloned().unwrap_or_default(),
-            image: Some(image_id),
+            image: image_id,
         };
 
         let circle_id = endpoints::circle::Create::api_with_auth(Some(req))
