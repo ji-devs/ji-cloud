@@ -15,6 +15,7 @@ pub struct CircleDetails {
     pub members: MutableVec<PublicUser>,
     pub loader: AsyncLoader,
     pub community_state: Rc<Community>,
+    pub(super) active_popup: Mutable<Option<ActivePopup>>,
 }
 
 impl CircleDetails {
@@ -25,6 +26,14 @@ impl CircleDetails {
             members: MutableVec::new(),
             loader: AsyncLoader::new(),
             community_state,
+            active_popup: Mutable::new(None),
         })
     }
+}
+
+#[derive(Clone, Copy, Debug)]
+pub(super) enum ActivePopup {
+    About,
+    Name,
+    Image,
 }

@@ -31,19 +31,43 @@ export class _ extends LitElement {
                     height: 120px;
                     column-gap: 32px;
                 }
-                .top-section ::slotted([slot=img]) {
+                .top-section .image {
                     grid-row: 1 / -1;
                     height: 120px;
                     width: 120px;
                     box-sizing: border-box;
+                    display: inline-grid;
+                }
+                .top-section .image ::slotted([slot=image]) {
+                    height: 100%;
+                    width: 100%;
                     border-radius: 50%;
+                    display: inline-block;
                     overflow: hidden;
                     border: solid 2px var(--main-yellow);
+                    grid-row: 1;
+                    grid-column: 1;
+                }
+                .top-section .image ::slotted([slot=edit-image]) {
+                    grid-row: 1;
+                    grid-column: 1;
+                    justify-self: end;
+                    font-size: 14px;
+                }
+                .top-section header {
+                    display: grid;
+                    grid-template-columns: auto auto;
+                    justify-content: start;
+                    column-gap: 10px;
+                }
+                .top-section header ::slotted(fa-button) {
+                    font-size: 14px;
                 }
                 .top-section h1 {
                     font-size: 40px;
                     font-weight: 800;
                     color: var(--dark-blue-4);
+                    display: inline-block;
                 }
                 .top-section .actions {
                     display: flex;
@@ -70,6 +94,12 @@ export class _ extends LitElement {
                     font-size: 14px;
                     display: grid;
                     row-gap: 16px;
+                }
+                .about-section header {
+                    display: grid;
+                    grid-template-columns: auto auto;
+                    justify-content: space-between;
+                    align-items: center;
                 }
                 .about-section h3 {
                     color: var(--dark-blue-4);
@@ -117,8 +147,14 @@ export class _ extends LitElement {
     render() {
         return html`
             <div class="top-section">
-                <slot name="img"></slot>
-                <h1>${this.name}</h1>
+                <div class="image">
+                    <slot name="image"></slot>
+                    <slot name="edit-image"></slot>
+                </div>
+                <header>
+                    <h1>${this.name}</h1>
+                    <slot name="edit-name"></slot>
+                </header>
                 <div class="actions">
                     <slot name="actions"></slot>
                 </div>
@@ -127,7 +163,10 @@ export class _ extends LitElement {
                 <slot name="member-images"></slot>
             </div>
             <div class="about-section">
-                <h3>${STR_ABOUT}</h3>
+                <header>
+                    <h3>${STR_ABOUT}</h3>
+                    <slot name="edit-about"></slot>
+                </header>
                 <p>${this.description}</p>
             </div>
             <div class="members-section">

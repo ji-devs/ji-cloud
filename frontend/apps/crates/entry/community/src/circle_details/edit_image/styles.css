@@ -1,0 +1,63 @@
+:host {
+    display: grid;
+    row-gap: 24px;
+    max-width: 400px;
+    width: 90vw;
+}
+popup-body {
+    border-radius: 16px;
+    box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+}
+fa-button {
+    justify-self: end;
+    font-size: 18px;
+}
+.body {
+    padding: 30px;
+    display: grid;
+    /* justify-content: center; */
+    row-gap: 20px;
+}
+
+.has-image {
+    display: grid;
+    justify-content: center;
+    row-gap: 10px;
+}
+.has-image profile-image, img {
+    height: 120px;
+    width: 120px;
+    border-radius: 50%;
+
+}
+.has-image button-rect {
+    justify-self: center;
+}
+
+input-file {
+    border-radius: 16px;
+    border: dashed 2px var(--light-blue-4);
+    width: 100%;
+    height: 190px;
+}
+input-file::part(wrapper) {
+    justify-items: center;
+}
+input-file fa-icon {
+    height: 48px;
+    width: 48px;
+    border-radius: 50%;
+    display: inline-grid;
+    place-content: center;
+    background-color: #e7f0fe;
+    color: #afccf1;
+    font-size: 26px;
+}
+input-file .pick-file-message {
+    color: var(--dark-gray-3);
+    font-size: 14px;
+}
+input-file .file-size {
+    color: var(--dark-gray-4);
+    font-size: 13px;
+}

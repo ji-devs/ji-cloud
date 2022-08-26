@@ -1,7 +1,14 @@
 use std::rc::Rc;
 
+use super::{
+    callbacks::EditCirclesCallbacks, edit_about::EditAbout, edit_image::EditImage,
+    edit_name::EditName, ActivePopup, CircleDetails,
+};
+use crate::member_details::component::Component;
+use crate::state::MEMBER_LIST_GRID_COLUMNS;
+use components::dialog::Dialog;
 use dominator::{clone, html, Dom};
-use futures_signals::signal_vec::SignalVecExt;
+use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
 use itertools::Itertools;
 use shared::{
     domain::{
@@ -15,12 +22,9 @@ use utils::{
     languages::Language,
     prelude::get_user_id,
     routes::{CommunityMembersRoute, CommunityRoute, Route},
+    unwrap::UnwrapJiExt,
 };
 use wasm_bindgen::JsValue;
-
-use crate::state::MEMBER_LIST_GRID_COLUMNS;
-
-use super::CircleDetails;
 
 // const STR_CONTACT_ADMIN: &str = "Contact admin";
 // const STR_INVITE: &str = "Invite";
@@ -50,9 +54,33 @@ impl CircleDetails {
                         .property("memberCount", circle.member_count)
                         .children(&mut [
                             html!("img-ji", {
-                                .property("slot", "img")
+                                .property("slot", "image")
                                 .property("lib", MediaLibrary::User.to_str())
                                 .property("id", &circle.image.0.to_string())
+                            }),
+                            html!("fa-button", {
+                                .property("slot", "edit-image")
+                                .property("icon", "fa-light fa-pen")
+                                .text("about")
+                                .event(clone!(state => move |_: events::Click| {
+                                    state.active_popup.set(Some(ActivePopup::Image))
+                                }))
+                            }),
+                            html!("fa-button", {
+                                .property("slot", "edit-name")
+                                .property("icon", "fa-light fa-pen")
+                                .text("about")
+                                .event(clone!(state => move |_: events::Click| {
+                                    state.active_popup.set(Some(ActivePopup::Name))
+                                }))
+                            }),
+                            html!("fa-button", {
+                                .property("slot", "edit-about")
+                                .property("icon", "fa-light fa-pen")
+                                .text("about")
+                                .event(clone!(state => move |_: events::Click| {
+                                    state.active_popup.set(Some(ActivePopup::About))
+                                }))
                             }),
                             // html!("button-rect", {
                             //     .property("slot", "actions")
@@ -129,6 +157,46 @@ impl CircleDetails {
                         })))
                     })
                 })
+            })))
+
+            .child_signal(state.active_popup.signal().map(clone!(state => move |active_popup| {
+                active_popup.map(clone!(state => move |active_popup| {
+                    Dialog::render(
+                        clone!(state => move || {
+                            let callbacks = EditCirclesCallbacks {
+                                save_changes: Box::new(clone!(state => move|circle| {
+                                    state.save_circle_changes(circle);
+                                })),
+                                close: Box::new(clone!(state => move || {
+                                    state.active_popup.set(None);
+                                }))
+                            };
+                            match active_popup {
+                                ActivePopup::About => {
+                                    EditAbout::new(
+                                        state.circle.get_cloned().unwrap_ji(),
+                                        callbacks
+                                    ).render()
+                                },
+                                ActivePopup::Name => {
+                                    EditName::new(
+                                        state.circle.get_cloned().unwrap_ji(),
+                                        callbacks
+                                    ).render()
+                                },
+                                ActivePopup::Image => {
+                                    EditImage::new(
+                                        state.circle.get_cloned().unwrap_ji(),
+                                        callbacks
+                                    ).render()
+                                },
+                            }
+                        }),
+                        Some(Box::new(clone!(state => move || {
+                            state.active_popup.set(None);
+                        })))
+                    )
+                }))
             })))
         })
     }

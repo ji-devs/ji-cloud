@@ -4,7 +4,10 @@ use dominator::clone;
 use futures::join;
 use shared::{
     api::{endpoints, ApiEndpoint},
-    domain::{circle::Circle, user::public_user::UserBrowseQuery},
+    domain::{
+        circle::{Circle, CircleUpdateRequest},
+        user::public_user::UserBrowseQuery,
+    },
     error::EmptyError,
 };
 use utils::{
@@ -89,6 +92,25 @@ impl CircleDetails {
                 }
                 Err(_) => todo!(),
             }
+        }));
+    }
+
+    pub fn save_circle_changes(self: &Rc<Self>, circle: Circle) {
+        let state = self;
+        state.active_popup.set(None);
+        state.loader.load(clone!(state => async move {
+            let req = CircleUpdateRequest {
+                display_name: Some(circle.display_name.clone()),
+                description: Some(circle.description.clone()),
+                image: Some(circle.image),
+            };
+
+            let path = endpoints::circle::Update::PATH.replace("{id}", &state.circle_id.0.to_string());
+            let res = api_with_auth_empty::<EmptyError, CircleUpdateRequest>(&path, endpoints::circle::Update::METHOD, Some(req)).await;
+            if let Err(_err) = res {
+                todo!()
+            }
+            state.circle.set(Some(circle))
         }));
     }
 
