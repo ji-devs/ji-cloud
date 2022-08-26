@@ -185,7 +185,7 @@ pub fn media_key(library: MediaLibrary, id: Uuid, file_kind: FileKind) -> String
     format!(
         "media/{}/{}/{}",
         library.to_str(),
-        id.to_hyphenated(),
+        id.hyphenated(),
         file_kind.suffix()
     )
 }

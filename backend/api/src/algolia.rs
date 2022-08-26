@@ -1200,7 +1200,7 @@ limit 100 for no key update skip locked;
         if let Err(e) = self.try_delete_image(id).await {
             log::warn!(
                 "failed to delete image with id {} from algolia: {}",
-                id.0.to_hyphenated(),
+                id.0.hyphenated(),
                 e
             );
         }
@@ -1218,7 +1218,7 @@ limit 100 for no key update skip locked;
         if let Err(e) = self.try_delete_jig(id).await {
             log::warn!(
                 "failed to delete jig with id {} from algolia: {}",
-                id.0.to_hyphenated(),
+                id.0.hyphenated(),
                 e
             );
         }
@@ -1236,7 +1236,7 @@ limit 100 for no key update skip locked;
         if let Err(e) = self.try_delete_resource(id).await {
             log::warn!(
                 "failed to delete resource with id {} from algolia: {}",
-                id.0.to_hyphenated(),
+                id.0.hyphenated(),
                 e
             );
         }
@@ -1254,7 +1254,7 @@ limit 100 for no key update skip locked;
         if let Err(e) = self.try_delete_circle(id).await {
             log::warn!(
                 "failed to delete circle with id {} from algolia: {}",
-                id.0.to_hyphenated(),
+                id.0.hyphenated(),
                 e
             );
         }
@@ -1272,7 +1272,7 @@ limit 100 for no key update skip locked;
         if let Err(e) = self.try_delete_course(id).await {
             log::warn!(
                 "failed to delete course with id {} from algolia: {}",
-                id.0.to_hyphenated(),
+                id.0.hyphenated(),
                 e
             );
         }
@@ -1290,7 +1290,7 @@ limit 100 for no key update skip locked;
         if let Err(e) = self.try_delete_public_user(id).await {
             log::warn!(
                 "failed to delete public user with id {} from algolia: {}",
-                id.to_hyphenated(),
+                id.hyphenated(),
                 e
             );
         }
