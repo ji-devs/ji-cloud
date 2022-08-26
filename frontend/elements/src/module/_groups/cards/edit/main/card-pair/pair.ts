@@ -1,5 +1,5 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
-import { classMap } from "lit-html/directives/class-map";
+import "@elements/core/hebrew-buttons/hebrew-buttons";
 
 @customElement("main-card-pair")
 export class _ extends LitElement {
@@ -45,6 +45,11 @@ export class _ extends LitElement {
                     grid-row: 2 / span 2;
                     grid-column: 2 / span 2;
                 }
+                ::slotted(hebrew-buttons) {
+                    align-self: center;
+                    justify-self: end;
+                    margin-bottom: 40px;
+                }
                 .index {
                     font-size: 14px;
                     text-align: center;
@@ -65,6 +70,7 @@ export class _ extends LitElement {
                 <div class="cards">
                     <div class="right"><slot name="right"></slot></div>
                     <div class="left"><slot name="left"></slot></div>
+                    <slot name="hebrew-buttons"></slot>
                 </div>
             </section>
             <div class="index">${index + 1}</div>

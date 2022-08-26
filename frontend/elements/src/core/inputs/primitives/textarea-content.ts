@@ -8,10 +8,11 @@
  * Starting in edit mode might be off if waiting for fonts to load
  */
 
-import { LitElement, html, css, customElement, property } from "lit-element";
+import { LitElement, html, css, customElement, property, query } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
 import { nothing } from "lit-html";
 import { styleMap } from "lit-html/directives/style-map";
+import { closestPierceShadow } from "@utils/dom";
 
 export type CLICK_MODE = "single" | "double" | "none";
 
@@ -30,7 +31,7 @@ export class _ extends LitElement {
                     font-family: var(--font-family, Poppins);
                     /*font-size: var(--font-size, 16px);*/
                     color: var(--color, black);
-                    display: none;
+                    /* display: none; */
                     text-align: center;
                 }
 
@@ -86,6 +87,12 @@ export class _ extends LitElement {
     @property()
     fontSize: string = "16px";
 
+    @query('textarea')
+    textarea!: HTMLTextAreaElement;
+
+    @query('#measure')
+    measure!: HTMLElement;
+
     toggleEditing = (value: boolean) => {
         this.editing = value;
         this.dispatchEvent(
@@ -98,10 +105,7 @@ export class _ extends LitElement {
         let { key } = evt;
         key = key.toLowerCase();
         if (key === "escape") {
-            const input = this.shadowRoot?.getElementById(
-                "input"
-            ) as HTMLInputElement;
-            input.value = this.value;
+            this.textarea.value = this.value;
             this.toggleEditing(false);
             this.dispatchEvent(new Event("reset"));
         } else if (key === "enter") {
@@ -114,40 +118,30 @@ export class _ extends LitElement {
     lastMeasuredHeight: number = 0;
     onInput() {
         const { constrainWidth, constrainHeight } = this;
-        const input = this.shadowRoot?.getElementById(
-            "input"
-        ) as HTMLInputElement;
         this.resizeInput();
         if (constrainWidth && constrainHeight) {
             while (
                 this.lastMeasuredWidth >= constrainWidth ||
                 this.lastMeasuredHeight >= constrainHeight
             ) {
-                const { value } = input;
-                input.value = value.substring(0, value.length - 1);
+                const { value } = this.textarea;
+                this.textarea.value = value.substring(0, value.length - 1);
                 this.resizeInput();
             }
         }
 
         this.dispatchEvent(
             new CustomEvent("custom-input", {
-                detail: { value: input.value },
+                detail: { value: this.textarea.value },
             })
         );
     }
 
     resizeInput = () => {
-        const input = this.shadowRoot?.getElementById(
-            "input"
-        ) as HTMLInputElement;
-        const measure = this.shadowRoot?.getElementById(
-            "measure"
-        ) as HTMLInputElement;
+        this.measure.textContent = this.textarea.value as string;
 
-        measure.textContent = input.value as string;
-
-        const lastChar = input.value.charAt(input.value.length - 1);
-        const rect = measure.getBoundingClientRect();
+        const lastChar = this.textarea.value.charAt(this.textarea.value.length - 1);
+        const rect = this.measure.getBoundingClientRect();
 
         let { width, height } = rect;
         if (lastChar === "\n" || lastChar === "\r") {
@@ -158,18 +152,25 @@ export class _ extends LitElement {
             height += lineRect.height;
         }
 
-        input.style.width = `${width}px`;
-        input.style.height = `${height}px`;
+        this.textarea.style.width = `${width}px`;
+        this.textarea.style.height = `${height}px`;
 
         this.lastMeasuredWidth = width;
         this.lastMeasuredHeight = height;
     };
 
-    onGlobalMouseDown = (evt: MouseEvent) => {
-        if (!evt.composedPath().includes(this as any)) {
+    onBlur(e: FocusEvent) {
+        let relatedTarget = closestPierceShadow(e.relatedTarget as Node, "hebrew-keyboard, hebrew-buttons");
+
+        // if is keyboard, keyboard with refocus. If is hebrew-buttons, refocus here
+        if(relatedTarget?.matches("hebrew-buttons")) {
+            this.shadowRoot?.querySelector("textarea")?.focus();
+        }
+
+        if (!relatedTarget) {
             this.dispatchChange();
         }
-    };
+    }
 
     firstUpdated(_changed: any) {
         this.resizeInput();
@@ -177,16 +178,11 @@ export class _ extends LitElement {
     updated(changed: any) {
         if (typeof changed.get("editing") === "boolean") {
             const { editing } = this;
-            this.removeGlobalListener();
             if (editing) {
-                window.addEventListener("mousedown", this.onGlobalMouseDown);
-                const input = this.shadowRoot?.getElementById(
-                    "input"
-                ) as HTMLInputElement;
-                if (input) {
-                    input.focus();
-                    input.value = this.value;
-                    input.setSelectionRange(-1, -1);
+                if (this.textarea) {
+                    this.textarea.focus();
+                    this.textarea.value = this.value;
+                    this.textarea.setSelectionRange(-1, -1);
                     this.resizeInput();
                 }
             }
@@ -195,18 +191,10 @@ export class _ extends LitElement {
 
     disconnectedCallback() {
         super.disconnectedCallback();
-        this.removeGlobalListener();
-    }
-
-    removeGlobalListener() {
-        window.removeEventListener("mousedown", this.onGlobalMouseDown);
     }
 
     dispatchChange = () => {
-        const input = this.shadowRoot?.getElementById(
-            "input"
-        ) as HTMLInputElement;
-        const value = input.value;
+        const value = this.textarea.value;
         this.dispatchEvent(
             new CustomEvent("custom-change", {
                 detail: { value },
@@ -260,15 +248,14 @@ export class _ extends LitElement {
                   `}
             <textarea
                 style=${style}
-                class="${classMap({
-                    visible: editing,
-                })}"
-                id="input"
+                .readOnly=${!editing}
                 @input="${this.onInput}"
                 @keyup="${this.onKey}"
+                @blur="${this.onBlur}"
+                @focus=${() => this.editing = true}
                 .value="${value}"
             ></textarea>
-            <span
+            <!-- <span
                 style=${style}
                 id="show"
                 class="${classMap({
@@ -285,7 +272,7 @@ export class _ extends LitElement {
                     }
                 }}
                 >${value}</span
-            >
+            > -->
             <span style=${style} id="measure" class="measure">${value}</span>
             <span style=${style} id="measure-line" class="measure">&nbsp;</span>
         `;
