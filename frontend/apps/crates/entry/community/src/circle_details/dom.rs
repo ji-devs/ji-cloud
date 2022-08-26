@@ -58,30 +58,6 @@ impl CircleDetails {
                                 .property("lib", MediaLibrary::User.to_str())
                                 .property("id", &circle.image.0.to_string())
                             }),
-                            html!("fa-button", {
-                                .property("slot", "edit-image")
-                                .property("icon", "fa-light fa-pen")
-                                .text("about")
-                                .event(clone!(state => move |_: events::Click| {
-                                    state.active_popup.set(Some(ActivePopup::Image))
-                                }))
-                            }),
-                            html!("fa-button", {
-                                .property("slot", "edit-name")
-                                .property("icon", "fa-light fa-pen")
-                                .text("about")
-                                .event(clone!(state => move |_: events::Click| {
-                                    state.active_popup.set(Some(ActivePopup::Name))
-                                }))
-                            }),
-                            html!("fa-button", {
-                                .property("slot", "edit-about")
-                                .property("icon", "fa-light fa-pen")
-                                .text("about")
-                                .event(clone!(state => move |_: events::Click| {
-                                    state.active_popup.set(Some(ActivePopup::About))
-                                }))
-                            }),
                             // html!("button-rect", {
                             //     .property("slot", "actions")
                             //     .property("kind", "outline")
@@ -105,16 +81,42 @@ impl CircleDetails {
                         .apply_if(
                             user_id_is_circle_author(&get_user_id(), circle),
                             clone!(state => move |dom| {
-                                dom.child(html!("button-rect", {
-                                    .property("slot", "actions")
-                                    .property("kind", "outline")
-                                    .property("size", "small")
-                                    .property("color", "red")
-                                    .text(STR_DELETE_CIRCLE)
-                                    .event(clone!(state => move |_: events::Click| {
-                                        state.delete_circle();
-                                    }))
-                                }))
+                                dom.children(&mut [
+                                    html!("button-rect", {
+                                        .property("slot", "actions")
+                                        .property("kind", "outline")
+                                        .property("size", "small")
+                                        .property("color", "red")
+                                        .text(STR_DELETE_CIRCLE)
+                                        .event(clone!(state => move |_: events::Click| {
+                                            state.delete_circle();
+                                        }))
+                                    }),
+                                    html!("fa-button", {
+                                        .property("slot", "edit-image")
+                                        .property("icon", "fa-light fa-pen")
+                                        .text("about")
+                                        .event(clone!(state => move |_: events::Click| {
+                                            state.active_popup.set(Some(ActivePopup::Image))
+                                        }))
+                                    }),
+                                    html!("fa-button", {
+                                        .property("slot", "edit-name")
+                                        .property("icon", "fa-light fa-pen")
+                                        .text("about")
+                                        .event(clone!(state => move |_: events::Click| {
+                                            state.active_popup.set(Some(ActivePopup::Name))
+                                        }))
+                                    }),
+                                    html!("fa-button", {
+                                        .property("slot", "edit-about")
+                                        .property("icon", "fa-light fa-pen")
+                                        .text("about")
+                                        .event(clone!(state => move |_: events::Click| {
+                                            state.active_popup.set(Some(ActivePopup::About))
+                                        }))
+                                    }),
+                                ])
                             })
                         )
                         .child_signal(state.community_state.user.signal_ref(clone!(state => move |user| {
