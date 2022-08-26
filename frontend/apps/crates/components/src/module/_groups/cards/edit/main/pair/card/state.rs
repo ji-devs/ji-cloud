@@ -3,7 +3,7 @@ use crate::module::_groups::cards::{edit::state::*, lookup::Side};
 
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
 use shared::domain::module::body::_groups::cards::Step;
-use std::{cell::RefCell, rc::Rc};
+use std::rc::Rc;
 use web_sys::HtmlElement;
 
 /// Used for passing it's contents as properties to the modal-confirm element
@@ -46,7 +46,6 @@ pub struct MainCard<RawData: RawDataExt, E: ExtraExt> {
     pub side: Side,
     pub card: Card,
     pub other: Card,
-    pub input_ref: Rc<RefCell<Option<HtmlElement>>>,
     pub editing_active: Mutable<bool>,
     pub is_image: bool,
     /// Whether the card can be selected
@@ -86,7 +85,6 @@ impl<RawData: RawDataExt, E: ExtraExt> MainCard<RawData, E> {
             side,
             card,
             other,
-            input_ref: Rc::new(RefCell::new(None)),
             editing_active: Mutable::new(false),
             is_image,
             can_select: step == Step::One,

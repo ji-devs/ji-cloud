@@ -258,9 +258,6 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
                             }
 
                         }))
-                        .after_inserted(clone!(state => move |dom| {
-                            *state.input_ref.borrow_mut() = Some(dom);
-                        }))
                     })
                 },
                 CardContent::Image(image) => {
