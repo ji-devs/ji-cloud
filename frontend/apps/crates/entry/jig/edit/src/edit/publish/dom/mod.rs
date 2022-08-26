@@ -159,7 +159,7 @@ fn render_page(state: Rc<Publish>) -> Dom {
                         })
                 })
                 .child({
-                    HebrewButtons::short().render(Some("hebrew-inputs"))
+                    HebrewButtons::reveal().render(Some("hebrew-inputs"))
                 })
                 .child(html!("input" => HtmlInputElement, {
                     .with_node!(elem => {
@@ -186,7 +186,7 @@ fn render_page(state: Rc<Publish>) -> Dom {
                 //         })
                 // })
                 .child({
-                    HebrewButtons::short().render(Some("hebrew-inputs"))
+                    HebrewButtons::reveal().render(Some("hebrew-inputs"))
                 })
                 .child(html!("textarea" => HtmlTextAreaElement, {
                     .with_node!(elem => {

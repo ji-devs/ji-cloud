@@ -7,7 +7,10 @@ use web_sys::HtmlElement;
 
 use crate::overlay::handle::OverlayHandle;
 
-use super::state::{HebrewButtons, Popup};
+use super::{
+    state::{HebrewButtons, Popup},
+    Kind,
+};
 
 const SEFARIA_URL: &str = "https://www.sefaria.org/texts/Tanakh";
 const SEFARIA_IFRAME_WIDTH: u32 = 700;
@@ -20,7 +23,11 @@ impl HebrewButtons {
         html!("hebrew-buttons" => HtmlElement, {
             .with_node!(elem => {
                 .property_signal("full", state.active_popup.signal().map(clone!(state => move |active_popup| {
-                    state.full || active_popup.is_some()
+                    match state.kind {
+                        Kind::Full => true,
+                        Kind::Reveal => active_popup.is_some(),
+                        Kind::KeyboardOnly => false,
+                    }
                 })))
                 .apply_if(slot.is_some(), |dom| {
                     dom.property("slot", slot.unwrap_ji())
@@ -28,46 +35,48 @@ impl HebrewButtons {
                 .child_signal(state.active_popup.signal().map(clone!(state, elem => move|active_popup| {
                     active_popup.map(|popup| state.render_popups(popup, elem.clone()))
                 })))
-                .children(&mut [
-                    html!("hebrew-inputs-action", {
-                        .property("slot", "full-only")
-                        .property("kind", Popup::Sefaria.str())
-                        .property_signal("active", state.active_popup.signal().map(|active_popup| {
-                            active_popup == Some(Popup::Sefaria)
-                        }))
-                        .event(clone!(state => move|_: events::Click| {
-                            state.on_action_click(Popup::Sefaria);
-                        }))
-                    }),
-                    html!("div", {
-                        .property("slot", "full-only")
-                        .class("divider")
-                    }),
-                    html!("hebrew-inputs-action", {
-                        .property("slot", "full-only")
-                        .property("kind", Popup::Dicta.str())
-                        .property_signal("active", state.active_popup.signal().map(|active_popup| {
-                            active_popup == Some(Popup::Dicta)
-                        }))
-                        .event(clone!(state => move|_: events::Click| {
-                            state.on_action_click(Popup::Dicta);
-                        }))
-                    }),
-                    html!("div", {
-                        .property("slot", "full-only")
-                        .class("divider")
-                    }),
-                    html!("hebrew-inputs-action", {
-                        .property("slot", "always")
-                        .property("kind", Popup::Keyboard.str())
-                        .property_signal("active", state.active_popup.signal().map(|active_popup| {
-                            active_popup == Some(Popup::Keyboard)
-                        }))
-                        .event(clone!(state => move|_: events::Click| {
-                            state.on_action_click(Popup::Keyboard);
-                        }))
-                    }),
-                ])
+                .apply_if(false, |dom| {
+                    dom.children(&mut [
+                        html!("hebrew-inputs-action", {
+                            .property("slot", "full-only")
+                            .property("kind", Popup::Sefaria.str())
+                            .property_signal("active", state.active_popup.signal().map(|active_popup| {
+                                active_popup == Some(Popup::Sefaria)
+                            }))
+                            .event(clone!(state => move|_: events::Click| {
+                                state.on_action_click(Popup::Sefaria);
+                            }))
+                        }),
+                        html!("div", {
+                            .property("slot", "full-only")
+                            .class("divider")
+                        }),
+                        html!("hebrew-inputs-action", {
+                            .property("slot", "full-only")
+                            .property("kind", Popup::Dicta.str())
+                            .property_signal("active", state.active_popup.signal().map(|active_popup| {
+                                active_popup == Some(Popup::Dicta)
+                            }))
+                            .event(clone!(state => move|_: events::Click| {
+                                state.on_action_click(Popup::Dicta);
+                            }))
+                        }),
+                        html!("div", {
+                            .property("slot", "full-only")
+                            .class("divider")
+                        }),
+                    ])
+                })
+                .child(html!("hebrew-inputs-action", {
+                    .property("slot", "always")
+                    .property("kind", Popup::Keyboard.str())
+                    .property_signal("active", state.active_popup.signal().map(|active_popup| {
+                        active_popup == Some(Popup::Keyboard)
+                    }))
+                    .event(clone!(state => move|_: events::Click| {
+                        state.on_action_click(Popup::Keyboard);
+                    }))
+                }))
             })
         })
     }

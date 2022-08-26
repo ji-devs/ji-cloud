@@ -110,7 +110,7 @@ fn render_tab_body(state: Rc<Step3>, tab: Tab) -> Dom {
             html!("tapping-board-interaction-label", {
                 .child(html!("input-wrapper", {
                     .child({
-                        HebrewButtons::short().render(Some("hebrew-inputs"))
+                        HebrewButtons::reveal().render(Some("hebrew-inputs"))
                     })
                     .property("label", crate::strings::step_3::STR_LABEL)
                     .child(html!("textarea" => HtmlTextAreaElement, {
