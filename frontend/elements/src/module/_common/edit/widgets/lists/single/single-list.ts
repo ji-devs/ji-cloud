@@ -1,38 +1,31 @@
 import { LitElement, html, css, customElement } from "lit-element";
 
-const STR_ADD_WORDS = "Add Your Words";
+const STR_ADD_WORDS = "Add words here";
 
 @customElement("sidebar-widget-single-list")
 export class _ extends LitElement {
     static get styles() {
         return [
             css`
-                :host {
-                    display: grid;
-                    /*
-                        using minmax(0, 1fr) instead of just 1fr to allow the items inside to overflow without growing the container.
-                        https://stackoverflow.com/a/52861514/5253155
-                        https://stackoverflow.com/a/43312314/5253155
-                    */
-                    grid-template-rows: auto auto minmax(0, 1fr);
-                    height: 100%;
-                }
                 header {
                     display: flex;
                     justify-content: space-between;
                 }
                 .input-buttons {
-                    margin-top: 34px;
+                    padding: 12px 0;
                     display: flex;
                     justify-content: flex-end;
-                    margin-bottom: 12px;
-                    margin-right: 4px;
                 }
                 @media (min-width: 1920px) {
                     .input-buttons {
                         margin-bottom: 18px;
                         margin-right: 0px;
                     }
+                }
+                .header {
+                    top: 0;
+                    position: sticky;
+                    background-color: #e9eff8;
                 }
                 .list {
                     box-sizing: border-box;
@@ -67,8 +60,10 @@ export class _ extends LitElement {
                 .done-btn {
                     display: flex;
                     justify-content: flex-end;
-                    margin-top: 16px;
-                    padding-bottom: 40px;
+                    padding: 16px 0;
+                    bottom: 0;
+                    position: sticky;
+                    background-color: #e9eff8;
                 }
             `,
         ];
@@ -76,12 +71,14 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <header>
-                <div>${STR_ADD_WORDS}</div>
-                <div><slot name="clear"></slot></div>
-            </header>
-            <div class="input-buttons">
-                <slot name="hebrew-buttons"></slot>
+            <div class="header">
+                <header>
+                    <div>${STR_ADD_WORDS}</div>
+                    <div><slot name="clear"></slot></div>
+                </header>
+                <div class="input-buttons">
+                    <slot name="hebrew-buttons"></slot>
+                </div>
             </div>
             <div class="lists-and-actions">
                 <div class="list">
