@@ -26,11 +26,11 @@ const STR_CONFIRM_TITLE: &str = "Warning";
 
 const STR_REMOVE_CONTENT_IMAGE: &str = "Are you sure you want to remove this image?";
 const STR_REMOVE_CONTENT_AUDIO: &str = "Are you sure you want to remove this audio clip?";
-const STR_REMOVE_CONFIRM: &str = "Remove";
+const STR_REMOVE_CONFIRM: &str = "Yes, remove";
 const STR_REMOVE_CANCEL: &str = "Don't remove";
 
 const STR_DELETE_CONTENT_PAIR: &str = "Are you sure you want to delete this pair?";
-const STR_DELETE_CONFIRM: &str = "Delete Pair";
+const STR_DELETE_CONFIRM: &str = "Yes, delete";
 const STR_DELETE_CANCEL: &str = "Don't delete";
 
 pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>) -> Dom {
@@ -49,6 +49,7 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
                             .property("content", confirm_action.content)
                             .property("cancel_text", confirm_action.cancel)
                             .property("confirm_text", confirm_action.confirm)
+                            .property("confirmIcon", "core/menus/delete-white.svg")
                             .event(clone!(state => move |_evt: events::CustomCancel| state.confirm_action.set(None)))
                             .event(clone!(state => move |_evt: events::CustomConfirm| {
                                 state.confirm_action.set(None);

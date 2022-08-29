@@ -331,7 +331,8 @@ pub fn render_question(
                             .property("title", "Warning")
                             .property("content", "Are you sure you want to delete this question?")
                             .property("cancel_text", "Don't delete")
-                            .property("confirm_text", "Delete question")
+                            .property("confirm_text", "Yes, delete")
+                            .property("confirmIcon", "core/menus/delete-white.svg")
                             .event(clone!(question => move |_evt: events::CustomCancel| question.confirm_delete.set_neq(false)))
                             .event(clone!(state, index, question => move |_evt: events::CustomConfirm| {
                                 question.confirm_delete.set_neq(false);
