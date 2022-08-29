@@ -1,5 +1,6 @@
 use std::rc::Rc;
 
+use components::confirm::Confirm;
 use dominator::clone;
 use futures::join;
 use shared::{
@@ -17,6 +18,10 @@ use utils::{
 };
 
 use super::CircleDetails;
+
+const STR_CONFIRM_DELETE_TITLE: &str = "Confirm";
+const STR_CONFIRM_DELETE_MESSAGE: &str =
+    "There are members in this circle! Are you sure you want to delete it?";
 
 impl CircleDetails {
     pub fn load_data(self: &Rc<Self>) {
@@ -118,6 +123,17 @@ impl CircleDetails {
         let state = self;
 
         state.loader.load(clone!(state => async move {
+            match &*state.circle.lock_ref() {
+                None => {},
+                Some(circle) => {
+                    if circle.member_count > 0 {
+                        if !Confirm::new(STR_CONFIRM_DELETE_TITLE.to_string(), STR_CONFIRM_DELETE_MESSAGE.to_string()).confirm().await {
+                            return;
+                        }
+                    }
+                },
+            };
+
             let path = endpoints::circle::Delete::PATH.replace("{id}", &state.circle_id.0.to_string());
             match api_with_auth_empty::<EmptyError, ()>(&path, endpoints::circle::Delete::METHOD, None).await
             {
