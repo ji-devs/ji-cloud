@@ -1,0 +1,29 @@
+dialog {
+    box-shadow: rgb(0 0 0 / 16%) 0px 3px 16px 0px;
+    border-radius: 16px;
+    border: 0;
+    padding: 0;
+    max-width: 400px;
+    min-width: 30vw;
+    display: grid;
+}
+
+popup-body {
+    grid-template-rows: auto 1fr;
+}
+
+[slot=body] {
+    padding: 0 30px 30px 30px;
+    display: grid;
+    row-gap: 28px;
+    grid-template-columns: auto auto;
+    justify-content: space-between;
+    align-content: space-between;
+    justify-items: center;
+}
+
+p {
+    grid-column: 1 / -1;
+    margin: 0;
+    color: var(--dark-gray-6);
+}

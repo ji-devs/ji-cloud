@@ -17,12 +17,16 @@ pub mod backgrounds;
 pub mod box_outline;
 #[cfg(feature = "buttons")]
 pub mod buttons;
+#[cfg(feature = "callback_future")]
+pub mod callback_future;
 #[cfg(feature = "categories_input")]
 pub mod categories_input;
 #[cfg(feature = "collision")]
 pub mod collision;
 #[cfg(feature = "color_select")]
 pub mod color_select;
+#[cfg(feature = "confirm")]
+pub mod confirm;
 #[cfg(feature = "dialog")]
 pub mod dialog;
 #[cfg(feature = "firebase")]

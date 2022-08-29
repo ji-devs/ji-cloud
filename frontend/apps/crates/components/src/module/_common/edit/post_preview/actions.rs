@@ -1,11 +1,7 @@
-use std::{
-    pin::Pin,
-    task::{Context, Poll},
-};
-
 use super::state::*;
+use crate::callback_future::CallbackFuture;
 use awsm_web::dom::StyleExt;
-use futures::{future::join_all, Future};
+use futures::future::join_all;
 use js_sys::Reflect;
 use shared::{
     api::endpoints::{self, ApiEndpoint},
@@ -29,8 +25,6 @@ use utils::{
 use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen_futures::spawn_local;
 use web_sys::{HtmlIFrameElement, Window};
-
-use futures_channel::oneshot;
 
 impl PostPreview {
     pub fn next(&self) {
@@ -266,8 +260,8 @@ fn print(html: String, scripts: Vec<String>) {
     });
 }
 
-fn add_script(window: Window, src: String) -> SimpleFuture<()> {
-    SimpleFuture::new(Box::new(move |resolve| {
+fn add_script(window: Window, src: String) -> CallbackFuture<()> {
+    CallbackFuture::new(Box::new(move |resolve| {
         let document = window.document().unwrap_ji();
         let body = window.document().unwrap_ji().body().unwrap_ji();
 
@@ -289,38 +283,4 @@ fn add_script(window: Window, src: String) -> SimpleFuture<()> {
         set_event_listener_once(&script, "load", callback);
         let _ = body.append_child(&script);
     }))
-}
-
-// might be worth putting in utils
-pub struct SimpleFuture<T>
-where
-    T: std::fmt::Debug + 'static,
-{
-    rx: oneshot::Receiver<T>,
-}
-
-impl<T> SimpleFuture<T>
-where
-    T: std::fmt::Debug + 'static,
-{
-    pub fn new(c: Box<dyn FnOnce(Box<dyn FnOnce(T)>)>) -> Self {
-        let (tx, rx) = oneshot::channel();
-
-        (c)(Box::new(move |val| {
-            tx.send(val).unwrap_ji();
-        }));
-
-        Self { rx }
-    }
-}
-
-impl<T> Future for SimpleFuture<T>
-where
-    T: std::fmt::Debug + 'static,
-{
-    type Output = T;
-
-    fn poll(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output> {
-        Future::poll(Pin::new(&mut self.rx), cx).map(|t| t.unwrap_ji())
-    }
 }

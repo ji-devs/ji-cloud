@@ -65,6 +65,7 @@ web-sys = { version = "0.3.55", features = [
     'HtmlScriptElement',
     'CanvasRenderingContext2d',
     'HtmlSelectElement',
+    'HtmlDialogElement',
     'Performance',
     'Path2d',
     'console',
@@ -86,8 +87,10 @@ animation = []
 audio_input = []
 audio_player_button = []
 backgrounds = []
+callback_future = []
 categories_input = []
 color_select = []
+confirm = []
 dialog = []
 image = []
 image_search = []
@@ -126,8 +129,10 @@ all= [
     "audio_input", 
     "audio_player_button", 
     "backgrounds", 
+    "callback_future",
     "categories_input",
     "color_select", 
+    "confirm", 
     "dialog", 
     "image", 
     "image_search", 
