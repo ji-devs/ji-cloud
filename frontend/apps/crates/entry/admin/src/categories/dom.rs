@@ -9,7 +9,7 @@ use utils::events;
 
 const STR_DELETE_TITLE: &str = "Warning";
 const STR_DELETE_CONTENT: &str = "Deleting the category \"{category}\" will also remove it from any images or JIGs associated with it. Are you sure you want to delete this category?";
-const STR_DELETE_CONFIRM: &str = "Delete category";
+const STR_DELETE_CONFIRM: &str = "Yes, delete";
 const STR_DELETE_CANCEL: &str = "Don't delete";
 
 pub struct CategoriesPage {}
@@ -28,6 +28,7 @@ impl CategoriesPage {
                         .property("content", STR_DELETE_CONTENT.replace("{category}", &content_state.cat.name.get_cloned()))
                         .property("cancel_text", STR_DELETE_CANCEL)
                         .property("confirm_text", STR_DELETE_CONFIRM)
+                        .property("confirmIcon", "core/menus/delete-white.svg")
                         .event(clone!(state => move |_evt: events::CustomCancel| state.deleting.set(None)))
                         .event(clone!(state => move |_evt: events::CustomConfirm| {
                             state.deleting.set(None);

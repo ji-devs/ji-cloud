@@ -21,7 +21,7 @@ use utils::prelude::*;
 
 const STR_DELETE_TITLE: &str = "Warning";
 const STR_DELETE_CONTENT: &str = "Are you sure you want to delete this activity?";
-const STR_DELETE_CONFIRM: &str = "Delete activity";
+const STR_DELETE_CONFIRM: &str = "Yes, delete";
 const STR_DELETE_CANCEL: &str = "Don't delete";
 
 pub struct ItemDom {}
@@ -61,6 +61,7 @@ impl ItemDom {
                         .property("content", STR_DELETE_CONTENT)
                         .property("cancel_text", STR_DELETE_CANCEL)
                         .property("confirm_text", STR_DELETE_CONFIRM)
+                        .property("confirmIcon", "core/menus/delete-white.svg")
                         .event(clone!(state => move |_evt: events::CustomCancel| state.confirm_delete.set_neq(false)))
                         .event(clone!(state => move |_evt: events::CustomConfirm| {
                             state.confirm_delete.set_neq(false);

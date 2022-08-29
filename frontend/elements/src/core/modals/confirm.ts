@@ -1,13 +1,12 @@
-import { LitElement, html, css, customElement, property } from "lit-element";
+import { html, css, customElement, property } from "lit-element";
+import { nothing } from "lit-html";
 import { classMap } from "lit-html/directives/class-map";
-import { unsafeHTML } from "lit-html/directives/unsafe-html";
 import { BaseButton } from "@elements/_styles/buttons";
 import "@elements/core/buttons/icon";
 import "@elements/core/buttons/rectangle";
 
 const STR_DEFAULT_CANCEL_TEXT = "Cancel";
 const STR_DEFAULT_CONFIRM_TEXT = "Confirm";
-const STR_TITLE_WARNING = "Warning";
 
 @customElement("modal-confirm")
 export class _ extends BaseButton {
@@ -132,7 +131,13 @@ export class _ extends BaseButton {
     cancel_text: string = STR_DEFAULT_CANCEL_TEXT;
 
     @property({ type: String })
+    cancelIcon?: string;
+
+    @property({ type: String })
     confirm_text: string = STR_DEFAULT_CONFIRM_TEXT;
+
+    @property({ type: String })
+    confirmIcon?: string;
 
     @property({ type: Boolean })
     dangerous: boolean = false;
@@ -143,7 +148,9 @@ export class _ extends BaseButton {
 
         if (!isPrimary && this.dangerous) {
             color = "red";
-            kind = "text";
+            kind = "outline";
+        } else if (isPrimary && this.dangerous) {
+            color = "alert"
         } else if (!isPrimary && !this.dangerous) {
             kind = "text";
         }
@@ -151,42 +158,47 @@ export class _ extends BaseButton {
         return [color, kind];
     }
 
-    renderConfirm(isPrimary: Boolean) {
-        const [color, kind] = this.buttonProps(isPrimary);
+    renderConfirm() {
+        const [color, kind] = this.buttonProps(true);
+
+        const icon = this.confirmIcon
+            ? html`<img-ui path="${this.confirmIcon}"></img-ui>`
+            : nothing;
 
         return html`
             <div @click=${this.onConfirm}>
-                <button-rect color=${color} kind=${kind}>${this.confirm_text}</button-rect>
+                <button-rect color=${color} kind=${kind} size="small">
+                    ${icon}
+                    ${this.confirm_text}
+                </button-rect>
             </div>
         `;
     }
 
-    renderCancel(isPrimary: Boolean) {
-        const [color, kind] = this.buttonProps(isPrimary);
+    renderCancel() {
+        const [color, kind] = this.buttonProps(false);
+
+        const icon = this.cancelIcon
+            ? html`<img-ui path="${this.cancelIcon}"></img-ui>`
+            : nothing;
 
         return html`
             <div @click=${this.onCancel}>
-                <button-rect color=${color} kind=${kind}>${this.cancel_text}</button-rect>
+                <button-rect color=${color} kind=${kind} size="small">
+                    ${icon}
+                    ${this.cancel_text}
+                </button-rect>
             </div>
         `;
     }
 
     renderActions() {
-        if (this.dangerous) {
-            return html`
-                <div class="options">
-                    ${this.renderConfirm(false)}
-                    ${this.renderCancel(true)}
-                </div>
-            `;
-        } else {
-            return html`
-                <div class="options">
-                    ${this.renderCancel(false)}
-                    ${this.renderConfirm(true)}
-                </div>
-            `;
-        }
+        return html`
+            <div class="options">
+                ${this.renderCancel()}
+                ${this.renderConfirm()}
+            </div>
+        `;
     }
 
     renderTitle() {

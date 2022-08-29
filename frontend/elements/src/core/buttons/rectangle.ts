@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import { ifDefined } from "lit-html/directives/if-defined";
 
-export type Color = "red" | "blue" | "green" | "darkGray" | "lightBlue";
+export type Color = "red" | "blue" | "green" | "darkGray" | "lightBlue" | "alert";
 export type Size = "small" | "medium" | "large";
 export type Kind = "filled" | "text" | "outline";
 
@@ -54,7 +54,13 @@ export class _ extends LitElement {
                     --color: var(--main-red);
                 }
                 :host([color="red"]:hover) {
-                    --color: #ed6065;
+                    --color: var(--dark-red-2);
+                }
+                :host([color="alert"]) {
+                    --color: var(--dark-red-2);
+                }
+                :host([color="alert"]:hover) {
+                    --color: var(--red-alert);
                 }
                 :host([color="blue"]) {
                     --color: #5590fc;
@@ -131,6 +137,12 @@ export class _ extends LitElement {
                     color: inherit;
                     display: flex;
                     column-gap: 6px;
+                }
+
+                button {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
                 }
             `,
         ];
