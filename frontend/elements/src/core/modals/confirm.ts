@@ -29,6 +29,8 @@ export class _ extends BaseButton {
                     opacity: 0.8;
                     background-color: var(--light-blue-3);
                     z-index: var(--overlay-z-index);
+                    -webkit-backdrop-filter: blur(30px);
+                    backdrop-filter: blur(30px);
                 }
                 .section {
                     position: fixed;
@@ -40,8 +42,6 @@ export class _ extends BaseButton {
                     width: 419px;
                     min-height: 276px;
                     border-radius: 16px;
-                    -webkit-backdrop-filter: blur(30px);
-                    backdrop-filter: blur(30px);
                     box-shadow: 0 3px 16px 0 rgba(0, 0, 0, 0.16);
                     background-color: var(--white);
                     opacity: 1;
