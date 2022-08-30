@@ -6,7 +6,7 @@ use crate::{
     helpers::{initialize_server, LoginExt},
 };
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn update_no_modules_changes() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Resource], &[]).await;
 

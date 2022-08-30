@@ -26,12 +26,12 @@ async fn unauthorized(route: &str) -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn get_image() -> anyhow::Result<()> {
     unauthorized("v1/image/00000000-0000-0000-0000-000000000000").await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn get_animation() -> anyhow::Result<()> {
     unauthorized("v1/animation/00000000-0000-0000-0000-000000000000").await
 }

@@ -10,7 +10,7 @@ use crate::{
     helpers::{initialize_server, LoginExt},
 };
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn create() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User], &[]).await;
 
@@ -38,7 +38,7 @@ async fn create() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn get() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::CategoryOrdering], &[]).await;
 
@@ -90,12 +90,12 @@ async fn get_nested_categories(query: &GetCategoryRequest) -> anyhow::Result<()>
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn nested_top_level() -> anyhow::Result<()> {
     get_nested_categories(&GetCategoryRequest::default()).await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn nested_whole_tree() -> anyhow::Result<()> {
     get_nested_categories(&GetCategoryRequest {
         scope: Some(CategoryTreeScope::Descendants),
@@ -104,7 +104,7 @@ async fn nested_whole_tree() -> anyhow::Result<()> {
     .await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn nested_overlapping() -> anyhow::Result<()> {
     get_nested_categories(&GetCategoryRequest {
         scope: Some(CategoryTreeScope::Descendants),
@@ -116,7 +116,7 @@ async fn nested_overlapping() -> anyhow::Result<()> {
     .await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn nested_ancestors() -> anyhow::Result<()> {
     get_nested_categories(&GetCategoryRequest {
         scope: Some(CategoryTreeScope::Ancestors),
@@ -125,7 +125,7 @@ async fn nested_ancestors() -> anyhow::Result<()> {
     .await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn nested_exact() -> anyhow::Result<()> {
     get_nested_categories(&GetCategoryRequest {
         scope: None,
@@ -137,7 +137,7 @@ async fn nested_exact() -> anyhow::Result<()> {
     .await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn upgdate_ordering() -> anyhow::Result<()> {
     let category_three = "81c4796a-e883-11ea-93f0-df2484ab6b11";
 
@@ -204,7 +204,7 @@ async fn upgdate_ordering() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn delete() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::CategoryOrdering], &[]).await;
 
@@ -280,7 +280,7 @@ async fn update(id: Uuid, body: &serde_json::Value) -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn update_parent() -> anyhow::Result<()> {
     update(
         "7fe19326-e883-11ea-93f0-5343493c17c4".parse()?,
@@ -289,7 +289,7 @@ async fn update_parent() -> anyhow::Result<()> {
     .await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn update_reparent_move() -> anyhow::Result<()> {
     update(
         "7fe19326-e883-11ea-93f0-5343493c17c4".parse()?,
@@ -298,7 +298,7 @@ async fn update_reparent_move() -> anyhow::Result<()> {
     .await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn update_move() -> anyhow::Result<()> {
     update(
         "81c4796a-e883-11ea-93f0-df2484ab6b11".parse()?,
@@ -307,7 +307,7 @@ async fn update_move() -> anyhow::Result<()> {
     .await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn update_scope() -> anyhow::Result<()> {
     update(
         "81c4796a-e883-11ea-93f0-df2484ab6b11".parse()?,
@@ -316,7 +316,7 @@ async fn update_scope() -> anyhow::Result<()> {
     .await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn update_rename() -> anyhow::Result<()> {
     update(
         "81c4796a-e883-11ea-93f0-df2484ab6b11".parse()?,

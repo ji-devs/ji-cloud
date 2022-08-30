@@ -4,7 +4,7 @@ mod entry;
 
 use crate::{fixture::Fixture, helpers::initialize_server};
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn list_bundles() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Locale], &[]).await;
 
@@ -29,7 +29,7 @@ async fn list_bundles() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn list_item_kind() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Locale], &[]).await;
 

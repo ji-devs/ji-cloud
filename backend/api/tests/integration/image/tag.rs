@@ -6,7 +6,7 @@ use http::StatusCode;
 use shared::domain::image::tag::{ImageTagCreateRequest, ImageTagUpdateRequest};
 use shared::domain::meta::ImageTagIndex;
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn create() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds], &[]).await;
 
@@ -35,7 +35,7 @@ async fn create() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn create_conflict() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds], &[]).await;
 
@@ -59,7 +59,7 @@ async fn create_conflict() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn list() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds], &[]).await;
 
@@ -122,7 +122,7 @@ async fn update(index: i16, req: ImageTagUpdateRequest) -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn update_no_index() -> anyhow::Result<()> {
     update(
         0,
@@ -134,7 +134,7 @@ async fn update_no_index() -> anyhow::Result<()> {
     .await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn update_with_index() -> anyhow::Result<()> {
     update(
         1,
@@ -146,7 +146,7 @@ async fn update_with_index() -> anyhow::Result<()> {
     .await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn update_none() -> anyhow::Result<()> {
     update(
         1,
@@ -158,7 +158,7 @@ async fn update_none() -> anyhow::Result<()> {
     .await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn update_only_index() -> anyhow::Result<()> {
     update(
         1,
@@ -170,7 +170,7 @@ async fn update_only_index() -> anyhow::Result<()> {
     .await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn update_conflict() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds], &[]).await;
 
@@ -208,7 +208,7 @@ async fn update_conflict() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn delete() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds], &[]).await;
 

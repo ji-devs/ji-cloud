@@ -13,7 +13,7 @@ use shared::domain::{
 use std::str::FromStr;
 use uuid::Uuid;
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn create() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
 
@@ -54,7 +54,7 @@ async fn create() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn get_draft() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
 
@@ -83,7 +83,7 @@ async fn get_draft() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn get_live() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
 
@@ -112,7 +112,7 @@ async fn get_live() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn delete() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
 

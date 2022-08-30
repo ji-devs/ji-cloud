@@ -7,7 +7,7 @@ use crate::{
 };
 use shared::domain::image::recent::UserRecentImageListRequest;
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn create() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
 
@@ -37,7 +37,7 @@ async fn create() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn create_conflict() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
 
@@ -67,7 +67,7 @@ async fn create_conflict() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn list_no_limit() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
 
@@ -93,7 +93,7 @@ async fn list_no_limit() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn list_with_limit() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
 
@@ -120,7 +120,7 @@ async fn list_with_limit() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn update() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
 
@@ -164,7 +164,7 @@ async fn update() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn delete() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
 

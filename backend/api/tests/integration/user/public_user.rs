@@ -5,7 +5,7 @@ use crate::{
     helpers::{initialize_server, LoginExt},
 };
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn browse_public_user() -> anyhow::Result<()> {
     let app = initialize_server(
         &[
@@ -40,7 +40,7 @@ async fn browse_public_user() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn browse_users_with_circles() -> anyhow::Result<()> {
     let app = initialize_server(
         &[
@@ -78,7 +78,7 @@ async fn browse_users_with_circles() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn browse_user_jigs() -> anyhow::Result<()> {
     let app = initialize_server(
         &[
@@ -122,7 +122,7 @@ async fn browse_user_jigs() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn browse_user_resources() -> anyhow::Result<()> {
     let app = initialize_server(
         &[
@@ -160,7 +160,7 @@ async fn browse_user_resources() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn browse_user_courses() -> anyhow::Result<()> {
     let app = initialize_server(
         &[
@@ -223,7 +223,7 @@ async fn browse_user_courses() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn browse_follower_and_unfollow() -> anyhow::Result<()> {
     let app = initialize_server(
         &[
@@ -290,7 +290,7 @@ async fn browse_follower_and_unfollow() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn browse_follower_and_follow() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::PublicUser], &[]).await;
 
@@ -359,7 +359,7 @@ async fn browse_follower_and_follow() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn browse_following_and_unfollow() -> anyhow::Result<()> {
     let app = initialize_server(
         &[
@@ -426,7 +426,7 @@ async fn browse_following_and_unfollow() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn follow_self_error() -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::User, Fixture::MetaKinds, Fixture::PublicUser],

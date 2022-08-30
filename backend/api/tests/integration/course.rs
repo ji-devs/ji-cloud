@@ -6,7 +6,7 @@ use crate::{
     helpers::{initialize_server, LoginExt},
 };
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn get() -> anyhow::Result<()> {
     let app = initialize_server(
         &[
@@ -70,7 +70,7 @@ async fn get() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn update_and_publish_browse() -> anyhow::Result<()> {
     let app = initialize_server(
         &[
@@ -196,7 +196,7 @@ async fn update_and_publish_browse() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn browse_simple() -> anyhow::Result<()> {
     let app = initialize_server(
         &[
@@ -235,7 +235,7 @@ async fn browse_simple() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn course_jig_index() -> anyhow::Result<()> {
     let app = initialize_server(
         &[
@@ -358,7 +358,7 @@ async fn course_jig_index() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn publish_modules() -> anyhow::Result<()> {
     let app = initialize_server(
         &[

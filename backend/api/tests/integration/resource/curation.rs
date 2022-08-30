@@ -7,7 +7,7 @@ use crate::{
     helpers::{initialize_server, LoginExt},
 };
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn admin_comment() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::MetaKinds, Fixture::Resource], &[]).await;
 

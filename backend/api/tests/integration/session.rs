@@ -2,7 +2,7 @@ use http::StatusCode;
 
 use crate::{fixture::Fixture, helpers::initialize_server};
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn create_401_no_auth() -> anyhow::Result<()> {
     let app = initialize_server(&[], &[]).await;
 
@@ -22,7 +22,7 @@ async fn create_401_no_auth() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn create_basic() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User], &[]).await;
 
@@ -49,7 +49,7 @@ async fn create_basic() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn create_basic_bad_password() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User], &[]).await;
 

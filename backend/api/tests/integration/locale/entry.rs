@@ -8,7 +8,7 @@ use crate::{
     helpers::{initialize_server, LoginExt},
 };
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn delete() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Locale], &[]).await;
 
@@ -28,7 +28,7 @@ async fn delete() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn get() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Locale], &[]).await;
 
@@ -76,22 +76,22 @@ async fn list(query: &[(&str, &str)]) -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn list_all_by_default() -> anyhow::Result<()> {
     list(&[]).await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn list_all_by_bundle() -> anyhow::Result<()> {
     list(&[("groupBy", "bundle")]).await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn list_empty_bundle_by_default() -> anyhow::Result<()> {
     list(&[("bundles", "85a46ffe-7c67-11eb-a0d7-277d94fe130c")]).await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn list_empty_bundle_by_bundle() -> anyhow::Result<()> {
     list(&[
         ("groupBy", "bundle"),
@@ -100,12 +100,12 @@ async fn list_empty_bundle_by_bundle() -> anyhow::Result<()> {
     .await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn list_single_bundle_by_default() -> anyhow::Result<()> {
     list(&[("bundles", "8359a48a-7c67-11eb-a0d7-0fd74777a62c")]).await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn list_single_bundle_by_bundle() -> anyhow::Result<()> {
     list(&[
         ("groupBy", "bundle"),
@@ -114,7 +114,7 @@ async fn list_single_bundle_by_bundle() -> anyhow::Result<()> {
     .await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn create() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Locale], &[]).await;
 
@@ -153,7 +153,7 @@ async fn create() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn update_in_app() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Locale], &[]).await;
 

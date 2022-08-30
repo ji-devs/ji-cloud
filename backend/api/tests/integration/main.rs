@@ -15,7 +15,7 @@ mod service;
 mod session;
 mod user;
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn pass() -> anyhow::Result<()> {
     let app = helpers::initialize_server(&[], &[]).await;
 

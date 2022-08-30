@@ -6,7 +6,7 @@ use crate::{
     helpers::{initialize_server, LoginExt},
 };
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn create_returns_created() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User], &[]).await;
 

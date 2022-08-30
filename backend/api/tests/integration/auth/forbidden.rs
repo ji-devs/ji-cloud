@@ -47,12 +47,12 @@ async fn forbidden(
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn category_post() -> anyhow::Result<()> {
     forbidden("v1/category", Some(&json!({"name": ""})), Method::POST).await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn category_patch() -> anyhow::Result<()> {
     forbidden(
         "v1/category/00000000-0000-0000-0000-000000000000",
@@ -62,7 +62,7 @@ async fn category_patch() -> anyhow::Result<()> {
     .await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn category_delete() -> anyhow::Result<()> {
     forbidden(
         "v1/category/00000000-0000-0000-0000-000000000000",
@@ -72,7 +72,7 @@ async fn category_delete() -> anyhow::Result<()> {
     .await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn image_post() -> anyhow::Result<()> {
     forbidden(
         "v1/image",
@@ -93,7 +93,7 @@ async fn image_post() -> anyhow::Result<()> {
     .await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn image_patch() -> anyhow::Result<()> {
     forbidden(
         "v1/image/00000000-0000-0000-0000-000000000000",
@@ -103,7 +103,7 @@ async fn image_patch() -> anyhow::Result<()> {
     .await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 #[ignore] // no s3
 async fn image_delete() -> anyhow::Result<()> {
     forbidden(
@@ -114,12 +114,12 @@ async fn image_delete() -> anyhow::Result<()> {
     .await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn jig_post() -> anyhow::Result<()> {
     forbidden("v1/jig", None, Method::POST).await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn jig_patch() -> anyhow::Result<()> {
     forbidden(
         "v1/jig/00000000-0000-0000-0000-000000000000",
@@ -129,7 +129,7 @@ async fn jig_patch() -> anyhow::Result<()> {
     .await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn jig_clone() -> anyhow::Result<()> {
     forbidden(
         "v1/jig/00000000-0000-0000-0000-000000000000/clone",
@@ -139,7 +139,7 @@ async fn jig_clone() -> anyhow::Result<()> {
     .await
 }
 
-// #[actix_rt::test]
+// #[sqlx::test]
 // async fn jig_delete() -> anyhow::Result<()> {
 //     forbidden(
 //         "v1/jig/00000000-0000-0000-0000-000000000000",
@@ -149,7 +149,7 @@ async fn jig_clone() -> anyhow::Result<()> {
 //     .await
 // }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn module_post() -> anyhow::Result<()> {
     use shared::domain::module::ModuleCreateRequest;
 
@@ -166,7 +166,7 @@ async fn module_post() -> anyhow::Result<()> {
     .await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn module_patch() -> anyhow::Result<()> {
     forbidden(
         "v1/module/draft/00000000-0000-0000-0000-000000000000",
@@ -176,7 +176,7 @@ async fn module_patch() -> anyhow::Result<()> {
     .await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn module_delete() -> anyhow::Result<()> {
     forbidden(
         "v1/module/draft/00000000-0000-0000-0000-000000000000",
@@ -186,7 +186,7 @@ async fn module_delete() -> anyhow::Result<()> {
     .await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn animation_post() -> anyhow::Result<()> {
     forbidden(
         "v1/animation",
@@ -204,7 +204,7 @@ async fn animation_post() -> anyhow::Result<()> {
     .await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 #[ignore] // route doesn't exist
 async fn animation_patch() -> anyhow::Result<()> {
     forbidden(
@@ -215,7 +215,7 @@ async fn animation_patch() -> anyhow::Result<()> {
     .await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 #[ignore] // no s3
 async fn animation_delete() -> anyhow::Result<()> {
     forbidden(

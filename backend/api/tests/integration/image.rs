@@ -56,12 +56,12 @@ async fn create(
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn create_no_meta() -> anyhow::Result<()> {
     create(&[], &[], &[], &[], &[]).await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn create_with_styles() -> anyhow::Result<()> {
     create(
         &[
@@ -76,7 +76,7 @@ async fn create_with_styles() -> anyhow::Result<()> {
     .await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn create_with_meta() -> anyhow::Result<()> {
     create(
         &["6389eaa0-de76-11ea-b7ab-0399bcf84df2".parse()?],
@@ -162,32 +162,32 @@ async fn create_error_tag(kind: &str, id: &i16) -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn create_with_style_error() -> anyhow::Result<()> {
     create_error("styles", "6389eaa0-de76-11ea-b7ab-0399bcf84df2").await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn create_with_affiliation_error() -> anyhow::Result<()> {
     create_error("affiliations", "6389eaa0-de76-11ea-b7ab-0399bcf84df2").await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn create_with_age_range_error() -> anyhow::Result<()> {
     create_error("age_ranges", "6389eaa0-de76-11ea-b7ab-0399bcf84df2").await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn create_with_category_error() -> anyhow::Result<()> {
     create_error("categories", "6389eaa0-de76-11ea-b7ab-0399bcf84df2").await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn create_with_tags_error() -> anyhow::Result<()> {
     create_error_tag("tags", &22).await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn get_metadata() -> anyhow::Result<()> {
     let app = initialize_server(
         &[
@@ -271,27 +271,27 @@ async fn update(req: &serde_json::Value) -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn update_empty() -> anyhow::Result<()> {
     update(&json!({})).await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn update_is_premium() -> anyhow::Result<()> {
     update(&json!({"is_premium": true})).await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn update_styles() -> anyhow::Result<()> {
     update(&json!({"styles": ["6389eaa0-de76-11ea-b7ab-0399bcf84df2", "6389ff7c-de76-11ea-b7ab-9b5661dd4f70"]})).await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn update_tags() -> anyhow::Result<()> {
     update(&json!({"tags": [0, 2]})).await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn browse() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
 
@@ -321,7 +321,7 @@ async fn browse() -> anyhow::Result<()> {
 
 // https://cloud.google.com/storage/docs/performing-resumable-uploads#single-chunk-upload
 #[ignore]
-#[actix_rt::test]
+#[sqlx::test]
 async fn upload_with_url() -> anyhow::Result<()> {
     let file: Vec<u8> = include_bytes!("../../fixtures/images/ji-logo.png").to_vec();
 
@@ -364,7 +364,7 @@ async fn upload_with_url() -> anyhow::Result<()> {
 }
 
 #[ignore]
-#[actix_rt::test]
+#[sqlx::test]
 async fn create_media_and_upload_with_url() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
 

@@ -32,17 +32,17 @@ async fn list(query: &[(&str, &str)]) -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn list_kind() -> anyhow::Result<()> {
     list(&[("kind", "Sticker")]).await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn list_all() -> anyhow::Result<()> {
     list(&[]).await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn create() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
 
@@ -71,7 +71,7 @@ async fn create() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn get() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
 
@@ -102,7 +102,7 @@ async fn get() -> anyhow::Result<()> {
 
 // needs s3
 #[ignore]
-#[actix_rt::test]
+#[sqlx::test]
 async fn delete() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
 

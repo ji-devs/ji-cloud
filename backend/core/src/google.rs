@@ -4,7 +4,6 @@ use anyhow::{anyhow, Context};
 use chrono::{DateTime, Duration, Utc};
 use reqwest::StatusCode;
 use serde::Deserialize;
-use time::{format_description, macros::datetime, OffsetDateTime};
 use yup_oauth2::{AccessToken, ServiceAccountAuthenticator, ServiceAccountKey};
 
 #[derive(Deserialize)]

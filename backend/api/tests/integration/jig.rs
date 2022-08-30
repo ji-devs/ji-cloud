@@ -12,7 +12,7 @@ mod cover;
 mod module;
 mod player;
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn create_default() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User], &[]).await;
 
@@ -79,7 +79,7 @@ async fn create_default() -> anyhow::Result<()> {
 }
 
 // requires algolia
-// #[actix_rt::test]
+// #[sqlx::test]
 // async fn delete() -> anyhow::Result<()> {
 //     let app = initialize_server(&[Fixture::User, Fixture::Jig]).await;
 
@@ -102,7 +102,7 @@ async fn create_default() -> anyhow::Result<()> {
 //     Ok(())
 // }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn create_with_params() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
 
@@ -133,7 +133,7 @@ async fn create_with_params() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn clone() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
 
@@ -200,7 +200,7 @@ async fn clone() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn get() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
 
@@ -258,7 +258,7 @@ async fn get() -> anyhow::Result<()> {
 }
 
 // todo: test-exhaustiveness: create a `JigBrowse` Fixture, actually test the cases (paging, jig count, etc)
-#[actix_rt::test]
+#[sqlx::test]
 async fn browse_simple() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
 
@@ -290,7 +290,7 @@ async fn browse_simple() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn browse_order_by() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
 
@@ -368,7 +368,7 @@ async fn browse_order_by() -> anyhow::Result<()> {
 
 // todo: test-exhaustiveness: create a `JigBrowse` Fixture, actually test the cases (paging, jig count, etc)
 #[ignore]
-#[actix_rt::test]
+#[sqlx::test]
 async fn browse_own_simple() -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::MetaKinds, Fixture::UserDefaultPerms, Fixture::Jig],
@@ -407,7 +407,7 @@ async fn browse_own_simple() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn count() -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::MetaKinds, Fixture::UserDefaultPerms, Fixture::Jig],
@@ -437,7 +437,7 @@ async fn count() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn update_and_publish() -> anyhow::Result<()> {
     let app = initialize_server(
         &[
@@ -571,7 +571,7 @@ async fn update_and_publish() -> anyhow::Result<()> {
 }
 
 #[ignore]
-#[actix_rt::test]
+#[sqlx::test]
 async fn update_and_publish_incomplete_modules() -> anyhow::Result<()> {
     let app = initialize_server(
         &[

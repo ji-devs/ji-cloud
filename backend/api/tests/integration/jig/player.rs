@@ -7,7 +7,7 @@ use shared::domain::jig::player::{
     instance::PlayerSessionInstanceResponse, JigPlayerSession, JigPlayerSessionListResponse,
 };
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn list() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
 
@@ -35,7 +35,7 @@ async fn list() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn create() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
 
@@ -101,7 +101,7 @@ async fn create() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn session_instance_play_count_flow() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
 

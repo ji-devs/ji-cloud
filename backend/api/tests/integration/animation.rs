@@ -42,7 +42,7 @@ async fn create() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn get_metadata() -> anyhow::Result<()> {
     let app = initialize_server(
         &[

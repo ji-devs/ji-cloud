@@ -18,7 +18,7 @@ mod color;
 mod font;
 mod public_user;
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn get_profile() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User], &[]).await;
 
@@ -45,7 +45,7 @@ async fn get_profile() -> anyhow::Result<()> {
 }
 
 #[ignore]
-#[actix_rt::test]
+#[sqlx::test]
 async fn post_profile() -> anyhow::Result<()> {
     if !service::email_test_guard() {
         return Ok(());
@@ -113,7 +113,7 @@ async fn post_profile() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn patch_profile() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
 
@@ -174,7 +174,7 @@ async fn patch_profile() -> anyhow::Result<()> {
 }
 
 #[ignore]
-#[actix_rt::test]
+#[sqlx::test]
 async fn verify_email() -> anyhow::Result<()> {
     if !service::email_test_guard() {
         return Ok(());
@@ -203,7 +203,7 @@ async fn verify_email() -> anyhow::Result<()> {
 }
 
 #[ignore]
-#[actix_rt::test]
+#[sqlx::test]
 async fn basic_auth_flow_no_login() -> anyhow::Result<()> {
     if !service::email_test_guard() {
         return Ok(());
@@ -310,7 +310,7 @@ async fn basic_auth_flow_no_login() -> anyhow::Result<()> {
 }
 
 #[ignore]
-#[actix_rt::test]
+#[sqlx::test]
 async fn basic_auth_flow() -> anyhow::Result<()> {
     if !service::email_test_guard() {
         return Ok(());
@@ -451,7 +451,7 @@ async fn basic_auth_flow() -> anyhow::Result<()> {
 }
 
 // #[ignore]
-// #[actix_rt::test]
+// #[sqlx::test]
 // async fn update_user_email() -> anyhow::Result<()> {
 //     if !service::email_test_guard() {
 //         return Ok(());

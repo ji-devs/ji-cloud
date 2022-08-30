@@ -6,7 +6,7 @@ use crate::{
     helpers::{initialize_server, LoginExt},
 };
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn get_all() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::UserFonts], &[]).await;
 
@@ -32,7 +32,7 @@ async fn get_all() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn update() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::UserFonts], &[]).await;
 
@@ -68,7 +68,7 @@ async fn update() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn delete() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::UserFonts], &[]).await;
 
@@ -103,7 +103,7 @@ async fn delete() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn create() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::UserFonts], &[]).await;
 

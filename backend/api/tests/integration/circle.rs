@@ -7,7 +7,7 @@ use crate::{
     helpers::{initialize_server, LoginExt},
 };
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn create() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
 
@@ -59,7 +59,7 @@ async fn create() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn join_circle() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::Circle], &[]).await;
 
@@ -126,7 +126,7 @@ async fn join_circle() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn leave_circle() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::Circle], &[]).await;
 
@@ -193,7 +193,7 @@ async fn leave_circle() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn browse_circles() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::Circle], &[]).await;
 
@@ -224,7 +224,7 @@ async fn browse_circles() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn update_circle() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::Circle], &[]).await;
 
@@ -296,7 +296,7 @@ async fn update_circle() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 async fn browse_circles_with_users() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::Circle], &[]).await;
 
