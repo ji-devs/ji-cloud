@@ -6,6 +6,7 @@ use futures_signals::signal::{Mutable, ReadOnlyMutable};
 use shared::domain::asset::{Asset, AssetId, AssetType, DraftOrLive, PrivacyLevel};
 use shared::domain::course::CourseResponse;
 use shared::domain::module::body::Instructions;
+use shared::domain::resource::ResourceResponse;
 use shared::{
     api::endpoints::{self, module::*, ApiEndpoint},
     domain::{
@@ -153,6 +154,17 @@ where
                                 .await
                                 .map(|jig| Asset::Jig(jig))
                         },
+                        AssetId::ResourceId(resource_id) => {
+                            // resources only played for thumbnail generation
+                            let path = endpoints::resource::GetDraft::PATH.replace("{id}", &resource_id.0.to_string());
+                            api_no_auth::<ResourceResponse, EmptyError, ()>(
+                                &path,
+                                endpoints::resource::GetDraft::METHOD,
+                                None
+                            )
+                                .await
+                                .map(|resource| Asset::Resource(resource))
+                        },
                         AssetId::CourseId(course_id) => {
                             let path = endpoints::course::GetDraft::PATH.replace("{id}", &course_id.0.to_string());
                             api_no_auth::<CourseResponse, EmptyError, ()>(
@@ -163,7 +175,6 @@ where
                                 .await
                                 .map(|course| Asset::Course(course))
                         },
-                        AssetId::ResourceId(_) => unimplemented!()
                     };
 
                     match resp {
