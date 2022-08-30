@@ -5,7 +5,7 @@ use actix_web::{
 use core::settings::RuntimeSettings;
 use futures::try_join;
 use shared::{
-    api::{endpoints::resource, ApiEndpoint},
+    api::{endpoints::resource, ApiEndpoint, PathParts},
     domain::{
         asset::{DraftOrLive, PrivacyLevel, UserOrMe},
         resource::{
@@ -481,69 +481,69 @@ async fn auth_claims(
 
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
-        resource::Create::PATH,
+        <resource::Create as ApiEndpoint>::Path::PATH,
         resource::Create::METHOD.route().to(create),
     )
     .route(
-        resource::GetLive::PATH,
+        <resource::GetLive as ApiEndpoint>::Path::PATH,
         resource::GetLive::METHOD.route().to(get_live),
     )
     .route(
-        resource::GetDraft::PATH,
+        <resource::GetDraft as ApiEndpoint>::Path::PATH,
         resource::GetDraft::METHOD.route().to(get_draft),
     )
     .route(
-        resource::Publish::PATH,
+        <resource::Publish as ApiEndpoint>::Path::PATH,
         resource::Publish::METHOD.route().to(publish_draft_to_live),
     )
     .route(
-        resource::Clone::PATH,
+        <resource::Clone as ApiEndpoint>::Path::PATH,
         resource::Clone::METHOD.route().to(clone),
     )
     .route(
-        resource::Browse::PATH,
+        <resource::Browse as ApiEndpoint>::Path::PATH,
         resource::Browse::METHOD.route().to(browse),
     )
     .route(
-        resource::Search::PATH,
+        <resource::Search as ApiEndpoint>::Path::PATH,
         resource::Search::METHOD.route().to(search),
     )
     .route(
-        resource::UpdateDraftData::PATH,
+        <resource::UpdateDraftData as ApiEndpoint>::Path::PATH,
         resource::UpdateDraftData::METHOD.route().to(update_draft),
     )
     .route(
-        resource::Delete::PATH,
+        <resource::Delete as ApiEndpoint>::Path::PATH,
         resource::Delete::METHOD.route().to(delete),
     )
     .route(
-        resource::ResourceAdminDataUpdate::PATH,
+        <resource::ResourceAdminDataUpdate as ApiEndpoint>::Path::PATH,
         resource::ResourceAdminDataUpdate::METHOD
             .route()
             .to(update_admin_data),
     )
     .route(
-        resource::Unlike::PATH,
+        <resource::Unlike as ApiEndpoint>::Path::PATH,
         resource::Unlike::METHOD.route().to(unlike),
     )
     .route(
-        resource::Count::PATH,
+        <resource::Count as ApiEndpoint>::Path::PATH,
         resource::Count::METHOD.route().to(count),
     )
     .route(
-        resource::Play::PATH,
+        <resource::Play as ApiEndpoint>::Path::PATH,
         resource::Play::METHOD.route().to(play),
     )
     .route(
-        resource::Like::PATH,
+        <resource::Like as ApiEndpoint>::Path::PATH,
         resource::Like::METHOD.route().to(like),
     )
     .route(
-        resource::Liked::PATH,
+        <resource::Liked as ApiEndpoint>::Path::PATH,
         resource::Liked::METHOD.route().to(liked),
     )
     .route(
-        resource::Unlike::PATH,
+        <resource::Unlike as ApiEndpoint>::Path::PATH,
         resource::Unlike::METHOD.route().to(unlike),
     );
 }

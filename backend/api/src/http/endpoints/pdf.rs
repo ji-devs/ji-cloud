@@ -1,5 +1,5 @@
 use actix_web::web::ServiceConfig;
-use shared::api::{endpoints::pdf, ApiEndpoint};
+use shared::api::{endpoints::pdf, ApiEndpoint, PathParts};
 use sqlx::postgres::PgDatabaseError;
 
 use crate::error;
@@ -153,23 +153,23 @@ pub mod user {
 
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
-        pdf::user::Create::PATH,
+        <pdf::user::Create as ApiEndpoint>::Path::PATH,
         pdf::user::Create::METHOD.route().to(self::user::create),
     )
     .route(
-        pdf::user::Upload::PATH,
+        <pdf::user::Upload as ApiEndpoint>::Path::PATH,
         pdf::user::Upload::METHOD.route().to(self::user::upload),
     )
     .route(
-        pdf::user::Delete::PATH,
+        <pdf::user::Delete as ApiEndpoint>::Path::PATH,
         pdf::user::Delete::METHOD.route().to(self::user::delete),
     )
     .route(
-        pdf::user::Get::PATH,
+        <pdf::user::Get as ApiEndpoint>::Path::PATH,
         pdf::user::Get::METHOD.route().to(self::user::get),
     )
     .route(
-        pdf::user::List::PATH,
+        <pdf::user::List as ApiEndpoint>::Path::PATH,
         pdf::user::List::METHOD.route().to(self::user::list),
     );
 }

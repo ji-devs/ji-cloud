@@ -3,7 +3,7 @@ use actix_web::{
     HttpResponse,
 };
 use shared::{
-    api::{endpoints::module, ApiEndpoint},
+    api::{endpoints::module, ApiEndpoint, PathParts},
     domain::{
         asset::{AssetId, AssetType},
         module::{ModuleId, ModuleResponse},
@@ -183,23 +183,23 @@ async fn delete(
 
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
-        module::Create::PATH,
+        <module::Create as ApiEndpoint>::Path::PATH,
         module::Create::METHOD.route().to(create),
     )
     .route(
-        module::GetLive::PATH,
+        <module::GetLive as ApiEndpoint>::Path::PATH,
         module::GetLive::METHOD.route().to(get_live),
     )
     .route(
-        module::GetDraft::PATH,
+        <module::GetDraft as ApiEndpoint>::Path::PATH,
         module::GetDraft::METHOD.route().to(get_draft),
     )
     .route(
-        module::Update::PATH,
+        <module::Update as ApiEndpoint>::Path::PATH,
         module::Update::METHOD.route().to(update),
     )
     .route(
-        module::Delete::PATH,
+        <module::Delete as ApiEndpoint>::Path::PATH,
         module::Delete::METHOD.route().to(delete),
     );
 }

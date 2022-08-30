@@ -1,6 +1,6 @@
 use actix_web::web::{Data, Json, ServiceConfig};
 use shared::{
-    api::{endpoints::locale, ApiEndpoint},
+    api::{endpoints::locale, ApiEndpoint, PathParts},
     domain::locale::{Bundle, ItemKind, ListBundleResponse, ListItemKindResponse},
 };
 use sqlx::PgPool;
@@ -185,31 +185,31 @@ where id = $1
 
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
-        locale::bundle::List::PATH,
+        <locale::bundle::List as ApiEndpoint>::Path::PATH,
         locale::bundle::List::METHOD.route().to(list_bundles),
     )
     .route(
-        locale::item_kind::List::PATH,
+        <locale::item_kind::List as ApiEndpoint>::Path::PATH,
         locale::item_kind::List::METHOD.route().to(list_item_kinds),
     )
     .route(
-        locale::entry::Get::PATH,
+        <locale::entry::Get as ApiEndpoint>::Path::PATH,
         locale::entry::Get::METHOD.route().to(entry::get),
     )
     .route(
-        locale::entry::Create::PATH,
+        <locale::entry::Create as ApiEndpoint>::Path::PATH,
         locale::entry::Create::METHOD.route().to(entry::create),
     )
     .route(
-        locale::entry::List::PATH,
+        <locale::entry::List as ApiEndpoint>::Path::PATH,
         locale::entry::List::METHOD.route().to(entry::list),
     )
     .route(
-        locale::entry::Update::PATH,
+        <locale::entry::Update as ApiEndpoint>::Path::PATH,
         locale::entry::Update::METHOD.route().to(entry::update),
     )
     .route(
-        locale::entry::Delete::PATH,
+        <locale::entry::Delete as ApiEndpoint>::Path::PATH,
         locale::entry::Delete::METHOD.route().to(entry::delete),
     );
 }

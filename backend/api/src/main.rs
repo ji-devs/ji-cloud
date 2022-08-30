@@ -42,18 +42,18 @@ async fn main() -> anyhow::Result<()> {
         mail_client,
         media_upload_cleaner,
         google_translate,
-        _guard,
+        // _guard,
     ) = {
         log::trace!("initializing settings and processes");
         let remote_target = settings::read_remote_target()?;
         let settings: SettingsManager = SettingsManager::new(remote_target).await?;
 
-        // `guard` needs to remain in scope so that we don't lose our Sentry config.
-        let guard = core::sentry::init(
-            settings.sentry_api_key().await?.as_deref(),
-            remote_target,
-            settings.sentry_sample_rate().await?,
-        )?;
+        // // `guard` needs to remain in scope so that we don't lose our Sentry config.
+        // let guard = core::sentry::init(
+        //     settings.sentry_api_key().await?.as_deref(),
+        //     remote_target,
+        //     settings.sentry_sample_rate().await?,
+        // )?;
 
         // Sentry is weird. By default info! and below events are used as breadcrumbs. I don't want
         // this, I want insight into the actual functioning of the system, not just errors.
@@ -153,7 +153,7 @@ async fn main() -> anyhow::Result<()> {
             mail_client,
             media_upload_cleaner,
             google_translate,
-            guard,
+            // guard,
         )
     };
 

@@ -1,7 +1,7 @@
 use actix_web::web::{Data, Json, ServiceConfig};
 use futures::try_join;
 use shared::{
-    api::{endpoints::meta::Get, ApiEndpoint},
+    api::{endpoints::meta::Get, ApiEndpoint, PathParts},
     domain::meta::MetadataResponse,
 };
 use sqlx::PgPool;
@@ -43,5 +43,8 @@ async fn get(db: Data<PgPool>) -> Result<Json<<Get as ApiEndpoint>::Res>, error:
 }
 
 pub fn configure(cfg: &mut ServiceConfig) {
-    cfg.route(Get::PATH, Get::METHOD.route().to(get));
+    cfg.route(
+        <Get as ApiEndpoint>::Path::PATH,
+        Get::METHOD.route().to(get),
+    );
 }

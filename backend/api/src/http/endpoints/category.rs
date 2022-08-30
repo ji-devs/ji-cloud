@@ -3,7 +3,7 @@ use actix_web::{
     HttpResponse,
 };
 use shared::{
-    api::endpoints::{category, ApiEndpoint},
+    api::endpoints::{category, ApiEndpoint, PathParts},
     domain::category::{
         CategoryId, CategoryResponse, CategoryTreeScope, CreateCategoryRequest, GetCategoryRequest,
         NewCategoryResponse, UpdateCategoryRequest,
@@ -119,19 +119,19 @@ async fn delete_category(
 
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
-        category::Get::PATH,
+        <category::Get as ApiEndpoint>::Path::PATH,
         category::Get::METHOD.route().to(get_categories),
     )
     .route(
-        category::Create::PATH,
+        <category::Create as ApiEndpoint>::Path::PATH,
         category::Create::METHOD.route().to(create_category),
     )
     .route(
-        category::Update::PATH,
+        <category::Update as ApiEndpoint>::Path::PATH,
         category::Update::METHOD.route().to(update_category),
     )
     .route(
-        category::Delete::PATH,
+        <category::Delete as ApiEndpoint>::Path::PATH,
         category::Delete::METHOD.route().to(delete_category),
     );
 }

@@ -3,7 +3,7 @@ use actix_web::{
     HttpResponse,
 };
 use shared::{
-    api::{endpoints::jig::curation, ApiEndpoint},
+    api::{endpoints::jig::curation, ApiEndpoint, PathParts},
     domain::{
         jig::{curation::CommentId, JigId},
         user::UserId,
@@ -106,19 +106,19 @@ async fn get_comment(
 
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
-        curation::UpdateCuration::PATH,
+        <curation::UpdateCuration as ApiEndpoint>::Path::PATH,
         curation::UpdateCuration::METHOD.route().to(update_curation),
     )
     .route(
-        curation::GetCuration::PATH,
+        <curation::GetCuration as ApiEndpoint>::Path::PATH,
         curation::GetCuration::METHOD.route().to(get_curation),
     )
     .route(
-        curation::CreateComment::PATH,
+        <curation::CreateComment as ApiEndpoint>::Path::PATH,
         curation::CreateComment::METHOD.route().to(create_comment),
     )
     .route(
-        curation::GetComment::PATH,
+        <curation::GetComment as ApiEndpoint>::Path::PATH,
         curation::GetComment::METHOD.route().to(get_comment),
     );
 }

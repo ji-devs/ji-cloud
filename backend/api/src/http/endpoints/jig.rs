@@ -5,7 +5,7 @@ use actix_web::{
 use core::settings::RuntimeSettings;
 use futures::try_join;
 use shared::{
-    api::{endpoints::jig, ApiEndpoint},
+    api::{endpoints::jig, ApiEndpoint, PathParts},
     domain::{
         asset::{DraftOrLive, PrivacyLevel, UserOrMe},
         jig::{
@@ -522,72 +522,102 @@ async fn auth_claims(
 }
 
 pub fn configure(cfg: &mut ServiceConfig) {
-    cfg.route(jig::Create::PATH, jig::Create::METHOD.route().to(create))
-        .route(
-            jig::GetLive::PATH,
-            jig::GetLive::METHOD.route().to(get_live),
-        )
-        .route(
-            jig::GetDraft::PATH,
-            jig::GetDraft::METHOD.route().to(get_draft),
-        )
-        .route(
-            jig::Publish::PATH,
-            jig::Publish::METHOD.route().to(publish_draft_to_live),
-        )
-        .route(jig::Clone::PATH, jig::Clone::METHOD.route().to(clone))
-        .route(jig::Browse::PATH, jig::Browse::METHOD.route().to(browse))
-        .route(jig::Search::PATH, jig::Search::METHOD.route().to(search))
-        .route(
-            jig::UpdateDraftData::PATH,
-            jig::UpdateDraftData::METHOD.route().to(update_draft),
-        )
-        .route(jig::Delete::PATH, jig::Delete::METHOD.route().to(delete))
-        .route(
-            jig::JigAdminDataUpdate::PATH,
-            jig::JigAdminDataUpdate::METHOD
-                .route()
-                .to(update_admin_data),
-        )
-        .route(
-            jig::player::Create::PATH,
-            jig::player::Create::METHOD.route().to(player::create),
-        )
-        .route(
-            jig::player::List::PATH,
-            jig::player::List::METHOD.route().to(player::list),
-        )
-        .route(
-            jig::player::instance::Create::PATH,
-            jig::player::instance::Create::METHOD
-                .route()
-                .to(player::instance::create_session_instance),
-        )
-        .route(
-            jig::player::instance::Complete::PATH,
-            jig::player::instance::Complete::METHOD
-                .route()
-                .to(player::instance::complete_session_instance),
-        )
-        .route(
-            jig::player::PlayCount::PATH,
-            jig::player::PlayCount::METHOD
-                .route()
-                .to(player::get_play_count),
-        )
-        .route(
-            jig::player::PlayCount::PATH,
-            jig::player::PlayCount::METHOD
-                .route()
-                .to(player::get_play_count),
-        )
-        .route(jig::Count::PATH, jig::Count::METHOD.route().to(count))
-        .route(jig::Play::PATH, jig::Play::METHOD.route().to(play))
-        .route(jig::Like::PATH, jig::Like::METHOD.route().to(like))
-        .route(jig::Liked::PATH, jig::Liked::METHOD.route().to(liked))
-        .route(jig::Unlike::PATH, jig::Unlike::METHOD.route().to(unlike))
-        .route(
-            jig::RemoveResource::PATH,
-            jig::RemoveResource::METHOD.route().to(remove_resource),
-        );
+    cfg.route(
+        <jig::Create as ApiEndpoint>::Path::PATH,
+        jig::Create::METHOD.route().to(create),
+    )
+    .route(
+        <jig::GetLive as ApiEndpoint>::Path::PATH,
+        jig::GetLive::METHOD.route().to(get_live),
+    )
+    .route(
+        <jig::GetDraft as ApiEndpoint>::Path::PATH,
+        jig::GetDraft::METHOD.route().to(get_draft),
+    )
+    .route(
+        <jig::Publish as ApiEndpoint>::Path::PATH,
+        jig::Publish::METHOD.route().to(publish_draft_to_live),
+    )
+    .route(
+        <jig::Clone as ApiEndpoint>::Path::PATH,
+        jig::Clone::METHOD.route().to(clone),
+    )
+    .route(
+        <jig::Browse as ApiEndpoint>::Path::PATH,
+        jig::Browse::METHOD.route().to(browse),
+    )
+    .route(
+        <jig::Search as ApiEndpoint>::Path::PATH,
+        jig::Search::METHOD.route().to(search),
+    )
+    .route(
+        <jig::UpdateDraftData as ApiEndpoint>::Path::PATH,
+        jig::UpdateDraftData::METHOD.route().to(update_draft),
+    )
+    .route(
+        <jig::Delete as ApiEndpoint>::Path::PATH,
+        jig::Delete::METHOD.route().to(delete),
+    )
+    .route(
+        <jig::JigAdminDataUpdate as ApiEndpoint>::Path::PATH,
+        jig::JigAdminDataUpdate::METHOD
+            .route()
+            .to(update_admin_data),
+    )
+    .route(
+        <jig::player::Create as ApiEndpoint>::Path::PATH,
+        jig::player::Create::METHOD.route().to(player::create),
+    )
+    .route(
+        <jig::player::List as ApiEndpoint>::Path::PATH,
+        jig::player::List::METHOD.route().to(player::list),
+    )
+    .route(
+        <jig::player::instance::Create as ApiEndpoint>::Path::PATH,
+        jig::player::instance::Create::METHOD
+            .route()
+            .to(player::instance::create_session_instance),
+    )
+    .route(
+        <jig::player::instance::Complete as ApiEndpoint>::Path::PATH,
+        jig::player::instance::Complete::METHOD
+            .route()
+            .to(player::instance::complete_session_instance),
+    )
+    .route(
+        <jig::player::PlayCount as ApiEndpoint>::Path::PATH,
+        jig::player::PlayCount::METHOD
+            .route()
+            .to(player::get_play_count),
+    )
+    .route(
+        <jig::player::PlayCount as ApiEndpoint>::Path::PATH,
+        jig::player::PlayCount::METHOD
+            .route()
+            .to(player::get_play_count),
+    )
+    .route(
+        <jig::Count as ApiEndpoint>::Path::PATH,
+        jig::Count::METHOD.route().to(count),
+    )
+    .route(
+        <jig::Play as ApiEndpoint>::Path::PATH,
+        jig::Play::METHOD.route().to(play),
+    )
+    .route(
+        <jig::Like as ApiEndpoint>::Path::PATH,
+        jig::Like::METHOD.route().to(like),
+    )
+    .route(
+        <jig::Liked as ApiEndpoint>::Path::PATH,
+        jig::Liked::METHOD.route().to(liked),
+    )
+    .route(
+        <jig::Unlike as ApiEndpoint>::Path::PATH,
+        jig::Unlike::METHOD.route().to(unlike),
+    )
+    .route(
+        <jig::RemoveResource as ApiEndpoint>::Path::PATH,
+        jig::RemoveResource::METHOD.route().to(remove_resource),
+    );
 }
