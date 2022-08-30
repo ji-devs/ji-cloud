@@ -4,8 +4,9 @@ use crate::{
     api::Method,
     domain::{
         jig::curation::{
-            CommentId, JigCurationCommentRequest, JigCurationCommentResponse, JigCurationData,
-            JigCurationUpdateRequest,
+            CommentId, JigCurationCommentCreatePath, JigCurationCommentGetPath,
+            JigCurationCommentRequest, JigCurationCommentResponse, JigCurationData,
+            JigCurationPath, JigCurationUpdatePath, JigCurationUpdateRequest,
         },
         CreateResponse,
     },
@@ -18,8 +19,8 @@ pub struct GetCuration;
 impl ApiEndpoint for GetCuration {
     type Req = ();
     type Res = JigCurationData;
+    type Path = JigCurationPath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/curation";
     const METHOD: Method = Method::Get;
 }
 
@@ -28,8 +29,8 @@ pub struct UpdateCuration;
 impl ApiEndpoint for UpdateCuration {
     type Req = JigCurationUpdateRequest;
     type Res = ();
+    type Path = JigCurationUpdatePath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/curation";
     const METHOD: Method = Method::Patch;
 }
 
@@ -38,8 +39,8 @@ pub struct CreateComment;
 impl ApiEndpoint for CreateComment {
     type Req = JigCurationCommentRequest;
     type Res = CreateResponse<CommentId>;
+    type Path = JigCurationCommentCreatePath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/curation/comment";
     const METHOD: Method = Method::Post;
 }
 
@@ -48,7 +49,7 @@ pub struct GetComment;
 impl ApiEndpoint for GetComment {
     type Req = ();
     type Res = JigCurationCommentResponse;
+    type Path = JigCurationCommentGetPath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/curation/comment/{comment_id}";
     const METHOD: Method = Method::Get;
 }

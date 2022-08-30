@@ -2,9 +2,10 @@
 //! Note: this assumes that the image referred to exists or is valid.
 
 use crate::{
-    api::{ApiEndpoint, Method},
+    api::{endpoints::ApiEndpoint, Method},
     domain::image::recent::{
-        UserRecentImageListRequest, UserRecentImageListResponse, UserRecentImageResponse,
+        UserRecentImageDeletePath, UserRecentImageListPath, UserRecentImageListRequest,
+        UserRecentImageListResponse, UserRecentImageResponse, UserRecentImageUpsertPath,
         UserRecentImageUpsertRequest,
     },
     error::EmptyError,
@@ -20,10 +21,10 @@ use crate::{
 pub struct List;
 
 impl ApiEndpoint for List {
+    type Path = UserRecentImageListPath;
     type Req = UserRecentImageListRequest;
     type Res = UserRecentImageListResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/user/me/recent/image";
     const METHOD: Method = Method::Get;
 }
 
@@ -41,11 +42,10 @@ pub struct Put;
 // TODO: Move ID into request body
 // TODO: grab req/res from above
 impl ApiEndpoint for Put {
+    type Path = UserRecentImageUpsertPath;
     type Req = UserRecentImageUpsertRequest;
     type Res = UserRecentImageResponse;
     type Err = EmptyError;
-    // uuid should be sufficient to identify an image, VERY unlikely to conflict across media libraries
-    const PATH: &'static str = "/v1/user/me/recent/image";
     const METHOD: Method = Method::Put;
 }
 
@@ -58,10 +58,9 @@ impl ApiEndpoint for Put {
 pub struct Delete;
 
 impl ApiEndpoint for Delete {
+    type Path = UserRecentImageDeletePath;
     type Req = ();
     type Res = ();
     type Err = EmptyError;
-    // uuid should be sufficient to identify an image, VERY unlikely to conflict across media libraries
-    const PATH: &'static str = "/v1/user/me/recent/image/{id}";
     const METHOD: Method = Method::Delete;
 }

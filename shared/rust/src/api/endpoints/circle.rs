@@ -2,9 +2,11 @@ use crate::{
     api::Method,
     domain::{
         circle::{
-            BrowseMembersResponse, Circle, CircleBrowseQuery, CircleBrowseResponse,
-            CircleCreateRequest, CircleId, CircleSearchQuery, CircleSearchResponse,
-            CircleUpdateRequest,
+            BrowseMembersResponse, Circle, CircleBrowseMembersPath, CircleBrowsePath,
+            CircleBrowseQuery, CircleBrowseResponse, CircleCreatePath, CircleCreateRequest,
+            CircleDeletePath, CircleGetPath, CircleId, CircleSearchPath, CircleSearchQuery,
+            CircleSearchResponse, CircleUpdateRequest, JoinCirclePath, LeaveCirclePath,
+            UpdateCirclePath,
         },
         CreateResponse,
     },
@@ -22,8 +24,8 @@ pub struct Create;
 impl ApiEndpoint for Create {
     type Req = CircleCreateRequest;
     type Res = CreateResponse<CircleId>;
+    type Path = CircleCreatePath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/circle";
     const METHOD: Method = Method::Post;
 }
 
@@ -36,8 +38,8 @@ pub struct Update;
 impl ApiEndpoint for Update {
     type Req = CircleUpdateRequest;
     type Res = ();
+    type Path = UpdateCirclePath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/circle/{id}";
     const METHOD: Method = Method::Patch;
 }
 
@@ -51,8 +53,8 @@ pub struct Browse;
 impl ApiEndpoint for Browse {
     type Req = CircleBrowseQuery;
     type Res = CircleBrowseResponse;
+    type Path = CircleBrowsePath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/circle/browse";
     const METHOD: Method = Method::Get;
 }
 
@@ -64,8 +66,8 @@ pub struct Search;
 impl ApiEndpoint for Search {
     type Req = CircleSearchQuery;
     type Res = CircleSearchResponse;
+    type Path = CircleSearchPath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/circle";
     const METHOD: Method = Method::Get;
 }
 
@@ -77,8 +79,8 @@ pub struct Delete;
 impl ApiEndpoint for Delete {
     type Req = ();
     type Res = ();
+    type Path = CircleDeletePath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/circle/{id}";
     const METHOD: Method = Method::Delete;
 }
 
@@ -94,8 +96,8 @@ pub struct Get;
 impl ApiEndpoint for Get {
     type Req = ();
     type Res = Circle;
+    type Path = CircleGetPath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/circle/{id}";
     const METHOD: Method = Method::Get;
 }
 
@@ -111,8 +113,8 @@ pub struct JoinCircle;
 impl ApiEndpoint for JoinCircle {
     type Req = ();
     type Res = ();
+    type Path = JoinCirclePath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/circle/{id}/join";
     const METHOD: Method = Method::Post;
 }
 
@@ -121,8 +123,8 @@ pub struct LeaveCircle;
 impl ApiEndpoint for LeaveCircle {
     type Req = ();
     type Res = ();
+    type Path = LeaveCirclePath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/circle/{id}/leave";
     const METHOD: Method = Method::Delete;
 }
 
@@ -131,7 +133,7 @@ pub struct BrowseMembers;
 impl ApiEndpoint for BrowseMembers {
     type Req = ();
     type Res = BrowseMembersResponse;
+    type Path = CircleBrowseMembersPath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/circle/{id}/members";
     const METHOD: Method = Method::Get;
 }

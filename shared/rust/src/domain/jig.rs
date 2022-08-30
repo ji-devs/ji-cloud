@@ -2,6 +2,7 @@
 pub mod curation;
 
 pub mod report;
+use macros::make_path_parts;
 pub use report::{JigReport, ReportId};
 
 pub mod player;
@@ -23,13 +24,15 @@ use super::{
     module::LiteModule,
     user::UserId,
 };
-use crate::domain::module::body::ThemeId;
+use crate::{api::endpoints::PathPart, domain::module::body::ThemeId};
 
 /// Wrapper type around [`Uuid`], represents the ID of a JIG.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct JigId(pub Uuid);
+
+make_path_parts!(JigCreatePath => "/v1/jig");
 
 /// Request to create a new JIG.
 ///
@@ -466,6 +469,12 @@ pub struct JigResponse {
     pub admin_data: JigAdminData,
 }
 
+make_path_parts!(JigGetLivePath => "/v1/jig/{}/live" => JigId);
+
+make_path_parts!(JigGetDraftPath => "/v1/jig/{}/draft" => JigId);
+
+make_path_parts!(JigUpdateDraftDataPath => "/v1/jig/{}" => JigId);
+
 /// Request for updating a JIG's draft data.
 #[derive(Serialize, Deserialize, Debug, Default)]
 #[serde(rename_all = "camelCase")]
@@ -539,6 +548,10 @@ pub struct JigUpdateDraftDataRequest {
     pub other_keywords: Option<String>,
 }
 
+make_path_parts!(JigPublishPath => "/v1/jig/{}/draft/publish" => JigId);
+
+make_path_parts!(JigBrowsePath => "/v1/jig/browse");
+
 /// Query for [`Browse`](crate::api::endpoints::jig::Browse).
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
@@ -605,6 +618,8 @@ pub struct JigBrowseResponse {
     /// The total number of jigs found
     pub total_jig_count: u64,
 }
+
+make_path_parts!(JigSearchPath => "/v1/jig");
 
 /// Search for jigs via the given query string.
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
@@ -721,6 +736,16 @@ pub struct JigIdResponse {
     pub id: JigId,
 }
 
+make_path_parts!(JigClonePath => "/v1/jig/{}/clone" => JigId);
+
+make_path_parts!(JigDeletePath => "/v1/jig/{}" => JigId);
+
+make_path_parts!(JigDeleteAllPath => "/v1/jig");
+
+make_path_parts!(JigCoverPath => "/v1/jig/{}/cover" => JigId);
+
+make_path_parts!(JigCountPath => "/v1/jig/count");
+
 /// Response for total count of public and published jig.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -729,11 +754,21 @@ pub struct JigCountResponse {
     pub total_count: u64,
 }
 
+make_path_parts!(JigLikePath => "/v1/jig/{}/like" => JigId);
+
+make_path_parts!(JigUnlikePath => "/v1/jig/{}/like" => JigId);
+
+make_path_parts!(JigLikedPath => "/v1/jig/{}/like" => JigId);
+
 /// Response for whether a user has liked a JIG.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct JigLikedResponse {
     /// Whether the authenticated user has liked the current JIG
     pub is_liked: bool,
 }
+
+make_path_parts!(JigPlayPath => "/v1/jig/{}/play" => JigId);
+
+make_path_parts!(JigAdminDataUpdatePath => "/v1/jig/{}/admin" => JigId);
 
 into_uuid![JigId];

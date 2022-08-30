@@ -1,7 +1,10 @@
 //! Types for animations.
 
+use crate::api::endpoints::PathPart;
+
 use super::{meta::AnimationStyleId, Publish};
 use chrono::{DateTime, Utc};
+use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "backend")]
 use sqlx::postgres::PgRow;
@@ -30,10 +33,12 @@ impl AnimationKind {
 }
 
 /// Wrapper type around [`Uuid`], represents the ID of an animation.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct AnimationId(pub Uuid);
+
+make_path_parts!(AnimationGetPath => "/v1/animation/{}" => AnimationId);
 
 /// Response for getting a single animation file.
 #[derive(Serialize, Deserialize, Debug)]
@@ -123,6 +128,8 @@ struct DbAnimation {
     pub updated_at: Option<DateTime<Utc>>,
 }
 
+make_path_parts!(AnimationCreatePath => "/v1/animation");
+
 // todo: # errors doc section
 /// Request to create a new animation.
 #[derive(Serialize, Deserialize, Debug)]
@@ -151,6 +158,8 @@ pub struct AnimationCreateRequest {
     pub is_looping: bool,
 }
 
+make_path_parts!(AnimationUploadPath => "/v1/animation/{}/raw" => AnimationId);
+
 /// Request to indicate the size of an user library image for upload.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AnimationUploadRequest {
@@ -164,5 +173,7 @@ pub struct AnimationUploadResponse {
     /// The session URI used for uploading, including the query for uploader ID
     pub session_uri: String,
 }
+
+make_path_parts!(AnimationDeletePath => "/v1/animation/{}" => AnimationId);
 
 into_uuid![AnimationId];

@@ -1,7 +1,8 @@
 use crate::{
     api::{ApiEndpoint, Method},
     domain::jig::player::{
-        JigPlayCountResponse, JigPlayerSessionCreateRequest, JigPlayerSessionCreateResponse,
+        JigPlayCountPath, JigPlayCountResponse, JigPlayerSessionCreatePath,
+        JigPlayerSessionCreateRequest, JigPlayerSessionCreateResponse, JigPlayerSessionListPath,
         JigPlayerSessionListResponse,
     },
     error::EmptyError,
@@ -41,10 +42,10 @@ use crate::{
 /// 1. Generate a random code in the range 0..MAX
 pub struct Create;
 impl ApiEndpoint for Create {
+    type Path = JigPlayerSessionCreatePath;
     type Req = JigPlayerSessionCreateRequest;
     type Res = JigPlayerSessionCreateResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/player";
     const METHOD: Method = Method::Post;
 }
 
@@ -58,10 +59,10 @@ impl ApiEndpoint for Create {
 /// * ['404 - NotFound'](http::StatusCode::NOT_FOUND) if the jig does not exist.
 pub struct List;
 impl ApiEndpoint for List {
+    type Path = JigPlayerSessionListPath;
     type Req = ();
     type Res = JigPlayerSessionListResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/player";
     const METHOD: Method = Method::Get;
 }
 
@@ -71,10 +72,10 @@ impl ApiEndpoint for List {
 /// * None
 pub struct PlayCount;
 impl ApiEndpoint for PlayCount {
+    type Path = JigPlayCountPath;
     type Req = ();
     type Res = JigPlayCountResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/play-count";
     const METHOD: Method = Method::Get;
 }
 
@@ -83,7 +84,8 @@ pub mod instance {
     use crate::{
         api::{ApiEndpoint, Method},
         domain::jig::player::instance::{
-            PlayerSessionInstanceCompleteRequest, PlayerSessionInstanceCreateRequest,
+            PlayerSessionInstanceCompletePath, PlayerSessionInstanceCompleteRequest,
+            PlayerSessionInstanceCreatePath, PlayerSessionInstanceCreateRequest,
             PlayerSessionInstanceResponse,
         },
         error::EmptyError,
@@ -101,10 +103,10 @@ pub mod instance {
     /// * ['404 - NotFound'](http::StatusCode::NOT_FOUND) if the jig player session does not exist.
     pub struct Create;
     impl ApiEndpoint for Create {
+        type Path = PlayerSessionInstanceCreatePath;
         type Req = PlayerSessionInstanceCreateRequest;
         type Res = PlayerSessionInstanceResponse;
         type Err = EmptyError;
-        const PATH: &'static str = "/v1/jig/player/instance";
         const METHOD: Method = Method::Post;
     }
 
@@ -119,10 +121,10 @@ pub mod instance {
     /// * ['404 - NotFound'](http::StatusCode::NOT_FOUND) if the jig player session instance stored in the token does not exist.
     pub struct Complete;
     impl ApiEndpoint for Complete {
+        type Path = PlayerSessionInstanceCompletePath;
         type Req = PlayerSessionInstanceCompleteRequest;
         type Res = ();
         type Err = EmptyError;
-        const PATH: &'static str = "/v1/jig/player/instance/complete";
         const METHOD: Method = Method::Post;
     }
 }

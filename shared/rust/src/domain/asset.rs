@@ -13,10 +13,13 @@ use serde::{Deserialize, Serialize};
 use strum_macros::Display;
 use uuid::Uuid;
 
-use crate::domain::{
-    category::CategoryId,
-    meta::{AffiliationId, AgeRangeId},
-    module::LiteModule,
+use crate::{
+    api::endpoints::PathPart,
+    domain::{
+        category::CategoryId,
+        meta::{AffiliationId, AgeRangeId},
+        module::LiteModule,
+    },
 };
 
 use super::{
@@ -98,6 +101,14 @@ impl TryFrom<&str> for AssetType {
             "resource" => Ok(Self::Resource),
             _ => Err(()),
         }
+    }
+}
+
+impl PathPart for AssetType {
+    const PLACEHOLDER: &'static str = "{asset_type}";
+
+    fn get_path_string(&self) -> String {
+        self.as_str().to_string()
     }
 }
 

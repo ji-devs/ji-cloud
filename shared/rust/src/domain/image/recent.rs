@@ -2,9 +2,14 @@
 //! Does not verify entries for validity/existence.
 
 use super::ImageId;
+use crate::api::endpoints::PathPart;
 use crate::media::MediaLibrary;
 use chrono::{DateTime, Utc};
+use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
+
+make_path_parts!(UserRecentImageListPath => "/v1/user/me/recent/image");
 
 /// Over-the-wire representation of a single recent image.
 #[derive(Serialize, Deserialize, Debug)]
@@ -18,6 +23,8 @@ pub struct UserRecentImageResponse {
     /// When the image was last used.
     pub last_used: DateTime<Utc>,
 }
+
+make_path_parts!(UserRecentImageUpsertPath => "/v1/user/me/recent/image");
 
 /// Request to add an entry to the recent user images list,
 /// see ['recent::Put'](crate::api::endpoints::image::recent::Put).
@@ -47,3 +54,6 @@ pub struct UserRecentImageListResponse {
     /// The images returned.
     pub images: Vec<UserRecentImageResponse>,
 }
+
+// uuid should be sufficient to identify an image, VERY unlikely to conflict across media libraries
+make_path_parts!(UserRecentImageDeletePath => "/v1/user/me/recent/image/{}" => Uuid);

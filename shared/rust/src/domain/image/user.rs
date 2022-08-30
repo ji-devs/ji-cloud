@@ -1,8 +1,14 @@
 //! Types for user image library.
 
+use crate::api::endpoints::PathPart;
+use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 
 use super::{ImageId, ImageSize};
+
+make_path_parts!(UserImageGetPath => "/v1/user/me/image/{}" => ImageId);
+
+make_path_parts!(UserImageCreatePath => "/v1/user/me/image");
 
 /// Request for creating a user image profile
 #[derive(Serialize, Deserialize, Debug)]
@@ -10,6 +16,8 @@ pub struct UserImageCreateRequest {
     /// The size of the image. Most relevant for uploading user profile images
     pub size: ImageSize,
 }
+
+make_path_parts!(UserImageListPath => "/v1/user/me/image");
 
 /// Query for listing. This is optional. If used, should be included as part of the query string.
 ///
@@ -46,6 +54,8 @@ pub struct UserImage {
     // more fields to be added
 }
 
+make_path_parts!(UserImageUploadPath => "/v1/user/me/image/{}/raw" => ImageId);
+
 /// Request to indicate the size of an user library image for upload.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UserImageUploadRequest {
@@ -59,3 +69,5 @@ pub struct UserImageUploadResponse {
     /// The session URI used for uploading, including the query for uploader ID
     pub session_uri: String,
 }
+
+make_path_parts!(UserImageDeletePath => "/v1/user/me/image/{}" => ImageId);

@@ -1,6 +1,9 @@
 //! Types for jig Modules.
 
+use super::asset::{AssetId, AssetType};
+use crate::api::endpoints::PathPart;
 use chrono::{DateTime, Utc};
+use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use uuid::Uuid;
@@ -10,12 +13,10 @@ pub mod body;
 
 pub use body::Body as ModuleBody;
 
-use super::asset::AssetId;
-
 /// Wrapper type around [`Uuid`](Uuid), represents the **unique ID** of a module.
 ///
 /// This uniquely identifies a module. There is no other module that shares this ID.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 #[serde(rename_all = "camelCase")]
@@ -205,6 +206,8 @@ pub struct Module {
     pub updated_at: DateTime<Utc>,
 }
 
+make_path_parts!(ModuleCreatePath => "/v1/module/draft");
+
 /// Request to create a new `Module`.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ModuleCreateRequest {
@@ -216,12 +219,18 @@ pub struct ModuleCreateRequest {
     pub body: ModuleBody,
 }
 
+make_path_parts!(ModuleGetLivePath => "/v1/{}/module/live/{}" => AssetType, ModuleId);
+
+make_path_parts!(ModuleGetDraftPath => "/v1/{}/module/draft/{}" => AssetType, ModuleId);
+
 /// Response for successfully finding a module
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ModuleResponse {
     /// The module we found
     pub module: Module,
 }
+
+make_path_parts!(ModuleUploadPath => "/v1/module/draft/{}" => ModuleId);
 
 /// Request to update a `Module`.
 /// note: fields here cannot be nulled out (`None` means "don't change").
@@ -247,6 +256,8 @@ pub struct ModuleUpdateRequest {
     #[serde(default)]
     pub is_complete: Option<bool>,
 }
+
+make_path_parts!(ModuleDeletePath => "/v1/module/draft/{}" => ModuleId);
 
 /// Request to delete a `Module`.
 #[derive(Serialize, Deserialize, Debug)]

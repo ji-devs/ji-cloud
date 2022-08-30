@@ -3,7 +3,9 @@ use crate::{
     domain::{
         additional_resource::{
             AdditionalResource, AdditionalResourceCreateRequest, AdditionalResourceId,
-            AdditionalResourceUpdateRequest, AssetIdResource,
+            AdditionalResourceUpdateRequest, AssetIdResource, CreateAssetResourcePath,
+            DeleteAssetResourcePath, GetAssetResourceDraftPath, GetAssetResourceLivePath,
+            UpdateAssetResourcePath,
         },
         CreateResponse,
     },
@@ -25,8 +27,8 @@ pub struct GetDraft;
 impl ApiEndpoint for GetDraft {
     type Req = AssetIdResource;
     type Res = AdditionalResource;
+    type Path = GetAssetResourceDraftPath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/additional-resource/{additional_resource_id}/draft";
     const METHOD: Method = Method::Get;
 }
 
@@ -41,10 +43,10 @@ impl ApiEndpoint for GetDraft {
 /// * [`NotFound`](http::StatusCode::NOT_FOUND) if the additional resource or the parent JIG or Course doesn't exist.
 pub struct GetLive;
 impl ApiEndpoint for GetLive {
+    type Path = GetAssetResourceLivePath;
     type Req = AssetIdResource;
     type Res = AdditionalResource;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/additional-resource/{additional_resource_id}/live";
     const METHOD: Method = Method::Get;
 }
 
@@ -61,10 +63,10 @@ impl ApiEndpoint for GetLive {
 /// * [`BadRequest`](http::StatusCode::BAD_REQUEST) if the request is missing/invalid.
 pub struct Create;
 impl ApiEndpoint for Create {
+    type Path = CreateAssetResourcePath;
     type Req = AdditionalResourceCreateRequest;
     type Res = CreateResponse<AdditionalResourceId>;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/additional-resource/draft";
     const METHOD: Method = Method::Post;
 }
 
@@ -81,10 +83,10 @@ impl ApiEndpoint for Create {
 /// * [`BadRequest`](http::StatusCode::BAD_REQUEST) if the request is missing/invalid.
 pub struct Update;
 impl ApiEndpoint for Update {
+    type Path = UpdateAssetResourcePath;
     type Req = AdditionalResourceUpdateRequest;
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/additional-resource/{additional_resource_id}";
     const METHOD: Method = Method::Patch;
 }
 
@@ -102,9 +104,9 @@ impl ApiEndpoint for Update {
 /// * [`BadRequest`](http::StatusCode::BAD_REQUEST) if the given `id` is not a [`Uuid`](uuid::Uuid) or the request is missing/invalid.
 pub struct Delete;
 impl ApiEndpoint for Delete {
+    type Path = DeleteAssetResourcePath;
     type Req = AssetIdResource;
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/additional-resource/{additional_resource_id}/draft";
     const METHOD: Method = Method::Delete;
 }

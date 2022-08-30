@@ -1,12 +1,13 @@
 /// routes for the user audio library
 pub mod user {
     use crate::{
-        api::{ApiEndpoint, Method},
+        api::{endpoints::ApiEndpoint, Method},
         domain::{
             audio::{
                 user::{
-                    UserAudioListResponse, UserAudioResponse, UserAudioUploadRequest,
-                    UserAudioUploadResponse,
+                    UserAudioCreatePath, UserAudioDeletePath, UserAudioGetPath, UserAudioListPath,
+                    UserAudioListResponse, UserAudioResponse, UserAudioUploadPath,
+                    UserAudioUploadRequest, UserAudioUploadResponse,
                 },
                 AudioId,
             },
@@ -18,29 +19,29 @@ pub mod user {
     /// List audio files.
     pub struct List;
     impl ApiEndpoint for List {
+        type Path = UserAudioListPath;
         type Req = ();
         type Res = UserAudioListResponse;
         type Err = EmptyError;
-        const PATH: &'static str = "/v1/user/me/audio";
         const METHOD: Method = Method::Get;
     }
 
     /// Get an audio file by ID.
     pub struct Get;
     impl ApiEndpoint for Get {
+        type Path = UserAudioGetPath;
         type Req = ();
         type Res = UserAudioResponse;
         type Err = EmptyError;
-        const PATH: &'static str = "/v1/user/me/audio/{id}";
         const METHOD: Method = Method::Get;
     }
     /// Create an audio file.
     pub struct Create;
     impl ApiEndpoint for Create {
+        type Path = UserAudioCreatePath;
         type Req = ();
         type Res = CreateResponse<AudioId>;
         type Err = EmptyError;
-        const PATH: &'static str = "/v1/user/me/audio";
         const METHOD: Method = Method::Post;
     }
 
@@ -51,20 +52,20 @@ pub mod user {
     pub struct Upload;
     impl ApiEndpoint for Upload {
         // raw bytes
+        type Path = UserAudioUploadPath;
         type Req = UserAudioUploadRequest;
         type Res = UserAudioUploadResponse;
         type Err = EmptyError;
-        const PATH: &'static str = "/v1/user/me/audio/{id}/raw";
         const METHOD: Method = Method::Put;
     }
 
     /// Delete an audio file.
     pub struct Delete;
     impl ApiEndpoint for Delete {
+        type Path = UserAudioDeletePath;
         type Req = ();
         type Res = ();
         type Err = EmptyError;
-        const PATH: &'static str = "/v1/user/me/audio/{id}";
         const METHOD: Method = Method::Delete;
     }
 }

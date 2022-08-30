@@ -2,7 +2,10 @@
 
 use crate::{
     api::{ApiEndpoint, Method},
-    domain::search::{CreateSearchKeyResponse, WebImageSearchQuery, WebImageSearchResponse},
+    domain::search::{
+        CreateSearchKeyPath, CreateSearchKeyResponse, WebImageSearchPath, WebImageSearchQuery,
+        WebImageSearchResponse,
+    },
     error::EmptyError,
 };
 
@@ -18,10 +21,10 @@ use crate::{
 /// * [`501 - NotImplemented`](http::StatusCode::NOT_IMPLEMENTED) if the route is not configured.
 pub struct CreateKey;
 impl ApiEndpoint for CreateKey {
+    type Path = CreateSearchKeyPath;
     type Req = ();
     type Res = CreateSearchKeyResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/search/key";
     const METHOD: Method = Method::Post;
 }
 
@@ -37,9 +40,9 @@ impl ApiEndpoint for CreateKey {
 /// * [`401 - Unauthorized`](http::StatusCode::UNAUTHORIZED) if missing/invalid auth was provided.
 pub struct WebImageSearch;
 impl ApiEndpoint for WebImageSearch {
+    type Path = WebImageSearchPath;
     type Req = WebImageSearchQuery;
     type Res = WebImageSearchResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/search/web/image";
     const METHOD: Method = Method::Get;
 }

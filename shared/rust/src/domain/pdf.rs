@@ -4,11 +4,17 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+use crate::api::endpoints::PathPart;
+
 /// Types for user Pdf library.
 pub mod user {
+    use crate::api::endpoints::PathPart;
+    use macros::make_path_parts;
     use serde::{Deserialize, Serialize};
 
     use super::PdfId;
+
+    make_path_parts!(UserPdfListPath => "/v1/user/me/pdf");
 
     /// Response for listing.
     #[derive(Serialize, Deserialize, Debug)]
@@ -16,6 +22,8 @@ pub mod user {
         /// the Pdf files returned.
         pub pdf_files: Vec<UserPdfResponse>,
     }
+
+    make_path_parts!(UserPdfGetPath => "/v1/user/me/pdf/{}" => PdfId);
 
     /// Response for getting a single Pdf file.
     #[derive(Serialize, Deserialize, Debug)]
@@ -32,6 +40,10 @@ pub mod user {
         // more fields to be added
     }
 
+    make_path_parts!(UserPdfCreatePath => "/v1/user/me/pdf");
+
+    make_path_parts!(UserPdfUploadPath => "/v1/user/me/pdf/{}/raw" => PdfId);
+
     /// Request indicating the size of an image for upload.
     #[derive(Serialize, Deserialize, Debug)]
     pub struct UserPdfUploadRequest {
@@ -46,10 +58,12 @@ pub mod user {
         /// The session URI used for uploading, including the query for uploader ID
         pub session_uri: String,
     }
+
+    make_path_parts!(UserPdfDeletePath => "/v1/user/me/pdf/{}" => PdfId);
 }
 
 /// Wrapper type around [`Uuid`](Uuid), represents the ID of an Pdf file.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct PdfId(pub Uuid);

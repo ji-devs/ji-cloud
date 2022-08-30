@@ -1,15 +1,16 @@
 //! Types for categories.
 
 use chrono::{DateTime, Utc};
+use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::domain::user::UserScope;
+use crate::{api::endpoints::PathPart, domain::user::UserScope};
 
 /// Wrapper type around [`Uuid`], represents the ID of a category.
 ///
 /// [`Uuid`]: ../../uuid/struct.Uuid.html
-#[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct CategoryId(pub Uuid);
@@ -67,6 +68,8 @@ pub struct CreateCategoryRequest {
     pub parent_id: Option<CategoryId>,
 }
 
+make_path_parts!(GetCategoryPath => "/v1/category");
+
 /// Request to get a tree of categories.
 ///
 /// # Examples
@@ -114,6 +117,8 @@ pub struct GetCategoryRequest {
     pub scope: Option<CategoryTreeScope>,
 }
 
+make_path_parts!(CreateCategoryPath => "/v1/category");
+
 #[derive(Serialize, Deserialize)]
 /// Response returned when a new category is created.
 pub struct NewCategoryResponse {
@@ -123,6 +128,8 @@ pub struct NewCategoryResponse {
     /// The id of the new category.
     pub id: CategoryId,
 }
+
+make_path_parts!(UpdateCategoryPath => "/v1/category/{}" => CategoryId);
 
 #[derive(Serialize, Deserialize, Default, Eq, PartialEq)]
 /// Request to update a category.
@@ -156,3 +163,5 @@ pub struct UpdateCategoryRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub user_scopes: Option<Vec<UserScope>>,
 }
+
+make_path_parts!(DeleteCategoryPath => "/v1/category/{}" => CategoryId);

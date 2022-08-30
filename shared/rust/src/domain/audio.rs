@@ -1,6 +1,7 @@
 //! Types for audio files.
 
 use super::meta::AudioStyleId;
+use crate::api::endpoints::PathPart;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "backend")]
@@ -9,9 +10,13 @@ use uuid::Uuid;
 
 /// Types for user audio library.
 pub mod user {
+    use macros::make_path_parts;
     use serde::{Deserialize, Serialize};
 
     use super::AudioId;
+    use crate::api::endpoints::PathPart;
+
+    make_path_parts!(UserAudioListPath => "/v1/user/me/audio");
 
     /// Response for listing.
     #[derive(Serialize, Deserialize, Debug)]
@@ -20,12 +25,16 @@ pub mod user {
         pub audio_files: Vec<UserAudioResponse>,
     }
 
+    make_path_parts!(UserAudioGetPath => "/v1/user/me/audio/{}" => AudioId);
+
     /// Response for getting a single audio file.
     #[derive(Serialize, Deserialize, Debug)]
     pub struct UserAudioResponse {
         /// The audio file's metadata.
         pub metadata: UserAudio,
     }
+
+    make_path_parts!(UserAudioCreatePath => "/v1/user/me/audio");
 
     /// Over the wire representation of an audio file's metadata.
     #[derive(Serialize, Deserialize, Debug)]
@@ -34,6 +43,8 @@ pub mod user {
         pub id: AudioId,
         // more fields to be added
     }
+
+    make_path_parts!(UserAudioUploadPath => "/v1/user/me/audio/{}/raw" => AudioId);
 
     /// Request indicating the size of an image for upload.
     #[derive(Serialize, Deserialize, Debug)]
@@ -49,10 +60,12 @@ pub mod user {
         /// The session URI used for uploading, including the query for uploader ID
         pub session_uri: String,
     }
+
+    make_path_parts!(UserAudioDeletePath => "/v1/user/me/audio/{}" => AudioId);
 }
 
 /// Wrapper type around [`Uuid`](Uuid), represents the ID of an audio file.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct AudioId(pub Uuid);

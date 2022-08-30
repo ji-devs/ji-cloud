@@ -1,13 +1,15 @@
 //! Types for additional resources for JIG or Courses.
 
-use crate::domain::{
-    asset::AssetId, audio::AudioId, image::ImageId, meta::ResourceTypeId, pdf::PdfId,
+use crate::{
+    api::endpoints::PathPart,
+    domain::{asset::AssetId, audio::AudioId, image::ImageId, meta::ResourceTypeId, pdf::PdfId},
 };
+use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 /// Wrapper type around [`Uuid`](Uuid), represents the ID of an additional resource.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct AdditionalResourceId(pub Uuid);
@@ -30,6 +32,8 @@ pub struct AdditionalResource {
     pub resource_content: ResourceContent,
 }
 
+make_path_parts!(CreateAssetResourcePath => "/v1/additional-resource/draft");
+
 /// Request to create a new `AdditionalResource`.
 ///
 /// [`additional_resource::Create`](crate::api::endpoints::additional_resource::Create)
@@ -50,6 +54,8 @@ pub struct AdditionalResourceCreateRequest {
     #[serde(flatten)]
     pub resource_content: ResourceContent,
 }
+
+make_path_parts!(UpdateAssetResourcePath => "/v1/additional-resource/{}" => AdditionalResourceId);
 
 /// Request to update an `AdditionalResource`.
 ///
@@ -79,6 +85,12 @@ pub struct AdditionalResourceUpdateRequest {
     #[serde(flatten)]
     pub resource_content: Option<ResourceContent>,
 }
+
+make_path_parts!(GetAssetResourceDraftPath => "/v1/additional-resource/{}/draft" => AdditionalResourceId);
+
+make_path_parts!(GetAssetResourceLivePath => "/v1/additional-resource/{}/live" => AdditionalResourceId);
+
+make_path_parts!(DeleteAssetResourcePath => "/v1/additional-resource/{}/draft" => AdditionalResourceId);
 
 /// Delete an `AdditionalResource` by Asset Id.
 ///

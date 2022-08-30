@@ -1,6 +1,9 @@
 use crate::{
     api::Method,
-    domain::session::{CreateSessionOAuthRequest, CreateSessionResponse, GetOAuthUrlResponse},
+    domain::session::{
+        CreateSessionOAuthPath, CreateSessionOAuthRequest, CreateSessionPath,
+        CreateSessionResponse, DeleteSessionPath, GetOAuthPath, GetOAuthUrlResponse,
+    },
     error::EmptyError,
 };
 
@@ -12,10 +15,10 @@ use super::ApiEndpoint;
 /// see: <https://tools.ietf.org/html/rfc7617#section-2>
 pub struct Create;
 impl ApiEndpoint for Create {
+    type Path = CreateSessionPath;
     type Req = ();
     type Res = CreateSessionResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/session";
     const METHOD: Method = Method::Post;
 }
 
@@ -41,10 +44,10 @@ impl ApiEndpoint for Create {
 ///     * Optionally include the user profile information returned in #1
 pub struct CreateOAuth;
 impl ApiEndpoint for CreateOAuth {
+    type Path = CreateSessionOAuthPath;
     type Req = CreateSessionOAuthRequest;
     type Res = CreateSessionResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/session/oauth";
     const METHOD: Method = Method::Post;
 }
 
@@ -55,10 +58,10 @@ impl ApiEndpoint for CreateOAuth {
 /// 2. Continue from [`CreateOAuth`]
 pub struct GetOAuthUrl;
 impl ApiEndpoint for GetOAuthUrl {
+    type Path = GetOAuthPath;
     type Req = ();
     type Res = GetOAuthUrlResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/session/oauth/url/{service}/{kind}";
     const METHOD: Method = Method::Get;
 }
 
@@ -70,9 +73,9 @@ impl ApiEndpoint for GetOAuthUrl {
 /// [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if the authorization is invalid
 pub struct Delete;
 impl ApiEndpoint for Delete {
+    type Path = DeleteSessionPath;
     type Req = ();
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/session";
     const METHOD: Method = Method::Delete;
 }

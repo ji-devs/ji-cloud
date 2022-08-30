@@ -1,5 +1,6 @@
 //! Types for Resources.
 use chrono::{DateTime, Utc};
+use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, convert::TryFrom};
 use uuid::Uuid;
@@ -8,6 +9,8 @@ pub mod curation;
 
 pub mod report;
 pub use report::{ReportId, ResourceReport};
+
+use crate::api::endpoints::PathPart;
 
 use super::{
     additional_resource::AdditionalResource,
@@ -19,10 +22,12 @@ use super::{
 };
 
 /// Wrapper type around [`Uuid`], represents the ID of a Resource.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct ResourceId(pub Uuid);
+
+make_path_parts!(ResourceCreatePath => "/v1/resource");
 
 /// The response returned when a request for `GET`ing a resource is successful.
 
@@ -153,6 +158,12 @@ pub struct ResourceCreateRequest {
     pub categories: Vec<CategoryId>,
 }
 
+make_path_parts!(ResourceGetLivePath => "/v1/resource/{}/live" => ResourceId);
+
+make_path_parts!(ResourceGetDraftPath => "/v1/resource/{}/draft" => ResourceId);
+
+make_path_parts!(ResourceUpdateDraftDataPath => "/v1/resource/{}" => ResourceId);
+
 /// Request for updating a Resource's draft data.
 #[derive(Serialize, Deserialize, Debug, Default)]
 #[serde(rename_all = "camelCase")]
@@ -204,6 +215,10 @@ pub struct ResourceUpdateDraftDataRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub other_keywords: Option<String>,
 }
+
+make_path_parts!(ResourcePublishPath => "/v1/resource/{}/draft/publish" => ResourceId);
+
+make_path_parts!(ResourceBrowsePath => "/v1/resource/browse");
 
 /// Query for [`Browse`](crate::api::endpoints::Resource::Browse).
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
@@ -271,6 +286,8 @@ pub struct ResourceBrowseResponse {
     /// The total number of Resources found
     pub total_resource_count: u64,
 }
+
+make_path_parts!(ResourceSearchPath => "/v1/resource");
 
 /// All id's associated with a Resource to delete
 pub struct DeleteUserResources {
@@ -393,6 +410,16 @@ pub struct ResourceIdResponse {
     pub id: ResourceId,
 }
 
+make_path_parts!(ResourceClonePath => "/v1/resource/{}/clone" => ResourceId);
+
+make_path_parts!(ResourceDeletePath => "/v1/resource/{}" => ResourceId);
+
+make_path_parts!(ResourceDeleteAllPath => "/v1/resource");
+
+make_path_parts!(ResourceCoverPath => "/v1/resource/{}/cover" => ResourceId);
+
+make_path_parts!(ResourceCountPath => "/v1/resource/count");
+
 /// Response for total count of public and published resource.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -486,5 +513,15 @@ impl TryFrom<u8> for ResourceRating {
         }
     }
 }
+
+make_path_parts!(ResourceLikePath => "/v1/resource/{}/like" => ResourceId);
+
+make_path_parts!(ResourceUnlikePath => "/v1/resource/{}/like" => ResourceId);
+
+make_path_parts!(ResourceLikedPath => "/v1/resource/{}/like" => ResourceId);
+
+make_path_parts!(ResourcePlayPath => "/v1/resource/{}/play" => ResourceId);
+
+make_path_parts!(ResourceAdminDataUpdatePath => "/v1/resource/{}/admin" => ResourceId);
 
 into_uuid![ResourceId];

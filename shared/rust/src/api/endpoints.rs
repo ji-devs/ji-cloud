@@ -1,11 +1,16 @@
 use crate::api::Method;
+pub use macros::{make_path_parts, PathPart};
 use serde::{de::DeserializeOwned, Serialize};
+use url::Url;
+use uuid::Uuid;
 
-//  add something for path requests?
 //  add something for auth required?
 
 /// Represents a A endpoint that the backend will support, and how to call it.
 pub trait ApiEndpoint {
+    /// The path type for this endpoint.
+    type Path: PathParts;
+
     /// The request type for this endpoint.
     type Req: Serialize;
 
@@ -14,9 +19,6 @@ pub trait ApiEndpoint {
 
     /// The (inner) error type for this endpoint.
     type Err: DeserializeOwned + Serialize;
-
-    /// The path to the endpoint.
-    const PATH: &'static str;
 
     /// The method used to make a request to the endpoint.
     const METHOD: Method;
@@ -75,3 +77,64 @@ pub mod circle;
 
 /// Module endpoints
 pub mod module;
+
+/// Item that can be part of PathParts
+pub trait PathPart {
+    /// placeholder to be replaced with value
+    const PLACEHOLDER: &'static str;
+
+    /// string value to replace placeholder with
+    fn get_path_string(&self) -> String;
+}
+
+/// Path of ApiEndpoint
+pub trait PathParts {
+    /// API path
+    const PATH: &'static str;
+
+    /// path path with placeholders replaced with values
+    fn get_filled(&self) -> String;
+}
+
+// TODO: think we should try to get rid of all these impls, we should use NewTypes instead
+
+impl PathPart for Uuid {
+    const PLACEHOLDER: &'static str = "{uuid}";
+
+    fn get_path_string(&self) -> String {
+        self.to_string()
+    }
+}
+
+impl PathPart for Url {
+    const PLACEHOLDER: &'static str = "{url}";
+
+    fn get_path_string(&self) -> String {
+        // maybe use urlencoding crate
+        todo!();
+    }
+}
+
+impl PathPart for i32 {
+    const PLACEHOLDER: &'static str = "{number}";
+
+    fn get_path_string(&self) -> String {
+        self.to_string()
+    }
+}
+
+impl PathPart for u32 {
+    const PLACEHOLDER: &'static str = "{number}";
+
+    fn get_path_string(&self) -> String {
+        self.to_string()
+    }
+}
+
+impl PathPart for i16 {
+    const PLACEHOLDER: &'static str = "{number}";
+
+    fn get_path_string(&self) -> String {
+        self.to_string()
+    }
+}

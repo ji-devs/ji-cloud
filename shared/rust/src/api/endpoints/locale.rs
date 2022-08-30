@@ -1,10 +1,11 @@
 /// Entry endpoints
 pub mod entry {
     use crate::{
-        api::{ApiEndpoint, Method},
+        api::{endpoints::ApiEndpoint, Method},
         domain::locale::{
-            CreateEntryRequest, CreateEntryResponse, GetEntryResponse, ListEntryQuery,
-            ListEntryResponse, UpdateEntryRequest,
+            CreateEntryPath, CreateEntryRequest, CreateEntryResponse, DeleteEntryPath,
+            GetEntryPath, GetEntryResponse, ListEntryPath, ListEntryQuery, ListEntryResponse,
+            UpdateEntryPath, UpdateEntryRequest,
         },
         error::EmptyError,
     };
@@ -14,8 +15,8 @@ pub mod entry {
     impl ApiEndpoint for Create {
         type Req = CreateEntryRequest;
         type Res = CreateEntryResponse;
+        type Path = CreateEntryPath;
         type Err = EmptyError;
-        const PATH: &'static str = "/v1/locale/entry";
         const METHOD: Method = Method::Post;
     }
 
@@ -24,8 +25,8 @@ pub mod entry {
     impl ApiEndpoint for List {
         type Req = ListEntryQuery;
         type Res = ListEntryResponse;
+        type Path = ListEntryPath;
         type Err = EmptyError;
-        const PATH: &'static str = "/v1/locale/entry";
         const METHOD: Method = Method::Get;
     }
 
@@ -34,8 +35,8 @@ pub mod entry {
     impl ApiEndpoint for Get {
         type Req = ();
         type Res = GetEntryResponse;
+        type Path = GetEntryPath;
         type Err = EmptyError;
-        const PATH: &'static str = "/v1/locale/entry/{id}";
         const METHOD: Method = Method::Get;
     }
 
@@ -44,8 +45,8 @@ pub mod entry {
     impl ApiEndpoint for Update {
         type Req = UpdateEntryRequest;
         type Res = ();
+        type Path = UpdateEntryPath;
         type Err = EmptyError;
-        const PATH: &'static str = "/v1/locale/entry/{id}";
         const METHOD: Method = Method::Patch;
     }
 
@@ -54,8 +55,8 @@ pub mod entry {
     impl ApiEndpoint for Delete {
         type Req = ();
         type Res = ();
+        type Path = DeleteEntryPath;
         type Err = EmptyError;
-        const PATH: &'static str = "/v1/locale/entry/{id}";
         const METHOD: Method = Method::Delete;
     }
 }
@@ -63,8 +64,8 @@ pub mod entry {
 /// [`ItemKind`](crate::domain::locale::ItemKind) endpoints
 pub mod item_kind {
     use crate::{
-        api::{ApiEndpoint, Method},
-        domain::locale::ListItemKindResponse,
+        api::{endpoints::ApiEndpoint, Method},
+        domain::locale::{ListItemKindPath, ListItemKindResponse},
         error::EmptyError,
     };
 
@@ -73,8 +74,8 @@ pub mod item_kind {
     impl ApiEndpoint for List {
         type Req = ();
         type Res = ListItemKindResponse;
+        type Path = ListItemKindPath;
         type Err = EmptyError;
-        const PATH: &'static str = "/v1/locale/item-kind";
         const METHOD: Method = Method::Get;
     }
 }
@@ -82,8 +83,8 @@ pub mod item_kind {
 /// [`Bundle`](crate::domain::locale::Bundle) endpoints
 pub mod bundle {
     use crate::{
-        api::{ApiEndpoint, Method},
-        domain::locale::ListBundleResponse,
+        api::{endpoints::ApiEndpoint, Method},
+        domain::locale::{ListBundlePath, ListBundleResponse},
         error::EmptyError,
     };
 
@@ -92,8 +93,8 @@ pub mod bundle {
     impl ApiEndpoint for List {
         type Req = ();
         type Res = ListBundleResponse;
+        type Path = ListBundlePath;
         type Err = EmptyError;
-        const PATH: &'static str = "/v1/locale/bundle";
         const METHOD: Method = Method::Get;
     }
 }

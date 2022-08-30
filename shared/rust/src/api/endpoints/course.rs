@@ -2,8 +2,10 @@ use crate::{
     api::Method,
     domain::{
         course::{
-            CourseBrowseQuery, CourseBrowseResponse, CourseCreateRequest, CourseId, CourseResponse,
-            CourseSearchQuery, CourseSearchResponse, CourseUpdateDraftDataRequest,
+            CourseBrowsePath, CourseBrowseQuery, CourseBrowseResponse, CourseCreatePath,
+            CourseCreateRequest, CourseDeletePath, CourseGetDraftPath, CourseGetLivePath, CourseId,
+            CoursePublishPath, CourseResponse, CourseSearchPath, CourseSearchQuery,
+            CourseSearchResponse, CourseUpdateDraftDataPath, CourseUpdateDraftDataRequest,
         },
         CreateResponse,
     },
@@ -31,8 +33,8 @@ pub struct Create;
 impl ApiEndpoint for Create {
     type Req = CourseCreateRequest;
     type Res = CreateResponse<CourseId>;
+    type Path = CourseCreatePath;
     type Err = MetadataNotFound;
-    const PATH: &'static str = "/v1/course";
     const METHOD: Method = Method::Post;
 }
 
@@ -48,8 +50,8 @@ pub struct GetLive;
 impl ApiEndpoint for GetLive {
     type Req = ();
     type Res = CourseResponse;
+    type Path = CourseGetLivePath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/course/{id}/live";
     const METHOD: Method = Method::Get;
 }
 
@@ -66,8 +68,8 @@ pub struct GetDraft;
 impl ApiEndpoint for GetDraft {
     type Req = ();
     type Res = CourseResponse;
+    type Path = CourseGetDraftPath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/course/{id}/draft";
     const METHOD: Method = Method::Get;
 }
 
@@ -86,8 +88,8 @@ pub struct UpdateDraftData;
 impl ApiEndpoint for UpdateDraftData {
     type Req = CourseUpdateDraftDataRequest;
     type Res = ();
+    type Path = CourseUpdateDraftDataPath;
     type Err = MetadataNotFound;
-    const PATH: &'static str = "/v1/course/{id}";
     const METHOD: Method = Method::Patch;
 }
 
@@ -100,8 +102,8 @@ pub struct Publish;
 impl ApiEndpoint for Publish {
     type Req = ();
     type Res = ();
+    type Path = CoursePublishPath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/course/{id}/draft/publish";
     const METHOD: Method = Method::Put;
 }
 
@@ -113,8 +115,8 @@ pub struct Browse;
 impl ApiEndpoint for Browse {
     type Req = CourseBrowseQuery;
     type Res = CourseBrowseResponse;
+    type Path = CourseBrowsePath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/course/browse";
     const METHOD: Method = Method::Get;
 }
 
@@ -126,8 +128,8 @@ pub struct Search;
 impl ApiEndpoint for Search {
     type Req = CourseSearchQuery;
     type Res = CourseSearchResponse;
+    type Path = CourseSearchPath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/course";
     const METHOD: Method = Method::Get;
 }
 
@@ -140,7 +142,7 @@ pub struct Delete;
 impl ApiEndpoint for Delete {
     type Req = ();
     type Res = ();
+    type Path = CourseDeletePath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/course/{id}";
     const METHOD: Method = Method::Delete;
 }

@@ -1,10 +1,12 @@
 //! routes for the global animation library
 
+use super::ApiEndpoint;
 use crate::{
-    api::{ApiEndpoint, Method},
+    api::Method,
     domain::{
         animation::{
-            AnimationCreateRequest, AnimationId, AnimationResponse, AnimationUploadRequest,
+            AnimationCreatePath, AnimationCreateRequest, AnimationDeletePath, AnimationGetPath,
+            AnimationId, AnimationResponse, AnimationUploadPath, AnimationUploadRequest,
             AnimationUploadResponse,
         },
         CreateResponse,
@@ -15,19 +17,19 @@ use crate::{
 /// Get an animation by ID.
 pub struct Get;
 impl ApiEndpoint for Get {
+    type Path = AnimationGetPath;
     type Req = ();
     type Res = AnimationResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/animation/{id}";
     const METHOD: Method = Method::Get;
 }
 /// Create an animation.
 pub struct Create;
 impl ApiEndpoint for Create {
+    type Path = AnimationCreatePath;
     type Req = AnimationCreateRequest;
     type Res = CreateResponse<AnimationId>;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/animation";
     const METHOD: Method = Method::Post;
 }
 
@@ -53,20 +55,20 @@ impl ApiEndpoint for Create {
 /// * [`501 - NotImplemented`](http::StatusCode::NOT_IMPLEMENTED) when the s3/gcs service is disabled.
 pub struct Upload;
 impl ApiEndpoint for Upload {
+    type Path = AnimationUploadPath;
     // raw bytes
     type Req = AnimationUploadRequest;
     type Res = AnimationUploadResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/animation/{id}/raw";
     const METHOD: Method = Method::Put;
 }
 
 /// Delete an animation.
 pub struct Delete;
 impl ApiEndpoint for Delete {
+    type Path = AnimationDeletePath;
     type Req = ();
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/animation/{id}";
     const METHOD: Method = Method::Delete;
 }

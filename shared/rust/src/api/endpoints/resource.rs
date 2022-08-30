@@ -2,10 +2,14 @@ use crate::{
     api::Method,
     domain::{
         resource::{
-            ResourceBrowseQuery, ResourceBrowseResponse, ResourceCountResponse,
-            ResourceCreateRequest, ResourceId, ResourceLikedResponse, ResourceResponse,
-            ResourceSearchQuery, ResourceSearchResponse, ResourceUpdateAdminDataRequest,
-            ResourceUpdateDraftDataRequest,
+            ResourceAdminDataUpdatePath, ResourceBrowsePath, ResourceBrowseQuery,
+            ResourceBrowseResponse, ResourceClonePath, ResourceCountPath, ResourceCountResponse,
+            ResourceCoverPath, ResourceCreatePath, ResourceCreateRequest, ResourceDeleteAllPath,
+            ResourceDeletePath, ResourceGetDraftPath, ResourceGetLivePath, ResourceId,
+            ResourceLikePath, ResourceLikedPath, ResourceLikedResponse, ResourcePlayPath,
+            ResourcePublishPath, ResourceResponse, ResourceSearchPath, ResourceSearchQuery,
+            ResourceSearchResponse, ResourceUnlikePath, ResourceUpdateAdminDataRequest,
+            ResourceUpdateDraftDataPath, ResourceUpdateDraftDataRequest,
         },
         CreateResponse,
     },
@@ -36,10 +40,10 @@ pub mod report;
 /// * One of `Admin`, `AdminResource`, or `ManageSelfResource`
 pub struct Create;
 impl ApiEndpoint for Create {
+    type Path = ResourceCreatePath;
     type Req = ResourceCreateRequest;
     type Res = CreateResponse<ResourceId>;
     type Err = MetadataNotFound;
-    const PATH: &'static str = "/v1/resource";
     const METHOD: Method = Method::Post;
 }
 
@@ -52,10 +56,10 @@ impl ApiEndpoint for Create {
 /// * [`NotFound`](http::StatusCode::NOT_FOUND) if the module does not exist, or the parent resource doesn't exist.
 pub struct GetLive;
 impl ApiEndpoint for GetLive {
+    type Path = ResourceGetLivePath;
     type Req = ();
     type Res = ResourceResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/resource/{id}/live";
     const METHOD: Method = Method::Get;
 }
 
@@ -69,10 +73,10 @@ impl ApiEndpoint for GetLive {
 /// * [`NotFound`](http::StatusCode::NOT_FOUND) if the module does not exist, or the parent resource doesn't exist.
 pub struct GetDraft;
 impl ApiEndpoint for GetDraft {
+    type Path = ResourceGetDraftPath;
     type Req = ();
     type Res = ResourceResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/resource/{id}/draft";
     const METHOD: Method = Method::Get;
 }
 
@@ -89,10 +93,10 @@ impl ApiEndpoint for GetDraft {
 /// * One of `Admin`, `AdminResource`,, or `ManageSelfResource` for owned Resources
 pub struct UpdateDraftData;
 impl ApiEndpoint for UpdateDraftData {
+    type Path = ResourceUpdateDraftDataPath;
     type Req = ResourceUpdateDraftDataRequest;
     type Res = ();
     type Err = MetadataNotFound;
-    const PATH: &'static str = "/v1/resource/{id}";
     const METHOD: Method = Method::Patch;
 }
 
@@ -102,10 +106,10 @@ impl ApiEndpoint for UpdateDraftData {
 /// * None
 pub struct Publish;
 impl ApiEndpoint for Publish {
+    type Path = ResourcePublishPath;
     type Req = ();
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/resource/{id}/draft/publish";
     const METHOD: Method = Method::Put;
 }
 
@@ -115,10 +119,10 @@ impl ApiEndpoint for Publish {
 /// * One of `Admin`, `AdminResource`, or `ManageSelfResource`
 pub struct Browse;
 impl ApiEndpoint for Browse {
+    type Path = ResourceBrowsePath;
     type Req = ResourceBrowseQuery;
     type Res = ResourceBrowseResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/resource/browse";
     const METHOD: Method = Method::Get;
 }
 
@@ -128,10 +132,10 @@ impl ApiEndpoint for Browse {
 /// * None
 pub struct Search;
 impl ApiEndpoint for Search {
+    type Path = ResourceSearchPath;
     type Req = ResourceSearchQuery;
     type Res = ResourceSearchResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/resource";
     const METHOD: Method = Method::Get;
 }
 
@@ -147,10 +151,10 @@ impl ApiEndpoint for Search {
 /// * ['BadRequest'](http::StatusCode::BAD_REQUEST) if the request is malformed or the Resource is a draft.
 pub struct Clone;
 impl ApiEndpoint for Clone {
+    type Path = ResourceClonePath;
     type Req = ();
     type Res = CreateResponse<ResourceId>;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/resource/{id}/clone";
     const METHOD: Method = Method::Post;
 }
 
@@ -160,10 +164,10 @@ impl ApiEndpoint for Clone {
 /// * One of `Admin`, `AdminResource`, or `ManageSelfResource` for owned Resources
 pub struct Delete;
 impl ApiEndpoint for Delete {
+    type Path = ResourceDeletePath;
     type Req = ();
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/resource/{id}";
     const METHOD: Method = Method::Delete;
 }
 
@@ -173,10 +177,10 @@ impl ApiEndpoint for Delete {
 /// * One of `Admin`, `AdminResource`, or `ManageSelfResource` for owned Resources
 pub struct DeleteAll;
 impl ApiEndpoint for DeleteAll {
+    type Path = ResourceDeleteAllPath;
     type Req = ();
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/resource";
     const METHOD: Method = Method::Delete;
 }
 
@@ -186,10 +190,10 @@ impl ApiEndpoint for DeleteAll {
 /// * One of `Admin`, `AdminResource`, or `ManageSelfResource` for owned Resources
 pub struct Cover;
 impl ApiEndpoint for Cover {
+    type Path = ResourceCoverPath;
     type Req = ();
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/resource/{id}/cover";
     const METHOD: Method = Method::Patch;
 }
 
@@ -199,10 +203,10 @@ impl ApiEndpoint for Cover {
 /// * None
 pub struct Count;
 impl ApiEndpoint for Count {
+    type Path = ResourceCountPath;
     type Req = ();
     type Res = ResourceCountResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/resource/count";
     const METHOD: Method = Method::Get;
 }
 
@@ -212,10 +216,10 @@ impl ApiEndpoint for Count {
 /// * Admin, BasicAuth
 pub struct Like;
 impl ApiEndpoint for Like {
+    type Path = ResourceLikePath;
     type Req = ();
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/resource/{id}/like";
     const METHOD: Method = Method::Put;
 }
 
@@ -225,10 +229,10 @@ impl ApiEndpoint for Like {
 /// * Admin, BasicAuth
 pub struct Unlike;
 impl ApiEndpoint for Unlike {
+    type Path = ResourceUnlikePath;
     type Req = ();
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/resource/{id}/like";
     const METHOD: Method = Method::Delete;
 }
 
@@ -238,10 +242,10 @@ impl ApiEndpoint for Unlike {
 /// * Admin, BasicAuth
 pub struct Liked;
 impl ApiEndpoint for Liked {
+    type Path = ResourceLikedPath;
     type Req = ();
     type Res = ResourceLikedResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/resource/{id}/like";
     const METHOD: Method = Method::Get;
 }
 
@@ -251,10 +255,10 @@ impl ApiEndpoint for Liked {
 /// * None
 pub struct Play;
 impl ApiEndpoint for Play {
+    type Path = ResourcePlayPath;
     type Req = ();
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/resource/{id}/play";
     const METHOD: Method = Method::Put;
 }
 
@@ -271,9 +275,9 @@ impl ApiEndpoint for Play {
 /// * [`BadRequest`](http::StatusCode::BAD_REQUEST) if the request is missing/invalid.
 pub struct ResourceAdminDataUpdate;
 impl ApiEndpoint for ResourceAdminDataUpdate {
+    type Path = ResourceAdminDataUpdatePath;
     type Req = ResourceUpdateAdminDataRequest;
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/resource/{id}/admin";
     const METHOD: Method = Method::Patch;
 }

@@ -1,11 +1,15 @@
 //! Types for Media.
 
+use crate::api::endpoints::PathPart;
 use chrono::{DateTime, Utc};
+use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 use url::Url;
 use uuid::Uuid;
 
 use crate::media::MediaKind;
+
+make_path_parts!(MediaCreatePath => "/v1/media/image/url");
 
 /// Response for adding a URL to the Web Media Library
 #[derive(Serialize, Deserialize, Debug)]
@@ -23,6 +27,10 @@ pub struct WebMediaUrlCreateRequest {
     /// The url.
     pub url: Url,
 }
+
+make_path_parts!(MediaUrlGetPath => "/v1/media/url/{}" => Url);
+
+make_path_parts!(MediaIdGetPath => "/v1/media/id/{}" => Uuid);
 
 /// Response for getting metadata for media from the web media library.
 #[derive(Serialize, Deserialize, Debug)]
@@ -42,3 +50,7 @@ pub struct WebMediaMetadataResponse {
     /// When this media was last updated, if ever.
     pub updated_at: Option<DateTime<Utc>>,
 }
+
+make_path_parts!(MediaUrlDeletePath => "/v1/media/url/{}" => Url);
+
+make_path_parts!(MediaIdDeletePath => "/v1/media/id/{}" => Uuid);

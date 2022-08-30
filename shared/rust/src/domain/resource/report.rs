@@ -1,16 +1,21 @@
 //! Types for Resource short codes for sharing
 use chrono::{DateTime, Utc};
+use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 use strum_macros::EnumIter;
 use uuid::Uuid;
 
+use crate::api::endpoints::PathPart;
+
 use super::ResourceId;
 
 /// Wrapper type around [`Uuid`](Uuid), represents the ID of a curation comment.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct ReportId(pub Uuid);
+
+make_path_parts!(GetResourceReportPath => "/v1/resource/{}/report/{}" => ResourceId, ReportId);
 
 /// Resource report details
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -41,6 +46,8 @@ pub struct ResourceReport {
     /// When report was submitted
     pub created_at: DateTime<Utc>,
 }
+
+make_path_parts!(CreateResourceReportPath => "/v1/resource/{}/report" => ResourceId);
 
 /// Request for reporting a resource
 #[derive(Serialize, Deserialize, Debug)]
