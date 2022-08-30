@@ -287,9 +287,10 @@ select resource.id                                       as "id!: ResourceId",
        blocked                                  as "blocked!",
        curated                                  as "curated!"
 from resource
-         inner join unnest($1::uuid[])
+inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
-    inner join resource_admin_data "admin" on admin.resource_id = resource.id
+inner join resource_admin_data "admin" on admin.resource_id = resource.id
+order by ord asc
     "#,
         ids,
     )
@@ -336,8 +337,9 @@ select id,
        other_keywords                             as "other_keywords!",
        translated_keywords                        as "translated_keywords!"
 from resource_data
-         inner join unnest($1::uuid[])
+inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
+order by ord asc
 "#,
         &resource_data_ids
     )
