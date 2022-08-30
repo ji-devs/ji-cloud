@@ -1,15 +1,19 @@
 use super::super::state::Sidebar;
 use crate::base::state::Base;
 use components::{
-    image::search::{
-        callbacks::Callbacks as ImageSearchCallbacks,
-        state::{ImageSearchKind, ImageSearchOptions, State as ImageSearchState},
+    image::{
+        search::{
+            callbacks::Callbacks as ImageSearchCallbacks,
+            state::{ImageSearchKind, ImageSearchOptions, State as ImageSearchState},
+        },
+        tag::ImageTag,
     },
     stickers::state::Stickers,
     tabs::MenuTabKind,
 };
 use dominator::clone;
 use futures_signals::signal::Mutable;
+use shared::domain::module::body::{video::Mode, BodyExt};
 use std::rc::Rc;
 use utils::unwrap::UnwrapJiExt;
 
@@ -52,8 +56,13 @@ impl Tab {
             MenuTabKind::Video => Self::Video,
             MenuTabKind::Text => Self::Text,
             MenuTabKind::Image => {
+                let mode = base.history.get_current().mode();
+
+                let tags_priority = mode.map(|mode| get_image_tag_priorities_from_mode(mode));
+
                 let opts = ImageSearchOptions {
                     kind: ImageSearchKind::Sticker,
+                    tags_priority,
                     ..ImageSearchOptions::default()
                 };
                 let callbacks = ImageSearchCallbacks::new(Some(
@@ -77,5 +86,14 @@ impl Tab {
             Self::Text => MenuTabKind::Text,
             Self::Image(_) => MenuTabKind::Image,
         }
+    }
+}
+
+fn get_image_tag_priorities_from_mode(mode: Mode) -> Vec<ImageTag> {
+    match mode {
+        Mode::Introduction => vec![ImageTag::Video],
+        Mode::Story => vec![ImageTag::Book],
+        Mode::Song => vec![ImageTag::Music],
+        Mode::Howto => vec![ImageTag::Boards],
     }
 }
