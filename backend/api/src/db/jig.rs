@@ -353,6 +353,7 @@ from jig
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
     inner join jig_admin_data "admin" on admin.jig_id = jig.id
+    order by ord asc
     "#,
         ids,
     )
@@ -408,8 +409,9 @@ select id,
        other_keywords                             as "other_keywords!",
        translated_keywords                        as "translated_keywords!"
 from jig_data
-         inner join unnest($1::uuid[])
+inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
+order by ord asc
 "#,
         &jig_data_ids
     )
