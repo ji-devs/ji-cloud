@@ -1,7 +1,10 @@
 //! types for searching
 
+use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 use strum_macros::EnumIter;
+
+make_path_parts!(CreateSearchKeyPath => "/v1/search/key");
 
 /// Represents the response given when an api key for algolia is requested.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -10,6 +13,8 @@ pub struct CreateSearchKeyResponse {
     pub key: String,
     // todo: add the expire time
 }
+
+make_path_parts!(WebImageSearchPath => "/v1/search/web/image");
 
 /// Search for images via the given query string.
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]

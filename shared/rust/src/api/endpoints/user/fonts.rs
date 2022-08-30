@@ -2,7 +2,10 @@ use super::ApiEndpoint;
 
 use crate::{
     api::method::Method,
-    domain::user::{UserFontNameRequest, UserFontResponse},
+    domain::user::{
+        UserFontCreatePath, UserFontDeletePath, UserFontGetPath, UserFontNameRequest,
+        UserFontResponse, UserFontUpdatePath,
+    },
     error::EmptyError,
 };
 
@@ -13,8 +16,8 @@ pub struct Create;
 impl ApiEndpoint for Create {
     type Req = UserFontNameRequest;
     type Res = UserFontResponse;
+    type Path = UserFontCreatePath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/user/me/font";
     const METHOD: Method = Method::Post;
 }
 
@@ -23,8 +26,8 @@ pub struct Get;
 impl ApiEndpoint for Get {
     type Req = ();
     type Res = UserFontResponse;
+    type Path = UserFontGetPath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/user/me/font";
     const METHOD: Method = Method::Get;
 }
 
@@ -33,8 +36,8 @@ pub struct Update;
 impl ApiEndpoint for Update {
     type Req = UserFontNameRequest;
     type Res = ();
+    type Path = UserFontUpdatePath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/user/me/font/{index}";
     const METHOD: Method = Method::Patch;
 }
 
@@ -43,7 +46,7 @@ pub struct Delete;
 impl ApiEndpoint for Delete {
     type Req = ();
     type Res = ();
+    type Path = UserFontDeletePath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/user/me/font/{index}";
     const METHOD: Method = Method::Delete;
 }

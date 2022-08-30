@@ -1,15 +1,15 @@
 //! routes for the jig curation by admin
 
 use crate::{
-    api::Method,
+    api::{ApiEndpoint, Method},
     domain::{
-        jig::report::{CreateJigReport, JigReport, ReportId},
+        jig::report::{
+            CreateJigReport, CreateJigReportPath, GetJigReportPath, JigReport, ReportId,
+        },
         CreateResponse,
     },
     error::EmptyError,
 };
-
-use super::ApiEndpoint;
 
 /// Create a Jig Report
 ///
@@ -21,10 +21,10 @@ use super::ApiEndpoint;
 ///
 pub struct Create;
 impl ApiEndpoint for Create {
+    type Path = CreateJigReportPath;
     type Req = CreateJigReport;
     type Res = CreateResponse<ReportId>;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/report";
     const METHOD: Method = Method::Post;
 }
 
@@ -38,9 +38,9 @@ impl ApiEndpoint for Create {
 ///
 pub struct Get;
 impl ApiEndpoint for Get {
+    type Path = GetJigReportPath;
     type Req = ();
     type Res = JigReport;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/report/{report_id}";
     const METHOD: Method = Method::Get;
 }

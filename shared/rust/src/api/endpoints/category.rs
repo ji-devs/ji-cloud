@@ -2,7 +2,8 @@ use super::ApiEndpoint;
 use crate::{
     api::method::Method,
     domain::category::{
-        CategoryResponse, CreateCategoryRequest, GetCategoryRequest, NewCategoryResponse,
+        CategoryResponse, CreateCategoryPath, CreateCategoryRequest, DeleteCategoryPath,
+        GetCategoryPath, GetCategoryRequest, NewCategoryResponse, UpdateCategoryPath,
         UpdateCategoryRequest,
     },
     error::EmptyError,
@@ -14,10 +15,10 @@ use crate::{
 /// No authorization required.
 pub struct Get;
 impl ApiEndpoint for Get {
+    type Path = GetCategoryPath;
     type Req = GetCategoryRequest;
     type Res = CategoryResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/category";
     const METHOD: Method = Method::Get;
 }
 
@@ -27,10 +28,10 @@ impl ApiEndpoint for Get {
 /// Standard + [`UserScope::ManageCategory`](crate::domain::user::UserScope).
 pub struct Create;
 impl ApiEndpoint for Create {
+    type Path = CreateCategoryPath;
     type Req = CreateCategoryRequest;
     type Res = NewCategoryResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/category";
     const METHOD: Method = Method::Post;
 }
 
@@ -40,10 +41,10 @@ impl ApiEndpoint for Create {
 /// Standard + [`UserScope::ManageCategory`](crate::domain::user::UserScope).
 pub struct Update;
 impl ApiEndpoint for Update {
+    type Path = UpdateCategoryPath;
     type Req = UpdateCategoryRequest;
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/category/{id}";
     const METHOD: Method = Method::Patch;
 }
 
@@ -53,9 +54,9 @@ impl ApiEndpoint for Update {
 /// Standard + [`UserScope::ManageCategory`](crate::domain::user::UserScope).
 pub struct Delete;
 impl ApiEndpoint for Delete {
+    type Path = DeleteCategoryPath;
     type Req = ();
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/category/{id}";
     const METHOD: Method = Method::Delete;
 }

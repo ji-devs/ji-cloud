@@ -1,20 +1,24 @@
 //! Types for users.
 
 use chrono::{DateTime, Utc};
+use macros::make_path_parts;
 use serde::{Deserialize, Serialize, Serializer};
 use std::convert::TryFrom;
 use uuid::Uuid;
 
-use crate::domain::{
-    circle::CircleId,
-    image::ImageId,
-    meta::{AffiliationId, AgeRangeId, SubjectId},
+use crate::{
+    api::endpoints::PathPart,
+    domain::{
+        circle::CircleId,
+        image::ImageId,
+        meta::{AffiliationId, AgeRangeId, SubjectId},
+    },
 };
 
 pub mod public_user;
 
 /// Wrapper type around [`Uuid`], represents the ID of a User.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct UserId(pub Uuid);
@@ -79,6 +83,8 @@ impl TryFrom<i16> for UserScope {
     }
 }
 
+make_path_parts!(UserLookupPath => "/v1/user");
+
 /// Query to lookup a user by unique data
 /// no filters will return that the user does not exist.
 /// multiple filters will act as a logical `OR` of them (multiple choices will return an arbitrary user).
@@ -99,6 +105,8 @@ pub struct OtherUser {
     /// The user's id.
     pub id: UserId,
 }
+
+make_path_parts!(ResetEmailPath => "/v1/user/me/reset-email");
 
 /// Update user email request
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
@@ -302,6 +310,8 @@ impl UserProfile {
     }
 }
 
+make_path_parts!(VerifyEmailPath => "/v1/user/verify-email");
+
 /// Request for [`VerifyEmail`](crate::api::endpoints::user::VerifyEmail)
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -318,6 +328,8 @@ pub enum VerifyEmailRequest {
         email: String,
     },
 }
+
+make_path_parts!(VerifyResetEmailPath => "/v1/user/verify-reset-email");
 
 /// Request for [`VerifyUpdateEmail`](crate::api::endpoints::user::VerifyEmail)
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -340,6 +352,8 @@ pub enum VerifyResetEmailRequest {
         paseto_token: String,
     },
 }
+
+make_path_parts!(CreateProfilePath => "/v1/user/me/profile");
 
 /// Request for [`user::profile::Create`](crate::api::endpoints::user::CreateProfile)
 #[derive(Debug, Serialize, Deserialize)]
@@ -409,6 +423,10 @@ pub struct CreateProfileRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub location: Option<serde_json::Value>,
 }
+
+make_path_parts!(GetProfilePath => "/v1/user/me/profile");
+
+make_path_parts!(PatchProfilePath => "/v1/user/me/profile");
 
 /// Request for [`PatchProfile`](crate::api::endpoints::user::PatchProfile)
 #[derive(Debug, Default, Serialize, Deserialize)]
@@ -535,6 +553,8 @@ pub struct PatchProfileRequest {
     pub location: Option<Option<serde_json::Value>>,
 }
 
+make_path_parts!(CreateUserPath => "/v1/user");
+
 /// Request for [`Create`](crate::api::endpoints::user::Create)
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CreateUserRequest {
@@ -545,12 +565,16 @@ pub struct CreateUserRequest {
     pub password: String,
 }
 
+make_path_parts!(ResetPasswordPath => "/v1/user/password-reset");
+
 /// Request for [`ResetPassword`](crate::api::endpoints::user::ResetPassword)
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ResetPasswordRequest {
     /// The email to request a password reset for
     pub email: String,
 }
+
+make_path_parts!(ChangePasswordPath => "/v1/user/me/password");
 
 /// Request for [`ChangePassword`](crate::api::endpoints::user::ChangePassword)
 #[derive(Debug, Serialize, Deserialize)]
@@ -569,12 +593,23 @@ pub enum ChangePasswordRequest {
     },
 }
 
+make_path_parts!(UserDeletePath => "/v1/user/me");
+
+// Colors
+
+make_path_parts!(UserColorCreatePath => "/v1/user/me/color");
+
+// i32 is color index
+make_path_parts!(UserColorUpdatePath => "/v1/user/me/color/{}" => i32);
+
 /// Request for [`CreateColor`](crate::api::endpoints::user::CreateColor), [`UpdateColor`](crate::api::endpoints::user::UpdateColor)
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UserColorValueRequest {
     /// the color to add/change to.
     pub color: rgb::RGBA8,
 }
+
+make_path_parts!(UserColorGetPath => "/v1/user/me/color");
 
 /// Response for [`GetColors`](crate::api::endpoints::user::GetColors)
 #[derive(Debug, Serialize, Deserialize)]
@@ -583,6 +618,16 @@ pub struct UserColorResponse {
     pub colors: Vec<rgb::RGBA8>,
 }
 
+// i32 is color index
+make_path_parts!(UserColorDeletePath => "/v1/user/me/color/{}" => i32);
+
+// Fonts
+
+make_path_parts!(UserFontCreatePath => "/v1/user/me/font");
+
+// i32 is font index
+make_path_parts!(UserFontUpdatePath => "/v1/user/me/font/{}" => i32);
+
 /// Request for [`CreateFont`](crate::api::endpoints::user::CreateFont), [`UpdateFont`](crate::api::endpoints::user::UpdateFont)
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UserFontNameRequest {
@@ -590,11 +635,16 @@ pub struct UserFontNameRequest {
     pub name: String,
 }
 
+make_path_parts!(UserFontGetPath => "/v1/user/me/font");
+
 /// Response for [`GetFonts`](crate::api::endpoints::user::GetFonts)
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UserFontResponse {
     /// Names of the user's fonts.
     pub names: Vec<String>,
 }
+
+// i32 is font index
+make_path_parts!(UserFontDeletePath => "/v1/user/me/font/{}" => i32);
 
 into_uuid![UserId];

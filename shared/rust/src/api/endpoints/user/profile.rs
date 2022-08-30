@@ -2,7 +2,10 @@ use crate::{
     api::{ApiEndpoint, Method},
     domain::{
         session::NewSessionResponse,
-        user::{CreateProfileRequest, PatchProfileRequest, UserProfile},
+        user::{
+            CreateProfilePath, CreateProfileRequest, GetProfilePath, PatchProfilePath,
+            PatchProfileRequest, UserProfile,
+        },
     },
     error::EmptyError,
 };
@@ -10,10 +13,10 @@ use crate::{
 /// Fetch your own user profile.
 pub struct Get;
 impl ApiEndpoint for Get {
+    type Path = GetProfilePath;
     type Req = ();
     type Res = UserProfile;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/user/me/profile";
     const METHOD: Method = Method::Get;
 }
 
@@ -32,10 +35,10 @@ impl ApiEndpoint for Get {
 /// * Empty username - [`422 - Unprocessable Entity`](http::StatusCode::UNPROCESSABLE_ENTITY)
 pub struct Create;
 impl ApiEndpoint for Create {
+    type Path = CreateProfilePath;
     type Req = CreateProfileRequest;
     type Res = NewSessionResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/user/me/profile";
     const METHOD: Method = Method::Post;
 }
 
@@ -49,9 +52,9 @@ impl ApiEndpoint for Create {
 /// * Empty username - [`422 - Unprocessable Entity`](http::StatusCode::UNPROCESSABLE_ENTITY)
 pub struct Patch;
 impl ApiEndpoint for Patch {
+    type Path = PatchProfilePath;
     type Req = PatchProfileRequest;
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/user/me/profile";
     const METHOD: Method = Method::Patch;
 }

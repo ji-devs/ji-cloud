@@ -1,11 +1,16 @@
 //! Types for public users.
 
+use crate::{
+    api::endpoints::PathPart,
+    domain::{
+        additional_resource::AdditionalResource, asset::UserOrMe, circle::CircleId,
+        csv_encode_uuids, from_csv, image::ImageId, user::UserId,
+    },
+};
+use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 
-use crate::domain::{
-    additional_resource::AdditionalResource, asset::UserOrMe, circle::CircleId, csv_encode_uuids,
-    from_csv, image::ImageId, user::UserId,
-};
+make_path_parts!(PublicUserGetPath => "/v1/user/{}/public" => UserId);
 
 /// A lite profile for other Users to view
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -56,6 +61,8 @@ pub struct PublicUser {
     pub circles: Vec<CircleId>,
 }
 
+make_path_parts!(PublicUserBrowsePath => "/v1/user/public/browse");
+
 /// Query for [`Browse`](crate::api::endpoints::user::public_user::Browse).
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
@@ -88,7 +95,9 @@ pub struct BrowsePublicUserResponse {
     pub total_user_count: u64,
 }
 
-/// Query for [`Browse`](crate::api::endpoints::user::public_user::Search).
+make_path_parts!(PublicUserSearchPath => "/v1/user/public");
+
+/// Query for [`Browse`](crate::api::endpoints::user::Search).
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct SearchPublicUserQuery {
@@ -155,6 +164,8 @@ pub struct SearchPublicUserResponse {
     pub total_user_count: u64,
 }
 
+make_path_parts!(BrowsePublicUserJigsPath => "/v1/user/{}/public/jig/browse" => UserId);
+
 /// Query for [`Browse`](crate::api::endpoints::user::public_user::BrowseUserJigs).
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
@@ -169,6 +180,8 @@ pub struct BrowsePublicUserJigsQuery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub page_limit: Option<u32>,
 }
+
+make_path_parts!(BrowsePublicUserResourcesPath => "/v1/user/{}/public/resource/browse" => UserId);
 
 /// Query for [`Browse`](crate::api::endpoints::user::public_user::BrowseUserResources).
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
@@ -199,6 +212,8 @@ pub struct BrowsePublicUserResourcesResponse {
     pub total_resource_count: u64,
 }
 
+make_path_parts!(BrowsePublicUserCoursesPath => "/v1/user/{}/public/course/browse" => UserId);
+
 /// Query for [`Browse`](crate::api::endpoints::user::public_user::BrowseUserCourses).
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
@@ -213,6 +228,8 @@ pub struct BrowsePublicUserCoursesQuery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub page_limit: Option<u32>,
 }
+
+make_path_parts!(BrowsePublicUserFollowersPath => "/v1/user/{}/public/follower/browse" => UserId);
 
 /// Query for [`Browse`](crate::api::endpoints::user::public_user::BrowseFollowers).
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
@@ -243,6 +260,8 @@ pub struct BrowsePublicUserFollowersResponse {
     pub total_follower_count: u64,
 }
 
+make_path_parts!(BrowsePublicUserFollowingPath => "/v1/user/{}/public/following/browse" => UserId);
+
 /// Query for [`Browse`](crate::api::endpoints::user::public_user::BrowseFollowing).
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
@@ -271,3 +290,7 @@ pub struct BrowsePublicUserFollowingResponse {
     /// The total number of followings found
     pub total_following_count: u64,
 }
+
+make_path_parts!(PublicUserFollowPath => "/v1/user/{}/follow" => UserId);
+
+make_path_parts!(PublicUserUnfollowPath => "/v1/user/{}/unfollow" => UserId);

@@ -1,13 +1,16 @@
 //! Types for Circles.
 
 use chrono::{DateTime, Utc};
+use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+
+use crate::api::endpoints::PathPart;
 
 use super::{asset::UserOrMe, image::ImageId, user::UserId};
 
 /// Wrapper type around [`Uuid`], represents the ID of a Circle.
-#[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 #[serde(rename_all = "camelCase")]
@@ -42,6 +45,8 @@ pub struct Circle {
     pub last_edited: Option<DateTime<Utc>>,
 }
 
+make_path_parts!(CircleCreatePath => "v1/circle");
+
 /// Request to create a new Circle.
 ///
 /// This creates the draft and live [Circle Data](Circle Data) copies with the requested info.
@@ -57,6 +62,8 @@ pub struct CircleCreateRequest {
     /// Image of the Circle
     pub image: ImageId,
 }
+
+make_path_parts!(UpdateCirclePath => "/v1/circle/{}" => CircleId);
 
 /// Request for updating a Circle's draft data.
 #[derive(Serialize, Deserialize, Debug, Default)]
@@ -77,6 +84,8 @@ pub struct CircleUpdateRequest {
     #[serde(default)]
     pub image: Option<ImageId>,
 }
+
+make_path_parts!(CircleBrowsePath => "/v1/circle/browse");
 
 /// Query for [`Browse`](crate::api::endpoints::circle::Browse).
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
@@ -119,6 +128,8 @@ pub struct CircleBrowseResponse {
     /// The total number of Circles found
     pub total_circle_count: u64,
 }
+
+make_path_parts!(CircleSearchPath => "/v1/circle");
 
 /// Search for Circles via the given query string.
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
@@ -163,6 +174,16 @@ pub struct CircleSearchResponse {
     /// The total number of Circles found
     pub total_circle_count: u64,
 }
+
+make_path_parts!(CircleDeletePath => "/v1/circle/{}" => CircleId);
+
+make_path_parts!(CircleGetPath => "/v1/circle/{}" => CircleId);
+
+make_path_parts!(JoinCirclePath => "/v1/circle/{}/join" => CircleId);
+
+make_path_parts!(LeaveCirclePath => "/v1/circle/{}/leave" => CircleId);
+
+make_path_parts!(CircleBrowseMembersPath => "/v1/circle/{}/members" => CircleId);
 
 /// Members associated with Circle
 #[derive(Serialize, Deserialize)]

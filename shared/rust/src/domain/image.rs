@@ -4,17 +4,22 @@ pub mod recent;
 pub mod tag;
 pub mod user;
 
+use crate::api::endpoints::PathPart;
+
 use super::{
     category::CategoryId,
     meta::{AffiliationId, AgeRangeId, ImageStyleId, ImageTagIndex},
     Publish,
 };
 use chrono::{DateTime, Utc};
+use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "backend")]
 use sqlx::{postgres::PgRow, types::Json};
 use std::collections::HashMap;
 use uuid::Uuid;
+
+make_path_parts!(ImageGetPath => "/v1/image/{}" => ImageId);
 
 /// Represents different sizes of images
 #[derive(Serialize, Deserialize, Copy, Clone, Debug)]
@@ -58,10 +63,12 @@ impl ImageSize {
 /// Wrapper type around [`Uuid`], represents the ID of a image.
 ///
 /// [`Uuid`]: ../../uuid/struct.Uuid.html
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct ImageId(pub Uuid);
+
+make_path_parts!(ImageCreatePath => "/v1/image");
 
 // todo: # errors doc section
 /// Request to create a new image.
@@ -99,6 +106,8 @@ pub struct ImageCreateRequest {
     /// What kind of image this is.
     pub size: ImageSize,
 }
+
+make_path_parts!(ImageUpdatePath => "/v1/image/{}" => ImageId);
 
 // todo: # errors doc section.
 #[derive(Serialize, Deserialize, Debug, Default)]
@@ -150,6 +159,8 @@ pub struct ImageUpdateRequest {
     #[serde(default)]
     pub tags: Option<Vec<ImageTagIndex>>,
 }
+
+make_path_parts!(ImageSearchPath => "/v1/image");
 
 /// Search for images via the given query string.
 ///
@@ -280,6 +291,8 @@ pub struct ImageSearchResponse {
     pub total_image_count: u64,
 }
 
+make_path_parts!(ImageBrowsePath => "/v1/image/browse");
+
 /// Query for [`Browse`](crate::api::endpoints::image::Browse).
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
@@ -325,6 +338,20 @@ pub struct ImageResponse {
     /// The image metadata.
     pub metadata: ImageMetadata,
 }
+
+make_path_parts!(ImageUploadPath => "/v1/image/{}/raw" => ImageId);
+// #[allow(missing_docs)]
+// #[derive(Clone, Debug)]
+// pub struct ImageUploadPath<'a>(&'a ImageId);
+
+// impl crate::api::endpoints::PathParts for ImageUploadPath<'_> {
+//     const PATH: &'static str = "/v1/image/{ImageId}/raw";
+//     fn get_filled(&self) -> String {
+//         let mut src = String::from(Self::PATH);
+//         src = src.replace(<ImageId>::PLACEHOLDER, &self.0.get_path_string());
+//         src
+//     }
+// }
 
 /// Request to indicate the size of an image for upload.
 #[derive(Serialize, Deserialize, Debug)]
@@ -449,5 +476,9 @@ struct DbImage {
     pub created_at: DateTime<Utc>,
     pub updated_at: Option<DateTime<Utc>>,
 }
+
+make_path_parts!(ImageDeletePath => "/v1/image/{}" => ImageId);
+
+make_path_parts!(ImagePutPath => "/v1/image/{}/use" => ImageId);
 
 into_uuid![ImageId];

@@ -1,15 +1,16 @@
+use super::ApiEndpoint;
 use crate::{
     api::Method,
     domain::{
         module::{
-            ModuleCreateRequest, ModuleDeleteRequest, ModuleId, ModuleResponse, ModuleUpdateRequest,
+            ModuleCreatePath, ModuleCreateRequest, ModuleDeletePath, ModuleDeleteRequest,
+            ModuleGetDraftPath, ModuleGetLivePath, ModuleId, ModuleResponse, ModuleUpdateRequest,
+            ModuleUploadPath,
         },
         CreateResponse,
     },
     error::EmptyError,
 };
-
-use super::ApiEndpoint;
 
 /// Get a Module by it's concrete ID.
 ///
@@ -20,10 +21,10 @@ use super::ApiEndpoint;
 /// * [`NotFound`](http::StatusCode::NOT_FOUND) if the module does not exist, or the parent jig doesn't exist.
 pub struct GetLive;
 impl ApiEndpoint for GetLive {
+    type Path = ModuleGetLivePath;
     type Req = ();
     type Res = ModuleResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/{asset_type}/module/live/{module_id}";
     const METHOD: Method = Method::Get;
 }
 
@@ -37,10 +38,10 @@ impl ApiEndpoint for GetLive {
 /// * [`NotFound`](http::StatusCode::NOT_FOUND) if the module does not exist, or the parent jig doesn't exist.
 pub struct GetDraft;
 impl ApiEndpoint for GetDraft {
+    type Path = ModuleGetDraftPath;
     type Req = ();
     type Res = ModuleResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/{asset_type}/module/draft/{module_id}";
     const METHOD: Method = Method::Get;
 }
 
@@ -56,10 +57,10 @@ impl ApiEndpoint for GetDraft {
 /// * [`BadRequest`](http::StatusCode::BAD_REQUEST) if the request is missing/invalid.
 pub struct Create;
 impl ApiEndpoint for Create {
+    type Path = ModuleCreatePath;
     type Req = ModuleCreateRequest;
     type Res = CreateResponse<ModuleId>;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/module/draft";
     const METHOD: Method = Method::Post;
 }
 
@@ -76,10 +77,10 @@ impl ApiEndpoint for Create {
 /// * [`NotFound`](http::StatusCode::NOT_FOUND) if the jig or module does not exist.
 pub struct Update;
 impl ApiEndpoint for Update {
+    type Path = ModuleUploadPath;
     type Req = ModuleUpdateRequest;
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/module/draft/{module_id}";
     const METHOD: Method = Method::Patch;
 }
 
@@ -96,9 +97,9 @@ impl ApiEndpoint for Update {
 /// * [`BadRequest`](http::StatusCode::BAD_REQUEST) if the given `id` is not a [`Uuid`](uuid::Uuid).
 pub struct Delete;
 impl ApiEndpoint for Delete {
+    type Path = ModuleDeletePath;
     type Req = ModuleDeleteRequest;
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/module/draft/{module_id}";
     const METHOD: Method = Method::Delete;
 }

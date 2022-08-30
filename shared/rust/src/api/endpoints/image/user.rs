@@ -5,8 +5,9 @@ use crate::{
     domain::{
         image::{
             user::{
-                UserImageCreateRequest, UserImageListQuery, UserImageListResponse,
-                UserImageResponse, UserImageUploadRequest, UserImageUploadResponse,
+                UserImageCreatePath, UserImageCreateRequest, UserImageDeletePath, UserImageGetPath,
+                UserImageListPath, UserImageListQuery, UserImageListResponse, UserImageResponse,
+                UserImageUploadPath, UserImageUploadRequest, UserImageUploadResponse,
             },
             ImageId,
         },
@@ -21,10 +22,10 @@ use crate::{
 /// * Request includes an optional query, called as a query string.
 pub struct List;
 impl ApiEndpoint for List {
+    type Path = UserImageListPath;
     type Req = UserImageListQuery;
     type Res = UserImageListResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/user/me/image";
     const METHOD: Method = Method::Get;
 }
 
@@ -37,20 +38,20 @@ impl ApiEndpoint for List {
 /// * TODO other errors here...
 pub struct Get;
 impl ApiEndpoint for Get {
+    type Path = UserImageGetPath;
     type Req = ();
     type Res = UserImageResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/user/me/image/{id}";
     const METHOD: Method = Method::Get;
 }
 
 /// Create an user library image.
 pub struct Create;
 impl ApiEndpoint for Create {
+    type Path = UserImageCreatePath;
     type Req = UserImageCreateRequest;
     type Res = CreateResponse<ImageId>;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/user/me/image";
     const METHOD: Method = Method::Post;
 }
 
@@ -76,11 +77,11 @@ impl ApiEndpoint for Create {
 /// * [`501 - NotImplemented`](http::StatusCode::NOT_IMPLEMENTED) when the s3/gcs service is disabled.
 pub struct Upload;
 impl ApiEndpoint for Upload {
+    type Path = UserImageUploadPath;
     // raw bytes
     type Req = UserImageUploadRequest;
     type Res = UserImageUploadResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/user/me/image/{id}/raw";
     const METHOD: Method = Method::Put;
 }
 
@@ -93,9 +94,9 @@ impl ApiEndpoint for Upload {
 /// * TODO other errors here...
 pub struct Delete;
 impl ApiEndpoint for Delete {
+    type Path = UserImageDeletePath;
     type Req = ();
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/user/me/image/{id}";
     const METHOD: Method = Method::Delete;
 }

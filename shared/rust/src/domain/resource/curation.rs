@@ -1,15 +1,20 @@
 //! Types for Resource short codes for sharing
 use chrono::{DateTime, Utc};
+use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+
+use crate::api::endpoints::PathPart;
 
 use super::{report::ResourceReport, ResourceId, UserId};
 
 /// Wrapper type around [`Uuid`](Uuid), represents the ID of a curation comment.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct CommentId(pub Uuid);
+
+make_path_parts!(ResourceCurationPath => "/v1/resource/{}/curation" => ResourceId);
 
 /// Curation data for Resources
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -99,6 +104,8 @@ impl Default for ResourceCurationStatus {
     }
 }
 
+make_path_parts!(ResourceCurationUpdatePath => "/v1/resource/{}/curation" => ResourceId);
+
 /// Curation data for ResourceS
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
@@ -144,6 +151,8 @@ pub struct ResourceCurationUpdateRequest {
     pub curation_status: Option<ResourceCurationStatus>,
 }
 
+make_path_parts!(ResourceCurationCommentCreatePath => "/v1/resource/{}/curation/comment" => ResourceId);
+
 /// Curation data for ResourceS
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
@@ -172,6 +181,8 @@ pub struct ResourceCurationCommentRequest {
     /// Display name of Resource
     pub value: String,
 }
+
+make_path_parts!(ResourceCurationCommentGetPath => "/v1/resource/{}/curation/comment/{}" => ResourceId, CommentId);
 
 /// Curation data for ResourceS
 #[derive(Serialize, Deserialize, Debug)]

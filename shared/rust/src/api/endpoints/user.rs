@@ -5,9 +5,10 @@ use crate::{
     domain::{
         session::NewSessionResponse,
         user::{
-            ChangePasswordRequest, CreateUserRequest, OtherUser, ResetEmailRequest,
-            ResetEmailResponse, ResetPasswordRequest, UserLookupQuery, VerifyEmailRequest,
-            VerifyResetEmailRequest,
+            ChangePasswordPath, ChangePasswordRequest, CreateUserPath, CreateUserRequest,
+            OtherUser, ResetEmailPath, ResetEmailRequest, ResetEmailResponse, ResetPasswordPath,
+            ResetPasswordRequest, UserDeletePath, UserLookupPath, UserLookupQuery, VerifyEmailPath,
+            VerifyEmailRequest, VerifyResetEmailPath, VerifyResetEmailRequest,
         },
     },
     error::EmptyError,
@@ -48,8 +49,8 @@ pub struct Create;
 impl ApiEndpoint for Create {
     type Req = CreateUserRequest;
     type Res = ();
+    type Path = CreateUserPath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/user";
     const METHOD: Method = Method::Post;
 }
 
@@ -84,8 +85,8 @@ pub struct VerifyEmail;
 impl ApiEndpoint for VerifyEmail {
     type Req = VerifyEmailRequest;
     type Res = Option<NewSessionResponse>;
+    type Path = VerifyEmailPath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/user/verify-email";
     const METHOD: Method = Method::Post;
 }
 
@@ -94,8 +95,8 @@ pub struct VerifyResetEmail;
 impl ApiEndpoint for VerifyResetEmail {
     type Req = VerifyResetEmailRequest;
     type Res = ();
+    type Path = VerifyResetEmailPath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/user/verify-reset-email";
     const METHOD: Method = Method::Post;
 }
 
@@ -111,8 +112,8 @@ pub struct ResetEmail;
 impl ApiEndpoint for ResetEmail {
     type Req = ResetEmailRequest;
     type Res = ResetEmailResponse;
+    type Path = ResetEmailPath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/user/me/reset-email";
     const METHOD: Method = Method::Patch;
 }
 
@@ -127,8 +128,8 @@ pub struct ResetPassword;
 impl ApiEndpoint for ResetPassword {
     type Req = ResetPasswordRequest;
     type Res = ();
+    type Path = ResetPasswordPath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/user/password-reset";
     const METHOD: Method = Method::Post;
 }
 
@@ -145,8 +146,8 @@ pub struct ChangePassword;
 impl ApiEndpoint for ChangePassword {
     type Req = ChangePasswordRequest;
     type Res = ();
+    type Path = ChangePasswordPath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/user/me/password";
     const METHOD: Method = Method::Put;
 }
 
@@ -155,8 +156,8 @@ pub struct UserLookup;
 impl ApiEndpoint for UserLookup {
     type Req = UserLookupQuery;
     type Res = OtherUser;
+    type Path = UserLookupPath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/user";
     const METHOD: Method = Method::Get;
 }
 
@@ -165,7 +166,7 @@ pub struct Delete;
 impl ApiEndpoint for Delete {
     type Req = ();
     type Res = ();
+    type Path = UserDeletePath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/user/me";
     const METHOD: Method = Method::Delete;
 }

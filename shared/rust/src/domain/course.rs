@@ -1,11 +1,13 @@
 //! Types for Courses.
 
 use chrono::{DateTime, Utc};
+use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use uuid::Uuid;
 
 use super::{
+    super::api::endpoints::PathPart,
     additional_resource::AdditionalResource,
     asset::{DraftOrLive, PrivacyLevel, UserOrMe},
     category::CategoryId,
@@ -15,11 +17,13 @@ use super::{
     user::UserId,
 };
 
-/// Wrapper type around [`UserId`], represents the ID of a Course.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+/// Wrapper type around [`Uuid`], represents the ID of a Course.
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct CourseId(pub Uuid);
+
+make_path_parts!(CourseCreatePath => "/v1/course");
 
 /// Request to create a new Course.
 ///
@@ -139,6 +143,12 @@ pub struct CourseResponse {
     pub course_data: CourseData,
 }
 
+make_path_parts!(CourseGetLivePath => "/v1/course/{}/live" => CourseId);
+
+make_path_parts!(CourseGetDraftPath => "/v1/course/{}/draft" => CourseId);
+
+make_path_parts!(CourseUpdateDraftDataPath => "/v1/course/{}" => CourseId);
+
 /// Request for updating a Course's draft data.
 #[derive(Serialize, Deserialize, Debug, Default)]
 #[serde(rename_all = "camelCase")]
@@ -196,6 +206,10 @@ pub struct CourseUpdateDraftDataRequest {
     pub items: Option<Vec<JigId>>,
 }
 
+make_path_parts!(CoursePublishPath => "/v1/course/{}/draft/publish" => CourseId);
+
+make_path_parts!(CourseBrowsePath => "/v1/course/browse");
+
 /// Query for [`Browse`](crate::api::endpoints::course::Browse).
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
@@ -252,6 +266,8 @@ pub struct CourseBrowseResponse {
     /// The total number of Courses found
     pub total_course_count: u64,
 }
+
+make_path_parts!(CourseSearchPath => "/v1/course");
 
 /// Search for Courses via the given query string.
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
@@ -361,5 +377,7 @@ pub struct CourseSearchResponse {
     /// The total number of Courses found
     pub total_course_count: u64,
 }
+
+make_path_parts!(CourseDeletePath => "/v1/course/{}" => CourseId);
 
 into_uuid![CourseId];

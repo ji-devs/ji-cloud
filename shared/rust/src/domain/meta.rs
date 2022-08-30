@@ -1,6 +1,7 @@
 //! Types for metadata.
 
 use chrono::{DateTime, Utc};
+use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -72,6 +73,8 @@ into_uuid!(
 pub struct ImageTagIndex(pub i16);
 
 into_i16_index!(ImageTagIndex);
+
+make_path_parts!(GetMetadataPath => "/v1/metadata");
 
 /// Represents an image style.
 #[derive(Serialize, Deserialize, Debug)]

@@ -2,9 +2,12 @@ use crate::{
     api::Method,
     domain::{
         jig::{
-            JigBrowseQuery, JigBrowseResponse, JigCountResponse, JigCreateRequest, JigId,
-            JigLikedResponse, JigResponse, JigSearchQuery, JigSearchResponse,
-            JigUpdateAdminDataRequest, JigUpdateDraftDataRequest,
+            JigAdminDataUpdatePath, JigBrowsePath, JigBrowseQuery, JigBrowseResponse, JigClonePath,
+            JigCountPath, JigCountResponse, JigCoverPath, JigCreatePath, JigCreateRequest,
+            JigDeleteAllPath, JigDeletePath, JigGetDraftPath, JigGetLivePath, JigId, JigLikePath,
+            JigLikedPath, JigLikedResponse, JigPlayPath, JigPublishPath, JigResponse,
+            JigSearchPath, JigSearchQuery, JigSearchResponse, JigUnlikePath,
+            JigUpdateAdminDataRequest, JigUpdateDraftDataPath, JigUpdateDraftDataRequest,
         },
         CreateResponse,
     },
@@ -40,8 +43,8 @@ pub struct Create;
 impl ApiEndpoint for Create {
     type Req = JigCreateRequest;
     type Res = CreateResponse<JigId>;
+    type Path = JigCreatePath;
     type Err = MetadataNotFound;
-    const PATH: &'static str = "/v1/jig";
     const METHOD: Method = Method::Post;
 }
 
@@ -56,8 +59,8 @@ pub struct GetLive;
 impl ApiEndpoint for GetLive {
     type Req = ();
     type Res = JigResponse;
+    type Path = JigGetLivePath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/live";
     const METHOD: Method = Method::Get;
 }
 
@@ -73,8 +76,8 @@ pub struct GetDraft;
 impl ApiEndpoint for GetDraft {
     type Req = ();
     type Res = JigResponse;
+    type Path = JigGetDraftPath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/draft";
     const METHOD: Method = Method::Get;
 }
 
@@ -93,8 +96,8 @@ pub struct UpdateDraftData;
 impl ApiEndpoint for UpdateDraftData {
     type Req = JigUpdateDraftDataRequest;
     type Res = ();
+    type Path = JigUpdateDraftDataPath;
     type Err = MetadataNotFound;
-    const PATH: &'static str = "/v1/jig/{id}";
     const METHOD: Method = Method::Patch;
 }
 
@@ -106,8 +109,8 @@ pub struct Publish;
 impl ApiEndpoint for Publish {
     type Req = ();
     type Res = ();
+    type Path = JigPublishPath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/draft/publish";
     const METHOD: Method = Method::Put;
 }
 
@@ -119,8 +122,8 @@ pub struct Browse;
 impl ApiEndpoint for Browse {
     type Req = JigBrowseQuery;
     type Res = JigBrowseResponse;
+    type Path = JigBrowsePath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/browse";
     const METHOD: Method = Method::Get;
 }
 
@@ -132,8 +135,8 @@ pub struct Search;
 impl ApiEndpoint for Search {
     type Req = JigSearchQuery;
     type Res = JigSearchResponse;
+    type Path = JigSearchPath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig";
     const METHOD: Method = Method::Get;
 }
 
@@ -151,8 +154,8 @@ pub struct Clone;
 impl ApiEndpoint for Clone {
     type Req = ();
     type Res = CreateResponse<JigId>;
+    type Path = JigClonePath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/clone";
     const METHOD: Method = Method::Post;
 }
 
@@ -164,8 +167,8 @@ pub struct Delete;
 impl ApiEndpoint for Delete {
     type Req = ();
     type Res = ();
+    type Path = JigDeletePath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}";
     const METHOD: Method = Method::Delete;
 }
 
@@ -177,8 +180,8 @@ pub struct DeleteAll;
 impl ApiEndpoint for DeleteAll {
     type Req = ();
     type Res = ();
+    type Path = JigDeleteAllPath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig";
     const METHOD: Method = Method::Delete;
 }
 
@@ -190,8 +193,8 @@ pub struct Cover;
 impl ApiEndpoint for Cover {
     type Req = ();
     type Res = ();
+    type Path = JigCoverPath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/cover";
     const METHOD: Method = Method::Patch;
 }
 
@@ -203,8 +206,8 @@ pub struct Count;
 impl ApiEndpoint for Count {
     type Req = ();
     type Res = JigCountResponse;
+    type Path = JigCountPath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/count";
     const METHOD: Method = Method::Get;
 }
 
@@ -216,8 +219,8 @@ pub struct Like;
 impl ApiEndpoint for Like {
     type Req = ();
     type Res = ();
+    type Path = JigLikePath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/like";
     const METHOD: Method = Method::Put;
 }
 
@@ -229,8 +232,8 @@ pub struct Unlike;
 impl ApiEndpoint for Unlike {
     type Req = ();
     type Res = ();
+    type Path = JigUnlikePath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/like";
     const METHOD: Method = Method::Delete;
 }
 
@@ -242,8 +245,8 @@ pub struct Liked;
 impl ApiEndpoint for Liked {
     type Req = ();
     type Res = JigLikedResponse;
+    type Path = JigLikedPath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/like";
     const METHOD: Method = Method::Get;
 }
 
@@ -255,8 +258,8 @@ pub struct Play;
 impl ApiEndpoint for Play {
     type Req = ();
     type Res = ();
+    type Path = JigPlayPath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/play";
     const METHOD: Method = Method::Put;
 }
 
@@ -275,8 +278,8 @@ pub struct JigAdminDataUpdate;
 impl ApiEndpoint for JigAdminDataUpdate {
     type Req = JigUpdateAdminDataRequest;
     type Res = ();
+    type Path = JigAdminDataUpdatePath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/admin";
     const METHOD: Method = Method::Patch;
 }
 
@@ -289,9 +292,11 @@ impl ApiEndpoint for JigAdminDataUpdate {
 /// * Admin
 pub struct RemoveResource;
 impl ApiEndpoint for RemoveResource {
+    type Path = RemoveResourcePath;
     type Req = ();
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/resources";
     const METHOD: Method = Method::Delete;
 }
+use crate::api::endpoints::PathPart;
+macros::make_path_parts!(RemoveResourcePath => "/v1/jig/{}/resources" => JigId);

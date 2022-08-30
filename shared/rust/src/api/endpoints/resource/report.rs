@@ -3,7 +3,10 @@
 use crate::{
     api::Method,
     domain::{
-        resource::report::{CreateResourceReport, ReportId, ResourceReport},
+        resource::report::{
+            CreateResourceReport, CreateResourceReportPath, GetResourceReportPath, ReportId,
+            ResourceReport,
+        },
         CreateResponse,
     },
     error::EmptyError,
@@ -21,10 +24,10 @@ use super::ApiEndpoint;
 ///
 pub struct Create;
 impl ApiEndpoint for Create {
+    type Path = CreateResourceReportPath;
     type Req = CreateResourceReport;
     type Res = CreateResponse<ReportId>;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/resource/{id}/report";
     const METHOD: Method = Method::Post;
 }
 
@@ -38,9 +41,9 @@ impl ApiEndpoint for Create {
 ///
 pub struct Get;
 impl ApiEndpoint for Get {
+    type Path = GetResourceReportPath;
     type Req = ();
     type Res = ResourceReport;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/resource/{id}/report/{report_id}";
     const METHOD: Method = Method::Get;
 }

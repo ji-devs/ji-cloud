@@ -1,12 +1,15 @@
 use super::ApiEndpoint;
-use crate::domain::image::ImageUploadRequest;
+use crate::domain::image::{
+    ImageBrowsePath, ImageCreatePath, ImageDeletePath, ImageGetPath, ImagePutPath, ImageSearchPath,
+    ImageUpdatePath, ImageUploadPath, ImageUploadRequest,
+};
+use crate::error::{EmptyError, MetadataNotFound};
 use crate::{
     api::Method,
     domain::image::{
         CreateResponse, ImageBrowseQuery, ImageBrowseResponse, ImageCreateRequest, ImageResponse,
         ImageSearchQuery, ImageSearchResponse, ImageUpdateRequest, ImageUploadResponse,
     },
-    error::{EmptyError, MetadataNotFound},
 };
 
 pub mod recent;
@@ -24,8 +27,8 @@ pub struct Get;
 impl ApiEndpoint for Get {
     type Req = ();
     type Res = ImageResponse;
+    type Path = ImageGetPath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/image/{id}";
     const METHOD: Method = Method::Get;
 }
 
@@ -49,8 +52,8 @@ pub struct Search;
 impl ApiEndpoint for Search {
     type Req = ImageSearchQuery;
     type Res = ImageSearchResponse;
+    type Path = ImageSearchPath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/image";
     const METHOD: Method = Method::Get;
 }
 
@@ -71,8 +74,8 @@ pub struct Browse;
 impl ApiEndpoint for Browse {
     type Req = ImageBrowseQuery;
     type Res = ImageBrowseResponse;
+    type Path = ImageBrowsePath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/image/browse";
     const METHOD: Method = Method::Get;
 }
 
@@ -87,8 +90,8 @@ pub struct Create;
 impl ApiEndpoint for Create {
     type Req = ImageCreateRequest;
     type Res = CreateResponse;
+    type Path = ImageCreatePath;
     type Err = MetadataNotFound;
-    const PATH: &'static str = "/v1/image";
     const METHOD: Method = Method::Post;
 }
 
@@ -119,8 +122,8 @@ impl ApiEndpoint for Upload {
     // raw bytes
     type Req = ImageUploadRequest;
     type Res = ImageUploadResponse;
+    type Path = ImageUploadPath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/image/{id}/raw";
     const METHOD: Method = Method::Put;
 }
 
@@ -129,8 +132,8 @@ pub struct UpdateMetadata;
 impl ApiEndpoint for UpdateMetadata {
     type Req = ImageUpdateRequest;
     type Res = ();
+    type Path = ImageUpdatePath;
     type Err = MetadataNotFound;
-    const PATH: &'static str = "/v1/image/{id}";
     const METHOD: Method = Method::Patch;
 }
 
@@ -139,8 +142,8 @@ pub struct Delete;
 impl ApiEndpoint for Delete {
     type Req = ();
     type Res = ();
+    type Path = ImageDeletePath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/image/{id}";
     const METHOD: Method = Method::Delete;
 }
 
@@ -149,7 +152,7 @@ pub struct PutImageUsage;
 impl ApiEndpoint for PutImageUsage {
     type Req = ();
     type Res = ();
+    type Path = ImagePutPath;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/image/{id}/use";
     const METHOD: Method = Method::Patch;
 }

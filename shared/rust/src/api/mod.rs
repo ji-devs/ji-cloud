@@ -13,4 +13,5 @@ pub mod method;
 pub mod result;
 
 pub use endpoints::ApiEndpoint;
+pub use endpoints::PathParts;
 pub use method::Method;

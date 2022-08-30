@@ -1,15 +1,20 @@
 //! Types for Jig short codes for sharing
 use chrono::{DateTime, Utc};
+use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+
+use crate::api::endpoints::PathPart;
 
 use super::{report::JigReport, JigId};
 
 /// Wrapper type around [`Uuid`](Uuid), represents the ID of a curation comment.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct CommentId(pub Uuid);
+
+make_path_parts!(JigCurationPath => "/v1/jig/{}/curation" => JigId);
 
 /// Curation data for JIGS
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -99,6 +104,8 @@ impl Default for JigCurationStatus {
     }
 }
 
+make_path_parts!(JigCurationUpdatePath => "/v1/jig/{}/curation" => JigId);
+
 /// Curation data for JIGS
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
@@ -149,6 +156,8 @@ pub struct JigCurationUpdateRequest {
     pub curation_status: Option<JigCurationStatus>,
 }
 
+make_path_parts!(JigCurationCommentCreatePath => "/v1/jig/{}/curation/comment" => JigId);
+
 /// Curation data for JIGS
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -176,6 +185,8 @@ pub struct JigCurationCommentRequest {
     /// Display name of JIG
     pub value: String,
 }
+
+make_path_parts!(JigCurationCommentGetPath => "/v1/jig/{}/curation/comment/{}" => JigId, CommentId);
 
 /// Curation data for JIGS
 #[derive(Serialize, Deserialize, Debug)]

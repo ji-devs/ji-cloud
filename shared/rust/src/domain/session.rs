@@ -2,6 +2,9 @@
 
 use std::fmt;
 
+use super::user::UserId;
+use crate::api::endpoints::PathPart;
+use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 
 /// The query key for
@@ -13,8 +16,12 @@ pub const AUTH_COOKIE_NAME: &str = "X-AUTH";
 /// The name of the CSRF header.
 pub const CSRF_HEADER_NAME: &str = "X-CSRF";
 
+make_path_parts!(ImpersonatePath => "/v1/admin/session/user/{}" => UserId);
+
 #[deprecated(note = "use NewSessionResponse")]
 pub use NewSessionResponse as CreateSessionSuccess;
+
+make_path_parts!(CreateSessionPath => "/v1/session");
 
 /// Response for creating a session.
 ///
@@ -120,6 +127,16 @@ pub enum OAuthUrlKind {
     /// Get OAuth Url for register
     Register,
 }
+impl PathPart for OAuthUrlKind {
+    const PLACEHOLDER: &'static str = "{url_kind}";
+
+    fn get_path_string(&self) -> String {
+        match self {
+            Self::Login => String::from("login"),
+            Self::Register => String::from("register"),
+        }
+    }
+}
 
 /// Which *service* to use for OAuth Url generation.
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
@@ -128,6 +145,15 @@ pub enum OAuthUrlKind {
 pub enum GetOAuthUrlServiceKind {
     /// Google OAuth v2
     Google,
+}
+impl PathPart for GetOAuthUrlServiceKind {
+    const PLACEHOLDER: &'static str = "{service_kind}";
+
+    fn get_path_string(&self) -> String {
+        match self {
+            Self::Google => String::from("google"),
+        }
+    }
 }
 
 /// OAuth provider for emails
@@ -147,6 +173,8 @@ impl OAuthProvider {
     }
 }
 
+make_path_parts!(GetOAuthPath => "/v1/session/oauth/url/{}/{}" => GetOAuthUrlServiceKind, OAuthUrlKind);
+
 /// Response for what URL to use for OAuth callback.
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -154,6 +182,8 @@ pub struct GetOAuthUrlResponse {
     ///  URL to use for OAuth callback
     pub url: String,
 }
+
+make_path_parts!(CreateSessionOAuthPath => "/v1/session/oauth");
 
 /// Request for Creating a Session / signing in via oauth.
 #[derive(Serialize, Deserialize)]
@@ -186,3 +216,5 @@ impl fmt::Debug for CreateSessionOAuthRequest {
         }
     }
 }
+
+make_path_parts!(DeleteSessionPath => "/v1/session");

@@ -4,7 +4,8 @@ use super::super::ApiEndpoint;
 use crate::{
     api::Method,
     domain::image::tag::{
-        ImageTagCreateRequest, ImageTagListResponse, ImageTagResponse, ImageTagUpdateRequest,
+        ImageTagCreatePath, ImageTagCreateRequest, ImageTagDeletePath, ImageTagListPath,
+        ImageTagListResponse, ImageTagResponse, ImageTagUpdatePath, ImageTagUpdateRequest,
     },
     error::EmptyError,
 };
@@ -21,10 +22,10 @@ use crate::{
 pub struct List;
 
 impl ApiEndpoint for List {
+    type Path = ImageTagListPath;
     type Req = ();
     type Res = ImageTagListResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/image/tag/all";
     const METHOD: Method = Method::Get;
 }
 
@@ -44,10 +45,10 @@ impl ApiEndpoint for List {
 pub struct Create;
 
 impl ApiEndpoint for Create {
+    type Path = ImageTagCreatePath;
     type Req = ImageTagCreateRequest;
     type Res = ImageTagResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/image/tag/{index}";
     const METHOD: Method = Method::Post;
 }
 
@@ -66,10 +67,10 @@ impl ApiEndpoint for Create {
 pub struct Update;
 
 impl ApiEndpoint for Update {
+    type Path = ImageTagUpdatePath;
     type Req = ImageTagUpdateRequest;
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/image/tag/{index}";
     const METHOD: Method = Method::Patch;
 }
 
@@ -87,9 +88,9 @@ impl ApiEndpoint for Update {
 pub struct Delete;
 
 impl ApiEndpoint for Delete {
+    type Path = ImageTagDeletePath;
     type Req = ();
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/image/tag/{index}";
     const METHOD: Method = Method::Delete;
 }

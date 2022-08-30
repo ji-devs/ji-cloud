@@ -1,5 +1,6 @@
 //! Types for admin routes.
 use chrono::Utc;
+use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 use strum_macros::{Display, EnumIter};
 
@@ -10,6 +11,8 @@ pub enum ExportType {
     /// Export user profiles
     Profiles,
 }
+
+make_path_parts!(ExportDataPath => "/v1/admin/export");
 
 /// Request to export data
 #[derive(Serialize, Deserialize, Debug, Clone)]

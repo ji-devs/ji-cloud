@@ -1,8 +1,12 @@
 //! Types to manage image tags.
 
+use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 
-use crate::domain::meta::ImageTagIndex;
+use crate::{api::endpoints::PathPart, domain::meta::ImageTagIndex};
+
+// i16 is tag index (ImageTag.as_index())
+make_path_parts!(ImageTagCreatePath => "/v1/image/tag/{}" => i16);
 
 /// Request to create an image tag.
 #[derive(Serialize, Deserialize, Debug)]
@@ -10,6 +14,8 @@ pub struct ImageTagCreateRequest {
     /// Display name of the image tag.
     pub display_name: String,
 }
+
+make_path_parts!(ImageTagListPath => "/v1/image/tag/all");
 
 /// Response returned to list all image tags.
 #[derive(Serialize, Deserialize)]
@@ -28,6 +34,9 @@ pub struct ImageTagResponse {
     pub display_name: String,
 }
 
+// i16 is tag index (ImageTag.as_index())
+make_path_parts!(ImageTagUpdatePath => "/v1/image/tag/{}" => i16);
+
 /// Request to update an image tag.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ImageTagUpdateRequest {
@@ -40,3 +49,6 @@ pub struct ImageTagUpdateRequest {
     /// If `index` is [`None`] then it will not be updated.
     pub index: Option<ImageTagIndex>,
 }
+
+// i16 is tag index (ImageTag.as_index())
+make_path_parts!(ImageTagDeletePath => "/v1/image/tag/{}" => i16);

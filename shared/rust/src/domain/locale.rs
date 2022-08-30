@@ -2,6 +2,8 @@
 
 use std::collections::BTreeMap;
 
+use crate::api::endpoints::PathPart;
+use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -86,6 +88,8 @@ pub struct Entry {
     pub in_mock: bool,
 }
 
+make_path_parts!(CreateEntryPath => "/v1/locale/entry");
+
 /// Request for creating an entry.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -162,6 +166,8 @@ impl Default for ListEntryGroupBy {
     }
 }
 
+make_path_parts!(ListEntryPath => "/v1/locale/entry");
+
 /// Query for listing [`entries`](Entry)
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
@@ -193,6 +199,9 @@ pub enum ListEntryResponse {
     List(Vec<Entry>),
 }
 
+// u32 is local id
+make_path_parts!(GetEntryPath => "/v1/locale/entry/{}" => u32);
+
 /// Response for getting a individual entry.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -200,6 +209,9 @@ pub struct GetEntryResponse {
     /// The requested entry.
     pub entry: Entry,
 }
+
+// u32 is local id
+make_path_parts!(UpdateEntryPath => "/v1/locale/entry/{}" => u32);
 
 /// Request for updating an [`Entry`]
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -264,6 +276,11 @@ pub struct UpdateEntryRequest {
     pub in_mock: Option<bool>,
 }
 
+// u32 is local id
+make_path_parts!(DeleteEntryPath => "/v1/locale/entry/{}" => u32);
+
+make_path_parts!(ListBundlePath => "/v1/locale/bundle");
+
 /// Response for listing bundles
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -271,6 +288,8 @@ pub struct ListBundleResponse {
     /// A list of bundles
     pub bundles: Vec<Bundle>,
 }
+
+make_path_parts!(ListItemKindPath => "/v1/locale/item-kind");
 
 /// Response for listing item kinds
 #[derive(Serialize, Deserialize, Clone, Debug)]
