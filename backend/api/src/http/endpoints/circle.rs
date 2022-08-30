@@ -4,7 +4,7 @@ use actix_web::{
 };
 use futures::try_join;
 use shared::{
-    api::{endpoints::circle, ApiEndpoint},
+    api::{endpoints::circle, ApiEndpoint, PathParts},
     domain::{
         asset::UserOrMe,
         circle::{BrowseMembersResponse, CircleBrowseResponse, CircleId, CircleSearchResponse},
@@ -303,36 +303,39 @@ async fn auth_claims(
 
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
-        circle::Create::PATH,
+        <circle::Create as ApiEndpoint>::Path::PATH,
         circle::Create::METHOD.route().to(create),
     )
     .route(
-        circle::Browse::PATH,
+        <circle::Browse as ApiEndpoint>::Path::PATH,
         circle::Browse::METHOD.route().to(browse),
     )
     .route(
-        circle::Search::PATH,
+        <circle::Search as ApiEndpoint>::Path::PATH,
         circle::Search::METHOD.route().to(search),
     )
     .route(
-        circle::BrowseMembers::PATH,
+        <circle::BrowseMembers as ApiEndpoint>::Path::PATH,
         circle::BrowseMembers::METHOD.route().to(browse_members),
     )
     .route(
-        circle::Update::PATH,
+        <circle::Update as ApiEndpoint>::Path::PATH,
         circle::Update::METHOD.route().to(update),
     )
     .route(
-        circle::Delete::PATH,
+        <circle::Delete as ApiEndpoint>::Path::PATH,
         circle::Delete::METHOD.route().to(delete),
     )
-    .route(circle::Get::PATH, circle::Get::METHOD.route().to(get_one))
     .route(
-        circle::JoinCircle::PATH,
+        <circle::Get as ApiEndpoint>::Path::PATH,
+        circle::Get::METHOD.route().to(get_one),
+    )
+    .route(
+        <circle::JoinCircle as ApiEndpoint>::Path::PATH,
         circle::JoinCircle::METHOD.route().to(join),
     )
     .route(
-        circle::LeaveCircle::PATH,
+        <circle::LeaveCircle as ApiEndpoint>::Path::PATH,
         circle::LeaveCircle::METHOD.route().to(leave),
     );
 }

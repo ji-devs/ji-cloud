@@ -7,7 +7,7 @@ use chrono::{Duration, Utc};
 use core::settings::RuntimeSettings;
 use serde::ser::Serialize;
 use shared::{
-    api::{endpoints::admin, ApiEndpoint},
+    api::{endpoints::admin, ApiEndpoint, PathParts},
     domain::{
         admin::{ExportDataRequest, ExportType},
         session::NewSessionResponse,
@@ -122,11 +122,11 @@ async fn export_data(
 
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
-        admin::Impersonate::PATH,
+        <admin::Impersonate as ApiEndpoint>::Path::PATH,
         admin::Impersonate::METHOD.route().to(impersonate),
     )
     .route(
-        admin::ExportData::PATH,
+        <admin::ExportData as ApiEndpoint>::Path::PATH,
         admin::ExportData::METHOD.route().to(export_data),
     );
 }

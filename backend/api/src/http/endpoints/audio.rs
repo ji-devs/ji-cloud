@@ -1,5 +1,5 @@
 use actix_web::web::ServiceConfig;
-use shared::api::{endpoints::audio, ApiEndpoint};
+use shared::api::{endpoints::audio, ApiEndpoint, PathParts};
 use sqlx::postgres::PgDatabaseError;
 
 use crate::error;
@@ -155,23 +155,23 @@ pub mod user {
 
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
-        audio::user::Create::PATH,
+        <audio::user::Create as ApiEndpoint>::Path::PATH,
         audio::user::Create::METHOD.route().to(self::user::create),
     )
     .route(
-        audio::user::Upload::PATH,
+        <audio::user::Upload as ApiEndpoint>::Path::PATH,
         audio::user::Upload::METHOD.route().to(self::user::upload),
     )
     .route(
-        audio::user::Delete::PATH,
+        <audio::user::Delete as ApiEndpoint>::Path::PATH,
         audio::user::Delete::METHOD.route().to(self::user::delete),
     )
     .route(
-        audio::user::Get::PATH,
+        <audio::user::Get as ApiEndpoint>::Path::PATH,
         audio::user::Get::METHOD.route().to(self::user::get),
     )
     .route(
-        audio::user::List::PATH,
+        <audio::user::List as ApiEndpoint>::Path::PATH,
         audio::user::List::METHOD.route().to(self::user::list),
     );
 }

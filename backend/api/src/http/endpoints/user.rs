@@ -19,7 +19,7 @@ use shared::{
             Profile, ResetEmail, ResetPassword, Search, Unfollow, UpdateColor, UpdateFont,
             UserLookup, VerifyEmail, VerifyResetEmail,
         },
-        ApiEndpoint,
+        ApiEndpoint, PathParts,
     },
     domain::{
         image::{ImageId, ImageSize},
@@ -993,103 +993,130 @@ values ($1, $2::text, $3)
 }
 
 pub fn configure(cfg: &mut ServiceConfig) {
-    cfg.route(ResetEmail::PATH, ResetEmail::METHOD.route().to(email_reset))
-        .route(
-            VerifyResetEmail::PATH,
-            VerifyResetEmail::METHOD.route().to(verify_email_reset),
-        )
-        .route(Profile::PATH, Profile::METHOD.route().to(get_profile))
-        .route(Create::PATH, Create::METHOD.route().to(create_user))
-        .route(
-            VerifyEmail::PATH,
-            VerifyEmail::METHOD.route().to(verify_email),
-        )
-        .route(
-            ResetPassword::PATH,
-            ResetPassword::METHOD.route().to(reset_password),
-        )
-        .route(
-            ChangePassword::PATH,
-            ChangePassword::METHOD.route().to(put_password),
-        )
-        .route(
-            CreateProfile::PATH,
-            CreateProfile::METHOD.route().to(create_profile),
-        )
-        .route(
-            PatchProfile::PATH,
-            PatchProfile::METHOD.route().to(patch_profile),
-        )
-        .route(UserLookup::PATH, UserLookup::METHOD.route().to(user_lookup))
-        .route(Delete::PATH, Delete::METHOD.route().to(delete))
-        .route(GetColors::PATH, GetColors::METHOD.route().to(color::get))
-        .route(
-            UpdateColor::PATH,
-            UpdateColor::METHOD.route().to(color::update),
-        )
-        .route(
-            CreateColor::PATH,
-            CreateColor::METHOD.route().to(color::create),
-        )
-        .route(
-            DeleteColor::PATH,
-            DeleteColor::METHOD.route().to(color::delete),
-        )
-        .route(GetFonts::PATH, GetFonts::METHOD.route().to(font::get))
-        .route(
-            UpdateFont::PATH,
-            UpdateFont::METHOD.route().to(font::update),
-        )
-        .route(
-            CreateFont::PATH,
-            CreateFont::METHOD.route().to(font::create),
-        )
-        .route(
-            DeleteFont::PATH,
-            DeleteFont::METHOD.route().to(font::delete),
-        )
-        .route(Search::PATH, Search::METHOD.route().to(public_user::search))
-        .route(
-            BrowsePublicUser::PATH,
-            BrowsePublicUser::METHOD.route().to(public_user::browse),
-        )
-        .route(
-            BrowseUserJigs::PATH,
-            BrowseUserJigs::METHOD
-                .route()
-                .to(public_user::browse_user_jigs),
-        )
-        .route(
-            BrowseResources::PATH,
-            BrowseResources::METHOD
-                .route()
-                .to(public_user::browse_user_resources),
-        )
-        .route(
-            BrowseCourses::PATH,
-            BrowseCourses::METHOD
-                .route()
-                .to(public_user::browse_user_courses),
-        )
-        .route(
-            GetPublicUser::PATH,
-            GetPublicUser::METHOD.route().to(public_user::get),
-        )
-        .route(
-            BrowseFollowers::PATH,
-            BrowseFollowers::METHOD
-                .route()
-                .to(public_user::browse_user_followers),
-        )
-        .route(
-            BrowseFollowing::PATH,
-            BrowseFollowing::METHOD
-                .route()
-                .to(public_user::browse_user_followings),
-        )
-        .route(Follow::PATH, Follow::METHOD.route().to(public_user::follow))
-        .route(
-            Unfollow::PATH,
-            Unfollow::METHOD.route().to(public_user::unfollow),
-        );
+    cfg.route(
+        <ResetEmail as ApiEndpoint>::Path::PATH,
+        ResetEmail::METHOD.route().to(email_reset),
+    )
+    .route(
+        <VerifyResetEmail as ApiEndpoint>::Path::PATH,
+        VerifyResetEmail::METHOD.route().to(verify_email_reset),
+    )
+    .route(
+        <Profile as ApiEndpoint>::Path::PATH,
+        Profile::METHOD.route().to(get_profile),
+    )
+    .route(
+        <Create as ApiEndpoint>::Path::PATH,
+        Create::METHOD.route().to(create_user),
+    )
+    .route(
+        <VerifyEmail as ApiEndpoint>::Path::PATH,
+        VerifyEmail::METHOD.route().to(verify_email),
+    )
+    .route(
+        <ResetPassword as ApiEndpoint>::Path::PATH,
+        ResetPassword::METHOD.route().to(reset_password),
+    )
+    .route(
+        <ChangePassword as ApiEndpoint>::Path::PATH,
+        ChangePassword::METHOD.route().to(put_password),
+    )
+    .route(
+        <CreateProfile as ApiEndpoint>::Path::PATH,
+        CreateProfile::METHOD.route().to(create_profile),
+    )
+    .route(
+        <PatchProfile as ApiEndpoint>::Path::PATH,
+        PatchProfile::METHOD.route().to(patch_profile),
+    )
+    .route(
+        <UserLookup as ApiEndpoint>::Path::PATH,
+        UserLookup::METHOD.route().to(user_lookup),
+    )
+    .route(
+        <Delete as ApiEndpoint>::Path::PATH,
+        Delete::METHOD.route().to(delete),
+    )
+    .route(
+        <GetColors as ApiEndpoint>::Path::PATH,
+        GetColors::METHOD.route().to(color::get),
+    )
+    .route(
+        <UpdateColor as ApiEndpoint>::Path::PATH,
+        UpdateColor::METHOD.route().to(color::update),
+    )
+    .route(
+        <CreateColor as ApiEndpoint>::Path::PATH,
+        CreateColor::METHOD.route().to(color::create),
+    )
+    .route(
+        <DeleteColor as ApiEndpoint>::Path::PATH,
+        DeleteColor::METHOD.route().to(color::delete),
+    )
+    .route(
+        <GetFonts as ApiEndpoint>::Path::PATH,
+        GetFonts::METHOD.route().to(font::get),
+    )
+    .route(
+        <UpdateFont as ApiEndpoint>::Path::PATH,
+        UpdateFont::METHOD.route().to(font::update),
+    )
+    .route(
+        <CreateFont as ApiEndpoint>::Path::PATH,
+        CreateFont::METHOD.route().to(font::create),
+    )
+    .route(
+        <DeleteFont as ApiEndpoint>::Path::PATH,
+        DeleteFont::METHOD.route().to(font::delete),
+    )
+    .route(
+        <Search as ApiEndpoint>::Path::PATH,
+        Search::METHOD.route().to(public_user::search),
+    )
+    .route(
+        <BrowsePublicUser as ApiEndpoint>::Path::PATH,
+        BrowsePublicUser::METHOD.route().to(public_user::browse),
+    )
+    .route(
+        <BrowseUserJigs as ApiEndpoint>::Path::PATH,
+        BrowseUserJigs::METHOD
+            .route()
+            .to(public_user::browse_user_jigs),
+    )
+    .route(
+        <BrowseResources as ApiEndpoint>::Path::PATH,
+        BrowseResources::METHOD
+            .route()
+            .to(public_user::browse_user_resources),
+    )
+    .route(
+        <BrowseCourses as ApiEndpoint>::Path::PATH,
+        BrowseCourses::METHOD
+            .route()
+            .to(public_user::browse_user_courses),
+    )
+    .route(
+        <GetPublicUser as ApiEndpoint>::Path::PATH,
+        GetPublicUser::METHOD.route().to(public_user::get),
+    )
+    .route(
+        <BrowseFollowers as ApiEndpoint>::Path::PATH,
+        BrowseFollowers::METHOD
+            .route()
+            .to(public_user::browse_user_followers),
+    )
+    .route(
+        <BrowseFollowing as ApiEndpoint>::Path::PATH,
+        BrowseFollowing::METHOD
+            .route()
+            .to(public_user::browse_user_followings),
+    )
+    .route(
+        <Follow as ApiEndpoint>::Path::PATH,
+        Follow::METHOD.route().to(public_user::follow),
+    )
+    .route(
+        <Unfollow as ApiEndpoint>::Path::PATH,
+        Unfollow::METHOD.route().to(public_user::unfollow),
+    );
 }

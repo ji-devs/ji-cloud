@@ -2,7 +2,7 @@ use actix_web::web::{Data, Json, Path, ServiceConfig};
 use core::settings::RuntimeSettings;
 use sendgrid::v3::Email;
 use shared::{
-    api::{endpoints::resource::report, ApiEndpoint},
+    api::{endpoints::resource::report, ApiEndpoint, PathParts},
     domain::{
         resource::{report::ReportId, report::ResourceReportEmail, ResourceId},
         CreateResponse,
@@ -91,8 +91,11 @@ async fn send_report(
 
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
-        report::Create::PATH,
+        <report::Create as ApiEndpoint>::Path::PATH,
         report::Create::METHOD.route().to(create),
     )
-    .route(report::Get::PATH, report::Get::METHOD.route().to(get));
+    .route(
+        <report::Get as ApiEndpoint>::Path::PATH,
+        report::Get::METHOD.route().to(get),
+    );
 }

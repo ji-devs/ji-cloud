@@ -5,7 +5,7 @@ use actix_web::{
 use chrono::{Duration, Utc};
 use core::settings::RuntimeSettings;
 use shared::{
-    api::{endpoints::session, ApiEndpoint},
+    api::{endpoints::session, ApiEndpoint, PathParts},
     domain::session::{CreateSessionResponse, NewSessionResponse},
 };
 use sqlx::PgPool;
@@ -81,19 +81,19 @@ async fn delete_session(
 
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
-        session::GetOAuthUrl::PATH,
+        <session::GetOAuthUrl as ApiEndpoint>::Path::PATH,
         session::GetOAuthUrl::METHOD.route().to(oauth::get_url),
     )
     .route(
-        session::Create::PATH,
+        <session::Create as ApiEndpoint>::Path::PATH,
         session::Create::METHOD.route().to(create_session),
     )
     .route(
-        session::Delete::PATH,
+        <session::Delete as ApiEndpoint>::Path::PATH,
         session::Delete::METHOD.route().to(delete_session),
     )
     .route(
-        session::CreateOAuth::PATH,
+        <session::CreateOAuth as ApiEndpoint>::Path::PATH,
         session::CreateOAuth::METHOD.route().to(oauth::create),
     );
 }

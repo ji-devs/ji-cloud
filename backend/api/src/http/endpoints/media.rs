@@ -3,7 +3,7 @@ use actix_web::{
     HttpResponse,
 };
 use shared::{
-    api::{endpoints, ApiEndpoint},
+    api::{endpoints, ApiEndpoint, PathParts},
     domain::{
         media::{UrlCreatedResponse, WebMediaMetadataResponse, WebMediaUrlCreateRequest},
         Base64,
@@ -176,23 +176,23 @@ where id = (select media_id from web_media_library_url where media_url = $1)
 
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
-        endpoints::media::Create::PATH,
+        <endpoints::media::Create as ApiEndpoint>::Path::PATH,
         endpoints::media::Create::METHOD.route().to(create),
     )
     .route(
-        endpoints::media::GetUrl::PATH,
+        <endpoints::media::GetUrl as ApiEndpoint>::Path::PATH,
         endpoints::media::GetUrl::METHOD.route().to(get_by_url),
     )
     .route(
-        endpoints::media::GetId::PATH,
+        <endpoints::media::GetId as ApiEndpoint>::Path::PATH,
         endpoints::media::GetId::METHOD.route().to(get),
     )
     .route(
-        endpoints::media::DeleteId::PATH,
+        <endpoints::media::DeleteId as ApiEndpoint>::Path::PATH,
         endpoints::media::DeleteId::METHOD.route().to(delete_url),
     )
     .route(
-        endpoints::media::DeleteUrl::PATH,
+        <endpoints::media::DeleteUrl as ApiEndpoint>::Path::PATH,
         endpoints::media::DeleteUrl::METHOD.route().to(delete_media),
     );
 }

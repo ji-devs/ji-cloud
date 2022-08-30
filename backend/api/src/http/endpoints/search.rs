@@ -4,7 +4,7 @@ use actix_web::{
 };
 use core::settings::RuntimeSettings;
 use shared::{
-    api::{endpoints::search, ApiEndpoint},
+    api::{endpoints::search, ApiEndpoint, PathParts},
     domain::search::{CreateSearchKeyResponse, WebImageSearchResponse},
 };
 
@@ -47,11 +47,11 @@ pub async fn search_web_images(
 
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
-        search::CreateKey::PATH,
+        <search::CreateKey as ApiEndpoint>::Path::PATH,
         search::CreateKey::METHOD.route().to(create_key),
     )
     .route(
-        search::WebImageSearch::PATH,
+        <search::WebImageSearch as ApiEndpoint>::Path::PATH,
         search::WebImageSearch::METHOD.route().to(search_web_images),
     );
 }

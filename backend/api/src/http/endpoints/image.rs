@@ -5,7 +5,7 @@ use actix_web::{
 use chrono::{DateTime, Utc};
 use futures::TryStreamExt;
 use shared::{
-    api::{endpoints, ApiEndpoint},
+    api::{endpoints, ApiEndpoint, PathParts},
     domain::image::{
         CreateResponse, ImageBrowseResponse, ImageId, ImageMetadata, ImageResponse,
         ImageSearchResponse, ImageUpdateRequest, ImageUploadResponse,
@@ -334,80 +334,83 @@ async fn page_limit(page_limit: Option<u32>) -> anyhow::Result<u32> {
 pub fn configure(cfg: &mut ServiceConfig) {
     use endpoints::image;
     cfg.route(
-        image::Create::PATH,
+        <image::Create as ApiEndpoint>::Path::PATH,
         image::Create::METHOD.route().to(create),
     )
     .route(
-        image::Search::PATH,
+        <image::Search as ApiEndpoint>::Path::PATH,
         image::Search::METHOD.route().to(search),
     )
     .route(
-        image::Browse::PATH,
+        <image::Browse as ApiEndpoint>::Path::PATH,
         image::Browse::METHOD.route().to(browse),
     )
-    .route(image::Get::PATH, image::Get::METHOD.route().to(get_one))
     .route(
-        image::UpdateMetadata::PATH,
+        <image::Get as ApiEndpoint>::Path::PATH,
+        image::Get::METHOD.route().to(get_one),
+    )
+    .route(
+        <image::UpdateMetadata as ApiEndpoint>::Path::PATH,
         image::UpdateMetadata::METHOD.route().to(update),
     )
     .route(
-        image::Delete::PATH,
+        <image::Delete as ApiEndpoint>::Path::PATH,
         image::Delete::METHOD.route().to(delete),
     )
     .route(
-        image::PutImageUsage::PATH,
+        <image::PutImageUsage as ApiEndpoint>::Path::PATH,
         image::PutImageUsage::METHOD.route().to(use_image),
     )
     .route(
-        image::Upload::PATH,
+        <image::Upload as ApiEndpoint>::Path::PATH,
         image::Upload::METHOD.route().to(upload),
     )
     .route(
-        image::user::Create::PATH,
+        <image::user::Create as ApiEndpoint>::Path::PATH,
         image::user::Create::METHOD.route().to(self::user::create),
     )
     .route(
-        image::user::Upload::PATH,
+        <image::user::Upload as ApiEndpoint>::Path::PATH,
         image::user::Upload::METHOD.route().to(self::user::upload),
     )
     .route(
-        image::user::Delete::PATH,
+        <image::user::Delete as ApiEndpoint>::Path::PATH,
         image::user::Delete::METHOD.route().to(self::user::delete),
     )
     .route(
-        image::user::Get::PATH,
+        <image::user::Get as ApiEndpoint>::Path::PATH,
         image::user::Get::METHOD.route().to(self::user::get),
     )
     .route(
-        image::user::List::PATH,
+        <image::user::List as ApiEndpoint>::Path::PATH,
         image::user::List::METHOD.route().to(self::user::list),
     )
     .route(
-        image::tag::Create::PATH,
+        <image::tag::Create as ApiEndpoint>::Path::PATH,
         image::tag::Create::METHOD.route().to(self::tag::create),
     )
     .route(
-        image::tag::Update::PATH,
+        <image::tag::Update as ApiEndpoint>::Path::PATH,
         image::tag::Update::METHOD.route().to(self::tag::update),
     )
     .route(
-        image::tag::Delete::PATH,
+        <image::tag::Delete as ApiEndpoint>::Path::PATH,
         image::tag::Delete::METHOD.route().to(self::tag::delete),
     )
     .route(
-        image::tag::List::PATH,
+        <image::tag::List as ApiEndpoint>::Path::PATH,
         image::tag::List::METHOD.route().to(self::tag::list),
     )
     .route(
-        image::recent::List::PATH,
+        <image::recent::List as ApiEndpoint>::Path::PATH,
         image::recent::List::METHOD.route().to(self::recent::list),
     )
     .route(
-        image::recent::Put::PATH,
+        <image::recent::Put as ApiEndpoint>::Path::PATH,
         image::recent::Put::METHOD.route().to(self::recent::put),
     )
     .route(
-        image::recent::Delete::PATH,
+        <image::recent::Delete as ApiEndpoint>::Path::PATH,
         image::recent::Delete::METHOD
             .route()
             .to(self::recent::delete),

@@ -4,7 +4,7 @@ use actix_web::{
 };
 use chrono::{DateTime, Utc};
 use shared::{
-    api::{endpoints::animation, ApiEndpoint},
+    api::{endpoints::animation, ApiEndpoint, PathParts},
     domain::{
         animation::{AnimationId, AnimationKind, AnimationResponse, AnimationUploadResponse},
         CreateResponse,
@@ -162,23 +162,23 @@ async fn get_one(
 
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
-        animation::Create::PATH,
+        <animation::Create as ApiEndpoint>::Path::PATH,
         animation::Create::METHOD.route().to(create),
     )
     .route(
-        animation::Upload::PATH,
+        <animation::Upload as ApiEndpoint>::Path::PATH,
         animation::Upload::METHOD.route().to(upload),
     )
     .route(
-        animation::Get::PATH,
+        <animation::Get as ApiEndpoint>::Path::PATH,
         animation::Get::METHOD.route().to(get_one),
     )
     // .route(
-    //     animation::UpdateMetadata::PATH,
+    //     <animation::UpdateMetadata as ApiEndpoint>::Path::PATH,
     //     animation::UpdateMetadata::METHOD.route().to(update),
     // )
     .route(
-        animation::Delete::PATH,
+        <animation::Delete as ApiEndpoint>::Path::PATH,
         animation::Delete::METHOD.route().to(delete),
     );
 }

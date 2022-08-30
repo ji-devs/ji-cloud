@@ -5,7 +5,7 @@ use actix_web::{
 use core::settings::RuntimeSettings;
 use futures::try_join;
 use shared::{
-    api::{endpoints::course, ApiEndpoint},
+    api::{endpoints::course, ApiEndpoint, PathParts},
     domain::{
         asset::{DraftOrLive, PrivacyLevel, UserOrMe},
         course::{CourseBrowseResponse, CourseCreateRequest, CourseId, CourseSearchResponse},
@@ -358,35 +358,35 @@ async fn auth_claims(
 
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
-        course::Create::PATH,
+        <course::Create as ApiEndpoint>::Path::PATH,
         course::Create::METHOD.route().to(create),
     )
     .route(
-        course::GetLive::PATH,
+        <course::GetLive as ApiEndpoint>::Path::PATH,
         course::GetLive::METHOD.route().to(get_live),
     )
     .route(
-        course::GetDraft::PATH,
+        <course::GetDraft as ApiEndpoint>::Path::PATH,
         course::GetDraft::METHOD.route().to(get_draft),
     )
     .route(
-        course::Publish::PATH,
+        <course::Publish as ApiEndpoint>::Path::PATH,
         course::Publish::METHOD.route().to(publish_draft_to_live),
     )
     .route(
-        course::Browse::PATH,
+        <course::Browse as ApiEndpoint>::Path::PATH,
         course::Browse::METHOD.route().to(browse),
     )
     .route(
-        course::Search::PATH,
+        <course::Search as ApiEndpoint>::Path::PATH,
         course::Search::METHOD.route().to(search),
     )
     .route(
-        course::UpdateDraftData::PATH,
+        <course::UpdateDraftData as ApiEndpoint>::Path::PATH,
         course::UpdateDraftData::METHOD.route().to(update_draft),
     )
     .route(
-        course::Delete::PATH,
+        <course::Delete as ApiEndpoint>::Path::PATH,
         course::Delete::METHOD.route().to(delete),
     );
 }
