@@ -17,7 +17,7 @@ pub fn render_sticker_text_menu<T: AsSticker>(
     html!("div", {
         .style("display", "flex")
         .style("flex-direction", "column")
-        .style("grid-gap", "10px")
+        .style("gap", "10px")
         .children(&mut [
             html!("menu-line", {
                 .property("icon", "edit")
