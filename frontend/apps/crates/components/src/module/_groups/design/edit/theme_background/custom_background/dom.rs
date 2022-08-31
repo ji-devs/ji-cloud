@@ -14,7 +14,7 @@ use crate::{
 };
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
-use shared::domain::module::body::StepExt;
+use shared::domain::module::body::{ModeExt, StepExt};
 use utils::events;
 use web_sys::HtmlElement;
 
@@ -23,10 +23,11 @@ use super::state::{CustomBackground, Tab};
 
 const STR_FILL_COLOR: &str = "Fill color";
 
-impl<Step, Base> CustomBackground<Step, Base>
+impl<Step, Mode, Base> CustomBackground<Step, Mode, Base>
 where
     Step: StepExt + 'static,
-    Base: BaseExt<Step> + DesignExt + 'static,
+    Mode: ModeExt + 'static,
+    Base: BaseExt<Step> + DesignExt<Mode> + 'static,
 {
     pub fn render(self: &Rc<Self>) -> Dom {
         let state = self;

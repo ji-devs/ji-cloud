@@ -1,6 +1,6 @@
 use dominator::clone;
 use futures_signals::signal::Mutable;
-use shared::domain::module::body::{Background, StepExt};
+use shared::domain::module::body::{Background, ModeExt, StepExt};
 use std::{marker::PhantomData, rc::Rc};
 
 use crate::{
@@ -19,10 +19,11 @@ use crate::{
 
 const STR_FILL_COLOR: &str = "Fill color";
 
-pub struct CustomBackground<Step, Base>
+pub struct CustomBackground<Step, Mode, Base>
 where
     Step: StepExt + 'static,
-    Base: BaseExt<Step> + DesignExt + 'static,
+    Mode: ModeExt + 'static,
+    Base: BaseExt<Step> + DesignExt<Mode> + 'static,
 {
     pub base: Rc<Base>,
     pub on_close: Box<dyn Fn()>,
@@ -31,14 +32,16 @@ where
     pub tab: Mutable<Tab>,
     pub tab_kind: Mutable<Option<MenuTabKind>>,
     _step: PhantomData<Step>,
+    _mode: PhantomData<Mode>,
 }
 
-impl<Step, Base> CustomBackground<Step, Base>
+impl<Step, Mode, Base> CustomBackground<Step, Mode, Base>
 where
     Step: StepExt + 'static,
-    Base: BaseExt<Step> + DesignExt + 'static,
+    Mode: ModeExt + 'static,
+    Base: BaseExt<Step> + DesignExt<Mode> + 'static,
 {
-    pub fn new(state: Rc<ThemeBackground<Step, Base>>, on_close: Box<dyn Fn()>) -> Rc<Self> {
+    pub fn new(state: Rc<ThemeBackground<Step, Mode, Base>>, on_close: Box<dyn Fn()>) -> Rc<Self> {
         let color_state = Rc::new(ColorPickerState::new(
             state.base.get_theme().read_only(),
             None,
@@ -58,6 +61,7 @@ where
             tab,
             tab_kind: state.tab_kind.clone(),
             _step: PhantomData,
+            _mode: PhantomData,
         })
     }
 }
@@ -69,15 +73,17 @@ pub enum Tab {
 }
 
 impl Tab {
-    pub fn new<Step, Base>(base: Rc<Base>, kind: MenuTabKind) -> Self
+    pub fn new<Step, Mode, Base>(base: Rc<Base>, kind: MenuTabKind) -> Self
     where
         Step: StepExt + 'static,
-        Base: BaseExt<Step> + DesignExt + 'static,
+        Mode: ModeExt + 'static,
+        Base: BaseExt<Step> + DesignExt<Mode> + 'static,
     {
         match kind {
             MenuTabKind::BackgroundImage => {
                 let opts = ImageSearchOptions {
                     kind: ImageSearchKind::Background,
+                    tags_priority: base.get_image_tag_priorities(),
                     ..ImageSearchOptions::default()
                 };
 

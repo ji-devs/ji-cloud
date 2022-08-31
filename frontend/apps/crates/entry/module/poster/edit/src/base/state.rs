@@ -1,5 +1,5 @@
+use components::image::tag::ImageTag;
 use components::module::_common::edit::prelude::*;
-
 use components::module::_groups::design::edit::design_ext::DesignExt;
 use components::{
     backgrounds::{callbacks::Callbacks as BackgroundsCallbacks, state::Backgrounds},
@@ -170,7 +170,7 @@ impl BaseExt<Step> for Base {
     }
 }
 
-impl DesignExt for Base {
+impl DesignExt<Mode> for Base {
     fn get_backgrounds(&self) -> Rc<Backgrounds> {
         Rc::clone(&self.backgrounds)
     }
@@ -185,5 +185,18 @@ impl DesignExt for Base {
         self.history.push_modify(|raw| {
             raw.set_theme(theme);
         });
+    }
+
+    fn get_image_tag_priorities(&self) -> Option<Vec<ImageTag>> {
+        let mode = self.history.get_current().mode();
+        mode.map(|mode| match mode {
+            Mode::Printables => vec![ImageTag::Printables],
+            Mode::TalkingPictures => vec![],
+            Mode::TeachAWord => vec![ImageTag::Boards],
+            Mode::StoryTime => vec![ImageTag::Book, ImageTag::Stage],
+            Mode::Map => vec![ImageTag::Map],
+            Mode::Poster => vec![],
+            Mode::HearASong => vec![ImageTag::Music],
+        })
     }
 }

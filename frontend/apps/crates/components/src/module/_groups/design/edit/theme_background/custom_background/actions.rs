@@ -6,14 +6,15 @@ use crate::{
         _common::edit::entry::prelude::BaseExt, _groups::design::edit::design_ext::DesignExt,
     },
 };
-use shared::domain::module::body::StepExt;
+use shared::domain::module::body::{ModeExt, StepExt};
 
 use super::state::CustomBackground;
 
-impl<Step, Base> CustomBackground<Step, Base>
+impl<Step, Mode, Base> CustomBackground<Step, Mode, Base>
 where
     Step: StepExt + 'static,
-    Base: BaseExt<Step> + DesignExt + 'static,
+    Mode: ModeExt + 'static,
+    Base: BaseExt<Step> + DesignExt<Mode> + 'static,
 {
     pub fn remove_overlay(self: &Rc<Self>) {
         self.base.get_backgrounds().delete_layer(Layer::Two);

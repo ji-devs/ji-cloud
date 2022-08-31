@@ -1,18 +1,15 @@
 use crate::base::{sidebar::state::Sidebar, state::Base};
 use components::{
-    image::{
-        search::{
-            callbacks::Callbacks as ImageSearchCallbacks,
-            state::{ImageSearchKind, ImageSearchOptions, State as ImageSearchState},
-        },
-        tag::ImageTag,
+    image::search::{
+        callbacks::Callbacks as ImageSearchCallbacks,
+        state::{ImageSearchKind, ImageSearchOptions, State as ImageSearchState},
     },
+    module::_groups::design::edit::design_ext::DesignExt,
     stickers::state::Stickers,
     tabs::MenuTabKind,
 };
 use dominator::clone;
 use futures_signals::signal::Mutable;
-use shared::domain::module::body::{poster::Mode, BodyExt};
 use std::rc::Rc;
 use utils::unwrap::UnwrapJiExt;
 
@@ -52,13 +49,9 @@ impl Tab {
         match kind {
             MenuTabKind::Text => Self::Text,
             MenuTabKind::Image => {
-                let mode = base.history.get_current().mode();
-
-                let tags_priority = mode.map(|mode| get_image_tag_priorities_from_mode(mode));
-
                 let opts = ImageSearchOptions {
                     kind: ImageSearchKind::Sticker,
-                    tags_priority,
+                    tags_priority: base.get_image_tag_priorities(),
                     ..ImageSearchOptions::default()
                 };
 
@@ -82,17 +75,5 @@ impl Tab {
             Self::Text => MenuTabKind::Text,
             Self::Image(_) => MenuTabKind::Image,
         }
-    }
-}
-
-fn get_image_tag_priorities_from_mode(mode: Mode) -> Vec<ImageTag> {
-    match mode {
-        Mode::Printables => vec![ImageTag::Printables],
-        Mode::TalkingPictures => vec![],
-        Mode::TeachAWord => vec![ImageTag::Boards],
-        Mode::StoryTime => vec![ImageTag::Book, ImageTag::Stage],
-        Mode::Map => vec![ImageTag::Map],
-        Mode::Poster => vec![],
-        Mode::HearASong => vec![ImageTag::Music],
     }
 }

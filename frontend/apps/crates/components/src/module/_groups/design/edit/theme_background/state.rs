@@ -7,7 +7,7 @@ use futures_signals::signal::Mutable;
 use shared::api::{endpoints, ApiEndpoint};
 use shared::domain::asset::AssetId;
 use shared::domain::jig::JigUpdateDraftDataRequest;
-use shared::domain::module::body::StepExt;
+use shared::domain::module::body::{ModeExt, StepExt};
 use shared::error::EmptyError;
 use std::marker::PhantomData;
 use std::rc::Rc;
@@ -18,22 +18,24 @@ use super::custom_background::CustomBackground;
 
 pub const STR_DESIGN_FROM_SCRATCH: &str = "Design from scratch";
 
-pub struct ThemeBackground<Step, Base>
+pub struct ThemeBackground<Step, Mode, Base>
 where
     Step: StepExt + 'static,
-    Base: BaseExt<Step> + DesignExt + 'static,
+    Mode: ModeExt + 'static,
+    Base: BaseExt<Step> + DesignExt<Mode> + 'static,
 {
     pub base: Rc<Base>,
     pub theme_selector: Rc<ThemeSelector>,
-    pub custom_background: Mutable<Option<Rc<CustomBackground<Step, Base>>>>,
+    pub custom_background: Mutable<Option<Rc<CustomBackground<Step, Mode, Base>>>>,
     pub tab_kind: Mutable<Option<MenuTabKind>>,
     _step: PhantomData<Step>,
 }
 
-impl<Step, Base> ThemeBackground<Step, Base>
+impl<Step, Mode, Base> ThemeBackground<Step, Mode, Base>
 where
     Step: StepExt + 'static,
-    Base: BaseExt<Step> + DesignExt + 'static,
+    Mode: ModeExt + 'static,
+    Base: BaseExt<Step> + DesignExt<Mode> + 'static,
 {
     pub fn new(base: Rc<Base>, tab_kind: Mutable<Option<MenuTabKind>>) -> Rc<Self> {
         let callbacks = ThemeSelectorCallbacks::new(clone!(base => move |theme_id| {

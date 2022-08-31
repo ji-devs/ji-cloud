@@ -3,7 +3,7 @@ use crate::module::_groups::design::edit::{
     design_ext::DesignExt, theme_background::STR_DESIGN_FROM_SCRATCH,
 };
 use dominator::{clone, html, Dom};
-use shared::domain::module::body::StepExt;
+use shared::domain::module::body::{ModeExt, StepExt};
 use std::rc::Rc;
 use utils::prelude::*;
 
@@ -11,10 +11,11 @@ use crate::theme_selector::dom::render_design as render_theme_selector;
 
 use super::ThemeBackground;
 
-impl<Step, Base> ThemeBackground<Step, Base>
+impl<Step, Mode, Base> ThemeBackground<Step, Mode, Base>
 where
     Step: StepExt + 'static,
-    Base: BaseExt<Step> + DesignExt + 'static,
+    Mode: ModeExt + 'static,
+    Base: BaseExt<Step> + DesignExt<Mode> + 'static,
 {
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self;

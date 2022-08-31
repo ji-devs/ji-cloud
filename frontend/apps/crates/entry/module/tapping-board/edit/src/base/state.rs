@@ -1,3 +1,4 @@
+use components::image::tag::ImageTag;
 use components::module::_common::edit::prelude::*;
 
 use components::module::_groups::design::edit::design_ext::DesignExt;
@@ -250,7 +251,7 @@ impl BaseExt<Step> for Base {
     }
 }
 
-impl DesignExt for Base {
+impl DesignExt<Mode> for Base {
     fn get_backgrounds(&self) -> Rc<Backgrounds> {
         Rc::clone(&self.backgrounds)
     }
@@ -265,5 +266,20 @@ impl DesignExt for Base {
         self.history.push_modify(|raw| {
             raw.set_theme(theme);
         });
+    }
+
+    fn get_image_tag_priorities(&self) -> Option<Vec<ImageTag>> {
+        let mode = self.history.get_current().mode();
+        mode.map(|mode| match mode {
+            Mode::Words => vec![ImageTag::Boards],
+            Mode::Images => vec![],
+            Mode::Talk => vec![],
+            Mode::Read => vec![ImageTag::Book],
+            Mode::Scene => vec![],
+            Mode::PhotoAlbum => vec![ImageTag::PhotoAlbum],
+            Mode::Comic => vec![ImageTag::Comix],
+            Mode::Timeline => vec![ImageTag::Timeline],
+            Mode::FamilyTree => vec![ImageTag::PhotoAlbum],
+        })
     }
 }

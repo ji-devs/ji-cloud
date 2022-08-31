@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use dominator::clone;
-use shared::domain::module::body::StepExt;
+use shared::domain::module::body::{ModeExt, StepExt};
 
 use crate::module::{
     _common::edit::entry::prelude::BaseExt, _groups::design::edit::design_ext::DesignExt,
@@ -9,10 +9,11 @@ use crate::module::{
 
 use super::{custom_background::CustomBackground, ThemeBackground};
 
-impl<Step, Base> ThemeBackground<Step, Base>
+impl<Step, Mode, Base> ThemeBackground<Step, Mode, Base>
 where
     Step: StepExt + 'static,
-    Base: BaseExt<Step> + DesignExt + 'static,
+    Mode: ModeExt + 'static,
+    Base: BaseExt<Step> + DesignExt<Mode> + 'static,
 {
     pub(super) fn open_custom_background(self: &Rc<Self>) {
         let state = self;

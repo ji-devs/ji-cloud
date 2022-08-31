@@ -1,4 +1,5 @@
 use components::{
+    image::tag::ImageTag,
     module::{_common::edit::prelude::*, _groups::design::edit::design_ext::DesignExt},
     stickers::state::Sticker,
 };
@@ -397,7 +398,7 @@ impl BaseExt<Step> for Base {
     }
 }
 
-impl DesignExt for Base {
+impl DesignExt<Mode> for Base {
     fn get_backgrounds(&self) -> Rc<Backgrounds> {
         Rc::clone(&self.backgrounds)
     }
@@ -412,5 +413,18 @@ impl DesignExt for Base {
         self.history.push_modify(|raw| {
             raw.set_theme(theme);
         });
+    }
+
+    fn get_image_tag_priorities(&self) -> Option<Vec<ImageTag>> {
+        let mode = self.history.get_current().mode();
+        mode.map(|mode| match mode {
+            Mode::SettingTable => vec![ImageTag::Table],
+            Mode::Sorting => vec![ImageTag::DragAndDrop],
+            Mode::WordBuilder => vec![ImageTag::Boards, ImageTag::Book],
+            Mode::SentenceBuilder => vec![ImageTag::Boards, ImageTag::Book],
+            Mode::Matching => vec![ImageTag::DragAndDrop],
+            Mode::DressUp => vec![ImageTag::Wardrobe],
+            Mode::SceneBuilder => vec![],
+        })
     }
 }

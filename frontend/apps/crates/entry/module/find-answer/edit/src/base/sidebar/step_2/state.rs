@@ -1,18 +1,15 @@
 use crate::base::state::Base;
 use components::{
-    image::{
-        search::{
-            callbacks::Callbacks as ImageSearchCallbacks,
-            state::{ImageSearchKind, ImageSearchOptions, State as ImageSearchState},
-        },
-        tag::ImageTag,
+    image::search::{
+        callbacks::Callbacks as ImageSearchCallbacks,
+        state::{ImageSearchKind, ImageSearchOptions, State as ImageSearchState},
     },
+    module::_groups::design::edit::design_ext::DesignExt,
     stickers::state::Stickers,
     tabs::MenuTabKind,
 };
 use dominator::clone;
 use futures_signals::signal::Mutable;
-use shared::domain::module::body::{find_answer::Mode, BodyExt};
 use std::rc::Rc;
 use utils::unwrap::UnwrapJiExt;
 
@@ -54,13 +51,9 @@ impl Tab {
         match kind {
             MenuTabKind::Text => Self::Text,
             MenuTabKind::Image => {
-                let mode = base.history.get_current().mode();
-
-                let tags_priority = mode.map(|mode| get_image_tag_priorities_from_mode(mode));
-
                 let opts = ImageSearchOptions {
                     kind: ImageSearchKind::Sticker,
-                    tags_priority,
+                    tags_priority: base.get_image_tag_priorities(),
                     ..ImageSearchOptions::default()
                 };
 
@@ -84,15 +77,5 @@ impl Tab {
             Self::Text => MenuTabKind::Text,
             Self::Image(_) => MenuTabKind::Image,
         }
-    }
-}
-
-fn get_image_tag_priorities_from_mode(mode: Mode) -> Vec<ImageTag> {
-    match mode {
-        Mode::Family => vec![ImageTag::PhotoAlbum],
-        Mode::Map => vec![ImageTag::Map],
-        Mode::MultipleChoice => vec![ImageTag::MultipleChoice],
-        Mode::Scene => vec![],
-        Mode::Text => vec![ImageTag::Boards, ImageTag::Book],
     }
 }

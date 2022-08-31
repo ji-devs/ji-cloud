@@ -1,5 +1,6 @@
 use components::{
     backgrounds::{callbacks::Callbacks as BackgroundsCallbacks, state::Backgrounds},
+    image::tag::ImageTag,
     module::_groups::design::edit::design_ext::DesignExt,
     stickers::{
         callbacks::Callbacks as StickersCallbacks,
@@ -247,7 +248,7 @@ impl BaseExt<Step> for Base {
     }
 }
 
-impl DesignExt for Base {
+impl DesignExt<Mode> for Base {
     fn get_backgrounds(&self) -> Rc<Backgrounds> {
         Rc::clone(&self.backgrounds)
     }
@@ -262,5 +263,15 @@ impl DesignExt for Base {
         self.history.push_modify(|raw| {
             raw.set_theme(theme);
         });
+    }
+
+    fn get_image_tag_priorities(&self) -> Option<Vec<ImageTag>> {
+        let mode = self.history.get_current().mode();
+        mode.map(|mode| match mode {
+            Mode::Introduction => vec![ImageTag::Video],
+            Mode::Story => vec![ImageTag::Book],
+            Mode::Song => vec![ImageTag::Music],
+            Mode::Howto => vec![ImageTag::Boards],
+        })
     }
 }
