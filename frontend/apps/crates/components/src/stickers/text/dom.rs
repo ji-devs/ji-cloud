@@ -203,6 +203,9 @@ pub fn render_sticker_text_raw(
                     html!("wysiwyg-output-renderer", {
                         .property("valueAsString", &text.value)
                         .property("theme", theme_id.as_str_id())
+                        // Prevent text from being selected if a student attempts to drag
+                        // a non-interactive text sticker.
+                        .style("user-select", "none")
                         .apply_if(mixin.is_some(), move |dom| {
                             dom.apply(mixin.unwrap_ji())
                         })
