@@ -239,28 +239,6 @@ pub(super) async fn publish_draft_to_live(
         .await
         .ok_or(error::CloneDraft::ResourceNotFound)?;
 
-    // let draft = db::resource::get_one(&db, resource_id, DraftOrLive::Draft)
-    //     .await?
-    //     .ok_or(error::CloneDraft::ResourceNotFound)?; // Not strictly necessary, we already know the Resource exists.
-
-    // let modules = draft.resource_data.modules;
-    // Check that modules have been configured on the Resource
-    // let has_modules = !modules.is_empty();
-    // Check whether the draft's modules all have content
-    // let modules_valid = modules
-    //     .into_iter()
-    //     .filter(|module| !module.is_complete)
-    //     .collect::<Vec<LiteModule>>()
-    //     .is_empty();
-
-    // If no modules or modules without content, prevent publishing.
-    // NOTE: we temporarily allow publishing resource without content
-    // since curation also uses this endpoint and some resources have already been published without content
-    // and those resources have to be curated
-    // if !modules_valid || !has_modules {
-    //     return Err(error::CloneDraft::IncompleteModules);
-    // }
-
     let new_live_id = db::resource::clone_data(&mut txn, &draft_id, DraftOrLive::Live).await?;
 
     sqlx::query!(
