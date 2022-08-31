@@ -156,6 +156,9 @@ pub fn render_sticker_sprite_raw(sprite: &RawSprite, opts: Option<SpriteRawRende
                 src.as_ref().map(|src| {
                     html!("img", {
                         .attribute("src", src)
+                        // Prevent sprites from being selected if a student attempts to drag
+                        // a non-interactive sticker.
+                        .style("user-select", "none")
                         .style("pointer-events", "none")
                         .style("display", "block")
                         .style("position", "relative")
