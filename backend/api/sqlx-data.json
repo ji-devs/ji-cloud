@@ -67,20 +67,6 @@
     },
     "query": "\nupdate jig_data\nset description = $2,\n    translated_description = '{}',\n    updated_at = now()\nwhere id = $1 and $2 is distinct from description"
   },
-  "020be2c772185ee700939f8e6bd1cb1d8ff5c0e8d9103eeb6f4426d3cfc2716f": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Text"
-        ]
-      }
-    },
-    "query": "\nupdate resource_data\nset display_name     = coalesce($2, display_name),\n    language         = coalesce($3, language),\n    updated_at = now()\nwhere id = $1\n  and ($2::text is not null and $2 is distinct from display_name) or\n       ($3::text is not null and $3 is distinct from language)\n"
-  },
   "0275b21fac8ef6473d7a30163979cfca243fe9fcfa294dbe0d4d3f8b22ee7c67": {
     "describe": {
       "columns": [
@@ -2190,22 +2176,22 @@
         }
       ],
       "nullable": [
+        false,
+        false,
+        false,
         true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true
+        false,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null,
+        false,
+        false,
+        false,
+        false
       ],
       "parameters": {
         "Left": [
@@ -2311,15 +2297,15 @@
         }
       ],
       "nullable": [
+        false,
         true,
         true,
+        null,
+        false,
+        false,
         true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true
+        false,
+        false
       ],
       "parameters": {
         "Left": [
@@ -3564,21 +3550,21 @@
         }
       ],
       "nullable": [
+        false,
+        false,
         true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
       ],
       "parameters": {
         "Left": [
@@ -4906,6 +4892,20 @@
       }
     },
     "query": "\nselect id                               as \"id!: ImageId\",\n       name\nfrom image_metadata\n     inner join image_upload on id = image_id\nwhere name <> '' and translated_name = '{}'\nand processed_at is not null\norder by coalesce(updated_at, created_at) desc\nlimit 50 for no key update skip locked;\n "
+  },
+  "6e2623b5778df6f4793ecc354dd6b50ec1eb969dc307e43ce66ae9e46b8001eb": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nupdate resource_data\nset display_name     = coalesce($2, display_name),\n    language         = coalesce($3, language),\n    updated_at = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from display_name) or\n       ($3::text is not null and $3 is distinct from language))\n"
   },
   "6ea38ea0c905f9d7aa943145a64b10e5d0cdc86d8f365dfdac9a8c45bba8e67c": {
     "describe": {
