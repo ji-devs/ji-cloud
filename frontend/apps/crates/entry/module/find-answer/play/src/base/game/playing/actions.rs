@@ -13,13 +13,17 @@ impl PlayState {
         // mark the selected set
         state.selected_set.lock_mut().insert(index);
 
-        for (trace_index, trace) in state.traces.iter().enumerate() {
-            if trace_index == index {
-                trace.select(state.clone());
-            } else {
-                trace.kill_playback();
+        // Play the correct sound effect always. But we also need to make sure that it is finished playing before
+        // moving on to the next activity.
+        state.play_correct_sound(clone!(state => move || {
+            for (trace_index, trace) in state.traces.iter().enumerate() {
+                if trace_index == index {
+                    trace.select(state.clone());
+                } else {
+                    trace.kill_playback();
+                }
             }
-        }
+        }));
     }
 
     pub fn incorrect_choice(_state: Rc<Self>, _incorrect_index: Option<usize>) {
@@ -31,7 +35,7 @@ impl PlayState {
         });
     }
 
-    fn play_correct_sound<F: Fn() + 'static>(self: &Rc<Self>, f: F) {
+    fn play_correct_sound<R, F: Fn() -> R + 'static>(self: &Rc<Self>, f: F) {
         AUDIO_MIXER.with(move |mixer| {
             let audio_path: AudioPath<'_> = mixer.get_random_positive().into();
             mixer.play_oneshot_on_ended(audio_path, move || {
@@ -88,29 +92,23 @@ impl PlayState {
         let state = self;
 
         match (completed_minimum, next_question) {
-            // If they've completed the minimum, then we can end this activity
-            (true, _) => {
-                state.play_correct_sound(clone!(state => move || {
-                    state.play_instructions_and_then(clone!(state => move || {
-                        state
-                            .game
-                            .base
-                            .set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
-                    }))
-                }));
-            }
             // If they haven't completed the minimum questions, or don't need to, _and_ we can move on to the next
             // question
             (false, Some(next_index)) => {
-                state.play_correct_sound(clone!(state => move || {
-                    state.game.move_next_question(next_index);
+                state.game.move_next_question(next_index);
+            }
+            // If they've completed the minimum, then we can end this activity
+            (true, _) => {
+                state.play_instructions_and_then(clone!(state => move || {
+                    state
+                        .game
+                        .base
+                        .set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
                 }));
             }
             (_, None) => {
                 // No more questions to ask, but the activity is configured so that the student can click continue.
-                state.play_correct_sound(clone!(state => move || {
-                    state.play_instructions_and_then(|| {})
-                }));
+                state.play_instructions_and_then(|| {})
             }
         }
     }
