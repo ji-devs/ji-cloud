@@ -368,6 +368,7 @@ impl DesignExt<Mode> for Base {
             Mode::MultipleChoice => vec![ImageTag::MultipleChoice],
             Mode::Scene => vec![],
             Mode::Text => vec![ImageTag::Boards, ImageTag::Book],
+            Mode::Differences => vec![],
         })
     }
 }
