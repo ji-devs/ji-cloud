@@ -1267,6 +1267,19 @@
     },
     "query": "select index as \"index: i16\" from image_tag where index = $1 for update"
   },
+  "1967c95aeff5916cbe0737394d29ceecb925877408c76f7e6518075e6d62a90e": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nupdate resource_data\nset display_name = $2,\n    translated_name = '{}',\n    updated_at = now()\nwhere id = $1 and $2 is distinct from display_name"
+  },
   "19e0b4ddf95507058d054928c0275e5091e02c75fd1b74867e54d0188ba2c56a": {
     "describe": {
       "columns": [
@@ -2077,6 +2090,20 @@
       }
     },
     "query": "\nselect id                               as \"id!: ImageId\",\n       description\nfrom image_metadata\n     inner join image_upload on id = image_id\nwhere description <> '' and translated_description = '{}'\nand processed_at is not null\norder by coalesce(updated_at, created_at) desc\nlimit 50 for no key update skip locked;\n "
+  },
+  "340e501a7da4700b5bccce3e503981333ee8176b2043bf55410d9292833ccea1": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Int2"
+        ]
+      }
+    },
+    "query": "\nupdate jig_data\nset language         = coalesce($2, language),\n    theme            = coalesce($3, theme),\n    updated_at = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from language) or\n       ($3::smallint is not null and $3 is distinct from theme))\n"
   },
   "34b1dd32f76952aba5206b08017300b1a6bc63f329481d1fc5858d0a87fad235": {
     "describe": {
@@ -3647,6 +3674,19 @@
     },
     "query": "\n        with cte as (\n            select (array_agg(up.user_id))[1]\n            from user_profile \"up\"\n            inner join \"user\" on up.user_id = \"user\".id \n            left join circle_member \"cm\" on cm.user_id = up.user_id\n            where cm.id = any($1) or $1 = array[]::uuid[]\n            group by \"user\".created_at\n        )\n            select count(*) as \"count!\" from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n           , ord)        \n        "
   },
+  "54bd0fd9b43e386d322274148c5ed9b47efb8479f32da5b1cacff2f7ce55c397": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Bool"
+        ]
+      }
+    },
+    "query": "\nupdate image_metadata\nset is_premium  = coalesce($2, is_premium),\n    updated_at  = now()\nwhere id = $1\n  and ($2::boolean is not null and $2 is distinct from is_premium)"
+  },
   "553077643f8e2943593651973afe7e2e6710791e2b5d00fba06fd31e09fea9f5": {
     "describe": {
       "columns": [
@@ -3743,6 +3783,19 @@
       }
     },
     "query": "insert into user_audio_upload (audio_id) values($1)"
+  },
+  "57b8e0205c4afcbd1b5f5544b1fed0750f1be4e904e34f7c4862e321cb67982c": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Jsonb"
+        ]
+      }
+    },
+    "query": "\n                            update resource_data\n                            set translated_name = $2,\n                                last_synced_at = null\n                            where id = $1\n                            "
   },
   "581277a6c2291f58d22661f85991403210b2477cd4d6ebaa0772b2b4ad2206f9": {
     "describe": {
@@ -4413,20 +4466,6 @@
     },
     "query": "\n            select subject_id as \"id: SubjectId\", display_name, created_at, updated_at from subject\n            order by index\n        "
   },
-  "6499d356fcd8a874a788f21f49a6d1dc28499768a0abecfc152fa0e506965e0e": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Text"
-        ]
-      }
-    },
-    "query": "\nupdate course_data\nset display_name     = coalesce($2, display_name),\n    language         = coalesce($3, language),\n    updated_at = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from display_name) or\n       ($3::text is not null and $3 is distinct from language))\n"
-  },
   "64ba22498633c2981b471b9d584e7b16173003a0a17836c3da2025076ebdfe8c": {
     "describe": {
       "columns": [
@@ -4893,20 +4932,6 @@
     },
     "query": "\nselect id                               as \"id!: ImageId\",\n       name\nfrom image_metadata\n     inner join image_upload on id = image_id\nwhere name <> '' and translated_name = '{}'\nand processed_at is not null\norder by coalesce(updated_at, created_at) desc\nlimit 50 for no key update skip locked;\n "
   },
-  "6e2623b5778df6f4793ecc354dd6b50ec1eb969dc307e43ce66ae9e46b8001eb": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Text"
-        ]
-      }
-    },
-    "query": "\nupdate resource_data\nset display_name     = coalesce($2, display_name),\n    language         = coalesce($3, language),\n    updated_at = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from display_name) or\n       ($3::text is not null and $3 is distinct from language))\n"
-  },
   "6ea38ea0c905f9d7aa943145a64b10e5d0cdc86d8f365dfdac9a8c45bba8e67c": {
     "describe": {
       "columns": [
@@ -5252,6 +5277,30 @@
     },
     "query": "\n        select user_id \"user_id: UserId\",\n        (\n           select\n             case \n                when exists(select 1 from user_auth_basic where lower(user_auth_basic.email) = lower($1::text)) = true then false\n                else true\n            end\n        )     as \"is_oauth!\"      \n         from user_email \n         where lower(email) = lower($1::text)"
   },
+  "776b863bc111466aca15a643f55b3f790005fbd61319bf6492f3328b062d2d20": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\nselect resource_data.id,\n       display_name\nfrom resource_data\ninner join resource on live_id = resource_data.id\nwhere display_name <> '' and translated_name = '{}'\nand published_at is not null\norder by coalesce(updated_at, created_at) desc\nlimit 5 for no key update skip locked;\n         "
+  },
   "79bce8bafae973dfdb2932091ebeeed4f007ecf2849cc8c859d45a1fea68a251": {
     "describe": {
       "columns": [],
@@ -5392,20 +5441,6 @@
       }
     },
     "query": "\nupdate resource_data\nset last_synced_at = now()\nwhere resource_data.id = any (select live_id from resource where resource.id = any ($1))\n"
-  },
-  "7c52442554186edb177fcd9dca9083748cd77443e1a0923be7de29cf0c811fdd": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Bool"
-        ]
-      }
-    },
-    "query": "\nupdate image_metadata\nset name        = coalesce($2, name),\n    is_premium  = coalesce($3, is_premium),\n    updated_at  = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from name) or\n       ($3::boolean is not null and $3 is distinct from is_premium))"
   },
   "7d012ecda19e0cd02f56f8dcc2e91e819425e457f87322c86495d318ef1befb8": {
     "describe": {
@@ -7160,6 +7195,30 @@
       }
     },
     "query": "select exists(select 1 from global_animation_upload where animation_id = $1 for no key update) as \"exists!\""
+  },
+  "9e9c844bb4a39d2e6c747e842567bc944f6328f7a2f9589e89c614350ef9dd95": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "description",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\nselect resource_data.id,\n       description\nfrom resource_data\ninner join resource on live_id = resource_data.id\nwhere description <> '' and translated_description = '{}'\nand published_at is not null\norder by coalesce(updated_at, created_at) desc\nlimit 5 for no key update skip locked;\n "
   },
   "9f99518316804bde4081b2b71e262da9148de6f4a164b674e4bdd130eb34a2ee": {
     "describe": {
@@ -9073,6 +9132,19 @@
     },
     "query": "\nselect exists(select 1 from user_profile where user_id = $1 for update) as \"exists!\"\n    "
   },
+  "bc808937e95d4211c2b3a7d0812bfa56f1a57991ce04ee55f8a2418cc7a0ff5c": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nupdate image_metadata\nset name = $2,\n    translated_name = '{}',\n    updated_at = now()\nwhere id = $1 and $2 is distinct from name"
+  },
   "bcd3b0e27152dad44930b4d5f6c2b36fc756a0883b702197c0f54bde10ad7a74": {
     "describe": {
       "columns": [],
@@ -9084,6 +9156,32 @@
       }
     },
     "query": "delete from circle where id = $1"
+  },
+  "bdfa6658d04ff049c61a416af645025bdd798b50d837f21ebd79ff76f71899e5": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Jsonb"
+        ]
+      }
+    },
+    "query": "\n                            update resource_data\n                            set translated_description = $2,\n                                last_synced_at = null\n                            where id = $1\n                            "
+  },
+  "be69b38c978b947311449ac912fac411d6af3b618ed4e6091f8c85574a2ad6b7": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nupdate course_data\nset language         = coalesce($2, language),\n    updated_at = now()\nwhere id = $1\n  and ($2::text is not null and $2 is distinct from language)\n"
   },
   "bfd314e70437482954c5dfb3a40ab08990a0bea43779d810e9dd903e87e10c81": {
     "describe": {
@@ -9172,6 +9270,19 @@
       }
     },
     "query": "\nupdate jig_data\nset audio_background = $2,\nupdated_at = now()\nwhere id = $1 and $2 is distinct from audio_background\n            "
+  },
+  "c56be98e44e9e3b3a764796441393998484aa2c1a91dd6fca10b918a5c08848e": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nupdate resource_data\nset language         = coalesce($2, language),\n    updated_at = now()\nwhere id = $1\n  and ($2::text is not null and $2 is distinct from language)\n"
   },
   "c721caaa5f743b93aea15f85f31faf1a9eda5905e3a1469025d5c811a157ffdd": {
     "describe": {
@@ -9490,6 +9601,19 @@
       }
     },
     "query": "delete from locale_entry where id = $1"
+  },
+  "ceb87a1ad1d6edc211ab0297d65a7c2d489ae0c1df0fdbd0331803a78e3fa43b": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nupdate course_data\nset display_name = $2,\n    translated_name = '{}',\n    updated_at = now()\nwhere id = $1 and $2 is distinct from display_name"
   },
   "ceee83d2943409d2f3a3e5a70b7ae3d423d39cf2b15af44565c6f4100abcfc31": {
     "describe": {
@@ -10469,21 +10593,6 @@
     },
     "query": "\nupdate course_data\nset description = $2,\n    updated_at = now()\nwhere id = $1 and $2 is distinct from description"
   },
-  "ec0634a118b7b9bbb6e590b8c99335fd5e20ece848cf14310e136f0d1b1d8248": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Text",
-          "Int2"
-        ]
-      }
-    },
-    "query": "\nupdate jig_data\nset display_name     = coalesce($2, display_name),\n    language         = coalesce($3, language),\n    theme            = coalesce($4, theme),\n    updated_at = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from display_name) or\n       ($3::text is not null and $3 is distinct from language) or\n       ($4::smallint is not null and $4 is distinct from theme))\n"
-  },
   "ec58db6f7417f0821c8a35acb1da226c7206c7614b4b5f9ab890693e0b9d9e41": {
     "describe": {
       "columns": [],
@@ -10668,6 +10777,181 @@
       }
     },
     "query": "\ninsert into course_data_jig(course_data_id, jig_id, index)\nselect $2, jig_id, index\nfrom course_data_jig\nwhere course_data_id = $1\n        "
+  },
+  "f0690dfd7a2dab5daf86dbcf154b3e886c65c43baeae1d4337e6541f78357bfe": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nupdate jig_data\nset display_name = $2,\n    translated_name = '{}',\n    updated_at = now()\nwhere id = $1 and $2 is distinct from display_name"
+  },
+  "f125eca01e72de816e6d58665a411decbf1a19456e5e1ce6a2b1191776731c68": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "language!",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "description!",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_description!: Json<HashMap<String, String>>",
+          "ordinal": 4,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "translated_name!: Json<HashMap<String, String>>",
+          "ordinal": 5,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "affiliations!",
+          "ordinal": 6,
+          "type_info": "UuidArray"
+        },
+        {
+          "name": "affiliation_names!",
+          "ordinal": 7,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "resource_types!",
+          "ordinal": 8,
+          "type_info": "UuidArray"
+        },
+        {
+          "name": "resource_type_names!",
+          "ordinal": 9,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "age_ranges!",
+          "ordinal": 10,
+          "type_info": "UuidArray"
+        },
+        {
+          "name": "age_range_names!",
+          "ordinal": 11,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "categories!",
+          "ordinal": 12,
+          "type_info": "UuidArray"
+        },
+        {
+          "name": "category_names!",
+          "ordinal": 13,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "privacy_level!: PrivacyLevel",
+          "ordinal": 14,
+          "type_info": "Int2"
+        },
+        {
+          "name": "author_id",
+          "ordinal": 15,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "locked!",
+          "ordinal": 16,
+          "type_info": "Bool"
+        },
+        {
+          "name": "other_keywords!",
+          "ordinal": 17,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_keywords!",
+          "ordinal": 18,
+          "type_info": "Text"
+        },
+        {
+          "name": "author_name",
+          "ordinal": 19,
+          "type_info": "Text"
+        },
+        {
+          "name": "rating",
+          "ordinal": 20,
+          "type_info": "Int2"
+        },
+        {
+          "name": "likes!",
+          "ordinal": 21,
+          "type_info": "Int8"
+        },
+        {
+          "name": "plays!",
+          "ordinal": 22,
+          "type_info": "Int8"
+        },
+        {
+          "name": "published_at",
+          "ordinal": 23,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "blocked!",
+          "ordinal": 24,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        false,
+        true,
+        false,
+        false,
+        false,
+        null,
+        true,
+        false,
+        false,
+        true,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\nselect resource.id,\n       display_name                                                                                                 as \"name\",\n       language                                                                                                     as \"language!\",\n       description                                                                                                  as \"description!\",\n       translated_description                                                                                       as \"translated_description!: Json<HashMap<String, String>>\",\n       translated_name                                                                                              as \"translated_name!: Json<HashMap<String, String>>\",\n       array((select affiliation_id\n              from resource_data_affiliation\n              where resource_data_id = resource_data.id))                                                                     as \"affiliations!\",\n       array((select affiliation.display_name\n              from affiliation\n                       inner join resource_data_affiliation on affiliation.id = resource_data_affiliation.affiliation_id\n              where resource_data_affiliation.resource_data_id = resource_data.id))                                                as \"affiliation_names!\",\n        array((select resource_type_id\n                from resource_data_resource\n                where resource_data_id = resource_data.id))                                                                     as \"resource_types!\",\n        array((select resource_type.display_name\n              from resource_type\n                        inner join resource_data_resource on resource_type.id = resource_data_resource.resource_type_id\n             where resource_data_resource.resource_data_id = resource_data.id))                                         as \"resource_type_names!\",\n       array((select age_range_id\n              from resource_data_age_range\n              where resource_data_id = resource_data.id))                                                                     as \"age_ranges!\",\n       array((select age_range.display_name\n              from age_range\n                       inner join resource_data_age_range on age_range.id = resource_data_age_range.age_range_id\n              where resource_data_age_range.resource_data_id = resource_data.id))                                                  as \"age_range_names!\",\n       array((select category_id\n              from resource_data_category\n              where resource_data_id = resource_data.id))                                                                     as \"categories!\",\n       array((select name\n              from category\n                       inner join resource_data_category on category.id = resource_data_category.category_id\n              where resource_data_category.resource_data_id = resource_data.id))                                                   as \"category_names!\",\n       privacy_level                                                                                                as \"privacy_level!: PrivacyLevel\",\n       author_id                                                                                                    as \"author_id\",\n       locked                                                                                                       as \"locked!\",\n       other_keywords                                                                                               as \"other_keywords!\",\n       translated_keywords                                                                                          as \"translated_keywords!\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = resource.author_id)                                                            as \"author_name\",\n        rating                                                                                                      as \"rating\",\n        likes                                                                                                       as \"likes!\",\n        plays                                                                                                       as \"plays!\",\n        published_at                                                                                                as \"published_at\",\n        blocked                                                                                                     as \"blocked!\"\nfrom resource\n         inner join resource_data on live_id = resource_data.id\n         inner join resource_admin_data \"rad\" on rad.resource_id = resource.id\nwhere ((last_synced_at is null and published_at is not null)\n   or (updated_at is not null and last_synced_at < updated_at)\n    or (published_at < now() is true and last_synced_at < published_at))\nlimit 100 for no key update skip locked;\n     "
   },
   "f1da735aa16c69d6e293d1c1b28cb018017f891f1e79dc7f3ed2a633880f493b": {
     "describe": {
@@ -10970,168 +11254,6 @@
       }
     },
     "query": "\nselect exists (\n    select 1 from user_scope where user_id = $1 and scope = any($2)\n) or (\n    exists (select 1 from user_scope where user_id = $1 and scope = $3) and\n    not exists (select 1 from circle where id = $4 and circle.creator_id <> $1)\n) as \"authed!\"\n"
-  },
-  "fb74133530b70a74a0771511ace1bb17c28f29a96132c4c53912eca1cd4235cb": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "name",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "language!",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "description!",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "translated_description!: Json<HashMap<String, String>>",
-          "ordinal": 4,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "translated_name!: Json<HashMap<String, String>>",
-          "ordinal": 5,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "affiliations!",
-          "ordinal": 6,
-          "type_info": "UuidArray"
-        },
-        {
-          "name": "affiliation_names!",
-          "ordinal": 7,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "resource_types!",
-          "ordinal": 8,
-          "type_info": "UuidArray"
-        },
-        {
-          "name": "resource_type_names!",
-          "ordinal": 9,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "age_ranges!",
-          "ordinal": 10,
-          "type_info": "UuidArray"
-        },
-        {
-          "name": "age_range_names!",
-          "ordinal": 11,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "categories!",
-          "ordinal": 12,
-          "type_info": "UuidArray"
-        },
-        {
-          "name": "category_names!",
-          "ordinal": 13,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "privacy_level!: PrivacyLevel",
-          "ordinal": 14,
-          "type_info": "Int2"
-        },
-        {
-          "name": "author_id",
-          "ordinal": 15,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "locked!",
-          "ordinal": 16,
-          "type_info": "Bool"
-        },
-        {
-          "name": "other_keywords!",
-          "ordinal": 17,
-          "type_info": "Text"
-        },
-        {
-          "name": "translated_keywords!",
-          "ordinal": 18,
-          "type_info": "Text"
-        },
-        {
-          "name": "author_name",
-          "ordinal": 19,
-          "type_info": "Text"
-        },
-        {
-          "name": "rating",
-          "ordinal": 20,
-          "type_info": "Int2"
-        },
-        {
-          "name": "likes!",
-          "ordinal": 21,
-          "type_info": "Int8"
-        },
-        {
-          "name": "plays!",
-          "ordinal": 22,
-          "type_info": "Int8"
-        },
-        {
-          "name": "published_at",
-          "ordinal": 23,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "blocked!",
-          "ordinal": 24,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        false,
-        true,
-        false,
-        false,
-        false,
-        null,
-        true,
-        false,
-        false,
-        true,
-        false
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "\nselect resource.id,\n       display_name                                                                                                 as \"name\",\n       language                                                                                                     as \"language!\",\n       description                                                                                                  as \"description!\",\n       translated_description                                                                                       as \"translated_description!: Json<HashMap<String, String>>\",\n       translated_name                                                                                              as \"translated_name!: Json<HashMap<String, String>>\",\n       array((select affiliation_id\n              from resource_data_affiliation\n              where resource_data_id = resource_data.id))                                                                     as \"affiliations!\",\n       array((select affiliation.display_name\n              from affiliation\n                       inner join resource_data_affiliation on affiliation.id = resource_data_affiliation.affiliation_id\n              where resource_data_affiliation.resource_data_id = resource_data.id))                                                as \"affiliation_names!\",\n        array((select resource_type_id\n                from resource_data_resource\n                where resource_data_id = resource_data.id))                                                                     as \"resource_types!\",\n        array((select resource_type.display_name\n              from resource_type\n                        inner join resource_data_resource on resource_type.id = resource_data_resource.resource_type_id\n             where resource_data_resource.resource_data_id = resource_data.id))                                         as \"resource_type_names!\",\n       array((select age_range_id\n              from resource_data_age_range\n              where resource_data_id = resource_data.id))                                                                     as \"age_ranges!\",\n       array((select age_range.display_name\n              from age_range\n                       inner join resource_data_age_range on age_range.id = resource_data_age_range.age_range_id\n              where resource_data_age_range.resource_data_id = resource_data.id))                                                  as \"age_range_names!\",\n       array((select category_id\n              from resource_data_category\n              where resource_data_id = resource_data.id))                                                                     as \"categories!\",\n       array((select name\n              from category\n                       inner join resource_data_category on category.id = resource_data_category.category_id\n              where resource_data_category.resource_data_id = resource_data.id))                                                   as \"category_names!\",\n       privacy_level                                                                                                as \"privacy_level!: PrivacyLevel\",\n       author_id                                                                                                    as \"author_id\",\n       locked                                                                                                       as \"locked!\",\n       other_keywords                                                                                               as \"other_keywords!\",\n       translated_keywords                                                                                          as \"translated_keywords!\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = resource.author_id)                                                                 as \"author_name\",\n        rating                                                                                                      as \"rating\",\n        likes                                                                                                as \"likes!\",\n        plays                                                                                               as \"plays!\",\n        published_at                                                                                                as \"published_at\",\n        blocked                                                                                                     as \"blocked!\"\nfrom resource\n         inner join resource_data on live_id = resource_data.id\n         inner join resource_admin_data \"rad\" on rad.resource_id = resource.id\nwhere ((last_synced_at is null and published_at is not null)\n   or (updated_at is not null and last_synced_at < updated_at)\n    or (published_at < now() is true and last_synced_at < published_at))\nlimit 100 for no key update skip locked;\n     "
   },
   "fc6bfe176017b10253bc42ecb9f96f0533953b10ea0ad57299f99a3a17bc6721": {
     "describe": {
