@@ -49,8 +49,9 @@ pub fn render_step_3(state: Rc<Step3>) -> Dom {
                 .child_signal(state.tab.signal_cloned().map(clone!(state => move |tab| {
                     match tab {
                         Tab::Select => {
-                            Some(html!("div", {
-                                .text(crate::strings::STR_SIDEBAR_SELECT)
+                            Some(html!("sidebar-empty", {
+                                .property("label", crate::strings::STR_SIDEBAR_SELECT)
+                                .property("imagePath", "module/_common/edit/sidebar/illustration-trace-area.svg")
                             }))
                         },
                         Tab::Audio(audio_signal_fn) => {

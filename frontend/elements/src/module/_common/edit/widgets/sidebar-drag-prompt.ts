@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement } from "lit-element";
 
-const STR_LABEL = "Put each item where it should be dropped.";
+const STR_LABEL = "Place each item in their correct areas";
 
 @customElement("module-sidebar-drag-prompt")
 export class _ extends LitElement {
