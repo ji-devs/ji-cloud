@@ -221,22 +221,25 @@ pub enum Mode {
     Scene,
     /// Text mode
     Text,
+    /// Find the differences mode
+    Differences,
 }
 
 impl Default for Mode {
     fn default() -> Self {
-        Self::Family
+        Self::MultipleChoice
     }
 }
 
 impl ModeExt for Mode {
     fn get_list() -> Vec<Self> {
         vec![
-            Self::Family,
-            Self::Map,
             Self::MultipleChoice,
             Self::Scene,
+            Self::Family,
+            Self::Map,
             Self::Text,
+            Self::Differences,
         ]
     }
 
@@ -247,15 +250,17 @@ impl ModeExt for Mode {
             Self::MultipleChoice => "multiple-choice",
             Self::Scene => "scene",
             Self::Text => "text",
+            Self::Differences => "differences",
         }
     }
 
     fn label(&self) -> &'static str {
-        const STR_FAMILY_LABEL: &'static str = "Family";
-        const STR_MAP_LABEL: &'static str = "Map";
+        const STR_FAMILY_LABEL: &'static str = "Family tree";
+        const STR_MAP_LABEL: &'static str = "Where on the map?";
         const STR_MULTIPLE_CHOICE_LABEL: &'static str = "Multiple Choice";
-        const STR_SCENE_LABEL: &'static str = "Scene";
-        const STR_TEXT_LABEL: &'static str = "Text";
+        const STR_SCENE_LABEL: &'static str = "Find the answers";
+        const STR_TEXT_LABEL: &'static str = "Find the text";
+        const STR_DIFFERENCES_LABEL: &'static str = "Find the differences";
 
         match self {
             Self::Family => STR_FAMILY_LABEL,
@@ -263,6 +268,7 @@ impl ModeExt for Mode {
             Self::MultipleChoice => STR_MULTIPLE_CHOICE_LABEL,
             Self::Scene => STR_SCENE_LABEL,
             Self::Text => STR_TEXT_LABEL,
+            Self::Differences => STR_DIFFERENCES_LABEL,
         }
     }
 }
