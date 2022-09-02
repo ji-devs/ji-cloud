@@ -51,7 +51,7 @@ pub fn render_step_3(state: Rc<Step3>) -> Dom {
                         Tab::Select => {
                             Some(html!("sidebar-empty", {
                                 .property("label", crate::strings::STR_SIDEBAR_SELECT)
-                                .property("imagePath", "module/_common/edit/sidebar/illustration-trace-area.svg")
+                                .property("imagePath", "module/_common/edit/sidebar/illustration-select-item.svg")
                             }))
                         },
                         Tab::Audio(audio_signal_fn) => {
