@@ -307,12 +307,12 @@ impl AudioHandle {
     }
     pub fn pause(&self) {
         AUDIO_MIXER.with(|mixer| {
-            mixer.run_audio_message(AudioMessageToTop::PlayHandleCalled(self.id()));
+            mixer.run_audio_message(AudioMessageToTop::PauseHandleCalled(self.id()));
         });
     }
     pub fn play(&self) {
         AUDIO_MIXER.with(|mixer| {
-            mixer.run_audio_message(AudioMessageToTop::PauseHandleCalled(self.id()));
+            mixer.run_audio_message(AudioMessageToTop::PlayHandleCalled(self.id()));
         });
     }
 }
