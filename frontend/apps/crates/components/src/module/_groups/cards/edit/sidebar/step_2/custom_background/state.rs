@@ -35,7 +35,7 @@ impl<RawData: RawDataExt, E: ExtraExt> CustomBackground<RawData, E> {
             None,
             Some(String::from(STR_FILL_COLOR)),
             Some(clone!(base => move |color| {
-                base.background.set(Some(Background::Color(color)))
+                base.set_bg(Some(Background::Color(color)));
             })),
         ));
 
