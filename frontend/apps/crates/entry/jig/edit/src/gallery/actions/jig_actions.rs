@@ -1,14 +1,13 @@
 use super::super::state::Gallery;
 use shared::{
-    api::endpoints::{self, ApiEndpoint},
+    api::endpoints::{self},
     domain::{
         asset::{Asset, DraftOrLive, UserOrMe},
         jig::{
-            JigBrowseQuery, JigBrowseResponse, JigCreateRequest, JigId, JigResponse, JigSearchQuery,
+            JigBrowsePath, JigBrowseQuery, JigClonePath, JigCreatePath, JigCreateRequest,
+            JigDeletePath, JigGetDraftPath, JigId, JigSearchPath, JigSearchQuery,
         },
-        CreateResponse,
     },
-    error::{EmptyError, MetadataNotFound},
 };
 use std::rc::Rc;
 use utils::prelude::*;
@@ -25,17 +24,13 @@ pub async fn load_jigs(
         ..Default::default()
     };
 
-    api_with_auth::<JigBrowseResponse, EmptyError, _>(
-        endpoints::jig::Browse::PATH,
-        endpoints::jig::Browse::METHOD,
-        Some(req),
-    )
-    .await
-    .map(|res| {
-        let assets = res.jigs.into_iter().map(|jig| jig.into()).collect();
-        (assets, res.total_jig_count)
-    })
-    .map_err(|_| ())
+    endpoints::jig::Browse::api_with_auth(JigBrowsePath(), Some(req))
+        .await
+        .map(|res| {
+            let assets = res.jigs.into_iter().map(|jig| jig.into()).collect();
+            (assets, res.total_jig_count)
+        })
+        .map_err(|_| ())
 }
 
 pub async fn search_jigs(q: String, is_published: Option<bool>) -> Result<Vec<Asset>, ()> {
@@ -46,7 +41,7 @@ pub async fn search_jigs(q: String, is_published: Option<bool>) -> Result<Vec<As
         ..Default::default()
     };
 
-    endpoints::jig::Search::api_with_auth(Some(req))
+    endpoints::jig::Search::api_with_auth(JigSearchPath(), Some(req))
         .await
         .map(|resp| resp.jigs.into_iter().map(|jig| jig.into()).collect())
         .map_err(|_| ())
@@ -55,13 +50,7 @@ pub async fn search_jigs(q: String, is_published: Option<bool>) -> Result<Vec<As
 pub async fn create_jig() {
     let req = JigCreateRequest::default();
 
-    match api_with_auth::<CreateResponse<JigId>, MetadataNotFound, _>(
-        endpoints::jig::Create::PATH,
-        endpoints::jig::Create::METHOD,
-        Some(req),
-    )
-    .await
-    {
+    match endpoints::jig::Create::api_with_auth(JigCreatePath(), Some(req)).await {
         Ok(resp) => {
             let url = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                 resp.id,
@@ -75,37 +64,20 @@ pub async fn create_jig() {
 }
 
 pub async fn copy_jig(jig_id: JigId) -> Result<Asset, ()> {
-    let path = endpoints::jig::Clone::PATH.replace("{id}", &jig_id.0.to_string());
-
-    match api_with_auth::<CreateResponse<JigId>, EmptyError, ()>(
-        &path,
-        endpoints::jig::Clone::METHOD,
-        None,
-    )
-    .await
-    {
-        Ok(resp) => {
-            let path = endpoints::jig::GetDraft::PATH.replace("{id}", &resp.id.0.to_string());
-            api_with_auth::<JigResponse, EmptyError, ()>(
-                &path,
-                endpoints::jig::GetDraft::METHOD,
-                None,
-            )
+    match endpoints::jig::Clone::api_with_auth(JigClonePath(jig_id), None).await {
+        Ok(resp) => endpoints::jig::GetDraft::api_with_auth(JigGetDraftPath(resp.id), None)
             .await
             .map(|resp| {
                 let asset: Asset = resp.into();
                 asset
             })
-            .map_err(|_| ())
-        }
+            .map_err(|_| ()),
         Err(_) => Err(()),
     }
 }
 
-pub async fn delete_jig(jig_id: JigId) -> Result<(), ()> {
-    let path = endpoints::jig::Delete::PATH.replace("{id}", &jig_id.0.to_string());
-    api_with_auth_empty::<EmptyError, ()>(&path, endpoints::jig::Delete::METHOD, None)
+pub async fn delete_jig(jig_id: JigId) -> anyhow::Result<()> {
+    endpoints::jig::Delete::api_with_auth_empty(JigDeletePath(jig_id), None)
         .await
         .map(|_| ())
-        .map_err(|_| ())
 }

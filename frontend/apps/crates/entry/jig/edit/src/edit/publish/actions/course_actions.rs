@@ -1,10 +1,9 @@
 use shared::{
-    api::endpoints::{course, ApiEndpoint},
-    domain::course::{CourseId, CourseResponse, CourseUpdateDraftDataRequest},
-    error::{EmptyError, MetadataNotFound},
+    api::endpoints::course,
+    domain::course::{CourseGetDraftPath, CourseId, CoursePublishPath, CourseUpdateDraftDataPath},
 };
 use utils::{
-    prelude::{api_with_auth, api_with_auth_empty},
+    prelude::ApiEndpointExt,
     routes::{AssetEditRoute, AssetRoute, CourseEditRoute, Route},
 };
 
@@ -12,21 +11,15 @@ use crate::edit::publish::editable_assets::EditableAsset;
 
 use super::super::editable_assets::EditableCourse;
 
-pub async fn save_and_publish_course(course: &EditableCourse) -> Result<(), ()> {
-    let path = course::UpdateDraftData::PATH.replace("{id}", &course.id.0.to_string());
+pub async fn save_and_publish_course(course: &EditableCourse) -> anyhow::Result<()> {
     let req = course.to_course_update_request();
-    api_with_auth_empty::<MetadataNotFound, CourseUpdateDraftDataRequest>(
-        &path,
-        course::UpdateDraftData::METHOD,
+    course::UpdateDraftData::api_with_auth_empty(
+        CourseUpdateDraftDataPath(course.id.clone()),
         Some(req),
     )
-    .await
-    .map_err(|_| ())?;
+    .await?;
 
-    let path = course::Publish::PATH.replace("{id}", &course.id.0.to_string());
-    api_with_auth_empty::<EmptyError, ()>(&path, course::Publish::METHOD, None)
-        .await
-        .map_err(|_| ())?;
+    course::Publish::api_with_auth_empty(CoursePublishPath(course.id.clone()), None).await?;
 
     let url: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
         course.id,
@@ -43,11 +36,8 @@ pub async fn save_and_publish_course(course: &EditableCourse) -> Result<(), ()> 
     Ok(())
 }
 
-pub async fn load_course(course_id: CourseId) -> Result<EditableAsset, ()> {
-    let path = course::GetDraft::PATH.replace("{id}", &course_id.0.to_string());
-
-    api_with_auth::<CourseResponse, EmptyError, ()>(&path, course::GetDraft::METHOD, None)
+pub async fn load_course(course_id: CourseId) -> anyhow::Result<EditableAsset> {
+    course::GetDraft::api_with_auth(CourseGetDraftPath(course_id.clone()), None)
         .await
         .map(|course| EditableAsset::Course(EditableCourse::new(course)))
-        .map_err(|_| ())
 }

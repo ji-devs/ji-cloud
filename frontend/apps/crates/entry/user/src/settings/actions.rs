@@ -4,14 +4,16 @@ use dominator::clone;
 use futures::future::join;
 use gloo_timers::future::TimeoutFuture;
 use shared::{
-    api::endpoints::{self, meta, user, ApiEndpoint},
-    domain::{meta::MetadataResponse, user::ResetPasswordRequest},
-    error::EmptyError,
+    api::endpoints::{self, meta, user},
+    domain::{
+        meta::GetMetadataPath,
+        user::{GetProfilePath, PatchProfilePath, ResetPasswordPath, ResetPasswordRequest},
+    },
 };
 use wasm_bindgen_futures::spawn_local;
 
 use super::state::{ResetPasswordStatus, SettingsPage};
-use utils::{fetch::api_with_auth, prelude::*, unwrap::UnwrapJiExt};
+use utils::{prelude::*, unwrap::UnwrapJiExt};
 
 impl SettingsPage {
     pub fn send_reset_password(self: &Rc<Self>) {
@@ -26,7 +28,7 @@ impl SettingsPage {
                 email: state.user.email.get_cloned()
             };
 
-            let res = endpoints::user::ResetPassword::api_no_auth_empty(Some(req)).await;
+            let res = endpoints::user::ResetPassword::api_no_auth_empty(ResetPasswordPath(), Some(req)).await;
 
             match res {
                 Ok(_) => {
@@ -53,19 +55,13 @@ impl SettingsPage {
 
     async fn load_profile(self: &Rc<Self>) {
         //let resp:Result<UserProfile, EmptyError> = api_with_auth::< _, _, ()>(&user::Profile::PATH, user::Profile::METHOD, None).await;
-        let resp = user::Profile::api_with_auth(None).await;
+        let resp = user::Profile::api_with_auth(GetProfilePath(), None).await;
 
         self.user.fill_from_user(resp.unwrap_ji());
     }
 
     async fn load_metadata(self: &Rc<Self>) {
-        match api_with_auth::<MetadataResponse, EmptyError, ()>(
-            meta::Get::PATH,
-            meta::Get::METHOD,
-            None,
-        )
-        .await
-        {
+        match meta::Get::api_with_auth(GetMetadataPath(), None).await {
             Err(_) => {}
             Ok(res) => {
                 self.metadata.set(Some(res));
@@ -78,7 +74,7 @@ impl SettingsPage {
         state.loader.load(clone!(state => async move {
             let info = state.user.to_update();
 
-            let res = user::PatchProfile::api_with_auth_empty(Some(info)).await;
+            let res = user::PatchProfile::api_with_auth_empty(PatchProfilePath(), Some(info)).await;
             if let Err(_err) = res {
                 todo!()
             }

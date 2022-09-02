@@ -1,7 +1,10 @@
 use std::rc::Rc;
 
 use dominator::clone;
-use shared::{api::endpoints, domain::circle::CircleBrowseQuery};
+use shared::{
+    api::endpoints,
+    domain::circle::{CircleBrowsePath, CircleBrowseQuery},
+};
 use utils::prelude::ApiEndpointExt;
 
 use super::CirclesList;
@@ -17,7 +20,7 @@ impl CirclesList {
                 ..Default::default()
             };
 
-            match endpoints::circle::Browse::api_no_auth(Some(req)).await {
+            match endpoints::circle::Browse::api_no_auth(CircleBrowsePath(), Some(req)).await {
                 Ok(res) => {
                     state.circles.set(Some(res.circles));
                     let page_count = page_count(res.total_circle_count as u32, state.items_per_page);

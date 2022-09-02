@@ -1,16 +1,14 @@
 use super::super::state::Gallery;
 use shared::{
-    api::endpoints::{self, ApiEndpoint},
+    api::endpoints::{self},
     domain::{
         asset::{Asset, DraftOrLive, UserOrMe},
         course::{
-            CourseBrowseQuery, CourseBrowseResponse, CourseCreateRequest, CourseId,
-            CourseSearchQuery,
+            CourseBrowsePath, CourseBrowseQuery, CourseCreatePath, CourseCreateRequest,
+            CourseDeletePath, CourseId, CourseSearchPath, CourseSearchQuery,
         },
-        module::{ModuleBody, ModuleCreateRequest, ModuleId, ModuleKind},
-        CreateResponse,
+        module::{ModuleBody, ModuleCreatePath, ModuleCreateRequest, ModuleKind},
     },
-    error::{EmptyError, MetadataNotFound},
 };
 use std::rc::Rc;
 use utils::prelude::*;
@@ -27,21 +25,17 @@ pub async fn load_courses(
         ..Default::default()
     };
 
-    api_with_auth::<CourseBrowseResponse, EmptyError, _>(
-        endpoints::course::Browse::PATH,
-        endpoints::course::Browse::METHOD,
-        Some(req),
-    )
-    .await
-    .map(|res| {
-        let assets = res
-            .courses
-            .into_iter()
-            .map(|course| course.into())
-            .collect();
-        (assets, res.total_course_count)
-    })
-    .map_err(|_| ())
+    endpoints::course::Browse::api_with_auth(CourseBrowsePath(), Some(req))
+        .await
+        .map(|res| {
+            let assets = res
+                .courses
+                .into_iter()
+                .map(|course| course.into())
+                .collect();
+            (assets, res.total_course_count)
+        })
+        .map_err(|_| ())
 }
 
 pub async fn search_courses(q: String, is_published: Option<bool>) -> Result<Vec<Asset>, ()> {
@@ -52,7 +46,7 @@ pub async fn search_courses(q: String, is_published: Option<bool>) -> Result<Vec
         ..Default::default()
     };
 
-    endpoints::course::Search::api_with_auth(Some(req))
+    endpoints::course::Search::api_with_auth(CourseSearchPath(), Some(req))
         .await
         .map(|resp| {
             resp.courses
@@ -68,13 +62,7 @@ pub async fn create_course() {
         ..Default::default()
     };
 
-    match api_with_auth::<CreateResponse<CourseId>, MetadataNotFound, _>(
-        endpoints::course::Create::PATH,
-        endpoints::course::Create::METHOD,
-        Some(req),
-    )
-    .await
-    {
+    match endpoints::course::Create::api_with_auth(CourseCreatePath(), Some(req)).await {
         Ok(resp) => {
             add_cover(&resp.id).await;
             let url = Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
@@ -96,13 +84,7 @@ async fn add_cover(course_id: &CourseId) {
 
     // let path = endpoints::module::Create::PATH.replace("{id}", &jig_id.0.to_string());
 
-    match api_with_auth::<CreateResponse<ModuleId>, EmptyError, _>(
-        endpoints::module::Create::PATH,
-        endpoints::module::Create::METHOD,
-        Some(req),
-    )
-    .await
-    {
+    match endpoints::module::Create::api_with_auth(ModuleCreatePath(), Some(req)).await {
         Ok(_) => {}
         Err(_) => {
             todo!()
@@ -139,10 +121,8 @@ pub async fn copy_course(_course_id: CourseId) -> Result<Asset, ()> {
     // }
 }
 
-pub async fn delete_course(course_id: CourseId) -> Result<(), ()> {
-    let path = endpoints::course::Delete::PATH.replace("{id}", &course_id.0.to_string());
-    api_with_auth_empty::<EmptyError, ()>(&path, endpoints::course::Delete::METHOD, None)
+pub async fn delete_course(course_id: CourseId) -> anyhow::Result<()> {
+    endpoints::course::Delete::api_with_auth_empty(CourseDeletePath(course_id), None)
         .await
         .map(|_| ())
-        .map_err(|_| ())
 }

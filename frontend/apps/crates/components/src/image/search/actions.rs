@@ -8,23 +8,25 @@ use dominator::clone;
 use futures::future::join;
 use futures_signals::signal_vec::MutableVec;
 use shared::api::endpoints::image;
-use shared::domain::image::ImageId;
+use shared::domain::image::recent::{UserRecentImageListPath, UserRecentImageUpsertPath};
+use shared::domain::image::user::UserImageCreatePath;
 use shared::domain::image::{
     recent::{UserRecentImageListRequest, UserRecentImageUpsertRequest},
     user::UserImageCreateRequest,
 };
-use shared::domain::media::WebMediaUrlCreateRequest;
-use shared::domain::meta::ImageTagIndex;
-use shared::domain::search::WebImageSearchQuery;
+use shared::domain::image::{ImageId, ImageSearchPath};
+use shared::domain::media::{MediaCreatePath, WebMediaUrlCreateRequest};
+use shared::domain::meta::{GetMetadataPath, ImageTagIndex};
+use shared::domain::search::{WebImageSearchPath, WebImageSearchQuery};
+use shared::domain::user::GetProfilePath;
 use shared::media::MediaKind;
 use shared::{
-    api::{endpoints, ApiEndpoint},
+    api::endpoints,
     domain::{
         image::{CreateResponse, ImageSearchQuery, ImageSize},
-        meta::{ImageStyle, MetadataResponse},
+        meta::ImageStyle,
         module::body::Image,
     },
-    error::EmptyError,
     media::MediaLibrary,
 };
 use std::rc::Rc;
@@ -35,7 +37,7 @@ use web_sys::File;
 pub async fn web_to_image(url: Url) -> Result<Image, ()> {
     let req = WebMediaUrlCreateRequest { url };
 
-    let res = endpoints::media::Create::api_with_auth(Some(req))
+    let res = endpoints::media::Create::api_with_auth(MediaCreatePath(), Some(req))
         .await
         .map_err(|_| ())?;
 
@@ -76,12 +78,7 @@ pub fn on_web_image_click(state: Rc<State>, url: Url) {
 }
 
 pub async fn get_styles() -> Vec<ImageStyle> {
-    let res = api_with_auth::<MetadataResponse, (), ()>(
-        endpoints::meta::Get::PATH,
-        endpoints::meta::Get::METHOD,
-        None,
-    )
-    .await;
+    let res = endpoints::meta::Get::api_with_auth(GetMetadataPath(), None).await;
     res.unwrap_ji().image_styles
 }
 
@@ -138,7 +135,8 @@ async fn search_async_web(state: Rc<State>) {
         image_type: state.selected_image_type.get_cloned(),
     };
 
-    let res = endpoints::search::WebImageSearch::api_with_auth(Some(req)).await;
+    let res =
+        endpoints::search::WebImageSearch::api_with_auth(WebImageSearchPath(), Some(req)).await;
 
     match res {
         Ok(res) => {
@@ -208,7 +206,7 @@ async fn search_async(state: Rc<State>, page: u32) {
 
     // log::info!("{:?}", search_query);
 
-    let res = endpoints::image::Search::api_with_auth(Some(search_query)).await;
+    let res = endpoints::image::Search::api_with_auth(ImageSearchPath(), Some(search_query)).await;
 
     match res {
         Ok(res) => {
@@ -259,7 +257,7 @@ async fn search_async(state: Rc<State>, page: u32) {
 }
 
 async fn get_user(state: Rc<State>) {
-    match endpoints::user::Profile::api_with_auth(None).await {
+    match endpoints::user::Profile::api_with_auth(GetProfilePath(), None).await {
         Err(_) => todo!(),
         Ok(user) => {
             *state.user.borrow_mut() = Some(user);
@@ -272,7 +270,7 @@ async fn get_recent(state: Rc<State>) {
         limit: RECENT_COUNT,
     };
 
-    match image::recent::List::api_with_auth(Some(req)).await {
+    match image::recent::List::api_with_auth(UserRecentImageListPath(), Some(req)).await {
         Err(_) => log::error!("Error getting recent images"),
         Ok(res) => {
             state.recent_list.lock_mut().replace_cloned(
@@ -308,7 +306,7 @@ pub fn add_recent(state: &State, image: &Image) {
         library: image.lib,
     };
     state.loader.load(async {
-        let _ = image::recent::Put::api_with_auth(Some(req)).await;
+        let _ = image::recent::Put::api_with_auth(UserRecentImageUpsertPath(), Some(req)).await;
     });
 }
 
@@ -317,13 +315,7 @@ pub async fn upload_file(state: Rc<State>, file: File) {
         size: ImageSize::Sticker,
     };
 
-    match api_with_auth::<CreateResponse, EmptyError, _>(
-        endpoints::image::user::Create::PATH,
-        endpoints::image::user::Create::METHOD,
-        Some(req),
-    )
-    .await
-    {
+    match endpoints::image::user::Create::api_with_auth(UserImageCreatePath(), Some(req)).await {
         Ok(resp) => {
             let CreateResponse { id } = resp;
 

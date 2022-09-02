@@ -4,11 +4,7 @@ use super::state::HomePageMode;
 use dominator::clone;
 use futures::join;
 
-use shared::{
-    api::{endpoints::jig, ApiEndpoint},
-    domain::jig::JigCountResponse,
-    error::EmptyError,
-};
+use shared::{api::endpoints::jig, domain::jig::JigCountPath};
 use std::rc::Rc;
 use utils::prelude::*;
 
@@ -47,13 +43,7 @@ pub fn fetch_data(state: Rc<Home>, include_search: bool) {
 }
 
 async fn fetch_total_jigs_count(state: Rc<Home>) {
-    match api_no_auth::<JigCountResponse, EmptyError, ()>(
-        jig::Count::PATH,
-        jig::Count::METHOD,
-        None,
-    )
-    .await
-    {
+    match jig::Count::api_no_auth(JigCountPath(), None).await {
         Err(_) => {}
         Ok(res) => {
             state.total_assets_count.set(res.total_count);

@@ -1,8 +1,9 @@
 use rgb::RGBA8;
 use shared::{
-    api::{endpoints, ApiEndpoint},
-    domain::user::{UserColorResponse, UserColorValueRequest},
-    error::EmptyError,
+    api::endpoints,
+    domain::user::{
+        UserColorCreatePath, UserColorDeletePath, UserColorGetPath, UserColorValueRequest,
+    },
 };
 use std::rc::Rc;
 
@@ -17,26 +18,16 @@ pub fn set_selected(state: Rc<State>, value: Option<RGBA8>) {
     state.value.set(value);
 }
 
-pub async fn get_user_colors() -> Result<Vec<RGBA8>, EmptyError> {
-    let res = api_with_auth::<UserColorResponse, EmptyError, Option<()>>(
-        endpoints::user::GetColors::PATH,
-        endpoints::user::GetColors::METHOD,
-        None,
-    )
-    .await?;
+pub async fn get_user_colors() -> Result<Vec<RGBA8>, anyhow::Error> {
+    let res = endpoints::user::GetColors::api_with_auth(UserColorGetPath(), None).await?;
 
     Ok(res.colors)
 }
 
-pub async fn add_user_color(state: Rc<State>, color: RGBA8) -> Result<(), EmptyError> {
+pub async fn add_user_color(state: Rc<State>, color: RGBA8) -> Result<(), anyhow::Error> {
     let req = UserColorValueRequest { color };
 
-    api_with_auth::<UserColorResponse, EmptyError, UserColorValueRequest>(
-        endpoints::user::CreateColor::PATH,
-        endpoints::user::CreateColor::METHOD,
-        Some(req),
-    )
-    .await?;
+    endpoints::user::CreateColor::api_with_auth(UserColorCreatePath(), Some(req)).await?;
 
     state.user_colors.lock_mut().push_cloned(color);
     set_selected(Rc::clone(&state), Some(color));
@@ -45,12 +36,9 @@ pub async fn add_user_color(state: Rc<State>, color: RGBA8) -> Result<(), EmptyE
 }
 
 pub async fn delete_user_color(state: Rc<State>, index: usize) {
-    let res = api_with_auth_empty::<EmptyError, ()>(
-        &endpoints::user::DeleteColor::PATH.replace("{index}", &index.to_string()),
-        endpoints::user::DeleteColor::METHOD,
-        None,
-    )
-    .await;
+    let res =
+        endpoints::user::DeleteColor::api_with_auth_empty(UserColorDeletePath(index as i32), None)
+            .await;
 
     match res {
         Err(_) => {}

@@ -4,18 +4,14 @@ use awsm_web::dom::StyleExt;
 use futures::future::join_all;
 use js_sys::Reflect;
 use shared::{
-    api::endpoints::{self, ApiEndpoint},
-    domain::{
-        module::{
-            body::{
-                Body, BodyExt, ModeExt, StepExt,
-                _groups::cards::{CardContent, CardPair},
-            },
-            LiteModule, ModuleBody, ModuleCreateRequest, ModuleId, ModuleKind,
+    api::endpoints::{self},
+    domain::module::{
+        body::{
+            Body, BodyExt, ModeExt, StepExt,
+            _groups::cards::{CardContent, CardPair},
         },
-        CreateResponse,
+        LiteModule, ModuleBody, ModuleCreatePath, ModuleCreateRequest, ModuleKind,
     },
-    error::EmptyError,
 };
 use utils::{
     iframe::{IframeAction, IframeMessageExt, ModuleToJigEditorMessage},
@@ -73,12 +69,7 @@ impl PostPreview {
         let asset_id = self.asset_id;
 
         self.loader.load(async move {
-            let res = api_with_auth::<CreateResponse<ModuleId>, EmptyError, ModuleCreateRequest>(
-                endpoints::module::Create::PATH,
-                endpoints::module::Create::METHOD,
-                Some(req),
-            )
-            .await;
+            let res = endpoints::module::Create::api_with_auth(ModuleCreatePath(), Some(req)).await;
 
             match res {
                 Ok(res) => {

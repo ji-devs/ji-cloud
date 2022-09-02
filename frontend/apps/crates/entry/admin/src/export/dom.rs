@@ -1,6 +1,7 @@
 use super::Export;
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::{map_ref, signal::SignalExt};
+use shared::api::PathParts;
 use shared::{
     api::{endpoints::admin::ExportData, ApiEndpoint},
     domain::admin::ExportType,
@@ -84,7 +85,7 @@ impl Export {
                                 params.push(format!("to_date={}", to_date.to_rfc3339_opts(chrono::SecondsFormat::Secs, true)));
                             }
                             let remote = SETTINGS.get().unwrap_ji().remote_target.api_url();
-                            format!("{}{}?{}", remote, ExportData::PATH, params.join("&"))
+                            format!("{}{}?{}", remote, <ExportData as ApiEndpoint>::Path::PATH, params.join("&"))
                         }
                 })
                 .text("Export")

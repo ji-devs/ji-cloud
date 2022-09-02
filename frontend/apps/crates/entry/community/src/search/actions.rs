@@ -4,7 +4,10 @@ use dominator::clone;
 use futures::join;
 use shared::{
     api::endpoints,
-    domain::{circle::CircleSearchQuery, user::public_user::SearchPublicUserQuery},
+    domain::{
+        circle::{CircleSearchPath, CircleSearchQuery},
+        user::public_user::{PublicUserSearchPath, SearchPublicUserQuery},
+    },
 };
 use utils::prelude::ApiEndpointExt;
 
@@ -49,7 +52,7 @@ impl CommunitySearch {
             ..Default::default()
         };
 
-        match endpoints::user::Search::api_no_auth(Some(req)).await {
+        match endpoints::user::Search::api_no_auth(PublicUserSearchPath(), Some(req)).await {
             Ok(res) => {
                 state.members.lock_mut().extend(res.users);
                 state.member_count.set_neq(res.total_user_count as u32);
@@ -67,7 +70,7 @@ impl CommunitySearch {
             ..Default::default()
         };
 
-        match endpoints::circle::Search::api_no_auth(Some(req)).await {
+        match endpoints::circle::Search::api_no_auth(CircleSearchPath(), Some(req)).await {
             Ok(res) => {
                 state.circles.lock_mut().extend(res.circles);
                 state.circle_count.set_neq(res.total_circle_count as u32);

@@ -3,7 +3,10 @@ use std::rc::Rc;
 use dominator::clone;
 use futures_signals::signal::Mutable;
 use gloo_timers::callback::Timeout;
-use shared::{api::endpoints::jig, domain::jig::JigPlayerSettings};
+use shared::{
+    api::endpoints::jig,
+    domain::jig::{player::JigPlayerSessionCreatePath, JigPlayerSettings},
+};
 use utils::prelude::*;
 
 use super::state::ShareAsset;
@@ -19,7 +22,7 @@ impl ShareAsset {
                 settings: JigPlayerSettings::default(),
             };
 
-            match jig::player::Create::api_with_auth(Some(req)).await {
+            match jig::player::Create::api_with_auth(JigPlayerSessionCreatePath(), Some(req)).await {
                 Err(_) => todo!(),
                 Ok(res) => {
                     let code = format!("{:04}", res.index.0);

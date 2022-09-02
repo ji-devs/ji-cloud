@@ -3,9 +3,8 @@ use super::{
     state::{AudioInput, AudioInputMode},
 };
 use shared::{
-    api::{endpoints, ApiEndpoint},
-    domain::{audio::AudioId, module::body::Audio, CreateResponse},
-    error::EmptyError,
+    api::endpoints,
+    domain::{audio::user::UserAudioCreatePath, module::body::Audio, CreateResponse},
     media::MediaLibrary,
 };
 use std::rc::Rc;
@@ -69,10 +68,9 @@ pub async fn file_change(state: Rc<AudioInput>, file: File) {
     let lib = MediaLibrary::User;
 
     let err = {
-        match api_with_auth_abortable::<CreateResponse<AudioId>, EmptyError, ()>(
-            endpoints::audio::user::Create::PATH,
-            endpoints::audio::user::Create::METHOD,
+        match endpoints::audio::user::Create::api_with_auth_abortable(
             Some(&*state.aborter.borrow()),
+            UserAudioCreatePath(),
             None,
         )
         .await

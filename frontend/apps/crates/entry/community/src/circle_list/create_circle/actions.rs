@@ -4,18 +4,19 @@ use components::image::upload::upload_image;
 use dominator::clone;
 use futures::join;
 use shared::{
-    api::{endpoints, ApiEndpoint},
+    api::endpoints,
     domain::{
-        circle::{Circle, CircleCreateRequest, CircleId},
-        image::{user::UserImageCreateRequest, ImageId, ImageSize},
+        circle::{
+            Circle, CircleCreatePath, CircleCreateRequest, CircleGetPath, CircleId, JoinCirclePath,
+        },
+        image::{
+            user::{UserImageCreatePath, UserImageCreateRequest},
+            ImageId, ImageSize,
+        },
     },
-    error::EmptyError,
     media::MediaLibrary,
 };
-use utils::{
-    prelude::{api_with_auth, api_with_auth_empty, ApiEndpointExt},
-    unwrap::UnwrapJiExt,
-};
+use utils::{prelude::ApiEndpointExt, unwrap::UnwrapJiExt};
 use web_sys::File;
 
 use super::CreateCircle;
@@ -49,7 +50,7 @@ impl CreateCircle {
             image: image_id,
         };
 
-        let circle_id = endpoints::circle::Create::api_with_auth(Some(req))
+        let circle_id = endpoints::circle::Create::api_with_auth(CircleCreatePath(), Some(req))
             .await?
             .id;
 
@@ -66,7 +67,7 @@ async fn upload_circle_image(file: File) -> anyhow::Result<ImageId> {
         size: ImageSize::UserProfile,
     };
 
-    let image_id = endpoints::image::user::Create::api_with_auth(Some(req))
+    let image_id = endpoints::image::user::Create::api_with_auth(UserImageCreatePath(), Some(req))
         .await
         .map_err(|_err| anyhow::anyhow!("Error creating image in db"))?
         .id;
@@ -79,16 +80,15 @@ async fn upload_circle_image(file: File) -> anyhow::Result<ImageId> {
 }
 
 async fn get_circle(circle_id: &CircleId) -> anyhow::Result<Circle> {
-    let path = endpoints::circle::Get::PATH.replace("{id}", &circle_id.0.to_string());
+    // let path = endpoints::circle::Get::PATH.replace("{id}", &circle_id.0.to_string());
     let circle =
-        api_with_auth::<Circle, EmptyError, ()>(&path, endpoints::circle::Get::METHOD, None)
-            .await?;
+        endpoints::circle::Get::api_with_auth(CircleGetPath(circle_id.clone()), None).await?;
     Ok(circle)
 }
 
 async fn join_circle(circle_id: &CircleId) -> anyhow::Result<()> {
-    let path = endpoints::circle::JoinCircle::PATH.replace("{id}", &circle_id.0.to_string());
-    api_with_auth_empty::<EmptyError, ()>(&path, endpoints::circle::JoinCircle::METHOD, None)
+    // let path = endpoints::circle::JoinCircle::PATH.replace("{id}", &circle_id.0.to_string());
+    endpoints::circle::JoinCircle::api_with_auth_empty(JoinCirclePath(circle_id.clone()), None)
         .await?;
     Ok(())
 }

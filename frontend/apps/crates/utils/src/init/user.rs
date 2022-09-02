@@ -3,13 +3,13 @@ use futures_signals::signal::Mutable;
 use once_cell::sync::OnceCell;
 use shared::{
     api::endpoints::user::Profile,
-    domain::user::{UserId, UserProfile},
+    domain::user::{GetProfilePath, UserId, UserProfile},
 };
 
 static USER: OnceCell<Mutable<Option<UserProfile>>> = OnceCell::new();
 
 pub(crate) async fn init() {
-    let (result, status) = Profile::api_with_auth_status(None).await;
+    let (result, status) = Profile::api_with_auth_status(GetProfilePath(), None).await;
 
     // `USER` is private and the only way to initialize it is through `init` - `set()`
     // should never fail at this point.

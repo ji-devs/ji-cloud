@@ -1,8 +1,4 @@
-use shared::{
-    api::{endpoints, ApiEndpoint},
-    domain::image::*,
-    error::EmptyError,
-};
+use shared::{api::endpoints, domain::image::*};
 
 use utils::prelude::*;
 
@@ -14,13 +10,10 @@ pub struct DateTimeStrings {
 }
 
 pub async fn load_date_time_strings(id: ImageId) -> DateTimeStrings {
-    let path = endpoints::image::Get::PATH.replace("{id}", &id.0.to_string());
-
-    let image =
-        api_with_auth::<ImageResponse, EmptyError, ()>(&path, endpoints::image::Get::METHOD, None)
-            .await
-            .unwrap_ji()
-            .metadata;
+    let image = endpoints::image::Get::api_with_auth(ImageGetPath(id), None)
+        .await
+        .unwrap_ji()
+        .metadata;
 
     DateTimeStrings {
         publish: match image.publish_at {

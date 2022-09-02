@@ -3,23 +3,23 @@ use std::rc::Rc;
 use dominator::clone;
 use futures::join;
 use shared::{
-    api::{endpoints, ApiEndpoint},
+    api::endpoints,
     domain::{
         asset::{DraftOrLive, UserOrMe},
-        circle::CircleBrowseQuery,
-        jig::JigBrowseQuery,
-        resource::ResourceBrowseQuery,
+        circle::{CircleBrowsePath, CircleBrowseQuery},
+        jig::{JigBrowsePath, JigBrowseQuery},
+        resource::{ResourceBrowsePath, ResourceBrowseQuery},
         user::{
             public_user::{
-                BrowsePublicUserFollowersQuery, BrowsePublicUserFollowersResponse,
-                BrowsePublicUserFollowingResponse, BrowsePublicUserFollowingsQuery, PublicUser,
+                BrowsePublicUserFollowersPath, BrowsePublicUserFollowersQuery,
+                BrowsePublicUserFollowingPath, BrowsePublicUserFollowingsQuery, PublicUser,
+                PublicUserFollowPath, PublicUserGetPath, PublicUserUnfollowPath,
             },
-            PatchProfileRequest, UserProfile,
+            PatchProfilePath, PatchProfileRequest, UserProfile,
         },
     },
-    error::EmptyError,
 };
-use utils::prelude::{api_no_auth, api_with_auth_empty, get_user_mutable, ApiEndpointExt};
+use utils::prelude::{get_user_mutable, ApiEndpointExt};
 
 use super::{Connections, Creations, MemberDetails};
 
@@ -39,14 +39,8 @@ impl MemberDetails {
     async fn load_member(self: &Rc<Self>) {
         let state = self;
 
-        let path =
-            endpoints::user::GetPublicUser::PATH.replace("{user_id}", &state.member_id.to_string());
-        match api_no_auth::<PublicUser, EmptyError, ()>(
-            &path,
-            endpoints::user::GetPublicUser::METHOD,
-            None,
-        )
-        .await
+        match endpoints::user::GetPublicUser::api_no_auth(PublicUserGetPath(state.member_id), None)
+            .await
         {
             Ok(member) => {
                 state.member.set(Some(member));
@@ -63,7 +57,7 @@ impl MemberDetails {
             ..Default::default()
         };
 
-        match endpoints::circle::Browse::api_no_auth(Some(req)).await {
+        match endpoints::circle::Browse::api_no_auth(CircleBrowsePath(), Some(req)).await {
             Ok(res) => {
                 state.circles.set(res.circles);
             }
@@ -91,7 +85,7 @@ impl MemberDetails {
             ..Default::default()
         };
 
-        match endpoints::jig::Browse::api_no_auth(Some(req)).await {
+        match endpoints::jig::Browse::api_no_auth(JigBrowsePath(), Some(req)).await {
             Ok(res) => state.creations.set(Creations::Jigs(Some(res.jigs))),
             Err(_) => todo!(),
         }
@@ -106,7 +100,7 @@ impl MemberDetails {
             ..Default::default()
         };
 
-        match endpoints::resource::Browse::api_no_auth(Some(req)).await {
+        match endpoints::resource::Browse::api_no_auth(ResourceBrowsePath(), Some(req)).await {
             Ok(res) => state
                 .creations
                 .set(Creations::Resources(Some(res.resources))),
@@ -132,13 +126,10 @@ impl MemberDetails {
             ..Default::default()
         };
 
-        let path = endpoints::user::BrowseFollowers::PATH
-            .replace("{user_id}", &state.member_id.to_string());
-        let res = api_no_auth::<
-            BrowsePublicUserFollowersResponse,
-            EmptyError,
-            BrowsePublicUserFollowersQuery,
-        >(&path, endpoints::user::BrowseFollowers::METHOD, Some(req))
+        let res = endpoints::user::BrowseFollowers::api_no_auth(
+            BrowsePublicUserFollowersPath(state.member_id),
+            Some(req),
+        )
         .await;
         match res {
             Ok(res) => {
@@ -159,13 +150,10 @@ impl MemberDetails {
             ..Default::default()
         };
 
-        let path = endpoints::user::BrowseFollowing::PATH
-            .replace("{user_id}", &state.member_id.to_string());
-        let res = api_no_auth::<
-            BrowsePublicUserFollowingResponse,
-            EmptyError,
-            BrowsePublicUserFollowingsQuery,
-        >(&path, endpoints::user::BrowseFollowers::METHOD, Some(req))
+        let res = endpoints::user::BrowseFollowing::api_no_auth(
+            BrowsePublicUserFollowingPath(state.member_id),
+            Some(req),
+        )
         .await;
         match res {
             Ok(res) => {
@@ -180,10 +168,8 @@ impl MemberDetails {
     pub fn follow_member(self: &Rc<Self>) {
         let state = self;
         state.loader.load(clone!(state => async move {
-            let path = endpoints::user::Follow::PATH.replace("{user_id}", &state.member_id.to_string());
-            let res = api_with_auth_empty::<EmptyError, ()>(
-                &path,
-                endpoints::user::Follow::METHOD,
+            let res = endpoints::user::Follow::api_with_auth_empty(
+                PublicUserFollowPath(state.member_id),
                 None
             ).await;
             match res {
@@ -201,10 +187,8 @@ impl MemberDetails {
     pub fn unfollow_member(self: &Rc<Self>) {
         let state = self;
         state.loader.load(clone!(state => async move {
-            let path = endpoints::user::Unfollow::PATH.replace("{user_id}", &state.member_id.to_string());
-            let res = api_with_auth_empty::<EmptyError, ()>(
-                &path,
-                endpoints::user::Unfollow::METHOD,
+            let res = endpoints::user::Unfollow::api_with_auth_empty(
+                PublicUserUnfollowPath(state.member_id),
                 None
             ).await;
             match res {
@@ -250,7 +234,7 @@ impl MemberDetails {
                 location: Some(updated_profile.location.clone()),
             };
 
-            let res = endpoints::user::PatchProfile::api_with_auth_empty(Some(req)).await;
+            let res = endpoints::user::PatchProfile::api_with_auth_empty(PatchProfilePath(), Some(req)).await;
             if let Err(_err) = res {
                 todo!()
             }

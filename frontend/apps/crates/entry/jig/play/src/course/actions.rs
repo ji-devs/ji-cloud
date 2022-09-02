@@ -4,17 +4,17 @@ use dominator::clone;
 use futures::future::try_join_all;
 use futures::join;
 use shared::{
-    api::{endpoints, ApiEndpoint},
+    api::endpoints,
     domain::{
         asset::DraftOrLive,
-        course::CourseResponse,
-        jig::{JigId, JigResponse},
+        course::{CourseGetDraftPath, CourseGetLivePath},
+        jig::{JigGetLivePath, JigId, JigResponse},
+        meta::GetMetadataPath,
     },
-    error::EmptyError,
 };
 use utils::{
     iframe::{AssetPlayerToPlayerPopup, IframeAction, IframeMessageExt},
-    prelude::{api_no_auth, ApiEndpointExt},
+    prelude::ApiEndpointExt,
     unwrap::UnwrapJiExt,
 };
 
@@ -35,24 +35,12 @@ impl CoursePlayer {
         let state = self;
         let course = match state.player_options.draft_or_live {
             DraftOrLive::Live => {
-                let path = endpoints::course::GetLive::PATH
-                    .replace("{id}", &state.course_id.0.to_string());
-                api_no_auth::<CourseResponse, EmptyError, ()>(
-                    &path,
-                    endpoints::course::GetLive::METHOD,
-                    None,
-                )
-                .await
+                endpoints::course::GetLive::api_no_auth(CourseGetLivePath(state.course_id), None)
+                    .await
             }
             DraftOrLive::Draft => {
-                let path = endpoints::course::GetDraft::PATH
-                    .replace("{id}", &state.course_id.0.to_string());
-                api_no_auth::<CourseResponse, EmptyError, ()>(
-                    &path,
-                    endpoints::course::GetDraft::METHOD,
-                    None,
-                )
-                .await
+                endpoints::course::GetDraft::api_no_auth(CourseGetDraftPath(state.course_id), None)
+                    .await
             }
         };
 
@@ -69,7 +57,7 @@ impl CoursePlayer {
     }
 
     async fn load_resource_types(self: &Rc<Self>) {
-        match endpoints::meta::Get::api_with_auth(None).await {
+        match endpoints::meta::Get::api_with_auth(GetMetadataPath(), None).await {
             Err(_) => todo!(),
             Ok(meta) => {
                 self.resource_types.set(meta.resource_types);
@@ -86,8 +74,7 @@ impl CoursePlayer {
     }
 
     async fn load_jig(self: &Rc<Self>, jig_id: &JigId) -> Result<JigResponse, ()> {
-        let path = endpoints::jig::GetLive::PATH.replace("{id}", &jig_id.0.to_string());
-        api_no_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::GetLive::METHOD, None)
+        endpoints::jig::GetLive::api_no_auth(JigGetLivePath(jig_id.clone()), None)
             .await
             .map_err(|_| ())
     }

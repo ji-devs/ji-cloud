@@ -5,31 +5,23 @@ use super::settings::state::State as SettingsState;
 use dominator::clone;
 use futures_signals::signal::Mutable;
 use shared::{
-    api::endpoints::{self, ApiEndpoint},
+    api::endpoints::{self},
     domain::{
         asset::{Asset, AssetType, DraftOrLive},
-        jig::{JigId, JigResponse, JigUpdateDraftDataRequest},
-        module::{
-            LiteModule, ModuleCreateRequest, ModuleId, ModuleKind, ModuleResponse,
-            ModuleUpdateRequest,
+        jig::{
+            JigGetDraftPath, JigId, JigResponse, JigUpdateDraftDataPath, JigUpdateDraftDataRequest,
         },
-        CreateResponse,
+        module::{
+            LiteModule, ModuleCreatePath, ModuleCreateRequest, ModuleGetDraftPath, ModuleId,
+            ModuleKind, ModuleUpdateRequest, ModuleUploadPath,
+        },
     },
-    error::EmptyError,
 };
 use std::rc::Rc;
 use utils::{asset::JigPlayerOptions, iframe::ModuleToJigEditorMessage, prelude::*};
 
 pub async fn load_jig(jig_id: JigId, jig_mutable: Mutable<Option<Asset>>) {
-    let path = endpoints::jig::GetDraft::PATH.replace("{id}", &jig_id.0.to_string());
-
-    match api_with_auth::<JigResponse, EmptyError, ()>(
-        &path,
-        endpoints::jig::GetDraft::METHOD,
-        None,
-    )
-    .await
-    {
+    match endpoints::jig::GetDraft::api_with_auth(JigGetDraftPath(jig_id), None).await {
         Ok(resp) => {
             jig_mutable.set(Some(resp.into()));
         }
@@ -50,10 +42,12 @@ pub fn navigate_to_publish(state: Rc<State>, jig: &JigResponse) {
     ))));
 }
 
-pub async fn update_jig(jig_id: &JigId, req: JigUpdateDraftDataRequest) -> Result<(), EmptyError> {
-    let path = endpoints::jig::UpdateDraftData::PATH.replace("{id}", &jig_id.0.to_string());
-    api_with_auth_empty::<EmptyError, _>(&path, endpoints::jig::UpdateDraftData::METHOD, Some(req))
-        .await
+pub async fn update_jig(jig_id: &JigId, req: JigUpdateDraftDataRequest) -> anyhow::Result<()> {
+    endpoints::jig::UpdateDraftData::api_with_auth_empty(
+        JigUpdateDraftDataPath(jig_id.clone()),
+        Some(req),
+    )
+    .await
 }
 
 pub async fn update_display_name(jig_id: JigId, value: String) {
@@ -169,19 +163,14 @@ fn populate_added_module(state: Rc<State>, module: LiteModule) {
 
 pub fn use_module_as(state: Rc<State>, target_kind: ModuleKind, source_module_id: ModuleId) {
     state.loader.load(clone!(state => async move {
-        let target_module_id: Result<(ModuleId, bool), EmptyError> = async {
+        let target_module_id: anyhow::Result<(ModuleId, bool)> = async {
             let asset_type = match state.asset {
                 Asset::Jig(_) => AssetType::Jig,
                 Asset::Course(_) => AssetType::Course,
                 Asset::Resource(_) => unimplemented!(),
             };
-            let path = endpoints::module::GetDraft::PATH
-                .replace("{asset_type}",asset_type.as_str())
-                .replace("{module_id}", &source_module_id.0.to_string());
-
-            let source_module = api_with_auth::<ModuleResponse, EmptyError, ()>(
-                &path,
-                endpoints::module::GetDraft::METHOD,
+            let source_module = endpoints::module::GetDraft::api_with_auth(
+                ModuleGetDraftPath(asset_type, source_module_id.clone()),
                 None
             ).await?.module;
 
@@ -192,9 +181,8 @@ pub fn use_module_as(state: Rc<State>, target_kind: ModuleKind, source_module_id
                 parent_id: state.asset.id(),
             };
 
-            let res = api_with_auth::<CreateResponse<ModuleId>, EmptyError, ModuleCreateRequest>(
-                endpoints::module::Create::PATH,
-                endpoints::module::Create::METHOD,
+            let res = endpoints::module::Create::api_with_auth(
+                ModuleCreatePath(),
                 Some(req),
             )
             .await?;
@@ -222,9 +210,7 @@ pub async fn update_module(
     // jig_id: &JigId,
     module_id: &ModuleId,
     req: ModuleUpdateRequest,
-) -> Result<(), EmptyError> {
-    let path = endpoints::module::Update::PATH
-        // .replace("{id}", &jig_id.0.to_string())
-        .replace("{module_id}", &module_id.0.to_string());
-    api_with_auth_empty::<EmptyError, _>(&path, endpoints::module::Update::METHOD, Some(req)).await
+) -> anyhow::Result<()> {
+    endpoints::module::Update::api_with_auth_empty(ModuleUploadPath(module_id.clone()), Some(req))
+        .await
 }

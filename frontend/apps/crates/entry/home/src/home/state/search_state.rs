@@ -7,19 +7,15 @@ use std::{
 use futures::join;
 use futures_signals::signal::Mutable;
 use shared::{
-    api::{
-        endpoints::{category, meta},
-        ApiEndpoint,
-    },
+    api::endpoints::{category, meta},
     domain::{
-        category::{Category, CategoryId, CategoryResponse, CategoryTreeScope, GetCategoryRequest},
+        category::{Category, CategoryId, CategoryTreeScope, GetCategoryPath, GetCategoryRequest},
         course::CourseSearchQuery,
         jig::JigSearchQuery,
-        meta::{Affiliation, AffiliationId, AgeRange, AgeRangeId, MetadataResponse, ResourceType},
+        meta::{Affiliation, AffiliationId, AgeRange, AgeRangeId, GetMetadataPath, ResourceType},
         resource::ResourceSearchQuery,
         user::UserProfile,
     },
-    error::EmptyError,
 };
 use utils::{
     languages::{Language, JIG_LANGUAGES},
@@ -146,14 +142,8 @@ impl SearchOptions {
         let _ = join!(self.load_metadata(), self.load_categories());
     }
 
-    async fn load_metadata(&self) -> Result<(), EmptyError> {
-        match api_no_auth::<MetadataResponse, EmptyError, ()>(
-            meta::Get::PATH,
-            meta::Get::METHOD,
-            None,
-        )
-        .await
-        {
+    async fn load_metadata(&self) -> Result<(), anyhow::Error> {
+        match meta::Get::api_no_auth(GetMetadataPath(), None).await {
             Err(e) => Err(e),
             Ok(res) => {
                 // only set values if they're not set yet from the profile
@@ -171,19 +161,13 @@ impl SearchOptions {
         }
     }
 
-    async fn load_categories(&self) -> Result<(), EmptyError> {
+    async fn load_categories(&self) -> Result<(), anyhow::Error> {
         let req = GetCategoryRequest {
             ids: Vec::new(),
             scope: Some(CategoryTreeScope::Descendants),
         };
 
-        match api_no_auth::<CategoryResponse, EmptyError, GetCategoryRequest>(
-            category::Get::PATH,
-            category::Get::METHOD,
-            Some(req),
-        )
-        .await
-        {
+        match category::Get::api_no_auth(GetCategoryPath(), Some(req)).await {
             Err(e) => Err(e),
             Ok(res) => {
                 let mut category_label_lookup = HashMap::new();

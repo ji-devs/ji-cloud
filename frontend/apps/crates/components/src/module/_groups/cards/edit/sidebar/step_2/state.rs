@@ -6,12 +6,11 @@ use crate::{
 use dominator::clone;
 use futures_signals::signal::Mutable;
 use shared::{
-    api::{endpoints, ApiEndpoint},
-    domain::jig::JigUpdateDraftDataRequest,
-    error::EmptyError,
+    api::endpoints::{self},
+    domain::jig::{JigUpdateDraftDataPath, JigUpdateDraftDataRequest},
 };
 use std::rc::Rc;
-use utils::prelude::api_with_auth_empty;
+use utils::prelude::ApiEndpointExt;
 use wasm_bindgen_futures::spawn_local;
 
 use super::custom_background::CustomBackground;
@@ -34,18 +33,15 @@ impl<RawData: RawDataExt, E: ExtraExt> Step2<RawData, E> {
             base.set_theme(theme_id);
 
             spawn_local(clone!(base => async move {
-                let jig_id_string = base.jig_id.0.to_string();
-
-                let path = endpoints::jig::UpdateDraftData::PATH.replace("{id}", &jig_id_string);
+                let jig_id = base.jig_id.clone();
 
                 let req = JigUpdateDraftDataRequest {
                     theme: Some(theme_id),
                     ..JigUpdateDraftDataRequest::default()
                 };
 
-                let _ = api_with_auth_empty::<EmptyError, _>(
-                    &path,
-                    endpoints::jig::UpdateDraftData::METHOD,
+                let _ = endpoints::jig::UpdateDraftData::api_with_auth_empty(
+                    JigUpdateDraftDataPath(jig_id),
                     Some(req),
                 )
                     .await;

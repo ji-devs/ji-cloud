@@ -3,7 +3,10 @@ use dominator::clone;
 use futures::join;
 use shared::{
     api::endpoints,
-    domain::asset::{AssetId, AssetType},
+    domain::{
+        asset::{AssetId, AssetType},
+        meta::GetMetadataPath,
+    },
 };
 use std::rc::Rc;
 use utils::prelude::*;
@@ -59,7 +62,7 @@ impl Gallery {
 
     async fn load_ages(self: &Rc<Self>) {
         let state = Rc::clone(self);
-        match endpoints::meta::Get::api_with_auth(None).await {
+        match endpoints::meta::Get::api_with_auth(GetMetadataPath(), None).await {
             Err(_e) => {}
             Ok(res) => {
                 state.age_ranges.set(res.age_ranges);

@@ -67,6 +67,7 @@ url = "2.2.2"
 gloo = "0.4.0"
 itertools = "0.10.1"
 async-trait = "0.1.51"
+anyhow = "1.0.62"
 
 [features]
 default = ["wee_alloc"]

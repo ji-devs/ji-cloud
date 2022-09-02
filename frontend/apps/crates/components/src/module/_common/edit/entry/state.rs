@@ -1,8 +1,8 @@
 use dominator::{clone, DomHandle};
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use shared::domain::asset::{Asset, AssetId, AssetType, DraftOrLive, PrivacyLevel};
-use shared::domain::course::CourseResponse;
-use shared::domain::resource::ResourceResponse;
+use shared::domain::course::CourseGetDraftPath;
+use shared::domain::resource::ResourceGetDraftPath;
 
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -23,12 +23,11 @@ use shared::domain::{
     },
 };
 use shared::{
-    api::endpoints::{self, module::*, ApiEndpoint},
+    api::endpoints::{self, module::*},
     domain::{
         jig::*,
         module::{body::ModeExt, *},
     },
-    error::EmptyError,
 };
 use utils::{languages::Language, prelude::*};
 
@@ -160,30 +159,24 @@ where
                     *_self.asset.borrow_mut() = {
                             let resp = match _self.opts.asset_id {
                                 AssetId::JigId(jig_id) => {
-                                    let path = endpoints::jig::GetDraft::PATH.replace("{id}", &jig_id.0.to_string());
-                                    api_no_auth::<JigResponse, EmptyError, ()>(
-                                        &path,
-                                        endpoints::jig::GetDraft::METHOD,
+                                    endpoints::jig::GetDraft::api_no_auth(
+                                        JigGetDraftPath(jig_id.clone()),
                                         None
                                     )
                                         .await
                                         .map(|jig| Asset::Jig(jig))
                                 },
                                 AssetId::ResourceId(resource_id) => {
-                                    let path = endpoints::resource::GetDraft::PATH.replace("{id}", &resource_id.0.to_string());
-                                    api_no_auth::<ResourceResponse, EmptyError, ()>(
-                                        &path,
-                                        endpoints::resource::GetDraft::METHOD,
+                                    endpoints::resource::GetDraft::api_no_auth(
+                                        ResourceGetDraftPath(resource_id.clone()),
                                         None
                                     )
                                         .await
                                         .map(|resource| Asset::Resource(resource))
                                 },
                                 AssetId::CourseId(course_id) => {
-                                    let path = endpoints::course::GetDraft::PATH.replace("{id}", &course_id.0.to_string());
-                                    api_no_auth::<CourseResponse, EmptyError, ()>(
-                                        &path,
-                                        endpoints::course::GetDraft::METHOD,
+                                    endpoints::course::GetDraft::api_no_auth(
+                                        CourseGetDraftPath(course_id.clone()),
                                         None
                                     )
                                         .await
@@ -249,11 +242,10 @@ where
                         (force_raw, InitSource::ForceRaw)
                     } else {
                         let resp = {
-                            let path = GetDraft::PATH
-                                .replace("{asset_type}",AssetType::from(&_self.opts.asset_id).as_str())
-                                .replace("{module_id}",&_self.opts.module_id.0.to_string());
-
-                            api_no_auth::<ModuleResponse, EmptyError, ()>(&path, GetDraft::METHOD, None).await
+                            GetDraft::api_no_auth(
+                                ModuleGetDraftPath(AssetType::from(&_self.opts.asset_id), _self.opts.module_id.clone()),
+                                None
+                            ).await
                         };
 
                         match resp {

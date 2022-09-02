@@ -5,7 +5,7 @@
 */
 
 use serde::{de::DeserializeOwned, Serialize};
-use shared::api::method::Method;
+use shared::api::{method::Method, PathParts};
 
 use crate::{
     env::env_var,
@@ -36,73 +36,119 @@ const DESERIALIZE_OK: &str = "couldn't deserialize ok in fetch";
 // extension trait to make calling the API very convenient
 #[async_trait(?Send)]
 pub trait ApiEndpointExt {
+    type Path: PathParts;
     type Req: Serialize;
     type Res: DeserializeOwned + Serialize;
-    type Err: DeserializeOwned + Serialize;
 
-    const EXT_PATH: &'static str;
+    // const EXTPATH: &'static str;
     const EXT_METHOD: Method;
 
     /**** WITH AUTH ****/
-    async fn api_with_auth(data: Option<Self::Req>) -> Result<Self::Res, Self::Err> {
-        api_with_auth(Self::EXT_PATH, Self::EXT_METHOD, data).await
+    async fn api_with_auth(path: Self::Path, data: Option<Self::Req>) -> anyhow::Result<Self::Res> {
+        log::info!("{}", path.get_filled());
+        log::info!("{}", Self::Path::PATH);
+        api_with_auth(&path.get_filled(), Self::EXT_METHOD, data).await
     }
-    async fn api_with_auth_status(data: Option<Self::Req>) -> (Result<Self::Res, Self::Err>, u16) {
-        api_with_auth_status(Self::EXT_PATH, Self::EXT_METHOD, data).await
+    async fn api_with_auth_status(
+        path: Self::Path,
+        data: Option<Self::Req>,
+    ) -> (anyhow::Result<Self::Res>, u16) {
+        log::info!("{}", path.get_filled());
+        log::info!("{}", Self::Path::PATH);
+        api_with_auth_status(&path.get_filled(), Self::EXT_METHOD, data).await
     }
     async fn api_with_auth_abortable(
         abort_controller: Option<&AbortController>,
+        path: Self::Path,
         data: Option<Self::Req>,
-    ) -> Result<Result<Self::Res, Self::Err>, IsAborted> {
-        api_with_auth_abortable(Self::EXT_PATH, Self::EXT_METHOD, abort_controller, data).await
+    ) -> Result<anyhow::Result<Self::Res>, IsAborted> {
+        log::info!("{}", path.get_filled());
+        log::info!("{}", Self::Path::PATH);
+        api_with_auth_abortable(&path.get_filled(), Self::EXT_METHOD, abort_controller, data).await
     }
     async fn api_with_auth_status_abortable(
         abort_controller: Option<&AbortController>,
+        path: Self::Path,
         data: Option<Self::Req>,
-    ) -> Result<(Result<Self::Res, Self::Err>, u16), IsAborted> {
-        api_with_auth_status_abortable(Self::EXT_PATH, Self::EXT_METHOD, abort_controller, data)
+    ) -> Result<(anyhow::Result<Self::Res>, u16), IsAborted> {
+        log::info!("{}", path.get_filled());
+        log::info!("{}", Self::Path::PATH);
+        api_with_auth_status_abortable(&path.get_filled(), Self::EXT_METHOD, abort_controller, data)
             .await
     }
     //TODO - get rid of this, use specialization
-    async fn api_with_auth_empty(data: Option<Self::Req>) -> Result<(), Self::Err> {
-        api_with_auth_empty(Self::EXT_PATH, Self::EXT_METHOD, data).await
+    async fn api_with_auth_empty(path: Self::Path, data: Option<Self::Req>) -> anyhow::Result<()> {
+        log::info!("{}", path.get_filled());
+        log::info!("{}", Self::Path::PATH);
+        api_with_auth_empty(&path.get_filled(), Self::EXT_METHOD, data).await
     }
-    async fn api_with_auth_empty_status(data: Option<Self::Req>) -> (Result<(), Self::Err>, u16) {
-        api_with_auth_empty_status(Self::EXT_PATH, Self::EXT_METHOD, data).await
+    async fn api_with_auth_empty_status(
+        path: Self::Path,
+        data: Option<Self::Req>,
+    ) -> (anyhow::Result<()>, u16) {
+        log::info!("{}", path.get_filled());
+        log::info!("{}", Self::Path::PATH);
+        api_with_auth_empty_status(&path.get_filled(), Self::EXT_METHOD, data).await
     }
 
     /**** NO AUTH ****/
-    async fn api_no_auth(data: Option<Self::Req>) -> Result<Self::Res, Self::Err> {
-        api_no_auth(Self::EXT_PATH, Self::EXT_METHOD, data).await
+    async fn api_no_auth(path: Self::Path, data: Option<Self::Req>) -> anyhow::Result<Self::Res> {
+        log::info!("{}", path.get_filled());
+        log::info!("{}", Self::Path::PATH);
+        api_no_auth(&path.get_filled(), Self::EXT_METHOD, data).await
     }
-    async fn api_no_auth_status(data: Option<Self::Req>) -> (Result<Self::Res, Self::Err>, u16) {
-        api_no_auth_status(Self::EXT_PATH, Self::EXT_METHOD, data).await
+    async fn api_no_auth_status(
+        path: Self::Path,
+        data: Option<Self::Req>,
+    ) -> (anyhow::Result<Self::Res>, u16) {
+        log::info!("{}", path.get_filled());
+        log::info!("{}", Self::Path::PATH);
+        api_no_auth_status(&path.get_filled(), Self::EXT_METHOD, data).await
     }
     //TODO - get rid of this, use specialization
-    async fn api_no_auth_empty(data: Option<Self::Req>) -> Result<(), Self::Err> {
-        api_no_auth_empty(Self::EXT_PATH, Self::EXT_METHOD, data).await
+    async fn api_no_auth_empty(path: Self::Path, data: Option<Self::Req>) -> anyhow::Result<()> {
+        log::info!("{}", path.get_filled());
+        log::info!("{}", Self::Path::PATH);
+        api_no_auth_empty(&path.get_filled(), Self::EXT_METHOD, data).await
     }
-    async fn api_no_auth_empty_status(data: Option<Self::Req>) -> (Result<(), Self::Err>, u16) {
-        api_no_auth_empty_status(Self::EXT_PATH, Self::EXT_METHOD, data).await
+    async fn api_no_auth_empty_status(
+        path: Self::Path,
+        data: Option<Self::Req>,
+    ) -> (anyhow::Result<()>, u16) {
+        log::info!("{}", path.get_filled());
+        log::info!("{}", Self::Path::PATH);
+        api_no_auth_empty_status(&path.get_filled(), Self::EXT_METHOD, data).await
     }
 
     /**** WITH BEARER TOKEN ****/
-    async fn api_with_token(token: &str, data: Option<Self::Req>) -> Result<Self::Res, Self::Err> {
-        api_with_token(Self::EXT_PATH, token, Self::EXT_METHOD, data).await
+    async fn api_with_token(
+        token: &str,
+        path: Self::Path,
+        data: Option<Self::Req>,
+    ) -> anyhow::Result<Self::Res> {
+        log::info!("{}", path.get_filled());
+        log::info!("{}", Self::Path::PATH);
+        api_with_token(&path.get_filled(), token, Self::EXT_METHOD, data).await
     }
     async fn api_with_token_status(
         token: &str,
+        path: Self::Path,
         data: Option<Self::Req>,
-    ) -> (Result<Self::Res, Self::Err>, u16) {
-        api_with_token_status(Self::EXT_PATH, token, Self::EXT_METHOD, data).await
+    ) -> (anyhow::Result<Self::Res>, u16) {
+        log::info!("{}", path.get_filled());
+        log::info!("{}", Self::Path::PATH);
+        api_with_token_status(&path.get_filled(), token, Self::EXT_METHOD, data).await
     }
     async fn api_with_token_status_abortable(
         token: &str,
         abort_controller: Option<&AbortController>,
+        path: Self::Path,
         data: Option<Self::Req>,
-    ) -> Result<(Result<Self::Res, Self::Err>, u16), IsAborted> {
+    ) -> Result<(anyhow::Result<Self::Res>, u16), IsAborted> {
+        log::info!("{}", path.get_filled());
+        log::info!("{}", Self::Path::PATH);
         api_with_token_status_abortable(
-            Self::EXT_PATH,
+            &path.get_filled(),
             token,
             Self::EXT_METHOD,
             abort_controller,
@@ -111,26 +157,43 @@ pub trait ApiEndpointExt {
         .await
     }
     //TODO - get rid of this, use specialization
-    async fn api_with_token_empty(token: &str, data: Option<Self::Req>) -> Result<(), Self::Err> {
-        api_with_token_empty(Self::EXT_PATH, token, Self::EXT_METHOD, data).await
+    async fn api_with_token_empty(
+        token: &str,
+        path: Self::Path,
+        data: Option<Self::Req>,
+    ) -> anyhow::Result<()> {
+        log::info!("{}", path.get_filled());
+        log::info!("{}", Self::Path::PATH);
+        api_with_token_empty(&path.get_filled(), token, Self::EXT_METHOD, data).await
     }
     async fn api_with_token_empty_status(
         token: &str,
+        path: Self::Path,
         data: Option<Self::Req>,
-    ) -> (Result<(), Self::Err>, u16) {
-        api_with_token_empty_status(Self::EXT_PATH, token, Self::EXT_METHOD, data).await
+    ) -> (anyhow::Result<()>, u16) {
+        log::info!("{}", path.get_filled());
+        log::info!("{}", Self::Path::PATH);
+        api_with_token_empty_status(&path.get_filled(), token, Self::EXT_METHOD, data).await
     }
 
     /**** WITH CREDENTIALS ****/
     //used in cases where we have the cookie but not the token
     //really just used for login and registration, to get the token via oauth flow
-    async fn api_no_auth_with_credentials(data: Option<Self::Req>) -> Result<Self::Res, Self::Err> {
-        api_no_auth_with_credentials(Self::EXT_PATH, Self::EXT_METHOD, data).await
+    async fn api_no_auth_with_credentials(
+        path: Self::Path,
+        data: Option<Self::Req>,
+    ) -> anyhow::Result<Self::Res> {
+        log::info!("{}", path.get_filled());
+        log::info!("{}", Self::Path::PATH);
+        api_no_auth_with_credentials(&path.get_filled(), Self::EXT_METHOD, data).await
     }
     async fn api_no_auth_with_credentials_status(
+        path: Self::Path,
         data: Option<Self::Req>,
-    ) -> (Result<Self::Res, Self::Err>, u16) {
-        api_no_auth_with_credentials_status(Self::EXT_PATH, Self::EXT_METHOD, data).await
+    ) -> (anyhow::Result<Self::Res>, u16) {
+        log::info!("{}", path.get_filled());
+        log::info!("{}", Self::Path::PATH);
+        api_no_auth_with_credentials_status(&path.get_filled(), Self::EXT_METHOD, data).await
     }
 
     /**** WITH BASIC ****/
@@ -138,26 +201,45 @@ pub trait ApiEndpointExt {
     async fn api_with_basic_token(
         user_id: &str,
         password: &str,
+        path: Self::Path,
         data: Option<Self::Req>,
-    ) -> Result<Self::Res, Self::Err> {
-        api_with_basic_token(Self::EXT_PATH, user_id, password, Self::EXT_METHOD, data).await
+    ) -> anyhow::Result<Self::Res> {
+        log::info!("{}", path.get_filled());
+        log::info!("{}", Self::Path::PATH);
+        api_with_basic_token(
+            &path.get_filled(),
+            user_id,
+            password,
+            Self::EXT_METHOD,
+            data,
+        )
+        .await
     }
     async fn api_with_basic_token_status(
         user_id: &str,
         password: &str,
+        path: Self::Path,
         data: Option<Self::Req>,
-    ) -> (Result<Self::Res, Self::Err>, u16) {
-        api_with_basic_token_status(Self::EXT_PATH, user_id, password, Self::EXT_METHOD, data).await
+    ) -> (anyhow::Result<Self::Res>, u16) {
+        log::info!("{}", path.get_filled());
+        log::info!("{}", Self::Path::PATH);
+        api_with_basic_token_status(
+            &path.get_filled(),
+            user_id,
+            password,
+            Self::EXT_METHOD,
+            data,
+        )
+        .await
     }
 }
 
 // impl the extension for all endpoints
 impl<T: ApiEndpoint> ApiEndpointExt for T {
+    type Path = T::Path;
     type Req = T::Req;
     type Res = T::Res;
-    type Err = T::Err;
 
-    const EXT_PATH: &'static str = T::PATH;
     const EXT_METHOD: Method = T::METHOD;
 }
 
@@ -238,14 +320,13 @@ pub async fn api_upload_file_status(
 }
 
 /**** WITH AUTH ****/
-pub async fn api_with_auth<T, E, Payload>(
+pub async fn api_with_auth<T, Payload>(
     endpoint: &str,
     method: Method,
     data: Option<Payload>,
-) -> Result<T, E>
+) -> anyhow::Result<T>
 where
     T: DeserializeOwned + Serialize,
-    E: DeserializeOwned + Serialize,
     Payload: Serialize,
 {
     let (resp, status) = api_with_auth_status(endpoint, method, data).await;
@@ -254,15 +335,14 @@ where
 
     resp
 }
-pub async fn api_with_auth_abortable<T, E, Payload>(
+pub async fn api_with_auth_abortable<T, Payload>(
     endpoint: &str,
     method: Method,
     abort_controller: Option<&AbortController>,
     data: Option<Payload>,
-) -> Result<Result<T, E>, IsAborted>
+) -> Result<anyhow::Result<T>, IsAborted>
 where
     T: DeserializeOwned + Serialize,
-    E: DeserializeOwned + Serialize,
     Payload: Serialize,
 {
     api_with_auth_status_abortable(endpoint, method, abort_controller, data)
@@ -276,14 +356,13 @@ where
         })
 }
 
-pub async fn api_with_auth_status<T, E, Payload>(
+pub async fn api_with_auth_status<T, Payload>(
     endpoint: &str,
     method: Method,
     data: Option<Payload>,
-) -> (Result<T, E>, u16)
+) -> (anyhow::Result<T>, u16)
 where
     T: DeserializeOwned + Serialize,
-    E: DeserializeOwned + Serialize,
     Payload: Serialize,
 {
     api_with_auth_status_abortable(endpoint, method, None, data)
@@ -291,15 +370,14 @@ where
         .unwrap_ji()
 }
 
-pub async fn api_with_auth_status_abortable<T, E, Payload>(
+pub async fn api_with_auth_status_abortable<T, Payload>(
     endpoint: &str,
     method: Method,
     abort_controller: Option<&AbortController>,
     data: Option<Payload>,
-) -> Result<(Result<T, E>, u16), IsAborted>
+) -> Result<(anyhow::Result<T>, u16), IsAborted>
 where
     T: DeserializeOwned + Serialize,
-    E: DeserializeOwned + Serialize,
     Payload: Serialize,
 {
     if let Ok(token) = env_var("LOCAL_API_AUTH_OVERRIDE") {
@@ -328,7 +406,8 @@ where
                     ))
                 } else {
                     Ok((
-                        Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR)),
+                        // Err(anyhow::anyhow!(DESERIALIZE_ERR)),
+                        Err(anyhow::anyhow!(DESERIALIZE_ERR)),
                         status,
                     ))
                 }
@@ -344,13 +423,12 @@ where
     }
 }
 //TODO - get rid of this, use specialization
-pub async fn api_with_auth_empty<E, Payload>(
+pub async fn api_with_auth_empty<Payload>(
     endpoint: &str,
     method: Method,
     data: Option<Payload>,
-) -> Result<(), E>
+) -> anyhow::Result<()>
 where
-    E: DeserializeOwned + Serialize,
     Payload: Serialize,
 {
     let (resp, status) = api_with_auth_empty_status(endpoint, method, data).await;
@@ -359,13 +437,12 @@ where
 
     resp
 }
-pub async fn api_with_auth_empty_status<E, Payload>(
+pub async fn api_with_auth_empty_status<Payload>(
     endpoint: &str,
     method: Method,
     data: Option<Payload>,
-) -> (Result<(), E>, u16)
+) -> (Result<(), anyhow::Error>, u16)
 where
-    E: DeserializeOwned + Serialize,
     Payload: Serialize,
 {
     if let Ok(token) = env_var("LOCAL_API_AUTH_OVERRIDE") {
@@ -390,23 +467,19 @@ where
         if res.ok() {
             (Ok(()), status)
         } else {
-            (
-                Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR)),
-                status,
-            )
+            (Err(anyhow::anyhow!(DESERIALIZE_ERR)), status)
         }
     }
 }
 
 /**** NO AUTH ****/
-pub async fn api_no_auth<T, E, Payload>(
+pub async fn api_no_auth<T, Payload>(
     endpoint: &str,
     method: Method,
     data: Option<Payload>,
-) -> Result<T, E>
+) -> anyhow::Result<T>
 where
     T: DeserializeOwned + Serialize,
-    E: DeserializeOwned + Serialize,
     Payload: Serialize,
 {
     let (resp, status) = api_no_auth_status(endpoint, method, data).await;
@@ -416,14 +489,13 @@ where
     resp
 }
 
-pub async fn api_no_auth_status<T, E, Payload>(
+pub async fn api_no_auth_status<T, Payload>(
     endpoint: &str,
     method: Method,
     data: Option<Payload>,
-) -> (Result<T, E>, u16)
+) -> (anyhow::Result<T>, u16)
 where
     T: DeserializeOwned + Serialize,
-    E: DeserializeOwned + Serialize,
     Payload: Serialize,
 {
     let (url, data) = api_get_query(endpoint, method, data);
@@ -441,19 +513,19 @@ where
         )
     } else {
         (
-            Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR)),
+            // Err(anyhow::anyhow!(res.json_from_str().await.expect_ji(DESERIALIZE_ERR))),
+            Err(anyhow::anyhow!(DESERIALIZE_ERR)),
             status,
         )
     }
 }
 //TODO - get rid of this, use specialization
-pub async fn api_no_auth_empty<E, Payload>(
+pub async fn api_no_auth_empty<Payload>(
     endpoint: &str,
     method: Method,
     data: Option<Payload>,
-) -> Result<(), E>
+) -> Result<(), anyhow::Error>
 where
-    E: DeserializeOwned + Serialize,
     Payload: Serialize,
 {
     let (resp, status) = api_no_auth_empty_status(endpoint, method, data).await;
@@ -464,13 +536,12 @@ where
 }
 
 //TODO - get rid of this, use specialization
-pub async fn api_no_auth_empty_status<E, Payload>(
+pub async fn api_no_auth_empty_status<Payload>(
     endpoint: &str,
     method: Method,
     data: Option<Payload>,
-) -> (Result<(), E>, u16)
+) -> (Result<(), anyhow::Error>, u16)
 where
-    E: DeserializeOwned + Serialize,
     Payload: Serialize,
 {
     let (url, data) = api_get_query(endpoint, method, data);
@@ -484,22 +555,18 @@ where
     if res.ok() {
         (Ok(()), status)
     } else {
-        (
-            Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR)),
-            status,
-        )
+        (Err(anyhow::anyhow!(DESERIALIZE_ERR)), status)
     }
 }
 /**** WITH BEARER TOKEN ****/
-pub async fn api_with_token<T, E, Payload>(
+pub async fn api_with_token<T, Payload>(
     endpoint: &str,
     token: &str,
     method: Method,
     data: Option<Payload>,
-) -> Result<T, E>
+) -> anyhow::Result<T>
 where
     T: DeserializeOwned + Serialize,
-    E: DeserializeOwned + Serialize,
     Payload: Serialize,
 {
     let (resp, status) = api_with_token_status(endpoint, token, method, data).await;
@@ -509,15 +576,14 @@ where
     resp
 }
 
-pub async fn api_with_token_status<T, E, Payload>(
+pub async fn api_with_token_status<T, Payload>(
     endpoint: &str,
     token: &str,
     method: Method,
     data: Option<Payload>,
-) -> (Result<T, E>, u16)
+) -> (anyhow::Result<T>, u16)
 where
     T: DeserializeOwned + Serialize,
-    E: DeserializeOwned + Serialize,
     Payload: Serialize,
 {
     api_with_token_status_abortable(endpoint, token, method, None, data)
@@ -525,16 +591,15 @@ where
         .unwrap_ji()
 }
 
-pub async fn api_with_token_status_abortable<T, E, Payload>(
+pub async fn api_with_token_status_abortable<T, Payload>(
     endpoint: &str,
     token: &str,
     method: Method,
     abort_controller: Option<&AbortController>,
     data: Option<Payload>,
-) -> Result<(Result<T, E>, u16), IsAborted>
+) -> Result<(anyhow::Result<T>, u16), IsAborted>
 where
     T: DeserializeOwned + Serialize,
-    E: DeserializeOwned + Serialize,
     Payload: Serialize,
 {
     let bearer = format!("Bearer {}", token);
@@ -560,10 +625,7 @@ where
                     status,
                 ))
             } else {
-                Ok((
-                    Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR)),
-                    status,
-                ))
+                Ok((Err(anyhow::anyhow!(DESERIALIZE_ERR)), status))
             }
         }
         Err(err) => {
@@ -576,14 +638,13 @@ where
     }
 }
 //TODO - get rid of this, use specialization
-pub async fn api_with_token_empty<E, Payload>(
+pub async fn api_with_token_empty<Payload>(
     endpoint: &str,
     token: &str,
     method: Method,
     data: Option<Payload>,
-) -> Result<(), E>
+) -> Result<(), anyhow::Error>
 where
-    E: DeserializeOwned + Serialize,
     Payload: Serialize,
 {
     let (resp, status) = api_with_token_empty_status(endpoint, token, method, data).await;
@@ -592,14 +653,13 @@ where
 
     resp
 }
-pub async fn api_with_token_empty_status<E, Payload>(
+pub async fn api_with_token_empty_status<Payload>(
     endpoint: &str,
     token: &str,
     method: Method,
     data: Option<Payload>,
-) -> (Result<(), E>, u16)
+) -> (Result<(), anyhow::Error>, u16)
 where
-    E: DeserializeOwned + Serialize,
     Payload: Serialize,
 {
     let bearer = format!("Bearer {}", token);
@@ -621,23 +681,19 @@ where
     if res.ok() {
         (Ok(()), status)
     } else {
-        (
-            Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR)),
-            status,
-        )
+        (Err(anyhow::anyhow!(DESERIALIZE_ERR)), status)
     }
 }
 /**** WITH CREDENTIALS ****/
 //used in cases where we have the cookie but not the token
 //really just used for login and registration, to get the token via oauth flow
-pub async fn api_no_auth_with_credentials<T, E, Payload>(
+pub async fn api_no_auth_with_credentials<T, Payload>(
     endpoint: &str,
     method: Method,
     data: Option<Payload>,
-) -> Result<T, E>
+) -> anyhow::Result<T>
 where
     T: DeserializeOwned + Serialize,
-    E: DeserializeOwned + Serialize,
     Payload: Serialize,
 {
     let (resp, status) = api_no_auth_with_credentials_status(endpoint, method, data).await;
@@ -647,14 +703,13 @@ where
     resp
 }
 
-pub async fn api_no_auth_with_credentials_status<T, E, Payload>(
+pub async fn api_no_auth_with_credentials_status<T, Payload>(
     endpoint: &str,
     method: Method,
     data: Option<Payload>,
-) -> (Result<T, E>, u16)
+) -> (anyhow::Result<T>, u16)
 where
     T: DeserializeOwned + Serialize,
-    E: DeserializeOwned + Serialize,
     Payload: Serialize,
 {
     let (url, data) = api_get_query(endpoint, method, data);
@@ -671,24 +726,20 @@ where
             status,
         )
     } else {
-        (
-            Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR)),
-            status,
-        )
+        (Err(anyhow::anyhow!(DESERIALIZE_ERR)), status)
     }
 }
 /**** WITH BASIC ****/
 //really just used with login - see https://datatracker.ietf.org/doc/html/rfc7617#section-2
-pub async fn api_with_basic_token<T, E, Payload>(
+pub async fn api_with_basic_token<T, Payload>(
     endpoint: &str,
     user_id: &str,
     password: &str,
     method: Method,
     data: Option<Payload>,
-) -> Result<T, E>
+) -> anyhow::Result<T>
 where
     T: DeserializeOwned + Serialize,
-    E: DeserializeOwned + Serialize,
     Payload: Serialize,
 {
     let (resp, status) =
@@ -699,16 +750,15 @@ where
     resp
 }
 
-pub async fn api_with_basic_token_status<T, E, Payload>(
+pub async fn api_with_basic_token_status<T, Payload>(
     endpoint: &str,
     user_id: &str,
     password: &str,
     method: Method,
     data: Option<Payload>,
-) -> (Result<T, E>, u16)
+) -> (anyhow::Result<T>, u16)
 where
     T: DeserializeOwned + Serialize,
-    E: DeserializeOwned + Serialize,
     Payload: Serialize,
 {
     let credentials = format!("{}:{}", user_id, password);
@@ -735,10 +785,7 @@ where
             status,
         )
     } else {
-        (
-            Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR)),
-            status,
-        )
+        (Err(anyhow::anyhow!(DESERIALIZE_ERR)), status)
     }
 }
 

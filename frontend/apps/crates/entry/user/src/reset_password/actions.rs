@@ -1,9 +1,8 @@
 use super::state::*;
 use dominator::clone;
 use shared::{
-    api::endpoints::{user, ApiEndpoint},
-    domain::user::ChangePasswordRequest,
-    error::EmptyError,
+    api::endpoints::user,
+    domain::user::{ChangePasswordPath, ChangePasswordRequest},
 };
 use std::rc::Rc;
 use utils::prelude::*;
@@ -29,7 +28,7 @@ impl PasswordResetPage {
                 force_logout: true
             };
 
-            let (resp, _status):(Result<(), EmptyError>, u16) = api_no_auth_empty_status(user::ChangePassword::PATH, user::ChangePassword::METHOD, Some(query)).await;
+            let (resp, _status):(anyhow::Result<()>, u16) = user::ChangePassword::api_no_auth_empty_status(ChangePasswordPath(), Some(query)).await;
 
             match resp {
                 Ok(_) => {

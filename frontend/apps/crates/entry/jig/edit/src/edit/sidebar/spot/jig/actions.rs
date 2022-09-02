@@ -2,11 +2,7 @@ use super::super::super::jig::actions as jig_actions;
 use super::super::super::spot::state::State as SpotState;
 use crate::edit::sidebar::state::{SidebarSpot, SidebarSpotItem};
 use dominator::clone;
-use shared::{
-    api::{endpoints, ApiEndpoint},
-    domain::{module::*, CreateResponse},
-    error::EmptyError,
-};
+use shared::{api::endpoints, domain::module::*};
 use std::rc::Rc;
 use utils::prelude::*;
 
@@ -31,13 +27,11 @@ pub fn edit(state: Rc<SpotState>) {
 
 pub async fn delete(state: Rc<SpotState>) {
     if let Some(module) = &*state.module.item.unwrap_jig() {
-        let path = endpoints::module::Delete::PATH.replace("{module_id}", &module.id.0.to_string());
-
         let req = ModuleDeleteRequest {
             parent_id: state.sidebar.asset.id(),
         };
 
-        api_with_auth_empty::<EmptyError, _>(&path, endpoints::module::Delete::METHOD, Some(req))
+        endpoints::module::Delete::api_with_auth_empty(ModuleDeletePath(module.id), Some(req))
             .await
             .unwrap();
     }
@@ -52,9 +46,8 @@ pub fn assign_kind(state: Rc<SpotState>, kind: ModuleKind) {
             body: ModuleBody::new(kind),
         });
 
-        match api_with_auth::<CreateResponse<ModuleId>, EmptyError, _>(
-            endpoints::module::Create::PATH,
-            endpoints::module::Create::METHOD,
+        match endpoints::module::Create::api_with_auth(
+            ModuleCreatePath(),
             req
         ).await {
             Ok(resp) => {

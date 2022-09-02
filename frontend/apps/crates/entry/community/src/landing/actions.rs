@@ -4,7 +4,10 @@ use dominator::clone;
 use futures::join;
 use shared::{
     api::endpoints,
-    domain::{circle::CircleBrowseQuery, user::public_user::UserBrowseQuery},
+    domain::{
+        circle::{CircleBrowsePath, CircleBrowseQuery},
+        user::public_user::{PublicUserBrowsePath, UserBrowseQuery},
+    },
 };
 use utils::prelude::ApiEndpointExt;
 
@@ -28,7 +31,9 @@ impl CommunityLanding {
             ..Default::default()
         };
 
-        match endpoints::user::BrowsePublicUser::api_no_auth(Some(req)).await {
+        match endpoints::user::BrowsePublicUser::api_no_auth(PublicUserBrowsePath(), Some(req))
+            .await
+        {
             Ok(res) => {
                 state.top_members.set(Some(res.users));
             }
@@ -43,7 +48,7 @@ impl CommunityLanding {
             ..Default::default()
         };
 
-        match endpoints::circle::Browse::api_no_auth(Some(req)).await {
+        match endpoints::circle::Browse::api_no_auth(CircleBrowsePath(), Some(req)).await {
             Ok(res) => {
                 state.top_circles.set(Some(res.circles));
             }

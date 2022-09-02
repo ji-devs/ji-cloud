@@ -1,11 +1,7 @@
 use super::state::*;
 use components::image::tag::ImageTag;
 use dominator::clone;
-use shared::{
-    api::{endpoints, ApiEndpoint},
-    domain::image::tag::*,
-    error::*,
-};
+use shared::{api::endpoints, domain::image::tag::*};
 use std::rc::Rc;
 use strum::IntoEnumIterator;
 use utils::prelude::*;
@@ -14,7 +10,7 @@ use utils::prelude::*;
 impl ImageTags {
     pub fn load_init(state: Rc<Self>) {
         state.loader.load(clone!(state => async move {
-            match api_with_auth::<ImageTagListResponse, EmptyError, _>(endpoints::image::tag::List::PATH, endpoints::image::tag::List::METHOD, None::<()>).await {
+            match endpoints::image::tag::List::api_with_auth(ImageTagListPath(), None).await {
                 Ok(resp) => {
                     state.list.lock_mut().replace_cloned(
                         resp.image_tags
@@ -47,8 +43,10 @@ impl ImageTags {
                             display_name: Some(tag.display_name().to_string()),
                             index: None
                         };
-                        let path = endpoints::image::tag::Update::PATH.replace("{index}", &tag.as_index().to_string());
-                        let _ = api_with_auth_empty::<EmptyError, _>(&path, endpoints::image::tag::Update::METHOD, Some(req)).await.unwrap_ji();
+                        let _ = endpoints::image::tag::Update::api_with_auth_empty(
+                            ImageTagUpdatePath(tag.as_index()),
+                            Some(req)
+                        ).await.unwrap_ji();
 
                         let curr_index = curr.index;
                         curr_list.set_cloned(index, Rc::new(ImageTagResponse {
@@ -61,9 +59,10 @@ impl ImageTags {
                         display_name: tag.display_name().to_string()
                     };
 
-                    let path = endpoints::image::tag::Create::PATH.replace("{index}", &tag.as_index().to_string());
-
-                    let resp = api_with_auth::<ImageTagResponse, EmptyError, _>(&path, endpoints::image::tag::Create::METHOD, Some(req)).await.unwrap_ji();
+                    let resp = endpoints::image::tag::Create::api_with_auth(
+                        ImageTagCreatePath(tag.as_index()),
+                        Some(req)
+                    ).await.unwrap_ji();
 
                     curr_list.push_cloned(Rc::new(resp));
                 }
@@ -82,8 +81,10 @@ impl ImageTags {
                 });
 
             for index in to_remove.iter() {
-                let path = endpoints::image::tag::Delete::PATH.replace("{index}", &index.to_string());
-                let _ = api_with_auth_empty::<EmptyError, _>(&path, endpoints::image::tag::Delete::METHOD, None::<()>).await.unwrap_ji();
+                let _ = endpoints::image::tag::Delete::api_with_auth_empty(
+                    ImageTagDeletePath(*index),
+                    None
+                ).await.unwrap_ji();
             }
         }));
     }

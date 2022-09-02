@@ -4,15 +4,17 @@ use components::confirm::Confirm;
 use dominator::clone;
 use futures::join;
 use shared::{
-    api::{endpoints, ApiEndpoint},
+    api::endpoints,
     domain::{
-        circle::{Circle, CircleUpdateRequest},
-        user::public_user::UserBrowseQuery,
+        circle::{
+            Circle, CircleDeletePath, CircleGetPath, CircleUpdateRequest, JoinCirclePath,
+            LeaveCirclePath, UpdateCirclePath,
+        },
+        user::public_user::{PublicUserBrowsePath, UserBrowseQuery},
     },
-    error::EmptyError,
 };
 use utils::{
-    prelude::{api_no_auth, api_with_auth_empty, ApiEndpointExt},
+    prelude::ApiEndpointExt,
     routes::{CommunityCirclesRoute, CommunityRoute, Route},
     unwrap::UnwrapJiExt,
 };
@@ -38,10 +40,7 @@ impl CircleDetails {
     async fn load_circle(self: &Rc<Self>) {
         let state = self;
 
-        let path = endpoints::circle::Get::PATH.replace("{id}", &state.circle_id.0.to_string());
-        match api_no_auth::<Circle, EmptyError, ()>(&path, endpoints::circle::Get::METHOD, None)
-            .await
-        {
+        match endpoints::circle::Get::api_no_auth(CircleGetPath(state.circle_id), None).await {
             Ok(circle) => {
                 state.circle.set(Some(circle));
             }
@@ -57,7 +56,9 @@ impl CircleDetails {
             ..Default::default()
         };
 
-        match endpoints::user::BrowsePublicUser::api_no_auth(Some(req)).await {
+        match endpoints::user::BrowsePublicUser::api_no_auth(PublicUserBrowsePath(), Some(req))
+            .await
+        {
             Ok(res) => {
                 state.members.lock_mut().extend(res.users);
             }
@@ -69,8 +70,7 @@ impl CircleDetails {
         let state = self;
 
         state.loader.load(clone!(state => async move {
-            let path = endpoints::circle::JoinCircle::PATH.replace("{id}", &state.circle_id.0.to_string());
-            match api_with_auth_empty::<EmptyError, ()>(&path, endpoints::circle::JoinCircle::METHOD, None).await
+            match endpoints::circle::JoinCircle::api_with_auth_empty(JoinCirclePath(state.circle_id), None).await
             {
                 Ok(_) => {
                     let mut user = state.community_state.user.get_cloned().unwrap_ji();
@@ -86,8 +86,7 @@ impl CircleDetails {
         let state = self;
 
         state.loader.load(clone!(state => async move {
-            let path = endpoints::circle::LeaveCircle::PATH.replace("{id}", &state.circle_id.0.to_string());
-            match api_with_auth_empty::<EmptyError, ()>(&path, endpoints::circle::LeaveCircle::METHOD, None).await
+            match endpoints::circle::LeaveCircle::api_with_auth_empty(LeaveCirclePath(state.circle_id), None).await
             {
                 Ok(_) => {
                     let mut user = state.community_state.user.get_cloned().unwrap_ji();
@@ -110,8 +109,7 @@ impl CircleDetails {
                 image: Some(circle.image),
             };
 
-            let path = endpoints::circle::Update::PATH.replace("{id}", &state.circle_id.0.to_string());
-            let res = api_with_auth_empty::<EmptyError, CircleUpdateRequest>(&path, endpoints::circle::Update::METHOD, Some(req)).await;
+            let res = endpoints::circle::Update::api_with_auth_empty(UpdateCirclePath(state.circle_id), Some(req)).await;
             if let Err(_err) = res {
                 todo!()
             }
@@ -134,8 +132,7 @@ impl CircleDetails {
                 },
             };
 
-            let path = endpoints::circle::Delete::PATH.replace("{id}", &state.circle_id.0.to_string());
-            match api_with_auth_empty::<EmptyError, ()>(&path, endpoints::circle::Delete::METHOD, None).await
+            match endpoints::circle::Delete::api_with_auth_empty(CircleDeletePath(state.circle_id), None).await
             {
                 Ok(_) => {
                     let route = Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::List));

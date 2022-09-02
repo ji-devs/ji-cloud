@@ -69,6 +69,7 @@ itertools = "0.10.1"
 async-trait = "0.1.51"
 unicode-segmentation = "1.8.0"
 rand = "0.8.4"
+anyhow = "1.0.62"
 
 [features]
 default = ["wee_alloc"]

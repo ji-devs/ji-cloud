@@ -1,7 +1,10 @@
 use std::rc::Rc;
 
 use dominator::clone;
-use shared::{api::endpoints, domain::user::ResetPasswordRequest};
+use shared::{
+    api::endpoints,
+    domain::user::{ResetPasswordPath, ResetPasswordRequest},
+};
 use utils::prelude::ApiEndpointExt;
 
 use super::SendResetLink;
@@ -17,7 +20,7 @@ impl SendResetLink {
                 email
             };
 
-            let res = endpoints::user::ResetPassword::api_no_auth_empty(Some(req)).await;
+            let res = endpoints::user::ResetPassword::api_no_auth_empty(ResetPasswordPath(), Some(req)).await;
 
             match res {
                 Ok(_) => {
