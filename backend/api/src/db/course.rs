@@ -648,20 +648,32 @@ where id = $1 and $2 is distinct from other_keywords"#,
         .await?;
     }
 
+    if let Some(display_name) = display_name {
+        sqlx::query!(
+            r#"
+update course_data
+set display_name = $2,
+    translated_name = '{}',
+    updated_at = now()
+where id = $1 and $2 is distinct from display_name"#,
+            draft_id,
+            display_name,
+        )
+        .execute(&mut txn)
+        .await?;
+    }
+
     // update trivial, not null fields
     sqlx::query!(
         //language=SQL
         r#"
 update course_data
-set display_name     = coalesce($2, display_name),
-    language         = coalesce($3, language),
+set language         = coalesce($2, language),
     updated_at = now()
 where id = $1
-  and (($2::text is not null and $2 is distinct from display_name) or
-       ($3::text is not null and $3 is distinct from language))
+  and ($2::text is not null and $2 is distinct from language)
 "#,
         draft_id,
-        display_name,
         language,
     )
     .execute(&mut txn)

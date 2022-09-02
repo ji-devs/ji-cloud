@@ -124,18 +124,30 @@ where id = $1 and $2 is distinct from description"#,
         .await?;
     }
 
+    if let Some(name) = name {
+        sqlx::query!(
+            r#"
+update image_metadata
+set name = $2,
+    translated_name = '{}',
+    updated_at = now()
+where id = $1 and $2 is distinct from name"#,
+            id.0,
+            name,
+        )
+        .execute(&mut *conn)
+        .await?;
+    }
+
     sqlx::query!(
         //language=SQL
         r#"
 update image_metadata
-set name        = coalesce($2, name),
-    is_premium  = coalesce($3, is_premium),
+set is_premium  = coalesce($2, is_premium),
     updated_at  = now()
 where id = $1
-  and (($2::text is not null and $2 is distinct from name) or
-       ($3::boolean is not null and $3 is distinct from is_premium))"#,
+  and ($2::boolean is not null and $2 is distinct from is_premium)"#,
         id.0,
-        name,
         is_premium,
     )
     .execute(conn)

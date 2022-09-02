@@ -888,22 +888,34 @@ where id = $1 and $2 is distinct from other_keywords"#,
         .await?;
     }
 
+    if let Some(display_name) = display_name {
+        sqlx::query!(
+            r#"
+update jig_data
+set display_name = $2,
+    translated_name = '{}',
+    updated_at = now()
+where id = $1 and $2 is distinct from display_name"#,
+            draft_id,
+            display_name,
+        )
+        .execute(&mut txn)
+        .await?;
+    }
+
     // update trivial, not null fields
     sqlx::query!(
         //language=SQL
         r#"
 update jig_data
-set display_name     = coalesce($2, display_name),
-    language         = coalesce($3, language),
-    theme            = coalesce($4, theme),
+set language         = coalesce($2, language),
+    theme            = coalesce($3, theme),
     updated_at = now()
 where id = $1
-  and (($2::text is not null and $2 is distinct from display_name) or
-       ($3::text is not null and $3 is distinct from language) or
-       ($4::smallint is not null and $4 is distinct from theme))
+  and (($2::text is not null and $2 is distinct from language) or
+       ($3::smallint is not null and $3 is distinct from theme))
 "#,
         draft_id,
-        display_name,
         language,
         theme.map(|it| *it as i16),
     )
