@@ -9,21 +9,21 @@ use futures::join;
 use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::MutableVec;
 use shared::{
-    api::{endpoints, ApiEndpoint},
+    api::endpoints,
     domain::{
         additional_resource::AdditionalResource,
         asset::PrivacyLevel,
         category::CategoryId,
         jig::{
-            JigId, JigRating, JigResponse, JigUpdateAdminDataRequest, JigUpdateDraftDataRequest,
+            JigAdminDataUpdatePath, JigId, JigPublishPath, JigRating, JigResponse,
+            JigUpdateAdminDataRequest, JigUpdateDraftDataPath, JigUpdateDraftDataRequest,
         },
         meta::AffiliationId,
         meta::AgeRangeId,
         module::LiteModule,
     },
-    error::EmptyError,
 };
-use utils::prelude::api_with_auth_empty;
+use utils::prelude::ApiEndpointExt;
 
 #[derive(Clone)]
 pub struct EditableJig {
@@ -98,11 +98,9 @@ impl EditableJig {
     }
 
     pub async fn save_draft(self: &Rc<Self>) {
-        let path = endpoints::jig::UpdateDraftData::PATH.replace("{id}", &self.id.0.to_string());
         let req = self.to_jig_update_request();
-        let res = api_with_auth_empty::<EmptyError, JigUpdateDraftDataRequest>(
-            &path,
-            endpoints::jig::UpdateDraftData::METHOD,
+        let res = endpoints::jig::UpdateDraftData::api_with_auth_empty(
+            JigUpdateDraftDataPath(self.id),
             Some(req),
         )
         .await;
@@ -113,11 +111,9 @@ impl EditableJig {
     }
 
     pub async fn save_admin_data(self: &Rc<Self>) {
-        let path = endpoints::jig::JigAdminDataUpdate::PATH.replace("{id}", &self.id.0.to_string());
         let req = self.to_update_admin_data_request();
-        let res = api_with_auth_empty::<EmptyError, JigUpdateAdminDataRequest>(
-            &path,
-            endpoints::jig::JigAdminDataUpdate::METHOD,
+        let res = endpoints::jig::JigAdminDataUpdate::api_with_auth_empty(
+            JigAdminDataUpdatePath(self.id),
             Some(req),
         )
         .await;
@@ -128,10 +124,7 @@ impl EditableJig {
     }
 
     pub async fn publish(self: &Rc<Self>) {
-        let path = endpoints::jig::Publish::PATH.replace("{id}", &self.id.0.to_string());
-        let res =
-            api_with_auth_empty::<EmptyError, ()>(&path, endpoints::jig::Publish::METHOD, None)
-                .await;
+        let res = endpoints::jig::Publish::api_with_auth_empty(JigPublishPath(self.id), None).await;
         match res {
             Ok(res) => res,
             Err(_) => todo!(),

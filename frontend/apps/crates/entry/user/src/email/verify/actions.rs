@@ -1,8 +1,10 @@
 use super::state::*;
 use shared::{
-    api::endpoints::{user, ApiEndpoint},
-    domain::{session::NewSessionResponse, user::VerifyEmailRequest},
-    error::EmptyError,
+    api::endpoints::user,
+    domain::{
+        session::NewSessionResponse,
+        user::{VerifyEmailPath, VerifyEmailRequest},
+    },
 };
 use utils::{prelude::*, storage};
 
@@ -12,12 +14,8 @@ impl VerifyEmailPage {
             token: self.token.clone(),
         };
 
-        let resp: Result<Option<NewSessionResponse>, EmptyError> = api_no_auth_with_credentials(
-            user::VerifyEmail::PATH,
-            user::VerifyEmail::METHOD,
-            Some(query),
-        )
-        .await;
+        let resp: anyhow::Result<Option<NewSessionResponse>> =
+            user::VerifyEmail::api_no_auth_with_credentials(VerifyEmailPath(), Some(query)).await;
 
         match resp {
             Ok(resp) => match resp {

@@ -3,17 +3,13 @@ use std::rc::Rc;
 use dominator::clone;
 use itertools::Itertools;
 use shared::{
-    api::{endpoints, ApiEndpoint},
+    api::endpoints,
     domain::{
-        course::{CourseResponse, CourseUpdateDraftDataRequest},
-        jig::{JigId, JigResponse, JigSearchQuery},
+        course::{CourseGetDraftPath, CourseUpdateDraftDataPath, CourseUpdateDraftDataRequest},
+        jig::{JigGetLivePath, JigId, JigResponse, JigSearchPath, JigSearchQuery},
     },
-    error::EmptyError,
 };
-use utils::{
-    prelude::{api_with_auth, api_with_auth_empty, ApiEndpointExt},
-    unwrap::UnwrapJiExt,
-};
+use utils::{prelude::ApiEndpointExt, unwrap::UnwrapJiExt};
 
 use super::state::JigSelection;
 
@@ -21,14 +17,8 @@ impl JigSelection {
     pub fn load_course(self: &Rc<Self>) {
         let state = Rc::clone(self);
         state.loader.load(clone!(state => async move {
-            let path = endpoints::course::GetDraft::PATH.replace(
-                "{id}",
-                &state.course_id.0.to_string()
-            );
-
-            let res = api_with_auth::<CourseResponse, EmptyError, ()>(
-                &path,
-                endpoints::course::GetDraft::METHOD,
+            let res = endpoints::course::GetDraft::api_with_auth(
+                CourseGetDraftPath(state.course_id),
                 None,
             )
             .await;
@@ -61,14 +51,8 @@ impl JigSelection {
                 ..Default::default()
             };
 
-            let path = endpoints::course::UpdateDraftData::PATH.replace(
-                "{id}",
-                &state.course_id.0.to_string()
-            );
-
-            let _ = api_with_auth_empty::<EmptyError, _>(
-                &path,
-                endpoints::course::UpdateDraftData::METHOD,
+            let _ = endpoints::course::UpdateDraftData::api_with_auth_empty(
+                CourseUpdateDraftDataPath(state.course_id.clone()),
                 Some(req),
             )
             .await;
@@ -100,9 +84,7 @@ impl JigSelection {
     }
 
     async fn get_jig(self: &Rc<Self>, jig_id: &JigId) -> JigResponse {
-        let path = endpoints::jig::GetLive::PATH.replace("{id}", &jig_id.0.to_string());
-
-        api_with_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::GetLive::METHOD, None)
+        endpoints::jig::GetLive::api_with_auth(JigGetLivePath(jig_id.clone()), None)
             .await
             .unwrap_ji()
     }
@@ -115,7 +97,7 @@ impl JigSelection {
                 ..Default::default()
             };
 
-            match endpoints::jig::Search::api_no_auth(Some(req)).await {
+            match endpoints::jig::Search::api_no_auth(JigSearchPath(), Some(req)).await {
                 Err(_) => todo!(),
                 Ok(res) => {
                     let jigs = res

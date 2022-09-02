@@ -1,7 +1,6 @@
 use shared::{
-    api::{endpoints::user::Profile, ApiEndpoint},
-    domain::user::UserProfile,
-    error::EmptyError,
+    api::endpoints::user::Profile,
+    domain::user::{GetProfilePath, UserProfile},
 };
 use std::rc::Rc;
 use utils::{
@@ -49,7 +48,7 @@ impl Router {
     pub fn render(state: Rc<Self>) -> Dom {
         html!("div", {
             .future(clone!(state => async move {
-                let (result, status) = api_with_auth_status::<UserProfile, EmptyError, ()>(Profile::PATH, Profile::METHOD, None).await;
+                let (result, status) = Profile::api_with_auth_status(GetProfilePath(), None).await;
 
                 match status  {
                     401 | 403 => {

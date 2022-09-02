@@ -1,7 +1,7 @@
 use super::state::*;
 use crate::module::_common::edit::history::state::HistoryState;
 use shared::{
-    api::endpoints::{module::*, ApiEndpoint},
+    api::endpoints::module::*,
     domain::{
         asset::{AssetId, DraftOrLive},
         module::{
@@ -9,7 +9,6 @@ use shared::{
             *,
         },
     },
-    error::EmptyError,
 };
 use std::rc::Rc;
 
@@ -150,7 +149,6 @@ pub fn save<RawData, Mode, Step>(
 {
     save_loader.load(async move {
         let body = raw_data.as_body();
-        let path = Update::PATH.replace("{module_id}", &module_id.0.to_string());
 
         let is_complete = raw_data.is_complete();
 
@@ -161,7 +159,7 @@ pub fn save<RawData, Mode, Step>(
             body: Some(body),
             parent_id: asset_id,
         });
-        let _ = api_with_auth_empty::<EmptyError, _>(&path, Update::METHOD, req).await;
+        let _ = Update::api_with_auth_empty(ModuleUploadPath(module_id.clone()), req).await;
 
         // Update the sidebar with this modules completion status
         let _ = IframeAction::new(ModuleToJigEditorMessage::Complete(module_id, is_complete))

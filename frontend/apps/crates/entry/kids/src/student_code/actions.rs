@@ -4,7 +4,10 @@ use dominator::clone;
 use shared::{
     api::endpoints::jig,
     domain::jig::player::{
-        instance::{PlayerSessionInstanceCreateRequest, PlayerSessionInstanceResponse},
+        instance::{
+            PlayerSessionInstanceCreatePath, PlayerSessionInstanceCreateRequest,
+            PlayerSessionInstanceResponse,
+        },
         JigPlayerSessionIndex,
     },
 };
@@ -30,7 +33,11 @@ async fn code_to_jig_id(number: String) -> Result<PlayerSessionInstanceResponse,
     let index = JigPlayerSessionIndex(number);
     let req = PlayerSessionInstanceCreateRequest { index };
 
-    let (result, status) = jig::player::instance::Create::api_no_auth_status(Some(req)).await;
+    let (result, status) = jig::player::instance::Create::api_no_auth_status(
+        PlayerSessionInstanceCreatePath(),
+        Some(req),
+    )
+    .await;
 
     match status {
         404 => Err(()),

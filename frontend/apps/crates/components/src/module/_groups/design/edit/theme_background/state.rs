@@ -4,14 +4,13 @@ use crate::tabs::MenuTabKind;
 use crate::theme_selector::state::{ThemeSelector, ThemeSelectorCallbacks};
 use dominator::clone;
 use futures_signals::signal::Mutable;
-use shared::api::{endpoints, ApiEndpoint};
+use shared::api::endpoints;
 use shared::domain::asset::AssetId;
-use shared::domain::jig::JigUpdateDraftDataRequest;
+use shared::domain::jig::{JigUpdateDraftDataPath, JigUpdateDraftDataRequest};
 use shared::domain::module::body::{ModeExt, StepExt};
-use shared::error::EmptyError;
 use std::marker::PhantomData;
 use std::rc::Rc;
-use utils::prelude::api_with_auth_empty;
+use utils::prelude::ApiEndpointExt;
 use wasm_bindgen_futures::spawn_local;
 
 use super::custom_background::CustomBackground;
@@ -44,18 +43,12 @@ where
             // if asset is Jig update theme
             if let AssetId::JigId(jig_id) = base.get_asset_id() {
                 spawn_local(async move {
-                    let path = endpoints::jig::UpdateDraftData::PATH.replace("{id}", &jig_id.0.to_string());
-
                     let req = JigUpdateDraftDataRequest {
                         theme: Some(theme_id),
                         ..JigUpdateDraftDataRequest::default()
                     };
 
-                    let _ = api_with_auth_empty::<EmptyError, _>(
-                        &path,
-                        endpoints::jig::UpdateDraftData::METHOD,
-                        Some(req),
-                    )
+                    let _ = endpoints::jig::UpdateDraftData::api_with_auth_empty(JigUpdateDraftDataPath(jig_id.clone()), Some(req))
                         .await;
                 })
             }

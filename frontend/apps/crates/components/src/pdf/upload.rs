@@ -2,9 +2,8 @@
 use crate::firebase;
 use awsm_web::loaders::helpers::AbortController;
 use shared::{
-    api::{endpoints, ApiEndpoint},
+    api::endpoints,
     domain::pdf::{user::*, *},
-    error::*,
     media::MediaLibrary,
 };
 use thiserror::Error;
@@ -65,12 +64,9 @@ pub async fn upload_pdf(
                     file_size: file.size() as usize,
                 };
 
-                let path = endpoints::pdf::user::Upload::PATH.replace("{id}", &id.0.to_string());
-
-                let resp = api_with_auth_status_abortable::<UserPdfUploadResponse, EmptyError, _>(
-                    &path,
-                    endpoints::pdf::user::Upload::METHOD,
+                let resp = endpoints::pdf::user::Upload::api_with_auth_status_abortable(
                     abort_controller,
+                    UserPdfUploadPath(id.clone()),
                     Some(req),
                 )
                 .await

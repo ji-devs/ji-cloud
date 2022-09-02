@@ -1,6 +1,6 @@
-use crate::fetch::api_no_auth;
-use shared::api::{endpoints, ApiEndpoint};
-use shared::domain::meta::MetadataResponse;
+use crate::prelude::ApiEndpointExt;
+use shared::api::endpoints;
+use shared::domain::meta::GetMetadataPath;
 
 type Id = String;
 
@@ -15,12 +15,7 @@ pub struct MetaOptions {
 impl MetaOptions {
     pub async fn load() -> Result<Self, ()> {
         //Probably doesn't need auth - just regular fetch from awsm_web
-        let resp: Result<MetadataResponse, ()> = api_no_auth::<_, _, ()>(
-            endpoints::meta::Get::PATH,
-            endpoints::meta::Get::METHOD,
-            None,
-        )
-        .await;
+        let resp = endpoints::meta::Get::api_no_auth(GetMetadataPath(), None).await;
         resp.map_err(|_err| {
             //log::error!("{:?}", err);
         })

@@ -2,9 +2,8 @@
 use crate::firebase;
 use awsm_web::loaders::helpers::AbortController;
 use shared::{
-    api::{endpoints, ApiEndpoint},
+    api::endpoints,
     domain::audio::{user::*, *},
-    error::*,
     media::MediaLibrary,
 };
 use thiserror::Error;
@@ -65,34 +64,32 @@ pub async fn upload_audio(
                     file_size: file.size() as usize,
                 };
 
-                let path = endpoints::audio::user::Upload::PATH.replace("{id}", &id.0.to_string());
+                // let path = endpoints::audio::user::Upload::PATH.replace("{id}", &id.0.to_string());
 
-                let resp =
-                    api_with_auth_status_abortable::<UserAudioUploadResponse, EmptyError, _>(
-                        &path,
-                        endpoints::audio::user::Upload::METHOD,
-                        abort_controller,
-                        Some(req),
-                    )
-                    .await
-                    .map_err(|aborted| {
-                        if aborted {
-                            UploadError::Aborted
-                        } else {
-                            UploadError::Other(awsm_web::errors::Error::Empty)
-                        }
-                    })
-                    .and_then(|(resp, status)| {
-                        if status == 413 {
-                            let _ = web_sys::window()
-                                .unwrap_ji()
-                                .alert_with_message(STR_AUDIO_IS_TOO_LARGE);
-                            Err(UploadError::TooLarge)
-                        } else {
-                            side_effect_status_code(status);
-                            resp.map_err(|_| UploadError::Other(awsm_web::errors::Error::Empty))
-                        }
-                    })?;
+                let resp = endpoints::audio::user::Upload::api_with_auth_status_abortable(
+                    abort_controller,
+                    UserAudioUploadPath(id.clone()),
+                    Some(req),
+                )
+                .await
+                .map_err(|aborted| {
+                    if aborted {
+                        UploadError::Aborted
+                    } else {
+                        UploadError::Other(awsm_web::errors::Error::Empty)
+                    }
+                })
+                .and_then(|(resp, status)| {
+                    if status == 413 {
+                        let _ = web_sys::window()
+                            .unwrap_ji()
+                            .alert_with_message(STR_AUDIO_IS_TOO_LARGE);
+                        Err(UploadError::TooLarge)
+                    } else {
+                        side_effect_status_code(status);
+                        resp.map_err(|_| UploadError::Other(awsm_web::errors::Error::Empty))
+                    }
+                })?;
 
                 let UserAudioUploadResponse { session_uri } = resp;
                 session_uri

@@ -3,15 +3,18 @@ use std::rc::Rc;
 use dominator::clone;
 use futures::join;
 use shared::{
-    api::{endpoints, ApiEndpoint},
+    api::endpoints,
     domain::{
         asset::{DraftOrLive, OrderBy},
-        jig::{JigBrowseQuery, JigId, JigResponse, JigSearchQuery},
+        jig::{
+            JigBrowsePath, JigBrowseQuery, JigGetDraftPath, JigId, JigResponse, JigSearchPath,
+            JigSearchQuery,
+        },
+        meta::GetMetadataPath,
     },
-    error::EmptyError,
 };
 use utils::{
-    prelude::{api_with_auth, ApiEndpointExt},
+    prelude::ApiEndpointExt,
     routes::{AdminCurationRoute, AdminRoute, Route},
 };
 
@@ -29,7 +32,7 @@ impl Curation {
     }
 
     async fn load_meta(self: &Rc<Self>) {
-        match endpoints::meta::Get::api_with_auth(None).await {
+        match endpoints::meta::Get::api_with_auth(GetMetadataPath(), None).await {
             Err(_) => todo!(),
             Ok(meta) => {
                 self.ages.set(meta.age_ranges);
@@ -65,7 +68,7 @@ impl Curation {
             ..Default::default()
         };
 
-        match endpoints::jig::Browse::api_with_auth(Some(req)).await {
+        match endpoints::jig::Browse::api_with_auth(JigBrowsePath(), Some(req)).await {
             Err(_) => todo!(),
             Ok(res) => JigListResponse {
                 jigs: res.jigs,
@@ -81,7 +84,7 @@ impl Curation {
             ..Default::default()
         };
 
-        match endpoints::jig::Search::api_with_auth(Some(req)).await {
+        match endpoints::jig::Search::api_with_auth(JigSearchPath(), Some(req)).await {
             Err(_) => todo!(),
             Ok(res) => JigListResponse {
                 jigs: res.jigs,
@@ -125,15 +128,7 @@ impl Curation {
     }
 
     async fn load_jig(self: &Rc<Self>, jig_id: &JigId) -> EditableJig {
-        let path = endpoints::jig::GetDraft::PATH.replace("{id}", &jig_id.0.to_string());
-
-        match api_with_auth::<JigResponse, EmptyError, ()>(
-            &path,
-            endpoints::jig::GetDraft::METHOD,
-            None,
-        )
-        .await
-        {
+        match endpoints::jig::GetDraft::api_with_auth(JigGetDraftPath(jig_id.clone()), None).await {
             Ok(jig) => jig.into(),
             Err(_) => {
                 todo!()

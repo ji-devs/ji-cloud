@@ -1,8 +1,7 @@
 use super::state::*;
 use shared::{
-    api::endpoints::{user, ApiEndpoint},
-    domain::user::VerifyEmailRequest,
-    error::EmptyError,
+    api::endpoints::user,
+    domain::user::{VerifyEmailPath, VerifyEmailRequest},
 };
 use utils::prelude::*;
 
@@ -14,12 +13,8 @@ impl SendEmailConfirmationPage {
         self.loader.load(async move {
             let query = VerifyEmailRequest::Resend { email };
 
-            let resp: Result<(), EmptyError> = api_no_auth_empty(
-                user::VerifyEmail::PATH,
-                user::VerifyEmail::METHOD,
-                Some(query),
-            )
-            .await;
+            let resp: anyhow::Result<()> =
+                user::VerifyEmail::api_no_auth_empty(VerifyEmailPath(), Some(query)).await;
 
             match resp {
                 Ok(_) => {

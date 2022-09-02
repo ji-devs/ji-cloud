@@ -1,11 +1,7 @@
 use std::rc::Rc;
 
-use shared::{
-    api::{endpoints, ApiEndpoint},
-    domain::resource::{ResourceSearchQuery, ResourceSearchResponse},
-    error::EmptyError,
-};
-use utils::prelude::api_no_auth;
+use shared::{api::endpoints, domain::resource::ResourceSearchPath};
+use utils::prelude::ApiEndpointExt;
 
 use crate::home::search_results::search_results_section::SearchResultsSection;
 
@@ -15,13 +11,7 @@ impl SearchResultsSection {
 
         req.page = Some(self.next_page.get());
 
-        match api_no_auth::<ResourceSearchResponse, EmptyError, ResourceSearchQuery>(
-            endpoints::resource::Search::PATH,
-            endpoints::resource::Search::METHOD,
-            Some(req),
-        )
-        .await
-        {
+        match endpoints::resource::Search::api_no_auth(ResourceSearchPath(), Some(req)).await {
             Err(_) => todo!(),
             Ok(res) => {
                 let mut resources = self.list.lock_mut();

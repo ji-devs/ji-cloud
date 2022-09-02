@@ -1,11 +1,7 @@
 use std::rc::Rc;
 
-use shared::{
-    api::{endpoints, ApiEndpoint},
-    domain::jig::{JigSearchQuery, JigSearchResponse},
-    error::EmptyError,
-};
-use utils::prelude::api_no_auth;
+use shared::{api::endpoints, domain::jig::JigSearchPath};
+use utils::prelude::ApiEndpointExt;
 
 use crate::home::search_results::search_results_section::SearchResultsSection;
 
@@ -15,13 +11,7 @@ impl SearchResultsSection {
 
         req.page = Some(self.next_page.get());
 
-        match api_no_auth::<JigSearchResponse, EmptyError, JigSearchQuery>(
-            endpoints::jig::Search::PATH,
-            endpoints::jig::Search::METHOD,
-            Some(req),
-        )
-        .await
-        {
+        match endpoints::jig::Search::api_no_auth(JigSearchPath(), Some(req)).await {
             Err(_) => todo!(),
             Ok(res) => {
                 let mut jigs = self.list.lock_mut();

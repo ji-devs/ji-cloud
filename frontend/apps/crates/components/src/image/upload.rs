@@ -2,9 +2,8 @@
 use crate::firebase;
 use awsm_web::loaders::helpers::AbortController;
 use shared::{
-    api::{endpoints, ApiEndpoint},
+    api::endpoints,
     domain::image::{user::*, *},
-    error::*,
     media::MediaLibrary,
 };
 use thiserror::Error;
@@ -65,12 +64,9 @@ pub async fn upload_image(
                     file_size: file.size() as usize,
                 };
 
-                let path = endpoints::image::Upload::PATH.replace("{id}", &id.0.to_string());
-
-                let resp = api_with_auth_status_abortable::<ImageUploadResponse, EmptyError, _>(
-                    &path,
-                    endpoints::image::Upload::METHOD,
+                let resp = endpoints::image::Upload::api_with_auth_status_abortable(
                     abort_controller,
+                    ImageUploadPath(id.clone()),
                     Some(req),
                 )
                 .await
@@ -102,34 +98,30 @@ pub async fn upload_image(
                     file_size: file.size() as usize,
                 };
 
-                let path = endpoints::image::user::Upload::PATH.replace("{id}", &id.0.to_string());
-
-                let resp =
-                    api_with_auth_status_abortable::<UserImageUploadResponse, EmptyError, _>(
-                        &path,
-                        endpoints::image::user::Upload::METHOD,
-                        abort_controller,
-                        Some(req),
-                    )
-                    .await
-                    .map_err(|aborted| {
-                        if aborted {
-                            UploadError::Aborted
-                        } else {
-                            UploadError::Other(awsm_web::errors::Error::Empty)
-                        }
-                    })
-                    .and_then(|(resp, status)| {
-                        if status == 413 {
-                            let _ = web_sys::window()
-                                .unwrap_ji()
-                                .alert_with_message(STR_IMAGE_TOO_LARGE);
-                            Err(UploadError::TooLarge)
-                        } else {
-                            side_effect_status_code(status);
-                            resp.map_err(|_| UploadError::Other(awsm_web::errors::Error::Empty))
-                        }
-                    })?;
+                let resp = endpoints::image::user::Upload::api_with_auth_status_abortable(
+                    abort_controller,
+                    UserImageUploadPath(id.clone()),
+                    Some(req),
+                )
+                .await
+                .map_err(|aborted| {
+                    if aborted {
+                        UploadError::Aborted
+                    } else {
+                        UploadError::Other(awsm_web::errors::Error::Empty)
+                    }
+                })
+                .and_then(|(resp, status)| {
+                    if status == 413 {
+                        let _ = web_sys::window()
+                            .unwrap_ji()
+                            .alert_with_message(STR_IMAGE_TOO_LARGE);
+                        Err(UploadError::TooLarge)
+                    } else {
+                        side_effect_status_code(status);
+                        resp.map_err(|_| UploadError::Other(awsm_web::errors::Error::Empty))
+                    }
+                })?;
 
                 let UserImageUploadResponse { session_uri } = resp;
                 session_uri

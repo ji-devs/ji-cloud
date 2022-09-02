@@ -68,6 +68,7 @@ itertools = "0.10.1"
 gloo-timers = "0.2.1"
 strum = "0.22.0"
 strum_macros = "0.22.0"
+anyhow = "1.0.62"
 
 [features]
 default = ["wee_alloc"]

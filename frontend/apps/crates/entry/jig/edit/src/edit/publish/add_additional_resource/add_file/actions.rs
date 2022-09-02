@@ -5,9 +5,12 @@ use shared::{
     api::endpoints,
     domain::{
         additional_resource::ResourceContent,
-        audio::AudioId,
-        image::{user::UserImageCreateRequest, ImageId, ImageSize},
-        pdf::PdfId,
+        audio::{user::UserAudioCreatePath, AudioId},
+        image::{
+            user::{UserImageCreatePath, UserImageCreateRequest},
+            ImageId, ImageSize,
+        },
+        pdf::{user::UserPdfCreatePath, PdfId},
     },
     media::MediaLibrary,
 };
@@ -71,7 +74,7 @@ async fn upload_image(file: &File) -> Result<ImageId, anyhow::Error> {
         size: ImageSize::Sticker,
     };
 
-    let image_id = endpoints::image::user::Create::api_with_auth(Some(req))
+    let image_id = endpoints::image::user::Create::api_with_auth(UserImageCreatePath(), Some(req))
         .await
         .map_err(|_| anyhow::Error::msg("Error creating image in db"))?
         .id;
@@ -83,8 +86,8 @@ async fn upload_image(file: &File) -> Result<ImageId, anyhow::Error> {
     Ok(image_id)
 }
 
-async fn upload_audio(file: &File) -> Result<AudioId, anyhow::Error> {
-    let audio_id = endpoints::audio::user::Create::api_with_auth(None)
+async fn upload_audio(file: &File) -> anyhow::Result<AudioId> {
+    let audio_id = endpoints::audio::user::Create::api_with_auth(UserAudioCreatePath(), None)
         .await
         .map_err(|_| anyhow::Error::msg("Error creating audio in db"))?
         .id;
@@ -97,7 +100,7 @@ async fn upload_audio(file: &File) -> Result<AudioId, anyhow::Error> {
 }
 
 async fn upload_pdf(file: &File) -> Result<PdfId, anyhow::Error> {
-    let pdf_id = endpoints::pdf::user::Create::api_with_auth(None)
+    let pdf_id = endpoints::pdf::user::Create::api_with_auth(UserPdfCreatePath(), None)
         .await
         .map_err(|_| anyhow::Error::msg("Error creating pdf in db"))?
         .id;

@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use dominator::clone;
-use shared::api::endpoints;
+use shared::{api::endpoints, domain::session::DeleteSessionPath};
 use utils::{
     prelude::{get_user_cloned, ApiEndpointExt},
     routes::{LoginQuery, Route, UserRoute},
@@ -21,7 +21,7 @@ pub fn fetch_profile(state: Rc<State>) {
 
 pub fn logout(state: Rc<State>) {
     state.loader.load(clone!(state => async move {
-        let server = endpoints::session::Delete::api_with_auth_empty(None).await;
+        let server = endpoints::session::Delete::api_with_auth_empty(DeleteSessionPath(), None).await;
         let local = delete_csrf_token();
 
         match (local, server) {

@@ -2,9 +2,8 @@ use super::state::*;
 use components::image::upload::upload_image;
 use dominator::clone;
 use shared::{
-    api::{endpoints, ApiEndpoint},
+    api::endpoints,
     domain::{image::*, meta::*},
-    error::*,
     media::MediaLibrary,
 };
 use std::rc::Rc;
@@ -27,7 +26,7 @@ pub fn on_change(state: Rc<State>, value: String) {
 
 pub fn on_file(state: Rc<State>, file: File) {
     state.loader.load(clone!(state => async move {
-        let meta_resp = api_no_auth::<MetadataResponse, (), ()>(endpoints::meta::Get::PATH, endpoints::meta::Get::METHOD, None).await.expect_ji("couldn't get meta response!");
+        let meta_resp = endpoints::meta::Get::api_no_auth(GetMetadataPath(), None).await.expect_ji("couldn't get meta response!");
 
         let affiliations = meta_resp.affiliations
             .iter()
@@ -52,7 +51,7 @@ pub fn on_file(state: Rc<State>, file: File) {
             size: *state.size.borrow()
         };
 
-        match api_with_auth::<CreateResponse, MetadataNotFound, _>(endpoints::image::Create::PATH, endpoints::image::Create::METHOD, Some(req)).await {
+        match endpoints::image::Create::api_with_auth(ImageCreatePath(), Some(req)).await {
             Ok(resp) => {
                 let CreateResponse { id} = resp;
 

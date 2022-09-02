@@ -3,16 +3,15 @@ use std::{collections::HashMap, pin::Pin, rc::Rc};
 use dominator::clone;
 use futures::{join, Future};
 use shared::{
-    api::endpoints::{category, meta, ApiEndpoint},
+    api::endpoints::{category, meta},
     domain::{
         asset::{AssetId, PrivacyLevel},
-        category::{Category, CategoryId, CategoryResponse, CategoryTreeScope, GetCategoryRequest},
-        meta::MetadataResponse,
+        category::{Category, CategoryId, CategoryTreeScope, GetCategoryPath, GetCategoryRequest},
+        meta::{GetMetadataPath, MetadataResponse},
     },
-    error::EmptyError,
 };
 use utils::{
-    prelude::{api_with_auth, UnwrapJiExt},
+    prelude::{ApiEndpointExt, UnwrapJiExt},
     routes::{CourseEditRoute, JigEditRoute, ResourceEditRoute},
 };
 
@@ -27,7 +26,7 @@ mod resource_actions;
 
 impl Publish {
     pub async fn load_new(asset_edit_state: Rc<AssetEditState>) -> Self {
-        let asset: Pin<Box<dyn Future<Output = Result<EditableAsset, ()>>>> =
+        let asset: Pin<Box<dyn Future<Output = anyhow::Result<EditableAsset>>>> =
             match asset_edit_state.asset_id {
                 AssetId::JigId(jig_id) => Box::pin(jig_actions::load_jig(jig_id)),
                 AssetId::ResourceId(resource_id) => {
@@ -168,25 +167,18 @@ fn set_default_values(asset: &EditableAsset, meta: &MetadataResponse) {
     asset.privacy_level().replace(PrivacyLevel::default());
 }
 
-async fn load_categories() -> Result<Vec<Category>, EmptyError> {
+async fn load_categories() -> anyhow::Result<Vec<Category>> {
     let req = GetCategoryRequest {
         ids: Vec::new(),
         scope: Some(CategoryTreeScope::Descendants),
     };
 
-    match api_with_auth::<CategoryResponse, EmptyError, GetCategoryRequest>(
-        category::Get::PATH,
-        category::Get::METHOD,
-        Some(req),
-    )
-    .await
-    {
+    match category::Get::api_with_auth(GetCategoryPath(), Some(req)).await {
         Ok(resp) => Ok(resp.categories),
         Err(e) => Err(e),
     }
 }
 
-pub async fn load_metadata() -> Result<MetadataResponse, EmptyError> {
-    api_with_auth::<MetadataResponse, EmptyError, ()>(meta::Get::PATH, meta::Get::METHOD, None)
-        .await
+pub async fn load_metadata() -> anyhow::Result<MetadataResponse> {
+    meta::Get::api_with_auth(GetMetadataPath(), None).await
 }

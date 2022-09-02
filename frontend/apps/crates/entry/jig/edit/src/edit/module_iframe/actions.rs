@@ -1,8 +1,7 @@
 use dominator::clone;
 use shared::{
-    api::endpoints::{module::*, ApiEndpoint},
+    api::endpoints::module::*,
     domain::{asset::AssetType, module::*},
-    error::EmptyError,
 };
 use std::rc::Rc;
 use utils::prelude::*;
@@ -17,11 +16,7 @@ impl ModuleIframe {
 
             let asset_type = AssetType::from(&state.asset_id);
 
-            let path = GetDraft::PATH
-                .replace("{asset_type}", asset_type.as_str())
-                .replace("{module_id}", &state.module_id.0.to_string());
-
-            match api_with_auth::<ModuleResponse, EmptyError, ()>(&path, GetDraft::METHOD, None).await {
+            match GetDraft::api_with_auth(ModuleGetDraftPath(asset_type, state.module_id.clone()), None).await {
                 Ok(resp) => {
                     state.module_kind.set(Some(resp.module.body.kind()));
                 }

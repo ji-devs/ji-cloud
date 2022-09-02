@@ -3,12 +3,11 @@ use std::rc::Rc;
 use dominator::{clone, html, Dom};
 
 use shared::{
-    api::{endpoints::jig, ApiEndpoint},
-    domain::jig::JigResponse,
-    error::EmptyError,
+    api::endpoints::jig,
+    domain::jig::{JigLikePath, JigResponse, JigUnlikePath},
 };
 
-use utils::{events, prelude::api_with_auth_empty};
+use utils::{events, prelude::ApiEndpointExt};
 
 use super::super::state::State;
 
@@ -30,19 +29,15 @@ pub fn render(state: Rc<State>, jig: &JigResponse) -> Dom {
 
                     let response = if jig_liked {
                         // Unlike the JIG
-                        let path = jig::Unlike::PATH.replace("{id}", &jig.id.0.to_string());
-                        api_with_auth_empty::<EmptyError, ()>(
-                            &path,
-                            jig::Unlike::METHOD,
+                        jig::Unlike::api_with_auth_empty(
+                            JigUnlikePath(jig.id),
                             None
                         )
                         .await
                     } else {
                         // Like the JIG
-                        let path = jig::Like::PATH.replace("{id}", &jig.id.0.to_string());
-                        api_with_auth_empty::<EmptyError, ()>(
-                            &path,
-                            jig::Like::METHOD,
+                        jig::Like::api_with_auth_empty(
+                            JigLikePath(jig.id),
                             None
                         )
                         .await

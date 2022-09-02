@@ -1,10 +1,6 @@
 use super::state::*;
 use dominator::clone;
-use shared::{
-    api::endpoints::{session, ApiEndpoint},
-    domain::session::*,
-    error::EmptyError,
-};
+use shared::{api::endpoints::session, domain::session::*};
 use std::rc::Rc;
 use utils::{prelude::*, storage};
 
@@ -21,7 +17,7 @@ pub fn signin_email(state: Rc<LoginPage>) {
         let email = state.email.get_value();
         let password = state.password.borrow().clone();
 
-        let (resp, _):(Result<CreateSessionResponse, EmptyError>, u16) = api_with_basic_token_status(session::Create::PATH, &email, &password, session::Create::METHOD, None::<()>).await;
+        let (resp, _):(anyhow::Result<CreateSessionResponse>, u16) = session::Create::api_with_basic_token_status(&email, &password, CreateSessionPath(), None::<()>).await;
 
         match resp {
             Ok(resp) => {

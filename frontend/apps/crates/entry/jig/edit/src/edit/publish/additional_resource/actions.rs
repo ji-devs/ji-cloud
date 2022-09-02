@@ -3,27 +3,20 @@ use std::rc::Rc;
 use super::state::AdditionalResourceComponent;
 use dominator::clone;
 use shared::{
-    api::{endpoints, ApiEndpoint},
-    domain::additional_resource::AssetIdResource,
-    error::EmptyError,
+    api::endpoints,
+    domain::additional_resource::{AssetIdResource, DeleteAssetResourcePath},
 };
-use utils::{prelude::api_with_auth_empty, unwrap::UnwrapJiExt};
+use utils::{prelude::ApiEndpointExt, unwrap::UnwrapJiExt};
 
 impl AdditionalResourceComponent {
     pub fn delete(self: &Rc<Self>) {
         let state = self;
         state.loader.load(clone!(state => async move {
-            let resource_id = state.additional_resource.id.0.to_string();
-
-            let path = endpoints::additional_resource::Delete::PATH
-                .replace("{additional_resource_id}", &resource_id);
-
             let req = AssetIdResource {
                 asset_id: Some(state.publish_state.asset.id()),
             };
-            let res = api_with_auth_empty::<EmptyError, AssetIdResource>(
-                &path,
-                endpoints::additional_resource::Delete::METHOD,
+            let res = endpoints::additional_resource::Delete::api_with_auth_empty(
+                DeleteAssetResourcePath(state.additional_resource.id.clone()),
                 Some(req)
             ).await;
 

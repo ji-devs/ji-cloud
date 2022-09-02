@@ -2,18 +2,13 @@ use std::rc::Rc;
 
 use dominator::clone;
 use shared::{
-    api::{
-        endpoints::{jig::report, meta},
-        ApiEndpoint,
-    },
+    api::endpoints::{jig::report, meta},
     domain::{
-        jig::{report::CreateJigReport, ReportId},
-        meta::MetadataResponse,
-        CreateResponse,
+        jig::report::{CreateJigReport, CreateJigReportPath},
+        meta::GetMetadataPath,
     },
-    error::EmptyError,
 };
-use utils::prelude::{api_no_auth, api_with_auth};
+use utils::prelude::ApiEndpointExt;
 
 use crate::jig::sidebar::state::ReportStatus;
 
@@ -23,11 +18,8 @@ pub fn send_report(state: Rc<State>) {
     state.player_state.loader.load(clone!(state => async move {
         let report_type = state.report_type.lock_ref().unwrap();
 
-        let id = &state.player_state.jig_id.0.to_string();
-        let path = report::Create::PATH.replace("{id}", id);
-        let response = api_with_auth::<CreateResponse<ReportId>, EmptyError, CreateJigReport>(
-            &path,
-            report::Create::METHOD,
+        let response = report::Create::api_with_auth(
+            CreateJigReportPath(state.player_state.jig_id),
             Some(CreateJigReport {
                 report_type
         })).await;
@@ -39,7 +31,7 @@ pub fn send_report(state: Rc<State>) {
 
 pub fn load_ages(state: Rc<State>) {
     state.loader.load(clone!(state => async move {
-        match api_no_auth::<MetadataResponse, EmptyError, ()>(meta::Get::PATH, meta::Get::METHOD, None).await {
+        match meta::Get::api_no_auth(GetMetadataPath(), None).await {
             Err(_) => {},
             Ok(res) => {
                 state.all_ages.set(res.age_ranges);

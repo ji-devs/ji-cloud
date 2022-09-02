@@ -1,10 +1,9 @@
 use shared::{
-    api::endpoints::{jig, ApiEndpoint},
-    domain::jig::{JigId, JigResponse, JigUpdateDraftDataRequest},
-    error::{EmptyError, MetadataNotFound},
+    api::endpoints::jig,
+    domain::jig::{JigGetDraftPath, JigId, JigPublishPath, JigUpdateDraftDataPath},
 };
 use utils::{
-    prelude::{api_with_auth, api_with_auth_empty},
+    prelude::ApiEndpointExt,
     routes::{AssetEditRoute, AssetRoute, JigEditRoute, Route},
 };
 
@@ -13,18 +12,13 @@ use crate::edit::publish::editable_assets::EditableAsset;
 use super::super::editable_assets::EditableJig;
 
 pub async fn save_and_publish_jig(jig: &EditableJig) -> Result<(), ()> {
-    let path = jig::UpdateDraftData::PATH.replace("{id}", &jig.id.0.to_string());
     let req = jig.to_jig_update_request();
-    api_with_auth_empty::<MetadataNotFound, JigUpdateDraftDataRequest>(
-        &path,
-        jig::UpdateDraftData::METHOD,
-        Some(req),
-    )
-    .await
-    .map_err(|_| ())?;
 
-    let path = jig::Publish::PATH.replace("{id}", &jig.id.0.to_string());
-    api_with_auth_empty::<EmptyError, ()>(&path, jig::Publish::METHOD, None)
+    jig::UpdateDraftData::api_with_auth_empty(JigUpdateDraftDataPath(jig.id.clone()), Some(req))
+        .await
+        .map_err(|_| ())?;
+
+    jig::Publish::api_with_auth_empty(JigPublishPath(jig.id.clone()), None)
         .await
         .map_err(|_| ())?;
 
@@ -43,11 +37,8 @@ pub async fn save_and_publish_jig(jig: &EditableJig) -> Result<(), ()> {
     Ok(())
 }
 
-pub async fn load_jig(jig_id: JigId) -> Result<EditableAsset, ()> {
-    let path = jig::GetDraft::PATH.replace("{id}", &jig_id.0.to_string());
-
-    api_with_auth::<JigResponse, EmptyError, ()>(&path, jig::GetDraft::METHOD, None)
+pub async fn load_jig(jig_id: JigId) -> anyhow::Result<EditableAsset> {
+    jig::GetDraft::api_with_auth(JigGetDraftPath(jig_id), None)
         .await
         .map(|jig| EditableAsset::Jig(EditableJig::new(jig)))
-        .map_err(|_| ())
 }

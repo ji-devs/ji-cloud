@@ -3,15 +3,14 @@ use std::rc::Rc;
 use dominator::clone;
 use futures::join;
 use shared::{
-    api::{endpoints, ApiEndpoint},
+    api::endpoints,
     domain::user::public_user::{
-        BrowsePublicUserFollowersQuery, BrowsePublicUserFollowersResponse,
-        BrowsePublicUserFollowingResponse, BrowsePublicUserFollowingsQuery,
+        BrowsePublicUserFollowersPath, BrowsePublicUserFollowersQuery,
+        BrowsePublicUserFollowingPath, BrowsePublicUserFollowingsQuery,
     },
-    error::EmptyError,
 };
 use utils::{
-    prelude::{api_no_auth, get_user_id},
+    prelude::{get_user_id, ApiEndpointExt},
     routes::{CommunityRoute, CommunitySearchQuery, Route},
 };
 
@@ -37,13 +36,10 @@ impl Community {
                 ..Default::default()
             };
 
-            let path =
-                endpoints::user::BrowseFollowers::PATH.replace("{user_id}", &user_id.to_string());
-            let res = api_no_auth::<
-                BrowsePublicUserFollowersResponse,
-                EmptyError,
-                BrowsePublicUserFollowersQuery,
-            >(&path, endpoints::user::BrowseFollowers::METHOD, Some(req))
+            let res = endpoints::user::BrowseFollowers::api_no_auth(
+                BrowsePublicUserFollowersPath(user_id),
+                Some(req),
+            )
             .await;
             match res {
                 Ok(res) => {
@@ -65,13 +61,10 @@ impl Community {
                 ..Default::default()
             };
 
-            let path =
-                endpoints::user::BrowseFollowing::PATH.replace("{user_id}", &user_id.to_string());
-            let res = api_no_auth::<
-                BrowsePublicUserFollowingResponse,
-                EmptyError,
-                BrowsePublicUserFollowingsQuery,
-            >(&path, endpoints::user::BrowseFollowers::METHOD, Some(req))
+            let res = endpoints::user::BrowseFollowing::api_no_auth(
+                BrowsePublicUserFollowingPath(user_id),
+                Some(req),
+            )
             .await;
             match res {
                 Ok(res) => {

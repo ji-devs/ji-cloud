@@ -1,12 +1,8 @@
 use super::state::*;
 use dominator::clone;
-use shared::{
-    api::endpoints::{user::*, ApiEndpoint},
-    domain::user::*,
-    error::EmptyError,
-};
+use shared::{api::endpoints::user::*, domain::user::*};
 use std::rc::Rc;
-use utils::fetch::api_no_auth;
+use utils::prelude::ApiEndpointExt;
 
 use crate::register::state::{Step, Step1Data};
 
@@ -64,8 +60,8 @@ async fn username_exists(name: String) -> bool {
         name: Some(name),
     };
 
-    let resp: Result<OtherUser, EmptyError> =
-        api_no_auth(UserLookup::PATH, UserLookup::METHOD, Some(query)).await;
+    let resp: anyhow::Result<OtherUser> =
+        UserLookup::api_no_auth(UserLookupPath(), Some(query)).await;
 
     resp.is_ok()
 }

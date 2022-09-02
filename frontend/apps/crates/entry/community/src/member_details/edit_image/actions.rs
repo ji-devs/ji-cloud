@@ -4,7 +4,10 @@ use components::image::upload::upload_image;
 use dominator::clone;
 use shared::{
     api::endpoints,
-    domain::image::{user::UserImageCreateRequest, ImageId, ImageSize},
+    domain::image::{
+        user::{UserImageCreatePath, UserImageCreateRequest},
+        ImageId, ImageSize,
+    },
     media::MediaLibrary,
 };
 use utils::{prelude::ApiEndpointExt, unwrap::UnwrapJiExt};
@@ -36,7 +39,7 @@ async fn upload_profile_image(file: File) -> Result<ImageId, Box<dyn std::error:
         size: ImageSize::UserProfile,
     };
 
-    let image_id = endpoints::image::user::Create::api_with_auth(Some(req))
+    let image_id = endpoints::image::user::Create::api_with_auth(UserImageCreatePath(), Some(req))
         .await
         .map_err(|_err| "Error creating image in db")?
         .id;

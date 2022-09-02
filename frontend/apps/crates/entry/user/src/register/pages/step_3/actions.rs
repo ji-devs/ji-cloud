@@ -4,7 +4,7 @@ use shared::{
     api::endpoints,
     domain::{
         meta::{AffiliationId, AgeRangeId, SubjectId},
-        user::CreateProfileRequest,
+        user::{CreateProfilePath, CreateProfileRequest},
     },
 };
 use std::rc::Rc;
@@ -58,7 +58,9 @@ pub fn submit(state: Rc<State>) {
     };
 
     state.register_loader.load(async {
-        let (resp, status) = endpoints::user::CreateProfile::api_with_auth_status(Some(req)).await;
+        let (resp, status) =
+            endpoints::user::CreateProfile::api_with_auth_status(CreateProfilePath(), Some(req))
+                .await;
 
         match resp {
             Ok(resp) => {

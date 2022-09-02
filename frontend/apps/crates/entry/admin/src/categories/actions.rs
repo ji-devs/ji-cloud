@@ -1,18 +1,14 @@
 use super::state::*;
 use futures_signals::signal_vec::{MutableVecLockMut, MutableVecLockRef};
 use shared::{
-    api::endpoints::{self, ApiEndpoint},
+    api::endpoints::{self},
     domain::category::{
-        CategoryResponse, CategoryTreeScope, CreateCategoryRequest, GetCategoryRequest,
-        NewCategoryResponse, UpdateCategoryRequest,
+        CategoryTreeScope, CreateCategoryPath, CreateCategoryRequest, DeleteCategoryPath,
+        GetCategoryPath, GetCategoryRequest, UpdateCategoryPath, UpdateCategoryRequest,
     },
-    error::EmptyError,
 };
 use std::rc::Rc;
-use utils::{
-    fetch::{api_with_auth, api_with_auth_empty},
-    unwrap::UnwrapJiExt,
-};
+use utils::{prelude::ApiEndpointExt, unwrap::UnwrapJiExt};
 
 use dominator::clone;
 use wasm_bindgen::prelude::*;
@@ -31,7 +27,7 @@ pub fn load_categories(state: Rc<State>) {
             scope: Some(CategoryTreeScope::Descendants)
         };
 
-        match api_with_auth::<CategoryResponse, EmptyError, _>(endpoints::category::Get::PATH, endpoints::category::Get::METHOD, Some(req)).await {
+        match endpoints::category::Get::api_with_auth(GetCategoryPath(), Some(req)).await {
             Ok(resp) => {
                 let categories:Vec<Rc<Category>> = resp.categories
                     .into_iter()
@@ -100,7 +96,7 @@ fn add_category(state: Rc<State>, parent: Option<Rc<Category>>) {
             parent_id: parent.as_ref().map(|cat| cat.id)
         };
 
-        match api_with_auth::<NewCategoryResponse, EmptyError, _>(endpoints::category::Create::PATH, endpoints::category::Create::METHOD, Some(req)).await {
+        match endpoints::category::Create::api_with_auth(CreateCategoryPath(), Some(req)).await {
             Ok(resp) => {
                 // Categories created here should be in the editing state already.
                 let cat = Rc::new(Category::new(resp.id, name, true));
@@ -159,8 +155,6 @@ pub fn move_category(content_state: Rc<ContentState>, dir: Direction) {
     if let Some(target_index) = target_index {
         let id = content_state.cat.id;
 
-        let path = endpoints::category::Update::PATH.replace("{id}", &id.0.to_string());
-
         let req = UpdateCategoryRequest {
             name: None,
             parent_id: None,
@@ -168,9 +162,8 @@ pub fn move_category(content_state: Rc<ContentState>, dir: Direction) {
             user_scopes: None,
         };
         content_state.state.loader.load(async move {
-            match api_with_auth_empty::<EmptyError, _>(
-                &path,
-                endpoints::category::Update::METHOD,
+            match endpoints::category::Update::api_with_auth_empty(
+                UpdateCategoryPath(id),
                 Some(req),
             )
             .await
@@ -188,12 +181,7 @@ pub fn delete_category(content_state: Rc<ContentState>) {
     content_state.state.loader.load(clone!(content_state => async move {
         let id = content_state.cat.id;
 
-        let path = endpoints::category::Delete::PATH.replace(
-            "{id}",
-            &id.0.to_string()
-        );
-
-        match api_with_auth_empty::<EmptyError, ()>(&path, endpoints::category::Delete::METHOD, None).await {
+        match endpoints::category::Delete::api_with_auth_empty(DeleteCategoryPath(id), None).await {
             Ok(_) => {
                 content_state
                     .with_siblings_mut(move |mut children|
@@ -212,7 +200,6 @@ pub fn rename_category(cat: &Rc<Category>, state: Rc<State>, name: String) {
     let id = cat.id;
 
     state.loader.load(async move {
-        let path = endpoints::category::Update::PATH.replace("{id}", &id.0.to_string());
         let req = UpdateCategoryRequest {
             name: Some(name),
             parent_id: None,
@@ -220,12 +207,8 @@ pub fn rename_category(cat: &Rc<Category>, state: Rc<State>, name: String) {
             user_scopes: None,
         };
 
-        match api_with_auth_empty::<EmptyError, _>(
-            &path,
-            endpoints::category::Update::METHOD,
-            Some(req),
-        )
-        .await
+        match endpoints::category::Update::api_with_auth_empty(UpdateCategoryPath(id), Some(req))
+            .await
         {
             Ok(_) => {}
             Err(_) => {

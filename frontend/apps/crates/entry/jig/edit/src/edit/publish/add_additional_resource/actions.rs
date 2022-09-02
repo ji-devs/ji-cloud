@@ -1,6 +1,7 @@
 use std::rc::Rc;
 
 use shared::domain::additional_resource::AdditionalResource;
+use shared::domain::additional_resource::CreateAssetResourcePath;
 use shared::domain::additional_resource::ResourceContent;
 use shared::domain::meta::ResourceTypeId;
 use shared::{api::endpoints, domain::additional_resource::AdditionalResourceCreateRequest};
@@ -25,7 +26,11 @@ impl AddAdditionalResource {
             resource_content: resource_content.clone(),
         };
 
-        let res = endpoints::additional_resource::Create::api_with_auth(Some(req)).await;
+        let res = endpoints::additional_resource::Create::api_with_auth(
+            CreateAssetResourcePath(),
+            Some(req),
+        )
+        .await;
 
         match res {
             Ok(res) => {

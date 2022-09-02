@@ -4,11 +4,11 @@ use dominator::{clone, Dom, DomHandle};
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
 use shared::domain::asset::{Asset, AssetId, AssetType, DraftOrLive, PrivacyLevel};
-use shared::domain::course::CourseResponse;
+use shared::domain::course::CourseGetDraftPath;
 use shared::domain::module::body::Instructions;
-use shared::domain::resource::ResourceResponse;
+use shared::domain::resource::ResourceGetDraftPath;
 use shared::{
-    api::endpoints::{self, module::*, ApiEndpoint},
+    api::endpoints::{self, module::*},
     domain::{
         jig::*,
         module::{
@@ -16,7 +16,6 @@ use shared::{
             *,
         },
     },
-    error::EmptyError,
 };
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -145,10 +144,8 @@ where
                 } else {
                     let resp = match _self.opts.asset_id {
                         AssetId::JigId(jig_id) => {
-                            let path = endpoints::jig::GetDraft::PATH.replace("{id}", &jig_id.0.to_string());
-                            api_no_auth::<JigResponse, EmptyError, ()>(
-                                &path,
-                                endpoints::jig::GetDraft::METHOD,
+                            endpoints::jig::GetDraft::api_no_auth(
+                                JigGetDraftPath(jig_id.clone()),
                                 None
                             )
                                 .await
@@ -156,20 +153,16 @@ where
                         },
                         AssetId::ResourceId(resource_id) => {
                             // resources only played for thumbnail generation
-                            let path = endpoints::resource::GetDraft::PATH.replace("{id}", &resource_id.0.to_string());
-                            api_no_auth::<ResourceResponse, EmptyError, ()>(
-                                &path,
-                                endpoints::resource::GetDraft::METHOD,
+                            endpoints::resource::GetDraft::api_no_auth(
+                                ResourceGetDraftPath(resource_id),
                                 None
                             )
                                 .await
                                 .map(|resource| Asset::Resource(resource))
                         },
                         AssetId::CourseId(course_id) => {
-                            let path = endpoints::course::GetDraft::PATH.replace("{id}", &course_id.0.to_string());
-                            api_no_auth::<CourseResponse, EmptyError, ()>(
-                                &path,
-                                endpoints::course::GetDraft::METHOD,
+                            endpoints::course::GetDraft::api_no_auth(
+                                CourseGetDraftPath(course_id.clone()),
                                 None
                             )
                                 .await
@@ -222,18 +215,16 @@ where
                 LoadingKind::Remote => {
                     let resp = match draft_or_live {
                         DraftOrLive::Draft => {
-                            let path = GetDraft::PATH
-                                .replace("{asset_type}",AssetType::from(&_self.opts.asset_id).as_str())
-                                .replace("{module_id}",&_self.opts.module_id.0.to_string());
-
-                            api_no_auth::<ModuleResponse, EmptyError, ()>(&path, GetDraft::METHOD, None).await
+                            GetDraft::api_no_auth(
+                                ModuleGetDraftPath(AssetType::from(&_self.opts.asset_id), _self.opts.module_id.clone()),
+                                None
+                            ).await
                         },
                         DraftOrLive::Live => {
-                            let path = GetLive::PATH
-                                .replace("{asset_type}",AssetType::from(&_self.opts.asset_id).as_str())
-                                .replace("{module_id}",&_self.opts.module_id.0.to_string());
-
-                            api_no_auth::<ModuleResponse, EmptyError, ()>(&path, GetLive::METHOD, None).await
+                            GetLive::api_no_auth(
+                                ModuleGetLivePath(AssetType::from(&_self.opts.asset_id), _self.opts.module_id.clone()),
+                                None
+                            ).await
                         },
                     };
 

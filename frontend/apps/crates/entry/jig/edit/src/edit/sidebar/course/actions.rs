@@ -1,25 +1,21 @@
 use super::super::state::State;
 use futures_signals::signal::Mutable;
 use shared::{
-    api::endpoints::{self, ApiEndpoint},
+    api::endpoints::{self},
     domain::{
         asset::Asset,
-        course::{CourseId, CourseResponse, CourseUpdateDraftDataRequest},
+        course::{
+            CourseGetDraftPath, CourseId, CourseResponse, CourseUpdateDraftDataPath,
+            CourseUpdateDraftDataRequest,
+        },
     },
-    error::EmptyError,
 };
 use std::rc::Rc;
 use utils::prelude::*;
 
 pub async fn load_course(course_id: CourseId, jig_mutable: Mutable<Option<Asset>>) {
-    let path = endpoints::course::GetDraft::PATH.replace("{id}", &course_id.0.to_string());
-
-    match api_with_auth::<CourseResponse, EmptyError, ()>(
-        &path,
-        endpoints::course::GetDraft::METHOD,
-        None,
-    )
-    .await
+    match endpoints::course::GetDraft::api_with_auth(CourseGetDraftPath(course_id.clone()), None)
+        .await
     {
         Ok(resp) => {
             jig_mutable.set(Some(resp.into()));
@@ -47,11 +43,9 @@ pub fn navigate_to_publish(state: Rc<State>, course: &CourseResponse) {
 pub async fn update_course(
     course_id: &CourseId,
     req: CourseUpdateDraftDataRequest,
-) -> Result<(), EmptyError> {
-    let path = endpoints::course::UpdateDraftData::PATH.replace("{id}", &course_id.0.to_string());
-    api_with_auth_empty::<EmptyError, _>(
-        &path,
-        endpoints::course::UpdateDraftData::METHOD,
+) -> anyhow::Result<()> {
+    endpoints::course::UpdateDraftData::api_with_auth_empty(
+        CourseUpdateDraftDataPath(course_id.clone()),
         Some(req),
     )
     .await

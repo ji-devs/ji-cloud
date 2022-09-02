@@ -4,9 +4,8 @@ use components::image::tag::ImageTag;
 use components::image::upload::upload_image;
 use dominator::clone;
 use shared::{
-    api::{endpoints, ApiEndpoint},
+    api::endpoints,
     domain::{category::*, image::tag::*, image::*, meta::*, Publish},
-    error::{EmptyError, MetadataNotFound},
     media::MediaLibrary,
 };
 use std::cell::RefCell;
@@ -30,13 +29,12 @@ pub fn load_initial(
 
     state.loader.load(clone!(state, ret => async move {
 
-        let path = endpoints::image::Get::PATH.replace("{id}",&state.id.0.to_string());
         let cat_req = GetCategoryRequest{ ids: Vec::new(), scope: Some( CategoryTreeScope::Descendants) } ;
         match (
-            api_with_auth::<ImageResponse, EmptyError, ()>(&path, endpoints::image::Get::METHOD, None).await,
-            api_with_auth::<CategoryResponse, EmptyError, _>(endpoints::category::Get::PATH, endpoints::category::Get::METHOD, Some(cat_req)).await,
-            api_no_auth::<MetadataResponse, (), ()>(endpoints::meta::Get::PATH, endpoints::meta::Get::METHOD, None).await,
-            api_with_auth::<ImageTagListResponse, (), ()>(endpoints::image::tag::List::PATH, endpoints::image::tag::List::METHOD, None).await
+            endpoints::image::Get::api_with_auth(ImageGetPath(state.id.clone()), None).await,
+            endpoints::category::Get::api_with_auth(GetCategoryPath(), Some(cat_req)).await,
+            endpoints::meta::Get::api_no_auth(GetMetadataPath(), None).await,
+            endpoints::image::tag::List::api_with_auth(ImageTagListPath(), None).await
         ) {
             (Ok(img_resp), Ok(cat_resp), Ok(meta_resp), Ok(tag_list_resp)) => {
 
@@ -79,8 +77,7 @@ pub fn load_initial(
 pub fn save(state: Rc<State>, req: ImageUpdateRequest) {
     state.loader.load(clone!(state => async move {
 
-        let path = endpoints::image::UpdateMetadata::PATH.replace("{id}",&state.id.0.to_string());
-        match api_with_auth_empty::<MetadataNotFound, _>(&path, endpoints::image::UpdateMetadata::METHOD, Some(req)).await {
+        match endpoints::image::UpdateMetadata::api_with_auth_empty(ImageUpdatePath(state.id.clone()), Some(req)).await {
             Ok(_) => {
             },
             Err(_err) => {
@@ -146,8 +143,7 @@ pub fn change_description(state: Rc<State>, image: Rc<MutableImage>, description
 
 pub fn delete(state: Rc<State>) {
     state.loader.load(clone!(state => async move {
-        let path = endpoints::image::Delete::PATH.replace("{id}",&state.id.0.to_string());
-        match api_with_auth_empty::<EmptyError, ()>(&path, endpoints::image::Delete::METHOD, None).await {
+        match endpoints::image::Delete::api_with_auth_empty(ImageDeletePath(state.id), None).await {
             Ok(_) => {
                 let route:String = Route::Admin(AdminRoute::ImageSearch(None)).into();
                 dominator::routing::go_to_url(&route);

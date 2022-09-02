@@ -1,9 +1,11 @@
 use super::state::*;
 use dominator::clone;
 use shared::{
-    api::endpoints::{user, ApiEndpoint},
-    domain::{session::*, user::CreateUserRequest},
-    error::EmptyError,
+    api::endpoints::user,
+    domain::{
+        session::*,
+        user::{CreateUserPath, CreateUserRequest},
+    },
 };
 use std::rc::Rc;
 use utils::prelude::*;
@@ -30,7 +32,7 @@ impl RegisterStart {
                 password
             };
 
-            let (resp, status):(Result<(), EmptyError>, u16) = api_no_auth_empty_status(user::Create::PATH, user::Create::METHOD, Some(query)).await;
+            let (resp, status):(anyhow::Result<()>, u16) = user::Create::api_no_auth_empty_status(CreateUserPath(), Some(query)).await;
 
             match resp {
                 Ok(_) => {

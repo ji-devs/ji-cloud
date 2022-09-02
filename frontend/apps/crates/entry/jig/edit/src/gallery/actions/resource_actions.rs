@@ -1,17 +1,15 @@
 use super::super::state::Gallery;
-use components::module::_common::prelude::ModuleId;
+
 use shared::{
-    api::endpoints::{self, ApiEndpoint},
+    api::endpoints::{self},
     domain::{
         asset::{Asset, DraftOrLive, UserOrMe},
-        module::{ModuleBody, ModuleCreateRequest, ModuleKind},
+        module::{ModuleBody, ModuleCreatePath, ModuleCreateRequest, ModuleKind},
         resource::{
-            ResourceBrowseQuery, ResourceBrowseResponse, ResourceCreateRequest, ResourceId,
-            ResourceSearchQuery,
+            ResourceBrowsePath, ResourceBrowseQuery, ResourceCreatePath, ResourceCreateRequest,
+            ResourceDeletePath, ResourceId, ResourceSearchPath, ResourceSearchQuery,
         },
-        CreateResponse,
     },
-    error::{EmptyError, MetadataNotFound},
 };
 use std::rc::Rc;
 use utils::prelude::*;
@@ -28,21 +26,17 @@ pub async fn load_resources(
         ..Default::default()
     };
 
-    api_with_auth::<ResourceBrowseResponse, EmptyError, _>(
-        endpoints::resource::Browse::PATH,
-        endpoints::resource::Browse::METHOD,
-        Some(req),
-    )
-    .await
-    .map(|res| {
-        let assets = res
-            .resources
-            .into_iter()
-            .map(|resource| resource.into())
-            .collect();
-        (assets, res.total_resource_count)
-    })
-    .map_err(|_| ())
+    endpoints::resource::Browse::api_with_auth(ResourceBrowsePath(), Some(req))
+        .await
+        .map(|res| {
+            let assets = res
+                .resources
+                .into_iter()
+                .map(|resource| resource.into())
+                .collect();
+            (assets, res.total_resource_count)
+        })
+        .map_err(|_| ())
 }
 
 pub async fn search_resources(q: String, is_published: Option<bool>) -> Result<Vec<Asset>, ()> {
@@ -53,7 +47,7 @@ pub async fn search_resources(q: String, is_published: Option<bool>) -> Result<V
         ..Default::default()
     };
 
-    endpoints::resource::Search::api_with_auth(Some(req))
+    endpoints::resource::Search::api_with_auth(ResourceSearchPath(), Some(req))
         .await
         .map(|resp| {
             resp.resources
@@ -67,13 +61,7 @@ pub async fn search_resources(q: String, is_published: Option<bool>) -> Result<V
 pub async fn create_resource() {
     let req = ResourceCreateRequest::default();
 
-    match api_with_auth::<CreateResponse<ResourceId>, MetadataNotFound, _>(
-        endpoints::resource::Create::PATH,
-        endpoints::resource::Create::METHOD,
-        Some(req),
-    )
-    .await
-    {
+    match endpoints::resource::Create::api_with_auth(ResourceCreatePath(), Some(req)).await {
         Ok(resp) => {
             add_cover(&resp.id).await;
             let url = Route::Asset(AssetRoute::Edit(AssetEditRoute::Resource(
@@ -95,9 +83,10 @@ async fn add_cover(resource_id: &ResourceId) {
 
     // let path = endpoints::module::Create::PATH.replace("{id}", &resource_id.0.to_string());
 
-    match api_with_auth::<CreateResponse<ModuleId>, EmptyError, _>(
-        endpoints::module::Create::PATH,
-        endpoints::module::Create::METHOD,
+    match endpoints::module::Create::api_with_auth(
+        // endpoints::module::Create::PATH,
+        // endpoints::module::Create::METHOD,
+        ModuleCreatePath(),
         Some(req),
     )
     .await
@@ -138,10 +127,8 @@ pub async fn copy_resource(_resource_id: ResourceId) -> Result<Asset, ()> {
     // }
 }
 
-pub async fn delete_resource(resource_id: ResourceId) -> Result<(), ()> {
-    let path = endpoints::resource::Delete::PATH.replace("{id}", &resource_id.0.to_string());
-    api_with_auth_empty::<EmptyError, ()>(&path, endpoints::resource::Delete::METHOD, None)
+pub async fn delete_resource(resource_id: ResourceId) -> anyhow::Result<()> {
+    endpoints::resource::Delete::api_with_auth_empty(ResourceDeletePath(resource_id), None)
         .await
         .map(|_| ())
-        .map_err(|_| ())
 }

@@ -12,19 +12,16 @@ use components::{
 use dominator::clone;
 use futures_signals::signal::SignalExt;
 use shared::{
-    api::{
-        endpoints::{self, jig},
-        ApiEndpoint,
-    },
+    api::endpoints::{self, jig},
     domain::{
         asset::DraftOrLive,
-        jig::{AudioBackground, JigLikedResponse, JigResponse},
+        jig::{AudioBackground, JigGetDraftPath, JigGetLivePath, JigLikedPath, JigPlayPath},
+        meta::GetMetadataPath,
     },
-    error::EmptyError,
 };
 use utils::{
     iframe::{IframeAction, JigToModulePlayerMessage, ModuleToJigPlayerMessage},
-    prelude::{api_no_auth, api_no_auth_empty, api_with_auth, ApiEndpointExt, SETTINGS},
+    prelude::{ApiEndpointExt, SETTINGS},
     routes::{HomeRoute, Route},
     unwrap::UnwrapJiExt,
 };
@@ -78,9 +75,8 @@ pub fn navigate_forward(state: Rc<JigPlayer>) {
             state.loader.load(clone!(state => async move {
                 // We don't need to handle an Ok Result; We can ignore Err, nothing is dependent on the
                 // success of this call. The failure should be noted in the server logs.
-                let _ = api_no_auth_empty::<EmptyError, ()>(
-                    &jig::Play::PATH.replace("{id}", &state.jig_id.0.to_string()),
-                    jig::Play::METHOD,
+                let _ = jig::Play::api_no_auth_empty(
+                    JigPlayPath(state.jig_id),
                     None,
                 ).await;
 
@@ -140,8 +136,7 @@ async fn load_jig(state: Rc<JigPlayer>) {
         let (jig, jig_liked) = match state.player_options.draft_or_live {
             DraftOrLive::Live => {
                 let jig = {
-                    let path = jig::GetLive::PATH.replace("{id}", &state.jig_id.0.to_string());
-                    api_no_auth::<JigResponse, EmptyError, ()>(&path, jig::GetLive::METHOD, None).await
+                    jig::GetLive::api_no_auth(JigGetLivePath(state.jig_id), None).await
                 };
 
                 // Fetch whether the current user has liked this JIG.
@@ -150,8 +145,7 @@ async fn load_jig(state: Rc<JigPlayer>) {
                         // Only fetch liked status if the jig request didn't error, the user is
                         // logged in and the user is not the author of the JIG.
                         Ok(jig) if can_load_liked_status(jig) => {
-                            let path = jig::Liked::PATH.replace("{id}", &state.jig_id.0.to_string());
-                            api_with_auth::<JigLikedResponse, EmptyError, ()>(&path, jig::Liked::METHOD, None)
+                            jig::Liked::api_with_auth(JigLikedPath(state.jig_id), None)
                                 .await
                                 .map_or(false, |r| r.is_liked)
                         },
@@ -163,8 +157,7 @@ async fn load_jig(state: Rc<JigPlayer>) {
             },
             DraftOrLive::Draft => {
                 let jig = {
-                    let path = jig::GetDraft::PATH.replace("{id}", &state.jig_id.0.to_string());
-                    api_no_auth::<JigResponse, EmptyError, ()>(&path, jig::GetDraft::METHOD, None).await
+                    jig::GetDraft::api_no_auth(JigGetDraftPath(state.jig_id), None).await
                 };
 
                 (jig, false)
@@ -185,7 +178,7 @@ async fn load_jig(state: Rc<JigPlayer>) {
 }
 
 async fn load_resource_types(state: Rc<JigPlayer>) {
-    match endpoints::meta::Get::api_with_auth(None).await {
+    match endpoints::meta::Get::api_with_auth(GetMetadataPath(), None).await {
         Err(_) => todo!(),
         Ok(meta) => {
             state.resource_types.set(meta.resource_types);
