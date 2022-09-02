@@ -90,6 +90,13 @@ struct JigTranslate {
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
+struct ResourceTranslate {
+    resource_data_id: Uuid,
+    text: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct CourseTranslate {
     course_data_id: Uuid,
     text: String,
@@ -114,22 +121,24 @@ impl GoogleTranslate {
     pub async fn spawn_cron_jobs(&self) -> anyhow::Result<()> {
         log::debug!("reached description translation cron job");
 
-        for count in 0..3 {
+        for count in 0..4 {
             let res = match count {
                 0 => self
                     .update_image_translations()
                     .await
                     .context("update image translation task errored"),
-
                 1 => self
                     .update_jig_translations()
                     .await
                     .context("update jig translation task errored"),
-
                 2 => self
                     .update_course_translations()
                     .await
                     .context("update course translation task errored"),
+                3 => self
+                    .update_resource_translations()
+                    .await
+                    .context("update resource translation task errored"),
 
                 _ => continue,
             };
@@ -396,6 +405,135 @@ limit 50 for no key update skip locked;
         txn.commit().await?;
 
         log::info!("completed update jig translations");
+
+        Ok(true)
+    }
+
+    async fn update_resource_translations(&self) -> anyhow::Result<bool> {
+        log::info!("reached update Resource translation");
+        let mut txn = self.db.begin().await?;
+
+        let descriptions: Vec<_> = sqlx::query!(
+            //language=SQL
+            r#"
+select resource_data.id,
+       description
+from resource_data
+inner join resource on live_id = resource_data.id
+where description <> '' and translated_description = '{}'
+and published_at is not null
+order by coalesce(updated_at, created_at) desc
+limit 5 for no key update skip locked;
+ "#
+        )
+        .fetch(&mut txn)
+        .map_ok(|row| ResourceTranslate {
+            resource_data_id: row.id,
+            text: row.description,
+        })
+        .try_collect()
+        .await?;
+
+        let display_names: Vec<_> = sqlx::query!(
+            //language=SQL
+            r#"
+select resource_data.id,
+       display_name
+from resource_data
+inner join resource on live_id = resource_data.id
+where display_name <> '' and translated_name = '{}'
+and published_at is not null
+order by coalesce(updated_at, created_at) desc
+limit 5 for no key update skip locked;
+         "#
+        )
+        .fetch(&mut txn)
+        .map_ok(|row| ResourceTranslate {
+            resource_data_id: row.id,
+            text: row.display_name,
+        })
+        .try_collect()
+        .await?;
+
+        if descriptions.is_empty() && display_names.is_empty() {
+            return Ok(true);
+        }
+
+        for t in descriptions {
+            let res: Option<Option<HashMap<String, String>>> =
+                multi_translation(&t.text, &self.api_key).await.ok();
+
+            if let Some(res) = res {
+                if let Some(res) = res {
+                    sqlx::query!(
+                        r#"
+                            update resource_data
+                            set translated_description = $2,
+                                last_synced_at = null
+                            where id = $1
+                            "#,
+                        &t.resource_data_id,
+                        json!(res)
+                    )
+                    .execute(&mut txn)
+                    .await?;
+                } else {
+                    log::debug!(
+                        "Empty translation list for resource_data_id: {}",
+                        t.resource_data_id
+                    );
+                    continue;
+                };
+            } else {
+                log::debug!(
+                    "Could not translate resource_data_id: {}, string: {}",
+                    t.resource_data_id,
+                    t.text
+                );
+
+                continue;
+            };
+        }
+
+        for t in display_names {
+            let res: Option<Option<HashMap<String, String>>> =
+                multi_translation(&t.text, &self.api_key).await.ok();
+
+            if let Some(res) = res {
+                if let Some(res) = res {
+                    sqlx::query!(
+                        r#"
+                            update resource_data
+                            set translated_name = $2,
+                                last_synced_at = null
+                            where id = $1
+                            "#,
+                        &t.resource_data_id,
+                        json!(res)
+                    )
+                    .execute(&mut txn)
+                    .await?;
+                } else {
+                    log::debug!(
+                        "Empty translation list for resource_data_id: {}",
+                        t.resource_data_id
+                    );
+                    continue;
+                };
+            } else {
+                log::debug!(
+                    "Could not translate resource_data_id: {}, string: {}",
+                    t.resource_data_id,
+                    t.text
+                );
+
+                continue;
+            };
+        }
+
+        txn.commit().await?;
+
+        log::info!("completed update resource translations");
 
         Ok(true)
     }

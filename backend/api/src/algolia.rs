@@ -607,7 +607,6 @@ where jig_data.id = any (select live_id from jig where jig.id = any ($1))
         log::info!("reached update resources");
         let mut txn = self.db.begin().await?;
 
-        // todo: allow for some way to do a partial update (for example, by having a channel for queueing partial updates)
         let requests: Vec<_> = sqlx::query!(
             //language=SQL
             r#"
@@ -652,10 +651,10 @@ select resource.id,
        translated_keywords                                                                                          as "translated_keywords!",
        (select given_name || ' '::text || family_name
         from user_profile
-        where user_profile.user_id = resource.author_id)                                                                 as "author_name",
+        where user_profile.user_id = resource.author_id)                                                            as "author_name",
         rating                                                                                                      as "rating",
-        likes                                                                                                as "likes!",
-        plays                                                                                               as "plays!",
+        likes                                                                                                       as "likes!",
+        plays                                                                                                       as "plays!",
         published_at                                                                                                as "published_at",
         blocked                                                                                                     as "blocked!"
 from resource
