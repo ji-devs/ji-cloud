@@ -6,10 +6,10 @@ use crate::{
             ResourceBrowseResponse, ResourceClonePath, ResourceCountPath, ResourceCountResponse,
             ResourceCoverPath, ResourceCreatePath, ResourceCreateRequest, ResourceDeleteAllPath,
             ResourceDeletePath, ResourceGetDraftPath, ResourceGetLivePath, ResourceId,
-            ResourceLikePath, ResourceLikedPath, ResourceLikedResponse, ResourcePlayPath,
-            ResourcePublishPath, ResourceResponse, ResourceSearchPath, ResourceSearchQuery,
-            ResourceSearchResponse, ResourceUnlikePath, ResourceUpdateAdminDataRequest,
-            ResourceUpdateDraftDataPath, ResourceUpdateDraftDataRequest,
+            ResourceLikePath, ResourceLikedPath, ResourceLikedResponse, ResourcePublishPath,
+            ResourceResponse, ResourceSearchPath, ResourceSearchQuery, ResourceSearchResponse,
+            ResourceUnlikePath, ResourceUpdateAdminDataRequest, ResourceUpdateDraftDataPath,
+            ResourceUpdateDraftDataRequest, ResourceViewPath,
         },
         CreateResponse,
     },
@@ -249,13 +249,13 @@ impl ApiEndpoint for Liked {
     const METHOD: Method = Method::Get;
 }
 
-/// Play a Resource
+/// View a Resource
 ///
 /// # Authorization
 /// * None
-pub struct Play;
-impl ApiEndpoint for Play {
-    type Path = ResourcePlayPath;
+pub struct View;
+impl ApiEndpoint for View {
+    type Path = ResourceViewPath;
     type Req = ();
     type Res = ();
     type Err = EmptyError;

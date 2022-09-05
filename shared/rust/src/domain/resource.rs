@@ -52,8 +52,8 @@ pub struct ResourceResponse {
     /// Number of likes on Resource
     pub likes: i64,
 
-    /// Number of plays Resource
-    pub plays: i64,
+    /// Number of views for a Resource
+    pub views: i64,
 
     /// The data of the requested Resource.
     pub resource_data: ResourceData,
@@ -520,7 +520,7 @@ make_path_parts!(ResourceUnlikePath => "/v1/resource/{}/like" => ResourceId);
 
 make_path_parts!(ResourceLikedPath => "/v1/resource/{}/like" => ResourceId);
 
-make_path_parts!(ResourcePlayPath => "/v1/resource/{}/play" => ResourceId);
+make_path_parts!(ResourceViewPath => "/v1/resource/{}/view" => ResourceId);
 
 make_path_parts!(ResourceAdminDataUpdatePath => "/v1/resource/{}/admin" => ResourceId);
 

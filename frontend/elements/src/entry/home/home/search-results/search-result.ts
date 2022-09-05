@@ -2,6 +2,7 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 import { nothing } from "lit-html";
 
 const STR_PLAYED = "Plays";
+const STR_VIEWED = "Views";
 const STR_LIKED = "Likes";
 const STR_JI_TEAM = "Ji Team";
 const STR_DESCRIPTION = "Description";
@@ -387,6 +388,8 @@ export class _ extends LitElement {
                     path="search/cards/jig-jiggling.svg"
                 ></img-ui>`
             : nothing
+
+        let playedLabel = this.kind === 'resource' ? STR_VIEWED : STR_PLAYED;
         return html`
             <div class="wrapper">
                 ${jiggling}
@@ -394,7 +397,7 @@ export class _ extends LitElement {
                     <slot name="image"></slot>
                     <h3 class="title">${this.title}</h3>
                     <div class="played-liked">
-                        ${this.renderCount(STR_PLAYED, this.playedCount)}
+                        ${this.renderCount(playedLabel, this.playedCount)}
                         ${this.renderCountDivider()}
                         ${this.renderCount(STR_LIKED, this.likedCount)}
                     </div>

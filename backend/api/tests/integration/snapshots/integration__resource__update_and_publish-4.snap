@@ -1,7 +1,6 @@
 ---
 source: tests/integration/resource.rs
 expression: body
-
 ---
 {
   "id": "[id]",
@@ -10,7 +9,7 @@ expression: body
   "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
   "authorName": "Bobby Tables",
   "likes": 0,
-  "plays": 0,
+  "views": 0,
   "resourceData": {
     "draftOrLive": "live",
     "displayName": "resource1",

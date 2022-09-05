@@ -309,6 +309,37 @@
     },
     "query": "\nselect draft_id from resource join resource_data on resource.draft_id = resource_data.id where resource.id = $1 for update\n"
   },
+  "09d5575a418348d2fd9924f38e0f6c37762a1ef80ffa2d20bb3d18fcd3cc3d11": {
+    "describe": {
+      "columns": [
+        {
+          "name": "name: String",
+          "ordinal": 0,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n            select index_name as \"name: String\"\n            from algolia_index_settings\n            where (index_name = $1 and index_hash <> $2)\n            or (index_name = $3 and index_hash <> $4)\n            or (index_name = $5 and index_hash <> $6)\n            or (index_name = $7 and index_hash <> $8)\n            or (index_name = $9 and index_hash <> $10)\n            or (index_name = $11 and index_hash <> $12)\n            "
+  },
   "0a1f9e5fee4b10a173b8723976cecfb920f90a4828d723abb14f6e0215cf880b": {
     "describe": {
       "columns": [
@@ -1779,6 +1810,72 @@
     },
     "query": "\nselect published_at  as \"published_at?\"\nfrom resource\nwhere id = $1\n    "
   },
+  "2b5a14b772fddfe8c66f0ff824ed425fe198cdfa96a00a94996fd385c1030452": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "username!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "creator_name!",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "bio?",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "languages_spoken?: Vec<String>",
+          "ordinal": 4,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "organization?",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "persona?: Vec<String>",
+          "ordinal": 6,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "location?: String",
+          "ordinal": 7,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "circles!",
+          "ordinal": 8,
+          "type_info": "UuidArray"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\n     select user_id                                  as \"id!\",\n            username                                 as \"username!\",\n            given_name || ' '::text || family_name   as \"creator_name!\",\n            (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n            (select languages_spoken from user_profile where user_profile.user_id = \"user\".id and languages_spoken_public is true)  as \"languages_spoken?: Vec<String>\",\n            (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n            (select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\",\n            (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?: String\",\n            (select array(select circle.id\n                from circle_member bm\n                inner join circle on bm.id = circle.id\n                where bm.user_id = \"user\".id\n            )) as \"circles!\"\n        from user_profile \"up\"\n        inner join \"user\" on \"user\".id = up.user_id\nwhere (last_synced_at is null or\n       (up.updated_at is not null and last_synced_at < up.updated_at))\nlimit 100 for no key update skip locked;\n     "
+  },
   "2c9269da9de0d178512713b7fc2789ad3472cc1dcea22eecd5fb941415d37bc4": {
     "describe": {
       "columns": [
@@ -2203,22 +2300,22 @@
         }
       ],
       "nullable": [
-        false,
-        false,
-        false,
         true,
-        false,
-        false,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null,
-        false,
-        false,
-        false,
-        false
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
       ],
       "parameters": {
         "Left": [
@@ -2324,15 +2421,15 @@
         }
       ],
       "nullable": [
-        false,
         true,
         true,
-        null,
-        false,
-        false,
         true,
-        false,
-        false
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
       ],
       "parameters": {
         "Left": [
@@ -2430,6 +2527,183 @@
       }
     },
     "query": "\nupdate resource_data_module\nset index = index - 1\nwhere resource_data_id = $1\n  and index > $2\n"
+  },
+  "39d0fc4f5ad8e4ed253babdba929331dde15b4957feead3d58dce53c9d6b8ac4": {
+    "describe": {
+      "columns": [
+        {
+          "name": "resource_id: ResourceId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "privacy_level: PrivacyLevel",
+          "ordinal": 1,
+          "type_info": "Int2"
+        },
+        {
+          "name": "creator_id?: UserId",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_id?: UserId",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_name",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "published_at",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "likes",
+          "ordinal": 8,
+          "type_info": "Int8"
+        },
+        {
+          "name": "views",
+          "ordinal": 9,
+          "type_info": "Int8"
+        },
+        {
+          "name": "display_name!",
+          "ordinal": 10,
+          "type_info": "Text"
+        },
+        {
+          "name": "language!",
+          "ordinal": 11,
+          "type_info": "Text"
+        },
+        {
+          "name": "description!",
+          "ordinal": 12,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_description!: Json<HashMap<String,String>>",
+          "ordinal": 13,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "draft_or_live!: DraftOrLive",
+          "ordinal": 14,
+          "type_info": "Int2"
+        },
+        {
+          "name": "cover?: (ModuleId, ModuleKind, bool)",
+          "ordinal": 15,
+          "type_info": "Record"
+        },
+        {
+          "name": "categories!: Vec<(CategoryId,)>",
+          "ordinal": 16,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "affiliations!: Vec<(AffiliationId,)>",
+          "ordinal": 17,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "age_ranges!: Vec<(AgeRangeId,)>",
+          "ordinal": 18,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
+          "ordinal": 19,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "locked!",
+          "ordinal": 20,
+          "type_info": "Bool"
+        },
+        {
+          "name": "other_keywords!",
+          "ordinal": 21,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_keywords!",
+          "ordinal": 22,
+          "type_info": "Text"
+        },
+        {
+          "name": "rating!: Option<ResourceRating>",
+          "ordinal": 23,
+          "type_info": "Int2"
+        },
+        {
+          "name": "blocked!",
+          "ordinal": 24,
+          "type_info": "Bool"
+        },
+        {
+          "name": "curated!",
+          "ordinal": 25,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        true,
+        null,
+        false,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        null,
+        null,
+        null,
+        null,
+        null,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Bool",
+          "Int2Array",
+          "UuidArray",
+          "Int2",
+          "Int4",
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\nwith cte as (\n    select array_agg(rd.id)\n    from resource_data \"rd\"\n          inner join resource on (draft_id = rd.id or (live_id = rd.id and rd.last_synced_at is not null and published_at is not null))\n          left join resource_admin_data \"admin\" on admin.resource_id = resource.id\n          left join resource_data_resource \"rdr\" on rd.id = rdr.resource_data_id\n    where (author_id = $1 or $1 is null)\n        and (blocked = $2 or $2 is null)\n        and (rd.privacy_level = any($3) or $3 = array[]::smallint[])\n        and (rdr.resource_type_id = any($4) or $4 = array[]::uuid[])\n        and (draft_or_live = $5 or $5 is null)\n    group by updated_at, created_at, resource.published_at, admin.resource_id\n    order by case when $6 = 0 then created_at\n        when $6 = 1 then published_at\n        else coalesce(updated_at, created_at)\n  end desc, resource_id\n),\ncte1 as (\n    select * from unnest(array((select cte.array_agg[1] from cte))) with ordinality t(id\n   , ord) order by ord\n)\nselect resource.id                                              as \"resource_id: ResourceId\",\n    privacy_level                                       as \"privacy_level: PrivacyLevel\",\n    creator_id                                          as \"creator_id?: UserId\",\n    author_id                                           as \"author_id?: UserId\",\n    (select given_name || ' '::text || family_name\n        from user_profile\n     where user_profile.user_id = author_id)            as \"author_name\",\n    created_at,\n    updated_at,\n    published_at,\n    likes,\n    views,\n   display_name                                                                  as \"display_name!\",\n   language                                                                      as \"language!\",\n   description                                                                   as \"description!\",\n   translated_description                                                        as \"translated_description!: Json<HashMap<String,String>>\",\n   draft_or_live                                                                 as \"draft_or_live!: DraftOrLive\",\n   (\n       select row(resource_data_module.id, kind, is_complete)\n       from resource_data_module\n       where resource_data_id = resource_data.id\n    )                                               as \"cover?: (ModuleId, ModuleKind, bool)\",\n   array(select row (category_id)\n         from resource_data_category\n         where resource_data_id = resource_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n   array(select row (affiliation_id)\n         from resource_data_affiliation\n         where resource_data_id = resource_data.id)     as \"affiliations!: Vec<(AffiliationId,)>\",\n   array(select row (age_range_id)\n         from resource_data_age_range\n         where resource_data_id = resource_data.id)     as \"age_ranges!: Vec<(AgeRangeId,)>\",\n   array(\n            select row (rdr.id, rdr.display_name, resource_type_id, resource_content)\n            from resource_data_resource \"rdr\"\n            where rdr.resource_data_id= resource_data.id\n        )                                               as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n   locked                                     as \"locked!\",\n   other_keywords                             as \"other_keywords!\",\n   translated_keywords                        as \"translated_keywords!\",\n   rating                                     as \"rating!: Option<ResourceRating>\",\n   blocked                                    as \"blocked!\",\n   curated                                    as \"curated!\"\nfrom cte1\ninner join resource_data on cte1.id = resource_data.id\ninner join resource on (\n    resource_data.id = resource.draft_id\n    or (\n        resource_data.id = resource.live_id\n        and last_synced_at is not null\n        and resource.published_at is not null\n    )\n)\nleft join resource_admin_data \"admin\" on admin.resource_id = resource.id\nwhere ord > (1 * $7 * $8)\norder by ord asc\nlimit $8\n"
   },
   "39f64cd116aebc8283a0b732722a5d198b6e48d255c1f3de2ad0919bee76fb4b": {
     "describe": {
@@ -2903,183 +3177,6 @@
       }
     },
     "query": "\nselect user_id              as \"id!: UserId\",\n    username                as \"username!\",\n    user_email.email::text  as \"email!\",\n    given_name              as \"given_name!\",\n    family_name             as \"family_name!\",\n    profile_image_id        as \"profile_image?: ImageId\",\n    language_app            as \"language_app!\",\n    language_emails         as \"language_emails!\",\n    languages_spoken         as \"languages_spoken!: Vec<String>\",\n    user_profile.created_at as \"created_at!\",\n    user_profile.updated_at,\n    organization,\n    persona                 as \"persona!: Vec<String>\",\n    location,\n    array(\n        select subject.display_name\n        from subject\n        inner join user_subject on subject.subject_id = user_subject.subject_id\n        where user_subject.user_id = \"user\".id\n    ) as \"subjects!: Vec<String>\",\n    array(\n        select affiliation.display_name\n        from affiliation\n        inner join user_affiliation on affiliation.id = user_affiliation.affiliation_id\n        where user_affiliation.user_id = \"user\".id\n    ) as \"affiliations!: Vec<String>\",\n    array(\n        select age_range.display_name\n        from age_range\n        inner join user_age_range on age_range.id = user_age_range.age_range_id\n        where user_age_range.user_id = \"user\".id\n    ) as \"age_ranges!: Vec<String>\"\nfrom \"user\"\n    inner join user_profile on \"user\".id = user_profile.user_id\n    inner join user_email using(user_id)\nwhere\n    (\n        user_profile.created_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end\n        and user_profile.created_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end\n    )\n    or (\n        user_profile.updated_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end\n        and user_profile.updated_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end\n    )\n"
-  },
-  "490da9432aff7da6bbfe16dfd7d9ef8431b7b6679270590431e6fc9bbddcbc75": {
-    "describe": {
-      "columns": [
-        {
-          "name": "resource_id: ResourceId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "privacy_level: PrivacyLevel",
-          "ordinal": 1,
-          "type_info": "Int2"
-        },
-        {
-          "name": "creator_id?: UserId",
-          "ordinal": 2,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "author_id?: UserId",
-          "ordinal": 3,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "author_name",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "created_at",
-          "ordinal": 5,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at",
-          "ordinal": 6,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "published_at",
-          "ordinal": 7,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "likes",
-          "ordinal": 8,
-          "type_info": "Int8"
-        },
-        {
-          "name": "plays",
-          "ordinal": 9,
-          "type_info": "Int8"
-        },
-        {
-          "name": "display_name!",
-          "ordinal": 10,
-          "type_info": "Text"
-        },
-        {
-          "name": "language!",
-          "ordinal": 11,
-          "type_info": "Text"
-        },
-        {
-          "name": "description!",
-          "ordinal": 12,
-          "type_info": "Text"
-        },
-        {
-          "name": "translated_description!: Json<HashMap<String,String>>",
-          "ordinal": 13,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "draft_or_live!: DraftOrLive",
-          "ordinal": 14,
-          "type_info": "Int2"
-        },
-        {
-          "name": "cover?: (ModuleId, ModuleKind, bool)",
-          "ordinal": 15,
-          "type_info": "Record"
-        },
-        {
-          "name": "categories!: Vec<(CategoryId,)>",
-          "ordinal": 16,
-          "type_info": "RecordArray"
-        },
-        {
-          "name": "affiliations!: Vec<(AffiliationId,)>",
-          "ordinal": 17,
-          "type_info": "RecordArray"
-        },
-        {
-          "name": "age_ranges!: Vec<(AgeRangeId,)>",
-          "ordinal": 18,
-          "type_info": "RecordArray"
-        },
-        {
-          "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
-          "ordinal": 19,
-          "type_info": "RecordArray"
-        },
-        {
-          "name": "locked!",
-          "ordinal": 20,
-          "type_info": "Bool"
-        },
-        {
-          "name": "other_keywords!",
-          "ordinal": 21,
-          "type_info": "Text"
-        },
-        {
-          "name": "translated_keywords!",
-          "ordinal": 22,
-          "type_info": "Text"
-        },
-        {
-          "name": "rating!: Option<ResourceRating>",
-          "ordinal": 23,
-          "type_info": "Int2"
-        },
-        {
-          "name": "blocked!",
-          "ordinal": 24,
-          "type_info": "Bool"
-        },
-        {
-          "name": "curated!",
-          "ordinal": 25,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        true,
-        true,
-        null,
-        false,
-        true,
-        true,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        null,
-        null,
-        null,
-        null,
-        null,
-        false,
-        false,
-        false,
-        true,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Bool",
-          "Int2Array",
-          "UuidArray",
-          "Int2",
-          "Int4",
-          "Int4",
-          "Int4"
-        ]
-      }
-    },
-    "query": "\nwith cte as (\n    select array_agg(rd.id)\n    from resource_data \"rd\"\n          inner join resource on (draft_id = rd.id or (live_id = rd.id and rd.last_synced_at is not null and published_at is not null))\n          left join resource_admin_data \"admin\" on admin.resource_id = resource.id\n          left join resource_data_resource \"rdr\" on rd.id = rdr.resource_data_id\n    where (author_id = $1 or $1 is null)\n        and (blocked = $2 or $2 is null)\n        and (rd.privacy_level = any($3) or $3 = array[]::smallint[])\n        and (rdr.resource_type_id = any($4) or $4 = array[]::uuid[])\n        and (draft_or_live = $5 or $5 is null)\n    group by updated_at, created_at, resource.published_at, admin.resource_id\n    order by case when $6 = 0 then created_at\n        when $6 = 1 then published_at\n        else coalesce(updated_at, created_at)\n  end desc, resource_id\n),\ncte1 as (\n    select * from unnest(array((select cte.array_agg[1] from cte))) with ordinality t(id\n   , ord) order by ord\n)\nselect resource.id                                              as \"resource_id: ResourceId\",\n    privacy_level                                       as \"privacy_level: PrivacyLevel\",\n    creator_id                                          as \"creator_id?: UserId\",\n    author_id                                           as \"author_id?: UserId\",\n    (select given_name || ' '::text || family_name\n        from user_profile\n     where user_profile.user_id = author_id)            as \"author_name\",\n    created_at,\n    updated_at,\n    published_at,\n    likes,\n    plays,\n   display_name                                                                  as \"display_name!\",\n   language                                                                      as \"language!\",\n   description                                                                   as \"description!\",\n   translated_description                                                        as \"translated_description!: Json<HashMap<String,String>>\",\n   draft_or_live                                                                 as \"draft_or_live!: DraftOrLive\",\n   (\n       select row(resource_data_module.id, kind, is_complete)\n       from resource_data_module\n       where resource_data_id = resource_data.id\n    )                                               as \"cover?: (ModuleId, ModuleKind, bool)\",\n   array(select row (category_id)\n         from resource_data_category\n         where resource_data_id = resource_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n   array(select row (affiliation_id)\n         from resource_data_affiliation\n         where resource_data_id = resource_data.id)     as \"affiliations!: Vec<(AffiliationId,)>\",\n   array(select row (age_range_id)\n         from resource_data_age_range\n         where resource_data_id = resource_data.id)     as \"age_ranges!: Vec<(AgeRangeId,)>\",\n   array(\n            select row (rdr.id, rdr.display_name, resource_type_id, resource_content)\n            from resource_data_resource \"rdr\"\n            where rdr.resource_data_id= resource_data.id\n        )                                               as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n   locked                                     as \"locked!\",\n   other_keywords                             as \"other_keywords!\",\n   translated_keywords                        as \"translated_keywords!\",\n   rating                                     as \"rating!: Option<ResourceRating>\",\n   blocked                                    as \"blocked!\",\n   curated                                    as \"curated!\"\nfrom cte1\ninner join resource_data on cte1.id = resource_data.id\ninner join resource on (\n    resource_data.id = resource.draft_id\n    or (\n        resource_data.id = resource.live_id\n        and last_synced_at is not null\n        and resource.published_at is not null\n    )\n)\nleft join resource_admin_data \"admin\" on admin.resource_id = resource.id\nwhere ord > (1 * $7 * $8)\norder by ord asc\nlimit $8\n"
   },
   "497d102ecb4180c0d121a24d6005b7bf078dd8c59dc68949b82c62bbb41951c0": {
     "describe": {
@@ -3577,21 +3674,21 @@
         }
       ],
       "nullable": [
-        false,
-        false,
         true,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
       ],
       "parameters": {
         "Left": [
@@ -3853,6 +3950,168 @@
       }
     },
     "query": "update user_pdf_upload set processed_at = now(), processing_result = false where pdf_id = $1"
+  },
+  "58b3000106a9df0e238d79453b3a2b66dff16b2dc1489b92eefe86d1b314089c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "language!",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "description!",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_description!: Json<HashMap<String, String>>",
+          "ordinal": 4,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "translated_name!: Json<HashMap<String, String>>",
+          "ordinal": 5,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "affiliations!",
+          "ordinal": 6,
+          "type_info": "UuidArray"
+        },
+        {
+          "name": "affiliation_names!",
+          "ordinal": 7,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "resource_types!",
+          "ordinal": 8,
+          "type_info": "UuidArray"
+        },
+        {
+          "name": "resource_type_names!",
+          "ordinal": 9,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "age_ranges!",
+          "ordinal": 10,
+          "type_info": "UuidArray"
+        },
+        {
+          "name": "age_range_names!",
+          "ordinal": 11,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "categories!",
+          "ordinal": 12,
+          "type_info": "UuidArray"
+        },
+        {
+          "name": "category_names!",
+          "ordinal": 13,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "privacy_level!: PrivacyLevel",
+          "ordinal": 14,
+          "type_info": "Int2"
+        },
+        {
+          "name": "author_id",
+          "ordinal": 15,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "locked!",
+          "ordinal": 16,
+          "type_info": "Bool"
+        },
+        {
+          "name": "other_keywords!",
+          "ordinal": 17,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_keywords!",
+          "ordinal": 18,
+          "type_info": "Text"
+        },
+        {
+          "name": "author_name",
+          "ordinal": 19,
+          "type_info": "Text"
+        },
+        {
+          "name": "rating",
+          "ordinal": 20,
+          "type_info": "Int2"
+        },
+        {
+          "name": "likes!",
+          "ordinal": 21,
+          "type_info": "Int8"
+        },
+        {
+          "name": "views!",
+          "ordinal": 22,
+          "type_info": "Int8"
+        },
+        {
+          "name": "published_at",
+          "ordinal": 23,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "blocked!",
+          "ordinal": 24,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        false,
+        true,
+        false,
+        false,
+        false,
+        null,
+        true,
+        false,
+        false,
+        true,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\nselect resource.id,\n       display_name                                                                                                 as \"name\",\n       language                                                                                                     as \"language!\",\n       description                                                                                                  as \"description!\",\n       translated_description                                                                                       as \"translated_description!: Json<HashMap<String, String>>\",\n       translated_name                                                                                              as \"translated_name!: Json<HashMap<String, String>>\",\n       array((select affiliation_id\n              from resource_data_affiliation\n              where resource_data_id = resource_data.id))                                                                     as \"affiliations!\",\n       array((select affiliation.display_name\n              from affiliation\n                       inner join resource_data_affiliation on affiliation.id = resource_data_affiliation.affiliation_id\n              where resource_data_affiliation.resource_data_id = resource_data.id))                                                as \"affiliation_names!\",\n        array((select resource_type_id\n                from resource_data_resource\n                where resource_data_id = resource_data.id))                                                                     as \"resource_types!\",\n        array((select resource_type.display_name\n              from resource_type\n                        inner join resource_data_resource on resource_type.id = resource_data_resource.resource_type_id\n             where resource_data_resource.resource_data_id = resource_data.id))                                         as \"resource_type_names!\",\n       array((select age_range_id\n              from resource_data_age_range\n              where resource_data_id = resource_data.id))                                                                     as \"age_ranges!\",\n       array((select age_range.display_name\n              from age_range\n                       inner join resource_data_age_range on age_range.id = resource_data_age_range.age_range_id\n              where resource_data_age_range.resource_data_id = resource_data.id))                                                  as \"age_range_names!\",\n       array((select category_id\n              from resource_data_category\n              where resource_data_id = resource_data.id))                                                                     as \"categories!\",\n       array((select name\n              from category\n                       inner join resource_data_category on category.id = resource_data_category.category_id\n              where resource_data_category.resource_data_id = resource_data.id))                                                   as \"category_names!\",\n       privacy_level                                                                                                as \"privacy_level!: PrivacyLevel\",\n       author_id                                                                                                    as \"author_id\",\n       locked                                                                                                       as \"locked!\",\n       other_keywords                                                                                               as \"other_keywords!\",\n       translated_keywords                                                                                          as \"translated_keywords!\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = resource.author_id)                                                            as \"author_name\",\n        rating                                                                                                      as \"rating\",\n        likes                                                                                                       as \"likes!\",\n        views                                                                                                       as \"views!\",\n        published_at                                                                                                as \"published_at\",\n        blocked                                                                                                     as \"blocked!\"\nfrom resource\n         inner join resource_data on live_id = resource_data.id\n         inner join resource_admin_data \"rad\" on rad.resource_id = resource.id\nwhere ((last_synced_at is null and published_at is not null)\n   or (updated_at is not null and last_synced_at < updated_at)\n    or (published_at < now() is true and last_synced_at < published_at))\nlimit 100 for no key update skip locked;\n     "
   },
   "58ed84397822e7790a3c721f37579e8cbe5aa2e6836c533323229873e88e247d": {
     "describe": {
@@ -4141,92 +4400,6 @@
       }
     },
     "query": "\n    update jig_curation_data\n    set age_ranges = $2\n    where jig_id = $1 and $2 is distinct from age_ranges\n                "
-  },
-  "5e44d5737a76d0208dc9b77e1d5879ee286993ad3e73508cd16b22f083d50a0e": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: ResourceId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "creator_id: UserId",
-          "ordinal": 1,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "author_id: UserId",
-          "ordinal": 2,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "author_name",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "live_id!",
-          "ordinal": 4,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "draft_id!",
-          "ordinal": 5,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "published_at",
-          "ordinal": 6,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "likes!",
-          "ordinal": 7,
-          "type_info": "Int8"
-        },
-        {
-          "name": "plays!",
-          "ordinal": 8,
-          "type_info": "Int8"
-        },
-        {
-          "name": "rating?: ResourceRating",
-          "ordinal": 9,
-          "type_info": "Int2"
-        },
-        {
-          "name": "blocked!",
-          "ordinal": 10,
-          "type_info": "Bool"
-        },
-        {
-          "name": "curated!",
-          "ordinal": 11,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        false,
-        true,
-        true,
-        null,
-        false,
-        false,
-        true,
-        false,
-        false,
-        true,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "UuidArray"
-        ]
-      }
-    },
-    "query": "\nselect resource.id                                       as \"id!: ResourceId\",\n       creator_id                               as \"creator_id: UserId\",\n       author_id                                as \"author_id: UserId\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id) as \"author_name\",\n       live_id                                  as \"live_id!\",\n       draft_id                                 as \"draft_id!\",\n       published_at,\n       likes                                     as \"likes!\",\n       plays                                    as \"plays!\",\n       rating                                   as \"rating?: ResourceRating\",\n       blocked                                  as \"blocked!\",\n       curated                                  as \"curated!\"\nfrom resource\ninner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\ninner join resource_admin_data \"admin\" on admin.resource_id = resource.id\norder by ord asc\n    "
   },
   "5e4bfa7c86f036663500b75df28a943c55cbc671a2dd296514568680f1b3733f": {
     "describe": {
@@ -4796,18 +4969,6 @@
     },
     "query": "\nupdate resource_data\nset privacy_level = coalesce($2, privacy_level)\nwhere id = $1\n  and $2 is distinct from privacy_level\n    "
   },
-  "6bdba0953b232ae8d54d44d35d6a8c5875b36f58687e8716092869db8c646209": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nupdate resource\nset plays = plays + 1\nwhere id = $1;\n            "
-  },
   "6bebe392e7dfa7d248a777b4c799d3000dd21c525c70300fbe2701cb9047c020": {
     "describe": {
       "columns": [
@@ -5352,30 +5513,6 @@
     },
     "query": "\nupdate course_data\nset privacy_level = coalesce($2, privacy_level),\n    updated_at = now()\nwhere id = $1\n  and $2 is distinct from privacy_level\n    "
   },
-  "7c0587e9559ef5ed74001227366f66519ea4375823ca8945f8e4b4ed16af7972": {
-    "describe": {
-      "columns": [
-        {
-          "name": "count!",
-          "ordinal": 0,
-          "type_info": "Int8"
-        }
-      ],
-      "nullable": [
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Int2",
-          "Uuid",
-          "Bool",
-          "Int2Array",
-          "UuidArray"
-        ]
-      }
-    },
-    "query": "\n        with cte as (\n            select array_agg(resource.id)\n            from resource \n                  inner join resource_data \"rd\" on (draft_id = rd.id or (live_id = rd.id and rd.last_synced_at is not null and published_at is not null))\n                  left join resource_admin_data \"admin\" on admin.resource_id = resource.id\n                  left join resource_data_resource \"rdr\" on rd.id = rdr.resource_data_id\n            where (rd.draft_or_live = $1 or $1 is null)\n                and (author_id = $2 or $2 is null)\n                and (blocked = $3 or $3 is null)\n                and (rd.privacy_level = any($4) or $4 = array[]::smallint[])\n                and (rdr.resource_type_id = any($5) or $5 = array[]::uuid[])\n            group by updated_at, created_at, resource.published_at, admin.resource_id, resource_id\n        )\n            select count(*) as \"count!\" from unnest(array((select cte.array_agg[1] from cte))) with ordinality t(id\n           , ord)\n        "
-  },
   "7c3feba53bc6a89c8e97b1928038ef8b335e2b61bf7029c80c33eb14361abdc8": {
     "describe": {
       "columns": [
@@ -5707,72 +5844,6 @@
       }
     },
     "query": "\ninsert into course_data_resource(course_data_id, resource_type_id, display_name, resource_content)\nselect $2, resource_type_id, display_name, resource_content\nfrom course_data_resource\nwhere course_data_id = $1\n        "
-  },
-  "80d6852064fe0b68993517bb20c28387b75b6d9f9b8d26099ddbc88d07fa9975": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "username!",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "creator_name!",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "bio?",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "languages_spoken?: Vec<String>",
-          "ordinal": 4,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "organization?",
-          "ordinal": 5,
-          "type_info": "Text"
-        },
-        {
-          "name": "persona?: Vec<String>",
-          "ordinal": 6,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "location?: String",
-          "ordinal": 7,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "circles!",
-          "ordinal": 8,
-          "type_info": "UuidArray"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "\n     select user_id                                  as \"id!\",\n            username                                 as \"username!\",\n            given_name || ' '::text || family_name   as \"creator_name!\",\n            (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n            (select languages_spoken from user_profile where user_profile.user_id = \"user\".id and languages_spoken_public is true)  as \"languages_spoken?: Vec<String>\", \n            (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\", \n            (select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\", \n            (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?: String\", \n            (select array(select circle.id \n                from circle_member bm \n                inner join circle on bm.id = circle.id \n                where bm.user_id = \"user\".id\n            )) as \"circles!\"\n        from user_profile \"up\"\n        inner join \"user\" on \"user\".id = up.user_id\nwhere (last_synced_at is null or\n       (up.updated_at is not null and last_synced_at < up.updated_at))\nlimit 100 for no key update skip locked;\n     "
   },
   "80e01d48b2deca10d1bbdd15cd319c204e235705bb642eaba2a05a7cf17c5036": {
     "describe": {
@@ -6201,171 +6272,6 @@
     },
     "query": "\ndelete\nfrom jig_data_additional_resource\nwhere jig_data_id = $1\n   or jig_data_id = $2\n    and id = $3\n        "
   },
-  "8972d16b027fa316363c0b6ab3c8471b8005dedb332f1512a2ca90d4fae1d207": {
-    "describe": {
-      "columns": [
-        {
-          "name": "resource_id: ResourceId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "display_name",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "creator_id: UserId",
-          "ordinal": 2,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "author_id: UserId",
-          "ordinal": 3,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "author_name",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "created_at",
-          "ordinal": 5,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at",
-          "ordinal": 6,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "published_at",
-          "ordinal": 7,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "privacy_level!: PrivacyLevel",
-          "ordinal": 8,
-          "type_info": "Int2"
-        },
-        {
-          "name": "language",
-          "ordinal": 9,
-          "type_info": "Text"
-        },
-        {
-          "name": "description",
-          "ordinal": 10,
-          "type_info": "Text"
-        },
-        {
-          "name": "translated_description!: Json<HashMap<String, String>>",
-          "ordinal": 11,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "likes",
-          "ordinal": 12,
-          "type_info": "Int8"
-        },
-        {
-          "name": "plays",
-          "ordinal": 13,
-          "type_info": "Int8"
-        },
-        {
-          "name": "locked",
-          "ordinal": 14,
-          "type_info": "Bool"
-        },
-        {
-          "name": "other_keywords",
-          "ordinal": 15,
-          "type_info": "Text"
-        },
-        {
-          "name": "translated_keywords",
-          "ordinal": 16,
-          "type_info": "Text"
-        },
-        {
-          "name": "rating?: ResourceRating",
-          "ordinal": 17,
-          "type_info": "Int2"
-        },
-        {
-          "name": "blocked",
-          "ordinal": 18,
-          "type_info": "Bool"
-        },
-        {
-          "name": "curated",
-          "ordinal": 19,
-          "type_info": "Bool"
-        },
-        {
-          "name": "cover?: (ModuleId, ModuleKind, bool)",
-          "ordinal": 20,
-          "type_info": "Record"
-        },
-        {
-          "name": "categories!: Vec<(CategoryId,)>",
-          "ordinal": 21,
-          "type_info": "RecordArray"
-        },
-        {
-          "name": "affiliations!: Vec<(AffiliationId,)>",
-          "ordinal": 22,
-          "type_info": "RecordArray"
-        },
-        {
-          "name": "age_ranges!: Vec<(AgeRangeId,)>",
-          "ordinal": 23,
-          "type_info": "RecordArray"
-        },
-        {
-          "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
-          "ordinal": 24,
-          "type_info": "RecordArray"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        true,
-        true,
-        null,
-        false,
-        true,
-        true,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        false,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int4"
-        ]
-      }
-    },
-    "query": "\nwith cte as (\n    select id      as \"resource_id\",\n           creator_id,\n           author_id,\n           likes,\n           plays,\n           case\n               when $2 = 0 then resource.draft_id\n               when $2 = 1 then resource.live_id\n               end as \"draft_or_live_id\",\n           published_at,\n           rating,\n           blocked,\n           curated\n    from resource\n    left join resource_admin_data \"admin\" on admin.resource_id = resource.id\n    where id = $1\n)\nselect cte.resource_id                                          as \"resource_id: ResourceId\",\n        display_name,\n        creator_id                                          as \"creator_id: UserId\",\n        author_id                                           as \"author_id: UserId\",\n        (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id)            as \"author_name\",\n        created_at,\n        updated_at,\n        published_at,\n        privacy_level                                       as \"privacy_level!: PrivacyLevel\",\n        language,\n        description,\n        translated_description                              as \"translated_description!: Json<HashMap<String, String>>\",\n        likes,\n        plays,\n        locked,\n        other_keywords,\n        translated_keywords,\n        rating                                               as \"rating?: ResourceRating\",\n        blocked                                              as \"blocked\",\n        curated,\n        (\n                select row(resource_data_module.id, kind, is_complete)\n                from resource_data_module\n                where resource_data_id = resource_data.id\n        )                                               as \"cover?: (ModuleId, ModuleKind, bool)\",\n        array(select row (category_id)\n                from resource_data_category\n                where resource_data_id = cte.draft_or_live_id)     as \"categories!: Vec<(CategoryId,)>\",\n        array(select row (affiliation_id)\n                from resource_data_affiliation\n                where resource_data_id = cte.draft_or_live_id)     as \"affiliations!: Vec<(AffiliationId,)>\",\n        array(select row (age_range_id)\n                from resource_data_age_range\n                where resource_data_id = cte.draft_or_live_id)     as \"age_ranges!: Vec<(AgeRangeId,)>\",\n        array(\n                select row (rdr.id, rdr.display_name, resource_type_id, resource_content)\n                from resource_data_resource \"rdr\"\n                where rdr.resource_data_id = cte.draft_or_live_id\n    )                                                    as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\"\nfrom resource_data\n         inner join cte on cte.draft_or_live_id = resource_data.id\n"
-  },
   "89a0dbe7265e411f69b9ea0dc06cb43f7c4290b23e7053af2b1583ae97cdd4ff": {
     "describe": {
       "columns": [
@@ -6648,6 +6554,30 @@
       }
     },
     "query": "\n        update resource_curation_data\n        set additional_resources = $2\n        where resource_id = $1 and $2 is distinct from additional_resources\n                    "
+  },
+  "932508742699d5ebb198b02fc4f4bcaa9fd0e50c4206e6536279163533526826": {
+    "describe": {
+      "columns": [
+        {
+          "name": "count!",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int2",
+          "Uuid",
+          "Bool",
+          "Int2Array",
+          "UuidArray"
+        ]
+      }
+    },
+    "query": "\n        with cte as (\n            select array_agg(resource.id)\n            from resource\n                  inner join resource_data \"rd\" on (draft_id = rd.id or (live_id = rd.id and rd.last_synced_at is not null and published_at is not null))\n                  left join resource_admin_data \"admin\" on admin.resource_id = resource.id\n                  left join resource_data_resource \"rdr\" on rd.id = rdr.resource_data_id\n            where (rd.draft_or_live = $1 or $1 is null)\n                and (author_id = $2 or $2 is null)\n                and (blocked = $3 or $3 is null)\n                and (rd.privacy_level = any($4) or $4 = array[]::smallint[])\n                and (rdr.resource_type_id = any($5) or $5 = array[]::uuid[])\n            group by updated_at, created_at, resource.published_at, admin.resource_id, resource_id\n        )\n            select count(*) as \"count!\" from unnest(array((select cte.array_agg[1] from cte))) with ordinality t(id\n           , ord)\n        "
   },
   "93e782118504e721380274424d8150074764f95f3c0dd6bb4628921dc39a6083": {
     "describe": {
@@ -6995,36 +6925,17 @@
     },
     "query": "delete from user_image_library where user_id = $1 and id = $2"
   },
-  "993e9c03537c73755cb1fa599ef3aa67c590f42eb301f673b03c14175852b44d": {
+  "98ca253af396be495aa7764cb4328e0760d0e0d3b6c970f5277b9b9885b68d98": {
     "describe": {
-      "columns": [
-        {
-          "name": "name: String",
-          "ordinal": 0,
-          "type_info": "Text"
-        }
-      ],
-      "nullable": [
-        false
-      ],
+      "columns": [],
+      "nullable": [],
       "parameters": {
         "Left": [
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text"
+          "Uuid"
         ]
       }
     },
-    "query": "\n            select index_name as \"name: String\"\n            from algolia_index_settings\n            where (index_name = $1 and index_hash <> $2) \n            or (index_name = $3 and index_hash <> $4)\n            or (index_name = $5 and index_hash <> $6)\n            or (index_name = $7 and index_hash <> $8)\n            or (index_name = $9 and index_hash <> $10)\n            or (index_name = $11 and index_hash <> $12)\n            "
+    "query": "\nupdate resource\nset views = views + 1\nwhere id = $1;\n            "
   },
   "9a280ed5b2d646c563937e8cee1bae592f8d46322edf1769a7c89670088ac3d8": {
     "describe": {
@@ -7253,6 +7164,16 @@
       }
     },
     "query": "update image_upload set processed_at = now(), processing_result = false where image_id = $1"
+  },
+  "a0b6dfc42579a369fd18b1fa61cc645712648453847686ceadfc48ba8d05ee72": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\n        update image_usage\n        set usage_reset_at = now()\n        where usage_reset_at < now() - interval '14 days'\n            "
   },
   "a0f81385b9713d0c508a0a5e6658939c1edf5149c2440bd55c07e788dfc2ed2a": {
     "describe": {
@@ -8002,16 +7923,6 @@
       }
     },
     "query": "\nselect cdm.id          as \"id!: ModuleId\",\n       contents    as \"body!\",\n       created_at  as \"created_at!\",\n       updated_at  as \"updated_at!\",\n       kind        as \"kind!: ModuleKind\",\n       is_complete as \"is_complete!\"\nfrom course_data_module \"cdm\"\ninner join course on course.draft_id = cdm.course_data_id\nwhere cdm.id is not distinct from $1\n"
-  },
-  "ab3f65700794b2255239083c9b4a2f553f0cd5764404fd40325b6bdff3724243": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "\n        update image_usage \n        set usage_reset_at = now()\n        where usage_reset_at < now() - interval '14 days'\n            "
   },
   "ab5d34d76960e465c8fad9c51b7c2e8526736b4ca8ef6da2cd4ceed53342b2c4": {
     "describe": {
@@ -9647,6 +9558,171 @@
     },
     "query": "\nselect exists(select 1 from user_scope where user_id = $1) as \"authed!\"\n"
   },
+  "d16552cda77417d3337e5752139c05140dbae26a108da21b771872c2f07e467e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "resource_id: ResourceId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "creator_id: UserId",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_id: UserId",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_name",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "published_at",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "privacy_level!: PrivacyLevel",
+          "ordinal": 8,
+          "type_info": "Int2"
+        },
+        {
+          "name": "language",
+          "ordinal": 9,
+          "type_info": "Text"
+        },
+        {
+          "name": "description",
+          "ordinal": 10,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_description!: Json<HashMap<String, String>>",
+          "ordinal": 11,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "likes",
+          "ordinal": 12,
+          "type_info": "Int8"
+        },
+        {
+          "name": "views",
+          "ordinal": 13,
+          "type_info": "Int8"
+        },
+        {
+          "name": "locked",
+          "ordinal": 14,
+          "type_info": "Bool"
+        },
+        {
+          "name": "other_keywords",
+          "ordinal": 15,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_keywords",
+          "ordinal": 16,
+          "type_info": "Text"
+        },
+        {
+          "name": "rating?: ResourceRating",
+          "ordinal": 17,
+          "type_info": "Int2"
+        },
+        {
+          "name": "blocked",
+          "ordinal": 18,
+          "type_info": "Bool"
+        },
+        {
+          "name": "curated",
+          "ordinal": 19,
+          "type_info": "Bool"
+        },
+        {
+          "name": "cover?: (ModuleId, ModuleKind, bool)",
+          "ordinal": 20,
+          "type_info": "Record"
+        },
+        {
+          "name": "categories!: Vec<(CategoryId,)>",
+          "ordinal": 21,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "affiliations!: Vec<(AffiliationId,)>",
+          "ordinal": 22,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "age_ranges!: Vec<(AgeRangeId,)>",
+          "ordinal": 23,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
+          "ordinal": 24,
+          "type_info": "RecordArray"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        true,
+        null,
+        false,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\nwith cte as (\n    select id      as \"resource_id\",\n           creator_id,\n           author_id,\n           likes,\n           views,\n           case\n               when $2 = 0 then resource.draft_id\n               when $2 = 1 then resource.live_id\n               end as \"draft_or_live_id\",\n           published_at,\n           rating,\n           blocked,\n           curated\n    from resource\n    left join resource_admin_data \"admin\" on admin.resource_id = resource.id\n    where id = $1\n)\nselect cte.resource_id                                          as \"resource_id: ResourceId\",\n        display_name,\n        creator_id                                          as \"creator_id: UserId\",\n        author_id                                           as \"author_id: UserId\",\n        (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id)            as \"author_name\",\n        created_at,\n        updated_at,\n        published_at,\n        privacy_level                                       as \"privacy_level!: PrivacyLevel\",\n        language,\n        description,\n        translated_description                              as \"translated_description!: Json<HashMap<String, String>>\",\n        likes,\n        views,\n        locked,\n        other_keywords,\n        translated_keywords,\n        rating                                               as \"rating?: ResourceRating\",\n        blocked                                              as \"blocked\",\n        curated,\n        (\n                select row(resource_data_module.id, kind, is_complete)\n                from resource_data_module\n                where resource_data_id = resource_data.id\n        )                                               as \"cover?: (ModuleId, ModuleKind, bool)\",\n        array(select row (category_id)\n                from resource_data_category\n                where resource_data_id = cte.draft_or_live_id)     as \"categories!: Vec<(CategoryId,)>\",\n        array(select row (affiliation_id)\n                from resource_data_affiliation\n                where resource_data_id = cte.draft_or_live_id)     as \"affiliations!: Vec<(AffiliationId,)>\",\n        array(select row (age_range_id)\n                from resource_data_age_range\n                where resource_data_id = cte.draft_or_live_id)     as \"age_ranges!: Vec<(AgeRangeId,)>\",\n        array(\n                select row (rdr.id, rdr.display_name, resource_type_id, resource_content)\n                from resource_data_resource \"rdr\"\n                where rdr.resource_data_id = cte.draft_or_live_id\n    )                                                    as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\"\nfrom resource_data\n         inner join cte on cte.draft_or_live_id = resource_data.id\n"
+  },
   "d16dc0b03e356a1b25e245e63137f60bd8bbc9d47cbc2c77db671decb4a52139": {
     "describe": {
       "columns": [],
@@ -10791,168 +10867,6 @@
     },
     "query": "\nupdate jig_data\nset display_name = $2,\n    translated_name = '{}',\n    updated_at = now()\nwhere id = $1 and $2 is distinct from display_name"
   },
-  "f125eca01e72de816e6d58665a411decbf1a19456e5e1ce6a2b1191776731c68": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "name",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "language!",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "description!",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "translated_description!: Json<HashMap<String, String>>",
-          "ordinal": 4,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "translated_name!: Json<HashMap<String, String>>",
-          "ordinal": 5,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "affiliations!",
-          "ordinal": 6,
-          "type_info": "UuidArray"
-        },
-        {
-          "name": "affiliation_names!",
-          "ordinal": 7,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "resource_types!",
-          "ordinal": 8,
-          "type_info": "UuidArray"
-        },
-        {
-          "name": "resource_type_names!",
-          "ordinal": 9,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "age_ranges!",
-          "ordinal": 10,
-          "type_info": "UuidArray"
-        },
-        {
-          "name": "age_range_names!",
-          "ordinal": 11,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "categories!",
-          "ordinal": 12,
-          "type_info": "UuidArray"
-        },
-        {
-          "name": "category_names!",
-          "ordinal": 13,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "privacy_level!: PrivacyLevel",
-          "ordinal": 14,
-          "type_info": "Int2"
-        },
-        {
-          "name": "author_id",
-          "ordinal": 15,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "locked!",
-          "ordinal": 16,
-          "type_info": "Bool"
-        },
-        {
-          "name": "other_keywords!",
-          "ordinal": 17,
-          "type_info": "Text"
-        },
-        {
-          "name": "translated_keywords!",
-          "ordinal": 18,
-          "type_info": "Text"
-        },
-        {
-          "name": "author_name",
-          "ordinal": 19,
-          "type_info": "Text"
-        },
-        {
-          "name": "rating",
-          "ordinal": 20,
-          "type_info": "Int2"
-        },
-        {
-          "name": "likes!",
-          "ordinal": 21,
-          "type_info": "Int8"
-        },
-        {
-          "name": "plays!",
-          "ordinal": 22,
-          "type_info": "Int8"
-        },
-        {
-          "name": "published_at",
-          "ordinal": 23,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "blocked!",
-          "ordinal": 24,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        false,
-        true,
-        false,
-        false,
-        false,
-        null,
-        true,
-        false,
-        false,
-        true,
-        false
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "\nselect resource.id,\n       display_name                                                                                                 as \"name\",\n       language                                                                                                     as \"language!\",\n       description                                                                                                  as \"description!\",\n       translated_description                                                                                       as \"translated_description!: Json<HashMap<String, String>>\",\n       translated_name                                                                                              as \"translated_name!: Json<HashMap<String, String>>\",\n       array((select affiliation_id\n              from resource_data_affiliation\n              where resource_data_id = resource_data.id))                                                                     as \"affiliations!\",\n       array((select affiliation.display_name\n              from affiliation\n                       inner join resource_data_affiliation on affiliation.id = resource_data_affiliation.affiliation_id\n              where resource_data_affiliation.resource_data_id = resource_data.id))                                                as \"affiliation_names!\",\n        array((select resource_type_id\n                from resource_data_resource\n                where resource_data_id = resource_data.id))                                                                     as \"resource_types!\",\n        array((select resource_type.display_name\n              from resource_type\n                        inner join resource_data_resource on resource_type.id = resource_data_resource.resource_type_id\n             where resource_data_resource.resource_data_id = resource_data.id))                                         as \"resource_type_names!\",\n       array((select age_range_id\n              from resource_data_age_range\n              where resource_data_id = resource_data.id))                                                                     as \"age_ranges!\",\n       array((select age_range.display_name\n              from age_range\n                       inner join resource_data_age_range on age_range.id = resource_data_age_range.age_range_id\n              where resource_data_age_range.resource_data_id = resource_data.id))                                                  as \"age_range_names!\",\n       array((select category_id\n              from resource_data_category\n              where resource_data_id = resource_data.id))                                                                     as \"categories!\",\n       array((select name\n              from category\n                       inner join resource_data_category on category.id = resource_data_category.category_id\n              where resource_data_category.resource_data_id = resource_data.id))                                                   as \"category_names!\",\n       privacy_level                                                                                                as \"privacy_level!: PrivacyLevel\",\n       author_id                                                                                                    as \"author_id\",\n       locked                                                                                                       as \"locked!\",\n       other_keywords                                                                                               as \"other_keywords!\",\n       translated_keywords                                                                                          as \"translated_keywords!\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = resource.author_id)                                                            as \"author_name\",\n        rating                                                                                                      as \"rating\",\n        likes                                                                                                       as \"likes!\",\n        plays                                                                                                       as \"plays!\",\n        published_at                                                                                                as \"published_at\",\n        blocked                                                                                                     as \"blocked!\"\nfrom resource\n         inner join resource_data on live_id = resource_data.id\n         inner join resource_admin_data \"rad\" on rad.resource_id = resource.id\nwhere ((last_synced_at is null and published_at is not null)\n   or (updated_at is not null and last_synced_at < updated_at)\n    or (published_at < now() is true and last_synced_at < published_at))\nlimit 100 for no key update skip locked;\n     "
-  },
   "f1da735aa16c69d6e293d1c1b28cb018017f891f1e79dc7f3ed2a633880f493b": {
     "describe": {
       "columns": [
@@ -11074,6 +10988,92 @@
       }
     },
     "query": "\nselect email::text\nfrom user_email\nwhere user_id = $1\n        "
+  },
+  "f62ee52834b6cea263c14dec0550f6107eaf8ab87228e4219bc0d5303411ec18": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: ResourceId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "creator_id: UserId",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_id: UserId",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_name",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "live_id!",
+          "ordinal": 4,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "draft_id!",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "published_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "likes!",
+          "ordinal": 7,
+          "type_info": "Int8"
+        },
+        {
+          "name": "views!",
+          "ordinal": 8,
+          "type_info": "Int8"
+        },
+        {
+          "name": "rating?: ResourceRating",
+          "ordinal": 9,
+          "type_info": "Int2"
+        },
+        {
+          "name": "blocked!",
+          "ordinal": 10,
+          "type_info": "Bool"
+        },
+        {
+          "name": "curated!",
+          "ordinal": 11,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      }
+    },
+    "query": "\nselect resource.id                                       as \"id!: ResourceId\",\n       creator_id                               as \"creator_id: UserId\",\n       author_id                                as \"author_id: UserId\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id) as \"author_name\",\n       live_id                                  as \"live_id!\",\n       draft_id                                 as \"draft_id!\",\n       published_at,\n       likes                                     as \"likes!\",\n       views                                    as \"views!\",\n       rating                                   as \"rating?: ResourceRating\",\n       blocked                                  as \"blocked!\",\n       curated                                  as \"curated!\"\nfrom resource\ninner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\ninner join resource_admin_data \"admin\" on admin.resource_id = resource.id\norder by ord asc\n    "
   },
   "f64ca413cb24e2061000716eccedd908608e9546bb2970bf9dd078e6a8f6eef2": {
     "describe": {

@@ -87,7 +87,7 @@ struct BatchResource<'a> {
     translated_keywords: &'a str,
     rating: Option<i16>,
     likes: &'a i64,
-    plays: &'a i64,
+    views: &'a i64,
     published_at: Option<DateTime<Utc>>,
     translated_name: &'a Vec<String>,
     translated_description: &'a Vec<String>,
@@ -314,7 +314,7 @@ impl Manager {
             r#"
             select index_name as "name: String"
             from algolia_index_settings
-            where (index_name = $1 and index_hash <> $2) 
+            where (index_name = $1 and index_hash <> $2)
             or (index_name = $3 and index_hash <> $4)
             or (index_name = $5 and index_hash <> $6)
             or (index_name = $7 and index_hash <> $8)
@@ -654,7 +654,7 @@ select resource.id,
         where user_profile.user_id = resource.author_id)                                                            as "author_name",
         rating                                                                                                      as "rating",
         likes                                                                                                       as "likes!",
-        plays                                                                                                       as "plays!",
+        views                                                                                                       as "views!",
         published_at                                                                                                as "published_at",
         blocked                                                                                                     as "blocked!"
 from resource
@@ -709,7 +709,7 @@ limit 100 for no key update skip locked;
                 translated_keywords: &row.translated_keywords,
                 rating: row.rating,
                 likes: &row.likes,
-                plays: &row.plays,
+                views: &row.views,
                 published_at: row.published_at,
                 translated_name: &translation_name,
                 translated_description: &translation_description,
@@ -762,7 +762,7 @@ where resource_data.id = any (select live_id from resource where resource.id = a
 
         sqlx::query!(
             r#"
-        update image_usage 
+        update image_usage
         set usage_reset_at = now()
         where usage_reset_at < now() - interval '14 days'
             "#
@@ -1061,13 +1061,13 @@ where course_data.id = any (select live_id from course where course.id = any ($1
             username                                 as "username!",
             given_name || ' '::text || family_name   as "creator_name!",
             (select bio from user_profile where user_profile.user_id = "user".id and bio_public is true)      as "bio?",
-            (select languages_spoken from user_profile where user_profile.user_id = "user".id and languages_spoken_public is true)  as "languages_spoken?: Vec<String>", 
-            (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?", 
-            (select persona from user_profile where user_profile.user_id = "user".id and persona_public is true)      as "persona?: Vec<String>", 
-            (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?: String", 
-            (select array(select circle.id 
-                from circle_member bm 
-                inner join circle on bm.id = circle.id 
+            (select languages_spoken from user_profile where user_profile.user_id = "user".id and languages_spoken_public is true)  as "languages_spoken?: Vec<String>",
+            (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?",
+            (select persona from user_profile where user_profile.user_id = "user".id and persona_public is true)      as "persona?: Vec<String>",
+            (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?: String",
+            (select array(select circle.id
+                from circle_member bm
+                inner join circle on bm.id = circle.id
                 where bm.user_id = "user".id
             )) as "circles!"
         from user_profile "up"

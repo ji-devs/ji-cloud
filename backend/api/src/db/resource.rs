@@ -145,7 +145,7 @@ with cte as (
            creator_id,
            author_id,
            likes,
-           plays,
+           views,
            case
                when $2 = 0 then resource.draft_id
                when $2 = 1 then resource.live_id
@@ -173,7 +173,7 @@ select cte.resource_id                                          as "resource_id:
         description,
         translated_description                              as "translated_description!: Json<HashMap<String, String>>",
         likes,
-        plays,
+        views,
         locked,
         other_keywords,
         translated_keywords,
@@ -214,7 +214,7 @@ from resource_data
         author_id: row.author_id,
         author_name: row.author_name,
         likes: row.likes,
-        plays: row.plays,
+        views: row.views,
         resource_data: ResourceData {
             created_at: row.created_at,
             draft_or_live,
@@ -282,7 +282,7 @@ select resource.id                                       as "id!: ResourceId",
        draft_id                                 as "draft_id!",
        published_at,
        likes                                     as "likes!",
-       plays                                    as "plays!",
+       views                                    as "views!",
        rating                                   as "rating?: ResourceRating",
        blocked                                  as "blocked!",
        curated                                  as "curated!"
@@ -357,7 +357,7 @@ order by ord asc
             author_id: resource_row.author_id,
             author_name: resource_row.author_name,
             likes: resource_row.likes,
-            plays: resource_row.plays,
+            views: resource_row.views,
             resource_data: ResourceData {
                 created_at: resource_data_row.created_at,
                 draft_or_live,
@@ -472,7 +472,7 @@ select resource.id                                              as "resource_id:
     updated_at,
     published_at,
     likes,
-    plays,
+    views,
    display_name                                                                  as "display_name!",
    language                                                                      as "language!",
    description                                                                   as "description!",
@@ -540,7 +540,7 @@ limit $8
             author_id: resource_data_row.author_id,
             author_name: resource_data_row.author_name,
             likes: resource_data_row.likes,
-            plays: resource_data_row.plays,
+            views: resource_data_row.views,
             resource_data: ResourceData {
                 created_at: resource_data_row.created_at,
                 draft_or_live: resource_data_row.draft_or_live,
@@ -820,7 +820,7 @@ pub async fn filtered_count(
         r#"
         with cte as (
             select array_agg(resource.id)
-            from resource 
+            from resource
                   inner join resource_data "rd" on (draft_id = rd.id or (live_id = rd.id and rd.last_synced_at is not null and published_at is not null))
                   left join resource_admin_data "admin" on admin.resource_id = resource.id
                   left join resource_data_resource "rdr" on rd.id = rdr.resource_data_id
@@ -1025,7 +1025,7 @@ returning id as "id!: ResourceId"
     Ok(new_resource.id)
 }
 
-pub async fn resource_play(db: &PgPool, id: ResourceId) -> anyhow::Result<()> {
+pub async fn resource_view(db: &PgPool, id: ResourceId) -> anyhow::Result<()> {
     let mut txn = db.begin().await?;
 
     let resource = sqlx::query!(
@@ -1050,7 +1050,7 @@ where id = $1
         // language=SQL
         r#"
 update resource
-set plays = plays + 1
+set views = views + 1
 where id = $1;
             "#,
         id.0,
