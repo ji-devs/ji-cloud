@@ -256,6 +256,8 @@ pub struct UserProfileExport {
     /// The user's preferred email language.
     pub language_emails: String,
     /// The user's preferred language.
+    #[serde(default)]
+    #[serde(serialize_with = "serialize_list")]
     pub languages_spoken: Vec<String>,
     /// When the user was created.
     pub created_at: DateTime<Utc>,
