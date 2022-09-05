@@ -7,16 +7,16 @@ use futures_signals::{
     signal::{Signal, SignalExt},
     signal_vec::SignalVecExt,
 };
-use shared::domain::{
+use shared::{domain::{
     asset::{Asset, AssetId, AssetType, DraftOrLive},
-    meta::ResourceTypeId,
-};
+    meta::ResourceTypeId, resource::ResourceViewPath,
+}, api::endpoints::resource};
 use std::rc::Rc;
 use utils::{
     ages::AgeRangeVecExt,
     asset::{published_at_string, ResourceContentExt},
     events,
-    prelude::get_user_cloned,
+    prelude::{get_user_cloned, ApiEndpointExt},
     routes::{AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, Route},
 };
 
@@ -209,6 +209,14 @@ impl SearchResultsSection {
                                         .property("href", resource.resource_content.get_link())
                                         .property("target", "_BLANK")
                                         .text("View")
+                                        .event(clone!(state => move |_: events::Click| {
+                                            state.loader.load(clone!(asset => async move {
+                                                let _ = resource::View::api_no_auth_empty(
+                                                    ResourceViewPath(asset.unwrap_resource().id),
+                                                    None,
+                                                ).await;
+                                            }))
+                                        }))
                                     })
                                 },
                                 None => {

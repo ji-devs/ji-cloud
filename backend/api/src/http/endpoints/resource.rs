@@ -401,11 +401,11 @@ async fn unlike(
 }
 
 /// Add a play to a resource
-async fn play(
+async fn view(
     db: Data<PgPool>,
     path: web::Path<ResourceId>,
 ) -> Result<HttpResponse, error::NotFound> {
-    db::resource::resource_play(&*db, path.into_inner()).await?;
+    db::resource::resource_view(&*db, path.into_inner()).await?;
 
     Ok(HttpResponse::NoContent().finish())
 }
@@ -531,8 +531,8 @@ pub fn configure(cfg: &mut ServiceConfig) {
         resource::Count::METHOD.route().to(count),
     )
     .route(
-        <resource::Play as ApiEndpoint>::Path::PATH,
-        resource::Play::METHOD.route().to(play),
+        <resource::View as ApiEndpoint>::Path::PATH,
+        resource::View::METHOD.route().to(view),
     )
     .route(
         <resource::Like as ApiEndpoint>::Path::PATH,

@@ -373,7 +373,7 @@ impl Asset {
         match self {
             Self::Jig(jig) => jig.plays,
             Self::Course(course) => course.plays,
-            Self::Resource(resource) => resource.plays,
+            Self::Resource(resource) => resource.views,
         }
     }
 

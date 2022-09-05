@@ -1,7 +1,6 @@
 ---
 source: tests/integration/resource.rs
 expression: body
-
 ---
 {
   "resources": [
@@ -12,7 +11,7 @@ expression: body
       "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
       "authorName": "Bobby Tables",
       "likes": 0,
-      "plays": 0,
+      "views": 0,
       "resourceData": {
         "draftOrLive": "draft",
         "displayName": "resource1",
@@ -61,7 +60,7 @@ expression: body
       "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
       "authorName": "Bobby Tables",
       "likes": 0,
-      "plays": 0,
+      "views": 0,
       "resourceData": {
         "draftOrLive": "live",
         "displayName": "resource2",
@@ -97,7 +96,7 @@ expression: body
       "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
       "authorName": "Bobby Tables",
       "likes": 0,
-      "plays": 0,
+      "views": 0,
       "resourceData": {
         "draftOrLive": "draft",
         "displayName": "resource2",
@@ -133,7 +132,7 @@ expression: body
       "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
       "authorName": "Bobby Tables",
       "likes": 0,
-      "plays": 0,
+      "views": 0,
       "resourceData": {
         "draftOrLive": "draft",
         "displayName": "resource3",
