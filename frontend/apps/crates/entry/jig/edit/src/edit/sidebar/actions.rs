@@ -20,6 +20,8 @@ pub fn navigate_to_publish(state: Rc<State>) {
 
 pub fn set_highlight_modules(state: &Rc<State>, highlight: bool) {
     if highlight {
+        state.collapsed.set_neq(false);
+
         let modules = state.modules.lock_ref();
 
         if modules
@@ -32,8 +34,7 @@ pub fn set_highlight_modules(state: &Rc<State>, highlight: bool) {
                 .highlight_modules
                 .set_neq(Some(ModuleHighlight::Publish))
         } else {
-            let idx = modules.iter().position(|module| //match &*module {
-                !module.is_incomplete.get());
+            let idx = modules.iter().position(|module| module.is_incomplete.get());
             match idx {
                 Some(idx) => state
                     .highlight_modules
