@@ -20,13 +20,10 @@ fa-button {
     align-items: center;
     padding: 30px;
 }
-.field-grid p fa-icon {
+.field-grid fa-icon {
     color: var(--light-red-4);
-}
-.field-grid p {
-    font-size: 16px;
-    font-weight: 500;
-    margin: 0;
+    text-align: center;
+    font-size: 24px;
 }
 button-rect {
     margin: 0 auto 30px auto;

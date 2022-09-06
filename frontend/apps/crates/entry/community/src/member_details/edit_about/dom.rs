@@ -54,11 +54,8 @@ impl Component for Rc<EditAbout> {
                 .property("slot", "body")
                 .class("field-grid")
                 .children(&mut [
-                    html!("p", {
-                        .child(html!("fa-icon", {
-                            .property("icon", "fa-solid fa-location-dot")
-                        }))
-                        .text(STR_LOCATION)
+                    html!("fa-icon", {
+                        .property("icon", "fa-solid fa-location-dot")
                     }),
                     html!("input-wrapper", {
                         .property("slot", "location")
@@ -87,11 +84,8 @@ impl Component for Rc<EditAbout> {
                             state.location_public.set_neq(evt.value());
                         }))
                     }),
-                    html!("p", {
-                        .child(html!("fa-icon", {
-                            .property("icon", "fa-solid fa-briefcase")
-                        }))
-                        .text(STR_ORGANIZATION)
+                    html!("fa-icon", {
+                        .property("icon", "fa-solid fa-briefcase")
                     }),
                     html!("input-wrapper", {
                         .property("slot", "organization")
@@ -116,11 +110,8 @@ impl Component for Rc<EditAbout> {
                             state.organization_public.set_neq(evt.value());
                         }))
                     }),
-                    html!("p", {
-                        .child(html!("fa-icon", {
-                            .property("icon", "fa-regular fa-id-card-clip")
-                        }))
-                        .text(STR_PERSONA)
+                    html!("fa-icon", {
+                        .property("icon", "fa-regular fa-id-card-clip")
                     }),
                     html!("input-select", {
                         .property("slot", "persona")
@@ -163,11 +154,8 @@ impl Component for Rc<EditAbout> {
                             state.persona_public.set_neq(evt.value());
                         }))
                     }),
-                    html!("p", {
-                        .child(html!("fa-icon", {
-                            .property("icon", "fa-solid fa-globe")
-                        }))
-                        .text(STR_LANGUAGE)
+                    html!("fa-icon", {
+                        .property("icon", "fa-solid fa-globe")
                     }),
                     html!("input-select", {
                         .property("slot", "language")
