@@ -105,8 +105,6 @@ impl TryFrom<&str> for AssetType {
 }
 
 impl PathPart for AssetType {
-    const PLACEHOLDER: &'static str = "{asset_type}";
-
     fn get_path_string(&self) -> String {
         self.as_str().to_string()
     }

@@ -1,7 +1,7 @@
 use convert_case::{Case, Casing};
 use itertools::Itertools;
 use proc_macro2::{Ident, Literal, TokenStream, TokenTree};
-use quote::{format_ident, quote};
+use quote::quote;
 
 pub struct PathPartsInput {
     pub name: Ident,
@@ -17,20 +17,27 @@ impl From<PathPartsInput> for TokenStream {
             parts,
         } = value;
 
-        for part in parts.iter() {
-            let display_name = part.to_string().to_case(Case::Snake);
-            path = path.replacen("{}", &format!("{{{display_name}}}"), 1);
+        let parts_placeholders = parts
+            .iter()
+            .map(|part| {
+                let display_name = part.to_string().to_case(Case::Snake);
+                let placeholder = format!("{{{display_name}}}");
+                placeholder
+            })
+            .collect_vec();
+
+        for part_placeholder in parts_placeholders.iter() {
+            path = path.replacen("{}", &part_placeholder, 1);
         }
 
-        let parts_replace = parts
+        let parts_replace = parts_placeholders
             .iter()
             .enumerate()
-            .map(|(i, part)| {
+            .map(|(i, part_placeholder)| {
                 // usize_unsuffixed needed for tuple index https://github.com/rust-lang/rust/issues/59553#issue-427261901
                 let index = Literal::usize_unsuffixed(i);
-                let part = format_ident!("{}", part);
                 quote! {
-                    src = src.replace(<#part>::PLACEHOLDER, &self.#index.get_path_string());
+                    src = src.replacen(#part_placeholder, &self.#index.get_path_string(), 1);
                 }
             })
             .collect_vec();

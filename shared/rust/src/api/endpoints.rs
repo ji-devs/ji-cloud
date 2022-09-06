@@ -80,9 +80,6 @@ pub mod module;
 
 /// Item that can be part of PathParts
 pub trait PathPart {
-    /// placeholder to be replaced with value
-    const PLACEHOLDER: &'static str;
-
     /// string value to replace placeholder with
     fn get_path_string(&self) -> String;
 }
@@ -99,16 +96,12 @@ pub trait PathParts {
 // TODO: think we should try to get rid of all these impls, we should use NewTypes instead
 
 impl PathPart for Uuid {
-    const PLACEHOLDER: &'static str = "{uuid}";
-
     fn get_path_string(&self) -> String {
         self.to_string()
     }
 }
 
 impl PathPart for Url {
-    const PLACEHOLDER: &'static str = "{url}";
-
     fn get_path_string(&self) -> String {
         // maybe use urlencoding crate
         todo!();
@@ -116,24 +109,18 @@ impl PathPart for Url {
 }
 
 impl PathPart for i32 {
-    const PLACEHOLDER: &'static str = "{number}";
-
     fn get_path_string(&self) -> String {
         self.to_string()
     }
 }
 
 impl PathPart for u32 {
-    const PLACEHOLDER: &'static str = "{number}";
-
     fn get_path_string(&self) -> String {
         self.to_string()
     }
 }
 
 impl PathPart for i16 {
-    const PLACEHOLDER: &'static str = "{number}";
-
     fn get_path_string(&self) -> String {
         self.to_string()
     }

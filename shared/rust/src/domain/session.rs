@@ -128,8 +128,6 @@ pub enum OAuthUrlKind {
     Register,
 }
 impl PathPart for OAuthUrlKind {
-    const PLACEHOLDER: &'static str = "{url_kind}";
-
     fn get_path_string(&self) -> String {
         match self {
             Self::Login => String::from("login"),
@@ -147,8 +145,6 @@ pub enum GetOAuthUrlServiceKind {
     Google,
 }
 impl PathPart for GetOAuthUrlServiceKind {
-    const PLACEHOLDER: &'static str = "{service_kind}";
-
     fn get_path_string(&self) -> String {
         match self {
             Self::Google => String::from("google"),
