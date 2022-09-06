@@ -15,7 +15,7 @@ pub fn edit(state: Rc<SpotState>) {
             .sidebar
             .asset_edit_state
             .route
-            .set_neq(AssetEditRoute::Jig(jig_id, JigEditRoute::Module(module_id)));
+            .set(AssetEditRoute::Jig(jig_id, JigEditRoute::Module(module_id)));
         state.sidebar.collapsed.set(true);
 
         Route::push_state(Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
