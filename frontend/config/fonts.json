@@ -9,6 +9,16 @@
         "format": "woff2",
         "range": "U+0590-05FF, U+FB1D-FB4F"
     },
+    "Shesek - dashed - dfus": {
+        "file": "shesekdfusfm-dashed.otf",
+        "format": "otf",
+        "range": "U+0590-05FF, U+FB1D-FB4F"
+    },
+    "Shesek - Regular - dfus": {
+        "file": "Shesek/shesekdfusfm-regular.otf",
+        "format": "otf",
+        "range": "U+0590-05FF, U+FB1D-FB4F"
+    },
     "Frank Ruhl Libre - Medium": {
         "file": "Frank_Ruhl_Libre/FrankRuhlLibre-Medium.ttf",
         "format": "truetype",
@@ -209,6 +219,10 @@
         "format": "truetype",
         "range": "U+0590-05FF, U+FB1D-FB4F"
     },
+    "RubikDirt": {
+        "file": "Rubik/RubikDirt-Regular.ttf",
+        "format": "truetype"
+    },
     "BerkshireSwash": {
         "file": "BerkshireSwash-Regular.ttf",
         "format": "truetype"
@@ -217,24 +231,21 @@
         "file": "Arima/ArimaMadurai-Regular.ttf",
         "format": "truetype"
     },
-    "TaameyDavidCLM": {
-        "file": "TaameyDavidCLM.woff2",
-        "format": "woff2"
+    "Poppins-regular": {
+        "file": "Poppins/Poppins-Regular.ttf",
+        "format": "truetype"
     },
-    "TaameyFrank": {
-        "file": "TaameyFrankCLM.woff2",
-        "format": "woff2"
+    "Noto-Sans-Hebrew": {
+        "file": "Noto-Sans-Hebrew/NotoSansHebrew-Regular.ttf",
+        "format": "truetype",
+        "range": "U+0590-05FF, U+FB1D-FB4F"
     },
-    "KeterYG": {
-        "file": "KeterYG.woff2",
-        "format": "woff2"
+    "Noto-Sans": {
+        "file": "Noto-Sans-Hebrew/NotoSansHebrew-Regular.ttf",
+        "format": "truetype"
     },
-    "FiraGO": {
-        "file": "FiraGO.woff2",
-        "format": "woff2"
-    },
-    "KeterAramTsova": {
-        "file": "KeterAramTsova.woff2",
-        "format": "woff2"
+    "Nunito-light": {
+        "file": "Nunito/Nunito-Light.ttf",
+        "format": "truetype"
     }
 }

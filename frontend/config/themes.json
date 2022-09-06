@@ -2203,5 +2203,467 @@
             "fontFamilyLetteringLeft": 0,
             "fontFamilyLetteringRight": 1
         }
+    },
+    "jigzi-green": {
+        "id": "jigzi-green",
+        "label": {
+            "en": "Jigzi Green"
+        },
+        "fontFamilies": [
+            "'Noto-Sans-Hebrew', 'Poppins-regular'",
+            "'Shesek - Regular', 'Caveat - Medium'"
+        ],
+        "colors": ["#192150", "#FFE13C","#192150"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 50,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 40,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "jigzi-blue": {
+        "id": "jigzi-blue",
+        "label": {
+            "en": "Jigzi Blue"
+        },
+        "fontFamilies": [
+            "'Shesek - Regular', 'Poppins-regular'",
+            "'Noto-Sans-Hebrew', 'Caveat - Medium'"
+        ],
+        "colors": ["#192150", "#FFFDE6","#192150"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 50,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 40,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "jigzi-red": {
+        "id": "jigzi-red",
+        "label": {
+            "en": "Jigzi Red"
+        },
+        "fontFamilies": [
+            "'Noto-Sans-Hebrew', 'Poppins-regular'",
+            "'Shesek - Regular', 'Caveat - Medium'"
+        ],
+        "colors": ["#192150", "#FFFDE6","#192150"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 50,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 40,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "nature": {
+        "id": "nature",
+        "label": {
+            "en": "Nature"
+        },
+        "fontFamilies": [
+            "'GveretLevinAlefAlefAlef-Regular', 'Itim-Regular'",
+            "'Noto-Sans-Hebrew', 'Poppins-regular'"
+        ],
+        "colors": ["#FFFDE6", "#123601","#123601"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 50,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 40,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "flowers": {
+        "id": "flowers",
+        "label": {
+            "en": "Flowers"
+        },
+        "fontFamilies": [
+            "'Shesek - Regular - dfus', 'Nunito-light'",
+            "'Shesek - Regular', 'Caveat - Medium'"
+        ],
+        "colors": ["#662900", "#FBDFE4","#CF1A3C"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 50,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 40,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "sport": {
+        "id": "sport",
+        "label": {
+            "en": "Sport"
+        },
+        "fontFamilies": [
+            "'Noto-Sans-Hebrew', 'Rubik'",
+            "'Shesek - Regular', 'Caveat - Medium'"
+        ],
+        "colors": ["#333333", "#FFF2B0","#333333"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 50,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 40,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "valentine_s-day": {
+        "id": "valentine_s-day",
+        "label": {
+            "en": "Valentine"
+        },
+        "fontFamilies": [
+            "'GveretLevinAlefAlefAlef-Regular', 'Itim-Regular'",
+            "'Noto-Sans-Hebrew', 'Poppins-regular'"
+        ],
+        "colors": ["#FFFFFF", "#BF2C35","#BF2C35"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 50,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 40,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "rosh-hashana": {
+        "id": "rosh-hashana",
+        "label": {
+            "en": "Rosh Hashana"
+        },
+        "fontFamilies": [
+            "'Frank Ruhl Libre - Medium', 'Noto-Sans'",
+            "'Noto-Sans-Hebrew', 'Poppins-regular'"
+        ],
+        "colors": ["#FFFDE6", "#123601","#123601"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 50,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 40,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "hebrew-reading": {
+        "id": "hebrew-reading",
+        "label": {
+            "en": "Hebrew Reading"
+        },
+        "fontFamilies": [
+            "'GveretLevinAlefAlefAlef-Regular', 'Itim-Regular'",
+            "'Shesek - Regular', 'Caveat - Medium'"
+        ],
+        "colors": ["#192150", "#FFFDA6","#192150"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 50,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 40,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "iml": {
+        "id": "iml",
+        "label": {
+            "en": "Ivrit Misaviv La'Olam"
+        },
+        "fontFamilies": [
+            "'Noto-Sans-Hebrew', 'Noto-Sans'",
+            "'Shesek - Regular', 'Caveat - Medium'"
+        ],
+        "colors": ["#10324E", "#FBE7B3","#10324E"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 50,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 40,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "tubishvat": {
+        "id": "tubishvat",
+        "label": {
+            "en": "Tu Bishvat"
+        },
+        "fontFamilies": [
+            "'RubikDirt', 'RubikDirt'",
+            "'Shesek - Regular', 'Caveat - Medium'"
+        ],
+        "colors": ["#FFFDE6", "#4B3924","#4B3924"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 50,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 40,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
     }
 }
