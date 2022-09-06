@@ -1,12 +1,13 @@
 use http::StatusCode;
+use sqlx::PgPool;
 
 use crate::{
     fixture::Fixture,
     helpers::{initialize_server, LoginExt},
 };
 
-#[actix_rt::test]
-async fn browse_public_user() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn browse_public_user(pool: PgPool) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::User,
@@ -15,10 +16,13 @@ async fn browse_public_user() -> anyhow::Result<()> {
             Fixture::Circle,
         ],
         &[],
+        pool,
     )
     .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -35,13 +39,11 @@ async fn browse_public_user() -> anyhow::Result<()> {
 
     insta::assert_json_snapshot!(body);
 
-    app.stop(false).await;
-
     Ok(())
 }
 
-#[actix_rt::test]
-async fn browse_users_with_circles() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn browse_users_with_circles(pool: PgPool) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::User,
@@ -50,10 +52,13 @@ async fn browse_users_with_circles() -> anyhow::Result<()> {
             Fixture::Circle,
         ],
         &[],
+        pool,
     )
     .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -73,13 +78,11 @@ async fn browse_users_with_circles() -> anyhow::Result<()> {
 
     insta::assert_json_snapshot!(body);
 
-    app.stop(false).await;
-
     Ok(())
 }
 
-#[actix_rt::test]
-async fn browse_user_jigs() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn browse_user_jigs(pool: PgPool) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::User,
@@ -88,10 +91,13 @@ async fn browse_user_jigs() -> anyhow::Result<()> {
             Fixture::PublicUser,
         ],
         &[],
+        pool,
     )
     .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -109,8 +115,6 @@ async fn browse_user_jigs() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(
         body, {
             ".**.lastEdited" => "[last_edited]",
@@ -122,8 +126,8 @@ async fn browse_user_jigs() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
-async fn browse_user_resources() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn browse_user_resources(pool: PgPool) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::User,
@@ -132,10 +136,13 @@ async fn browse_user_resources() -> anyhow::Result<()> {
             Fixture::PublicUser,
         ],
         &[],
+        pool,
     )
     .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -153,15 +160,13 @@ async fn browse_user_resources() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body);
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn browse_user_courses() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn browse_user_courses(pool: PgPool) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::User,
@@ -171,10 +176,13 @@ async fn browse_user_courses() -> anyhow::Result<()> {
             Fixture::Course,
         ],
         &[],
+        pool,
     )
     .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -210,8 +218,6 @@ async fn browse_user_courses() -> anyhow::Result<()> {
 
     assert_eq!(resp.status(), StatusCode::OK);
 
-    app.stop(false).await;
-
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
@@ -223,8 +229,8 @@ async fn browse_user_courses() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
-async fn browse_follower_and_unfollow() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn browse_follower_and_unfollow(pool: PgPool) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::User,
@@ -234,10 +240,13 @@ async fn browse_follower_and_unfollow() -> anyhow::Result<()> {
             Fixture::Course,
         ],
         &[],
+        pool,
     )
     .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -281,8 +290,6 @@ async fn browse_follower_and_unfollow() -> anyhow::Result<()> {
 
     assert_eq!(resp.status(), StatusCode::OK);
 
-    app.stop(false).await;
-
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(body);
@@ -290,11 +297,13 @@ async fn browse_follower_and_unfollow() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
-async fn browse_follower_and_follow() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::PublicUser], &[]).await;
+#[sqlx::test]
+async fn browse_follower_and_follow(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::PublicUser], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -350,8 +359,6 @@ async fn browse_follower_and_follow() -> anyhow::Result<()> {
 
     assert_eq!(resp.status(), StatusCode::OK);
 
-    app.stop(false).await;
-
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(body);
@@ -359,8 +366,8 @@ async fn browse_follower_and_follow() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
-async fn browse_following_and_unfollow() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn browse_following_and_unfollow(pool: PgPool) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::User,
@@ -370,10 +377,13 @@ async fn browse_following_and_unfollow() -> anyhow::Result<()> {
             Fixture::Course,
         ],
         &[],
+        pool,
     )
     .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -417,8 +427,6 @@ async fn browse_following_and_unfollow() -> anyhow::Result<()> {
 
     assert_eq!(resp.status(), StatusCode::OK);
 
-    app.stop(false).await;
-
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(body);
@@ -426,15 +434,18 @@ async fn browse_following_and_unfollow() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
-async fn follow_self_error() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn follow_self_error(pool: PgPool) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::User, Fixture::MetaKinds, Fixture::PublicUser],
         &[],
+        pool,
     )
     .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -451,8 +462,6 @@ async fn follow_self_error() -> anyhow::Result<()> {
         .await?;
 
     assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
-
-    app.stop(false).await;
 
     Ok(())
 }

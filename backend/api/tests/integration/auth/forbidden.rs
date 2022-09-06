@@ -1,6 +1,7 @@
 use http::{Method, StatusCode};
 use serde_json::json;
 use shared::error::{ApiError, EmptyError};
+use sqlx::PgPool;
 
 use crate::{
     fixture::Fixture,
@@ -17,10 +18,13 @@ async fn forbidden(
     route: &str,
     req: Option<&serde_json::Value>,
     method: Method,
+    pool: PgPool,
 ) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::UserNoPerms], &[]).await;
+    let app = initialize_server(&[Fixture::UserNoPerms], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -40,40 +44,46 @@ async fn forbidden(
 
     let body: ApiError<EmptyError> = resp.json().await?;
 
-    app.stop(false).await;
-
     assert_eq!(body.code, StatusCode::FORBIDDEN);
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn category_post() -> anyhow::Result<()> {
-    forbidden("v1/category", Some(&json!({"name": ""})), Method::POST).await
+#[sqlx::test]
+async fn category_post(pool: PgPool) -> anyhow::Result<()> {
+    forbidden(
+        "v1/category",
+        Some(&json!({"name": ""})),
+        Method::POST,
+        pool,
+    )
+    .await
 }
 
-#[actix_rt::test]
-async fn category_patch() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn category_patch(pool: PgPool) -> anyhow::Result<()> {
     forbidden(
         "v1/category/00000000-0000-0000-0000-000000000000",
         None,
         Method::PATCH,
+        pool,
     )
     .await
 }
 
-#[actix_rt::test]
-async fn category_delete() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn category_delete(pool: PgPool) -> anyhow::Result<()> {
     forbidden(
         "v1/category/00000000-0000-0000-0000-000000000000",
         None,
         Method::DELETE,
+        pool,
     )
     .await
 }
 
-#[actix_rt::test]
-async fn image_post() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn image_post(pool: PgPool) -> anyhow::Result<()> {
     forbidden(
         "v1/image",
         Some(&json!({
@@ -89,58 +99,63 @@ async fn image_post() -> anyhow::Result<()> {
                 "size": "Canvas",
         })),
         Method::POST,
+        pool,
     )
     .await
 }
 
-#[actix_rt::test]
-async fn image_patch() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn image_patch(pool: PgPool) -> anyhow::Result<()> {
     forbidden(
         "v1/image/00000000-0000-0000-0000-000000000000",
         None,
         Method::PATCH,
+        pool,
     )
     .await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 #[ignore] // no s3
-async fn image_delete() -> anyhow::Result<()> {
+async fn image_delete(pool: PgPool) -> anyhow::Result<()> {
     forbidden(
         "v1/image/00000000-0000-0000-0000-000000000000",
         None,
         Method::DELETE,
+        pool,
     )
     .await
 }
 
-#[actix_rt::test]
-async fn jig_post() -> anyhow::Result<()> {
-    forbidden("v1/jig", None, Method::POST).await
+#[sqlx::test]
+async fn jig_post(pool: PgPool) -> anyhow::Result<()> {
+    forbidden("v1/jig", None, Method::POST, pool).await
 }
 
-#[actix_rt::test]
-async fn jig_patch() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn jig_patch(pool: PgPool) -> anyhow::Result<()> {
     forbidden(
         "v1/jig/00000000-0000-0000-0000-000000000000",
         None,
         Method::PATCH,
+        pool,
     )
     .await
 }
 
-#[actix_rt::test]
-async fn jig_clone() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn jig_clone(pool: PgPool) -> anyhow::Result<()> {
     forbidden(
         "v1/jig/00000000-0000-0000-0000-000000000000/clone",
         None,
         Method::POST,
+        pool,
     )
     .await
 }
 
-// #[actix_rt::test]
-// async fn jig_delete() -> anyhow::Result<()> {
+// #[sqlx::test]
+// async fn jig_delete(pool: PgPool) -> anyhow::Result<()> {
 //     forbidden(
 //         "v1/jig/00000000-0000-0000-0000-000000000000",
 //         None,
@@ -149,8 +164,8 @@ async fn jig_clone() -> anyhow::Result<()> {
 //     .await
 // }
 
-#[actix_rt::test]
-async fn module_post() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn module_post(pool: PgPool) -> anyhow::Result<()> {
     use shared::domain::module::ModuleCreateRequest;
 
     forbidden(
@@ -162,32 +177,35 @@ async fn module_post() -> anyhow::Result<()> {
             body: ModuleBody::new(ModuleKind::Cover),
         })?),
         Method::POST,
+        pool,
     )
     .await
 }
 
-#[actix_rt::test]
-async fn module_patch() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn module_patch(pool: PgPool) -> anyhow::Result<()> {
     forbidden(
         "v1/module/draft/00000000-0000-0000-0000-000000000000",
         Some(&serde_json::json!({"jigId": "00000000-0000-0000-0000-000000000000"})),
         Method::PATCH,
+        pool,
     )
     .await
 }
 
-#[actix_rt::test]
-async fn module_delete() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn module_delete(pool: PgPool) -> anyhow::Result<()> {
     forbidden(
         "v1/module/draft/00000000-0000-0000-0000-000000000000",
         Some(&serde_json::json!({"jigId": "00000000-0000-0000-0000-000000000000"})),
         Method::DELETE,
+        pool,
     )
     .await
 }
 
-#[actix_rt::test]
-async fn animation_post() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn animation_post(pool: PgPool) -> anyhow::Result<()> {
     forbidden(
         "v1/animation",
         Some(&json!({
@@ -200,28 +218,31 @@ async fn animation_post() -> anyhow::Result<()> {
             "kind": "Gif",
         })),
         Method::POST,
+        pool,
     )
     .await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 #[ignore] // route doesn't exist
-async fn animation_patch() -> anyhow::Result<()> {
+async fn animation_patch(pool: PgPool) -> anyhow::Result<()> {
     forbidden(
         "v1/animation/00000000-0000-0000-0000-000000000000",
         None,
         Method::PATCH,
+        pool,
     )
     .await
 }
 
-#[actix_rt::test]
+#[sqlx::test]
 #[ignore] // no s3
-async fn animation_delete() -> anyhow::Result<()> {
+async fn animation_delete(pool: PgPool) -> anyhow::Result<()> {
     forbidden(
         "v1/animation/00000000-0000-0000-0000-000000000000",
         None,
         Method::DELETE,
+        pool,
     )
     .await
 }

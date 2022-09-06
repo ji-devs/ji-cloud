@@ -1,0 +1,7 @@
+---
+source: tests/integration/audio/user.rs
+expression: body
+---
+{
+  "id": "[id]"
+}

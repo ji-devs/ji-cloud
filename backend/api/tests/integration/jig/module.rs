@@ -6,6 +6,7 @@ use shared::domain::{
     jig::JigId,
     module::{body::memory, ModuleBody, ModuleCreateRequest, ModuleKind, ModuleUpdateRequest},
 };
+use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::{
@@ -13,9 +14,14 @@ use crate::{
     helpers::{initialize_server, LoginExt},
 };
 
-#[actix_rt::test]
-async fn get_live() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
+#[sqlx::test]
+async fn get_live(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
+        &[],
+        pool,
+    )
+    .await;
 
     let port = app.port();
 
@@ -43,9 +49,14 @@ async fn get_live() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
-async fn create_default() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
+#[sqlx::test]
+async fn create_default(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
+        &[],
+        pool,
+    )
+    .await;
 
     let port = app.port();
 
@@ -103,9 +114,14 @@ async fn create_default() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
-async fn update_empty() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
+#[sqlx::test]
+async fn update_empty(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
+        &[],
+        pool,
+    )
+    .await;
 
     let port = app.port();
 
@@ -154,9 +170,14 @@ async fn update_empty() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
-async fn update_contents() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
+#[sqlx::test]
+async fn update_contents(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
+        &[],
+        pool,
+    )
+    .await;
 
     let port = app.port();
 
@@ -225,8 +246,8 @@ async fn update_contents() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
-async fn drag_up_down_modules() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn drag_up_down_modules(pool: PgPool) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::MetaKinds,
@@ -235,6 +256,7 @@ async fn drag_up_down_modules() -> anyhow::Result<()> {
             Fixture::CategoryOrdering,
         ],
         &[],
+        pool,
     )
     .await;
 

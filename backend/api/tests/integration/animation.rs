@@ -1,17 +1,20 @@
 use http::StatusCode;
 use serde_json::json;
 use shared::domain::{animation::AnimationId, CreateResponse};
+use sqlx::PgPool;
 
 use crate::{
     fixture::Fixture,
     helpers::{initialize_server, LoginExt},
 };
 
-#[actix_rt::test]
-async fn create() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[]).await;
+#[sqlx::test]
+async fn create(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -35,15 +38,13 @@ async fn create() -> anyhow::Result<()> {
 
     let body: CreateResponse<AnimationId> = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body, {".id" => "[id]"});
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn get_metadata() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn get_metadata(pool: PgPool) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::User,
@@ -52,10 +53,13 @@ async fn get_metadata() -> anyhow::Result<()> {
             Fixture::MetaAnimation,
         ],
         &[],
+        pool,
     )
     .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -72,8 +76,6 @@ async fn get_metadata() -> anyhow::Result<()> {
     assert_eq!(resp.status(), StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
-
-    app.stop(false).await;
 
     insta::assert_json_snapshot!(body, {".metadata.updated_at" => "[timestamp]"});
 

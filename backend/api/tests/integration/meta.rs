@@ -1,12 +1,13 @@
 use http::StatusCode;
+use sqlx::PgPool;
 
 use crate::{
     fixture::Fixture,
     helpers::{initialize_server, LoginExt},
 };
 
-#[actix_rt::test]
-async fn get() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn get(pool: PgPool) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::User,
@@ -17,10 +18,13 @@ async fn get() -> anyhow::Result<()> {
             Fixture::MetaAnimation,
         ],
         &[],
+        pool,
     )
     .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -34,8 +38,6 @@ async fn get() -> anyhow::Result<()> {
     assert_eq!(resp.status(), StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
-
-    app.stop(false).await;
 
     insta::assert_json_snapshot!(body);
 

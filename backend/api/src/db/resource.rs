@@ -1052,7 +1052,7 @@ where id = $1
         return Err(anyhow::anyhow!("Resource has not been published"));
     };
 
-    //update Resource play count
+    //update Resource view count
     sqlx::query!(
         // language=SQL
         r#"

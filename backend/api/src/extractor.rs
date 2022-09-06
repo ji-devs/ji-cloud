@@ -8,7 +8,7 @@ use crate::{
 use actix_http::Payload;
 use actix_web::{
     cookie::Cookie,
-    http::{header, HeaderMap},
+    http::{header, header::HeaderMap},
     web::Data,
     Either, FromRequest, HttpMessage, HttpRequest,
 };
@@ -139,7 +139,6 @@ impl TokenUser {
 }
 
 impl FromRequest for TokenUser {
-    type Config = ();
     type Error = actix_web::Error;
     type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
     fn from_request(
@@ -253,7 +252,6 @@ pub struct TokenUserWithScope<S: Scope> {
 }
 
 impl<S: Scope> FromRequest for TokenUserWithScope<S> {
-    type Config = ();
     type Error = actix_web::Error;
     type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
     fn from_request(
@@ -307,7 +305,6 @@ pub struct TokenUserNoCsrfWithScope<S: Scope> {
 }
 
 impl<S: Scope> FromRequest for TokenUserNoCsrfWithScope<S> {
-    type Config = ();
     type Error = actix_web::Error;
     type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
     fn from_request(
@@ -385,7 +382,6 @@ pub struct TokenSessionOf<S: SessionMaskRequirement> {
 }
 
 impl<S: SessionMaskRequirement> FromRequest for TokenSessionOf<S> {
-    type Config = ();
     type Error = actix_web::Error;
     type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
     fn from_request(
@@ -441,7 +437,6 @@ pub struct EmailBasicUser {
 }
 
 impl FromRequest for EmailBasicUser {
-    type Config = ();
     type Error = actix_web::Error;
     type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
     fn from_request(
@@ -456,8 +451,10 @@ impl FromRequest for EmailBasicUser {
             None => return future::err(BasicError::new(StatusCode::UNAUTHORIZED).into()).into(),
         };
 
+        let basic_clone = basic.clone();
+
         let (email, password) = match basic.password() {
-            Some(password) => (Cow::clone(basic.user_id()), Cow::clone(password)),
+            Some(password) => (basic_clone.user_id().to_owned(), password.to_owned()),
             None => return future::err(BasicError::new(StatusCode::UNAUTHORIZED).into()).into(),
         };
 
@@ -531,7 +528,6 @@ from user_auth_basic where email = $1::text
 pub struct RequestOrigin(pub Option<String>);
 
 impl FromRequest for RequestOrigin {
-    type Config = ();
     type Error = actix_web::Error;
     type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
     fn from_request(req: &HttpRequest, _payload: &mut Payload) -> Self::Future {
@@ -548,7 +544,6 @@ impl FromRequest for RequestOrigin {
 pub struct UserAgent(pub Option<String>);
 
 impl FromRequest for UserAgent {
-    type Config = ();
     type Error = actix_web::Error;
     type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
     fn from_request(req: &HttpRequest, _payload: &mut Payload) -> Self::Future {
@@ -565,7 +560,6 @@ impl FromRequest for UserAgent {
 pub struct IPAddress(pub Option<String>);
 
 impl FromRequest for IPAddress {
-    type Config = ();
     type Error = actix_web::Error;
     type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
     fn from_request(req: &HttpRequest, _payload: &mut Payload) -> Self::Future {

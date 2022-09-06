@@ -1,15 +1,21 @@
 use http::StatusCode;
 use serde_json::json;
 use shared::domain::resource::curation::ResourceCurationCommentRequest;
+use sqlx::PgPool;
 
 use crate::{
     fixture::Fixture,
     helpers::{initialize_server, LoginExt},
 };
 
-#[actix_rt::test]
-async fn admin_comment() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::MetaKinds, Fixture::Resource], &[]).await;
+#[sqlx::test]
+async fn admin_comment(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::User, Fixture::MetaKinds, Fixture::Resource],
+        &[],
+        pool,
+    )
+    .await;
 
     let port = app.port();
 

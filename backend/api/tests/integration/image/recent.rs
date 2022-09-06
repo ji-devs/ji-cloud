@@ -1,5 +1,6 @@
 use http::StatusCode;
 use serde_json::json;
+use sqlx::PgPool;
 
 use crate::{
     fixture::Fixture,
@@ -7,11 +8,13 @@ use crate::{
 };
 use shared::domain::image::recent::UserRecentImageListRequest;
 
-#[actix_rt::test]
-async fn create() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
+#[sqlx::test]
+async fn create(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -30,18 +33,18 @@ async fn create() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body, {".last_used" => "[timestamp]"});
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn create_conflict() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
+#[sqlx::test]
+async fn create_conflict(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -60,18 +63,18 @@ async fn create_conflict() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body, {".last_used" => "[timestamp]"});
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn list_no_limit() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
+#[sqlx::test]
+async fn list_no_limit(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -86,18 +89,18 @@ async fn list_no_limit() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body);
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn list_with_limit() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
+#[sqlx::test]
+async fn list_with_limit(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -113,18 +116,18 @@ async fn list_with_limit() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body);
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn update() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
+#[sqlx::test]
+async fn update(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -157,18 +160,18 @@ async fn update() -> anyhow::Result<()> {
 
     let body_2: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body_2, {".**.last_used" => "[timestamp]"});
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn delete() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
+#[sqlx::test]
+async fn delete(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -194,8 +197,6 @@ async fn delete() -> anyhow::Result<()> {
     assert_eq!(resp.status(), StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
-
-    app.stop(false).await;
 
     insta::assert_json_snapshot!(body); //, {".**.last_used" => "[timestamp]"});
 

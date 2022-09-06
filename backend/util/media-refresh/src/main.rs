@@ -15,14 +15,14 @@
 
 use std::{fs::File, path::PathBuf};
 
-use clap::Clap;
+use clap::{Parser, Subcommand};
 use reqwest::header::{self, HeaderMap, HeaderValue};
 use simplelog::Config;
 
 mod download;
 mod refresh;
 
-#[derive(Clap)]
+#[derive(Parser)]
 #[clap(rename_all = "kebab-case")]
 struct Opts {
     /// Endpoint to access the API from

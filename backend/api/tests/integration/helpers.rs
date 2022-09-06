@@ -5,7 +5,7 @@ use core::settings::{JwkAudiences, RuntimeSettings};
 use ji_cloud_api::http::Application;
 use rand::Rng;
 use shared::config::RemoteTarget;
-use sqlx::{Connection, Executor, PgPool};
+use sqlx::{Connection, Executor, PgPool, Pool, Postgres};
 
 use crate::fixture::Fixture;
 use crate::service::{Service, TestServicesSettings};
@@ -139,8 +139,12 @@ static DB_URL_MANAGER: once_cell::sync::Lazy<DbManager> = once_cell::sync::Lazy:
 pub static PASETO_KEY: once_cell::sync::Lazy<Box<[u8; 32]>> =
     once_cell::sync::Lazy::new(|| Box::new(generate_paseto_key()));
 
-pub async fn initialize_server(fixtures: &[Fixture], services: &[Service]) -> Application {
-    let (app, _) = initialize_server_and_get_db(fixtures, services).await;
+pub async fn initialize_server(
+    fixtures: &[Fixture],
+    services: &[Service],
+    pool: Pool<Postgres>,
+) -> Application {
+    let (app, _) = initialize_server_and_get_db(fixtures, services, pool).await;
     app
 }
 
@@ -148,6 +152,7 @@ pub async fn initialize_server(fixtures: &[Fixture], services: &[Service]) -> Ap
 pub async fn initialize_server_and_get_db(
     fixtures: &[Fixture],
     services: &[Service],
+    pool: Pool<Postgres>,
 ) -> (Application, PgPool) {
     let _ = dotenv::dotenv().ok();
 
@@ -158,15 +163,17 @@ pub async fn initialize_server_and_get_db(
         media_watch: "".to_string(),
     });
 
+    println!("pool: {:?}", pool);
+
     let db_name = DB_URL_MANAGER.create().await.expect("failed to create db");
 
     let db_url = DB_URL_MANAGER.get_url(&db_name);
 
-    println!("{}", db_url);
-
-    let db = ji_cloud_api::db::get_pool(db_url.parse().expect("db url was invalid"))
+    let db = ji_cloud_api::db::get_test_pool(db_url.parse().expect("db url was invalid"), pool)
         .await
         .expect("failed to get db");
+
+    // let db = pool.clone();
 
     for fixture in fixtures {
         db.execute(fixture.as_query())
