@@ -2115,6 +2115,27 @@
     },
     "query": "\nselect id,\n       kind as \"kind: MediaKind\",\n       created_at,\n       updated_at,\n       array(select media_url from web_media_library_url where media_id = $1) as \"urls!\"\nfrom web_media_library\nwhere id = $1"
   },
+  "3139cd944d05943ec57e8229c8f989488d48a6f7cdabf6986dde2677548f1e36": {
+    "describe": {
+      "columns": [
+        {
+          "name": "authed!",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "select exists(select 1 from circle where creator_id = $1 and id = $2) as \"authed!\""
+  },
   "32bbb9dc2446795abc480d132b14960dc9b5d636d4b95d75400cffae27762155": {
     "describe": {
       "columns": [
@@ -11231,29 +11252,6 @@
       }
     },
     "query": "delete from web_media_library where id = $1 returning kind as \"kind: MediaKind\""
-  },
-  "fb5c18dc3493191c5c189cedb4c68c4962209491d47dc76fbce7222a9ca79002": {
-    "describe": {
-      "columns": [
-        {
-          "name": "authed!",
-          "ordinal": 0,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2Array",
-          "Int2",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect exists (\n    select 1 from user_scope where user_id = $1 and scope = any($2)\n) or (\n    exists (select 1 from user_scope where user_id = $1 and scope = $3) and\n    not exists (select 1 from circle where id = $4 and circle.creator_id <> $1)\n) as \"authed!\"\n"
   },
   "fc6bfe176017b10253bc42ecb9f96f0533953b10ea0ad57299f99a3a17bc6721": {
     "describe": {
