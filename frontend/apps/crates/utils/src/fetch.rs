@@ -45,16 +45,12 @@ pub trait ApiEndpointExt {
 
     /**** WITH AUTH ****/
     async fn api_with_auth(path: Self::Path, data: Option<Self::Req>) -> anyhow::Result<Self::Res> {
-        log::info!("{}", path.get_filled());
-        log::info!("{}", Self::Path::PATH);
         api_with_auth(&path.get_filled(), Self::EXT_METHOD, data).await
     }
     async fn api_with_auth_status(
         path: Self::Path,
         data: Option<Self::Req>,
     ) -> (anyhow::Result<Self::Res>, u16) {
-        log::info!("{}", path.get_filled());
-        log::info!("{}", Self::Path::PATH);
         api_with_auth_status(&path.get_filled(), Self::EXT_METHOD, data).await
     }
     async fn api_with_auth_abortable(
@@ -62,8 +58,6 @@ pub trait ApiEndpointExt {
         path: Self::Path,
         data: Option<Self::Req>,
     ) -> Result<anyhow::Result<Self::Res>, IsAborted> {
-        log::info!("{}", path.get_filled());
-        log::info!("{}", Self::Path::PATH);
         api_with_auth_abortable(&path.get_filled(), Self::EXT_METHOD, abort_controller, data).await
     }
     async fn api_with_auth_status_abortable(
@@ -71,52 +65,38 @@ pub trait ApiEndpointExt {
         path: Self::Path,
         data: Option<Self::Req>,
     ) -> Result<(anyhow::Result<Self::Res>, u16), IsAborted> {
-        log::info!("{}", path.get_filled());
-        log::info!("{}", Self::Path::PATH);
         api_with_auth_status_abortable(&path.get_filled(), Self::EXT_METHOD, abort_controller, data)
             .await
     }
     //TODO - get rid of this, use specialization
     async fn api_with_auth_empty(path: Self::Path, data: Option<Self::Req>) -> anyhow::Result<()> {
-        log::info!("{}", path.get_filled());
-        log::info!("{}", Self::Path::PATH);
         api_with_auth_empty(&path.get_filled(), Self::EXT_METHOD, data).await
     }
     async fn api_with_auth_empty_status(
         path: Self::Path,
         data: Option<Self::Req>,
     ) -> (anyhow::Result<()>, u16) {
-        log::info!("{}", path.get_filled());
-        log::info!("{}", Self::Path::PATH);
         api_with_auth_empty_status(&path.get_filled(), Self::EXT_METHOD, data).await
     }
 
     /**** NO AUTH ****/
     async fn api_no_auth(path: Self::Path, data: Option<Self::Req>) -> anyhow::Result<Self::Res> {
-        log::info!("{}", path.get_filled());
-        log::info!("{}", Self::Path::PATH);
         api_no_auth(&path.get_filled(), Self::EXT_METHOD, data).await
     }
     async fn api_no_auth_status(
         path: Self::Path,
         data: Option<Self::Req>,
     ) -> (anyhow::Result<Self::Res>, u16) {
-        log::info!("{}", path.get_filled());
-        log::info!("{}", Self::Path::PATH);
         api_no_auth_status(&path.get_filled(), Self::EXT_METHOD, data).await
     }
     //TODO - get rid of this, use specialization
     async fn api_no_auth_empty(path: Self::Path, data: Option<Self::Req>) -> anyhow::Result<()> {
-        log::info!("{}", path.get_filled());
-        log::info!("{}", Self::Path::PATH);
         api_no_auth_empty(&path.get_filled(), Self::EXT_METHOD, data).await
     }
     async fn api_no_auth_empty_status(
         path: Self::Path,
         data: Option<Self::Req>,
     ) -> (anyhow::Result<()>, u16) {
-        log::info!("{}", path.get_filled());
-        log::info!("{}", Self::Path::PATH);
         api_no_auth_empty_status(&path.get_filled(), Self::EXT_METHOD, data).await
     }
 
@@ -126,8 +106,6 @@ pub trait ApiEndpointExt {
         path: Self::Path,
         data: Option<Self::Req>,
     ) -> anyhow::Result<Self::Res> {
-        log::info!("{}", path.get_filled());
-        log::info!("{}", Self::Path::PATH);
         api_with_token(&path.get_filled(), token, Self::EXT_METHOD, data).await
     }
     async fn api_with_token_status(
@@ -135,8 +113,6 @@ pub trait ApiEndpointExt {
         path: Self::Path,
         data: Option<Self::Req>,
     ) -> (anyhow::Result<Self::Res>, u16) {
-        log::info!("{}", path.get_filled());
-        log::info!("{}", Self::Path::PATH);
         api_with_token_status(&path.get_filled(), token, Self::EXT_METHOD, data).await
     }
     async fn api_with_token_status_abortable(
@@ -145,8 +121,6 @@ pub trait ApiEndpointExt {
         path: Self::Path,
         data: Option<Self::Req>,
     ) -> Result<(anyhow::Result<Self::Res>, u16), IsAborted> {
-        log::info!("{}", path.get_filled());
-        log::info!("{}", Self::Path::PATH);
         api_with_token_status_abortable(
             &path.get_filled(),
             token,
@@ -162,8 +136,6 @@ pub trait ApiEndpointExt {
         path: Self::Path,
         data: Option<Self::Req>,
     ) -> anyhow::Result<()> {
-        log::info!("{}", path.get_filled());
-        log::info!("{}", Self::Path::PATH);
         api_with_token_empty(&path.get_filled(), token, Self::EXT_METHOD, data).await
     }
     async fn api_with_token_empty_status(
@@ -171,8 +143,6 @@ pub trait ApiEndpointExt {
         path: Self::Path,
         data: Option<Self::Req>,
     ) -> (anyhow::Result<()>, u16) {
-        log::info!("{}", path.get_filled());
-        log::info!("{}", Self::Path::PATH);
         api_with_token_empty_status(&path.get_filled(), token, Self::EXT_METHOD, data).await
     }
 
@@ -183,16 +153,12 @@ pub trait ApiEndpointExt {
         path: Self::Path,
         data: Option<Self::Req>,
     ) -> anyhow::Result<Self::Res> {
-        log::info!("{}", path.get_filled());
-        log::info!("{}", Self::Path::PATH);
         api_no_auth_with_credentials(&path.get_filled(), Self::EXT_METHOD, data).await
     }
     async fn api_no_auth_with_credentials_status(
         path: Self::Path,
         data: Option<Self::Req>,
     ) -> (anyhow::Result<Self::Res>, u16) {
-        log::info!("{}", path.get_filled());
-        log::info!("{}", Self::Path::PATH);
         api_no_auth_with_credentials_status(&path.get_filled(), Self::EXT_METHOD, data).await
     }
 
@@ -204,8 +170,6 @@ pub trait ApiEndpointExt {
         path: Self::Path,
         data: Option<Self::Req>,
     ) -> anyhow::Result<Self::Res> {
-        log::info!("{}", path.get_filled());
-        log::info!("{}", Self::Path::PATH);
         api_with_basic_token(
             &path.get_filled(),
             user_id,
@@ -221,8 +185,6 @@ pub trait ApiEndpointExt {
         path: Self::Path,
         data: Option<Self::Req>,
     ) -> (anyhow::Result<Self::Res>, u16) {
-        log::info!("{}", path.get_filled());
-        log::info!("{}", Self::Path::PATH);
         api_with_basic_token_status(
             &path.get_filled(),
             user_id,
