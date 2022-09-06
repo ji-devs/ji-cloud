@@ -2,7 +2,8 @@ use std::{net::TcpListener, sync::Arc};
 
 use actix_service::Service;
 use actix_web::{
-    dev::{MessageBody, Server, ServiceRequest, ServiceResponse},
+    body::MessageBody,
+    dev::{Server, ServiceRequest, ServiceResponse},
     error::Error,
     middleware::{Compat, Condition},
     web::{method, Data},
@@ -95,7 +96,7 @@ impl Application {
 
     pub async fn stop(mut self, graceful: bool) {
         if let Some(server) = self.server.take() {
-            server.stop(graceful).await
+            server.handle().stop(graceful).await
         }
     }
 }
@@ -103,7 +104,7 @@ impl Application {
 impl Drop for Application {
     fn drop(&mut self) {
         if let Some(server) = self.server.take() {
-            let _ = tokio::spawn(server.stop(false));
+            let _ = tokio::spawn(server.handle().stop(false));
         }
     }
 }
@@ -285,7 +286,7 @@ pub fn build(
     Ok(Application::new(port, server.run()))
 }
 
-fn default_route() -> HttpResponse {
+async fn default_route() -> HttpResponse {
     HttpResponse::NotFound().json(BasicError::with_message(
         http::StatusCode::NOT_FOUND,
         "Route not found".to_owned(),

@@ -59,7 +59,11 @@ pub async fn get_access_token_response_and_project_id(
             let token = get_google_token_from_credentials(credentials).await?;
 
             let access_token = Some(token.as_str().to_owned());
-            let expires_at = token.expiration_time();
+            let expires_at = if let Some(exp_at) = token.expiration_time() {
+                Some(Utc::now() + Duration::seconds(exp_at.unix_timestamp()))
+            } else {
+                None
+            };
 
             Ok((
                 GoogleAccessTokenResponse {

@@ -74,11 +74,10 @@ returning id
     ) -> Result<Json<ListEntryResponse>, error::Server> {
         let query = query.map_or_else(ListEntryQuery::default, Query::into_inner);
 
-        let entries = sqlx::query_as!(
-            Entry,
+        let entries = sqlx::query!(
             r#"
 select
-    id as "id: u32",
+    id as "id",
     bundle_id,
     section,
     item_kind_id,
@@ -98,7 +97,23 @@ order by id
             query.bundles.is_empty(),
         )
         .fetch_all(db.as_ref())
-        .await?;
+        .await?
+        .into_iter()
+        .map(|row| Entry {
+            id: row.id as u32,
+            bundle_id: row.bundle_id,
+            section: row.section,
+            item_kind_id: row.item_kind_id,
+            english: row.english,
+            hebrew: row.hebrew,
+            status: row.status,
+            zeplin_reference: row.zeplin_reference,
+            comments: row.comments,
+            in_app: row.in_app,
+            in_element: row.in_element,
+            in_mock: row.in_mock,
+        })
+        .collect();
 
         match query.group_by {
             ListEntryGroupBy::None => Ok(Json(ListEntryResponse::List(entries))),
@@ -121,11 +136,10 @@ order by id
         db: Data<PgPool>,
         id: Path<u32>,
     ) -> Result<Json<GetEntryResponse>, error::NotFound> {
-        let entry = sqlx::query_as!(
-            Entry,
+        let entry = sqlx::query!(
             r#"
 select
-    id as "id: u32",
+    id as "id",
     bundle_id,
     section,
     item_kind_id,
@@ -140,12 +154,25 @@ select
 from locale_entry
 where id = $1
 "#,
-            id.into_inner() as u32,
+            id.into_inner() as i32,
         )
         .fetch_optional(db.as_ref())
         .await?
+        .map(|row| Entry {
+            id: row.id as u32,
+            bundle_id: row.bundle_id,
+            section: row.section,
+            item_kind_id: row.item_kind_id,
+            english: row.english,
+            hebrew: row.hebrew,
+            status: row.status,
+            zeplin_reference: row.zeplin_reference,
+            comments: row.comments,
+            in_app: row.in_app,
+            in_element: row.in_element,
+            in_mock: row.in_mock,
+        })
         .ok_or(error::NotFound::ResourceNotFound)?;
-
         Ok(Json(GetEntryResponse { entry }))
     }
 

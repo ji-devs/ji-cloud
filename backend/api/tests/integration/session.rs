@@ -1,12 +1,15 @@
 use http::StatusCode;
+use sqlx::PgPool;
 
 use crate::{fixture::Fixture, helpers::initialize_server};
 
-#[actix_rt::test]
-async fn create_401_no_auth() -> anyhow::Result<()> {
-    let app = initialize_server(&[], &[]).await;
+#[sqlx::test]
+async fn create_401_no_auth(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -17,16 +20,16 @@ async fn create_401_no_auth() -> anyhow::Result<()> {
 
     assert_eq!(resp.status(), StatusCode::UNAUTHORIZED);
 
-    app.stop(false).await;
-
     Ok(())
 }
 
-#[actix_rt::test]
-async fn create_basic() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[]).await;
+#[sqlx::test]
+async fn create_basic(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -44,16 +47,16 @@ async fn create_basic() -> anyhow::Result<()> {
         .expect("body wasn't a object")
         .contains_key("csrf");
 
-    app.stop(false).await;
-
     Ok(())
 }
 
-#[actix_rt::test]
-async fn create_basic_bad_password() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[]).await;
+#[sqlx::test]
+async fn create_basic_bad_password(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -64,8 +67,6 @@ async fn create_basic_bad_password() -> anyhow::Result<()> {
         .await?;
 
     assert_eq!(resp.status(), StatusCode::UNAUTHORIZED);
-
-    app.stop(false).await;
 
     Ok(())
 }

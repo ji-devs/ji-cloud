@@ -1,17 +1,20 @@
 use http::StatusCode;
 use serde_json::json;
 use shared::domain::{circle::CircleId, CreateResponse};
+use sqlx::PgPool;
 
 use crate::{
     fixture::Fixture,
     helpers::{initialize_server, LoginExt},
 };
 
-#[actix_rt::test]
-async fn create() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
+#[sqlx::test]
+async fn create(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -44,8 +47,6 @@ async fn create() -> anyhow::Result<()> {
 
     assert_eq!(resp.status(), StatusCode::OK);
 
-    app.stop(false).await;
-
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
@@ -59,11 +60,13 @@ async fn create() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
-async fn join_circle() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::Circle], &[]).await;
+#[sqlx::test]
+async fn join_circle(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::Circle], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -121,16 +124,16 @@ async fn join_circle() -> anyhow::Result<()> {
         }
     );
 
-    app.stop(false).await;
-
     Ok(())
 }
 
-#[actix_rt::test]
-async fn leave_circle() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::Circle], &[]).await;
+#[sqlx::test]
+async fn leave_circle(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::Circle], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -179,8 +182,6 @@ async fn leave_circle() -> anyhow::Result<()> {
 
     assert_eq!(resp.status(), StatusCode::OK);
 
-    app.stop(false).await;
-
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
@@ -193,11 +194,13 @@ async fn leave_circle() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
-async fn browse_circles() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::Circle], &[]).await;
+#[sqlx::test]
+async fn browse_circles(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::Circle], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -219,16 +222,16 @@ async fn browse_circles() -> anyhow::Result<()> {
         }
     );
 
-    app.stop(false).await;
-
     Ok(())
 }
 
-#[actix_rt::test]
-async fn update_circle() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::Circle], &[]).await;
+#[sqlx::test]
+async fn update_circle(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::Circle], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -291,16 +294,16 @@ async fn update_circle() -> anyhow::Result<()> {
         }
     );
 
-    app.stop(false).await;
-
     Ok(())
 }
 
-#[actix_rt::test]
-async fn browse_circles_with_users() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::Circle], &[]).await;
+#[sqlx::test]
+async fn browse_circles_with_users(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::Circle], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -322,8 +325,6 @@ async fn browse_circles_with_users() -> anyhow::Result<()> {
         {".**.createdAt" => "[created_at]",
          ".**.lastEdited" => "[last_edited]"
     });
-
-    app.stop(false).await;
 
     Ok(())
 }

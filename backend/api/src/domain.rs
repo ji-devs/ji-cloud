@@ -1,7 +1,9 @@
+use actix_http::body::BoxBody;
 use actix_web::{
     cookie::{Cookie, SameSite},
     HttpResponse, Responder,
 };
+
 use chrono::{DateTime, Utc};
 use http::StatusCode;
 use shared::domain::user::UserScope;
@@ -153,7 +155,9 @@ impl fmt::Display for NoContentClearAuth {
 }
 
 impl Responder for NoContentClearAuth {
-    fn respond_to(self, _: &actix_web::HttpRequest) -> HttpResponse {
+    type Body = BoxBody;
+
+    fn respond_to(self, _: &actix_web::HttpRequest) -> HttpResponse<BoxBody> {
         let mut cookie = Cookie::named(AUTH_COOKIE_NAME);
         cookie.set_max_age(time::Duration::seconds(0));
         cookie.set_http_only(true);

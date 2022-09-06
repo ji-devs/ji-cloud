@@ -1,16 +1,19 @@
 use http::StatusCode;
 use shared::domain::{audio::AudioId, CreateResponse};
+use sqlx::PgPool;
 
 use crate::{
     fixture::Fixture,
     helpers::{initialize_server, LoginExt},
 };
 
-#[actix_rt::test]
-async fn create_returns_created() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[]).await;
+#[sqlx::test]
+async fn create_returns_created(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -24,8 +27,6 @@ async fn create_returns_created() -> anyhow::Result<()> {
     assert_eq!(resp.status(), StatusCode::CREATED);
 
     let body: CreateResponse<AudioId> = resp.json().await?;
-
-    app.stop(false).await;
 
     insta::assert_json_snapshot!(body, {".id" => "[id]"});
 

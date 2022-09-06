@@ -5,6 +5,7 @@ mod user;
 use http::StatusCode;
 use serde_json::json;
 use shared::domain::{image::ImageId, CreateResponse};
+use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::{
@@ -19,10 +20,18 @@ async fn create(
     affiliations: &[Uuid],
     categories: &[Uuid],
     tags: &[i16],
+    pool: PgPool,
 ) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds], &[]).await;
+    let app = initialize_server(
+        &[Fixture::User, Fixture::Image, Fixture::MetaKinds],
+        &[],
+        pool,
+    )
+    .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -49,20 +58,18 @@ async fn create(
 
     let body: CreateResponse<ImageId> = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body, {".id" => "[id]"});
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn create_no_meta() -> anyhow::Result<()> {
-    create(&[], &[], &[], &[], &[]).await
+#[sqlx::test]
+async fn create_no_meta(pool: PgPool) -> anyhow::Result<()> {
+    create(&[], &[], &[], &[], &[], pool).await
 }
 
-#[actix_rt::test]
-async fn create_with_styles() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn create_with_styles(pool: PgPool) -> anyhow::Result<()> {
     create(
         &[
             "6389eaa0-de76-11ea-b7ab-0399bcf84df2".parse()?,
@@ -72,26 +79,30 @@ async fn create_with_styles() -> anyhow::Result<()> {
         &[],
         &[],
         &[],
+        pool,
     )
     .await
 }
 
-#[actix_rt::test]
-async fn create_with_meta() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn create_with_meta(pool: PgPool) -> anyhow::Result<()> {
     create(
         &["6389eaa0-de76-11ea-b7ab-0399bcf84df2".parse()?],
         &["f3722790-de76-11ea-b7ab-77b45e9af3ef".parse()?],
         &["c0cd4446-de76-11ea-b7ab-93987e8aa112".parse()?],
         &[],
         &[1],
+        pool,
     )
     .await
 }
 
-async fn create_error(kind: &str, id: &str) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[]).await;
+async fn create_error(kind: &str, id: &str, pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -118,17 +129,17 @@ async fn create_error(kind: &str, id: &str) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body);
 
     Ok(())
 }
 
-async fn create_error_tag(kind: &str, id: &i16) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[]).await;
+async fn create_error_tag(kind: &str, id: &i16, pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -155,40 +166,38 @@ async fn create_error_tag(kind: &str, id: &i16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body);
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn create_with_style_error() -> anyhow::Result<()> {
-    create_error("styles", "6389eaa0-de76-11ea-b7ab-0399bcf84df2").await
+#[sqlx::test]
+async fn create_with_style_error(pool: PgPool) -> anyhow::Result<()> {
+    create_error("styles", "6389eaa0-de76-11ea-b7ab-0399bcf84df2", pool).await
 }
 
-#[actix_rt::test]
-async fn create_with_affiliation_error() -> anyhow::Result<()> {
-    create_error("affiliations", "6389eaa0-de76-11ea-b7ab-0399bcf84df2").await
+#[sqlx::test]
+async fn create_with_affiliation_error(pool: PgPool) -> anyhow::Result<()> {
+    create_error("affiliations", "6389eaa0-de76-11ea-b7ab-0399bcf84df2", pool).await
 }
 
-#[actix_rt::test]
-async fn create_with_age_range_error() -> anyhow::Result<()> {
-    create_error("age_ranges", "6389eaa0-de76-11ea-b7ab-0399bcf84df2").await
+#[sqlx::test]
+async fn create_with_age_range_error(pool: PgPool) -> anyhow::Result<()> {
+    create_error("age_ranges", "6389eaa0-de76-11ea-b7ab-0399bcf84df2", pool).await
 }
 
-#[actix_rt::test]
-async fn create_with_category_error() -> anyhow::Result<()> {
-    create_error("categories", "6389eaa0-de76-11ea-b7ab-0399bcf84df2").await
+#[sqlx::test]
+async fn create_with_category_error(pool: PgPool) -> anyhow::Result<()> {
+    create_error("categories", "6389eaa0-de76-11ea-b7ab-0399bcf84df2", pool).await
 }
 
-#[actix_rt::test]
-async fn create_with_tags_error() -> anyhow::Result<()> {
-    create_error_tag("tags", &22).await
+#[sqlx::test]
+async fn create_with_tags_error(pool: PgPool) -> anyhow::Result<()> {
+    create_error_tag("tags", &22, pool).await
 }
 
-#[actix_rt::test]
-async fn get_metadata() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn get_metadata(pool: PgPool) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::User,
@@ -197,10 +206,13 @@ async fn get_metadata() -> anyhow::Result<()> {
             Fixture::MetaImage,
         ],
         &[],
+        pool,
     )
     .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -218,8 +230,6 @@ async fn get_metadata() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body, {".metadata.updated_at" => "[timestamp]"});
 
     Ok(())
@@ -230,10 +240,17 @@ async fn get_metadata() -> anyhow::Result<()> {
 // todo: delete; missing algolia, s3
 // todo: delete: edge case (never uploaded, should work even without s3), missing algolia
 
-async fn update(req: &serde_json::Value) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::MetaKinds, Fixture::Image], &[]).await;
+async fn update(req: &serde_json::Value, pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::User, Fixture::MetaKinds, Fixture::Image],
+        &[],
+        pool,
+    )
+    .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -264,38 +281,38 @@ async fn update(req: &serde_json::Value) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body, {".metadata.updated_at" => "[timestamp]"});
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn update_empty() -> anyhow::Result<()> {
-    update(&json!({})).await
+#[sqlx::test]
+async fn update_empty(pool: PgPool) -> anyhow::Result<()> {
+    update(&json!({}), pool).await
 }
 
-#[actix_rt::test]
-async fn update_is_premium() -> anyhow::Result<()> {
-    update(&json!({"is_premium": true})).await
+#[sqlx::test]
+async fn update_is_premium(pool: PgPool) -> anyhow::Result<()> {
+    update(&json!({"is_premium": true}), pool).await
 }
 
-#[actix_rt::test]
-async fn update_styles() -> anyhow::Result<()> {
-    update(&json!({"styles": ["6389eaa0-de76-11ea-b7ab-0399bcf84df2", "6389ff7c-de76-11ea-b7ab-9b5661dd4f70"]})).await
+#[sqlx::test]
+async fn update_styles(pool: PgPool) -> anyhow::Result<()> {
+    update(&json!({"styles": ["6389eaa0-de76-11ea-b7ab-0399bcf84df2", "6389ff7c-de76-11ea-b7ab-9b5661dd4f70"]}), pool).await
 }
 
-#[actix_rt::test]
-async fn update_tags() -> anyhow::Result<()> {
-    update(&json!({"tags": [0, 2]})).await
+#[sqlx::test]
+async fn update_tags(pool: PgPool) -> anyhow::Result<()> {
+    update(&json!({"tags": [0, 2]}), pool).await
 }
 
-#[actix_rt::test]
-async fn browse() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
+#[sqlx::test]
+async fn browse(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -312,8 +329,6 @@ async fn browse() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body, {".metadata.updated_at" => "[timestamp]"});
 
     Ok(())
@@ -321,17 +336,20 @@ async fn browse() -> anyhow::Result<()> {
 
 // https://cloud.google.com/storage/docs/performing-resumable-uploads#single-chunk-upload
 #[ignore]
-#[actix_rt::test]
-async fn upload_with_url() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn upload_with_url(pool: PgPool) -> anyhow::Result<()> {
     let file: Vec<u8> = include_bytes!("../../fixtures/images/ji-logo.png").to_vec();
 
     let app = initialize_server(
         &[Fixture::User, Fixture::Image],
         &[Service::GoogleCloudStorage],
+        pool,
     )
     .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -364,11 +382,13 @@ async fn upload_with_url() -> anyhow::Result<()> {
 }
 
 #[ignore]
-#[actix_rt::test]
-async fn create_media_and_upload_with_url() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
+#[sqlx::test]
+async fn create_media_and_upload_with_url(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 

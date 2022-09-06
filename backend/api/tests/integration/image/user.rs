@@ -1,15 +1,18 @@
 use http::StatusCode;
 use serde_json::json;
+use sqlx::PgPool;
 
 use crate::{
     fixture::Fixture,
     helpers::{initialize_server, LoginExt},
 };
 
-async fn list(query: &[(&str, &str)]) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
+async fn list(query: &[(&str, &str)], pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -25,28 +28,28 @@ async fn list(query: &[(&str, &str)]) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body);
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn list_kind() -> anyhow::Result<()> {
-    list(&[("kind", "Sticker")]).await
+#[sqlx::test]
+async fn list_kind(pool: PgPool) -> anyhow::Result<()> {
+    list(&[("kind", "Sticker")], pool).await
 }
 
-#[actix_rt::test]
-async fn list_all() -> anyhow::Result<()> {
-    list(&[]).await
+#[sqlx::test]
+async fn list_all(pool: PgPool) -> anyhow::Result<()> {
+    list(&[], pool).await
 }
 
-#[actix_rt::test]
-async fn create() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
+#[sqlx::test]
+async fn create(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -64,18 +67,18 @@ async fn create() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body, {".**.id" => "[id]"});
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn get() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
+#[sqlx::test]
+async fn get(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -93,8 +96,6 @@ async fn get() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body, {".**.id" => "[id]"});
 
     Ok(())
@@ -102,11 +103,13 @@ async fn get() -> anyhow::Result<()> {
 
 // needs s3
 #[ignore]
-#[actix_rt::test]
-async fn delete() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
+#[sqlx::test]
+async fn delete(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -123,8 +126,6 @@ async fn delete() -> anyhow::Result<()> {
     assert_eq!(resp.status(), StatusCode::CREATED);
 
     let body: serde_json::Value = resp.json().await?;
-
-    app.stop(false).await;
 
     insta::assert_json_snapshot!(body, {".**.id" => "[id]"});
 

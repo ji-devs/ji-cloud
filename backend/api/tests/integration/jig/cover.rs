@@ -1,14 +1,20 @@
 use serde_json::json;
 use shared::domain::jig::JigResponse;
+use sqlx::PgPool;
 
 use crate::{
     fixture::Fixture,
     helpers::{initialize_server, LoginExt},
 };
 
-#[actix_rt::test]
-async fn update_no_modules_changes() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
+#[sqlx::test]
+async fn update_no_modules_changes(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
+        &[],
+        pool,
+    )
+    .await;
 
     let port = app.port();
 

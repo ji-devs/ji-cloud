@@ -65,9 +65,6 @@ impl TestServicesSettings {
 
                 let token = token.access_token.unwrap();
 
-                println!("token: {:?}", token);
-                println!("project id: {:?}", project_id);
-
                 (token, project_id)
             }
         };

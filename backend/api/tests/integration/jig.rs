@@ -1,6 +1,7 @@
 use http::StatusCode;
 use serde_json::json;
 use shared::domain::{jig::JigId, CreateResponse};
+use sqlx::PgPool;
 
 use crate::{
     fixture::Fixture,
@@ -12,11 +13,13 @@ mod cover;
 mod module;
 mod player;
 
-#[actix_rt::test]
-async fn create_default() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[]).await;
+#[sqlx::test]
+async fn create_default(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -61,8 +64,6 @@ async fn create_default() -> anyhow::Result<()> {
         .await?
         .error_for_status()?;
 
-    app.stop(false).await;
-
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
@@ -79,11 +80,13 @@ async fn create_default() -> anyhow::Result<()> {
 }
 
 // requires algolia
-// #[actix_rt::test]
-// async fn delete() -> anyhow::Result<()> {
+// #[sqlx::test]
+// async fn delete(pool: PgPool) -> anyhow::Result<()> {
 //     let app = initialize_server(&[Fixture::User, Fixture::Jig]).await;
 
 //     let port = app.port();
+
+//     tokio::spawn(app.run_until_stopped());
 
 //     let client = reqwest::Client::new();
 
@@ -102,11 +105,18 @@ async fn create_default() -> anyhow::Result<()> {
 //     Ok(())
 // }
 
-#[actix_rt::test]
-async fn create_with_params() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
+#[sqlx::test]
+async fn create_with_params(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
+        &[],
+        pool,
+    )
+    .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -126,18 +136,23 @@ async fn create_with_params() -> anyhow::Result<()> {
 
     let body: CreateResponse<JigId> = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body, {".id" => "[id]", ".last_edited" => "[last_edited]"});
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn clone() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
+#[sqlx::test]
+async fn clone(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
+        &[],
+        pool,
+    )
+    .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -195,16 +210,21 @@ async fn clone() -> anyhow::Result<()> {
         }
     );
 
-    app.stop(false).await;
-
     Ok(())
 }
 
-#[actix_rt::test]
-async fn get() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
+#[sqlx::test]
+async fn get(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
+        &[],
+        pool,
+    )
+    .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -252,17 +272,22 @@ async fn get() -> anyhow::Result<()> {
         }
     );
 
-    app.stop(false).await;
-
     Ok(())
 }
 
 // todo: test-exhaustiveness: create a `JigBrowse` Fixture, actually test the cases (paging, jig count, etc)
-#[actix_rt::test]
-async fn browse_simple() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
+#[sqlx::test]
+async fn browse_simple(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
+        &[],
+        pool,
+    )
+    .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -277,8 +302,6 @@ async fn browse_simple() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(
         body, {
             ".**.lastEdited" => "[last_edited]",
@@ -290,11 +313,18 @@ async fn browse_simple() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
-async fn browse_order_by() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
+#[sqlx::test]
+async fn browse_order_by(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
+        &[],
+        pool,
+    )
+    .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -353,8 +383,6 @@ async fn browse_order_by() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(
         body, {
             ".**.lastEdited" => "[last_edited]",
@@ -368,15 +396,18 @@ async fn browse_order_by() -> anyhow::Result<()> {
 
 // todo: test-exhaustiveness: create a `JigBrowse` Fixture, actually test the cases (paging, jig count, etc)
 #[ignore]
-#[actix_rt::test]
-async fn browse_own_simple() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn browse_own_simple(pool: PgPool) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::MetaKinds, Fixture::UserDefaultPerms, Fixture::Jig],
         &[],
+        pool,
     )
     .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -394,8 +425,6 @@ async fn browse_own_simple() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(
         body, {
             ".**.lastEdited" => "[last_edited]",
@@ -407,15 +436,18 @@ async fn browse_own_simple() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
-async fn count() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn count(pool: PgPool) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::MetaKinds, Fixture::UserDefaultPerms, Fixture::Jig],
         &[],
+        pool,
     )
     .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -430,15 +462,13 @@ async fn count() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body);
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn update_and_publish() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn update_and_publish(pool: PgPool) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::MetaKinds,
@@ -447,10 +477,13 @@ async fn update_and_publish() -> anyhow::Result<()> {
             Fixture::CategoryOrdering,
         ],
         &[],
+        pool,
     )
     .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -565,14 +598,12 @@ async fn update_and_publish() -> anyhow::Result<()> {
         }
     );
 
-    app.stop(false).await;
-
     Ok(())
 }
 
 #[ignore]
-#[actix_rt::test]
-async fn update_and_publish_incomplete_modules() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn update_and_publish_incomplete_modules(pool: PgPool) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::MetaKinds,
@@ -581,10 +612,13 @@ async fn update_and_publish_incomplete_modules() -> anyhow::Result<()> {
             Fixture::CategoryOrdering,
         ],
         &[],
+        pool,
     )
     .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -611,8 +645,6 @@ async fn update_and_publish_incomplete_modules() -> anyhow::Result<()> {
         .await?;
 
     assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
-
-    app.stop(false).await;
 
     Ok(())
 }

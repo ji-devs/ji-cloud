@@ -5,12 +5,20 @@ use crate::{
 use http::StatusCode;
 use shared::domain::image::tag::{ImageTagCreateRequest, ImageTagUpdateRequest};
 use shared::domain::meta::ImageTagIndex;
+use sqlx::PgPool;
 
-#[actix_rt::test]
-async fn create() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds], &[]).await;
+#[sqlx::test]
+async fn create(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::User, Fixture::Image, Fixture::MetaKinds],
+        &[],
+        pool,
+    )
+    .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -30,16 +38,21 @@ async fn create() -> anyhow::Result<()> {
 
     insta::assert_json_snapshot!(body, { ".id" => "[id]" });
 
-    app.stop(false).await;
-
     Ok(())
 }
 
-#[actix_rt::test]
-async fn create_conflict() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds], &[]).await;
+#[sqlx::test]
+async fn create_conflict(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::User, Fixture::Image, Fixture::MetaKinds],
+        &[],
+        pool,
+    )
+    .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -54,16 +67,21 @@ async fn create_conflict() -> anyhow::Result<()> {
 
     assert_eq!(resp.status(), StatusCode::CONFLICT);
 
-    app.stop(false).await;
-
     Ok(())
 }
 
-#[actix_rt::test]
-async fn list() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds], &[]).await;
+#[sqlx::test]
+async fn list(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::User, Fixture::Image, Fixture::MetaKinds],
+        &[],
+        pool,
+    )
+    .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -82,15 +100,20 @@ async fn list() -> anyhow::Result<()> {
 
     insta::assert_json_snapshot!(body, { ".**.id" => "[id]" });
 
-    app.stop(false).await;
-
     Ok(())
 }
 
-async fn update(index: i16, req: ImageTagUpdateRequest) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds], &[]).await;
+async fn update(index: i16, req: ImageTagUpdateRequest, pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::User, Fixture::Image, Fixture::MetaKinds],
+        &[],
+        pool,
+    )
+    .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -117,64 +140,73 @@ async fn update(index: i16, req: ImageTagUpdateRequest) -> anyhow::Result<()> {
 
     insta::assert_json_snapshot!(body, { ".**.id" => "[id]" });
 
-    app.stop(false).await;
-
     Ok(())
 }
 
-#[actix_rt::test]
-async fn update_no_index() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn update_no_index(pool: PgPool) -> anyhow::Result<()> {
     update(
         0,
         ImageTagUpdateRequest {
             display_name: Some("test".to_owned()),
             index: None,
         },
+        pool,
     )
     .await
 }
 
-#[actix_rt::test]
-async fn update_with_index() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn update_with_index(pool: PgPool) -> anyhow::Result<()> {
     update(
         1,
         ImageTagUpdateRequest {
             display_name: Some("test".to_owned()),
             index: Some(ImageTagIndex(15)),
         },
+        pool,
     )
     .await
 }
 
-#[actix_rt::test]
-async fn update_none() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn update_none(pool: PgPool) -> anyhow::Result<()> {
     update(
         1,
         ImageTagUpdateRequest {
             display_name: None,
             index: None,
         },
+        pool,
     )
     .await
 }
 
-#[actix_rt::test]
-async fn update_only_index() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn update_only_index(pool: PgPool) -> anyhow::Result<()> {
     update(
         1,
         ImageTagUpdateRequest {
             display_name: None,
             index: Some(ImageTagIndex(3)),
         },
+        pool,
     )
     .await
 }
 
-#[actix_rt::test]
-async fn update_conflict() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds], &[]).await;
+#[sqlx::test]
+async fn update_conflict(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::User, Fixture::Image, Fixture::MetaKinds],
+        &[],
+        pool,
+    )
+    .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -203,16 +235,21 @@ async fn update_conflict() -> anyhow::Result<()> {
 
     insta::assert_json_snapshot!(body, { ".**.id" => "[id]" });
 
-    app.stop(false).await;
-
     Ok(())
 }
 
-#[actix_rt::test]
-async fn delete() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds], &[]).await;
+#[sqlx::test]
+async fn delete(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::User, Fixture::Image, Fixture::MetaKinds],
+        &[],
+        pool,
+    )
+    .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -224,8 +261,6 @@ async fn delete() -> anyhow::Result<()> {
         .error_for_status()?;
 
     assert_eq!(resp.status(), StatusCode::NO_CONTENT);
-
-    app.stop(false).await;
 
     Ok(())
 }

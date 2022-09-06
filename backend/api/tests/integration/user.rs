@@ -18,11 +18,13 @@ mod color;
 mod font;
 mod public_user;
 
-#[actix_rt::test]
-async fn get_profile() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[]).await;
+#[sqlx::test]
+async fn get_profile(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -37,16 +39,14 @@ async fn get_profile() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body);
 
     Ok(())
 }
 
 #[ignore]
-#[actix_rt::test]
-async fn post_profile() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn post_profile(pool: PgPool) -> anyhow::Result<()> {
     if !service::email_test_guard() {
         return Ok(());
     }
@@ -69,9 +69,11 @@ async fn post_profile() -> anyhow::Result<()> {
     .expect("failed to create auth token");
 
     // test server application
-    let app = initialize_server(&[Fixture::User], &[Service::Email]).await;
+    let app = initialize_server(&[Fixture::User], &[Service::Email], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -106,18 +108,18 @@ async fn post_profile() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body, {".csrf" => "[csrf]"});
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn patch_profile() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
+#[sqlx::test]
+async fn patch_profile(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -166,23 +168,23 @@ async fn patch_profile() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body, { ".updated_at" => "[timestamptz]" });
 
     Ok(())
 }
 
 #[ignore]
-#[actix_rt::test]
-async fn verify_email() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn verify_email(pool: PgPool) -> anyhow::Result<()> {
     if !service::email_test_guard() {
         return Ok(());
     }
 
-    let app = initialize_server(&[Fixture::User], &[Service::Email]).await;
+    let app = initialize_server(&[Fixture::User], &[Service::Email], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -203,8 +205,8 @@ async fn verify_email() -> anyhow::Result<()> {
 }
 
 #[ignore]
-#[actix_rt::test]
-async fn basic_auth_flow_no_login() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn basic_auth_flow_no_login(pool: PgPool) -> anyhow::Result<()> {
     if !service::email_test_guard() {
         return Ok(());
     }
@@ -213,9 +215,11 @@ async fn basic_auth_flow_no_login() -> anyhow::Result<()> {
     const PASSWORD: &str = "badpassword";
 
     let (app, db): (Application, PgPool) =
-        initialize_server_and_get_db(&[], &[Service::Email]).await;
+        initialize_server_and_get_db(&[], &[Service::Email], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -301,7 +305,6 @@ async fn basic_auth_flow_no_login() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
     txn.commit().await?;
 
     insta::assert_json_snapshot!(body, {".csrf" => "[csrf]"});
@@ -310,8 +313,8 @@ async fn basic_auth_flow_no_login() -> anyhow::Result<()> {
 }
 
 #[ignore]
-#[actix_rt::test]
-async fn basic_auth_flow() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn basic_auth_flow(pool: PgPool) -> anyhow::Result<()> {
     if !service::email_test_guard() {
         return Ok(());
     }
@@ -320,9 +323,11 @@ async fn basic_auth_flow() -> anyhow::Result<()> {
     const PASSWORD: &str = "badpassword";
 
     let (app, db): (Application, PgPool) =
-        initialize_server_and_get_db(&[], &[Service::Email]).await;
+        initialize_server_and_get_db(&[], &[Service::Email], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -442,7 +447,6 @@ async fn basic_auth_flow() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
     txn.commit().await?;
 
     insta::assert_json_snapshot!(body, {".csrf" => "[csrf]"});
@@ -451,8 +455,8 @@ async fn basic_auth_flow() -> anyhow::Result<()> {
 }
 
 // #[ignore]
-// #[actix_rt::test]
-// async fn update_user_email() -> anyhow::Result<()> {
+// #[sqlx::test]
+// async fn update_user_email(pool: PgPool) -> anyhow::Result<()> {
 //     if !service::email_test_guard() {
 //         return Ok(());
 //     }
@@ -460,6 +464,8 @@ async fn basic_auth_flow() -> anyhow::Result<()> {
 //     let app = initialize_server(&[Fixture::User], &[Service::Email]).await;
 //
 //     let port = app.port();
+
+//     tokio::spawn(app.run_until_stopped());
 //
 //     let client = reqwest::Client::new();
 //
@@ -489,8 +495,7 @@ async fn basic_auth_flow() -> anyhow::Result<()> {
 //
 //     let body: serde_json::Value = resp.json().await?;
 //
-//     app.stop(false).await;
-//
+//    //
 //     insta::assert_json_snapshot!(body, { ".updated_at" => "[timestamptz]" });
 //
 //     Ok(())

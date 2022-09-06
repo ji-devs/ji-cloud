@@ -3,6 +3,7 @@ use serde_json::json;
 use shared::domain::category::{
     CategoryTreeScope, CreateCategoryRequest, GetCategoryRequest, NewCategoryResponse,
 };
+use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::{
@@ -10,11 +11,13 @@ use crate::{
     helpers::{initialize_server, LoginExt},
 };
 
-#[actix_rt::test]
-async fn create() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[]).await;
+#[sqlx::test]
+async fn create(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -33,16 +36,16 @@ async fn create() -> anyhow::Result<()> {
 
     let _body: NewCategoryResponse = resp.json().await?;
 
-    app.stop(false).await;
-
     Ok(())
 }
 
-#[actix_rt::test]
-async fn get() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::CategoryOrdering], &[]).await;
+#[sqlx::test]
+async fn get(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::CategoryOrdering], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -57,17 +60,17 @@ async fn get() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body);
 
     Ok(())
 }
 
-async fn get_nested_categories(query: &GetCategoryRequest) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::CategoryNesting], &[]).await;
+async fn get_nested_categories(query: &GetCategoryRequest, pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::CategoryNesting], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -83,67 +86,79 @@ async fn get_nested_categories(query: &GetCategoryRequest) -> anyhow::Result<()>
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body);
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn nested_top_level() -> anyhow::Result<()> {
-    get_nested_categories(&GetCategoryRequest::default()).await
+#[sqlx::test]
+async fn nested_top_level(pool: PgPool) -> anyhow::Result<()> {
+    get_nested_categories(&GetCategoryRequest::default(), pool).await
 }
 
-#[actix_rt::test]
-async fn nested_whole_tree() -> anyhow::Result<()> {
-    get_nested_categories(&GetCategoryRequest {
-        scope: Some(CategoryTreeScope::Descendants),
-        ids: vec![],
-    })
+#[sqlx::test]
+async fn nested_whole_tree(pool: PgPool) -> anyhow::Result<()> {
+    get_nested_categories(
+        &GetCategoryRequest {
+            scope: Some(CategoryTreeScope::Descendants),
+            ids: vec![],
+        },
+        pool,
+    )
     .await
 }
 
-#[actix_rt::test]
-async fn nested_overlapping() -> anyhow::Result<()> {
-    get_nested_categories(&GetCategoryRequest {
-        scope: Some(CategoryTreeScope::Descendants),
-        ids: vec![
-            "afbce03c-e90f-11ea-8281-cfde02f6b582".parse()?,
-            "e315d3b2-e90f-11ea-8281-73cd69c14821".parse()?,
-        ],
-    })
+#[sqlx::test]
+async fn nested_overlapping(pool: PgPool) -> anyhow::Result<()> {
+    get_nested_categories(
+        &GetCategoryRequest {
+            scope: Some(CategoryTreeScope::Descendants),
+            ids: vec![
+                "afbce03c-e90f-11ea-8281-cfde02f6b582".parse()?,
+                "e315d3b2-e90f-11ea-8281-73cd69c14821".parse()?,
+            ],
+        },
+        pool,
+    )
     .await
 }
 
-#[actix_rt::test]
-async fn nested_ancestors() -> anyhow::Result<()> {
-    get_nested_categories(&GetCategoryRequest {
-        scope: Some(CategoryTreeScope::Ancestors),
-        ids: vec!["e315d3b2-e90f-11ea-8281-73cd69c14821".parse()?],
-    })
+#[sqlx::test]
+async fn nested_ancestors(pool: PgPool) -> anyhow::Result<()> {
+    get_nested_categories(
+        &GetCategoryRequest {
+            scope: Some(CategoryTreeScope::Ancestors),
+            ids: vec!["e315d3b2-e90f-11ea-8281-73cd69c14821".parse()?],
+        },
+        pool,
+    )
     .await
 }
 
-#[actix_rt::test]
-async fn nested_exact() -> anyhow::Result<()> {
-    get_nested_categories(&GetCategoryRequest {
-        scope: None,
-        ids: vec![
-            "afbce03c-e90f-11ea-8281-cfde02f6b582".parse()?,
-            "01cff7d8-e910-11ea-8281-7f86c625a156".parse()?,
-        ],
-    })
+#[sqlx::test]
+async fn nested_exact(pool: PgPool) -> anyhow::Result<()> {
+    get_nested_categories(
+        &GetCategoryRequest {
+            scope: None,
+            ids: vec![
+                "afbce03c-e90f-11ea-8281-cfde02f6b582".parse()?,
+                "01cff7d8-e910-11ea-8281-7f86c625a156".parse()?,
+            ],
+        },
+        pool,
+    )
     .await
 }
 
-#[actix_rt::test]
-async fn upgdate_ordering() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn upgdate_ordering(pool: PgPool) -> anyhow::Result<()> {
     let category_three = "81c4796a-e883-11ea-93f0-df2484ab6b11";
 
-    let app = initialize_server(&[Fixture::User, Fixture::CategoryOrdering], &[]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::CategoryOrdering], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -197,18 +212,18 @@ async fn upgdate_ordering() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body, {".**.updated_at" => "[timestamp]"});
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn delete() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::CategoryOrdering], &[]).await;
+#[sqlx::test]
+async fn delete(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::CategoryOrdering], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -235,17 +250,17 @@ async fn delete() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body, {".**.updated_at" => "[timestamp]"});
 
     Ok(())
 }
 
-async fn update(id: Uuid, body: &serde_json::Value) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::CategoryOrdering], &[]).await;
+async fn update(id: Uuid, body: &serde_json::Value, pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::CategoryOrdering], &[], pool).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -273,54 +288,57 @@ async fn update(id: Uuid, body: &serde_json::Value) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body, {".**.updated_at" => "[timestamp]"});
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn update_parent() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn update_parent(pool: PgPool) -> anyhow::Result<()> {
     update(
         "7fe19326-e883-11ea-93f0-5343493c17c4".parse()?,
         &json!({"parent_id": "81c4796a-e883-11ea-93f0-df2484ab6b11"}),
+        pool,
     )
     .await
 }
 
-#[actix_rt::test]
-async fn update_reparent_move() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn update_reparent_move(pool: PgPool) -> anyhow::Result<()> {
     update(
         "7fe19326-e883-11ea-93f0-5343493c17c4".parse()?,
         &json!({"parent_id": (), "index": 0}),
+        pool,
     )
     .await
 }
 
-#[actix_rt::test]
-async fn update_move() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn update_move(pool: PgPool) -> anyhow::Result<()> {
     update(
         "81c4796a-e883-11ea-93f0-df2484ab6b11".parse()?,
         &json!({"index": 1}),
+        pool,
     )
     .await
 }
 
-#[actix_rt::test]
-async fn update_scope() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn update_scope(pool: PgPool) -> anyhow::Result<()> {
     update(
         "81c4796a-e883-11ea-93f0-df2484ab6b11".parse()?,
         &json!({"user_scopes": ["Admin", "ManageCategory", "ManageImage", "ManageAnimation"]}),
+        pool,
     )
     .await
 }
 
-#[actix_rt::test]
-async fn update_rename() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn update_rename(pool: PgPool) -> anyhow::Result<()> {
     update(
         "81c4796a-e883-11ea-93f0-df2484ab6b11".parse()?,
         &json!({"name": "abc123"}),
+        pool,
     )
     .await
 }

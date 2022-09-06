@@ -1,13 +1,14 @@
 use http::StatusCode;
 use serde_json::json;
+use sqlx::PgPool;
 
 use crate::{
     fixture::Fixture,
     helpers::{initialize_server, LoginExt},
 };
 
-#[actix_rt::test]
-async fn get() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn get(pool: PgPool) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::MetaKinds,
@@ -16,10 +17,13 @@ async fn get() -> anyhow::Result<()> {
             Fixture::Course,
         ],
         &[],
+        pool,
     )
     .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -65,13 +69,11 @@ async fn get() -> anyhow::Result<()> {
         }
     );
 
-    app.stop(false).await;
-
     Ok(())
 }
 
-#[actix_rt::test]
-async fn update_and_publish_browse() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn update_and_publish_browse(pool: PgPool) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::MetaKinds,
@@ -80,10 +82,13 @@ async fn update_and_publish_browse() -> anyhow::Result<()> {
             Fixture::Course,
         ],
         &[],
+        pool,
     )
     .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -191,13 +196,11 @@ async fn update_and_publish_browse() -> anyhow::Result<()> {
         }
     );
 
-    app.stop(false).await;
-
     Ok(())
 }
 
-#[actix_rt::test]
-async fn browse_simple() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn browse_simple(pool: PgPool) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::MetaKinds,
@@ -206,10 +209,13 @@ async fn browse_simple() -> anyhow::Result<()> {
             Fixture::Course,
         ],
         &[],
+        pool,
     )
     .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -224,8 +230,6 @@ async fn browse_simple() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(
         body, {
             ".**.lastEdited" => "[last_edited]",
@@ -235,8 +239,8 @@ async fn browse_simple() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
-async fn course_jig_index() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn course_jig_index(pool: PgPool) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::MetaKinds,
@@ -245,10 +249,13 @@ async fn course_jig_index() -> anyhow::Result<()> {
             Fixture::Course,
         ],
         &[],
+        pool,
     )
     .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -353,13 +360,11 @@ async fn course_jig_index() -> anyhow::Result<()> {
         }
     );
 
-    app.stop(false).await;
-
     Ok(())
 }
 
-#[actix_rt::test]
-async fn publish_modules() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn publish_modules(pool: PgPool) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::MetaKinds,
@@ -368,10 +373,13 @@ async fn publish_modules() -> anyhow::Result<()> {
             Fixture::Course,
         ],
         &[],
+        pool,
     )
     .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -444,8 +452,6 @@ async fn publish_modules() -> anyhow::Result<()> {
             ".**.publishedAt" => "[published_at]"
         }
     );
-
-    app.stop(false).await;
 
     Ok(())
 }

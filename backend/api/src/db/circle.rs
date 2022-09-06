@@ -250,7 +250,7 @@ select  id            as "circle_id!: CircleId",
         display_name  as "display_name!",
         description   as "description!",
         image         as "image!: ImageId",
-        member_count  as "member_count!: u32",
+        member_count  as "member_count!",
         creator_id    as "creator_id!: UserId",
         created_at    as "created_at!",
         updated_at   
@@ -271,7 +271,7 @@ with ordinality t(id, ord) using (id)
             created_by: row.creator_id,
             description: row.description,
             image: row.image,
-            member_count: row.member_count,
+            member_count: row.member_count as u32,
             created_at: row.created_at,
             last_edited: row.updated_at,
         })

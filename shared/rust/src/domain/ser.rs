@@ -43,12 +43,12 @@ where
     let mut out = String::with_capacity(len);
     let mut iter = uuids.iter().copied().map(<T as Into<Uuid>>::into);
     if let Some(item) = iter.next() {
-        write!(&mut out, "{}", item.to_hyphenated())
+        write!(&mut out, "{}", item.hyphenated())
             .expect("`String` call to `write!` shouldn't fail.");
     }
 
     for item in iter {
-        write!(&mut out, ",{}", item.to_hyphenated())
+        write!(&mut out, ",{}", item.hyphenated())
             .expect("`String` call to `write!` shouldn't fail");
     }
 

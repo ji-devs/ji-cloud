@@ -10,12 +10,18 @@ use shared::domain::{
     jig::JigId,
     meta::ResourceTypeId,
 };
+use sqlx::PgPool;
 use std::str::FromStr;
 use uuid::Uuid;
 
-#[actix_rt::test]
-async fn create() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
+#[sqlx::test]
+async fn create(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
+        &[],
+        pool,
+    )
+    .await;
 
     let port: u16 = app.port();
 
@@ -54,9 +60,14 @@ async fn create() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
-async fn get_draft() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
+#[sqlx::test]
+async fn get_draft(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
+        &[],
+        pool,
+    )
+    .await;
 
     let port: u16 = app.port();
 
@@ -83,9 +94,14 @@ async fn get_draft() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
-async fn get_live() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
+#[sqlx::test]
+async fn get_live(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
+        &[],
+        pool,
+    )
+    .await;
 
     let port: u16 = app.port();
 
@@ -112,9 +128,14 @@ async fn get_live() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
-async fn delete() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
+#[sqlx::test]
+async fn delete(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
+        &[],
+        pool,
+    )
+    .await;
 
     let port: u16 = app.port();
 

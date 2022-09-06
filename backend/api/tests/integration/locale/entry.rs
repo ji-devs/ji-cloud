@@ -2,15 +2,16 @@ use http::StatusCode;
 
 use serde_json::json;
 use shared::domain::locale::{CreateEntryRequest, EntryStatus};
+use sqlx::PgPool;
 
 use crate::{
     fixture::Fixture,
     helpers::{initialize_server, LoginExt},
 };
 
-#[actix_rt::test]
-async fn delete() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[]).await;
+#[sqlx::test]
+async fn delete(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[], pool).await;
 
     let port = app.port();
 
@@ -28,9 +29,9 @@ async fn delete() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
-async fn get() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[]).await;
+#[sqlx::test]
+async fn get(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[], pool).await;
 
     let port = app.port();
 
@@ -51,8 +52,8 @@ async fn get() -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn list(query: &[(&str, &str)]) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[]).await;
+async fn list(query: &[(&str, &str)], pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[], pool).await;
 
     let port = app.port();
 
@@ -76,47 +77,53 @@ async fn list(query: &[(&str, &str)]) -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
-async fn list_all_by_default() -> anyhow::Result<()> {
-    list(&[]).await
+#[sqlx::test]
+async fn list_all_by_default(pool: PgPool) -> anyhow::Result<()> {
+    list(&[], pool).await
 }
 
-#[actix_rt::test]
-async fn list_all_by_bundle() -> anyhow::Result<()> {
-    list(&[("groupBy", "bundle")]).await
+#[sqlx::test]
+async fn list_all_by_bundle(pool: PgPool) -> anyhow::Result<()> {
+    list(&[("groupBy", "bundle")], pool).await
 }
 
-#[actix_rt::test]
-async fn list_empty_bundle_by_default() -> anyhow::Result<()> {
-    list(&[("bundles", "85a46ffe-7c67-11eb-a0d7-277d94fe130c")]).await
+#[sqlx::test]
+async fn list_empty_bundle_by_default(pool: PgPool) -> anyhow::Result<()> {
+    list(&[("bundles", "85a46ffe-7c67-11eb-a0d7-277d94fe130c")], pool).await
 }
 
-#[actix_rt::test]
-async fn list_empty_bundle_by_bundle() -> anyhow::Result<()> {
-    list(&[
-        ("groupBy", "bundle"),
-        ("bundles", "85a46ffe-7c67-11eb-a0d7-277d94fe130c"),
-    ])
+#[sqlx::test]
+async fn list_empty_bundle_by_bundle(pool: PgPool) -> anyhow::Result<()> {
+    list(
+        &[
+            ("groupBy", "bundle"),
+            ("bundles", "85a46ffe-7c67-11eb-a0d7-277d94fe130c"),
+        ],
+        pool,
+    )
     .await
 }
 
-#[actix_rt::test]
-async fn list_single_bundle_by_default() -> anyhow::Result<()> {
-    list(&[("bundles", "8359a48a-7c67-11eb-a0d7-0fd74777a62c")]).await
+#[sqlx::test]
+async fn list_single_bundle_by_default(pool: PgPool) -> anyhow::Result<()> {
+    list(&[("bundles", "8359a48a-7c67-11eb-a0d7-0fd74777a62c")], pool).await
 }
 
-#[actix_rt::test]
-async fn list_single_bundle_by_bundle() -> anyhow::Result<()> {
-    list(&[
-        ("groupBy", "bundle"),
-        ("bundles", "8359a48a-7c67-11eb-a0d7-0fd74777a62c"),
-    ])
+#[sqlx::test]
+async fn list_single_bundle_by_bundle(pool: PgPool) -> anyhow::Result<()> {
+    list(
+        &[
+            ("groupBy", "bundle"),
+            ("bundles", "8359a48a-7c67-11eb-a0d7-0fd74777a62c"),
+        ],
+        pool,
+    )
     .await
 }
 
-#[actix_rt::test]
-async fn create() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[]).await;
+#[sqlx::test]
+async fn create(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[], pool).await;
 
     let port = app.port();
 
@@ -153,9 +160,9 @@ async fn create() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
-async fn update_in_app() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[]).await;
+#[sqlx::test]
+async fn update_in_app(pool: PgPool) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[], pool).await;
 
     let port = app.port();
 

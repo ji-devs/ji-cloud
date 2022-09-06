@@ -61,6 +61,22 @@ pub async fn get_pool(connect_options: PgConnectOptions) -> anyhow::Result<PgPoo
     Ok(pool)
 }
 
+pub async fn get_test_pool(
+    connect_options: PgConnectOptions,
+    pool: PgPool,
+) -> anyhow::Result<PgPool> {
+    // let pool = PgPoolOptions::new()
+    //     .max_connections(DB_POOL_CONNECTIONS)
+    //     .connect_with(connect_options)
+    //     .await?;
+
+    log::info!("Running migrations, if there are any");
+    sqlx::migrate!("./migrations").run(&pool).await?;
+    log::info!("Migrations complete");
+
+    Ok(pool)
+}
+
 trait Metadata: Into<Uuid> + Copy {
     const TABLE: &'static str;
 }
