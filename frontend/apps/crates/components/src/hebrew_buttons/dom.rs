@@ -35,7 +35,7 @@ impl HebrewButtons {
                 .child_signal(state.active_popup.signal().map(clone!(state, elem => move|active_popup| {
                     active_popup.map(|popup| state.render_popups(popup, elem.clone()))
                 })))
-                .apply_if(false, |dom| {
+                .apply_if(state.kind != Kind::KeyboardOnly, |dom| {
                     dom.children(&mut [
                         html!("hebrew-inputs-action", {
                             .property("slot", "full-only")
