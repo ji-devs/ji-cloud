@@ -25,7 +25,7 @@ pub enum Hint {
 
 impl Default for Hint {
     fn default() -> Self {
-        Self::Highlight
+        Self::None
     }
 }
 

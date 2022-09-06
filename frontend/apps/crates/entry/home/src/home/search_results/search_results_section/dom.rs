@@ -7,10 +7,14 @@ use futures_signals::{
     signal::{Signal, SignalExt},
     signal_vec::SignalVecExt,
 };
-use shared::{domain::{
-    asset::{Asset, AssetId, AssetType, DraftOrLive},
-    meta::ResourceTypeId, resource::ResourceViewPath,
-}, api::endpoints::resource};
+use shared::{
+    api::endpoints::resource,
+    domain::{
+        asset::{Asset, AssetId, AssetType, DraftOrLive},
+        meta::ResourceTypeId,
+        resource::ResourceViewPath,
+    },
+};
 use std::rc::Rc;
 use utils::{
     ages::AgeRangeVecExt,
