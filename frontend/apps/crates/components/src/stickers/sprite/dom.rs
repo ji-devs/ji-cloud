@@ -128,6 +128,7 @@ pub fn render_sticker_sprite_raw(sprite: &RawSprite, opts: Option<SpriteRawRende
     let mixin = opts.base.mixin;
 
     parent
+        .style("user-select", "none")
         .style_signal("width", width_signal(size.signal_cloned()))
         .style_signal("height", height_signal(size.signal_cloned()))
         .style_signal("top", bounds::size_height_center_rem_signal(size.signal()))

@@ -192,6 +192,7 @@ pub fn render_sticker_text_raw(
         )
         .child(
             parent
+                .style("user-select", "none")
                 .style("position", "absolute")
                 .style("transform", text.transform.rotation_matrix_string())
                 //the text determines transform size, not the other way around
