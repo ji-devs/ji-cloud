@@ -6958,6 +6958,56 @@
     },
     "query": "\nupdate resource\nset views = views + 1\nwhere id = $1;\n            "
   },
+  "99fa41555d59f16f6c77672a3282c49bda64b93672deb98569dc677a6f987989": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: ModuleId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "body!",
+          "ordinal": 1,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "created_at!",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at!",
+          "ordinal": 3,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "kind!: ModuleKind",
+          "ordinal": 4,
+          "type_info": "Int2"
+        },
+        {
+          "name": "is_complete!",
+          "ordinal": 5,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect jdm.id      as \"id!: ModuleId\",\n       contents    as \"body!\",\n       created_at  as \"created_at!\",\n       updated_at  as \"updated_at!\",\n       kind        as \"kind!: ModuleKind\",\n       is_complete as \"is_complete!\"\nfrom jig_data_module \"jdm\"\ninner join jig on jig.draft_id = jdm.jig_data_id \nwhere jdm.id is not distinct from $1 \n"
+  },
   "9a280ed5b2d646c563937e8cee1bae592f8d46322edf1769a7c89670088ac3d8": {
     "describe": {
       "columns": [],
@@ -10601,56 +10651,6 @@
       }
     },
     "query": "\nupdate jig_data\nset other_keywords = $2,\n    translated_keywords = (case when ($3::text is not null) then $3::text else (translated_keywords) end),\n    updated_at = now()\nwhere id = $1 and $2 is distinct from other_keywords"
-  },
-  "ea0bf9d029c261fd6d17e1ea5b8ea8aa10276f40dda9399e5234fcf225a98b71": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: ModuleId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "body!",
-          "ordinal": 1,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "created_at!",
-          "ordinal": 2,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at!",
-          "ordinal": 3,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "kind!: ModuleKind",
-          "ordinal": 4,
-          "type_info": "Int2"
-        },
-        {
-          "name": "is_complete!",
-          "ordinal": 5,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        true,
-        true,
-        true,
-        true,
-        true,
-        true
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect jdm.id          as \"id!: ModuleId\",\n       contents    as \"body!\",\n       created_at  as \"created_at!\",\n       updated_at  as \"updated_at!\",\n       kind        as \"kind!: ModuleKind\",\n       is_complete as \"is_complete!\"\nfrom jig_data_module \"jdm\"\ninner join jig on jig.draft_id = jdm.jig_data_id \nwhere jdm.id is not distinct from $1 \n"
   },
   "eb44eafd34c17ff3cd679cd11f53fcde64f4b6039ba2b1625dd2c78ca2494a2d": {
     "describe": {
