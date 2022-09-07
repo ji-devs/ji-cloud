@@ -236,12 +236,12 @@
         "format": "truetype"
     },
     "Noto-Sans-Hebrew": {
-        "file": "Noto-Sans-Hebrew/NotoSansHebrew-Regular.ttf",
+        "file": "Noto_Sans_Hebrew/NotoSansHebrew-Regular.ttf",
         "format": "truetype",
         "range": "U+0590-05FF, U+FB1D-FB4F"
     },
     "Noto-Sans": {
-        "file": "Noto-Sans-Hebrew/NotoSansHebrew-Regular.ttf",
+        "file": "Noto_Sans_Hebrew/NotoSansHebrew-Regular.ttf",
         "format": "truetype"
     },
     "Nunito-light": {
