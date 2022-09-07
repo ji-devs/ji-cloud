@@ -1,22 +1,22 @@
 {
-    "Shesek - Regular": {
+    "Shesek FM Regular": {
         "file": "Shesek/shesek-regular-fm.woff2",
         "format": "woff2",
         "range": "U+0590-05FF, U+FB1D-FB4F"
     },
-    "Shesek - dashed": {
+    "Shesek FM Dashed": {
         "file": "Shesek/shesek-dashed-fm.woff2",
         "format": "woff2",
         "range": "U+0590-05FF, U+FB1D-FB4F"
     },
-    "Shesek - dashed - dfus": {
+    "Shesek Dfus FM Dashed": {
         "file": "Shesek/ShesekDfusFM-Dashed.woff2",
-        "format": "otf",
+        "format": "woff2",
         "range": "U+0590-05FF, U+FB1D-FB4F"
     },
-    "Shesek - Regular - dfus": {
+    "Shesek Dfus FM Regular": {
         "file": "Shesek/ShesekDfusFM-Regular.woff2",
-        "format": "otf",
+        "format": "woff2",
         "range": "U+0590-05FF, U+FB1D-FB4F"
     },
     "Frank Ruhl Libre - Medium": {

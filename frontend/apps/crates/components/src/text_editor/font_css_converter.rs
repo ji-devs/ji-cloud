@@ -2,9 +2,9 @@ use super::wysiwyg_types::Font;
 
 /*
     turn:
-        "Shesek - Regular, Architects Daughter - Regular"
+        "Shesek FM Regular, Architects Daughter - Regular"
     into:
-        "\"Shesek - Regular\", \"Architects Daughter - Regular\""
+        "\"Shesek FM Regular\", \"Architects Daughter - Regular\""
 */
 pub fn font_to_css(font: &Font) -> String {
     let mut list: Vec<&str> = font.split(", ").collect();
@@ -31,16 +31,16 @@ mod tests {
     use super::*;
 
     fn get_css_font_single() -> String {
-        String::from("\"Shesek - Regular\"")
+        String::from("\"Shesek FM Regular\"")
     }
     fn get_css_font_multiple() -> String {
-        String::from("\"Shesek - Regular\", \"Architects Daughter - Regular\"")
+        String::from("\"Shesek FM Regular\", \"Architects Daughter - Regular\"")
     }
     fn get_font_single() -> String {
-        String::from("Shesek - Regular")
+        String::from("Shesek FM Regular")
     }
     fn get_font_multiple() -> String {
-        String::from("Shesek - Regular, Architects Daughter - Regular")
+        String::from("Shesek FM Regular, Architects Daughter - Regular")
     }
 
     #[test]
