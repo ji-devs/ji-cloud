@@ -260,7 +260,7 @@
             "en": "Our Israel"
         },
         "fontFamilies": [
-            "'VarelaRound-Regular'",
+            "'VarelaRound-Heb', 'Courgette-Regular'",
             "'Shesek FM Regular', 'Caveat - Medium'"
         ],
         "colors": ["#ffffff", "#039BE5", "#ffffff"],
@@ -642,7 +642,7 @@
             "en": "Happy Sukkot"
         },
         "fontFamilies": [
-            "'Shesek FM Regular', 'IndieFlower-Regular'",
+            "'Amatic-Regular', 'IndieFlower-Regular'",
             "'Tinos-Regular', 'Caveat - Medium'"
         ],
         "colors": ["#FDFBEE", "#3E9B42", "#4a7838"],
@@ -1369,7 +1369,7 @@
             "en": "Israel"
         },
         "fontFamilies": [
-            "'VarelaRound-Regular'",
+            "'VarelaRound-Heb', 'Courgette-Regular'",
             "'Shesek FM Regular', 'Caveat - Medium'"
         ],
         "colors": ["#192150", "#f7f8fd", "#ffffff"],
@@ -2420,10 +2420,10 @@
             "en": "Sport"
         },
         "fontFamilies": [
-            "'Noto-Sans-Hebrew', 'Rubik'",
+            "'RubikMarkerHatch', 'RubikMarkerHatch'",
             "'Shesek FM Regular', 'Caveat - Medium'"
         ],
-        "colors": ["#333333", "#FFF2B0","#333333"],
+        "colors": ["#192150", "#FFF2B0","#192150"],
         "textEditor": {
             "h1": {
                 "fontFamily": 0,
@@ -2504,10 +2504,10 @@
             "en": "Rosh Hashana"
         },
         "fontFamilies": [
-            "'Frank Ruhl Libre - Medium', 'Noto-Sans'",
+            "'GveretLevinAlefAlefAlef-Regular', 'Itim-Regular'",
             "'Noto-Sans-Hebrew', 'Poppins-regular'"
         ],
-        "colors": ["#FFFDE6", "#123601","#123601"],
+        "colors": ["#FFFDE6", "#FFD03A","#CF1A3C"],
         "textEditor": {
             "h1": {
                 "fontFamily": 0,
@@ -2546,7 +2546,7 @@
             "en": "Hebrew Reading"
         },
         "fontFamilies": [
-            "'GveretLevinAlefAlefAlef-Regular', 'Itim-Regular'",
+            "'Frank Ruhl Libre - Medium', 'Noto-Sans'",
             "'Shesek FM Regular', 'Caveat - Medium'"
         ],
         "colors": ["#192150", "#FFFDA6","#192150"],

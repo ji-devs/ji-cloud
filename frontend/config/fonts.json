@@ -223,6 +223,10 @@
         "file": "Rubik/RubikDirt-Regular.ttf",
         "format": "truetype"
     },
+    "RubikMarkerHatch": {
+        "file": "Rubik/RubikMarkerHatch-Regular.ttf",
+        "format": "truetype"
+    },
     "BerkshireSwash": {
         "file": "BerkshireSwash-Regular.ttf",
         "format": "truetype"
