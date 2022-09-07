@@ -5,6 +5,7 @@ use crate::{
 };
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::{collections::HashSet, convert::TryFrom, fmt::Debug, hash::Hash};
+use strum_macros::{EnumIter, IntoStaticStr};
 
 /// Memory Game Body.
 pub mod memory;
@@ -529,113 +530,77 @@ impl Default for Transform {
 
 /// Theme Ids. Used in various modules
 /// See the frontend extension trait for more info
-#[derive(Clone, Copy, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Clone, Copy, Eq, PartialEq, Serialize, Deserialize, Debug, EnumIter, IntoStaticStr)]
 #[repr(i16)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[allow(missing_docs)]
+#[strum(serialize_all = "kebab-case")]
 pub enum ThemeId {
-    #[allow(missing_docs)]
     Blank,
-    #[allow(missing_docs)]
     Jigzi,
-    #[allow(missing_docs)]
+    JigziGreen,
+    JigziBlue,
+    JigziRed,
     Chalkboard,
-    #[allow(missing_docs)]
+    Iml,
+    HebrewReading,
     MyNotebook,
-    #[allow(missing_docs)]
     BackToSchool,
-    #[allow(missing_docs)]
     MyWorkspace,
-    #[allow(missing_docs)]
     Comix,
-    #[allow(missing_docs)]
     Surreal,
-    #[allow(missing_docs)]
     Abstract,
-    #[allow(missing_docs)]
     Denim,
-    #[allow(missing_docs)]
     HappyBrush,
-    #[allow(missing_docs)]
     Graffiti,
-    #[allow(missing_docs)]
     JewishText,
-    #[allow(missing_docs)]
     ShabbatShalom,
-    #[allow(missing_docs)]
     RoshHashana,
-    #[allow(missing_docs)]
+    RoshHashanah,
     AppleWithHoney,
-    #[allow(missing_docs)]
     Pomegranate,
-    #[allow(missing_docs)]
     YomKippur,
-    #[allow(missing_docs)]
     HappySukkot,
-    #[allow(missing_docs)]
     Sukkot,
-    #[allow(missing_docs)]
+    #[strum(serialize = "tubishvat")]
+    TuBishvat,
     IlluminatingHanukkah,
-    #[allow(missing_docs)]
     Chanukah,
-    #[allow(missing_docs)]
     ChanukahLights,
-    #[allow(missing_docs)]
     Purim,
-    #[allow(missing_docs)]
     PurimFeast,
-    #[allow(missing_docs)]
     PurimSweets,
-    #[allow(missing_docs)]
     HappyPassover,
-    #[allow(missing_docs)]
+    #[strum(serialize = "passover-matza")]
     PassoveMatza,
-    #[allow(missing_docs)]
     PassoverSeder,
-    #[allow(missing_docs)]
     HappyShavuot,
-    #[allow(missing_docs)]
     ShavuotDishes,
-    #[allow(missing_docs)]
     ShavuotFields,
-    #[allow(missing_docs)]
     OurIsrael,
-    #[allow(missing_docs)]
     Israel,
-    #[allow(missing_docs)]
     JerusalemCity,
-    #[allow(missing_docs)]
     JerusalemWall,
-    #[allow(missing_docs)]
     LovelySpring,
-    #[allow(missing_docs)]
     Spring,
-    #[allow(missing_docs)]
+    Flowers,
+    Nature,
     WatermelonSummer,
-    #[allow(missing_docs)]
     SummerPool,
-    #[allow(missing_docs)]
     ExcitingFall,
-    #[allow(missing_docs)]
     Autumn,
-    #[allow(missing_docs)]
     WinterSnow,
-    #[allow(missing_docs)]
     IceAge,
-    #[allow(missing_docs)]
     LostInSpace,
-    #[allow(missing_docs)]
     Space,
-    #[allow(missing_docs)]
     Camping,
-    #[allow(missing_docs)]
     HappyBirthday,
-    #[allow(missing_docs)]
+    #[strum(serialize = "valentine_s-day")]
+    Valentine,
     Jungle,
-    #[allow(missing_docs)]
     OurPlanet,
-    #[allow(missing_docs)]
     Theater,
-    #[allow(missing_docs)]
+    Sport,
     Travel,
 }
 

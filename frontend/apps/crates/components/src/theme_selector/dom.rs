@@ -1,6 +1,7 @@
 use super::state::*;
 use dominator::{clone, html, Dom};
 use std::rc::Rc;
+use strum::IntoEnumIterator;
 use utils::prelude::*;
 
 pub fn render_design(state: Rc<ThemeSelector>, slot: Option<&str>, action: Option<Dom>) -> Dom {
@@ -26,7 +27,7 @@ fn render(
                 .child(action.unwrap_ji())
             }))
         })
-        .children(THEME_IDS.iter().copied()
+        .children(ThemeId::iter()
           .map(|theme_id| {
             html!(element_name, {
                 .property("theme", theme_id.as_str_id())
