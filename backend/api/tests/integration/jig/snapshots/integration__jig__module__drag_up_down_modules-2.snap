@@ -1,0 +1,77 @@
+---
+source: tests/integration/jig/module.rs
+expression: body
+---
+{
+  "id": "0cc084bc-7c83-11eb-9f77-e3218dffb008",
+  "publishedAt": "2022-06-24T17:57:33.149359Z",
+  "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+  "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+  "authorName": "Bobby Tables",
+  "likes": 0,
+  "plays": 0,
+  "jigData": {
+    "createdAt": "2021-03-04T00:46:26.134651Z",
+    "lastEdited": "[last_edited]",
+    "draftOrLive": "draft",
+    "displayName": "name",
+    "modules": [
+      {
+        "id": "a6b24a06-1dd7-11ec-8426-635a3a7ea572",
+        "kind": "Cover",
+        "is_complete": false
+      },
+      {
+        "id": "a6b24a88-1dd7-11ec-8426-57525d09b22c",
+        "kind": "Memory",
+        "is_complete": false
+      },
+      {
+        "id": "a6b24a42-1dd7-11ec-8426-a7165f9281a2",
+        "kind": "Flashcards",
+        "is_complete": false
+      }
+    ],
+    "ageRanges": [],
+    "affiliations": [],
+    "language": "en",
+    "categories": [],
+    "additionalResources": [
+      {
+        "id": "286b834a-1dd9-11ec-8426-6f641a50e23f",
+        "displayName": "link test",
+        "resourceTypeId": "a91aca34-519e-11ec-ab46-175eaaf1ff23",
+        "link": "url://url.url.url/urls/s"
+      },
+      {
+        "id": "286b8390-1dd9-11ec-8426-fbeb80c504d9",
+        "displayName": "link test",
+        "resourceTypeId": "a91aca34-519e-11ec-ab46-175eaaf1ff23",
+        "link": "url://url.url.url/url/s"
+      }
+    ],
+    "description": "test description",
+    "defaultPlayerSettings": {
+      "direction": "ltr",
+      "displayScore": true,
+      "trackAssessments": true,
+      "dragAssist": true
+    },
+    "theme": "Blank",
+    "audioBackground": null,
+    "audioEffects": {
+      "feedbackPositive": "[audio]",
+      "feedbackNegative": "[audio]"
+    },
+    "privacyLevel": "unlisted",
+    "locked": false,
+    "otherKeywords": "",
+    "translatedKeywords": "",
+    "translatedDescription": {}
+  },
+  "adminData": {
+    "rating": null,
+    "blocked": false,
+    "curated": false
+  }
+}

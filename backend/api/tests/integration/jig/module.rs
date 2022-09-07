@@ -1,5 +1,6 @@
 use http::StatusCode;
 
+use serde_json::json;
 use shared::domain::{
     asset::{AssetId, AssetType},
     jig::JigId,
@@ -220,6 +221,81 @@ async fn update_contents() -> anyhow::Result<()> {
     app.stop(false).await;
 
     insta::assert_json_snapshot!(body, {".**.updated_at" => "[timestamp]"});
+
+    Ok(())
+}
+
+#[actix_rt::test]
+async fn drag_up_down_modules() -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[
+            Fixture::MetaKinds,
+            Fixture::User,
+            Fixture::Jig,
+            Fixture::CategoryOrdering,
+        ],
+        &[],
+    )
+    .await;
+
+    let port = app.port();
+
+    let client = reqwest::Client::new();
+
+    let jig_id = "0cc084bc-7c83-11eb-9f77-e3218dffb008".to_string();
+    let module_id = "a6b24a42-1dd7-11ec-8426-a7165f9281a2".to_string();
+
+    let resp = client
+        .get(&format!("http://0.0.0.0:{}/v1/jig/{jig_id}/draft", port))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.lastEdited" => "[last_edited]",
+            ".**.feedbackPositive" => "[audio]",
+            ".**.feedbackNegative" => "[audio]",
+        }
+    );
+
+    let resp = client
+        .patch(&format!(
+            "http://0.0.0.0:{}/v1/module/draft/{module_id}",
+            port
+        ))
+        .json(&json!({
+            "jigId": "0cc084bc-7c83-11eb-9f77-e3218dffb008",
+            "index": 2,
+        }))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::NO_CONTENT);
+
+    let resp = client
+        .get(&format!("http://0.0.0.0:{}/v1/jig/{jig_id}/draft", port))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.lastEdited" => "[last_edited]",
+            ".**.feedbackPositive" => "[audio]",
+            ".**.feedbackNegative" => "[audio]",
+        }
+    );
+
+    app.stop(false).await;
 
     Ok(())
 }
