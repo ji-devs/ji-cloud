@@ -8,8 +8,7 @@
  * Starting in edit mode might be off if waiting for fonts to load
  */
 
-import { LitElement, html, css, customElement, property, query } from "lit-element";
-import { classMap } from "lit-html/directives/class-map";
+import { LitElement, html, css, customElement, property, query, PropertyValues } from "lit-element";
 import { nothing } from "lit-html";
 import { styleMap } from "lit-html/directives/style-map";
 import { closestPierceShadow } from "@utils/dom";
@@ -45,7 +44,6 @@ export class _ extends LitElement {
                     padding: 0;
                     resize: none;
                     overflow: hidden;
-                    padding: 0 1px;
                     min-width: 2px;
                     min-height: 1em;
                     background-color: rgb(var(--theme-background-color));
@@ -89,9 +87,6 @@ export class _ extends LitElement {
 
     @query('textarea')
     textarea!: HTMLTextAreaElement;
-
-    @query('#measure')
-    measure!: HTMLElement;
 
     toggleEditing = (value: boolean) => {
         this.editing = value;
@@ -138,10 +133,11 @@ export class _ extends LitElement {
     }
 
     resizeInput = () => {
-        this.measure.textContent = this.textarea.value as string;
+        this.textarea.style.height = `0px`;
+        this.textarea.style.height = `${this.textarea.scrollHeight}px`;
 
         const lastChar = this.textarea.value.charAt(this.textarea.value.length - 1);
-        const rect = this.measure.getBoundingClientRect();
+        const rect = this.textarea.getBoundingClientRect();
 
         let { width, height } = rect;
         if (lastChar === "\n" || lastChar === "\r") {
@@ -151,9 +147,6 @@ export class _ extends LitElement {
             const lineRect = measureLine.getBoundingClientRect();
             height += lineRect.height;
         }
-
-        this.textarea.style.width = `${width}px`;
-        this.textarea.style.height = `${height}px`;
 
         this.lastMeasuredWidth = width;
         this.lastMeasuredHeight = height;
@@ -172,18 +165,17 @@ export class _ extends LitElement {
         }
     }
 
-    firstUpdated(_changed: any) {
+    firstUpdated() {
         this.resizeInput();
     }
-    updated(changed: any) {
-        if (typeof changed.get("editing") === "boolean") {
+    updated(changed: PropertyValues) {
+        if (changed.has("editing")) {
             const { editing } = this;
             if (editing) {
                 if (this.textarea) {
                     this.textarea.focus();
                     this.textarea.value = this.value;
                     this.textarea.setSelectionRange(-1, -1);
-                    this.resizeInput();
                 }
             }
         }
@@ -255,25 +247,6 @@ export class _ extends LitElement {
                 @focus=${() => this.editing = true}
                 .value="${value}"
             ></textarea>
-            <!-- <span
-                style=${style}
-                id="show"
-                class="${classMap({
-                    visible: !editing,
-                })}"
-                @dblclick=${() => {
-                    if (clickMode === "double") {
-                        this.toggleEditing(true);
-                    }
-                }}
-                @click=${() => {
-                    if (clickMode === "single") {
-                        this.toggleEditing(true);
-                    }
-                }}
-                >${value}</span
-            > -->
-            <span style=${style} id="measure" class="measure">${value}</span>
             <span style=${style} id="measure-line" class="measure">&nbsp;</span>
         `;
     }
