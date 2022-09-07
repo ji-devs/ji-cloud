@@ -1,6 +1,6 @@
 use crate::module::_groups::cards::edit::state::{ExtraExt, RawDataExt};
 
-use crate::theme_selector::dom::render_design as render_theme_selector;
+use crate::theme_selector::dom::render_cards as render_theme_selector;
 use dominator::{clone, events, html, Dom};
 use std::rc::Rc;
 
