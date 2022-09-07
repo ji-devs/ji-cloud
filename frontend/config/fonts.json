@@ -10,12 +10,12 @@
         "range": "U+0590-05FF, U+FB1D-FB4F"
     },
     "Shesek - dashed - dfus": {
-        "file": "shesekdfusfm-dashed.otf",
+        "file": "Shesek/ShesekDfusFM-Dashed.woff2",
         "format": "otf",
         "range": "U+0590-05FF, U+FB1D-FB4F"
     },
     "Shesek - Regular - dfus": {
-        "file": "Shesek/shesekdfusfm-regular.otf",
+        "file": "Shesek/ShesekDfusFM-Regular.woff2",
         "format": "otf",
         "range": "U+0590-05FF, U+FB1D-FB4F"
     },
