@@ -90,7 +90,7 @@ pub async fn get_draft(pool: &PgPool, id: ModuleId) -> anyhow::Result<Option<Mod
     let module = sqlx::query!(
         //language=SQL
         r#"
-select jdm.id          as "id!: ModuleId",
+select jdm.id      as "id!: ModuleId",
        contents    as "body!",
        created_at  as "created_at!",
        updated_at  as "updated_at!",
@@ -225,7 +225,7 @@ set
     updated_at = now()
 where jig_data_id = $1 and index between $2 and $3
 "#,
-                parent_id.0,
+                draft_id,
                 index,
                 new_index
             )
