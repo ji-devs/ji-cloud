@@ -2588,7 +2588,7 @@
             "en": "Ivrit Misaviv La'Olam"
         },
         "fontFamilies": [
-            "'Noto-Sans-Hebrew', 'Noto-Sans'",
+            "'Shesek Dfus FM Regular', 'Noto-Sans'",
             "'Shesek FM Regular', 'Caveat - Medium'"
         ],
         "colors": ["#10324E", "#FBE7B3","#10324E"],
