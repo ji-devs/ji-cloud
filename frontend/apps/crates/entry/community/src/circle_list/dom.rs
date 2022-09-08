@@ -24,7 +24,7 @@ impl CirclesList {
             .child(html!("button-rect", {
                 .property("slot", "create-button")
                 .property("color", "blue")
-                .text("Start a new circle")
+                .text("Start a circle")
                 .event(clone!(state => move |_: events::Click| {
                     state.create_popup_open.set(true);
                 }))

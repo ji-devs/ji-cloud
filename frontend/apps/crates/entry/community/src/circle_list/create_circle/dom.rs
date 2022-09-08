@@ -21,7 +21,7 @@ impl CreateCircle {
                     .property("label", STR_CIRCLE_NAME)
                     .property("slot", "name")
                     .child(html!("input" => HtmlInputElement, {
-                        .property("placeholder", "Choose a name that aims to connect members")
+                        .property("placeholder", "Type a name")
                         .with_node!(input => {
                             .event(clone!(state => move |_: events::Input| {
                                 let value = input.value();
