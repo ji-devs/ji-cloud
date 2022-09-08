@@ -1,6 +1,8 @@
 use std::rc::Rc;
 
+use dominator_helpers::make_custom_event;
 use futures_signals::signal::Mutable;
+use wasm_bindgen::JsValue;
 
 pub struct HebrewButtons {
     pub(super) kind: Kind,
@@ -52,3 +54,6 @@ impl Popup {
         }
     }
 }
+
+// used to close other hebrew-buttons-popups
+make_custom_event!(HebrewButtonOpened, "hebrew-button-opened");

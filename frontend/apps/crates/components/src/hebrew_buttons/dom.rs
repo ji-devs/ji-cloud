@@ -9,7 +9,7 @@ use crate::overlay::handle::OverlayHandle;
 
 use super::{
     state::{HebrewButtons, Popup},
-    Kind,
+    HebrewButtonOpened, Kind,
 };
 
 const SEFARIA_URL: &str = "https://www.sefaria.org/texts/Tanakh";
@@ -76,6 +76,9 @@ impl HebrewButtons {
                     .event(clone!(state => move|_: events::Click| {
                         state.on_action_click(Popup::Keyboard);
                     }))
+                }))
+                .global_event(clone!(state => move|_: HebrewButtonOpened| {
+                    state.active_popup.set_neq(None);
                 }))
             })
         })
