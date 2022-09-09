@@ -68,7 +68,13 @@ async fn export_data_by_type(
 ) -> Result<Vec<impl Serialize>, error::Server> {
     let data = match query.export_type {
         ExportType::Profiles => {
-            db::user::user_profiles_by_date_range(&db, query.from_date, query.to_date).await?
+            db::user::user_profiles_by_date_range(
+                &db,
+                query.date_filter_type,
+                query.from_date,
+                query.to_date,
+            )
+            .await?
         }
     };
 

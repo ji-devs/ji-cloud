@@ -1,6 +1,7 @@
 use chrono::{DateTime, Utc};
 use chrono_tz::Tz;
 use shared::domain::{
+    admin::DateFilterType,
     circle::CircleId,
     image::ImageId,
     meta::{
@@ -50,16 +51,16 @@ select user_id as "id: UserId",
     given_name,
     family_name,
     profile_image_id       as "profile_image?: ImageId",
-    (select case when exists(select * from user_auth_google where user_id = $1) = true then 1 else 0 end)     as "is_oauth!: bool",           
+    (select case when exists(select * from user_auth_google where user_id = $1) = true then 1 else 0 end)     as "is_oauth!: bool",
     languages_spoken         as "languages_spoken!: Vec<String>",
     language_app,
     language_emails,
-    bio,    
-    location_public, 
-    languages_spoken_public, 
-    persona_public, 
+    bio,
+    location_public,
+    languages_spoken_public,
+    persona_public,
     bio_public,
-    organization_public, 
+    organization_public,
     opt_into_edu_resources,
     over_18,
     timezone,
@@ -72,9 +73,9 @@ select user_id as "id: UserId",
     array(select subject_id from user_subject where user_subject.user_id = "user".id) as "subjects!: Vec<Uuid>",
     array(select affiliation_id from user_affiliation where user_affiliation.user_id = "user".id) as "affiliations!: Vec<Uuid>",
     array(select age_range_id from user_age_range where user_age_range.user_id = "user".id) as "age_ranges!: Vec<Uuid>",
-    array(select circle.id 
-        from circle_member bm 
-        inner join circle on bm.id = circle.id 
+    array(select circle.id
+        from circle_member bm
+        inner join circle on bm.id = circle.id
         where bm.user_id = "user".id or circle.creator_id = "user".id
     ) as "circles!: Vec<Uuid>"
 from "user"
@@ -132,9 +133,13 @@ where id = $1"#,
 
 pub async fn user_profiles_by_date_range(
     db: &sqlx::PgPool,
+    date_filter_type: DateFilterType,
     from_date: Option<DateTime<Utc>>,
     to_date: Option<DateTime<Utc>>,
 ) -> anyhow::Result<Vec<UserProfileExport>> {
+    let date_filter_type = serde_json::to_value(&date_filter_type)?;
+    let date_filter_type: &str = date_filter_type.as_str().unwrap();
+
     let rows = sqlx::query!(
         //language=SQL
         r#"
@@ -175,16 +180,24 @@ from "user"
     inner join user_email using(user_id)
 where
     (
-        user_profile.created_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end
-        and user_profile.created_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end
+        ($3 = 'either' or $3 = 'onlynew')
+        and (
+            user_profile.created_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end
+            and user_profile.created_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end
+        )
     )
     or (
-        user_profile.updated_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end
-        and user_profile.updated_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end
+        ($3 = 'either' or $3 = 'onlyupdated')
+        and (
+            user_profile.updated_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end
+            and user_profile.updated_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end
+        )
     )
 "#,
+        // date_filter_type,
         from_date,
         to_date,
+        date_filter_type,
     )
     .fetch_all(db)
     .await?;
@@ -431,7 +444,7 @@ update user_profile
 set username               = coalesce($2, username),
     given_name             = coalesce($3, given_name),
     family_name            = coalesce($4, family_name),
-    language_app           = coalesce($5, language_app),   
+    language_app           = coalesce($5, language_app),
     language_emails        = coalesce($6, language_emails),
     timezone               = coalesce($7, timezone),
     opt_into_edu_resources = coalesce($8, opt_into_edu_resources),
@@ -455,7 +468,7 @@ where user_id = $1
        ($11::bool is not null and $11 is distinct from location_public) or
        ($12::bool is not null and $12 is distinct from languages_spoken_public) or
        ($13::text is not null and $13 is distinct from bio) or
-       ($14::bool is not null and $14 is distinct from bio_public) 
+       ($14::bool is not null and $14 is distinct from bio_public)
     )
     "#,
         user_id.0,
