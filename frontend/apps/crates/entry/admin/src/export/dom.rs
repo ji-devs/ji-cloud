@@ -1,10 +1,11 @@
 use super::Export;
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::{map_ref, signal::SignalExt};
+use serde::Serialize;
 use shared::api::PathParts;
 use shared::{
     api::{endpoints::admin::ExportData, ApiEndpoint},
-    domain::admin::ExportType,
+    domain::admin::{DateFilterType, ExportType},
 };
 use std::rc::Rc;
 use strum::IntoEnumIterator;
@@ -21,22 +22,34 @@ impl Export {
                 .property("label", "Data to export")
                 .property("multiple", false)
                 .property_signal("value", state.export_type.signal_cloned().map(|export_type| {
-                    match export_type {
-                        None => JsValue::NULL,
-                        Some(export_type) => JsValue::from_str(&format!("{}", export_type)),
-                    }
+                        JsValue::from_str(&format!("{}", export_type))
                 }))
                 .children(ExportType::iter().map(|export_type| {
                     html!("input-select-option", {
                         .text(&format!("{}", export_type))
                         .property_signal("selected", state.export_type.signal_cloned().map(clone!(export_type => move |current_type| {
-                            match current_type {
-                                Some(current_type) => export_type == current_type,
-                                None => false,
-                            }
+                            export_type == current_type
                         })))
                         .event(clone!(state => move |_: events::CustomSelectedChange| {
-                            state.export_type.set(Some(export_type.clone()));
+                            state.export_type.set(export_type.clone());
+                        }))
+                    })
+                }))
+            }))
+            .child(html!("input-select", {
+                .property("label", "Filter by")
+                .property("multiple", false)
+                .property_signal("value", state.date_filter_type.signal_cloned().map(|date_filter_type| {
+                        JsValue::from_str(&format!("{}", date_filter_type))
+                }))
+                .children(DateFilterType::iter().map(|date_filter_type| {
+                    html!("input-select-option", {
+                        .text(&format!("{}", date_filter_type))
+                        .property_signal("selected", state.date_filter_type.signal_cloned().map(clone!(date_filter_type => move |current_type| {
+                            date_filter_type == current_type
+                        })))
+                        .event(clone!(state => move |_: events::CustomSelectedChange| {
+                            state.date_filter_type.set(date_filter_type.clone());
                         }))
                     })
                 }))
@@ -68,16 +81,17 @@ impl Export {
             .child(html!("button-rect", {
                 .property("kind", "filled")
                 .property("color", "blue")
-                .property_signal("disabled", state.export_type.signal_cloned().map(|export_type| export_type.is_none()))
                 .property_signal("href", map_ref! {
                     let export_type = state.export_type.signal_cloned(),
+                    let date_filter_type = state.date_filter_type.signal_cloned(),
                     let from_date = state.from_date.signal_cloned(),
                     let to_date = state.to_date.signal_cloned()
                         => {
                             let mut params = Vec::new();
-                            if let Some(export_type) = export_type {
-                                params.push(format!("export_type={}", export_type).to_lowercase());
-                            }
+
+                            params.push(format!("export_type={}", serializable_as_str(export_type)));
+                            params.push(format!("date_filter_type={}", serializable_as_str(date_filter_type)));
+
                             if let Some(from_date) = from_date {
                                 params.push(format!("from_date={}", from_date.to_rfc3339_opts(chrono::SecondsFormat::Secs, true)));
                             }
@@ -92,4 +106,9 @@ impl Export {
             }))
         })
     }
+}
+
+fn serializable_as_str<T: Serialize>(value: T) -> String {
+    let value = serde_json::to_value(value).unwrap_ji();
+    value.as_str().unwrap_ji().to_owned()
 }
