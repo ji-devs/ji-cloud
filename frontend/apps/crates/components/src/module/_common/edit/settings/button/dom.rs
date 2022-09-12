@@ -1,5 +1,6 @@
 use super::state::*;
 use dominator::{clone, html, with_node, Dom, DomBuilder};
+use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 use utils::prelude::*;
 use wasm_bindgen::JsValue;
@@ -26,6 +27,10 @@ where
     html!("module-settings-button", {
         .property("kind", state.kind.as_str_id())
         .property_signal("active", (state.active_signal) ())
+        .property_signal("bubbleOpen", state.bubble_open.signal())
+        .event(clone!(state => move |_evt: events::Close| {
+            state.bubble_open.set_neq(false);
+        }))
         .apply(clone!(state => move |dom| {
             if let SettingsButtonKind::Custom(_, label) = state.kind {
                 dom.property("label", label)
@@ -52,6 +57,11 @@ where
 
                 if should_click {
                     (state.on_click.as_ref().unwrap_ji()) ();
+
+                    if state.value.is_some() {
+                        let is_open = state.bubble_open.get();
+                        state.bubble_open.set_neq(!is_open);
+                    }
                 }
             }))
         })
@@ -61,25 +71,34 @@ where
 
             dom
                 .property_signal("num", value.string_signal())
-                .child(html!("module-settings-bubble", {
-                    .property("slot", "bubble")
-                    .child(html!("module-settings-bubble-content", {
-                        .property("kind", state.kind.as_str_id())
-                        .property_signal("value", state.value.as_ref().unwrap_ji().string_signal())
-                        .apply_if(input_kind.is_some(), |dom| {
-                            dom.child(
-                                match input_kind.unwrap_ji() {
-                                    InputKind::Field => {
-                                        render_input_field(state)
-                                    },
-                                    InputKind::Select(max) => {
-                                        render_input_select(state, max)
-                                    }
-                                }
-                            )
-                        })
-                    }))
-                }))
+                .child_signal(state.bubble_open.signal_cloned().map(clone!(state => move |bubble_open| {
+                    if bubble_open {
+                        Some(html!("module-settings-bubble", {
+                            .property("slot", "bubble")
+                            .event(clone!(state => move |_evt: events::Close| {
+                                state.bubble_open.set_neq(false);
+                            }))
+                            .child(html!("module-settings-bubble-content", {
+                                .property("kind", state.kind.as_str_id())
+                                .property_signal("value", state.value.as_ref().unwrap_ji().string_signal())
+                                .apply_if(input_kind.is_some(), clone!(state => move |dom| {
+                                    dom.child(
+                                        match input_kind.unwrap_ji() {
+                                            InputKind::Field => {
+                                                render_input_field(state)
+                                            },
+                                            InputKind::Select(max) => {
+                                                render_input_select(state, max)
+                                            }
+                                        }
+                                    )
+                                }))
+                            }))
+                        }))
+                    } else {
+                        None
+                    }
+                })))
         })
         .apply_if(mixin.is_some(), |dom| {
             dom.apply(mixin.unwrap_ji())
@@ -91,10 +110,17 @@ pub fn render_input_field(state: Rc<SettingsButton>) -> Dom {
     html!("input" => web_sys::HtmlInputElement, {
         .property_signal("value", state.value.as_ref().unwrap_ji().string_signal())
         .with_node!(elem => {
-            .event(clone!(state => move |_evt:events::Change| {
+            .event(clone!(state, elem => move |_evt:events::Change| {
                 let value = state.value.as_ref().unwrap_ji();
                 value.handle_event(&elem.value());
             }))
+        })
+        .after_inserted(|elem| {
+            wasm_bindgen_futures::spawn_local(clone!(elem => async move {
+                gloo_timers::future::TimeoutFuture::new(0).await;
+                // automatically focus so that blur works
+                let _ = elem.focus();
+            }));
         })
     })
 }
