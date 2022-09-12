@@ -65,6 +65,23 @@ export class _ extends LitElement {
         ];
     }
 
+    connectedCallback() {
+        super.connectedCallback();
+
+        window.addEventListener("keyup", this.onKeyup);
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        window.removeEventListener("keyup", this.onKeyup);
+    }
+
+    onKeyup = (event: KeyboardEvent) => {
+        if (event.key.toLowerCase() === "enter") {
+            this.dispatchEvent(new Event("close"));
+        }
+    };
+
     render() {
         return html`
             ${renderSvgArrow()}

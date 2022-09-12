@@ -8,6 +8,7 @@ pub struct SettingsButton {
     pub(super) active_signal: BoxSignalFn<bool>,
     pub(super) value: Option<Box<dyn SettingsValueExt>>,
     pub(super) on_click: Option<Box<dyn Fn()>>,
+    pub(super) bubble_open: Mutable<bool>,
 }
 
 impl SettingsButton {
@@ -22,6 +23,7 @@ impl SettingsButton {
             active_signal: box_signal_fn(active_signal),
             value: value.map(|v| Box::new(v) as _),
             on_click: on_click.map(|f| Box::new(f) as _),
+            bubble_open: Mutable::new(false),
         })
     }
 

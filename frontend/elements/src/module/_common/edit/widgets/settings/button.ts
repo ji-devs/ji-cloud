@@ -153,7 +153,7 @@ export class _ extends LitElement {
 		the bubble will nudge itself to the left;
 		*/
                 .bubble {
-                    display: none;
+                    display: block;
                     position: relative;
                     top: 0;
                     left: 0;
@@ -162,10 +162,6 @@ export class _ extends LitElement {
                     white-space: nowrap;
                     overflow: visible;
                     z-index: 1000;
-                }
-
-                :host([hover]) .bubble {
-                    display: block;
                 }
             `,
         ];
@@ -181,6 +177,9 @@ export class _ extends LitElement {
     hover: boolean = false;
 
     @property({ type: Boolean })
+    bubbleOpen: boolean = false;
+
+    @property({ type: Boolean })
     active: boolean = false;
 
     @property({ type: Number })
@@ -188,25 +187,20 @@ export class _ extends LitElement {
 
     connectedCallback() {
         super.connectedCallback();
-
-        this.addEventListener("mouseenter", this.onMouseEnter);
-        this.addEventListener("mouseleave", this.onMouseLeave);
+        window.addEventListener("mousedown", this.onGlobalMouseDown);
     }
 
     disconnectedCallback() {
         super.disconnectedCallback();
-
-        this.removeEventListener("mouseenter", this.onMouseEnter);
-        this.removeEventListener("mouseleave", this.onMouseLeave);
+        window.removeEventListener("mousedown", this.onGlobalMouseDown);
     }
 
-    onMouseEnter() {
-        this.hover = true;
-    }
+    onGlobalMouseDown = (evt: MouseEvent) => {
+        if (this.bubbleOpen && !evt.composedPath().includes(this.shadowRoot as any)) {
+            this.dispatchEvent(new Event("close"));
+        }
+    };
 
-    onMouseLeave() {
-        this.hover = false;
-    }
 
     render() {
         const { kind, hover, active, num, label } = this;
