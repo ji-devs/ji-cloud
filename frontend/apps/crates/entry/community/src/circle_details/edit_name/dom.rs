@@ -1,17 +1,14 @@
 use std::rc::Rc;
 
-use dominator::{clone, html, with_node, DomBuilder};
-use utils::events;
-use web_sys::{HtmlInputElement, ShadowRoot};
-
-use crate::member_details::component::Component;
-
 use super::EditName;
+use dominator::{clone, html, with_node, DomBuilder};
+use utils::{component::Component, events};
+use web_sys::{HtmlInputElement, ShadowRoot};
 
 pub const STR_NAME: &str = "Name";
 pub const STR_NAME_PLACEHOLDER: &str = "Circle name";
 
-impl Component for Rc<EditName> {
+impl Component<EditName> for Rc<EditName> {
     fn styles() -> &'static str {
         include_str!("./styles.css")
     }

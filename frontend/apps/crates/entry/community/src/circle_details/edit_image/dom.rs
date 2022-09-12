@@ -1,20 +1,17 @@
 use std::rc::Rc;
 
+use super::{EditImage, ImageIfOrFile};
 use dominator::{clone, html, DomBuilder};
 use futures_signals::{map_ref, signal::SignalExt};
-use utils::events;
+use utils::{component::Component, events};
 use web_sys::{File, ShadowRoot, Url};
-
-use crate::member_details::component::Component;
-
-use super::{EditImage, ImageIfOrFile};
 
 const STR_HEADING: &str = "Profile picture";
 const STR_LABEL_PRIMARY: &str = "Upload or drag image here";
 const STR_LABEL_SECONDARY: &str = "Stretches to fit. Max 5 MB";
 const STR_SAVE: &str = "Save";
 
-impl Component for Rc<EditImage> {
+impl Component<EditImage> for Rc<EditImage> {
     fn styles() -> &'static str {
         include_str!("./styles.css")
     }

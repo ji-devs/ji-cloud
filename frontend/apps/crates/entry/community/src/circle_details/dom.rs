@@ -4,7 +4,6 @@ use super::{
     callbacks::EditCirclesCallbacks, edit_about::EditAbout, edit_image::EditImage,
     edit_name::EditName, ActivePopup, CircleDetails,
 };
-use crate::member_details::component::Component;
 use crate::state::MEMBER_LIST_GRID_COLUMNS;
 use components::dialog::Dialog;
 use dominator::{clone, html, Dom};
@@ -18,6 +17,7 @@ use shared::{
     media::MediaLibrary,
 };
 use utils::{
+    component::Component,
     events,
     languages::Language,
     prelude::get_user_id,

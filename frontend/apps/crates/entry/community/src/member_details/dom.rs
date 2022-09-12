@@ -1,8 +1,8 @@
 use std::rc::Rc;
 
 use super::{
-    callbacks::EditProfileCallbacks, component::Component, edit_about::EditAbout,
-    edit_bio::EditBio, edit_image::EditImage, ActivePopup, Connections, Creations, MemberDetails,
+    callbacks::EditProfileCallbacks, edit_about::EditAbout, edit_bio::EditBio,
+    edit_image::EditImage, ActivePopup, Connections, Creations, MemberDetails,
 };
 use components::{
     dialog::Dialog,
@@ -21,6 +21,7 @@ use shared::{
 };
 use utils::{
     asset::ResourceContentExt,
+    component::Component,
     events,
     languages::Language,
     prelude::{get_user_cloned, get_user_id},

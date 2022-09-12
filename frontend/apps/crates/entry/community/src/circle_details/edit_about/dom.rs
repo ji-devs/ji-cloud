@@ -1,17 +1,14 @@
 use std::rc::Rc;
 
-use dominator::{clone, html, with_node, DomBuilder};
-use utils::events;
-use web_sys::{HtmlTextAreaElement, ShadowRoot};
-
-use crate::member_details::component::Component;
-
 use super::EditAbout;
+use dominator::{clone, html, with_node, DomBuilder};
+use utils::{component::Component, events};
+use web_sys::{HtmlTextAreaElement, ShadowRoot};
 
 pub const STR_ABOUT: &str = "About";
 pub const STR_ABOUT_PLACEHOLDER: &str = "";
 
-impl Component for Rc<EditAbout> {
+impl Component<EditAbout> for Rc<EditAbout> {
     fn styles() -> &'static str {
         include_str!("./styles.css")
     }

@@ -1,18 +1,16 @@
 use std::rc::Rc;
 
+use super::EditAbout;
 use dominator::{clone, html, with_node, DomBuilder};
 use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
 use itertools::Itertools;
 use utils::{
+    component::Component,
     events,
     languages::{Language, JIG_LANGUAGES},
     unwrap::UnwrapJiExt,
 };
 use web_sys::{HtmlInputElement, ShadowRoot};
-
-use crate::member_details::component::Component;
-
-use super::EditAbout;
 
 pub const STR_HEADING: &str = "Edit your details";
 pub const STR_LOCATION: &str = "Where I live";
@@ -31,7 +29,7 @@ pub const STR_PERSONA_OPTIONS: &[&str] = &[
     "Content manager",
 ];
 
-impl Component for Rc<EditAbout> {
+impl Component<EditAbout> for Rc<EditAbout> {
     fn styles() -> &'static str {
         include_str!("./styles.css")
     }

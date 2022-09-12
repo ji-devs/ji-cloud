@@ -1,18 +1,15 @@
 use std::rc::Rc;
 
-use dominator::{clone, html, with_node, DomBuilder};
-use utils::events;
-use web_sys::{HtmlTextAreaElement, ShadowRoot};
-
-use crate::member_details::component::Component;
-
 use super::EditBio;
+use dominator::{clone, html, with_node, DomBuilder};
+use utils::{component::Component, events};
+use web_sys::{HtmlTextAreaElement, ShadowRoot};
 
 pub const STR_BIO: &str = "Bio";
 pub const STR_MY_BIO: &str = "My bio";
 pub const STR_BIO_PLACEHOLDER: &str = "Tell the community about yourself";
 
-impl Component for Rc<EditBio> {
+impl Component<EditBio> for Rc<EditBio> {
     fn styles() -> &'static str {
         include_str!("./styles.css")
     }

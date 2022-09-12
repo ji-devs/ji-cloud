@@ -3,8 +3,7 @@ mod callbacks;
 mod dom;
 mod state;
 
-// trying out a new component system with these popups
-pub mod component;
+// trying out the new component system with these popups
 mod edit_about;
 mod edit_bio;
 mod edit_image;

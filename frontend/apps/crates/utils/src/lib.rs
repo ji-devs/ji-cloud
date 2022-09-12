@@ -5,6 +5,7 @@ pub mod api_helpers;
 pub mod asset;
 pub mod clipboard;
 pub mod colors;
+pub mod component;
 pub mod drag;
 pub mod env;
 pub mod events;
