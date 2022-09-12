@@ -289,6 +289,8 @@ pub struct UserProfileExport {
     /// The user's country
     #[serde(default)]
     pub country: Option<String>,
+    /// Whether this user has opted in to receive educational resources
+    pub opt_into_edu_resources: bool,
 }
 
 fn serialize_list<S, T>(list: &Vec<T>, serializer: S) -> Result<S::Ok, S::Error>
