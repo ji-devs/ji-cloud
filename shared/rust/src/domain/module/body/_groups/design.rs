@@ -154,7 +154,14 @@ pub struct Video {
 pub enum VideoHost {
     /// YouTube
     #[serde(alias = "youtube")]
-    Youtube(YoutubeUrl),
+    Youtube(YoutubeVideo),
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+/// YouTube host video url
+pub struct YoutubeVideo {
+    /// url of the YouTube video
+    pub url: YoutubeUrl,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
