@@ -157,6 +157,7 @@ select user_id              as "id!: UserId",
     organization,
     persona                 as "persona!: Vec<String>",
     location,
+    opt_into_edu_resources,
     array(
         select subject.display_name
         from subject
@@ -247,6 +248,7 @@ where
                 subjects: row.subjects,
                 age_ranges: row.age_ranges,
                 affiliations: row.affiliations,
+                opt_into_edu_resources: row.opt_into_edu_resources,
             }
         })
         .collect())

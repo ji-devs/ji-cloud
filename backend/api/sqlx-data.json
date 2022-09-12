@@ -243,124 +243,6 @@
     },
     "query": "\n        with cte as (\n            select jdar.id              as id,\n                   jdar.display_name,\n                   resource_type_id,\n                   resource_content,\n                   author_id,\n                   updated_at,\n                   created_at\n            from jig_data_additional_resource \"jdar\"\n            inner join jig on jig.live_id = jdar.jig_data_id\n            inner join jig_data on jig.live_id = jig_data.id\n            where author_id = $1 and jig.published_at is not null\n           ),\n           cte1 as (\n              select cdr.id              as id,\n                cdr.display_name,\n                resource_type_id,\n                resource_content,\n                author_id,\n                updated_at,\n                created_at\n          from course_data_resource \"cdr\"\n          inner join course on course.live_id = cdr.course_data_id\n          inner join course_data on course.live_id = course_data.id\n          where author_id = $1 and course.published_at is not null\n          ),\n          cte2 as (\n            select *\n            from unnest(array(\n                select\n                (array_agg(id))[1] as id\n                from (select id, updated_at, created_at from cte union all select id, updated_at, created_at from cte1)\n                resource\n                group by resource.updated_at, resource.created_at\n                order by coalesce(resource.updated_at, created_at))) with ordinality t(id\n                , ord) order by ord\n         )\n          select cte3.id                as \"id!: AddId\",\n                 display_name           as \"display_name!\",\n                 resource_type_id       as \"resource_type_id!: TypeId\",\n                 resource_content        as \"resource_content!\"\n         from\n          (select * from cte\n          union all\n          select * from cte1) cte3\n        inner join cte2 on cte2.id = cte3.id\n        where ord > (1 * $2 * $3)\n        order by ord asc\n        limit $3\n            "
   },
-  "0737022a1dc9f19611ae833be6ad6c1830d27dac7f4874945c077be0cf6965eb": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: UserId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "username!",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "email!",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "given_name!",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "family_name!",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "profile_image?: ImageId",
-          "ordinal": 5,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "language_app!",
-          "ordinal": 6,
-          "type_info": "Text"
-        },
-        {
-          "name": "language_emails!",
-          "ordinal": 7,
-          "type_info": "Text"
-        },
-        {
-          "name": "languages_spoken!: Vec<String>",
-          "ordinal": 8,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "created_at!",
-          "ordinal": 9,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at",
-          "ordinal": 10,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "organization",
-          "ordinal": 11,
-          "type_info": "Text"
-        },
-        {
-          "name": "persona!: Vec<String>",
-          "ordinal": 12,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "location",
-          "ordinal": 13,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "subjects!: Vec<String>",
-          "ordinal": 14,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "affiliations!: Vec<String>",
-          "ordinal": 15,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "age_ranges!: Vec<String>",
-          "ordinal": 16,
-          "type_info": "TextArray"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        null,
-        false,
-        false,
-        true,
-        false,
-        false,
-        false,
-        false,
-        true,
-        true,
-        true,
-        true,
-        null,
-        null,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Timestamptz",
-          "Timestamptz",
-          "Text"
-        ]
-      }
-    },
-    "query": "\nselect user_id              as \"id!: UserId\",\n    username                as \"username!\",\n    user_email.email::text  as \"email!\",\n    given_name              as \"given_name!\",\n    family_name             as \"family_name!\",\n    profile_image_id        as \"profile_image?: ImageId\",\n    language_app            as \"language_app!\",\n    language_emails         as \"language_emails!\",\n    languages_spoken         as \"languages_spoken!: Vec<String>\",\n    user_profile.created_at as \"created_at!\",\n    user_profile.updated_at,\n    organization,\n    persona                 as \"persona!: Vec<String>\",\n    location,\n    array(\n        select subject.display_name\n        from subject\n        inner join user_subject on subject.subject_id = user_subject.subject_id\n        where user_subject.user_id = \"user\".id\n    ) as \"subjects!: Vec<String>\",\n    array(\n        select affiliation.display_name\n        from affiliation\n        inner join user_affiliation on affiliation.id = user_affiliation.affiliation_id\n        where user_affiliation.user_id = \"user\".id\n    ) as \"affiliations!: Vec<String>\",\n    array(\n        select age_range.display_name\n        from age_range\n        inner join user_age_range on age_range.id = user_age_range.age_range_id\n        where user_age_range.user_id = \"user\".id\n    ) as \"age_ranges!: Vec<String>\"\nfrom \"user\"\n    inner join user_profile on \"user\".id = user_profile.user_id\n    inner join user_email using(user_id)\nwhere\n    (\n        ($3 = 'either' or $3 = 'onlynew')\n        and (\n            user_profile.created_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end\n            and user_profile.created_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end\n        )\n    )\n    or (\n        ($3 = 'either' or $3 = 'onlyupdated')\n        and (\n            user_profile.updated_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end\n            and user_profile.updated_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end\n        )\n    )\n"
-  },
   "07c23d4be4038602fadd286c040a438b0366a8308e634d0ef4f5325c7b07b225": {
     "describe": {
       "columns": [],
@@ -10606,6 +10488,130 @@
       }
     },
     "query": "\n                                update image_metadata\n                                set translated_name = $2,\n                                last_synced_at = null\n                                where id = $1\n                                "
+  },
+  "e507c5682a9424e1b2e0971c135667c3f9fc13894921c9a2690eb05c63f2ade1": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: UserId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "username!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "email!",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "given_name!",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "family_name!",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "profile_image?: ImageId",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "language_app!",
+          "ordinal": 6,
+          "type_info": "Text"
+        },
+        {
+          "name": "language_emails!",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "languages_spoken!: Vec<String>",
+          "ordinal": 8,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "created_at!",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 10,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "organization",
+          "ordinal": 11,
+          "type_info": "Text"
+        },
+        {
+          "name": "persona!: Vec<String>",
+          "ordinal": 12,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "location",
+          "ordinal": 13,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "opt_into_edu_resources",
+          "ordinal": 14,
+          "type_info": "Bool"
+        },
+        {
+          "name": "subjects!: Vec<String>",
+          "ordinal": 15,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "affiliations!: Vec<String>",
+          "ordinal": 16,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "age_ranges!: Vec<String>",
+          "ordinal": 17,
+          "type_info": "TextArray"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        null,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        false,
+        null,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Timestamptz",
+          "Timestamptz",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nselect user_id              as \"id!: UserId\",\n    username                as \"username!\",\n    user_email.email::text  as \"email!\",\n    given_name              as \"given_name!\",\n    family_name             as \"family_name!\",\n    profile_image_id        as \"profile_image?: ImageId\",\n    language_app            as \"language_app!\",\n    language_emails         as \"language_emails!\",\n    languages_spoken         as \"languages_spoken!: Vec<String>\",\n    user_profile.created_at as \"created_at!\",\n    user_profile.updated_at,\n    organization,\n    persona                 as \"persona!: Vec<String>\",\n    location,\n    opt_into_edu_resources,\n    array(\n        select subject.display_name\n        from subject\n        inner join user_subject on subject.subject_id = user_subject.subject_id\n        where user_subject.user_id = \"user\".id\n    ) as \"subjects!: Vec<String>\",\n    array(\n        select affiliation.display_name\n        from affiliation\n        inner join user_affiliation on affiliation.id = user_affiliation.affiliation_id\n        where user_affiliation.user_id = \"user\".id\n    ) as \"affiliations!: Vec<String>\",\n    array(\n        select age_range.display_name\n        from age_range\n        inner join user_age_range on age_range.id = user_age_range.age_range_id\n        where user_age_range.user_id = \"user\".id\n    ) as \"age_ranges!: Vec<String>\"\nfrom \"user\"\n    inner join user_profile on \"user\".id = user_profile.user_id\n    inner join user_email using(user_id)\nwhere\n    (\n        ($3 = 'either' or $3 = 'onlynew')\n        and (\n            user_profile.created_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end\n            and user_profile.created_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end\n        )\n    )\n    or (\n        ($3 = 'either' or $3 = 'onlyupdated')\n        and (\n            user_profile.updated_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end\n            and user_profile.updated_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end\n        )\n    )\n"
   },
   "e57b7c587be57d904c82ee82ea48df2b8e02a38dd1a4c1c7fee015385d66d155": {
     "describe": {
