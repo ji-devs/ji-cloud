@@ -14,6 +14,7 @@ use shared::{
                 Image, Instructions,
                 _groups::design::{
                     Backgrounds, BaseContent, Sprite, Sticker, Text, Video, VideoHost, YoutubeUrl,
+                    YoutubeVideo,
                 },
                 video::{Content, DoneAction, Mode, ModuleData as RawData, PlaySettings},
             },
@@ -85,7 +86,8 @@ impl DebugSettings {
                                         let youtube_url =
                                             YoutubeUrl::try_parse("LUQksiZ2TVw".to_string())
                                                 .unwrap_ji();
-                                        let host = VideoHost::Youtube(youtube_url);
+                                        let host =
+                                            VideoHost::Youtube(YoutubeVideo { url: youtube_url });
                                         Sticker::Video(Video::new(host))
                                     }
                                 })

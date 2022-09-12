@@ -3,7 +3,7 @@ use std::rc::Rc;
 use components::stickers::video::ext::YoutubeUrlExt;
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
-use shared::domain::module::body::_groups::design::{VideoHost, YoutubeUrl};
+use shared::domain::module::body::_groups::design::{VideoHost, YoutubeUrl, YoutubeVideo};
 use utils::events;
 use web_sys::{HtmlElement, HtmlInputElement};
 
@@ -25,9 +25,9 @@ pub fn render(state: Rc<Step2>) -> Dom {
                         match video {
                             None => String::new(),
                             Some(video) => {
-                                // TODO: don't .lock_ref()
+                                // TODO: don't .lock_ref(), use ref_map
                                 match &*video.host.lock_ref() {
-                                    VideoHost::Youtube(youtube_url) => youtube_url.0.clone(),
+                                    VideoHost::Youtube(youtube) => youtube.url.0.clone(),
                                 }
                             },
                         }
@@ -40,7 +40,9 @@ pub fn render(state: Rc<Step2>) -> Dom {
                                 }
                                 Ok(youtube_url) => {
                                     actions::set_error(&wrapper, false);
-                                    let host = VideoHost::Youtube(youtube_url);
+                                    let host = VideoHost::Youtube(YoutubeVideo {
+                                        url: youtube_url
+                                    });
                                     state.sidebar.base.on_link_change(host);
                                 },
                             };

@@ -2,7 +2,7 @@ use super::state::Video;
 use crate::base::styles;
 use components::stickers::video::ext::*;
 use dominator::{clone, html, with_node, Dom};
-use shared::domain::module::body::{_groups::design::YoutubeUrl, legacy::activity::VideoSource};
+use shared::domain::module::body::{_groups::design::YoutubeVideo, legacy::activity::VideoSource};
 use std::rc::Rc;
 use utils::prelude::*;
 
@@ -94,7 +94,7 @@ impl Video {
         })
     }
 
-    pub fn render_youtube(self: Rc<Self>, yt: &YoutubeUrl) -> Dom {
+    pub fn render_youtube(self: Rc<Self>, yt: &YoutubeVideo) -> Dom {
         let state = self;
 
         html!("video-youtube-player" => HtmlElement, {
@@ -104,7 +104,7 @@ impl Video {
                     .property("start", start.round())
                     .property("end", end.round())
             })
-            .property("videoId", yt.get_id())
+            .property("videoId", yt.url.get_id())
             .property("hideControls", true)
             .style("position", "absolute")
             .style_signal("transform", state.transform_signal())

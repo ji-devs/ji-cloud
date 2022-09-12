@@ -20,7 +20,7 @@ use futures_signals::signal::{Mutable, ReadOnlyMutable, SignalExt};
 use gloo_timers::future::TimeoutFuture;
 use js_sys::Reflect;
 use shared::domain::module::body::{
-    _groups::design::{Video as RawVideo, VideoHost, YoutubeUrl},
+    _groups::design::{Video as RawVideo, VideoHost, YoutubeVideo},
     video::DoneAction,
 };
 use std::rc::Rc;
@@ -61,7 +61,7 @@ pub struct VideoRawRenderOptions {
 }
 
 fn render_youtube_video(
-    youtube: &YoutubeUrl,
+    youtube: &YoutubeVideo,
     video: Rc<Video>,
     opts: Rc<VideoRenderOptions>,
 ) -> Dom {
@@ -89,7 +89,7 @@ fn render_youtube_video(
                 false => "none",
             }
         }))
-        .property("videoId", youtube.get_id())
+        .property("videoId", youtube.url.get_id())
         // always autoplay since there's another layer for the play button
         .property("autoplay", true)
         .property_signal("captions", opts.captions.signal())
@@ -183,7 +183,7 @@ pub fn render_sticker_video<T: AsSticker>(
                             match host {
                                 VideoHost::Youtube(youtube) => Some(
                                     html!("video-youtube-thumbnail", {
-                                        .property("videoId", youtube.get_id())
+                                        .property("videoId", youtube.url.get_id())
                                         .apply(|dom| apply_transform(dom, &video.transform))
                                     })
                                 ),
@@ -278,9 +278,9 @@ pub fn render_sticker_video_raw(video: &RawVideo, opts: Option<VideoRawRenderOpt
         .style_signal("height", height_signal.map(|x| format!("{}px", x)))
         .child({
             match &video.host {
-                VideoHost::Youtube(youtube_url) => {
+                VideoHost::Youtube(youtube_video) => {
                     html!("video-youtube-player" => HtmlElement, {
-                        .property("videoId", youtube_url.get_id())
+                        .property("videoId", youtube_video.url.get_id())
                         .property_signal("autoplay", opts.autoplay.signal())
                         .property_signal("loop", opts._loop.signal())
                         .property_signal("captions", opts.captions.signal())
