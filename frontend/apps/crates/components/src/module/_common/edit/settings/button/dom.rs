@@ -109,19 +109,18 @@ where
 pub fn render_input_field(state: Rc<SettingsButton>) -> Dom {
     html!("input" => web_sys::HtmlInputElement, {
         .property_signal("value", state.value.as_ref().unwrap_ji().string_signal())
-        .with_node!(elem => {
-            .event(clone!(state, elem => move |_evt:events::Change| {
-                let value = state.value.as_ref().unwrap_ji();
-                value.handle_event(&elem.value());
-            }))
-        })
         .after_inserted(|elem| {
             wasm_bindgen_futures::spawn_local(clone!(elem => async move {
                 gloo_timers::future::TimeoutFuture::new(0).await;
-                // automatically focus so that blur works
+                // Automatically focus so that blur works
                 let _ = elem.focus();
             }));
         })
+        .after_removed(clone!(state => move |elem| {
+            // Whenever this element is removed, handle the new value
+            let value = state.value.as_ref().unwrap_ji();
+            value.handle_event(&elem.value());
+        }))
     })
 }
 
