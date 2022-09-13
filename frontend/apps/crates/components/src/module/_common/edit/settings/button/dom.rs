@@ -38,33 +38,33 @@ where
                 dom
             }
         }))
-        .apply_if(state.on_click.is_some(), |dom| {
-            dom.event(clone!(state => move |evt:events::Click| {
-                // Prevents clicks inside the settings bubble from toggling the state of the
-                // setting.
-                let should_click = match evt.target() {
-                    Some(target) => {
-                        let target: JsValue = target.into();
-                        let element: HtmlElement = target.into();
+        .event(clone!(state => move |evt: events::Click| {
+            // Prevents clicks inside the settings bubble from toggling the state of the
+            // setting.
+            let can_click = match evt.target() {
+                Some(target) => {
+                    let target: JsValue = target.into();
+                    let element: HtmlElement = target.into();
 
-                        !matches!(
-                            element.closest("module-settings-bubble"),
-                            Ok(Some(_))
-                        )
-                    },
-                    _ => true
-                };
+                    !matches!(
+                        element.closest("module-settings-bubble"),
+                        Ok(Some(_))
+                    )
+                },
+                _ => true
+            };
 
-                if should_click {
-                    (state.on_click.as_ref().unwrap_ji()) ();
-
-                    if state.value.is_some() {
-                        let is_open = state.bubble_open.get();
-                        state.bubble_open.set_neq(!is_open);
-                    }
+            if can_click {
+                if let Some(on_click) = &state.on_click {
+                    on_click();
                 }
-            }))
-        })
+
+                if state.value.is_some() {
+                    let is_open = state.bubble_open.get();
+                    state.bubble_open.set_neq(!is_open);
+                }
+            }
+        }))
         .apply_if(state.value.is_some(), |dom| {
             let value = state.value.as_ref().unwrap_ji();
             let input_kind = get_input_kind(state.kind);
