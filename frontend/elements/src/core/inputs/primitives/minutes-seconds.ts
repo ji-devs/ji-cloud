@@ -1,5 +1,4 @@
-import { html, css, LitElement, PropertyValues } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { LitElement, html, css, customElement, property, query, internalProperty } from "lit-element";
 
 const MINUTE = 60;
 
@@ -38,10 +37,10 @@ export class _ extends LitElement {
     @property({ type: Number })
     value?: number;
 
-    @state()
+    @internalProperty()
     minutes?: number;
 
-    @state()
+    @internalProperty()
     seconds?: number;
   
     // firstUpdated() {
