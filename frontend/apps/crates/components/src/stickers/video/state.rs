@@ -12,6 +12,8 @@ use super::config::{YOUTUBE_VIDEO_HEIGHT, YOUTUBE_VIDEO_WIDTH};
 #[derive(Clone)]
 pub struct Video {
     pub host: Mutable<VideoHost>,
+    pub start_at: Mutable<Option<u32>>,
+    pub end_at: Mutable<Option<u32>>,
     pub transform: Rc<TransformState>,
     pub playing_started: Mutable<bool>,
     pub is_playing: Mutable<bool>,
@@ -37,6 +39,8 @@ impl Video {
                 true,
                 transform_callbacks,
             )),
+            start_at: Mutable::new(video.start_at),
+            end_at: Mutable::new(video.end_at),
             playing_started,
             is_playing,
         }
@@ -53,6 +57,8 @@ impl Video {
         RawVideo {
             host: self.host.get_cloned(),
             transform: self.transform.get_inner_clone(),
+            start_at: self.start_at.get(),
+            end_at: self.end_at.get(),
         }
     }
 }

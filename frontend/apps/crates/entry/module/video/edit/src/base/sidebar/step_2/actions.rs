@@ -11,23 +11,14 @@ use web_sys::HtmlElement;
 
 impl Base {
     pub fn on_link_change(&self, host: VideoHost) {
-        let stickers = self.stickers.list.lock_ref();
-        let video_sticker = stickers
-            .iter()
-            .find(|sticker| matches!(sticker, Sticker::Video(_)));
+        let video = self.get_video_sticker();
 
-        match video_sticker {
+        match video {
             None => {
-                // drop stickers ref so that it can be mutated for adding the new video sticker
-                drop(stickers);
                 self.add_video_sticker(host);
             }
-            Some(video_sticker) => {
-                let video = match video_sticker {
-                    Sticker::Video(video) => video,
-                    _ => unreachable!("should not be possible"),
-                };
-                self.update_video_sticker(Rc::clone(video), host);
+            Some(video) => {
+                self.update_video_sticker(video, host);
             }
         }
     }
@@ -41,6 +32,23 @@ impl Base {
         sticker.playing_started.set_neq(false);
         sticker.is_playing.set_neq(false);
         Stickers::call_change(&Rc::clone(&self.stickers));
+    }
+
+    #[must_use]
+    pub fn get_video_sticker(&self) -> Option<Rc<Video>> {
+        let stickers = self.stickers.list.lock_ref();
+
+        let video = stickers
+            .iter()
+            .find(|sticker| matches!(sticker, Sticker::Video(_)))
+            .map(|sticker| match sticker {
+                Sticker::Video(video) => video,
+                _ => unreachable!("should not be possible"),
+            });
+
+        let video = video.map(|video| Rc::clone(&video));
+
+        video
     }
 
     pub fn delete_video(&self) {

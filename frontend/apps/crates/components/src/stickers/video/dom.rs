@@ -97,6 +97,8 @@ fn render_youtube_video(
         .property_signal("loop", opts.done_action.signal().map(|done_action| {
             matches!(done_action, Some(DoneAction::Loop))
         }))
+        .property_signal("start", video.start_at.signal())
+        .property_signal("end", video.end_at.signal())
         .apply(|dom| apply_transform(dom, &video.transform))
         .event(clone!(video, opts => move |_: events::YoutubeEnded| {
             video.is_playing.set_neq(false);
@@ -285,7 +287,15 @@ pub fn render_sticker_video_raw(video: &RawVideo, opts: Option<VideoRawRenderOpt
                         .property_signal("loop", opts._loop.signal())
                         .property_signal("captions", opts.captions.signal())
                         .property_signal("muted", opts.muted.signal())
-
+                        .apply(|mut dom| {
+                            if let Some(start_at) = video.start_at {
+                                dom = dom.property("start", start_at);
+                            }
+                            if let Some(end_at) = video.end_at {
+                                dom = dom.property("end", end_at);
+                            }
+                            dom
+                        })
                         .style("display", "block")
                         .style("width", "100%")
                         .style("height", "100%")

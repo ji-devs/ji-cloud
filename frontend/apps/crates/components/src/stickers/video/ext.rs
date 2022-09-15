@@ -16,6 +16,8 @@ impl VideoExt for Video {
         Self {
             host,
             transform: Transform::identity(),
+            start_at: None,
+            end_at: None,
         }
     }
 }

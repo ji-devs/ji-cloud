@@ -108,6 +108,24 @@ impl CustomInput {
     }
 }
 
+// Custom Input number
+#[derive(Deserialize, Debug)]
+pub struct CustomInputNumberData {
+    pub value: Option<i64>,
+}
+
+make_custom_event_serde!(
+    "custom-input-number",
+    CustomInputNumber,
+    CustomInputNumberData
+);
+
+impl CustomInputNumber {
+    pub fn value(&self) -> Option<i64> {
+        self.data().value
+    }
+}
+
 // Custom Toggle
 #[derive(Deserialize, Debug)]
 pub struct CustomToggleData {

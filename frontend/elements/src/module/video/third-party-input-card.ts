@@ -24,6 +24,12 @@ export class _ extends LitElement {
                 ::slotted([slot="delete"]) {
                     justify-self: start;
                 }
+                .start-end {
+                    display: grid;
+                    grid-template-columns: auto auto;
+                    justify-content: space-between;
+                    column-gap: 10px;
+                }
             `,
         ];
     }
@@ -35,6 +41,10 @@ export class _ extends LitElement {
         return html`
             <img-ui path="module/video/host-youtube.png"></img-ui>
             <slot name="input"></slot>
+            <div class="start-end">
+                <slot name="start-at"></slot>
+                <slot name="end-at"></slot>
+            </div>
             <slot name="delete"></slot>
         `;
     }

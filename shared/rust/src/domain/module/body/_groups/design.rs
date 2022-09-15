@@ -147,6 +147,12 @@ pub struct Video {
 
     /// Transforms
     pub transform: Transform,
+
+    /// url of the YouTube video
+    pub start_at: Option<u32>,
+
+    /// url of the YouTube video
+    pub end_at: Option<u32>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
