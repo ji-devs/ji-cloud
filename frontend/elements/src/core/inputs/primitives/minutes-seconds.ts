@@ -1,4 +1,4 @@
-import { LitElement, html, css, customElement, property, query, internalProperty } from "lit-element";
+import { LitElement, html, css, customElement, property, internalProperty, PropertyValues } from "lit-element";
 
 const MINUTE = 60;
 
