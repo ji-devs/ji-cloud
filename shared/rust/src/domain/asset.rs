@@ -3,7 +3,7 @@
 use std::{
     collections::HashMap,
     convert::TryFrom,
-    fmt::{self, Debug, Display},
+    fmt::{self, Debug},
     str::FromStr,
 };
 
@@ -122,16 +122,6 @@ pub enum AssetId {
 
     /// Resource ID
     ResourceId(ResourceId),
-}
-
-impl Display for AssetId {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::JigId(jig_id) => write!(f, "{}", &jig_id.0),
-            Self::CourseId(course_id) => write!(f, "{}", &course_id.0),
-            Self::ResourceId(resource_id) => write!(f, "{}", &resource_id.0),
-        }
-    }
 }
 
 impl From<JigId> for AssetId {

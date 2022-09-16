@@ -205,7 +205,7 @@ impl SearchResultsSection {
                                             _ => unimplemented!(),
                                         };
                                         let mut properties = HashMap::new();
-                                        properties.insert("Asset ID", format!("{asset_id}"));
+                                        properties.insert("Asset ID", format!("{}", asset_id.uuid()));
                                         properties.insert("Asset Type", asset_type.to_owned());
                                         mixpanel::track("Play", Some(properties));
                                     })
@@ -225,7 +225,7 @@ impl SearchResultsSection {
                                         .text("View")
                                         .event(clone!(state => move |_: events::Click| {
                                             let mut properties = HashMap::new();
-                                            properties.insert("Asset ID", format!("{}", asset.id()));
+                                            properties.insert("Asset ID", format!("{}", asset.id().uuid()));
                                             properties.insert("Asset Type", "Resource".to_owned());
                                             mixpanel::track("Play", Some(properties));
 
