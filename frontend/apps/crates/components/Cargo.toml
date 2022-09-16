@@ -74,7 +74,7 @@ awsm_web = { version = "0.32.0", features = ["loaders", "serde_iso", "dom", "ima
 anyhow = "1.0.45"
 gloo-timers = "0.2.1"
 rgb = "0.8.29"
-regex = "1.5.4"
+regex = "1.5.5"
 futures-channel = "0.3.21"
 
 [features]
