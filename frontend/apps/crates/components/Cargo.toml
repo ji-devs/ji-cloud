@@ -92,6 +92,7 @@ categories_input = []
 color_select = []
 confirm = []
 dialog = []
+file_input = []
 image = []
 image_search = []
 image_upload = []
@@ -134,6 +135,7 @@ all= [
     "color_select", 
     "confirm", 
     "dialog", 
+    "file_input",
     "image", 
     "image_search", 
     "image_upload", 

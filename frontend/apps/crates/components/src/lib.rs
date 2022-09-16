@@ -29,6 +29,8 @@ pub mod color_select;
 pub mod confirm;
 #[cfg(feature = "dialog")]
 pub mod dialog;
+#[cfg(feature = "file_input")]
+pub mod file_input;
 #[cfg(feature = "firebase")]
 pub mod firebase;
 #[cfg(feature = "hebrew_buttons")]

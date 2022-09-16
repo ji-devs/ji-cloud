@@ -44,7 +44,7 @@ export class _ extends LitElement {
                     border-radius: 50%;
                     display: inline-block;
                     overflow: hidden;
-                    border: solid 2px var(--main-yellow);
+                    /* border: solid 2px var(--main-yellow); */
                     grid-row: 1;
                     grid-column: 1;
                 }

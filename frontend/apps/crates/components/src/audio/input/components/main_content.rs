@@ -3,9 +3,9 @@ use std::rc::Rc;
 use dominator::{clone, html, Dom};
 use futures_signals::signal::{from_stream, SignalExt};
 use gloo_timers::future::IntervalStream;
-use utils::events;
+use utils::component::Component;
 use wasm_bindgen_futures::spawn_local;
-
+use crate::file_input::{FileInput, FileInputConfig, MaxSize};
 use super::{super::actions::file_change, player};
 use crate::audio::input::state::{AudioInput, AudioInputAddMethod, AudioInputMode};
 
@@ -25,19 +25,20 @@ fn render_start(state: Rc<AudioInput>, add_method: AudioInputAddMethod) -> Dom {
     match add_method {
         AudioInputAddMethod::Record => render_input_icon("record"),
         AudioInputAddMethod::Upload => {
-            html!("input-file", {
-                .property("slot", "main-content")
-                .child(html!("audio-input-icon", {
-                    .property("kind", "upload")
-                }))
-                .event(clone!(state => move |evt: events::CustomFile| {
-                    let state = state.clone();
-                    spawn_local(async move {
-                        let file = evt.file();
-                        file_change(state.clone(), file).await;
-                    });
-                }))
-            })
+            FileInput::new(FileInputConfig {
+                max_size: MaxSize::MB5,
+                accept: "audio/*",
+                slot: Some("main-content"),
+                show_border: false,
+                on_change: Box::new(clone!(state => move |file| {
+                    spawn_local(clone!(state => async move {
+                        if let Some(file) = file {
+                            file_change(state.clone(), file).await;
+                        }
+                    }));
+                })),
+                ..Default::default()
+            }).render()
         }
     }
 }

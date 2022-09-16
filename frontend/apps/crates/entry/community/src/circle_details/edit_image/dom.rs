@@ -1,14 +1,13 @@
 use std::rc::Rc;
 
 use super::{EditImage, ImageIfOrFile};
+use components::file_input::{FileInput, FileInputConfig};
 use dominator::{clone, html, DomBuilder};
 use futures_signals::{map_ref, signal::SignalExt};
 use utils::{component::Component, events};
 use web_sys::{File, ShadowRoot, Url};
 
 const STR_HEADING: &str = "Profile picture";
-const STR_LABEL_PRIMARY: &str = "Upload or drag image here";
-const STR_LABEL_SECONDARY: &str = "Stretches to fit. Max 5 MB";
 const STR_SAVE: &str = "Save";
 
 impl Component<EditImage> for Rc<EditImage> {
@@ -67,25 +66,14 @@ impl Component<EditImage> for Rc<EditImage> {
                                     })
                                 },
                                 None => {
-                                    html!("input-file", {
-                                        .event(clone!(state => move |evt: events::CustomFile| {
-                                            let file = evt.file();
-                                            state.image.set(Some(ImageIfOrFile::File(file)))
-                                        }))
-                                        .children(&mut [
-                                            html!("fa-icon", {
-                                                .property("icon", "fa-light fa-cloud-arrow-up")
-                                            }),
-                                            html!("p", {
-                                                .class("pick-file-message")
-                                                .text(STR_LABEL_PRIMARY)
-                                            }),
-                                            html!("p", {
-                                                .class("file-size")
-                                                .text(STR_LABEL_SECONDARY)
-                                            }),
-                                        ])
-                                    })
+                                    FileInput::new(FileInputConfig {
+                                        on_change: Box::new(clone!(state => move |file| {
+                                            let file = file.map(|file| ImageIfOrFile::File(file));
+                                            state.image.set(file);
+                                        })),
+                                        accept: "image/*",
+                                        ..Default::default()
+                                    }).render()
                                 },
                             })
                         }))

@@ -1,0 +1,45 @@
+:host {
+    display: grid;
+}
+
+input-file {
+    border-radius: 16px;
+    justify-items: center;
+}
+
+input-file.error {
+    border-color: var(--red-alert);
+}
+
+input-file::part(wrapper) {
+    justify-items: center;
+    padding: 30px;
+    box-sizing: border-box;
+}
+
+input-file fa-icon {
+    height: 48px;
+    width: 48px;
+    border-radius: 50%;
+    display: inline-grid;
+    place-content: center;
+    background-color: #e7f0fe;
+    color: #afccf1;
+    font-size: 26px;
+}
+
+input-file .pick-file-message {
+    color: var(--dark-gray-3);
+    font-size: 14px;
+}
+
+input-file .file-size {
+    color: var(--dark-gray-4);
+    font-size: 13px;
+}
+
+input-file .error-message {
+    color: var(--red-alert);
+    text-align: center;
+    font-size: 14px;
+}
