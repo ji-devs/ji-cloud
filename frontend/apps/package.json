@@ -10,12 +10,10 @@
         "build:sandbox": "rollup --config rollup.sandbox.js"
     },
     "dependencies": {
-        "@rollup/plugin-commonjs": "^22.0.2",
         "@rollup/plugin-node-resolve": "^13.1.1",
         "@wasm-tool/rollup-plugin-rust": "1.0.7",
         "cross-env": "^7.0.3",
         "firebase": "^9.6.1",
-        "mixpanel-browser": "^2.45.0",
         "rollup": "^2.61.1",
         "vmsg": "^0.4.0"
     },

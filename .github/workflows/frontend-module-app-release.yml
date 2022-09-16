@@ -1,7 +1,6 @@
 name: Module - App - Release
 
 on:
-  workflow_dispatch:
   push:
     branches: [ master ]
     paths:
@@ -70,7 +69,6 @@ jobs:
         working-directory: "./frontend/apps"
         env:
           LOCAL_CDN_FRONTEND_DIR: ${{ github.workspace }}/frontend
-          MIXPANEL_PROJECT_TOKEN: ${{ secrets.MIXPANEL_PROJECT_TOKEN_RELEASE }}
 
       - name: install google cloud sdk
         uses: google-github-actions/setup-gcloud@v0
