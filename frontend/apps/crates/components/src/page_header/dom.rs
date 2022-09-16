@@ -1,4 +1,4 @@
-use std::{collections::HashMap, rc::Rc};
+use std::rc::Rc;
 
 use dominator::{clone, html, with_node, Dom, EventOptions};
 use futures_signals::signal::{Signal, SignalExt};
@@ -6,7 +6,6 @@ use shared::domain::user::{UserProfile, UserScope};
 use strum::IntoEnumIterator;
 use utils::{
     events,
-    init::mixpanel,
     routes::{AdminRoute, AssetRoute, Route, UserRoute},
     unwrap::UnwrapJiExt,
 };
@@ -56,11 +55,6 @@ pub fn render(
                 })
                 .property("href", &page_link.route())
                 .property("target", page_link.target())
-                .event(move |_evt: events::Click| {
-                    let mut properties = HashMap::new();
-                    properties.insert("Header Kind", page_link.kind_str().to_owned());
-                    mixpanel::track("Header Click", Some(properties));
-                })
             })
         }))
         .child(html!("button-rect", {
