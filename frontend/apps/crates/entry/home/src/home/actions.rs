@@ -5,8 +5,8 @@ use dominator::clone;
 use futures::join;
 
 use shared::{api::endpoints::jig, domain::jig::JigCountPath};
-use std::rc::Rc;
-use utils::prelude::*;
+use std::{collections::HashMap, rc::Rc};
+use utils::{init::mixpanel, prelude::*};
 
 use super::state::Home;
 
@@ -72,7 +72,7 @@ async fn search_async(state: Rc<Home>) {
         .set(HomePageMode::Search(Rc::clone(&search_state)));
 
     let query_params = state.search_selected.to_query_params();
-    Route::Home(HomeRoute::Search(Some(Box::new(query_params)))).push_state();
+    Route::Home(HomeRoute::Search(Some(Box::new(query_params.clone())))).push_state();
 
     join!(
         search_state.jigs.load_items(),
@@ -81,6 +81,24 @@ async fn search_async(state: Rc<Home>) {
     );
 
     search_state.loading.set(false);
+
+    // Mixpanel event tracking
+    let mut properties = HashMap::new();
+    let ages = query_params
+        .age_ranges
+        .iter()
+        .map(|v| {
+            let age_ranges = state.search_options.age_ranges.get_cloned();
+            let age = age_ranges.iter().find(|age| age.id == *v).unwrap_ji();
+            age.display_name.clone()
+        })
+        .collect::<Vec<String>>()
+        .join(",");
+    let language = query_params.language.unwrap_or("All languages".to_owned());
+    properties.insert("Query", query_params.q);
+    properties.insert("Ages", ages);
+    properties.insert("Language", language);
+    mixpanel::track("Search", Some(properties));
 }
 
 pub fn search(state: Rc<Home>) {

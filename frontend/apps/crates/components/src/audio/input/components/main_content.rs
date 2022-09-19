@@ -1,13 +1,13 @@
 use std::rc::Rc;
 
+use super::{super::actions::file_change, player};
+use crate::audio::input::state::{AudioInput, AudioInputAddMethod, AudioInputMode};
+use crate::file_input::{FileInput, FileInputConfig, MaxSize};
 use dominator::{clone, html, Dom};
 use futures_signals::signal::{from_stream, SignalExt};
 use gloo_timers::future::IntervalStream;
 use utils::component::Component;
 use wasm_bindgen_futures::spawn_local;
-use crate::file_input::{FileInput, FileInputConfig, MaxSize};
-use super::{super::actions::file_change, player};
-use crate::audio::input::state::{AudioInput, AudioInputAddMethod, AudioInputMode};
 
 const STR_UPLOADING_TEXT: &str = "Uploading... please wait.";
 
@@ -24,22 +24,21 @@ pub fn render(state: Rc<AudioInput>, mode: AudioInputMode, add_method: AudioInpu
 fn render_start(state: Rc<AudioInput>, add_method: AudioInputAddMethod) -> Dom {
     match add_method {
         AudioInputAddMethod::Record => render_input_icon("record"),
-        AudioInputAddMethod::Upload => {
-            FileInput::new(FileInputConfig {
-                max_size: MaxSize::MB5,
-                accept: "audio/*",
-                slot: Some("main-content"),
-                show_border: false,
-                on_change: Box::new(clone!(state => move |file| {
-                    spawn_local(clone!(state => async move {
-                        if let Some(file) = file {
-                            file_change(state.clone(), file).await;
-                        }
-                    }));
-                })),
-                ..Default::default()
-            }).render()
-        }
+        AudioInputAddMethod::Upload => FileInput::new(FileInputConfig {
+            max_size: MaxSize::MB5,
+            accept: "audio/*",
+            slot: Some("main-content"),
+            show_border: false,
+            on_change: Box::new(clone!(state => move |file| {
+                spawn_local(clone!(state => async move {
+                    if let Some(file) = file {
+                        file_change(state.clone(), file).await;
+                    }
+                }));
+            })),
+            ..Default::default()
+        })
+        .render(),
     }
 }
 

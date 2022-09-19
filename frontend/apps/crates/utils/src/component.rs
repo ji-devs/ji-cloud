@@ -7,9 +7,8 @@
     ```
 */
 
-
 use dominator::{html, shadow_root, Dom, DomBuilder, ShadowRootMode};
-use web_sys::{ShadowRoot, HtmlElement};
+use web_sys::{HtmlElement, ShadowRoot};
 
 // using a T to get around orphan rules when implementing Component in dependents this crate,
 // not entirely sure that this is the right way of doing things though
