@@ -462,6 +462,9 @@ pub struct JigResponse {
     /// Number of plays Jig
     pub plays: i64,
 
+    /// Live is current to Draft
+    pub live_up_to_date: bool,
+
     /// The data of the requested JIG.
     pub jig_data: JigData,
 

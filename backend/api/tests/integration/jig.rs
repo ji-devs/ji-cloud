@@ -616,3 +616,79 @@ async fn update_and_publish_incomplete_modules() -> anyhow::Result<()> {
 
     Ok(())
 }
+
+#[actix_rt::test]
+async fn live_up_to_date_flag() -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[
+            Fixture::MetaKinds,
+            Fixture::User,
+            Fixture::Jig,
+            Fixture::CategoryOrdering,
+        ],
+        &[],
+    )
+    .await;
+
+    let port = app.port();
+
+    let client = reqwest::Client::new();
+
+    let resp = client
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/jig/19becb2b-bff7-4c1b-bb2c-16f2e098d3d3/draft",
+            port
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.lastEdited" => "[last_edited]",
+            ".**.feedbackPositive" => "[audio]",
+            ".**.feedbackNegative" => "[audio]",
+        }
+    );
+
+    let _resp = client
+        .put(&format!(
+            "http://0.0.0.0:{}/v1/jig/19becb2b-bff7-4c1b-bb2c-16f2e098d3d3/draft/publish",
+            port
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    let resp = client
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/jig/19becb2b-bff7-4c1b-bb2c-16f2e098d3d3/live",
+            port
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(
+        body, {
+            // Really just need to redact the module ID because it is recreated for the live data,
+            // but I couldn't get a selector working correctly... So redacting all IDs.
+            ".**.id" => "[id]",
+            ".**.lastEdited" => "[last_edited]",
+            ".**.publishedAt" => "[published_at]",
+            ".**.feedbackPositive" => "[audio]",
+            ".**.feedbackNegative" => "[audio]"
+        }
+    );
+
+    app.stop(false).await;
+
+    Ok(())
+}

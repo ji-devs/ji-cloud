@@ -55,6 +55,9 @@ pub struct ResourceResponse {
     /// Number of views for a Resource
     pub views: i64,
 
+    /// Live is current to Draft
+    pub live_up_to_date: bool,
+
     /// The data of the requested Resource.
     pub resource_data: ResourceData,
 

@@ -10,6 +10,7 @@ expression: body
   "authorName": "Bobby Tables",
   "likes": 0,
   "views": 0,
+  "liveUpToDate": true,
   "resourceData": {
     "draftOrLive": "live",
     "displayName": "resource1",

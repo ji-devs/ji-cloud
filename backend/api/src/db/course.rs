@@ -139,6 +139,7 @@ with cte as (
            author_id,
            likes,
            plays,
+           live_up_to_date,
            case
                when $2 = 0 then course.draft_id
                when $2 = 1 then course.live_id
@@ -162,6 +163,7 @@ select cte.course_id                                          as "course_id: Cou
        translated_description                              as "translated_description!: Json<HashMap<String, String>>",
        likes,
        plays,
+       live_up_to_date,
        other_keywords,
        translated_keywords,
        (
@@ -206,6 +208,7 @@ from course_data
         author_name: row.author_name,
         likes: row.likes,
         plays: row.plays,
+        live_up_to_date: row.live_up_to_date,
         course_data: CourseData {
             draft_or_live,
             display_name: row.display_name,
@@ -266,7 +269,8 @@ select course.id                                       as "id!: CourseId",
        draft_id                                 as "draft_id!",
        published_at,
        likes                                    as "likes!",
-       plays                                    as "plays!"
+       plays                                    as "plays!",
+       live_up_to_date                          as "live_up_to_date!"
 from course
 inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
@@ -341,6 +345,7 @@ order by ord asc
             author_name: course_row.author_name,
             likes: course_row.likes,
             plays: course_row.plays,
+            live_up_to_date: course_row.live_up_to_date,
             course_data: CourseData {
                 draft_or_live,
                 display_name: course_data_row.display_name,
@@ -441,6 +446,7 @@ select course.id                                                                
     published_at,
     likes,
     plays,
+    live_up_to_date,
     display_name                                                                  as "display_name!",
     updated_at,
     language                                                                      as "language!",
@@ -509,6 +515,7 @@ limit $6
             author_name: course_data_row.author_name,
             likes: course_data_row.likes,
             plays: course_data_row.plays,
+            live_up_to_date: course_data_row.live_up_to_date,
             course_data: CourseData {
                 draft_or_live: course_data_row.draft_or_live,
                 display_name: course_data_row.display_name,

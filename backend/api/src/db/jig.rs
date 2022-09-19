@@ -171,6 +171,7 @@ with cte as (
            author_id,
            liked_count,
            play_count,
+           live_up_to_date,
            case
                when $2 = 0 then jig.draft_id
                when $2 = 1 then jig.live_id
@@ -206,6 +207,7 @@ select cte.jig_id                                          as "jig_id: JigId",
         audio_background                                    as "audio_background: AudioBackground",
         liked_count,
         play_count,
+        live_up_to_date,
         locked,
         other_keywords,
         translated_keywords,
@@ -250,6 +252,7 @@ from jig_data
         author_name: row.author_name,
         likes: row.liked_count,
         plays: row.play_count,
+        live_up_to_date: row.live_up_to_date,
         jig_data: JigData {
             created_at: row.created_at,
             draft_or_live,
@@ -341,6 +344,7 @@ select jig.id                                       as "id!: JigId",
        draft_id                                 as "draft_id!",
        published_at,
        liked_count                              as "liked_count!",
+       live_up_to_date                          as "live_up_to_date!",
        (
            select play_count
            from jig_play_count
@@ -430,6 +434,7 @@ order by ord asc
             author_name: jig_row.author_name,
             likes: jig_row.liked_count,
             plays: jig_row.play_count,
+            live_up_to_date: jig_row.live_up_to_date,
             jig_data: JigData {
                 created_at: jig_data_row.created_at,
                 draft_or_live,
@@ -566,6 +571,7 @@ select jig.id                                              as "jig_id: JigId",
     updated_at,
     published_at,
     liked_count,
+    live_up_to_date,
     (
          select play_count
          from jig_play_count
@@ -648,6 +654,7 @@ limit $8
             author_name: jig_data_row.author_name,
             likes: jig_data_row.liked_count,
             plays: jig_data_row.play_count,
+            live_up_to_date: jig_data_row.live_up_to_date,
             jig_data: JigData {
                 created_at: jig_data_row.created_at,
                 draft_or_live: jig_data_row.draft_or_live,

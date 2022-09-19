@@ -12,6 +12,7 @@ expression: body
       "authorName": "Bobby Tables",
       "likes": 0,
       "views": 0,
+      "liveUpToDate": false,
       "resourceData": {
         "draftOrLive": "draft",
         "displayName": "resource2",
@@ -48,6 +49,7 @@ expression: body
       "authorName": "Bobby Tables",
       "likes": 0,
       "views": 0,
+      "liveUpToDate": false,
       "resourceData": {
         "draftOrLive": "live",
         "displayName": "resource2",
@@ -84,6 +86,7 @@ expression: body
       "authorName": "Bobby Tables",
       "likes": 0,
       "views": 0,
+      "liveUpToDate": false,
       "resourceData": {
         "draftOrLive": "draft",
         "displayName": "resource3",
@@ -120,6 +123,7 @@ expression: body
       "authorName": "Bobby Tables",
       "likes": 0,
       "views": 0,
+      "liveUpToDate": false,
       "resourceData": {
         "draftOrLive": "draft",
         "displayName": "resource1",
