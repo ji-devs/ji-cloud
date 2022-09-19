@@ -3,7 +3,7 @@ use std::rc::Rc;
 use dominator::{clone, html, DomBuilder};
 use futures_signals::signal::SignalExt;
 use utils::{component::Component, events};
-use web_sys::{ShadowRoot, HtmlElement};
+use web_sys::{HtmlElement, ShadowRoot};
 
 use super::FileInput;
 

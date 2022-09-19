@@ -71,6 +71,9 @@ pub fn render(
             .property("href", DONATE_LINK)
             .property("target", "_blank")
             .text(STR_DONATE)
+            .event(move |_evt: events::Click| {
+                mixpanel::track("Donate Click", None);
+            })
         }))
         .apply_if(render_beta, |dom| {
             dom.child(html!("beta-button", {
@@ -151,6 +154,7 @@ fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {
                 .text(STR_LOGOUT)
                 .event(clone!(state => move |_: events::Click| {
                     actions::logout(Rc::clone(&state));
+                    mixpanel::track("Header Logout Click", None);
                 }))
             }),
             html!("profile-image", {
@@ -227,6 +231,9 @@ fn render_logged_out() -> Vec<Dom> {
             .property("color", "black")
             .property("href", &Route::User(UserRoute::Register(Default::default())).to_string())
             .text(STR_SIGN_UP)
+            .event(move |_evt: events::Click| {
+                mixpanel::track("Header Signup Click", None);
+            })
         }),
         html!("button-rect", {
             .property("slot", "user")
@@ -240,6 +247,7 @@ fn render_logged_out() -> Vec<Dom> {
                     e.prevent_default();
 
                     actions::navigate_to_login();
+                    mixpanel::track("Header Login Click", None);
                 }
             )
         }),

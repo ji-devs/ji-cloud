@@ -6,7 +6,7 @@ pub struct FileInputConfig {
     pub on_change: Box<dyn Fn(Option<File>)>,
     pub max_size: MaxSize,
     pub accept: &'static str,
-    pub slot: Option<&'static str,>,
+    pub slot: Option<&'static str>,
     pub show_border: bool,
 }
 

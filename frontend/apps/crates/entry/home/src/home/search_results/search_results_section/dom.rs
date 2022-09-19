@@ -154,6 +154,9 @@ impl SearchResultsSection {
                                     .property("iconHoverPath", "search/cards/share-backside-hover.svg")
                                     .property("gapOverride", "0px")
                                     .property("label", "Share")
+                                    .event(clone!(asset => move |_: events::Click| {
+                                        track_action("share", asset.clone());
+                                    }))
                                 }),
                                 Some("actions"),
                             ))
@@ -182,6 +185,9 @@ impl SearchResultsSection {
                                             AssetId::ResourceId(_) => unreachable!(),
                                         }.to_string()
                                     })
+                                    .event(clone!(asset => move |_: events::Click| {
+                                        track_action("edit", asset.clone());
+                                    }))
                                 }))
                             }))
                             .child(html!("button-rect-icon", {
@@ -199,15 +205,7 @@ impl SearchResultsSection {
                                         // } else {
                                         //     state.home_state.play_login_popup_shown.set(true);
                                         // }
-                                        let asset_type = match asset_id {
-                                            AssetId::JigId(_) => "Jig",
-                                            AssetId::CourseId(_) => "Course",
-                                            _ => unimplemented!(),
-                                        };
-                                        let mut properties = HashMap::new();
-                                        properties.insert("Asset ID", format!("{}", asset_id.uuid()));
-                                        properties.insert("Asset Type", asset_type.to_owned());
-                                        mixpanel::track("Play", Some(properties));
+                                        track_action("play", asset.clone());
                                     })
                                 })
                             }))
@@ -224,10 +222,7 @@ impl SearchResultsSection {
                                         .property("target", "_BLANK")
                                         .text("View")
                                         .event(clone!(state => move |_: events::Click| {
-                                            let mut properties = HashMap::new();
-                                            properties.insert("Asset ID", format!("{}", asset.id().uuid()));
-                                            properties.insert("Asset Type", "Resource".to_owned());
-                                            mixpanel::track("Play", Some(properties));
+                                            track_action("play", asset.clone());
 
                                             state.loader.load(clone!(asset => async move {
                                                 let _ = resource::View::api_no_auth_empty(
@@ -271,4 +266,21 @@ impl SearchResultsSection {
                 }
             })
     }
+}
+
+fn track_action(action: &str, asset: Rc<Asset>) {
+    let asset_id = asset.id();
+
+    let asset_type = match asset_id {
+        AssetId::JigId(_) => "Jig",
+        AssetId::CourseId(_) => "Course",
+        AssetId::ResourceId(_) => "Resource",
+    };
+
+    let mut properties = HashMap::new();
+    properties.insert("Asset ID", format!("{}", asset_id.uuid()));
+    properties.insert("Asset Type", asset_type.to_owned());
+    properties.insert("Asset Name", asset.display_name().clone());
+
+    mixpanel::track(action, Some(properties));
 }
