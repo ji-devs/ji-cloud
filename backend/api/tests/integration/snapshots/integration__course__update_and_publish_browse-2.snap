@@ -1,7 +1,6 @@
 ---
 source: tests/integration/course.rs
 expression: body
-
 ---
 {
   "id": "3a6a3660-f3ec-11ec-b8ef-071747fa2a0d",
@@ -11,6 +10,7 @@ expression: body
   "authorName": "Bobby Tables",
   "likes": 0,
   "plays": 0,
+  "liveUpToDate": false,
   "courseData": {
     "draftOrLive": "draft",
     "displayName": "course name1",

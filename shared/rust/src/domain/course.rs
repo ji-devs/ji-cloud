@@ -139,6 +139,9 @@ pub struct CourseResponse {
     /// Number of plays Course
     pub plays: i64,
 
+    /// Live is current to Draft
+    pub live_up_to_date: bool,
+
     /// The data of the requested Course.
     pub course_data: CourseData,
 }

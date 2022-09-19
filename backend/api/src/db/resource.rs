@@ -146,6 +146,7 @@ with cte as (
            author_id,
            likes,
            views,
+           live_up_to_date,
            case
                when $2 = 0 then resource.draft_id
                when $2 = 1 then resource.live_id
@@ -174,6 +175,7 @@ select cte.resource_id                                          as "resource_id:
         translated_description                              as "translated_description!: Json<HashMap<String, String>>",
         likes,
         views,
+        live_up_to_date,
         locked,
         other_keywords,
         translated_keywords,
@@ -215,6 +217,7 @@ from resource_data
         author_name: row.author_name,
         likes: row.likes,
         views: row.views,
+        live_up_to_date: row.live_up_to_date,
         resource_data: ResourceData {
             created_at: row.created_at,
             draft_or_live,
@@ -283,6 +286,7 @@ select resource.id                                       as "id!: ResourceId",
        published_at,
        likes                                     as "likes!",
        views                                    as "views!",
+       live_up_to_date                          as "live_up_to_date!",
        rating                                   as "rating?: ResourceRating",
        blocked                                  as "blocked!",
        curated                                  as "curated!"
@@ -358,6 +362,7 @@ order by ord asc
             author_name: resource_row.author_name,
             likes: resource_row.likes,
             views: resource_row.views,
+            live_up_to_date: resource_row.live_up_to_date,
             resource_data: ResourceData {
                 created_at: resource_data_row.created_at,
                 draft_or_live,
@@ -473,6 +478,7 @@ select resource.id                                              as "resource_id:
     published_at,
     likes,
     views,
+    live_up_to_date,
    display_name                                                                  as "display_name!",
    language                                                                      as "language!",
    description                                                                   as "description!",
@@ -541,6 +547,7 @@ limit $8
             author_name: resource_data_row.author_name,
             likes: resource_data_row.likes,
             views: resource_data_row.views,
+            live_up_to_date: resource_data_row.live_up_to_date,
             resource_data: ResourceData {
                 created_at: resource_data_row.created_at,
                 draft_or_live: resource_data_row.draft_or_live,

@@ -601,3 +601,77 @@ async fn update_and_publish_incomplete_modules() -> anyhow::Result<()> {
 
     Ok(())
 }
+
+#[actix_rt::test]
+async fn live_up_to_date_flag() -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[
+            Fixture::MetaKinds,
+            Fixture::User,
+            Fixture::Resource,
+            Fixture::CategoryOrdering,
+        ],
+        &[],
+    )
+    .await;
+
+    let port = app.port();
+
+    let client = reqwest::Client::new();
+
+    let resource_id = "d8067526-1518-11ed-87fa-ebaf880b6d9c".to_string();
+
+    let resp = client
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/resource/{resource_id}/draft",
+            port
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.lastEdited" => "[last_edited]",
+        }
+    );
+
+    let _resp = client
+        .put(&format!(
+            "http://0.0.0.0:{}/v1/resource/{resource_id}/draft/publish",
+            port
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    let resp = client
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/resource/{resource_id}/live",
+            port
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(
+        body, {
+            // Really just need to redact the module ID because it is recreated for the live data,
+            // but I couldn't get a selector working correctly... So redacting all IDs.
+            ".**.id" => "[id]",
+            ".**.lastEdited" => "[last_edited]",
+            ".**.publishedAt" => "[published_at]",
+        }
+    );
+
+    app.stop(false).await;
+
+    Ok(())
+}
