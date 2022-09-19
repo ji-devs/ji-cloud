@@ -207,6 +207,7 @@ where
                         published_at: None,
                         likes: 0,
                         plays: 0,
+                        live_up_to_date: false,
                         jig_data: JigData {
                             created_at: chrono::offset::Utc::now(),
                             last_edited: None,

@@ -72,6 +72,7 @@ impl Component<EditImage> for Rc<EditImage> {
                                             state.image.set(file);
                                         })),
                                         accept: "image/*",
+                                        preview_images: true,
                                         ..Default::default()
                                     }).render()
                                 },

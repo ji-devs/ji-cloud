@@ -29,6 +29,7 @@ fn render_start(state: Rc<AudioInput>, add_method: AudioInputAddMethod) -> Dom {
             accept: "audio/*",
             slot: Some("main-content"),
             show_border: false,
+            preview_images: true,
             on_change: Box::new(clone!(state => move |file| {
                 spawn_local(clone!(state => async move {
                     if let Some(file) = file {

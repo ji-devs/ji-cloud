@@ -13,7 +13,7 @@ mod dom;
 pub use config::*;
 
 pub struct FileInput {
-    _value: Mutable<Option<File>>,
+    value: Mutable<Option<File>>,
     on_change: Box<dyn Fn(Option<File>)>,
     max_size: MaxSize,
     error_size: Mutable<bool>,
@@ -21,12 +21,13 @@ pub struct FileInput {
     accept: &'static str,
     slot: Option<&'static str>,
     show_border: bool,
+    preview_images: bool,
 }
 
 impl FileInput {
     pub fn new(config: FileInputConfig) -> Rc<Self> {
         Rc::new(Self {
-            _value: Mutable::new(config.value),
+            value: Mutable::new(config.value),
             on_change: config.on_change,
             max_size: config.max_size,
             error_size: Mutable::new(false),
@@ -34,6 +35,7 @@ impl FileInput {
             accept: config.accept,
             slot: config.slot,
             show_border: config.show_border,
+            preview_images: config.preview_images,
         })
     }
 

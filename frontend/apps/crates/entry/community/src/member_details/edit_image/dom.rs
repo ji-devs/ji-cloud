@@ -71,6 +71,7 @@ impl Component<EditImage> for Rc<EditImage> {
                                             let file = file.map(|file| ImageIfOrFile::File(file));
                                             state.image.set(file);
                                         })),
+                                        preview_images: true,
                                         accept: "image/*",
                                         ..Default::default()
                                     }).render()

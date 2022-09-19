@@ -54,10 +54,6 @@ export class _ extends LitElement {
                 ::slotted([slot=image]) {
                     grid-area: image;
                     display: grid;
-                    border: dashed 2px var(--light-blue-5);
-                    border-radius: 14px;
-                    color: var(--light-blue-5);
-                    font-size: 50px;
                     height: 230px;
                 }
                 ::slotted([slot=submit]) {

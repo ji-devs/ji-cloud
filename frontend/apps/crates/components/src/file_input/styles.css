@@ -2,7 +2,18 @@
     display: grid;
 }
 
+.remove {
+    font-size: 12px;
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: end;
+    margin: 10px;
+    z-index: 1;
+}
+
 input-file {
+    grid-column: 1;
+    grid-row: 1;
     border-radius: 16px;
     justify-items: center;
 }
@@ -17,7 +28,17 @@ input-file::part(wrapper) {
     box-sizing: border-box;
 }
 
-input-file fa-icon {
+input-file img {
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+}
+
+.empty {
+    display: grid;
+    justify-items: center;
+}
+
+.empty fa-icon {
     height: 48px;
     width: 48px;
     border-radius: 50%;
@@ -28,17 +49,17 @@ input-file fa-icon {
     font-size: 26px;
 }
 
-input-file .pick-file-message {
+.empty .pick-file-message {
     color: var(--dark-gray-3);
     font-size: 14px;
 }
 
-input-file .file-size {
+.empty .file-size {
     color: var(--dark-gray-4);
     font-size: 13px;
 }
 
-input-file .error-message {
+.empty .error-message {
     color: var(--red-alert);
     text-align: center;
     font-size: 14px;

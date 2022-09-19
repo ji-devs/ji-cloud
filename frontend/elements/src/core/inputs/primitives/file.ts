@@ -31,6 +31,8 @@ export class _ extends LitElement {
     private onChange(e: any) {
         if (e.target.files[0]) {
             this.newFile(e.target.files[0]);
+            // clear input so that selecting the file again will trigger onchange
+            e.target.value = "";
         }
     }
 
@@ -46,6 +48,8 @@ export class _ extends LitElement {
     }
 
     private newFile(file: File) {
+        console.log(file);
+        
         this.dispatchEvent(
             new CustomEvent("custom-file", {
                 detail: file,

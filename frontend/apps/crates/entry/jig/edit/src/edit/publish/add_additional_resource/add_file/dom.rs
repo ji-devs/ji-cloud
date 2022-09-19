@@ -1,12 +1,13 @@
 use std::rc::Rc;
 
+use components::file_input::{FileInput, FileInputConfig};
 use dominator::{clone, html, Dom};
 use futures_signals::{
     map_ref,
     signal::{not, Signal},
 };
 
-use utils::events;
+use utils::{component::Component, events};
 
 use crate::edit::publish::add_additional_resource::ActivePopup;
 
@@ -40,20 +41,14 @@ impl AddFile {
                         state.add_resources_state.active_popup.set(None);
                     }))
                 }),
-                html!("input-file", {
-                    .property("slot", "input-file")
-                    .property("accept", "image/*,audio/*,application/pdf")
-                    .text_signal(state.file.signal_ref(|file| {
-                        match file {
-                            Some(file) => file.name(),
-                            None => String::from("Select file")
-                        }
-                    }))
-                    .event(clone!(state => move |e: events::CustomFile| {
-                        let file = e.file();
-                        state.file.set(Some(file));
-                    }))
-                }),
+                FileInput::new(FileInputConfig {
+                    on_change: Box::new(clone!(state => move|file| {
+                        state.file.set(file);
+                    })),
+                    accept: "image/*,audio/*,application/pdf",
+                    slot: Some("input-file"),
+                    ..Default::default()
+                }).render(),
                 html!("button-rect", {
                     .property("slot", "actions")
                     .property("color", "blue")

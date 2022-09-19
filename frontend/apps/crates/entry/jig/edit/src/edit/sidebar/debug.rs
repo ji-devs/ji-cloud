@@ -24,6 +24,7 @@ pub fn get_jig() -> JigResponse {
         author_id: None,
         author_name: None,
         published_at: None,
+        live_up_to_date: false,
         jig_data: JigData {
             created_at: chrono::offset::Utc::now(),
             draft_or_live: DraftOrLive::Draft,

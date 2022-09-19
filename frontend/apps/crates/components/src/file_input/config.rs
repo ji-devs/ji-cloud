@@ -8,6 +8,7 @@ pub struct FileInputConfig {
     pub accept: &'static str,
     pub slot: Option<&'static str>,
     pub show_border: bool,
+    pub preview_images: bool,
 }
 
 impl Default for FileInputConfig {
@@ -19,6 +20,7 @@ impl Default for FileInputConfig {
             max_size: Default::default(),
             accept: Default::default(),
             slot: Default::default(),
+            preview_images: Default::default(),
         }
     }
 }
