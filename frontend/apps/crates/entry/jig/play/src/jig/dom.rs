@@ -6,8 +6,10 @@ use futures_signals::map_ref;
 use futures_signals::signal::{Signal, SignalExt};
 use js_sys::Reflect;
 use shared::domain::{jig::JigResponse, module::ModuleKind};
+use std::collections::HashMap;
 use std::rc::Rc;
 use utils::iframe::{AssetPlayerToPlayerPopup, IframeMessageExt};
+use utils::init::mixpanel;
 use utils::js_wrappers::is_iframe;
 use utils::{
     iframe::{IframeAction, ModuleToJigPlayerMessage},
@@ -26,6 +28,25 @@ impl JigPlayer {
         actions::load_data(state.clone());
 
         html!("jig-play-landing", {
+            .future(state.jig.signal_cloned().for_each(clone!(state => move |jig| {
+                // Don't unwrap the jig field because we don't want mixpanel logic to break the app.
+                if let Some(jig) = jig {
+                    let mut properties = HashMap::new();
+
+                    if state.player_options.is_student {
+                        properties.insert("IsStudent", "Yes".to_owned());
+                    } else {
+                        properties.insert("IsTeacher", "Yes".to_owned());
+                    };
+
+                    properties.insert("Jig ID", jig.id.0.to_string());
+                    properties.insert("Jig Name", jig.jig_data.display_name);
+
+                    mixpanel::track("Jig Play", Some(properties));
+                }
+
+                async {}
+            })))
             .property_signal("rtl", state.jig.signal_cloned().map(|jig| {
                 jig.map(|jig| jig.jig_data.default_player_settings.direction.is_rtl())
             }))

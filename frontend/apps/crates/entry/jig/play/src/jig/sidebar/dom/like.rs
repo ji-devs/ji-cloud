@@ -9,7 +9,7 @@ use shared::{
 
 use utils::{events, prelude::ApiEndpointExt};
 
-use super::super::state::State;
+use super::{super::state::State, track_action};
 
 pub fn render(state: Rc<State>, jig: &JigResponse) -> Dom {
     html!("jig-play-sidebar-action", {
@@ -18,6 +18,7 @@ pub fn render(state: Rc<State>, jig: &JigResponse) -> Dom {
         .property_signal("active", state.player_state.jig_liked.signal_ref(|jig_liked| jig_liked.unwrap_or(false)))
         // TODO Render active or not active
         .event(clone!(state, jig => move |_: events::Click| {
+            track_action("Like Click", state.clone());
             // If jig_liked is None, we don't want to do anything because the request to fetch
             // whether the user liked this jig may not have resolved yet.
             if let Some(jig_liked) = state.player_state.jig_liked.get() {

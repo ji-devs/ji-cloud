@@ -1,4 +1,4 @@
-use std::{rc::Rc, collections::HashMap};
+use std::{collections::HashMap, rc::Rc};
 
 use components::{
     overlay::container::OverlayContainer,
@@ -9,9 +9,10 @@ use futures_signals::signal::{Signal, SignalExt};
 use shared::domain::user::{UserId, UserProfile};
 use utils::{
     events,
+    init::mixpanel,
     prelude::{get_user_cloned, get_user_id},
     routes::{CommunityCirclesRoute, CommunityMembersRoute, CommunityRoute, Route, UserRoute},
-    unwrap::UnwrapJiExt, init::mixpanel,
+    unwrap::UnwrapJiExt,
 };
 use web_sys::HtmlInputElement;
 

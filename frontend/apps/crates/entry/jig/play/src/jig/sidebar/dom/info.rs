@@ -12,7 +12,7 @@ use utils::{
     events,
 };
 
-use super::{super::state::State, report};
+use super::{super::state::State, report, track_action};
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("anchored-overlay", {
@@ -31,6 +31,7 @@ pub fn render(state: Rc<State>) -> Dom {
             .event(clone!(state => move |_: events::Click| {
                 let mut info_popup_active = state.info_popup_active.lock_mut();
                 *info_popup_active = !*info_popup_active;
+                track_action("Information Click", state.clone());
             }))
         }))
         .child_signal({

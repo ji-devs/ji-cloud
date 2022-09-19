@@ -1,9 +1,11 @@
+use std::collections::HashMap;
 use std::rc::Rc;
 
 use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use utils::events;
+use utils::init::mixpanel;
 
 use crate::jig::sidebar::actions::load_ages;
 
@@ -38,6 +40,7 @@ pub fn render(state: Rc<State>) -> Dom {
             .property("slot", "opener")
             .event(clone!(state => move |_: events::Click| {
                 state.sidebar_open.set(true);
+                mixpanel::track("Jig Play Sidebar Jiggling", None);
             }))
         }))
         .child(html!("button", {
@@ -104,4 +107,16 @@ pub fn render(state: Rc<State>) -> Dom {
             }
         })))
     })
+}
+
+fn track_action(action: &str, state: Rc<State>) {
+    // Don't unwrap the jig field because we don't want mixpanel logic to break the app.
+    if let Some(jig) = state.player_state.jig.get_cloned() {
+        let mut properties = HashMap::new();
+        properties.insert("Jig ID", jig.id.0.to_string());
+        properties.insert("Jig Name", jig.jig_data.display_name);
+        properties.insert("Action", action.to_owned());
+
+        mixpanel::track("Jig Play Sidebar Action", Some(properties));
+    }
 }
