@@ -57,7 +57,7 @@ async fn update(
     let id = path.into_inner();
     let user_id = claims.user_id();
 
-    db::circle::is_author(&*db, user_id, id).await?;
+    db::circle::authz(&*db, user_id, Some(id)).await?;
 
     let req = req.map_or_else(Default::default, Json::into_inner);
 
@@ -83,7 +83,7 @@ async fn delete(
     let id = path.into_inner();
     let user_id = claims.user_id();
 
-    db::circle::is_author(&*db, user_id, id).await?;
+    db::circle::authz(&*db, user_id, Some(id)).await?;
 
     db::circle::delete(&*db, id).await?;
 
