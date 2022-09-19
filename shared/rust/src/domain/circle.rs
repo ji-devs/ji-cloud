@@ -45,7 +45,7 @@ pub struct Circle {
     pub last_edited: Option<DateTime<Utc>>,
 }
 
-make_path_parts!(CircleCreatePath => "v1/circle");
+make_path_parts!(CircleCreatePath => "/v1/circle");
 
 /// Request to create a new Circle.
 ///
