@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{rc::Rc, collections::HashMap};
 
 use components::{
     overlay::container::OverlayContainer,
@@ -11,7 +11,7 @@ use utils::{
     events,
     prelude::{get_user_cloned, get_user_id},
     routes::{CommunityCirclesRoute, CommunityMembersRoute, CommunityRoute, Route, UserRoute},
-    unwrap::UnwrapJiExt,
+    unwrap::UnwrapJiExt, init::mixpanel,
 };
 use web_sys::HtmlInputElement;
 
@@ -27,6 +27,7 @@ impl Community {
     pub fn render(self: &Rc<Self>) -> Dom {
         let state = self;
         state.load_data();
+        mixpanel::track("Community Loaded", None);
 
         html!("community-main", {
             .children(&mut [
@@ -146,6 +147,9 @@ impl Community {
                         .apply_if(user_id.is_some(), move |dom| dominator::on_click_go_to_url!(dom, {
                             route
                         }))
+                        .event(|_: events::Click| {
+                            track_nav_item("My profile");
+                        })
                     })
                 },
                 {
@@ -159,6 +163,9 @@ impl Community {
                         .child(html!("fa-icon", {
                             .property("icon", "fa-thin fa-circle-nodes")
                         }))
+                        .event(|_: events::Click| {
+                            track_nav_item("Circles");
+                        })
                         .apply(move |dom| dominator::on_click_go_to_url!(dom, {
                             route
                         }))
@@ -175,6 +182,9 @@ impl Community {
                         .child(html!("fa-icon", {
                             .property("icon", "fa-thin fa-people-group")
                         }))
+                        .event(|_: events::Click| {
+                            track_nav_item("Members");
+                        })
                         .apply(move |dom| dominator::on_click_go_to_url!(dom, {
                             route
                         }))
@@ -190,6 +200,7 @@ impl Community {
                             &EventOptions::preventable(),
                             |e: events::Click| {
                                 e.prevent_default();
+                                track_nav_item("ProDev");
                                 let _ = web_sys::window()
                                     .unwrap_ji()
                                     .alert_with_message("Coming soon");
@@ -207,4 +218,11 @@ fn is_current_users_page(user_id: &Option<UserId>, member_route: &CommunityMembe
         (Some(user_id), CommunityMembersRoute::Member(active_user)) => user_id == active_user,
         _ => false,
     }
+}
+
+fn track_nav_item(item: &str) {
+    let mut properties = HashMap::new();
+    properties.insert("Item", item.to_owned());
+
+    mixpanel::track("Community Nav Click", Some(properties));
 }
