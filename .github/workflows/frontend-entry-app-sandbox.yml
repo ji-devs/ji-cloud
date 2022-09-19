@@ -99,6 +99,7 @@ jobs:
         working-directory: "./frontend/apps"
         env:
           LOCAL_CDN_FRONTEND_DIR: ${{ github.workspace }}/frontend
+          MIXPANEL_PROJECT_TOKEN: ${{ secrets.MIXPANEL_PROJECT_TOKEN_SANDBOX }}
 
       - name: install google cloud sdk
         uses: google-github-actions/setup-gcloud@v0

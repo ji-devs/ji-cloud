@@ -15,11 +15,12 @@ use shared::{
         resource::ResourceViewPath,
     },
 };
-use std::rc::Rc;
+use std::{collections::HashMap, rc::Rc};
 use utils::{
     ages::AgeRangeVecExt,
     asset::{published_at_string, ResourceContentExt},
     events,
+    init::mixpanel,
     prelude::{get_user_cloned, ApiEndpointExt},
     routes::{AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, Route},
 };
@@ -198,6 +199,15 @@ impl SearchResultsSection {
                                         // } else {
                                         //     state.home_state.play_login_popup_shown.set(true);
                                         // }
+                                        let asset_type = match asset_id {
+                                            AssetId::JigId(_) => "Jig",
+                                            AssetId::CourseId(_) => "Course",
+                                            _ => unimplemented!(),
+                                        };
+                                        let mut properties = HashMap::new();
+                                        properties.insert("Asset ID", format!("{}", asset_id.uuid()));
+                                        properties.insert("Asset Type", asset_type.to_owned());
+                                        mixpanel::track("Play", Some(properties));
                                     })
                                 })
                             }))
@@ -214,6 +224,11 @@ impl SearchResultsSection {
                                         .property("target", "_BLANK")
                                         .text("View")
                                         .event(clone!(state => move |_: events::Click| {
+                                            let mut properties = HashMap::new();
+                                            properties.insert("Asset ID", format!("{}", asset.id().uuid()));
+                                            properties.insert("Asset Type", "Resource".to_owned());
+                                            mixpanel::track("Play", Some(properties));
+
                                             state.loader.load(clone!(asset => async move {
                                                 let _ = resource::View::api_no_auth_empty(
                                                     ResourceViewPath(asset.unwrap_resource().id),
