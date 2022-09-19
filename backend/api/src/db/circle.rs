@@ -1,7 +1,7 @@
 use shared::domain::{
     circle::{Circle, CircleId},
     image::ImageId,
-    user::UserId,
+    user::{UserId, UserScope},
 };
 
 use sqlx::{PgConnection, PgPool};
@@ -315,19 +315,49 @@ select exists(select 1 from circle where id = $1) as "valid!"
     Ok(())
 }
 
-pub async fn is_author(
+pub async fn authz(
     db: &PgPool,
     user_id: UserId,
-    circle_id: CircleId,
+    circle_id: Option<CircleId>,
 ) -> Result<(), error::Auth> {
-    let authed: bool = sqlx::query!(
-        r#"select exists(select 1 from circle where creator_id = $1 and id = $2) as "authed!""#,
-        user_id.0,
-        circle_id.0
-    )
-    .fetch_one(db)
-    .await?
-    .authed;
+    let authed = match circle_id {
+        None => {
+            sqlx::query!(
+                r#"
+select exists(select 1 from user_scope where user_id = $1 and scope = any($2)) as "authed!"
+"#,
+                user_id.0,
+                &[
+                    UserScope::Admin as i16,
+                    UserScope::AdminJig as i16,
+                    UserScope::ManageSelfJig as i16,
+                ][..],
+            )
+            .fetch_one(db)
+            .await?
+            .authed
+        }
+        Some(id) => {
+            sqlx::query!(
+                //language=SQL
+                r#"
+select exists (
+    select 1 from user_scope where user_id = $1 and scope = any($2)
+) or (
+    exists (select 1 from user_scope where user_id = $1 and scope = $3) and
+    not exists (select 1 from circle where id = $4 and circle.creator_id <> $1)
+) as "authed!"
+"#,
+                user_id.0,
+                &[UserScope::Admin as i16, UserScope::AdminJig as i16,][..],
+                UserScope::ManageSelfJig as i16,
+                id.0
+            )
+            .fetch_one(db)
+            .await?
+            .authed
+        }
+    };
 
     if !authed {
         return Err(error::Auth::Forbidden);
