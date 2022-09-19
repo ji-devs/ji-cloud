@@ -21,7 +21,6 @@ export default {
         format: "iife",
         sourcemap: true,
     },
-
     plugins: [
         rust({
             serverPath: `${URL_FRONTEND_SANDBOX}/${APP_NAME}/js/`,
@@ -30,6 +29,7 @@ export default {
             debug: false,
         }),
         nodeResolve(),
+        commonjs(),
         injectProcessEnv(getEnv()),
     ],
 };

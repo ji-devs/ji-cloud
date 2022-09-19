@@ -2,6 +2,7 @@ import rust from "@wasm-tool/rollup-plugin-rust";
 import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
 import nodeResolve from "@rollup/plugin-node-resolve";
+import commonjs from "@rollup/plugin-commonjs";
 import injectProcessEnv from "rollup-plugin-inject-process-env";
 import { getEnv } from "./rollup.common.js";
 
@@ -50,6 +51,7 @@ export default {
         }),
 
         nodeResolve(),
+        commonjs(),
 
         injectProcessEnv(getEnv()),
 

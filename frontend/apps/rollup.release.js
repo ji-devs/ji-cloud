@@ -29,6 +29,7 @@ export default {
             debug: false,
         }),
         nodeResolve(),
+        commonjs(),
         injectProcessEnv(getEnv()),
     ],
 };

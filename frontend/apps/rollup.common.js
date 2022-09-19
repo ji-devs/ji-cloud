@@ -1,5 +1,6 @@
 require("dotenv").config({ path: __dirname + "/./../../.env" });
 
+
 export function getEnv() {
     return {
         LOCAL_API_URL: process.env.LOCAL_API_URL,
@@ -10,5 +11,6 @@ export function getEnv() {
         LOCAL_PAGES_URL_IFRAME: process.env.LOCAL_PAGES_URL_IFRAME,
         LOCAL_FRONTEND_URL: process.env.LOCAL_FRONTEND_URL,
         LOCAL_API_AUTH_OVERRIDE: process.env.LOCAL_API_AUTH_OVERRIDE,
+        MIXPANEL_PROJECT_TOKEN: process.env.MIXPANEL_PROJECT_TOKEN,
     };
 }
