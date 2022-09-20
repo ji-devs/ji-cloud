@@ -7,6 +7,8 @@ use futures_signals::map_ref;
 use futures_signals::signal::SignalExt;
 use futures_signals::signal_vec::SignalVecExt;
 use shared::domain::asset::{Asset, DraftOrLive};
+use utils::init::mixpanel;
+use std::collections::HashMap;
 use std::rc::Rc;
 use strum::IntoEnumIterator;
 use utils::ages::AgeRangeVecExt;
@@ -40,8 +42,9 @@ impl Gallery {
     }
 
     pub fn render(self: Rc<Self>) -> Dom {
-        let state = self;
+        mixpanel::track("Jig Gallery Load", None);
 
+        let state = self;
         state.load_data();
 
         let load_more_signal = map_ref! {
@@ -95,6 +98,7 @@ impl Gallery {
                         .property("slot", "create-jig")
                         .event(clone!(state => move |_: events::Click| {
                             state.create_asset();
+                            mixpanel::track("Jig Gallery Create", None);
                         }))
                     }))
                     // .apply_if(state.focus.is_modules(), move |dom| {
@@ -145,6 +149,7 @@ impl Gallery {
                     // }))
                     .children_signal_vec(state.assets.signal_vec_cloned().map(clone!(state => move |jig| {
                         let jig_ages = jig.age_ranges().clone();
+
                         html!("jig-gallery-recent", {
                             .property("slot", "recent-items")
                             .property("label", jig.display_name())
@@ -170,6 +175,11 @@ impl Gallery {
                                     },
                                 }
                             })
+                            .event(clone!(jig => move |_: events::Click| {
+                                let mut properties = HashMap::new();
+                                properties.insert("Asset ID", jig.id().uuid().to_string());
+                                mixpanel::track("Jig Gallery Edit", Some(properties));
+                            }))
                             .child_signal(state.age_ranges.signal_cloned().map(clone!(jig => move |age_ranges| {
                                 let icon = match jig.published_at() {
                                     None => "entry/jig/gallery/age-icon-draft.svg",
