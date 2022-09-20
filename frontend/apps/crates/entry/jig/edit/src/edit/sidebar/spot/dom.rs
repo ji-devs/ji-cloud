@@ -2,6 +2,7 @@ use components::overlay::handle::OverlayHandle;
 use dominator::{clone, html, with_node, Dom, DomBuilder, EventOptions};
 use futures_signals::map_ref;
 use shared::domain::asset::DraftOrLive;
+use utils::init::mixpanel;
 use web_sys::{HtmlElement, Node, ScrollBehavior, ScrollIntoViewOptions};
 
 use super::super::course::menu::dom as CourseMenuDom;
@@ -15,6 +16,7 @@ use crate::edit::sidebar::state::{
 use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
 use futures_signals::signal::{not, SignalExt};
 use shared::domain::module::ModuleKind;
+use std::collections::HashMap;
 use std::rc::Rc;
 use std::str::FromStr;
 use utils::prelude::*;
@@ -129,6 +131,10 @@ impl ItemDom {
                         .event(clone!(state => move |evt:events::CustomDrop| {
                             if let Some(detail) = evt.detail().as_string() {
                                 if let Ok(kind) = ModuleKind::from_str(&detail) {
+                                    let mut properties = HashMap::new();
+                                    properties.insert("Activity Kind", detail.to_owned());
+                                    mixpanel::track("Jig Edit Add Activity", Some(properties));
+
                                     actions::on_module_kind_drop(
                                         Rc::clone(&state),
                                         kind
