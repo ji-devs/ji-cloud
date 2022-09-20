@@ -9,7 +9,7 @@ use shared::domain::{jig::JigResponse, module::ModuleKind};
 use std::collections::HashMap;
 use std::rc::Rc;
 use utils::iframe::{AssetPlayerToPlayerPopup, IframeMessageExt};
-use utils::init::mixpanel;
+use utils::init::analytics;
 use utils::js_wrappers::is_iframe;
 use utils::{
     iframe::{IframeAction, ModuleToJigPlayerMessage},
@@ -29,7 +29,7 @@ impl JigPlayer {
 
         html!("jig-play-landing", {
             .future(state.jig.signal_cloned().for_each(clone!(state => move |jig| {
-                // Don't unwrap the jig field because we don't want mixpanel logic to break the app.
+                // Don't unwrap the jig field because we don't want analytics logic to break the app.
                 if let Some(jig) = jig {
                     let mut properties = HashMap::new();
 
@@ -42,7 +42,7 @@ impl JigPlayer {
                     properties.insert("Jig ID", jig.id.0.to_string());
                     properties.insert("Jig Name", jig.jig_data.display_name);
 
-                    mixpanel::track("Jig Play", Some(properties));
+                    analytics::event("Jig Play", Some(properties));
                 }
 
                 async {}

@@ -6,7 +6,7 @@ use shared::domain::user::{UserProfile, UserScope};
 use strum::IntoEnumIterator;
 use utils::{
     events,
-    init::mixpanel,
+    init::analytics,
     routes::{AdminRoute, AssetRoute, Route, UserRoute},
     unwrap::UnwrapJiExt,
 };
@@ -59,7 +59,7 @@ pub fn render(
                 .event(move |_evt: events::Click| {
                     let mut properties = HashMap::new();
                     properties.insert("Header Kind", page_link.kind_str().to_owned());
-                    mixpanel::track("Header Click", Some(properties));
+                    analytics::event("Header Click", Some(properties));
                 })
             })
         }))
@@ -72,7 +72,7 @@ pub fn render(
             .property("target", "_blank")
             .text(STR_DONATE)
             .event(move |_evt: events::Click| {
-                mixpanel::track("Donate Click", None);
+                analytics::event("Donate Click", None);
             })
         }))
         .apply_if(render_beta, |dom| {
@@ -154,7 +154,7 @@ fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {
                 .text(STR_LOGOUT)
                 .event(clone!(state => move |_: events::Click| {
                     actions::logout(Rc::clone(&state));
-                    mixpanel::track("Header Logout Click", None);
+                    analytics::event("Header Logout Click", None);
                 }))
             }),
             html!("profile-image", {
@@ -232,7 +232,7 @@ fn render_logged_out() -> Vec<Dom> {
             .property("href", &Route::User(UserRoute::Register(Default::default())).to_string())
             .text(STR_SIGN_UP)
             .event(move |_evt: events::Click| {
-                mixpanel::track("Header Signup Click", None);
+                analytics::event("Header Signup Click", None);
             })
         }),
         html!("button-rect", {
@@ -247,7 +247,7 @@ fn render_logged_out() -> Vec<Dom> {
                     e.prevent_default();
 
                     actions::navigate_to_login();
-                    mixpanel::track("Header Login Click", None);
+                    analytics::event("Header Login Click", None);
                 }
             )
         }),

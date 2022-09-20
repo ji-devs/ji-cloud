@@ -6,7 +6,7 @@ use futures::join;
 
 use shared::{api::endpoints::jig, domain::jig::JigCountPath};
 use std::{collections::HashMap, rc::Rc};
-use utils::{init::mixpanel, prelude::*};
+use utils::{init::analytics, prelude::*};
 
 use super::state::Home;
 
@@ -82,7 +82,7 @@ async fn search_async(state: Rc<Home>) {
 
     search_state.loading.set(false);
 
-    // Mixpanel event tracking
+    // Analytics event tracking
     let mut properties = HashMap::new();
     let ages = query_params
         .age_ranges
@@ -98,7 +98,7 @@ async fn search_async(state: Rc<Home>) {
     properties.insert("Query", query_params.q);
     properties.insert("Ages", ages);
     properties.insert("Language", language);
-    mixpanel::track("Search", Some(properties));
+    analytics::event("Search", Some(properties));
 }
 
 pub fn search(state: Rc<Home>) {

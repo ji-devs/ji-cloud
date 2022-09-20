@@ -1,9 +1,9 @@
-pub mod mixpanel;
+pub mod analytics;
 pub mod settings;
 pub mod user;
 
 pub async fn init() {
-    mixpanel::init();
+    analytics::init();
     settings::init().await;
     user::init().await;
 }

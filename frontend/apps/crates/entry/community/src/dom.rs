@@ -9,7 +9,7 @@ use futures_signals::signal::{Signal, SignalExt};
 use shared::domain::user::{UserId, UserProfile};
 use utils::{
     events,
-    init::mixpanel,
+    init::analytics,
     prelude::{get_user_cloned, get_user_id},
     routes::{CommunityCirclesRoute, CommunityMembersRoute, CommunityRoute, Route, UserRoute},
     unwrap::UnwrapJiExt,
@@ -28,7 +28,7 @@ impl Community {
     pub fn render(self: &Rc<Self>) -> Dom {
         let state = self;
         state.load_data();
-        mixpanel::track("Community Loaded", None);
+        analytics::event("Community Loaded", None);
 
         html!("community-main", {
             .children(&mut [
@@ -225,5 +225,5 @@ fn track_nav_item(item: &str) {
     let mut properties = HashMap::new();
     properties.insert("Item", item.to_owned());
 
-    mixpanel::track("Community Nav Click", Some(properties));
+    analytics::event("Community Nav Click", Some(properties));
 }

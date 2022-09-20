@@ -6,7 +6,7 @@ use shared::domain::module::{
     ModuleKind,
 };
 use std::rc::Rc;
-use utils::{init::mixpanel, prelude::*};
+use utils::{init::analytics, prelude::*};
 
 pub fn render_post_preview<RawData, Mode, Step>(state: Rc<PostPreview>, raw_data: RawData) -> Dom
 where
@@ -56,7 +56,7 @@ where
                             .property("slot", "action-print")
                             .property("kind", "print-cards")
                             .event(clone!(state => move |_evt:events::Click| {
-                                mixpanel::track("Jig Edit Print Cards", None);
+                                analytics::event("Jig Edit Print Cards", None);
 
                                 if state.print_cards(&raw_data).is_err() {
                                     let _ = web_sys::window()

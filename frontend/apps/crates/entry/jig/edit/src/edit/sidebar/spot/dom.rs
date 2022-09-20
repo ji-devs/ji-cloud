@@ -2,7 +2,7 @@ use components::overlay::handle::OverlayHandle;
 use dominator::{clone, html, with_node, Dom, DomBuilder, EventOptions};
 use futures_signals::map_ref;
 use shared::domain::asset::DraftOrLive;
-use utils::init::mixpanel;
+use utils::init::analytics;
 use web_sys::{HtmlElement, Node, ScrollBehavior, ScrollIntoViewOptions};
 
 use super::super::course::menu::dom as CourseMenuDom;
@@ -133,7 +133,7 @@ impl ItemDom {
                                 if let Ok(kind) = ModuleKind::from_str(&detail) {
                                     let mut properties = HashMap::new();
                                     properties.insert("Activity Kind", detail.to_owned());
-                                    mixpanel::track("Jig Edit Add Activity", Some(properties));
+                                    analytics::event("Jig Edit Add Activity", Some(properties));
 
                                     actions::on_module_kind_drop(
                                         Rc::clone(&state),
