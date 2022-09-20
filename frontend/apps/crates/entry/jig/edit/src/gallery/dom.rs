@@ -12,7 +12,7 @@ use std::rc::Rc;
 use strum::IntoEnumIterator;
 use utils::ages::AgeRangeVecExt;
 use utils::asset::published_at_string;
-use utils::init::mixpanel;
+use utils::init::analytics;
 use utils::prelude::*;
 
 const STR_DELETE: &str = "Delete";
@@ -42,7 +42,7 @@ impl Gallery {
     }
 
     pub fn render(self: Rc<Self>) -> Dom {
-        mixpanel::track("Jig Gallery Load", None);
+        analytics::event("Jig Gallery Load", None);
 
         let state = self;
         state.load_data();
@@ -98,7 +98,7 @@ impl Gallery {
                         .property("slot", "create-jig")
                         .event(clone!(state => move |_: events::Click| {
                             state.create_asset();
-                            mixpanel::track("Jig Gallery Create", None);
+                            analytics::event("Jig Gallery Create", None);
                         }))
                     }))
                     // .apply_if(state.focus.is_modules(), move |dom| {
@@ -178,7 +178,7 @@ impl Gallery {
                             .event(clone!(jig => move |_: events::Click| {
                                 let mut properties = HashMap::new();
                                 properties.insert("Asset ID", jig.id().uuid().to_string());
-                                mixpanel::track("Jig Gallery Edit", Some(properties));
+                                analytics::event("Jig Gallery Edit", Some(properties));
                             }))
                             .child_signal(state.age_ranges.signal_cloned().map(clone!(jig => move |age_ranges| {
                                 let icon = match jig.published_at() {

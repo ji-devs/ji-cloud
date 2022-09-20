@@ -20,7 +20,7 @@ use utils::{
     ages::AgeRangeVecExt,
     asset::{published_at_string, ResourceContentExt},
     events,
-    init::mixpanel,
+    init::analytics,
     prelude::{get_user_cloned, ApiEndpointExt},
     routes::{AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, Route},
 };
@@ -282,5 +282,5 @@ fn track_action(action: &str, asset: Rc<Asset>) {
     properties.insert("Asset Type", asset_type.to_owned());
     properties.insert("Asset Name", asset.display_name().clone());
 
-    mixpanel::track(action, Some(properties));
+    analytics::event(action, Some(properties));
 }
