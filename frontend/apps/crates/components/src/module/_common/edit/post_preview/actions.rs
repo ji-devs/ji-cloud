@@ -2,6 +2,7 @@ use super::state::*;
 use crate::callback_future::CallbackFuture;
 use awsm_web::dom::StyleExt;
 use futures::future::join_all;
+use itertools::Itertools;
 use js_sys::Reflect;
 use shared::{
     api::endpoints::{self},
@@ -12,10 +13,12 @@ use shared::{
         },
         LiteModule, ModuleBody, ModuleCreatePath, ModuleCreateRequest, ModuleKind,
     },
+    media::PngImageFile,
 };
 use utils::{
     iframe::{IframeAction, IframeMessageExt, ModuleToJigEditorMessage},
     js_wrappers::set_event_listener_once,
+    path::image_lib_url,
     prelude::*,
 };
 use wasm_bindgen::{JsCast, JsValue};
@@ -129,30 +132,24 @@ impl PostPreview {
     }
 }
 
+const EL_NAME_LIST: &str = "module-card-print-list";
+const EL_NAME_SINGLE: &str = "module-card-print-single";
+const EL_NAME_DOUBLE: &str = "module-card-print-double";
 fn get_html_to_print(body: Body) -> anyhow::Result<String> {
-    match body {
+    let children = match body {
         ModuleBody::MemoryGame(_) | ModuleBody::Matching(_) | ModuleBody::CardQuiz(_) => {
             let pairs = get_card_pairs(body)?;
-            let texts = cards_to_text_singles(pairs)?;
-            let json = serde_json::to_string(&texts).unwrap_ji();
-            // needed so that a `"` characters don't end the html attribute
-            let json = json.replace("\"", "&quot;");
-            let html =
-                format!("<module-card-print-single cards=\"{json}\"></module-card-print-single>");
-            Ok(html)
+            cards_to_elements_singles(pairs)
         }
         ModuleBody::Flashcards(_) => {
             let pairs = get_card_pairs(body)?;
-            let texts = cards_to_text_doubles(pairs)?;
-            let json = serde_json::to_string(&texts).unwrap_ji();
-            // needed so that a `"` characters don't end the html attribute
-            let json = json.replace("\"", "&quot;");
-            let html =
-                format!("<module-card-print-double cards=\"{json}\"></module-card-print-double>");
-            Ok(html)
+            cards_to_elements_doubles(pairs)
         }
-        _ => Err(anyhow::anyhow!("Not a card game")),
-    }
+        _ => {
+            return Err(anyhow::anyhow!("Not a card game"));
+        }
+    };
+    Ok(format!("<{EL_NAME_LIST}>{children}</{EL_NAME_LIST}>"))
 }
 
 fn get_card_pairs(body: Body) -> anyhow::Result<Vec<CardPair>> {
@@ -165,45 +162,48 @@ fn get_card_pairs(body: Body) -> anyhow::Result<Vec<CardPair>> {
     }
 }
 
-fn cards_to_text_singles(cards: Vec<CardPair>) -> anyhow::Result<Vec<String>> {
-    let mut texts = Vec::with_capacity(cards.len() * 2);
-    let err = Err(anyhow::anyhow!("Contains image"));
-    for pair in cards {
-        match pair.0.card_content {
-            CardContent::Text(text) => texts.push(text),
-            CardContent::Image(_) => {
-                return err;
-            }
-        };
-        match pair.1.card_content {
-            CardContent::Text(text) => texts.push(text),
-            CardContent::Image(_) => {
-                return err;
-            }
-        };
-    }
-    Ok(texts)
+fn cards_to_elements_singles(cards: Vec<CardPair>) -> String {
+    cards
+        .into_iter()
+        .map(|card| [card.0.card_content, card.1.card_content])
+        .flatten()
+        .map(|card_content| {
+            format!(
+                "<{EL_NAME_SINGLE} {attributes}></{EL_NAME_SINGLE}>",
+                attributes = get_attributes_for_card_elements(&card_content, "")
+            )
+        })
+        .collect_vec()
+        .join("")
 }
 
-fn cards_to_text_doubles(cards: Vec<CardPair>) -> anyhow::Result<Vec<(String, String)>> {
-    let mut texts = Vec::with_capacity(cards.len() * 2);
-    let err = Err(anyhow::anyhow!("Contains image"));
-    for pair in cards {
-        let a = match pair.0.card_content {
-            CardContent::Text(text) => text,
-            CardContent::Image(_) => {
-                return err;
-            }
-        };
-        let b = match pair.1.card_content {
-            CardContent::Text(text) => text,
-            CardContent::Image(_) => {
-                return err;
-            }
-        };
-        texts.push((a, b));
+fn cards_to_elements_doubles(cards: Vec<CardPair>) -> String {
+    cards
+        .iter()
+        .map(|card| {
+            format!(
+                "<{EL_NAME_DOUBLE} {attributes_0} {attributes_1}></{EL_NAME_DOUBLE}>",
+                attributes_0 = get_attributes_for_card_elements(&card.0.card_content, "A"),
+                attributes_1 = get_attributes_for_card_elements(&card.1.card_content, "B")
+            )
+        })
+        .collect_vec()
+        .join("")
+}
+
+fn get_attributes_for_card_elements(card: &CardContent, attr_postfix: &str) -> String {
+    match &card {
+        CardContent::Text(text) => {
+            format!("card{attr_postfix}='{text}' kind{attr_postfix}='text'")
+        }
+        CardContent::Image(image) => {
+            let url = image
+                .as_ref()
+                .map(|image| image_lib_url(image.lib, PngImageFile::Resized, image.id))
+                .unwrap_or_default();
+            format!("card{attr_postfix}='{url}' kind{attr_postfix}='image'")
+        }
     }
-    Ok(texts)
 }
 
 fn print(html: String, scripts: Vec<String>) {

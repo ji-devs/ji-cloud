@@ -1,4 +1,5 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
+import { CardKind } from "./types";
 
 @customElement("module-card-print-single")
 export class _ extends LitElement {
@@ -6,22 +7,13 @@ export class _ extends LitElement {
         return [
             css`
                 :host {
-                    width: 100%;
-                    display: block;
-                }
-                .cards {
-                    --border: dashed 1px #a1a8ad;
-                    text-align: center;
-                    padding: 20px;
-                }
-                .card-wrapper {
                     display: inline-grid;
                     grid-template-rows: 20px 30vw;
                     width: 45vw;
                     border-right: var(--border);
                     margin-top: 20px;
                 }
-                .card-wrapper fa-icon {
+                fa-icon {
                     color: #a1a8ad;
                     justify-self: end;
                     transform: translate(10px, -10px) rotate(90deg);
@@ -35,11 +27,17 @@ export class _ extends LitElement {
                     padding: 8px;
                     break-inside: avoid;
                 }
+                .card .text, .card .image {
+                    grid-row: 1 / -1;
+                    place-self: center;
+                }
                 .card .text {
                     font-size: 40px;
                     color: var(--dark-gray-6);
-                    grid-row: 1 / -1;
-                    place-self: center;
+                }
+                .card .image {
+                    max-width: 100%;
+                    max-height: 100%;
                 }
                 .card .signature {
                     display: flex;
@@ -57,23 +55,26 @@ export class _ extends LitElement {
         ];
     }
 
-    @property({ type: Array })
-    cards: string[] = [];
+    @property()
+    card: string = "";
+
+    @property()
+    kind: CardKind = "text";
 
     render() {
         return html`
-            <div class="cards">
-                ${this.cards.map(card => html`
-                    <div class="card-wrapper">
-                        <fa-icon icon="fa-solid fa-scissors"></fa-icon>
-                        <div class="card">
-                            <div class="text">${card}</div>
-                            <div class="signature">
-                                <img-ui path="core/page-header/logo.svg"></img-ui> Jigzi.org
-                            </div>
-                        </div>
-                    </div>
-                `)}
+            <fa-icon icon="fa-solid fa-scissors"></fa-icon>
+            <div class="card">
+                ${
+                    this.kind === "text" ? (
+                        html`<div class="text">${this.card}</div>`
+                    ) : (
+                        html`<img class="image" src=${this.card}>`
+                    )
+                }
+                <div class="signature">
+                    <img-ui path="core/page-header/logo.svg"></img-ui> Jigzi.org
+                </div>
             </div>
         `;
     }
