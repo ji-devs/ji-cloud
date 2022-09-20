@@ -5,9 +5,9 @@ use once_cell::sync::OnceCell;
 use serde_wasm_bindgen::Serializer;
 use wasm_bindgen::prelude::*;
 
-use self::mixpanel::MixpanelProvider as Provider;
+mod mixpanel;
 
-pub mod mixpanel;
+use self::mixpanel::MixpanelProvider as Provider;
 
 static ANALYTICS: OnceCell<Provider> = OnceCell::new();
 
