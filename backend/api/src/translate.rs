@@ -759,7 +759,7 @@ pub async fn multi_translation(
     Ok(Some(translation_list))
 }
 
-// #[actix_rt::test]
+// #[sqlx::test]
 // async fn test_translated_description() -> anyhow::Result<()> {
 //     let api_key: &str = "";
 
