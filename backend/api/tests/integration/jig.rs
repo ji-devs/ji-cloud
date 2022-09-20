@@ -649,8 +649,8 @@ async fn update_and_publish_incomplete_modules(pool: PgPool) -> anyhow::Result<(
     Ok(())
 }
 
-#[actix_rt::test]
-async fn live_up_to_date_flag() -> anyhow::Result<()> {
+#[sqlx::test]
+async fn live_up_to_date_flag(pool: PgPool) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::MetaKinds,
@@ -659,6 +659,7 @@ async fn live_up_to_date_flag() -> anyhow::Result<()> {
             Fixture::CategoryOrdering,
         ],
         &[],
+        pool,
     )
     .await;
 
