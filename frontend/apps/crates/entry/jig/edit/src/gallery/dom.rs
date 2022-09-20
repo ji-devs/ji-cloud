@@ -7,12 +7,12 @@ use futures_signals::map_ref;
 use futures_signals::signal::SignalExt;
 use futures_signals::signal_vec::SignalVecExt;
 use shared::domain::asset::{Asset, DraftOrLive};
-use utils::init::mixpanel;
 use std::collections::HashMap;
 use std::rc::Rc;
 use strum::IntoEnumIterator;
 use utils::ages::AgeRangeVecExt;
 use utils::asset::published_at_string;
+use utils::init::mixpanel;
 use utils::prelude::*;
 
 const STR_DELETE: &str = "Delete";

@@ -7,6 +7,7 @@ use futures_signals::{
 use shared::domain::asset::{DraftOrLive, PrivacyLevel};
 use utils::{
     events,
+    init::mixpanel,
     routes::{AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, ResourceEditRoute, Route},
 };
 use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement};
@@ -255,6 +256,7 @@ fn render_page(state: Rc<Publish>) -> Dom {
                             .style("color", "var(--main-yellow)")
                         }))
                         .event(clone!(state => move |_: events::Click| {
+                            mixpanel::track("Jig Edit Publish", None);
                             Rc::clone(&state).save_asset();
                         }))
                     }))

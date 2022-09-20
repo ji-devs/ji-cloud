@@ -6,7 +6,7 @@ use shared::domain::module::{
     ModuleKind,
 };
 use std::rc::Rc;
-use utils::{prelude::*, init::mixpanel};
+use utils::{init::mixpanel, prelude::*};
 
 pub fn render_post_preview<RawData, Mode, Step>(state: Rc<PostPreview>, raw_data: RawData) -> Dom
 where
