@@ -18,9 +18,9 @@ use utils::prelude::*;
 const STR_DELETE: &str = "Delete";
 const STR_DUPLICATE: &str = "Duplicate";
 const STR_SEARCH: &str = "Search";
-const STR_SHOW_JIG_ALL: &str = "Show all my JIGs";
-const STR_SHOW_JIG_PUBLISHED: &str = "Show published JIGs";
-const STR_SHOW_JIG_DRAFT: &str = "Show drafts";
+const STR_SHOW_ALL: &str = "Show all";
+const STR_SHOW_PUBLISHED: &str = "Show published";
+const STR_SHOW_DRAFT: &str = "Show drafts";
 
 const STR_DELETE_TITLE: &str = "Warning";
 const STR_DELETE_CONTENT: &str = "Are you sure you want to delete this JIG?";
@@ -35,9 +35,9 @@ const STR_LOAD_MORE: &str = "See more";
 impl Gallery {
     fn visible_assets_option_string(visible_jigs: &VisibleAssets) -> &'static str {
         match visible_jigs {
-            VisibleAssets::All => STR_SHOW_JIG_ALL,
-            VisibleAssets::Published => STR_SHOW_JIG_PUBLISHED,
-            VisibleAssets::Draft => STR_SHOW_JIG_DRAFT,
+            VisibleAssets::All => STR_SHOW_ALL,
+            VisibleAssets::Published => STR_SHOW_PUBLISHED,
+            VisibleAssets::Draft => STR_SHOW_DRAFT,
         }
     }
 
@@ -147,14 +147,15 @@ impl Gallery {
                     //     .property("slot", "recent-items")
                     //     .property_signal("visible", state.loader.is_loading())
                     // }))
-                    .children_signal_vec(state.assets.signal_vec_cloned().map(clone!(state => move |jig| {
-                        let jig_ages = jig.age_ranges().clone();
+                    .children_signal_vec(state.assets.signal_vec_cloned().map(clone!(state => move |asset| {
+                        let asset_ages = asset.age_ranges().clone();
 
                         html!("jig-gallery-recent", {
                             .property("slot", "recent-items")
-                            .property("label", jig.display_name())
+                            .property("label", asset.display_name())
+                            .property("draft", !asset.live_up_to_date())
                             .property("href", {
-                                match &jig {
+                                match &asset {
                                     Asset::Jig(jig) => {
                                         String::from(Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                                             jig.id,
@@ -175,17 +176,17 @@ impl Gallery {
                                     },
                                 }
                             })
-                            .event(clone!(jig => move |_: events::Click| {
+                            .event(clone!(asset => move |_: events::Click| {
                                 let mut properties = HashMap::new();
-                                properties.insert("Asset ID", jig.id().uuid().to_string());
-                                analytics::event("Jig Gallery Edit", Some(properties));
+                                properties.insert("Asset ID", asset.id().uuid().to_string());
+                                analytics::event("Asset Gallery Edit", Some(properties));
                             }))
-                            .child_signal(state.age_ranges.signal_cloned().map(clone!(jig => move |age_ranges| {
-                                let icon = match jig.published_at() {
+                            .child_signal(state.age_ranges.signal_cloned().map(clone!(asset => move |age_ranges| {
+                                let icon = match asset.published_at() {
                                     None => "entry/jig/gallery/age-icon-draft.svg",
                                     Some(_) => "entry/jig/gallery/age-icon.svg",
                                 };
-                                let range = age_ranges.range(&jig_ages);
+                                let range = age_ranges.range(&asset_ages);
                                 Some(html!("age-range", {
                                     .property("slot", "ages")
                                     .property("icon", icon)
@@ -194,7 +195,7 @@ impl Gallery {
                                 }))
                             })))
                             .apply(|dom| {
-                                match jig.published_at() {
+                                match asset.published_at() {
                                     None => {
                                         // dom.property("draft", true)
                                         dom
@@ -206,8 +207,8 @@ impl Gallery {
                             })
                             .child(
                                 ModuleThumbnail::new(
-                                    jig.id(),
-                                    jig.cover().cloned(),
+                                    asset.id(),
+                                    asset.cover().cloned(),
                                     ThumbnailFallback::Asset,
                                     DraftOrLive::Draft
                                 ).render(Some("thumbnail"))
@@ -217,16 +218,16 @@ impl Gallery {
                                     .property("slot", "menu-content")
                                     .property("icon", "duplicate")
                                     .text(STR_DUPLICATE)
-                                    .event(clone!(state, jig => move |_: events::Click| {
-                                        state.copy_asset(jig.id());
+                                    .event(clone!(state, asset => move |_: events::Click| {
+                                        state.copy_asset(asset.id());
                                     }))
                                 }),
                                 html!("menu-line", {
                                     .property("slot", "menu-content")
                                     .property("icon", "delete")
                                     .text(STR_DELETE)
-                                    .event(clone!(state, jig => move |_: events::Click| {
-                                        state.confirm_delete.set_neq(Some(jig.id()));
+                                    .event(clone!(state, asset => move |_: events::Click| {
+                                        state.confirm_delete.set_neq(Some(asset.id()));
                                     }))
                                 }),
                             ])

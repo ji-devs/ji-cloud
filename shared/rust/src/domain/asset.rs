@@ -419,6 +419,15 @@ impl Asset {
             Self::Resource(_) => ThemeId::default(),
         }
     }
+
+    /// get live_up_to_date
+    pub fn live_up_to_date(&self) -> bool {
+        match self {
+            Self::Jig(jig) => jig.live_up_to_date,
+            Self::Course(course) => course.live_up_to_date,
+            Self::Resource(resource) => resource.live_up_to_date,
+        }
+    }
 }
 
 // dyn_clone::clone_trait_object!(Asset);
