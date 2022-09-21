@@ -1,7 +1,7 @@
 use http::{Method, StatusCode};
 use serde_json::json;
 use shared::error::{ApiError, EmptyError};
-use sqlx::PgPool;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
@@ -18,9 +18,10 @@ async fn forbidden(
     route: &str,
     req: Option<&serde_json::Value>,
     method: Method,
-    pool: PgPool,
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
 ) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::UserNoPerms], &[], pool).await;
+    let app = initialize_server(&[Fixture::UserNoPerms], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
 
@@ -50,40 +51,52 @@ async fn forbidden(
 }
 
 #[sqlx::test]
-async fn category_post(pool: PgPool) -> anyhow::Result<()> {
+async fn category_post(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     forbidden(
         "v1/category",
         Some(&json!({"name": ""})),
         Method::POST,
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }
 
 #[sqlx::test]
-async fn category_patch(pool: PgPool) -> anyhow::Result<()> {
+async fn category_patch(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     forbidden(
         "v1/category/00000000-0000-0000-0000-000000000000",
         None,
         Method::PATCH,
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }
 
 #[sqlx::test]
-async fn category_delete(pool: PgPool) -> anyhow::Result<()> {
+async fn category_delete(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     forbidden(
         "v1/category/00000000-0000-0000-0000-000000000000",
         None,
         Method::DELETE,
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }
 
 #[sqlx::test]
-async fn image_post(pool: PgPool) -> anyhow::Result<()> {
+async fn image_post(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     forbidden(
         "v1/image",
         Some(&json!({
@@ -99,63 +112,68 @@ async fn image_post(pool: PgPool) -> anyhow::Result<()> {
                 "size": "Canvas",
         })),
         Method::POST,
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }
 
 #[sqlx::test]
-async fn image_patch(pool: PgPool) -> anyhow::Result<()> {
+async fn image_patch(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     forbidden(
         "v1/image/00000000-0000-0000-0000-000000000000",
         None,
         Method::PATCH,
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }
 
 #[sqlx::test]
 #[ignore] // no s3
-async fn image_delete(pool: PgPool) -> anyhow::Result<()> {
+async fn image_delete(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     forbidden(
         "v1/image/00000000-0000-0000-0000-000000000000",
         None,
         Method::DELETE,
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }
 
 #[sqlx::test]
-async fn jig_post(pool: PgPool) -> anyhow::Result<()> {
-    forbidden("v1/jig", None, Method::POST, pool).await
+async fn jig_post(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    forbidden("v1/jig", None, Method::POST, pool_opts, conn_opts).await
 }
 
 #[sqlx::test]
-async fn jig_patch(pool: PgPool) -> anyhow::Result<()> {
+async fn jig_patch(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     forbidden(
         "v1/jig/00000000-0000-0000-0000-000000000000",
         None,
         Method::PATCH,
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }
 
 #[sqlx::test]
-async fn jig_clone(pool: PgPool) -> anyhow::Result<()> {
+async fn jig_clone(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     forbidden(
         "v1/jig/00000000-0000-0000-0000-000000000000/clone",
         None,
         Method::POST,
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }
 
 // #[sqlx::test]
-// async fn jig_delete(pool: PgPool) -> anyhow::Result<()> {
+// async fn jig_delete(pool_opts: PoolOptions<Postgres>, conn_opts: PgConnectOptions<Postgres>) -> anyhow::Result<()> {
 //     forbidden(
 //         "v1/jig/00000000-0000-0000-0000-000000000000",
 //         None,
@@ -165,7 +183,7 @@ async fn jig_clone(pool: PgPool) -> anyhow::Result<()> {
 // }
 
 #[sqlx::test]
-async fn module_post(pool: PgPool) -> anyhow::Result<()> {
+async fn module_post(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     use shared::domain::module::ModuleCreateRequest;
 
     forbidden(
@@ -177,35 +195,44 @@ async fn module_post(pool: PgPool) -> anyhow::Result<()> {
             body: ModuleBody::new(ModuleKind::Cover),
         })?),
         Method::POST,
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }
 
 #[sqlx::test]
-async fn module_patch(pool: PgPool) -> anyhow::Result<()> {
+async fn module_patch(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     forbidden(
         "v1/module/draft/00000000-0000-0000-0000-000000000000",
         Some(&serde_json::json!({"jigId": "00000000-0000-0000-0000-000000000000"})),
         Method::PATCH,
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }
 
 #[sqlx::test]
-async fn module_delete(pool: PgPool) -> anyhow::Result<()> {
+async fn module_delete(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     forbidden(
         "v1/module/draft/00000000-0000-0000-0000-000000000000",
         Some(&serde_json::json!({"jigId": "00000000-0000-0000-0000-000000000000"})),
         Method::DELETE,
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }
 
 #[sqlx::test]
-async fn animation_post(pool: PgPool) -> anyhow::Result<()> {
+async fn animation_post(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     forbidden(
         "v1/animation",
         Some(&json!({
@@ -218,31 +245,40 @@ async fn animation_post(pool: PgPool) -> anyhow::Result<()> {
             "kind": "Gif",
         })),
         Method::POST,
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }
 
 #[sqlx::test]
 #[ignore] // route doesn't exist
-async fn animation_patch(pool: PgPool) -> anyhow::Result<()> {
+async fn animation_patch(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     forbidden(
         "v1/animation/00000000-0000-0000-0000-000000000000",
         None,
         Method::PATCH,
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }
 
 #[sqlx::test]
 #[ignore] // no s3
-async fn animation_delete(pool: PgPool) -> anyhow::Result<()> {
+async fn animation_delete(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     forbidden(
         "v1/animation/00000000-0000-0000-0000-000000000000",
         None,
         Method::DELETE,
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }

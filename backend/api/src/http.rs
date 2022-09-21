@@ -88,9 +88,10 @@ impl Application {
     // this function only returns when the application is stopped.
     pub async fn run_until_stopped(mut self) -> Result<(), std::io::Error> {
         if let Some(server) = self.server.take() {
+            println!("run until stop");
+
             server.await?;
         }
-
         Ok(())
     }
 

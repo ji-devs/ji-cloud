@@ -1,7 +1,7 @@
 use http::StatusCode;
 use serde_json::json;
 use shared::domain::resource::curation::ResourceCurationCommentRequest;
-use sqlx::PgPool;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
@@ -9,15 +9,21 @@ use crate::{
 };
 
 #[sqlx::test]
-async fn admin_comment(pool: PgPool) -> anyhow::Result<()> {
+async fn admin_comment(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::User, Fixture::MetaKinds, Fixture::Resource],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -61,8 +67,6 @@ async fn admin_comment(pool: PgPool) -> anyhow::Result<()> {
         .send()
         .await?
         .error_for_status()?;
-
-    app.stop(false).await;
 
     let body: serde_json::Value = resp.json().await?;
 

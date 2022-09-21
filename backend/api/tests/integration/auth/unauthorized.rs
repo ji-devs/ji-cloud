@@ -1,11 +1,15 @@
 use http::StatusCode;
 use shared::error::{ApiError, EmptyError};
-use sqlx::PgPool;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{fixture::Fixture, helpers::initialize_server};
 
-async fn unauthorized(route: &str, pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::UserNoPerms], &[], pool).await;
+async fn unauthorized(
+    route: &str,
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::UserNoPerms], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
 
@@ -28,11 +32,24 @@ async fn unauthorized(route: &str, pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn get_image(pool: PgPool) -> anyhow::Result<()> {
-    unauthorized("v1/image/00000000-0000-0000-0000-000000000000", pool).await
+async fn get_image(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    unauthorized(
+        "v1/image/00000000-0000-0000-0000-000000000000",
+        pool_opts,
+        conn_opts,
+    )
+    .await
 }
 
 #[sqlx::test]
-async fn get_animation(pool: PgPool) -> anyhow::Result<()> {
-    unauthorized("v1/animation/00000000-0000-0000-0000-000000000000", pool).await
+async fn get_animation(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    unauthorized(
+        "v1/animation/00000000-0000-0000-0000-000000000000",
+        pool_opts,
+        conn_opts,
+    )
+    .await
 }

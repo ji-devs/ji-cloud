@@ -1,6 +1,6 @@
 use serde_json::json;
 use shared::domain::jig::JigResponse;
-use sqlx::PgPool;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
@@ -8,15 +8,21 @@ use crate::{
 };
 
 #[sqlx::test]
-async fn update_no_modules_changes(pool: PgPool) -> anyhow::Result<()> {
+async fn update_no_modules_changes(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -44,8 +50,6 @@ async fn update_no_modules_changes(pool: PgPool) -> anyhow::Result<()> {
         .error_for_status()?;
 
     let body: JigResponse = resp.json().await?;
-
-    app.stop(false).await;
 
     insta::assert_json_snapshot!(body, {".**.lastEdited" => "[timestamp]", ".**.feedbackPositive" => "[audio]", ".**.feedbackNegative" => "[audio]"});
 

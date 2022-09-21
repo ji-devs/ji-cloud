@@ -1,6 +1,6 @@
 use http::StatusCode;
 use shared::domain::{audio::AudioId, CreateResponse};
-use sqlx::PgPool;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
@@ -8,8 +8,11 @@ use crate::{
 };
 
 #[sqlx::test]
-async fn create_returns_created(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[], pool).await;
+async fn create_returns_created(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
 

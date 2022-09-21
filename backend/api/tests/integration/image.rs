@@ -5,7 +5,7 @@ mod user;
 use http::StatusCode;
 use serde_json::json;
 use shared::domain::{image::ImageId, CreateResponse};
-use sqlx::PgPool;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 use uuid::Uuid;
 
 use crate::{
@@ -20,12 +20,14 @@ async fn create(
     affiliations: &[Uuid],
     categories: &[Uuid],
     tags: &[i16],
-    pool: PgPool,
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
 ) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::User, Fixture::Image, Fixture::MetaKinds],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -64,12 +66,18 @@ async fn create(
 }
 
 #[sqlx::test]
-async fn create_no_meta(pool: PgPool) -> anyhow::Result<()> {
-    create(&[], &[], &[], &[], &[], pool).await
+async fn create_no_meta(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    create(&[], &[], &[], &[], &[], pool_opts, conn_opts).await
 }
 
 #[sqlx::test]
-async fn create_with_styles(pool: PgPool) -> anyhow::Result<()> {
+async fn create_with_styles(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     create(
         &[
             "6389eaa0-de76-11ea-b7ab-0399bcf84df2".parse()?,
@@ -79,26 +87,36 @@ async fn create_with_styles(pool: PgPool) -> anyhow::Result<()> {
         &[],
         &[],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }
 
 #[sqlx::test]
-async fn create_with_meta(pool: PgPool) -> anyhow::Result<()> {
+async fn create_with_meta(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     create(
         &["6389eaa0-de76-11ea-b7ab-0399bcf84df2".parse()?],
         &["f3722790-de76-11ea-b7ab-77b45e9af3ef".parse()?],
         &["c0cd4446-de76-11ea-b7ab-93987e8aa112".parse()?],
         &[],
         &[1],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }
 
-async fn create_error(kind: &str, id: &str, pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[], pool).await;
+async fn create_error(
+    kind: &str,
+    id: &str,
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
 
@@ -134,8 +152,13 @@ async fn create_error(kind: &str, id: &str, pool: PgPool) -> anyhow::Result<()> 
     Ok(())
 }
 
-async fn create_error_tag(kind: &str, id: &i16, pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[], pool).await;
+async fn create_error_tag(
+    kind: &str,
+    id: &i16,
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
 
@@ -172,32 +195,71 @@ async fn create_error_tag(kind: &str, id: &i16, pool: PgPool) -> anyhow::Result<
 }
 
 #[sqlx::test]
-async fn create_with_style_error(pool: PgPool) -> anyhow::Result<()> {
-    create_error("styles", "6389eaa0-de76-11ea-b7ab-0399bcf84df2", pool).await
+async fn create_with_style_error(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    create_error(
+        "styles",
+        "6389eaa0-de76-11ea-b7ab-0399bcf84df2",
+        pool_opts,
+        conn_opts,
+    )
+    .await
 }
 
 #[sqlx::test]
-async fn create_with_affiliation_error(pool: PgPool) -> anyhow::Result<()> {
-    create_error("affiliations", "6389eaa0-de76-11ea-b7ab-0399bcf84df2", pool).await
+async fn create_with_affiliation_error(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    create_error(
+        "affiliations",
+        "6389eaa0-de76-11ea-b7ab-0399bcf84df2",
+        pool_opts,
+        conn_opts,
+    )
+    .await
 }
 
 #[sqlx::test]
-async fn create_with_age_range_error(pool: PgPool) -> anyhow::Result<()> {
-    create_error("age_ranges", "6389eaa0-de76-11ea-b7ab-0399bcf84df2", pool).await
+async fn create_with_age_range_error(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    create_error(
+        "age_ranges",
+        "6389eaa0-de76-11ea-b7ab-0399bcf84df2",
+        pool_opts,
+        conn_opts,
+    )
+    .await
 }
 
 #[sqlx::test]
-async fn create_with_category_error(pool: PgPool) -> anyhow::Result<()> {
-    create_error("categories", "6389eaa0-de76-11ea-b7ab-0399bcf84df2", pool).await
+async fn create_with_category_error(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    create_error(
+        "categories",
+        "6389eaa0-de76-11ea-b7ab-0399bcf84df2",
+        pool_opts,
+        conn_opts,
+    )
+    .await
 }
 
 #[sqlx::test]
-async fn create_with_tags_error(pool: PgPool) -> anyhow::Result<()> {
-    create_error_tag("tags", &22, pool).await
+async fn create_with_tags_error(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    create_error_tag("tags", &22, pool_opts, conn_opts).await
 }
 
 #[sqlx::test]
-async fn get_metadata(pool: PgPool) -> anyhow::Result<()> {
+async fn get_metadata(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::User,
@@ -206,7 +268,8 @@ async fn get_metadata(pool: PgPool) -> anyhow::Result<()> {
             Fixture::MetaImage,
         ],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -240,11 +303,16 @@ async fn get_metadata(pool: PgPool) -> anyhow::Result<()> {
 // todo: delete; missing algolia, s3
 // todo: delete: edge case (never uploaded, should work even without s3), missing algolia
 
-async fn update(req: &serde_json::Value, pool: PgPool) -> anyhow::Result<()> {
+async fn update(
+    req: &serde_json::Value,
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::User, Fixture::MetaKinds, Fixture::Image],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -287,28 +355,37 @@ async fn update(req: &serde_json::Value, pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn update_empty(pool: PgPool) -> anyhow::Result<()> {
-    update(&json!({}), pool).await
+async fn update_empty(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    update(&json!({}), pool_opts, conn_opts).await
 }
 
 #[sqlx::test]
-async fn update_is_premium(pool: PgPool) -> anyhow::Result<()> {
-    update(&json!({"is_premium": true}), pool).await
+async fn update_is_premium(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    update(&json!({"is_premium": true}), pool_opts, conn_opts).await
 }
 
 #[sqlx::test]
-async fn update_styles(pool: PgPool) -> anyhow::Result<()> {
-    update(&json!({"styles": ["6389eaa0-de76-11ea-b7ab-0399bcf84df2", "6389ff7c-de76-11ea-b7ab-9b5661dd4f70"]}), pool).await
+async fn update_styles(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    update(&json!({"styles": ["6389eaa0-de76-11ea-b7ab-0399bcf84df2", "6389ff7c-de76-11ea-b7ab-9b5661dd4f70"]}), pool_opts,
+conn_opts
+    )
+    .await
 }
 
 #[sqlx::test]
-async fn update_tags(pool: PgPool) -> anyhow::Result<()> {
-    update(&json!({"tags": [0, 2]}), pool).await
+async fn update_tags(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    update(&json!({"tags": [0, 2]}), pool_opts, conn_opts).await
 }
 
 #[sqlx::test]
-async fn browse(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool).await;
+async fn browse(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
 
@@ -337,13 +414,17 @@ async fn browse(pool: PgPool) -> anyhow::Result<()> {
 // https://cloud.google.com/storage/docs/performing-resumable-uploads#single-chunk-upload
 #[ignore]
 #[sqlx::test]
-async fn upload_with_url(pool: PgPool) -> anyhow::Result<()> {
+async fn upload_with_url(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let file: Vec<u8> = include_bytes!("../../fixtures/images/ji-logo.png").to_vec();
 
     let app = initialize_server(
         &[Fixture::User, Fixture::Image],
         &[Service::GoogleCloudStorage],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -383,8 +464,11 @@ async fn upload_with_url(pool: PgPool) -> anyhow::Result<()> {
 
 #[ignore]
 #[sqlx::test]
-async fn create_media_and_upload_with_url(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool).await;
+async fn create_media_and_upload_with_url(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
 

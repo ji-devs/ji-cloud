@@ -1,6 +1,6 @@
 use http::StatusCode;
 use serde_json::json;
-use sqlx::PgPool;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
@@ -9,8 +9,8 @@ use crate::{
 use shared::domain::image::recent::UserRecentImageListRequest;
 
 #[sqlx::test]
-async fn create(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool).await;
+async fn create(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
 
@@ -39,8 +39,11 @@ async fn create(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn create_conflict(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool).await;
+async fn create_conflict(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
 
@@ -69,8 +72,11 @@ async fn create_conflict(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn list_no_limit(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool).await;
+async fn list_no_limit(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
 
@@ -95,8 +101,11 @@ async fn list_no_limit(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn list_with_limit(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool).await;
+async fn list_with_limit(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
 
@@ -122,8 +131,8 @@ async fn list_with_limit(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn update(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool).await;
+async fn update(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
 
@@ -166,8 +175,8 @@ async fn update(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn delete(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool).await;
+async fn delete(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
 

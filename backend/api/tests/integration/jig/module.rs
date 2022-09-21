@@ -6,7 +6,7 @@ use shared::domain::{
     jig::JigId,
     module::{body::memory, ModuleBody, ModuleCreateRequest, ModuleKind, ModuleUpdateRequest},
 };
-use sqlx::PgPool;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 use uuid::Uuid;
 
 use crate::{
@@ -15,11 +15,12 @@ use crate::{
 };
 
 #[sqlx::test]
-async fn get_live(pool: PgPool) -> anyhow::Result<()> {
+async fn get_live(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -50,11 +51,15 @@ async fn get_live(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn create_default(pool: PgPool) -> anyhow::Result<()> {
+async fn create_default(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -115,11 +120,12 @@ async fn create_default(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn update_empty(pool: PgPool) -> anyhow::Result<()> {
+async fn update_empty(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -171,11 +177,15 @@ async fn update_empty(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn update_contents(pool: PgPool) -> anyhow::Result<()> {
+async fn update_contents(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -247,7 +257,10 @@ async fn update_contents(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn drag_up_down_modules(pool: PgPool) -> anyhow::Result<()> {
+async fn drag_up_down_modules(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::MetaKinds,
@@ -256,7 +269,8 @@ async fn drag_up_down_modules(pool: PgPool) -> anyhow::Result<()> {
             Fixture::CategoryOrdering,
         ],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 

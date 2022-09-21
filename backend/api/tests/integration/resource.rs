@@ -1,7 +1,8 @@
 use http::StatusCode;
+use insta::assert_json_snapshot;
 use serde_json::json;
 use shared::domain::{resource::ResourceId, CreateResponse};
-use sqlx::PgPool;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
@@ -12,8 +13,13 @@ mod cover;
 mod curation;
 
 #[sqlx::test]
-async fn create_default(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[], pool).await;
+async fn create_default(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User], &[], pool_opts, conn_opts).await;
+
+    let mut settings = insta::Settings::clone_current();
 
     let port = app.port();
 
@@ -28,13 +34,17 @@ async fn create_default(pool: PgPool) -> anyhow::Result<()> {
         .await?
         .error_for_status()?;
 
-    println!("resp: {:?}", resp);
+    println!("First");
 
     assert_eq!(resp.status(), StatusCode::CREATED);
 
     let body: CreateResponse<ResourceId> = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, {".id" => "[id]"});
+    settings
+        .bind_async(async {
+            assert_json_snapshot!(body, {".id" => "[id]"});
+        })
+        .await;
 
     let resource_id = body.id.0;
 
@@ -48,15 +58,15 @@ async fn create_default(pool: PgPool) -> anyhow::Result<()> {
         .await?
         .error_for_status()?;
 
+    println!("Second");
+
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
         body, {
             ".**.id" => "[id]",
             ".**.createdAt" => "[created_at]",
-            ".**.lastEdited" => "[last_edited]"
-        }
-    );
+            ".**.lastEdited" => "[last_edited]"});
 
     let resp = client
         .get(&format!(
@@ -67,6 +77,8 @@ async fn create_default(pool: PgPool) -> anyhow::Result<()> {
         .send()
         .await?
         .error_for_status()?;
+
+    println!("Third");
 
     let body: serde_json::Value = resp.json().await?;
 
@@ -82,11 +94,15 @@ async fn create_default(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn create_with_params(pool: PgPool) -> anyhow::Result<()> {
+async fn create_with_params(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::MetaKinds, Fixture::User, Fixture::Resource],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -118,11 +134,12 @@ async fn create_with_params(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn clone(pool: PgPool) -> anyhow::Result<()> {
+async fn clone(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::MetaKinds, Fixture::User, Fixture::Resource],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -144,6 +161,8 @@ async fn clone(pool: PgPool) -> anyhow::Result<()> {
         .await?
         .error_for_status()?;
 
+    println!("First");
+
     assert_eq!(resp.status(), StatusCode::CREATED);
 
     let CreateResponse { id: ResourceId(id) } = resp.json().await?;
@@ -154,6 +173,8 @@ async fn clone(pool: PgPool) -> anyhow::Result<()> {
         .send()
         .await?
         .error_for_status()?;
+
+    println!("Second");
 
     assert_eq!(resp.status(), StatusCode::OK);
 
@@ -173,7 +194,7 @@ async fn clone(pool: PgPool) -> anyhow::Result<()> {
         .send()
         .await?
         .error_for_status()?;
-
+    println!("Third");
     assert_eq!(resp.status(), StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
@@ -190,11 +211,12 @@ async fn clone(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn get(pool: PgPool) -> anyhow::Result<()> {
+async fn get(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::MetaKinds, Fixture::User, Fixture::Resource],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -251,11 +273,15 @@ async fn get(pool: PgPool) -> anyhow::Result<()> {
 
 // todo: test-exhaustiveness: create a `ResourceBrowse` Fixture, actually test the cases (paging, resource count, etc)
 #[sqlx::test]
-async fn browse_simple(pool: PgPool) -> anyhow::Result<()> {
+async fn browse_simple(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::MetaKinds, Fixture::User, Fixture::Resource],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -326,11 +352,15 @@ async fn browse_simple(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn browse_order_by(pool: PgPool) -> anyhow::Result<()> {
+async fn browse_order_by(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::MetaKinds, Fixture::User, Fixture::Resource],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -388,13 +418,16 @@ async fn browse_order_by(pool: PgPool) -> anyhow::Result<()> {
     Ok(())
 }
 
-// todo: test-exhaustiveness: create a `ResourceBrowse` Fixture, actually test the cases (paging, resource count, etc)
 #[sqlx::test]
-async fn browse_own_simple(pool: PgPool) -> anyhow::Result<()> {
+async fn browse_own_simple(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::MetaKinds, Fixture::User, Fixture::Resource],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -428,7 +461,7 @@ async fn browse_own_simple(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn count(pool: PgPool) -> anyhow::Result<()> {
+async fn count(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::MetaKinds,
@@ -436,7 +469,8 @@ async fn count(pool: PgPool) -> anyhow::Result<()> {
             Fixture::Resource,
         ],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -463,16 +497,20 @@ async fn count(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn update_and_publish(pool: PgPool) -> anyhow::Result<()> {
+async fn update_and_publish(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::MetaKinds,
-            Fixture::User,
+            Fixture::UserDefaultPerms,
             Fixture::Resource,
             Fixture::CategoryOrdering,
         ],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -592,16 +630,20 @@ async fn update_and_publish(pool: PgPool) -> anyhow::Result<()> {
 
 #[ignore]
 #[sqlx::test]
-async fn update_and_publish_incomplete_modules(pool: PgPool) -> anyhow::Result<()> {
+async fn update_and_publish_incomplete_modules(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::MetaKinds,
-            Fixture::User,
+            Fixture::UserDefaultPerms,
             Fixture::Resource,
             Fixture::CategoryOrdering,
         ],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -639,20 +681,26 @@ async fn update_and_publish_incomplete_modules(pool: PgPool) -> anyhow::Result<(
 }
 
 #[sqlx::test]
-async fn live_up_to_date_flag(pool: PgPool) -> anyhow::Result<()> {
+async fn live_up_to_date_flag(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::MetaKinds,
-            Fixture::User,
+            Fixture::UserDefaultPerms,
             Fixture::Resource,
             Fixture::CategoryOrdering,
         ],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -667,6 +715,8 @@ async fn live_up_to_date_flag(pool: PgPool) -> anyhow::Result<()> {
         .send()
         .await?
         .error_for_status()?;
+
+    println!("First");
 
     let body: serde_json::Value = resp.json().await?;
 
@@ -686,6 +736,8 @@ async fn live_up_to_date_flag(pool: PgPool) -> anyhow::Result<()> {
         .await?
         .error_for_status()?;
 
+    println!("Second");
+
     let resp = client
         .get(&format!(
             "http://0.0.0.0:{}/v1/resource/{resource_id}/live",
@@ -695,6 +747,8 @@ async fn live_up_to_date_flag(pool: PgPool) -> anyhow::Result<()> {
         .send()
         .await?
         .error_for_status()?;
+
+    println!("Third");
 
     let body: serde_json::Value = resp.json().await?;
 
@@ -707,8 +761,6 @@ async fn live_up_to_date_flag(pool: PgPool) -> anyhow::Result<()> {
             ".**.publishedAt" => "[published_at]",
         }
     );
-
-    app.stop(false).await;
 
     Ok(())
 }

@@ -2,7 +2,7 @@ use http::StatusCode;
 
 use serde_json::json;
 use shared::domain::locale::{CreateEntryRequest, EntryStatus};
-use sqlx::PgPool;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
@@ -10,10 +10,12 @@ use crate::{
 };
 
 #[sqlx::test]
-async fn delete(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[], pool).await;
+async fn delete(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -30,10 +32,12 @@ async fn delete(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn get(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[], pool).await;
+async fn get(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -52,10 +56,16 @@ async fn get(pool: PgPool) -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn list(query: &[(&str, &str)], pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[], pool).await;
+async fn list(
+    query: &[(&str, &str)],
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -70,62 +80,92 @@ async fn list(query: &[(&str, &str)], pool: PgPool) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body);
 
     Ok(())
 }
 
 #[sqlx::test]
-async fn list_all_by_default(pool: PgPool) -> anyhow::Result<()> {
-    list(&[], pool).await
+async fn list_all_by_default(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    list(&[], pool_opts, conn_opts).await
 }
 
 #[sqlx::test]
-async fn list_all_by_bundle(pool: PgPool) -> anyhow::Result<()> {
-    list(&[("groupBy", "bundle")], pool).await
+async fn list_all_by_bundle(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    list(&[("groupBy", "bundle")], pool_opts, conn_opts).await
 }
 
 #[sqlx::test]
-async fn list_empty_bundle_by_default(pool: PgPool) -> anyhow::Result<()> {
-    list(&[("bundles", "85a46ffe-7c67-11eb-a0d7-277d94fe130c")], pool).await
+async fn list_empty_bundle_by_default(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    list(
+        &[("bundles", "85a46ffe-7c67-11eb-a0d7-277d94fe130c")],
+        pool_opts,
+        conn_opts,
+    )
+    .await
 }
 
 #[sqlx::test]
-async fn list_empty_bundle_by_bundle(pool: PgPool) -> anyhow::Result<()> {
+async fn list_empty_bundle_by_bundle(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     list(
         &[
             ("groupBy", "bundle"),
             ("bundles", "85a46ffe-7c67-11eb-a0d7-277d94fe130c"),
         ],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }
 
 #[sqlx::test]
-async fn list_single_bundle_by_default(pool: PgPool) -> anyhow::Result<()> {
-    list(&[("bundles", "8359a48a-7c67-11eb-a0d7-0fd74777a62c")], pool).await
+async fn list_single_bundle_by_default(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    list(
+        &[("bundles", "8359a48a-7c67-11eb-a0d7-0fd74777a62c")],
+        pool_opts,
+        conn_opts,
+    )
+    .await
 }
 
 #[sqlx::test]
-async fn list_single_bundle_by_bundle(pool: PgPool) -> anyhow::Result<()> {
+async fn list_single_bundle_by_bundle(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     list(
         &[
             ("groupBy", "bundle"),
             ("bundles", "8359a48a-7c67-11eb-a0d7-0fd74777a62c"),
         ],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }
 
 #[sqlx::test]
-async fn create(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[], pool).await;
+async fn create(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -153,18 +193,21 @@ async fn create(pool: PgPool) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body, {".id" => "[id]"});
 
     Ok(())
 }
 
 #[sqlx::test]
-async fn update_in_app(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[], pool).await;
+async fn update_in_app(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -189,8 +232,6 @@ async fn update_in_app(pool: PgPool) -> anyhow::Result<()> {
     assert_eq!(resp.status(), StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
-
-    app.stop(false).await;
 
     insta::assert_json_snapshot!(body);
 
