@@ -61,7 +61,7 @@ export const getContentStyle = (
                 ? "transparent"
                 : `var(--theme-${theme}-cards-border-color)`,
         backgroundColor:
-            styleKind === "dragging" || styleKind === "none"
+            styleKind === "none"
                 ? "white"
                 : bgOpacity === 1.0
                 ? `var(--theme-${theme}-cards-fill-color)`
