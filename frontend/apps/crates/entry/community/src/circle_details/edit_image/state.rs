@@ -33,7 +33,7 @@ impl EditImage {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Eq)]
 pub(super) enum ImageIfOrFile {
     ImageId(ImageId),
     File(File),

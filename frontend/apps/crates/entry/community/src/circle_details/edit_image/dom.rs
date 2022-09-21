@@ -60,7 +60,8 @@ impl Component<EditImage> for Rc<EditImage> {
                                             .property("color", "blue")
                                             .property("kind", "text")
                                             .event(clone!(state => move |_: events::Click| {
-                                                state.image.set(None);
+                                                // using set_neq otherwise FileInput would be reinitialized and won't show errors
+                                                state.image.set_neq(None);
                                             }))
                                         }))
                                     })
