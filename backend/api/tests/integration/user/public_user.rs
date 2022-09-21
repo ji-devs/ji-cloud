@@ -1,5 +1,5 @@
 use http::StatusCode;
-use sqlx::PgPool;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
@@ -7,7 +7,10 @@ use crate::{
 };
 
 #[sqlx::test]
-async fn browse_public_user(pool: PgPool) -> anyhow::Result<()> {
+async fn browse_public_user(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::User,
@@ -16,7 +19,8 @@ async fn browse_public_user(pool: PgPool) -> anyhow::Result<()> {
             Fixture::Circle,
         ],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -43,7 +47,10 @@ async fn browse_public_user(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn browse_users_with_circles(pool: PgPool) -> anyhow::Result<()> {
+async fn browse_users_with_circles(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::User,
@@ -52,7 +59,8 @@ async fn browse_users_with_circles(pool: PgPool) -> anyhow::Result<()> {
             Fixture::Circle,
         ],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -82,7 +90,10 @@ async fn browse_users_with_circles(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn browse_user_jigs(pool: PgPool) -> anyhow::Result<()> {
+async fn browse_user_jigs(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::User,
@@ -91,7 +102,8 @@ async fn browse_user_jigs(pool: PgPool) -> anyhow::Result<()> {
             Fixture::PublicUser,
         ],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -127,7 +139,10 @@ async fn browse_user_jigs(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn browse_user_resources(pool: PgPool) -> anyhow::Result<()> {
+async fn browse_user_resources(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::User,
@@ -136,7 +151,8 @@ async fn browse_user_resources(pool: PgPool) -> anyhow::Result<()> {
             Fixture::PublicUser,
         ],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -166,7 +182,10 @@ async fn browse_user_resources(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn browse_user_courses(pool: PgPool) -> anyhow::Result<()> {
+async fn browse_user_courses(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::User,
@@ -176,7 +195,8 @@ async fn browse_user_courses(pool: PgPool) -> anyhow::Result<()> {
             Fixture::Course,
         ],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -230,7 +250,10 @@ async fn browse_user_courses(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn browse_follower_and_unfollow(pool: PgPool) -> anyhow::Result<()> {
+async fn browse_follower_and_unfollow(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::User,
@@ -240,7 +263,8 @@ async fn browse_follower_and_unfollow(pool: PgPool) -> anyhow::Result<()> {
             Fixture::Course,
         ],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -298,8 +322,17 @@ async fn browse_follower_and_unfollow(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn browse_follower_and_follow(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::PublicUser], &[], pool).await;
+async fn browse_follower_and_follow(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::User, Fixture::PublicUser],
+        &[],
+        pool_opts,
+        conn_opts,
+    )
+    .await;
 
     let port = app.port();
 
@@ -367,7 +400,10 @@ async fn browse_follower_and_follow(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn browse_following_and_unfollow(pool: PgPool) -> anyhow::Result<()> {
+async fn browse_following_and_unfollow(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::User,
@@ -377,7 +413,8 @@ async fn browse_following_and_unfollow(pool: PgPool) -> anyhow::Result<()> {
             Fixture::Course,
         ],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -435,11 +472,15 @@ async fn browse_following_and_unfollow(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn follow_self_error(pool: PgPool) -> anyhow::Result<()> {
+async fn follow_self_error(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::User, Fixture::MetaKinds, Fixture::PublicUser],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 

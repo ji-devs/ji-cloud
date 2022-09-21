@@ -1,4 +1,4 @@
-use sqlx::PgPool;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 mod animation;
 mod audio;
@@ -18,8 +18,8 @@ mod session;
 mod user;
 
 #[sqlx::test]
-async fn pass(pool: PgPool) -> anyhow::Result<()> {
-    let app = helpers::initialize_server(&[], &[], pool).await;
+async fn pass(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    let app = helpers::initialize_server(&[], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
 

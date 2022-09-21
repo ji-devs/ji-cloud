@@ -107,7 +107,6 @@ impl<T: Service + ?Sized> From<Arc<T>> for ServiceData<T> {
 impl<T: Service + ?Sized + 'static> FromRequest for ServiceData<T> {
     type Future = Ready<Result<Self, Self::Error>>;
     type Error = error::Service;
-    
 
     #[inline]
     fn from_request(req: &actix_web::HttpRequest, _: &mut actix_http::Payload) -> Self::Future {

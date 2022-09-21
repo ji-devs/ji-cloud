@@ -10,20 +10,23 @@ use shared::domain::{
     jig::JigId,
     meta::ResourceTypeId,
 };
-use sqlx::PgPool;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 use std::str::FromStr;
 use uuid::Uuid;
-
+#[ignore]
 #[sqlx::test]
-async fn create(pool: PgPool) -> anyhow::Result<()> {
+async fn create(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
     let port: u16 = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -53,23 +56,24 @@ async fn create(pool: PgPool) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body, {".id" => "[id]"});
 
     Ok(())
 }
-
+#[ignore]
 #[sqlx::test]
-async fn get_draft(pool: PgPool) -> anyhow::Result<()> {
+async fn get_draft(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
     let port: u16 = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -87,23 +91,24 @@ async fn get_draft(pool: PgPool) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body);
 
     Ok(())
 }
-
+#[ignore]
 #[sqlx::test]
-async fn get_live(pool: PgPool) -> anyhow::Result<()> {
+async fn get_live(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
     let port: u16 = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -121,23 +126,24 @@ async fn get_live(pool: PgPool) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body);
 
     Ok(())
 }
-
+#[ignore]
 #[sqlx::test]
-async fn delete(pool: PgPool) -> anyhow::Result<()> {
+async fn delete(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
     let port: u16 = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -156,8 +162,6 @@ async fn delete(pool: PgPool) -> anyhow::Result<()> {
         .error_for_status()?;
 
     assert_eq!(resp.status(), StatusCode::NO_CONTENT);
-
-    app.stop(false).await;
 
     Ok(())
 }

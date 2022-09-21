@@ -13,6 +13,7 @@ pub(crate) mod resource;
 pub(crate) mod session;
 pub(crate) mod user;
 
+use anyhow::Context;
 use core::config::DB_POOL_CONNECTIONS;
 use shared::domain::{
     category::CategoryId,
@@ -27,6 +28,7 @@ use sqlx::{
     PgConnection,
 };
 use std::fmt::Write as _;
+use std::time::Duration;
 use tracing::{instrument, Instrument};
 use uuid::Uuid;
 
@@ -62,13 +64,18 @@ pub async fn get_pool(connect_options: PgConnectOptions) -> anyhow::Result<PgPoo
 }
 
 pub async fn get_test_pool(
-    connect_options: PgConnectOptions,
-    pool: PgPool,
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
 ) -> anyhow::Result<PgPool> {
-    // let pool = PgPoolOptions::new()
-    //     .max_connections(DB_POOL_CONNECTIONS)
-    //     .connect_with(connect_options)
-    //     .await?;
+    let pool = pool_opts
+        .max_connections(10)
+        .idle_timeout(Some(Duration::from_secs(600)))
+        .acquire_timeout(Duration::from_secs(30))
+        .connect_with(conn_opts)
+        .await
+        .context("failed to connect to DATABASE_URL")?;
+
+    println!("Pool: {:?}", pool);
 
     log::info!("Running migrations, if there are any");
     sqlx::migrate!("./migrations").run(&pool).await?;

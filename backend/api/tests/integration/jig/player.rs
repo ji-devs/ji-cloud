@@ -6,18 +6,21 @@ use http::StatusCode;
 use shared::domain::jig::player::{
     instance::PlayerSessionInstanceResponse, JigPlayerSession, JigPlayerSessionListResponse,
 };
-use sqlx::PgPool;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 #[sqlx::test]
-async fn list(pool: PgPool) -> anyhow::Result<()> {
+async fn list(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -34,23 +37,24 @@ async fn list(pool: PgPool) -> anyhow::Result<()> {
 
     let body: JigPlayerSessionListResponse = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body, { ".**.expires_at" => "[timestamp]" });
 
     Ok(())
 }
 
 #[sqlx::test]
-async fn create(pool: PgPool) -> anyhow::Result<()> {
+async fn create(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -105,23 +109,27 @@ async fn create(pool: PgPool) -> anyhow::Result<()> {
 
     let body: JigPlayerSessionListResponse = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body, { ".**.index" => "[index]", ".**.expires_at" => "[timestamp]"  });
 
     Ok(())
 }
 
 #[sqlx::test]
-async fn session_instance_play_count_flow(pool: PgPool) -> anyhow::Result<()> {
+async fn session_instance_play_count_flow(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
     let port = app.port();
+
+    tokio::spawn(app.run_until_stopped());
 
     let client: reqwest::Client = reqwest::ClientBuilder::new()
         .user_agent("mocked user agent")
@@ -171,8 +179,6 @@ async fn session_instance_play_count_flow(pool: PgPool) -> anyhow::Result<()> {
         .send()
         .await?
         .error_for_status()?;
-
-    app.stop(false).await;
 
     let body: serde_json::Value = resp.json().await?;
 

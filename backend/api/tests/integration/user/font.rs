@@ -1,6 +1,6 @@
 use http::StatusCode;
 use serde_json::json;
-use sqlx::PgPool;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
@@ -8,8 +8,14 @@ use crate::{
 };
 
 #[sqlx::test]
-async fn get_all(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::UserFonts], &[], pool).await;
+async fn get_all(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::User, Fixture::UserFonts],
+        &[],
+        pool_opts,
+        conn_opts,
+    )
+    .await;
 
     let port = app.port();
 
@@ -34,8 +40,14 @@ async fn get_all(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn update(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::UserFonts], &[], pool).await;
+async fn update(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::User, Fixture::UserFonts],
+        &[],
+        pool_opts,
+        conn_opts,
+    )
+    .await;
 
     let port = app.port();
 
@@ -70,8 +82,14 @@ async fn update(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn delete(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::UserFonts], &[], pool).await;
+async fn delete(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::User, Fixture::UserFonts],
+        &[],
+        pool_opts,
+        conn_opts,
+    )
+    .await;
 
     let port = app.port();
 
@@ -105,8 +123,14 @@ async fn delete(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn create(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::UserFonts], &[], pool).await;
+async fn create(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::User, Fixture::UserFonts],
+        &[],
+        pool_opts,
+        conn_opts,
+    )
+    .await;
 
     let port = app.port();
 

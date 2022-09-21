@@ -1,6 +1,6 @@
 use http::StatusCode;
 use serde_json::json;
-use sqlx::PgPool;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
@@ -8,7 +8,7 @@ use crate::{
 };
 
 #[sqlx::test]
-async fn get(pool: PgPool) -> anyhow::Result<()> {
+async fn get(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::MetaKinds,
@@ -17,7 +17,8 @@ async fn get(pool: PgPool) -> anyhow::Result<()> {
             Fixture::Course,
         ],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -73,7 +74,10 @@ async fn get(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn update_and_publish_browse(pool: PgPool) -> anyhow::Result<()> {
+async fn update_and_publish_browse(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::MetaKinds,
@@ -82,7 +86,8 @@ async fn update_and_publish_browse(pool: PgPool) -> anyhow::Result<()> {
             Fixture::Course,
         ],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -200,7 +205,10 @@ async fn update_and_publish_browse(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn browse_simple(pool: PgPool) -> anyhow::Result<()> {
+async fn browse_simple(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::MetaKinds,
@@ -209,7 +217,8 @@ async fn browse_simple(pool: PgPool) -> anyhow::Result<()> {
             Fixture::Course,
         ],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -240,7 +249,10 @@ async fn browse_simple(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn course_jig_index(pool: PgPool) -> anyhow::Result<()> {
+async fn course_jig_index(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::MetaKinds,
@@ -249,7 +261,8 @@ async fn course_jig_index(pool: PgPool) -> anyhow::Result<()> {
             Fixture::Course,
         ],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -364,7 +377,10 @@ async fn course_jig_index(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn publish_modules(pool: PgPool) -> anyhow::Result<()> {
+async fn publish_modules(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::MetaKinds,
@@ -373,7 +389,8 @@ async fn publish_modules(pool: PgPool) -> anyhow::Result<()> {
             Fixture::Course,
         ],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -457,7 +474,10 @@ async fn publish_modules(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn live_up_to_date_flag(pool: PgPool) -> anyhow::Result<()> {
+async fn live_up_to_date_flag(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::MetaKinds,
@@ -466,7 +486,8 @@ async fn live_up_to_date_flag(pool: PgPool) -> anyhow::Result<()> {
             Fixture::Course,
         ],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -525,8 +546,6 @@ async fn live_up_to_date_flag(pool: PgPool) -> anyhow::Result<()> {
             ".**.publishedAt" => "[published_at]",
         }
     );
-
-    app.stop(false).await;
 
     Ok(())
 }

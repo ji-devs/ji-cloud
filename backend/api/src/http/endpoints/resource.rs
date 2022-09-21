@@ -49,8 +49,6 @@ async fn create(
 
     let db = db.as_ref();
 
-    println!("here");
-
     let creator_id = auth.user_id();
 
     db::resource::authz(db, creator_id, None).await?;

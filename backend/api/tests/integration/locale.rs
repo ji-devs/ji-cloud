@@ -1,13 +1,13 @@
 use http::StatusCode;
-use sqlx::PgPool;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 mod entry;
 
 use crate::{fixture::Fixture, helpers::initialize_server};
 
 #[sqlx::test]
-async fn list_bundles(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[], pool).await;
+async fn list_bundles(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
 
@@ -31,8 +31,11 @@ async fn list_bundles(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn list_item_kind(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[], pool).await;
+async fn list_item_kind(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
 

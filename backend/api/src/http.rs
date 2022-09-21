@@ -1,5 +1,7 @@
-use std::{net::TcpListener, sync::Arc};
+use std::{net::TcpListener, sync::Arc, time::Duration};
 
+use actix_http::KeepAlive;
+use actix_rt::time::timeout;
 use actix_service::Service;
 use actix_web::{
     body::MessageBody,
@@ -84,14 +86,42 @@ impl Application {
         self.port
     }
 
+    // pub fn port(&self) -> u16 {
+    //     self.port
+    // }
+
     // A more expressive name that makes it clear that
     // this function only returns when the application is stopped.
     pub async fn run_until_stopped(mut self) -> Result<(), std::io::Error> {
         if let Some(server) = self.server.take() {
+            println!("run until stop");
+
             server.await?;
         }
 
+        println!("Stopped!");
+
         Ok(())
+    }
+
+    // A more expressive name that makes it clear that
+    // this function only returns when the application is stopped.
+    pub async fn test_run_until_stopped(mut self) -> Result<(), std::io::Error> {
+        // If server is none, server thread has been cleaned up
+
+        println!("port: {:?}", self.port());
+        if let Some(server) = self.server.take() {
+            println!("run until stop");
+
+            tokio::spawn(server);
+        }
+        Ok(())
+    }
+
+    pub async fn test_stop(mut self, graceful: bool) {
+        if let Some(server) = self.server.take() {
+            server.handle().stop(graceful).await;
+        }
     }
 
     pub async fn stop(mut self, graceful: bool) {
@@ -104,7 +134,10 @@ impl Application {
 impl Drop for Application {
     fn drop(&mut self) {
         if let Some(server) = self.server.take() {
-            let _ = tokio::spawn(server.handle().stop(false));
+            println!("DROPPING!");
+            let _ = tokio::spawn(server.handle().stop(true));
+        } else {
+            println!("Not taking!!!");
         }
     }
 }
@@ -224,7 +257,7 @@ pub fn build(
         app.app_data(Data::from(jwk_verifier.clone()))
             .wrap(cors::get(local_insecure))
             .wrap(Condition::new(
-                !enable_tracing_logs,
+                enable_tracing_logs,
                 Compat::new(actix_web::middleware::Logger::default()),
             ))
             .wrap(Condition::new(
@@ -268,7 +301,8 @@ pub fn build(
             .configure(endpoints::pdf::configure)
             .configure(endpoints::circle::configure)
             .route("/", method(http::Method::GET).to(no_content_response))
-    });
+    })
+    .keep_alive(Duration::from_secs(30));
 
     // if listenfd doesn't take a TcpListener (i.e. we're not running via
     // the command above), we fall back to explicitly binding to a given

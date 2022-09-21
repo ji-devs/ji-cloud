@@ -3,7 +3,7 @@ use serde_json::json;
 use shared::domain::category::{
     CategoryTreeScope, CreateCategoryRequest, GetCategoryRequest, NewCategoryResponse,
 };
-use sqlx::PgPool;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 use uuid::Uuid;
 
 use crate::{
@@ -12,8 +12,8 @@ use crate::{
 };
 
 #[sqlx::test]
-async fn create(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[], pool).await;
+async fn create(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
 
@@ -40,8 +40,14 @@ async fn create(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn get(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::CategoryOrdering], &[], pool).await;
+async fn get(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::User, Fixture::CategoryOrdering],
+        &[],
+        pool_opts,
+        conn_opts,
+    )
+    .await;
 
     let port = app.port();
 
@@ -65,8 +71,18 @@ async fn get(pool: PgPool) -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn get_nested_categories(query: &GetCategoryRequest, pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::CategoryNesting], &[], pool).await;
+async fn get_nested_categories(
+    query: &GetCategoryRequest,
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::User, Fixture::CategoryNesting],
+        &[],
+        pool_opts,
+        conn_opts,
+    )
+    .await;
 
     let port = app.port();
 
@@ -92,24 +108,34 @@ async fn get_nested_categories(query: &GetCategoryRequest, pool: PgPool) -> anyh
 }
 
 #[sqlx::test]
-async fn nested_top_level(pool: PgPool) -> anyhow::Result<()> {
-    get_nested_categories(&GetCategoryRequest::default(), pool).await
+async fn nested_top_level(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    get_nested_categories(&GetCategoryRequest::default(), pool_opts, conn_opts).await
 }
 
 #[sqlx::test]
-async fn nested_whole_tree(pool: PgPool) -> anyhow::Result<()> {
+async fn nested_whole_tree(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     get_nested_categories(
         &GetCategoryRequest {
             scope: Some(CategoryTreeScope::Descendants),
             ids: vec![],
         },
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }
 
 #[sqlx::test]
-async fn nested_overlapping(pool: PgPool) -> anyhow::Result<()> {
+async fn nested_overlapping(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     get_nested_categories(
         &GetCategoryRequest {
             scope: Some(CategoryTreeScope::Descendants),
@@ -118,25 +144,30 @@ async fn nested_overlapping(pool: PgPool) -> anyhow::Result<()> {
                 "e315d3b2-e90f-11ea-8281-73cd69c14821".parse()?,
             ],
         },
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }
 
 #[sqlx::test]
-async fn nested_ancestors(pool: PgPool) -> anyhow::Result<()> {
+async fn nested_ancestors(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     get_nested_categories(
         &GetCategoryRequest {
             scope: Some(CategoryTreeScope::Ancestors),
             ids: vec!["e315d3b2-e90f-11ea-8281-73cd69c14821".parse()?],
         },
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }
 
 #[sqlx::test]
-async fn nested_exact(pool: PgPool) -> anyhow::Result<()> {
+async fn nested_exact(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     get_nested_categories(
         &GetCategoryRequest {
             scope: None,
@@ -145,16 +176,26 @@ async fn nested_exact(pool: PgPool) -> anyhow::Result<()> {
                 "01cff7d8-e910-11ea-8281-7f86c625a156".parse()?,
             ],
         },
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }
 
 #[sqlx::test]
-async fn upgdate_ordering(pool: PgPool) -> anyhow::Result<()> {
+async fn upgdate_ordering(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let category_three = "81c4796a-e883-11ea-93f0-df2484ab6b11";
 
-    let app = initialize_server(&[Fixture::User, Fixture::CategoryOrdering], &[], pool).await;
+    let app = initialize_server(
+        &[Fixture::User, Fixture::CategoryOrdering],
+        &[],
+        pool_opts,
+        conn_opts,
+    )
+    .await;
 
     let port = app.port();
 
@@ -218,8 +259,14 @@ async fn upgdate_ordering(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn delete(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::CategoryOrdering], &[], pool).await;
+async fn delete(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::User, Fixture::CategoryOrdering],
+        &[],
+        pool_opts,
+        conn_opts,
+    )
+    .await;
 
     let port = app.port();
 
@@ -255,8 +302,19 @@ async fn delete(pool: PgPool) -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn update(id: Uuid, body: &serde_json::Value, pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::CategoryOrdering], &[], pool).await;
+async fn update(
+    id: Uuid,
+    body: &serde_json::Value,
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::User, Fixture::CategoryOrdering],
+        &[],
+        pool_opts,
+        conn_opts,
+    )
+    .await;
 
     let port = app.port();
 
@@ -294,51 +352,65 @@ async fn update(id: Uuid, body: &serde_json::Value, pool: PgPool) -> anyhow::Res
 }
 
 #[sqlx::test]
-async fn update_parent(pool: PgPool) -> anyhow::Result<()> {
+async fn update_parent(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     update(
         "7fe19326-e883-11ea-93f0-5343493c17c4".parse()?,
         &json!({"parent_id": "81c4796a-e883-11ea-93f0-df2484ab6b11"}),
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }
 
 #[sqlx::test]
-async fn update_reparent_move(pool: PgPool) -> anyhow::Result<()> {
+async fn update_reparent_move(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     update(
         "7fe19326-e883-11ea-93f0-5343493c17c4".parse()?,
         &json!({"parent_id": (), "index": 0}),
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }
 
 #[sqlx::test]
-async fn update_move(pool: PgPool) -> anyhow::Result<()> {
+async fn update_move(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     update(
         "81c4796a-e883-11ea-93f0-df2484ab6b11".parse()?,
         &json!({"index": 1}),
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }
 
 #[sqlx::test]
-async fn update_scope(pool: PgPool) -> anyhow::Result<()> {
+async fn update_scope(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     update(
         "81c4796a-e883-11ea-93f0-df2484ab6b11".parse()?,
         &json!({"user_scopes": ["Admin", "ManageCategory", "ManageImage", "ManageAnimation"]}),
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }
 
 #[sqlx::test]
-async fn update_rename(pool: PgPool) -> anyhow::Result<()> {
+async fn update_rename(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     update(
         "81c4796a-e883-11ea-93f0-df2484ab6b11".parse()?,
         &json!({"name": "abc123"}),
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }

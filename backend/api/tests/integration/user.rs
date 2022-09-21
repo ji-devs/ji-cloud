@@ -12,15 +12,18 @@ use shared::domain::{
     session::{CreateSessionResponse, NewSessionResponse},
     user::{CreateProfileRequest, PatchProfileRequest},
 };
-use sqlx::PgPool;
+use sqlx::{
+    postgres::{PgConnectOptions, PgPoolOptions},
+    PgPool,
+};
 
 mod color;
 mod font;
 mod public_user;
 
 #[sqlx::test]
-async fn get_profile(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[], pool).await;
+async fn get_profile(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
 
@@ -46,7 +49,7 @@ async fn get_profile(pool: PgPool) -> anyhow::Result<()> {
 
 #[ignore]
 #[sqlx::test]
-async fn post_profile(pool: PgPool) -> anyhow::Result<()> {
+async fn post_profile(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     if !service::email_test_guard() {
         return Ok(());
     }
@@ -69,7 +72,7 @@ async fn post_profile(pool: PgPool) -> anyhow::Result<()> {
     .expect("failed to create auth token");
 
     // test server application
-    let app = initialize_server(&[Fixture::User], &[Service::Email], pool).await;
+    let app = initialize_server(&[Fixture::User], &[Service::Email], pool_opts, conn_opts).await;
 
     let port = app.port();
 
@@ -114,8 +117,11 @@ async fn post_profile(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn patch_profile(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool).await;
+async fn patch_profile(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
 
@@ -175,12 +181,12 @@ async fn patch_profile(pool: PgPool) -> anyhow::Result<()> {
 
 #[ignore]
 #[sqlx::test]
-async fn verify_email(pool: PgPool) -> anyhow::Result<()> {
+async fn verify_email(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     if !service::email_test_guard() {
         return Ok(());
     }
 
-    let app = initialize_server(&[Fixture::User], &[Service::Email], pool).await;
+    let app = initialize_server(&[Fixture::User], &[Service::Email], pool_opts, conn_opts).await;
 
     let port = app.port();
 
@@ -206,7 +212,10 @@ async fn verify_email(pool: PgPool) -> anyhow::Result<()> {
 
 #[ignore]
 #[sqlx::test]
-async fn basic_auth_flow_no_login(pool: PgPool) -> anyhow::Result<()> {
+async fn basic_auth_flow_no_login(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     if !service::email_test_guard() {
         return Ok(());
     }
@@ -215,7 +224,7 @@ async fn basic_auth_flow_no_login(pool: PgPool) -> anyhow::Result<()> {
     const PASSWORD: &str = "badpassword";
 
     let (app, db): (Application, PgPool) =
-        initialize_server_and_get_db(&[], &[Service::Email], pool).await;
+        initialize_server_and_get_db(&[], &[Service::Email], pool_opts, conn_opts).await;
 
     let port = app.port();
 
@@ -314,7 +323,10 @@ async fn basic_auth_flow_no_login(pool: PgPool) -> anyhow::Result<()> {
 
 #[ignore]
 #[sqlx::test]
-async fn basic_auth_flow(pool: PgPool) -> anyhow::Result<()> {
+async fn basic_auth_flow(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     if !service::email_test_guard() {
         return Ok(());
     }
@@ -323,7 +335,7 @@ async fn basic_auth_flow(pool: PgPool) -> anyhow::Result<()> {
     const PASSWORD: &str = "badpassword";
 
     let (app, db): (Application, PgPool) =
-        initialize_server_and_get_db(&[], &[Service::Email], pool).await;
+        initialize_server_and_get_db(&[], &[Service::Email], pool_opts, conn_opts).await;
 
     let port = app.port();
 
@@ -456,7 +468,7 @@ async fn basic_auth_flow(pool: PgPool) -> anyhow::Result<()> {
 
 // #[ignore]
 // #[sqlx::test]
-// async fn update_user_email(pool: PgPool) -> anyhow::Result<()> {
+// async fn update_user_email(pool_opts: PoolOptions<Postgres>, conn_opts: PgConnectOptions<Postgres>) -> anyhow::Result<()> {
 //     if !service::email_test_guard() {
 //         return Ok(());
 //     }
@@ -464,6 +476,8 @@ async fn basic_auth_flow(pool: PgPool) -> anyhow::Result<()> {
 //     let app = initialize_server(&[Fixture::User], &[Service::Email]).await;
 //
 //     let port = app.port();
+
+// tokio::spawn(app.run_until_stopped());
 
 //     tokio::spawn(app.run_until_stopped());
 //

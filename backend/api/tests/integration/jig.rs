@@ -1,7 +1,7 @@
 use http::StatusCode;
 use serde_json::json;
 use shared::domain::{jig::JigId, CreateResponse};
-use sqlx::PgPool;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
@@ -14,8 +14,11 @@ mod module;
 mod player;
 
 #[sqlx::test]
-async fn create_default(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[], pool).await;
+async fn create_default(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
 
@@ -81,7 +84,7 @@ async fn create_default(pool: PgPool) -> anyhow::Result<()> {
 
 // requires algolia
 // #[sqlx::test]
-// async fn delete(pool: PgPool) -> anyhow::Result<()> {
+// async fn delete(pool_opts: PoolOptions<Postgres>, conn_opts: PgConnectOptions<Postgres>) -> anyhow::Result<()> {
 //     let app = initialize_server(&[Fixture::User, Fixture::Jig]).await;
 
 //     let port = app.port();
@@ -106,11 +109,15 @@ async fn create_default(pool: PgPool) -> anyhow::Result<()> {
 // }
 
 #[sqlx::test]
-async fn create_with_params(pool: PgPool) -> anyhow::Result<()> {
+async fn create_with_params(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -142,11 +149,12 @@ async fn create_with_params(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn clone(pool: PgPool) -> anyhow::Result<()> {
+async fn clone(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -214,11 +222,12 @@ async fn clone(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn get(pool: PgPool) -> anyhow::Result<()> {
+async fn get(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -277,11 +286,15 @@ async fn get(pool: PgPool) -> anyhow::Result<()> {
 
 // todo: test-exhaustiveness: create a `JigBrowse` Fixture, actually test the cases (paging, jig count, etc)
 #[sqlx::test]
-async fn browse_simple(pool: PgPool) -> anyhow::Result<()> {
+async fn browse_simple(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -314,11 +327,15 @@ async fn browse_simple(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn browse_order_by(pool: PgPool) -> anyhow::Result<()> {
+async fn browse_order_by(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -397,11 +414,15 @@ async fn browse_order_by(pool: PgPool) -> anyhow::Result<()> {
 // todo: test-exhaustiveness: create a `JigBrowse` Fixture, actually test the cases (paging, jig count, etc)
 #[ignore]
 #[sqlx::test]
-async fn browse_own_simple(pool: PgPool) -> anyhow::Result<()> {
+async fn browse_own_simple(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::MetaKinds, Fixture::UserDefaultPerms, Fixture::Jig],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -437,11 +458,12 @@ async fn browse_own_simple(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn count(pool: PgPool) -> anyhow::Result<()> {
+async fn count(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::MetaKinds, Fixture::UserDefaultPerms, Fixture::Jig],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -468,7 +490,10 @@ async fn count(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn update_and_publish(pool: PgPool) -> anyhow::Result<()> {
+async fn update_and_publish(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::MetaKinds,
@@ -477,7 +502,8 @@ async fn update_and_publish(pool: PgPool) -> anyhow::Result<()> {
             Fixture::CategoryOrdering,
         ],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -603,7 +629,10 @@ async fn update_and_publish(pool: PgPool) -> anyhow::Result<()> {
 
 #[ignore]
 #[sqlx::test]
-async fn update_and_publish_incomplete_modules(pool: PgPool) -> anyhow::Result<()> {
+async fn update_and_publish_incomplete_modules(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::MetaKinds,
@@ -612,7 +641,8 @@ async fn update_and_publish_incomplete_modules(pool: PgPool) -> anyhow::Result<(
             Fixture::CategoryOrdering,
         ],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -650,7 +680,10 @@ async fn update_and_publish_incomplete_modules(pool: PgPool) -> anyhow::Result<(
 }
 
 #[sqlx::test]
-async fn live_up_to_date_flag(pool: PgPool) -> anyhow::Result<()> {
+async fn live_up_to_date_flag(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::MetaKinds,
@@ -659,7 +692,8 @@ async fn live_up_to_date_flag(pool: PgPool) -> anyhow::Result<()> {
             Fixture::CategoryOrdering,
         ],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 

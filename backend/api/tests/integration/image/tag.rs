@@ -5,14 +5,15 @@ use crate::{
 use http::StatusCode;
 use shared::domain::image::tag::{ImageTagCreateRequest, ImageTagUpdateRequest};
 use shared::domain::meta::ImageTagIndex;
-use sqlx::PgPool;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 #[sqlx::test]
-async fn create(pool: PgPool) -> anyhow::Result<()> {
+async fn create(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::User, Fixture::Image, Fixture::MetaKinds],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -42,11 +43,15 @@ async fn create(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn create_conflict(pool: PgPool) -> anyhow::Result<()> {
+async fn create_conflict(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::User, Fixture::Image, Fixture::MetaKinds],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -71,11 +76,12 @@ async fn create_conflict(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn list(pool: PgPool) -> anyhow::Result<()> {
+async fn list(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::User, Fixture::Image, Fixture::MetaKinds],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -103,11 +109,17 @@ async fn list(pool: PgPool) -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn update(index: i16, req: ImageTagUpdateRequest, pool: PgPool) -> anyhow::Result<()> {
+async fn update(
+    index: i16,
+    req: ImageTagUpdateRequest,
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::User, Fixture::Image, Fixture::MetaKinds],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -144,63 +156,80 @@ async fn update(index: i16, req: ImageTagUpdateRequest, pool: PgPool) -> anyhow:
 }
 
 #[sqlx::test]
-async fn update_no_index(pool: PgPool) -> anyhow::Result<()> {
+async fn update_no_index(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     update(
         0,
         ImageTagUpdateRequest {
             display_name: Some("test".to_owned()),
             index: None,
         },
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }
 
 #[sqlx::test]
-async fn update_with_index(pool: PgPool) -> anyhow::Result<()> {
+async fn update_with_index(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     update(
         1,
         ImageTagUpdateRequest {
             display_name: Some("test".to_owned()),
             index: Some(ImageTagIndex(15)),
         },
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }
 
 #[sqlx::test]
-async fn update_none(pool: PgPool) -> anyhow::Result<()> {
+async fn update_none(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     update(
         1,
         ImageTagUpdateRequest {
             display_name: None,
             index: None,
         },
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }
 
 #[sqlx::test]
-async fn update_only_index(pool: PgPool) -> anyhow::Result<()> {
+async fn update_only_index(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     update(
         1,
         ImageTagUpdateRequest {
             display_name: None,
             index: Some(ImageTagIndex(3)),
         },
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await
 }
 
 #[sqlx::test]
-async fn update_conflict(pool: PgPool) -> anyhow::Result<()> {
+async fn update_conflict(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::User, Fixture::Image, Fixture::MetaKinds],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
@@ -239,11 +268,12 @@ async fn update_conflict(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn delete(pool: PgPool) -> anyhow::Result<()> {
+async fn delete(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     let app = initialize_server(
         &[Fixture::User, Fixture::Image, Fixture::MetaKinds],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 

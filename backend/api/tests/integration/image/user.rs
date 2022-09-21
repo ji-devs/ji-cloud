@@ -1,14 +1,18 @@
 use http::StatusCode;
 use serde_json::json;
-use sqlx::PgPool;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
     helpers::{initialize_server, LoginExt},
 };
 
-async fn list(query: &[(&str, &str)], pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool).await;
+async fn list(
+    query: &[(&str, &str)],
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
 
@@ -34,18 +38,18 @@ async fn list(query: &[(&str, &str)], pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn list_kind(pool: PgPool) -> anyhow::Result<()> {
-    list(&[("kind", "Sticker")], pool).await
+async fn list_kind(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    list(&[("kind", "Sticker")], pool_opts, conn_opts).await
 }
 
 #[sqlx::test]
-async fn list_all(pool: PgPool) -> anyhow::Result<()> {
-    list(&[], pool).await
+async fn list_all(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    list(&[], pool_opts, conn_opts).await
 }
 
 #[sqlx::test]
-async fn create(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool).await;
+async fn create(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
 
@@ -73,8 +77,8 @@ async fn create(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn get(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool).await;
+async fn get(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
 
@@ -104,8 +108,8 @@ async fn get(pool: PgPool) -> anyhow::Result<()> {
 // needs s3
 #[ignore]
 #[sqlx::test]
-async fn delete(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool).await;
+async fn delete(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
 

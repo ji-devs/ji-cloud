@@ -1,7 +1,7 @@
 use http::StatusCode;
 use serde_json::json;
 use shared::domain::{circle::CircleId, CreateResponse};
-use sqlx::PgPool;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
@@ -9,8 +9,8 @@ use crate::{
 };
 
 #[sqlx::test]
-async fn create(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool).await;
+async fn create(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
 
@@ -61,8 +61,14 @@ async fn create(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn join_circle(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::Circle], &[], pool).await;
+async fn join_circle(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::User, Fixture::Image, Fixture::Circle],
+        &[],
+        pool_opts,
+        conn_opts,
+    )
+    .await;
 
     let port = app.port();
 
@@ -128,8 +134,14 @@ async fn join_circle(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn leave_circle(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::Circle], &[], pool).await;
+async fn leave_circle(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::User, Fixture::Image, Fixture::Circle],
+        &[],
+        pool_opts,
+        conn_opts,
+    )
+    .await;
 
     let port = app.port();
 
@@ -195,8 +207,17 @@ async fn leave_circle(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn browse_circles(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::Circle], &[], pool).await;
+async fn browse_circles(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::User, Fixture::Image, Fixture::Circle],
+        &[],
+        pool_opts,
+        conn_opts,
+    )
+    .await;
 
     let port = app.port();
 
@@ -226,8 +247,17 @@ async fn browse_circles(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn update_circle(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::Circle], &[], pool).await;
+async fn update_circle(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::User, Fixture::Image, Fixture::Circle],
+        &[],
+        pool_opts,
+        conn_opts,
+    )
+    .await;
 
     let port = app.port();
 
@@ -298,8 +328,17 @@ async fn update_circle(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn browse_circles_with_users(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::Circle], &[], pool).await;
+async fn browse_circles_with_users(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    let app = initialize_server(
+        &[Fixture::User, Fixture::Image, Fixture::Circle],
+        &[],
+        pool_opts,
+        conn_opts,
+    )
+    .await;
 
     let port = app.port();
 

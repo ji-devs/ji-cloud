@@ -1,11 +1,14 @@
 use http::StatusCode;
-use sqlx::PgPool;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{fixture::Fixture, helpers::initialize_server};
 
 #[sqlx::test]
-async fn create_401_no_auth(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[], &[], pool).await;
+async fn create_401_no_auth(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    let app = initialize_server(&[], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
 
@@ -24,8 +27,8 @@ async fn create_401_no_auth(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn create_basic(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[], pool).await;
+async fn create_basic(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
 
@@ -51,8 +54,11 @@ async fn create_basic(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn create_basic_bad_password(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[], pool).await;
+async fn create_basic_bad_password(
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
 

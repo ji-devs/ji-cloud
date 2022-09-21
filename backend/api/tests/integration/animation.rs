@@ -1,7 +1,7 @@
 use http::StatusCode;
 use serde_json::json;
 use shared::domain::{animation::AnimationId, CreateResponse};
-use sqlx::PgPool;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
@@ -9,8 +9,8 @@ use crate::{
 };
 
 #[sqlx::test]
-async fn create(pool: PgPool) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[], pool).await;
+async fn create(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User], &[], pool_opts, conn_opts).await;
 
     let port = app.port();
 
@@ -44,7 +44,7 @@ async fn create(pool: PgPool) -> anyhow::Result<()> {
 }
 
 #[sqlx::test]
-async fn get_metadata(pool: PgPool) -> anyhow::Result<()> {
+async fn get_metadata(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
     let app = initialize_server(
         &[
             Fixture::User,
@@ -53,7 +53,8 @@ async fn get_metadata(pool: PgPool) -> anyhow::Result<()> {
             Fixture::MetaAnimation,
         ],
         &[],
-        pool,
+        pool_opts,
+        conn_opts,
     )
     .await;
 
