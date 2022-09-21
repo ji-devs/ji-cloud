@@ -8,8 +8,6 @@ use super::FileInput;
 
 const STR_LABEL_PRIMARY: &str = "Upload or drag file here";
 const STR_LABEL_SECONDARY: &str = "Stretches to fit. Max ";
-const STR_FILE_TOO_LARGE: &str = "The file you selected is too large. Max size is ";
-const STR_WRONG_FILE_TYPE: &str = "The file you selected is not of a type we that accept";
 
 impl Component<FileInput> for Rc<FileInput> {
     fn styles() -> &'static str {
@@ -67,8 +65,8 @@ impl Component<FileInput> for Rc<FileInput> {
                             .child(html!("fa-icon", {
                                 .property("icon", "fa-light fa-cloud-arrow-up")
                             }))
-                            .children_signal_vec(state.has_error_signal().map(clone!(state => move|error_size| {
-                                match error_size {
+                            .children_signal_vec(state.has_error_signal().map(clone!(state => move|has_error| {
+                                match has_error {
                                     true => vec![],
                                     false => vec![
                                         html!("p", {
@@ -87,19 +85,19 @@ impl Component<FileInput> for Rc<FileInput> {
                                 error_size.then(clone!(state => move || {
                                     html!("p", {
                                         .class("error-message")
-                                        .text(STR_FILE_TOO_LARGE)
+                                        .text(&state.error_msg_size)
                                         .text(&format!("{}", state.max_size))
                                     })
                                 }))
                             })))
-                            .child_signal(state.error_mime_type.signal().map(|error_size| {
-                                error_size.then(|| {
+                            .child_signal(state.error_mime_type.signal().map(clone!(state => move|error_mime_type| {
+                                error_mime_type.then(|| {
                                     html!("p", {
                                         .class("error-message")
-                                        .text(STR_WRONG_FILE_TYPE)
+                                        .text(&state.error_msg_type)
                                     })
                                 })
-                            }))
+                            })))
                         })),
                     }
                 })))

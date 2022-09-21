@@ -48,8 +48,6 @@ export class _ extends LitElement {
     }
 
     private newFile(file: File) {
-        console.log(file);
-        
         this.dispatchEvent(
             new CustomEvent("custom-file", {
                 detail: file,
