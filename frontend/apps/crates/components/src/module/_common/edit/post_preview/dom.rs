@@ -51,7 +51,7 @@ where
             .apply(|dom| {
                 log::info!("{:?}", RawData::kind());
                 match RawData::kind() {
-                    ModuleKind::Memory | ModuleKind::Flashcards | ModuleKind::Matching | ModuleKind::CardQuiz  => {
+                    ModuleKind::Memory | ModuleKind::Flashcards | ModuleKind::Matching | ModuleKind::CardQuiz => {
                         dom.child(html!("post-preview-action", {
                             .property("slot", "action-print")
                             .property("kind", "print-cards")
@@ -61,8 +61,18 @@ where
                                 if state.print_cards(&raw_data).is_err() {
                                     let _ = web_sys::window()
                                         .unwrap_ji()
-                                        .alert_with_message("Can't print cards with images yet");
+                                        .alert_with_message("Error");
                                 }
+                            }))
+                        }))
+                    }
+                    ModuleKind::Poster => {
+                        dom.child(html!("post-preview-action", {
+                            .property("slot", "action-print")
+                            .property("kind", "print")
+                            .event(clone!(state => move |_evt:events::Click| {
+                                analytics::event("Jig Edit Print Design", None);
+                                state.print_design();
                             }))
                         }))
                     }
