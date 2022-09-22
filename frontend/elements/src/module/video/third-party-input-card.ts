@@ -22,7 +22,10 @@ export class _ extends LitElement {
                     margin-bottom: 46px;
                 }
                 ::slotted([slot="delete"]) {
-                    justify-self: start;
+                    justify-self: end;
+                }
+                ::slotted([slot="clip-checkbox"]) {
+                    margin-top: 16px;
                 }
                 .start-end {
                     display: grid;
@@ -40,12 +43,13 @@ export class _ extends LitElement {
     render() {
         return html`
             <img-ui path="module/video/host-youtube.png"></img-ui>
+            <slot name="delete"></slot>
             <slot name="input"></slot>
+            <slot name="clip-checkbox"></slot>
             <div class="start-end">
                 <slot name="start-at"></slot>
                 <slot name="end-at"></slot>
             </div>
-            <slot name="delete"></slot>
         `;
     }
 }

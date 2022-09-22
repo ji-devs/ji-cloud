@@ -45,6 +45,7 @@ pub struct Base {
 
     // reference to the video in the stickers list
     pub video: Mutable<Option<Rc<Video>>>,
+    pub clip: Mutable<bool>,
 }
 
 pub struct PlaySettings {
@@ -163,6 +164,7 @@ impl Base {
             stickers,
             play_settings: PlaySettings::new(content.play_settings),
             video: Mutable::new(None),
+            clip: Mutable::new(false),
         });
 
         *_self_ref.borrow_mut() = Some(_self.clone());
@@ -185,6 +187,9 @@ impl Base {
                                 _self.video.set(None);
                             },
                             Some(Sticker::Video(video)) => {
+                                if video.start_at.get().is_some() || video.end_at.get().is_some() {
+                                    _self.clip.set(true);
+                                }
                                 _self.video.set(Some(Rc::clone(video)));
                             },
                             _ => unreachable!(),

@@ -1,9 +1,14 @@
-use std::rc::Rc;
-
-use components::stickers::{state::Stickers, video::ext::YoutubeUrlExt};
+use components::stickers::{
+    state::Stickers,
+    video::{ext::YoutubeUrlExt, state::Video},
+};
 use dominator::{clone, html, with_node, Dom};
-use futures_signals::signal::SignalExt;
+use futures_signals::{
+    map_ref,
+    signal::{Signal, SignalExt},
+};
 use shared::domain::module::body::_groups::design::{VideoHost, YoutubeUrl, YoutubeVideo};
+use std::rc::Rc;
 use utils::{events, unwrap::UnwrapJiExt};
 use web_sys::{HtmlElement, HtmlInputElement};
 
@@ -55,56 +60,23 @@ pub fn render(state: Rc<Step2>) -> Dom {
             match video {
                 None => vec![],
                 Some(video) => vec![
-                    html!("input-wrapper", {
-                        .property("slot", "start-at")
-                        .property("label", "Start time")
-                        .child(html!("input-minutes-seconds" => HtmlElement, {
-                            .property("type", "number")
-                            .property_signal("value", video.start_at.signal_ref(|start_at| {
-                                match start_at {
-                                    Some(start_at) => start_at.to_string(),
-                                    None => String::new(),
-                                }
-                            }))
-                            .with_node!(_input => {
-                                .event(clone!(state => move |e: events::CustomInputNumber| {
-                                    let video = state.sidebar.base.get_video_sticker().unwrap_ji();
-
-                                    let value = e.value()
-                                        .map(|num| num as u32);
-
-                                        log::info!("{value:?}");
-
-                                    video.start_at.set(value);
-                                    Stickers::call_change(&Rc::clone(&state.sidebar.base.stickers));
-                                }))
-                            })
-                        }))
-                    }),
-                    html!("input-wrapper", {
-                        .property("slot", "end-at")
-                        .property("label", "End time")
-                        .child(html!("input-minutes-seconds" => HtmlElement, {
-                            .property("type", "number")
-                            .property_signal("value", video.end_at.signal_ref(|end_at| {
-                                match end_at {
-                                    Some(end_at) => end_at.to_string(),
-                                    None => String::new(),
-                                }
-                            }))
-                            .with_node!(_input => {
-                                .event(clone!(state => move |e: events::CustomInputNumber| {
-                                    let video = state.sidebar.base.get_video_sticker().unwrap_ji();
-
-                                    let value = e.value()
-                                        .map(|num| num as u32);
-
-                                        log::info!("{value:?}");
-
-                                    video.end_at.set(value);
-                                    Stickers::call_change(&Rc::clone(&state.sidebar.base.stickers));
-                                }))
-                            })
+                    html!("input-checkbox", {
+                        .property("label", "Clip video")
+                        .property("slot", "clip-checkbox")
+                        .property_signal("checked", state.sidebar.base.clip.signal())
+                        // .property_signal("disabled", map_ref! {
+                        //     let start_at = video.start_at.signal(),
+                        //     let end_at = video.end_at.signal() => {
+                        //         start_at.is_some() || end_at.is_some()
+                        //     }
+                        // })
+                        .event(clone!(state, video => move |e: events::CustomToggle| {
+                            if !e.value() {
+                                // clear values if unchecked
+                                video.start_at.set(None);
+                                video.end_at.set(None);
+                            }
+                            state.sidebar.base.clip.set(e.value());
                         }))
                     }),
                     html!("button-rect", {
@@ -119,5 +91,70 @@ pub fn render(state: Rc<Step2>) -> Dom {
                 ],
             }
         })).to_signal_vec())
+        .children_signal_vec(show_start_end_signal(&state).map(clone!(state => move |video| {
+            match video {
+                None => vec![],
+                Some(video) => vec![
+                    html!("input-wrapper", {
+                        .property("slot", "start-at")
+                        .property("label", "Start time")
+                        .child(html!("input-minutes-seconds" => HtmlElement, {
+                            .property("type", "number")
+                            .property_signal("value", video.start_at.signal_ref(|start_at| {
+                                match start_at {
+                                    Some(start_at) => start_at.to_string(),
+                                    None => String::new(),
+                                }
+                            }))
+                            .event(clone!(state => move |e: events::CustomInputNumber| {
+                                let video = state.sidebar.base.get_video_sticker().unwrap_ji();
+
+                                let value = e.value().map(|num| num as u32);
+
+                                log::info!("{value:?}");
+
+                                video.start_at.set(value);
+                                Stickers::call_change(&Rc::clone(&state.sidebar.base.stickers));
+                            }))
+                        }))
+                    }),
+                    html!("input-wrapper", {
+                        .property("slot", "end-at")
+                        .property("label", "End time")
+                        .child(html!("input-minutes-seconds" => HtmlElement, {
+                            .property("type", "number")
+                            .property_signal("value", video.end_at.signal_ref(|end_at| {
+                                match end_at {
+                                    Some(end_at) => end_at.to_string(),
+                                    None => String::new(),
+                                }
+                            }))
+                            .event(clone!(state => move |e: events::CustomInputNumber| {
+                                let video = state.sidebar.base.get_video_sticker().unwrap_ji();
+
+                                let value = e.value().map(|num| num as u32);
+
+                                log::info!("{value:?}");
+
+                                video.end_at.set(value);
+                                Stickers::call_change(&Rc::clone(&state.sidebar.base.stickers));
+                            }))
+                        }))
+                    }),
+                ],
+            }
+        })).to_signal_vec())
     })
+}
+
+fn show_start_end_signal(state: &Rc<Step2>) -> impl Signal<Item = Option<Rc<Video>>> {
+    map_ref! {
+        let video = state.sidebar.base.video.signal_cloned(),
+        let clip = state.sidebar.base.clip.signal() => move {
+            match video {
+                Some(video) if *clip => Some(Rc::clone(video)),
+                _ => None,
+            }
+        }
+    }
 }
