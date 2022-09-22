@@ -86,7 +86,6 @@ impl Component<FileInput> for Rc<FileInput> {
                                     html!("p", {
                                         .class("error-message")
                                         .text(&state.error_msg_size)
-                                        .text(&format!("{}", state.max_size))
                                     })
                                 }))
                             })))
