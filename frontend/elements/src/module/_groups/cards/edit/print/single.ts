@@ -9,8 +9,9 @@ export class _ extends LitElement {
                 :host {
                     display: inline-grid;
                     grid-template-rows: 20px 30vw;
-                    width: 45vw;
                     border-right: var(--border);
+                    width: calc(45vw - 4px);
+                    margin: 2px;
                     margin-top: 20px;
                 }
                 fa-icon {
@@ -34,6 +35,7 @@ export class _ extends LitElement {
                 .card .text {
                     font-size: 40px;
                     color: var(--dark-gray-6);
+                    font-family: "CabinSketch-bold","VarelaRound-Regular";
                 }
                 .card .image {
                     max-width: 100%;
