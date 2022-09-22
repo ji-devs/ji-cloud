@@ -1,28 +1,29 @@
 use js_sys::Reflect;
 use shared::domain::{asset::AssetId, module::ModuleId};
-use utils::unwrap::UnwrapJiExt;
+use utils::{path::uploads_url, unwrap::UnwrapJiExt};
 use wasm_bindgen::JsValue;
 
 pub fn print(asset_id: AssetId, module_id: ModuleId) {
+    let screenshot_url = format!("screenshot/{}/{}/full.jpg", asset_id.uuid(), module_id.0);
+    let screenshot_url = uploads_url(&screenshot_url);
+
     let html = format!(
         r#"
-            <style>
-                body {{
-                    place-content: center;
-                    display: grid;
-                    height: 100vh;
-                    width: 100vw;
-                    margin: 0;
-                }}
-                img {{
-                    max-width: 100vw;
-                    max-height: 100vh;
-                }}
-            </style>
-            <img src="https://uploads.sandbox.jicloud.org/screenshot/{}/{}/full.jpg">
-        "#,
-        asset_id.uuid(),
-        module_id.0
+        <style>
+            body {{
+                place-content: center;
+                display: grid;
+                height: 100vh;
+                width: 100vw;
+                margin: 0;
+            }}
+            img {{
+                max-width: 100vw;
+                max-height: 100vh;
+            }}
+        </style>
+        <img src="{screenshot_url}">
+    "#
     );
 
     let custom_elements_script = web_sys::window()
