@@ -70,7 +70,7 @@ impl Component<EditImage> for Rc<EditImage> {
                                     FileInput::new(FileInputConfig {
                                         on_change: Box::new(clone!(state => move |file| {
                                             let file = file.map(|file| ImageIfOrFile::File(file));
-                                            state.image.set(file);
+                                            state.image.set_neq(file);
                                         })),
                                         accept: "image/*",
                                         preview_images: true,

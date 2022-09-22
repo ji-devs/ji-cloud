@@ -64,7 +64,7 @@ impl CreateCircle {
             .child(
                 FileInput::new(FileInputConfig {
                     on_change: Box::new(clone!(state => move |file| {
-                        state.image.set(file);
+                        state.image.set_neq(file);
                     })),
                     accept: "image/*",
                     slot: Some("image"),
