@@ -1,6 +1,7 @@
 use crate::callback_future::CallbackFuture;
 use awsm_web::dom::StyleExt;
 use futures::future::join_all;
+use gloo_timers::future::TimeoutFuture;
 use js_sys::Reflect;
 use utils::{js_wrappers::set_event_listener_once, unwrap::UnwrapJiExt};
 use wasm_bindgen::{JsCast, JsValue};
@@ -26,6 +27,9 @@ fn print(html: String, scripts: Vec<String>) {
         iframe.set_style("border", "0");
 
         let _ = body.append_child(&iframe);
+
+        // needed for Firefox, give the iframe a chance to be attached to the dom before doing anything with it
+        TimeoutFuture::new(0).await;
 
         let iframe_window = iframe.content_window().unwrap_ji();
 
