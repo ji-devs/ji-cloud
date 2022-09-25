@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement } from "lit-element";
 import "@elements/core/images/ui";
-import "@elements/entry/jig/_common/bg";
+import "@elements/entry/asset/_common/bg";
 
 @customElement("jig-edit-page")
 export class _ extends LitElement {

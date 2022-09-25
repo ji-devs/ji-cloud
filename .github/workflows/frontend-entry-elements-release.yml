@@ -59,7 +59,7 @@ jobs:
 
     strategy:
       matrix:
-        app: [admin, home, jig/edit, jig/play, community, user, kids]
+        app: [admin, home, asset/edit, asset/play, community, user, kids]
     steps:
 
       - name: checkout repo

@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement } from "lit-element";
 import "@elements/core/images/ui";
-import "@elements/entry/jig/_common/bg";
+import "@elements/entry/asset/_common/bg";
 
 const STR_TITLE_1 = "Add an Activity";
 const STR_TITLE_2 = "Create your own digital learning path";

@@ -1,7 +1,7 @@
 import { argsToAttrs } from "@utils/attributes";
-import "@elements/entry/jig/_common/sidebar-modules/module";
-import "@elements/entry/jig/edit/sidebar/module/window";
-import "@elements/entry/jig/edit/sidebar/module/menu";
+import "@elements/entry/asset/_common/sidebar-modules/module";
+import "@elements/entry/asset/edit/sidebar/module/window";
+import "@elements/entry/asset/edit/sidebar/module/menu";
 import "@elements/core/buttons/icon";
 import "@elements/core/menu/kebab";
 import "@elements/core/menu/menu-line";

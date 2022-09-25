@@ -12,7 +12,7 @@ Where `target` is one of:
 * `local-main-nomedia` (will not start the local media server)
 * `local-iframe-nomedia` (different port and will not start the local media server)
 
-`app` is the name of the SPA (`user`, `jig/edit`, `module/memory/edit`, etc.)
+`app` is the name of the SPA (`user`, `asset/edit`, `module/memory/edit`, etc.)
 
 ## Available apps and modules
 
