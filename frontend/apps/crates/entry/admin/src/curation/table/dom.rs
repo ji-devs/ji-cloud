@@ -9,7 +9,7 @@ use futures_signals::{
     signal_vec::SignalVecExt,
 };
 use shared::domain::{
-    asset::{DraftOrLive, OrderBy},
+    asset::{DraftOrLive, OrderBy, PrivacyLevel},
     meta::{AffiliationId, AgeRangeId},
 };
 use std::rc::Rc;
@@ -172,6 +172,15 @@ impl CurationTable {
                                 match rating {
                                     Some(rating) => rating as u8,
                                     None => 0,
+                                }
+                            }))
+                        }),
+                        html!("span", {
+                            .text_signal(jig.privacy_level.signal().map(|privacy_level| {
+                                match privacy_level {
+                                    PrivacyLevel::Public => "Public",
+                                    PrivacyLevel::Unlisted => "Unlisted",
+                                    PrivacyLevel::Private => "Private",
                                 }
                             }))
                         }),

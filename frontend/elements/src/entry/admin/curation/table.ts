@@ -50,6 +50,7 @@ export class _ extends LitElement {
         "Blocked",
         "Author",
         "Rating",
+        "Privacy",
         // "Author's Badge",
         "Created",
         "Last published",
