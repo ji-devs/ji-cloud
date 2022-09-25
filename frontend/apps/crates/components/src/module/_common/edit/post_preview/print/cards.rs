@@ -10,12 +10,8 @@ use shared::{
     },
     media::PngImageFile,
 };
-use utils::{path::image_lib_url, unwrap::UnwrapJiExt};
+use utils::{path::image_lib_url, themes::ThemeIdExt, unwrap::UnwrapJiExt};
 use wasm_bindgen::JsValue;
-
-const EL_NAME_LIST: &str = "module-card-print-list";
-const EL_NAME_SINGLE: &str = "module-card-print-single";
-const EL_NAME_DOUBLE: &str = "module-card-print-double";
 
 pub fn print<RawData, Mode, Step>(raw_data: &RawData) -> anyhow::Result<()>
 where
@@ -23,7 +19,14 @@ where
     Mode: ModeExt + 'static,
     Step: StepExt + 'static,
 {
-    let html = get_html_to_print(raw_data.as_body())?;
+    let theme = raw_data.get_theme().unwrap();
+
+    let fonts = theme.map_theme(|theme| {
+        let font_index = theme.cards.font_family;
+        &theme.font_families[font_index]
+    });
+
+    let html = get_html_to_print(raw_data.as_body(), fonts)?;
 
     let custom_elements_script = web_sys::window()
         .unwrap_ji()
@@ -45,21 +48,23 @@ where
     Ok(())
 }
 
-fn get_html_to_print(body: Body) -> anyhow::Result<String> {
+fn get_html_to_print(body: Body, fonts: &str) -> anyhow::Result<String> {
     let children = match body {
         ModuleBody::MemoryGame(_) | ModuleBody::Matching(_) | ModuleBody::CardQuiz(_) => {
             let pairs = get_card_pairs(body)?;
-            cards_to_elements_singles(pairs)
+            cards_to_elements_singles(pairs, fonts)
         }
         ModuleBody::Flashcards(_) => {
             let pairs = get_card_pairs(body)?;
-            cards_to_elements_doubles(pairs)
+            cards_to_elements_doubles(pairs, fonts)
         }
         _ => {
             return Err(anyhow::anyhow!("Not a card game"));
         }
     };
-    Ok(format!("<{EL_NAME_LIST}>{children}</{EL_NAME_LIST}>"))
+    Ok(format!(
+        "<module-card-print-list>{children}</module-card-print-list>"
+    ))
 }
 
 fn get_card_pairs(body: Body) -> anyhow::Result<Vec<CardPair>> {
@@ -72,14 +77,14 @@ fn get_card_pairs(body: Body) -> anyhow::Result<Vec<CardPair>> {
     }
 }
 
-fn cards_to_elements_singles(cards: Vec<CardPair>) -> String {
+fn cards_to_elements_singles(cards: Vec<CardPair>, fonts: &str) -> String {
     cards
         .into_iter()
         .map(|card| [card.0.card_content, card.1.card_content])
         .flatten()
         .map(|card_content| {
             format!(
-                "<{EL_NAME_SINGLE} {attributes}></{EL_NAME_SINGLE}>",
+                r#"<module-card-print-single fonts="{fonts}" {attributes}></module-card-print-single>"#,
                 attributes = get_attributes_for_card_elements(&card_content, "")
             )
         })
@@ -87,12 +92,12 @@ fn cards_to_elements_singles(cards: Vec<CardPair>) -> String {
         .join("")
 }
 
-fn cards_to_elements_doubles(cards: Vec<CardPair>) -> String {
+fn cards_to_elements_doubles(cards: Vec<CardPair>, fonts: &str) -> String {
     cards
         .iter()
         .map(|card| {
             format!(
-                "<{EL_NAME_DOUBLE} {attributes_0} {attributes_1}></{EL_NAME_DOUBLE}>",
+                r#"<module-card-print-double fonts="{fonts}" {attributes_0} {attributes_1}></module-card-print-double>"#,
                 attributes_0 = get_attributes_for_card_elements(&card.0.card_content, "A"),
                 attributes_1 = get_attributes_for_card_elements(&card.1.card_content, "B")
             )

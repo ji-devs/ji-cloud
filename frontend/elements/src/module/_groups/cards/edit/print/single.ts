@@ -1,3 +1,4 @@
+import { loadFonts } from "@elements/_themes/themes";
 import { LitElement, html, css, customElement, property } from "lit-element";
 import { CardKind } from "./types";
 
@@ -35,7 +36,6 @@ export class _ extends LitElement {
                 .card .text {
                     font-size: 40px;
                     color: var(--dark-gray-6);
-                    font-family: "CabinSketch-bold","VarelaRound-Regular";
                 }
                 .card .image {
                     max-width: 100%;
@@ -63,8 +63,26 @@ export class _ extends LitElement {
     @property()
     kind: CardKind = "text";
 
+    @property({ reflect: true })
+    fonts?: string;
+
+    firstUpdated() {
+        if (this.fonts) {
+            let fonts = this.fonts
+                .split(",")
+                .map(f => f.trim())
+                .map(f => f.replaceAll("'", ""));
+            loadFonts(fonts);
+        }
+    }
+
     render() {
         return html`
+            <style>
+                .text {
+                    font-family: ${this.fonts}
+                }
+            </style>
             <fa-icon icon="fa-solid fa-scissors"></fa-icon>
             <div class="card">
                 ${

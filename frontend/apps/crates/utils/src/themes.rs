@@ -85,7 +85,7 @@ pub struct Theme {
     pub id: String,
 
     #[serde(rename(deserialize = "fontFamilies"))]
-    pub font_familes: Vec<String>,
+    pub font_families: Vec<String>,
     /// 3 values for now
     #[serde(deserialize_with = "hex_to_rgba8")]
     pub colors: Vec<RGBA8>,

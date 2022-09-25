@@ -66,7 +66,7 @@ where
                             }))
                         }))
                     }
-                    ModuleKind::Poster => {
+                    ModuleKind::Poster | ModuleKind::Cover | ModuleKind::ResourceCover => {
                         dom.child(html!("post-preview-action", {
                             .property("slot", "action-print")
                             .property("kind", "print")

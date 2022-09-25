@@ -44,7 +44,7 @@ fn print(html: String, scripts: Vec<String>) {
         join_all(scripts).await;
 
         // give css a chance to load, with simple tests 1 second was enough
-        // querying the document for the css link and listening to it's load event might make more sense
+        // querying the document for the css link and listening for it's load event might make more sense
         gloo_timers::future::TimeoutFuture::new(1_000).await;
 
         set_event_listener_once(
