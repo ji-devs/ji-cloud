@@ -7,6 +7,7 @@ export class _ extends LitElement {
             css`
                 :host {
                     display: grid;
+                    grid-auto-rows: minmax(0, 1fr);
                 }
                 label {
                     height: 100%;

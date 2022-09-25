@@ -1,5 +1,6 @@
 :host {
     display: grid;
+    grid-auto-rows: minmax(0, 1fr);
 }
 
 .remove {
@@ -24,7 +25,7 @@ input-file.error {
 
 input-file::part(wrapper) {
     justify-items: center;
-    padding: 30px;
+    padding: 10px;
     box-sizing: border-box;
 }
 

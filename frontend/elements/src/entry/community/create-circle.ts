@@ -54,7 +54,7 @@ export class _ extends LitElement {
                 ::slotted([slot=image]) {
                     grid-area: image;
                     display: grid;
-                    height: 230px;
+                    height: 238px;
                 }
                 ::slotted([slot=submit]) {
                     grid-area: submit;
