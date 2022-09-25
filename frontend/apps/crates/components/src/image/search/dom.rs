@@ -71,7 +71,13 @@ pub fn render_loaded(state: Rc<State>, action: Option<Dom>) -> Dom {
         .apply_if(state.options.kind != ImageSearchKind::Sticker, clone!(state => move |dom| {
             dom.child(html!("img-ui", {
                 .property("slot", "images")
-                .property("path", "module/_common/edit/widgets/sidebar/image-select/clear-image.svg")
+                .property("path", {
+                    match state.options.kind {
+                        ImageSearchKind::Background => "module/_common/edit/widgets/sidebar/image-select/clear-image-background.svg",
+                        ImageSearchKind::Overlay => "module/_common/edit/widgets/sidebar/image-select/clear-image-overlay.svg",
+                        ImageSearchKind::Sticker => unreachable!(),
+                    }
+                })
                 .event(clone!(state => move |_: events::Click| {
                     state.clear_selected();
                 }))
