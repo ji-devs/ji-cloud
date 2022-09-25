@@ -17,6 +17,9 @@ import { letters, niqquds, punctuations } from "./data";
 import { enderStyles, renderDelete, renderEnder, renderSpace } from "./buttons";
 import { cantillationsStyles, renderCantillations } from "./cantillations";
 import { AnchoredOverlayAbsolute } from "@elements/core/overlays/anchored-overlay-absolute";
+import "@elements/core/icon/fa-icon";
+
+const STR_DRAG_ME = "Drag me around";
 
 @customElement("hebrew-keyboard")
 export class _ extends LitElement {
@@ -29,12 +32,17 @@ export class _ extends LitElement {
             enderStyles,
             css`
                 :host {
+                    display: grid;
+                    justify-items: center;
+                    filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.16));
+                    cursor: grab;
+                }
+                .main {
                     padding: 12px;
                     display: inline-grid;
                     grid-template-rows: repeat(5, 32px);
                     row-gap: 8px;
                     border-radius: 14px;
-                    box-shadow: 0 3px 10px 0 rgba(0, 0, 0, 0.16);
                     background-color: #fff;
                 }
                 .row {
@@ -152,6 +160,15 @@ export class _ extends LitElement {
                 }
                 anchored-overlay-absolute [slot="overlay"] button {
                     width: 32px;
+                }
+                .under {
+                    background-color: var(--main-blue);
+                    clip-path: path("M 200 0 c -2 18 -1 24 -13 24 L 14 24 c -12 0 -12 -5 -14 -24 z");
+                    width: 200px;
+                    font-size: 14px;
+                    line-height: 24px;
+                    text-align: center;
+                    color: #ffffff;
                 }
             `,
         ];
@@ -298,11 +315,17 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <div class="row">${this.renderRow1()}</div>
-            <div class="row">${this.renderRow2()}</div>
-            <div class="row">${this.renderRow3()}</div>
-            <div class="row">${this.renderRow4()}</div>
-            <div class="row">${this.renderRow5()}</div>
+            <div class="main">
+                <div class="row">${this.renderRow1()}</div>
+                <div class="row">${this.renderRow2()}</div>
+                <div class="row">${this.renderRow3()}</div>
+                <div class="row">${this.renderRow4()}</div>
+                <div class="row">${this.renderRow5()}</div>
+            </div>
+            <div class="under">
+                <fa-icon icon="fa-solid fa-grip-dots"></fa-icon>
+                ${STR_DRAG_ME}
+            </div>
         `;
     }
 }
