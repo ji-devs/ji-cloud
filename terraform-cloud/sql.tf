@@ -1,13 +1,3 @@
-##
-## Configures specified provider
-## Doc: https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference
-##
-provider "google" {
-  project = "ji-cloud-developer-staging"
-  region  = "europe-west1"
-  zone    = "europe-west1-d"
-}
-
 resource "random_id" "db_name_suffix" {
   byte_length = 4
 }
@@ -71,5 +61,3 @@ resource "google_sql_user" "database" {
 data "google_secret_manager_secret_version" "basic" { 
   secret = "DB_PASSWORD"
 }
-
-
