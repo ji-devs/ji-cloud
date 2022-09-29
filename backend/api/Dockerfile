@@ -2,7 +2,8 @@
 ## BUILDER        ##
 ####################
 
-FROM ekidd/rust-musl-builder:latest AS api-builder
+FROM messense/rust-musl-cross:x86_64-musl AS api-builder
+
 
 # Add our source code.
 
@@ -12,7 +13,7 @@ COPY ./backend/core ./backend/core
 COPY ./backend/api ./backend/api
 
 # Fix permissions on source code.
-RUN sudo chown -R rust:rust /home/rust
+# RUN sudo chown -R rust:rust /home/rust
 
 # Build our application.
 WORKDIR ./backend/api
