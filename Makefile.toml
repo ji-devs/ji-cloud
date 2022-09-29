@@ -16,6 +16,11 @@ DOCKER_BUILDKIT = "1"
 script_runner = "@shell"
 script = ["gcloud auth configure-docker"]
 
+# Configure Google Artifact Registry
+[tasks.gcloud-configure-docker-gar]
+script_runner = "@shell"
+script = ["gcloud auth configure-docker --quiet us-east1-docker.pkg.dev"]
+
 ###################
 ## PAGES         ##
 ###################
@@ -49,6 +54,43 @@ run_task = [{name = [
     "docker-publish-sandbox-pages",
     "deploy-sandbox-pages",
 ]}]
+
+[tasks.sandbox-pages-build-test]
+run_task = [{name = [
+    "gcloud-configure-docker-gar",
+    "docker-build-pages-builder",
+    "deploy-sandbox-pages-test",
+]}]
+
+[tasks.docker-build-pages-builder]
+command = "docker"
+args = [
+    "buildx",
+    "build",
+    "--file",
+    "backend/pages/Dockerfile",
+    "--cache-from",
+    "us-east1-docker.pkg.dev/ji-cloud-developer-sandbox/docker/ji-cloud-pages-builder:latest",
+    "--cache-to",
+    "type=registry,mode=max,ref=us-east1-docker.pkg.dev/ji-cloud-developer-sandbox/docker/ji-cloud-pages-builder:latest",
+    "--tag",
+    "us-east1-docker.pkg.dev/ji-cloud-developer-sandbox/docker/ji-cloud-pages-test:latest",
+    "--push",
+    "--target",
+    "app",
+    "."
+]
+
+[tasks.deploy-sandbox-pages-test]
+script_runner = "@shell"
+script = ["""\
+    gcloud run deploy \
+        ji-cloud-pages-test \
+        --project ji-cloud-developer-sandbox \
+        --region europe-west1 \
+        --image us-east1-docker.pkg.dev/ji-cloud-developer-sandbox/docker/ji-cloud-pages-test:latest \
+        --platform managed
+"""]
 
 [tasks.docker-build-sandbox-pages]
 command = "docker"
@@ -95,6 +137,43 @@ run_task = [{name = [
     "docker-publish-sandbox-api",
     "deploy-sandbox-api",
 ]}]
+
+[tasks.sandbox-api-build-test]
+run_task = [{name = [
+    "gcloud-configure-docker-gar",
+    "docker-build-api-builder",
+    "deploy-sandbox-api-test",
+]}]
+
+[tasks.docker-build-api-builder]
+command = "docker"
+args = [
+    "buildx",
+    "build",
+    "--file",
+    "backend/api/Dockerfile",
+    "--cache-from",
+    "us-east1-docker.pkg.dev/ji-cloud-developer-sandbox/docker/ji-cloud-api-builder:latest",
+    "--cache-to",
+    "type=registry,mode=max,ref=us-east1-docker.pkg.dev/ji-cloud-developer-sandbox/docker/ji-cloud-api-builder:latest",
+    "--tag",
+    "us-east1-docker.pkg.dev/ji-cloud-developer-sandbox/docker/ji-cloud-api-test:latest",
+    "--push",
+    "--target",
+    "app",
+    "."
+]
+
+[tasks.deploy-sandbox-api-test]
+script_runner = "@shell"
+script = ["""\
+    gcloud run deploy \
+        ji-cloud-api-test \
+        --project ji-cloud-developer-sandbox \
+        --region europe-west1 \
+        --image us-east1-docker.pkg.dev/ji-cloud-developer-sandbox/docker/ji-cloud-api-test:latest \
+        --platform managed
+"""]
 
 [tasks.docker-build-sandbox-api]
 command = "docker"
