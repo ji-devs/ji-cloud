@@ -2,7 +2,8 @@ use crate::curation::EditableJig;
 
 use super::state::*;
 use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
-use dominator::{clone, html, Dom};
+use convert_case::{Case, Casing};
+use dominator::{clone, html, with_node, Dom};
 use futures_signals::{
     map_ref,
     signal::{Signal, SignalExt},
@@ -13,7 +14,8 @@ use shared::domain::{
     meta::{AffiliationId, AgeRangeId},
 };
 use std::rc::Rc;
-use utils::{events, languages::Language, routes::AdminCurationRoute};
+use utils::{events, languages::Language, routes::AdminCurationRoute, unwrap::UnwrapJiExt};
+use web_sys::HtmlSelectElement;
 
 impl CurationTable {
     pub fn render(self: Rc<Self>) -> Dom {
@@ -175,13 +177,31 @@ impl CurationTable {
                                 }
                             }))
                         }),
-                        html!("span", {
-                            .text_signal(jig.privacy_level.signal().map(|privacy_level| {
-                                match privacy_level {
-                                    PrivacyLevel::Public => "Public",
-                                    PrivacyLevel::Unlisted => "Unlisted",
-                                    PrivacyLevel::Private => "Private",
-                                }
+                        html!("label", {
+                            .child(html!("select" => HtmlSelectElement, {
+                                .with_node!(select => {
+                                    .property_signal("value", jig.privacy_level.signal().map(|privacy_level| {
+                                        privacy_level.as_str().to_case(Case::Title)
+                                    }))
+                                    .children(&mut [
+                                        html!("option", {
+                                            .text(&PrivacyLevel::Public.as_str().to_case(Case::Title))
+                                        }),
+                                        html!("option", {
+                                            .text(&PrivacyLevel::Unlisted.as_str().to_case(Case::Title))
+                                        }),
+                                        html!("option", {
+                                            .text(&PrivacyLevel::Private.as_str().to_case(Case::Title))
+                                        }),
+                                    ])
+                                    .event(clone!(jig, select => move |_: events::Change| {
+                                        let value = select.value().to_case(Case::Lower);
+                                        let value = value.parse().unwrap_ji();
+                                        jig.privacy_level.set(value);
+
+                                        jig.save_and_publish();
+                                    }))
+                                })
                             }))
                         }),
                         html!("span", {

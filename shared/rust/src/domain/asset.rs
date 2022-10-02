@@ -7,6 +7,7 @@ use std::{
     str::FromStr,
 };
 
+use anyhow::anyhow;
 use chrono::{DateTime, Utc};
 // use dyn_clone::DynClone;
 use serde::{Deserialize, Serialize};
@@ -540,6 +541,19 @@ impl PrivacyLevel {
             Self::Unlisted => "unlisted",
             Self::Private => "private",
         }
+    }
+}
+
+impl FromStr for PrivacyLevel {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(match s {
+            "public" => Self::Public,
+            "unlisted" => Self::Unlisted,
+            "private" => Self::Private,
+            _ => return Err(anyhow!("invalid"))
+        })
     }
 }
 

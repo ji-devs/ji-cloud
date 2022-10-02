@@ -75,7 +75,7 @@ uuid = { version = "0.8.2", features = ["serde", "wasm-bindgen"] }
 url = "2.2.2"
 gloo = "0.4.0"
 rand = "0.8.4"
-
+convert_case = "0.6.0"
 
 [features]
 default = ["wee_alloc"]
