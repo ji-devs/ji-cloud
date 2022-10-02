@@ -552,7 +552,7 @@ impl FromStr for PrivacyLevel {
             "public" => Self::Public,
             "unlisted" => Self::Unlisted,
             "private" => Self::Private,
-            _ => return Err(anyhow!("invalid"))
+            _ => return Err(anyhow!("invalid")),
         })
     }
 }
