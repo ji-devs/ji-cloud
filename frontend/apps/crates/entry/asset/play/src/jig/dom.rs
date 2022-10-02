@@ -299,13 +299,17 @@ fn render_done_popup(state: Rc<JigPlayer>) -> impl Signal<Item = Option<Dom>> {
                                 );
                             }
                             if !state.player_options.is_student {
-                                dom = dom.child(ShareAsset::new(state.jig_id.into()).render(
-                                    html!("jig-play-done-action", {
-                                        .text("share")
-                                        .property("kind", "share")
-                                    }),
-                                    Some("actions")
-                                ));
+                                dom = dom.child_signal(state.jig.signal_cloned().map(|jig| {
+                                    jig.map(|jig| {
+                                        ShareAsset::new(jig.into()).render(
+                                            html!("jig-play-done-action", {
+                                                .text("share")
+                                                .property("kind", "share")
+                                            }),
+                                            Some("actions")
+                                        )
+                                    })
+                                }));
                             }
                             if is_iframe() {
                                 dom = dom.child(

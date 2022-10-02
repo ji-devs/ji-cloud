@@ -22,7 +22,7 @@ use utils::{
     events,
     init::analytics,
     prelude::{get_user_cloned, ApiEndpointExt},
-    routes::{AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, Route},
+    routes::{AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, ResourceEditRoute, Route},
 };
 
 use super::state::SearchResultsSection;
@@ -68,7 +68,8 @@ impl SearchResultsSection {
     fn render_result(self: &Rc<Self>, asset: Rc<Asset>) -> Dom {
         let state = self;
         let jig_ages = asset.age_ranges().clone();
-        let share_jig = ShareAsset::new(asset.id());
+        let share_asset = ShareAsset::new((*asset).clone());
+        let user_id = state.user.get_cloned().map(|user| user.id);
 
         html!("home-search-result", {
             .property("slot", "results")
@@ -77,7 +78,7 @@ impl SearchResultsSection {
             .property("likedCount", asset.likes())
             .property("author", asset.author_name().clone().unwrap_or_default())
             .property("language", asset.language())
-            .property_signal("flipped", share_jig.active_popup.signal_cloned().map(|active_popup| active_popup.is_some()))
+            .property_signal("flipped", share_asset.active_popup.signal_cloned().map(|active_popup| active_popup.is_some()))
             .property("kind", state.asset_type.as_str())
             .property("publishedAt", {
                 match asset.published_at() {
@@ -140,75 +141,79 @@ impl SearchResultsSection {
                     .text_signal(state.resource_type_name(resource.resource_type_id))
                 })
             }))
+            .child(share_asset.render(
+                html!("button-empty", {
+                    .style("display", "flex")
+                    .style("align-items", "center")
+                    .style("gap", "10px")
+                    .child(html!("fa-icon", {
+                        .property("icon", "fa-thin fa-share-nodes")
+                        .style("font-size", "26px")
+                    }))
+                    .text(" Share")
+                    .event(clone!(asset => move |_: events::Click| {
+                        track_action("share", asset.clone());
+                    }))
+                }),
+                Some("actions"),
+            ))
+            .apply_if(asset.author_id() == &user_id, clone!(asset => move |dom| {
+                dom.child(html!("a", {
+                    .property("slot", "actions")
+                    .child(html!("fa-icon", {
+                        .property("icon", "fa-light fa-pencil")
+                        .style("font-size", "18px")
+                    }))
+                    .text(" Edit")
+                    .property("href", {
+                        match asset.id() {
+                            AssetId::JigId(jig_id) => {
+                                Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
+                                    jig_id,
+                                    JigEditRoute::Landing
+                                )))
+                            },
+                            AssetId::CourseId(course_id) => {
+                                Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
+                                    course_id,
+                                    CourseEditRoute::Landing
+                                )))
+                            },
+                            AssetId::ResourceId(resource_id) => {
+                                Route::Asset(AssetRoute::Edit(AssetEditRoute::Resource(
+                                    resource_id,
+                                    ResourceEditRoute::Landing
+                                )))
+                            },
+                        }.to_string()
+                    })
+                    .event(clone!(asset => move |_: events::Click| {
+                        track_action("edit", asset.clone());
+                    }))
+                }))
+            }))
             .apply(|dom| {
-                let user_id = state.user.get_cloned().map(|user| user.id);
-
                 match state.asset_type {
                     AssetType::Jig | AssetType::Course => {
-                        dom
-                            .child(share_jig.render(
-                                html!("button-icon-label", {
-                                    .property("slot", "actions")
-                                    .property("labelColor", "dark-blue")
-                                    .property("iconPath", "search/cards/share-backside.svg")
-                                    .property("iconHoverPath", "search/cards/share-backside-hover.svg")
-                                    .property("gapOverride", "0px")
-                                    .property("label", "Share")
-                                    .event(clone!(asset => move |_: events::Click| {
-                                        track_action("share", asset.clone());
-                                    }))
-                                }),
-                                Some("actions"),
-                            ))
-                            .apply_if(asset.author_id() == &user_id, clone!(asset => move |dom| {
-                                dom.child(html!("button-icon-label", {
-                                    .property("slot", "actions")
-                                    .property("labelColor", "dark-blue")
-                                    .property("iconPath", "search/cards/edit-backside.svg")
-                                    .property("iconHoverPath", "search/cards/edit-backside-hover.svg")
-                                    .property("gapOverride", "0px")
-                                    .property("label", "Edit")
-                                    .property("href", {
-                                        match asset.id() {
-                                            AssetId::JigId(jig_id) => {
-                                                Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
-                                                    jig_id,
-                                                    JigEditRoute::Landing
-                                                )))
-                                            },
-                                            AssetId::CourseId(course_id) => {
-                                                Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
-                                                    course_id,
-                                                    CourseEditRoute::Landing
-                                                )))
-                                            },
-                                            AssetId::ResourceId(_) => unreachable!(),
-                                        }.to_string()
-                                    })
-                                    .event(clone!(asset => move |_: events::Click| {
-                                        track_action("edit", asset.clone());
-                                    }))
-                                }))
-                            }))
-                            .child(html!("button-rect-icon", {
-                                .property("slot", "play-button")
-                                .property("color", "red")
-                                .property("bold", true)
-                                .property("size", "small")
-                                .property("iconBeforePath", "search/cards/play.svg")
-                                .text("Play")
-                                .event({
-                                    let asset_id = asset.id();
-                                    clone!(state => move |_: events::Click| {
-                                        // if get_user().is_some() {
-                                            state.home_state.play_asset.set(Some(asset_id));
-                                        // } else {
-                                        //     state.home_state.play_login_popup_shown.set(true);
-                                        // }
-                                        track_action("play", asset.clone());
-                                    })
+                        dom.child(html!("button-rect-icon", {
+                            .property("slot", "play-button")
+                            .property("color", "red")
+                            .property("bold", true)
+                            .property("size", "small")
+                            .property("iconBeforePath", "search/cards/play.svg")
+                            .text("Play")
+                            .event({
+                                let asset_id = asset.id();
+                                clone!(state => move |_: events::Click| {
+                                    // if get_user().is_some() {
+                                        state.home_state.play_asset.set(Some(asset_id));
+                                    // } else {
+                                    //     state.home_state.play_login_popup_shown.set(true);
+                                    // }
+                                    track_action("play", asset.clone());
                                 })
-                            }))
+                            })
+                        }))
                     },
                     AssetType::Resource => {
                         dom.child({

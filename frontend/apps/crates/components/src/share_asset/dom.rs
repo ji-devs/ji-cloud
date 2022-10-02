@@ -42,7 +42,6 @@ impl ShareAsset {
                     state.active_popup.set(None);
                 }))
                 .child(html!("empty-fragment", {
-                    .property("slot", "anchor")
                     .style("display", "flex")
                     .event(clone!(state => move |_: events::Click| {
                         let new_value = match &*state.active_popup.lock_ref() {
@@ -89,7 +88,7 @@ impl ShareAsset {
         let state = self;
         html!("share-jig-main", {
             .property("slot", "overlay")
-            .apply_if(state.asset_id.is_jig_id(), |dom| {
+            .apply_if(state.asset.is_jig(), |dom| {
                 dom.child(html!("share-jig-option", {
                     .property("kind", "students")
                     .text(STR_STUDENTS_LABEL)
@@ -98,45 +97,45 @@ impl ShareAsset {
                     }))
                 }))
             })
-            .children(&mut [
-                html!("share-jig-option", {
-                    .property("kind", "google-classroom")
-                    .text(STR_CLASSROOM)
-                    .event(clone!(state => move |_: events::Click| {
-                        if let Some(window) = window() {
-                            let share_url = format!("https://classroom.google.com/share?url={}", encode_uri_component(&state.asset_link(true)));
-                            let _ = window.open_with_url_and_target(&share_url, "_blank");
-                        }
-                    }))
-                }),
-                html!("share-jig-option", {
+            .child(html!("share-jig-option", {
+                .property("kind", "google-classroom")
+                .text(STR_CLASSROOM)
+                .event(clone!(state => move |_: events::Click| {
+                    if let Some(window) = window() {
+                        let share_url = format!("https://classroom.google.com/share?url={}", encode_uri_component(&state.asset_link(true)));
+                        let _ = window.open_with_url_and_target(&share_url, "_blank");
+                    }
+                }))
+            }))
+            .apply_if(!state.asset.is_resource(), |dom| {
+                dom.child(html!("share-jig-option", {
                     .property("kind", "embed")
                     .text(&format!("{STR_EMBED_LABEL}{}", state.asset_type_name()))
                     .event(clone!(state => move |_: events::Click| {
                         state.active_popup.set(Some(ActivePopup::ShareEmbed));
                     }))
-                }),
-                html!("share-jig-option", {
-                    .property("kind", "copy")
-                    .text_signal(state.link_copied.signal().map(clone!(state => move |copied| {
-                        match copied {
-                            false => format!("{}{}{}", STR_COPY_LABEL_1, state.asset_type_name(), STR_COPY_LABEL_2),
-                            true => format!("{}{STR_COPIED_LABEL}", state.asset_type_name()),
-                        }
-                    })))
-                    .event(clone!(state => move|_: events::Click| {
-                        clipboard::write_text(&state.asset_link(false));
-                        ShareAsset::set_copied_mutable(state.link_copied.clone());
-                    }))
-                }),
-                html!("fa-button", {
-                    .property("slot", "close")
-                    .property("icon", "fa-light fa-xmark")
-                    .event(clone!(state => move |_: events::Click| {
-                        state.active_popup.set(None);
-                    }))
-                }),
-            ])
+                }))
+            })
+            .child(html!("share-jig-option", {
+                .property("kind", "copy")
+                .text_signal(state.link_copied.signal().map(clone!(state => move |copied| {
+                    match copied {
+                        false => format!("{}{}{}", STR_COPY_LABEL_1, state.asset_type_name(), STR_COPY_LABEL_2),
+                        true => format!("{}{STR_COPIED_LABEL}", state.asset_type_name()),
+                    }
+                })))
+                .event(clone!(state => move|_: events::Click| {
+                    clipboard::write_text(&state.asset_link(false));
+                    ShareAsset::set_copied_mutable(state.link_copied.clone());
+                }))
+            }))
+            .child(html!("fa-button", {
+                .property("slot", "close")
+                .property("icon", "fa-light fa-xmark")
+                .event(clone!(state => move |_: events::Click| {
+                    state.active_popup.set(None);
+                }))
+            }))
         })
     }
 

@@ -2,8 +2,8 @@ use std::rc::Rc;
 
 use awsm_web::loaders::helpers::AsyncLoader;
 use futures_signals::signal::Mutable;
-use shared::domain::asset::AssetId;
-use utils::asset::{CoursePlayerOptions, JigPlayerOptions};
+use shared::domain::asset::Asset;
+use utils::asset::{CoursePlayerOptions, JigPlayerOptions, ResourceContentExt};
 use utils::routes::{AssetRoute, Route};
 
 use utils::prelude::*;
@@ -12,7 +12,7 @@ pub struct ShareAsset {
     pub active_popup: Mutable<Option<ActivePopup>>,
     pub student_code: Mutable<Option<String>>,
     pub loader: AsyncLoader,
-    pub asset_id: AssetId,
+    pub asset: Asset,
     pub copied_embed: Mutable<bool>,
     pub link_copied: Mutable<bool>,
     pub copied_student_url: Mutable<bool>,
@@ -20,9 +20,9 @@ pub struct ShareAsset {
 }
 
 impl ShareAsset {
-    pub fn new(asset_id: AssetId) -> Rc<Self> {
+    pub fn new(asset: Asset) -> Rc<Self> {
         Rc::new(Self {
-            asset_id,
+            asset,
             student_code: Mutable::new(None),
             loader: AsyncLoader::new(),
             active_popup: Mutable::new(None),
@@ -42,41 +42,53 @@ impl ShareAsset {
     }
 
     pub(super) fn asset_link(&self, is_student: bool) -> String {
-        let url = match self.asset_id {
-            AssetId::JigId(jig_id) => Route::Asset(AssetRoute::Play(AssetPlayRoute::Jig(
-                jig_id,
-                None,
-                JigPlayerOptions {
-                    is_student,
-                    ..Default::default()
-                },
-            ))),
-            AssetId::ResourceId(_) => {
-                todo!()
-            }
-            AssetId::CourseId(course_id) => Route::Asset(AssetRoute::Play(AssetPlayRoute::Course(
-                course_id,
-                CoursePlayerOptions {
-                    is_student,
-                    ..Default::default()
-                },
-            ))),
-        }
-        .to_string();
         let origin = web_sys::window()
             .unwrap_ji()
             .location()
             .origin()
             .unwrap_ji();
-
-        format!("{}{}", origin, url)
+        let url = match &self.asset {
+            Asset::Jig(jig) => {
+                let path = Route::Asset(AssetRoute::Play(AssetPlayRoute::Jig(
+                    jig.id,
+                    None,
+                    JigPlayerOptions {
+                        is_student,
+                        ..Default::default()
+                    },
+                )))
+                .to_string();
+                format!("{}{}", origin, path)
+            }
+            Asset::Resource(resource) => {
+                match resource.resource_data.additional_resources.get(0) {
+                    Some(resource) => resource.resource_content.get_link(),
+                    None => {
+                        // Should't really get here
+                        String::new()
+                    }
+                }
+            }
+            Asset::Course(course) => {
+                let path = Route::Asset(AssetRoute::Play(AssetPlayRoute::Course(
+                    course.id,
+                    CoursePlayerOptions {
+                        is_student,
+                        ..Default::default()
+                    },
+                )))
+                .to_string();
+                format!("{}{}", origin, path)
+            }
+        };
+        url
     }
 
     pub(super) fn asset_type_name(&self) -> &'static str {
-        match self.asset_id {
-            AssetId::JigId(_) => "JIG",
-            AssetId::CourseId(_) => "course",
-            AssetId::ResourceId(_) => "resource",
+        match self.asset {
+            Asset::Jig(_) => "JIG",
+            Asset::Course(_) => "course",
+            Asset::Resource(_) => "resource",
         }
     }
 }

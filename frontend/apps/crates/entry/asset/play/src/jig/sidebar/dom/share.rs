@@ -3,12 +3,13 @@ use std::rc::Rc;
 use components::share_asset;
 use dominator::{html, Dom};
 use futures_signals::signal::SignalExt;
+use shared::domain::jig::JigResponse;
 use utils::events;
 
 use super::{super::state::State, track_action};
 
-pub fn render(state: Rc<State>) -> Dom {
-    let share_jig = share_asset::ShareAsset::new(state.player_state.jig_id.into());
+pub fn render(state: Rc<State>, jig: JigResponse) -> Dom {
+    let share_jig = share_asset::ShareAsset::new(jig.into());
 
     let anchor = html!("jig-play-sidebar-action", {
         .property("kind", "share")

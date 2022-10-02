@@ -284,6 +284,22 @@ export class _ extends LitElement {
                     gap: 16px;
                     align-items: center;
                 }
+                .hover .extra-actions ::slotted([slot=actions]) {
+                    text-decoration: none;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    color: var(--dark-blue-1);
+                }
+                .hover .extra-actions ::slotted([slot=actions]:hover) {
+                    color: var(--dark-blue-2);
+                }
+                :host([kind=resource]) .hover .extra-actions ::slotted([slot=actions]) {
+                    color: #ffffff;
+                }
+                :host([kind=resource]) .hover .extra-actions ::slotted([slot=actions]:hover) {
+                    color: #eeeeee;
+                }
                 .hover .primary-action {
                     margin-left: auto;
                     align-self: center;

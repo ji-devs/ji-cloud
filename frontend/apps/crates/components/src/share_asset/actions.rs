@@ -18,7 +18,7 @@ impl ShareAsset {
         let state = self;
         state.loader.load(clone!(state => async move {
             let req = shared::domain::jig::player::JigPlayerSessionCreateRequest {
-                jig_id: *state.asset_id.unwrap_jig(),
+                jig_id: state.asset.unwrap_jig().id,
                 settings: JigPlayerSettings::default(),
             };
 

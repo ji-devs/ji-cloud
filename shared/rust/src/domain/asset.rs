@@ -249,6 +249,21 @@ impl Asset {
         }
     }
 
+    /// check if is jig
+    pub fn is_jig(&self) -> bool {
+        matches!(self, Self::Jig(_))
+    }
+
+    /// check if is course
+    pub fn is_course(&self) -> bool {
+        matches!(self, Self::Course(_))
+    }
+
+    /// check if is resource
+    pub fn is_resource(&self) -> bool {
+        matches!(self, Self::Resource(_))
+    }
+
     /// get id
     pub fn id(&self) -> AssetId {
         match self {

@@ -4,6 +4,7 @@ import "./icon";
 
 export type LabelColor = "blue" | "dark-blue";
 
+// Deprecated
 @customElement("button-icon-label")
 export class _ extends LitElement {
     static get styles() {

@@ -66,7 +66,7 @@ pub fn render(state: Rc<State>) -> Dom {
             // only show share options if jig is published
             match jig {
                 Some(jig) if jig.jig_data.draft_or_live.is_live() => {
-                    Some(share::render(Rc::clone(&state)))
+                    Some(share::render(Rc::clone(&state), jig.clone()))
                 },
                 _ => None,
             }

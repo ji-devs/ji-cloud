@@ -16,7 +16,7 @@ pub struct PostPublish {
 impl PostPublish {
     pub fn new(asset: Asset, asset_edit_state: Rc<AssetEditState>) -> Rc<Self> {
         Rc::new(Self {
-            share_state: ShareAsset::new(asset.id()),
+            share_state: ShareAsset::new(asset.clone()),
             asset,
             loader: AsyncLoader::new(),
             asset_edit_state,
