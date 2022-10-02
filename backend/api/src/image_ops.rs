@@ -60,7 +60,7 @@ pub fn regenerate_images(
     let resized = {
         let (width, height) = size.size();
         let new_image = match size {
-            ImageSize::Canvas => original.resize_exact(width, height, FilterType::Nearest),
+            ImageSize::Canvas => original.resize_exact(width, height, FilterType::Triangle),
 
             ImageSize::Sticker if (width >= original.width() && height >= original.height()) => {
                 original.clone()
