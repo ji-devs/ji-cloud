@@ -4,7 +4,7 @@ use futures_signals::{
     signal::{Mutable, SignalExt},
     signal_vec::SignalVecExt,
 };
-use shared::domain::asset::{DraftOrLive, PrivacyLevel};
+use shared::domain::asset::{Asset, DraftOrLive, PrivacyLevel};
 use utils::{
     events,
     init::analytics,
@@ -12,11 +12,13 @@ use utils::{
 };
 use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement};
 
+use crate::edit::publish::Publish;
+
 use super::add_additional_resource::AddAdditionalResource;
 use super::additional_resource::AdditionalResourceComponent;
 
-use super::state::Publish;
-use super::{super::state::AssetEditState, editable_assets::EditableAsset};
+use super::editable_assets::EditableAsset;
+use super::state::PrePublish;
 use components::{
     hebrew_buttons::HebrewButtons,
     module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback},
@@ -52,13 +54,13 @@ const STR_PUBLIC_POPUP_BODY_2: &str = " private? Please consider sharing your ";
 const STR_PUBLIC_POPUP_BODY_3: &str = " with the Jigzi community.";
 const STR_MISSING_INFO_TOOLTIP: &str = "Please fill in the missing information.";
 
-impl Publish {
-    pub fn render(asset_edit_state: Rc<AssetEditState>) -> Dom {
-        let state: Mutable<Option<Rc<Publish>>> = Mutable::new(None);
+impl PrePublish {
+    pub fn render(publish_state: Rc<Publish>, asset: Asset) -> Dom {
+        let state: Mutable<Option<Rc<PrePublish>>> = Mutable::new(None);
 
         html!("empty-fragment", {
             .future(clone!(state => async move {
-                let _state = Publish::load_new(asset_edit_state).await;
+                let _state = PrePublish::load_data(publish_state, asset).await;
                 state.set(Some(Rc::new(_state)));
             }))
             .property("slot", "main")
@@ -72,7 +74,7 @@ impl Publish {
     }
 }
 
-fn render_page(state: Rc<Publish>) -> Dom {
+fn render_page(state: Rc<PrePublish>) -> Dom {
     html!("jig-edit-publish", {
         .property("assetDisplayName", state.asset_type_name())
         .property("resourceOnTop", state.asset.is_resource())
@@ -206,10 +208,10 @@ fn render_page(state: Rc<Publish>) -> Dom {
                 }))
             }),
 
-            Publish::render_ages(state.clone()),
-            Publish::render_languages(state.clone()),
-            Publish::render_categories_select(state.clone()),
-            Publish::render_category_pills(state.clone()),
+            PrePublish::render_ages(state.clone()),
+            PrePublish::render_languages(state.clone()),
+            PrePublish::render_categories_select(state.clone()),
+            PrePublish::render_category_pills(state.clone()),
 
             html!("button-rect", {
                 .property("slot", "publish-later")
@@ -219,21 +221,21 @@ fn render_page(state: Rc<Publish>) -> Dom {
                 .event(clone!(state => move |_: events::Click| {
                     let url = match &state.asset {
                         EditableAsset::Jig(jig) => {
-                            state.asset_edit_state.set_route_jig(JigEditRoute::Landing);
+                            state.publish_state.asset_edit_state.set_route_jig(JigEditRoute::Landing);
                             Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                                 jig.id,
                                 JigEditRoute::Landing
                             ))).to_string()
                         },
                         EditableAsset::Resource(resource) => {
-                            state.asset_edit_state.set_route_resource(ResourceEditRoute::Landing);
+                            state.publish_state.asset_edit_state.set_route_resource(ResourceEditRoute::Landing);
                             Route::Asset(AssetRoute::Edit(AssetEditRoute::Resource(
                                 resource.id,
                                 ResourceEditRoute::Landing
                             ))).to_string()
                         },
                         EditableAsset::Course(course) => {
-                            state.asset_edit_state.set_route_jig(JigEditRoute::Landing);
+                            state.publish_state.asset_edit_state.set_route_jig(JigEditRoute::Landing);
                             Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
                                 course.id,
                                 CourseEditRoute::Landing

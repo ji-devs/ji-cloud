@@ -7,9 +7,7 @@ use futures_signals::signal::SignalExt;
 use utils::events;
 use web_sys::HtmlElement;
 
-use crate::edit::publish::add_additional_resource::{
-    add_file::state::AddFile, add_link::state::AddLink,
-};
+use super::super::add_additional_resource::{add_file::state::AddFile, add_link::state::AddLink};
 
 use super::state::{ActivePopup, AddAdditionalResource};
 

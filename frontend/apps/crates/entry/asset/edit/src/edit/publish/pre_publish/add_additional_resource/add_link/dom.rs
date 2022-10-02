@@ -9,7 +9,7 @@ use url::{ParseError, Url};
 use utils::events;
 use web_sys::HtmlTextAreaElement;
 
-use crate::edit::publish::add_additional_resource::ActivePopup;
+use super::super::super::add_additional_resource::ActivePopup;
 
 use super::state::AddLink;
 

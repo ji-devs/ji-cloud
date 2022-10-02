@@ -54,25 +54,6 @@ impl From<JigResponse> for EditableJig {
 }
 
 impl EditableJig {
-    pub fn new(jig: JigResponse) -> Self {
-        Self {
-            id: jig.id,
-            display_name: Mutable::new(jig.jig_data.display_name),
-            cover: jig.jig_data.modules.first().cloned(),
-            modules: jig.jig_data.modules,
-            description: Mutable::new(jig.jig_data.description),
-            age_ranges: Mutable::new(HashSet::from_iter(jig.jig_data.age_ranges)),
-            language: Mutable::new(jig.jig_data.language),
-            categories: Mutable::new(HashSet::from_iter(jig.jig_data.categories)),
-            affiliations: Mutable::new(HashSet::from_iter(jig.jig_data.affiliations)),
-            additional_resources: Rc::new(MutableVec::new_with_values(
-                jig.jig_data.additional_resources,
-            )),
-            privacy_level: Mutable::new(jig.jig_data.privacy_level),
-            published_at: jig.published_at,
-        }
-    }
-
     pub fn to_jig_update_request(&self) -> JigUpdateDraftDataRequest {
         // don't include additional_resources here since they're handled in separately
         JigUpdateDraftDataRequest {

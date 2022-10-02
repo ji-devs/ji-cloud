@@ -3,12 +3,12 @@ use futures_signals::signal::{Signal, SignalExt};
 use std::rc::Rc;
 use utils::{events, languages::Language};
 
-use super::super::state::Publish;
+use super::super::state::PrePublish;
 
 const STR_LANGUAGE_LABEL: &str = "Language of instruction";
 const STR_LANGUAGE_PLACEHOLDER: &str = "Select language";
 
-impl Publish {
+impl PrePublish {
     pub fn render_languages(self: Rc<Self>) -> Dom {
         let state = Rc::clone(&self);
         html!("input-select", {
@@ -33,7 +33,7 @@ impl Publish {
     }
 }
 
-fn render_language(Language(lang_code, land_label): &Language, state: Rc<Publish>) -> Dom {
+fn render_language(Language(lang_code, land_label): &Language, state: Rc<PrePublish>) -> Dom {
     html!("input-select-option", {
         .text(land_label)
         .property_signal("selected", state.asset.language().signal_cloned().map(clone!(lang_code => move |selected_lang| {
@@ -47,7 +47,7 @@ fn render_language(Language(lang_code, land_label): &Language, state: Rc<Publish
     })
 }
 
-fn language_value_signal(state: Rc<Publish>) -> impl Signal<Item = &'static str> {
+fn language_value_signal(state: Rc<PrePublish>) -> impl Signal<Item = &'static str> {
     state.asset.language().signal_cloned().map(clone!(state => move |selected_language| {
         match state.languages.iter().find(|Language(lang_code, _)| lang_code == &selected_language) {
             Some(lang) => lang.1,

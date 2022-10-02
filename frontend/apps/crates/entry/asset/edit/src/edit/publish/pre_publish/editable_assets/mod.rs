@@ -11,7 +11,7 @@ pub use editable_resource::EditableResource;
 use futures_signals::{signal::Mutable, signal_vec::MutableVec};
 use shared::domain::{
     additional_resource::AdditionalResource,
-    asset::{AssetId, PrivacyLevel},
+    asset::{Asset, AssetId, PrivacyLevel},
     category::CategoryId,
     meta::{AffiliationId, AgeRangeId},
     module::LiteModule,
@@ -122,5 +122,15 @@ impl EditableAsset {
 
     pub fn _is_course(&self) -> bool {
         matches!(self, Self::Course(_))
+    }
+}
+
+impl From<Asset> for EditableAsset {
+    fn from(asset: Asset) -> Self {
+        match asset {
+            Asset::Jig(jig) => EditableAsset::Jig(jig.into()),
+            Asset::Course(course) => EditableAsset::Course(course.into()),
+            Asset::Resource(resource) => EditableAsset::Resource(resource.into()),
+        }
     }
 }

@@ -3,7 +3,7 @@ use std::rc::Rc;
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
 
-use super::super::state::Publish as PublishState;
+use super::super::state::PrePublish as PublishState;
 
 pub struct AddAdditionalResource {
     pub(super) active_popup: Mutable<Option<ActivePopup>>,

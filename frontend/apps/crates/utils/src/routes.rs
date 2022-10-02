@@ -224,14 +224,12 @@ pub enum JigEditRoute {
     Landing,
     Module(ModuleId),
     Publish,
-    PostPublish,
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ResourceEditRoute {
     Landing,
     Cover(ModuleId),
-    PostPublish,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -239,7 +237,6 @@ pub enum CourseEditRoute {
     Landing,
     Cover(ModuleId),
     Publish,
-    PostPublish,
 }
 
 #[derive(Debug, Clone)]
@@ -423,12 +420,6 @@ impl Route {
                     JigEditRoute::Publish,
                 )))
             }
-            ["asset", "edit", "jig", jig_id, "post-publish"] => {
-                Self::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
-                    JigId(Uuid::from_str(jig_id).unwrap_ji()),
-                    JigEditRoute::PostPublish,
-                )))
-            }
             ["asset", "edit", "jig", "debug"] => Self::Asset(AssetRoute::Edit(
                 AssetEditRoute::Jig(JigId(Uuid::from_u128(0)), JigEditRoute::Landing),
             )),
@@ -440,12 +431,6 @@ impl Route {
                 Self::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                     JigId(Uuid::from_str(jig_id).unwrap_ji()),
                     JigEditRoute::Module(ModuleId(Uuid::from_str(module_id).unwrap_ji())),
-                )))
-            }
-            ["asset", "edit", "resource", resource_id, "post-publish"] => {
-                Self::Asset(AssetRoute::Edit(AssetEditRoute::Resource(
-                    ResourceId(Uuid::from_str(resource_id).unwrap_ji()),
-                    ResourceEditRoute::PostPublish,
                 )))
             }
             ["asset", "edit", "resource", "debug"] => {
@@ -470,12 +455,6 @@ impl Route {
                 Self::Asset(AssetRoute::Edit(AssetEditRoute::Course(
                     CourseId(Uuid::from_str(course_id).unwrap_ji()),
                     CourseEditRoute::Publish,
-                )))
-            }
-            ["asset", "edit", "course", course_id, "post-publish"] => {
-                Self::Asset(AssetRoute::Edit(AssetEditRoute::Course(
-                    CourseId(Uuid::from_str(course_id).unwrap_ji()),
-                    CourseEditRoute::PostPublish,
                 )))
             }
             ["asset", "edit", "course", "debug"] => Self::Asset(AssetRoute::Edit(
@@ -712,9 +691,6 @@ impl From<&Route> for String {
                         JigEditRoute::Publish => {
                             format!("/asset/edit/jig/{}/publish", jig_id.0)
                         }
-                        JigEditRoute::PostPublish => {
-                            format!("/asset/edit/jig/{}/post-publish", jig_id.0)
-                        }
                     },
                     AssetEditRoute::Resource(resource_id, route) => match route {
                         ResourceEditRoute::Landing => {
@@ -726,9 +702,6 @@ impl From<&Route> for String {
                                 resource_id.0, cover_id.0
                             )
                         }
-                        ResourceEditRoute::PostPublish => {
-                            format!("/asset/edit/resource/{}/post-publish", resource_id.0)
-                        }
                     },
                     AssetEditRoute::Course(course_id, route) => match route {
                         CourseEditRoute::Landing => {
@@ -739,9 +712,6 @@ impl From<&Route> for String {
                         }
                         CourseEditRoute::Publish => {
                             format!("/asset/edit/course/{}/publish", course_id.0)
-                        }
-                        CourseEditRoute::PostPublish => {
-                            format!("/asset/edit/course/{}/post-publish", course_id.0)
                         }
                     },
                 },

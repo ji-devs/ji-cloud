@@ -40,7 +40,7 @@ impl From<CourseResponse> for EditableCourse {
             cover: course.course_data.cover,
             items: course.course_data.items,
             display_name: Mutable::new(course.course_data.display_name),
-            description: Mutable::new(course.course_data.description.clone()),
+            description: Mutable::new(course.course_data.description),
             age_ranges: Mutable::new(HashSet::from_iter(course.course_data.age_ranges)),
             language: Mutable::new(course.course_data.language),
             categories: Mutable::new(HashSet::from_iter(course.course_data.categories)),
@@ -55,25 +55,6 @@ impl From<CourseResponse> for EditableCourse {
 }
 
 impl EditableCourse {
-    pub fn new(course: CourseResponse) -> Self {
-        Self {
-            id: course.id,
-            display_name: Mutable::new(course.course_data.display_name),
-            cover: course.course_data.cover,
-            items: course.course_data.items,
-            description: Mutable::new(course.course_data.description),
-            age_ranges: Mutable::new(HashSet::from_iter(course.course_data.age_ranges)),
-            language: Mutable::new(course.course_data.language),
-            categories: Mutable::new(HashSet::from_iter(course.course_data.categories)),
-            affiliations: Mutable::new(HashSet::from_iter(course.course_data.affiliations)),
-            additional_resources: Rc::new(MutableVec::new_with_values(
-                course.course_data.additional_resources,
-            )),
-            privacy_level: Mutable::new(course.course_data.privacy_level),
-            published_at: course.published_at,
-        }
-    }
-
     pub fn to_course_update_request(&self) -> CourseUpdateDraftDataRequest {
         // don't include additional_resources here since they're handled in separately
         CourseUpdateDraftDataRequest {

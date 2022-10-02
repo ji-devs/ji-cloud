@@ -7,13 +7,13 @@ use shared::domain::meta::AgeRange;
 use std::rc::Rc;
 use utils::{events, unwrap::UnwrapJiExt};
 
-use super::super::state::Publish;
+use super::super::state::PrePublish;
 
 const STR_AGE_LABEL: &str = "Age range";
 const STR_AGE_PLACEHOLDER: &str = "Select one or more";
 const STR_ALL_AGES: &str = "All ages";
 
-impl Publish {
+impl PrePublish {
     pub fn render_ages(self: Rc<Self>) -> Dom {
         let state = Rc::clone(&self);
         html!("input-select", {
@@ -54,7 +54,7 @@ impl Publish {
     }
 }
 
-fn render_age(age: &AgeRange, state: Rc<Publish>) -> Dom {
+fn render_age(age: &AgeRange, state: Rc<PrePublish>) -> Dom {
     let age_id = age.id;
     html!("input-select-option", {
         .text(&age.display_name)
@@ -72,7 +72,7 @@ fn render_age(age: &AgeRange, state: Rc<Publish>) -> Dom {
     })
 }
 
-fn age_value_signal(state: Rc<Publish>) -> impl Signal<Item = String> {
+fn age_value_signal(state: Rc<PrePublish>) -> impl Signal<Item = String> {
     map_ref! {
         let selected_ages = state.asset.age_ranges().signal_cloned(),
         let available_ages = state.ages.signal_cloned() => {

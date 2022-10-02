@@ -2,8 +2,8 @@ use std::rc::Rc;
 
 use super::{
     super::edit::publish::Publish, course::jig_selection::state::JigSelection,
-    module_iframe::ModuleIframe, post_publish::PostPublish, selection::dom::SelectionDom,
-    sidebar::dom::SidebarDom, state::AssetEditState,
+    module_iframe::ModuleIframe, selection::dom::SelectionDom, sidebar::dom::SidebarDom,
+    state::AssetEditState,
 };
 use components::{
     overlay::handle::OverlayHandle,
@@ -53,29 +53,17 @@ impl AssetEditState {
                                     Some(ModuleIframe::new(state.asset_id, module_id).render())
                                 },
                                 JigEditRoute::Publish => {
-                                    Some(Publish::render(Rc::clone(&state)))
-                                }
-                                JigEditRoute::PostPublish => {
-                                    Some(PostPublish::new(
-                                        state.asset_id,
-                                        Rc::clone(&state)
-                                    ).render())
+                                    Some(Publish::new(Rc::clone(&state)).render())
                                 }
                             }
                         },
                         AssetEditRoute::Resource(_resource_id, resource_edit_route) => {
                             match resource_edit_route {
                                 ResourceEditRoute::Landing => {
-                                    Some(Publish::render(Rc::clone(&state)))
+                                    Some(Publish::new(Rc::clone(&state)).render())
                                 },
                                 ResourceEditRoute::Cover(cover_id) => {
                                     Some(ModuleIframe::new(state.asset_id, cover_id).render())
-                                },
-                                ResourceEditRoute::PostPublish => {
-                                    Some(PostPublish::new(
-                                        state.asset_id,
-                                        Rc::clone(&state)
-                                    ).render())
                                 },
                             }
                         },
@@ -88,13 +76,7 @@ impl AssetEditState {
                                     Some(ModuleIframe::new(state.asset_id, cover_id).render())
                                 },
                                 CourseEditRoute::Publish => {
-                                    Some(Publish::render(Rc::clone(&state)))
-                                },
-                                CourseEditRoute::PostPublish => {
-                                    Some(PostPublish::new(
-                                        state.asset_id,
-                                        Rc::clone(&state)
-                                    ).render())
+                                    Some(Publish::new(Rc::clone(&state)).render())
                                 },
                             }
                         },

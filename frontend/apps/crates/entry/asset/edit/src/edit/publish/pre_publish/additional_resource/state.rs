@@ -3,7 +3,7 @@ use std::rc::Rc;
 use awsm_web::loaders::helpers::AsyncLoader;
 use shared::domain::additional_resource::AdditionalResource;
 
-use super::super::state::Publish as PublishState;
+use super::super::state::PrePublish as PublishState;
 
 pub struct AdditionalResourceComponent {
     pub(super) loader: AsyncLoader,

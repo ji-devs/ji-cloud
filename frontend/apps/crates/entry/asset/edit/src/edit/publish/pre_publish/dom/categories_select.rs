@@ -4,12 +4,12 @@ use futures_signals::{map_ref, signal::Signal};
 use std::rc::Rc;
 use utils::unwrap::UnwrapJiExt;
 
-use super::super::state::Publish;
+use super::super::state::PrePublish;
 
 const STR_CATEGORIES_LABEL: &str = "Keywords";
 const STR_CATEGORIES_PLACEHOLDER: &str = "Select one or more";
 
-impl Publish {
+impl PrePublish {
     pub fn render_categories_select(self: Rc<Self>) -> Dom {
         let state = Rc::clone(&self);
 

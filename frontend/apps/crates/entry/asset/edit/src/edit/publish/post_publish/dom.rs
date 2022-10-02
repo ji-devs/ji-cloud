@@ -1,6 +1,6 @@
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
-use shared::domain::asset::AssetId;
+use shared::domain::asset::Asset;
 use utils::{
     asset::{AssetPlayerOptions, JigPlayerOptions},
     events,
@@ -16,18 +16,18 @@ impl PostPublish {
         html!("post-publish", {
             .property("slot", "main")
             .apply(clone!(state => move |dom| {
-                match state.asset_edit_state.asset_id {
-                    AssetId::ResourceId(_) => {
+                match state.asset {
+                    Asset::Resource(_) => {
                         dom.children(
                             render_resources_focused_actions(&state)
                         )
                     },
-                    AssetId::JigId(_) => {
+                    Asset::Jig(_) => {
                         dom.children(
                             render_modules_focused_actions(&state)
                         )
                     },
-                    AssetId::CourseId(_) => todo!(),
+                    Asset::Course(_) => todo!(),
                 }
             }))
         })

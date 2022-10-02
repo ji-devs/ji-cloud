@@ -52,24 +52,6 @@ impl From<ResourceResponse> for EditableResource {
 }
 
 impl EditableResource {
-    pub fn new(resource: ResourceResponse) -> Self {
-        Self {
-            id: resource.id,
-            display_name: Mutable::new(resource.resource_data.display_name),
-            cover: resource.resource_data.cover,
-            description: Mutable::new(resource.resource_data.description),
-            age_ranges: Mutable::new(HashSet::from_iter(resource.resource_data.age_ranges)),
-            language: Mutable::new(resource.resource_data.language),
-            categories: Mutable::new(HashSet::from_iter(resource.resource_data.categories)),
-            affiliations: Mutable::new(HashSet::from_iter(resource.resource_data.affiliations)),
-            additional_resources: Rc::new(MutableVec::new_with_values(
-                resource.resource_data.additional_resources,
-            )),
-            privacy_level: Mutable::new(resource.resource_data.privacy_level),
-            published_at: resource.published_at,
-        }
-    }
-
     pub fn to_resource_update_request(&self) -> ResourceUpdateDraftDataRequest {
         // don't include additional_resources here since they're handled in separately
         ResourceUpdateDraftDataRequest {

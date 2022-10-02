@@ -1,8 +1,7 @@
 mod actions;
-mod add_additional_resource;
-mod additional_resource;
 mod dom;
-mod editable_assets;
+mod post_publish;
+mod pre_publish;
 mod state;
 
 pub use dom::*;

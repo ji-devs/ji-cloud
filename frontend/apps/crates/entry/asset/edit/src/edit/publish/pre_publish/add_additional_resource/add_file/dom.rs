@@ -9,7 +9,7 @@ use futures_signals::{
 
 use utils::{component::Component, events};
 
-use crate::edit::publish::add_additional_resource::ActivePopup;
+use super::super::super::add_additional_resource::ActivePopup;
 
 use super::state::AddFile;
 

@@ -4,9 +4,9 @@ use shared::domain::category::CategoryId;
 use std::rc::Rc;
 use utils::{events, unwrap::UnwrapJiExt};
 
-use super::super::state::Publish;
+use super::super::state::PrePublish;
 
-impl Publish {
+impl PrePublish {
     pub fn render_category_pills(self: Rc<Self>) -> Dom {
         let state = Rc::clone(&self);
         html!("div", {
@@ -20,7 +20,7 @@ impl Publish {
     }
 }
 
-fn render_pill(state: Rc<Publish>, category_id: CategoryId) -> Dom {
+fn render_pill(state: Rc<PrePublish>, category_id: CategoryId) -> Dom {
     html!("pill-close", {
         .property_signal("label", state.category_label_lookup.signal_cloned().map(move |category_label_lookup| {
             category_label_lookup.get(&category_id).unwrap_ji().clone()
