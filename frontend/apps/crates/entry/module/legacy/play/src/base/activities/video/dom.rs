@@ -104,7 +104,7 @@ impl Video {
                     .property("start", start.round())
                     .property("end", end.round())
             })
-            .property("videoId", yt.url.get_id())
+            .property("videoId", yt.get_id())
             .property("hideControls", true)
             .style("position", "absolute")
             .style_signal("transform", state.transform_signal())
