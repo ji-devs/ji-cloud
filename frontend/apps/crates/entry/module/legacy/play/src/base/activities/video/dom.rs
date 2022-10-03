@@ -2,7 +2,7 @@ use super::state::Video;
 use crate::base::styles;
 use components::stickers::video::ext::*;
 use dominator::{clone, html, with_node, Dom};
-use shared::domain::module::body::{_groups::design::YoutubeVideo, legacy::activity::VideoSource};
+use shared::domain::module::body::{_groups::design::YoutubeUrl, legacy::activity::VideoSource};
 use std::rc::Rc;
 use utils::prelude::*;
 
@@ -94,7 +94,7 @@ impl Video {
         })
     }
 
-    pub fn render_youtube(self: Rc<Self>, yt: &YoutubeVideo) -> Dom {
+    pub fn render_youtube(self: Rc<Self>, yt: &YoutubeUrl) -> Dom {
         let state = self;
 
         html!("video-youtube-player" => HtmlElement, {
