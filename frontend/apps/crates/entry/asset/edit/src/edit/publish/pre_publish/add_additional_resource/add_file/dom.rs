@@ -17,7 +17,7 @@ const STR_SAVE: &str = "Save";
 const STR_CANCEL: &str = "Cancel";
 const STR_BACK: &str = "Back";
 const STR_ERROR_MSG_TYPE: &str =
-    "Oh no! We don't accept that type of file. We accept all image, video, audio and PDF files.";
+    "Oh no! We don't accept that type of file. We accept all image, audio and PDF files.";
 const STR_ERROR_MSG_SIZE: &str = "Oh no! This file is too heavy. Maximum file size: 5 MB.";
 
 impl AddFile {
