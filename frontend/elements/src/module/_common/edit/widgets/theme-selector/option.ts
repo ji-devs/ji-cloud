@@ -1,9 +1,12 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
 import { ThemeId, THEMES } from "@elements/_themes/themes";
-import { cardBackIconPath } from "@elements/module/_groups/cards/helpers";
 
-@customElement("theme-selector-cards-option")
+const themeIconPath = (theme: ThemeId, hover: boolean, optionType?: String): string => {
+    return `theme/${theme}/icon${optionType ? `-${optionType}` : ""}${hover ? "-hover" : ""}.jpg`;
+};
+
+@customElement("theme-selector-option")
 export class _ extends LitElement {
     static get styles() {
         return [
@@ -37,83 +40,49 @@ export class _ extends LitElement {
 
                 .content {
                     position: relative;
-                    top: 0px;
-                    left: 0px;
-                }
-                .left,
-                .right {
-                    box-sizing: border-box;
-                    width: 76px;
-                    height: 76px;
-                }
-                @media (min-width: 1920px) {
-                    .left,
-                    .right {
-                        width: 112px;
-                        height: 112px;
-                    }
-                }
-                .left {
-                    position: absolute;
-                    top: 16px;
-                    left: 16px;
-                    border-radius: 16px;
-                    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16);
-                }
-
-                .right {
-                    position: absolute;
-                    top: 28px;
-                    left: calc(54px + 13px);
-                }
-                @media (min-width: 1920px) {
-                    .right {
-                        top: 32px;
-                        left: calc(88px + 13px);
-                    }
-                }
-
-                .right {
+                    top: 0;
+                    left: 0;
                     display: flex;
-                    justify-content: center;
+                    flex-direction: column;
                     align-items: center;
+                    margin-top: 20px;
+                }
+                @media (min-width: 1920px) {
+                    .content {
+                        margin-top: 30px;
+                    }
+                }
+
+                img-ui {
+                    margin-bottom: 14px;
+                    width: 136px;
+                }
+                @media (min-width: 1920px) {
+                    img-ui {
+                        margin-bottom: 16px;
+                        width: 200px;
+                    }
                 }
 
                 .menu {
                     position: absolute;
                     top: -16px;
-                    right: -16px;
+                    right: 0px;
                     z-index: 1;
-                }
-
-                .label {
-                    position: absolute;
-                    left: 0px;
-                    text-align: center;
-                    width: 100%;
-                    font-size: 14px;
-                    font-weight: 500;
-                    color: var(--dark-blue-8);
-                    top: 114px;
-                }
-                @media (min-width: 1920px) {
-                    .label {
-                        top: 160px;
-                    }
                 }
 
                 .hidden {
                     display: none;
                 }
+                .label {
+                    text-align: center;
+                    font-size: 14px;
+                    font-weight: 500;
+                    color: var(--dark-blue-8);
+                }
 
                 :host([selected]) .label {
                     color: var(--main-blue);
-                }
-
-                img-ui {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
                 }
             `,
         ];
@@ -125,8 +94,11 @@ export class _ extends LitElement {
     @property({ type: Boolean, reflect: true })
     selected: boolean = false;
 
-    @property({ type: Boolean })
+    @property({ type: Boolean, reflect: true })
     hover: boolean = false;
+
+    @property({ type: String })
+    optionType?: String;
 
     onEnter() {
         this.hover = true;
@@ -137,7 +109,7 @@ export class _ extends LitElement {
     }
 
     render() {
-        const { theme, hover } = this;
+        const { theme, optionType, hover } = this;
 
         const sectionClasses = classMap({
             hover,
@@ -149,6 +121,7 @@ export class _ extends LitElement {
         const imageHoverClass = classMap({
             hidden: !hover,
         });
+
         return html`
             <section
                 class=${sectionClasses}
@@ -156,19 +129,14 @@ export class _ extends LitElement {
                 @mouseleave="${this.onLeave.bind(this)}"
             >
                 <div class="content">
-                    <div class="right">
-                        <img-ui path="${cardBackIconPath(theme)}"></img-ui>
-                    </div>
-                    <div class="left">
-                        <img-ui
-                            class=${imageClass}
-                            path="theme/${theme}/card-front-icon.svg"
-                        ></img-ui>
-                        <img-ui
-                            class=${imageHoverClass}
-                            path="theme/${theme}/card-front-icon-hover.svg"
-                        ></img-ui>
-                    </div>
+                    <img-ui
+                        class=${imageClass}
+                        path="${themeIconPath(theme, false, optionType)}"
+                    ></img-ui>
+                    <img-ui
+                        class=${imageHoverClass}
+                        path="${themeIconPath(theme, true, optionType)}"
+                    ></img-ui>
                     <div class="label">${THEMES[theme].label.en}</div>
                 </div>
             </section>

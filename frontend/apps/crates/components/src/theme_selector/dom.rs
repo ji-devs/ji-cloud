@@ -5,14 +5,14 @@ use strum::IntoEnumIterator;
 use utils::prelude::*;
 
 pub fn render_design(state: Rc<ThemeSelector>, slot: Option<&str>, action: Option<Dom>) -> Dom {
-    render("theme-selector-design-option", state, slot, action)
+    render(None, state, slot, action)
 }
 pub fn render_cards(state: Rc<ThemeSelector>, slot: Option<&str>, action: Option<Dom>) -> Dom {
-    render("theme-selector-cards-option", state, slot, action)
+    render(Some("cards"), state, slot, action)
 }
 
 fn render(
-    element_name: &str,
+    option_type: Option<&str>,
     state: Rc<ThemeSelector>,
     slot: Option<&str>,
     action: Option<Dom>,
@@ -29,8 +29,9 @@ fn render(
         })
         .children(ThemeId::iter()
           .map(|theme_id| {
-            html!(element_name, {
+            html!("theme-selector-option", {
                 .property("theme", theme_id.as_str_id())
+                .property("optionType", option_type)
                 .property_signal("selected", state.selected_signal(theme_id))
                 .event(clone!(state => move |_evt:events::Click| {
                     state.set_theme(theme_id);

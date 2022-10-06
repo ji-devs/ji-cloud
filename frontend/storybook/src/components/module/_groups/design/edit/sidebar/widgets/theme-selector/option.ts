@@ -5,8 +5,8 @@ import {
     ThemeIds,
     ThemeControl,
 } from "~/components/module/_common/theme";
-import "@elements/module/_groups/design/edit/sidebar/widgets/theme-selector/option";
-import { STATE } from "@elements/module/_groups/design/edit/sidebar/widgets/theme-selector/option";
+import "@elements/module/_common/edit/widgets/theme-selector/option";
+import { STATE } from "@elements/module/_common/edit/widgets/theme-selector/option";
 
 export default {
     title: "Module / _GROUPS / Design / Edit / Sidebar / Widgets / Theme Selector",
