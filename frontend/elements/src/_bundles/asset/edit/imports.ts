@@ -66,7 +66,6 @@ import "@elements/entry/asset/edit/publish/resource-button-add";
 import "@elements/core/progress-bar/progress-bar";
 import "@elements/entry/asset/edit/post-publish/post-publish";
 import "@elements/entry/asset/edit/post-publish/post-publish-action";
-import "@elements/module/_groups/design/edit/sidebar/widgets/theme-selector/option";
 import "@elements/_bundles/_sub-bundles/hebrew-buttons";
 import "@elements/core/modals/confirm";
 import "@elements/core/modals/video";
