@@ -9,8 +9,8 @@ use utils::{events::ModuleResizeEvent, iframe::*, prelude::*, resize::*};
 
 use super::{ending::*, loading::dom::render_loading, state::*};
 use crate::{
-    audio::mixer::AUDIO_MIXER, instructions::player::InstructionsPlayer,
-    module::_common::play::prelude::*, overlay::container::OverlayContainer,
+    audio::mixer::AUDIO_MIXER, module::_common::play::prelude::*,
+    overlay::container::OverlayContainer,
 };
 use shared::domain::module::body::{BodyExt, ModeExt, StepExt};
 
@@ -136,31 +136,19 @@ where
     Step: StepExt + 'static,
 {
     let instructions = base.get_instructions();
-    let feedback_player = base.get_feedback_player();
+    let feedback = base.get_feedback();
     let is_screenshot = utils::screenshot::is_screenshot_url();
 
     html!("empty-fragment", {
         .property("slot", "main")
         .child(Base::render(base.clone()))
-        .apply_if(instructions.is_some() && !is_screenshot, clone!(base => move |dom| {
-            dom
-                .child_signal(base.play_phase().signal().map(clone!(base => move |curr_play_phase| {
-                    match curr_play_phase {
-                        ModulePlayPhase::Playing => {
-                            Some(InstructionsPlayer::render(
-                                InstructionsPlayer::new(base.get_instructions().unwrap_ji(), None::<fn()>),
-                            ))
-                        }
-                        _ => None
-                    }
-                })))
-        }))
-        .child_signal(feedback_player.signal_cloned().map(|feedback_player| {
-            feedback_player.map(InstructionsPlayer::render)
+        .future(feedback.signal_cloned().for_each(move |feedback| async move {
+            let msg = IframeAction::new(ModuleToJigPlayerMessage::instructions_once(feedback.clone()));
+            let _ = msg.try_post_message_to_player();
         }))
         .apply_if(jig_player, |dom| {
             dom
-                .global_event(|evt:dominator_helpers::events::Message| {
+                .global_event(clone!(state => move |evt: dominator_helpers::events::Message| {
                     if let Ok(msg) = evt.try_serde_data::<IframeAction<JigToModulePlayerMessage>>() {
                         match msg.data {
                             JigToModulePlayerMessage::Play => {
@@ -170,12 +158,17 @@ where
                                 AUDIO_MIXER.with(|mixer| mixer.pause_all());
                             },
                             JigToModulePlayerMessage::TimerDone => {
-                            }
+                            },
+                            JigToModulePlayerMessage::InstructionsDone => {
+                                if let InitPhase::Ready(base) = &*state.phase.get_cloned() {
+                                    base.base.handle_instructions_ended();
+                                }
+                            },
                         }
                     } else {
                         log::info!("hmmm got other iframe message...");
                     }
-                })
+                }))
                 .after_inserted(|_elem| {
                     //On mount - send an empty IframeInit message to let the player know we're ready
                     IframeInit::empty()
@@ -207,6 +200,9 @@ where
 
                     ModulePlayPhase::Playing => {
                         if jig_player {
+                            let msg = IframeAction::new(ModuleToJigPlayerMessage::instructions(instructions.clone()));
+                            let _ = msg.try_post_message_to_player();
+
                             let timer_seconds = base.get_timer_minutes().map(|minutes| minutes * 60);
 
                             let msg = IframeAction::new(ModuleToJigPlayerMessage::Start(timer_seconds));

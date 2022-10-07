@@ -28,5 +28,6 @@ pub mod resize;
 pub mod routes;
 pub mod screenshot;
 pub mod storage;
+pub mod text;
 pub mod themes;
 pub mod unwrap;

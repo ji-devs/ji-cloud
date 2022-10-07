@@ -431,6 +431,13 @@ pub struct Instructions {
     pub audio: Option<Audio>,
 }
 
+impl Instructions {
+    /// Whether the instructions actually have either text or audio content set
+    pub fn has_content(&self) -> bool {
+        self.text.is_some() || self.audio.is_some()
+    }
+}
+
 #[derive(Clone, Serialize, Deserialize, Debug)]
 /// Background
 pub enum Background {

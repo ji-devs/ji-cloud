@@ -6,7 +6,8 @@ use shared::domain::{
             Instructions,
             _groups::design::Backgrounds,
             drag_drop::{
-                Item, Mode, ModuleData as RawData, PlaySettings, Step, TargetArea, TargetTransform,
+                Item, Mode, ModuleData as RawData, Next, PlaySettings, Step, TargetArea,
+                TargetTransform,
             },
         },
         ModuleId,
@@ -14,7 +15,7 @@ use shared::domain::{
 };
 use utils::prelude::*;
 
-use futures_signals::signal::Mutable;
+use futures_signals::signal::{Mutable, ReadOnlyMutable};
 use std::rc::Rc;
 
 pub struct Base {
@@ -24,6 +25,7 @@ pub struct Base {
     pub theme_id: ThemeId,
     pub instructions: Instructions,
     pub feedback: Instructions,
+    pub feedback_signal: Mutable<Option<Instructions>>,
     pub settings: PlaySettings,
     pub backgrounds: Backgrounds,
     pub items: Vec<Item>,
@@ -52,6 +54,7 @@ impl Base {
             theme_id,
             instructions: content.instructions,
             feedback: content.feedback,
+            feedback_signal: Mutable::new(None),
             settings: content.play_settings,
             backgrounds: content.backgrounds,
             items: content.items,
@@ -65,6 +68,16 @@ impl Base {
 impl BaseExt for Base {
     fn get_instructions(&self) -> Option<Instructions> {
         Some(self.instructions.clone())
+    }
+
+    fn get_feedback(&self) -> ReadOnlyMutable<Option<Instructions>> {
+        self.feedback_signal.read_only()
+    }
+
+    fn handle_instructions_ended(&self) {
+        if let Next::PlaceAll = self.settings.next {
+            self.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
+        }
     }
 
     fn get_timer_minutes(&self) -> Option<u32> {

@@ -1,5 +1,4 @@
 use components::{
-    instructions::player::InstructionsPlayer,
     stickers::dom::{
         mixin_sticker_button_signal, render_sticker_raw, BaseRawRenderOptions,
         StickerRawRenderOptions, TransformOverride,
@@ -22,17 +21,14 @@ pub fn render(state: Rc<PlayState>) -> Dom {
         // display block for touch action to work
         .style("display", "block")
         .style("touch-action", "none")
-        .future(state.all_interactive_items_have_sizes().for_each(clone!(state, targets_ready => move |x| {
+        .future(state.all_interactive_items_have_sizes().for_each(clone!(state, targets_ready => move |has_sizes| {
             clone!(state, targets_ready => async move {
-                if x {
+                if has_sizes {
                     state.set_targets();
                     targets_ready.set_neq(true);
                 }
             })
         })))
-        .child_signal(state.feedback_player.signal_cloned().map(|feedback| {
-            feedback.map(InstructionsPlayer::render)
-        }))
         .child(TracesShow::render(TracesShow::new(
                 state.game.base.target_areas
                     .iter()

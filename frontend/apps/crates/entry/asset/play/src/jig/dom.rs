@@ -1,6 +1,7 @@
 use super::{actions, sidebar};
+use components::overlay::handle::OverlayHandle;
 use components::share_asset::ShareAsset;
-use dominator::{clone, events, html, with_node, Dom};
+use dominator::{clone, html, with_node, Dom};
 use dominator_helpers::{events::Message, signals::DefaultSignal};
 use futures_signals::map_ref;
 use futures_signals::signal::{Signal, SignalExt};
@@ -8,9 +9,11 @@ use js_sys::Reflect;
 use shared::domain::{jig::JigResponse, module::ModuleKind};
 use std::collections::HashMap;
 use std::rc::Rc;
+use utils::events;
 use utils::iframe::{AssetPlayerToPlayerPopup, IframeMessageExt};
 use utils::init::analytics;
 use utils::js_wrappers::is_iframe;
+use utils::prelude::is_in_iframe;
 use utils::{
     iframe::{IframeAction, ModuleToJigPlayerMessage},
     prelude::SETTINGS,
@@ -22,10 +25,43 @@ use web_sys::{HtmlElement, HtmlIFrameElement};
 
 use super::state::JigPlayer;
 
+const DEFAULT_INSTRUCTIONS_TEXT: &str = "Are you ready?";
+
+enum ShowInstructions {
+    AudioOnly,
+    All,
+}
+
 impl JigPlayer {
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self;
         actions::load_data(state.clone());
+
+        let should_show_instructions = map_ref! {
+            let instructions = state.instructions.signal_cloned(),
+            let started = state.started.signal_cloned()
+            => {
+                if let Some(instructions) = instructions {
+                    if instructions.text.is_none() && instructions.audio.is_some() && !instructions.persisted {
+                        Some(ShowInstructions::AudioOnly)
+                    }
+                    else if instructions.text.is_none() && instructions.audio.is_none() && !instructions.persisted {
+                        // If persisted is false, and there is no text, then we don't want to display the popup.
+                        None
+                    } else {
+                        // Otherwise, if the activity has started, we can display it.
+                        if *started {
+                            Some(ShowInstructions::All)
+                        } else {
+                            None
+                        }
+                    }
+                } else {
+                    // No instructions have been set for this activity.
+                    None
+                }
+            }
+        };
 
         html!("jig-play-landing", {
             .future(state.jig.signal_cloned().for_each(clone!(state => move |jig| {
@@ -47,6 +83,27 @@ impl JigPlayer {
 
                 async {}
             })))
+            .future(state.active_module.signal_cloned().for_each(clone!(state => move |_active_module| {
+                state.started.set_neq(false);
+                state.instructions.set(None);
+                state.instructions_visible.set_neq(false);
+                async {}
+            })))
+            .future(should_show_instructions.for_each(clone!(state => move |should_show| {
+                match should_show {
+                    Some(ShowInstructions::AudioOnly) => {
+                        actions::play_instructions_audio(state.clone());
+                    }
+                    Some(ShowInstructions::All) => {
+                        // Only show, never hide from here. Otherwise we can cause a race condition between Play and Pause.
+                        actions::show_instructions(state.clone(), true);
+                    }
+                    _ => {
+
+                    }
+                }
+                async {}
+            })))
             .property_signal("rtl", state.jig.signal_cloned().map(|jig| {
                 jig.map(|jig| jig.jig_data.default_player_settings.direction.is_rtl())
             }))
@@ -61,6 +118,7 @@ impl JigPlayer {
                 };
                 false
             }))
+            .property("inIframe", is_in_iframe())
             .global_event(clone!(state => move |evt:Message| {
                 match evt.try_serde_data::<IframeAction<ModuleToJigPlayerMessage>>() {
                     Err(_) => {},
@@ -158,6 +216,79 @@ impl JigPlayer {
                 } else {
                     None
                 }
+            })))
+            .child_signal(state.instructions.signal_cloned().map(clone!(state => move |instructions| {
+                instructions.map(clone!(state => move |instructions| {
+                    html!("empty-fragment", {
+                        .property("slot", "instructions")
+                        .child(html!("button-icon", {
+                            .style("width", "40px")
+                            .style("height", "40px")
+                            .property("iconPath", "jig/play/icn-instructions.svg")
+                            .property("iconHoverPath", "jig/play/icn-instructions-hover.svg")
+                            .event(clone!(state => move |_evt: events::Click| {
+                                actions::show_instructions(state.clone(), true);
+                            }))
+                        }))
+                        .child_signal(state.instructions_visible.signal_ref(clone!(state, instructions => move |visible| {
+                            if *visible {
+                                Some(html!("empty-fragment" => HtmlElement, {
+                                    .with_node!(elem => {
+                                        .apply(OverlayHandle::lifecycle(
+                                            clone!(state, instructions => move || {
+                                                html!("overlay-tooltip-info", {
+                                                    .property("marginX", -16)
+                                                    .property("target", &elem)
+                                                    .attribute("targetAnchor", "br")
+                                                    .attribute("contentAnchor", "oppositeV")
+                                                    .apply(clone!(instructions => move |dom| {
+                                                        if instructions.persisted {
+                                                            dom.property("body", &instructions.text.unwrap_or(DEFAULT_INSTRUCTIONS_TEXT.to_owned()))
+                                                        } else if let Some(text) = &instructions.text {
+                                                            dom.property("body", text)
+                                                        } else {
+                                                            dom
+                                                        }
+                                                    }))
+                                                    .property("closeable", true)
+                                                    .property("strategy", "track")
+                                                    .event(clone!(state => move |_evt: events::Close| {
+                                                        actions::show_instructions(state.clone(), false);
+                                                    }))
+                                                    .apply_if(instructions.audio.is_some(), clone!(state => move |dom| {
+                                                        dom.child(html!("button-rect", {
+                                                            .property("slot", "actions")
+                                                            .property("kind", "text")
+                                                            .property("color", "lightBlue")
+                                                            .property("size", "small")
+                                                            .text("Repeat")
+                                                            .event(clone!(state => move |_evt: events::Click| {
+                                                                actions::play_instructions_audio(state.clone());
+                                                            }))
+                                                        }))
+                                                    }))
+                                                    .child(html!("button-rect", {
+                                                        .property("slot", "actions")
+                                                        .property("kind", "filled")
+                                                        .property("color", "blue")
+                                                        .property("size", "small")
+                                                        .style("margin-left", "auto")
+                                                        .text("OK")
+                                                        .event(clone!(state => move |_evt: events::Click| {
+                                                            actions::show_instructions(state.clone(), false);
+                                                        }))
+                                                    }))
+                                                })
+                                            })
+                                        ))
+                                    })
+                                }))
+                            } else {
+                                None
+                            }
+                        })))
+                    })
+                }))
             })))
             .children(&mut [
                 html!("jig-play-play-button", {
@@ -318,8 +449,7 @@ fn render_done_popup(state: Rc<JigPlayer>) -> impl Signal<Item = Option<Dom>> {
                                         .property("kind", "exit")
                                         .text("exit")
                                         .event(|_: events::Click| {
-                                            let e = IframeAction::new(AssetPlayerToPlayerPopup::Close).try_post_message_to_parent();
-                                            log::info!("{:?}", e);
+                                            let _ = IframeAction::new(AssetPlayerToPlayerPopup::Close).try_post_message_to_parent();
                                         })
                                     })
                                 );

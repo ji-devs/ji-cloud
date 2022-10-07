@@ -1,9 +1,5 @@
 use super::state::*;
-use components::{
-    audio::mixer::{AudioPath, AUDIO_MIXER},
-    instructions::player::InstructionsPlayer,
-    module::_common::play::prelude::*,
-};
+use components::audio::mixer::{AudioPath, AUDIO_MIXER};
 use dominator::clone;
 use shared::domain::module::body::find_answer::Next;
 use std::rc::Rc;
@@ -30,7 +26,7 @@ impl PlayState {
         AUDIO_MIXER.with(move |mixer| {
             let audio_path: AudioPath<'_> = mixer.get_random_negative().into();
             mixer.play_oneshot_on_ended(audio_path, move || {
-                // TODO once the advanced mdoal has been added, negative feedback audio can be added here.
+                // TODO once the advanced modal has been added, negative feedback audio can be added here.
             });
         });
     }
@@ -97,32 +93,15 @@ impl PlayState {
             (false, Some(next_index)) => {
                 state.game.move_next_question(next_index);
             }
-            // If they've completed the minimum, then we can end this activity
-            (true, _) => {
-                state.play_instructions_and_then(clone!(state => move || {
-                    state
-                        .game
-                        .base
-                        .set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
-                }));
-            }
-            (_, None) => {
-                // No more questions to ask, but the activity is configured so that the student can click continue.
-                state.play_instructions_and_then(|| {})
+            // If they've completed the minimum, then we can end this activity, or
+            // There are noo more questions to ask, but the activity is configured so that the student can click continue.
+            _ => {
+                state
+                    .game
+                    .base
+                    .feedback_signal
+                    .set(Some(state.game.base.feedback.clone()));
             }
         }
-    }
-
-    fn play_instructions_and_then<F: Fn() + 'static>(self: &Rc<Self>, f: F) {
-        let state = self;
-
-        state
-            .game
-            .base
-            .feedback_player
-            .set(Some(InstructionsPlayer::new(
-                state.game.base.feedback.clone(),
-                Some(f),
-            )));
     }
 }

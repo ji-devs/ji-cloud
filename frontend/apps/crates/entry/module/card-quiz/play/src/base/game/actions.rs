@@ -4,12 +4,9 @@ use std::sync::atomic::Ordering;
 
 use components::{
     audio::mixer::{AudioMixer, AudioPath, AudioSourceExt, AUDIO_MIXER},
-    instructions::player::InstructionsPlayer,
-    module::_common::play::prelude::*,
     module::_groups::cards::play::card::dom::FLIPPED_AUDIO_EFFECT,
 };
 
-use crate::base::state::Phase;
 use dominator::clone;
 use futures_signals::signal::Mutable;
 use gloo_timers::future::TimeoutFuture;
@@ -46,16 +43,10 @@ impl Game {
                 state.base.settings.n_rounds
             );
         } else {
-            log::info!("GAME OVER!");
-            state.base.feedback_player.set(Some(InstructionsPlayer::new(
-                state.base.feedback.clone(),
-                Some(clone!(state => move || {
-                    state.base.phase.set(Phase::Ending);
-                    state
-                        .base
-                        .set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Positive)));
-                })),
-            )));
+            state
+                .base
+                .feedback_signal
+                .set(Some(state.base.feedback.clone()));
         }
     }
 

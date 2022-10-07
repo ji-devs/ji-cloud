@@ -1,5 +1,4 @@
 use crate::audio::mixer::AUDIO_MIXER;
-use crate::instructions::player::InstructionsPlayer;
 use dominator::{clone, Dom, DomHandle};
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
@@ -401,8 +400,12 @@ pub trait BaseExt: DomRenderable {
         None
     }
 
-    fn get_feedback_player(&self) -> ReadOnlyMutable<Option<Rc<InstructionsPlayer>>> {
+    fn get_feedback(&self) -> ReadOnlyMutable<Option<Instructions>> {
         Mutable::new(None).read_only()
+    }
+
+    fn handle_instructions_ended(&self) {
+        // Do nothing. Activities which have custom ended logic/rules should implement this.
     }
 
     fn get_timer_minutes(&self) -> Option<u32> {

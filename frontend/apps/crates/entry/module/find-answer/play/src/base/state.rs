@@ -1,5 +1,4 @@
-use components::{instructions::player::InstructionsPlayer, module::_common::play::prelude::*};
-use dominator::clone;
+use components::module::_common::play::prelude::*;
 use once_cell::sync::OnceCell;
 use rand::prelude::*;
 use shared::domain::{
@@ -8,7 +7,8 @@ use shared::domain::{
         body::{
             _groups::design::{Backgrounds, Sticker},
             find_answer::{
-                Mode, ModuleData as RawData, Ordering, PlaySettings, Question, QuestionField, Step,
+                Mode, ModuleData as RawData, Next, Ordering, PlaySettings, Question, QuestionField,
+                Step,
             },
             Instructions,
         },
@@ -35,12 +35,10 @@ pub struct Base {
     pub question_field: QuestionField,
     pub module_phase: Mutable<ModulePlayPhase>,
     /// Custom instructions player so that we can handle the on_ended event.
-    pub instructions_player: Rc<InstructionsPlayer>,
-    /// Whether the instructions player has completed playback.
-    pub instructions_finished: Mutable<bool>,
+    pub instructions: Instructions,
     /// Feedback to play when the activity ends
     pub feedback: Instructions,
-    pub feedback_player: Mutable<Option<Rc<InstructionsPlayer>>>,
+    pub feedback_signal: Mutable<Option<Instructions>>,
 }
 
 impl Base {
@@ -86,17 +84,9 @@ impl Base {
             sticker_refs,
             question_field: content.question_field,
             module_phase: init_args.play_phase,
-            instructions_player: InstructionsPlayer::new(
-                content.base.instructions,
-                Some(clone!(base_ref => move || {
-                    if let Some(base_ref) = &*base_ref.borrow() {
-                        base_ref.instructions_finished.set_neq(true);
-                    }
-                })),
-            ),
-            instructions_finished: Mutable::new(false),
+            instructions: content.base.instructions,
             feedback: content.base.feedback,
-            feedback_player: Mutable::new(None),
+            feedback_signal: Mutable::new(None),
         });
 
         *base_ref.borrow_mut() = Some(base.clone());
@@ -110,8 +100,21 @@ impl BaseExt for Base {
         self.module_phase.clone()
     }
 
-    fn get_feedback_player(&self) -> ReadOnlyMutable<Option<Rc<InstructionsPlayer>>> {
-        self.feedback_player.read_only()
+    fn get_instructions(&self) -> Option<Instructions> {
+        Some(self.instructions.clone())
+    }
+
+    fn get_feedback(&self) -> ReadOnlyMutable<Option<Instructions>> {
+        self.feedback_signal.read_only()
+    }
+
+    fn handle_instructions_ended(&self) {
+        match self.settings.next {
+            Next::SelectAll | Next::SelectSome(_) => {
+                self.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
+            }
+            _ => {}
+        }
     }
 
     fn get_timer_minutes(&self) -> Option<u32> {

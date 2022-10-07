@@ -68,6 +68,7 @@ awsm_web = { version = "0.32.0", features = ["loaders", "image", "serde_iso", "c
 anyhow = "1.0.45"
 rgb = "0.8.29"
 lazy_static = "1.4.0"
+unicode-segmentation = "1.8.0"
 
 [features]
 debug_log = []
