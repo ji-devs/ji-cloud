@@ -4,16 +4,10 @@ use super::state::*;
 use shared::domain::module::body::_groups::design::Trace;
 use utils::{drag::Drag, prelude::*, resize::get_resize_info};
 
-use dominator::clone;
-
 use crate::debug::*;
 use components::audio::mixer::{AudioPath, AudioSourceExt, AUDIO_MIXER};
 use components::collision::stickers_traces::pixels::{debug_render_hit_trace, get_hit_index};
-use components::instructions::player::InstructionsPlayer;
 use wasm_bindgen_futures::spawn_local;
-
-use components::module::_common::play::prelude::*;
-use shared::domain::module::body::drag_drop::Next;
 
 impl PlayState {
     pub fn set_targets(&self) {
@@ -115,16 +109,11 @@ impl PlayState {
                             // feedback for the activity. If we played this at the same time, it
                             // we could have two audio clips playing simultaneously which would be
                             // noisy and distracting from the intent of the feedbacks.
-                            state.feedback_player.set(Some(
-                                InstructionsPlayer::new(
-                                    state.game.base.feedback.clone(),
-                                    Some(clone!(state => move || {
-                                        if matches!(state.game.base.settings.next, Next::PlaceAll) {
-                                            state.game.base.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
-                                        }
-                                    }))
-                                )
-                            ));
+                            state
+                                .game
+                                .base
+                                .feedback_signal
+                                .set(Some(state.game.base.feedback.clone()));
                         });
                     });
                 }

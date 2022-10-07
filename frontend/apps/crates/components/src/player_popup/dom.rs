@@ -29,9 +29,10 @@ impl PlayerPopup {
                 match close_button_shown {
                     false => None,
                     true => {
-                        Some(html!("button", {
+                        Some(html!("button-icon", {
                             .property("slot", "close")
-                            .text("×")
+                            .property("iconPath", "jig/play/icn-close.svg")
+                            .property("iconHoverPath", "jig/play/icn-close-hover.svg")
                             .event(clone!(state => move |_: events::Click| {
                                 (state.callbacks.close)();
                             }))

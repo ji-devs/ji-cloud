@@ -1,20 +1,6 @@
 use crate::module::_groups::cards::edit::state::*;
 use shared::domain::module::body::_groups::cards::{CardPair as RawCardPair, Mode};
 use shared::domain::module::body::{Background, ThemeId};
-use unicode_segmentation::UnicodeSegmentation;
-use utils::prelude::*;
-
-pub fn limit_text(max_len: usize, text: String) -> String {
-    let len = text.graphemes(true).count();
-
-    if len > max_len {
-        let cutoff_grapheme_byte = text.grapheme_indices(true).nth(max_len).unwrap_ji().0;
-
-        text[..cutoff_grapheme_byte].to_string()
-    } else {
-        text
-    }
-}
 
 impl<RawData: RawDataExt, E: ExtraExt> CardsBase<RawData, E> {
     pub fn clear_all(&self) {

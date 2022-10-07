@@ -5,8 +5,11 @@ use web_sys::HtmlTextAreaElement;
 
 use super::state::State;
 use crate::audio::input::{AudioInput, AudioInputCallbacks, AudioInputOptions};
-use futures_signals::signal::SignalExt;
+use futures_signals::{map_ref, signal::SignalExt};
 use shared::domain::module::body::Audio;
+use unicode_segmentation::UnicodeSegmentation;
+
+const MAX_INSTRUCTION_TEXT_LEN: usize = 200;
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("div", {
@@ -18,18 +21,36 @@ pub fn render(state: Rc<State>) -> Dom {
 }
 
 pub fn render_text(state: Rc<State>) -> Dom {
-    fn change_text(state: &State, text: String, push_history: bool) {
+    fn change_text(state: &State, elem: &HtmlTextAreaElement, push_history: bool) {
+        let text = elem.value();
+        let limited_text = limit_text(MAX_INSTRUCTION_TEXT_LEN, text.clone());
         let mut lock = state.instructions.lock_mut();
 
-        if text.is_empty() {
+        if limited_text.is_empty() {
             lock.text = None;
         } else {
-            lock.text = Some(text);
+            lock.text = Some(limited_text.clone());
         }
         (state.callbacks.save)(lock.clone(), push_history);
+
+        if limited_text != text {
+            elem.set_value(&limited_text);
+        }
     }
+
+    let char_limit_signal = map_ref! {
+        let text = state.text_signal()
+        => {
+            let count = text.graphemes(true).count();
+            format!("({}/{})", count, MAX_INSTRUCTION_TEXT_LEN)
+        }
+    };
+
     html!("input-wrapper", {
-        .property("label", state.instructions_text.label)
+        .property_signal("label", char_limit_signal.map(clone!(state => move |count_text| {
+            format!("{} {}", state.instructions_text.label, count_text)
+        })))
+        // .property("label", format!("{} ({})", state.instructions_text.label, MAX_INSTRUCTION_TEXT_LEN))
         .child(html!("textarea" => HtmlTextAreaElement, {
             .with_node!(elem => {
                 .text_signal(state.text_signal())
@@ -37,12 +58,12 @@ pub fn render_text(state: Rc<State>) -> Dom {
                 .property("rows", 4)
                 //Input saves every character
                 //Change also pushes history
-                .event(clone!(state => move |_:events::Input| {
-                    change_text(&state, elem.value(), false);
+                .event(clone!(state => move |_: events::Input| {
+                    change_text(&state, &elem, false);
                 }))
-                .event(clone!(state => move |evt:events::Change| {
+                .event(clone!(state => move |evt: events::Change| {
                     let target = evt.dyn_target::<HtmlTextAreaElement>().unwrap_ji();
-                    change_text(&state, target.value(), true);
+                    change_text(&state, &target, true);
                 }))
             })
         }))

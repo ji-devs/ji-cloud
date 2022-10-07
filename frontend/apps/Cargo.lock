@@ -2625,6 +2625,7 @@ dependencies = [
  "strum 0.22.0",
  "strum_macros 0.22.0",
  "thiserror",
+ "unicode-segmentation",
  "url",
  "uuid",
  "wasm-bindgen",

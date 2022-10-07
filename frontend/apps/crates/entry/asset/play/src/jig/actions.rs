@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use super::{
-    state::{can_load_liked_status, JigPlayer},
+    state::{can_load_liked_status, Instructions, JigPlayer},
     timer::Timer,
 };
 use awsm_web::audio::{AudioClipOptions, AudioHandle};
@@ -17,6 +17,7 @@ use shared::{
         asset::DraftOrLive,
         jig::{AudioBackground, JigGetDraftPath, JigGetLivePath, JigLikedPath, JigPlayPath},
         meta::GetMetadataPath,
+        module::body::Instructions as ModuleInstructions,
     },
 };
 use utils::{
@@ -124,6 +125,54 @@ pub fn navigate_to_module(state: Rc<JigPlayer>, module_id: &ModuleId) {
     }
 }
 
+pub fn set_instructions(
+    state: Rc<JigPlayer>,
+    instructions: Option<ModuleInstructions>,
+    persisted: bool,
+) {
+    // Only set the instructions field if the Instructions has content. Otherwise, leave it at None.
+    let instructions = match instructions {
+        Some(instructions) if instructions.has_content() => Some(instructions),
+        _ => None,
+    };
+
+    state.instructions.set(
+        instructions.map(|instructions| Instructions::from_instructions(instructions, persisted)),
+    );
+}
+
+pub fn show_instructions(state: Rc<JigPlayer>, visible: bool) {
+    if let Some(instructions) = state.instructions.get_cloned() {
+        if !(!instructions.persisted && instructions.text.is_none()) {
+            state.instructions_visible.set_neq(visible);
+            set_paused(state.clone(), visible);
+        }
+
+        if visible {
+            play_instructions_audio(state);
+        } else {
+            if !instructions.persisted {
+                send_iframe_message(
+                    Rc::clone(&state),
+                    JigToModulePlayerMessage::InstructionsDone,
+                );
+            }
+        }
+    }
+}
+
+pub fn play_instructions_audio(state: Rc<JigPlayer>) {
+    if let Some(instructions) = state.instructions.get_cloned() {
+        if let Some(audio) = &instructions.audio {
+            AUDIO_MIXER.with(clone!(state, instructions => move |mixer| mixer.play_oneshot_on_ended(audio.as_source(), clone!(state => move || {
+                if !instructions.persisted {
+                    send_iframe_message(Rc::clone(&state), JigToModulePlayerMessage::InstructionsDone);
+                }
+            }))));
+        }
+    }
+}
+
 pub fn load_data(state: Rc<JigPlayer>) {
     state.loader.load(clone!(state => async move {
         load_resource_types(Rc::clone(&state)).await;
@@ -208,7 +257,7 @@ pub fn start_timer(state: Rc<JigPlayer>, time: u32) {
 
     spawn_local(timer.time.signal().for_each(clone!(state => move|time| {
         if time == 0 {
-            sent_iframe_message(Rc::clone(&state), JigToModulePlayerMessage::TimerDone);
+            send_iframe_message(Rc::clone(&state), JigToModulePlayerMessage::TimerDone);
         }
         async {}
     })));
@@ -218,8 +267,10 @@ pub fn start_timer(state: Rc<JigPlayer>, time: u32) {
 
 pub fn toggle_paused(state: Rc<JigPlayer>) {
     let paused = !state.paused.get();
+    set_paused(state, paused);
+}
 
-    // set state to paused
+pub fn set_paused(state: Rc<JigPlayer>, paused: bool) {
     state.paused.set(paused);
 
     // pause timer if exists
@@ -235,10 +286,11 @@ pub fn toggle_paused(state: Rc<JigPlayer>) {
         false => JigToModulePlayerMessage::Play,
         true => JigToModulePlayerMessage::Pause,
     };
-    sent_iframe_message(Rc::clone(&state), iframe_message);
+
+    send_iframe_message(Rc::clone(&state), iframe_message);
 }
 
-pub fn sent_iframe_message(state: Rc<JigPlayer>, data: JigToModulePlayerMessage) {
+pub fn send_iframe_message(state: Rc<JigPlayer>, data: JigToModulePlayerMessage) {
     let iframe_origin: String = Route::Home(HomeRoute::Home).into();
     let iframe_origin = unsafe {
         SETTINGS
@@ -248,7 +300,9 @@ pub fn sent_iframe_message(state: Rc<JigPlayer>, data: JigToModulePlayerMessage)
     };
 
     match &*state.iframe.borrow() {
-        None => todo!(),
+        None => {
+            // Do nothing - we cannot send a message to an iframe which does not exist yet.
+        }
         Some(iframe) => {
             let m = IframeAction::new(data);
             let _ = iframe
@@ -280,6 +334,9 @@ pub fn on_iframe_message(state: Rc<JigPlayer>, message: ModuleToJigPlayerMessage
         ModuleToJigPlayerMessage::JumpToId(module_id) => {
             navigate_to_module(state, &module_id);
         }
+        ModuleToJigPlayerMessage::Instructions(instructions, persisted) => {
+            set_instructions(state, instructions, persisted);
+        }
     };
 }
 
@@ -303,6 +360,8 @@ fn start_player(state: Rc<JigPlayer>, time: Option<u32>) {
     if let Some(time) = time {
         start_timer(Rc::clone(&state), time);
     }
+
+    state.started.set_neq(true);
 }
 
 pub fn reload_iframe(state: Rc<JigPlayer>) {

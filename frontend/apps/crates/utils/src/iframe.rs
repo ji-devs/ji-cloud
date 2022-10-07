@@ -1,6 +1,6 @@
 use crate::unwrap::UnwrapJiExt;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use shared::domain::module::{LiteModule, ModuleId};
+use shared::domain::module::{body::Instructions, LiteModule, ModuleId};
 use std::cell::Cell;
 use wasm_bindgen::prelude::*;
 
@@ -171,6 +171,7 @@ pub enum JigToModulePlayerMessage {
     TimerDone,
     Play,
     Pause,
+    InstructionsDone,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -181,13 +182,28 @@ pub enum ModuleToJigPlayerMessage {
     Next,
     JumpToIndex(usize),
     JumpToId(ModuleId),
+    /// Optional instructions, and whether they should be always available
+    Instructions(Option<Instructions>, bool),
+}
+
+impl ModuleToJigPlayerMessage {
+    /// Instructions which will be available until new instructions are sent, or the activity ends
+    pub fn instructions(instructions: Option<Instructions>) -> Self {
+        Self::Instructions(instructions, true)
+    }
+
+    /// Instructions which will be available only once until audio has played, or the student has
+    /// clicked OK
+    pub fn instructions_once(instructions: Option<Instructions>) -> Self {
+        Self::Instructions(instructions, false)
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum ModuleToJigEditorMessage {
     AppendModule(LiteModule),
     Next,
-    /// Whenever a modules completion status changes, i.e. meets the minimum required content.
+    /// Whenever a modules completion status changes, i.e. meets the minimum required content
     Complete(ModuleId, bool),
     Publish,
 }

@@ -13,12 +13,10 @@ use std::{cell::RefCell, rc::Rc};
 use utils::drag::Drag;
 
 use components::collision::stickers_traces::pixels::{StickerBoundsKind, StickerHitSource};
-use components::instructions::player::InstructionsPlayer;
 use std::borrow::Cow;
 pub struct PlayState {
     pub game: Rc<Game>,
     pub items: Vec<PlayItem>,
-    pub feedback_player: Mutable<Option<Rc<InstructionsPlayer>>>,
 }
 
 impl PlayState {
@@ -39,11 +37,7 @@ impl PlayState {
             })
             .collect();
 
-        Rc::new(Self {
-            game,
-            items,
-            feedback_player: Mutable::new(None),
-        })
+        Rc::new(Self { game, items })
     }
 
     pub fn all_interactive_items_have_sizes(&self) -> impl Signal<Item = bool> {

@@ -1,3 +1,4 @@
+import { faL } from "@fortawesome/pro-solid-svg-icons";
 import { LitElement, html, css, customElement, property } from "lit-element";
 
 @customElement("jig-play-landing")
@@ -53,7 +54,7 @@ export class _ extends LitElement {
                 .controls {
                     display: grid;
                     grid-template-columns: 0px 1fr auto;
-                    grid-template-rows: 1fr 100px;
+                    grid-template-rows: auto 1fr 100px;
                     box-sizing: border-box;
                 }
                 .controls {
@@ -68,9 +69,31 @@ export class _ extends LitElement {
                     grid-row: 1 / -1;
                     z-index: 3;
                 }
+                .top-bar {
+                    grid-row: 1;
+                    grid-column: 1 / -1;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-end;
+                }
+                .top-bar .instructions {
+                    margin: 16px;
+                }
+                :host([inIframe]) .top-bar .instructions {
+                    margin-right: 96px;
+                }
+                ::slotted([slot="instructions"]) {
+                    width: 40px;
+                    height: 40px;
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    display: inline-flex;
+                    place-content: center;
+                }
                 .indicators {
                     grid-column: 3;
-                    grid-row: 1;
+                    grid-row: 2;
                     display: grid;
                     grid-gap: 16px;
                     justify-items: end;
@@ -78,7 +101,7 @@ export class _ extends LitElement {
                     padding-top: 74px;
                 }
                 .bottom-bar {
-                    grid-row: 2;
+                    grid-row: 3;
                     grid-column: 1 / -1;
                     display: grid;
                     grid-template-columns: 62px calc(100vw - 800px) 62px;
@@ -90,7 +113,7 @@ export class _ extends LitElement {
                     transform: scale(-1, 1);
                 }
                 .bottom-right {
-                    grid-row: 2;
+                    grid-row: 3;
                     grid-column: 3;
                     display: flex;
                     column-gap: 40px;
@@ -139,6 +162,9 @@ export class _ extends LitElement {
     @property({ type: Boolean, reflect: true })
     rtl: boolean = false;
 
+    @property({ type: Boolean, reflect: true })
+    inIframe: boolean = false;
+
     render() {
         return html`
             <main>
@@ -151,6 +177,11 @@ export class _ extends LitElement {
                     </div>
                     <div class="indicators">
                         <slot name="indicators"></slot>
+                    </div>
+                    <div class="top-bar">
+                        <div class="instructions">
+                            <slot name="instructions"></slot>
+                        </div>
                     </div>
                     <div class="bottom-bar">
                         <span class="back"><slot name="back"></slot></span>

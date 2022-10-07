@@ -14,10 +14,7 @@ use shared::{
 };
 
 use super::card::state::*;
-use components::{
-    instructions::player::InstructionsPlayer,
-    module::{_common::play::prelude::*, _groups::cards::lookup::Side},
-};
+use components::module::{_common::play::prelude::*, _groups::cards::lookup::Side};
 use futures::future::join_all;
 use futures_signals::signal::{self, Mutable, ReadOnlyMutable, Signal, SignalExt};
 use gloo_timers::future::TimeoutFuture;
@@ -40,7 +37,7 @@ pub struct Base {
     pub instructions: Instructions,
     /// Feedback to play when the activity ends
     pub feedback: Instructions,
-    pub feedback_player: Mutable<Option<Rc<InstructionsPlayer>>>,
+    pub feedback_signal: Mutable<Option<Instructions>>,
     pub settings: PlayerSettings,
     pub module_phase: Mutable<ModulePlayPhase>,
 }
@@ -138,7 +135,7 @@ impl Base {
             found_pairs: RefCell::new(Vec::new()),
             instructions: content.base.instructions,
             feedback: content.base.feedback,
-            feedback_player: Mutable::new(None),
+            feedback_signal: Mutable::new(None),
             settings: content.player_settings,
             module_phase: init_args.play_phase,
         })
@@ -167,8 +164,12 @@ impl BaseExt for Base {
         Some(self.instructions.clone())
     }
 
-    fn get_feedback_player(&self) -> ReadOnlyMutable<Option<Rc<InstructionsPlayer>>> {
-        self.feedback_player.read_only()
+    fn get_feedback(&self) -> ReadOnlyMutable<Option<Instructions>> {
+        self.feedback_signal.read_only()
+    }
+
+    fn handle_instructions_ended(&self) {
+        self.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Positive)));
     }
 
     fn get_timer_minutes(&self) -> Option<u32> {

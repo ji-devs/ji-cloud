@@ -7,6 +7,7 @@ pub use crate::{
     math::transform_ext::*,
     mixin::MixinStub,
     routes::*,
+    text::*,
     themes::*,
     unwrap::*,
 };

@@ -1,8 +1,7 @@
 use super::state::*;
 use components::{
     backgrounds::dom::render_backgrounds_raw,
-    instructions::player::InstructionsPlayer,
-    module::_common::play::prelude::{DomRenderable, ModulePlayPhase},
+    module::_common::play::prelude::DomRenderable,
     stickers::{
         dom::{render_sticker_raw, StickerRawRenderOptions},
         sprite::dom::SpriteRawRenderOptions,
@@ -11,7 +10,6 @@ use components::{
     },
 };
 use dominator::{apply_methods, clone, html, Dom};
-use futures_signals::signal::SignalExt;
 use js_sys::Reflect;
 use shared::domain::module::body::{
     _groups::design::Sticker as RawSticker, find_answer::QuestionField,
@@ -74,21 +72,7 @@ impl DomRenderable for Base {
                     )
                 })
             )
-            .child_signal(state.instructions_finished.signal_cloned().map(clone!(state => move |finished| {
-                if finished {
-                    Some(render_game(Game::new(state.clone())))
-                } else {
-                    None
-                }
-            })))
-            .child_signal(state.module_phase.signal_cloned().map(clone!(state => move |phase| {
-                // Only play audio and update the text if we're in the playing phase.
-                if let ModulePlayPhase::Playing = phase {
-                    Some(InstructionsPlayer::render(state.instructions_player.clone()))
-                } else {
-                    None
-                }
-            })))
+            .child(render_game(Game::new(state.clone())))
         })
     }
 }

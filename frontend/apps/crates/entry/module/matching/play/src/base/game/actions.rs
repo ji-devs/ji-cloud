@@ -2,10 +2,6 @@ use super::state::*;
 
 use std::sync::atomic::Ordering;
 
-use crate::base::state::Phase;
-use components::instructions::player::InstructionsPlayer;
-use components::module::_common::play::prelude::*;
-use dominator::clone;
 use rand::prelude::*;
 use std::convert::TryInto;
 use std::rc::Rc;
@@ -38,16 +34,10 @@ impl Game {
                 state.base.settings.n_rounds
             );
         } else {
-            log::info!("GAME OVER!");
-            state.base.feedback_player.set(Some(InstructionsPlayer::new(
-                state.base.feedback.clone(),
-                Some(clone!(state => move || {
-                    state.base.phase.set(Phase::Ending);
-                    state
-                        .base
-                        .set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Positive)));
-                })),
-            )));
+            state
+                .base
+                .feedback_signal
+                .set(Some(state.base.feedback.clone()));
         }
     }
 

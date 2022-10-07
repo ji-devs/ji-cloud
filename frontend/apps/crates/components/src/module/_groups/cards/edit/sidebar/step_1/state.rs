@@ -14,7 +14,7 @@ use crate::{
             state::{Options as SingleListOptions, State as SingleListState},
         },
     },
-    module::_groups::cards::edit::{actions, config, state::*, strings},
+    module::_groups::cards::edit::{config, state::*, strings},
     tabs::MenuTabKind,
 };
 use dominator::clone;
@@ -22,6 +22,7 @@ use futures_signals::signal::Mutable;
 use once_cell::sync::OnceCell;
 use shared::{config as shared_config, domain::module::body::_groups::cards::Mode};
 use std::rc::Rc;
+use utils::text::limit_text;
 
 pub struct Step1<RawData: RawDataExt, E: ExtraExt> {
     pub base: Rc<CardsBase<RawData, E>>,
@@ -153,7 +154,7 @@ fn make_single_list<RawData: RawDataExt, E: ExtraExt>(
     let _mode = state.base.mode;
 
     let callbacks = SingleListCallbacks::new(
-        |text| actions::limit_text(config::SINGLE_LIST_CHAR_LIMIT, text),
+        |text| limit_text(config::SINGLE_LIST_CHAR_LIMIT, text),
         clone!(state => move |tooltip| {
             state.base.tooltips.list_error.set(tooltip);
         }),
@@ -180,7 +181,7 @@ fn make_dual_list<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>
     let mode = state.base.mode;
 
     let callbacks = DualListCallbacks::new(
-        |text| actions::limit_text(config::DUAL_LIST_CHAR_LIMIT, text),
+        |text| limit_text(config::DUAL_LIST_CHAR_LIMIT, text),
         clone!(state => move |tooltip| {
             state.base.tooltips.list_error.set(tooltip);
         }),

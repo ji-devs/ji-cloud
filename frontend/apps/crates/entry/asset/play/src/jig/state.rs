@@ -1,12 +1,13 @@
 use std::{cell::RefCell, rc::Rc};
 
 use awsm_web::{audio::AudioHandle, loaders::helpers::AsyncLoader};
+use components::module::_common::prelude::Audio;
 use futures_signals::signal::Mutable;
 use serde::{Deserialize, Serialize};
 use shared::domain::{
     jig::{JigId, JigPlayerSettings, JigResponse},
     meta::ResourceType,
-    module::ModuleId,
+    module::{body::Instructions as ModuleInstructions, ModuleId},
 };
 use utils::asset::JigPlayerOptions;
 use web_sys::HtmlIFrameElement;
@@ -27,12 +28,18 @@ pub struct JigPlayer {
     pub timer: Mutable<Option<Timer>>,
     pub points: Mutable<u32>,
     pub iframe: Rc<RefCell<Option<HtmlIFrameElement>>>,
+    /// Whether this activity has started (via clicking Play button, or automatically).
+    ///
+    /// Note: *Not* related to the paused field.
+    pub started: Mutable<bool>,
     pub paused: Mutable<bool>,
     pub done: Mutable<bool>,
     pub player_options: JigPlayerOptions,
     pub bg_audio_handle: Rc<RefCell<Option<AudioHandle>>>,
     pub bg_audio_playing: Mutable<bool>,
     pub resource_types: Mutable<Vec<ResourceType>>,
+    pub instructions: Mutable<Option<Instructions>>,
+    pub instructions_visible: Mutable<bool>,
 }
 
 impl JigPlayer {
@@ -53,12 +60,15 @@ impl JigPlayer {
             timer: Mutable::new(None),
             points: Mutable::new(0),
             iframe: Rc::new(RefCell::new(None)),
+            started: Mutable::new(false),
             paused: Mutable::new(false),
             done: Mutable::new(false),
             player_options,
             bg_audio_handle: Rc::new(RefCell::new(None)),
             bg_audio_playing: Mutable::new(true),
             resource_types: Default::default(),
+            instructions: Mutable::new(None),
+            instructions_visible: Mutable::new(false),
         })
     }
 }
@@ -80,5 +90,22 @@ pub fn can_load_liked_status(jig: &JigResponse) -> bool {
             None => true,
         },
         _ => false, // No logged-in user
+    }
+}
+
+#[derive(Clone)]
+pub struct Instructions {
+    pub text: Option<String>,
+    pub audio: Option<Audio>,
+    pub persisted: bool,
+}
+
+impl Instructions {
+    pub fn from_instructions(instructions: ModuleInstructions, persisted: bool) -> Self {
+        Self {
+            text: instructions.text,
+            audio: instructions.audio,
+            persisted,
+        }
     }
 }

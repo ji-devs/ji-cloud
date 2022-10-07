@@ -13,7 +13,7 @@ use shared::domain::{
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
 use std::rc::Rc;
 
-use components::{instructions::player::InstructionsPlayer, module::_common::play::prelude::*};
+use components::module::_common::play::prelude::*;
 use utils::prelude::*;
 
 use super::game::state::Game;
@@ -27,7 +27,7 @@ pub struct Base {
     pub instructions: Instructions,
     /// Feedback to play when the activity ends
     pub feedback: Instructions,
-    pub feedback_player: Mutable<Option<Rc<InstructionsPlayer>>>,
+    pub feedback_signal: Mutable<Option<Instructions>>,
     pub settings: PlayerSettings,
     pub raw_pairs: Vec<CardPair>,
     pub phase: Mutable<Phase>,
@@ -61,7 +61,7 @@ impl Base {
             background: content.base.background,
             instructions: content.base.instructions,
             feedback: content.base.feedback,
-            feedback_player: Mutable::new(None),
+            feedback_signal: Mutable::new(None),
             settings: content.player_settings,
             raw_pairs: content.base.pairs,
             phase: Mutable::new(Phase::Init),
@@ -79,8 +79,13 @@ impl BaseExt for Base {
         Some(self.instructions.clone())
     }
 
-    fn get_feedback_player(&self) -> ReadOnlyMutable<Option<Rc<InstructionsPlayer>>> {
-        self.feedback_player.read_only()
+    fn get_feedback(&self) -> ReadOnlyMutable<Option<Instructions>> {
+        self.feedback_signal.read_only()
+    }
+
+    fn handle_instructions_ended(&self) {
+        self.phase.set(Phase::Ending);
+        self.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Positive)));
     }
 
     fn get_timer_minutes(&self) -> Option<u32> {
