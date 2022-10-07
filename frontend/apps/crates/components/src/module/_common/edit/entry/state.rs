@@ -15,18 +15,17 @@ use dominator_helpers::{futures::AsyncLoader, signals::OptionSignal};
 
 //use super::actions::{HistoryChangeFn, HistoryUndoRedoFn};
 use super::{actions::*, base::state::*, choose::state::*};
-use shared::domain::{
-    jig::JigId,
-    module::{
-        body::{BodyExt, StepExt},
-        ModuleId,
-    },
-};
 use shared::{
     api::endpoints::{self, module::*},
     domain::{
-        jig::*,
-        module::{body::ModeExt, *},
+        jig::{
+            AudioEffects, JigAdminData, JigData, JigGetDraftPath, JigId, JigPlayerSettings,
+            JigResponse,
+        },
+        module::{
+            body::{BodyExt, ModeExt, StepExt},
+            ModuleBody, ModuleGetDraftPath, ModuleId,
+        },
     },
 };
 use utils::{languages::Language, prelude::*};

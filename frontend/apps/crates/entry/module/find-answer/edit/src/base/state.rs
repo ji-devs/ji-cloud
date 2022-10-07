@@ -18,6 +18,7 @@ use futures_signals::{
     signal_vec::MutableVec,
 };
 use shared::domain::asset::AssetId;
+use shared::domain::module::body::Audio;
 use shared::domain::module::body::_groups::design::Trace;
 use shared::domain::module::body::find_answer::{Ordering, Question as RawQuestion, QuestionField};
 use shared::domain::{

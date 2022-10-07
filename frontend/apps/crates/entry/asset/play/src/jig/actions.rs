@@ -5,10 +5,7 @@ use super::{
     timer::Timer,
 };
 use awsm_web::audio::{AudioClipOptions, AudioHandle};
-use components::{
-    audio::mixer::{AudioSourceExt, AUDIO_MIXER},
-    module::_common::prelude::ModuleId,
-};
+use components::audio::mixer::{AudioSourceExt, AUDIO_MIXER};
 use dominator::clone;
 use futures_signals::signal::SignalExt;
 use shared::{

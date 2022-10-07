@@ -8,7 +8,6 @@ use std::rc::Rc;
 
 use components::{
     audio::input::{AudioInput, AudioInputCallbacks, AudioInputOptions},
-    module::_common::prelude::Audio,
     overlay::handle::OverlayHandle,
     tabs::{MenuTab, MenuTabKind},
 };
@@ -19,7 +18,7 @@ use futures_signals::{
     signal_vec::SignalVecExt,
 };
 use js_sys::Reflect;
-use shared::domain::module::body::_groups::design::TraceKind;
+use shared::domain::module::body::{Audio, _groups::design::TraceKind};
 use utils::prelude::*;
 use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement};
 

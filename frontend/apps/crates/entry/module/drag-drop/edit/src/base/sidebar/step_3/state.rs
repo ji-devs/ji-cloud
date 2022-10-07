@@ -2,12 +2,12 @@ use super::super::state::Sidebar;
 use crate::base::state::{Base, ItemKind};
 use components::{
     audio::input::{AudioInput, AudioInputCallbacks, AudioInputOptions},
-    module::_common::prelude::Audio,
     tabs::MenuTabKind,
 };
 use dominator::clone;
 use dominator_helpers::signals::{rc_signal_fn, RcSignalFn};
 use futures_signals::signal::{Mutable, SignalExt};
+use shared::domain::module::body::Audio;
 use std::rc::Rc;
 
 pub struct Step3 {
