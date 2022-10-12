@@ -1,6 +1,7 @@
-name: Entry - Elements - Release 
+name: Entry - Elements - Release
 
 on:
+  workflow_dispatch:
   push:
     branches: [ master ]
     paths:
@@ -16,7 +17,7 @@ jobs:
       - name: checkout repo
         uses: actions/checkout@v1
 
-      - name: Extract label 
+      - name: Extract label
         shell: bash
         run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - test - elements]\")"
         id: extract_label
@@ -34,13 +35,13 @@ jobs:
           node-version: '16'
 
       - name: install npm deps
-        run: npm ci 
+        run: npm ci
         working-directory: "./frontend/elements"
         env:
           FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
-      - name: test elements 
-        run: npm run test 
+      - name: test elements
+        run: npm run test
         working-directory: "./frontend/elements"
         env:
           FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
@@ -65,7 +66,7 @@ jobs:
       - name: checkout repo
         uses: actions/checkout@v1
 
-      - name: Extract label 
+      - name: Extract label
         shell: bash
         run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - module/${{ matrix.app }} - elements]\")"
         id: extract_label
@@ -83,15 +84,15 @@ jobs:
           node-version: '16'
 
       - name: install npm deps
-        run: npm ci 
+        run: npm ci
         working-directory: "./frontend/elements"
         env:
           FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
-      - name: build elements 
+      - name: build elements
         run: npm run build:release
         working-directory: "./frontend/elements"
-        env: 
+        env:
           APP_NAME: "${{ matrix.app }}"
           FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
@@ -103,7 +104,7 @@ jobs:
 
       - name: deploy to google cloud
         run: gsutil -m rsync -d -r frontend/elements/dist/${{ matrix.app }} gs://ji-cloud-frontend-origin-eu-001/${{ matrix.app }}/elements
-        
+
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master
         with:
