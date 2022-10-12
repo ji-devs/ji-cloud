@@ -12,67 +12,36 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-# Common deps
-utils = {path = "../../../utils"}
 shared = {path = "../../../../../../shared/rust", features = ["wasm"]}
-wasm-logger = { version = "0.2.0", optional = true }
-wee_alloc = { version = "0.4.5", optional = true }
-console_error_panic_hook = { version = "0.1.7", optional = true }
-wasm-bindgen = "0.2.82"
-js-sys = "0.3.55"
-web-sys = { version = "0.3.55", features = [
-    'Url',
-    'Request',
-    'RequestInit',
-    'Response',
-    'RequestMode',
-    'Headers',
-    'Document',
-    'DocumentFragment',
-    'HtmlTemplateElement',
-    'Window',
-    'Storage',
-    'Location',
-    'Element',
-    'CssStyleDeclaration',
-    'DomTokenList',
-    'HtmlCollection',
-    'HtmlInputElement',
-    'HtmlImageElement',
-    'HtmlSelectElement',
-    'HtmlIFrameElement',
-    'KeyboardEvent',
-    'MouseEvent',
-    'FileList',
-    'File',
-    'DomRect',
-    'ScrollIntoViewOptions',
-    'ScrollBehavior',
-    'CustomEvent',
-    'CustomEventInit',
-] }
-wasm-bindgen-futures = "0.4.28"
-htmlescape = "0.3.1"
-dominator = "0.5.22"
-futures-signals = "0.3.23"
-dominator_helpers = "0.7.2"
-serde = { version = "1.0.130", features = ["derive"] }
-serde-wasm-bindgen = "0.3.1"
-serde_json = "1.0.70"
-futures = "0.3.17"
-log = "0.4.14"
-cfg-if = "1.0.0"
-awsm_web = { version = "0.32.0", features = ["dom", "loaders"] }
-discard = "1.0.4"
-uuid = { version = "0.8.2", features = ["serde", "wasm-bindgen"] }
-url = "2.2.2"
-gloo = "0.4.0"
-itertools = "0.10.1"
-strum = "0.22.0"
-strum_macros = "0.22.0"
-chrono = "0.4.19"
+utils = {path = "../../../utils"}
 components = {path = "../../../components"}
-anyhow = "1.0.48"
+wasm-logger = { workspace = true, optional = true }
+wee_alloc = { workspace = true, optional = true }
+console_error_panic_hook = { workspace = true, optional = true }
+wasm-bindgen.workspace = true
+js-sys.workspace = true
+web-sys.workspace = true
+wasm-bindgen-futures.workspace = true
+htmlescape.workspace = true
+dominator.workspace = true
+futures-signals.workspace = true
+dominator_helpers.workspace = true
+serde = { workspace = true, features = ["derive"] }
+serde-wasm-bindgen.workspace = true
+serde_json.workspace = true
+futures.workspace = true
+log.workspace = true
+cfg-if.workspace = true
+awsm_web = { workspace = true, features = ["dom", "loaders"] }
+discard.workspace = true
+uuid = { workspace = true, features = ["serde", "wasm-bindgen"] }
+url.workspace = true
+gloo.workspace = true
+itertools.workspace = true
+strum.workspace = true
+strum_macros.workspace = true
+chrono.workspace = true
+anyhow.workspace = true
 
 [features]
 default = ["wee_alloc"]
