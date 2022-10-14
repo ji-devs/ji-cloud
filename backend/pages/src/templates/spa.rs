@@ -10,12 +10,12 @@ use askama::Template;
 
 #[derive(Debug, Clone, PartialEq, Copy, Eq, serde::Deserialize)]
 #[serde(rename_all = "kebab-case")]
-pub enum ModuleJigPageKind {
+pub enum ModuleAssetPageKind {
     Edit,
     Play,
 }
 
-impl ModuleJigPageKind {
+impl ModuleAssetPageKind {
     pub fn as_str(self) -> &'static str {
         match self {
             Self::Edit => "edit",
@@ -31,8 +31,8 @@ pub enum SpaPage {
     Community,
     Admin,
     Kids,
-    Jig(ModuleJigPageKind),
-    Module(String, ModuleJigPageKind),
+    Asset(ModuleAssetPageKind),
+    Module(String, ModuleAssetPageKind),
     Dev(String),
     LegacyJig,
 }
@@ -45,7 +45,7 @@ impl SpaPage {
             Self::Community => Cow::Borrowed("community"),
             Self::Admin => Cow::Borrowed("admin"),
             Self::Kids => Cow::Borrowed("kids"),
-            Self::Jig(page_kind) => Cow::Owned(format!("jig/{}", page_kind.as_str())),
+            Self::Asset(page_kind) => Cow::Owned(format!("asset/{}", page_kind.as_str())),
             Self::Module(kind, page_kind) => {
                 Cow::Owned(format!("module/{}/{}", kind, page_kind.as_str()))
             }
@@ -86,7 +86,7 @@ fn spa_template(settings: &RuntimeSettings, spa: SpaPage) -> actix_web::Result<H
         google_maps_url,
         local_dev: settings.is_local(),
         include_hubspot: match spa {
-            SpaPage::Jig(ModuleJigPageKind::Play) => false,
+            SpaPage::Asset(ModuleAssetPageKind::Play) => false,
             SpaPage::Module(_, __) => false,
             SpaPage::LegacyJig => false,
             _ => true,
@@ -120,12 +120,12 @@ pub async fn admin_template(settings: Data<RuntimeSettings>) -> actix_web::Resul
     spa_template(&settings, SpaPage::Admin)
 }
 
-pub async fn jig_template(
+pub async fn asset_template(
     settings: Data<RuntimeSettings>,
-    path: Path<(ModuleJigPageKind, String)>,
+    path: Path<(ModuleAssetPageKind, String)>,
 ) -> actix_web::Result<HttpResponse> {
     let (page_kind, _asset_kind) = path.into_inner();
-    spa_template(&settings, SpaPage::Jig(page_kind))
+    spa_template(&settings, SpaPage::Asset(page_kind))
 }
 
 pub async fn legacy_template(
@@ -144,7 +144,7 @@ pub async fn legacy_template_with_module(
 
 pub async fn module_template(
     settings: Data<RuntimeSettings>,
-    path: Path<(String, ModuleJigPageKind, String)>,
+    path: Path<(String, ModuleAssetPageKind, String)>,
 ) -> actix_web::Result<HttpResponse> {
     let (module_kind, page_kind, _) = path.into_inner();
     spa_template(&settings, SpaPage::Module(module_kind, page_kind))
