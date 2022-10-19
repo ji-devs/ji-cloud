@@ -14,7 +14,7 @@ use shared::{
         asset::DraftOrLive,
         jig::{AudioBackground, JigGetDraftPath, JigGetLivePath, JigLikedPath, JigPlayPath},
         meta::GetMetadataPath,
-        module::body::Instructions as ModuleInstructions,
+        module::{body::Instructions as ModuleInstructions, ModuleId},
     },
 };
 use utils::{

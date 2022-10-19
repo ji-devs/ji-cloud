@@ -1,13 +1,15 @@
 use std::{cell::RefCell, rc::Rc};
 
 use awsm_web::{audio::AudioHandle, loaders::helpers::AsyncLoader};
-use components::module::_common::prelude::Audio;
 use futures_signals::signal::Mutable;
 use serde::{Deserialize, Serialize};
 use shared::domain::{
     jig::{JigId, JigPlayerSettings, JigResponse},
     meta::ResourceType,
-    module::{body::Instructions as ModuleInstructions, ModuleId},
+    module::{
+        body::{Audio, Instructions as ModuleInstructions},
+        ModuleId,
+    },
 };
 use utils::asset::JigPlayerOptions;
 use web_sys::HtmlIFrameElement;
