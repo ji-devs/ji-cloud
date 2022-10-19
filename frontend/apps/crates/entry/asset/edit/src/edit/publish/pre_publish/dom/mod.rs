@@ -41,7 +41,10 @@ pub mod language;
 const STR_PUBLISH: &str = "Publish ";
 const STR_PUBLISH_LATER: &str = "Publish later";
 const STR_PUBLIC_LABEL_1: &str = "My ";
-const STR_PUBLIC_LABEL_2: &str = " is public";
+const STR_PUBLIC_LABEL_2: &str = " is ";
+const STR_PUBLIC_PUBLIC: &str = "public";
+const STR_PUBLIC_UNLISTED: &str = "unlisted";
+const STR_PUBLIC_PRIVATE: &str = "private";
 const STR_NAME_LABEL: &str = "’s name";
 const STR_NAME_PLACEHOLDER_1: &str = "Type your ";
 const STR_NAME_PLACEHOLDER_2: &str = "’s name here";
@@ -107,6 +110,13 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                     .text(STR_PUBLIC_LABEL_1)
                     .text(state.asset_type_name())
                     .text(STR_PUBLIC_LABEL_2)
+                    .text_signal(state.asset.privacy_level().signal().map(|privacy_level| {
+                        match privacy_level {
+                            PrivacyLevel::Public => STR_PUBLIC_PUBLIC,
+                            PrivacyLevel::Unlisted => STR_PUBLIC_UNLISTED,
+                            PrivacyLevel::Private => STR_PUBLIC_PRIVATE,
+                        }
+                    }))
                     .child(html!("input-switch", {
                         .property_signal("enabled", state.asset.privacy_level().signal().map(|privacy_level| {
                             privacy_level == PrivacyLevel::Public
