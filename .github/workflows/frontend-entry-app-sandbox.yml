@@ -68,6 +68,9 @@ jobs:
       - name: make nightly the default
         run: rustup default nightly
 
+      - name: update rust
+        run: rustup update
+
       - name: install node
         uses: actions/setup-node@v2
         with:
