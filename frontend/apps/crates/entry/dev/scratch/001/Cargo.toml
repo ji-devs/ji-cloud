@@ -15,32 +15,32 @@ crate-type = ["cdylib"]
 utils = {path = "../../../../utils"}
 components = {path = "../../../../components"}
 shared = {path = "../../../../../../../shared/rust", features = ["wasm"]}
-once_cell.workspace = true
+once_cell = { workspace = true }
 wasm-logger = { workspace = true, optional = true }
 wee_alloc = { workspace = true, optional = true }
 console_error_panic_hook = { workspace = true, optional = true }
-wasm-bindgen.workspace = true
-js-sys.workspace = true
-web-sys.workspace = true
-wasm-bindgen-futures.workspace = true
-htmlescape.workspace = true
-dominator.workspace = true
-futures-signals.workspace = true
-dominator_helpers.workspace = true
+wasm-bindgen = { workspace = true }
+js-sys = { workspace = true }
+web-sys = { workspace = true }
+wasm-bindgen-futures = { workspace = true }
+htmlescape = { workspace = true }
+dominator = { workspace = true }
+futures-signals = { workspace = true }
+dominator_helpers = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
-serde-wasm-bindgen.workspace = true
-serde_json.workspace = true
-futures.workspace = true
-log.workspace = true
-cfg-if.workspace = true
+serde-wasm-bindgen = { workspace = true }
+serde_json = { workspace = true }
+futures = { workspace = true }
+log = { workspace = true }
+cfg-if = { workspace = true }
 awsm_web = { workspace = true, features = ["dom"] }
-discard.workspace = true
+discard = { workspace = true }
 uuid = { workspace = true, features = ["serde", "wasm-bindgen"] }
-url.workspace = true
-gloo.workspace = true
-itertools.workspace = true
-async-trait.workspace = true
-anyhow.workspace = true
+url = { workspace = true }
+gloo = { workspace = true }
+itertools = { workspace = true }
+async-trait = { workspace = true }
+anyhow = { workspace = true }
 
 [features]
 default = ["wee_alloc"]

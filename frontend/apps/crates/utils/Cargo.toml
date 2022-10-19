@@ -8,40 +8,40 @@ edition = "2021"
 
 [dependencies]
 shared = {path = "../../../../shared/rust", features = ["wasm"]}
-chrono.workspace = true
-thiserror.workspace = true
-futures.workspace = true
-itertools.workspace = true
-async-trait.workspace = true
-serde.workspace = true
-serde_repr.workspace = true
-base64.workspace = true
-strum.workspace = true
-strum_macros.workspace = true
-log.workspace = true
-serde_json.workspace = true
-cfg-if.workspace = true
-wasm-bindgen.workspace = true
-js-sys.workspace = true
-wasm-bindgen-futures.workspace = true
-serde-wasm-bindgen.workspace = true
-once_cell.workspace = true
-uuid.workspace = true
-url.workspace = true
-serde_qs.workspace = true
-dominator.workspace = true
-futures-signals.workspace = true
-dominator_helpers.workspace = true
-htmlescape.workspace = true
-gloo-timers.workspace = true
-console_error_panic_hook.workspace = true
+chrono = { workspace = true }
+thiserror = { workspace = true }
+futures = { workspace = true }
+itertools = { workspace = true }
+async-trait = { workspace = true }
+serde = { workspace = true }
+serde_repr = { workspace = true }
+base64 = { workspace = true }
+strum = { workspace = true }
+strum_macros = { workspace = true }
+log = { workspace = true }
+serde_json = { workspace = true }
+cfg-if = { workspace = true }
+wasm-bindgen = { workspace = true }
+js-sys = { workspace = true }
+wasm-bindgen-futures = { workspace = true }
+serde-wasm-bindgen = { workspace = true }
+once_cell = { workspace = true }
+uuid = { workspace = true }
+url = { workspace = true }
+serde_qs = { workspace = true }
+dominator = { workspace = true }
+futures-signals = { workspace = true }
+dominator_helpers = { workspace = true }
+htmlescape = { workspace = true }
+gloo-timers = { workspace = true }
+console_error_panic_hook = { workspace = true }
 wasm-logger = { workspace = true, optional = true }
-web-sys.workspace = true
-awsm_web.workspace = true
-anyhow.workspace = true
-rgb.workspace = true
-lazy_static.workspace = true
-unicode-segmentation.workspace = true
+web-sys = { workspace = true }
+awsm_web = { workspace = true }
+anyhow = { workspace = true }
+rgb = { workspace = true }
+lazy_static = { workspace = true }
+unicode-segmentation = { workspace = true }
 
 [features]
 debug_log = []
