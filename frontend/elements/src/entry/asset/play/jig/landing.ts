@@ -78,6 +78,7 @@ export class _ extends LitElement {
                 }
                 .top-bar .instructions {
                     margin: 16px;
+                    margin-right: 22px;
                 }
                 :host([inIframe]) .top-bar .instructions {
                     margin-right: 96px;

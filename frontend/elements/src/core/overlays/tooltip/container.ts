@@ -19,7 +19,7 @@ import {
     getAnchors,
 } from "@elements/core/overlays/content";
 
-export type Color = "blue" | "red" | "green" | "light-orange";
+export type Color = "blue" | "dark-blue" | "red" | "green" | "light-orange";
 
 const TRIANGLE_WIDTH = 18;
 const TRIANGLE_HEIGHT = 10;
@@ -65,11 +65,12 @@ export class _ extends LitElement {
                 }
 
                 :host([color="blue"]) {
-                    --tooltip-bg-color: var(--light-orange-1);
-                    --tooltip-border-color: var(--light-orange-2);
-
                     --tooltip-bg-color: var(--dark-blue-5);
                     --tooltip-border-color: var(--light-blue-3);
+                }
+                :host([color="dark-blue"]) {
+                    --tooltip-bg-color: var(--dark-blue-8);
+                    --tooltip-border-color: var(--light-blue-8);
                 }
                 :host([color="green"]) {
                     --tooltip-bg-color: var(--main-green);

@@ -26,6 +26,7 @@ pub fn render(state: Rc<Step4>) -> Dom {
             render_tab(state.clone(), MenuTabKind::Instructions),
             html!("module-sidebar-body", {
                 .property("slot", "body")
+                .style("overflow", "inherit") // Inherit overflow otherwise the Hebrew controls will be hidden
                 .child_signal(state.tab.signal_cloned().map(|tab| {
                     match tab {
                         Tab::Settings(state) => {

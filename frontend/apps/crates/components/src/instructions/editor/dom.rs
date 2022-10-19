@@ -4,7 +4,10 @@ use utils::prelude::*;
 use web_sys::HtmlTextAreaElement;
 
 use super::state::State;
-use crate::audio::input::{AudioInput, AudioInputCallbacks, AudioInputOptions};
+use crate::{
+    audio::input::{AudioInput, AudioInputCallbacks, AudioInputOptions},
+    hebrew_buttons::HebrewButtons,
+};
 use futures_signals::{map_ref, signal::SignalExt};
 use shared::domain::module::body::Audio;
 use unicode_segmentation::UnicodeSegmentation;
@@ -50,7 +53,7 @@ pub fn render_text(state: Rc<State>) -> Dom {
         .property_signal("label", char_limit_signal.map(clone!(state => move |count_text| {
             format!("{} {}", state.instructions_text.label, count_text)
         })))
-        // .property("label", format!("{} ({})", state.instructions_text.label, MAX_INSTRUCTION_TEXT_LEN))
+        .child(HebrewButtons::reveal().render(Some("hebrew-inputs")))
         .child(html!("textarea" => HtmlTextAreaElement, {
             .with_node!(elem => {
                 .text_signal(state.text_signal())
