@@ -205,6 +205,10 @@ pub enum ModuleToJigEditorMessage {
     Next,
     /// Whenever a modules completion status changes, i.e. meets the minimum required content
     Complete(ModuleId, bool),
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum ModuleToAssetEditorMessage {
     Publish,
 }
 

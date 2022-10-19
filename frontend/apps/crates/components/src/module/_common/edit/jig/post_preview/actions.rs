@@ -19,7 +19,7 @@ impl PostPreview {
             log::info!("Couldn't post message to top... redirect!");
 
             let route: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
-                *self.asset_id.unwrap_jig(), // TODO: handle all types of assets
+                self.jig_id,
                 JigEditRoute::Landing,
             )))
             .into();
@@ -28,13 +28,13 @@ impl PostPreview {
     }
 
     pub fn publish(&self) {
-        let msg = IframeAction::new(ModuleToJigEditorMessage::Publish);
+        let msg = IframeAction::new(ModuleToAssetEditorMessage::Publish);
 
         if msg.try_post_message_to_editor().is_err() {
             log::info!("Couldn't post message to top... redirect!");
 
             let route: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
-                *self.asset_id.unwrap_jig(), // TODO: handle all types of assets
+                self.jig_id,
                 JigEditRoute::Landing,
             )))
             .into();
@@ -52,10 +52,10 @@ impl PostPreview {
 
         let req = ModuleCreateRequest {
             body: target_body,
-            parent_id: self.asset_id.into(),
+            parent_id: self.jig_id.into(),
         };
 
-        let asset_id = self.asset_id;
+        let jig_id = self.jig_id;
 
         self.loader.load(async move {
             let res = endpoints::module::Create::api_with_auth(ModuleCreatePath(), Some(req)).await;
@@ -75,7 +75,7 @@ impl PostPreview {
                     if msg.try_post_message_to_editor().is_err() {
                         log::info!("Couldn't post message to parent... redirect!");
                         let route: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
-                            *(asset_id.unwrap_jig()), // TODO: handle all types of assets
+                            jig_id,
                             JigEditRoute::Module(module_id),
                         )))
                         .into();
@@ -99,6 +99,6 @@ impl PostPreview {
     }
 
     pub fn print_design(&self) {
-        super::print::screenshot::print(self.asset_id, self.module_id);
+        super::print::screenshot::print(self.jig_id.into(), self.module_id);
     }
 }

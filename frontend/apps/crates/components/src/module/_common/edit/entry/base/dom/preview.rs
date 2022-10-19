@@ -1,8 +1,5 @@
 use super::super::{
-    super::{
-        super::post_preview::{dom::render_post_preview, state::PostPreview},
-        strings,
-    },
+    super::{super::jig::post_preview::PostPreview, strings},
     nav::dom::render_nav,
     state::*,
 };
@@ -38,12 +35,6 @@ where
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
 {
-    let post_preview = Rc::new(PostPreview::new(
-        RawData::kind(),
-        state.base.get_asset_id(),
-        state.base.get_module_id(),
-    ));
-
     html!("module-preview-header", {
         .property("slot", "header")
         .property("moduleKind", module_kind.as_str())
@@ -53,9 +44,12 @@ where
             .property("size", "small")
             .property("iconAfter", "arrow")
             .text(strings::STR_DONE)
-            .event(clone!(state, post_preview => move |_evt:events::Click| {
-                state.preview_mode.set(Some(PreviewMode::PostPreview(post_preview.clone())));
-
+            .event(clone!(state => move |_evt:events::Click| {
+                if state.asset.is_jig() {
+                    state.jig_is_post_preview.set(true);
+                } else {
+                    state.navigate_to_publish();
+                }
             }))
         }))
     })
@@ -80,15 +74,14 @@ where
 {
     html!("empty-fragment", {
         .property("slot", "overlay")
-        .child_signal(state.preview_mode.signal_cloned().map(clone!(state => move |preview_mode| {
-            preview_mode.and_then(|preview_mode| {
-                match preview_mode {
-                    PreviewMode::PostPreview(post_preview_state) => {
-                        let data = state.history.get_current();
-                        Some(render_post_preview(post_preview_state, data))
-                    }
-                    _ => None
-                }
+        .child_signal(state.jig_is_post_preview.signal_cloned().map(clone!(state => move |jig_is_post_preview| {
+            jig_is_post_preview.then(|| {
+                let data = state.history.get_current();
+                PostPreview::new(
+                    RawData::kind(),
+                    *state.base.get_asset_id().unwrap_jig(), // only jigs should have the post preview page
+                    state.base.get_module_id(),
+                ).render(data)
             })
         })))
     })

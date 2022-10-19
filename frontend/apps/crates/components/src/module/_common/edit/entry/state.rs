@@ -1,5 +1,6 @@
 use dominator::{clone, DomHandle};
-use futures_signals::signal::{Mutable, Signal, SignalExt};
+use dominator_helpers::signals::EitherSignal;
+use futures_signals::signal::{always, Mutable, Signal, SignalExt};
 use shared::domain::asset::{Asset, AssetId, AssetType, DraftOrLive, PrivacyLevel};
 use shared::domain::course::CourseGetDraftPath;
 use shared::domain::resource::ResourceGetDraftPath;
@@ -308,20 +309,23 @@ where
         _self
     }
 
-    pub fn preview_mode_signal(&self) -> impl Signal<Item = Option<PreviewMode>> {
+    pub fn step_signal(&self) -> impl Signal<Item = Option<Step>> {
         self.phase
             .signal_cloned()
             .switch(|phase| match phase.as_ref() {
                 Phase::Choose(_) => OptionSignal::new(None),
                 Phase::Init => OptionSignal::new(None),
-                Phase::Base(app_base) => {
-                    OptionSignal::new(Some(app_base.preview_mode.signal_cloned()))
-                }
+                Phase::Base(app_base) => OptionSignal::new(Some(app_base.step.signal_cloned())),
             })
-            .map(|x| x.flatten())
     }
 
-    pub fn is_preview_signal(&self) -> impl Signal<Item = bool> {
-        self.preview_mode_signal().map(|x| x.is_some())
+    pub fn is_post_preview_signal(&self) -> impl Signal<Item = bool> {
+        self.phase
+            .signal_cloned()
+            .switch(|phase| match phase.as_ref() {
+                Phase::Choose(_) => EitherSignal::Left(always(false)),
+                Phase::Init => EitherSignal::Left(always(false)),
+                Phase::Base(app_base) => EitherSignal::Right(app_base.jig_is_post_preview.signal()),
+            })
     }
 }

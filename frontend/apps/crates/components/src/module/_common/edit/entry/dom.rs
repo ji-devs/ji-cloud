@@ -30,29 +30,30 @@ pub fn render_page_body<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer
 {
     let sig = map_ref! {
         let phase = state.phase.signal_cloned(),
-        let preview_mode = state.preview_mode_signal()
+        let step = state.step_signal(),
+        let is_post_preview = state.is_post_preview_signal()
             => {
-                (phase.clone(), preview_mode.clone())
+                (phase.clone(), *step, *is_post_preview)
             }
     };
 
-    let sig = sig.map(clone!(state => move |(phase, preview_mode)| {
+    let sig = sig.map(clone!(state => move |(phase, step, is_post_preview)| {
         let page_kind = {
             match phase.as_ref() {
                 Phase::Init | Phase::Choose(_) => ModulePageKind::GridPlain,
                 Phase::Base(_) => {
-                    match preview_mode.as_ref() {
-                        Some(preview_mode) => {
-                            match preview_mode {
-                                PreviewMode::Preview => {
+                    match step {
+                        Some(step) if step.is_preview() => {
+                            match is_post_preview {
+                                false => {
                                     ModulePageKind::GridResizePreview
                                 },
-                                PreviewMode::PostPreview(_) => {
+                                true => {
                                     ModulePageKind::GridPlain
-                                }
+                                },
                             }
                         }
-                        None => {
+                        _ => {
                             if state.opts.is_main_scrollable {
                                 ModulePageKind::GridResizeScrollable
                             } else {
@@ -80,7 +81,7 @@ pub fn render_page_body<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer
                 }))
                 .children_signal_vec({
                     has_resized_once.signal()
-                        .map(clone!(state, phase, preview_mode => move |has_resized_once| {
+                        .map(clone!(state, phase => move |has_resized_once| {
                             if !has_resized_once {
                                 vec![]
                             } else {
@@ -90,7 +91,6 @@ pub fn render_page_body<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer
                                     },
                                     Phase::Base(app_base) => {
                                         super::base::dom::render(
-                                            preview_mode.clone(),
                                             state.opts.asset_id,
                                             state.opts.module_id,
                                             app_base.clone()

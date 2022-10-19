@@ -8,9 +8,7 @@ use shared::{
     api::endpoints::{self},
     domain::{
         asset::{Asset, AssetType, DraftOrLive},
-        jig::{
-            JigGetDraftPath, JigId, JigResponse, JigUpdateDraftDataPath, JigUpdateDraftDataRequest,
-        },
+        jig::{JigGetDraftPath, JigId, JigUpdateDraftDataPath, JigUpdateDraftDataRequest},
         module::{
             LiteModule, ModuleCreatePath, ModuleCreateRequest, ModuleGetDraftPath, ModuleId,
             ModuleKind, ModuleUpdateRequest, ModuleUploadPath,
@@ -31,15 +29,9 @@ pub async fn load_jig(jig_id: JigId, jig_mutable: Mutable<Option<Asset>>) {
     }
 }
 
-pub fn navigate_to_publish(state: Rc<State>, jig: &JigResponse) {
-    state.asset_edit_state.set_route_jig(JigEditRoute::Publish);
+pub fn navigate_to_publish(state: Rc<State>) {
     state.collapsed.set(true);
-
-    let jig_id = jig.id;
-    Route::push_state(Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
-        jig_id,
-        JigEditRoute::Publish,
-    ))));
+    state.asset_edit_state.navigate_to_publish();
 }
 
 pub async fn update_jig(jig_id: &JigId, req: JigUpdateDraftDataRequest) -> anyhow::Result<()> {
@@ -138,9 +130,6 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
                 // JigFocus::Modules,
                 JigEditRoute::Landing,
             ))));
-        }
-        ModuleToJigEditorMessage::Publish => {
-            navigate_to_publish(Rc::clone(&state), state.asset.unwrap_jig());
         }
     }
 }

@@ -17,7 +17,6 @@ use shared::domain::{
 };
 
 pub fn render<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
-    preview_mode: Option<PreviewMode>,
     asset_id: AssetId,
     module_id: ModuleId,
     state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
@@ -33,16 +32,16 @@ where
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
 {
-    match preview_mode {
-        Some(preview_mode) => match preview_mode {
-            PreviewMode::Preview => {
+    match state.step.get().is_preview() {
+        true => match state.jig_is_post_preview.get() {
+            false => {
                 vec![
                     render_preview_header(RawData::kind(), state.clone()),
                     render_preview_main(RawData::kind(), asset_id, module_id, state.clone()),
                     render_preview_overlay(RawData::kind(), asset_id, module_id, state),
                 ]
             }
-            PreviewMode::PostPreview(_) => {
+            true => {
                 vec![render_preview_overlay(
                     RawData::kind(),
                     asset_id,
@@ -51,7 +50,7 @@ where
                 )]
             }
         },
-        None => {
+        false => {
             vec![
                 render_main_bg(state.clone()),
                 render_main(state.clone()),

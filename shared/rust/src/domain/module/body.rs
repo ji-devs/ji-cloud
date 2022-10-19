@@ -371,7 +371,7 @@ where
 
 /// This extension trait makes it possible to keep the Step
 /// functionality generic and at a higher level than the module itself
-pub trait StepExt: Copy + Default + PartialEq + Eq + Hash + Debug {
+pub trait StepExt: Clone + Copy + Default + PartialEq + Eq + Hash + Debug + Unpin {
     /// Get the next step from current step
     fn next(&self) -> Option<Self>;
     /// Get the step as a number

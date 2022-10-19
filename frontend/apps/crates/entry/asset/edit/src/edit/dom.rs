@@ -10,6 +10,7 @@ use components::{
     player_popup::{PlayerPopup, PreviewPopupCallbacks},
 };
 use dominator::{clone, html, Dom};
+use dominator_helpers::events::Message;
 use futures_signals::signal::SignalExt;
 use utils::{asset::AssetPlayerOptions, prelude::*};
 
@@ -100,6 +101,11 @@ impl AssetEditState {
                         None
                     }
                 })))
+                .global_event(clone!(state => move |evt: Message| {
+                    if let Ok(m) = evt.try_serde_data::<IframeAction<ModuleToAssetEditorMessage>>() {
+                        state.on_iframe_message(m.data);
+                    };
+                }))
             }))
             .child_signal(state.play_jig.signal_cloned().map(clone!(state => move|play_jig| {
                 play_jig.map(|settings| {

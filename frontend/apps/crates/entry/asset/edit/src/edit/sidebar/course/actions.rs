@@ -5,8 +5,7 @@ use shared::{
     domain::{
         asset::Asset,
         course::{
-            CourseGetDraftPath, CourseId, CourseResponse, CourseUpdateDraftDataPath,
-            CourseUpdateDraftDataRequest,
+            CourseGetDraftPath, CourseId, CourseUpdateDraftDataPath, CourseUpdateDraftDataRequest,
         },
     },
 };
@@ -27,17 +26,9 @@ pub async fn load_course(course_id: CourseId, jig_mutable: Mutable<Option<Asset>
 }
 
 #[allow(dead_code)] // TODO: remove once used
-pub fn navigate_to_publish(state: Rc<State>, course: &CourseResponse) {
-    state
-        .asset_edit_state
-        .set_route_course(CourseEditRoute::Publish);
+pub fn navigate_to_publish(state: Rc<State>) {
     state.collapsed.set(true);
-
-    let course_id = course.id;
-    Route::push_state(Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
-        course_id,
-        CourseEditRoute::Publish,
-    ))));
+    state.asset_edit_state.navigate_to_publish();
 }
 
 pub async fn update_course(

@@ -1,6 +1,5 @@
-use dominator::{clone, Dom};
-use dominator_helpers::futures::AsyncLoader;
-use futures_signals::signal::{Mutable, ReadOnlyMutable, Signal, SignalExt};
+use dominator::Dom;
+use futures_signals::signal::{Mutable, ReadOnlyMutable, Signal};
 use shared::domain::asset::{Asset, AssetId};
 use std::collections::HashSet;
 use std::{marker::PhantomData, rc::Rc};
@@ -13,7 +12,6 @@ use shared::domain::module::{
 use std::future::Future;
 use utils::prelude::*;
 
-use crate::module::_common::edit::post_preview::state::PostPreview;
 use crate::tabs::MenuTabKind;
 
 /// This is passed *to* the consumer in order to get a BaseInit
@@ -88,7 +86,7 @@ where
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
 {
-    pub preview_step_reactor: AsyncLoader,
+    // pub preview_step_reactor: AsyncLoader,
     pub step: Mutable<Step>,
     pub asset: Asset,
     pub base: Rc<Base>,
@@ -99,7 +97,8 @@ where
     pub overlay: Rc<Overlay>,
     pub steps_completed: Mutable<HashSet<Step>>,
     pub history: Rc<HistoryStateImpl<RawData>>,
-    pub preview_mode: Mutable<Option<PreviewMode>>,
+    // Only for Jigs
+    pub jig_is_post_preview: Mutable<bool>,
     pub mode: Option<Mode>,
     phantom: PhantomData<Mode>,
 }
@@ -107,7 +106,7 @@ where
 #[derive(Clone)]
 pub enum PreviewMode {
     Preview,
-    PostPreview(Rc<PostPreview>),
+    PostPreview,
 }
 
 impl<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>
@@ -153,19 +152,6 @@ where
             theme_id.set_neq(force_theme);
         }
 
-        // setup a reactor on the step stuff, independent of the dom rendering
-        let preview_step_reactor = AsyncLoader::new();
-
-        let preview_mode = Mutable::new(None);
-        preview_step_reactor.load(step.signal().for_each(clone!(preview_mode => move |step| {
-            if step.is_preview() {
-                preview_mode.set(Some(PreviewMode::Preview));
-            } else if preview_mode.lock_ref().is_some() {
-                preview_mode.set(None);
-            }
-            async move {}
-        })));
-
         Self {
             step,
             asset,
@@ -175,10 +161,9 @@ where
             header: init.header,
             footer: init.footer,
             overlay: init.overlay,
-            preview_step_reactor,
             steps_completed,
             history: app.history.borrow().as_ref().unwrap_ji().clone(),
-            preview_mode,
+            jig_is_post_preview: Mutable::new(false),
             mode,
             phantom: PhantomData,
         }

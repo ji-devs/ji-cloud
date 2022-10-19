@@ -8,11 +8,11 @@ use std::rc::Rc;
 pub fn navigate_to_publish(state: Rc<State>) {
     state.collapsed.set(true);
     match &state.asset {
-        Asset::Jig(jig) => {
-            jig_actions::navigate_to_publish(Rc::clone(&state), jig);
+        Asset::Jig(_) => {
+            jig_actions::navigate_to_publish(Rc::clone(&state));
         }
-        Asset::Course(course) => {
-            course_actions::navigate_to_publish(Rc::clone(&state), course);
+        Asset::Course(_) => {
+            course_actions::navigate_to_publish(Rc::clone(&state));
         }
         Asset::Resource(_) => unimplemented!(),
     }
