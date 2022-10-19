@@ -10,6 +10,9 @@ import {
 import "@elements/core/buttons/icon";
 import "./container";
 import { Color } from "./container";
+import { faSortSizeDown } from "@fortawesome/pro-solid-svg-icons";
+
+type Size = "regular" | "large";
 
 @customElement("overlay-tooltip-info")
 export class _ extends LitElement {
@@ -69,12 +72,24 @@ export class _ extends LitElement {
                     color: #ffffff;
                 }
                 .body {
+                    font-family: Poppins, Alef;
                     font-size: 14px;
                     letter-spacing: -0.18px;
                     color: #ffffff;
                     width: 304px;
                     margin: 8px 0 36px 0;
                 }
+                :host([size="large"]) .body {
+                    font-size: 22px;
+                    width: auto;
+                    min-width: 304px;
+                    max-width: 500px;
+                }
+
+                :host([color="dark-blue"]) .body {
+                    color: #f78c83;
+                }
+
                 :host([removeMargins]) .body {
                     margin: inherit;
                 }
@@ -169,8 +184,11 @@ export class _ extends LitElement {
     @property({ type: Number })
     marginY: number = 0;
 
-    @property()
+    @property({ reflect: true })
     color: Color = "blue";
+
+    @property({ reflect: true })
+    size: Size = "regular";
 
     @property({ type: Number })
     arrowNudge: number = 0;

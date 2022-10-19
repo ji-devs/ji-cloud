@@ -4,7 +4,7 @@ use components::share_asset::ShareAsset;
 use dominator::{clone, html, with_node, Dom};
 use dominator_helpers::{events::Message, signals::DefaultSignal};
 use futures_signals::map_ref;
-use futures_signals::signal::{Signal, SignalExt};
+use futures_signals::signal::{Mutable, Signal, SignalExt};
 use js_sys::Reflect;
 use shared::domain::{jig::JigResponse, module::ModuleKind};
 use std::collections::HashMap;
@@ -241,6 +241,8 @@ impl JigPlayer {
                                                     .property("target", &elem)
                                                     .attribute("targetAnchor", "br")
                                                     .attribute("contentAnchor", "oppositeV")
+                                                    .property("size", "large")
+                                                    .property("color", "dark-blue")
                                                     .apply(clone!(instructions => move |dom| {
                                                         if instructions.persisted {
                                                             dom.property("body", &instructions.text.unwrap_or(DEFAULT_INSTRUCTIONS_TEXT.to_owned()))
@@ -256,26 +258,54 @@ impl JigPlayer {
                                                         actions::show_instructions(state.clone(), false);
                                                     }))
                                                     .apply_if(instructions.audio.is_some(), clone!(state => move |dom| {
+                                                        let hover = Mutable::new(false);
                                                         dom.child(html!("button-rect", {
                                                             .property("slot", "actions")
                                                             .property("kind", "text")
                                                             .property("color", "lightBlue")
                                                             .property("size", "small")
+                                                            .event(clone!(hover => move |_evt: events::PointerEnter| hover.set_neq(true)))
+                                                            .event(clone!(hover => move |_evt: events::PointerLeave| hover.set_neq(false)))
+                                                            .child(html!("img-ui", {
+                                                                .style("height", "24px")
+                                                                .property_signal("path", hover.signal_ref(|hover| {
+                                                                    if *hover {
+                                                                        "jig/play/icon-repeat-hover.svg"
+                                                                    } else {
+                                                                        "jig/play/icon-repeat.svg"
+                                                                    }
+                                                                }))
+                                                            }))
                                                             .text("Repeat")
                                                             .event(clone!(state => move |_evt: events::Click| {
                                                                 actions::play_instructions_audio(state.clone());
                                                             }))
                                                         }))
                                                     }))
-                                                    .child(html!("button-rect", {
-                                                        .property("slot", "actions")
-                                                        .property("kind", "filled")
-                                                        .property("color", "blue")
-                                                        .property("size", "small")
-                                                        .style("margin-left", "auto")
-                                                        .text("OK")
-                                                        .event(clone!(state => move |_evt: events::Click| {
-                                                            actions::show_instructions(state.clone(), false);
+                                                    .apply(clone!(state => move |dom| {
+                                                        let hover = Mutable::new(false);
+                                                        dom.child(html!("button-rect", {
+                                                            .property("slot", "actions")
+                                                            .property("kind", "filled")
+                                                            .property("color", "blue")
+                                                            .property("size", "small")
+                                                            .style("margin-left", "auto")
+                                                            .event(clone!(hover => move |_evt: events::PointerEnter| hover.set_neq(true)))
+                                                            .event(clone!(hover => move |_evt: events::PointerLeave| hover.set_neq(false)))
+                                                            .child(html!("img-ui", {
+                                                                .style("height", "24px")
+                                                                .property_signal("path", hover.signal_ref(|hover| {
+                                                                    if *hover {
+                                                                        "jig/play/icon-thumbsup-hover.svg"
+                                                                    } else {
+                                                                        "jig/play/icon-thumbsup.svg"
+                                                                    }
+                                                                }))
+                                                            }))
+                                                            .text("OK")
+                                                            .event(clone!(state => move |_evt: events::Click| {
+                                                                actions::show_instructions(state.clone(), false);
+                                                            }))
                                                         }))
                                                     }))
                                                 })
