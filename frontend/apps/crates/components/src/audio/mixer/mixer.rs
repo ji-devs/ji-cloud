@@ -15,6 +15,9 @@ use web_sys::{HtmlIFrameElement, MessageEvent};
 
 use super::{mixer_iframe::AudioMixerIframe, mixer_top::AudioMixerTop};
 
+// TODO: Currently initializing a AUDIO_MIXER in all window levels but only really used in player,
+// might be a good idea to only initialize in player
+
 thread_local! {
     pub static AUDIO_MIXER:AudioMixer = AudioMixer::new()
 }
@@ -52,7 +55,7 @@ pub struct AudioMixer {
     iframes: RefCell<Vec<HtmlIFrameElement>>,
 }
 
-/// Public interface
+/// Public interface, designed to be as close as possible to old interface
 impl AudioMixer {
     pub fn context_available(&self) -> bool {
         *self.context_available.borrow()
