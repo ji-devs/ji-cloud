@@ -128,9 +128,9 @@ fn create_audio_element_on_context(context: &AudioContext) -> HtmlAudioElement {
     // let _ = el.play();
     // let _ = el.load();
 
-    let res = el.load().unwrap_ji();
-    web_sys::console::log_1(&res);
-    log::info!("^ .load()");
+    el.load();
+    log::info!("after .load()");
+
 
     el
 }
