@@ -344,7 +344,7 @@ pub(super) enum AudioMessageToTop {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub(super) struct PlayAudioMessage {
-    pub path: String,
+    pub path: String, // TODO: rename to url
     pub auto_play: bool,
     pub is_loop: bool,
     pub handle_id: AudioHandleId,
