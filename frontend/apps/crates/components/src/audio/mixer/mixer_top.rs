@@ -116,6 +116,7 @@ const EMPTY_URL: &str = "data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29t
 fn create_audio_element_on_context(context: &AudioContext) -> HtmlAudioElement {
     let el = HtmlAudioElement::new()
         .unwrap_ji();
+    el.set_autoplay(true);
     el.set_src(EMPTY_URL);
     el.set_cross_origin(Some("anonymous"));
     let track = context.create_media_element_source(&el)
