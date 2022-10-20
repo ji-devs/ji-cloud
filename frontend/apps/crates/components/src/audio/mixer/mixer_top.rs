@@ -72,7 +72,8 @@ impl AudioMixerTop {
         // let _ = el.play();
         let res = el.play().unwrap_ji();
         web_sys::console::log_1(&res);
-        log::info!("^ .play()");
+        log::info!("^ .play(), el ↓");
+        web_sys::console::log_1(&el);
         self.active
             .borrow_mut()
             .insert(audio_message.handle_id, el);
@@ -108,9 +109,13 @@ impl AudioMixerTop {
 
 fn init_empty_audio_elements(count: usize, context: &AudioContext) -> Vec<HtmlAudioElement> {
     log::info!("here {}", count);
+    let mut i = 0usize;
     (0..count).map(|_| {
         log::info!("here");
-        create_audio_element_on_context(context)
+        let el = create_audio_element_on_context(context);
+        el.set_attribute("hay", &i.to_string());
+        i += 1;
+        el
     }).collect_vec()
 }
 
