@@ -42,7 +42,7 @@ impl AudioMixerTop {
             }
             AudioMessageToTop::PauseAll => {
                 for (_, el) in self.active.borrow().iter() {
-                    let _ = el.pause();
+                    // let _ = el.pause();
                 }
             }
             AudioMessageToTop::PlayAll => {
@@ -83,7 +83,7 @@ impl AudioMixerTop {
     fn pause_handle_called(&self, handle_id: AudioHandleId) {
         let awsm_handles = self.active.borrow();
         if let Some(audio) = awsm_handles.get(&handle_id) {
-            let _ = audio.pause();
+            // let _ = audio.pause();
         }
     }
 
