@@ -69,7 +69,10 @@ impl AudioMixerTop {
         el.set_loop(audio_message.is_loop);
         // set_event_listener(&el, "ended", Box::new(move |e: Event| (on_ended)())); // TODO: need a way to get rid of these once removed, maybe have a central listener for all audio el that never get removed and call correct item
 
-        let _ = el.play();
+        // let _ = el.play();
+        let res = el.play().unwrap_ji();
+        web_sys::console::log_1(&res);
+        log::info!("^ .play()");
         self.active
             .borrow_mut()
             .insert(audio_message.handle_id, el);
@@ -123,7 +126,11 @@ fn create_audio_element_on_context(context: &AudioContext) -> HtmlAudioElement {
         .unwrap_ji();
     let _ = track.connect_with_audio_node(&context.destination());
     // let _ = el.play();
-    let _ = el.load();
+    // let _ = el.load();
+
+    let res = el.load().unwrap_ji();
+    web_sys::console::log_1(&res);
+    log::info!("^ .load()");
 
     el
 }
