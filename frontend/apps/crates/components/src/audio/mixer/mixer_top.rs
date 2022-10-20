@@ -74,6 +74,7 @@ impl AudioMixerTop {
         web_sys::console::log_1(&res);
         log::info!("^ .play(), el ↓");
         web_sys::console::log_1(&el);
+        log::info!("{}", &audio_message.path);
         self.active
             .borrow_mut()
             .insert(audio_message.handle_id, el);
