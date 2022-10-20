@@ -128,9 +128,9 @@ fn create_audio_element_on_context(context: &AudioContext) -> HtmlAudioElement {
     // el.set_autoplay(true);
     el.set_src(EMPTY_URL);
     el.set_cross_origin(Some("anonymous"));
-    let track = context.create_media_element_source(&el)
-        .unwrap_ji();
-    let _ = track.connect_with_audio_node(&context.destination());
+    // let track = context.create_media_element_source(&el)
+    //     .unwrap_ji();
+    // let _ = track.connect_with_audio_node(&context.destination());
     // let _ = el.play();
     // let _ = el.load();
 
