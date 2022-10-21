@@ -280,12 +280,12 @@ pub fn set_paused(state: Rc<JigPlayer>, paused: bool) {
         }
     }
 
-    AUDIO_MIXER.with(|mixer| {
-        match paused {
-            true => mixer.pause_all(),
-            false => mixer.play_all(),
-        };
-    });
+    // AUDIO_MIXER.with(|mixer| {
+    //     match paused {
+    //         true => mixer.pause_all(),
+    //         false => mixer.play_all(),
+    //     };
+    // });
 }
 
 pub fn send_iframe_message(state: Rc<JigPlayer>, data: JigToModulePlayerMessage) {

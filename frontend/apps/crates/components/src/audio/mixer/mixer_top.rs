@@ -47,8 +47,10 @@ impl AudioMixerTop {
                 self.handle_dropped(handle_id);
             }
             AudioMessageToTop::PauseAll => {
+                // panic!("");
+                // log::info!("pause all pause");
                 for (_, el) in self.active.borrow().iter() {
-                    // let _ = el.pause();
+                    let _ = el.pause();
                 }
             }
             AudioMessageToTop::PlayAll => {
@@ -96,7 +98,8 @@ impl AudioMixerTop {
     fn pause_handle_called(&self, handle_id: AudioHandleId) {
         let awsm_handles = self.active.borrow();
         if let Some(audio) = awsm_handles.get(&handle_id) {
-            // let _ = audio.pause();
+            log::info!("handle pause");
+            let _ = audio.pause();
         }
     }
 
@@ -109,8 +112,8 @@ impl AudioMixerTop {
 
     fn broadcast_context_available_request(&self) {
         // let available = true; // = self.audio_context.state() == AudioContextState::Running;
-        let available = self.audio_context.state() == AudioContextState::Running;
-        log::info!("context available {available}");
+        // let available = self.audio_context.state() == AudioContextState::Running;
+        // log::info!("context available {available}");
         let available = *self.ready.borrow();
         AUDIO_MIXER.with(|mixer| {
             mixer.set_context_available(available);
@@ -120,10 +123,10 @@ impl AudioMixerTop {
 }
 
 fn init_empty_audio_elements(count: usize, context: &AudioContext) -> Vec<HtmlAudioElement> {
-    log::info!("here {}", count);
+    // log::info!("here {}", count);
     let mut i = 0usize;
     (0..count).map(|_| {
-        log::info!("here");
+        // log::info!("here");
         let el = create_audio_element_on_context(context);
         el.set_attribute("hay", &i.to_string());
         i += 1;
@@ -146,7 +149,7 @@ fn create_audio_element_on_context(context: &AudioContext) -> HtmlAudioElement {
     // let _ = el.load();
 
     el.load();
-    log::info!("after .load()");
+    // log::info!("after .load()");
 
 
     el
