@@ -13,6 +13,8 @@ pub struct AudioMixerTop {
 impl AudioMixerTop {
     pub(super) fn new() -> Self {
         let audio_context = create_audio_context();
+        web_sys::console::log_1(&audio_context);
+        log::info!("^ audio context");
         // let inactive = init_empty_audio_elements(10, &audio_context);
         // log::info!("inactive len {}", inactive.len());
         Self {
