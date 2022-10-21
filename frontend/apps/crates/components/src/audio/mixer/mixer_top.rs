@@ -18,13 +18,11 @@ impl AudioMixerTop {
         web_sys::console::log_1(&audio_context);
         log::info!("^ audio context");
         // let inactive = init_empty_audio_elements(10, &audio_context);
-        // log::info!("inactive len {}", inactive.len());
         Self {
             audio_context,
             active: Default::default(),
             // inactive: RefCell::new(inactive),
             inactive: RefCell::new(vec![]),
-
             ready: RefCell::new(false),
         }
     }
@@ -47,8 +45,6 @@ impl AudioMixerTop {
                 self.handle_dropped(handle_id);
             }
             AudioMessageToTop::PauseAll => {
-                // panic!("");
-                // log::info!("pause all pause");
                 for (_, el) in self.active.borrow().iter() {
                     let _ = el.pause();
                 }
@@ -65,8 +61,7 @@ impl AudioMixerTop {
     }
 
     fn play<F: FnMut() + 'static>(&self, audio_message: PlayAudioMessage, mut on_ended: F) {
-
-        *self.ready.borrow_mut() = true;
+        *self.ready.borrow_mut() = true; // TODO: this? really??
         if self.inactive.borrow().len() == 0 { // TODO: dont like 
             let inactive = init_empty_audio_elements(10, &self.audio_context);
             *self.inactive.borrow_mut() = inactive;
@@ -79,12 +74,10 @@ impl AudioMixerTop {
         el.set_loop(audio_message.is_loop);
         // set_event_listener(&el, "ended", Box::new(move |e: Event| (on_ended)())); // TODO: need a way to get rid of these once removed, maybe have a central listener for all audio el that never get removed and call correct item
 
-        // let _ = el.play();
-        let res = el.play().unwrap_ji();
-        web_sys::console::log_1(&res);
-        log::info!("^ .play(), el ↓");
-        web_sys::console::log_1(&el);
-        log::info!("{}", &audio_message.path);
+        let _ = el.play();
+        // let res = el.play().unwrap_ji();
+        // web_sys::console::log_1(&res);
+        // log::info!("^ .play(), el ↓");
         self.active
             .borrow_mut()
             .insert(audio_message.handle_id, el);
@@ -98,7 +91,6 @@ impl AudioMixerTop {
     fn pause_handle_called(&self, handle_id: AudioHandleId) {
         let awsm_handles = self.active.borrow();
         if let Some(audio) = awsm_handles.get(&handle_id) {
-            log::info!("handle pause");
             let _ = audio.pause();
         }
     }
@@ -111,7 +103,6 @@ impl AudioMixerTop {
     }
 
     fn broadcast_context_available_request(&self) {
-        // let available = true; // = self.audio_context.state() == AudioContextState::Running;
         // let available = self.audio_context.state() == AudioContextState::Running;
         // log::info!("context available {available}");
         let available = *self.ready.borrow();
@@ -123,34 +114,23 @@ impl AudioMixerTop {
 }
 
 fn init_empty_audio_elements(count: usize, context: &AudioContext) -> Vec<HtmlAudioElement> {
-    // log::info!("here {}", count);
-    let mut i = 0usize;
     (0..count).map(|_| {
-        // log::info!("here");
-        let el = create_audio_element_on_context(context);
-        el.set_attribute("hay", &i.to_string());
-        i += 1;
-        el
+        create_audio_element_on_context(context)
     }).collect_vec()
 }
 
 // TODO: proper credit
 const EMPTY_URL: &str = "data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV";
-fn create_audio_element_on_context(context: &AudioContext) -> HtmlAudioElement {
+fn create_audio_element_on_context(_context: &AudioContext) -> HtmlAudioElement {
     let el = HtmlAudioElement::new()
         .unwrap_ji();
-    // el.set_autoplay(true);
     el.set_src(EMPTY_URL);
     el.set_cross_origin(Some("anonymous"));
     // let track = context.create_media_element_source(&el)
     //     .unwrap_ji();
     // let _ = track.connect_with_audio_node(&context.destination());
     // let _ = el.play();
-    // let _ = el.load();
-
     el.load();
-    // log::info!("after .load()");
-
 
     el
 }
