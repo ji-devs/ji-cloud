@@ -222,7 +222,7 @@ impl AudioMixer {
         .forget();
 
         Self {
-            kind: match is_iframe() {
+            kind: match is_module_player_iframe() {
                 true => AudioMixerKind::Iframe(AudioMixerIframe::new()),
                 false => AudioMixerKind::Top(AudioMixerTop::new()),
             },
@@ -593,4 +593,13 @@ impl From<jig::AudioFeedbackNegative> for AudioPath<'_> {
             jig::AudioFeedbackNegative::Whir => "module/feedback-negative/whir.mp3",
         }))
     }
+}
+
+#[wasm_bindgen::prelude::wasm_bindgen(inline_js = r#"export function is_module_player() { return /^\/module\/\w+\/play\//.test(location.pathname) }"#)]
+extern {
+    fn is_module_player() -> bool;
+}
+
+fn is_module_player_iframe() -> bool {
+    is_iframe() && is_module_player()
 }
