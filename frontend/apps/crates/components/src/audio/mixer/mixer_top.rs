@@ -8,6 +8,8 @@ pub struct AudioMixerTop {
     audio_context: AudioContext,
     active: RefCell<HashMap<AudioHandleId, HtmlAudioElement>>,
     inactive: RefCell<Vec<HtmlAudioElement>>,
+
+    ready: RefCell<bool>,
 }
 
 impl AudioMixerTop {
@@ -22,6 +24,8 @@ impl AudioMixerTop {
             active: Default::default(),
             // inactive: RefCell::new(inactive),
             inactive: RefCell::new(vec![]),
+
+            ready: RefCell::new(false),
         }
     }
 
@@ -59,6 +63,8 @@ impl AudioMixerTop {
     }
 
     fn play<F: FnMut() + 'static>(&self, audio_message: PlayAudioMessage, mut on_ended: F) {
+
+        *self.ready.borrow_mut() = true;
         if self.inactive.borrow().len() == 0 { // TODO: dont like 
             let inactive = init_empty_audio_elements(10, &self.audio_context);
             *self.inactive.borrow_mut() = inactive;
@@ -105,7 +111,7 @@ impl AudioMixerTop {
         // let available = true; // = self.audio_context.state() == AudioContextState::Running;
         let available = self.audio_context.state() == AudioContextState::Running;
         log::info!("context available {available}");
-        let available = true;
+        let available = *self.ready.borrow();
         AUDIO_MIXER.with(|mixer| {
             mixer.set_context_available(available);
             mixer.message_all_iframes(AudioMessageFromTop::ContextAvailable(available));
