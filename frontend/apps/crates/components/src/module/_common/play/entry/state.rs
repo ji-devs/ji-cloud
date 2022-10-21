@@ -380,8 +380,10 @@ where
             raw,
             source,
             play_phase: Mutable::new(if RawData::has_preload() {
+                log::info!("has_preload true");
                 ModulePlayPhase::Preload
             } else {
+                log::info!("has_preload false");
                 ModulePlayPhase::Init
             }),
             phantom: PhantomData,
