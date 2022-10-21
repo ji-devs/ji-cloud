@@ -105,6 +105,7 @@ impl AudioMixerTop {
         // let available = true; // = self.audio_context.state() == AudioContextState::Running;
         let available = self.audio_context.state() == AudioContextState::Running;
         log::info!("context available {available}");
+        let available = true;
         AUDIO_MIXER.with(|mixer| {
             mixer.set_context_available(available);
             mixer.message_all_iframes(AudioMessageFromTop::ContextAvailable(available));
