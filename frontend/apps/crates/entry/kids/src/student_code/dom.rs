@@ -53,6 +53,7 @@ pub fn render(state: Rc<State>, code: Option<String>) -> Dom {
                 player_options.is_student = true;
                 PlayerPopup::new(
                     jig_id.into(),
+                    None,
                     player_options.into(),
                     PreviewPopupCallbacks::new(close)
                 ).render(None)

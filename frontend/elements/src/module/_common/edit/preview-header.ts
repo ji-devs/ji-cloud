@@ -2,11 +2,6 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 import { nothing } from "lit-html";
 import { ModuleKind } from "@elements/module/_common/types";
 
-const STR_TITLE = "Preview Mode";
-
-const STR_AUTOSAVED =
-    "Your work is auto-saved. To make changes, click back to any step.";
-
 const STR_TOOLTIP_CONTINUE = "Click to continue";
 
 @customElement("module-preview-header")
@@ -95,10 +90,6 @@ export class _ extends LitElement {
             <section id="section">
                 <div class="nav">
                     <slot name="nav"></slot>
-                </div>
-                <div class="text">
-                    <h1>${STR_TITLE}</h1>
-                    <p>${STR_AUTOSAVED}</p>
                 </div>
                 <div class="btn"><slot name="btn"></slot></div>
             </section>

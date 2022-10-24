@@ -10,7 +10,7 @@ const STR_USE_IN_PREFIX = "Use the content from this";
 const STR_USE_IN_SUFFIX = "activity in:";
 
 const STR_HEADER_LINE_1_PREFIX = "Your";
-const STR_HEADER_LINE_1_SUFFIX = "activity is ready!";
+const STR_HEADER_LINE_1_SUFFIX = "is ready!";
 const STR_HEADER_LINE_2 = "It’s now part of your JIG.";
 
 @customElement("post-preview")
@@ -20,49 +20,34 @@ export class _ extends LitElement {
             css`
                 :host {
                     width: 90%;
-                    max-width: 1232px;
+                    max-width: 740px;
                     display: grid;
-                    grid-template-rows: 1fr 1fr;
+                    grid-template-rows: 1fr;
                     box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
                     border-radius: 32px;
                     overflow: auto;
                     margin: 20px 0;
-                    height: calc(100vh - 40px);
                 }
                 @media screen and (max-width: 1280px) {
-                    .top-section .message {
-                        font-size: 16px;
-                    }
                     .bottom-section .action-header, .bottom-section-centered .action-header {
                         font-size: 24px;
                     }
-                }
-                .top-section {
-                    background-color: #fff;
-                    display: grid;
-                    grid-template-rows: auto min-content;
-                    justify-content: center;
-                    padding: 30px 0;
-                    grid-gap: 30px;
-                    justify-items: center;
-                }
-                .top-section img-ui {
-                    width: 240px;
-                    display: grid;
-                    align-content: center;
+                    .bottom-section .message, .bottom-section-centered .message {
+                        font-size: 20px;
+                    }
                 }
                 .message {
                     text-align: center;
                     line-height: 1.18;
-                    font-size: 22px;
+                    font-size: 24px;
                     font-weight: 500;
                     color: #fd7076;
                     margin: 0;
                 }
                 .bottom-section {
-                    background-color: var(--light-orange-1);
+                    background-color: var(--white);
                     display: grid;
-                    column-gap: 48px;
+                    grid-gap: 16px;
                     align-items: center;
                     align-content: center;
                     padding: 30px 0;
@@ -80,9 +65,9 @@ export class _ extends LitElement {
                     column-gap: 48px;
                 }
                 .bottom-section-centered {
-                    background-color: var(--light-orange-1);
+                    background-color: var(--white);
                     display: grid;
-                    column-gap: 48px;
+                    grid-gap: 16px;
                     justify-content: center;
                     align-items: center;
                     padding: 46px 0;
@@ -141,29 +126,30 @@ export class _ extends LitElement {
         const { module, hasConvertable } = this;
 
         return html`
-            <div class="top-section">
-                <img-ui
-                    path="module/_common/edit/post-preview/splash.png"
-                ></img-ui>
-                <div class="message">
-                    ${STR_HEADER_LINE_1_PREFIX}
-                    ${STR_MODULE_DISPLAY_NAME[this.module]}
-                    ${STR_HEADER_LINE_1_SUFFIX}
-                    <br />
-                    ${STR_HEADER_LINE_2}
-                </div>
-            </div>
             ${hasConvertable
                 ? renderConvertable(module)
-                : renderNonConvertable()}
+                : renderNonConvertable(module)}
             <slot name="loader"></slot>
         `;
     }
 }
 
-function renderNonConvertable() {
+function renderMessage(module: ModuleKind) {
+    return html`
+        <div class="message">
+            ${STR_HEADER_LINE_1_PREFIX}
+            ${STR_MODULE_DISPLAY_NAME[module]}
+            ${STR_HEADER_LINE_1_SUFFIX}
+            <br />
+            ${STR_HEADER_LINE_2}
+        </div>
+    `;
+}
+
+function renderNonConvertable(module: ModuleKind) {
     return html`
         <div class="bottom-section-centered">
+            ${renderMessage(module)}
             <h3 class="action-header">${STR_ACTION_HEADER}</h3>
             <div class="actions">
                 <slot class="action-print" name="action-print"></slot>
@@ -176,6 +162,7 @@ function renderNonConvertable() {
 function renderConvertable(module: ModuleKind) {
     return html`
         <div class="bottom-section">
+            ${renderMessage(module)}
             <h3 class="action-header">${STR_ACTION_HEADER}</h3>
             <div class="actions">
                 <h4 class="action-use-in-header">

@@ -26,6 +26,7 @@ export class _ extends LitElement {
                     height: 100%;
                     width: 100%;
                 }
+
                 ::slotted([slot="iframe"]),
                 .controls,
                 .paused-backdrop,

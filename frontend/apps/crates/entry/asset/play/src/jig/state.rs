@@ -23,11 +23,11 @@ pub struct JigPlayer {
     /// Loaded after [`State`] is initialized necessitating an Option
     pub jig_liked: Mutable<Option<bool>>,
     pub loader: AsyncLoader,
-    pub active_module: Mutable<usize>,
+    pub active_module: Mutable<Option<usize>>,
     /// Count of modules which have been played
     pub played_modules: RefCell<usize>,
     pub play_tracked: RefCell<bool>,
-    pub module_id: Mutable<Option<ModuleId>>, // needed?
+    pub start_module_id: Option<ModuleId>,
     pub timer: Mutable<Option<Timer>>,
     pub points: Mutable<u32>,
     pub iframe: Rc<RefCell<Option<HtmlIFrameElement>>>,
@@ -48,18 +48,26 @@ pub struct JigPlayer {
 impl JigPlayer {
     pub fn new(
         jig_id: JigId,
-        _module_id: Option<ModuleId>,
+        module_id: Option<ModuleId>,
         player_options: JigPlayerOptions,
     ) -> Rc<Self> {
+        let active_module = match module_id {
+            // If the module_id is specified, then we need to make sure that we don't unecessarily load
+            // the first module;
+            Some(_) => Mutable::new(None),
+            // Otherwise, if no module_id is set, then set the active module to the first module.
+            None => Mutable::new(Some(0)),
+        };
+
         Rc::new(Self {
             jig_id,
             jig: Mutable::new(None),
             jig_liked: Mutable::new(None),
             loader: AsyncLoader::new(),
-            active_module: Mutable::new(0),
+            active_module,
             played_modules: RefCell::new(0),
             play_tracked: RefCell::new(false),
-            module_id: Mutable::new(None),
+            start_module_id: module_id,
             timer: Mutable::new(None),
             points: Mutable::new(0),
             iframe: Rc::new(RefCell::new(None)),

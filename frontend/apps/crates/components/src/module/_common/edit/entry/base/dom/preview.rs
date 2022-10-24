@@ -1,22 +1,23 @@
+use crate::player_popup::{PlayerPopup, PreviewPopupCallbacks};
+
 use super::super::{
     super::{super::jig::post_preview::PostPreview, strings},
     nav::dom::render_nav,
     state::*,
 };
-use dominator::{clone, html, with_node, Dom};
+use dominator::{clone, html, Dom};
 use std::rc::Rc;
 
-use dominator_helpers::events::Message;
-use futures_signals::signal::SignalExt;
+use futures_signals::signal::{Mutable, SignalExt};
 use shared::domain::{
-    asset::AssetId,
+    asset::{AssetId, DraftOrLive},
     module::{
         body::{BodyExt, ModeExt, StepExt},
         ModuleId, ModuleKind,
     },
 };
 use utils::{
-    iframe::{EmptyMessage, IframeInit},
+    asset::{AssetPlayerOptions, JigPlayerOptions},
     prelude::*,
 };
 
@@ -39,19 +40,6 @@ where
         .property("slot", "header")
         .property("moduleKind", module_kind.as_str())
         .child(render_nav(state.clone()))
-        .child(html!("button-rect", {
-            .property("slot", "btn")
-            .property("size", "small")
-            .property("iconAfter", "arrow")
-            .text(strings::STR_DONE)
-            .event(clone!(state => move |_evt:events::Click| {
-                if state.asset.is_jig() {
-                    state.jig_is_post_preview.set(true);
-                } else {
-                    state.navigate_to_publish();
-                }
-            }))
-        }))
     })
 }
 
@@ -88,7 +76,6 @@ where
 }
 
 pub fn render_preview_main<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
-    module_kind: ModuleKind,
     asset_id: AssetId,
     module_id: ModuleId,
     state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
@@ -104,40 +91,57 @@ where
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
 {
-    let url = {
-        let route: String =
-            Route::Module(ModuleRoute::Play(module_kind, asset_id, module_id)).into();
+    let preview_open = Mutable::new(true);
 
-        let url = unsafe { SETTINGS.get_unchecked().remote_target.spa_iframe(&route) };
-
-        format!("{}?iframe_data=true", url)
-    };
-
-    html!("iframe" => web_sys::HtmlIFrameElement, {
-        .property("allow", "autoplay; fullscreen")
+    html!("empty-fragment", {
         .property("slot", "main")
-        .style("width", "100%")
-        .style("height", "100%")
-        .style("border", "none")
-        .property("src", url.clone())
-        .with_node!(elem => {
-            .global_event(clone!(state, url => move |evt:Message| {
-
-                //Wait until the iframe sends its empty message
-                //Then send back the current raw data from history
-                if evt.try_serde_data::<IframeInit<EmptyMessage>>().is_ok() {
-                    let data = state.history.get_current();
-
-                    let msg:IframeInit<RawData> = IframeInit::new(data);
-                    if let Some(window) = elem.content_window() {
-                        let _ = window.post_message(&msg.into(), &url);
-                    } else {
-                        log::info!("unable to get window for sending iframe msg!");
-                    }
-                } else {
-                    log::info!("hmmm got other iframe message...");
-                }
+        .child_signal(preview_open.signal_cloned().map(clone!(preview_open => move |open| {
+            if open {
+                let close = clone!(preview_open => move || {
+                    preview_open.set_neq(false);
+                });
+                Some(
+                    PlayerPopup::new(
+                        asset_id,
+                        Some(module_id),
+                        AssetPlayerOptions::Jig(JigPlayerOptions {
+                            draft_or_live: DraftOrLive::Draft,
+                            ..Default::default()
+                        }),
+                        PreviewPopupCallbacks::new(close)
+                    ).render(Some("preview"))
+                )
+            } else {
+                None
+            }
+        })))
+        .child(html!("preview-body", {
+            .child(html!("button-rect", {
+                .property("slot", "actions")
+                .property("color", "red")
+                .property("kind", "text")
+                .text(strings::STR_PREVIEW_AGAIN)
+                .event(clone!(preview_open => move |_: events::Click| {
+                    preview_open.set_neq(true);
+                }))
             }))
-        })
+            .child(html!("button-rect", {
+                .property("slot", "actions")
+                .property("color", "red")
+                .property("kind", "filled")
+                .property("size", "small")
+                .text(strings::STR_DONE)
+                .child(html!("img-ui", {
+                    .property("path", "core/buttons/rect/arrow-right-yellow.svg")
+                }))
+                .event(clone!(state => move |_evt:events::Click| {
+                    if state.asset.is_jig() {
+                        state.jig_is_post_preview.set(true);
+                    } else {
+                        state.navigate_to_publish();
+                    }
+                }))
+            }))
+        }))
     })
 }

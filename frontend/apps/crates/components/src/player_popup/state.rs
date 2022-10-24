@@ -1,13 +1,14 @@
 use std::rc::Rc;
 
 use futures_signals::signal::Mutable;
-use shared::domain::asset::AssetId;
+use shared::domain::{asset::AssetId, module::ModuleId};
 use utils::asset::{AssetPlayerOptions, CoursePlayerOptions, JigPlayerOptions};
 
 use super::PreviewPopupCallbacks;
 
 pub struct PlayerPopup {
     pub asset_id: AssetId,
+    pub module_id: Option<ModuleId>,
     pub player_options: AssetPlayerOptions,
     pub open: Mutable<bool>,
     pub callbacks: PreviewPopupCallbacks,
@@ -17,11 +18,13 @@ pub struct PlayerPopup {
 impl PlayerPopup {
     pub fn new(
         asset_id: AssetId,
+        module_id: Option<ModuleId>,
         player_options: AssetPlayerOptions,
         callbacks: PreviewPopupCallbacks,
     ) -> Rc<Self> {
         Rc::new(Self {
             asset_id,
+            module_id,
             player_options,
             open: Mutable::new(true),
             callbacks,
@@ -40,6 +43,7 @@ impl PlayerPopup {
         };
         Rc::new(Self {
             asset_id,
+            module_id: None,
             player_options,
             open: Mutable::new(true),
             callbacks,

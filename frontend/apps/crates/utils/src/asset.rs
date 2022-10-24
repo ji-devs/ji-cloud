@@ -228,6 +228,15 @@ pub enum AssetPlayerOptions {
     Course(CoursePlayerOptions),
 }
 
+impl AssetPlayerOptions {
+    pub fn is_draft(&self) -> bool {
+        match self {
+            Self::Jig(options) => options.draft_or_live.is_draft(),
+            Self::Course(options) => options.draft_or_live.is_draft(),
+        }
+    }
+}
+
 impl From<JigPlayerOptions> for AssetPlayerOptions {
     fn from(player_option: JigPlayerOptions) -> Self {
         AssetPlayerOptions::Jig(player_option)

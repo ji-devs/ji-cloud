@@ -37,7 +37,7 @@ where
             false => {
                 vec![
                     render_preview_header(RawData::kind(), state.clone()),
-                    render_preview_main(RawData::kind(), asset_id, module_id, state.clone()),
+                    render_preview_main(asset_id, module_id, state.clone()),
                     render_preview_overlay(RawData::kind(), asset_id, module_id, state),
                 ]
             }
