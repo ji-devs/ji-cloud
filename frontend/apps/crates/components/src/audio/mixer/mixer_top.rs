@@ -1,8 +1,14 @@
 use super::{AudioHandleId, AudioMessageFromTop, AudioMessageToTop, PlayAudioMessage, AUDIO_MIXER};
+use dominator::clone;
+use gloo_timers::callback;
 use itertools::Itertools;
 use web_sys::{HtmlAudioElement, AudioContext, AudioContextState, Event};
 use std::{cell::RefCell, collections::HashMap};
 use utils::{prelude::*, js_wrappers::set_event_listener};
+
+thread_local! {
+    static ENDED_CALLBACKS: RefCell<HashMap<AudioHandleId, Box<dyn FnMut()>>> = Default::default();
+}
 
 pub struct AudioMixerTop {
     audio_context: AudioContext,
@@ -62,17 +68,37 @@ impl AudioMixerTop {
 
     fn play<F: FnMut() + 'static>(&self, audio_message: PlayAudioMessage, mut on_ended: F) {
         *self.ready.borrow_mut() = true; // TODO: this? really??
+        // bad becuse if pool get emptid out it will just create more
         if self.inactive.borrow().len() == 0 { // TODO: dont like 
             let inactive = init_empty_audio_elements(10, &self.audio_context);
+            for el in &inactive {
+                set_event_listener(&el, "ended", Box::new(clone!(el => move |_: Event| {
+                    let id = el.get_attribute("handle_id").unwrap_ji();
+                    let id = AudioHandleId(id);
+                    ENDED_CALLBACKS.with(move |ended_callbacks| {
+                        let mut ended_callbacks = ended_callbacks.borrow_mut();
+                        let callback = ended_callbacks.get_mut(&id);
+                        if let Some(callback) = callback {
+                            (callback)();
+                        }
+                    });
+                })));
+            }
             *self.inactive.borrow_mut() = inactive;
         };
 
+        let inactive_len = self.inactive.borrow().len();
+        log::info!("inactive_len {inactive_len}");
 
         // unwrapping, should never exceed number of items in pool
         let el = self.inactive.borrow_mut().pop().unwrap_ji();
         el.set_src(&audio_message.path);
         el.set_loop(audio_message.is_loop);
-        // set_event_listener(&el, "ended", Box::new(move |e: Event| (on_ended)())); // TODO: need a way to get rid of these once removed, maybe have a central listener for all audio el that never get removed and call correct item
+        el.set_attribute("handle_id", &audio_message.handle_id.to_string());// TODO: maybe find a solution that's protected byt the type system, eg a new struct
+        ENDED_CALLBACKS.with(|ended_callbacks| {
+            ended_callbacks.borrow_mut().insert(audio_message.handle_id.clone(), Box::new(on_ended));
+        });
+        // set_event_listener(&el, "ended", Box::new(move |e: Event| (on_ended)())); // TODO: need a way to get rid of these once removed, maybe have a central listener for all audio el that never get removed and calls correct item
 
         let _ = el.play();
         // let res = el.play().unwrap_ji();
@@ -84,20 +110,24 @@ impl AudioMixerTop {
     }
 
     fn handle_dropped(&self, handle_id: AudioHandleId) {
-        let mut awsm_handles = self.active.borrow_mut();
-        awsm_handles.remove(&handle_id);
+        let mut active = self.active.borrow_mut();
+        let el = active.remove(&handle_id);
+        if let Some(el) = el {
+            el.remove_attribute("handle_id");
+            self.inactive.borrow_mut().push(el);
+        }
     }
 
     fn pause_handle_called(&self, handle_id: AudioHandleId) {
-        let awsm_handles = self.active.borrow();
-        if let Some(audio) = awsm_handles.get(&handle_id) {
+        let active = self.active.borrow();
+        if let Some(audio) = active.get(&handle_id) {
             let _ = audio.pause();
         }
     }
 
     fn play_handle_called(&self, handle_id: AudioHandleId) {
-        let awsm_handles = self.active.borrow();
-        if let Some(audio) = awsm_handles.get(&handle_id) {
+        let active = self.active.borrow();
+        if let Some(audio) = active.get(&handle_id) {
             let _ = audio.play();
         }
     }

@@ -290,11 +290,17 @@ impl AudioMixer {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq, Hash)]
-pub(super) struct AudioHandleId(String);
+pub(super) struct AudioHandleId(pub String); // TODO: remove pub
 
 impl AudioHandleId {
     pub fn new() -> Self {
         Self(js_sys::Math::random().to_string())
+    }
+}
+
+impl ToString for AudioHandleId { // TODO: remove if can
+    fn to_string(&self) -> String {
+        self.0.to_string()
     }
 }
 
