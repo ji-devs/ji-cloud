@@ -38,6 +38,7 @@ impl CoursePlayer {
                     });
                     PlayerPopup::new(
                         jig_id.into(),
+                        None,
                         options,
                         PreviewPopupCallbacks::new(close)
                     ).render(None)

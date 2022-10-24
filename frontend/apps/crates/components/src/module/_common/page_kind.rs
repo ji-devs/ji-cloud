@@ -19,14 +19,11 @@ impl ModulePageKind {
         self == &Self::GridResizeScrollable
     }
 
-    pub fn add_preview_attribute(&self) -> bool {
-        matches!(self, Self::GridResizePreview)
-    }
     pub fn element_name(&self) -> &str {
         match self {
             Self::GridResize => "module-page-grid-resize",
             Self::GridResizeScrollable => "module-page-grid-resize",
-            Self::GridResizePreview => "module-page-grid-resize",
+            Self::GridResizePreview => "module-page-preview",
             Self::GridPlain => "module-page-grid-plain",
             Self::Iframe => "module-page-iframe",
             Self::Empty => "div",

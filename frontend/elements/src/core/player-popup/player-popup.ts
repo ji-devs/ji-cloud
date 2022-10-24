@@ -1,4 +1,5 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
+import { nothing } from "lit-html";
 
 const CSS_RULE_WEBKIT = `
     :root::-webkit-scrollbar {
@@ -52,6 +53,7 @@ export class _ extends LitElement {
                     height: 100%;
                     width: 100%;
                     aspect-ratio: 16 / 9;
+                    border: 4px red solid;
                 }
                 ::slotted([slot="close"]) {
                     margin: 16px;
@@ -69,12 +71,28 @@ export class _ extends LitElement {
                     right: 0;
                     padding: 0;
                 }
+
+                :host .preview {
+                    position: absolute;
+                    left: 50%;
+                    display: inline;
+                    transform: translateX(-50%);
+                    padding: 2px 29px 4px;
+                    box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+                    border: solid 1px var(--dark-blue-3);
+                    background-color: var(--dark-blue-3);
+                    border-radius: 0 0 16px 16px;
+                    color: var(--white);
+                }
             `,
         ];
     }
 
     @property({ reflect: true })
     size: Size = "aspect-ratio";
+
+    @property({ type: Boolean })
+    preview: boolean = false;
 
     connectedCallback() {
         super.connectedCallback();
@@ -93,6 +111,7 @@ export class _ extends LitElement {
     render() {
         return html`
             <div class="iframe-wrapper">
+                ${this.preview ? html`<div class="preview">Preview mode</div>` : nothing}
                 <slot name="iframe"></slot>
                 <slot name="close"></slot>
             </div>

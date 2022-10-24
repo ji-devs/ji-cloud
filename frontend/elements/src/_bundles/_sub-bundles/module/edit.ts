@@ -22,9 +22,11 @@ import "@elements/core/menu/menu-line";
 import "@elements/core/menu/menu-items";
 import "@elements/core/module-page/grid-resize";
 import "@elements/core/module-page/grid-plain";
+import "@elements/core/module-page/preview";
 import "@elements/core/nav/steps-nav";
 import "@elements/core/nav/step-nav";
 import "@elements/core/help/jigzi-help";
+import "@elements/core/player-popup/player-popup";
 import "@elements/module/_common/edit/footer";
 import "@elements/module/_common/edit/footer-continue-button";
 import "@elements/module/_common/edit/header";
@@ -45,6 +47,7 @@ import "@elements/module/_common/edit/widgets/sidebar-drag-prompt";
 import "@elements/module/_common/edit/post-preview/post-preview";
 import "@elements/module/_common/edit/post-preview/post-preview-container";
 import "@elements/module/_common/edit/post-preview/post-preview-action";
+import "@elements/module/_common/edit/preview-body";
 /* Common components used in most editors */
 
 //color select

@@ -71,9 +71,6 @@ pub fn render_page_body<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer
                 .apply_if(page_kind.add_scrollable_attribute(), |dom| {
                     dom.property("scrollable", true)
                 })
-                .apply_if(page_kind.add_preview_attribute(), |dom| {
-                    dom.property("preview", true)
-                })
                 .event(clone!(has_resized_once => move |event:ModuleResizeEvent| {
                     //in utils / global static
                     set_resize_info(event.data());

@@ -52,57 +52,58 @@ pub fn pause_background_audio(state: &JigPlayer, audio_handle: &AudioHandle) {
 }
 
 pub fn navigate_forward(state: Rc<JigPlayer>) {
-    let active_module = state.active_module.get();
+    if let Some(active_module) = state.active_module.get() {
+        let module_count = (&*state.jig.lock_ref())
+            .as_ref()
+            .map(|jig| jig.jig_data.modules.len());
 
-    let module_count = (&*state.jig.lock_ref())
-        .as_ref()
-        .map(|jig| jig.jig_data.modules.len());
+        if let Some(module_count) = module_count {
+            let is_done = active_module == module_count - 1;
+            // Track that the JIG has been played if
+            // - The JIG is not a draft;
+            // - The play hasn't been tracked yet;
+            // - Either TRACK_MODULE_COUNT count of modules have been played or the JIG is done.
+            let should_track = !state.player_options.draft_or_live.is_draft()
+                && !*state.play_tracked.borrow()
+                && (*state.played_modules.borrow() + 1 == TRACK_MODULE_COUNT || is_done);
 
-    if let Some(module_count) = module_count {
-        let is_done = active_module == module_count - 1;
-        // Track that the JIG has been played if
-        // - The JIG is not a draft;
-        // - The play hasn't been tracked yet;
-        // - Either TRACK_MODULE_COUNT count of modules have been played or the JIG is done.
-        let should_track = !state.player_options.draft_or_live.is_draft()
-            && !*state.play_tracked.borrow()
-            && (*state.played_modules.borrow() + 1 == TRACK_MODULE_COUNT || is_done);
+            if should_track {
+                state.loader.load(clone!(state => async move {
+                    // We don't need to handle an Ok Result; We can ignore Err, nothing is dependent on the
+                    // success of this call. The failure should be noted in the server logs.
+                    let _ = jig::Play::api_no_auth_empty(
+                        JigPlayPath(state.jig_id),
+                        None,
+                    ).await;
 
-        if should_track {
-            state.loader.load(clone!(state => async move {
-                // We don't need to handle an Ok Result; We can ignore Err, nothing is dependent on the
-                // success of this call. The failure should be noted in the server logs.
-                let _ = jig::Play::api_no_auth_empty(
-                    JigPlayPath(state.jig_id),
-                    None,
-                ).await;
+                    // Set the flag to indicate that the play has been tracked for this JIG.
+                    *state.play_tracked.borrow_mut() = true;
+                }))
+            }
 
-                // Set the flag to indicate that the play has been tracked for this JIG.
-                *state.play_tracked.borrow_mut() = true;
-            }))
-        }
+            if !is_done {
+                // Only increment the played count when navigating to the _next_ module.
+                let mut played_modules = state.played_modules.borrow_mut();
+                *played_modules += 1;
 
-        if !is_done {
-            // Only increment the played count when navigating to the _next_ module.
-            let mut played_modules = state.played_modules.borrow_mut();
-            *played_modules += 1;
-
-            navigate_to_index(Rc::clone(&state), active_module + 1);
-        } else {
-            state.done.set(true);
+                navigate_to_index(Rc::clone(&state), active_module + 1);
+            } else {
+                state.done.set(true);
+            }
         }
     }
 }
 
 pub fn navigate_back(state: Rc<JigPlayer>) {
-    let active_module = state.active_module.get();
-    if active_module != 0 {
-        navigate_to_index(state, active_module - 1);
+    if let Some(active_module) = state.active_module.get() {
+        if active_module != 0 {
+            navigate_to_index(state, active_module - 1);
+        }
     }
 }
 
 pub fn navigate_to_index(state: Rc<JigPlayer>, index: usize) {
-    state.active_module.set(index);
+    state.active_module.set(Some(index));
     state.timer.set(None);
     state.done.set(false);
 }
@@ -211,7 +212,17 @@ async fn load_jig(state: Rc<JigPlayer>) {
 
         match jig {
             Ok(jig) => {
+                log::info!("IS JIG");
                 // state.active_module.set(Some(resp.jig.modules[0].clone()));
+                if let Some(start_module_id) = state.start_module_id {
+                    log::info!("MODULE ID {start_module_id:?}");
+                    if let Some((index, _)) = jig.jig_data.modules.iter().enumerate().find(|module| {
+                        module.1.id == start_module_id
+                    }) {
+                        log::info!("Found at idx {index}");
+                        state.active_module.set_neq(Some(index));
+                    };
+                }
                 state.jig.set(Some(jig));
                 state.jig_liked.set(Some(jig_liked));
             },

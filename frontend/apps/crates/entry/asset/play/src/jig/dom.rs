@@ -178,11 +178,8 @@ impl JigPlayer {
                         .property("allow", "autoplay; fullscreen")
                         .property("slot", "iframe")
                         .property_signal("src", jig_and_active_module_signal(Rc::clone(&state)).map(clone!(state => move|(jig, active_module_index)| {
-                            match jig {
-                                None => {
-                                    crate::debug::settings().empty_module_url.to_string()
-                                },
-                                Some(jig) => {
+                            match (jig, active_module_index) {
+                                (Some(jig), Some(active_module_index)) => {
                                     let active_module = &jig.jig_data.modules.get(active_module_index);
 
                                     match active_module {
@@ -207,6 +204,10 @@ impl JigPlayer {
                                             url
                                         },
                                     }
+                                },
+                                (Some(_jig), None) => "".to_owned(),
+                                _ => {
+                                    crate::debug::settings().empty_module_url.to_string()
                                 },
                             }
                         })))
@@ -343,11 +344,11 @@ impl JigPlayer {
                     .property("kind", "back")
                     .visible_signal(jig_and_active_module_signal(Rc::clone(&state)).map(|(jig, active_module)| {
                         // if module already loaded and not first module
-                        match jig {
-                            None => false,
-                            Some(_jig) => {
+                        match (jig, active_module) {
+                            (Some(_jig), Some(active_module)) => {
                                 active_module != 0
                             },
+                            _ => false,
                         }
                     }))
                     .event(clone!(state => move |_: events::Click| {
@@ -377,19 +378,21 @@ impl JigPlayer {
 /// Otherwise emits the value of the module's `is_complete` field.
 fn active_module_valid_signal(state: Rc<JigPlayer>) -> impl Signal<Item = bool> {
     jig_and_active_module_signal(state).map(|(jig, active_module_index)| {
-        match jig {
-            Some(jig) => match &jig.jig_data.modules.get(active_module_index) {
-                Some(module) => module.is_complete || matches!(module.kind, ModuleKind::Legacy),
-                None => true, // Active module isn't in the list
-            },
-            None => true, // Jig isn't set
+        match (jig, active_module_index) {
+            (Some(jig), Some(active_module_index)) => {
+                match &jig.jig_data.modules.get(active_module_index) {
+                    Some(module) => module.is_complete || matches!(module.kind, ModuleKind::Legacy),
+                    None => true, // Active module isn't in the list
+                }
+            }
+            _ => true, // Jig isn't set
         }
     })
 }
 
 fn jig_and_active_module_signal(
     state: Rc<JigPlayer>,
-) -> impl Signal<Item = (Option<JigResponse>, usize)> {
+) -> impl Signal<Item = (Option<JigResponse>, Option<usize>)> {
     map_ref! {
         let jig = state.jig.signal_cloned(),
         let active_module = state.active_module.signal_cloned() => (
@@ -421,13 +424,17 @@ fn progress_signal(state: Rc<JigPlayer>) -> impl Signal<Item = u32> {
         match jig {
             None => 0,
             Some(jig) => {
-                let len = jig.jig_data.modules.len();
-                let step_percent = 100f32 / len as f32;
-                let current_progress = active_module_index as f32 * step_percent;
-                // TODO: ask corrine if this should be here
-                let current_progress = current_progress + step_percent;
-                log::info!("{}", current_progress);
-                current_progress.round() as u32
+                if let Some(active_module_index) = active_module_index {
+                    let len = jig.jig_data.modules.len();
+                    let step_percent = 100f32 / len as f32;
+                    let current_progress = active_module_index as f32 * step_percent;
+                    // TODO: ask corrine if this should be here
+                    let current_progress = current_progress + step_percent;
+                    log::info!("{}", current_progress);
+                    current_progress.round() as u32
+                } else {
+                    0
+                }
             }
         }
     })

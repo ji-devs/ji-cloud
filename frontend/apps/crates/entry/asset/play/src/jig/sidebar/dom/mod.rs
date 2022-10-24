@@ -87,10 +87,10 @@ pub fn render(state: Rc<State>) -> Dom {
                                 .property("isLastModule", i == module_count - 1)
                                 .property("selected", true)
                                 .property_signal("selected", state.player_state.active_module.signal().map(move |active_module_index| {
-                                    i == active_module_index
+                                    Some(i) == active_module_index
                                 }))
                                 .event(clone!(state => move |_: events::Click| {
-                                    state.player_state.active_module.set(i);
+                                    state.player_state.active_module.set(Some(i));
                                 }))
                                 .child(
                                     ModuleThumbnail::new(

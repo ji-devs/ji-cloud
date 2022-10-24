@@ -116,6 +116,7 @@ impl AssetEditState {
                             });
                             PlayerPopup::new(
                                 state.asset_id,
+                                None,
                                 settings.into(),
                                 PreviewPopupCallbacks::new(close)
                             ).render(None)
@@ -126,6 +127,7 @@ impl AssetEditState {
                             });
                             PlayerPopup::new(
                                 state.asset_id,
+                                None,
                                 settings.into(),
                                 PreviewPopupCallbacks::new(close)
                             ).render(None)
