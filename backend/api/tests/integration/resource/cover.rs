@@ -1,10 +1,11 @@
+use insta::assert_json_snapshot;
 use serde_json::json;
 use shared::domain::resource::ResourceResponse;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, LoginExt},
+    helpers::{assert_snapshot, initialize_server, LoginExt},
 };
 
 #[sqlx::test]
@@ -21,6 +22,7 @@ async fn update_no_modules_changes(
     .await;
 
     let port = app.port();
+    let _ = app.handle();
 
     tokio::spawn(app.run_until_stopped());
 
@@ -53,7 +55,7 @@ async fn update_no_modules_changes(
 
     let body: ResourceResponse = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, {".**.lastEdited" => "[timestamp]"});
+    assert_snapshot(|| assert_json_snapshot!(body, {".**.lastEdited" => "[timestamp]"}))?;
 
     Ok(())
 }

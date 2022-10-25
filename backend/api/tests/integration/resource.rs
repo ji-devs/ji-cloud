@@ -1,13 +1,11 @@
 use http::StatusCode;
-use insta::assert_json_snapshot;
 use serde_json::json;
 use shared::domain::{resource::ResourceId, CreateResponse};
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
-use tokio::runtime::{self, Runtime};
 
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, test_initialize_server, LoginExt},
+    helpers::{assert_snapshot, initialize_server, LoginExt},
 };
 
 mod cover;
@@ -20,16 +18,12 @@ async fn create_default(
 ) -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User], &[], pool_opts, conn_opts).await;
 
-    let settings = insta::Settings::clone_current();
-
-    // Create the runtime
-    let rt = runtime::Runtime::new()?;
-
     let port = app.port();
+    let _ = app.handle();
 
     print!("port: {port}");
 
-    let join_handle = rt.spawn(app.run_until_stopped());
+    let join_handle = tokio::spawn(app.run_until_stopped());
 
     println!("join_handle: {:?}", join_handle);
 
@@ -46,17 +40,13 @@ async fn create_default(
 
     println!("First");
 
-    assert_eq!(resp.status(), StatusCode::CREATED);
+    let status = resp.status();
+
+    assert_snapshot(|| assert_eq!(status, StatusCode::CREATED))?;
 
     let body: CreateResponse<ResourceId> = resp.json().await?;
 
-    settings
-        .bind_async(async {
-            println!("join_handle: {:?}", join_handle);
-
-            assert_json_snapshot!(body, {".id" => "[id]"});
-        })
-        .await;
+    assert_snapshot(|| insta::assert_json_snapshot!(body))?;
 
     let resource_id = body.id.0;
 
@@ -74,11 +64,13 @@ async fn create_default(
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(
+    assert_snapshot(|| {
+        insta::assert_json_snapshot!(
         body, {
             ".**.id" => "[id]",
             ".**.createdAt" => "[created_at]",
-            ".**.lastEdited" => "[last_edited]"});
+            ".**.lastEdited" => "[last_edited]"})
+    })?;
 
     let resp = client
         .get(&format!(
@@ -94,13 +86,15 @@ async fn create_default(
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(
-        body, {
-            ".**.id" => "[id]",
-            ".**.createdAt" => "[created_at]",
-            ".**.lastEdited" => "[last_edited]"
-        }
-    );
+    assert_snapshot(|| {
+        insta::assert_json_snapshot!(
+            body, {
+                ".**.id" => "[id]",
+                ".**.createdAt" => "[created_at]",
+                ".**.lastEdited" => "[last_edited]"
+            }
+        )
+    })?;
 
     Ok(())
 }
@@ -118,11 +112,10 @@ async fn create_with_params(
     )
     .await;
 
-    let rt = Runtime::new().unwrap();
-
     let port = app.port();
+    let _ = app.handle();
 
-    let join_handle = rt.spawn(app.run_until_stopped());
+    let join_handle = tokio::spawn(app.run_until_stopped());
 
     println!("join_handle: {:?}", join_handle);
     let client = reqwest::Client::new();
@@ -138,12 +131,15 @@ async fn create_with_params(
         .send()
         .await?
         .error_for_status()?;
+    let status = resp.status();
 
-    assert_eq!(resp.status(), StatusCode::CREATED);
+    assert_snapshot(|| assert_eq!(status, StatusCode::CREATED))?;
 
     let body: CreateResponse<ResourceId> = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, {".id" => "[id]", ".last_edited" => "[last_edited]"});
+    assert_snapshot(
+        || insta::assert_json_snapshot!(body, {".id" => "[id]", ".last_edited" => "[last_edited]"}),
+    )?;
 
     Ok(())
 }
@@ -158,11 +154,10 @@ async fn clone(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow:
     )
     .await;
 
-    let rt = Runtime::new().unwrap();
-
     let port = app.port();
+    let _ = app.handle();
 
-    let join_handle = rt.spawn(app.run_until_stopped());
+    let join_handle = tokio::spawn(app.run_until_stopped());
 
     println!("join_handle: {:?}", join_handle);
     let client = reqwest::Client::new();
@@ -180,8 +175,9 @@ async fn clone(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow:
         .error_for_status()?;
 
     println!("First");
+    let status = resp.status();
 
-    assert_eq!(resp.status(), StatusCode::CREATED);
+    assert_snapshot(|| assert_eq!(status, StatusCode::CREATED))?;
 
     let CreateResponse { id: ResourceId(id) } = resp.json().await?;
 
@@ -193,18 +189,21 @@ async fn clone(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow:
         .error_for_status()?;
 
     println!("Second");
+    let status = resp.status();
 
-    assert_eq!(resp.status(), StatusCode::OK);
+    assert_snapshot(|| assert_eq!(status, StatusCode::OK))?;
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(
-        body, {
-            ".**.id" => "[id]",
-            ".**.lastEdited" => "[last_edited]",
-            ".**.additionalResources" => "[ids]"
-        }
-    );
+    assert_snapshot(|| {
+        insta::assert_json_snapshot!(
+            body, {
+                ".**.id" => "[id]",
+                ".**.lastEdited" => "[last_edited]",
+                ".**.additionalResources" => "[ids]"
+            }
+        )
+    })?;
 
     let resp = client
         .get(&format!("http://0.0.0.0:{}/v1/resource/{}/live", port, id))
@@ -212,18 +211,21 @@ async fn clone(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow:
         .send()
         .await?
         .error_for_status()?;
+    let status = resp.status();
     println!("Third");
-    assert_eq!(resp.status(), StatusCode::OK);
+    assert_snapshot(|| assert_eq!(status, StatusCode::OK))?;
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(
-        body, {
-            ".**.id" => "[id]",
-            ".**.lastEdited" => "[last_edited]",
-            ".**.additionalResources" => "[ids]"
-        }
-    );
+    assert_snapshot(|| {
+        insta::assert_json_snapshot!(
+            body, {
+                ".**.id" => "[id]",
+                ".**.lastEdited" => "[last_edited]",
+                ".**.additionalResources" => "[ids]"
+            }
+        )
+    })?;
 
     Ok(())
 }
@@ -238,11 +240,10 @@ async fn get(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::R
     )
     .await;
 
-    let rt = Runtime::new().unwrap();
-
     let port = app.port();
+    let _ = app.handle();
 
-    let join_handle = rt.spawn(app.run_until_stopped());
+    let join_handle = tokio::spawn(app.run_until_stopped());
 
     println!("join_handle: {:?}", join_handle);
     let client = reqwest::Client::new();
@@ -258,16 +259,19 @@ async fn get(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::R
         .send()
         .await?
         .error_for_status()?;
+    let status = resp.status();
 
-    assert_eq!(resp.status(), StatusCode::OK);
+    assert_snapshot(|| assert_eq!(status, StatusCode::OK))?;
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(
-        body, {
-            ".**.lastEdited" => "[last_edited]"
-        }
-    );
+    assert_snapshot(|| {
+        insta::assert_json_snapshot!(
+            body, {
+                ".**.lastEdited" => "[last_edited]"
+            }
+        )
+    })?;
 
     let resp = client
         .get(&format!(
@@ -278,16 +282,19 @@ async fn get(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::R
         .send()
         .await?
         .error_for_status()?;
+    let status = resp.status();
 
-    assert_eq!(resp.status(), StatusCode::OK);
+    assert_snapshot(|| assert_eq!(status, StatusCode::OK))?;
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(
-        body, {
-            ".**.lastEdited" => "[last_edited]"
-        }
-    );
+    assert_snapshot(|| {
+        insta::assert_json_snapshot!(
+            body, {
+                ".**.lastEdited" => "[last_edited]"
+            }
+        )
+    })?;
 
     Ok(())
 }
@@ -306,11 +313,10 @@ async fn browse_simple(
     )
     .await;
 
-    let rt = Runtime::new().unwrap();
-
     let port = app.port();
+    let _ = app.handle();
 
-    let join_handle = rt.spawn(app.run_until_stopped());
+    let join_handle = tokio::spawn(app.run_until_stopped());
 
     println!("join_handle: {:?}", join_handle);
     let client = reqwest::Client::new();
@@ -321,16 +327,19 @@ async fn browse_simple(
         .send()
         .await?
         .error_for_status()?;
+    let status = resp.status();
 
-    assert_eq!(resp.status(), StatusCode::OK);
+    assert_snapshot(|| assert_eq!(status, StatusCode::OK))?;
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(
-        body, {
-            ".**.lastEdited" => "[last_edited]"
-        }
-    );
+    assert_snapshot(|| {
+        insta::assert_json_snapshot!(
+            body, {
+                ".**.lastEdited" => "[last_edited]"
+            }
+        )
+    })?;
 
     let resp = client
         .get(&format!(
@@ -341,16 +350,19 @@ async fn browse_simple(
         .send()
         .await?
         .error_for_status()?;
+    let status = resp.status();
 
-    assert_eq!(resp.status(), StatusCode::OK);
+    assert_snapshot(|| assert_eq!(status, StatusCode::OK))?;
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(
-        body, {
-            ".**.lastEdited" => "[last_edited]"
-        }
-    );
+    assert_snapshot(|| {
+        insta::assert_json_snapshot!(
+            body, {
+                ".**.lastEdited" => "[last_edited]"
+            }
+        )
+    })?;
 
     let resp = client
         .get(&format!(
@@ -361,16 +373,19 @@ async fn browse_simple(
         .send()
         .await?
         .error_for_status()?;
+    let status = resp.status();
 
-    assert_eq!(resp.status(), StatusCode::OK);
+    assert_snapshot(|| assert_eq!(status, StatusCode::OK))?;
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(
-        body, {
-            ".**.lastEdited" => "[last_edited]"
-        }
-    );
+    assert_snapshot(|| {
+        insta::assert_json_snapshot!(
+            body, {
+                ".**.lastEdited" => "[last_edited]"
+            }
+        )
+    })?;
 
     Ok(())
 }
@@ -388,11 +403,10 @@ async fn browse_order_by(
     )
     .await;
 
-    let rt = Runtime::new().unwrap();
-
     let port = app.port();
+    let _ = app.handle();
 
-    let join_handle = rt.spawn(app.run_until_stopped());
+    let join_handle = tokio::spawn(app.run_until_stopped());
 
     println!("join_handle: {:?}", join_handle);
     let client = reqwest::Client::new();
@@ -403,12 +417,13 @@ async fn browse_order_by(
         .send()
         .await?
         .error_for_status()?;
+    let status = resp.status();
 
-    assert_eq!(resp.status(), StatusCode::OK);
+    assert_snapshot(|| assert_eq!(status, StatusCode::OK))?;
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    assert_snapshot(|| insta::assert_json_snapshot!(body))?;
 
     let resp = client
         .get(&format!(
@@ -419,12 +434,13 @@ async fn browse_order_by(
         .send()
         .await?
         .error_for_status()?;
+    let status = resp.status();
 
-    assert_eq!(resp.status(), StatusCode::OK);
+    assert_snapshot(|| assert_eq!(status, StatusCode::OK))?;
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    assert_snapshot(|| insta::assert_json_snapshot!(body))?;
 
     let resp = client
         .get(&format!(
@@ -435,12 +451,13 @@ async fn browse_order_by(
         .send()
         .await?
         .error_for_status()?;
+    let status = resp.status();
 
-    assert_eq!(resp.status(), StatusCode::OK);
+    assert_snapshot(|| assert_eq!(status, StatusCode::OK))?;
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    assert_snapshot(|| insta::assert_json_snapshot!(body))?;
 
     Ok(())
 }
@@ -458,11 +475,10 @@ async fn browse_own_simple(
     )
     .await;
 
-    let rt = Runtime::new().unwrap();
-
     let port = app.port();
+    let _ = app.handle();
 
-    let join_handle = rt.spawn(app.run_until_stopped());
+    let join_handle = tokio::spawn(app.run_until_stopped());
 
     println!("join_handle: {:?}", join_handle);
     let client = reqwest::Client::new();
@@ -477,15 +493,19 @@ async fn browse_own_simple(
         .await?
         .error_for_status()?;
 
-    assert_eq!(resp.status(), StatusCode::OK);
+    let status = resp.status();
+
+    assert_snapshot(|| assert_eq!(status, StatusCode::OK))?;
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(
-        body, {
-            ".**.lastEdited" => "[last_edited]"
-        }
-    );
+    assert_snapshot(|| {
+        insta::assert_json_snapshot!(
+            body, {
+                ".**.lastEdited" => "[last_edited]"
+            }
+        )
+    })?;
 
     Ok(())
 }
@@ -504,11 +524,10 @@ async fn count(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow:
     )
     .await;
 
-    let rt = Runtime::new().unwrap();
-
     let port = app.port();
+    let _ = app.handle();
 
-    let join_handle = rt.spawn(app.run_until_stopped());
+    let join_handle = tokio::spawn(app.run_until_stopped());
 
     println!("join_handle: {:?}", join_handle);
     let client = reqwest::Client::new();
@@ -520,11 +539,13 @@ async fn count(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow:
         .await?
         .error_for_status()?;
 
-    assert_eq!(resp.status(), StatusCode::OK);
+    let status = resp.status();
+
+    assert_snapshot(|| assert_eq!(status, StatusCode::OK))?;
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    assert_snapshot(|| insta::assert_json_snapshot!(body))?;
 
     Ok(())
 }
@@ -547,11 +568,10 @@ async fn update_and_publish(
     )
     .await;
 
-    let rt = Runtime::new().unwrap();
-
     let port = app.port();
+    let _ = app.handle();
 
-    let join_handle = rt.spawn(app.run_until_stopped());
+    let join_handle = tokio::spawn(app.run_until_stopped());
 
     println!("join_handle: {:?}", join_handle);
     let client = reqwest::Client::new();
@@ -570,11 +590,13 @@ async fn update_and_publish(
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(
-        body, {
-            ".**.lastEdited" => "[last_edited]",
-        }
-    );
+    assert_snapshot(|| {
+        insta::assert_json_snapshot!(
+            body, {
+                ".**.lastEdited" => "[last_edited]",
+            }
+        )
+    })?;
 
     let resp = client
         .patch(&format!(
@@ -590,8 +612,9 @@ async fn update_and_publish(
         .send()
         .await?
         .error_for_status()?;
+    let status = resp.status();
 
-    assert_eq!(resp.status(), StatusCode::NO_CONTENT);
+    assert_snapshot(|| assert_eq!(status, StatusCode::NO_CONTENT))?;
 
     let resp = client
         .get(&format!(
@@ -605,11 +628,13 @@ async fn update_and_publish(
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(
-        body, {
-            ".**.lastEdited" => "[last_edited]",
-        }
-    );
+    assert_snapshot(|| {
+        insta::assert_json_snapshot!(
+            body, {
+                ".**.lastEdited" => "[last_edited]",
+            }
+        )
+    })?;
 
     let resp = client
         .get(&format!(
@@ -623,11 +648,13 @@ async fn update_and_publish(
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(
-        body, {
-            ".**.lastEdited" => "[last_edited]",
-        }
-    );
+    assert_snapshot(|| {
+        insta::assert_json_snapshot!(
+            body, {
+                ".**.lastEdited" => "[last_edited]",
+            }
+        )
+    })?;
 
     let _resp = client
         .put(&format!(
@@ -651,15 +678,17 @@ async fn update_and_publish(
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(
-        body, {
-            // Really just need to redact the module ID because it is recreated for the live data,
-            // but I couldn't get a selector working correctly... So redacting all IDs.
-            ".**.id" => "[id]",
-            ".**.lastEdited" => "[last_edited]",
-            ".**.publishedAt" => "[published_at]"
-        }
-    );
+    assert_snapshot(|| {
+        insta::assert_json_snapshot!(
+            body, {
+                // Really just need to redact the module ID because it is recreated for the live data,
+                // but I couldn't get a selector working correctly... So redacting all IDs.
+                ".**.id" => "[id]",
+                ".**.lastEdited" => "[last_edited]",
+                ".**.publishedAt" => "[published_at]"
+            }
+        )
+    })?;
 
     Ok(())
 }
@@ -683,11 +712,10 @@ async fn update_and_publish_incomplete_modules(
     )
     .await;
 
-    let rt = Runtime::new().unwrap();
-
     let port = app.port();
+    let _ = app.handle();
 
-    let join_handle = rt.spawn(app.run_until_stopped());
+    let join_handle = tokio::spawn(app.run_until_stopped());
 
     println!("join_handle: {:?}", join_handle);
     let client = reqwest::Client::new();
@@ -701,8 +729,9 @@ async fn update_and_publish_incomplete_modules(
         .login()
         .send()
         .await?;
+    let status = resp.status();
 
-    assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
+    assert_snapshot(|| assert_eq!(status, StatusCode::BAD_REQUEST))?;
 
     // Test no modules on JIG returns HTTP 400
     let resp = client
@@ -713,8 +742,9 @@ async fn update_and_publish_incomplete_modules(
         .login()
         .send()
         .await?;
+    let status = resp.status();
 
-    assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
+    assert_snapshot(|| assert_eq!(status, StatusCode::BAD_REQUEST))?;
 
     Ok(())
 }
@@ -737,11 +767,10 @@ async fn live_up_to_date_flag(
     )
     .await;
 
-    let rt = Runtime::new().unwrap();
-
     let port = app.port();
+    let _ = app.handle();
 
-    let join_handle = rt.spawn(app.run_until_stopped());
+    let join_handle = tokio::spawn(app.run_until_stopped());
 
     println!("join_handle: {:?}", join_handle);
     let client = reqwest::Client::new();
@@ -762,11 +791,13 @@ async fn live_up_to_date_flag(
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(
-        body, {
-            ".**.lastEdited" => "[last_edited]",
-        }
-    );
+    assert_snapshot(|| {
+        insta::assert_json_snapshot!(
+            body, {
+                ".**.lastEdited" => "[last_edited]",
+            }
+        )
+    })?;
 
     let _resp = client
         .put(&format!(
@@ -794,15 +825,17 @@ async fn live_up_to_date_flag(
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(
-        body, {
-            // Really just need to redact the module ID because it is recreated for the live data,
-            // but I couldn't get a selector working correctly... So redacting all IDs.
-            ".**.id" => "[id]",
-            ".**.lastEdited" => "[last_edited]",
-            ".**.publishedAt" => "[published_at]",
-        }
-    );
+    assert_snapshot(|| {
+        insta::assert_json_snapshot!(
+            body, {
+                // Really just need to redact the module ID because it is recreated for the live data,
+                // but I couldn't get a selector working correctly... So redacting all IDs.
+                ".**.id" => "[id]",
+                ".**.lastEdited" => "[last_edited]",
+                ".**.publishedAt" => "[published_at]",
+            }
+        )
+    })?;
 
     Ok(())
 }

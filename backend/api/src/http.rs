@@ -1,11 +1,9 @@
 use std::{net::TcpListener, sync::Arc, time::Duration};
 
-use actix_http::KeepAlive;
-use actix_rt::time::timeout;
 use actix_service::Service;
 use actix_web::{
     body::MessageBody,
-    dev::{Server, ServiceRequest, ServiceResponse},
+    dev::{Server, ServerHandle, ServiceRequest, ServiceResponse},
     error::Error,
     middleware::{Compat, Condition},
     web::{method, Data},
@@ -19,6 +17,7 @@ use core::{
 };
 use futures::Future;
 use sqlx::postgres::PgPool;
+use tokio::runtime::Runtime;
 use tracing::Span;
 use tracing_actix_web::{root_span, DefaultRootSpanBuilder, RootSpanBuilder, TracingLogger};
 
@@ -72,12 +71,14 @@ where
 pub struct Application {
     port: u16,
     server: Option<Server>,
+    server_handle: Arc<ServerHandle>,
 }
 
 impl Application {
     pub fn new(port: u16, server: Server) -> Self {
         Self {
             port,
+            server_handle: Arc::new(server.handle()),
             server: Some(server),
         }
     }
@@ -86,9 +87,9 @@ impl Application {
         self.port
     }
 
-    // pub fn port(&self) -> u16 {
-    //     self.port
-    // }
+    pub fn handle(&self) -> Arc<ServerHandle> {
+        self.server_handle.clone()
+    }
 
     // A more expressive name that makes it clear that
     // this function only returns when the application is stopped.
@@ -104,26 +105,6 @@ impl Application {
         Ok(())
     }
 
-    // A more expressive name that makes it clear that
-    // this function only returns when the application is stopped.
-    pub async fn test_run_until_stopped(mut self) -> Result<(), std::io::Error> {
-        // If server is none, server thread has been cleaned up
-
-        println!("port: {:?}", self.port());
-        if let Some(server) = self.server.take() {
-            println!("run until stop");
-
-            tokio::spawn(server);
-        }
-        Ok(())
-    }
-
-    pub async fn test_stop(mut self, graceful: bool) {
-        if let Some(server) = self.server.take() {
-            server.handle().stop(graceful).await;
-        }
-    }
-
     pub async fn stop(mut self, graceful: bool) {
         if let Some(server) = self.server.take() {
             server.handle().stop(graceful).await
@@ -133,12 +114,14 @@ impl Application {
 
 impl Drop for Application {
     fn drop(&mut self) {
-        if let Some(server) = self.server.take() {
-            println!("DROPPING!");
-            let _ = tokio::spawn(server.handle().stop(true));
-        } else {
-            println!("Not taking!!!");
-        }
+        let handle = self.server_handle.clone();
+        let rt = Runtime::new().unwrap();
+        let _ = rt.spawn(async move {
+            println!("handle.stop");
+            handle.stop(true).await;
+            println!("graceful?");
+        });
+        println!("spawn graceful shutdown?");
     }
 }
 

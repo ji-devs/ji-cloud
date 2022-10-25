@@ -5,7 +5,7 @@ use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, LoginExt},
+    helpers::{assert_snapshot, initialize_server, LoginExt},
 };
 
 #[sqlx::test]
@@ -22,6 +22,7 @@ async fn admin_comment(
     .await;
 
     let port = app.port();
+    let _ = app.handle();
 
     tokio::spawn(app.run_until_stopped());
 
@@ -41,7 +42,7 @@ async fn admin_comment(
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    assert_snapshot(|| insta::assert_json_snapshot!(body))?;
 
     let resp = client
         .post(&format!(
@@ -56,7 +57,8 @@ async fn admin_comment(
         .await?
         .error_for_status()?;
 
-    assert_eq!(resp.status(), StatusCode::CREATED);
+    let status = resp.status();
+    assert_snapshot(|| assert_eq!(status, StatusCode::CREATED))?;
 
     let resp = client
         .get(&format!(
@@ -70,12 +72,14 @@ async fn admin_comment(
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(
-        body, {
-            ".**.id" => "[id]",
-            ".**.createdAt" => "[created_at]",
-        }
-    );
+    assert_snapshot(|| {
+        insta::assert_json_snapshot!(
+            body, {
+                ".**.id" => "[id]",
+                ".**.createdAt" => "[created_at]",
+            }
+        )
+    })?;
 
     Ok(())
 }
