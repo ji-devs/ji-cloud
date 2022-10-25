@@ -28,6 +28,15 @@ pub fn render_sticker_sprite_menu<T: AsSticker>(
                 }))
             }),
             html!("menu-line", {
+                .property("icon", "move-to-front")
+                .event(clone!(stickers, index, sprite => move |_ :events::Click| {
+                    sprite.transform.close_menu();
+                    if let Some(index) = index.get() {
+                        stickers.move_to_front(index);
+                    }
+                }))
+            }),
+            html!("menu-line", {
                 .property("icon", "move-forward")
                 .event(clone!(stickers, index, sprite => move |_evt:events::Click| {
                     sprite.transform.close_menu();
@@ -42,6 +51,15 @@ pub fn render_sticker_sprite_menu<T: AsSticker>(
                     sprite.transform.close_menu();
                     if let Some(index) = index.get() {
                         stickers.move_backward(index);
+                    }
+                }))
+            }),
+            html!("menu-line", {
+                .property("icon", "move-to-back")
+                .event(clone!(stickers, index, sprite => move |_evt:events::Click| {
+                    sprite.transform.close_menu();
+                    if let Some(index) = index.get() {
+                        stickers.move_to_back(index);
                     }
                 }))
             }),

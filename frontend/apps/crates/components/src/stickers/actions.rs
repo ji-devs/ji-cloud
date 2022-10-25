@@ -46,6 +46,27 @@ impl<T: AsSticker> Stickers<T> {
         self.move_dir(index, Direction::Head);
     }
 
+    pub fn move_to_back(&self, index: usize) {
+        self.list.lock_mut().move_from_to(index, 0);
+        self.select_index(0);
+        self.call_change();
+        self.call_index_change(VecDiff::Move {
+            old_index: index,
+            new_index: 0,
+        });
+    }
+
+    pub fn move_to_front(&self, index: usize) {
+        let front_index = self.list.lock_ref().len() - 1;
+        self.list.lock_mut().move_from_to(index, front_index);
+        self.select_index(front_index);
+        self.call_change();
+        self.call_index_change(VecDiff::Move {
+            old_index: index,
+            new_index: front_index,
+        });
+    }
+
     fn move_dir(&self, index: usize, dir: Direction) {
         let curr = index;
         let len = self.list.lock_ref().len();
