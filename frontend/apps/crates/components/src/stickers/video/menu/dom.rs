@@ -18,6 +18,15 @@ pub fn render_sticker_video_menu<T: AsSticker>(
         .style("gap", "10px")
         .children(&mut [
             html!("menu-line", {
+                .property("icon", "move-to-front")
+                .event(clone!(stickers, index, video => move |_ :events::Click| {
+                    video.transform.close_menu();
+                    if let Some(index) = index.get() {
+                        stickers.move_to_front(index);
+                    }
+                }))
+            }),
+            html!("menu-line", {
                 .property("icon", "move-forward")
                 .event(clone!(stickers, index, video => move |_ :events::Click| {
                     video.transform.close_menu();
@@ -32,6 +41,15 @@ pub fn render_sticker_video_menu<T: AsSticker>(
                     video.transform.close_menu();
                     if let Some(index) = index.get() {
                         stickers.move_backward(index);
+                    }
+                }))
+            }),
+            html!("menu-line", {
+                .property("icon", "move-to-back")
+                .event(clone!(stickers, index, video => move |_ :events::Click| {
+                    video.transform.close_menu();
+                    if let Some(index) = index.get() {
+                        stickers.move_to_back(index);
                     }
                 }))
             }),

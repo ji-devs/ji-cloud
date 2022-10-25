@@ -31,8 +31,10 @@ const STR_LABEL_LOOKUP: any = {
     ["print"]: "Print",
     ["reuse"]: "Reuse",
     //all stickers
-    ["move-forward"]: "Move forward",
-    ["move-backward"]: "Send backward",
+    ["move-to-front"]: "Bring to front",
+    ["move-forward"]: "Bring forwards",
+    ["move-backward"]: "Send backwards",
+    ["move-to-back"]: "Send to back",
     ["flip-horizontal"]: "Flip right-left",
     ["flip-vertical"]: "Flip up-down",
     //bg only
