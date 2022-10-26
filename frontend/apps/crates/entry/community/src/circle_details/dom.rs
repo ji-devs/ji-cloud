@@ -36,7 +36,7 @@ const STR_SEARCH_MEMBER: &str = "search";
 fn user_id_is_circle_author(user_id: &Option<UserId>, circle: &Circle) -> bool {
     match user_id {
         Some(user_id) => user_id == &circle.created_by,
-        None => todo!(),
+        None => false,
     }
 }
 
