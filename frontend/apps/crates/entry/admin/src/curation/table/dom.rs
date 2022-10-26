@@ -190,9 +190,9 @@ impl CurationTable {
                                         html!("option", {
                                             .text(&PrivacyLevel::Unlisted.as_str().to_case(Case::Title))
                                         }),
-                                        html!("option", {
-                                            .text(&PrivacyLevel::Private.as_str().to_case(Case::Title))
-                                        }),
+                                        // html!("option", {
+                                        //     .text(&PrivacyLevel::Private.as_str().to_case(Case::Title))
+                                        // }),
                                     ])
                                     .event(clone!(jig, select => move |_: events::Change| {
                                         let value = select.value().to_case(Case::Lower);
