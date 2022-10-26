@@ -15,20 +15,18 @@ thread_local! {
 }
 
 pub struct AudioMixerTop {
-    audio_context: AudioContext,
+    // if none than context is not ready yet
+    audio_context: RefCell<Option<AudioContext>>,
     active: RefCell<HashMap<AudioHandleId, HtmlAudioElement>>,
     inactive: RefCell<Vec<HtmlAudioElement>>,
-    already_played: RefCell<bool>,
 }
 
 impl AudioMixerTop {
     pub(super) fn new() -> Self {
-        let audio_context = create_audio_context();
         Self {
-            audio_context,
+            audio_context: Default::default(),
             active: Default::default(),
             inactive: Default::default(),
-            already_played: RefCell::new(false),
         }
     }
 
@@ -66,9 +64,10 @@ impl AudioMixerTop {
     }
 
     fn init_if_not_ready(&self) {
-        if !*self.already_played.borrow() {
-            *self.already_played.borrow_mut() = true;
-            *self.inactive.borrow_mut() = init_empty_audio_elements(10, &self.audio_context);
+        if self.audio_context.borrow().is_none() {
+            let audio_context = create_audio_context();
+            *self.inactive.borrow_mut() = init_empty_audio_elements(10, &audio_context);
+            *self.audio_context.borrow_mut() = Some(audio_context);
         }
     }
 
@@ -124,7 +123,7 @@ impl AudioMixerTop {
     }
 
     fn broadcast_context_available_request(&self) {
-        let available = *self.already_played.borrow();
+        let available = self.audio_context.borrow().is_some();
         AUDIO_MIXER.with(|mixer| {
             mixer.set_context_available(available);
             mixer.message_all_iframes(AudioMessageFromTop::ContextAvailable(available));

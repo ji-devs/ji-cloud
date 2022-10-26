@@ -224,7 +224,7 @@ impl AudioMixer {
                 false => AudioMixerKind::Top(AudioMixerTop::new()),
             },
             callbacks: Default::default(),
-            context_available: RefCell::new(false), // corresponds to AudioMixerTop.already_played
+            context_available: RefCell::new(false), // corresponds to AudioMixerTop.audio_context.is_some()
             settings: Default::default(),
             rng: RefCell::new(thread_rng()),
             iframes: Default::default(),
