@@ -1,6 +1,6 @@
 use super::{actions, sidebar};
-use components::overlay::handle::OverlayHandle;
 use components::audio::mixer::audio_iframe_messenger;
+use components::overlay::handle::OverlayHandle;
 use components::share_asset::ShareAsset;
 use dominator::{clone, html, with_node, Dom};
 use dominator_helpers::{events::Message, signals::DefaultSignal};
@@ -335,7 +335,7 @@ impl JigPlayer {
                         }
                     }))
                     .event(clone!(state => move |_:events::Click| {
-                        actions::toggle_paused(Rc::clone(&state));
+                        actions::toggle_paused(&state);
                     }))
                 }),
                 html!("jig-play-move-button", {

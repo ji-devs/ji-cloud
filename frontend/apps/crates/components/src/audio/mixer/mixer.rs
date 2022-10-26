@@ -15,9 +15,6 @@ use web_sys::{HtmlIFrameElement, MessageEvent};
 
 use super::{mixer_iframe::AudioMixerIframe, mixer_top::AudioMixerTop};
 
-// TODO: Currently initializing a AUDIO_MIXER in all window levels but only really used in player,
-// might be a good idea to only initialize in player
-
 thread_local! {
     pub static AUDIO_MIXER:AudioMixer = AudioMixer::new()
 }
@@ -44,6 +41,8 @@ fn setup_iframe_to_parent_listener() {
     );
 }
 
+// Might make sense to only have one kind on each entry and use conditional compilation to set correct kind.
+// But the compiler might be doing that already.
 pub struct AudioMixer {
     kind: AudioMixerKind,
     settings: Rc<RefCell<AudioSettings>>,
@@ -85,14 +84,14 @@ impl AudioMixer {
     /// Oneshots are AudioClips because they drop themselves
     /// They're intended solely to be kicked off and not being held anywhere
     pub fn play_oneshot<A: Into<AudioSource>>(&self, audio: A) {
-        let path = match audio.into() {
+        let url = match audio.into() {
             AudioSource::Url(audio_path) => audio_path,
             AudioSource::Buffer(_) => todo!(),
         };
         let handle_id = AudioHandleId::new();
         let audio_message = PlayAudioMessage {
             handle_id: handle_id.clone(),
-            path,
+            url,
             auto_play: true,
             is_loop: false,
         };
@@ -109,14 +108,14 @@ impl AudioMixer {
         F: FnMut() + 'static,
         A: Into<AudioSource>,
     {
-        let path = match audio.into() {
+        let url = match audio.into() {
             AudioSource::Url(audio_path) => audio_path,
             AudioSource::Buffer(_) => todo!(),
         };
         let handle_id = AudioHandleId::new();
         let audio_message = PlayAudioMessage {
             handle_id: handle_id.clone(),
-            path,
+            url,
             auto_play: true,
             is_loop: false,
         };
@@ -133,14 +132,14 @@ impl AudioMixer {
 
     /// Play a clip and get a Handle to hold (simple API around add_source)
     pub fn play<A: Into<AudioSource>>(&self, audio: A, is_loop: bool) -> AudioHandle {
-        let path = match audio.into() {
+        let url = match audio.into() {
             AudioSource::Url(audio_path) => audio_path,
             AudioSource::Buffer(_) => todo!(),
         };
         let handle = AudioHandle::new();
         let audio_message = PlayAudioMessage {
             handle_id: handle.id().clone(),
-            path,
+            url,
             auto_play: true,
             is_loop,
         };
@@ -153,14 +152,14 @@ impl AudioMixer {
         F: FnMut() + 'static,
         A: Into<AudioSource>,
     {
-        let path = match audio.into() {
+        let url = match audio.into() {
             AudioSource::Url(audio_path) => audio_path,
             AudioSource::Buffer(_) => todo!(),
         };
         let handle = AudioHandle::new();
         let audio_message = PlayAudioMessage {
             handle_id: handle.id().clone(),
-            path,
+            url,
             auto_play: true,
             is_loop,
         };
@@ -177,14 +176,14 @@ impl AudioMixer {
     where
         F: FnMut() + 'static,
     {
-        let path = match audio.into() {
+        let url = match audio.into() {
             AudioSource::Url(audio_path) => audio_path,
             AudioSource::Buffer(_) => todo!(),
         };
         let handle = AudioHandle::new();
         let audio_message = PlayAudioMessage {
             handle_id: handle.id().clone(),
-            path,
+            url,
             auto_play: options.auto_play,
             is_loop: options.is_loop,
         };
@@ -208,8 +207,6 @@ impl AudioMixer {
 /// Private methods
 impl AudioMixer {
     fn new() -> Self {
-        log::info!("initializing AUDIO_MIXER");
-
         setup_iframe_to_parent_listener();
 
         // once initialized broadcast context available
@@ -222,12 +219,12 @@ impl AudioMixer {
         .forget();
 
         Self {
-            kind: match is_iframe() {
+            kind: match use_iframe_audio() {
                 true => AudioMixerKind::Iframe(AudioMixerIframe::new()),
                 false => AudioMixerKind::Top(AudioMixerTop::new()),
             },
             callbacks: Default::default(),
-            context_available: RefCell::new(false),
+            context_available: RefCell::new(false), // corresponds to AudioMixerTop.already_played
             settings: Default::default(),
             rng: RefCell::new(thread_rng()),
             iframes: Default::default(),
@@ -284,7 +281,6 @@ impl AudioMixer {
     }
 
     pub(super) fn set_context_available(&self, available: bool) {
-        log::info!("set_context_available");
         *self.context_available.borrow_mut() = available;
     }
 }
@@ -344,7 +340,7 @@ pub(super) enum AudioMessageToTop {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub(super) struct PlayAudioMessage {
-    pub path: String,
+    pub url: String,
     pub auto_play: bool,
     pub is_loop: bool,
     pub handle_id: AudioHandleId,
@@ -593,4 +589,12 @@ impl From<jig::AudioFeedbackNegative> for AudioPath<'_> {
             jig::AudioFeedbackNegative::Whir => "module/feedback-negative/whir.mp3",
         }))
     }
+}
+
+fn use_iframe_audio() -> bool {
+    // if local and is top window don't use iframe
+    if cfg!(feature = "local") && !is_iframe() {
+        return false;
+    }
+    cfg!(feature = "iframe_audio")
 }

@@ -5,9 +5,7 @@ use super::{
     timer::Timer,
 };
 use awsm_web::audio::AudioClipOptions;
-use components::{
-    audio::mixer::{AudioHandle, AudioSourceExt, AUDIO_MIXER},
-};
+use components::audio::mixer::{AudioHandle, AudioSourceExt, AUDIO_MIXER};
 use dominator::clone;
 use futures_signals::signal::SignalExt;
 use shared::{
@@ -144,7 +142,7 @@ pub fn show_instructions(state: Rc<JigPlayer>, visible: bool) {
     if let Some(instructions) = state.instructions.get_cloned() {
         if !(!instructions.persisted && instructions.text.is_none()) {
             state.instructions_visible.set_neq(visible);
-            set_paused(state.clone(), visible);
+            set_timer_paused(&state, visible);
         }
 
         if visible {
@@ -264,21 +262,15 @@ pub fn start_timer(state: Rc<JigPlayer>, time: u32) {
     state.timer.set(Some(timer));
 }
 
-pub fn toggle_paused(state: Rc<JigPlayer>) {
+pub fn toggle_paused(state: &Rc<JigPlayer>) {
     let paused = !state.paused.get();
     set_paused(state, paused);
 }
 
-pub fn set_paused(state: Rc<JigPlayer>, paused: bool) {
+pub fn set_paused(state: &Rc<JigPlayer>, paused: bool) {
     state.paused.set(paused);
 
-    // pause timer if exists
-    match &*state.timer.lock_ref() {
-        None => {}
-        Some(timer) => {
-            *timer.paused.borrow_mut() = paused;
-        }
-    }
+    set_timer_paused(state, paused);
 
     AUDIO_MIXER.with(|mixer| {
         match paused {
@@ -286,6 +278,15 @@ pub fn set_paused(state: Rc<JigPlayer>, paused: bool) {
             false => mixer.play_all(),
         };
     });
+}
+
+fn set_timer_paused(state: &Rc<JigPlayer>, paused: bool) {
+    match &*state.timer.lock_ref() {
+        None => {}
+        Some(timer) => {
+            *timer.paused.borrow_mut() = paused;
+        }
+    }
 }
 
 pub fn send_iframe_message(state: Rc<JigPlayer>, data: JigToModulePlayerMessage) {

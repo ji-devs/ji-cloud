@@ -13,7 +13,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 utils = {path = "../../../../utils"}
-components = {path = "../../../../components"}
+components = {path = "../../../../components", features = ["iframe_audio"]}
 shared = {path = "../../../../../../../shared/rust", features = ["wasm"]}
 once_cell = { workspace = true }
 wasm-logger = { workspace = true, optional = true }
@@ -49,4 +49,4 @@ release = ["utils/release", "components/release"]
 sandbox = ["quiet", "wasm-logger", "console_error_panic_hook", "utils/sandbox"]
 ts_test = []
 quiet = ["utils/quiet", "components/quiet"]
-local = ["wasm-logger", "console_error_panic_hook", "utils/local"]
+local = ["wasm-logger", "console_error_panic_hook", "utils/local", "components/local"]

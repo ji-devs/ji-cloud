@@ -49,6 +49,7 @@ quiet = ["utils/quiet"]
 local = ["quiet"]
 release = []
 sandbox = []
+iframe_audio = []
 
 animation = []
 audio_input = []
