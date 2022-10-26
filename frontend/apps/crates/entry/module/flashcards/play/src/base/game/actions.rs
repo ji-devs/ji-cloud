@@ -1,6 +1,6 @@
 use super::state::*;
 use components::{
-    audio::mixer::{AudioPath, AudioSourceExt, AUDIO_MIXER},
+    audio::mixer::{AudioPath, AUDIO_MIXER},
     module::_groups::cards::{lookup::Side, play::card::dom::FLIPPED_AUDIO_EFFECT},
 };
 use gloo_timers::future::TimeoutFuture;
@@ -97,6 +97,6 @@ pub(super) fn get_current(base: &Base, deck: &mut Vec<CardPair>) -> Option<Curre
 
 fn play_card_audio(card: &Card) {
     if let Some(audio) = &card.audio {
-        AUDIO_MIXER.with(|mixer| mixer.play_oneshot(audio.as_source()));
+        AUDIO_MIXER.with(|mixer| mixer.play_oneshot(audio.into()));
     }
 }

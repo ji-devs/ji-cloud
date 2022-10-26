@@ -5,7 +5,7 @@ use shared::domain::module::body::_groups::design::Trace;
 use utils::{drag::Drag, prelude::*, resize::get_resize_info};
 
 use crate::debug::*;
-use components::audio::mixer::{AudioPath, AudioSourceExt, AUDIO_MIXER};
+use components::audio::mixer::{AudioPath, AUDIO_MIXER};
 use components::collision::stickers_traces::pixels::{debug_render_hit_trace, get_hit_index};
 use wasm_bindgen_futures::spawn_local;
 
@@ -144,7 +144,7 @@ impl InteractiveItem {
     pub fn try_play_user_audio(&self) {
         if let Some(audio) = self.audio.as_ref() {
             AUDIO_MIXER.with(|mixer| {
-                mixer.play_oneshot(audio.as_source());
+                mixer.play_oneshot(audio.into());
             });
         }
     }

@@ -1,5 +1,5 @@
 use super::{state::TraceBubble, EndPolicy};
-use crate::audio::mixer::{AudioSourceExt, AUDIO_MIXER};
+use crate::audio::mixer::AUDIO_MIXER;
 use dominator::clone;
 use std::rc::Rc;
 use std::sync::atomic::Ordering;
@@ -9,7 +9,7 @@ impl TraceBubble {
         *state.audio_handle.borrow_mut() = state.audio.as_ref().map(|audio| {
             AUDIO_MIXER.with(|mixer| {
                 mixer.play_on_ended(
-                    audio.as_source(),
+                    audio.into(),
                     false,
                     clone!(state => move || {
                         state.on_audio_ended();

@@ -3,7 +3,7 @@ use super::state::*;
 use std::sync::atomic::Ordering;
 
 use components::{
-    audio::mixer::{AudioMixer, AudioPath, AudioSourceExt, AUDIO_MIXER},
+    audio::mixer::{AudioMixer, AudioPath, AUDIO_MIXER},
     module::_groups::cards::play::card::dom::FLIPPED_AUDIO_EFFECT,
 };
 
@@ -94,7 +94,7 @@ impl Game {
                             // Play the card audio first if it exists and then the feedback effect.
                             if let Some(audio) = &card_id.card.audio {
                                 AUDIO_MIXER.with(move |mixer| {
-                                    mixer.play_oneshot_on_ended(audio.as_source(), move || {
+                                    mixer.play_oneshot_on_ended(audio.into(), move || {
                                         AUDIO_MIXER.with(play_feedback);
                                     })
                                 });
@@ -119,7 +119,7 @@ impl Game {
                                 if let Some(card_id) = card_id {
                                     if let Some(audio) = &card_id.card.audio {
                                         AUDIO_MIXER.with(|mixer| {
-                                            mixer.play_oneshot(audio.as_source())
+                                            mixer.play_oneshot(audio.into())
                                         });
                                     }
                                 }

@@ -1,7 +1,6 @@
 use std::rc::Rc;
 
-use awsm_web::audio::AudioClipOptions;
-use components::audio::mixer::{AudioHandle, AudioSourceExt, AUDIO_MIXER};
+use components::audio::mixer::{AudioHandle, AUDIO_MIXER};
 use dominator::{clone, html, with_node, Dom};
 use web_sys::HtmlInputElement;
 
@@ -105,9 +104,9 @@ fn line(
                     }
                 }))
                 .event(clone!(option, audio_handles => move |_ :events::Click| {
-                    let on_ended = Some(clone!(audio_handles => move|| {
+                    let on_ended = clone!(audio_handles => move|| {
                         audio_handles[index].set(None);
-                    }));
+                    });
 
                     let mut audio_handles = audio_handles.iter().map(|x| x.lock_mut()).collect::<Vec<MutableLockMut<Option<AudioHandle>>>>();
 
@@ -119,11 +118,7 @@ fn line(
                                 o
                             }).collect();
 
-                            let handle = AUDIO_MIXER.with(|mixer| mixer.add_source(option.as_source(), AudioClipOptions {
-                                auto_play: true,
-                                is_loop: false,
-                                on_ended,
-                            }));
+                            let handle = AUDIO_MIXER.with(move |mixer| mixer.play_on_ended(option.into(), false, on_ended));
                             *audio_handles[index] = Some(handle);
                         },
                     };

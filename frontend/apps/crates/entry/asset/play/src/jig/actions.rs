@@ -4,8 +4,7 @@ use super::{
     state::{can_load_liked_status, Instructions, JigPlayer},
     timer::Timer,
 };
-use awsm_web::audio::AudioClipOptions;
-use components::audio::mixer::{AudioHandle, AudioSourceExt, AUDIO_MIXER};
+use components::audio::mixer::{AudioHandle, AUDIO_MIXER};
 use dominator::clone;
 use futures_signals::signal::SignalExt;
 use shared::{
@@ -161,7 +160,7 @@ pub fn show_instructions(state: Rc<JigPlayer>, visible: bool) {
 pub fn play_instructions_audio(state: Rc<JigPlayer>) {
     if let Some(instructions) = state.instructions.get_cloned() {
         if let Some(audio) = &instructions.audio {
-            AUDIO_MIXER.with(clone!(state, instructions => move |mixer| mixer.play_oneshot_on_ended(audio.as_source(), clone!(state => move || {
+            AUDIO_MIXER.with(clone!(state, instructions => move |mixer| mixer.play_oneshot_on_ended(audio.into(), clone!(state => move || {
                 if !instructions.persisted {
                     send_iframe_message(Rc::clone(&state), JigToModulePlayerMessage::InstructionsDone);
                 }
@@ -233,16 +232,7 @@ async fn load_resource_types(state: Rc<JigPlayer>) {
 }
 
 fn init_audio(state: &JigPlayer, background_audio: AudioBackground) {
-    let handle = AUDIO_MIXER.with(|mixer| {
-        mixer.add_source(
-            background_audio.as_source(),
-            AudioClipOptions {
-                auto_play: true,
-                is_loop: true,
-                on_ended: None::<fn()>,
-            },
-        )
-    });
+    let handle = AUDIO_MIXER.with(move |mixer| mixer.play(background_audio.into(), true));
 
     let mut bg_audio_handle = state.bg_audio_handle.borrow_mut();
     *bg_audio_handle = Some(handle);

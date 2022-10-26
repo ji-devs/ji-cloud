@@ -1,4 +1,3 @@
-use awsm_web::audio::{AudioClipOptions, AudioSource};
 use dominator::{clone, DomBuilder};
 use gloo_timers::callback::Timeout;
 use rand::prelude::*;
@@ -79,19 +78,13 @@ impl AudioMixer {
         *chosen_effect.unwrap_ji()
     }
 
-    // TODO: update all 4 pub play calls to not use Into<AudioSource>
-
     /// Oneshots are AudioClips because they drop themselves
     /// They're intended solely to be kicked off and not being held anywhere
-    pub fn play_oneshot<A: Into<AudioSource>>(&self, audio: A) {
-        let url = match audio.into() {
-            AudioSource::Url(audio_path) => audio_path,
-            AudioSource::Buffer(_) => todo!(),
-        };
+    pub fn play_oneshot(&self, path: AudioPath) {
         let handle_id = AudioHandleId::new();
         let audio_message = PlayAudioMessage {
             handle_id: handle_id.clone(),
-            url,
+            url: path.url(),
             auto_play: true,
             is_loop: false,
         };
@@ -103,19 +96,14 @@ impl AudioMixer {
         });
     }
 
-    pub fn play_oneshot_on_ended<F, A>(&self, audio: A, mut on_ended: F)
+    pub fn play_oneshot_on_ended<F>(&self, path: AudioPath, mut on_ended: F)
     where
         F: FnMut() + 'static,
-        A: Into<AudioSource>,
     {
-        let url = match audio.into() {
-            AudioSource::Url(audio_path) => audio_path,
-            AudioSource::Buffer(_) => todo!(),
-        };
         let handle_id = AudioHandleId::new();
         let audio_message = PlayAudioMessage {
             handle_id: handle_id.clone(),
-            url,
+            url: path.url(),
             auto_play: true,
             is_loop: false,
         };
@@ -130,16 +118,11 @@ impl AudioMixer {
         );
     }
 
-    /// Play a clip and get a Handle to hold (simple API around add_source)
-    pub fn play<A: Into<AudioSource>>(&self, audio: A, is_loop: bool) -> AudioHandle {
-        let url = match audio.into() {
-            AudioSource::Url(audio_path) => audio_path,
-            AudioSource::Buffer(_) => todo!(),
-        };
+    pub fn play(&self, path: AudioPath, is_loop: bool) -> AudioHandle {
         let handle = AudioHandle::new();
         let audio_message = PlayAudioMessage {
             handle_id: handle.id().clone(),
-            url,
+            url: path.url(),
             auto_play: true,
             is_loop,
         };
@@ -147,51 +130,18 @@ impl AudioMixer {
         handle
     }
 
-    pub fn play_on_ended<F, A>(&self, audio: A, is_loop: bool, on_ended: F) -> AudioHandle
+    pub fn play_on_ended<F>(&self, path: AudioPath, is_loop: bool, on_ended: F) -> AudioHandle
     where
         F: FnMut() + 'static,
-        A: Into<AudioSource>,
     {
-        let url = match audio.into() {
-            AudioSource::Url(audio_path) => audio_path,
-            AudioSource::Buffer(_) => todo!(),
-        };
         let handle = AudioHandle::new();
         let audio_message = PlayAudioMessage {
             handle_id: handle.id().clone(),
-            url,
+            url: path.url(),
             auto_play: true,
             is_loop,
         };
         self.stash_callback_and_play(audio_message, on_ended);
-        handle
-    }
-
-    /// Add a source with various options and get a Handle to hold
-    pub fn add_source<F, A: Into<AudioSource>>(
-        &self,
-        audio: A,
-        mut options: AudioClipOptions<F>,
-    ) -> AudioHandle
-    where
-        F: FnMut() + 'static,
-    {
-        let url = match audio.into() {
-            AudioSource::Url(audio_path) => audio_path,
-            AudioSource::Buffer(_) => todo!(),
-        };
-        let handle = AudioHandle::new();
-        let audio_message = PlayAudioMessage {
-            handle_id: handle.id().clone(),
-            url,
-            auto_play: options.auto_play,
-            is_loop: options.is_loop,
-        };
-        self.stash_callback_and_play(audio_message, move || {
-            if let Some(on_ended) = &mut options.on_ended {
-                (*on_ended)();
-            }
-        });
         handle
     }
 
@@ -422,11 +372,6 @@ impl AudioSettings {
             }
         };
     }
-
-    pub fn bg_source(&self) -> impl Into<AudioSource> {
-        let path: AudioPath = self.bg.into();
-        path
-    }
 }
 
 impl Default for AudioSettings {
@@ -439,27 +384,10 @@ impl Default for AudioSettings {
     }
 }
 
-//This is a bit confusing...
-//but basically it lets us call .as_source()
-//on Audio, AudioBackground, etc.
-//it does it by way of the intermediate Into<AudioPath> impl
-pub trait AudioSourceExt<'a> {
-    fn as_source(&'a self) -> AudioSource;
-}
-
-impl<'a, F: 'a> AudioSourceExt<'a> for F
-where
-    AudioPath<'a>: From<&'a F>,
-{
-    fn as_source(&'a self) -> AudioSource {
-        let path: AudioPath = self.into();
-        path.into()
-    }
-}
-
 pub enum AudioPath<'a> {
     Lib(Cow<'a, Audio>),
     Cdn(Cow<'a, str>),
+    Url(Cow<'a, str>),
 }
 
 impl AudioPath<'_> {
@@ -467,17 +395,16 @@ impl AudioPath<'_> {
         Self::Cdn(Cow::Owned(cdn_path))
     }
 
+    pub fn new_url(url: String) -> Self {
+        Self::Url(Cow::Owned(url))
+    }
+
     pub fn url(&self) -> String {
         match self {
             Self::Lib(audio) => path::audio_lib_url(audio.lib, audio.id),
             Self::Cdn(cdn_path) => path::audio_cdn_url(cdn_path),
+            Self::Url(url) => url.to_string(),
         }
-    }
-}
-
-impl<'a> From<AudioPath<'a>> for AudioSource {
-    fn from(audio_path: AudioPath) -> Self {
-        AudioSource::Url(audio_path.url())
     }
 }
 

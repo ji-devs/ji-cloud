@@ -1,7 +1,6 @@
 use core::hash::Hash;
 use std::{collections::HashSet, rc::Rc};
 
-use awsm_web::audio::AudioClipOptions;
 use components::audio::mixer::{AudioHandle, AudioPath, AUDIO_MIXER};
 use dominator::{clone, html, Dom};
 
@@ -154,9 +153,9 @@ where
                     }
                 }))
                 .event(clone!(option, audio_handles => move |_ :events::Click| {
-                    let on_ended = Some(clone!(audio_handles => move|| {
+                    let on_ended = clone!(audio_handles => move|| {
                         audio_handles[index].set(None);
-                    }));
+                    });
 
                     let mut audio_handles = audio_handles.iter().map(|x| x.lock_mut()).collect::<Vec<MutableLockMut<Option<AudioHandle>>>>();
 
@@ -170,11 +169,7 @@ where
 
                             let path:AudioPath = option.clone().into();
 
-                            let handle = AUDIO_MIXER.with(move |mixer| mixer.add_source(path, AudioClipOptions {
-                                auto_play: true,
-                                is_loop: false,
-                                on_ended,
-                            }));
+                            let handle = AUDIO_MIXER.with(move |mixer| mixer.play_on_ended(path, false, on_ended));
                             *audio_handles[index] = Some(handle);
                         },
                     };

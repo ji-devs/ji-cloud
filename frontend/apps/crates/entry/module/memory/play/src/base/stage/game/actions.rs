@@ -1,7 +1,7 @@
 use crate::base::state::*;
 
 use components::{
-    audio::mixer::{AudioMixer, AudioPath, AudioSourceExt, AUDIO_MIXER},
+    audio::mixer::{AudioMixer, AudioPath, AUDIO_MIXER},
     module::_groups::cards::play::card::dom::FLIPPED_AUDIO_EFFECT,
 };
 use dominator::clone;
@@ -62,7 +62,7 @@ pub fn evaluate(state: Rc<Base>, id_1: usize, id_2: usize) {
                 // Play the card audio first if it exists, and then the feedback effect
                 if let Some(audio) = &card_state.card.audio {
                     AUDIO_MIXER.with(|mixer| {
-                        mixer.play_oneshot_on_ended(audio.as_source(), move || {
+                        mixer.play_oneshot_on_ended(audio.into(), move || {
                             AUDIO_MIXER.with(play_feedback);
                         });
                     });
@@ -95,6 +95,6 @@ pub fn evaluate(state: Rc<Base>, id_1: usize, id_2: usize) {
 
 fn play_card_audio(card: &Card) {
     if let Some(audio) = &card.audio {
-        AUDIO_MIXER.with(|mixer| mixer.play_oneshot(audio.as_source()));
+        AUDIO_MIXER.with(|mixer| mixer.play_oneshot(audio.into()));
     }
 }

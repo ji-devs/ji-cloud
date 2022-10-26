@@ -1,5 +1,5 @@
 use super::state::*;
-use crate::audio::mixer::{AudioSourceExt, AUDIO_MIXER};
+use crate::audio::mixer::AUDIO_MIXER;
 use crate::buttons::{Button, ButtonStyle, ButtonStyleIcon};
 use dominator::{clone, html, Dom};
 use std::rc::Rc;
@@ -20,7 +20,7 @@ impl AudioPlayerButton {
                         AUDIO_MIXER.with(|mixer| {
                             state.handle.set(Some(
                                 mixer.play_on_ended(
-                                    state.audio.as_source(),
+                                    state.audio.clone().into(),
                                     false,
                                     clone!(state => move || {
                                         state.stop();
