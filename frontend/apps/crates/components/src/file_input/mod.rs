@@ -53,7 +53,7 @@ impl FileInput {
     }
 }
 
-#[derive(Default, Clone, Debug, PartialEq, Eq)]
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum MaxSize {
     #[default]
     MB5 = 1024 * 1024 * 5,
