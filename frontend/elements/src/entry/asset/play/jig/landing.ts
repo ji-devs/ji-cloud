@@ -1,4 +1,3 @@
-import { faL } from "@fortawesome/pro-solid-svg-icons";
 import { LitElement, html, css, customElement, property } from "lit-element";
 
 @customElement("jig-play-landing")
@@ -140,7 +139,7 @@ export class _ extends LitElement {
                         height: calc(100% - 50px);
                     }
                     .controls {
-                        grid-template-rows: 1fr 50px;
+                        grid-template-rows: auto 1fr 50px;
                     }
                     .bottom-bar {
                         grid-template-columns: 30px 1fr 30px;
