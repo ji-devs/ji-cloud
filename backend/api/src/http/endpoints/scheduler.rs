@@ -3,7 +3,9 @@ use actix_web::{
     HttpResponse,
 };
 use actix_web_httpauth::extractors::bearer::BearerAuth;
+use sqlx::PgPool;
 
+use crate::http::endpoints::scheduler::expired_emails::delete_expired_emails;
 use crate::{
     algolia::Manager,
     error,
@@ -12,6 +14,8 @@ use crate::{
     service::{upload::cleaner::UploadCleaner, ServiceData},
     translate::GoogleTranslate,
 };
+
+pub(crate) mod expired_emails;
 
 async fn batch_update(
     algolia_manager: ServiceData<Manager>,
@@ -79,6 +83,28 @@ async fn translate_descriptions(
     Ok(HttpResponse::Ok().finish())
 }
 
+async fn clean_expired_emails(
+    bearer_auth: BearerAuth,
+    jwks: Data<JwkVerifier>,
+    db: Data<PgPool>,
+    user_agent: UserAgent,
+) -> Result<HttpResponse, error::ServiceSession> {
+    if user_agent
+        .0
+        .map_or(true, |it| it != "Google-Cloud-Scheduler")
+    {
+        return Err(error::ServiceSession::Unauthorized);
+    }
+
+    let _claims: IdentityClaims = jwks
+        .verify_iam_api_invoker_oauth(bearer_auth.token(), 3)
+        .await?;
+
+    delete_expired_emails(&*db).await?;
+
+    Ok(HttpResponse::Ok().finish())
+}
+
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
         "/v1/scheduler/update-algolia",
@@ -91,5 +117,9 @@ pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
         "/v1/scheduler/translate-descriptions",
         method(http::Method::POST).to(translate_descriptions),
+    );
+    cfg.route(
+        "/v1/scheduler/expired-emails-clean",
+        method(http::Method::POST).to(clean_expired_emails),
     );
 }
