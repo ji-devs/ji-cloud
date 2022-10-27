@@ -26,16 +26,21 @@ pub enum AudioMixerKind {
 fn setup_iframe_to_parent_listener() {
     let window = web_sys::window().unwrap_ji();
     set_event_listener(
-        &window,
+        &window.clone(),
         "message",
-        Box::new(|evt: MessageEvent| {
-            if let Ok(m) =
-                serde_wasm_bindgen::from_value::<IframeAction<AudioMessageToTop>>(evt.data())
-            {
-                AUDIO_MIXER.with(|mixer| {
-                    mixer.run_audio_message(m.data);
-                })
-            };
+        Box::new(move |evt: MessageEvent| {
+            if let Some(source) = evt.source() {
+                // ignore messages from self
+                if !source.loose_eq(window.clone().as_ref()) {
+                    if let Ok(m) =
+                        serde_wasm_bindgen::from_value::<IframeAction<AudioMessageToTop>>(evt.data())
+                    {
+                        AUDIO_MIXER.with(|mixer| {
+                            mixer.run_audio_message(m.data);
+                        })
+                    };
+                }
+            }
         }),
     );
 }
