@@ -31,7 +31,7 @@ use wasm_bindgen::JsValue;
 const STR_MEMBER: &str = "Member";
 const STR_DELETE_CIRCLE: &str = "Delete circle";
 const STR_JOIN: &str = "Join";
-const STR_SEARCH_MEMBER: &str = "search";
+const STR_SEARCH_MEMBER: &str = "Search member";
 
 fn user_id_is_circle_author(user_id: &Option<UserId>, circle: &Circle) -> bool {
     match user_id {
