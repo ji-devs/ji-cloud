@@ -4513,6 +4513,18 @@
     },
     "query": "\n    update jig_curation_data\n    set description = $2\n    where jig_id = $1 and $2 is distinct from description\n                "
   },
+  "608570654b76fe283fddb937731c721ebfee382fd9004821681ba0ebaaa953f6": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int2"
+        ]
+      }
+    },
+    "query": "\n        delete from \"user\" \n        using session\n        where \"user\".id = session.user_id \n        and (scope_mask & $1) = $1 \n        and expires_at <= now() \n     "
+  },
   "620638cd11c57d625c799e1d5ada2d57161cb59e06559bc3bd7ee3e3e3a8d5ee": {
     "describe": {
       "columns": [
