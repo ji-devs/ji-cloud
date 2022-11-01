@@ -71,14 +71,14 @@ where
 pub struct Application {
     port: u16,
     server: Option<Server>,
-    server_handle: Arc<ServerHandle>,
+    server_handle: ServerHandle,
 }
 
 impl Application {
     pub fn new(port: u16, server: Server) -> Self {
         Self {
             port,
-            server_handle: Arc::new(server.handle()),
+            server_handle: server.handle(),
             server: Some(server),
         }
     }
@@ -87,7 +87,7 @@ impl Application {
         self.port
     }
 
-    pub fn handle(&self) -> Arc<ServerHandle> {
+    pub fn handle(&self) -> ServerHandle {
         self.server_handle.clone()
     }
 

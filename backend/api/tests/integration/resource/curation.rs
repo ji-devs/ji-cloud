@@ -1,31 +1,19 @@
 use http::StatusCode;
+use macros::test_service;
 use serde_json::json;
 use shared::domain::resource::curation::ResourceCurationCommentRequest;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
-    helpers::{assert_snapshot, initialize_server, LoginExt},
+    helpers::{setup_service, LoginExt},
 };
 
-#[sqlx::test]
-async fn admin_comment(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::User, Fixture::MetaKinds, Fixture::Resource],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-    let _ = app.handle();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Resource")
+)]
+async fn admin_comment(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resource_id = "d8067526-1518-11ed-87fa-ebaf880b6d9c".to_string();
@@ -42,7 +30,7 @@ async fn admin_comment(
 
     let body: serde_json::Value = resp.json().await?;
 
-    assert_snapshot(|| insta::assert_json_snapshot!(body))?;
+    insta::assert_json_snapshot!("admin_comment_1", body);
 
     let resp = client
         .post(&format!(
@@ -58,7 +46,8 @@ async fn admin_comment(
         .error_for_status()?;
 
     let status = resp.status();
-    assert_snapshot(|| assert_eq!(status, StatusCode::CREATED))?;
+
+    assert_eq!(status, StatusCode::CREATED);
 
     let resp = client
         .get(&format!(
@@ -72,14 +61,10 @@ async fn admin_comment(
 
     let body: serde_json::Value = resp.json().await?;
 
-    assert_snapshot(|| {
-        insta::assert_json_snapshot!(
-            body, {
-                ".**.id" => "[id]",
-                ".**.createdAt" => "[created_at]",
-            }
-        )
-    })?;
+    insta::assert_json_snapshot!("admin_comment_2", body,  {
+        ".**.id" => "[id]",
+        ".**.createdAt" => "[created_at]",
+    });
 
     Ok(())
 }

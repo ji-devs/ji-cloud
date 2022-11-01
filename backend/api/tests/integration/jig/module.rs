@@ -1,5 +1,6 @@
 use http::StatusCode;
 
+use macros::test_service;
 use serde_json::json;
 use shared::domain::{
     asset::{AssetId, AssetType},
@@ -11,21 +12,14 @@ use uuid::Uuid;
 
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, LoginExt},
+    helpers::{setup_service, LoginExt},
 };
 
-#[sqlx::test]
-async fn get_live(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
+)]
+async fn get_live(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -43,28 +37,16 @@ async fn get_live(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyh
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body, {".**.updated_at" => "[timestamp]"});
 
     Ok(())
 }
 
-#[sqlx::test]
-async fn create_default(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
+)]
+async fn create_default(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -119,18 +101,11 @@ async fn create_default(
     Ok(())
 }
 
-#[sqlx::test]
-async fn update_empty(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
+)]
+async fn update_empty(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -169,28 +144,16 @@ async fn update_empty(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> 
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body, {".**.updated_at" => "[timestamp]"});
 
     Ok(())
 }
 
-#[sqlx::test]
-async fn update_contents(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
+)]
+async fn update_contents(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -249,33 +212,21 @@ async fn update_contents(
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(body, {".**.updated_at" => "[timestamp]"});
 
     Ok(())
 }
 
-#[sqlx::test]
-async fn drag_up_down_modules(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::MetaKinds,
-            Fixture::User,
-            Fixture::Jig,
-            Fixture::CategoryOrdering,
-        ],
-        &[],
-        pool_opts,
-        conn_opts,
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::MetaKinds",
+        "Fixture::User",
+        "Fixture::Jig",
+        "Fixture::CategoryOrdering"
     )
-    .await;
-
-    let port = app.port();
-
+)]
+async fn drag_up_down_modules(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let jig_id = "0cc084bc-7c83-11eb-9f77-e3218dffb008".to_string();
@@ -330,8 +281,6 @@ async fn drag_up_down_modules(
             ".**.feedbackNegative" => "[audio]",
         }
     );
-
-    app.stop(false).await;
 
     Ok(())
 }

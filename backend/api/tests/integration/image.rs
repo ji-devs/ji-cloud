@@ -3,6 +3,7 @@ mod tag;
 mod user;
 
 use http::StatusCode;
+use macros::test_service;
 use serde_json::json;
 use shared::domain::{image::ImageId, CreateResponse};
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
@@ -10,7 +11,7 @@ use uuid::Uuid;
 
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, LoginExt},
+    helpers::{setup_service, LoginExt},
     service::Service,
 };
 
@@ -20,21 +21,8 @@ async fn create(
     affiliations: &[Uuid],
     categories: &[Uuid],
     tags: &[i16],
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
+    port: u16,
 ) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::User, Fixture::Image, Fixture::MetaKinds],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
     let client = reqwest::Client::new();
 
     let resp = client
@@ -65,19 +53,19 @@ async fn create(
     Ok(())
 }
 
-#[sqlx::test]
-async fn create_no_meta(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    create(&[], &[], &[], &[], &[], pool_opts, conn_opts).await
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::Image", "Fixture::MetaKinds")
+)]
+async fn create_no_meta(port: u16) -> anyhow::Result<()> {
+    create(&[], &[], &[], &[], &[], port).await
 }
 
-#[sqlx::test]
-async fn create_with_styles(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::Image", "Fixture::MetaKinds")
+)]
+async fn create_with_styles(port: u16) -> anyhow::Result<()> {
     create(
         &[
             "6389eaa0-de76-11ea-b7ab-0399bcf84df2".parse()?,
@@ -87,41 +75,28 @@ async fn create_with_styles(
         &[],
         &[],
         &[],
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }
 
-#[sqlx::test]
-async fn create_with_meta(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::Image", "Fixture::MetaKinds")
+)]
+async fn create_with_meta(port: u16) -> anyhow::Result<()> {
     create(
         &["6389eaa0-de76-11ea-b7ab-0399bcf84df2".parse()?],
         &["f3722790-de76-11ea-b7ab-77b45e9af3ef".parse()?],
         &["c0cd4446-de76-11ea-b7ab-93987e8aa112".parse()?],
         &[],
         &[1],
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }
 
-async fn create_error(
-    kind: &str,
-    id: &str,
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[], pool_opts, conn_opts).await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+async fn create_error(kind: &str, id: &str, port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -152,18 +127,7 @@ async fn create_error(
     Ok(())
 }
 
-async fn create_error_tag(
-    kind: &str,
-    id: &i16,
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[], pool_opts, conn_opts).await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+async fn create_error_tag(kind: &str, id: &i16, port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -194,89 +158,41 @@ async fn create_error_tag(
     Ok(())
 }
 
-#[sqlx::test]
-async fn create_with_style_error(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    create_error(
-        "styles",
-        "6389eaa0-de76-11ea-b7ab-0399bcf84df2",
-        pool_opts,
-        conn_opts,
-    )
-    .await
+#[test_service(setup = "setup_service", fixtures("Fixture::User"))]
+async fn create_with_style_error(port: u16) -> anyhow::Result<()> {
+    create_error("styles", "6389eaa0-de76-11ea-b7ab-0399bcf84df2", port).await
 }
 
-#[sqlx::test]
-async fn create_with_affiliation_error(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    create_error(
-        "affiliations",
-        "6389eaa0-de76-11ea-b7ab-0399bcf84df2",
-        pool_opts,
-        conn_opts,
-    )
-    .await
+#[test_service(setup = "setup_service", fixtures("Fixture::User"))]
+async fn create_with_affiliation_error(port: u16) -> anyhow::Result<()> {
+    create_error("affiliations", "6389eaa0-de76-11ea-b7ab-0399bcf84df2", port).await
 }
 
-#[sqlx::test]
-async fn create_with_age_range_error(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    create_error(
-        "age_ranges",
-        "6389eaa0-de76-11ea-b7ab-0399bcf84df2",
-        pool_opts,
-        conn_opts,
-    )
-    .await
+#[test_service(setup = "setup_service", fixtures("Fixture::User"))]
+async fn create_with_age_range_error(port: u16) -> anyhow::Result<()> {
+    create_error("age_ranges", "6389eaa0-de76-11ea-b7ab-0399bcf84df2", port).await
 }
 
-#[sqlx::test]
-async fn create_with_category_error(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    create_error(
-        "categories",
-        "6389eaa0-de76-11ea-b7ab-0399bcf84df2",
-        pool_opts,
-        conn_opts,
-    )
-    .await
+#[test_service(setup = "setup_service", fixtures("Fixture::User"))]
+async fn create_with_category_error(port: u16) -> anyhow::Result<()> {
+    create_error("categories", "6389eaa0-de76-11ea-b7ab-0399bcf84df2", port).await
 }
 
-#[sqlx::test]
-async fn create_with_tags_error(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    create_error_tag("tags", &22, pool_opts, conn_opts).await
+#[test_service(setup = "setup_service", fixtures("Fixture::User"))]
+async fn create_with_tags_error(port: u16) -> anyhow::Result<()> {
+    create_error_tag("tags", &22, port).await
 }
 
-#[sqlx::test]
-async fn get_metadata(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::User,
-            Fixture::MetaKinds,
-            Fixture::Image,
-            Fixture::MetaImage,
-        ],
-        &[],
-        pool_opts,
-        conn_opts,
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::User",
+        "Fixture::Image",
+        "Fixture::MetaKinds",
+        "Fixture::MetaImage"
     )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+)]
+async fn get_metadata(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -303,23 +219,7 @@ async fn get_metadata(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> 
 // todo: delete; missing algolia, s3
 // todo: delete: edge case (never uploaded, should work even without s3), missing algolia
 
-async fn update(
-    req: &serde_json::Value,
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::User, Fixture::MetaKinds, Fixture::Image],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+async fn update(req: &serde_json::Value, port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -354,43 +254,42 @@ async fn update(
     Ok(())
 }
 
-#[sqlx::test]
-async fn update_empty(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    update(&json!({}), pool_opts, conn_opts).await
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::MetaKinds", "Fixture::Image")
+)]
+async fn update_empty(port: u16) -> anyhow::Result<()> {
+    update(&json!({}), port).await
 }
 
-#[sqlx::test]
-async fn update_is_premium(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    update(&json!({"is_premium": true}), pool_opts, conn_opts).await
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::MetaKinds", "Fixture::Image")
+)]
+async fn update_is_premium(port: u16) -> anyhow::Result<()> {
+    update(&json!({"is_premium": true}), port).await
 }
 
-#[sqlx::test]
-async fn update_styles(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    update(&json!({"styles": ["6389eaa0-de76-11ea-b7ab-0399bcf84df2", "6389ff7c-de76-11ea-b7ab-9b5661dd4f70"]}), pool_opts,
-conn_opts
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::MetaKinds", "Fixture::Image")
+)]
+async fn update_styles(port: u16) -> anyhow::Result<()> {
+    update(&json!({"styles": ["6389eaa0-de76-11ea-b7ab-0399bcf84df2", "6389ff7c-de76-11ea-b7ab-9b5661dd4f70"]}), port
     )
     .await
 }
 
-#[sqlx::test]
-async fn update_tags(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    update(&json!({"tags": [0, 2]}), pool_opts, conn_opts).await
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::MetaKinds", "Fixture::Image")
+)]
+async fn update_tags(port: u16) -> anyhow::Result<()> {
+    update(&json!({"tags": [0, 2]}), port).await
 }
 
-#[sqlx::test]
-async fn browse(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool_opts, conn_opts).await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Image"))]
+async fn browse(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     // create a new image resource
@@ -413,24 +312,13 @@ async fn browse(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow
 
 // https://cloud.google.com/storage/docs/performing-resumable-uploads#single-chunk-upload
 #[ignore]
-#[sqlx::test]
-async fn upload_with_url(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::Image"),
+    services("Service::GoogleCloudStorage")
+)]
+async fn upload_with_url(port: u16) -> anyhow::Result<()> {
     let file: Vec<u8> = include_bytes!("../../fixtures/images/ji-logo.png").to_vec();
-
-    let app = initialize_server(
-        &[Fixture::User, Fixture::Image],
-        &[Service::GoogleCloudStorage],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -463,17 +351,8 @@ async fn upload_with_url(
 }
 
 #[ignore]
-#[sqlx::test]
-async fn create_media_and_upload_with_url(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool_opts, conn_opts).await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Image"))]
+async fn create_media_and_upload_with_url(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     // create a new image resource

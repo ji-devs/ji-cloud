@@ -1,34 +1,19 @@
 use http::StatusCode;
+use macros::test_service;
 use serde_json::json;
 use shared::domain::{resource::ResourceId, CreateResponse};
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
-    helpers::{assert_snapshot, initialize_server, LoginExt},
+    helpers::{setup_service, LoginExt},
 };
 
 mod cover;
 mod curation;
 
-#[sqlx::test]
-async fn create_default(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[], pool_opts, conn_opts).await;
-
-    let port = app.port();
-    let _ = app.handle();
-
-    print!("port: {port}");
-
-    let join_handle = tokio::spawn(app.run_until_stopped());
-
-    println!("join_handle: {:?}", join_handle);
-
-    // app.run_until_stopped().await?;
-
+#[test_service(setup = "setup_service", fixtures("Fixture::User"))]
+async fn create_default(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -42,11 +27,10 @@ async fn create_default(
 
     let status = resp.status();
 
-    assert_snapshot(|| assert_eq!(status, StatusCode::CREATED))?;
+    assert_eq!(status, StatusCode::CREATED);
 
     let body: CreateResponse<ResourceId> = resp.json().await?;
-
-    assert_snapshot(|| insta::assert_json_snapshot!(body))?;
+    insta::assert_json_snapshot!(body);
 
     let resource_id = body.id.0;
 
@@ -64,13 +48,11 @@ async fn create_default(
 
     let body: serde_json::Value = resp.json().await?;
 
-    assert_snapshot(|| {
-        insta::assert_json_snapshot!(
+    insta::assert_json_snapshot!(
         body, {
             ".**.id" => "[id]",
             ".**.createdAt" => "[created_at]",
-            ".**.lastEdited" => "[last_edited]"})
-    })?;
+            ".**.lastEdited" => "[last_edited]"});
 
     let resp = client
         .get(&format!(
@@ -85,39 +67,17 @@ async fn create_default(
     println!("Third");
 
     let body: serde_json::Value = resp.json().await?;
-
-    assert_snapshot(|| {
-        insta::assert_json_snapshot!(
-            body, {
-                ".**.id" => "[id]",
-                ".**.createdAt" => "[created_at]",
-                ".**.lastEdited" => "[last_edited]"
-            }
-        )
-    })?;
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.id" => "[id]",
+            ".**.createdAt" => "[created_at]",
+            ".**.lastEdited" => "[last_edited]"});
 
     Ok(())
 }
 
-#[sqlx::test]
-async fn create_with_params(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::MetaKinds, Fixture::User, Fixture::Resource],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-    let _ = app.handle();
-
-    let join_handle = tokio::spawn(app.run_until_stopped());
-
-    println!("join_handle: {:?}", join_handle);
+#[test_service(setup = "setup_service", fixtures("Fixture::User"))]
+async fn create_with_params(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -133,33 +93,23 @@ async fn create_with_params(
         .error_for_status()?;
     let status = resp.status();
 
-    assert_snapshot(|| assert_eq!(status, StatusCode::CREATED))?;
+    assert_eq!(status, StatusCode::CREATED);
 
     let body: CreateResponse<ResourceId> = resp.json().await?;
 
-    assert_snapshot(
-        || insta::assert_json_snapshot!(body, {".id" => "[id]", ".last_edited" => "[last_edited]"}),
-    )?;
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.id" => "[id]",
+            ".**.lastEdited" => "[last_edited]"});
 
     Ok(())
 }
 
-#[sqlx::test]
-async fn clone(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::MetaKinds, Fixture::User, Fixture::Resource],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-    let _ = app.handle();
-
-    let join_handle = tokio::spawn(app.run_until_stopped());
-
-    println!("join_handle: {:?}", join_handle);
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Resource")
+)]
+async fn clone(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resource_id = "d8067526-1518-11ed-87fa-ebaf880b6d9c".to_string();
@@ -177,7 +127,7 @@ async fn clone(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow:
     println!("First");
     let status = resp.status();
 
-    assert_snapshot(|| assert_eq!(status, StatusCode::CREATED))?;
+    assert_eq!(status, StatusCode::CREATED);
 
     let CreateResponse { id: ResourceId(id) } = resp.json().await?;
 
@@ -191,19 +141,19 @@ async fn clone(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow:
     println!("Second");
     let status = resp.status();
 
-    assert_snapshot(|| assert_eq!(status, StatusCode::OK))?;
+    assert_eq!(status, StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
 
-    assert_snapshot(|| {
-        insta::assert_json_snapshot!(
-            body, {
-                ".**.id" => "[id]",
-                ".**.lastEdited" => "[last_edited]",
-                ".**.additionalResources" => "[ids]"
-            }
-        )
-    })?;
+    assert_eq!(status, StatusCode::CREATED);
+
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.id" => "[id]",
+            ".**.lastEdited" => "[last_edited]",
+            ".**.additionalResources" => "[ids]"
+        }
+    );
 
     let resp = client
         .get(&format!("http://0.0.0.0:{}/v1/resource/{}/live", port, id))
@@ -213,39 +163,26 @@ async fn clone(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow:
         .error_for_status()?;
     let status = resp.status();
     println!("Third");
-    assert_snapshot(|| assert_eq!(status, StatusCode::OK))?;
+    assert_eq!(status, StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
 
-    assert_snapshot(|| {
-        insta::assert_json_snapshot!(
-            body, {
-                ".**.id" => "[id]",
-                ".**.lastEdited" => "[last_edited]",
-                ".**.additionalResources" => "[ids]"
-            }
-        )
-    })?;
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.id" => "[id]",
+            ".**.lastEdited" => "[last_edited]",
+            ".**.additionalResources" => "[ids]"
+        }
+    );
 
     Ok(())
 }
 
-#[sqlx::test]
-async fn get(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::MetaKinds, Fixture::User, Fixture::Resource],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-    let _ = app.handle();
-
-    let join_handle = tokio::spawn(app.run_until_stopped());
-
-    println!("join_handle: {:?}", join_handle);
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Resource")
+)]
+async fn get(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resource_id = "d8067526-1518-11ed-87fa-ebaf880b6d9c".to_string();
@@ -261,17 +198,15 @@ async fn get(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::R
         .error_for_status()?;
     let status = resp.status();
 
-    assert_snapshot(|| assert_eq!(status, StatusCode::OK))?;
+    assert_eq!(status, StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
 
-    assert_snapshot(|| {
-        insta::assert_json_snapshot!(
-            body, {
-                ".**.lastEdited" => "[last_edited]"
-            }
-        )
-    })?;
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.lastEdited" => "[last_edited]",
+        }
+    );
 
     let resp = client
         .get(&format!(
@@ -284,41 +219,25 @@ async fn get(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::R
         .error_for_status()?;
     let status = resp.status();
 
-    assert_snapshot(|| assert_eq!(status, StatusCode::OK))?;
+    assert_eq!(status, StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
 
-    assert_snapshot(|| {
-        insta::assert_json_snapshot!(
-            body, {
-                ".**.lastEdited" => "[last_edited]"
-            }
-        )
-    })?;
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.lastEdited" => "[last_edited]",
+        }
+    );
 
     Ok(())
 }
 
 // todo: test-exhaustiveness: create a `ResourceBrowse` Fixture, actually test the cases (paging, resource count, etc)
-#[sqlx::test]
-async fn browse_simple(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::MetaKinds, Fixture::User, Fixture::Resource],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-    let _ = app.handle();
-
-    let join_handle = tokio::spawn(app.run_until_stopped());
-
-    println!("join_handle: {:?}", join_handle);
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Resource")
+)]
+async fn browse_simple(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -329,17 +248,15 @@ async fn browse_simple(
         .error_for_status()?;
     let status = resp.status();
 
-    assert_snapshot(|| assert_eq!(status, StatusCode::OK))?;
+    assert_eq!(status, StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
 
-    assert_snapshot(|| {
-        insta::assert_json_snapshot!(
-            body, {
-                ".**.lastEdited" => "[last_edited]"
-            }
-        )
-    })?;
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.lastEdited" => "[last_edited]",
+        }
+    );
 
     let resp = client
         .get(&format!(
@@ -352,17 +269,15 @@ async fn browse_simple(
         .error_for_status()?;
     let status = resp.status();
 
-    assert_snapshot(|| assert_eq!(status, StatusCode::OK))?;
+    assert_eq!(status, StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
 
-    assert_snapshot(|| {
-        insta::assert_json_snapshot!(
-            body, {
-                ".**.lastEdited" => "[last_edited]"
-            }
-        )
-    })?;
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.lastEdited" => "[last_edited]",
+        }
+    );
 
     let resp = client
         .get(&format!(
@@ -375,40 +290,24 @@ async fn browse_simple(
         .error_for_status()?;
     let status = resp.status();
 
-    assert_snapshot(|| assert_eq!(status, StatusCode::OK))?;
+    assert_eq!(status, StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
 
-    assert_snapshot(|| {
-        insta::assert_json_snapshot!(
-            body, {
-                ".**.lastEdited" => "[last_edited]"
-            }
-        )
-    })?;
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.lastEdited" => "[last_edited]",
+        }
+    );
 
     Ok(())
 }
 
-#[sqlx::test]
-async fn browse_order_by(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::MetaKinds, Fixture::User, Fixture::Resource],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-    let _ = app.handle();
-
-    let join_handle = tokio::spawn(app.run_until_stopped());
-
-    println!("join_handle: {:?}", join_handle);
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Resource")
+)]
+async fn browse_order_by(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -419,11 +318,11 @@ async fn browse_order_by(
         .error_for_status()?;
     let status = resp.status();
 
-    assert_snapshot(|| assert_eq!(status, StatusCode::OK))?;
+    assert_eq!(status, StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
 
-    assert_snapshot(|| insta::assert_json_snapshot!(body))?;
+    insta::assert_json_snapshot!(body);
 
     let resp = client
         .get(&format!(
@@ -436,11 +335,11 @@ async fn browse_order_by(
         .error_for_status()?;
     let status = resp.status();
 
-    assert_snapshot(|| assert_eq!(status, StatusCode::OK))?;
+    assert_eq!(status, StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
 
-    assert_snapshot(|| insta::assert_json_snapshot!(body))?;
+    insta::assert_json_snapshot!(body);
 
     let resp = client
         .get(&format!(
@@ -453,34 +352,20 @@ async fn browse_order_by(
         .error_for_status()?;
     let status = resp.status();
 
-    assert_snapshot(|| assert_eq!(status, StatusCode::OK))?;
+    assert_eq!(status, StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
 
-    assert_snapshot(|| insta::assert_json_snapshot!(body))?;
+    insta::assert_json_snapshot!(body);
 
     Ok(())
 }
 
-#[sqlx::test]
-async fn browse_own_simple(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::MetaKinds, Fixture::User, Fixture::Resource],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-    let _ = app.handle();
-
-    let join_handle = tokio::spawn(app.run_until_stopped());
-
-    println!("join_handle: {:?}", join_handle);
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Resource")
+)]
+async fn browse_own_simple(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -495,41 +380,24 @@ async fn browse_own_simple(
 
     let status = resp.status();
 
-    assert_snapshot(|| assert_eq!(status, StatusCode::OK))?;
+    assert_eq!(status, StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
 
-    assert_snapshot(|| {
-        insta::assert_json_snapshot!(
-            body, {
-                ".**.lastEdited" => "[last_edited]"
-            }
-        )
-    })?;
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.lastEdited" => "[last_edited]",
+        }
+    );
 
     Ok(())
 }
 
-#[sqlx::test]
-async fn count(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::MetaKinds,
-            Fixture::UserDefaultPerms,
-            Fixture::Resource,
-        ],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-    let _ = app.handle();
-
-    let join_handle = tokio::spawn(app.run_until_stopped());
-
-    println!("join_handle: {:?}", join_handle);
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::UserDefaultPerms", "Fixture::Resource")
+)]
+async fn count(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -541,39 +409,25 @@ async fn count(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow:
 
     let status = resp.status();
 
-    assert_snapshot(|| assert_eq!(status, StatusCode::OK))?;
+    assert_eq!(status, StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
 
-    assert_snapshot(|| insta::assert_json_snapshot!(body))?;
+    insta::assert_json_snapshot!(body);
 
     Ok(())
 }
 
-#[sqlx::test]
-async fn update_and_publish(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::MetaKinds,
-            Fixture::UserDefaultPerms,
-            Fixture::Resource,
-            Fixture::CategoryOrdering,
-        ],
-        &[],
-        pool_opts,
-        conn_opts,
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::MetaKinds",
+        "Fixture::UserDefaultPerms",
+        "Fixture::Resource",
+        "Fixture::CategoryOrdering"
     )
-    .await;
-
-    let port = app.port();
-    let _ = app.handle();
-
-    let join_handle = tokio::spawn(app.run_until_stopped());
-
-    println!("join_handle: {:?}", join_handle);
+)]
+async fn update_and_publish(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resource_id = "d8067526-1518-11ed-87fa-ebaf880b6d9c".to_string();
@@ -590,13 +444,11 @@ async fn update_and_publish(
 
     let body: serde_json::Value = resp.json().await?;
 
-    assert_snapshot(|| {
-        insta::assert_json_snapshot!(
-            body, {
-                ".**.lastEdited" => "[last_edited]",
-            }
-        )
-    })?;
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.lastEdited" => "[last_edited]",
+        }
+    );
 
     let resp = client
         .patch(&format!(
@@ -614,7 +466,7 @@ async fn update_and_publish(
         .error_for_status()?;
     let status = resp.status();
 
-    assert_snapshot(|| assert_eq!(status, StatusCode::NO_CONTENT))?;
+    assert_eq!(status, StatusCode::NO_CONTENT);
 
     let resp = client
         .get(&format!(
@@ -628,13 +480,11 @@ async fn update_and_publish(
 
     let body: serde_json::Value = resp.json().await?;
 
-    assert_snapshot(|| {
-        insta::assert_json_snapshot!(
-            body, {
-                ".**.lastEdited" => "[last_edited]",
-            }
-        )
-    })?;
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.lastEdited" => "[last_edited]",
+        }
+    );
 
     let resp = client
         .get(&format!(
@@ -648,13 +498,11 @@ async fn update_and_publish(
 
     let body: serde_json::Value = resp.json().await?;
 
-    assert_snapshot(|| {
-        insta::assert_json_snapshot!(
-            body, {
-                ".**.lastEdited" => "[last_edited]",
-            }
-        )
-    })?;
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.lastEdited" => "[last_edited]",
+        }
+    );
 
     let _resp = client
         .put(&format!(
@@ -678,46 +526,28 @@ async fn update_and_publish(
 
     let body: serde_json::Value = resp.json().await?;
 
-    assert_snapshot(|| {
-        insta::assert_json_snapshot!(
-            body, {
-                // Really just need to redact the module ID because it is recreated for the live data,
-                // but I couldn't get a selector working correctly... So redacting all IDs.
-                ".**.id" => "[id]",
-                ".**.lastEdited" => "[last_edited]",
-                ".**.publishedAt" => "[published_at]"
-            }
-        )
-    })?;
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.id" => "[id]",
+            ".**.lastEdited" => "[last_edited]",
+            ".**.additionalResources" => "[ids]"
+        }
+    );
 
     Ok(())
 }
 
 #[ignore]
-#[sqlx::test]
-async fn update_and_publish_incomplete_modules(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::MetaKinds,
-            Fixture::UserDefaultPerms,
-            Fixture::Resource,
-            Fixture::CategoryOrdering,
-        ],
-        &[],
-        pool_opts,
-        conn_opts,
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::MetaKinds",
+        "Fixture::UserDefaultPerms",
+        "Fixture::Resource",
+        "Fixture::CategoryOrdering"
     )
-    .await;
-
-    let port = app.port();
-    let _ = app.handle();
-
-    let join_handle = tokio::spawn(app.run_until_stopped());
-
-    println!("join_handle: {:?}", join_handle);
+)]
+async fn update_and_publish_incomplete_modules(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     // Test no modules on JIG returns HTTP 400
@@ -731,7 +561,7 @@ async fn update_and_publish_incomplete_modules(
         .await?;
     let status = resp.status();
 
-    assert_snapshot(|| assert_eq!(status, StatusCode::BAD_REQUEST))?;
+    assert_eq!(status, StatusCode::BAD_REQUEST);
 
     // Test no modules on JIG returns HTTP 400
     let resp = client
@@ -744,35 +574,21 @@ async fn update_and_publish_incomplete_modules(
         .await?;
     let status = resp.status();
 
-    assert_snapshot(|| assert_eq!(status, StatusCode::BAD_REQUEST))?;
+    assert_eq!(status, StatusCode::BAD_REQUEST);
 
     Ok(())
 }
 
-#[sqlx::test]
-async fn live_up_to_date_flag(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::MetaKinds,
-            Fixture::UserDefaultPerms,
-            Fixture::Resource,
-            Fixture::CategoryOrdering,
-        ],
-        &[],
-        pool_opts,
-        conn_opts,
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::MetaKinds",
+        "Fixture::UserDefaultPerms",
+        "Fixture::Resource",
+        "Fixture::CategoryOrdering"
     )
-    .await;
-
-    let port = app.port();
-    let _ = app.handle();
-
-    let join_handle = tokio::spawn(app.run_until_stopped());
-
-    println!("join_handle: {:?}", join_handle);
+)]
+async fn live_up_to_date_flag(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resource_id = "d8067526-1518-11ed-87fa-ebaf880b6d9c".to_string();
@@ -791,13 +607,11 @@ async fn live_up_to_date_flag(
 
     let body: serde_json::Value = resp.json().await?;
 
-    assert_snapshot(|| {
-        insta::assert_json_snapshot!(
-            body, {
-                ".**.lastEdited" => "[last_edited]",
-            }
-        )
-    })?;
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.lastEdited" => "[last_edited]",
+        }
+    );
 
     let _resp = client
         .put(&format!(
@@ -825,17 +639,13 @@ async fn live_up_to_date_flag(
 
     let body: serde_json::Value = resp.json().await?;
 
-    assert_snapshot(|| {
-        insta::assert_json_snapshot!(
-            body, {
-                // Really just need to redact the module ID because it is recreated for the live data,
-                // but I couldn't get a selector working correctly... So redacting all IDs.
-                ".**.id" => "[id]",
-                ".**.lastEdited" => "[last_edited]",
-                ".**.publishedAt" => "[published_at]",
-            }
-        )
-    })?;
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.id" => "[id]",
+            ".**.lastEdited" => "[last_edited]",
+            ".**.additionalResources" => "[ids]"
+        }
+    );
 
     Ok(())
 }

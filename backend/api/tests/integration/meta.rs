@@ -1,32 +1,24 @@
 use http::StatusCode;
+use macros::test_service;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, LoginExt},
+    helpers::{setup_service, LoginExt},
 };
 
-#[sqlx::test]
-async fn get(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::User,
-            Fixture::Animation,
-            Fixture::Image,
-            Fixture::MetaKinds,
-            Fixture::MetaImage,
-            Fixture::MetaAnimation,
-        ],
-        &[],
-        pool_opts,
-conn_opts
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::User",
+        "Fixture::Animation",
+        "Fixture::Image",
+        "Fixture::MetaKinds",
+        "Fixture::MetaImage",
+        "Fixture::MetaAnimation"
     )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+)]
+async fn get(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client

@@ -1,26 +1,18 @@
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, LoginExt},
+    helpers::{setup_service, LoginExt},
 };
 use http::StatusCode;
+use macros::test_service;
 use shared::domain::image::tag::{ImageTagCreateRequest, ImageTagUpdateRequest};
 use shared::domain::meta::ImageTagIndex;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
-#[sqlx::test]
-async fn create(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::User, Fixture::Image, Fixture::MetaKinds],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User, Fixture::Image, Fixture::MetaKinds")
+)]
+async fn create(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -42,23 +34,11 @@ async fn create(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow
     Ok(())
 }
 
-#[sqlx::test]
-async fn create_conflict(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::User, Fixture::Image, Fixture::MetaKinds],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User, Fixture::Image, Fixture::MetaKinds")
+)]
+async fn create_conflict(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -75,20 +55,11 @@ async fn create_conflict(
     Ok(())
 }
 
-#[sqlx::test]
-async fn list(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::User, Fixture::Image, Fixture::MetaKinds],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User, Fixture::Image, Fixture::MetaKinds")
+)]
+async fn list(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     log::info!("making request");
@@ -109,24 +80,7 @@ async fn list(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::
     Ok(())
 }
 
-async fn update(
-    index: i16,
-    req: ImageTagUpdateRequest,
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::User, Fixture::Image, Fixture::MetaKinds],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+async fn update(index: i16, req: ImageTagUpdateRequest, port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -155,88 +109,75 @@ async fn update(
     Ok(())
 }
 
-#[sqlx::test]
-async fn update_no_index(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User, Fixture::Image, Fixture::MetaKinds")
+)]
+async fn update_no_index(port: u16) -> anyhow::Result<()> {
     update(
         0,
         ImageTagUpdateRequest {
             display_name: Some("test".to_owned()),
             index: None,
         },
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }
 
-#[sqlx::test]
-async fn update_with_index(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User, Fixture::Image, Fixture::MetaKinds")
+)]
+async fn update_with_index(port: u16) -> anyhow::Result<()> {
     update(
         1,
         ImageTagUpdateRequest {
             display_name: Some("test".to_owned()),
             index: Some(ImageTagIndex(15)),
         },
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }
 
-#[sqlx::test]
-async fn update_none(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User, Fixture::Image, Fixture::MetaKinds")
+)]
+async fn update_none(port: u16) -> anyhow::Result<()> {
     update(
         1,
         ImageTagUpdateRequest {
             display_name: None,
             index: None,
         },
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }
 
-#[sqlx::test]
-async fn update_only_index(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User, Fixture::Image, Fixture::MetaKinds")
+)]
+async fn update_only_index(port: u16) -> anyhow::Result<()> {
     update(
         1,
         ImageTagUpdateRequest {
             display_name: None,
             index: Some(ImageTagIndex(3)),
         },
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }
 
-#[sqlx::test]
-async fn update_conflict(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::User, Fixture::Image, Fixture::MetaKinds],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User, Fixture::Image, Fixture::MetaKinds")
+)]
+async fn update_conflict(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -267,20 +208,11 @@ async fn update_conflict(
     Ok(())
 }
 
-#[sqlx::test]
-async fn delete(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::User, Fixture::Image, Fixture::MetaKinds],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User, Fixture::Image, Fixture::MetaKinds")
+)]
+async fn delete(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client

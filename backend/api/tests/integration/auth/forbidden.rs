@@ -1,11 +1,12 @@
 use http::{Method, StatusCode};
+use macros::test_service;
 use serde_json::json;
 use shared::error::{ApiError, EmptyError};
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, LoginExt},
+    helpers::{setup_service, LoginExt},
 };
 use shared::domain::{
     asset::AssetId,
@@ -18,15 +19,8 @@ async fn forbidden(
     route: &str,
     req: Option<&serde_json::Value>,
     method: Method,
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
+    port: u16,
 ) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::UserNoPerms], &[], pool_opts, conn_opts).await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
     let client = reqwest::Client::new();
 
     let request = client
@@ -50,53 +44,41 @@ async fn forbidden(
     Ok(())
 }
 
-#[sqlx::test]
-async fn category_post(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
+#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+async fn category_post(port: u16) -> anyhow::Result<()> {
     forbidden(
         "v1/category",
-        Some(&json!({"name": ""})),
+        Some(&json!({"name": "Fixture::UserNoPerms"})),
         Method::POST,
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }
 
-#[sqlx::test]
-async fn category_patch(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
+#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+async fn category_patch(port: u16) -> anyhow::Result<()> {
     forbidden(
         "v1/category/00000000-0000-0000-0000-000000000000",
         None,
         Method::PATCH,
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }
 
-#[sqlx::test]
-async fn category_delete(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
+#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+async fn category_delete(port: u16) -> anyhow::Result<()> {
     forbidden(
         "v1/category/00000000-0000-0000-0000-000000000000",
         None,
         Method::DELETE,
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }
 
-#[sqlx::test]
-async fn image_post(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+async fn image_post(port: u16) -> anyhow::Result<()> {
     forbidden(
         "v1/image",
         Some(&json!({
@@ -112,67 +94,62 @@ async fn image_post(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> an
                 "size": "Canvas",
         })),
         Method::POST,
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }
 
-#[sqlx::test]
-async fn image_patch(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+async fn image_patch(port: u16) -> anyhow::Result<()> {
     forbidden(
         "v1/image/00000000-0000-0000-0000-000000000000",
         None,
         Method::PATCH,
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }
 
-#[sqlx::test]
+#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
 #[ignore] // no s3
-async fn image_delete(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+async fn image_delete(port: u16) -> anyhow::Result<()> {
     forbidden(
         "v1/image/00000000-0000-0000-0000-000000000000",
         None,
         Method::DELETE,
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }
 
-#[sqlx::test]
-async fn jig_post(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    forbidden("v1/jig", None, Method::POST, pool_opts, conn_opts).await
+#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+async fn jig_post(port: u16) -> anyhow::Result<()> {
+    forbidden("v1/jig", None, Method::POST, port).await
 }
 
-#[sqlx::test]
-async fn jig_patch(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+async fn jig_patch(port: u16) -> anyhow::Result<()> {
     forbidden(
         "v1/jig/00000000-0000-0000-0000-000000000000",
         None,
         Method::PATCH,
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }
 
-#[sqlx::test]
-async fn jig_clone(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+async fn jig_clone(port: u16) -> anyhow::Result<()> {
     forbidden(
         "v1/jig/00000000-0000-0000-0000-000000000000/clone",
         None,
         Method::POST,
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }
 
-// #[sqlx::test]
+// #[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
 // async fn jig_delete(pool_opts: PoolOptions<Postgres>, conn_opts: PgConnectOptions<Postgres>) -> anyhow::Result<()> {
 //     forbidden(
 //         "v1/jig/00000000-0000-0000-0000-000000000000",
@@ -182,8 +159,8 @@ async fn jig_clone(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> any
 //     .await
 // }
 
-#[sqlx::test]
-async fn module_post(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+async fn module_post(port: u16) -> anyhow::Result<()> {
     use shared::domain::module::ModuleCreateRequest;
 
     forbidden(
@@ -195,44 +172,35 @@ async fn module_post(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> a
             body: ModuleBody::new(ModuleKind::Cover),
         })?),
         Method::POST,
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }
 
-#[sqlx::test]
-async fn module_patch(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+async fn module_patch(port: u16) -> anyhow::Result<()> {
     forbidden(
         "v1/module/draft/00000000-0000-0000-0000-000000000000",
         Some(&serde_json::json!({"jigId": "00000000-0000-0000-0000-000000000000"})),
         Method::PATCH,
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }
 
-#[sqlx::test]
-async fn module_delete(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
+#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+async fn module_delete(port: u16) -> anyhow::Result<()> {
     forbidden(
         "v1/module/draft/00000000-0000-0000-0000-000000000000",
         Some(&serde_json::json!({"jigId": "00000000-0000-0000-0000-000000000000"})),
         Method::DELETE,
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }
 
-#[sqlx::test]
-async fn animation_post(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
+#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+async fn animation_post(port: u16) -> anyhow::Result<()> {
     forbidden(
         "v1/animation",
         Some(&json!({
@@ -245,40 +213,31 @@ async fn animation_post(
             "kind": "Gif",
         })),
         Method::POST,
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }
 
-#[sqlx::test]
+#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
 #[ignore] // route doesn't exist
-async fn animation_patch(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
+async fn animation_patch(port: u16) -> anyhow::Result<()> {
     forbidden(
         "v1/animation/00000000-0000-0000-0000-000000000000",
         None,
         Method::PATCH,
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }
 
-#[sqlx::test]
+#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
 #[ignore] // no s3
-async fn animation_delete(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
+async fn animation_delete(port: u16) -> anyhow::Result<()> {
     forbidden(
         "v1/animation/00000000-0000-0000-0000-000000000000",
         None,
         Method::DELETE,
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }

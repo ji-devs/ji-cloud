@@ -1,18 +1,13 @@
 use http::StatusCode;
+use macros::test_service;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 mod entry;
 
-use crate::{fixture::Fixture, helpers::initialize_server};
+use crate::{fixture::Fixture, helpers::setup_service};
 
-#[sqlx::test]
-async fn list_bundles(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[], pool_opts, conn_opts).await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
+async fn list_bundles(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -30,17 +25,8 @@ async fn list_bundles(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> 
     Ok(())
 }
 
-#[sqlx::test]
-async fn list_item_kind(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[], pool_opts, conn_opts).await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
+async fn list_item_kind(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client

@@ -1,4 +1,5 @@
 use http::StatusCode;
+use macros::test_service;
 use serde_json::json;
 use shared::domain::category::{
     CategoryTreeScope, CreateCategoryRequest, GetCategoryRequest, NewCategoryResponse,
@@ -8,17 +9,11 @@ use uuid::Uuid;
 
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, LoginExt},
+    helpers::{initialize_server, setup_service, LoginExt},
 };
 
-#[sqlx::test]
-async fn create(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[], pool_opts, conn_opts).await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(setup = "setup_service", fixtures("Fixture::User"))]
+async fn create(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -39,20 +34,11 @@ async fn create(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow
     Ok(())
 }
 
-#[sqlx::test]
-async fn get(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::User, Fixture::CategoryOrdering],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::CategoryOrdering")
+)]
+async fn get(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -71,23 +57,7 @@ async fn get(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::R
     Ok(())
 }
 
-async fn get_nested_categories(
-    query: &GetCategoryRequest,
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::User, Fixture::CategoryNesting],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+async fn get_nested_categories(query: &GetCategoryRequest, port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -107,35 +77,34 @@ async fn get_nested_categories(
     Ok(())
 }
 
-#[sqlx::test]
-async fn nested_top_level(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    get_nested_categories(&GetCategoryRequest::default(), pool_opts, conn_opts).await
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::CategoryNesting")
+)]
+async fn nested_top_level(port: u16) -> anyhow::Result<()> {
+    get_nested_categories(&GetCategoryRequest::default(), port).await
 }
 
-#[sqlx::test]
-async fn nested_whole_tree(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::CategoryNesting")
+)]
+async fn nested_whole_tree(port: u16) -> anyhow::Result<()> {
     get_nested_categories(
         &GetCategoryRequest {
             scope: Some(CategoryTreeScope::Descendants),
             ids: vec![],
         },
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }
 
-#[sqlx::test]
-async fn nested_overlapping(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::CategoryNesting")
+)]
+async fn nested_overlapping(port: u16) -> anyhow::Result<()> {
     get_nested_categories(
         &GetCategoryRequest {
             scope: Some(CategoryTreeScope::Descendants),
@@ -144,30 +113,31 @@ async fn nested_overlapping(
                 "e315d3b2-e90f-11ea-8281-73cd69c14821".parse()?,
             ],
         },
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }
 
-#[sqlx::test]
-async fn nested_ancestors(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::CategoryNesting")
+)]
+async fn nested_ancestors(port: u16) -> anyhow::Result<()> {
     get_nested_categories(
         &GetCategoryRequest {
             scope: Some(CategoryTreeScope::Ancestors),
             ids: vec!["e315d3b2-e90f-11ea-8281-73cd69c14821".parse()?],
         },
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }
 
-#[sqlx::test]
-async fn nested_exact(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::CategoryNesting")
+)]
+async fn nested_exact(port: u16) -> anyhow::Result<()> {
     get_nested_categories(
         &GetCategoryRequest {
             scope: None,
@@ -176,30 +146,17 @@ async fn nested_exact(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> 
                 "01cff7d8-e910-11ea-8281-7f86c625a156".parse()?,
             ],
         },
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }
 
-#[sqlx::test]
-async fn upgdate_ordering(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::CategoryOrdering")
+)]
+async fn upgdate_ordering(port: u16) -> anyhow::Result<()> {
     let category_three = "81c4796a-e883-11ea-93f0-df2484ab6b11";
-
-    let app = initialize_server(
-        &[Fixture::User, Fixture::CategoryOrdering],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -258,20 +215,11 @@ async fn upgdate_ordering(
     Ok(())
 }
 
-#[sqlx::test]
-async fn delete(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::User, Fixture::CategoryOrdering],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::CategoryOrdering")
+)]
+async fn delete(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -302,24 +250,7 @@ async fn delete(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow
     Ok(())
 }
 
-async fn update(
-    id: Uuid,
-    body: &serde_json::Value,
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::User, Fixture::CategoryOrdering],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+async fn update(id: Uuid, body: &serde_json::Value, port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -351,66 +282,67 @@ async fn update(
     Ok(())
 }
 
-#[sqlx::test]
-async fn update_parent(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::CategoryOrdering")
+)]
+async fn update_parent(port: u16) -> anyhow::Result<()> {
     update(
         "7fe19326-e883-11ea-93f0-5343493c17c4".parse()?,
         &json!({"parent_id": "81c4796a-e883-11ea-93f0-df2484ab6b11"}),
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }
 
-#[sqlx::test]
-async fn update_reparent_move(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::CategoryOrdering")
+)]
+async fn update_reparent_move(port: u16) -> anyhow::Result<()> {
     update(
         "7fe19326-e883-11ea-93f0-5343493c17c4".parse()?,
         &json!({"parent_id": (), "index": 0}),
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }
 
-#[sqlx::test]
-async fn update_move(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::CategoryOrdering")
+)]
+async fn update_move(port: u16) -> anyhow::Result<()> {
     update(
         "81c4796a-e883-11ea-93f0-df2484ab6b11".parse()?,
         &json!({"index": 1}),
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }
 
-#[sqlx::test]
-async fn update_scope(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::CategoryOrdering")
+)]
+async fn update_scope(port: u16) -> anyhow::Result<()> {
     update(
         "81c4796a-e883-11ea-93f0-df2484ab6b11".parse()?,
         &json!({"user_scopes": ["Admin", "ManageCategory", "ManageImage", "ManageAnimation"]}),
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }
 
-#[sqlx::test]
-async fn update_rename(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::CategoryOrdering")
+)]
+async fn update_rename(port: u16) -> anyhow::Result<()> {
     update(
         "81c4796a-e883-11ea-93f0-df2484ab6b11".parse()?,
         &json!({"name": "abc123"}),
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }

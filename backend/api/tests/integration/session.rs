@@ -1,19 +1,11 @@
 use http::StatusCode;
+use macros::test_service;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
-use crate::{fixture::Fixture, helpers::initialize_server};
+use crate::{fixture::Fixture, helpers::setup_service};
 
-#[sqlx::test]
-async fn create_401_no_auth(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(&[], &[], pool_opts, conn_opts).await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(setup = "setup_service", fixtures(""))]
+async fn create_401_no_auth(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -26,14 +18,8 @@ async fn create_401_no_auth(
     Ok(())
 }
 
-#[sqlx::test]
-async fn create_basic(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[], pool_opts, conn_opts).await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(setup = "setup_service", fixtures("Fixture::User"))]
+async fn create_basic(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -53,17 +39,8 @@ async fn create_basic(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> 
     Ok(())
 }
 
-#[sqlx::test]
-async fn create_basic_bad_password(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[], pool_opts, conn_opts).await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(setup = "setup_service", fixtures("Fixture::User"))]
+async fn create_basic_bad_password(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client

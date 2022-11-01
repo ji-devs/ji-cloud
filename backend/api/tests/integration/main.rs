@@ -1,3 +1,5 @@
+use crate::helpers::setup_service;
+use macros::test_service;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 mod animation;
@@ -17,14 +19,8 @@ mod service;
 mod session;
 mod user;
 
-#[sqlx::test]
-async fn pass(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = helpers::initialize_server(&[], &[], pool_opts, conn_opts).await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(setup = "setup_service")]
+async fn pass(port: u16) -> anyhow::Result<()> {
     let resp = reqwest::get(&format!("http://0.0.0.0:{}", port)).await?;
 
     assert_eq!(resp.status(), http::StatusCode::NO_CONTENT);

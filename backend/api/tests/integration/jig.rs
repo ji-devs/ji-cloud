@@ -1,11 +1,12 @@
 use http::StatusCode;
+use macros::test_service;
 use serde_json::json;
 use shared::domain::{jig::JigId, CreateResponse};
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, LoginExt},
+    helpers::{setup_service, LoginExt},
 };
 
 mod additional_resource;
@@ -13,17 +14,8 @@ mod cover;
 mod module;
 mod player;
 
-#[sqlx::test]
-async fn create_default(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[], pool_opts, conn_opts).await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(setup = "setup_service", fixtures("Fixture::User"))]
+async fn create_default(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -83,7 +75,7 @@ async fn create_default(
 }
 
 // requires algolia
-// #[sqlx::test]
+// #[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Jig"))]
 // async fn delete(pool_opts: PoolOptions<Postgres>, conn_opts: PgConnectOptions<Postgres>) -> anyhow::Result<()> {
 //     let app = initialize_server(&[Fixture::User, Fixture::Jig]).await;
 
@@ -108,23 +100,11 @@ async fn create_default(
 //     Ok(())
 // }
 
-#[sqlx::test]
-async fn create_with_params(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
+)]
+async fn create_with_params(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -148,20 +128,11 @@ async fn create_with_params(
     Ok(())
 }
 
-#[sqlx::test]
-async fn clone(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
+)]
+async fn clone(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -221,20 +192,11 @@ async fn clone(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow:
     Ok(())
 }
 
-#[sqlx::test]
-async fn get(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
+)]
+async fn get(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -285,23 +247,11 @@ async fn get(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::R
 }
 
 // todo: test-exhaustiveness: create a `JigBrowse` Fixture, actually test the cases (paging, jig count, etc)
-#[sqlx::test]
-async fn browse_simple(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
+)]
+async fn browse_simple(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -326,23 +276,11 @@ async fn browse_simple(
     Ok(())
 }
 
-#[sqlx::test]
-async fn browse_order_by(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
+)]
+async fn browse_order_by(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -413,23 +351,11 @@ async fn browse_order_by(
 
 // todo: test-exhaustiveness: create a `JigBrowse` Fixture, actually test the cases (paging, jig count, etc)
 #[ignore]
-#[sqlx::test]
-async fn browse_own_simple(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::MetaKinds, Fixture::UserDefaultPerms, Fixture::Jig],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::UserDefaultPerms", "Fixture::Jig")
+)]
+async fn browse_own_simple(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -457,20 +383,11 @@ async fn browse_own_simple(
     Ok(())
 }
 
-#[sqlx::test]
-async fn count(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::MetaKinds, Fixture::UserDefaultPerms, Fixture::Jig],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::UserDefaultPerms", "Fixture::Jig")
+)]
+async fn count(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -489,28 +406,16 @@ async fn count(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow:
     Ok(())
 }
 
-#[sqlx::test]
-async fn update_and_publish(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::MetaKinds,
-            Fixture::User,
-            Fixture::Jig,
-            Fixture::CategoryOrdering,
-        ],
-        &[],
-        pool_opts,
-        conn_opts,
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::MetaKinds",
+        "Fixture::User",
+        "Fixture::Jig",
+        "Fixture::CategoryOrdering"
     )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+)]
+async fn update_and_publish(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -628,28 +533,16 @@ async fn update_and_publish(
 }
 
 #[ignore]
-#[sqlx::test]
-async fn update_and_publish_incomplete_modules(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::MetaKinds,
-            Fixture::User,
-            Fixture::Jig,
-            Fixture::CategoryOrdering,
-        ],
-        &[],
-        pool_opts,
-        conn_opts,
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::MetaKinds",
+        "Fixture::User",
+        "Fixture::Jig",
+        "Fixture::CategoryOrdering"
     )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+)]
+async fn update_and_publish_incomplete_modules(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     // Test no modules on JIG returns HTTP 400
@@ -679,26 +572,16 @@ async fn update_and_publish_incomplete_modules(
     Ok(())
 }
 
-#[sqlx::test]
-async fn live_up_to_date_flag(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::MetaKinds,
-            Fixture::User,
-            Fixture::Jig,
-            Fixture::CategoryOrdering,
-        ],
-        &[],
-        pool_opts,
-        conn_opts,
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::MetaKinds",
+        "Fixture::User",
+        "Fixture::Jig",
+        "Fixture::CategoryOrdering"
     )
-    .await;
-
-    let port = app.port();
-
+)]
+async fn live_up_to_date_flag(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -754,8 +637,6 @@ async fn live_up_to_date_flag(
             ".**.feedbackNegative" => "[audio]"
         }
     );
-
-    app.stop(false).await;
 
     Ok(())
 }

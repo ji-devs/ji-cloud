@@ -1,8 +1,9 @@
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, LoginExt},
+    helpers::{setup_service, LoginExt},
 };
 use http::StatusCode;
+use macros::test_service;
 use shared::domain::{
     additional_resource::{AdditionalResourceCreateRequest, AssetIdResource, ResourceContent},
     asset::AssetId,
@@ -14,20 +15,11 @@ use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 use std::str::FromStr;
 use uuid::Uuid;
 #[ignore]
-#[sqlx::test]
-async fn create(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port: u16 = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
+)]
+async fn create(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -61,20 +53,11 @@ async fn create(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow
     Ok(())
 }
 #[ignore]
-#[sqlx::test]
-async fn get_draft(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port: u16 = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
+)]
+async fn get_draft(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -96,20 +79,11 @@ async fn get_draft(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> any
     Ok(())
 }
 #[ignore]
-#[sqlx::test]
-async fn get_live(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port: u16 = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
+)]
+async fn get_live(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -131,20 +105,11 @@ async fn get_live(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyh
     Ok(())
 }
 #[ignore]
-#[sqlx::test]
-async fn delete(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port: u16 = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
+)]
+async fn delete(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client

@@ -1,22 +1,17 @@
 use http::StatusCode;
 
+use macros::test_service;
 use serde_json::json;
 use shared::domain::locale::{CreateEntryRequest, EntryStatus};
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, LoginExt},
+    helpers::{setup_service, LoginExt},
 };
 
-#[sqlx::test]
-async fn delete(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[], pool_opts, conn_opts).await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
+async fn delete(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -31,14 +26,8 @@ async fn delete(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow
     Ok(())
 }
 
-#[sqlx::test]
-async fn get(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[], pool_opts, conn_opts).await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
+async fn get(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -56,17 +45,7 @@ async fn get(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::R
     Ok(())
 }
 
-async fn list(
-    query: &[(&str, &str)],
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[], pool_opts, conn_opts).await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+async fn list(query: &[(&str, &str)], port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -85,88 +64,52 @@ async fn list(
     Ok(())
 }
 
-#[sqlx::test]
-async fn list_all_by_default(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    list(&[], pool_opts, conn_opts).await
+#[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
+async fn list_all_by_default(port: u16) -> anyhow::Result<()> {
+    list(&[], port).await
 }
 
-#[sqlx::test]
-async fn list_all_by_bundle(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    list(&[("groupBy", "bundle")], pool_opts, conn_opts).await
+#[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
+async fn list_all_by_bundle(port: u16) -> anyhow::Result<()> {
+    list(&[("groupBy", "bundle")], port).await
 }
 
-#[sqlx::test]
-async fn list_empty_bundle_by_default(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    list(
-        &[("bundles", "85a46ffe-7c67-11eb-a0d7-277d94fe130c")],
-        pool_opts,
-        conn_opts,
-    )
-    .await
+#[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
+async fn list_empty_bundle_by_default(port: u16) -> anyhow::Result<()> {
+    list(&[("bundles", "85a46ffe-7c67-11eb-a0d7-277d94fe130c")], port).await
 }
 
-#[sqlx::test]
-async fn list_empty_bundle_by_bundle(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
+#[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
+async fn list_empty_bundle_by_bundle(port: u16) -> anyhow::Result<()> {
     list(
         &[
             ("groupBy", "bundle"),
             ("bundles", "85a46ffe-7c67-11eb-a0d7-277d94fe130c"),
         ],
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }
 
-#[sqlx::test]
-async fn list_single_bundle_by_default(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    list(
-        &[("bundles", "8359a48a-7c67-11eb-a0d7-0fd74777a62c")],
-        pool_opts,
-        conn_opts,
-    )
-    .await
+#[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
+async fn list_single_bundle_by_default(port: u16) -> anyhow::Result<()> {
+    list(&[("bundles", "8359a48a-7c67-11eb-a0d7-0fd74777a62c")], port).await
 }
 
-#[sqlx::test]
-async fn list_single_bundle_by_bundle(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
+#[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
+async fn list_single_bundle_by_bundle(port: u16) -> anyhow::Result<()> {
     list(
         &[
             ("groupBy", "bundle"),
             ("bundles", "8359a48a-7c67-11eb-a0d7-0fd74777a62c"),
         ],
-        pool_opts,
-        conn_opts,
+        port,
     )
     .await
 }
 
-#[sqlx::test]
-async fn create(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[], pool_opts, conn_opts).await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
+async fn create(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -198,17 +141,8 @@ async fn create(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow
     Ok(())
 }
 
-#[sqlx::test]
-async fn update_in_app(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[], pool_opts, conn_opts).await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
+async fn update_in_app(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client

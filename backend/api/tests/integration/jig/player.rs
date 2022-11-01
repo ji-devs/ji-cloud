@@ -1,27 +1,19 @@
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, LoginExt},
+    helpers::{setup_service, LoginExt},
 };
 use http::StatusCode;
+use macros::test_service;
 use shared::domain::jig::player::{
     instance::PlayerSessionInstanceResponse, JigPlayerSession, JigPlayerSessionListResponse,
 };
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
-#[sqlx::test]
-async fn list(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
+)]
+async fn list(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -42,20 +34,11 @@ async fn list(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::
     Ok(())
 }
 
-#[sqlx::test]
-async fn create(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
+)]
+async fn create(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -114,23 +97,11 @@ async fn create(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow
     Ok(())
 }
 
-#[sqlx::test]
-async fn session_instance_play_count_flow(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::MetaKinds, Fixture::User, Fixture::Jig],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
+)]
+async fn session_instance_play_count_flow(port: u16) -> anyhow::Result<()> {
     let client: reqwest::Client = reqwest::ClientBuilder::new()
         .user_agent("mocked user agent")
         .connect_timeout(std::time::Duration::from_secs(5))

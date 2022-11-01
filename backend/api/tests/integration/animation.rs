@@ -1,21 +1,16 @@
 use http::StatusCode;
+use macros::test_service;
 use serde_json::json;
 use shared::domain::{animation::AnimationId, CreateResponse};
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, LoginExt},
+    helpers::{setup_service, LoginExt},
 };
 
-#[sqlx::test]
-async fn create(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[], pool_opts, conn_opts).await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(setup = "setup_service", fixtures("Fixture::User"))]
+async fn create(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -43,25 +38,16 @@ async fn create(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow
     Ok(())
 }
 
-#[sqlx::test]
-async fn get_metadata(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::User,
-            Fixture::Animation,
-            Fixture::MetaKinds,
-            Fixture::MetaAnimation,
-        ],
-        &[],
-        pool_opts,
-        conn_opts,
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::User",
+        "Fixture::Animation",
+        "Fixture::MetaKinds",
+        "Fixture::MetaAnimation"
     )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+)]
+async fn get_metadata(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client

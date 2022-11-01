@@ -1,3 +1,4 @@
+use actix_web::dev::ServerHandle;
 use chrono::{Duration, Utc};
 use core::settings::{JwkAudiences, RuntimeSettings};
 use ji_cloud_api::http::Application;
@@ -37,6 +38,7 @@ impl LoginExt for reqwest::RequestBuilder {
     }
 }
 
+#[allow(dead_code)]
 pub fn assert_snapshot<F: FnOnce() -> () + UnwindSafe>(f: F) -> anyhow::Result<()> {
     let result = panic::catch_unwind(f);
 
@@ -139,6 +141,23 @@ pub async fn initialize_server_and_get_db(
     .expect("failed to initialize server");
 
     (app, db)
+}
+
+pub async fn setup_service(
+    fixtures: &[Fixture],
+    services: &[Service],
+    pool_opts: PgPoolOptions,
+    conn_opts: PgConnectOptions,
+) -> (ServerHandle, u16) {
+    let app = initialize_server(fixtures, services, pool_opts, conn_opts).await;
+
+    let handle = app.handle();
+
+    let port = app.port();
+
+    let _join_handle = tokio::spawn(app.run_until_stopped());
+
+    (handle, port)
 }
 
 pub fn log_init() {

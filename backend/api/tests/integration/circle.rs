@@ -1,21 +1,17 @@
 use http::StatusCode;
+use macros::test_service;
 use serde_json::json;
 use shared::domain::{circle::CircleId, CreateResponse};
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, LoginExt},
+    helpers::{setup_service, LoginExt},
 };
 
-#[sqlx::test]
-async fn create(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[], pool_opts, conn_opts).await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Image"))]
+async fn create(port: u16) -> anyhow::Result<()> {
+    let name = "create";
     let client = reqwest::Client::new();
 
     let resp = client
@@ -34,7 +30,7 @@ async fn create(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow
 
     let body: CreateResponse<CircleId> = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, {".id" => "[id]"});
+    insta::assert_json_snapshot!(format!("{}-1",name) ,body, {".id" => "[id]"});
 
     let circle_id = body.id.0;
 
@@ -50,6 +46,7 @@ async fn create(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
             ".**.id" => "[id]",
             ".**.createdAt" => "[created_at]",
@@ -60,19 +57,12 @@ async fn create(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow
     Ok(())
 }
 
-#[sqlx::test]
-async fn join_circle(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::User, Fixture::Image, Fixture::Circle],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::Image", "Fixture::Circle")
+)]
+async fn join_circle(port: u16) -> anyhow::Result<()> {
+    let name = "join_circle";
 
     let client = reqwest::Client::new();
 
@@ -91,6 +81,7 @@ async fn join_circle(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> a
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-1",name),
         body, {
             ".**.createdAt" => "[created_at]",
             ".**.lastEdited" => "[last_edited]",
@@ -124,6 +115,7 @@ async fn join_circle(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> a
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
             ".**.createdAt" => "[created_at]",
             ".**.lastEdited" => "[last_edited]",
@@ -132,20 +124,12 @@ async fn join_circle(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> a
 
     Ok(())
 }
-
-#[sqlx::test]
-async fn leave_circle(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::User, Fixture::Image, Fixture::Circle],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::Image", "Fixture::Circle")
+)]
+async fn leave_circle(port: u16) -> anyhow::Result<()> {
+    let name = "leave_circle";
 
     let client = reqwest::Client::new();
 
@@ -164,6 +148,7 @@ async fn leave_circle(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> 
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-1",name),
         body, {
             ".**.createdAt" => "[created_at]",
             ".**.lastEdited" => "[last_edited]",
@@ -197,6 +182,7 @@ async fn leave_circle(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> 
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
             ".**.createdAt" => "[created_at]",
             ".**.lastEdited" => "[last_edited]",
@@ -205,23 +191,12 @@ async fn leave_circle(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> 
 
     Ok(())
 }
-
-#[sqlx::test]
-async fn browse_circles(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::User, Fixture::Image, Fixture::Circle],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::Image", "Fixture::Circle")
+)]
+async fn browse_circles(port: u16) -> anyhow::Result<()> {
+    let name = "browse_circle";
 
     let client = reqwest::Client::new();
 
@@ -237,6 +212,7 @@ async fn browse_circles(
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-1",name),
         body, {
             ".**.createdAt" => "[created_at]",
             ".**.lastEdited" => "[last_edited]",
@@ -246,22 +222,12 @@ async fn browse_circles(
     Ok(())
 }
 
-#[sqlx::test]
-async fn update_circle(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::User, Fixture::Image, Fixture::Circle],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::Image", "Fixture::Circle")
+)]
+async fn update_circle(port: u16) -> anyhow::Result<()> {
+    let name = "update_circle";
 
     let client = reqwest::Client::new();
 
@@ -280,6 +246,7 @@ async fn update_circle(
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-1",name),
         body, {
             ".**.createdAt" => "[created_at]",
             ".**.lastEdited" => "[last_edited]",
@@ -318,6 +285,7 @@ async fn update_circle(
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
             ".**.createdAt" => "[created_at]",
             ".**.lastEdited" => "[last_edited]",
@@ -326,23 +294,12 @@ async fn update_circle(
 
     Ok(())
 }
-
-#[sqlx::test]
-async fn browse_circles_with_users(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::User, Fixture::Image, Fixture::Circle],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::Image", "Fixture::Circle")
+)]
+async fn browse_circles_with_users(port: u16) -> anyhow::Result<()> {
+    let name = "browse_circles_with_users";
 
     let client = reqwest::Client::new();
 
@@ -360,10 +317,13 @@ async fn browse_circles_with_users(
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body,
-        {".**.createdAt" => "[created_at]",
-         ".**.lastEdited" => "[last_edited]"
-    });
+    insta::assert_json_snapshot!(
+        format!("{}-1",name),
+        body, {
+            ".**.createdAt" => "[created_at]",
+            ".**.lastEdited" => "[last_edited]",
+        }
+    );
 
     Ok(())
 }

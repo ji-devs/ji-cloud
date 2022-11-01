@@ -1,31 +1,19 @@
 use insta::assert_json_snapshot;
+use macros::test_service;
 use serde_json::json;
 use shared::domain::resource::ResourceResponse;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
-    helpers::{assert_snapshot, initialize_server, LoginExt},
+    helpers::{setup_service, LoginExt},
 };
 
-#[sqlx::test]
-async fn update_no_modules_changes(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::MetaKinds, Fixture::User, Fixture::Resource],
-        &[],
-        pool_opts,
-        conn_opts,
-    )
-    .await;
-
-    let port = app.port();
-    let _ = app.handle();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Resource")
+)]
+async fn update_no_modules_changes(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resource_id = "d8067526-1518-11ed-87fa-ebaf880b6d9c".to_string();
@@ -55,7 +43,9 @@ async fn update_no_modules_changes(
 
     let body: ResourceResponse = resp.json().await?;
 
-    assert_snapshot(|| assert_json_snapshot!(body, {".**.lastEdited" => "[timestamp]"}))?;
+    insta::assert_json_snapshot!(
+        "update_no_modules_changes",body, {
+            ".**.lastEdited" => "[last_edited]"});
 
     Ok(())
 }

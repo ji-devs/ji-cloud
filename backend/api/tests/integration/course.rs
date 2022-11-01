@@ -1,31 +1,23 @@
 use http::StatusCode;
+use macros::test_service;
 use serde_json::json;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, LoginExt},
+    helpers::{setup_service, LoginExt},
 };
 
-#[sqlx::test]
-async fn get(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::MetaKinds,
-            Fixture::User,
-            Fixture::Jig,
-            Fixture::Course,
-        ],
-        &[],
-        pool_opts,
-        conn_opts,
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::MetaKinds",
+        "Fixture::User",
+        "Fixture::Jig",
+        "Fixture::Course"
     )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+)]
+async fn get(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let course_id = "3a6a3660-f3ec-11ec-b8ef-071747fa2a0d".to_string();
@@ -73,28 +65,16 @@ async fn get(pool_opts: PgPoolOptions, conn_opts: PgConnectOptions) -> anyhow::R
     Ok(())
 }
 
-#[sqlx::test]
-async fn update_and_publish_browse(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::MetaKinds,
-            Fixture::User,
-            Fixture::Jig,
-            Fixture::Course,
-        ],
-        &[],
-        pool_opts,
-        conn_opts,
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::MetaKinds",
+        "Fixture::User",
+        "Fixture::Jig",
+        "Fixture::Course"
     )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+)]
+async fn update_and_publish_browse(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -204,28 +184,16 @@ async fn update_and_publish_browse(
     Ok(())
 }
 
-#[sqlx::test]
-async fn browse_simple(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::MetaKinds,
-            Fixture::User,
-            Fixture::Jig,
-            Fixture::Course,
-        ],
-        &[],
-        pool_opts,
-        conn_opts,
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::MetaKinds",
+        "Fixture::User",
+        "Fixture::Jig",
+        "Fixture::Course"
     )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+)]
+async fn browse_simple(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -248,28 +216,16 @@ async fn browse_simple(
     Ok(())
 }
 
-#[sqlx::test]
-async fn course_jig_index(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::MetaKinds,
-            Fixture::User,
-            Fixture::Jig,
-            Fixture::Course,
-        ],
-        &[],
-        pool_opts,
-        conn_opts,
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::MetaKinds",
+        "Fixture::User",
+        "Fixture::Jig",
+        "Fixture::Course"
     )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+)]
+async fn course_jig_index(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -376,28 +332,16 @@ async fn course_jig_index(
     Ok(())
 }
 
-#[sqlx::test]
-async fn publish_modules(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::MetaKinds,
-            Fixture::User,
-            Fixture::Jig,
-            Fixture::Course,
-        ],
-        &[],
-        pool_opts,
-        conn_opts,
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::MetaKinds",
+        "Fixture::User",
+        "Fixture::Jig",
+        "Fixture::Course"
     )
-    .await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+)]
+async fn publish_modules(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let course_id = "3a6a3660-f3ec-11ec-b8ef-071747fa2a0d".to_string();
@@ -473,26 +417,16 @@ async fn publish_modules(
     Ok(())
 }
 
-#[sqlx::test]
-async fn live_up_to_date_flag(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::MetaKinds,
-            Fixture::User,
-            Fixture::Jig,
-            Fixture::Course,
-        ],
-        &[],
-        pool_opts,
-        conn_opts,
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::MetaKinds",
+        "Fixture::User",
+        "Fixture::Jig",
+        "Fixture::Course"
     )
-    .await;
-
-    let port = app.port();
-
+)]
+async fn live_up_to_date_flag(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let course_id = "3a6a3660-f3ec-11ec-b8ef-071747fa2a0d".to_string();

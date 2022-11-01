@@ -1,23 +1,15 @@
 use http::StatusCode;
+use macros::test_service;
 use shared::domain::{audio::AudioId, CreateResponse};
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, LoginExt},
+    helpers::{setup_service, LoginExt},
 };
 
-#[sqlx::test]
-async fn create_returns_created(
-    pool_opts: PgPoolOptions,
-    conn_opts: PgConnectOptions,
-) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[], pool_opts, conn_opts).await;
-
-    let port = app.port();
-
-    tokio::spawn(app.run_until_stopped());
-
+#[test_service(setup = "setup_service", fixtures("Fixture::User"))]
+async fn create_returns_created(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
