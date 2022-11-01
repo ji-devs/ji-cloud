@@ -240,6 +240,7 @@ impl JigPlayer {
                                         .apply(OverlayHandle::lifecycle(
                                             clone!(state, instructions => move || {
                                                 html!("overlay-tooltip-info", {
+                                                    .property("centeredContent", true)
                                                     .property("marginX", -16)
                                                     .property("target", &elem)
                                                     .attribute("targetAnchor", "br")
