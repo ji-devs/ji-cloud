@@ -93,8 +93,34 @@ where
 {
     let preview_open = Mutable::new(true);
 
-    html!("empty-fragment", {
+    html!("preview-body", {
         .property("slot", "main")
+        .child(html!("button-rect", {
+            .property("slot", "actions")
+            .property("color", "red")
+            .property("kind", "text")
+            .text(strings::STR_PREVIEW_AGAIN)
+            .event(clone!(preview_open => move |_: events::Click| {
+                preview_open.set_neq(true);
+            }))
+        }))
+        .child(html!("button-rect", {
+            .property("slot", "actions")
+            .property("color", "red")
+            .property("kind", "filled")
+            .property("size", "small")
+            .text(strings::STR_DONE)
+            .child(html!("img-ui", {
+                .property("path", "core/buttons/rect/arrow-right-yellow.svg")
+            }))
+            .event(clone!(state => move |_evt:events::Click| {
+                if state.asset.is_jig() {
+                    state.jig_is_post_preview.set(true);
+                } else {
+                    state.navigate_to_publish();
+                }
+            }))
+        }))
         .child_signal(preview_open.signal_cloned().map(clone!(preview_open => move |open| {
             if open {
                 let close = clone!(preview_open => move || {
@@ -109,39 +135,11 @@ where
                             ..Default::default()
                         }),
                         PreviewPopupCallbacks::new(close)
-                    ).render(Some("preview"))
+                    ).render(Some("popup"))
                 )
             } else {
                 None
             }
         })))
-        .child(html!("preview-body", {
-            .child(html!("button-rect", {
-                .property("slot", "actions")
-                .property("color", "red")
-                .property("kind", "text")
-                .text(strings::STR_PREVIEW_AGAIN)
-                .event(clone!(preview_open => move |_: events::Click| {
-                    preview_open.set_neq(true);
-                }))
-            }))
-            .child(html!("button-rect", {
-                .property("slot", "actions")
-                .property("color", "red")
-                .property("kind", "filled")
-                .property("size", "small")
-                .text(strings::STR_DONE)
-                .child(html!("img-ui", {
-                    .property("path", "core/buttons/rect/arrow-right-yellow.svg")
-                }))
-                .event(clone!(state => move |_evt:events::Click| {
-                    if state.asset.is_jig() {
-                        state.jig_is_post_preview.set(true);
-                    } else {
-                        state.navigate_to_publish();
-                    }
-                }))
-            }))
-        }))
     })
 }

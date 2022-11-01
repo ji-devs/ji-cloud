@@ -1,8 +1,9 @@
 import { LitElement, html, css, customElement } from "lit-element";
 import "@elements/core/images/ui";
 
-const STR_TITLE = "Great design";
-const STR_MESSAGE = "To make changes, click back to any step. If you are happy with the activity you just saw, click done. Your work is auto-saved.";
+const STR_TITLE = "Like what you see?";
+const STR_MESSAGE_1 = "To make changes, click back to any step.";
+const STR_MESSAGE_2 = " If you are happy with your activity, click Done.";
 
 @customElement("preview-body")
 export class _ extends LitElement {
@@ -26,6 +27,7 @@ export class _ extends LitElement {
                 }
                 .title {
                     font-size: 28px;
+                    font-weight: bold;
                     text-align: center;
                     color: var(--dark-blue-4);
                 }
@@ -35,6 +37,9 @@ export class _ extends LitElement {
                     font-size: 18px;
                     color: var(--dark-blue-4);
                     margin: 0;
+                }
+                .message p {
+                    margin: 6px;
                 }
                 .actions {
                     display: flex;
@@ -48,16 +53,18 @@ export class _ extends LitElement {
 
     render() {
         return html`
-                <img-ui
-                    path="module/_common/edit/post-preview/splash.png"
-                ></img-ui>
-                <div class="title">${STR_TITLE}</div>
-                <div class="message">
-                    ${STR_MESSAGE}
-                </div>
-                <div class="actions">
-                    <slot name="actions"></slot>
-                </div>
+            <img-ui
+                path="module/_common/edit/post-preview/splash.png"
+            ></img-ui>
+            <div class="title">${STR_TITLE}</div>
+            <div class="message">
+                <p>${STR_MESSAGE_1}</p>
+                <p>${STR_MESSAGE_2}</p>
+            </div>
+            <div class="actions">
+                <slot name="actions"></slot>
+            </div>
+            <slot name="popup"></slot>
         `;
     }
 }
