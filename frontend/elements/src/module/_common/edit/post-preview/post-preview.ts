@@ -53,8 +53,15 @@ export class _ extends LitElement {
                     padding: 30px 0;
                 }
                 .bottom-section .actions {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    grid-gap: 48px;
+                }
+
+                .bottom-section .actions > div {
                     display: grid;
-                    grid-template-columns: repeat(3, 116px) 1px repeat(auto-fit, 116px);
+                    grid-template-columns: repeat(auto-fit, 116px);
                     justify-content: center;
                     column-gap: 48px;
                 }
@@ -165,17 +172,20 @@ function renderConvertable(module: ModuleKind) {
             ${renderMessage(module)}
             <h3 class="action-header">${STR_ACTION_HEADER}</h3>
             <div class="actions">
-                <h4 class="action-use-in-header">
-                    ${STR_USE_IN_PREFIX} ${STR_MODULE_DISPLAY_NAME[module]}
-                    ${STR_USE_IN_SUFFIX}
-                </h4>
-                <slot class="module-1" name="module-1"></slot>
-                <slot class="module-2" name="module-2"></slot>
-                <slot class="module-3" name="module-3"></slot>
-                <div class="divider"></div>
-                <slot class="action-print" name="action-print"></slot>
-                <slot class="action-publish" name="action-publish"></slot>
-                <slot class="action-continue" name="action-continue"></slot>
+                <div>
+                    <slot class="action-print" name="action-print"></slot>
+                    <slot class="action-publish" name="action-publish"></slot>
+                    <slot class="action-continue" name="action-continue"></slot>
+                </div>
+                <div>
+                    <h4 class="action-use-in-header">
+                        ${STR_USE_IN_PREFIX} ${STR_MODULE_DISPLAY_NAME[module]}
+                        ${STR_USE_IN_SUFFIX}
+                    </h4>
+                    <slot class="module-1" name="module-1"></slot>
+                    <slot class="module-2" name="module-2"></slot>
+                    <slot class="module-3" name="module-3"></slot>
+                </div>
             </div>
         </div>
     `;
