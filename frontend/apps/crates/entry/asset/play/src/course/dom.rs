@@ -93,19 +93,15 @@ impl CoursePlayer {
 
                 }))
             }))
-            .child_signal(state.course.signal_cloned().map(|course| {
-                course.map(|course| {
-                    ShareAsset::new(course.into()).render(
-                        html!("button-empty", {
-                            .child(html!("fa-icon", {
-                                .property("icon", "fa-light fa-share-nodes")
-                            }))
-                            .text(STR_SHARE_COURSE)
-                        }),
-                        Some("share")
-                    )
-                })
-            }))
+            .child(ShareAsset::new(course.clone().into()).render(
+                html!("button-empty", {
+                    .child(html!("fa-icon", {
+                        .property("icon", "fa-light fa-share-nodes")
+                    }))
+                    .text(STR_SHARE_COURSE)
+                }),
+                Some("share")
+            ))
             .child_signal(state.active_jig.signal_cloned().map(|active_jig| {
                 active_jig.map(|active_jig| {
                     html!("div", {
