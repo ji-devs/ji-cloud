@@ -78,12 +78,14 @@ export class _ extends LitElement {
                     color: #ffffff;
                     width: 304px;
                     margin: 8px 0 36px 0;
+                    white-space: pre-wrap;
+                    overflow-wrap: break-word;
                 }
                 :host([size="large"]) .body {
                     font-size: 22px;
-                    width: auto;
+                    width: max-content;
+                    max-width: 504px;
                     min-width: 304px;
-                    max-width: 500px;
                 }
 
                 :host([color="dark-blue"]) .body {
@@ -96,6 +98,11 @@ export class _ extends LitElement {
                 :host([color="light-orange"]) .body {
                     color: var(--dark-gray-6);
                 }
+
+                :host([centeredContent]) .body {
+                    text-align: center;
+                }
+
                 .actions {
                     display: flex;
                     flex-direction: row;
@@ -195,6 +202,9 @@ export class _ extends LitElement {
 
     @property({ type: Boolean, reflect: true })
     removeMargins: boolean = false;
+
+    @property({ type: Boolean, reflect: true })
+    centeredContent: boolean = false;
 
     renderClose() {
         if (!this.closeable) {
