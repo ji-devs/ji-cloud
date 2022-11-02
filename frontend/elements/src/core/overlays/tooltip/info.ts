@@ -267,7 +267,7 @@ export class _ extends LitElement {
                             ? html`<div class="title">${title}</div>`
                             : nothing}
                         ${body !== ""
-                            ? html`<section class="body">${body}</section>`
+                            ? html`<section dir="auto" class="body">${body}</section>`
                             : html`<section class="body"><slot name="body"></slot></section>`}
                         <div class="actions">
                             <slot name="actions"></slot>

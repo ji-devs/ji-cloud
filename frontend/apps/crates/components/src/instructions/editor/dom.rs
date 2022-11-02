@@ -56,6 +56,7 @@ pub fn render_text(state: Rc<State>) -> Dom {
         .child(HebrewButtons::reveal().render(Some("hebrew-inputs")))
         .child(html!("textarea" => HtmlTextAreaElement, {
             .with_node!(elem => {
+                .attribute("dir", "auto")
                 .text_signal(state.text_signal())
                 .property("placeholder", state.instructions_text.placeholder)
                 .property("rows", 4)
