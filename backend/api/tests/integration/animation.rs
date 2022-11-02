@@ -11,6 +11,8 @@ use crate::{
 
 #[test_service(setup = "setup_service", fixtures("Fixture::User"))]
 async fn create(port: u16) -> anyhow::Result<()> {
+    let name = "create";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -33,7 +35,7 @@ async fn create(port: u16) -> anyhow::Result<()> {
 
     let body: CreateResponse<AnimationId> = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, {".id" => "[id]"});
+    insta::assert_json_snapshot!(format!("{}",name), body, {".id" => "[id]"});
 
     Ok(())
 }
@@ -48,6 +50,8 @@ async fn create(port: u16) -> anyhow::Result<()> {
     )
 )]
 async fn get_metadata(port: u16) -> anyhow::Result<()> {
+    let name = "get_metadata";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -64,7 +68,7 @@ async fn get_metadata(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, {".metadata.updated_at" => "[timestamp]"});
+    insta::assert_json_snapshot!(format!("{}",name), body, {".metadata.updated_at" => "[timestamp]"});
 
     Ok(())
 }

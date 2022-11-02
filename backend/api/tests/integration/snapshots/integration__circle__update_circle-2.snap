@@ -1,7 +1,6 @@
 ---
 source: tests/integration/circle.rs
 expression: body
-
 ---
 {
   "id": "57a1eaaa-f182-11ec-a96e-13f3929f5b22",

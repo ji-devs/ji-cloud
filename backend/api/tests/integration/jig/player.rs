@@ -14,6 +14,8 @@ use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
     fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
 )]
 async fn list(port: u16) -> anyhow::Result<()> {
+    let name = "list";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -29,7 +31,7 @@ async fn list(port: u16) -> anyhow::Result<()> {
 
     let body: JigPlayerSessionListResponse = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, { ".**.expires_at" => "[timestamp]" });
+    insta::assert_json_snapshot!(format!("{}-1",name), body, { ".**.expires_at" => "[timestamp]" });
 
     Ok(())
 }
@@ -39,6 +41,8 @@ async fn list(port: u16) -> anyhow::Result<()> {
     fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
 )]
 async fn create(port: u16) -> anyhow::Result<()> {
+    let name = "create";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -61,7 +65,7 @@ async fn create(port: u16) -> anyhow::Result<()> {
 
     let body: JigPlayerSession = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, { ".**.index" => "[index]", ".**.expires_at" => "[timestamp]" });
+    insta::assert_json_snapshot!(format!("{}-1",name), body, { ".**.index" => "[index]", ".**.expires_at" => "[timestamp]" });
 
     let _resp = client
         .post(&format!("http://0.0.0.0:{}/v1/jig/player", port))
@@ -92,7 +96,7 @@ async fn create(port: u16) -> anyhow::Result<()> {
 
     let body: JigPlayerSessionListResponse = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, { ".**.index" => "[index]", ".**.expires_at" => "[timestamp]"  });
+    insta::assert_json_snapshot!(format!("{}-2",name), body, { ".**.index" => "[index]", ".**.expires_at" => "[timestamp]"  });
 
     Ok(())
 }
@@ -102,6 +106,8 @@ async fn create(port: u16) -> anyhow::Result<()> {
     fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
 )]
 async fn session_instance_play_count_flow(port: u16) -> anyhow::Result<()> {
+    let name = "session_instance_play_count_flow";
+
     let client: reqwest::Client = reqwest::ClientBuilder::new()
         .user_agent("mocked user agent")
         .connect_timeout(std::time::Duration::from_secs(5))
@@ -124,7 +130,7 @@ async fn session_instance_play_count_flow(port: u16) -> anyhow::Result<()> {
 
     let token = body.token.clone();
 
-    insta::assert_json_snapshot!(body, {".**.token" => "[instance_token]"});
+    insta::assert_json_snapshot!(format!("{}-1",name), body, {".**.token" => "[instance_token]"});
 
     let resp = client
         .post(&format!(
@@ -153,7 +159,7 @@ async fn session_instance_play_count_flow(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}-2", name), body);
 
     Ok(())
 }

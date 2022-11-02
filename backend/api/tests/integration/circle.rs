@@ -30,7 +30,7 @@ async fn create(port: u16) -> anyhow::Result<()> {
 
     let body: CreateResponse<CircleId> = resp.json().await?;
 
-    insta::assert_json_snapshot!(format!("{}-1",name) ,body, {".id" => "[id]"});
+    insta::assert_json_snapshot!(format!("{}-1",name), body, {".id" => "[id]"});
 
     let circle_id = body.id.0;
 
@@ -124,6 +124,7 @@ async fn join_circle(port: u16) -> anyhow::Result<()> {
 
     Ok(())
 }
+
 #[test_service(
     setup = "setup_service",
     fixtures("Fixture::User", "Fixture::Image", "Fixture::Circle")
@@ -212,7 +213,7 @@ async fn browse_circles(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
-        format!("{}-1",name),
+        format!("{}",name),
         body, {
             ".**.createdAt" => "[created_at]",
             ".**.lastEdited" => "[last_edited]",
@@ -294,6 +295,7 @@ async fn update_circle(port: u16) -> anyhow::Result<()> {
 
     Ok(())
 }
+
 #[test_service(
     setup = "setup_service",
     fixtures("Fixture::User", "Fixture::Image", "Fixture::Circle")
@@ -318,7 +320,7 @@ async fn browse_circles_with_users(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
-        format!("{}-1",name),
+        format!("{}",name),
         body, {
             ".**.createdAt" => "[created_at]",
             ".**.lastEdited" => "[last_edited]",

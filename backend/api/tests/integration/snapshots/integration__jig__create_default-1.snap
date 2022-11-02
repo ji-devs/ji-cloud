@@ -1,7 +1,6 @@
 ---
-source: tests/integration/audio/user.rs
+source: tests/integration/jig.rs
 expression: body
-
 ---
 {
   "id": "[id]"

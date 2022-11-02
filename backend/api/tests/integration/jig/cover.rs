@@ -13,6 +13,7 @@ use crate::{
     fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
 )]
 async fn update_no_modules_changes(port: u16) -> anyhow::Result<()> {
+    let name = "update_no_modules_changes";
     let client = reqwest::Client::new();
 
     let _resp = client
@@ -40,7 +41,7 @@ async fn update_no_modules_changes(port: u16) -> anyhow::Result<()> {
 
     let body: JigResponse = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, {".**.lastEdited" => "[timestamp]", ".**.feedbackPositive" => "[audio]", ".**.feedbackNegative" => "[audio]"});
+    insta::assert_json_snapshot!(format!("{}", name), body, {".**.lastEdited" => "[timestamp]", ".**.feedbackPositive" => "[audio]", ".**.feedbackNegative" => "[audio]"});
 
     Ok(())
 }

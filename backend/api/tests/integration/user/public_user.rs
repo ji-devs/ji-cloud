@@ -17,6 +17,8 @@ use crate::{
     )
 )]
 async fn browse_public_user(port: u16) -> anyhow::Result<()> {
+    let name = "browse_public_user";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -30,7 +32,7 @@ async fn browse_public_user(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }
@@ -45,6 +47,8 @@ async fn browse_public_user(port: u16) -> anyhow::Result<()> {
     )
 )]
 async fn browse_users_with_circles(port: u16) -> anyhow::Result<()> {
+    let name = "browse_users_with_circles";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -61,7 +65,7 @@ async fn browse_users_with_circles(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }
@@ -76,6 +80,8 @@ async fn browse_users_with_circles(port: u16) -> anyhow::Result<()> {
     )
 )]
 async fn browse_user_jigs(port: u16) -> anyhow::Result<()> {
+    let name = "browse_user_jigs";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -92,7 +98,7 @@ async fn browse_user_jigs(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(
+    insta::assert_json_snapshot!(format!("{}", name),
         body, {
             ".**.lastEdited" => "[last_edited]",
             ".**.feedbackPositive" => "[audio]",
@@ -113,6 +119,8 @@ async fn browse_user_jigs(port: u16) -> anyhow::Result<()> {
     )
 )]
 async fn browse_user_resources(port: u16) -> anyhow::Result<()> {
+    let name = "browse_user_resources";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -129,7 +137,7 @@ async fn browse_user_resources(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }
@@ -145,6 +153,8 @@ async fn browse_user_resources(port: u16) -> anyhow::Result<()> {
     )
 )]
 async fn browse_user_courses(port: u16) -> anyhow::Result<()> {
+    let name = "browse_user_courses";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -161,7 +171,7 @@ async fn browse_user_courses(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(
+    insta::assert_json_snapshot!(format!("{}-1", name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -181,7 +191,7 @@ async fn browse_user_courses(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(
+    insta::assert_json_snapshot!(format!("{}-2", name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -201,6 +211,8 @@ async fn browse_user_courses(port: u16) -> anyhow::Result<()> {
     )
 )]
 async fn browse_follower_and_unfollow(port: u16) -> anyhow::Result<()> {
+    let name = "browse_follower_and_unfollow";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -217,7 +229,7 @@ async fn browse_follower_and_unfollow(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}-1", name), body);
 
     let resp = client
         .delete(&format!(
@@ -245,7 +257,7 @@ async fn browse_follower_and_unfollow(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}-2", name), body);
 
     Ok(())
 }
@@ -255,6 +267,8 @@ async fn browse_follower_and_unfollow(port: u16) -> anyhow::Result<()> {
     fixtures("Fixture::User", "Fixture::PublicUser")
 )]
 async fn browse_follower_and_follow(port: u16) -> anyhow::Result<()> {
+    let name = "browse_follower_and_follow";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -283,7 +297,7 @@ async fn browse_follower_and_follow(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}-1", name), body);
 
     let resp = client
         .post(&format!(
@@ -311,7 +325,7 @@ async fn browse_follower_and_follow(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}-2", name), body);
 
     Ok(())
 }
@@ -327,6 +341,8 @@ async fn browse_follower_and_follow(port: u16) -> anyhow::Result<()> {
     )
 )]
 async fn browse_following_and_unfollow(port: u16) -> anyhow::Result<()> {
+    let name = "browse_following_and_unfollow";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -343,7 +359,7 @@ async fn browse_following_and_unfollow(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}-1", name), body);
 
     let resp = client
         .delete(&format!(
@@ -371,7 +387,7 @@ async fn browse_following_and_unfollow(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}-2", name), body);
 
     Ok(())
 }

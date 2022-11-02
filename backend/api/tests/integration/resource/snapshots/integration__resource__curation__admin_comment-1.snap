@@ -1,7 +1,6 @@
 ---
 source: tests/integration/resource/curation.rs
 expression: body
-
 ---
 {
   "resourceId": "d8067526-1518-11ed-87fa-ebaf880b6d9c",

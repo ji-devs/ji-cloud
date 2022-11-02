@@ -20,6 +20,8 @@ use crate::{
     fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
 )]
 async fn get_live(port: u16) -> anyhow::Result<()> {
+    let name = "get_live";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -37,7 +39,7 @@ async fn get_live(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, {".**.updated_at" => "[timestamp]"});
+    insta::assert_json_snapshot!(format!("{}",name), body, {".**.updated_at" => "[timestamp]"});
 
     Ok(())
 }
@@ -47,6 +49,8 @@ async fn get_live(port: u16) -> anyhow::Result<()> {
     fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
 )]
 async fn create_default(port: u16) -> anyhow::Result<()> {
+    let name = "create_default";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -66,7 +70,7 @@ async fn create_default(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, {
+    insta::assert_json_snapshot!(format!("{}-1",name), body, {
         ".**.id" => "[id]",
         ".**.created_at" => "[created_at]",
         ".**.updated_at" => "[updated_at]"});
@@ -92,7 +96,7 @@ async fn create_default(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, {
+    insta::assert_json_snapshot!(format!("{}-2",name), body, {
         ".**.id" => "[id]",
         ".**.stable_id" => "[stable_id]",
         ".**.created_at" => "[created_at]",
@@ -106,6 +110,8 @@ async fn create_default(port: u16) -> anyhow::Result<()> {
     fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
 )]
 async fn update_empty(port: u16) -> anyhow::Result<()> {
+    let name = "update_empty";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -144,7 +150,7 @@ async fn update_empty(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, {".**.updated_at" => "[timestamp]"});
+    insta::assert_json_snapshot!(format!("{}",name), body, {".**.updated_at" => "[timestamp]"});
 
     Ok(())
 }
@@ -154,6 +160,8 @@ async fn update_empty(port: u16) -> anyhow::Result<()> {
     fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
 )]
 async fn update_contents(port: u16) -> anyhow::Result<()> {
+    let name = "update_contents";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -195,7 +203,7 @@ async fn update_contents(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, {".**.updated_at" => "[timestamp]"});
+    insta::assert_json_snapshot!(format!("{}-1",name), body, {".**.updated_at" => "[timestamp]"});
 
     let resp = client
         .get(&format!(
@@ -212,7 +220,7 @@ async fn update_contents(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, {".**.updated_at" => "[timestamp]"});
+    insta::assert_json_snapshot!(format!("{}-2",name), body, {".**.updated_at" => "[timestamp]"});
 
     Ok(())
 }
@@ -227,6 +235,8 @@ async fn update_contents(port: u16) -> anyhow::Result<()> {
     )
 )]
 async fn drag_up_down_modules(port: u16) -> anyhow::Result<()> {
+    let name = "drag_up_down_modules";
+
     let client = reqwest::Client::new();
 
     let jig_id = "0cc084bc-7c83-11eb-9f77-e3218dffb008".to_string();
@@ -242,6 +252,7 @@ async fn drag_up_down_modules(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-1",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
             ".**.feedbackPositive" => "[audio]",
@@ -275,6 +286,7 @@ async fn drag_up_down_modules(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
             ".**.feedbackPositive" => "[audio]",

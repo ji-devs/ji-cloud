@@ -1,7 +1,6 @@
 ---
 source: tests/integration/user/color.rs
 expression: body
-
 ---
 {
   "colors": [

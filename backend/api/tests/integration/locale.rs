@@ -8,6 +8,7 @@ use crate::{fixture::Fixture, helpers::setup_service};
 
 #[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
 async fn list_bundles(port: u16) -> anyhow::Result<()> {
+    let name = "list_bundles";
     let client = reqwest::Client::new();
 
     let resp = client
@@ -20,13 +21,14 @@ async fn list_bundles(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }
 
 #[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
 async fn list_item_kind(port: u16) -> anyhow::Result<()> {
+    let name = "list_item_kind";
     let client = reqwest::Client::new();
 
     let resp = client
@@ -39,7 +41,7 @@ async fn list_item_kind(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }

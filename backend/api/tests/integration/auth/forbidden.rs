@@ -111,18 +111,6 @@ async fn image_patch(port: u16) -> anyhow::Result<()> {
 }
 
 #[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
-#[ignore] // no s3
-async fn image_delete(port: u16) -> anyhow::Result<()> {
-    forbidden(
-        "v1/image/00000000-0000-0000-0000-000000000000",
-        None,
-        Method::DELETE,
-        port,
-    )
-    .await
-}
-
-#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
 async fn jig_post(port: u16) -> anyhow::Result<()> {
     forbidden("v1/jig", None, Method::POST, port).await
 }
@@ -218,29 +206,43 @@ async fn animation_post(port: u16) -> anyhow::Result<()> {
     .await
 }
 
-#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
-#[ignore] // route doesn't exist
-async fn animation_patch(port: u16) -> anyhow::Result<()> {
-    forbidden(
-        "v1/animation/00000000-0000-0000-0000-000000000000",
-        None,
-        Method::PATCH,
-        port,
-    )
-    .await
-}
+// Ignored tests aren't captured. Will resolve later
+//
+// #[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+// #[ignore] // route doesn't exist
+// async fn animation_patch(port: u16) -> anyhow::Result<()> {
+//     forbidden(
+//         "v1/animation/00000000-0000-0000-0000-000000000000",
+//         None,
+//         Method::PATCH,
+//         port,
+//     )
+//     .await
+// }
 
-#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
-#[ignore] // no s3
-async fn animation_delete(port: u16) -> anyhow::Result<()> {
-    forbidden(
-        "v1/animation/00000000-0000-0000-0000-000000000000",
-        None,
-        Method::DELETE,
-        port,
-    )
-    .await
-}
+// #[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+// #[ignore] // no s3
+// async fn animation_delete(port: u16) -> anyhow::Result<()> {
+//     forbidden(
+//         "v1/animation/00000000-0000-0000-0000-000000000000",
+//         None,
+//         Method::DELETE,
+//         port,
+//     )
+//     .await
+// }
+//
+//#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+// #[ignore] // no s3
+// async fn image_delete(port: u16) -> anyhow::Result<()> {
+//     forbidden(
+//         "v1/image/00000000-0000-0000-0000-000000000000",
+//         None,
+//         Method::DELETE,
+//         port,
+//     )
+//     .await
+// }
 
 // todo: admin routes
 // todo: locale routes

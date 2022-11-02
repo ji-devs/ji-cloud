@@ -18,6 +18,8 @@ use crate::{
     )
 )]
 async fn get(port: u16) -> anyhow::Result<()> {
+    let name = "get";
+
     let client = reqwest::Client::new();
 
     let course_id = "3a6a3660-f3ec-11ec-b8ef-071747fa2a0d".to_string();
@@ -37,6 +39,7 @@ async fn get(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-1",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -57,6 +60,7 @@ async fn get(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -75,6 +79,8 @@ async fn get(port: u16) -> anyhow::Result<()> {
     )
 )]
 async fn update_and_publish_browse(port: u16) -> anyhow::Result<()> {
+    let name = "update_and_publish_browse";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -90,6 +96,7 @@ async fn update_and_publish_browse(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-1",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -124,6 +131,7 @@ async fn update_and_publish_browse(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -142,6 +150,7 @@ async fn update_and_publish_browse(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-3",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -172,6 +181,7 @@ async fn update_and_publish_browse(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-4",name),
         body, {
             // Really just need to redact the module ID because it is recreated for the live data,
             // but I couldn't get a selector working correctly... So redacting all IDs.
@@ -194,6 +204,8 @@ async fn update_and_publish_browse(port: u16) -> anyhow::Result<()> {
     )
 )]
 async fn browse_simple(port: u16) -> anyhow::Result<()> {
+    let name = "browse_simple";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -208,6 +220,7 @@ async fn browse_simple(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -226,6 +239,8 @@ async fn browse_simple(port: u16) -> anyhow::Result<()> {
     )
 )]
 async fn course_jig_index(port: u16) -> anyhow::Result<()> {
+    let name = "course_jig_index";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -241,6 +256,7 @@ async fn course_jig_index(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-1",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -274,6 +290,7 @@ async fn course_jig_index(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -292,6 +309,7 @@ async fn course_jig_index(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-3",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -322,6 +340,7 @@ async fn course_jig_index(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-4",name),
         body, {
             ".**.id" => "[id]",
             ".**.lastEdited" => "[last_edited]",
@@ -342,6 +361,8 @@ async fn course_jig_index(port: u16) -> anyhow::Result<()> {
     )
 )]
 async fn publish_modules(port: u16) -> anyhow::Result<()> {
+    let name = "publish_modules";
+
     let client = reqwest::Client::new();
 
     let course_id = "3a6a3660-f3ec-11ec-b8ef-071747fa2a0d".to_string();
@@ -359,6 +380,7 @@ async fn publish_modules(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-1",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -377,6 +399,7 @@ async fn publish_modules(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -407,6 +430,7 @@ async fn publish_modules(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-3",name),
         body, {
             ".**.id" => "[id]",
             ".**.lastEdited" => "[last_edited]",
@@ -427,6 +451,8 @@ async fn publish_modules(port: u16) -> anyhow::Result<()> {
     )
 )]
 async fn live_up_to_date_flag(port: u16) -> anyhow::Result<()> {
+    let name = "live_up_to_date_flag";
+
     let client = reqwest::Client::new();
 
     let course_id = "3a6a3660-f3ec-11ec-b8ef-071747fa2a0d".to_string();
@@ -444,6 +470,7 @@ async fn live_up_to_date_flag(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-1",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -472,6 +499,7 @@ async fn live_up_to_date_flag(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
             // Really just need to redact the module ID because it is recreated for the live data,
             // but I couldn't get a selector working correctly... So redacting all IDs.

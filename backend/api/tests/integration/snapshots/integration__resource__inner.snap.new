@@ -1,8 +1,0 @@
----
-source: tests/integration/resource.rs
-assertion_line: 37
-expression: body
----
-{
-  "id": "[id]"
-}

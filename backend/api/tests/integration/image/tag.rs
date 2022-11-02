@@ -13,6 +13,7 @@ use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
     fixtures("Fixture::User, Fixture::Image, Fixture::MetaKinds")
 )]
 async fn create(port: u16) -> anyhow::Result<()> {
+    let name = "create";
     let client = reqwest::Client::new();
 
     let resp = client
@@ -29,7 +30,7 @@ async fn create(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, { ".id" => "[id]" });
+    insta::assert_json_snapshot!(format!("{}",name), body, { ".id" => "[id]" });
 
     Ok(())
 }
@@ -60,9 +61,8 @@ async fn create_conflict(port: u16) -> anyhow::Result<()> {
     fixtures("Fixture::User, Fixture::Image, Fixture::MetaKinds")
 )]
 async fn list(port: u16) -> anyhow::Result<()> {
+    let name = "list";
     let client = reqwest::Client::new();
-
-    log::info!("making request");
 
     let resp = client
         .get(&format!("http://0.0.0.0:{}/v1/image/tag/all", port,))
@@ -75,12 +75,17 @@ async fn list(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, { ".**.id" => "[id]" });
+    insta::assert_json_snapshot!(format!("{}",name), body, { ".**.id" => "[id]" });
 
     Ok(())
 }
 
-async fn update(index: i16, req: ImageTagUpdateRequest, port: u16) -> anyhow::Result<()> {
+async fn update(
+    index: i16,
+    req: ImageTagUpdateRequest,
+    name: &str,
+    port: u16,
+) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -104,7 +109,7 @@ async fn update(index: i16, req: ImageTagUpdateRequest, port: u16) -> anyhow::Re
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, { ".**.id" => "[id]" });
+    insta::assert_json_snapshot!(format!("{}",name), body, { ".**.id" => "[id]" });
 
     Ok(())
 }
@@ -114,12 +119,14 @@ async fn update(index: i16, req: ImageTagUpdateRequest, port: u16) -> anyhow::Re
     fixtures("Fixture::User, Fixture::Image, Fixture::MetaKinds")
 )]
 async fn update_no_index(port: u16) -> anyhow::Result<()> {
+    let name = "update_no_index";
     update(
         0,
         ImageTagUpdateRequest {
             display_name: Some("test".to_owned()),
             index: None,
         },
+        name,
         port,
     )
     .await
@@ -130,12 +137,14 @@ async fn update_no_index(port: u16) -> anyhow::Result<()> {
     fixtures("Fixture::User, Fixture::Image, Fixture::MetaKinds")
 )]
 async fn update_with_index(port: u16) -> anyhow::Result<()> {
+    let name = "update_with_index";
     update(
         1,
         ImageTagUpdateRequest {
             display_name: Some("test".to_owned()),
             index: Some(ImageTagIndex(15)),
         },
+        name,
         port,
     )
     .await
@@ -146,12 +155,14 @@ async fn update_with_index(port: u16) -> anyhow::Result<()> {
     fixtures("Fixture::User, Fixture::Image, Fixture::MetaKinds")
 )]
 async fn update_none(port: u16) -> anyhow::Result<()> {
+    let name = "update_none";
     update(
         1,
         ImageTagUpdateRequest {
             display_name: None,
             index: None,
         },
+        name,
         port,
     )
     .await
@@ -162,12 +173,14 @@ async fn update_none(port: u16) -> anyhow::Result<()> {
     fixtures("Fixture::User, Fixture::Image, Fixture::MetaKinds")
 )]
 async fn update_only_index(port: u16) -> anyhow::Result<()> {
+    let name = "update_only_index";
     update(
         1,
         ImageTagUpdateRequest {
             display_name: None,
             index: Some(ImageTagIndex(3)),
         },
+        name,
         port,
     )
     .await
@@ -178,6 +191,7 @@ async fn update_only_index(port: u16) -> anyhow::Result<()> {
     fixtures("Fixture::User, Fixture::Image, Fixture::MetaKinds")
 )]
 async fn update_conflict(port: u16) -> anyhow::Result<()> {
+    let name = "update_conflict";
     let client = reqwest::Client::new();
 
     let resp = client
@@ -203,7 +217,7 @@ async fn update_conflict(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, { ".**.id" => "[id]" });
+    insta::assert_json_snapshot!(format!("{}",name), body, { ".**.id" => "[id]" });
 
     Ok(())
 }

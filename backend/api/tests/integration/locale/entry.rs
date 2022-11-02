@@ -28,6 +28,8 @@ async fn delete(port: u16) -> anyhow::Result<()> {
 
 #[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
 async fn get(port: u16) -> anyhow::Result<()> {
+    let name = "get";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -40,12 +42,12 @@ async fn get(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }
 
-async fn list(query: &[(&str, &str)], port: u16) -> anyhow::Result<()> {
+async fn list(query: &[(&str, &str)], name: &str, port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -59,33 +61,47 @@ async fn list(query: &[(&str, &str)], port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }
 
 #[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
 async fn list_all_by_default(port: u16) -> anyhow::Result<()> {
-    list(&[], port).await
+    let name = "list_all_by_default";
+
+    list(&[], name, port).await
 }
 
 #[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
 async fn list_all_by_bundle(port: u16) -> anyhow::Result<()> {
-    list(&[("groupBy", "bundle")], port).await
+    let name = "list_all_by_bundle";
+
+    list(&[("groupBy", "bundle")], name, port).await
 }
 
 #[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
 async fn list_empty_bundle_by_default(port: u16) -> anyhow::Result<()> {
-    list(&[("bundles", "85a46ffe-7c67-11eb-a0d7-277d94fe130c")], port).await
+    let name = "list_empty_bundle_by_default";
+
+    list(
+        &[("bundles", "85a46ffe-7c67-11eb-a0d7-277d94fe130c")],
+        name,
+        port,
+    )
+    .await
 }
 
 #[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
 async fn list_empty_bundle_by_bundle(port: u16) -> anyhow::Result<()> {
+    let name = "list_empty_bundle_by_bundle";
+
     list(
         &[
             ("groupBy", "bundle"),
             ("bundles", "85a46ffe-7c67-11eb-a0d7-277d94fe130c"),
         ],
+        name,
         port,
     )
     .await
@@ -93,16 +109,26 @@ async fn list_empty_bundle_by_bundle(port: u16) -> anyhow::Result<()> {
 
 #[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
 async fn list_single_bundle_by_default(port: u16) -> anyhow::Result<()> {
-    list(&[("bundles", "8359a48a-7c67-11eb-a0d7-0fd74777a62c")], port).await
+    let name = "list_single_bundle_by_default";
+
+    list(
+        &[("bundles", "8359a48a-7c67-11eb-a0d7-0fd74777a62c")],
+        name,
+        port,
+    )
+    .await
 }
 
 #[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
 async fn list_single_bundle_by_bundle(port: u16) -> anyhow::Result<()> {
+    let name = "list_single_bundle_by_bundle";
+
     list(
         &[
             ("groupBy", "bundle"),
             ("bundles", "8359a48a-7c67-11eb-a0d7-0fd74777a62c"),
         ],
+        name,
         port,
     )
     .await
@@ -110,6 +136,8 @@ async fn list_single_bundle_by_bundle(port: u16) -> anyhow::Result<()> {
 
 #[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
 async fn create(port: u16) -> anyhow::Result<()> {
+    let name = "create";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -136,13 +164,15 @@ async fn create(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, {".id" => "[id]"});
+    insta::assert_json_snapshot!(format!("{}", name), body, {".id" => "[id]"});
 
     Ok(())
 }
 
 #[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
 async fn update_in_app(port: u16) -> anyhow::Result<()> {
+    let name = "update_in_app";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -167,7 +197,7 @@ async fn update_in_app(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }

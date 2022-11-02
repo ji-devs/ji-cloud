@@ -10,6 +10,7 @@ use crate::{
 
 #[test_service(setup = "setup_service", fixtures("Fixture::User"))]
 async fn create_returns_created(port: u16) -> anyhow::Result<()> {
+    let name = "created_returns_created";
     let client = reqwest::Client::new();
 
     let resp = client
@@ -23,7 +24,7 @@ async fn create_returns_created(port: u16) -> anyhow::Result<()> {
 
     let body: CreateResponse<AudioId> = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, {".id" => "[id]"});
+    insta::assert_json_snapshot!(format!("{}",name), body, {".id" => "[id]"});
 
     Ok(())
 }

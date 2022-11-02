@@ -1,7 +1,6 @@
 ---
 source: tests/integration/meta.rs
 expression: body
-
 ---
 {
   "image_styles": [

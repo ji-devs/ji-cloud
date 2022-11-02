@@ -1,7 +1,6 @@
 ---
 source: tests/integration/circle.rs
 expression: body
-
 ---
 {
   "id": "[id]"

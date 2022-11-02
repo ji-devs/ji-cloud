@@ -1,7 +1,6 @@
 ---
 source: tests/integration/jig/additional_resource.rs
 expression: body
-
 ---
 {
   "id": "286b8390-1dd9-11ec-8426-fbeb80c504d9",

@@ -14,12 +14,13 @@ use shared::domain::{
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 use std::str::FromStr;
 use uuid::Uuid;
-#[ignore]
+
 #[test_service(
     setup = "setup_service",
     fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
 )]
 async fn create(port: u16) -> anyhow::Result<()> {
+    let name = "create";
     let client = reqwest::Client::new();
 
     let resp = client
@@ -48,16 +49,17 @@ async fn create(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, {".id" => "[id]"});
+    insta::assert_json_snapshot!(format!("{}",name), body, {".id" => "[id]"});
 
     Ok(())
 }
-#[ignore]
+
 #[test_service(
     setup = "setup_service",
     fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
 )]
 async fn get_draft(port: u16) -> anyhow::Result<()> {
+    let name = "get_draft";
     let client = reqwest::Client::new();
 
     let resp = client
@@ -74,16 +76,17 @@ async fn get_draft(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }
-#[ignore]
+
 #[test_service(
     setup = "setup_service",
     fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
 )]
 async fn get_live(port: u16) -> anyhow::Result<()> {
+    let name = "get_live";
     let client = reqwest::Client::new();
 
     let resp = client
@@ -100,11 +103,11 @@ async fn get_live(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }
-#[ignore]
+
 #[test_service(
     setup = "setup_service",
     fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")

@@ -1,4 +1,3 @@
-use insta::assert_json_snapshot;
 use macros::test_service;
 use serde_json::json;
 use shared::domain::resource::ResourceResponse;
@@ -14,6 +13,8 @@ use crate::{
     fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Resource")
 )]
 async fn update_no_modules_changes(port: u16) -> anyhow::Result<()> {
+    let name = "update_no_modules_changes";
+
     let client = reqwest::Client::new();
 
     let resource_id = "d8067526-1518-11ed-87fa-ebaf880b6d9c".to_string();
@@ -44,7 +45,7 @@ async fn update_no_modules_changes(port: u16) -> anyhow::Result<()> {
     let body: ResourceResponse = resp.json().await?;
 
     insta::assert_json_snapshot!(
-        "update_no_modules_changes",body, {
+        format!("{}", name), body, {
             ".**.lastEdited" => "[last_edited]"});
 
     Ok(())

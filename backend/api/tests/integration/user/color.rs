@@ -13,6 +13,8 @@ use crate::{
     fixtures("Fixture::User", "Fixture::UserColors")
 )]
 async fn get_all(port: u16) -> anyhow::Result<()> {
+    let name = "get_all";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -26,7 +28,7 @@ async fn get_all(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }
@@ -36,6 +38,8 @@ async fn get_all(port: u16) -> anyhow::Result<()> {
     fixtures("Fixture::User", "Fixture::UserColors")
 )]
 async fn update(port: u16) -> anyhow::Result<()> {
+    let name = "update";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -66,7 +70,7 @@ async fn update(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }
@@ -76,6 +80,8 @@ async fn update(port: u16) -> anyhow::Result<()> {
     fixtures("Fixture::User", "Fixture::UserColors")
 )]
 async fn delete(port: u16) -> anyhow::Result<()> {
+    let name = "delete";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -98,7 +104,7 @@ async fn delete(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }
@@ -108,6 +114,8 @@ async fn delete(port: u16) -> anyhow::Result<()> {
     fixtures("Fixture::User", "Fixture::UserColors")
 )]
 async fn create(port: u16) -> anyhow::Result<()> {
+    let name = "create";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -138,7 +146,7 @@ async fn create(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }

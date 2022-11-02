@@ -19,6 +19,8 @@ use crate::{
     )
 )]
 async fn get(port: u16) -> anyhow::Result<()> {
+    let name = "course_jig_index";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -32,7 +34,7 @@ async fn get(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }

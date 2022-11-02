@@ -1,7 +1,6 @@
 ---
 source: tests/integration/image/tag.rs
 expression: body
-
 ---
 {
   "image_tags": [

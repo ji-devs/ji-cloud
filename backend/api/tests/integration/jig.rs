@@ -16,6 +16,7 @@ mod player;
 
 #[test_service(setup = "setup_service", fixtures("Fixture::User"))]
 async fn create_default(port: u16) -> anyhow::Result<()> {
+    let name = "create_default";
     let client = reqwest::Client::new();
 
     let resp = client
@@ -29,7 +30,7 @@ async fn create_default(port: u16) -> anyhow::Result<()> {
 
     let body: CreateResponse<JigId> = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, {".id" => "[id]"});
+    insta::assert_json_snapshot!(format!("{}-1",name), body, {".id" => "[id]"});
 
     let jig_id = body.id.0;
 
@@ -43,6 +44,7 @@ async fn create_default(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
             ".**.id" => "[id]",
             ".**.createdAt" => "[created_at]",
@@ -62,6 +64,7 @@ async fn create_default(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-3",name),
         body, {
             ".**.id" => "[id]",
             ".**.createdAt" => "[created_at]",
@@ -83,7 +86,8 @@ async fn create_default(port: u16) -> anyhow::Result<()> {
 
 //     tokio::spawn(app.run_until_stopped());
 
-//     let client = reqwest::Client::new();
+// let name = "browse_simple";//
+// let client = reqwest::Client::new();
 
 //     let resp = client
 //         .delete(&format!(
@@ -105,6 +109,7 @@ async fn create_default(port: u16) -> anyhow::Result<()> {
     fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
 )]
 async fn create_with_params(port: u16) -> anyhow::Result<()> {
+    let name = "create_with_params";
     let client = reqwest::Client::new();
 
     let resp = client
@@ -123,7 +128,7 @@ async fn create_with_params(port: u16) -> anyhow::Result<()> {
 
     let body: CreateResponse<JigId> = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, {".id" => "[id]", ".last_edited" => "[last_edited]"});
+    insta::assert_json_snapshot!(format!("{}",name), body, {".id" => "[id]", ".last_edited" => "[last_edited]"});
 
     Ok(())
 }
@@ -133,6 +138,7 @@ async fn create_with_params(port: u16) -> anyhow::Result<()> {
     fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
 )]
 async fn clone(port: u16) -> anyhow::Result<()> {
+    let name = "clone";
     let client = reqwest::Client::new();
 
     let resp = client
@@ -161,6 +167,7 @@ async fn clone(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-1",name),
         body, {
             ".**.id" => "[id]",
             ".**.lastEdited" => "[last_edited]",
@@ -180,6 +187,7 @@ async fn clone(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
             ".**.id" => "[id]",
             ".**.lastEdited" => "[last_edited]",
@@ -197,6 +205,7 @@ async fn clone(port: u16) -> anyhow::Result<()> {
     fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
 )]
 async fn get(port: u16) -> anyhow::Result<()> {
+    let name = "get";
     let client = reqwest::Client::new();
 
     let resp = client
@@ -214,6 +223,7 @@ async fn get(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-1",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
             ".**.feedbackPositive" => "[audio]",
@@ -236,6 +246,7 @@ async fn get(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
             ".**.feedbackPositive" => "[audio]",
@@ -252,6 +263,7 @@ async fn get(port: u16) -> anyhow::Result<()> {
     fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
 )]
 async fn browse_simple(port: u16) -> anyhow::Result<()> {
+    let name = "browse_simple";
     let client = reqwest::Client::new();
 
     let resp = client
@@ -266,6 +278,7 @@ async fn browse_simple(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
             ".**.feedbackPositive" => "[audio]",
@@ -281,6 +294,7 @@ async fn browse_simple(port: u16) -> anyhow::Result<()> {
     fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
 )]
 async fn browse_order_by(port: u16) -> anyhow::Result<()> {
+    let name = "browse_order_by";
     let client = reqwest::Client::new();
 
     let resp = client
@@ -295,12 +309,13 @@ async fn browse_order_by(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
-        body, {
-            ".**.lastEdited" => "[last_edited]",
-            ".**.feedbackPositive" => "[audio]",
-            ".**.feedbackNegative" => "[audio]"
-        }
-    );
+    format!("{}-1",name),
+            body, {
+                ".**.lastEdited" => "[last_edited]",
+                ".**.feedbackPositive" => "[audio]",
+                ".**.feedbackNegative" => "[audio]"
+            }
+        );
 
     let resp = client
         .get(&format!("http://0.0.0.0:{}/v1/jig/browse", port))
@@ -317,12 +332,13 @@ async fn browse_order_by(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
-        body, {
-            ".**.lastEdited" => "[last_edited]",
-            ".**.feedbackPositive" => "[audio]",
-            ".**.feedbackNegative" => "[audio]"
-        }
-    );
+    format!("{}-2",name),
+            body, {
+                ".**.lastEdited" => "[last_edited]",
+                ".**.feedbackPositive" => "[audio]",
+                ".**.feedbackNegative" => "[audio]"
+            }
+        );
 
     let resp = client
         .get(&format!("http://0.0.0.0:{}/v1/jig/browse", port))
@@ -339,23 +355,24 @@ async fn browse_order_by(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
-        body, {
-            ".**.lastEdited" => "[last_edited]",
-            ".**.feedbackPositive" => "[audio]",
-            ".**.feedbackNegative" => "[audio]"
-        }
-    );
+    format!("{}-3",name),
+            body, {
+                ".**.lastEdited" => "[last_edited]",
+                ".**.feedbackPositive" => "[audio]",
+                ".**.feedbackNegative" => "[audio]"
+            }
+        );
 
     Ok(())
 }
 
 // todo: test-exhaustiveness: create a `JigBrowse` Fixture, actually test the cases (paging, jig count, etc)
-#[ignore]
 #[test_service(
     setup = "setup_service",
     fixtures("Fixture::MetaKinds", "Fixture::UserDefaultPerms", "Fixture::Jig")
 )]
 async fn browse_own_simple(port: u16) -> anyhow::Result<()> {
+    let name = "browse_own_simple";
     let client = reqwest::Client::new();
 
     let resp = client
@@ -373,12 +390,13 @@ async fn browse_own_simple(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
-        body, {
-            ".**.lastEdited" => "[last_edited]",
-            ".**.feedbackPositive" => "[audio]",
-            ".**.feedbackNegative" => "[audio]"
-        }
-    );
+    format!("{}",name),
+            body, {
+                ".**.lastEdited" => "[last_edited]",
+                ".**.feedbackPositive" => "[audio]",
+                ".**.feedbackNegative" => "[audio]"
+            }
+        );
 
     Ok(())
 }
@@ -388,6 +406,7 @@ async fn browse_own_simple(port: u16) -> anyhow::Result<()> {
     fixtures("Fixture::MetaKinds", "Fixture::UserDefaultPerms", "Fixture::Jig")
 )]
 async fn count(port: u16) -> anyhow::Result<()> {
+    let name = "count";
     let client = reqwest::Client::new();
 
     let resp = client
@@ -401,7 +420,7 @@ async fn count(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }
@@ -416,6 +435,7 @@ async fn count(port: u16) -> anyhow::Result<()> {
     )
 )]
 async fn update_and_publish(port: u16) -> anyhow::Result<()> {
+    let name = "update_and_publish";
     let client = reqwest::Client::new();
 
     let resp = client
@@ -431,6 +451,7 @@ async fn update_and_publish(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-1",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
             ".**.feedbackPositive" => "[audio]",
@@ -468,6 +489,7 @@ async fn update_and_publish(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
             ".**.feedbackPositive" => "[audio]",
@@ -488,6 +510,7 @@ async fn update_and_publish(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-3",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
             ".**.feedbackPositive" => "[audio]",
@@ -518,6 +541,7 @@ async fn update_and_publish(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-4",name),
         body, {
             // Really just need to redact the module ID because it is recreated for the live data,
             // but I couldn't get a selector working correctly... So redacting all IDs.
@@ -532,46 +556,6 @@ async fn update_and_publish(port: u16) -> anyhow::Result<()> {
     Ok(())
 }
 
-#[ignore]
-#[test_service(
-    setup = "setup_service",
-    fixtures(
-        "Fixture::MetaKinds",
-        "Fixture::User",
-        "Fixture::Jig",
-        "Fixture::CategoryOrdering"
-    )
-)]
-async fn update_and_publish_incomplete_modules(port: u16) -> anyhow::Result<()> {
-    let client = reqwest::Client::new();
-
-    // Test no modules on JIG returns HTTP 400
-    let resp = client
-        .put(&format!(
-            "http://0.0.0.0:{}/v1/jig/3a71522a-cd77-11eb-8dc1-af3e35f7c743/draft/publish",
-            port
-        ))
-        .login()
-        .send()
-        .await?;
-
-    assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
-
-    // Test no modules on JIG returns HTTP 400
-    let resp = client
-        .put(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft/publish",
-            port
-        ))
-        .login()
-        .send()
-        .await?;
-
-    assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
-
-    Ok(())
-}
-
 #[test_service(
     setup = "setup_service",
     fixtures(
@@ -582,6 +566,7 @@ async fn update_and_publish_incomplete_modules(port: u16) -> anyhow::Result<()> 
     )
 )]
 async fn live_up_to_date_flag(port: u16) -> anyhow::Result<()> {
+    let name = "live_up_to_date_flag";
     let client = reqwest::Client::new();
 
     let resp = client
@@ -597,6 +582,7 @@ async fn live_up_to_date_flag(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-1",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
             ".**.feedbackPositive" => "[audio]",
@@ -627,6 +613,7 @@ async fn live_up_to_date_flag(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
             // Really just need to redact the module ID because it is recreated for the live data,
             // but I couldn't get a selector working correctly... So redacting all IDs.
@@ -640,3 +627,43 @@ async fn live_up_to_date_flag(port: u16) -> anyhow::Result<()> {
 
     Ok(())
 }
+
+// #[ignore]
+// #[test_service(
+//     setup = "setup_service",
+//     fixtures(
+//         "Fixture::MetaKinds",
+//         "Fixture::User",
+//         "Fixture::Jig",
+//         "Fixture::CategoryOrdering"
+//     )
+// )]
+// async fn update_and_publish_incomplete_modules(port: u16) -> anyhow::Result<()> {
+//     let client = reqwest::Client::new();
+
+//     // Test no modules on JIG returns HTTP 400
+//     let resp = client
+//         .put(&format!(
+//             "http://0.0.0.0:{}/v1/jig/3a71522a-cd77-11eb-8dc1-af3e35f7c743/draft/publish",
+//             port
+//         ))
+//         .login()
+//         .send()
+//         .await?;
+
+//     assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
+
+//     // Test no modules on JIG returns HTTP 400
+//     let resp = client
+//         .put(&format!(
+//             "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft/publish",
+//             port
+//         ))
+//         .login()
+//         .send()
+//         .await?;
+
+//     assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
+
+//     Ok(())
+// }

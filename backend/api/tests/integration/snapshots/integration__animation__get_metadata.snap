@@ -1,7 +1,6 @@
 ---
 source: tests/integration/animation.rs
 expression: body
-
 ---
 {
   "metadata": {

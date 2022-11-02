@@ -14,6 +14,8 @@ mod curation;
 
 #[test_service(setup = "setup_service", fixtures("Fixture::User"))]
 async fn create_default(port: u16) -> anyhow::Result<()> {
+    let name = "create_default";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -23,14 +25,13 @@ async fn create_default(port: u16) -> anyhow::Result<()> {
         .await?
         .error_for_status()?;
 
-    println!("First");
-
     let status = resp.status();
 
     assert_eq!(status, StatusCode::CREATED);
 
     let body: CreateResponse<ResourceId> = resp.json().await?;
-    insta::assert_json_snapshot!(body);
+
+    insta::assert_json_snapshot!(format!("{}-1", name), body, {".**.id" => "[id]"});
 
     let resource_id = body.id.0;
 
@@ -44,11 +45,10 @@ async fn create_default(port: u16) -> anyhow::Result<()> {
         .await?
         .error_for_status()?;
 
-    println!("Second");
-
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name), 
         body, {
             ".**.id" => "[id]",
             ".**.createdAt" => "[created_at]",
@@ -64,10 +64,10 @@ async fn create_default(port: u16) -> anyhow::Result<()> {
         .await?
         .error_for_status()?;
 
-    println!("Third");
-
     let body: serde_json::Value = resp.json().await?;
+
     insta::assert_json_snapshot!(
+        format!("{}-3",name), 
         body, {
             ".**.id" => "[id]",
             ".**.createdAt" => "[created_at]",
@@ -76,8 +76,13 @@ async fn create_default(port: u16) -> anyhow::Result<()> {
     Ok(())
 }
 
-#[test_service(setup = "setup_service", fixtures("Fixture::User"))]
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Resource")
+)]
 async fn create_with_params(port: u16) -> anyhow::Result<()> {
+    let name = "create_with_params";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -98,6 +103,7 @@ async fn create_with_params(port: u16) -> anyhow::Result<()> {
     let body: CreateResponse<ResourceId> = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}",name), 
         body, {
             ".**.id" => "[id]",
             ".**.lastEdited" => "[last_edited]"});
@@ -110,6 +116,8 @@ async fn create_with_params(port: u16) -> anyhow::Result<()> {
     fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Resource")
 )]
 async fn clone(port: u16) -> anyhow::Result<()> {
+    let name = "clone";
+
     let client = reqwest::Client::new();
 
     let resource_id = "d8067526-1518-11ed-87fa-ebaf880b6d9c".to_string();
@@ -124,7 +132,6 @@ async fn clone(port: u16) -> anyhow::Result<()> {
         .await?
         .error_for_status()?;
 
-    println!("First");
     let status = resp.status();
 
     assert_eq!(status, StatusCode::CREATED);
@@ -138,16 +145,14 @@ async fn clone(port: u16) -> anyhow::Result<()> {
         .await?
         .error_for_status()?;
 
-    println!("Second");
     let status = resp.status();
 
     assert_eq!(status, StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
 
-    assert_eq!(status, StatusCode::CREATED);
-
     insta::assert_json_snapshot!(
+        format!("{}-1",name),
         body, {
             ".**.id" => "[id]",
             ".**.lastEdited" => "[last_edited]",
@@ -162,12 +167,12 @@ async fn clone(port: u16) -> anyhow::Result<()> {
         .await?
         .error_for_status()?;
     let status = resp.status();
-    println!("Third");
     assert_eq!(status, StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
             ".**.id" => "[id]",
             ".**.lastEdited" => "[last_edited]",
@@ -183,6 +188,8 @@ async fn clone(port: u16) -> anyhow::Result<()> {
     fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Resource")
 )]
 async fn get(port: u16) -> anyhow::Result<()> {
+    let name = "get";
+
     let client = reqwest::Client::new();
 
     let resource_id = "d8067526-1518-11ed-87fa-ebaf880b6d9c".to_string();
@@ -203,6 +210,7 @@ async fn get(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-1",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -224,6 +232,7 @@ async fn get(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -238,6 +247,8 @@ async fn get(port: u16) -> anyhow::Result<()> {
     fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Resource")
 )]
 async fn browse_simple(port: u16) -> anyhow::Result<()> {
+    let name = "browse_simple";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -253,6 +264,7 @@ async fn browse_simple(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-1",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -274,6 +286,7 @@ async fn browse_simple(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -295,6 +308,7 @@ async fn browse_simple(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-3",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -308,6 +322,8 @@ async fn browse_simple(port: u16) -> anyhow::Result<()> {
     fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Resource")
 )]
 async fn browse_order_by(port: u16) -> anyhow::Result<()> {
+    let name = "browse_order_by";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -322,7 +338,7 @@ async fn browse_order_by(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}-1", name), body);
 
     let resp = client
         .get(&format!(
@@ -339,7 +355,7 @@ async fn browse_order_by(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}-2", name), body);
 
     let resp = client
         .get(&format!(
@@ -356,7 +372,7 @@ async fn browse_order_by(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}-3", name), body);
 
     Ok(())
 }
@@ -366,6 +382,8 @@ async fn browse_order_by(port: u16) -> anyhow::Result<()> {
     fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Resource")
 )]
 async fn browse_own_simple(port: u16) -> anyhow::Result<()> {
+    let name = "browse_own_simple";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -385,6 +403,7 @@ async fn browse_own_simple(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -398,6 +417,8 @@ async fn browse_own_simple(port: u16) -> anyhow::Result<()> {
     fixtures("Fixture::MetaKinds", "Fixture::UserDefaultPerms", "Fixture::Resource")
 )]
 async fn count(port: u16) -> anyhow::Result<()> {
+    let name = "count";
+
     let client = reqwest::Client::new();
 
     let resp = client
@@ -413,7 +434,7 @@ async fn count(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }
@@ -428,6 +449,8 @@ async fn count(port: u16) -> anyhow::Result<()> {
     )
 )]
 async fn update_and_publish(port: u16) -> anyhow::Result<()> {
+    let name = "update_and_publish";
+
     let client = reqwest::Client::new();
 
     let resource_id = "d8067526-1518-11ed-87fa-ebaf880b6d9c".to_string();
@@ -445,6 +468,7 @@ async fn update_and_publish(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-1",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -481,8 +505,10 @@ async fn update_and_publish(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
+            ".**.publishedAt" => "[published_at]",
         }
     );
 
@@ -499,6 +525,7 @@ async fn update_and_publish(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-3",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -527,57 +554,60 @@ async fn update_and_publish(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-4",name),
         body, {
             ".**.id" => "[id]",
             ".**.lastEdited" => "[last_edited]",
-            ".**.additionalResources" => "[ids]"
+            ".**.publishedAt" => "[published_at]",
+            ".**.additionalResources" => "[ids]",
+
         }
     );
 
     Ok(())
 }
 
-#[ignore]
-#[test_service(
-    setup = "setup_service",
-    fixtures(
-        "Fixture::MetaKinds",
-        "Fixture::UserDefaultPerms",
-        "Fixture::Resource",
-        "Fixture::CategoryOrdering"
-    )
-)]
-async fn update_and_publish_incomplete_modules(port: u16) -> anyhow::Result<()> {
-    let client = reqwest::Client::new();
+// #[ignore]
+// #[test_service(
+//     setup = "setup_service",
+//     fixtures(
+//         "Fixture::MetaKinds",
+//         "Fixture::UserDefaultPerms",
+//         "Fixture::Resource",
+//         "Fixture::CategoryOrdering"
+//     )
+// )]
+// async fn publish_incomplete_modules(port: u16) -> anyhow::Result<()> {
+//     let client = reqwest::Client::new();
 
-    // Test no modules on JIG returns HTTP 400
-    let resp = client
-        .put(&format!(
-            "http://0.0.0.0:{}/v1/resource/3a71522a-cd77-11eb-8dc1-af3e35f7c743/draft/publish",
-            port
-        ))
-        .login()
-        .send()
-        .await?;
-    let status = resp.status();
+//     // Test no modules on JIG returns HTTP 400
+//     let resp = client
+//         .put(&format!(
+//             "http://0.0.0.0:{}/v1/resource/{}/draft/publish",
+//             port, "2f8d91d0-1519-11ed-87fa-eb1826fcf343"
+//         ))
+//         .login()
+//         .send()
+//         .await?;
+//     let status = resp.status();
 
-    assert_eq!(status, StatusCode::BAD_REQUEST);
+//     assert_eq!(status, StatusCode::BAD_REQUEST);
 
-    // Test no modules on JIG returns HTTP 400
-    let resp = client
-        .put(&format!(
-            "http://0.0.0.0:{}/v1/resource/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft/publish",
-            port
-        ))
-        .login()
-        .send()
-        .await?;
-    let status = resp.status();
+//     // Test no modules on JIG returns HTTP 400
+//     let resp = client
+//         .put(&format!(
+//             "http://0.0.0.0:{}/v1/resource/{}/draft/publish",
+//             port, "af827e00-1519-11ed-87fa-7b1aa26c85a8"
+//         ))
+//         .login()
+//         .send()
+//         .await?;
+//     let status = resp.status();
 
-    assert_eq!(status, StatusCode::BAD_REQUEST);
+//     assert_eq!(status, StatusCode::BAD_REQUEST);
 
-    Ok(())
-}
+//     Ok(())
+// }
 
 #[test_service(
     setup = "setup_service",
@@ -589,6 +619,8 @@ async fn update_and_publish_incomplete_modules(port: u16) -> anyhow::Result<()> 
     )
 )]
 async fn live_up_to_date_flag(port: u16) -> anyhow::Result<()> {
+    let name = "live_up_to_date_flag";
+
     let client = reqwest::Client::new();
 
     let resource_id = "d8067526-1518-11ed-87fa-ebaf880b6d9c".to_string();
@@ -608,7 +640,9 @@ async fn live_up_to_date_flag(port: u16) -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-1",name),
         body, {
+            ".**.publishedAt" => "[published_at]",
             ".**.lastEdited" => "[last_edited]",
         }
     );
@@ -623,8 +657,6 @@ async fn live_up_to_date_flag(port: u16) -> anyhow::Result<()> {
         .await?
         .error_for_status()?;
 
-    println!("Second");
-
     let resp = client
         .get(&format!(
             "http://0.0.0.0:{}/v1/resource/{resource_id}/live",
@@ -635,14 +667,14 @@ async fn live_up_to_date_flag(port: u16) -> anyhow::Result<()> {
         .await?
         .error_for_status()?;
 
-    println!("Third");
-
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
             ".**.id" => "[id]",
             ".**.lastEdited" => "[last_edited]",
+            ".**.publishedAt" => "[published_at]",
             ".**.additionalResources" => "[ids]"
         }
     );
