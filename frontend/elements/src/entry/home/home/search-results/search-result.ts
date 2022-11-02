@@ -247,6 +247,8 @@ export class _ extends LitElement {
                 .hover .description {
                     font-size: 14px;
                     font-weight: 300;
+                    overflow-wrap: break-word;
+                    white-space: pre-wrap;
                 }
                 .hover h4,
                 .hover .author-section {
