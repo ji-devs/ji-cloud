@@ -4,7 +4,12 @@ use utils::{path::uploads_url, unwrap::UnwrapJiExt};
 use wasm_bindgen::JsValue;
 
 pub fn print(asset_id: AssetId, module_id: ModuleId) {
-    let screenshot_url = format!("screenshot/{}/{}/full.jpg?cb={}", asset_id.uuid(), module_id.0, js_sys::Math::random().to_string());
+    let screenshot_url = format!(
+        "screenshot/{}/{}/full.jpg?cb={}",
+        asset_id.uuid(),
+        module_id.0,
+        js_sys::Math::random().to_string()
+    );
     let screenshot_url = uploads_url(&screenshot_url);
 
     let html = format!(
