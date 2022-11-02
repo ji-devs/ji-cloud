@@ -50,6 +50,8 @@ export class _ extends LitElement {
                 @media (min-width: 1920px) {
                     .description {
                         display: block;
+                        overflow-wrap: break-word;
+                        white-space: pre-wrap;
                     }
                 }
                 ::slotted([slot=play-button]) {
