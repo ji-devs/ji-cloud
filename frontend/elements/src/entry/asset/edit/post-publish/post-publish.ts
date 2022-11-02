@@ -2,7 +2,8 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/images/ui";
 
 const STR_ACTION_HEADER = "What do you want to do next?";
-const STR_HEADER = "Your JIG is live!";
+const STR_HEADER_1 = "Your ";
+const STR_HEADER_2 = " is live!";
 
 @customElement("post-publish")
 export class _ extends LitElement {
@@ -66,6 +67,9 @@ export class _ extends LitElement {
         ];
     }
 
+    @property()
+    assetName: string = "";
+
     render() {
         return html`
             <main>
@@ -73,7 +77,9 @@ export class _ extends LitElement {
                     <img-ui
                         path="module/_common/edit/post-preview/splash.png"
                     ></img-ui>
-                    <div class="message">${STR_HEADER}</div>
+                    <div class="message">
+                        ${STR_HEADER_1}${this.assetName}${STR_HEADER_2}
+                    </div>
                 </div>
                 <div class="bottom-section">
                     <h3 class="action-header">${STR_ACTION_HEADER}</h3>

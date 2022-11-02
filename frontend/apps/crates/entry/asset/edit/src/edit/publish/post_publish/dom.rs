@@ -2,7 +2,7 @@ use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::asset::Asset;
 use utils::{
-    asset::{AssetPlayerOptions, JigPlayerOptions},
+    asset::{AssetPlayerOptions, CoursePlayerOptions, JigPlayerOptions},
     events,
     routes::{AssetRoute, Route},
 };
@@ -15,6 +15,13 @@ impl PostPublish {
         let state = self;
         html!("post-publish", {
             .property("slot", "main")
+            .apply(clone!(state => move |dom| {
+                dom.property("assetName", match state.asset {
+                    Asset::Jig(_) => "JIG",
+                    Asset::Course(_) => "Course",
+                    Asset::Resource(_) => "Resource",
+                })
+            }))
             .apply(clone!(state => move |dom| {
                 match state.asset {
                     Asset::Resource(_) => {
@@ -89,16 +96,16 @@ impl PostPublish {
             Rc::clone(&state.share_state).render(share_anchor, Some("actions")),
             html!("post-publish-action", {
                 .property("slot", "actions")
-                .property("kind", "new-jig")
+                .property("kind", "new-course")
                 .event(clone!(state => move |_: events::Click| {
                     state.create_course();
                 }))
             }),
             html!("post-publish-action", {
-                .property("kind", "play-jig")
+                .property("kind", "play-course")
                 .property("slot", "actions")
                 .event(clone!(state => move |_: events::Click| {
-                    let settings = AssetPlayerOptions::Jig(JigPlayerOptions::default());
+                    let settings = AssetPlayerOptions::Course(CoursePlayerOptions::default());
                     state.asset_edit_state.play_jig.set(Some(settings));
                 }))
             }),
