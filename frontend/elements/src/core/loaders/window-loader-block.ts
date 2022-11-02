@@ -15,7 +15,7 @@ export class _ extends LitElement {
                     height: 100vh;
                     background-color: #6ca1fc3d;
                     background-image: url(${unsafeCSS(
-                        mediaUi("core/loaders/large.svg")
+                        mediaUi("core/loaders/loader.svg")
                     )});
                     background-position: center center;
                     background-repeat: no-repeat;
