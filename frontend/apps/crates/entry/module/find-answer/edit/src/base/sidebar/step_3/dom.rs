@@ -403,6 +403,7 @@ fn render_tab_body(state: Rc<Step3>, tab: Tab) -> Dom {
                                 .property("label", crate::strings::step_3::STR_LABEL)
                                 .child(HebrewButtons::reveal().render(Some("hebrew-inputs")))
                                 .child(html!("textarea" => HtmlTextAreaElement, {
+                                    .attribute("dir", "auto")
                                     .property_signal("value", question.question_text.signal_cloned().map(|text| text.unwrap_or_default()))
                                     .property("placeholder", crate::strings::step_3::STR_PLACEHOLDER)
                                     .property("rows", 1)

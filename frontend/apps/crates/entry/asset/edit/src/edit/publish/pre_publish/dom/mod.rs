@@ -176,6 +176,7 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                 })
                 .child(html!("input" => HtmlInputElement, {
                     .with_node!(elem => {
+                        .attribute("dir", "auto")
                         .property("placeholder", format!("{}{}{}", STR_NAME_PLACEHOLDER_1, state.asset_type_name(), STR_NAME_PLACEHOLDER_2))
                         .property_signal("value", state.asset.display_name().signal_cloned())
                         .event(clone!(state => move |_evt: events::Input| {
@@ -203,6 +204,7 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                 })
                 .child(html!("textarea" => HtmlTextAreaElement, {
                     .with_node!(elem => {
+                        .attribute("dir", "auto")
                         .property("placeholder", format!(
                             "{}{}{}",
                             STR_DESCRIPTION_PLACEHOLDER_1,

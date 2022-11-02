@@ -29,6 +29,6 @@ export class _ extends LitElement {
     }
 
     render() {
-        return html`<section><slot></slot></section>`;
+        return html`<section dir="auto"><slot></slot></section>`;
     }
 }

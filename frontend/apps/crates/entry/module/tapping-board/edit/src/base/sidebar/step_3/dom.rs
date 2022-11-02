@@ -115,6 +115,7 @@ fn render_tab_body(state: Rc<Step3>, tab: Tab) -> Dom {
                     .property("label", crate::strings::step_3::STR_LABEL)
                     .child(html!("textarea" => HtmlTextAreaElement, {
                         .with_node!(elem => {
+                            .attribute("dir", "auto")
                             .property_signal("value", text_state.signal_cloned().map(|text| {
                                 text.unwrap_or_default()
                             }))
