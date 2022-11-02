@@ -4,7 +4,7 @@ use utils::{path::uploads_url, unwrap::UnwrapJiExt};
 use wasm_bindgen::JsValue;
 
 pub fn print(asset_id: AssetId, module_id: ModuleId) {
-    let screenshot_url = format!("screenshot/{}/{}/full.jpg", asset_id.uuid(), module_id.0);
+    let screenshot_url = format!("screenshot/{}/{}/full.jpg?cb={}", asset_id.uuid(), module_id.0, js_sys::Math::random().to_string());
     let screenshot_url = uploads_url(&screenshot_url);
 
     let html = format!(
@@ -17,12 +17,34 @@ pub fn print(asset_id: AssetId, module_id: ModuleId) {
                 width: 100vw;
                 margin: 0;
             }}
+            div {{
+                display: grid;
+            }}
             img {{
                 max-width: 100vw;
                 max-height: 100vh;
+                grid-column: 1;
+                grid-row: 1;
+            }}
+            span {{
+                grid-column: 1;
+                grid-row: 1;
+                align-self: end;
+                color: #fff;
+                display: flex;
+                align-items: center;
+                padding: 1vh 1vw;
+            }}
+            span img-ui {{
+                height: 16px;
             }}
         </style>
-        <img src="{screenshot_url}">
+        <div>
+            <img src="{screenshot_url}">
+            <span>
+                <img-ui path="core/page-header/logo.svg"></img-ui>.org
+            </span>
+        </div>
     "#
     );
 
