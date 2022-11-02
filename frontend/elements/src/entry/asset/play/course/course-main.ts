@@ -66,6 +66,8 @@ export class _ extends LitElement {
                 .description {
                     color: var(--dark-gray-6);
                     margin: 0;
+                    overflow-wrap: break-word;
+                    white-space: pre-wrap;
                 }
                 :host(:not([hasAdditionalResources])) .additional-resources {
                     display: none;
