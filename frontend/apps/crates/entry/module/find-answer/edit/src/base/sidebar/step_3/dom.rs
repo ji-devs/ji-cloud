@@ -8,6 +8,7 @@ use std::rc::Rc;
 
 use components::{
     audio::input::{AudioInput, AudioInputCallbacks, AudioInputOptions},
+    hebrew_buttons::HebrewButtons,
     overlay::handle::OverlayHandle,
     tabs::{MenuTab, MenuTabKind},
 };
@@ -294,6 +295,7 @@ pub fn render_question(
                                             render_tab(MenuTabKind::Answer, state.sidebar.tab_kind.clone()),
                                             html!("module-sidebar-body", {
                                                 .property("slot", "body")
+                                                .style("overflow", "inherit")
                                                 .child_signal(
                                                     //based on the selected tab kind, create and render the tab state
                                                     state.sidebar.tab_kind.signal_cloned()
@@ -399,6 +401,7 @@ fn render_tab_body(state: Rc<Step3>, tab: Tab) -> Dom {
                         html!("empty-fragment", {
                             .child(html!("input-wrapper", {
                                 .property("label", crate::strings::step_3::STR_LABEL)
+                                .child(HebrewButtons::reveal().render(Some("hebrew-inputs")))
                                 .child(html!("textarea" => HtmlTextAreaElement, {
                                     .property_signal("value", question.question_text.signal_cloned().map(|text| text.unwrap_or_default()))
                                     .property("placeholder", crate::strings::step_3::STR_PLACEHOLDER)
