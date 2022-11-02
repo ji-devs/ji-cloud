@@ -4,6 +4,8 @@
    the non_status versions do side effects based on the status (e.g. redirect to no-auth page)
 */
 
+use std::future;
+
 use serde::{de::DeserializeOwned, Serialize};
 use shared::api::{method::Method, PathParts};
 
@@ -221,7 +223,7 @@ pub async fn upload_file_gcs(
 ) -> Result<(), awsm_web::errors::Error> {
     let (resp, status) = upload_file_gcs_status(url, file, abort_controller).await;
 
-    side_effect_status_code(status);
+    side_effect_status_code(status).await;
 
     resp
 }
@@ -249,7 +251,7 @@ pub async fn upload_file_gcs_status(
 pub async fn api_upload_file(endpoint: &str, file: &File, method: Method) -> Result<(), ()> {
     let (resp, status) = api_upload_file_status(endpoint, file, method).await;
 
-    side_effect_status_code(status);
+    side_effect_status_code(status).await;
 
     resp
 }
@@ -293,7 +295,7 @@ where
 {
     let (resp, status) = api_with_auth_status(endpoint, method, data).await;
 
-    side_effect_status_code(status);
+    side_effect_status_code(status).await;
 
     resp
 }
@@ -307,15 +309,13 @@ where
     T: DeserializeOwned + Serialize,
     Payload: Serialize,
 {
-    api_with_auth_status_abortable(endpoint, method, abort_controller, data)
-        .await
-        .map(|res| {
-            let (resp, status) = res;
+    let resp = api_with_auth_status_abortable(endpoint, method, abort_controller, data).await;
 
-            side_effect_status_code(status);
+    if let Ok((_, status)) = resp {
+        side_effect_status_code(status).await;
+    }
 
-            resp
-        })
+    resp.map(|(resp, _)| resp)
 }
 
 pub async fn api_with_auth_status<T, Payload>(
@@ -395,7 +395,7 @@ where
 {
     let (resp, status) = api_with_auth_empty_status(endpoint, method, data).await;
 
-    side_effect_status_code(status);
+    side_effect_status_code(status).await;
 
     resp
 }
@@ -446,7 +446,7 @@ where
 {
     let (resp, status) = api_no_auth_status(endpoint, method, data).await;
 
-    side_effect_status_code(status);
+    side_effect_status_code(status).await;
 
     resp
 }
@@ -492,7 +492,7 @@ where
 {
     let (resp, status) = api_no_auth_empty_status(endpoint, method, data).await;
 
-    side_effect_status_code(status);
+    side_effect_status_code(status).await;
 
     resp
 }
@@ -533,7 +533,7 @@ where
 {
     let (resp, status) = api_with_token_status(endpoint, token, method, data).await;
 
-    side_effect_status_code(status);
+    side_effect_status_code(status).await;
 
     resp
 }
@@ -611,7 +611,7 @@ where
 {
     let (resp, status) = api_with_token_empty_status(endpoint, token, method, data).await;
 
-    side_effect_status_code(status);
+    side_effect_status_code(status).await;
 
     resp
 }
@@ -660,7 +660,7 @@ where
 {
     let (resp, status) = api_no_auth_with_credentials_status(endpoint, method, data).await;
 
-    side_effect_status_code(status);
+    side_effect_status_code(status).await;
 
     resp
 }
@@ -707,7 +707,7 @@ where
     let (resp, status) =
         api_with_basic_token_status(endpoint, user_id, password, method, data).await;
 
-    side_effect_status_code(status);
+    side_effect_status_code(status).await;
 
     resp
 }
@@ -778,10 +778,12 @@ fn api_get_query<T: Serialize>(
 
 //made pub just in case, but rarely ever called from the outside
 //helpful for debugging sometimes too
-pub fn side_effect_status_code(status_code: u16) {
+pub async fn side_effect_status_code(status_code: u16) {
     match status_code {
         403 | 401 => {
             Route::User(UserRoute::NoAuth).redirect();
+            // don't return so that this error is not handled, redirection is enough
+            future::pending::<()>().await;
         }
         _ => {}
     }

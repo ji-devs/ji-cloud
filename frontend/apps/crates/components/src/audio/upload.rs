@@ -78,15 +78,19 @@ pub async fn upload_audio(
                     } else {
                         UploadError::Other(awsm_web::errors::Error::Empty)
                     }
-                })
-                .and_then(|(resp, status)| {
+                });
+
+                if let Ok((_, status)) = resp {
+                    side_effect_status_code(status).await;
+                }
+
+                let resp = resp.and_then(|(resp, status)| {
                     if status == 413 {
                         let _ = web_sys::window()
                             .unwrap_ji()
                             .alert_with_message(STR_AUDIO_IS_TOO_LARGE);
                         Err(UploadError::TooLarge)
                     } else {
-                        side_effect_status_code(status);
                         resp.map_err(|_| UploadError::Other(awsm_web::errors::Error::Empty))
                     }
                 })?;
