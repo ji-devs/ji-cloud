@@ -22,6 +22,10 @@ impl HebrewButtons {
         let state = self;
         html!("hebrew-buttons" => HtmlElement, {
             .with_node!(elem => {
+                .future(state.active_popup.signal().for_each(clone!(state => move |active_popup| {
+                    (state.on_open_toggle)(active_popup.is_some());
+                    async {}
+                })))
                 .property_signal("full", state.active_popup.signal().map(clone!(state => move |active_popup| {
                     match state.kind {
                         Kind::Full => true,

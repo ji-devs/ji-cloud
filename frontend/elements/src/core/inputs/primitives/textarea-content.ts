@@ -9,7 +9,6 @@
  */
 
 import { LitElement, html, css, customElement, property, query, PropertyValues } from "lit-element";
-import { nothing } from "lit-html";
 import { styleMap } from "lit-html/directives/style-map";
 import { closestPierceShadow } from "@utils/dom";
 
@@ -20,23 +19,11 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
-                .hiddenClickArea {
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                }
                 textarea,
-                span {
+                .measure {
                     font-family: var(--font-family, Poppins);
-                    /*font-size: var(--font-size, 16px);*/
                     color: var(--color, black);
-                    /* display: none; */
                     text-align: center;
-                }
-
-                span {
-                    white-space: pre-wrap;
-                    user-select: none;
                 }
                 textarea {
                     outline: 0;
@@ -48,14 +35,10 @@ export class _ extends LitElement {
                     min-height: 1em;
                     background-color: rgb(var(--theme-background-color));
                 }
-
-                textarea.visible,
-                span.measure,
-                span.visible {
+                .measure {
+                    white-space: pre-wrap;
+                    user-select: none;
                     display: inline-block;
-                }
-
-                span.measure {
                     position: absolute;
                     left: -10000px;
                     bottom: 10000px;
@@ -96,18 +79,6 @@ export class _ extends LitElement {
             })
         );
     };
-    onKey(evt: KeyboardEvent) {
-        let { key } = evt;
-        key = key.toLowerCase();
-        if (key === "escape") {
-            this.textarea.value = this.value;
-            this.toggleEditing(false);
-            this.dispatchEvent(new Event("reset"));
-        } else if (key === "enter") {
-            //not for textarea...
-            //this.dispatchChange();
-        }
-    }
 
     lastMeasuredWidth: number = 0;
     lastMeasuredHeight: number = 0;
@@ -157,12 +128,15 @@ export class _ extends LitElement {
 
         // if is keyboard, keyboard with refocus. If is hebrew-buttons, refocus here
         if(relatedTarget?.matches("hebrew-buttons")) {
-            this.shadowRoot?.querySelector("textarea")?.focus();
-        }
-
-        if (!relatedTarget) {
+            this.textarea?.focus();
+        } else {
             this.dispatchChange();
+            this.toggleEditing(false);
         }
+    }
+
+    onFocus() {
+        this.toggleEditing(true);
     }
 
     firstUpdated() {
@@ -174,8 +148,6 @@ export class _ extends LitElement {
             if (editing) {
                 if (this.textarea) {
                     this.textarea.focus();
-                    this.textarea.value = this.value;
-                    this.textarea.setSelectionRange(-1, -1);
                 }
             }
         }
@@ -192,60 +164,20 @@ export class _ extends LitElement {
                 detail: { value },
             })
         );
-
-        this.toggleEditing(false);
     };
 
     render() {
-        const {
-            value,
-            editing,
-            clickMode,
-            constrainWidth,
-            constrainHeight,
-            disableFixedClickArea,
-        } = this;
-
         const style = styleMap({
             fontSize: this.fontSize,
         });
 
-        const hiddenClickAreaStyle = styleMap({
-            display:
-                !editing && constrainWidth && constrainHeight
-                    ? "block"
-                    : "none",
-            width: `${constrainWidth}px`,
-            height: `${constrainHeight}px`,
-        });
-
         return html`
-            ${disableFixedClickArea
-                ? nothing
-                : html`
-                      <div
-                          class="hiddenClickArea"
-                          style=${hiddenClickAreaStyle}
-                          @dblclick=${() => {
-                              if (clickMode === "double") {
-                                  this.toggleEditing(true);
-                              }
-                          }}
-                          @click=${() => {
-                              if (clickMode === "single") {
-                                  this.toggleEditing(true);
-                              }
-                          }}
-                      ></div>
-                  `}
             <textarea
                 style=${style}
-                .readOnly=${!editing}
-                @input="${this.onInput}"
-                @keyup="${this.onKey}"
-                @blur="${this.onBlur}"
-                @focus=${() => this.editing = true}
-                .value="${value}"
+                @input=${this.onInput}
+                @blur=${this.onBlur}
+                @focus=${this.onFocus}
+                .value=${this.value}
             ></textarea>
             <span style=${style} id="measure-line" class="measure">&nbsp;</span>
         `;

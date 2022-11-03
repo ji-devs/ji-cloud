@@ -48,7 +48,14 @@ export class _ extends LitElement {
                 ::slotted(hebrew-buttons) {
                     align-self: center;
                     justify-self: end;
-                    margin-bottom: 40px;
+                    grid-row: 1;
+                    grid-column: 1 / 4;
+                    margin-bottom: 70px;
+                    background-color: #fff;
+                    padding: 10px;
+                    box-shadow: 0 3px 16px 0 rgba(0, 0, 0, 0.2);
+                    border-radius: 8px;
+                    z-index: 1;
                 }
                 .index {
                     font-size: 14px;
