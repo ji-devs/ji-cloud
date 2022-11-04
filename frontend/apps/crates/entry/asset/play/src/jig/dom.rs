@@ -7,6 +7,7 @@ use dominator_helpers::{events::Message, signals::DefaultSignal};
 use futures_signals::map_ref;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use js_sys::Reflect;
+use shared::domain::module::body::InstructionsType;
 use shared::domain::{jig::JigResponse, module::ModuleKind};
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -26,8 +27,9 @@ use web_sys::{HtmlElement, HtmlIFrameElement};
 
 use super::state::JigPlayer;
 
-const DEFAULT_INSTRUCTIONS_TEXT: &str = "Are you ready?";
+const DEFAULT_INSTRUCTIONS_TEXT: &str = "1, 2, 3 Go!";
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum ShowInstructions {
     AudioOnly,
     All,
@@ -40,27 +42,38 @@ impl JigPlayer {
 
         let should_show_instructions = map_ref! {
             let instructions = state.instructions.signal_cloned(),
-            let started = state.started.signal_cloned()
+            let timer = state.timer.signal_cloned(),
+            let started = state.started.signal_cloned().dedupe()
             => {
-                if let Some(instructions) = instructions {
-                    if instructions.text.is_none() && instructions.audio.is_some() && !instructions.persisted {
-                        Some(ShowInstructions::AudioOnly)
-                    }
-                    else if instructions.text.is_none() && instructions.audio.is_none() && !instructions.persisted {
-                        // If persisted is false, and there is no text, then we don't want to display the popup.
-                        None
-                    } else {
-                        // Otherwise, if the activity has started, we can display it.
-                        if *started {
-                            Some(ShowInstructions::All)
+                let result = if *started {
+                    if let Some(instructions) = instructions {
+                        if timer.is_some() || instructions.text.is_some() {
+                            let is_instructions = instructions.instructions_type.is_instructions();
+                            // if there is text or a timer, and
+                            if is_instructions || instructions.text.is_some() {
+                                // this is an instructions type or there is text
+                                Some(ShowInstructions::All)
+                            } else if instructions.audio.is_some() {
+                                // otherwise play just audio
+                                Some(ShowInstructions::AudioOnly)
+                            } else {
+                                None
+                            }
+                        } else if instructions.audio.is_some() {
+                            // otherwise, if there is just audio, then play that
+                            Some(ShowInstructions::AudioOnly)
                         } else {
                             None
                         }
+                    } else {
+                        // No instructions have been set for this activity.
+                        None
                     }
                 } else {
-                    // No instructions have been set for this activity.
                     None
-                }
+                };
+
+                result
             }
         };
 
@@ -230,7 +243,15 @@ impl JigPlayer {
                             .property("iconPath", "jig/play/icn-instructions.svg")
                             .property("iconHoverPath", "jig/play/icn-instructions-hover.svg")
                             .event(clone!(state => move |_evt: events::Click| {
-                                actions::show_instructions(state.clone(), true);
+                                let instructions = state.instructions.get_cloned();
+                                let timer = state.timer.get_cloned();
+                                if let Some(instructions) = instructions {
+                                    if timer.is_some() || instructions.text.is_some() {
+                                        actions::show_instructions(state.clone(), true);
+                                    } else if instructions.audio.is_some() {
+                                        actions::play_instructions_audio(state.clone());
+                                    }
+                                }
                             }))
                         }))
                         .child_signal(state.instructions_visible.signal_ref(clone!(state, instructions => move |visible| {
@@ -248,12 +269,17 @@ impl JigPlayer {
                                                     .property("size", "large")
                                                     .property("color", "dark-blue")
                                                     .apply(clone!(instructions => move |dom| {
-                                                        if instructions.persisted {
-                                                            dom.property("body", &instructions.text.unwrap_or(DEFAULT_INSTRUCTIONS_TEXT.to_owned()))
-                                                        } else if let Some(text) = &instructions.text {
-                                                            dom.property("body", text)
-                                                        } else {
-                                                            dom
+                                                        match instructions.instructions_type {
+                                                            InstructionsType::Instructions => {
+                                                                dom.property("body", &instructions.text.unwrap_or(DEFAULT_INSTRUCTIONS_TEXT.to_owned()))
+                                                            }
+                                                            InstructionsType::Feedback => {
+                                                                if let Some(text) = &instructions.text {
+                                                                    dom.property("body", text)
+                                                                } else {
+                                                                    dom
+                                                                }
+                                                            }
                                                         }
                                                     }))
                                                     .property("closeable", true)

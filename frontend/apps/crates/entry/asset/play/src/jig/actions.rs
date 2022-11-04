@@ -13,7 +13,10 @@ use shared::{
         asset::DraftOrLive,
         jig::{AudioBackground, JigGetDraftPath, JigGetLivePath, JigLikedPath, JigPlayPath},
         meta::GetMetadataPath,
-        module::{body::Instructions as ModuleInstructions, ModuleId},
+        module::{
+            body::{Instructions as ModuleInstructions, InstructionsType},
+            ModuleId,
+        },
     },
 };
 use utils::{
@@ -124,31 +127,33 @@ pub fn navigate_to_module(state: Rc<JigPlayer>, module_id: &ModuleId) {
 
 pub fn set_instructions(
     state: Rc<JigPlayer>,
-    instructions: Option<ModuleInstructions>,
-    persisted: bool,
+    instructions: Option<(ModuleInstructions, InstructionsType)>,
 ) {
     // Only set the instructions field if the Instructions has content. Otherwise, leave it at None.
     let instructions = match instructions {
-        Some(instructions) if instructions.has_content() => Some(instructions),
+        Some((instructions, instructions_type)) if instructions.has_content() => {
+            Some((instructions, instructions_type))
+        }
         _ => None,
     };
 
-    state.instructions.set(
-        instructions.map(|instructions| Instructions::from_instructions(instructions, persisted)),
-    );
+    state
+        .instructions
+        .set(instructions.map(|(instructions, instructions_type)| {
+            Instructions::from_instructions(instructions, instructions_type)
+        }));
 }
 
 pub fn show_instructions(state: Rc<JigPlayer>, visible: bool) {
     if let Some(instructions) = state.instructions.get_cloned() {
-        if !(!instructions.persisted && instructions.text.is_none()) {
-            state.instructions_visible.set_neq(visible);
-            set_timer_paused(&state, visible);
-        }
+        state.instructions_visible.set_neq(visible);
+        set_timer_paused(&state, visible);
 
         if visible {
             play_instructions_audio(state);
         } else {
-            if !instructions.persisted {
+            if instructions.instructions_type.is_feedback() {
+                set_instructions(state.clone(), None);
                 send_iframe_message(
                     Rc::clone(&state),
                     JigToModulePlayerMessage::InstructionsDone,
@@ -162,7 +167,8 @@ pub fn play_instructions_audio(state: Rc<JigPlayer>) {
     if let Some(instructions) = state.instructions.get_cloned() {
         if let Some(audio) = &instructions.audio {
             AUDIO_MIXER.with(clone!(state, instructions => move |mixer| mixer.play_oneshot_on_ended(audio.into(), clone!(state => move || {
-                if !instructions.persisted {
+                if instructions.instructions_type.is_feedback() {
+                    set_instructions(state.clone(), None);
                     send_iframe_message(Rc::clone(&state), JigToModulePlayerMessage::InstructionsDone);
                 }
             }))));
@@ -334,8 +340,8 @@ pub fn on_iframe_message(state: Rc<JigPlayer>, message: ModuleToJigPlayerMessage
         ModuleToJigPlayerMessage::JumpToId(module_id) => {
             navigate_to_module(state, &module_id);
         }
-        ModuleToJigPlayerMessage::Instructions(instructions, persisted) => {
-            set_instructions(state, instructions, persisted);
+        ModuleToJigPlayerMessage::Instructions(instructions) => {
+            set_instructions(state, instructions);
         }
     };
 }

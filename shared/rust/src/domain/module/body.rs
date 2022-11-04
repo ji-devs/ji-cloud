@@ -438,6 +438,27 @@ impl Instructions {
     }
 }
 
+/// Type of Instructions to be shown
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub enum InstructionsType {
+    /// Instructions are shown when an activity starts
+    Instructions,
+    /// Feedback is shown at the end of an activity
+    Feedback,
+}
+
+impl InstructionsType {
+    /// Whether this variant is `Instructions`
+    pub fn is_instructions(&self) -> bool {
+        matches!(self, Self::Instructions)
+    }
+
+    /// Whether this variant is `Feedback`
+    pub fn is_feedback(&self) -> bool {
+        matches!(self, Self::Feedback)
+    }
+}
+
 #[derive(Clone, Serialize, Deserialize, Debug)]
 /// Background
 pub enum Background {

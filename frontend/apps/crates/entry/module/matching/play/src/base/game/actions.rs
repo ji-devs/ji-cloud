@@ -1,7 +1,10 @@
+use crate::base::state::Phase;
+
 use super::state::*;
 
 use std::sync::atomic::Ordering;
 
+use components::module::_common::play::prelude::{BaseExt, ModuleEnding, ModulePlayPhase};
 use rand::prelude::*;
 use std::convert::TryInto;
 use std::rc::Rc;
@@ -34,10 +37,15 @@ impl Game {
                 state.base.settings.n_rounds
             );
         } else {
-            state
-                .base
-                .feedback_signal
-                .set(Some(state.base.feedback.clone()));
+            let feedback = &state.base.feedback;
+            if feedback.has_content() {
+                state.base.feedback_signal.set(Some(feedback.clone()));
+            } else {
+                state.base.phase.set(Phase::Ending);
+                state
+                    .base
+                    .set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Positive)));
+            }
         }
     }
 
