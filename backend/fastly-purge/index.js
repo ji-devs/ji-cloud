@@ -41,7 +41,7 @@ const getMetadata = (filename) => {
         //surrogateControl: "max-age=2628000",
       }
     : {
-        cacheControl: "public, max-age=3600",
+        cacheControl: "public, max-age=86400",
         //doesn't work
         //surrogateControl: "max-age=2628000",
       };
