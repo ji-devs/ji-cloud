@@ -1,6 +1,6 @@
 use super::card::state::*;
 use crate::module::_groups::cards::{edit::state::*, lookup::Side};
-use futures_signals::signal::{ReadOnlyMutable, Mutable};
+use futures_signals::signal::{Mutable, ReadOnlyMutable};
 use std::rc::Rc;
 
 use shared::domain::module::body::_groups::cards::Step;

@@ -1,4 +1,4 @@
-use dominator::{html, Dom, clone};
+use dominator::{clone, html, Dom};
 use futures_signals::map_ref;
 use std::rc::Rc;
 
