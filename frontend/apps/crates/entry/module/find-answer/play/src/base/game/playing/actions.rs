@@ -1,5 +1,8 @@
 use super::state::*;
-use components::audio::mixer::{AudioPath, AUDIO_MIXER};
+use components::{
+    audio::mixer::{AudioPath, AUDIO_MIXER},
+    module::_common::play::prelude::{BaseExt, ModuleEnding, ModulePlayPhase},
+};
 use dominator::clone;
 use shared::domain::module::body::find_answer::Next;
 use std::rc::Rc;
@@ -96,11 +99,20 @@ impl PlayState {
             // If they've completed the minimum, then we can end this activity, or
             // There are noo more questions to ask, but the activity is configured so that the student can click continue.
             _ => {
-                state
-                    .game
-                    .base
-                    .feedback_signal
-                    .set(Some(state.game.base.feedback.clone()));
+                let feedback = &state.game.base.feedback;
+                if feedback.has_content() {
+                    state.game.base.feedback_signal.set(Some(feedback.clone()));
+                } else {
+                    match state.game.base.settings.next {
+                        Next::SelectAll | Next::SelectSome(_) => {
+                            state
+                                .game
+                                .base
+                                .set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
+                        }
+                        _ => {}
+                    }
+                }
             }
         }
     }

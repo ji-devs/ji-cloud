@@ -8,7 +8,7 @@ use shared::domain::{
     jig::{JigId, JigPlayerSettings, JigResponse},
     meta::ResourceType,
     module::{
-        body::{Audio, Instructions as ModuleInstructions},
+        body::{Audio, Instructions as ModuleInstructions, InstructionsType},
         ModuleId,
     },
 };
@@ -104,19 +104,22 @@ pub fn can_load_liked_status(jig: &JigResponse) -> bool {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct Instructions {
     pub text: Option<String>,
     pub audio: Option<Audio>,
-    pub persisted: bool,
+    pub instructions_type: InstructionsType,
 }
 
 impl Instructions {
-    pub fn from_instructions(instructions: ModuleInstructions, persisted: bool) -> Self {
+    pub fn from_instructions(
+        instructions: ModuleInstructions,
+        instructions_type: InstructionsType,
+    ) -> Self {
         Self {
             text: instructions.text,
             audio: instructions.audio,
-            persisted,
+            instructions_type,
         }
     }
 }

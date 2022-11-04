@@ -1,10 +1,15 @@
+use crate::base::state::Phase;
+
 use super::state::*;
 
 use std::sync::atomic::Ordering;
 
 use components::{
     audio::mixer::{AudioMixer, AudioPath, AUDIO_MIXER},
-    module::_groups::cards::play::card::dom::FLIPPED_AUDIO_EFFECT,
+    module::{
+        _common::play::prelude::{BaseExt, ModuleEnding, ModulePlayPhase},
+        _groups::cards::play::card::dom::FLIPPED_AUDIO_EFFECT,
+    },
 };
 
 use dominator::clone;
@@ -43,10 +48,15 @@ impl Game {
                 state.base.settings.n_rounds
             );
         } else {
-            state
-                .base
-                .feedback_signal
-                .set(Some(state.base.feedback.clone()));
+            let feedback = &state.base.feedback;
+            if feedback.has_content() {
+                state.base.feedback_signal.set(Some(feedback.clone()));
+            } else {
+                state.base.phase.set(Phase::Ending);
+                state
+                    .base
+                    .set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Positive)));
+            }
         }
     }
 

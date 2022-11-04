@@ -1,7 +1,9 @@
 use std::rc::Rc;
 
 use super::state::*;
+use components::module::_common::play::prelude::{BaseExt, ModuleEnding, ModulePlayPhase};
 use shared::domain::module::body::_groups::design::Trace;
+use shared::domain::module::body::drag_drop::Next;
 use utils::{drag::Drag, prelude::*, resize::get_resize_info};
 
 use crate::debug::*;
@@ -109,11 +111,16 @@ impl PlayState {
                             // feedback for the activity. If we played this at the same time, it
                             // we could have two audio clips playing simultaneously which would be
                             // noisy and distracting from the intent of the feedbacks.
-                            state
-                                .game
-                                .base
-                                .feedback_signal
-                                .set(Some(state.game.base.feedback.clone()));
+                            let feedback = &state.game.base.feedback;
+                            if feedback.has_content() {
+                                state.game.base.feedback_signal.set(Some(feedback.clone()));
+                            } else {
+                                if let Next::PlaceAll = state.game.base.settings.next {
+                                    state.game.base.set_play_phase(ModulePlayPhase::Ending(Some(
+                                        ModuleEnding::Next,
+                                    )));
+                                }
+                            }
                         });
                     });
                 }

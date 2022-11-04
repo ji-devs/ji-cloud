@@ -12,7 +12,7 @@ use crate::{
     audio::mixer::AUDIO_MIXER, module::_common::play::prelude::*,
     overlay::container::OverlayContainer,
 };
-use shared::domain::module::body::{BodyExt, ModeExt, StepExt};
+use shared::domain::module::body::{BodyExt, InstructionsType, ModeExt, StepExt};
 
 pub fn render_page_body<RawData, Mode, Step, Base>(
     state: Rc<GenericState<RawData, Mode, Step, Base>>,
@@ -140,7 +140,7 @@ where
         .property("slot", "main")
         .child(Base::render(base.clone()))
         .future(feedback.signal_cloned().for_each(move |feedback| async move {
-            let msg = IframeAction::new(ModuleToJigPlayerMessage::instructions_once(feedback.clone()));
+            let msg = IframeAction::new(ModuleToJigPlayerMessage::Instructions(feedback.map(|feedback| (feedback, InstructionsType::Feedback))));
             let _ = msg.try_post_message_to_player();
         }))
         .apply_if(jig_player, |dom| {
@@ -195,7 +195,7 @@ where
 
                     ModulePlayPhase::Playing => {
                         if jig_player {
-                            let msg = IframeAction::new(ModuleToJigPlayerMessage::instructions(instructions.clone()));
+                            let msg = IframeAction::new(ModuleToJigPlayerMessage::Instructions(instructions.clone().map(|instructions| (instructions, InstructionsType::Instructions))));
                             let _ = msg.try_post_message_to_player();
 
                             let timer_seconds = base.get_timer_minutes().map(|minutes| minutes * 60);
