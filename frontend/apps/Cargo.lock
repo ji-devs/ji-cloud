@@ -13,9 +13,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.62"
+version = "1.0.66"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1485d4d2cc45e7b201ee3767015c96faa5904387c9d87c6efdd0fb511f12d305"
+checksum = "216261ddc8289130e551ddcd5ce8a064710c0d064a4d2895c67151c92b5443f6"
 
 [[package]]
 name = "app-admin"
@@ -49,7 +49,7 @@ dependencies = [
  "strum_macros",
  "url",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -86,7 +86,7 @@ dependencies = [
  "unicode-segmentation",
  "url",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -123,7 +123,7 @@ dependencies = [
  "unicode-segmentation",
  "url",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -157,7 +157,7 @@ dependencies = [
  "shared",
  "url",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -193,7 +193,7 @@ dependencies = [
  "unicode-segmentation",
  "url",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -229,7 +229,7 @@ dependencies = [
  "unicode-segmentation",
  "url",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -265,7 +265,7 @@ dependencies = [
  "unicode-segmentation",
  "url",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -301,7 +301,7 @@ dependencies = [
  "unicode-segmentation",
  "url",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -337,7 +337,7 @@ dependencies = [
  "unicode-segmentation",
  "url",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -374,7 +374,7 @@ dependencies = [
  "unicode-segmentation",
  "url",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -411,7 +411,7 @@ dependencies = [
  "unicode-segmentation",
  "url",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -448,7 +448,7 @@ dependencies = [
  "unicode-segmentation",
  "url",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -483,7 +483,7 @@ dependencies = [
  "strum",
  "strum_macros",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -519,7 +519,7 @@ dependencies = [
  "strum_macros",
  "url",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -551,7 +551,7 @@ dependencies = [
  "serde_json",
  "shared",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -587,7 +587,7 @@ dependencies = [
  "unicode-segmentation",
  "url",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -624,7 +624,7 @@ dependencies = [
  "unicode-segmentation",
  "url",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -661,7 +661,7 @@ dependencies = [
  "unicode-segmentation",
  "url",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -698,7 +698,7 @@ dependencies = [
  "unicode-segmentation",
  "url",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -734,7 +734,7 @@ dependencies = [
  "unicode-segmentation",
  "url",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -771,7 +771,7 @@ dependencies = [
  "unicode-segmentation",
  "url",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -807,7 +807,7 @@ dependencies = [
  "unicode-segmentation",
  "url",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -843,7 +843,7 @@ dependencies = [
  "unicode-segmentation",
  "url",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -879,7 +879,7 @@ dependencies = [
  "unicode-segmentation",
  "url",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -915,7 +915,7 @@ dependencies = [
  "unicode-segmentation",
  "url",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -951,7 +951,7 @@ dependencies = [
  "unicode-segmentation",
  "url",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -987,7 +987,7 @@ dependencies = [
  "unicode-segmentation",
  "url",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -1021,7 +1021,7 @@ dependencies = [
  "serde_json",
  "shared",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -1058,7 +1058,7 @@ dependencies = [
  "unicode-segmentation",
  "url",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -1094,7 +1094,7 @@ dependencies = [
  "unicode-segmentation",
  "url",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -1295,7 +1295,7 @@ dependencies = [
  "unicode-segmentation",
  "url",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
@@ -1855,7 +1855,7 @@ dependencies = [
  "strum_macros",
  "url",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -2118,9 +2118,9 @@ dependencies = [
 
 [[package]]
 name = "regex"
-version = "1.5.4"
+version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d07a8629359eb56f1e2fb1652bb04212c072a87ba68546a04065d525673ac461"
+checksum = "e076559ef8e241f2ae3479e36f97bd5741c0330689e217ad51ce2c76808b868a"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -2135,9 +2135,9 @@ checksum = "6c230d73fb8d8c1b9c0b3135c5142a8acee3a0558fb8db5cf1cb65f8d7862132"
 
 [[package]]
 name = "regex-syntax"
-version = "0.6.25"
+version = "0.6.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f497285884f3fcff424ffc933e56d7cbca511def0c9831a7f9b5f6153e3cc89b"
+checksum = "456c603be3e8d448b072f410900c09faf164fbce2d480456f50eea6e25f9c848"
 
 [[package]]
 name = "rgb"
@@ -2188,7 +2188,7 @@ dependencies = [
  "shared",
  "url",
  "utils",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -2308,7 +2308,7 @@ dependencies = [
  "strum_macros",
  "thiserror",
  "url",
- "uuid",
+ "uuid 1.2.1",
  "wasm-bindgen",
 ]
 
@@ -2491,7 +2491,7 @@ dependencies = [
  "thiserror",
  "unicode-segmentation",
  "url",
- "uuid",
+ "uuid 0.8.2",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -2505,6 +2505,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bc5cf98d8186244414c848017f0e2676b3fcb46807f6668a97dfe67359a3c4b7"
 dependencies = [
  "getrandom",
+ "serde",
+]
+
+[[package]]
+name = "uuid"
+version = "1.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "feb41e78f93363bb2df8b0e86a2ca30eed7806ea16ea0c790d757cf93f79be83"
+dependencies = [
  "serde",
 ]
 

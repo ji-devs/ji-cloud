@@ -78,7 +78,7 @@ rgb = "0.8.29"
 unicode-segmentation = "1.8.0"
 lazy_static = "1.4.0"
 wee_alloc = { version = "0.4.5" }
-regex = "1.5.4"
+regex = "1.7.0"
 futures-channel = "0.3.21"
 rand = "0.8.4"
 chrono-tz = { version = "0.6.0", features = ["serde"] }
