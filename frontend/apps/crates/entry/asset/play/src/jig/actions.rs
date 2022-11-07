@@ -167,7 +167,7 @@ pub fn play_instructions_audio(state: Rc<JigPlayer>) {
     if let Some(instructions) = state.instructions.get_cloned() {
         if let Some(audio) = &instructions.audio {
             AUDIO_MIXER.with(clone!(state, instructions => move |mixer| mixer.play_oneshot_on_ended(audio.into(), clone!(state => move || {
-                if instructions.instructions_type.is_feedback() {
+                if instructions.instructions_type.is_feedback() && instructions.text.is_none() {
                     set_instructions(state.clone(), None);
                     send_iframe_message(Rc::clone(&state), JigToModulePlayerMessage::InstructionsDone);
                 }
