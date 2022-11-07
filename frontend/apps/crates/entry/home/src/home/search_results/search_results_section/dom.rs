@@ -202,17 +202,10 @@ impl SearchResultsSection {
                             .property("size", "small")
                             .property("iconBeforePath", "search/cards/play.svg")
                             .text("Play")
-                            .event({
-                                let asset_id = asset.id();
-                                clone!(state => move |_: events::Click| {
-                                    // if get_user().is_some() {
-                                        state.home_state.play_asset.set(Some(asset_id));
-                                    // } else {
-                                    //     state.home_state.play_login_popup_shown.set(true);
-                                    // }
-                                    track_action("play", asset.clone());
-                                })
-                            })
+                            .event(clone!(state => move |_: events::Click| {
+                                state.on_play_asset_click(asset.id());
+                                track_action("play", asset.clone());
+                            }))
                         }))
                     },
                     AssetType::Resource => {
