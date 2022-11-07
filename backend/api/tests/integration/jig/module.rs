@@ -1,23 +1,26 @@
 use http::StatusCode;
 
+use macros::test_service;
 use serde_json::json;
 use shared::domain::{
     asset::{AssetId, AssetType},
     jig::JigId,
     module::{body::memory, ModuleBody, ModuleCreateRequest, ModuleKind, ModuleUpdateRequest},
 };
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 use uuid::Uuid;
 
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, LoginExt},
+    helpers::{setup_service, LoginExt},
 };
 
-#[actix_rt::test]
-async fn get_live() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
-
-    let port = app.port();
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
+)]
+async fn get_live(port: u16) -> anyhow::Result<()> {
+    let name = "get_live";
 
     let client = reqwest::Client::new();
 
@@ -36,18 +39,17 @@ async fn get_live() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
-    insta::assert_json_snapshot!(body, {".**.updated_at" => "[timestamp]"});
+    insta::assert_json_snapshot!(format!("{}",name), body, {".**.updated_at" => "[timestamp]"});
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn create_default() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
-
-    let port = app.port();
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
+)]
+async fn create_default(port: u16) -> anyhow::Result<()> {
+    let name = "create_default";
 
     let client = reqwest::Client::new();
 
@@ -68,7 +70,7 @@ async fn create_default() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, {
+    insta::assert_json_snapshot!(format!("{}-1",name), body, {
         ".**.id" => "[id]",
         ".**.created_at" => "[created_at]",
         ".**.updated_at" => "[updated_at]"});
@@ -94,7 +96,7 @@ async fn create_default() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, {
+    insta::assert_json_snapshot!(format!("{}-2",name), body, {
         ".**.id" => "[id]",
         ".**.stable_id" => "[stable_id]",
         ".**.created_at" => "[created_at]",
@@ -103,11 +105,12 @@ async fn create_default() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
-async fn update_empty() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
-
-    let port = app.port();
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
+)]
+async fn update_empty(port: u16) -> anyhow::Result<()> {
+    let name = "update_empty";
 
     let client = reqwest::Client::new();
 
@@ -147,18 +150,17 @@ async fn update_empty() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
-    insta::assert_json_snapshot!(body, {".**.updated_at" => "[timestamp]"});
+    insta::assert_json_snapshot!(format!("{}",name), body, {".**.updated_at" => "[timestamp]"});
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn update_contents() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
-
-    let port = app.port();
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
+)]
+async fn update_contents(port: u16) -> anyhow::Result<()> {
+    let name = "update_contents";
 
     let client = reqwest::Client::new();
 
@@ -201,7 +203,7 @@ async fn update_contents() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, {".**.updated_at" => "[timestamp]"});
+    insta::assert_json_snapshot!(format!("{}-1",name), body, {".**.updated_at" => "[timestamp]"});
 
     let resp = client
         .get(&format!(
@@ -218,27 +220,22 @@ async fn update_contents() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
-    insta::assert_json_snapshot!(body, {".**.updated_at" => "[timestamp]"});
+    insta::assert_json_snapshot!(format!("{}-2",name), body, {".**.updated_at" => "[timestamp]"});
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn drag_up_down_modules() -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::MetaKinds,
-            Fixture::User,
-            Fixture::Jig,
-            Fixture::CategoryOrdering,
-        ],
-        &[],
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::MetaKinds",
+        "Fixture::User",
+        "Fixture::Jig",
+        "Fixture::CategoryOrdering"
     )
-    .await;
-
-    let port = app.port();
+)]
+async fn drag_up_down_modules(port: u16) -> anyhow::Result<()> {
+    let name = "drag_up_down_modules";
 
     let client = reqwest::Client::new();
 
@@ -255,6 +252,7 @@ async fn drag_up_down_modules() -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-1",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
             ".**.feedbackPositive" => "[audio]",
@@ -288,14 +286,13 @@ async fn drag_up_down_modules() -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
             ".**.feedbackPositive" => "[audio]",
             ".**.feedbackNegative" => "[audio]",
         }
     );
-
-    app.stop(false).await;
 
     Ok(())
 }

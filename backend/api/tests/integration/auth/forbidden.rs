@@ -1,10 +1,12 @@
 use http::{Method, StatusCode};
+use macros::test_service;
 use serde_json::json;
 use shared::error::{ApiError, EmptyError};
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, LoginExt},
+    helpers::{setup_service, LoginExt},
 };
 use shared::domain::{
     asset::AssetId,
@@ -17,11 +19,8 @@ async fn forbidden(
     route: &str,
     req: Option<&serde_json::Value>,
     method: Method,
+    port: u16,
 ) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::UserNoPerms], &[]).await;
-
-    let port = app.port();
-
     let client = reqwest::Client::new();
 
     let request = client
@@ -40,40 +39,46 @@ async fn forbidden(
 
     let body: ApiError<EmptyError> = resp.json().await?;
 
-    app.stop(false).await;
-
     assert_eq!(body.code, StatusCode::FORBIDDEN);
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn category_post() -> anyhow::Result<()> {
-    forbidden("v1/category", Some(&json!({"name": ""})), Method::POST).await
+#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+async fn category_post(port: u16) -> anyhow::Result<()> {
+    forbidden(
+        "v1/category",
+        Some(&json!({"name": "Fixture::UserNoPerms"})),
+        Method::POST,
+        port,
+    )
+    .await
 }
 
-#[actix_rt::test]
-async fn category_patch() -> anyhow::Result<()> {
+#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+async fn category_patch(port: u16) -> anyhow::Result<()> {
     forbidden(
         "v1/category/00000000-0000-0000-0000-000000000000",
         None,
         Method::PATCH,
+        port,
     )
     .await
 }
 
-#[actix_rt::test]
-async fn category_delete() -> anyhow::Result<()> {
+#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+async fn category_delete(port: u16) -> anyhow::Result<()> {
     forbidden(
         "v1/category/00000000-0000-0000-0000-000000000000",
         None,
         Method::DELETE,
+        port,
     )
     .await
 }
 
-#[actix_rt::test]
-async fn image_post() -> anyhow::Result<()> {
+#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+async fn image_post(port: u16) -> anyhow::Result<()> {
     forbidden(
         "v1/image",
         Some(&json!({
@@ -89,58 +94,51 @@ async fn image_post() -> anyhow::Result<()> {
                 "size": "Canvas",
         })),
         Method::POST,
+        port,
     )
     .await
 }
 
-#[actix_rt::test]
-async fn image_patch() -> anyhow::Result<()> {
+#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+async fn image_patch(port: u16) -> anyhow::Result<()> {
     forbidden(
         "v1/image/00000000-0000-0000-0000-000000000000",
         None,
         Method::PATCH,
+        port,
     )
     .await
 }
 
-#[actix_rt::test]
-#[ignore] // no s3
-async fn image_delete() -> anyhow::Result<()> {
-    forbidden(
-        "v1/image/00000000-0000-0000-0000-000000000000",
-        None,
-        Method::DELETE,
-    )
-    .await
+#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+async fn jig_post(port: u16) -> anyhow::Result<()> {
+    forbidden("v1/jig", None, Method::POST, port).await
 }
 
-#[actix_rt::test]
-async fn jig_post() -> anyhow::Result<()> {
-    forbidden("v1/jig", None, Method::POST).await
-}
-
-#[actix_rt::test]
-async fn jig_patch() -> anyhow::Result<()> {
+#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+async fn jig_patch(port: u16) -> anyhow::Result<()> {
     forbidden(
         "v1/jig/00000000-0000-0000-0000-000000000000",
         None,
         Method::PATCH,
+        port,
     )
     .await
 }
 
-#[actix_rt::test]
-async fn jig_clone() -> anyhow::Result<()> {
+#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+async fn jig_clone(port: u16) -> anyhow::Result<()> {
     forbidden(
         "v1/jig/00000000-0000-0000-0000-000000000000/clone",
         None,
         Method::POST,
+        port,
     )
     .await
 }
 
-// #[actix_rt::test]
-// async fn jig_delete() -> anyhow::Result<()> {
+// #[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+// async fn jig_delete(pool_opts: PoolOptions<Postgres>, conn_opts: PgConnectOptions<Postgres>) -> anyhow::Result<()> {
 //     forbidden(
 //         "v1/jig/00000000-0000-0000-0000-000000000000",
 //         None,
@@ -149,8 +147,8 @@ async fn jig_clone() -> anyhow::Result<()> {
 //     .await
 // }
 
-#[actix_rt::test]
-async fn module_post() -> anyhow::Result<()> {
+#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+async fn module_post(port: u16) -> anyhow::Result<()> {
     use shared::domain::module::ModuleCreateRequest;
 
     forbidden(
@@ -162,32 +160,35 @@ async fn module_post() -> anyhow::Result<()> {
             body: ModuleBody::new(ModuleKind::Cover),
         })?),
         Method::POST,
+        port,
     )
     .await
 }
 
-#[actix_rt::test]
-async fn module_patch() -> anyhow::Result<()> {
+#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+async fn module_patch(port: u16) -> anyhow::Result<()> {
     forbidden(
         "v1/module/draft/00000000-0000-0000-0000-000000000000",
         Some(&serde_json::json!({"jigId": "00000000-0000-0000-0000-000000000000"})),
         Method::PATCH,
+        port,
     )
     .await
 }
 
-#[actix_rt::test]
-async fn module_delete() -> anyhow::Result<()> {
+#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+async fn module_delete(port: u16) -> anyhow::Result<()> {
     forbidden(
         "v1/module/draft/00000000-0000-0000-0000-000000000000",
         Some(&serde_json::json!({"jigId": "00000000-0000-0000-0000-000000000000"})),
         Method::DELETE,
+        port,
     )
     .await
 }
 
-#[actix_rt::test]
-async fn animation_post() -> anyhow::Result<()> {
+#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+async fn animation_post(port: u16) -> anyhow::Result<()> {
     forbidden(
         "v1/animation",
         Some(&json!({
@@ -200,31 +201,48 @@ async fn animation_post() -> anyhow::Result<()> {
             "kind": "Gif",
         })),
         Method::POST,
+        port,
     )
     .await
 }
 
-#[actix_rt::test]
-#[ignore] // route doesn't exist
-async fn animation_patch() -> anyhow::Result<()> {
-    forbidden(
-        "v1/animation/00000000-0000-0000-0000-000000000000",
-        None,
-        Method::PATCH,
-    )
-    .await
-}
+// Ignored tests aren't captured. Will resolve later
+//
+// #[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+// #[ignore] // route doesn't exist
+// async fn animation_patch(port: u16) -> anyhow::Result<()> {
+//     forbidden(
+//         "v1/animation/00000000-0000-0000-0000-000000000000",
+//         None,
+//         Method::PATCH,
+//         port,
+//     )
+//     .await
+// }
 
-#[actix_rt::test]
-#[ignore] // no s3
-async fn animation_delete() -> anyhow::Result<()> {
-    forbidden(
-        "v1/animation/00000000-0000-0000-0000-000000000000",
-        None,
-        Method::DELETE,
-    )
-    .await
-}
+// #[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+// #[ignore] // no s3
+// async fn animation_delete(port: u16) -> anyhow::Result<()> {
+//     forbidden(
+//         "v1/animation/00000000-0000-0000-0000-000000000000",
+//         None,
+//         Method::DELETE,
+//         port,
+//     )
+//     .await
+// }
+//
+//#[test_service(setup = "setup_service", fixtures("Fixture::UserNoPerms"))]
+// #[ignore] // no s3
+// async fn image_delete(port: u16) -> anyhow::Result<()> {
+//     forbidden(
+//         "v1/image/00000000-0000-0000-0000-000000000000",
+//         None,
+//         Method::DELETE,
+//         port,
+//     )
+//     .await
+// }
 
 // todo: admin routes
 // todo: locale routes

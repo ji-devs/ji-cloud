@@ -1,19 +1,17 @@
 use http::StatusCode;
 
+use macros::test_service;
 use serde_json::json;
 use shared::domain::locale::{CreateEntryRequest, EntryStatus};
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, LoginExt},
+    helpers::{setup_service, LoginExt},
 };
 
-#[actix_rt::test]
-async fn delete() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[]).await;
-
-    let port = app.port();
-
+#[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
+async fn delete(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -28,11 +26,9 @@ async fn delete() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
-async fn get() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[]).await;
-
-    let port = app.port();
+#[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
+async fn get(port: u16) -> anyhow::Result<()> {
+    let name = "get";
 
     let client = reqwest::Client::new();
 
@@ -46,16 +42,12 @@ async fn get() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }
 
-async fn list(query: &[(&str, &str)]) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[]).await;
-
-    let port = app.port();
-
+async fn list(query: &[(&str, &str)], name: &str, port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -69,56 +61,82 @@ async fn list(query: &[(&str, &str)]) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn list_all_by_default() -> anyhow::Result<()> {
-    list(&[]).await
+#[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
+async fn list_all_by_default(port: u16) -> anyhow::Result<()> {
+    let name = "list_all_by_default";
+
+    list(&[], name, port).await
 }
 
-#[actix_rt::test]
-async fn list_all_by_bundle() -> anyhow::Result<()> {
-    list(&[("groupBy", "bundle")]).await
+#[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
+async fn list_all_by_bundle(port: u16) -> anyhow::Result<()> {
+    let name = "list_all_by_bundle";
+
+    list(&[("groupBy", "bundle")], name, port).await
 }
 
-#[actix_rt::test]
-async fn list_empty_bundle_by_default() -> anyhow::Result<()> {
-    list(&[("bundles", "85a46ffe-7c67-11eb-a0d7-277d94fe130c")]).await
-}
+#[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
+async fn list_empty_bundle_by_default(port: u16) -> anyhow::Result<()> {
+    let name = "list_empty_bundle_by_default";
 
-#[actix_rt::test]
-async fn list_empty_bundle_by_bundle() -> anyhow::Result<()> {
-    list(&[
-        ("groupBy", "bundle"),
-        ("bundles", "85a46ffe-7c67-11eb-a0d7-277d94fe130c"),
-    ])
+    list(
+        &[("bundles", "85a46ffe-7c67-11eb-a0d7-277d94fe130c")],
+        name,
+        port,
+    )
     .await
 }
 
-#[actix_rt::test]
-async fn list_single_bundle_by_default() -> anyhow::Result<()> {
-    list(&[("bundles", "8359a48a-7c67-11eb-a0d7-0fd74777a62c")]).await
-}
+#[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
+async fn list_empty_bundle_by_bundle(port: u16) -> anyhow::Result<()> {
+    let name = "list_empty_bundle_by_bundle";
 
-#[actix_rt::test]
-async fn list_single_bundle_by_bundle() -> anyhow::Result<()> {
-    list(&[
-        ("groupBy", "bundle"),
-        ("bundles", "8359a48a-7c67-11eb-a0d7-0fd74777a62c"),
-    ])
+    list(
+        &[
+            ("groupBy", "bundle"),
+            ("bundles", "85a46ffe-7c67-11eb-a0d7-277d94fe130c"),
+        ],
+        name,
+        port,
+    )
     .await
 }
 
-#[actix_rt::test]
-async fn create() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[]).await;
+#[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
+async fn list_single_bundle_by_default(port: u16) -> anyhow::Result<()> {
+    let name = "list_single_bundle_by_default";
 
-    let port = app.port();
+    list(
+        &[("bundles", "8359a48a-7c67-11eb-a0d7-0fd74777a62c")],
+        name,
+        port,
+    )
+    .await
+}
+
+#[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
+async fn list_single_bundle_by_bundle(port: u16) -> anyhow::Result<()> {
+    let name = "list_single_bundle_by_bundle";
+
+    list(
+        &[
+            ("groupBy", "bundle"),
+            ("bundles", "8359a48a-7c67-11eb-a0d7-0fd74777a62c"),
+        ],
+        name,
+        port,
+    )
+    .await
+}
+
+#[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
+async fn create(port: u16) -> anyhow::Result<()> {
+    let name = "create";
 
     let client = reqwest::Client::new();
 
@@ -146,18 +164,14 @@ async fn create() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
-    insta::assert_json_snapshot!(body, {".id" => "[id]"});
+    insta::assert_json_snapshot!(format!("{}", name), body, {".id" => "[id]"});
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn update_in_app() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[]).await;
-
-    let port = app.port();
+#[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Locale"))]
+async fn update_in_app(port: u16) -> anyhow::Result<()> {
+    let name = "update_in_app";
 
     let client = reqwest::Client::new();
 
@@ -183,9 +197,7 @@ async fn update_in_app() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }

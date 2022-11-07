@@ -1,17 +1,20 @@
 use http::StatusCode;
+use macros::test_service;
 use serde_json::json;
 use shared::domain::resource::curation::ResourceCurationCommentRequest;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, LoginExt},
+    helpers::{setup_service, LoginExt},
 };
 
-#[actix_rt::test]
-async fn admin_comment() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::MetaKinds, Fixture::Resource], &[]).await;
-
-    let port = app.port();
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Resource")
+)]
+async fn admin_comment(port: u16) -> anyhow::Result<()> {
+    let name = "admin_comment";
 
     let client = reqwest::Client::new();
 
@@ -29,7 +32,7 @@ async fn admin_comment() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}-1", name), body);
 
     let resp = client
         .post(&format!(
@@ -44,7 +47,9 @@ async fn admin_comment() -> anyhow::Result<()> {
         .await?
         .error_for_status()?;
 
-    assert_eq!(resp.status(), StatusCode::CREATED);
+    let status = resp.status();
+
+    assert_eq!(status, StatusCode::CREATED);
 
     let resp = client
         .get(&format!(
@@ -56,16 +61,12 @@ async fn admin_comment() -> anyhow::Result<()> {
         .await?
         .error_for_status()?;
 
-    app.stop(false).await;
-
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(
-        body, {
-            ".**.id" => "[id]",
-            ".**.createdAt" => "[created_at]",
-        }
-    );
+    insta::assert_json_snapshot!(format!("{}-2",name), body,  {
+        ".**.id" => "[id]",
+        ".**.createdAt" => "[created_at]",
+    });
 
     Ok(())
 }

@@ -1,9 +1,0 @@
----
-source: tests/integration/user.rs
-expression: body
-
----
-{
-  "code": 501,
-  "message": "S3 is disabled"
-}

@@ -3,14 +3,15 @@ mod tag;
 mod user;
 
 use http::StatusCode;
+use macros::test_service;
 use serde_json::json;
 use shared::domain::{image::ImageId, CreateResponse};
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 use uuid::Uuid;
 
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, LoginExt},
-    service::Service,
+    helpers::{setup_service, LoginExt},
 };
 
 async fn create(
@@ -19,11 +20,9 @@ async fn create(
     affiliations: &[Uuid],
     categories: &[Uuid],
     tags: &[i16],
+    name: &str,
+    port: u16,
 ) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds], &[]).await;
-
-    let port = app.port();
-
     let client = reqwest::Client::new();
 
     let resp = client
@@ -49,20 +48,29 @@ async fn create(
 
     let body: CreateResponse<ImageId> = resp.json().await?;
 
-    app.stop(false).await;
-
-    insta::assert_json_snapshot!(body, {".id" => "[id]"});
+    insta::assert_json_snapshot!(
+        format!("{}",name), body, {".id" => "[id]"});
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn create_no_meta() -> anyhow::Result<()> {
-    create(&[], &[], &[], &[], &[]).await
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::Image", "Fixture::MetaKinds")
+)]
+async fn create_no_meta(port: u16) -> anyhow::Result<()> {
+    let name = "create_no_meta";
+
+    create(&[], &[], &[], &[], &[], name, port).await
 }
 
-#[actix_rt::test]
-async fn create_with_styles() -> anyhow::Result<()> {
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::Image", "Fixture::MetaKinds")
+)]
+async fn create_with_styles(port: u16) -> anyhow::Result<()> {
+    let name = "create_with_styles";
+
     create(
         &[
             "6389eaa0-de76-11ea-b7ab-0399bcf84df2".parse()?,
@@ -72,27 +80,32 @@ async fn create_with_styles() -> anyhow::Result<()> {
         &[],
         &[],
         &[],
+        name,
+        port,
     )
     .await
 }
 
-#[actix_rt::test]
-async fn create_with_meta() -> anyhow::Result<()> {
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::Image", "Fixture::MetaKinds")
+)]
+async fn create_with_meta(port: u16) -> anyhow::Result<()> {
+    let name = "create_with_meta";
+
     create(
         &["6389eaa0-de76-11ea-b7ab-0399bcf84df2".parse()?],
         &["f3722790-de76-11ea-b7ab-77b45e9af3ef".parse()?],
         &["c0cd4446-de76-11ea-b7ab-93987e8aa112".parse()?],
         &[],
         &[1],
+        name,
+        port,
     )
     .await
 }
 
-async fn create_error(kind: &str, id: &str) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[]).await;
-
-    let port = app.port();
-
+async fn create_error(kind: &str, id: &str, name: &str, port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -118,18 +131,12 @@ async fn create_error(kind: &str, id: &str) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }
 
-async fn create_error_tag(kind: &str, id: &i16) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[]).await;
-
-    let port = app.port();
-
+async fn create_error_tag(kind: &str, id: &i16, name: &str, port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -155,52 +162,75 @@ async fn create_error_tag(kind: &str, id: &i16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn create_with_style_error() -> anyhow::Result<()> {
-    create_error("styles", "6389eaa0-de76-11ea-b7ab-0399bcf84df2").await
+#[test_service(setup = "setup_service", fixtures("Fixture::User"))]
+async fn create_with_style_error(port: u16) -> anyhow::Result<()> {
+    let name = "create_with_style_error";
+
+    create_error("styles", "6389eaa0-de76-11ea-b7ab-0399bcf84df2", name, port).await
 }
 
-#[actix_rt::test]
-async fn create_with_affiliation_error() -> anyhow::Result<()> {
-    create_error("affiliations", "6389eaa0-de76-11ea-b7ab-0399bcf84df2").await
-}
+#[test_service(setup = "setup_service", fixtures("Fixture::User"))]
+async fn create_with_affiliation_error(port: u16) -> anyhow::Result<()> {
+    let name = "create_with_affiliation_error";
 
-#[actix_rt::test]
-async fn create_with_age_range_error() -> anyhow::Result<()> {
-    create_error("age_ranges", "6389eaa0-de76-11ea-b7ab-0399bcf84df2").await
-}
-
-#[actix_rt::test]
-async fn create_with_category_error() -> anyhow::Result<()> {
-    create_error("categories", "6389eaa0-de76-11ea-b7ab-0399bcf84df2").await
-}
-
-#[actix_rt::test]
-async fn create_with_tags_error() -> anyhow::Result<()> {
-    create_error_tag("tags", &22).await
-}
-
-#[actix_rt::test]
-async fn get_metadata() -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::User,
-            Fixture::MetaKinds,
-            Fixture::Image,
-            Fixture::MetaImage,
-        ],
-        &[],
+    create_error(
+        "affiliations",
+        "6389eaa0-de76-11ea-b7ab-0399bcf84df2",
+        name,
+        port,
     )
-    .await;
+    .await
+}
 
-    let port = app.port();
+#[test_service(setup = "setup_service", fixtures("Fixture::User"))]
+async fn create_with_age_range_error(port: u16) -> anyhow::Result<()> {
+    let name = "create_with_age_range_error";
+
+    create_error(
+        "age_ranges",
+        "6389eaa0-de76-11ea-b7ab-0399bcf84df2",
+        name,
+        port,
+    )
+    .await
+}
+
+#[test_service(setup = "setup_service", fixtures("Fixture::User"))]
+async fn create_with_category_error(port: u16) -> anyhow::Result<()> {
+    let name = "create_with_category_error";
+
+    create_error(
+        "categories",
+        "6389eaa0-de76-11ea-b7ab-0399bcf84df2",
+        name,
+        port,
+    )
+    .await
+}
+
+#[test_service(setup = "setup_service", fixtures("Fixture::User"))]
+async fn create_with_tags_error(port: u16) -> anyhow::Result<()> {
+    let name = "create_with_tags_error";
+
+    create_error_tag("tags", &22, name, port).await
+}
+
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::User",
+        "Fixture::Image",
+        "Fixture::MetaKinds",
+        "Fixture::MetaImage"
+    )
+)]
+async fn get_metadata(port: u16) -> anyhow::Result<()> {
+    let name = "get_metadata";
 
     let client = reqwest::Client::new();
 
@@ -218,9 +248,7 @@ async fn get_metadata() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
-    insta::assert_json_snapshot!(body, {".metadata.updated_at" => "[timestamp]"});
+    insta::assert_json_snapshot!(format!("{}",name), body, {".metadata.updated_at" => "[timestamp]"});
 
     Ok(())
 }
@@ -230,11 +258,7 @@ async fn get_metadata() -> anyhow::Result<()> {
 // todo: delete; missing algolia, s3
 // todo: delete: edge case (never uploaded, should work even without s3), missing algolia
 
-async fn update(req: &serde_json::Value) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::MetaKinds, Fixture::Image], &[]).await;
-
-    let port = app.port();
-
+async fn update(req: &serde_json::Value, name: &str, port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -264,39 +288,52 @@ async fn update(req: &serde_json::Value) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
-    insta::assert_json_snapshot!(body, {".metadata.updated_at" => "[timestamp]"});
+    insta::assert_json_snapshot!(format!("{}",name), body, {".metadata.updated_at" => "[timestamp]"});
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn update_empty() -> anyhow::Result<()> {
-    update(&json!({})).await
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::MetaKinds", "Fixture::Image")
+)]
+async fn update_empty(port: u16) -> anyhow::Result<()> {
+    let name = "update_empty";
+    update(&json!({}), name, port).await
 }
 
-#[actix_rt::test]
-async fn update_is_premium() -> anyhow::Result<()> {
-    update(&json!({"is_premium": true})).await
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::MetaKinds", "Fixture::Image")
+)]
+async fn update_is_premium(port: u16) -> anyhow::Result<()> {
+    let name = "update_is_premium";
+    update(&json!({"is_premium": true}), name, port).await
 }
 
-#[actix_rt::test]
-async fn update_styles() -> anyhow::Result<()> {
-    update(&json!({"styles": ["6389eaa0-de76-11ea-b7ab-0399bcf84df2", "6389ff7c-de76-11ea-b7ab-9b5661dd4f70"]})).await
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::MetaKinds", "Fixture::Image")
+)]
+async fn update_styles(port: u16) -> anyhow::Result<()> {
+    let name = "update_styles";
+    update(&json!({"styles": ["6389eaa0-de76-11ea-b7ab-0399bcf84df2", "6389ff7c-de76-11ea-b7ab-9b5661dd4f70"]}), name, port
+    )
+    .await
 }
 
-#[actix_rt::test]
-async fn update_tags() -> anyhow::Result<()> {
-    update(&json!({"tags": [0, 2]})).await
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::MetaKinds", "Fixture::Image")
+)]
+async fn update_tags(port: u16) -> anyhow::Result<()> {
+    let name = "update_tags";
+    update(&json!({"tags": [0, 2]}), name, port).await
 }
 
-#[actix_rt::test]
-async fn browse() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
-
-    let port = app.port();
-
+#[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Image"))]
+async fn browse(port: u16) -> anyhow::Result<()> {
+    let name = "browse";
     let client = reqwest::Client::new();
 
     // create a new image resource
@@ -312,113 +349,106 @@ async fn browse() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
-    insta::assert_json_snapshot!(body, {".metadata.updated_at" => "[timestamp]"});
+    insta::assert_json_snapshot!(format!("{}",name), body, {".metadata.updated_at" => "[timestamp]"});
 
     Ok(())
 }
 
 // https://cloud.google.com/storage/docs/performing-resumable-uploads#single-chunk-upload
-#[ignore]
-#[actix_rt::test]
-async fn upload_with_url() -> anyhow::Result<()> {
-    let file: Vec<u8> = include_bytes!("../../fixtures/images/ji-logo.png").to_vec();
+// #[ignore]
+// #[test_service(
+//     setup = "setup_service",
+//     fixtures("Fixture::User", "Fixture::Image"),
+//     services("Service::GoogleCloudStorage")
+// )]
+// async fn upload_with_url(port: u16) -> anyhow::Result<()> {
+//     let _name = "upload_with_url";
 
-    let app = initialize_server(
-        &[Fixture::User, Fixture::Image],
-        &[Service::GoogleCloudStorage],
-    )
-    .await;
+//     let file: Vec<u8> = include_bytes!("../../fixtures/images/ji-logo.png").to_vec();
 
-    let port = app.port();
+//     let client = reqwest::Client::new();
 
-    let client = reqwest::Client::new();
+//     // get an upload URL for the new media
+//     let resp = client
+//         .patch(&format!(
+//             "http://0.0.0.0:{}/v1/image/8cca720a-c4bb-11eb-8edf-63da1d86939c/raw",
+//             port,
+//         ))
+//         .json(&json!({ "file_size": &file.len() }))
+//         .login()
+//         .send()
+//         .await?
+//         .error_for_status()?;
 
-    // get an upload URL for the new media
-    let resp = client
-        .patch(&format!(
-            "http://0.0.0.0:{}/v1/image/8cca720a-c4bb-11eb-8edf-63da1d86939c/raw",
-            port,
-        ))
-        .json(&json!({ "file_size": &file.len() }))
-        .login()
-        .send()
-        .await?
-        .error_for_status()?;
+//     assert_eq!(resp.status(), StatusCode::OK);
 
-    assert_eq!(resp.status(), StatusCode::OK);
+//     let resp: shared::domain::image::ImageUploadResponse = resp.json().await?;
 
-    let resp: shared::domain::image::ImageUploadResponse = resp.json().await?;
+//     let resp = client
+//         .put(&resp.session_uri)
+//         .header(reqwest::header::CONTENT_LENGTH, &file.len().to_string())
+//         .body(file)
+//         .send()
+//         .await?;
 
-    let resp = client
-        .put(&resp.session_uri)
-        .header(reqwest::header::CONTENT_LENGTH, &file.len().to_string())
-        .body(file)
-        .send()
-        .await?;
+//     assert_eq!(resp.status(), StatusCode::OK);
 
-    assert_eq!(resp.status(), StatusCode::OK);
+//     Ok(())
+// }
 
-    Ok(())
-}
+// #[ignore]
+// #[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Image"))]
+// async fn create_media_and_upload_with_url(port: u16) -> anyhow::Result<()> {
+//     let _name = "create_media_and_upload_with_url";
+//     let client = reqwest::Client::new();
 
-#[ignore]
-#[actix_rt::test]
-async fn create_media_and_upload_with_url() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
+//     // create a new image resource
+//     let resp = client
+//         .post(&format!("http://0.0.0.0:{}/v1/image", port))
+//         .json(&json!({
+//             "name": "test_img",
+//             "description": "test_descip",
+//             "is_premium": false,
+//             "publish_at": (),
+//             "styles": [],
+//             "age_ranges": [],
+//             "affiliations": [],
+//             "tags": [],
+//             "categories": [],
+//             "size": "Canvas",
+//         }))
+//         .login()
+//         .send()
+//         .await?
+//         .error_for_status()?;
 
-    let port = app.port();
+//     assert_eq!(StatusCode::CREATED, resp.status());
 
-    let client = reqwest::Client::new();
+//     let resp: shared::domain::image::CreateResponse = resp.json().await?;
 
-    // create a new image resource
-    let resp = client
-        .post(&format!("http://0.0.0.0:{}/v1/image", port))
-        .json(&json!({
-            "name": "test_img",
-            "description": "test_descip",
-            "is_premium": false,
-            "publish_at": (),
-            "styles": [],
-            "age_ranges": [],
-            "affiliations": [],
-            "tags": [],
-            "categories": [],
-            "size": "Canvas",
-        }))
-        .login()
-        .send()
-        .await?
-        .error_for_status()?;
+//     let id = resp.id.0;
 
-    assert_eq!(StatusCode::CREATED, resp.status());
+//     // get an upload URL for the new media
+//     let resp = client
+//         .patch(&format!(
+//             "http://0.0.0.0:{}/v1/image/{}/raw",
+//             port,
+//             id.to_string()
+//         ))
+//         .json(&json!({"file_size": 5}))
+//         .login()
+//         .send()
+//         .await?
+//         .error_for_status()?;
 
-    let resp: shared::domain::image::CreateResponse = resp.json().await?;
+//     assert_eq!(resp.status(), StatusCode::OK);
 
-    let id = resp.id.0;
+//     let resp: shared::domain::image::ImageUploadResponse = resp.json().await?;
 
-    // get an upload URL for the new media
-    let resp = client
-        .patch(&format!(
-            "http://0.0.0.0:{}/v1/image/{}/raw",
-            port,
-            id.to_string()
-        ))
-        .json(&json!({"file_size": 5}))
-        .login()
-        .send()
-        .await?
-        .error_for_status()?;
+//     let _url = resp.session_uri;
 
-    assert_eq!(resp.status(), StatusCode::OK);
+//     // perform upload in single chunk
+//     let _resp = client;
 
-    let resp: shared::domain::image::ImageUploadResponse = resp.json().await?;
-
-    let _url = resp.session_uri;
-
-    // perform upload in single chunk
-    let _resp = client;
-
-    Ok(())
-}
+//     Ok(())
+// }

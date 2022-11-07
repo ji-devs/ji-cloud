@@ -14,6 +14,7 @@ pub enum Service {
 
 // FIXME: make this more generic for all services, once GCS migration and test coverage is included
 // if the given key is false, then bypass the test so CI can
+#[allow(dead_code)]
 pub fn email_test_guard() -> bool {
     let _ = dotenv::dotenv().ok();
     !core::env::env_bool("TEST_SENDGRID_DISABLE")
@@ -64,9 +65,6 @@ impl TestServicesSettings {
                 .await?;
 
                 let token = token.access_token.unwrap();
-
-                println!("token: {:?}", token);
-                println!("project id: {:?}", project_id);
 
                 (token, project_id)
             }

@@ -15,7 +15,7 @@ pub const DB_INSTANCE_SANDBOX: &str =
 /// Release target
 pub const DB_INSTANCE_RELEASE: &str = "ji-cloud:europe-west1:ji-cloud-002";
 /// Maximum # of DB pools
-pub const DB_POOL_CONNECTIONS: u32 = 10;
+pub const DB_POOL_CONNECTIONS: u32 = 20;
 /// User and DB owner
 pub const REMOTE_DB_USER: &str = "postgres";
 /// Name of the DB

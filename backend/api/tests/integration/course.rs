@@ -1,25 +1,24 @@
 use http::StatusCode;
+use macros::test_service;
 use serde_json::json;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, LoginExt},
+    helpers::{setup_service, LoginExt},
 };
 
-#[actix_rt::test]
-async fn get() -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::MetaKinds,
-            Fixture::User,
-            Fixture::Jig,
-            Fixture::Course,
-        ],
-        &[],
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::MetaKinds",
+        "Fixture::User",
+        "Fixture::Jig",
+        "Fixture::Course"
     )
-    .await;
-
-    let port = app.port();
+)]
+async fn get(port: u16) -> anyhow::Result<()> {
+    let name = "get";
 
     let client = reqwest::Client::new();
 
@@ -40,6 +39,7 @@ async fn get() -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-1",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -60,30 +60,26 @@ async fn get() -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
     );
 
-    app.stop(false).await;
-
     Ok(())
 }
 
-#[actix_rt::test]
-async fn update_and_publish_browse() -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::MetaKinds,
-            Fixture::User,
-            Fixture::Jig,
-            Fixture::Course,
-        ],
-        &[],
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::MetaKinds",
+        "Fixture::User",
+        "Fixture::Jig",
+        "Fixture::Course"
     )
-    .await;
-
-    let port = app.port();
+)]
+async fn update_and_publish_browse(port: u16) -> anyhow::Result<()> {
+    let name = "update_and_publish_browse";
 
     let client = reqwest::Client::new();
 
@@ -100,6 +96,7 @@ async fn update_and_publish_browse() -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-1",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -134,6 +131,7 @@ async fn update_and_publish_browse() -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -152,6 +150,7 @@ async fn update_and_publish_browse() -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-3",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -182,6 +181,7 @@ async fn update_and_publish_browse() -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-4",name),
         body, {
             // Really just need to redact the module ID because it is recreated for the live data,
             // but I couldn't get a selector working correctly... So redacting all IDs.
@@ -191,25 +191,20 @@ async fn update_and_publish_browse() -> anyhow::Result<()> {
         }
     );
 
-    app.stop(false).await;
-
     Ok(())
 }
 
-#[actix_rt::test]
-async fn browse_simple() -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::MetaKinds,
-            Fixture::User,
-            Fixture::Jig,
-            Fixture::Course,
-        ],
-        &[],
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::MetaKinds",
+        "Fixture::User",
+        "Fixture::Jig",
+        "Fixture::Course"
     )
-    .await;
-
-    let port = app.port();
+)]
+async fn browse_simple(port: u16) -> anyhow::Result<()> {
+    let name = "browse_simple";
 
     let client = reqwest::Client::new();
 
@@ -224,9 +219,8 @@ async fn browse_simple() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(
+        format!("{}",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -235,20 +229,17 @@ async fn browse_simple() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
-async fn course_jig_index() -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::MetaKinds,
-            Fixture::User,
-            Fixture::Jig,
-            Fixture::Course,
-        ],
-        &[],
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::MetaKinds",
+        "Fixture::User",
+        "Fixture::Jig",
+        "Fixture::Course"
     )
-    .await;
-
-    let port = app.port();
+)]
+async fn course_jig_index(port: u16) -> anyhow::Result<()> {
+    let name = "course_jig_index";
 
     let client = reqwest::Client::new();
 
@@ -265,6 +256,7 @@ async fn course_jig_index() -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-1",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -298,6 +290,7 @@ async fn course_jig_index() -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -316,6 +309,7 @@ async fn course_jig_index() -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-3",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -346,6 +340,7 @@ async fn course_jig_index() -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-4",name),
         body, {
             ".**.id" => "[id]",
             ".**.lastEdited" => "[last_edited]",
@@ -353,25 +348,20 @@ async fn course_jig_index() -> anyhow::Result<()> {
         }
     );
 
-    app.stop(false).await;
-
     Ok(())
 }
 
-#[actix_rt::test]
-async fn publish_modules() -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::MetaKinds,
-            Fixture::User,
-            Fixture::Jig,
-            Fixture::Course,
-        ],
-        &[],
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::MetaKinds",
+        "Fixture::User",
+        "Fixture::Jig",
+        "Fixture::Course"
     )
-    .await;
-
-    let port = app.port();
+)]
+async fn publish_modules(port: u16) -> anyhow::Result<()> {
+    let name = "publish_modules";
 
     let client = reqwest::Client::new();
 
@@ -390,6 +380,7 @@ async fn publish_modules() -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-1",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -408,6 +399,7 @@ async fn publish_modules() -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -438,6 +430,7 @@ async fn publish_modules() -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-3",name),
         body, {
             ".**.id" => "[id]",
             ".**.lastEdited" => "[last_edited]",
@@ -445,25 +438,20 @@ async fn publish_modules() -> anyhow::Result<()> {
         }
     );
 
-    app.stop(false).await;
-
     Ok(())
 }
 
-#[actix_rt::test]
-async fn live_up_to_date_flag() -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::MetaKinds,
-            Fixture::User,
-            Fixture::Jig,
-            Fixture::Course,
-        ],
-        &[],
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::MetaKinds",
+        "Fixture::User",
+        "Fixture::Jig",
+        "Fixture::Course"
     )
-    .await;
-
-    let port = app.port();
+)]
+async fn live_up_to_date_flag(port: u16) -> anyhow::Result<()> {
+    let name = "live_up_to_date_flag";
 
     let client = reqwest::Client::new();
 
@@ -482,6 +470,7 @@ async fn live_up_to_date_flag() -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-1",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -510,6 +499,7 @@ async fn live_up_to_date_flag() -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
             // Really just need to redact the module ID because it is recreated for the live data,
             // but I couldn't get a selector working correctly... So redacting all IDs.
@@ -518,8 +508,6 @@ async fn live_up_to_date_flag() -> anyhow::Result<()> {
             ".**.publishedAt" => "[published_at]",
         }
     );
-
-    app.stop(false).await;
 
     Ok(())
 }

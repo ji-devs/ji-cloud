@@ -1,20 +1,20 @@
 use http::StatusCode;
+use macros::test_service;
 use serde_json::json;
 use shared::domain::{resource::ResourceId, CreateResponse};
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, LoginExt},
+    helpers::{setup_service, LoginExt},
 };
 
 mod cover;
 mod curation;
 
-#[actix_rt::test]
-async fn create_default() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[]).await;
-
-    let port = app.port();
+#[test_service(setup = "setup_service", fixtures("Fixture::User"))]
+async fn create_default(port: u16) -> anyhow::Result<()> {
+    let name = "create_default";
 
     let client = reqwest::Client::new();
 
@@ -25,11 +25,13 @@ async fn create_default() -> anyhow::Result<()> {
         .await?
         .error_for_status()?;
 
-    assert_eq!(resp.status(), StatusCode::CREATED);
+    let status = resp.status();
+
+    assert_eq!(status, StatusCode::CREATED);
 
     let body: CreateResponse<ResourceId> = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, {".id" => "[id]"});
+    insta::assert_json_snapshot!(format!("{}-1", name), body, {".**.id" => "[id]"});
 
     let resource_id = body.id.0;
 
@@ -46,12 +48,11 @@ async fn create_default() -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name), 
         body, {
             ".**.id" => "[id]",
             ".**.createdAt" => "[created_at]",
-            ".**.lastEdited" => "[last_edited]"
-        }
-    );
+            ".**.lastEdited" => "[last_edited]"});
 
     let resp = client
         .get(&format!(
@@ -63,26 +64,24 @@ async fn create_default() -> anyhow::Result<()> {
         .await?
         .error_for_status()?;
 
-    app.stop(false).await;
-
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-3",name), 
         body, {
             ".**.id" => "[id]",
             ".**.createdAt" => "[created_at]",
-            ".**.lastEdited" => "[last_edited]"
-        }
-    );
+            ".**.lastEdited" => "[last_edited]"});
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn create_with_params() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Resource], &[]).await;
-
-    let port = app.port();
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Resource")
+)]
+async fn create_with_params(port: u16) -> anyhow::Result<()> {
+    let name = "create_with_params";
 
     let client = reqwest::Client::new();
 
@@ -97,23 +96,27 @@ async fn create_with_params() -> anyhow::Result<()> {
         .send()
         .await?
         .error_for_status()?;
+    let status = resp.status();
 
-    assert_eq!(resp.status(), StatusCode::CREATED);
+    assert_eq!(status, StatusCode::CREATED);
 
     let body: CreateResponse<ResourceId> = resp.json().await?;
 
-    app.stop(false).await;
-
-    insta::assert_json_snapshot!(body, {".id" => "[id]", ".last_edited" => "[last_edited]"});
+    insta::assert_json_snapshot!(
+        format!("{}",name), 
+        body, {
+            ".**.id" => "[id]",
+            ".**.lastEdited" => "[last_edited]"});
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn clone() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Resource], &[]).await;
-
-    let port = app.port();
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Resource")
+)]
+async fn clone(port: u16) -> anyhow::Result<()> {
+    let name = "clone";
 
     let client = reqwest::Client::new();
 
@@ -129,7 +132,9 @@ async fn clone() -> anyhow::Result<()> {
         .await?
         .error_for_status()?;
 
-    assert_eq!(resp.status(), StatusCode::CREATED);
+    let status = resp.status();
+
+    assert_eq!(status, StatusCode::CREATED);
 
     let CreateResponse { id: ResourceId(id) } = resp.json().await?;
 
@@ -140,11 +145,14 @@ async fn clone() -> anyhow::Result<()> {
         .await?
         .error_for_status()?;
 
-    assert_eq!(resp.status(), StatusCode::OK);
+    let status = resp.status();
+
+    assert_eq!(status, StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-1",name),
         body, {
             ".**.id" => "[id]",
             ".**.lastEdited" => "[last_edited]",
@@ -158,12 +166,13 @@ async fn clone() -> anyhow::Result<()> {
         .send()
         .await?
         .error_for_status()?;
-
-    assert_eq!(resp.status(), StatusCode::OK);
+    let status = resp.status();
+    assert_eq!(status, StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
             ".**.id" => "[id]",
             ".**.lastEdited" => "[last_edited]",
@@ -171,16 +180,15 @@ async fn clone() -> anyhow::Result<()> {
         }
     );
 
-    app.stop(false).await;
-
     Ok(())
 }
 
-#[actix_rt::test]
-async fn get() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Resource], &[]).await;
-
-    let port = app.port();
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Resource")
+)]
+async fn get(port: u16) -> anyhow::Result<()> {
+    let name = "get";
 
     let client = reqwest::Client::new();
 
@@ -195,14 +203,16 @@ async fn get() -> anyhow::Result<()> {
         .send()
         .await?
         .error_for_status()?;
+    let status = resp.status();
 
-    assert_eq!(resp.status(), StatusCode::OK);
+    assert_eq!(status, StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-1",name),
         body, {
-            ".**.lastEdited" => "[last_edited]"
+            ".**.lastEdited" => "[last_edited]",
         }
     );
 
@@ -215,28 +225,29 @@ async fn get() -> anyhow::Result<()> {
         .send()
         .await?
         .error_for_status()?;
+    let status = resp.status();
 
-    assert_eq!(resp.status(), StatusCode::OK);
+    assert_eq!(status, StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
-            ".**.lastEdited" => "[last_edited]"
+            ".**.lastEdited" => "[last_edited]",
         }
     );
-
-    app.stop(false).await;
 
     Ok(())
 }
 
 // todo: test-exhaustiveness: create a `ResourceBrowse` Fixture, actually test the cases (paging, resource count, etc)
-#[actix_rt::test]
-async fn browse_simple() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Resource], &[]).await;
-
-    let port = app.port();
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Resource")
+)]
+async fn browse_simple(port: u16) -> anyhow::Result<()> {
+    let name = "browse_simple";
 
     let client = reqwest::Client::new();
 
@@ -246,14 +257,16 @@ async fn browse_simple() -> anyhow::Result<()> {
         .send()
         .await?
         .error_for_status()?;
+    let status = resp.status();
 
-    assert_eq!(resp.status(), StatusCode::OK);
+    assert_eq!(status, StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-1",name),
         body, {
-            ".**.lastEdited" => "[last_edited]"
+            ".**.lastEdited" => "[last_edited]",
         }
     );
 
@@ -266,14 +279,16 @@ async fn browse_simple() -> anyhow::Result<()> {
         .send()
         .await?
         .error_for_status()?;
+    let status = resp.status();
 
-    assert_eq!(resp.status(), StatusCode::OK);
+    assert_eq!(status, StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
-            ".**.lastEdited" => "[last_edited]"
+            ".**.lastEdited" => "[last_edited]",
         }
     );
 
@@ -286,27 +301,28 @@ async fn browse_simple() -> anyhow::Result<()> {
         .send()
         .await?
         .error_for_status()?;
+    let status = resp.status();
 
-    assert_eq!(resp.status(), StatusCode::OK);
+    assert_eq!(status, StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(
+        format!("{}-3",name),
         body, {
-            ".**.lastEdited" => "[last_edited]"
+            ".**.lastEdited" => "[last_edited]",
         }
     );
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn browse_order_by() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Resource], &[]).await;
-
-    let port = app.port();
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Resource")
+)]
+async fn browse_order_by(port: u16) -> anyhow::Result<()> {
+    let name = "browse_order_by";
 
     let client = reqwest::Client::new();
 
@@ -316,12 +332,13 @@ async fn browse_order_by() -> anyhow::Result<()> {
         .send()
         .await?
         .error_for_status()?;
+    let status = resp.status();
 
-    assert_eq!(resp.status(), StatusCode::OK);
+    assert_eq!(status, StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}-1", name), body);
 
     let resp = client
         .get(&format!(
@@ -332,12 +349,13 @@ async fn browse_order_by() -> anyhow::Result<()> {
         .send()
         .await?
         .error_for_status()?;
+    let status = resp.status();
 
-    assert_eq!(resp.status(), StatusCode::OK);
+    assert_eq!(status, StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}-2", name), body);
 
     let resp = client
         .get(&format!(
@@ -348,24 +366,23 @@ async fn browse_order_by() -> anyhow::Result<()> {
         .send()
         .await?
         .error_for_status()?;
+    let status = resp.status();
 
-    assert_eq!(resp.status(), StatusCode::OK);
+    assert_eq!(status, StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}-3", name), body);
 
     Ok(())
 }
 
-// todo: test-exhaustiveness: create a `ResourceBrowse` Fixture, actually test the cases (paging, resource count, etc)
-#[actix_rt::test]
-async fn browse_own_simple() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Resource], &[]).await;
-
-    let port = app.port();
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Resource")
+)]
+async fn browse_own_simple(port: u16) -> anyhow::Result<()> {
+    let name = "browse_own_simple";
 
     let client = reqwest::Client::new();
 
@@ -379,34 +396,28 @@ async fn browse_own_simple() -> anyhow::Result<()> {
         .await?
         .error_for_status()?;
 
-    assert_eq!(resp.status(), StatusCode::OK);
+    let status = resp.status();
+
+    assert_eq!(status, StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
     insta::assert_json_snapshot!(
+        format!("{}",name),
         body, {
-            ".**.lastEdited" => "[last_edited]"
+            ".**.lastEdited" => "[last_edited]",
         }
     );
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn count() -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::MetaKinds,
-            Fixture::UserDefaultPerms,
-            Fixture::Resource,
-        ],
-        &[],
-    )
-    .await;
-
-    let port = app.port();
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::UserDefaultPerms", "Fixture::Resource")
+)]
+async fn count(port: u16) -> anyhow::Result<()> {
+    let name = "count";
 
     let client = reqwest::Client::new();
 
@@ -417,31 +428,28 @@ async fn count() -> anyhow::Result<()> {
         .await?
         .error_for_status()?;
 
-    assert_eq!(resp.status(), StatusCode::OK);
+    let status = resp.status();
+
+    assert_eq!(status, StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn update_and_publish() -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::MetaKinds,
-            Fixture::User,
-            Fixture::Resource,
-            Fixture::CategoryOrdering,
-        ],
-        &[],
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::MetaKinds",
+        "Fixture::UserDefaultPerms",
+        "Fixture::Resource",
+        "Fixture::CategoryOrdering"
     )
-    .await;
-
-    let port = app.port();
+)]
+async fn update_and_publish(port: u16) -> anyhow::Result<()> {
+    let name = "update_and_publish";
 
     let client = reqwest::Client::new();
 
@@ -460,6 +468,7 @@ async fn update_and_publish() -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-1",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -479,8 +488,9 @@ async fn update_and_publish() -> anyhow::Result<()> {
         .send()
         .await?
         .error_for_status()?;
+    let status = resp.status();
 
-    assert_eq!(resp.status(), StatusCode::NO_CONTENT);
+    assert_eq!(status, StatusCode::NO_CONTENT);
 
     let resp = client
         .get(&format!(
@@ -495,8 +505,10 @@ async fn update_and_publish() -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
+            ".**.publishedAt" => "[published_at]",
         }
     );
 
@@ -513,6 +525,7 @@ async fn update_and_publish() -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-3",name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -541,81 +554,72 @@ async fn update_and_publish() -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-4",name),
         body, {
-            // Really just need to redact the module ID because it is recreated for the live data,
-            // but I couldn't get a selector working correctly... So redacting all IDs.
             ".**.id" => "[id]",
             ".**.lastEdited" => "[last_edited]",
-            ".**.publishedAt" => "[published_at]"
+            ".**.publishedAt" => "[published_at]",
+            ".**.additionalResources" => "[ids]",
+
         }
     );
 
-    app.stop(false).await;
-
     Ok(())
 }
 
-#[ignore]
-#[actix_rt::test]
-async fn update_and_publish_incomplete_modules() -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::MetaKinds,
-            Fixture::User,
-            Fixture::Resource,
-            Fixture::CategoryOrdering,
-        ],
-        &[],
+// #[ignore]
+// #[test_service(
+//     setup = "setup_service",
+//     fixtures(
+//         "Fixture::MetaKinds",
+//         "Fixture::UserDefaultPerms",
+//         "Fixture::Resource",
+//         "Fixture::CategoryOrdering"
+//     )
+// )]
+// async fn publish_incomplete_modules(port: u16) -> anyhow::Result<()> {
+//     let client = reqwest::Client::new();
+
+//     // Test no modules on JIG returns HTTP 400
+//     let resp = client
+//         .put(&format!(
+//             "http://0.0.0.0:{}/v1/resource/{}/draft/publish",
+//             port, "2f8d91d0-1519-11ed-87fa-eb1826fcf343"
+//         ))
+//         .login()
+//         .send()
+//         .await?;
+//     let status = resp.status();
+
+//     assert_eq!(status, StatusCode::BAD_REQUEST);
+
+//     // Test no modules on JIG returns HTTP 400
+//     let resp = client
+//         .put(&format!(
+//             "http://0.0.0.0:{}/v1/resource/{}/draft/publish",
+//             port, "af827e00-1519-11ed-87fa-7b1aa26c85a8"
+//         ))
+//         .login()
+//         .send()
+//         .await?;
+//     let status = resp.status();
+
+//     assert_eq!(status, StatusCode::BAD_REQUEST);
+
+//     Ok(())
+// }
+
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::MetaKinds",
+        "Fixture::UserDefaultPerms",
+        "Fixture::Resource",
+        "Fixture::CategoryOrdering"
     )
-    .await;
-
-    let port = app.port();
-
-    let client = reqwest::Client::new();
-
-    // Test no modules on JIG returns HTTP 400
-    let resp = client
-        .put(&format!(
-            "http://0.0.0.0:{}/v1/resource/3a71522a-cd77-11eb-8dc1-af3e35f7c743/draft/publish",
-            port
-        ))
-        .login()
-        .send()
-        .await?;
-
-    assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
-
-    // Test no modules on JIG returns HTTP 400
-    let resp = client
-        .put(&format!(
-            "http://0.0.0.0:{}/v1/resource/0cc084bc-7c83-11eb-9f77-e3218dffb008/draft/publish",
-            port
-        ))
-        .login()
-        .send()
-        .await?;
-
-    assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
-
-    app.stop(false).await;
-
-    Ok(())
-}
-
-#[actix_rt::test]
-async fn live_up_to_date_flag() -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::MetaKinds,
-            Fixture::User,
-            Fixture::Resource,
-            Fixture::CategoryOrdering,
-        ],
-        &[],
-    )
-    .await;
-
-    let port = app.port();
+)]
+async fn live_up_to_date_flag(port: u16) -> anyhow::Result<()> {
+    let name = "live_up_to_date_flag";
 
     let client = reqwest::Client::new();
 
@@ -631,10 +635,14 @@ async fn live_up_to_date_flag() -> anyhow::Result<()> {
         .await?
         .error_for_status()?;
 
+    println!("First");
+
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-1",name),
         body, {
+            ".**.publishedAt" => "[published_at]",
             ".**.lastEdited" => "[last_edited]",
         }
     );
@@ -662,16 +670,14 @@ async fn live_up_to_date_flag() -> anyhow::Result<()> {
     let body: serde_json::Value = resp.json().await?;
 
     insta::assert_json_snapshot!(
+        format!("{}-2",name),
         body, {
-            // Really just need to redact the module ID because it is recreated for the live data,
-            // but I couldn't get a selector working correctly... So redacting all IDs.
             ".**.id" => "[id]",
             ".**.lastEdited" => "[last_edited]",
             ".**.publishedAt" => "[published_at]",
+            ".**.additionalResources" => "[ids]"
         }
     );
-
-    app.stop(false).await;
 
     Ok(())
 }

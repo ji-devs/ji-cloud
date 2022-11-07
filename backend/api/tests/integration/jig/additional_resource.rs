@@ -1,8 +1,9 @@
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, LoginExt},
+    helpers::{setup_service, LoginExt},
 };
 use http::StatusCode;
+use macros::test_service;
 use shared::domain::{
     additional_resource::{AdditionalResourceCreateRequest, AssetIdResource, ResourceContent},
     asset::AssetId,
@@ -10,15 +11,16 @@ use shared::domain::{
     jig::JigId,
     meta::ResourceTypeId,
 };
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 use std::str::FromStr;
 use uuid::Uuid;
 
-#[actix_rt::test]
-async fn create() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
-
-    let port: u16 = app.port();
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
+)]
+async fn create(port: u16) -> anyhow::Result<()> {
+    let name = "create";
     let client = reqwest::Client::new();
 
     let resp = client
@@ -47,19 +49,17 @@ async fn create() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
-    insta::assert_json_snapshot!(body, {".id" => "[id]"});
+    insta::assert_json_snapshot!(format!("{}",name), body, {".id" => "[id]"});
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn get_draft() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
-
-    let port: u16 = app.port();
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
+)]
+async fn get_draft(port: u16) -> anyhow::Result<()> {
+    let name = "get_draft";
     let client = reqwest::Client::new();
 
     let resp = client
@@ -76,19 +76,17 @@ async fn get_draft() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn get_live() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
-
-    let port: u16 = app.port();
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
+)]
+async fn get_live(port: u16) -> anyhow::Result<()> {
+    let name = "get_live";
     let client = reqwest::Client::new();
 
     let resp = client
@@ -105,19 +103,16 @@ async fn get_live() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn delete() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
-
-    let port: u16 = app.port();
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
+)]
+async fn delete(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -135,8 +130,6 @@ async fn delete() -> anyhow::Result<()> {
         .error_for_status()?;
 
     assert_eq!(resp.status(), StatusCode::NO_CONTENT);
-
-    app.stop(false).await;
 
     Ok(())
 }

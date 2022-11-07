@@ -3,7 +3,8 @@ mod routes;
 
 use crate::templates::direct;
 use actix_web::{
-    dev::{MessageBody, Service, ServiceRequest, ServiceResponse},
+    body::MessageBody,
+    dev::{Service, ServiceRequest, ServiceResponse},
     http,
     web::{self, Data},
     HttpResponse,

@@ -1,24 +1,23 @@
 use http::StatusCode;
+use macros::test_service;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, LoginExt},
+    helpers::{setup_service, LoginExt},
 };
 
-#[actix_rt::test]
-async fn browse_public_user() -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::User,
-            Fixture::Image,
-            Fixture::PublicUser,
-            Fixture::Circle,
-        ],
-        &[],
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::User",
+        "Fixture::Image",
+        "Fixture::PublicUser",
+        "Fixture::Circle"
     )
-    .await;
-
-    let port = app.port();
+)]
+async fn browse_public_user(port: u16) -> anyhow::Result<()> {
+    let name = "browse_public_user";
 
     let client = reqwest::Client::new();
 
@@ -33,27 +32,22 @@ async fn browse_public_user() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
-
-    app.stop(false).await;
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn browse_users_with_circles() -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::User,
-            Fixture::Image,
-            Fixture::PublicUser,
-            Fixture::Circle,
-        ],
-        &[],
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::User",
+        "Fixture::Image",
+        "Fixture::PublicUser",
+        "Fixture::Circle"
     )
-    .await;
-
-    let port = app.port();
+)]
+async fn browse_users_with_circles(port: u16) -> anyhow::Result<()> {
+    let name = "browse_users_with_circles";
 
     let client = reqwest::Client::new();
 
@@ -71,27 +65,22 @@ async fn browse_users_with_circles() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
-
-    app.stop(false).await;
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn browse_user_jigs() -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::User,
-            Fixture::MetaKinds,
-            Fixture::Jig,
-            Fixture::PublicUser,
-        ],
-        &[],
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::User",
+        "Fixture::MetaKinds",
+        "Fixture::Jig",
+        "Fixture::PublicUser"
     )
-    .await;
-
-    let port = app.port();
+)]
+async fn browse_user_jigs(port: u16) -> anyhow::Result<()> {
+    let name = "browse_user_jigs";
 
     let client = reqwest::Client::new();
 
@@ -109,9 +98,7 @@ async fn browse_user_jigs() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
-    insta::assert_json_snapshot!(
+    insta::assert_json_snapshot!(format!("{}", name),
         body, {
             ".**.lastEdited" => "[last_edited]",
             ".**.feedbackPositive" => "[audio]",
@@ -122,20 +109,17 @@ async fn browse_user_jigs() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
-async fn browse_user_resources() -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::User,
-            Fixture::MetaKinds,
-            Fixture::Jig,
-            Fixture::PublicUser,
-        ],
-        &[],
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::User",
+        "Fixture::MetaKinds",
+        "Fixture::Jig",
+        "Fixture::PublicUser"
     )
-    .await;
-
-    let port = app.port();
+)]
+async fn browse_user_resources(port: u16) -> anyhow::Result<()> {
+    let name = "browse_user_resources";
 
     let client = reqwest::Client::new();
 
@@ -153,28 +137,23 @@ async fn browse_user_resources() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn browse_user_courses() -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::User,
-            Fixture::MetaKinds,
-            Fixture::Jig,
-            Fixture::PublicUser,
-            Fixture::Course,
-        ],
-        &[],
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::User",
+        "Fixture::MetaKinds",
+        "Fixture::Jig",
+        "Fixture::PublicUser",
+        "Fixture::Course"
     )
-    .await;
-
-    let port = app.port();
+)]
+async fn browse_user_courses(port: u16) -> anyhow::Result<()> {
+    let name = "browse_user_courses";
 
     let client = reqwest::Client::new();
 
@@ -192,7 +171,7 @@ async fn browse_user_courses() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(
+    insta::assert_json_snapshot!(format!("{}-1", name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -210,11 +189,9 @@ async fn browse_user_courses() -> anyhow::Result<()> {
 
     assert_eq!(resp.status(), StatusCode::OK);
 
-    app.stop(false).await;
-
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(
+    insta::assert_json_snapshot!(format!("{}-2", name),
         body, {
             ".**.lastEdited" => "[last_edited]",
         }
@@ -223,21 +200,18 @@ async fn browse_user_courses() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
-async fn browse_follower_and_unfollow() -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::User,
-            Fixture::MetaKinds,
-            Fixture::Jig,
-            Fixture::PublicUser,
-            Fixture::Course,
-        ],
-        &[],
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::User",
+        "Fixture::MetaKinds",
+        "Fixture::Jig",
+        "Fixture::PublicUser",
+        "Fixture::Course"
     )
-    .await;
-
-    let port = app.port();
+)]
+async fn browse_follower_and_unfollow(port: u16) -> anyhow::Result<()> {
+    let name = "browse_follower_and_unfollow";
 
     let client = reqwest::Client::new();
 
@@ -255,7 +229,7 @@ async fn browse_follower_and_unfollow() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}-1", name), body);
 
     let resp = client
         .delete(&format!(
@@ -281,20 +255,19 @@ async fn browse_follower_and_unfollow() -> anyhow::Result<()> {
 
     assert_eq!(resp.status(), StatusCode::OK);
 
-    app.stop(false).await;
-
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}-2", name), body);
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn browse_follower_and_follow() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::PublicUser], &[]).await;
-
-    let port = app.port();
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::PublicUser")
+)]
+async fn browse_follower_and_follow(port: u16) -> anyhow::Result<()> {
+    let name = "browse_follower_and_follow";
 
     let client = reqwest::Client::new();
 
@@ -324,7 +297,7 @@ async fn browse_follower_and_follow() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}-1", name), body);
 
     let resp = client
         .post(&format!(
@@ -350,30 +323,25 @@ async fn browse_follower_and_follow() -> anyhow::Result<()> {
 
     assert_eq!(resp.status(), StatusCode::OK);
 
-    app.stop(false).await;
-
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}-2", name), body);
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn browse_following_and_unfollow() -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::User,
-            Fixture::MetaKinds,
-            Fixture::Jig,
-            Fixture::PublicUser,
-            Fixture::Course,
-        ],
-        &[],
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::User",
+        "Fixture::MetaKinds",
+        "Fixture::Jig",
+        "Fixture::PublicUser",
+        "Fixture::Course"
     )
-    .await;
-
-    let port = app.port();
+)]
+async fn browse_following_and_unfollow(port: u16) -> anyhow::Result<()> {
+    let name = "browse_following_and_unfollow";
 
     let client = reqwest::Client::new();
 
@@ -391,7 +359,7 @@ async fn browse_following_and_unfollow() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}-1", name), body);
 
     let resp = client
         .delete(&format!(
@@ -417,25 +385,18 @@ async fn browse_following_and_unfollow() -> anyhow::Result<()> {
 
     assert_eq!(resp.status(), StatusCode::OK);
 
-    app.stop(false).await;
-
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}-2", name), body);
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn follow_self_error() -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[Fixture::User, Fixture::MetaKinds, Fixture::PublicUser],
-        &[],
-    )
-    .await;
-
-    let port = app.port();
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::MetaKinds", "Fixture::PublicUser")
+)]
+async fn follow_self_error(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     // Also, the current user logged in
@@ -451,8 +412,6 @@ async fn follow_self_error() -> anyhow::Result<()> {
         .await?;
 
     assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
-
-    app.stop(false).await;
 
     Ok(())
 }

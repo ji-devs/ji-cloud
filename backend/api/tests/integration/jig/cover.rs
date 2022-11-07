@@ -1,17 +1,19 @@
+use macros::test_service;
 use serde_json::json;
 use shared::domain::jig::JigResponse;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, LoginExt},
+    helpers::{setup_service, LoginExt},
 };
 
-#[actix_rt::test]
-async fn update_no_modules_changes() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::MetaKinds, Fixture::User, Fixture::Jig], &[]).await;
-
-    let port = app.port();
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
+)]
+async fn update_no_modules_changes(port: u16) -> anyhow::Result<()> {
+    let name = "update_no_modules_changes";
     let client = reqwest::Client::new();
 
     let _resp = client
@@ -39,9 +41,7 @@ async fn update_no_modules_changes() -> anyhow::Result<()> {
 
     let body: JigResponse = resp.json().await?;
 
-    app.stop(false).await;
-
-    insta::assert_json_snapshot!(body, {".**.lastEdited" => "[timestamp]", ".**.feedbackPositive" => "[audio]", ".**.feedbackNegative" => "[audio]"});
+    insta::assert_json_snapshot!(format!("{}", name), body, {".**.lastEdited" => "[timestamp]", ".**.feedbackPositive" => "[audio]", ".**.feedbackNegative" => "[audio]"});
 
     Ok(())
 }

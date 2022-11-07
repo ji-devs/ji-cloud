@@ -2,7 +2,8 @@ use std::{net::TcpListener, sync::Arc};
 
 use actix_service::Service;
 use actix_web::{
-    dev::{MessageBody, Server, ServiceRequest, ServiceResponse},
+    body::MessageBody,
+    dev::{Server, ServerHandle, ServiceRequest, ServiceResponse},
     error::Error,
     middleware::{Compat, Condition},
     web::{method, Data},
@@ -69,18 +70,24 @@ where
 pub struct Application {
     port: u16,
     server: Option<Server>,
+    server_handle: ServerHandle,
 }
 
 impl Application {
     pub fn new(port: u16, server: Server) -> Self {
         Self {
             port,
+            server_handle: server.handle(),
             server: Some(server),
         }
     }
 
     pub fn port(&self) -> u16 {
         self.port
+    }
+
+    pub fn handle(&self) -> ServerHandle {
+        self.server_handle.clone()
     }
 
     // A more expressive name that makes it clear that
@@ -95,16 +102,17 @@ impl Application {
 
     pub async fn stop(mut self, graceful: bool) {
         if let Some(server) = self.server.take() {
-            server.stop(graceful).await
+            server.handle().stop(graceful).await
         }
     }
 }
 
 impl Drop for Application {
     fn drop(&mut self) {
-        if let Some(server) = self.server.take() {
-            let _ = tokio::spawn(server.stop(false));
-        }
+        let handle = self.server_handle.clone();
+        let _ = tokio::spawn(async move {
+            handle.stop(true).await;
+        });
     }
 }
 
@@ -223,7 +231,7 @@ pub fn build(
         app.app_data(Data::from(jwk_verifier.clone()))
             .wrap(cors::get(local_insecure))
             .wrap(Condition::new(
-                !enable_tracing_logs,
+                enable_tracing_logs,
                 Compat::new(actix_web::middleware::Logger::default()),
             ))
             .wrap(Condition::new(
@@ -285,7 +293,7 @@ pub fn build(
     Ok(Application::new(port, server.run()))
 }
 
-fn default_route() -> HttpResponse {
+async fn default_route() -> HttpResponse {
     HttpResponse::NotFound().json(BasicError::with_message(
         http::StatusCode::NOT_FOUND,
         "Route not found".to_owned(),

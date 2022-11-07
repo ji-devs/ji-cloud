@@ -28,9 +28,8 @@ use shared::media::{FileKind, MediaLibrary, PngImageFile};
 use simplelog::Config;
 use uuid::Uuid;
 
-use clap::Clap;
-
-#[derive(Clap)]
+use clap::{Parser, Subcommand};
+#[derive(Parser)]
 #[clap(rename_all = "kebab-case")]
 struct Opts {
     /// The endpoint to access S3 from

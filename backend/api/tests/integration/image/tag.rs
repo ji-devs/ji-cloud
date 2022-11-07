@@ -1,17 +1,19 @@
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, LoginExt},
+    helpers::{setup_service, LoginExt},
 };
 use http::StatusCode;
+use macros::test_service;
 use shared::domain::image::tag::{ImageTagCreateRequest, ImageTagUpdateRequest};
 use shared::domain::meta::ImageTagIndex;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
-#[actix_rt::test]
-async fn create() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds], &[]).await;
-
-    let port = app.port();
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User, Fixture::Image, Fixture::MetaKinds")
+)]
+async fn create(port: u16) -> anyhow::Result<()> {
+    let name = "create";
     let client = reqwest::Client::new();
 
     let resp = client
@@ -28,19 +30,16 @@ async fn create() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, { ".id" => "[id]" });
-
-    app.stop(false).await;
+    insta::assert_json_snapshot!(format!("{}",name), body, { ".id" => "[id]" });
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn create_conflict() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds], &[]).await;
-
-    let port = app.port();
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User, Fixture::Image, Fixture::MetaKinds")
+)]
+async fn create_conflict(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -54,20 +53,16 @@ async fn create_conflict() -> anyhow::Result<()> {
 
     assert_eq!(resp.status(), StatusCode::CONFLICT);
 
-    app.stop(false).await;
-
     Ok(())
 }
 
-#[actix_rt::test]
-async fn list() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds], &[]).await;
-
-    let port = app.port();
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User, Fixture::Image, Fixture::MetaKinds")
+)]
+async fn list(port: u16) -> anyhow::Result<()> {
+    let name = "list";
     let client = reqwest::Client::new();
-
-    log::info!("making request");
 
     let resp = client
         .get(&format!("http://0.0.0.0:{}/v1/image/tag/all", port,))
@@ -80,18 +75,17 @@ async fn list() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, { ".**.id" => "[id]" });
-
-    app.stop(false).await;
+    insta::assert_json_snapshot!(format!("{}",name), body, { ".**.id" => "[id]" });
 
     Ok(())
 }
 
-async fn update(index: i16, req: ImageTagUpdateRequest) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds], &[]).await;
-
-    let port = app.port();
-
+async fn update(
+    index: i16,
+    req: ImageTagUpdateRequest,
+    name: &str,
+    port: u16,
+) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -115,67 +109,89 @@ async fn update(index: i16, req: ImageTagUpdateRequest) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, { ".**.id" => "[id]" });
-
-    app.stop(false).await;
+    insta::assert_json_snapshot!(format!("{}",name), body, { ".**.id" => "[id]" });
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn update_no_index() -> anyhow::Result<()> {
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User, Fixture::Image, Fixture::MetaKinds")
+)]
+async fn update_no_index(port: u16) -> anyhow::Result<()> {
+    let name = "update_no_index";
     update(
         0,
         ImageTagUpdateRequest {
             display_name: Some("test".to_owned()),
             index: None,
         },
+        name,
+        port,
     )
     .await
 }
 
-#[actix_rt::test]
-async fn update_with_index() -> anyhow::Result<()> {
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User, Fixture::Image, Fixture::MetaKinds")
+)]
+async fn update_with_index(port: u16) -> anyhow::Result<()> {
+    let name = "update_with_index";
     update(
         1,
         ImageTagUpdateRequest {
             display_name: Some("test".to_owned()),
             index: Some(ImageTagIndex(15)),
         },
+        name,
+        port,
     )
     .await
 }
 
-#[actix_rt::test]
-async fn update_none() -> anyhow::Result<()> {
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User, Fixture::Image, Fixture::MetaKinds")
+)]
+async fn update_none(port: u16) -> anyhow::Result<()> {
+    let name = "update_none";
     update(
         1,
         ImageTagUpdateRequest {
             display_name: None,
             index: None,
         },
+        name,
+        port,
     )
     .await
 }
 
-#[actix_rt::test]
-async fn update_only_index() -> anyhow::Result<()> {
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User, Fixture::Image, Fixture::MetaKinds")
+)]
+async fn update_only_index(port: u16) -> anyhow::Result<()> {
+    let name = "update_only_index";
     update(
         1,
         ImageTagUpdateRequest {
             display_name: None,
             index: Some(ImageTagIndex(3)),
         },
+        name,
+        port,
     )
     .await
 }
 
-#[actix_rt::test]
-async fn update_conflict() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds], &[]).await;
-
-    let port = app.port();
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User, Fixture::Image, Fixture::MetaKinds")
+)]
+async fn update_conflict(port: u16) -> anyhow::Result<()> {
+    let name = "update_conflict";
     let client = reqwest::Client::new();
 
     let resp = client
@@ -201,19 +217,16 @@ async fn update_conflict() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, { ".**.id" => "[id]" });
-
-    app.stop(false).await;
+    insta::assert_json_snapshot!(format!("{}",name), body, { ".**.id" => "[id]" });
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn delete() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds], &[]).await;
-
-    let port = app.port();
-
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User, Fixture::Image, Fixture::MetaKinds")
+)]
+async fn delete(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -224,8 +237,6 @@ async fn delete() -> anyhow::Result<()> {
         .error_for_status()?;
 
     assert_eq!(resp.status(), StatusCode::NO_CONTENT);
-
-    app.stop(false).await;
 
     Ok(())
 }

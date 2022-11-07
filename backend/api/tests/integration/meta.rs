@@ -1,26 +1,25 @@
 use http::StatusCode;
+use macros::test_service;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, LoginExt},
+    helpers::{setup_service, LoginExt},
 };
 
-#[actix_rt::test]
-async fn get() -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::User,
-            Fixture::Animation,
-            Fixture::Image,
-            Fixture::MetaKinds,
-            Fixture::MetaImage,
-            Fixture::MetaAnimation,
-        ],
-        &[],
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::User",
+        "Fixture::Animation",
+        "Fixture::Image",
+        "Fixture::MetaKinds",
+        "Fixture::MetaImage",
+        "Fixture::MetaAnimation"
     )
-    .await;
-
-    let port = app.port();
+)]
+async fn get(port: u16) -> anyhow::Result<()> {
+    let name = "course_jig_index";
 
     let client = reqwest::Client::new();
 
@@ -35,9 +34,7 @@ async fn get() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }

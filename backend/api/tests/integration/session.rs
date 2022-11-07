@@ -1,13 +1,11 @@
 use http::StatusCode;
+use macros::test_service;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
-use crate::{fixture::Fixture, helpers::initialize_server};
+use crate::{fixture::Fixture, helpers::setup_service};
 
-#[actix_rt::test]
-async fn create_401_no_auth() -> anyhow::Result<()> {
-    let app = initialize_server(&[], &[]).await;
-
-    let port = app.port();
-
+#[test_service(setup = "setup_service", fixtures(""))]
+async fn create_401_no_auth(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -17,17 +15,11 @@ async fn create_401_no_auth() -> anyhow::Result<()> {
 
     assert_eq!(resp.status(), StatusCode::UNAUTHORIZED);
 
-    app.stop(false).await;
-
     Ok(())
 }
 
-#[actix_rt::test]
-async fn create_basic() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[]).await;
-
-    let port = app.port();
-
+#[test_service(setup = "setup_service", fixtures("Fixture::User"))]
+async fn create_basic(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -44,17 +36,11 @@ async fn create_basic() -> anyhow::Result<()> {
         .expect("body wasn't a object")
         .contains_key("csrf");
 
-    app.stop(false).await;
-
     Ok(())
 }
 
-#[actix_rt::test]
-async fn create_basic_bad_password() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[]).await;
-
-    let port = app.port();
-
+#[test_service(setup = "setup_service", fixtures("Fixture::User"))]
+async fn create_basic_bad_password(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -64,8 +50,6 @@ async fn create_basic_bad_password() -> anyhow::Result<()> {
         .await?;
 
     assert_eq!(resp.status(), StatusCode::UNAUTHORIZED);
-
-    app.stop(false).await;
 
     Ok(())
 }

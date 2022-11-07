@@ -1,7 +1,6 @@
 ---
 source: tests/integration/locale.rs
 expression: body
-
 ---
 {
   "bundles": [

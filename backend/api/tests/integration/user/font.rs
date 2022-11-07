@@ -1,16 +1,19 @@
 use http::StatusCode;
+use macros::test_service;
 use serde_json::json;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, LoginExt},
+    helpers::{setup_service, LoginExt},
 };
 
-#[actix_rt::test]
-async fn get_all() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::UserFonts], &[]).await;
-
-    let port = app.port();
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::UserFonts")
+)]
+async fn get_all(port: u16) -> anyhow::Result<()> {
+    let name = "get_all";
 
     let client = reqwest::Client::new();
 
@@ -25,18 +28,17 @@ async fn get_all() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn update() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::UserFonts], &[]).await;
-
-    let port = app.port();
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::UserFonts")
+)]
+async fn update(port: u16) -> anyhow::Result<()> {
+    let name = "update";
 
     let client = reqwest::Client::new();
 
@@ -61,18 +63,17 @@ async fn update() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn delete() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::UserFonts], &[]).await;
-
-    let port = app.port();
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::UserFonts")
+)]
+async fn delete(port: u16) -> anyhow::Result<()> {
+    let name = "delete";
 
     let client = reqwest::Client::new();
 
@@ -96,18 +97,17 @@ async fn delete() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn create() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::UserFonts], &[]).await;
-
-    let port = app.port();
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::UserFonts")
+)]
+async fn create(port: u16) -> anyhow::Result<()> {
+    let name = "create";
 
     let client = reqwest::Client::new();
 
@@ -132,9 +132,7 @@ async fn create() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(format!("{}", name), body);
 
     Ok(())
 }

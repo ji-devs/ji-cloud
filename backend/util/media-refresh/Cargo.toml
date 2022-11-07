@@ -2,24 +2,27 @@
 name = "media-refresh"
 version = "0.1.0"
 authors = ["Chloe Ross <orangesnowfox@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.38"
-chrono = "0.4.19"
-clap = "3.0.0-beta.2"
+anyhow = "1.0.64"
+chrono = "0.4.22"
+clap = { version = "3.2.20", default-features = false, features = [
+    "env",
+    "derive",
+] }
 csv = "1.1.5"
 dotenv = "0.15.0"
 flume = { version = "0.10.1", features = ["async"] }
-futures = "0.3.12"
+futures = "0.3.24"
 indicatif = "0.15.0"
 log = "0.4.14"
-reqwest = { version = "0.11.0", features = ["json"] }
-serde = { version = "1.0.123", features = ["derive"] }
-serde_json = "1.0.61"
+reqwest = { version = "0.11.6", features = ["json"] }
+serde = { version = "1.0.144", features = ["derive"] }
+serde_json = "1.0.85"
 shared = { path = "../../../shared/rust" }
 simplelog = "0.9.0"
-tokio = { version = "1.0", features = ["rt", "macros", "rt-multi-thread"] }
-uuid = "0.8.2"
+tokio = { version = "1.21.0", features = ["rt", "macros", "rt-multi-thread"] }
+uuid = "1.1.2"

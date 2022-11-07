@@ -45,6 +45,8 @@ async fn create(
     ),
     error::CreateWithMetadata,
 > {
+    println!("here");
+
     let db = db.as_ref();
 
     let creator_id = auth.user_id();

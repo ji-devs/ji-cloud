@@ -34,20 +34,7 @@ expression: body
     "otherKeywords": "",
     "translatedKeywords": "",
     "translatedDescription": {},
-    "additionalResources": [
-      {
-        "id": "[id]",
-        "displayName": "link test",
-        "resourceTypeId": "a91aca34-519e-11ec-ab46-175eaaf1ff23",
-        "link": "url://url.url.url/urls/s"
-      },
-      {
-        "id": "[id]",
-        "displayName": "link test",
-        "resourceTypeId": "a91aca34-519e-11ec-ab46-175eaaf1ff23",
-        "link": "url://url.url.url/url/s"
-      }
-    ]
+    "additionalResources": "[ids]"
   },
   "adminData": {
     "rating": null,

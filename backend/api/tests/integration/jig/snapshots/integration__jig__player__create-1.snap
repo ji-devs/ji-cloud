@@ -1,0 +1,14 @@
+---
+source: tests/integration/jig/player.rs
+expression: body
+---
+{
+  "index": "[index]",
+  "settings": {
+    "direction": "rtl",
+    "displayScore": false,
+    "trackAssessments": false,
+    "dragAssist": false
+  },
+  "expires_at": "[timestamp]"
+}

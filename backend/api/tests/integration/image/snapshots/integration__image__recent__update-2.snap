@@ -1,7 +1,6 @@
 ---
 source: tests/integration/image/recent.rs
 expression: body_2
-
 ---
 {
   "images": [

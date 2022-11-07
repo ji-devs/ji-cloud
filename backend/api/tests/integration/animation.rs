@@ -1,17 +1,17 @@
 use http::StatusCode;
+use macros::test_service;
 use serde_json::json;
 use shared::domain::{animation::AnimationId, CreateResponse};
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
-    helpers::{initialize_server, LoginExt},
+    helpers::{setup_service, LoginExt},
 };
 
-#[actix_rt::test]
-async fn create() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User], &[]).await;
-
-    let port = app.port();
+#[test_service(setup = "setup_service", fixtures("Fixture::User"))]
+async fn create(port: u16) -> anyhow::Result<()> {
+    let name = "create";
 
     let client = reqwest::Client::new();
 
@@ -35,27 +35,22 @@ async fn create() -> anyhow::Result<()> {
 
     let body: CreateResponse<AnimationId> = resp.json().await?;
 
-    app.stop(false).await;
-
-    insta::assert_json_snapshot!(body, {".id" => "[id]"});
+    insta::assert_json_snapshot!(format!("{}",name), body, {".id" => "[id]"});
 
     Ok(())
 }
 
-#[actix_rt::test]
-async fn get_metadata() -> anyhow::Result<()> {
-    let app = initialize_server(
-        &[
-            Fixture::User,
-            Fixture::Animation,
-            Fixture::MetaKinds,
-            Fixture::MetaAnimation,
-        ],
-        &[],
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::User",
+        "Fixture::Animation",
+        "Fixture::MetaKinds",
+        "Fixture::MetaAnimation"
     )
-    .await;
-
-    let port = app.port();
+)]
+async fn get_metadata(port: u16) -> anyhow::Result<()> {
+    let name = "get_metadata";
 
     let client = reqwest::Client::new();
 
@@ -73,9 +68,7 @@ async fn get_metadata() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    app.stop(false).await;
-
-    insta::assert_json_snapshot!(body, {".metadata.updated_at" => "[timestamp]"});
+    insta::assert_json_snapshot!(format!("{}",name), body, {".metadata.updated_at" => "[timestamp]"});
 
     Ok(())
 }
