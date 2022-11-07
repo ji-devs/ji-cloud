@@ -9,7 +9,6 @@
 const DISABLE_CHILD_POINTER_THRESHHOLD = 3;
 
 import { LitElement, html, css, customElement, property } from "lit-element";
-import { nothing } from "lit-html";
 
 @customElement("drag-container")
 export class _ extends LitElement {
@@ -30,6 +29,7 @@ export class _ extends LitElement {
                     -webkit-user-drag: none;
                     -webkit-user-select: none;
                     -ms-user-select: none;
+                    touch-action: none;
                 }
 
                 :host([disableChildPointer]) ::slotted(*) {
@@ -48,33 +48,33 @@ export class _ extends LitElement {
     @property({ type: Number })
     y: number = 0;
 
-    lastMouseX: number = 0;
-    lastMouseY: number = 0;
+    lastPointerX: number = 0;
+    lastPointerY: number = 0;
 
     accumDiffX: number = 0;
     accumDiffY: number = 0;
 
-    onThisMouseDown = (evt: MouseEvent) => {
+    onThisPointerDown = (evt: PointerEvent) => {
         this.accumDiffX = 0;
         this.accumDiffY = 0;
         this.disableChildPointer = false;
 
-        this.lastMouseX = evt.clientX;
-        this.lastMouseY = evt.clientY;
+        this.lastPointerX = evt.clientX;
+        this.lastPointerY = evt.clientY;
 
-        window.addEventListener("mousemove", this.onGlobalMouseMove);
-        window.addEventListener("mouseup", this.onGlobalMouseUp);
+        window.addEventListener("pointermove", this.onGlobalPointerMove);
+        window.addEventListener("pointerup", this.onGlobalPointerUp);
     };
 
-    onGlobalMouseMove = (evt: MouseEvent) => {
-        const diffX = evt.clientX - this.lastMouseX;
-        const diffY = evt.clientY - this.lastMouseY;
+    onGlobalPointerMove = (evt: PointerEvent) => {
+        const diffX = evt.clientX - this.lastPointerX;
+        const diffY = evt.clientY - this.lastPointerY;
 
         this.x += diffX;
         this.y += diffY;
 
-        this.lastMouseX = evt.clientX;
-        this.lastMouseY = evt.clientY;
+        this.lastPointerX = evt.clientX;
+        this.lastPointerY = evt.clientY;
 
         this.accumDiffX += Math.abs(diffX);
         this.accumDiffY += Math.abs(diffX);
@@ -87,7 +87,7 @@ export class _ extends LitElement {
         }
     };
 
-    onGlobalMouseDown = (evt: MouseEvent) => {
+    onGlobalPointerDown = (evt: PointerEvent) => {
         const self = this.shadowRoot?.getElementById("section") as any;
 
         if (!evt.composedPath().includes(self)) {
@@ -95,26 +95,26 @@ export class _ extends LitElement {
         }
     };
 
-    onGlobalMouseUp = (_evt: MouseEvent) => {
+    onGlobalPointerUp = (_evt: PointerEvent) => {
         this.removeGlobalMoveListener();
         this.removeGlobalUpListener();
         this.disableChildPointer = false;
     };
 
     removeGlobalDownListener() {
-        window.removeEventListener("mousedown", this.onGlobalMouseDown);
+        window.removeEventListener("pointerdown", this.onGlobalPointerDown);
     }
 
     removeGlobalMoveListener() {
-        window.removeEventListener("mousemove", this.onGlobalMouseMove);
+        window.removeEventListener("pointermove", this.onGlobalPointerMove);
     }
     removeGlobalUpListener() {
-        window.removeEventListener("mouseup", this.onGlobalMouseUp);
+        window.removeEventListener("pointerup", this.onGlobalPointerUp);
     }
 
     //lifecycle
     firstUpdated() {
-        window.addEventListener("mousedown", this.onGlobalMouseDown);
+        window.addEventListener("pointerdown", this.onGlobalPointerDown);
     }
 
     disconnectedCallback() {
@@ -132,7 +132,7 @@ export class _ extends LitElement {
         return html`<section
             id="section"
             style="${style}"
-            @mousedown=${this.onThisMouseDown}
+            @pointerdown=${this.onThisPointerDown}
         >
             <slot></slot>
         </section>`;
