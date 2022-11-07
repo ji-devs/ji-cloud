@@ -366,41 +366,6 @@ async fn browse_order_by(port: u16) -> anyhow::Result<()> {
     Ok(())
 }
 
-// todo: test-exhaustiveness: create a `JigBrowse` Fixture, actually test the cases (paging, jig count, etc)
-#[test_service(
-    setup = "setup_service",
-    fixtures("Fixture::MetaKinds", "Fixture::UserDefaultPerms", "Fixture::Jig")
-)]
-async fn browse_own_simple(port: u16) -> anyhow::Result<()> {
-    let name = "browse_own_simple";
-    let client = reqwest::Client::new();
-
-    let resp = client
-        .get(&format!(
-            "http://0.0.0.0:{}/v1/jig/browse?authorId=me",
-            port
-        ))
-        .login()
-        .send()
-        .await?
-        .error_for_status()?;
-
-    assert_eq!(resp.status(), StatusCode::OK);
-
-    let body: serde_json::Value = resp.json().await?;
-
-    insta::assert_json_snapshot!(
-    format!("{}",name),
-            body, {
-                ".**.lastEdited" => "[last_edited]",
-                ".**.feedbackPositive" => "[audio]",
-                ".**.feedbackNegative" => "[audio]"
-            }
-        );
-
-    Ok(())
-}
-
 #[test_service(
     setup = "setup_service",
     fixtures("Fixture::MetaKinds", "Fixture::UserDefaultPerms", "Fixture::Jig")
@@ -664,6 +629,41 @@ async fn live_up_to_date_flag(port: u16) -> anyhow::Result<()> {
 //         .await?;
 
 //     assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
+
+//     Ok(())
+// }
+
+// todo: test-exhaustiveness: create a `JigBrowse` Fixture, actually test the cases (paging, jig count, etc)
+// #[test_service(
+//     setup = "setup_service",
+//     fixtures("Fixture::MetaKinds", "Fixture::UserDefaultPerms", "Fixture::Jig")
+// )]
+// async fn browse_own_simple(port: u16) -> anyhow::Result<()> {
+//     let name = "browse_own_simple";
+//     let client = reqwest::Client::new();
+
+//     let resp = client
+//         .get(&format!(
+//             "http://0.0.0.0:{}/v1/jig/browse?authorId=me",
+//             port
+//         ))
+//         .login()
+//         .send()
+//         .await?
+//         .error_for_status()?;
+
+//     assert_eq!(resp.status(), StatusCode::OK);
+
+//     let body: serde_json::Value = resp.json().await?;
+
+//     insta::assert_json_snapshot!(
+//     format!("{}",name),
+//             body, {
+//                 ".**.lastEdited" => "[last_edited]",
+//                 ".**.feedbackPositive" => "[audio]",
+//                 ".**.feedbackNegative" => "[audio]"
+//             }
+//         );
 
 //     Ok(())
 // }

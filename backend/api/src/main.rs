@@ -18,10 +18,9 @@ use core::{
     env::env_bool,
     settings::{self, SettingsManager},
 };
+use ji_cloud_api::{algolia, db, http, jwk, logger, service, translate};
 use sentry_tracing::EventFilter;
 use tracing_subscriber::{fmt::format::FmtSpan, layer::SubscriberExt, EnvFilter, Registry};
-
-use ji_cloud_api::{algolia, db, http, jwk, logger, service, translate};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -176,7 +175,7 @@ async fn main() -> anyhow::Result<()> {
 
     log::info!("app started!");
 
-    tokio::task::block_in_place(|| handle.join())
+    let _ = tokio::task::block_in_place(|| handle.join())
         .unwrap()
         .context("http server died")?;
 

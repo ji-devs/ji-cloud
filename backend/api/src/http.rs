@@ -17,7 +17,6 @@ use core::{
 };
 use futures::Future;
 use sqlx::postgres::PgPool;
-use tokio::runtime::Runtime;
 use tracing::Span;
 use tracing_actix_web::{root_span, DefaultRootSpanBuilder, RootSpanBuilder, TracingLogger};
 
@@ -111,12 +110,9 @@ impl Application {
 impl Drop for Application {
     fn drop(&mut self) {
         let handle = self.server_handle.clone();
-        let rt = Runtime::new().unwrap();
-        let _ = rt.spawn(async move {
+        let _ = tokio::spawn(async move {
             handle.stop(true).await;
-            println!("graceful");
         });
-        println!("spawn graceful shutdown");
     }
 }
 
