@@ -40,15 +40,15 @@ impl BoxOutline {
         D: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
     {
         html!("box-outline-absolute", {
-            .property("lineHidden", state.style.line_hidden())
+            .prop("lineHidden", state.style.line_hidden())
             .apply_if(slot.is_some(), |dom| {
-                dom.property("slot", slot.unwrap_ji())
+                dom.prop("slot", slot.unwrap_ji())
             })
             .apply_if(state.get_top_right_hover_only(), |dom| {
-                dom.property("top-right-hover-only", true)
+                dom.prop("top-right-hover-only", true)
             })
             .apply_if(state.get_top_left_hover_only(), |dom| {
-                dom.property("top-left-hover-only", true)
+                dom.prop("top-left-hover-only", true)
             })
             .style_signal("top", state.top_style_signal())
             .style_signal("left", state.left_style_signal())
@@ -68,21 +68,21 @@ impl BoxOutline {
                     })
                     .apply_if(click_area.is_some(), |dom| {
                         dom
-                            .property("click-area", true)
+                            .prop("click-area", true)
                             .child(html!("div", {
-                                .property("slot", "click-area")
+                                .prop("slot", "click-area")
                                 .apply(click_area.unwrap_ji())
                             }))
                     })
                     .apply_if(top_right.is_some(), |dom| {
                         dom.child(html!("div", {
-                            .property("slot", "top-right")
+                            .prop("slot", "top-right")
                             .apply(top_right.unwrap_ji())
                         }))
                     })
                     .apply_if(top_left.is_some(), |dom| {
                         dom.child(html!("div", {
-                            .property("slot", "top-left")
+                            .prop("slot", "top-left")
                             .apply(top_left.unwrap_ji())
                         }))
                     })

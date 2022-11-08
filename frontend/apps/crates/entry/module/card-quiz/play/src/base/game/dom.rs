@@ -12,7 +12,7 @@ use utils::prelude::*;
 impl Game {
     pub fn render(state: Rc<Self>) -> Dom {
         html!("card-quiz-main", {
-            .property("slot", "main")
+            .prop("slot", "main")
             .children_signal_vec(
                 state.current.signal_cloned()
                     .map(clone!(state => move |current| {
@@ -42,7 +42,7 @@ impl Game {
 
                                 children.push(render_card_mixin(options, |dom| {
                                     dom
-                                        .property_signal(
+                                        .prop_signal(
                                             "effect",
                                             phase.signal().map(move |phase| {
                                                 match phase {
@@ -51,7 +51,7 @@ impl Game {
                                                 }
                                             })
                                         )
-                                        .property_signal("flipped", phase.signal().map(clone!(state, pair_id => move |phase| {
+                                        .prop_signal("flipped", phase.signal().map(clone!(state, pair_id => move |phase| {
                                             if is_incorrect_choice(&state, &pair_id) {
                                                 false
                                             } else {

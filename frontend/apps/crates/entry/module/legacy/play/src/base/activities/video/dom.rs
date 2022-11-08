@@ -45,12 +45,12 @@ impl Video {
             .style("transform-origin", {
                 "center center"
             })
-            .property("controls", false)
-            .attribute("src", &state.base.activity_media_url(&url))
+            .prop("controls", false)
+            .attr("src", &state.base.activity_media_url(&url))
             .apply_if(state.raw.range.is_some(), |dom| {
                 let (start, _) = state.raw.range.unwrap_ji();
                 dom
-                    .property("currentTime", start.round())
+                    .prop("currentTime", start.round())
             })
             .event(clone!(state => move |_: events::LoadedMetadata| {
                 state.start_gates.replace_with(|gates| {
@@ -101,11 +101,11 @@ impl Video {
             .apply_if(state.raw.range.is_some(), |dom| {
                 let (start, end) = state.raw.range.unwrap_ji();
                 dom
-                    .property("start", start.round())
-                    .property("end", end.round())
+                    .prop("start", start.round())
+                    .prop("end", end.round())
             })
-            .property("videoId", yt.get_id())
-            .property("hideControls", true)
+            .prop("videoId", yt.get_id())
+            .prop("hideControls", true)
             .style("position", "absolute")
             .style_signal("transform", state.transform_signal())
             .style_signal("display", state.has_size_signal().map(|has_size| {
@@ -118,11 +118,11 @@ impl Video {
             .style("transform-origin", {
                 "center center"
             })
-            .property("captions", false)
-            .property("muted", false)
-            .property("loop", false)
+            .prop("captions", false)
+            .prop("muted", false)
+            .prop("loop", false)
             // always false since we imperatively play when the context is ready
-            .property("autoplay", false)
+            .prop("autoplay", false)
             .event(clone!(state => move |_: events::Ready| {
                 state.start_gates.replace_with(|gates| {
                     gates.video = true;

@@ -18,16 +18,16 @@ impl CurationJig {
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self;
         html!("admin-curation-jig-details", {
-            .property("slot", "jig-details")
+            .prop("slot", "jig-details")
             .child(html!("window-loader-block", {
-                .property("slot", "loader")
-                .property_signal("visible", state.jig.loader.is_loading())
+                .prop("slot", "loader")
+                .prop_signal("visible", state.jig.loader.is_loading())
             }))
             .children(&mut [
                 html!("button-rect", {
-                    .property("slot", "back")
-                    .property("color", "blue")
-                    .property("kind", "text")
+                    .prop("slot", "back")
+                    .prop("color", "blue")
+                    .prop("kind", "text")
                     .text("Back")
                     .event(clone!(state => move |_: events::Click| {
                         let route = AdminCurationRoute::Table;
@@ -35,8 +35,8 @@ impl CurationJig {
                     }))
                 }),
                 html!("star-rating", {
-                    .property("slot", "rating")
-                    .property_signal("rating", state.jig.rating.signal_cloned().map(|rating| {
+                    .prop("slot", "rating")
+                    .prop_signal("rating", state.jig.rating.signal_cloned().map(|rating| {
                         rating.map(|rating| {
                             rating as u8
                         })
@@ -50,19 +50,19 @@ impl CurationJig {
                     }))
                 }),
                 html!("div", {
-                    .property("slot", "buttons")
+                    .prop("slot", "buttons")
                     .children(&mut [
                         html!("button-rect", {
-                            .property("kind", "text")
-                            .property("color", "blue")
+                            .prop("kind", "text")
+                            .prop("color", "blue")
                             .text("Cancel")
                             .event(clone!(state => move |_: events::Click| {
                                 state.curation_state.navigate_to(AdminCurationRoute::Table);
                             }))
                         }),
                         html!("button-rect", {
-                            .property("kind", "filled")
-                            .property("color", "blue")
+                            .prop("kind", "filled")
+                            .prop("color", "blue")
                             .text("Save and republish")
                             .event(clone!(state => move |_: events::Click| {
                                 state.jig.save_and_publish();
@@ -71,14 +71,14 @@ impl CurationJig {
                     ])
                 }),
                 html!("div", {
-                    .property("slot", "inputs")
+                    .prop("slot", "inputs")
                     .children(&mut [
                         html!("input-wrapper", {
-                            .property("label", "JIG name")
+                            .prop("label", "JIG name")
                             .children(&mut [
                                 html!("input" => HtmlInputElement, {
                                     .with_node!(elem => {
-                                        .property_signal("value", state.jig.display_name.signal_cloned())
+                                        .prop_signal("value", state.jig.display_name.signal_cloned())
                                         .event(clone!(state => move |_evt: events::Input| {
                                             let value = elem.value();
                                             state.jig.display_name.set(value);
@@ -88,11 +88,11 @@ impl CurationJig {
                             ])
                         }),
                         html!("input-wrapper", {
-                            .property("label", "Author name")
+                            .prop("label", "Author name")
                             .children(&mut [
                                 html!("input", {
-                                    .property("readOnly", true)
-                                    .property("value", &state.jig.author_name)
+                                    .prop("readOnly", true)
+                                    .prop("value", &state.jig.author_name)
                                 }),
                             ])
                         }),
@@ -100,11 +100,11 @@ impl CurationJig {
                         state.render_ages(),
                         state.render_affiliations(),
                         html!("input-wrapper", {
-                            .property("label", "JIG teacher's description")
+                            .prop("label", "JIG teacher's description")
                             .children(&mut [
                                 html!("textarea" => HtmlTextAreaElement, {
                                     .with_node!(elem => {
-                                        .property_signal("value", state.jig.description.signal_cloned())
+                                        .prop_signal("value", state.jig.description.signal_cloned())
                                         .event(clone!(state => move |_evt: events::Input| {
                                             let value = elem.value();
                                             state.jig.description.set(value);
@@ -114,11 +114,11 @@ impl CurationJig {
                             ])
                         }),
                         html!("input-wrapper", {
-                            .property("label", "Additional keywords")
+                            .prop("label", "Additional keywords")
                             .children(&mut [
                                 html!("textarea" => HtmlTextAreaElement, {
                                     .with_node!(elem => {
-                                        .property_signal("value", state.jig.other_keywords.signal_cloned())
+                                        .prop_signal("value", state.jig.other_keywords.signal_cloned())
                                         .event(clone!(state => move |_evt: events::Input| {
                                             let value = elem.value();
                                             state.jig.other_keywords.set(value);
@@ -139,8 +139,8 @@ impl CurationJig {
                 ).render(Some("player"))
             )
             .child(html!("fa-button", {
-                .property("slot", "player")
-                .property("icon", "fa-duotone fa-circle-play")
+                .prop("slot", "player")
+                .prop("icon", "fa-duotone fa-circle-play")
                 .event(clone!(state => move |_: events::Click| {
                     state.player_open.set(true);
                 }))
@@ -160,20 +160,20 @@ impl CurationJig {
                 }
             })))
             .child(html!("fa-button", {
-                .property("slot", "block")
+                .prop("slot", "block")
                 .style_signal("color", state.jig.blocked.signal().map(|blocked| {
                     match blocked {
                         true => "red",
                         false => "green",
                     }
                 }))
-                .property_signal("icon", state.jig.blocked.signal().map(|blocked| {
+                .prop_signal("icon", state.jig.blocked.signal().map(|blocked| {
                     match blocked {
                         true => "fa-solid fa-eye-slash",
                         false => "fa-solid fa-eye",
                     }
                 }))
-                .property_signal("title", state.jig.blocked.signal().map(|blocked| {
+                .prop_signal("title", state.jig.blocked.signal().map(|blocked| {
                     match blocked {
                         true => "Blocked",
                         false => "Visible",

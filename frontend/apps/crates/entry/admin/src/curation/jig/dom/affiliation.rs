@@ -16,12 +16,12 @@ impl CurationJig {
     pub fn render_affiliations(self: &Rc<Self>) -> Dom {
         let state = Rc::clone(self);
         html!("input-select", {
-            .property("slot", "affiliation")
-            .property("label", STR_AFFILIATION_LABEL)
-            .property("placeholder", STR_AFFILIATION_PLACEHOLDER)
-            .property("multiple", true)
-            .property_signal("value", affiliation_value_signal(state.clone()))
-            // .property_signal("error", {
+            .prop("slot", "affiliation")
+            .prop("label", STR_AFFILIATION_LABEL)
+            .prop("placeholder", STR_AFFILIATION_PLACEHOLDER)
+            .prop("multiple", true)
+            .prop_signal("value", affiliation_value_signal(state.clone()))
+            // .prop_signal("error", {
             //     (map_ref! {
             //         let submission_tried = state.submission_tried.signal(),
             //         let value = state.jig.affiliation_ranges.signal_cloned()
@@ -44,7 +44,7 @@ fn render_affiliation(affiliation: &Affiliation, state: Rc<CurationJig>) -> Dom 
     let affiliation_id = affiliation.id;
     html!("input-select-option", {
         .text(&affiliation.display_name)
-        .property_signal("selected", state.jig.affiliations.signal_cloned().map(clone!(affiliation_id => move |affiliations| {
+        .prop_signal("selected", state.jig.affiliations.signal_cloned().map(clone!(affiliation_id => move |affiliations| {
             affiliations.contains(&affiliation_id)
         })))
         .event(clone!(state => move |_: events::CustomSelectedChange| {

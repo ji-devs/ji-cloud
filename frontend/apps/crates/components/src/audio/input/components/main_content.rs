@@ -45,14 +45,14 @@ fn render_start(state: Rc<AudioInput>, add_method: AudioInputAddMethod) -> Dom {
 
 fn render_recording() -> Dom {
     html!("audio-input-recording", {
-        .property("slot", "main-content")
+        .prop("slot", "main-content")
     })
 }
 
 fn render_input_icon(kind: &str) -> Dom {
     html!("audio-input-icon", {
-        .property("kind", kind)
-        .property("slot", "main-content")
+        .prop("kind", kind)
+        .prop("slot", "main-content")
     })
 }
 
@@ -61,10 +61,10 @@ fn render_uploading() -> Dom {
     let mut step = 0.8_f64;
 
     html!("progress-bar", {
-        .property("color", "blue")
-        .property("progress", 50)
-        .property("slot", "main-content")
-        .property_signal("progress", from_stream(IntervalStream::new(50)).map(move |_| {
+        .prop("color", "blue")
+        .prop("progress", 50)
+        .prop("slot", "main-content")
+        .prop_signal("progress", from_stream(IntervalStream::new(50)).map(move |_| {
             progress += step;
             if progress > 95_f64 {
                 step = 0.01;
@@ -78,7 +78,7 @@ fn render_uploading() -> Dom {
             progress as i32
         }))
         .child(html!("div", {
-            .property("slot", "progress-label")
+            .prop("slot", "progress-label")
             .text(STR_UPLOADING_TEXT)
         }))
     })

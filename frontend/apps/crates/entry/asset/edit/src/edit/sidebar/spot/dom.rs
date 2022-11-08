@@ -54,16 +54,16 @@ impl ItemDom {
         };
 
         html!("empty-fragment", {
-            .property("slot", if index == 0 { "cover-module" } else { "modules" })
+            .prop("slot", if index == 0 { "cover-module" } else { "modules" })
             .child_signal(state.confirm_delete.signal().map(clone!(state => move |confirm_delete| {
                 if confirm_delete {
                     Some(html!("modal-confirm", {
-                        .property("dangerous", true)
-                        .property("title", STR_DELETE_TITLE)
-                        .property("content", STR_DELETE_CONTENT)
-                        .property("cancel_text", STR_DELETE_CANCEL)
-                        .property("confirm_text", STR_DELETE_CONFIRM)
-                        .property("confirmIcon", "core/menus/delete-white.svg")
+                        .prop("dangerous", true)
+                        .prop("title", STR_DELETE_TITLE)
+                        .prop("content", STR_DELETE_CONTENT)
+                        .prop("cancel_text", STR_DELETE_CANCEL)
+                        .prop("confirm_text", STR_DELETE_CONFIRM)
+                        .prop("confirmIcon", "core/menus/delete-white.svg")
                         .event(clone!(state => move |_evt: events::CustomCancel| state.confirm_delete.set_neq(false)))
                         .event(clone!(state => move |_evt: events::CustomConfirm| {
                             state.confirm_delete.set_neq(false);
@@ -93,10 +93,10 @@ impl ItemDom {
                 .style("display", {
                     if is_filler { "none" } else {"block"}
                 })
-                .property("module", state.kind_str())
-                .property("index", index as u32)
-                .property_signal("collapsed", state.sidebar.collapsed.signal())
-                .property_signal("selected", state.is_selected_signal())
+                .prop("module", state.kind_str())
+                .prop("index", index as u32)
+                .prop_signal("collapsed", state.sidebar.collapsed.signal())
+                .prop_signal("selected", state.is_selected_signal())
                 // TODO:
                 // .event(|_evt:events::MouseDown| {
                 //     actions::mouse_down(state.clone(), evt.x(), evt.y());
@@ -123,11 +123,11 @@ impl ItemDom {
                 )
                 .child(html!("jig-edit-sidebar-module-window" => HtmlElement, {
                     .with_node!(elem => {
-                        .property("slot", "window")
-                        .property_signal("state", State::window_state_signal(Rc::clone(&state)))
-                        .property_signal("incomplete", is_incomplete_signal)
-                        .property("activeModuleKind", state.kind_str())
-                        .property("coverOnly", state.index == 0)
+                        .prop("slot", "window")
+                        .prop_signal("state", State::window_state_signal(Rc::clone(&state)))
+                        .prop_signal("incomplete", is_incomplete_signal)
+                        .prop("activeModuleKind", state.kind_str())
+                        .prop("coverOnly", state.index == 0)
                         .event(clone!(state => move |evt:events::CustomDrop| {
                             if let Some(detail) = evt.detail().as_string() {
                                 if let Ok(kind) = ModuleKind::from_str(&detail) {
@@ -195,12 +195,12 @@ impl ItemDom {
                                             .apply(OverlayHandle::lifecycle(clone!(state, elem => move || {
                                                 html!("overlay-tooltip-error", {
                                                     .text("This part of your JIG needs attention. Add content or delete.")
-                                                    .property("target", elem.clone())
-                                                    .property("targetAnchor", "tr")
-                                                    .property("contentAnchor", "oppositeH")
-                                                    .property("marginX", 75i32)
-                                                    .property("closeable", true)
-                                                    .property("strategy", "track")
+                                                    .prop("target", elem.clone())
+                                                    .prop("targetAnchor", "tr")
+                                                    .prop("contentAnchor", "oppositeH")
+                                                    .prop("marginX", 75i32)
+                                                    .prop("closeable", true)
+                                                    .prop("strategy", "track")
                                                     .style("width", "350px")
                                                     .event(clone!(state => move |_:events::Close| {
                                                         state.sidebar.highlight_modules.set_neq(None);
@@ -223,9 +223,9 @@ impl ItemDom {
                                         true => {
                                             Some(html!("overlay-tooltip-error", {
                                                 .text("Only the cover can be dragged here.")
-                                                .property("target", elem.clone())
-                                                .property("targetAnchor", "mr")
-                                                .property("contentAnchor", "oppositeH")
+                                                .prop("target", elem.clone())
+                                                .prop("targetAnchor", "mr")
+                                                .prop("contentAnchor", "oppositeH")
                                                 .style("width", "650px")
                                                 .event(clone!(state => move |_:events::Close| {
                                                     state.tried_module_at_cover.set(false);
@@ -303,8 +303,8 @@ impl ItemDom {
 
             if should_add {
                 dom.child(html!("button-icon", {
-                    .property("icon", "gears")
-                    .property("slot", "add")
+                    .prop("icon", "gears")
+                    .prop("slot", "add")
                     .event(clone!(state => move |_evt:events::Click| {
                         actions::add_empty_module_after(state.clone())
                     }))

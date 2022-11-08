@@ -25,13 +25,13 @@ pub fn render(state: Rc<Home>, auto_search: bool) -> Dom {
     fetch_data(state.clone(), auto_search);
 
     html!("home-search-section", {
-        .property_signal("mode", state.mode.signal_cloned().map(|mode| mode.to_string()))
-        .property_signal("resultsCount", state.total_assets_count.signal().map(|x| x as f64))
+        .prop_signal("mode", state.mode.signal_cloned().map(|mode| mode.to_string()))
+        .prop_signal("resultsCount", state.total_assets_count.signal().map(|x| x as f64))
         // .child(html!("home-search-section-help", {
-        //     .property("slot", "help")
+        //     .prop("slot", "help")
         // }))
         .child(html!("form", {
-            .property("slot", "search-bar")
+            .prop("slot", "search-bar")
             .event_with_options(&EventOptions::preventable(), clone!(state => move |e: events::Submit| {
                 e.prevent_default();
                 search(Rc::clone(&state));
@@ -40,10 +40,10 @@ pub fn render(state: Rc<Home>, auto_search: bool) -> Dom {
                 .children(&mut [
                     html!("input" => HtmlInputElement, {
                         .with_node!(elem => {
-                            .property("slot", "query")
-                            .property("placeholder", STR_WHAT_ARE_YOU_LOOKING_FOR)
+                            .prop("slot", "query")
+                            .prop("placeholder", STR_WHAT_ARE_YOU_LOOKING_FOR)
                             // set value on init from query param
-                            .property("value", &*state.search_selected.query.lock_ref())
+                            .prop("value", &*state.search_selected.query.lock_ref())
                             .event(clone!(state => move |_: events::Input| {
                                 let v = elem.value();
                                 state.search_selected.query.set(v)
@@ -51,12 +51,12 @@ pub fn render(state: Rc<Home>, auto_search: bool) -> Dom {
                         })
                     }),
                     html!("home-search-section-select", {
-                        .property("slot", "age")
-                        .property("multiple", true)
-                        .property_signal("value", age_value_signal(state.clone()))
+                        .prop("slot", "age")
+                        .prop("multiple", true)
+                        .prop_signal("value", age_value_signal(state.clone()))
                         .child(html!("input-select-option", {
                             .text(STR_ALL_AGES)
-                            .property_signal("selected", state.search_selected.age_ranges.signal_cloned().map(|age_ranges| {
+                            .prop_signal("selected", state.search_selected.age_ranges.signal_cloned().map(|age_ranges| {
                                 age_ranges.is_empty()
                             }))
                             .event(clone!(state => move |_: events::CustomSelectedChange| {
@@ -72,7 +72,7 @@ pub fn render(state: Rc<Home>, auto_search: bool) -> Dom {
                                 let age_id = age_range.id;
                                 html!("input-select-option", {
                                     .text(&age_range.display_name)
-                                    .property_signal("selected", state.search_selected.age_ranges.signal_cloned().map(clone!(age_range => move |age_ranges| {
+                                    .prop_signal("selected", state.search_selected.age_ranges.signal_cloned().map(clone!(age_range => move |age_ranges| {
                                         age_ranges.contains(&age_range.id)
                                     })))
                                     .event(clone!(state => move |_: events::CustomSelectedChange| {
@@ -87,11 +87,11 @@ pub fn render(state: Rc<Home>, auto_search: bool) -> Dom {
                         })).to_signal_vec())
                     }),
                     html!("home-search-section-select", {
-                        .property("slot", "language")
-                        .property_signal("value", language_value_signal(state.clone()))
+                        .prop("slot", "language")
+                        .prop_signal("value", language_value_signal(state.clone()))
                         .child(html!("input-select-option", {
                             .text(STR_ALL_LANGUAGES)
-                            .property_signal("selected", state.search_selected.language.signal_cloned().map(|lang| lang.is_none()))
+                            .prop_signal("selected", state.search_selected.language.signal_cloned().map(|lang| lang.is_none()))
                             .event(clone!(state => move |evt: events::CustomSelectedChange| {
                                 if evt.selected() {
                                     state.search_selected.language.set(None);
@@ -106,7 +106,7 @@ pub fn render(state: Rc<Home>, auto_search: bool) -> Dom {
                                 .map(|lang| {
                                     html!("input-select-option", {
                                         .text(lang.display_name())
-                                        .property_signal("selected", state.search_selected.language.signal_cloned().map(clone!(lang => move |selected_language| {
+                                        .prop_signal("selected", state.search_selected.language.signal_cloned().map(clone!(lang => move |selected_language| {
                                             match selected_language {
                                                 Some(selected_language) => selected_language == lang.code(),
                                                 None => false,
@@ -123,9 +123,9 @@ pub fn render(state: Rc<Home>, auto_search: bool) -> Dom {
                         )
                     }),
                     html!("button-rect", {
-                        .property("slot", "button")
-                        .property("size", "small")
-                        .property("bold", true)
+                        .prop("slot", "button")
+                        .prop("size", "small")
+                        .prop("bold", true)
                         .text(STR_SEARCH)
                         .event(clone!(state => move |_: events::Click| {
                             search(Rc::clone(&state));

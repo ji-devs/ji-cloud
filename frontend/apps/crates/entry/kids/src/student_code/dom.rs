@@ -20,26 +20,26 @@ pub fn render(state: Rc<State>, code: Option<String>) -> Dom {
     html!("empty-fragment", {
         .child(html!("kids-student-code", {
             .child(html!("kids-student-code-input", {
-                .property("slot", "input")
-                .property_signal("error", state.error.signal())
+                .prop("slot", "input")
+                .prop_signal("error", state.error.signal())
                 .event(clone!(state => move |evt: events::CustomInput| {
                     submit_code(Rc::clone(&state), evt.value());
                 }))
             }))
             .child(html!("kids-student-code-jigzi", {
-                .property("slot", "jigzi")
-                .property_signal("mode", state.error.signal().map(|error| {
+                .prop("slot", "jigzi")
+                .prop_signal("mode", state.error.signal().map(|error| {
                     match error {
                         true => "try-again",
                         false => "default",
                     }
                 }))
                 .child(html!("button", {
-                    .property("slot", "try-again")
+                    .prop("slot", "try-again")
                     .text(STR_TRY_AGAIN)
                 }))
                 .child(html!("button", {
-                    .property("slot", "help")
+                    .prop("slot", "help")
                     .text(STR_HELP)
                 }))
             }))

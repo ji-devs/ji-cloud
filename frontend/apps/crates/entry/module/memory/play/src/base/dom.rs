@@ -9,7 +9,7 @@ use super::{sidebar::dom::render as render_sidebar, stage::dom::render as render
 impl DomRenderable for Base {
     fn render(state: Rc<Base>) -> Dom {
         html!("empty-fragment", {
-            .property("slot", "main")
+            .prop("slot", "main")
             .child(
                 html!("memory-container", {
                     .children(&mut [

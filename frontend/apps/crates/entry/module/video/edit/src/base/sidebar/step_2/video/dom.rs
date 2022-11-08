@@ -20,13 +20,13 @@ const STR_DELETE: &str = "Delete";
 
 pub fn render(state: Rc<Step2>) -> Dom {
     html!("video-third-party-input-card", {
-        .property("host", "youtube")
+        .prop("host", "youtube")
         .child(html!("input-wrapper" => HtmlElement, {
             .with_node!(wrapper => {
-                .property("slot", "input")
-                .property("label", "Add a YouTube link")
+                .prop("slot", "input")
+                .prop("label", "Add a YouTube link")
                 .child(html!("input" => HtmlInputElement, {
-                    .property_signal("value", state.sidebar.base.video.signal_cloned().map(|video| {
+                    .prop_signal("value", state.sidebar.base.video.signal_cloned().map(|video| {
                         match video {
                             None => String::new(),
                             Some(video) => {
@@ -61,10 +61,10 @@ pub fn render(state: Rc<Step2>) -> Dom {
                 None => vec![],
                 Some(video) => vec![
                     html!("input-checkbox", {
-                        .property("label", "Clip video")
-                        .property("slot", "clip-checkbox")
-                        .property_signal("checked", state.sidebar.base.clip.signal())
-                        // .property_signal("disabled", map_ref! {
+                        .prop("label", "Clip video")
+                        .prop("slot", "clip-checkbox")
+                        .prop_signal("checked", state.sidebar.base.clip.signal())
+                        // .prop_signal("disabled", map_ref! {
                         //     let start_at = video.start_at.signal(),
                         //     let end_at = video.end_at.signal() => {
                         //         start_at.is_some() || end_at.is_some()
@@ -80,9 +80,9 @@ pub fn render(state: Rc<Step2>) -> Dom {
                         }))
                     }),
                     html!("button-rect", {
-                        .property("slot", "delete")
-                        .property("kind", "text")
-                        .property("color", "blue")
+                        .prop("slot", "delete")
+                        .prop("kind", "text")
+                        .prop("color", "blue")
                         .text(STR_DELETE)
                         .event(clone!(state => move |_: events::Click| {
                             state.sidebar.base.delete_video();
@@ -96,11 +96,11 @@ pub fn render(state: Rc<Step2>) -> Dom {
                 None => vec![],
                 Some(video) => vec![
                     html!("input-wrapper", {
-                        .property("slot", "start-at")
-                        .property("label", "Start time")
+                        .prop("slot", "start-at")
+                        .prop("label", "Start time")
                         .child(html!("input-minutes-seconds" => HtmlElement, {
-                            .property("type", "number")
-                            .property_signal("value", video.start_at.signal_ref(|start_at| {
+                            .prop("type", "number")
+                            .prop_signal("value", video.start_at.signal_ref(|start_at| {
                                 match start_at {
                                     Some(start_at) => start_at.to_string(),
                                     None => String::new(),
@@ -119,11 +119,11 @@ pub fn render(state: Rc<Step2>) -> Dom {
                         }))
                     }),
                     html!("input-wrapper", {
-                        .property("slot", "end-at")
-                        .property("label", "End time")
+                        .prop("slot", "end-at")
+                        .prop("label", "End time")
                         .child(html!("input-minutes-seconds" => HtmlElement, {
-                            .property("type", "number")
-                            .property_signal("value", video.end_at.signal_ref(|end_at| {
+                            .prop("type", "number")
+                            .prop_signal("value", video.end_at.signal_ref(|end_at| {
                                 match end_at {
                                     Some(end_at) => end_at.to_string(),
                                     None => String::new(),

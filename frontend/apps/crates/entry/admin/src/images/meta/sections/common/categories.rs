@@ -60,14 +60,14 @@ pub fn render_report(
         }))
         .children(&mut [
             html!("div", {
-                .property("slot", "content")
+                .prop("slot", "content")
                 .text(&cat.name)
             })
         ])
-        .property("hasChildren", !cat.children.is_empty())
-        .property("isChild", parent.is_some())
+        .prop("hasChildren", !cat.children.is_empty())
+        .prop("isChild", parent.is_some())
         .child(html!("div", {
-            .property("slot", "children")
+            .prop("slot", "children")
             .children(cat.children.iter().map(|child| {
                 render_report(categories.clone(), Some(cat.clone()), child.clone())
             }))

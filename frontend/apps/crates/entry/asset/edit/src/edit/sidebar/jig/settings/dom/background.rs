@@ -23,28 +23,28 @@ pub fn render(state: Rc<State>) -> Dom {
     let audio_handles = Rc::new(audio_handles);
 
     html!("jig-audio-body", {
-        .property("slot", "overlay")
-        .property("kind", "background")
+        .prop("slot", "overlay")
+        .prop("kind", "background")
         .children(&mut [
             html!("button-rect", {
-                .property("kind", "text")
-                .property("slot", "back")
-                .property("color", "blue")
-                .child(html!("fa-icon", {.property("icon", "fa-light fa-chevron-left")}))
+                .prop("kind", "text")
+                .prop("slot", "back")
+                .prop("color", "blue")
+                .child(html!("fa-icon", {.prop("icon", "fa-light fa-chevron-left")}))
                 .text(STR_BACK_TO_SETTINGS)
                 .event(clone!(state => move|_: events::Click| {
                     set_active_popup(Rc::clone(&state), ActiveSettingsPopup::Main);
                 }))
             }),
             html!("button-icon", {
-                .property("icon", "x")
-                .property("slot", "close")
+                .prop("icon", "x")
+                .prop("slot", "close")
                 .event(clone!(state => move |_:events::Click| {
                     state.active_popup.set(None);
                 }))
             }),
             // html!("input-search", {
-            //     .property("slot", "search")
+            //     .prop("slot", "search")
             // }),
         ])
         .children(AudioBackground::variants().iter().enumerate().map(clone!(state, audio_handles => move|(index, option)| {
@@ -72,15 +72,15 @@ fn line(
     let audio_handle = &audio_handles[index];
 
     html!("jig-audio-line", {
-        .property("slot", "lines")
-        .property("label", option.display_name())
-        .property_signal("playing", audio_handle.signal_ref(|x| x.is_some()))
+        .prop("slot", "lines")
+        .prop("label", option.display_name())
+        .prop_signal("playing", audio_handle.signal_ref(|x| x.is_some()))
         .children(&mut [
             html!("input" => HtmlInputElement, {
                 .with_node!(elem =>{
-                    .property("slot", "checkbox")
-                    .property("type", "checkbox")
-                    .property_signal("checked", state.background_audio.signal_cloned().map(clone!(option => move|selected_audio| {
+                    .prop("slot", "checkbox")
+                    .prop("type", "checkbox")
+                    .prop_signal("checked", state.background_audio.signal_cloned().map(clone!(option => move|selected_audio| {
                         match selected_audio {
                             Some(selected_audio) if selected_audio == option => {
                                 true
@@ -96,8 +96,8 @@ fn line(
                 })
             }),
             html!("jig-audio-play-pause", {
-                .property("slot", "play-pause")
-                .property_signal("mode", audio_handle.signal_ref(|audio_handle| {
+                .prop("slot", "play-pause")
+                .prop_signal("mode", audio_handle.signal_ref(|audio_handle| {
                     match audio_handle {
                         Some(_) => "pause",
                         None => "play",

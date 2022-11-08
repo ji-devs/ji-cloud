@@ -16,18 +16,18 @@ use super::{super::state::State, report, track_action};
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("anchored-overlay", {
-        .property("positionY", "bottom-out")
-        .property("positionX", "left-in")
-        .property("styled", true)
-        .property("slot", "actions")
-        .property_signal("open", info_open_signal(Rc::clone(&state)))
+        .prop("positionY", "bottom-out")
+        .prop("positionX", "left-in")
+        .prop("styled", true)
+        .prop("slot", "actions")
+        .prop_signal("open", info_open_signal(Rc::clone(&state)))
         .event(clone!(state => move |_: events::Close| {
             state.info_popup_active.set(false);
         }))
         .child(html!("jig-play-sidebar-action", {
-            .property("slot", "anchor")
-            .property("kind", "info")
-            .property_signal("active", info_open_signal(Rc::clone(&state)))
+            .prop("slot", "anchor")
+            .prop("kind", "info")
+            .prop_signal("active", info_open_signal(Rc::clone(&state)))
             .event(clone!(state => move |_: events::Click| {
                 let mut info_popup_active = state.info_popup_active.lock_mut();
                 *info_popup_active = !*info_popup_active;
@@ -58,30 +58,30 @@ fn info_open_signal(state: Rc<State>) -> impl Signal<Item = bool> {
 
 fn render_jig_info(state: Rc<State>, jig: &JigResponse) -> Dom {
     html!("jig-play-sidebar-jig-info", {
-        .property("slot", "overlay")
-        .property("name", &jig.jig_data.display_name)
-        .property("playedCount", jig.plays as usize)
-        .property("likedCount", jig.likes as usize)
-        .property("language", &jig.jig_data.language)
-        // .property("author", jig.author_id)
-        .property("publishedAt", {
+        .prop("slot", "overlay")
+        .prop("name", &jig.jig_data.display_name)
+        .prop("playedCount", jig.plays as usize)
+        .prop("likedCount", jig.likes as usize)
+        .prop("language", &jig.jig_data.language)
+        // .prop("author", jig.author_id)
+        .prop("publishedAt", {
             match jig.published_at {
                 Some(publish_at) => published_at_string(publish_at, false),
                 None => String::new(),
             }
         })
-        .property("description", &jig.jig_data.description)
+        .prop("description", &jig.jig_data.description)
         .child_signal(state.all_ages.signal_cloned().map(clone!(jig => move |age_ranges| {
             let range = age_ranges.range(&jig.jig_data.age_ranges);
             Some(html!("age-range", {
-                .property("slot", "ages")
-                .property("icon", "entry/jig/play/sidebar/age.svg")
-                .property("from", range.0)
-                .property("to", range.1)
+                .prop("slot", "ages")
+                .prop("icon", "entry/jig/play/sidebar/age.svg")
+                .prop("from", range.0)
+                .prop("to", range.1)
             }))
         })))
         .child(html!("button-empty", {
-            .property("slot", "close")
+            .prop("slot", "close")
             .text("×")
             .event(clone!(state => move |_: events::Click| {
                 state.info_popup_active.set(false);
@@ -89,19 +89,19 @@ fn render_jig_info(state: Rc<State>, jig: &JigResponse) -> Dom {
         }))
         .children(jig.jig_data.categories.iter().map(|category_id| {
             html!("pill-close", {
-                .property("slot", "categories")
-                .property("label", &category_id.0.to_string())
+                .prop("slot", "categories")
+                .prop("label", &category_id.0.to_string())
             })
         }))
 
         .children(jig.jig_data.additional_resources.iter().map(|resource| {
             html!("a", {
-                .property("slot", "additional-resources")
-                .property("target", "_BLANK")
-                .property("title", &resource.display_name)
-                .property("href", resource.resource_content.get_link())
+                .prop("slot", "additional-resources")
+                .prop("target", "_BLANK")
+                .prop("title", &resource.display_name)
+                .prop("href", resource.resource_content.get_link())
                 .child(html!("fa-icon", {
-                    .property("icon", "fa-light fa-file")
+                    .prop("icon", "fa-light fa-file")
                 }))
                 .text(" ")
                 .text(&resource.display_name)
@@ -109,8 +109,8 @@ fn render_jig_info(state: Rc<State>, jig: &JigResponse) -> Dom {
             })
         }))
         .child(html!("button-rect", {
-            .property("slot", "courses")
-            .property("kind", "text")
+            .prop("slot", "courses")
+            .prop("kind", "text")
             .text("Sefer Bereishit")
         }))
         .children_signal_vec(report::render(Rc::clone(&state)).to_signal_vec())

@@ -48,33 +48,33 @@ impl MemberDetails {
             .child_signal(state.member.signal_ref(clone!(state => move |member| {
                 member.as_ref().map(|member| {
                     html!("community-member-details", {
-                        .property("givenName", &member.given_name)
-                        .property("familyName", &member.family_name)
+                        .prop("givenName", &member.given_name)
+                        .prop("familyName", &member.family_name)
                         .apply(|mut dom| {
                             if let Some(_location) = &member.location {
                                 // add city
-                                // dom = dom.property("city", city)
+                                // dom = dom.prop("city", city)
                             }
                             if let Some(languages_spoken) = &member.languages_spoken {
                                 if languages_spoken.len() > 0 {
                                     let languages = languages_spoken.iter().map(|l| Language::code_to_display_name(l)).join(", ");
-                                    dom = dom.property("language", languages)
+                                    dom = dom.prop("language", languages)
                                 }
                             }
                             if let Some(organization) = &member.organization {
-                                dom = dom.property("organization", organization)
+                                dom = dom.prop("organization", organization)
                             }
                             if let Some(persona) = &member.persona {
-                                dom = dom.property("persona", persona.join(", "));
+                                dom = dom.prop("persona", persona.join(", "));
                             }
                             if let Some(bio) = &member.bio {
-                                dom = dom.property("bio", bio)
+                                dom = dom.prop("bio", bio)
                             }
                             dom
                         })
                         .child(html!("profile-image", {
-                            .property("slot", "profile-image")
-                            .property("imageId", {
+                            .prop("slot", "profile-image")
+                            .prop("imageId", {
                                 match &member.profile_image {
                                     Some(image_id) => JsValue::from_str(&image_id.0.to_string()),
                                     None => JsValue::UNDEFINED,
@@ -84,8 +84,8 @@ impl MemberDetails {
                         .children_signal_vec(state.circles.signal_ref(move |circles| {
                             circles.iter().map(move |circle| {
                                 link!(Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::Circle(circle.id))).to_string(), {
-                                    .property("slot", "circles")
-                                    .property("title", &circle.display_name)
+                                    .prop("slot", "circles")
+                                    .prop("title", &circle.display_name)
                                     .child(html!("img-ji", {
                                         .style("height", "90px")
                                         .style("width", "90px")
@@ -93,8 +93,8 @@ impl MemberDetails {
                                         .style("border", "solid 1px var(--light-gray-1)")
                                         .style("border-radius", "50%")
                                         .style("overflow", "hidden")
-                                        .property("lib", MediaLibrary::User.to_str())
-                                        .property("id", &circle.image.0.to_string())
+                                        .prop("lib", MediaLibrary::User.to_str())
+                                        .prop("id", &circle.image.0.to_string())
                                     }))
                                     .child(html!("span", {
                                         .style("white-space", "nowrap")
@@ -118,24 +118,24 @@ impl MemberDetails {
                         .apply_if(is_current_user, clone!(state => move |dom| {
                             dom.children(&mut [
                                 html!("fa-button", {
-                                    .property("slot", "edit-profile-image")
-                                    .property("icon", "fa-light fa-pen")
+                                    .prop("slot", "edit-profile-image")
+                                    .prop("icon", "fa-light fa-pen")
                                     .text("Image")
                                     .event(clone!(state => move |_: events::Click| {
                                         state.active_popup.set(Some(ActivePopup::Image))
                                     }))
                                 }),
                                 html!("fa-button", {
-                                    .property("slot", "edit-about")
-                                    .property("icon", "fa-light fa-pen")
+                                    .prop("slot", "edit-about")
+                                    .prop("icon", "fa-light fa-pen")
                                     .text("about")
                                     .event(clone!(state => move |_: events::Click| {
                                         state.active_popup.set(Some(ActivePopup::About))
                                     }))
                                 }),
                                 html!("fa-button", {
-                                    .property("slot", "edit-bio")
-                                    .property("icon", "fa-light fa-pen")
+                                    .prop("slot", "edit-bio")
+                                    .prop("icon", "fa-light fa-pen")
                                     .text("Bio")
                                     .event(clone!(state => move |_: events::Click| {
                                         state.active_popup.set(Some(ActivePopup::Bio))
@@ -214,12 +214,12 @@ impl MemberDetails {
                 Some(match is_following {
                     true => {
                         html!("button-rect", {
-                            .property("slot", "follow")
-                            .property("kind", "outline")
-                            .property("size", "small")
-                            .property("color", "green")
+                            .prop("slot", "follow")
+                            .prop("kind", "outline")
+                            .prop("size", "small")
+                            .prop("color", "green")
                             .child(html!("fa-icon", {
-                                .property("icon", "fa-solid fa-check")
+                                .prop("icon", "fa-solid fa-check")
                             }))
                             .text(STR_FOLLOWING)
                             .event(clone!(state => move |_: events::Click| {
@@ -229,10 +229,10 @@ impl MemberDetails {
                     },
                     false => {
                         html!("button-rect", {
-                            .property("slot", "follow")
-                            .property("kind", "outline")
-                            .property("size", "small")
-                            .property("color", "blue")
+                            .prop("slot", "follow")
+                            .prop("kind", "outline")
+                            .prop("size", "small")
+                            .prop("color", "blue")
                             .text(STR_FOLLOW)
                             .event(clone!(state => move |_: events::Click| {
                                 state.follow_member();
@@ -247,9 +247,9 @@ impl MemberDetails {
         let state = self;
         dom.children(&mut [
             html!("community-member-details-tab", {
-                .property("slot", "creation-tabs")
+                .prop("slot", "creation-tabs")
                 .text("JIGs")
-                .property_signal("active", state.creations.signal_ref(|creations| {
+                .prop_signal("active", state.creations.signal_ref(|creations| {
                     matches!(creations, Creations::Jigs(_))
                 }))
                 .event(clone!(state => move |_: events::Click| {
@@ -257,9 +257,9 @@ impl MemberDetails {
                 }))
             }),
             html!("community-member-details-tab", {
-                .property("slot", "creation-tabs")
+                .prop("slot", "creation-tabs")
                 .text("Resources")
-                .property_signal("active", state.creations.signal_ref(|creations| {
+                .prop_signal("active", state.creations.signal_ref(|creations| {
                     matches!(creations, Creations::Resources(_))
                 }))
                 .event(clone!(state => move |_: events::Click| {
@@ -276,7 +276,7 @@ impl MemberDetails {
                             if jigs.is_empty() {
                                 vec![
                                     html!("div", {
-                                        .property("slot", "creation-assets")
+                                        .prop("slot", "creation-assets")
                                         .text("User has no JIGs")
                                     })
                                 ]
@@ -290,7 +290,7 @@ impl MemberDetails {
                             if resources.is_empty() {
                                 vec![
                                     html!("div", {
-                                        .property("slot", "creation-assets")
+                                        .prop("slot", "creation-assets")
                                         .text("User has no resources")
                                     })
                                 ]
@@ -302,7 +302,7 @@ impl MemberDetails {
                         },
                         Creations::Jigs(None) | Creations::Resources(None) => vec![
                             html!("progress", {
-                                .property("slot", "creation-assets")
+                                .prop("slot", "creation-assets")
                             })
                         ]
                     }
@@ -321,8 +321,8 @@ impl MemberDetails {
                 ThumbnailFallback::Asset,
                 DraftOrLive::Live,
             ).render(Some("thumbnail")))
-            .property("slot", "creation-assets")
-            .property("name", &jig.jig_data.display_name)
+            .prop("slot", "creation-assets")
+            .prop("name", &jig.jig_data.display_name)
             .event(clone!(state => move |_:events::Click| {
                 state.play_jig.set(Some(jig_id));
             }))
@@ -345,9 +345,9 @@ impl MemberDetails {
                 ThumbnailFallback::Asset,
                 DraftOrLive::Live,
             ).render(Some("thumbnail")))
-            .property("slot", "creation-assets")
-            .property("name", &resource.resource_data.display_name)
-            .property("href", link)
+            .prop("slot", "creation-assets")
+            .prop("name", &resource.resource_data.display_name)
+            .prop("href", link)
         })
     }
 
@@ -355,9 +355,9 @@ impl MemberDetails {
         let state = self;
         dom.children(&mut [
             html!("community-member-details-tab", {
-                .property("slot", "connection-tabs")
+                .prop("slot", "connection-tabs")
                 .text("Followers")
-                .property_signal("active", state.connections.signal_ref(|connections| {
+                .prop_signal("active", state.connections.signal_ref(|connections| {
                     matches!(connections, Connections::Followers(_))
                 }))
                 .event(clone!(state => move |_: events::Click| {
@@ -365,9 +365,9 @@ impl MemberDetails {
                 }))
             }),
             html!("community-member-details-tab", {
-                .property("slot", "connection-tabs")
+                .prop("slot", "connection-tabs")
                 .text("Following")
-                .property_signal("active", state.connections.signal_ref(|connections| {
+                .prop_signal("active", state.connections.signal_ref(|connections| {
                     matches!(connections, Connections::Following(_))
                 }))
                 .event(clone!(state => move |_: events::Click| {
@@ -384,7 +384,7 @@ impl MemberDetails {
                             if members.is_empty() {
                                 vec![
                                     html!("div", {
-                                        .property("slot", "connection-members")
+                                        .prop("slot", "connection-members")
                                         .text("User has no followers")
                                     })
                                 ]
@@ -398,7 +398,7 @@ impl MemberDetails {
                             if members.is_empty() {
                                 vec![
                                     html!("div", {
-                                        .property("slot", "connection-members")
+                                        .prop("slot", "connection-members")
                                         .text("User is not following anyone")
                                     })
                                 ]
@@ -410,7 +410,7 @@ impl MemberDetails {
                         },
                         Connections::Followers(None) | Connections::Following(None) => vec![
                             html!("progress", {
-                                .property("slot", "connection-members")
+                                .prop("slot", "connection-members")
                             })
                         ]
                     }
@@ -421,14 +421,14 @@ impl MemberDetails {
 
     fn render_member(self: &Rc<Self>, member: &PublicUser) -> Dom {
         html!("community-member-details-connection", {
-            .property("slot", "connection-members")
-            .property("name", &member.given_name)
+            .prop("slot", "connection-members")
+            .prop("name", &member.given_name)
             .apply(move |dom| dominator::on_click_go_to_url!(dom, {
                 Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(member.id))).to_string()
             }))
             .child(html!("profile-image", {
-                .property("slot", "profile-image")
-                .property("imageId", {
+                .prop("slot", "profile-image")
+                .prop("imageId", {
                     match &member.profile_image {
                         Some(image_id) => JsValue::from_str(&image_id.0.to_string()),
                         None => JsValue::UNDEFINED,

@@ -89,7 +89,7 @@ impl MainSelect {
                     None,
                     BoxOutlineMixins {
                         main: Some(clone!(state, index => move |dom:DomBuilder<HtmlElement>| {
-                            dom.property_signal("lineThick", state.is_selected(index))
+                            dom.prop_signal("lineThick", state.is_selected(index))
                         })),
 
                         click_area: Some(clone!(state, index, item => move |dom:DomBuilder<HtmlElement>| {

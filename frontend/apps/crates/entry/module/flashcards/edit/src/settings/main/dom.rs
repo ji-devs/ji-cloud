@@ -20,7 +20,7 @@ pub fn render(state: Rc<MainSettings>) -> Dom {
     };
 
     html!("flashcards-main", {
-        .property("slot", "main")
+        .prop("slot", "main")
         .children_signal_vec(
             display_signal.map(clone!(state => move |(display_mode, swap)| {
                 let mut children:Vec<Dom> = Vec::new();

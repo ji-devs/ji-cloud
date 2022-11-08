@@ -35,13 +35,13 @@ impl LocaleOuterDom {
         html!("empty-fragment", {
             .child(
                 html!("locale-page", {
-                    .property_signal("sortOrder", state.sort.signal_ref(|sort| sort.order.to_string()))
-                    .property_signal("saving", state.saving_loader.is_loading())
-                    .property_signal("columnsAmount", state.visible_columns.signal_vec_cloned().map(|_| 1).sum())
+                    .prop_signal("sortOrder", state.sort.signal_ref(|sort| sort.order.to_string()))
+                    .prop_signal("saving", state.saving_loader.is_loading())
+                    .prop_signal("columnsAmount", state.visible_columns.signal_vec_cloned().map(|_| 1).sum())
                     .children(&mut [
                         html!("select" => HtmlSelectElement, {
-                            .property("slot", "bundles")
-                            .attribute("multiple", "")
+                            .prop("slot", "bundles")
+                            .attr("multiple", "")
                             .with_node!(elem => {
                                 .event(clone!(state, elem => move |_:events::Change| {
                                     state.loader.load(clone!(state, elem => async move {
@@ -53,19 +53,19 @@ impl LocaleOuterDom {
                             .children(
                                 state.bundles.lock_ref().iter().map(|(e, selected)| {
                                     html!("option", {
-                                        .property("text", e.name.to_string())
-                                        .property("value", e.id.to_string())
-                                        .property("selected", *selected)
+                                        .prop("text", e.name.to_string())
+                                        .prop("value", e.id.to_string())
+                                        .prop("selected", *selected)
                                     })
                                 })
                             )
                         }),
                         html!("button-rect", {
-                            .property("color", "blue")
-                            .property("slot", "add-entry")
+                            .prop("color", "blue")
+                            .prop("slot", "add-entry")
                             .text(STR_ADD_ENTRY)
                             // .child(html!("img", {
-                            //     .attribute("src", "assets/add-icon.png")
+                            //     .attr("src", "assets/add-icon.png")
                             // }))
                             .event(clone!(state => move |_event: events::Click| {
                                 state.loader.load(clone!(state => async move {
@@ -137,7 +137,7 @@ impl LocaleOuterDom {
             )
             .child(
                 html!("window-loader-block", {
-                    .property_signal("visible", state.loader.is_loading())
+                    .prop_signal("visible", state.loader.is_loading())
                 })
             )
         })

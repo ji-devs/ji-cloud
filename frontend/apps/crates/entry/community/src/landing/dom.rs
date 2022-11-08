@@ -22,7 +22,7 @@ impl CommunityLanding {
             .children_signal_vec(state.top_members.signal_ref(clone!(state => move |top_members| {
                 match top_members {
                     None => vec![html!("progress", {
-                        .property("slot", "members")
+                        .prop("slot", "members")
                     })],
                     Some(top_members) => {
                         top_members.iter().map(|member| {
@@ -32,8 +32,8 @@ impl CommunityLanding {
                 }
             })).to_signal_vec())
             .child(html!("button-rect", {
-                .property("slot", "members-link")
-                .property("color", "blue")
+                .prop("slot", "members-link")
+                .prop("color", "blue")
                 .text(STR_SEE_MORE)
                 .apply(move |dom| dominator::on_click_go_to_url!(dom, {
                     Route::Community(CommunityRoute::Members(CommunityMembersRoute::List)).to_string()
@@ -42,7 +42,7 @@ impl CommunityLanding {
             .children_signal_vec(state.top_circles.signal_ref(clone!(state => move |top_circles| {
                 match top_circles {
                     None => vec![html!("progress", {
-                        .property("slot", "circles")
+                        .prop("slot", "circles")
                     })],
                     Some(top_circles) => {
                         top_circles.iter().map(|circle| {
@@ -52,8 +52,8 @@ impl CommunityLanding {
                 }
             })).to_signal_vec())
             .child(html!("button-rect", {
-                .property("slot", "circles-link")
-                .property("color", "blue")
+                .prop("slot", "circles-link")
+                .prop("color", "blue")
                 .text(STR_SEE_MORE)
                 .apply(move |dom| dominator::on_click_go_to_url!(dom, {
                     Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::List)).to_string()
@@ -64,14 +64,14 @@ impl CommunityLanding {
 
     fn render_member(self: &Rc<Self>, member: &PublicUser) -> Dom {
         link!(Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(member.id))).to_string(), {
-            .property("slot", "members")
+            .prop("slot", "members")
             .child(html!("profile-image", {
                 .style("height", "64px")
                 .style("width", "64px")
                 .style("overflow", "hidden")
                 .style("border-radius", "50%")
-                .property("slot", "profile-image")
-                .property("imageId", {
+                .prop("slot", "profile-image")
+                .prop("imageId", {
                     match &member.profile_image {
                         Some(image_id) => JsValue::from_str(&image_id.0.to_string()),
                         None => JsValue::UNDEFINED,
@@ -84,8 +84,8 @@ impl CommunityLanding {
 
     fn render_circle(self: &Rc<Self>, circle: &Circle) -> Dom {
         link!(Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::Circle(circle.id))).to_string(), {
-            .property("slot", "circles")
-            .property("title", &circle.display_name)
+            .prop("slot", "circles")
+            .prop("title", &circle.display_name)
             .child(html!("img-ji", {
                 .style("height", "90px")
                 .style("width", "90px")
@@ -93,8 +93,8 @@ impl CommunityLanding {
                 .style("border", "solid 1px var(--light-gray-1)")
                 .style("border-radius", "50%")
                 .style("overflow", "hidden")
-                .property("lib", MediaLibrary::User.to_str())
-                .property("id", &circle.image.0.to_string())
+                .prop("lib", MediaLibrary::User.to_str())
+                .prop("id", &circle.image.0.to_string())
             }))
             .child(html!("span", {
                 .style("white-space", "nowrap")

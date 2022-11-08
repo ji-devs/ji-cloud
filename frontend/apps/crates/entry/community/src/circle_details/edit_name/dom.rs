@@ -18,28 +18,28 @@ impl Component<EditName> for Rc<EditName> {
 
         dom.child(html!("popup-body", {
             .child(html!("fa-button", {
-                .property("slot", "close")
-                .property("icon", "fa-regular fa-xmark")
+                .prop("slot", "close")
+                .prop("icon", "fa-regular fa-xmark")
                 .event(clone!(state => move |_: events::Click| {
                     (state.callbacks.close)();
                 }))
             }))
             .child(html!("h3", {
-                .property("slot", "heading")
+                .prop("slot", "heading")
                 .text(STR_NAME)
             }))
             .child(html!("div", {
-                .property("slot", "body")
+                .prop("slot", "body")
                 .class("field-grid")
                 .child(html!("div", {
                     .class("body")
                     .children(&mut [
                         html!("input-wrapper", {
-                            .property("slot", "organization")
+                            .prop("slot", "organization")
                             .child(html!("input" => HtmlInputElement, {
                                 .with_node!(elem => {
-                                    .property("placeholder", STR_NAME_PLACEHOLDER)
-                                    .property_signal("value", state.display_name.signal_cloned())
+                                    .prop("placeholder", STR_NAME_PLACEHOLDER)
+                                    .prop_signal("value", state.display_name.signal_cloned())
                                     .event(clone!(state => move |_: events::Input| {
                                         state.display_name.set(elem.value());
                                     }))
@@ -48,7 +48,7 @@ impl Component<EditName> for Rc<EditName> {
                         }),
                         html!("button-rect", {
                             .text("Save")
-                            .property("slot", "submit")
+                            .prop("slot", "submit")
                             .event(clone!(state => move |_: events::Click| {
                                 let circle = state.get_circle_update_data();
                                 (state.callbacks.save_changes)(circle);

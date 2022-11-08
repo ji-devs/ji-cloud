@@ -37,8 +37,8 @@ where
     Overlay: OverlayExt + 'static,
 {
     html!("module-preview-header", {
-        .property("slot", "header")
-        .property("moduleKind", module_kind.as_str())
+        .prop("slot", "header")
+        .prop("moduleKind", module_kind.as_str())
         .child(render_nav(state.clone()))
     })
 }
@@ -61,7 +61,7 @@ where
     Overlay: OverlayExt + 'static,
 {
     html!("empty-fragment", {
-        .property("slot", "overlay")
+        .prop("slot", "overlay")
         .child_signal(state.jig_is_post_preview.signal_cloned().map(clone!(state => move |jig_is_post_preview| {
             jig_is_post_preview.then(|| {
                 let data = state.history.get_current();
@@ -94,24 +94,24 @@ where
     let preview_open = Mutable::new(true);
 
     html!("preview-body", {
-        .property("slot", "main")
+        .prop("slot", "main")
         .child(html!("button-rect", {
-            .property("slot", "actions")
-            .property("color", "red")
-            .property("kind", "text")
+            .prop("slot", "actions")
+            .prop("color", "red")
+            .prop("kind", "text")
             .text(strings::STR_PREVIEW_AGAIN)
             .event(clone!(preview_open => move |_: events::Click| {
                 preview_open.set_neq(true);
             }))
         }))
         .child(html!("button-rect", {
-            .property("slot", "actions")
-            .property("color", "red")
-            .property("kind", "filled")
-            .property("size", "small")
+            .prop("slot", "actions")
+            .prop("color", "red")
+            .prop("kind", "filled")
+            .prop("size", "small")
             .text(strings::STR_DONE)
             .child(html!("img-ui", {
-                .property("path", "core/buttons/rect/arrow-right-yellow.svg")
+                .prop("path", "core/buttons/rect/arrow-right-yellow.svg")
             }))
             .event(clone!(state => move |_evt:events::Click| {
                 if state.asset.is_jig() {

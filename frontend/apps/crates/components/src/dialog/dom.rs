@@ -16,8 +16,8 @@ impl Dialog {
             .apply(OverlayHandle::lifecycle(
                 move || {
                     html!("overlay-content", {
-                        .property("flowContentAnchor", "mm")
-                        .property("contentAnchor", "mm")
+                        .prop("flowContentAnchor", "mm")
+                        .prop("contentAnchor", "mm")
                         .child(html!("dialog-backdrop" => HtmlElement, {
                             .with_node!(elem => {
                                 .event(clone!(on_close => move |e: events::Click| {

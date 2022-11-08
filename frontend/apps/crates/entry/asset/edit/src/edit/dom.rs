@@ -89,7 +89,7 @@ impl AssetEditState {
                             .apply(OverlayHandle::lifecycle(clone!(state => move || {
                                 html!("empty-fragment", {
                                     .child(html!("modal-video", {
-                                        .property("videoId", STR_YT_VIDEO_ID)
+                                        .prop("videoId", STR_YT_VIDEO_ID)
                                         .event(clone!(state => move |_evt: events::Close| {
                                             state.set_permanently_closed();
                                         }))

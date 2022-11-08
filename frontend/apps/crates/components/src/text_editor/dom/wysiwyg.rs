@@ -10,7 +10,7 @@ impl TextEditor {
     pub fn render_wysiwyg(self: &Rc<Self>) -> Dom {
         let state = self;
         html!("wysiwyg-base", {
-            .property_signal("theme", state.theme_id.signal_cloned().map(|theme_id| {
+            .prop_signal("theme", state.theme_id.signal_cloned().map(|theme_id| {
                 theme_id.as_str_id()
             }))
             .after_inserted(clone!(state => move |wysiwyg_ref| {

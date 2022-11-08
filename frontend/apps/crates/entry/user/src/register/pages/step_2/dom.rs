@@ -29,11 +29,11 @@ impl Step2Page {
         html!("page-register-step2", {
             .children(&mut [
                 html!("input-wrapper", {
-                    .property("slot", "location")
-                    .property("label", STR_LOCATION_LABEL)
-                    .property_signal("error", state.location_error.signal())
+                    .prop("slot", "location")
+                    .prop("label", STR_LOCATION_LABEL)
+                    .prop_signal("error", state.location_error.signal())
                     .child(html!("input-location", {
-                        .property("placeholder", STR_LOCATION_PLACEHOLDER)
+                        .prop("placeholder", STR_LOCATION_PLACEHOLDER)
                         .event(clone!(state => move |evt:events::GoogleLocation| {
                             *state.location_json.borrow_mut() = evt.raw_json();
                         }))
@@ -52,21 +52,21 @@ impl Step2Page {
                     ),
                     Some("language"),
                     clone!(state => move |dom| {
-                        dom.property_signal("error", state.language_error.signal())
+                        dom.prop_signal("error", state.language_error.signal())
                     })
                 ),
                 html!("input-select", {
-                    .property("slot", "persona")
-                    .property("label", STR_PERSONA_LABEL)
-                    .property("placeholder", STR_PERSONA_PLACEHOLDER)
-                    .property("multiple", true)
-                    .property_signal("value", state.persona.signal_vec_cloned().to_signal_cloned().map(|persona| {
+                    .prop("slot", "persona")
+                    .prop("label", STR_PERSONA_LABEL)
+                    .prop("placeholder", STR_PERSONA_PLACEHOLDER)
+                    .prop("multiple", true)
+                    .prop_signal("value", state.persona.signal_vec_cloned().to_signal_cloned().map(|persona| {
                         persona.join(", ")
                     }))
                     .children(STR_PERSONA_OPTIONS.iter().map(|persona| {
                         html!("input-select-option", {
                             .text(persona)
-                            .property_signal(
+                            .prop_signal(
                                 "selected",
                                 state.persona.signal_vec_cloned().to_signal_cloned().map(move |p| {
                                     p.iter().any(|p| p == persona)
@@ -91,11 +91,11 @@ impl Step2Page {
                             }))
                         })
                     }))
-                    .property_signal("error", state.persona_error.signal())
+                    .prop_signal("error", state.persona_error.signal())
                 }),
                 html!("input-wrapper", {
-                    .property("slot", "organization")
-                    .property("label", STR_ORGANIZATION_LABEL)
+                    .prop("slot", "organization")
+                    .prop("label", STR_ORGANIZATION_LABEL)
                     .child(html!("input" => HtmlInputElement, {
                         .with_node!(elem => {
                             .event(clone!(state => move |_:events::Input| {
@@ -110,25 +110,25 @@ impl Step2Page {
                     }))
                 }),
                 html!("div", {
-                    .property("slot", "checkbox")
+                    .prop("slot", "checkbox")
                     .child(
                         html!("input-checkbox", {
-                            .property_signal("error", state.terms_error_str())
+                            .prop_signal("error", state.terms_error_str())
                             .child(html!("div", {
-                                .property("slot", "label")
+                                .prop("slot", "label")
                                 .text(STR_TERMS_LABEL_ONE)
                                 .child(html!("a", {
-                                    .attribute("href", "https://www.jewishinteractive.org/terms-and-conditions/")
+                                    .attr("href", "https://www.jewishinteractive.org/terms-and-conditions/")
                                     .text(STR_TERMS_TERMS)
-                                    .attribute("target", "_blank")
+                                    .attr("target", "_blank")
                                     .style("color", "var(--main-blue)")
                                 }))
                                 .child(html!("span", {
                                     .text(STR_TERMS_LABEL_TWO)
                                 }))
                                 .child(html!("a", {
-                                    .attribute("target", "_blank")
-                                    .attribute("href", "https://www.jewishinteractive.org/privacy-policy/")
+                                    .attr("target", "_blank")
+                                    .attr("href", "https://www.jewishinteractive.org/privacy-policy/")
                                     .text(STR_TERMS_PRIVACY)
                                     .style("color", "var(--main-blue)")
                                 }))
@@ -142,21 +142,21 @@ impl Step2Page {
                     )
                 }),
                 html!("input-checkbox", {
-                    .property("slot", "checkbox")
-                    .property("label", STR_MARKETING_LABEL)
+                    .prop("slot", "checkbox")
+                    .prop("label", STR_MARKETING_LABEL)
                     .event(clone!(state => move |evt:events::CustomToggle| {
                         *state.marketing.borrow_mut() = evt.value();
                     }))
                 }),
                 html!("p", {
-                    .property("slot", "committed-to-privacy")
+                    .prop("slot", "committed-to-privacy")
                     .text(STR_PROTECTING_PRIVACY)
                 }),
                 html!("button-rect-icon", {
-                    .property("slot", "submit")
-                    .property("color", "red")
-                    .property("size", "medium")
-                    .property("iconAfter", "arrow")
+                    .prop("slot", "submit")
+                    .prop("color", "red")
+                    .prop("size", "medium")
+                    .prop("iconAfter", "arrow")
                     .text(STR_ONE_MORE_STEP)
                     .event(clone!(state => move |_evt:events::Click| {
                         actions::submit(state.clone());

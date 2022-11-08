@@ -30,19 +30,19 @@ pub fn render(state: Rc<State>) -> Dom {
         .children(&mut [
             HebrewButtons::full().render(Some("hebrew-buttons")),
             html!("button-rect", {
-                .property("slot", "clear")
-                .property("kind", "text")
-                .property("color", "blue")
+                .prop("slot", "clear")
+                .prop("kind", "text")
+                .prop("color", "blue")
                 .text(super::strings::STR_CLEAR)
                 .event(clone!(state => move |_evt:events::Click| {
                     state.confirm_clear.set_neq(true);
                 }))
             }),
             html!("button-rect", {
-                .property_signal("disabled", state.is_valid_signal().map(|valid| !valid))
-                .property("size", "small")
-                .property("iconAfter", "done")
-                .property("slot", "done-btn")
+                .prop_signal("disabled", state.is_valid_signal().map(|valid| !valid))
+                .prop("size", "small")
+                .prop("iconAfter", "done")
+                .prop("slot", "done-btn")
                 .text(super::strings::STR_DONE)
                 .event(clone!(state => move |_evt:events::Click| {
                     match state.derive_list() {
@@ -83,12 +83,12 @@ pub fn render(state: Rc<State>) -> Dom {
                     .style("display", "none")
                     .apply(OverlayHandle::lifecycle(clone!(state => move || {
                         html!("modal-confirm", {
-                            .property("dangerous", true)
-                            .property("title", STR_DELETE_TITLE)
-                            .property("content", STR_DELETE_CONTENT)
-                            .property("cancel_text", STR_DELETE_CANCEL)
-                            .property("confirm_text", STR_DELETE_CONFIRM)
-                            .property("confirmIcon", "core/menus/delete-white.svg")
+                            .prop("dangerous", true)
+                            .prop("title", STR_DELETE_TITLE)
+                            .prop("content", STR_DELETE_CONTENT)
+                            .prop("cancel_text", STR_DELETE_CANCEL)
+                            .prop("confirm_text", STR_DELETE_CONFIRM)
+                            .prop("confirmIcon", "core/menus/delete-white.svg")
                             .event(clone!(state => move |_evt: events::CustomCancel| state.confirm_clear.set_neq(false)))
                             .event(clone!(state => move |_evt: events::CustomConfirm| {
                                 state.confirm_clear.set_neq(false);
@@ -134,17 +134,17 @@ impl ColumnSide {
 
 fn render_column(state: Rc<State>, side: ColumnSide) -> Dom {
     html!("sidebar-widget-dual-list-column", {
-        .property("slot", side.side_prop())
-        .property("side", side.side_prop())
-        .property("header", &(state.callbacks.get_header) (side))
+        .prop("slot", side.side_prop())
+        .prop("side", side.side_prop())
+        .prop("header", &(state.callbacks.get_header) (side))
         .children_signal_vec(
             side.mutable(&state).signal_vec_cloned()
                 .enumerate()
                 .map(clone!(state => move |(index, value)| {
                     let row = index.get().unwrap_or_default();
                     html!("sidebar-widget-dual-list-input", {
-                        .property("rows", state.opts.cell_rows)
-                        .property_signal("value", {
+                        .prop("rows", state.opts.cell_rows)
+                        .prop_signal("value", {
                             clone!(state => map_ref! {
                                 let value = value.signal_cloned(),
                                 let is_placeholder = state.is_placeholder.signal()
@@ -158,8 +158,8 @@ fn render_column(state: Rc<State>, side: ColumnSide) -> Dom {
                                     }
                             })
                         })
-                        .property("constrain", state.callbacks.constrain.as_ref())
-                        .property_signal("placeholder", state.is_placeholder.signal())
+                        .prop("constrain", state.callbacks.constrain.as_ref())
+                        .prop_signal("placeholder", state.is_placeholder.signal())
                         .event(clone!(state => move |_evt:events::Focus| {
                             //log::info!("got focus!");
                             state.is_placeholder.set_neq(false);

@@ -18,7 +18,7 @@ pub fn render_sticker_video_menu<T: AsSticker>(
         .style("gap", "10px")
         .children(&mut [
             html!("menu-line", {
-                .property("icon", "move-to-front")
+                .prop("icon", "move-to-front")
                 .event(clone!(stickers, index, video => move |_ :events::Click| {
                     video.transform.close_menu();
                     if let Some(index) = index.get() {
@@ -27,7 +27,7 @@ pub fn render_sticker_video_menu<T: AsSticker>(
                 }))
             }),
             html!("menu-line", {
-                .property("icon", "move-forward")
+                .prop("icon", "move-forward")
                 .event(clone!(stickers, index, video => move |_ :events::Click| {
                     video.transform.close_menu();
                     if let Some(index) = index.get() {
@@ -36,7 +36,7 @@ pub fn render_sticker_video_menu<T: AsSticker>(
                 }))
             }),
             html!("menu-line", {
-                .property("icon", "move-backward")
+                .prop("icon", "move-backward")
                 .event(clone!(stickers, index, video => move |_ :events::Click| {
                     video.transform.close_menu();
                     if let Some(index) = index.get() {
@@ -45,7 +45,7 @@ pub fn render_sticker_video_menu<T: AsSticker>(
                 }))
             }),
             html!("menu-line", {
-                .property("icon", "move-to-back")
+                .prop("icon", "move-to-back")
                 .event(clone!(stickers, index, video => move |_ :events::Click| {
                     video.transform.close_menu();
                     if let Some(index) = index.get() {
@@ -54,7 +54,7 @@ pub fn render_sticker_video_menu<T: AsSticker>(
                 }))
             }),
             html!("menu-line", {
-                .property("icon", "delete")
+                .prop("icon", "delete")
                 .event(clone!(stickers, video => move |_ :events::Click| {
                     video.transform.close_menu();
                     if let Some(index) = index.get() {

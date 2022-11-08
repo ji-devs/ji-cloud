@@ -7,7 +7,7 @@ use utils::events;
 
 pub fn render(state: Rc<AudioInput>) -> Dom {
     html!("audio-input-delete", {
-        .property("slot", "delete")
+        .prop("slot", "delete")
         .visible_signal(state.mode.signal_cloned().map(|mode| {
             match mode {
                 AudioInputMode::Empty | AudioInputMode::Recording | AudioInputMode::Uploading => false,

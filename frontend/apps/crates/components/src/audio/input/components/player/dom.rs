@@ -9,12 +9,12 @@ use web_sys::HtmlAudioElement;
 pub fn render(state: Rc<AudioInput>, audio: Audio) -> Dom {
     let current_time = Mutable::new(0);
     html!("progress-bar", {
-        .property("slot", "main-content")
-        .property("color", "green")
-        .property_signal("progress", current_time.signal())
+        .prop("slot", "main-content")
+        .prop("color", "green")
+        .prop_signal("progress", current_time.signal())
         .child(html!("audio" => HtmlAudioElement, {
-            .property("autoplay", true)
-            .property("src", audio_lib_url(audio.lib, audio.id))
+            .prop("autoplay", true)
+            .prop("src", audio_lib_url(audio.lib, audio.id))
             .with_node!(elem => {
                 .event(clone!(current_time => move |_:events::TimeUpdate| {
                     super::actions::on_time_update(&elem, &current_time);

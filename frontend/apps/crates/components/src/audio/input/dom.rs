@@ -14,9 +14,9 @@ impl AudioInput {
     pub fn render(state: Rc<Self>, slot: Option<&str>) -> Dom {
         html!("audio-input", {
             .apply_if(slot.is_some(), move |dom| {
-                dom.property("slot", slot.unwrap_ji())
+                dom.prop("slot", slot.unwrap_ji())
             })
-            .property_signal("mode", state.mode.signal_cloned().map(get_element_mode))
+            .prop_signal("mode", state.mode.signal_cloned().map(get_element_mode))
             .children(&mut [
                 add_method::render(state.clone(), AudioInputAddMethod::Record),
                 add_method::render(state.clone(), AudioInputAddMethod::Upload),
@@ -32,7 +32,7 @@ impl AudioInput {
                 sig.map(clone!(state => move |(mode, add_method)| {
                     vec![
                         html!("empty-fragment", {
-                            .property("slot", "main-action")
+                            .prop("slot", "main-action")
                             .child(main_action::render(state.clone(), mode.clone(), add_method))
                         }),
                         main_content::render(state.clone(), mode, add_method),

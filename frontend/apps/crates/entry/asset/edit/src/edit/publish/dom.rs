@@ -10,7 +10,7 @@ impl Publish {
         state.load_data();
 
         html!("empty-fragment", {
-            .property("slot", "main")
+            .prop("slot", "main")
             .child_signal(
                 map_ref! {
                     let asset = state.asset.signal_cloned(),

@@ -38,28 +38,28 @@ impl Component<EditAbout> for Rc<EditAbout> {
         let state = self;
         dom.child(html!("popup-body", {
             .child(html!("fa-button", {
-                .property("slot", "close")
-                .property("icon", "fa-regular fa-xmark")
+                .prop("slot", "close")
+                .prop("icon", "fa-regular fa-xmark")
                 .event(clone!(state => move |_: events::Click| {
                     (state.callbacks.close)();
                 }))
             }))
             .child(html!("h3", {
-                .property("slot", "heading")
+                .prop("slot", "heading")
                 .text(STR_HEADING)
             }))
             .child(html!("div", {
-                .property("slot", "body")
+                .prop("slot", "body")
                 .class("field-grid")
                 .children(&mut [
                     html!("fa-icon", {
-                        .property("icon", "fa-solid fa-location-dot")
+                        .prop("icon", "fa-solid fa-location-dot")
                     }),
                     html!("input-wrapper", {
-                        .property("slot", "location")
-                        .property("label", STR_LOCATION)
+                        .prop("slot", "location")
+                        .prop("label", STR_LOCATION)
                         .child(html!("input-location", {
-                            .property_signal("locationAsString", state.location.signal_cloned().map(|location| {
+                            .prop_signal("locationAsString", state.location.signal_cloned().map(|location| {
                                 location.unwrap_or_default()
                                     .as_str()
                                     .unwrap_or_default()
@@ -71,57 +71,57 @@ impl Component<EditAbout> for Rc<EditAbout> {
                             }))
                         }))
                         .child(html!("img-ui", {
-                            .property("slot", "icon")
-                            .property("path", "core/inputs/pencil-blue-darker.svg")
+                            .prop("slot", "icon")
+                            .prop("path", "core/inputs/pencil-blue-darker.svg")
                         }))
                     }),
                     html!("community-private-public-switch", {
-                        .property("type", "checkbox")
-                        .property_signal("isPublic", state.location_public.signal())
+                        .prop("type", "checkbox")
+                        .prop_signal("isPublic", state.location_public.signal())
                         .event(clone!(state => move |evt: events::CustomToggle| {
                             state.location_public.set_neq(evt.value());
                         }))
                     }),
                     html!("fa-icon", {
-                        .property("icon", "fa-solid fa-briefcase")
+                        .prop("icon", "fa-solid fa-briefcase")
                     }),
                     html!("input-wrapper", {
-                        .property("slot", "organization")
-                        .property("label", STR_ORGANIZATION)
+                        .prop("slot", "organization")
+                        .prop("label", STR_ORGANIZATION)
                         .child(html!("input" => HtmlInputElement, {
                             .with_node!(elem => {
-                                .property_signal("value", state.organization.signal_cloned().map(|i| i.unwrap_or_default()))
+                                .prop_signal("value", state.organization.signal_cloned().map(|i| i.unwrap_or_default()))
                                 .event(clone!(state => move |_: events::Input| {
                                     state.organization.set(Some(elem.value()));
                                 }))
                             })
                         }))
                         .child(html!("img-ui", {
-                            .property("slot", "icon")
-                            .property("path", "core/inputs/pencil-blue-darker.svg")
+                            .prop("slot", "icon")
+                            .prop("path", "core/inputs/pencil-blue-darker.svg")
                         }))
                     }),
                     html!("community-private-public-switch", {
-                        .property("type", "checkbox")
-                        .property_signal("isPublic", state.organization_public.signal())
+                        .prop("type", "checkbox")
+                        .prop_signal("isPublic", state.organization_public.signal())
                         .event(clone!(state => move |evt: events::CustomToggle| {
                             state.organization_public.set_neq(evt.value());
                         }))
                     }),
                     html!("fa-icon", {
-                        .property("icon", "fa-regular fa-id-card-clip")
+                        .prop("icon", "fa-regular fa-id-card-clip")
                     }),
                     html!("input-select", {
-                        .property("slot", "persona")
-                        .property("label", STR_PERSONA)
-                        .property("multiple", true)
-                        .property_signal("value", state.persona.signal_vec_cloned().to_signal_cloned().map(|persona| {
+                        .prop("slot", "persona")
+                        .prop("label", STR_PERSONA)
+                        .prop("multiple", true)
+                        .prop_signal("value", state.persona.signal_vec_cloned().to_signal_cloned().map(|persona| {
                             persona.join(", ")
                         }))
                         .children(STR_PERSONA_OPTIONS.iter().map(|persona| {
                             html!("input-select-option", {
                                 .text(persona)
-                                .property_signal(
+                                .prop_signal(
                                     "selected",
                                     state.persona.signal_vec_cloned().to_signal_cloned().map(move |p| {
                                         p.iter().any(|p| p == persona)
@@ -146,26 +146,26 @@ impl Component<EditAbout> for Rc<EditAbout> {
                         }))
                     }),
                     html!("community-private-public-switch", {
-                        .property("type", "checkbox")
-                        .property_signal("isPublic", state.persona_public.signal())
+                        .prop("type", "checkbox")
+                        .prop_signal("isPublic", state.persona_public.signal())
                         .event(clone!(state => move |evt: events::CustomToggle| {
                             state.persona_public.set_neq(evt.value());
                         }))
                     }),
                     html!("fa-icon", {
-                        .property("icon", "fa-solid fa-globe")
+                        .prop("icon", "fa-solid fa-globe")
                     }),
                     html!("input-select", {
-                        .property("slot", "language")
-                        .property("label", STR_LANGUAGE)
-                        .property("multiple", true)
-                        .property_signal("value", state.languages_spoken.signal_ref(|languages_spoken| {
+                        .prop("slot", "language")
+                        .prop("label", STR_LANGUAGE)
+                        .prop("multiple", true)
+                        .prop_signal("value", state.languages_spoken.signal_ref(|languages_spoken| {
                             languages_spoken.iter().map(|l| Language::code_to_display_name(l)).join(", ")
                         }))
                         .children(JIG_LANGUAGES.iter().map(|lang| {
                             html!("input-select-option", {
                                 .text(lang.display_name())
-                                .property_signal("selected", state.languages_spoken.signal_cloned().map(clone!(lang => move |languages_spoken| {
+                                .prop_signal("selected", state.languages_spoken.signal_cloned().map(clone!(lang => move |languages_spoken| {
                                     languages_spoken.contains(lang.code())
                                 })))
                                 .event(clone!(state => move |_: events::CustomSelectedChange| {
@@ -181,8 +181,8 @@ impl Component<EditAbout> for Rc<EditAbout> {
                         }))
                     }),
                     html!("community-private-public-switch", {
-                        .property("type", "checkbox")
-                        .property_signal("isPublic", state.languages_spoken_public.signal())
+                        .prop("type", "checkbox")
+                        .prop_signal("isPublic", state.languages_spoken_public.signal())
                         .event(clone!(state => move |evt: events::CustomToggle| {
                             state.languages_spoken_public.set_neq(evt.value());
                         }))
@@ -191,7 +191,7 @@ impl Component<EditAbout> for Rc<EditAbout> {
             }))
             .child(html!("button-rect", {
                 .text("Save")
-                .property("slot", "body")
+                .prop("slot", "body")
                 .event(clone!(state => move |_: events::Click| {
                     let user = state.get_user_profile_from_fields();
                     (state.callbacks.save_changes)(user);

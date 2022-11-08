@@ -21,9 +21,9 @@ impl ControllerDom {
         OnPreviewFn: Fn() + 'static,
     {
         html!("module-header-controller", {
-            .property("slot", "controller")
-            .property_signal("undoable", history.undoable())
-            .property_signal("redoable", history.redoable())
+            .prop("slot", "controller")
+            .prop_signal("undoable", history.undoable())
+            .prop_signal("redoable", history.redoable())
             .event(clone!(history => move |evt:events::CustomString| {
                 match evt.value().as_ref() {
                     "undo" => {

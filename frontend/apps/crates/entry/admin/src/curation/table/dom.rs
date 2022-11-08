@@ -24,22 +24,22 @@ impl CurationTable {
         let state = self;
         html!("admin-curation-table", {
             .child(html!("input-search", {
-                .property("slot", "search")
-                .property("placeholder", "Search...")
+                .prop("slot", "search")
+                .prop("placeholder", "Search...")
                 .event(clone!(state => move |e: events::CustomSearch| {
                     state.search_jigs(e.query());
                 }))
             }))
             .child(html!("table-order-by", {
-                .property("slot", "controls")
+                .prop("slot", "controls")
                 .child(html!("input-select", {
-                    .property_signal("value", state.curation_state.order_by.signal().map(|order_by| {
+                    .prop_signal("value", state.curation_state.order_by.signal().map(|order_by| {
                         format!("{}", order_by)
                     }))
                     .children(order_by_options.iter().map(|option| {
                         html!("input-select-option", {
                             .text(&format!("{}", option).to_string())
-                            .property_signal("selected", state.curation_state.order_by.signal().map(clone!(option => move |order_by| {
+                            .prop_signal("selected", state.curation_state.order_by.signal().map(clone!(option => move |order_by| {
                                 order_by == option
                             })))
                             .event(clone!(state, option => move |evt: events::CustomSelectedChange| {
@@ -52,12 +52,12 @@ impl CurationTable {
                 }))
             }))
             .child(html!("table-pagination", {
-                .property("slot", "controls")
+                .prop("slot", "controls")
                 .child(html!("fa-button", {
-                    .property("slot", "back")
-                    .property("title", "Previous")
-                    .property("icon", "fa-solid fa-chevron-left")
-                    .property_signal("disabled", state.curation_state.active_page.signal().map(|active_page| {
+                    .prop("slot", "back")
+                    .prop("title", "Previous")
+                    .prop("icon", "fa-solid fa-chevron-left")
+                    .prop_signal("disabled", state.curation_state.active_page.signal().map(|active_page| {
                         active_page == 0
                     }))
                     .event(clone!(state => move |_: events::Click| {
@@ -66,10 +66,10 @@ impl CurationTable {
                     }))
                 }))
                 .child(html!("fa-button", {
-                    .property("slot", "next")
-                    .property("title", "Next")
-                    .property("icon", "fa-solid fa-chevron-right")
-                    .property_signal("disabled", map_ref! {
+                    .prop("slot", "next")
+                    .prop("title", "Next")
+                    .prop("icon", "fa-solid fa-chevron-right")
+                    .prop_signal("disabled", map_ref! {
                         let total_pages = state.curation_state.total_pages.signal(),
                         let active_page = state.curation_state.active_page.signal() => {
                             match total_pages {
@@ -89,13 +89,13 @@ impl CurationTable {
                 .child_signal(state.curation_state.total_pages.signal().map(clone!(state => move |total_pages| {
                     total_pages.map(|total_pages| {
                         html!("input-select", {
-                            .property_signal("value", state.curation_state.active_page.signal().map(|active_page| {
+                            .prop_signal("value", state.curation_state.active_page.signal().map(|active_page| {
                                 format!("{}", active_page + 1)
                             }))
                             .children((0..total_pages).map(|page| {
                                 html!("input-select-option", {
                                     .text(&format!("{}", page + 1).to_string())
-                                    .property_signal("selected", state.curation_state.active_page.signal().map(clone!(page => move |active_page| {
+                                    .prop_signal("selected", state.curation_state.active_page.signal().map(clone!(page => move |active_page| {
                                         page == active_page
                                     })))
                                     .event(clone!(state, page => move |evt: events::CustomSelectedChange| {
@@ -139,20 +139,20 @@ impl CurationTable {
 
                         html!("span", {
                             .child(html!("fa-button", {
-                                .property("slot", "block")
+                                .prop("slot", "block")
                                 .style_signal("color", jig.blocked.signal().map(|blocked| {
                                     match blocked {
                                         true => "red",
                                         false => "green",
                                     }
                                 }))
-                                .property_signal("icon", jig.blocked.signal().map(|blocked| {
+                                .prop_signal("icon", jig.blocked.signal().map(|blocked| {
                                     match blocked {
                                         true => "fa-solid fa-eye-slash",
                                         false => "fa-solid fa-eye",
                                     }
                                 }))
-                                .property_signal("title", jig.blocked.signal().map(|blocked| {
+                                .prop_signal("title", jig.blocked.signal().map(|blocked| {
                                     match blocked {
                                         true => "Blocked",
                                         false => "Visible",
@@ -170,7 +170,7 @@ impl CurationTable {
                             .text(&jig.author_name)
                         }),
                         html!("star-rating", {
-                            .property_signal("rating", jig.rating.signal().map(|rating| {
+                            .prop_signal("rating", jig.rating.signal().map(|rating| {
                                 match rating {
                                     Some(rating) => rating as u8,
                                     None => 0,
@@ -180,7 +180,7 @@ impl CurationTable {
                         html!("label", {
                             .child(html!("select" => HtmlSelectElement, {
                                 .with_node!(select => {
-                                    .property_signal("value", jig.privacy_level.signal().map(|privacy_level| {
+                                    .prop_signal("value", jig.privacy_level.signal().map(|privacy_level| {
                                         privacy_level.as_str().to_case(Case::Title)
                                     }))
                                     .children(&mut [

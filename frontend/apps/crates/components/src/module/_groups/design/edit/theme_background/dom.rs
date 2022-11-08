@@ -21,7 +21,7 @@ where
         let state = self;
 
         html!("module-sidebar-body", {
-            .property("slot", "body")
+            .prop("slot", "body")
             .child_signal(state.custom_background.signal_ref(clone!(state => move |custom_background| {
                 match custom_background {
                     Some(custom_background) => {
@@ -29,10 +29,10 @@ where
                     },
                     None => {
                         let action = html!("button-rect", {
-                            .property("kind", "text")
-                            .property("color", "blue")
+                            .prop("kind", "text")
+                            .prop("color", "blue")
                             .child(html!("fa-icon", {
-                                .property("icon", "fa-light fa-paint-brush")
+                                .prop("icon", "fa-light fa-paint-brush")
                             }))
                             .text(STR_DESIGN_FROM_SCRATCH)
                             .event(clone!(state => move |_: events::Click|{

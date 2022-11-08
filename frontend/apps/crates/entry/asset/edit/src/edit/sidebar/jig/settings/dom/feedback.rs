@@ -20,15 +20,15 @@ const STR_MISTAKE: &str = "Mistake";
 
 pub fn render(state: Rc<State>, tab: FeedbackTab) -> Dom {
     html!("jig-audio-body", {
-        .property("slot", "overlay")
-        .property("kind", "feedback")
+        .prop("slot", "overlay")
+        .prop("kind", "feedback")
         .children(&mut [
             html!("label", {
-                .property("slot", "correct-mistake")
+                .prop("slot", "correct-mistake")
                 .child(html!("input", {
-                    .property("name", "correct-mistake")
-                    .property("type", "radio")
-                    .property("checked", tab == FeedbackTab::Positive)
+                    .prop("name", "correct-mistake")
+                    .prop("type", "radio")
+                    .prop("checked", tab == FeedbackTab::Positive)
                     .event(clone!(state => move |_:events::Input| {
                         state.active_popup.set(Some(ActiveSettingsPopup::Feedback(FeedbackTab::Positive)));
                     }))
@@ -36,11 +36,11 @@ pub fn render(state: Rc<State>, tab: FeedbackTab) -> Dom {
                 .text(STR_CORRECT)
             }),
             html!("label", {
-                .property("slot", "correct-mistake")
+                .prop("slot", "correct-mistake")
                 .child(html!("input", {
-                    .property("name", "correct-mistake")
-                    .property("type", "radio")
-                    .property("checked", tab == FeedbackTab::Negative)
+                    .prop("name", "correct-mistake")
+                    .prop("type", "radio")
+                    .prop("checked", tab == FeedbackTab::Negative)
                     .event(clone!(state => move |_:events::Input| {
                         state.active_popup.set(Some(ActiveSettingsPopup::Feedback(FeedbackTab::Negative)));
                     }))
@@ -48,24 +48,24 @@ pub fn render(state: Rc<State>, tab: FeedbackTab) -> Dom {
                 .text(STR_MISTAKE)
             }),
             html!("button-rect", {
-                .property("kind", "text")
-                .property("slot", "back")
-                .property("color", "blue")
-                .child(html!("fa-icon", {.property("icon", "fa-light fa-chevron-left")}))
+                .prop("kind", "text")
+                .prop("slot", "back")
+                .prop("color", "blue")
+                .child(html!("fa-icon", {.prop("icon", "fa-light fa-chevron-left")}))
                 .text(STR_BACK_TO_SETTINGS)
                 .event(clone!(state => move|_: events::Click| {
                     set_active_popup(Rc::clone(&state), ActiveSettingsPopup::Main);
                 }))
             }),
             html!("button-icon", {
-                .property("icon", "x")
-                .property("slot", "close")
+                .prop("icon", "x")
+                .prop("slot", "close")
                 .event(clone!(state => move |_:events::Click| {
                     state.active_popup.set(None);
                 }))
             }),
             // html!("input-search", {
-            //     .property("slot", "search")
+            //     .prop("slot", "search")
             // }),
         ])
         .apply(|dom| {
@@ -124,14 +124,14 @@ where
     let audio_handle = &audio_handles[index];
 
     html!("jig-audio-line", {
-        .property("slot", "lines")
-        .property("label", option.display_name())
-        .property_signal("playing", audio_handle.signal_ref(|x| x.is_some()))
+        .prop("slot", "lines")
+        .prop("label", option.display_name())
+        .prop_signal("playing", audio_handle.signal_ref(|x| x.is_some()))
         .children(&mut [
             html!("input", {
-                .property("slot", "checkbox")
-                .property("type", "checkbox")
-                .property_signal("checked", list.signal_cloned().map(clone!(option => move|list| {
+                .prop("slot", "checkbox")
+                .prop("type", "checkbox")
+                .prop_signal("checked", list.signal_cloned().map(clone!(option => move|list| {
                     list.contains(&option)
                 })))
                 .event(clone!(state, option => move |_ :events::Click| {
@@ -145,8 +145,8 @@ where
                 }))
             }),
             html!("jig-audio-play-pause", {
-                .property("slot", "play-pause")
-                .property_signal("mode", audio_handle.signal_ref(|audio_handle| {
+                .prop("slot", "play-pause")
+                .prop_signal("mode", audio_handle.signal_ref(|audio_handle| {
                     match audio_handle {
                         Some(_) => "pause",
                         None => "play",

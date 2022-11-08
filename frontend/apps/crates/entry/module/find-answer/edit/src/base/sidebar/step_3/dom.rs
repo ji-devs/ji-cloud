@@ -84,8 +84,8 @@ pub fn render(state: Rc<Step3>) -> Dom {
     state.sidebar.base.continue_next_fn.set(None);
 
     html!("module-sidebar-body", {
-        .property("slot", "body")
-        .property_signal("dark", empty_signal(state.clone()).map(|is_empty| !is_empty))
+        .prop("slot", "body")
+        .prop_signal("dark", empty_signal(state.clone()).map(|is_empty| !is_empty))
         .child_signal(empty_signal(state.clone()).map(clone!(state => move |is_empty| {
             if is_empty {
                 // Make sure that the tab_kind is reset so that we can display the correct Jiggling text.
@@ -94,9 +94,9 @@ pub fn render(state: Rc<Step3>) -> Dom {
                 Some(html!("questions-empty", {
                     .child(html!("div", {
                         .child(html!("button-icon", {
-                            .property("size", "medium")
-                            .property("color", "blue")
-                            .property("icon", "circle-+-blue")
+                            .prop("size", "medium")
+                            .prop("color", "blue")
+                            .prop("icon", "circle-+-blue")
                             .event(clone!(state => move|_: events::Click| {
                                 state.sidebar.base.add_default_question();
                                 state.sidebar.base.current_question.set(Some(0))
@@ -117,10 +117,10 @@ pub fn render(state: Rc<Step3>) -> Dom {
         .child_signal(empty_signal(state.clone()).map(clone!(state => move |is_empty| {
             if !is_empty {
                 Some(html!("button-icon-label", {
-                    .property("slot", "action")
-                    .property("icon", "circle-+-blue")
-                    .property("label", "Add a question")
-                    .property("labelcolor", "blue")
+                    .prop("slot", "action")
+                    .prop("icon", "circle-+-blue")
+                    .prop("label", "Add a question")
+                    .prop("labelcolor", "blue")
                     .event(clone!(state => move|_: events::Click| {
                         state.sidebar.base.add_default_question();
                         let index = state.sidebar.base.questions.lock_ref().len() - 1;
@@ -145,8 +145,8 @@ pub fn render_question(
 ) -> Dom {
     html!("question-item", {
         .child(html!("fa-button", {
-            .property("slot", "toggle")
-            .property_signal("icon", current_question_idx_signal(state.clone(), index.signal()).map(|is_current| {
+            .prop("slot", "toggle")
+            .prop_signal("icon", current_question_idx_signal(state.clone(), index.signal()).map(|is_current| {
                 if is_current {
                     "fa-thin fa-angle-down"
                 } else {
@@ -161,10 +161,10 @@ pub fn render_question(
         .child_signal(question.is_editing_title.signal_cloned().dedupe().map(clone!(state, index, question => move |is_editing_title| {
             if is_editing_title {
                 Some(html!("input-wrapper", {
-                    .property("slot", "title")
-                    .property("pad", false)
+                    .prop("slot", "title")
+                    .prop("pad", false)
                     .child(html!("input" => HtmlInputElement, {
-                        .property_signal("value", question.title.signal_cloned().map(|title| {
+                        .prop_signal("value", question.title.signal_cloned().map(|title| {
                             match title {
                                 Some(title) => title,
                                 None => "".to_string(),
@@ -192,7 +192,7 @@ pub fn render_question(
             } else {
                 Some(html!("span", {
                     .style("cursor", "pointer")
-                    .property("slot", "title")
+                    .prop("slot", "title")
                     .text_signal(question_default_title_signal(question.clone(), index.signal_cloned()))
                     .event(clone!(state, index => move|_: events::Click| {
                         let question_index = index.get_cloned().unwrap_ji();
@@ -204,9 +204,9 @@ pub fn render_question(
         .child_signal(question.is_editing_title.signal_cloned().dedupe().map(clone!(question => move |is_editing| {
             if !is_editing {
                 Some(html!("img-ui", {
-                    .property("slot", "edit-btn")
+                    .prop("slot", "edit-btn")
                     .style("cursor", "pointer")
-                    .property("path", "core/inputs/pencil-blue-darker.svg")
+                    .prop("path", "core/inputs/pencil-blue-darker.svg")
                     .event(clone!(question => move|_: events::Click| {
                         question.is_editing_title.set_neq(!question.is_editing_title.get());
                     }))
@@ -217,10 +217,10 @@ pub fn render_question(
         })))
         .child(html!("menu-kebab", {
             .with_node!(kebab_elem => {
-                .property("slot", "menu")
+                .prop("slot", "menu")
                 .child(html!("menu-line", {
-                    .property("icon", "edit")
-                    .property("customLabel", "Rename question")
+                    .prop("icon", "edit")
+                    .prop("customLabel", "Rename question")
                     .event(clone!(question, kebab_elem => move |_: events::Click| {
                         question.is_editing_title.set_neq(true);
                         close_kebab_menu(&kebab_elem);
@@ -230,7 +230,7 @@ pub fn render_question(
                     match current_index {
                         Some(current_index) if *current_index > 0 => {
                             Some(html!("menu-line", {
-                                .property("icon", "move-up")
+                                .prop("icon", "move-up")
                                 .event(clone!(state, index, kebab_elem => move |_: events::Click| {
                                     state.sidebar.base.move_question(index.get().unwrap_ji(), Direction::Up);
                                     close_kebab_menu(&kebab_elem);
@@ -244,7 +244,7 @@ pub fn render_question(
                     match current_index {
                         Some(current_index) if *current_index < state.sidebar.base.questions.lock_ref().len() - 1 => {
                             Some(html!("menu-line", {
-                                .property("icon", "move-down")
+                                .prop("icon", "move-down")
                                 .event(clone!(state, index, kebab_elem => move |_: events::Click| {
                                     state.sidebar.base.move_question(index.get().unwrap_ji(), Direction::Down);
                                     close_kebab_menu(&kebab_elem);
@@ -255,8 +255,8 @@ pub fn render_question(
                     }
                 })))
                 .child(html!("menu-line", {
-                    .property("icon", "delete")
-                    .property("customLabel", "Delete question")
+                    .prop("icon", "delete")
+                    .prop("customLabel", "Delete question")
                     .event(clone!(question, kebab_elem => move |_: events::Click| {
                         question.confirm_delete.set_neq(true);
                         close_kebab_menu(&kebab_elem);
@@ -294,7 +294,7 @@ pub fn render_question(
                                             render_tab(MenuTabKind::Question, state.sidebar.tab_kind.clone()),
                                             render_tab(MenuTabKind::Answer, state.sidebar.tab_kind.clone()),
                                             html!("module-sidebar-body", {
-                                                .property("slot", "body")
+                                                .prop("slot", "body")
                                                 .style("overflow", "inherit")
                                                 .child_signal(
                                                     //based on the selected tab kind, create and render the tab state
@@ -328,12 +328,12 @@ pub fn render_question(
                 Some(html!("empty-fragment", {
                     .apply(OverlayHandle::lifecycle(clone!(state, index, question => move || {
                         html!("modal-confirm", {
-                            .property("dangerous", true)
-                            .property("title", "Warning")
-                            .property("content", "Are you sure you want to delete this question?")
-                            .property("cancel_text", "Don't delete")
-                            .property("confirm_text", "Yes, delete")
-                            .property("confirmIcon", "core/menus/delete-white.svg")
+                            .prop("dangerous", true)
+                            .prop("title", "Warning")
+                            .prop("content", "Are you sure you want to delete this question?")
+                            .prop("cancel_text", "Don't delete")
+                            .prop("confirm_text", "Yes, delete")
+                            .prop("confirmIcon", "core/menus/delete-white.svg")
                             .event(clone!(question => move |_evt: events::CustomCancel| question.confirm_delete.set_neq(false)))
                             .event(clone!(state, index, question => move |_evt: events::CustomConfirm| {
                                 question.confirm_delete.set_neq(false);
@@ -400,13 +400,13 @@ fn render_tab_body(state: Rc<Step3>, tab: Tab) -> Dom {
 
                         html!("empty-fragment", {
                             .child(html!("input-wrapper", {
-                                .property("label", crate::strings::step_3::STR_LABEL)
+                                .prop("label", crate::strings::step_3::STR_LABEL)
                                 .child(HebrewButtons::reveal().render(Some("hebrew-inputs")))
                                 .child(html!("textarea" => HtmlTextAreaElement, {
-                                    .attribute("dir", "auto")
-                                    .property_signal("value", question.question_text.signal_cloned().map(|text| text.unwrap_or_default()))
-                                    .property("placeholder", crate::strings::step_3::STR_PLACEHOLDER)
-                                    .property("rows", 1)
+                                    .attr("dir", "auto")
+                                    .prop_signal("value", question.question_text.signal_cloned().map(|text| text.unwrap_or_default()))
+                                    .prop("placeholder", crate::strings::step_3::STR_PLACEHOLDER)
+                                    .prop("rows", 1)
                                     .event(move |evt: events::Change| {
                                         let target = evt.dyn_target::<HtmlTextAreaElement>().unwrap_ji();
                                         let value = target.value();
@@ -438,8 +438,8 @@ fn render_tab_body(state: Rc<Step3>, tab: Tab) -> Dom {
         }
         Tab::Answer => html!("empty-fragment", {
             .child(html!("sidebar-empty", {
-                .property("label", "Trace all correct answers")
-                .property("imagePath", "module/_common/edit/sidebar/illustration-trace-area.svg")
+                .prop("label", "Trace all correct answers")
+                .prop("imagePath", "module/_common/edit/sidebar/illustration-trace-area.svg")
             }))
         }),
     }

@@ -69,7 +69,7 @@ pub fn render_page_body<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer
 
         html!(page_kind.element_name(), {
                 .apply_if(page_kind.add_scrollable_attribute(), |dom| {
-                    dom.property("scrollable", true)
+                    dom.prop("scrollable", true)
                 })
                 .event(clone!(has_resized_once => move |event:ModuleResizeEvent| {
                     //in utils / global static

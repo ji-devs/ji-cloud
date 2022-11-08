@@ -37,9 +37,9 @@ impl SearchResultsSection {
         state.user.set(get_user_cloned());
 
         html!("home-search-results-section", {
-            .property("slot", "sections")
-            .property("kind", state.asset_type.as_str())
-            .property_signal("resultsCount", state.total.signal())
+            .prop("slot", "sections")
+            .prop("kind", state.asset_type.as_str())
+            .prop_signal("resultsCount", state.total.signal())
             .children_signal_vec(state.list.signal_vec_cloned().map(clone!(state => move |jig| {
                 state.render_result(jig)
             })))
@@ -48,10 +48,10 @@ impl SearchResultsSection {
                     true => None,
                     false => {
                         Some(html!("button-rect", {
-                            .property("slot", "load-more")
-                            .property("color", "blue")
-                            .property("type", "filled")
-                            .property_signal("disabled", state.loader.is_loading())
+                            .prop("slot", "load-more")
+                            .prop("color", "blue")
+                            .prop("type", "filled")
+                            .prop_signal("disabled", state.loader.is_loading())
                             .text(STR_LOAD_MORE)
                             .event(clone!(state => move |_: events::Click| {
                                 state.loader.load(clone!(state => async move {
@@ -72,15 +72,15 @@ impl SearchResultsSection {
         let user_id = state.user.get_cloned().map(|user| user.id);
 
         html!("home-search-result", {
-            .property("slot", "results")
-            .property("title", asset.display_name())
-            .property("playedCount", asset.plays())
-            .property("likedCount", asset.likes())
-            .property("author", asset.author_name().clone().unwrap_or_default())
-            .property("language", asset.language())
-            .property_signal("flipped", share_asset.active_popup.signal_cloned().map(|active_popup| active_popup.is_some()))
-            .property("kind", state.asset_type.as_str())
-            .property("publishedAt", {
+            .prop("slot", "results")
+            .prop("title", asset.display_name())
+            .prop("playedCount", asset.plays())
+            .prop("likedCount", asset.likes())
+            .prop("author", asset.author_name().clone().unwrap_or_default())
+            .prop("language", asset.language())
+            .prop_signal("flipped", share_asset.active_popup.signal_cloned().map(|active_popup| active_popup.is_some()))
+            .prop("kind", state.asset_type.as_str())
+            .prop("publishedAt", {
                 match asset.published_at() {
                     Some(publish_at) => published_at_string(publish_at, false),
                     None => String::new(),
@@ -89,13 +89,13 @@ impl SearchResultsSection {
             .child_signal(state.home_state.search_options.age_ranges.signal_cloned().map(move |age_ranges| {
                 let range = age_ranges.range(&jig_ages);
                 Some(html!("age-range", {
-                    .property("slot", "ages")
-                    .property("icon", "entry/home/search-results/age.svg")
-                    .property("from", range.0)
-                    .property("to", range.1)
+                    .prop("slot", "ages")
+                    .prop("icon", "entry/home/search-results/age.svg")
+                    .prop("from", range.0)
+                    .prop("to", range.1)
                 }))
             }))
-            .property("description", asset.description().clone())
+            .prop("description", asset.description().clone())
             .child(
                 ModuleThumbnail::new(
                     asset.id(),
@@ -106,11 +106,11 @@ impl SearchResultsSection {
             )
             .apply_if(!asset.categories().is_empty(), clone!(state, asset => move |dom| {
                 dom.child(html!("home-search-result-details", {
-                    .property("slot", "categories")
+                    .prop("slot", "categories")
                     .child(html!("div", {
                         .children(asset.categories().iter().map(|category_id| {
                             html!("home-search-result-category", {
-                                .property_signal("label", {
+                                .prop_signal("label", {
                                     state.home_state.search_options.category_label_lookup.signal_cloned().map(clone!(category_id => move |category_label_lookup| {
                                         match category_label_lookup.get(&category_id) {
                                             Some(label) => label.to_owned(),
@@ -123,19 +123,19 @@ impl SearchResultsSection {
                     }))
                 }))
             }))
-            .property("showAdditionalResources", {
+            .prop("showAdditionalResources", {
                 !asset.additional_resources().is_empty()
                 &&
                 !state.asset_type.is_resource()
             })
             .children(asset.additional_resources().iter().map(|resource| {
                 html!("a", {
-                    .property("slot", "additional-resources")
-                    .property("target", "_BLANK")
-                    .property("title", &resource.display_name)
-                    .property("href", resource.resource_content.get_link())
+                    .prop("slot", "additional-resources")
+                    .prop("target", "_BLANK")
+                    .prop("title", &resource.display_name)
+                    .prop("href", resource.resource_content.get_link())
                     .child(html!("fa-icon", {
-                        .property("icon", "fa-light fa-file")
+                        .prop("icon", "fa-light fa-file")
                     }))
                     .text(" ")
                     .text_signal(state.resource_type_name(resource.resource_type_id))
@@ -147,7 +147,7 @@ impl SearchResultsSection {
                     .style("align-items", "center")
                     .style("gap", "10px")
                     .child(html!("fa-icon", {
-                        .property("icon", "fa-thin fa-share-nodes")
+                        .prop("icon", "fa-thin fa-share-nodes")
                         .style("font-size", "26px")
                     }))
                     .text(" Share")
@@ -159,13 +159,13 @@ impl SearchResultsSection {
             ))
             .apply_if(asset.author_id() == &user_id, clone!(asset => move |dom| {
                 dom.child(html!("a", {
-                    .property("slot", "actions")
+                    .prop("slot", "actions")
                     .child(html!("fa-icon", {
-                        .property("icon", "fa-light fa-pencil")
+                        .prop("icon", "fa-light fa-pencil")
                         .style("font-size", "18px")
                     }))
                     .text(" Edit")
-                    .property("href", {
+                    .prop("href", {
                         match asset.id() {
                             AssetId::JigId(jig_id) => {
                                 Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
@@ -196,11 +196,11 @@ impl SearchResultsSection {
                 match state.asset_type {
                     AssetType::Jig | AssetType::Course => {
                         dom.child(html!("button-rect-icon", {
-                            .property("slot", "play-button")
-                            .property("color", "red")
-                            .property("bold", true)
-                            .property("size", "small")
-                            .property("iconBeforePath", "search/cards/play.svg")
+                            .prop("slot", "play-button")
+                            .prop("color", "red")
+                            .prop("bold", true)
+                            .prop("size", "small")
+                            .prop("iconBeforePath", "search/cards/play.svg")
                             .text("Play")
                             .event(clone!(state => move |_: events::Click| {
                                 state.on_play_asset_click(asset.id());
@@ -213,11 +213,11 @@ impl SearchResultsSection {
                             match asset.additional_resources().get(0) {
                                 Some(resource) => {
                                     html!("button-rect", {
-                                        .property("slot", "play-button")
-                                        .property("color", "green")
-                                        .property("bold", true)
-                                        .property("href", resource.resource_content.get_link())
-                                        .property("target", "_BLANK")
+                                        .prop("slot", "play-button")
+                                        .prop("color", "green")
+                                        .prop("bold", true)
+                                        .prop("href", resource.resource_content.get_link())
+                                        .prop("target", "_BLANK")
                                         .text("View")
                                         .event(clone!(state => move |_: events::Click| {
                                             track_action("play", asset.clone());
@@ -235,7 +235,7 @@ impl SearchResultsSection {
                                     // should not be possible, resource focused jigs need to have exactly one additional resource
                                     html!("span", {
                                         .text("Error 😞")
-                                        .property("slot", "play-button")
+                                        .prop("slot", "play-button")
                                     })
                                 },
                             }

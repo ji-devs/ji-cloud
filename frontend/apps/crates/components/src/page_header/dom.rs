@@ -42,20 +42,20 @@ pub fn render(
 
     html!("page-header", {
         .apply_if(slot.is_some(), |dom| {
-            dom.property("slot", slot.unwrap_ji())
+            dom.prop("slot", slot.unwrap_ji())
         })
         .children(PageLinks::iter().map(|page_link| {
             html!("page-header-link", {
-                .property("slot", "links")
-                .property("kind", page_link.kind_str())
-                .property("active", {
+                .prop("slot", "links")
+                .prop("kind", page_link.kind_str())
+                .prop("active", {
                     matches!(
                         &active_page,
                         Some(active_page) if active_page == &page_link
                     )
                 })
-                .property("href", &page_link.route())
-                .property("target", page_link.target())
+                .prop("href", &page_link.route())
+                .prop("target", page_link.target())
                 .event(move |_evt: events::Click| {
                     let mut properties = HashMap::new();
                     properties.insert("Header Kind", page_link.kind_str().to_owned());
@@ -64,12 +64,12 @@ pub fn render(
             })
         }))
         .child(html!("button-rect", {
-            .property("slot", "donate")
-            .property("color", "green")
-            .property("size", "small")
-            .property("bold", true)
-            .property("href", DONATE_LINK)
-            .property("target", "_blank")
+            .prop("slot", "donate")
+            .prop("color", "green")
+            .prop("size", "small")
+            .prop("bold", true)
+            .prop("href", DONATE_LINK)
+            .prop("target", "_blank")
             .text(STR_DONATE)
             .event(move |_evt: events::Click| {
                 analytics::event("Donate Click", None);
@@ -77,7 +77,7 @@ pub fn render(
         }))
         .apply_if(render_beta, |dom| {
             dom.child(html!("beta-button", {
-                .property("slot", "beta")
+                .prop("slot", "beta")
                 .event(clone!(state => move |_evt: events::Click| {
                     state.beta_tooltip.set_neq(true);
                 }))
@@ -90,17 +90,17 @@ pub fn render(
                                     .apply(OverlayHandle::lifecycle(
                                         clone!(state, elem => move || {
                                             html!("overlay-tooltip-info", {
-                                                .property("target", &elem)
-                                                .property("color", "light-orange")
-                                                .attribute("targetAnchor", "mm")
-                                                .attribute("contentAnchor", "bl")
-                                                .property("closeable", true)
-                                                .property("strategy", "track")
+                                                .prop("target", &elem)
+                                                .prop("color", "light-orange")
+                                                .attr("targetAnchor", "mm")
+                                                .attr("contentAnchor", "bl")
+                                                .prop("closeable", true)
+                                                .prop("strategy", "track")
                                                 .event(clone!(state => move |_evt: events::Close| {
                                                     state.beta_tooltip.set_neq(false);
                                                 }))
                                                 .child(html!("beta-tooltip-content", {
-                                                    .property("slot", "body")
+                                                    .prop("slot", "body")
                                                 }))
                                             })
                                         })
@@ -115,7 +115,7 @@ pub fn render(
         .apply(|dom| {
             if let Some(PageLinks::Home) = active_page {
                 dom.child(html!("page-header-student-code", {
-                    .property("slot", "student-code")
+                    .prop("slot", "student-code")
                 }))
             } else {
                 dom
@@ -142,15 +142,15 @@ fn has_privileges(state: Rc<State>, scope: UserScope) -> impl Signal<Item = bool
 
 fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {
     vec![html!("page-header-profile", {
-        .property("slot", "user")
-        .property("name", &user.given_name)
-        .property("email", &user.email)
+        .prop("slot", "user")
+        .prop("name", &user.given_name)
+        .prop("email", &user.email)
         .children(&mut [
             html!("button-rect", {
-                .property("slot", "logout")
-                .property("kind", "outline")
-                .property("size", "small")
-                .property("color", "blue")
+                .prop("slot", "logout")
+                .prop("kind", "outline")
+                .prop("size", "small")
+                .prop("color", "blue")
                 .text(STR_LOGOUT)
                 .event(clone!(state => move |_: events::Click| {
                     actions::logout(Rc::clone(&state));
@@ -158,8 +158,8 @@ fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {
                 }))
             }),
             html!("profile-image", {
-                .property("slot", "profile-image")
-                .property("imageId", {
+                .prop("slot", "profile-image")
+                .prop("imageId", {
                     match &user.profile_image {
                         Some(image_id) => JsValue::from_str(&image_id.0.to_string()),
                         None => JsValue::UNDEFINED,
@@ -167,8 +167,8 @@ fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {
                 })
             }),
             html!("profile-image", {
-                .property("slot", "overlay-profile-image")
-                .property("imageId", {
+                .prop("slot", "overlay-profile-image")
+                .prop("imageId", {
                     match &user.profile_image {
                         Some(image_id) => JsValue::from_str(&image_id.0.to_string()),
                         None => JsValue::UNDEFINED,
@@ -177,10 +177,10 @@ fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {
             }),
         ])
         .child(html!("a", {
-            .property("slot", "user-links")
-            .property("href", Route::Asset(AssetRoute::JigGallery).to_string())
+            .prop("slot", "user-links")
+            .prop("href", Route::Asset(AssetRoute::JigGallery).to_string())
             .child(html!("img-ui", {
-                .property("path", "core/page-header/jig-icon.svg")
+                .prop("path", "core/page-header/jig-icon.svg")
             }))
             .text(STR_MY_JIGS)
         }))
@@ -189,10 +189,10 @@ fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {
                 false => None,
                 true => {
                     Some(html!("a", {
-                        .property("slot", "user-links")
-                        .property("href", Route::Asset(AssetRoute::ResourceGallery).to_string())
+                        .prop("slot", "user-links")
+                        .prop("href", Route::Asset(AssetRoute::ResourceGallery).to_string())
                         .child(html!("fa-icon", {
-                            .property("icon", "fa-light fa-lightbulb-on")
+                            .prop("icon", "fa-light fa-lightbulb-on")
                         }))
                         .text(STR_MY_RESOURCES)
                     }))
@@ -200,11 +200,11 @@ fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {
             }
         }))
         .child(html!("a", {
-            .property("slot", "user-links")
-            .property("href", Route::User(UserRoute::Settings).to_string())
+            .prop("slot", "user-links")
+            .prop("href", Route::User(UserRoute::Settings).to_string())
 
             .child(html!("fa-icon", {
-                .property("icon", "fa-light fa-gear")
+                .prop("icon", "fa-light fa-gear")
             }))
             .text(STR_MY_SETTINGS)
         }))
@@ -213,8 +213,8 @@ fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {
                 false => None,
                 true => {
                     Some(html!("a", {
-                        .property("slot", "admin")
-                        .property("href", Route::Admin(AdminRoute::Landing).to_string())
+                        .prop("slot", "admin")
+                        .prop("href", Route::Admin(AdminRoute::Landing).to_string())
                         .text(STR_ADMIN)
                     }))
                 }
@@ -226,20 +226,20 @@ fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {
 fn render_logged_out() -> Vec<Dom> {
     vec![
         html!("button-rect", {
-            .property("slot", "user")
-            .property("kind", "text")
-            .property("color", "black")
-            .property("href", &Route::User(UserRoute::Register(Default::default())).to_string())
+            .prop("slot", "user")
+            .prop("kind", "text")
+            .prop("color", "black")
+            .prop("href", &Route::User(UserRoute::Register(Default::default())).to_string())
             .text(STR_SIGN_UP)
             .event(move |_evt: events::Click| {
                 analytics::event("Header Signup Click", None);
             })
         }),
         html!("button-rect", {
-            .property("slot", "user")
-            .property("kind", "text")
-            .property("color", "black")
-            .property("href", &Route::User(UserRoute::Login(Default::default())).to_string())
+            .prop("slot", "user")
+            .prop("kind", "text")
+            .prop("color", "black")
+            .prop("href", &Route::User(UserRoute::Login(Default::default())).to_string())
             .text(STR_LOGIN)
             .event_with_options(
                 &EventOptions::preventable(),

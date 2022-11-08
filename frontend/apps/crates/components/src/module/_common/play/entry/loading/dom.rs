@@ -18,6 +18,6 @@ where
         .style("position", "absolute")
         .style("width", "100%")
         .style("height", "100%")
-        .property("slot", "main")
+        .prop("slot", "main")
     })
 }

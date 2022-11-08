@@ -12,13 +12,13 @@ impl AdditionalResourceComponent {
         let resource_content = &state.additional_resource.resource_content;
         log::info!("{:#?}", resource_content.get_link());
         html!("jig-edit-publish-resource", {
-            .property("slot", "resources")
-            .property("label", &state.additional_resource.display_name)
-            .property("resourceHref", &state.additional_resource.resource_content.get_link())
-            .property_signal("resourceType", state.resource_type_name_signal())
+            .prop("slot", "resources")
+            .prop("label", &state.additional_resource.display_name)
+            .prop("resourceHref", &state.additional_resource.resource_content.get_link())
+            .prop_signal("resourceType", state.resource_type_name_signal())
             .child(html!("fa-button", {
-                .property("slot", "delete")
-                .property("icon", "fa-light fa-trash-can")
+                .prop("slot", "delete")
+                .prop("icon", "fa-light fa-trash-can")
                 .event(clone!(state => move |_: events::Click| {
                     state.delete();
                 }))

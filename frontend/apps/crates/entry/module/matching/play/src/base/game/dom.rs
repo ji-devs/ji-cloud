@@ -10,7 +10,7 @@ use futures_signals::signal::SignalExt;
 
 pub fn render(state: Rc<Game>) -> Dom {
     html!("matching-main", {
-        .property("slot", "main")
+        .prop("slot", "main")
         .children_signal_vec(
             state.current.signal_cloned()
                 .map(|current| {
@@ -27,7 +27,7 @@ pub fn render(state: Rc<Game>) -> Dom {
 
                         children.push(
                             html!("empty-fragment", {
-                                .property("slot", "drag")
+                                .prop("slot", "drag")
                                 .style("position", "absolute")
                                 .child_signal(current.drag.signal_cloned().map(|drag| {
                                     drag.map(render_drag)

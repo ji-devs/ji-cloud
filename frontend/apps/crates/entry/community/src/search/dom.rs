@@ -26,13 +26,13 @@ impl CommunitySearch {
         state.search();
 
         html!("community-search-page", {
-            .property("query", &state.query.q)
-            .property_signal("memberCount", state.member_count.signal())
+            .prop("query", &state.query.q)
+            .prop_signal("memberCount", state.member_count.signal())
             .children_signal_vec(state.members.signal_vec_cloned().map(clone!(state => move|member| {
                 state.render_member(&member)
             })))
             .child_signal(state.render_see_more_members())
-            .property_signal("circleCount", state.circle_count.signal())
+            .prop_signal("circleCount", state.circle_count.signal())
             .children_signal_vec(state.circles.signal_vec_cloned().map(clone!(state => move|circle| {
                 state.render_circle(&circle)
             })))
@@ -43,15 +43,15 @@ impl CommunitySearch {
     fn render_member(self: &Rc<Self>, member: &PublicUser) -> Dom {
         html!("community-list-member", {
             .class(&*MEMBER_LIST_GRID_COLUMNS)
-            .property("slot", "members")
-            .property("name", &format!("{} {}", member.given_name, member.family_name))
-            // .property("city", "New York")
-            // .property("state", "NY")
+            .prop("slot", "members")
+            .prop("name", &format!("{} {}", member.given_name, member.family_name))
+            // .prop("city", "New York")
+            // .prop("state", "NY")
             .apply(|mut dom| {
                 if let Some(languages_spoken) = &member.languages_spoken {
                     if languages_spoken.len() > 0 {
                         let languages = languages_spoken.iter().map(|l| Language::code_to_display_name(l)).join(", ");
-                        dom = dom.property("language", languages);
+                        dom = dom.prop("language", languages);
                     };
                 };
                 dom
@@ -60,8 +60,8 @@ impl CommunitySearch {
                 Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(member.id))).to_string()
             }))
             .child(html!("profile-image", {
-                .property("slot", "img")
-                .property("imageId", {
+                .prop("slot", "img")
+                .prop("imageId", {
                     match &member.profile_image {
                         Some(image_id) => JsValue::from_str(&image_id.0.to_string()),
                         None => JsValue::UNDEFINED,
@@ -74,21 +74,21 @@ impl CommunitySearch {
     fn render_circle(self: &Rc<Self>, circle: &Circle) -> Dom {
         html!("community-list-circle", {
             .class(&*CIRCLE_LIST_GRID_COLUMNS)
-            .property("slot", "circles")
-            .property("name", &circle.display_name)
-            .property("memberCount", circle.member_count)
-            .property("description", &circle.description)
+            .prop("slot", "circles")
+            .prop("name", &circle.display_name)
+            .prop("memberCount", circle.member_count)
+            .prop("description", &circle.description)
             .apply(move |dom| dominator::on_click_go_to_url!(dom, {
                 Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::Circle(circle.id))).to_string()
             }))
             .child(html!("img-ji", {
-                .property("slot", "img")
-                .property("lib", MediaLibrary::User.to_str())
-                .property("id", &circle.image.0.to_string())
+                .prop("slot", "img")
+                .prop("lib", MediaLibrary::User.to_str())
+                .prop("id", &circle.image.0.to_string())
             }))
             .child(html!("community-list-circle-status", {
-                .property("slot", "status")
-                .property("status", "")
+                .prop("slot", "status")
+                .prop("status", "")
             }))
         })
     }
@@ -100,9 +100,9 @@ impl CommunitySearch {
             let member_len = state.members.signal_vec_cloned().len() => move {
                 if *member_count > *member_len as u32 {
                     Some(html!("button-rect", {
-                        .property("slot", "members-see-more")
-                        .property("color", "blue")
-                        .property_signal("disabled", state.loader.is_loading())
+                        .prop("slot", "members-see-more")
+                        .prop("color", "blue")
+                        .prop_signal("disabled", state.loader.is_loading())
                         .text(STR_SEE_MORE)
                         .event(clone!(state => move |_: events::Click| {
                             state.load_more_members();
@@ -122,9 +122,9 @@ impl CommunitySearch {
             let circle_len = state.circles.signal_vec_cloned().len() => move {
                 if *circle_count > *circle_len as u32 {
                     Some(html!("button-rect", {
-                        .property("slot", "circles-see-more")
-                        .property("color", "blue")
-                        .property_signal("disabled", state.loader.is_loading())
+                        .prop("slot", "circles-see-more")
+                        .prop("color", "blue")
+                        .prop_signal("disabled", state.loader.is_loading())
                         .text(STR_SEE_MORE)
                         .event(clone!(state => move |_: events::Click| {
                             state.load_more_circles();

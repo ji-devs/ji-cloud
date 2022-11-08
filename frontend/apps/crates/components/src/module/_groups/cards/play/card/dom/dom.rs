@@ -91,15 +91,15 @@ where
     html!("play-card", {
         .style("visibility", "visible")
         .apply_if(slot.is_some(), |dom|
-            dom.property("slot", slot.unwrap_ji())
+            dom.prop("slot", slot.unwrap_ji())
         )
-        .property("styleKind", style_kind.as_str_id())
-        .property("size", size.as_str_id())
-        .property("flipOnHover", flip_on_hover)
-        .property("flipped", flipped)
-        .property("theme", theme_id.as_str_id())
-        .property("mode", mode.as_str_id())
-        .property("side", side.as_str_id())
+        .prop("styleKind", style_kind.as_str_id())
+        .prop("size", size.as_str_id())
+        .prop("flipOnHover", flip_on_hover)
+        .prop("flipped", flipped)
+        .prop("theme", theme_id.as_str_id())
+        .prop("mode", mode.as_str_id())
+        .prop("side", side.as_str_id())
         .style("visibility", {
             if transparent {
                 "hidden"
@@ -119,15 +119,15 @@ where
             let t = simple_transform.unwrap_ji();
 
             dom
-                .property("translateX", t.x)
-                .property("translateY", t.y)
-                .property("scale", t.scale)
-                .property("hasTransform", true)
+                .prop("translateX", t.x)
+                .prop("translateY", t.y)
+                .prop("scale", t.scale)
+                .prop("hasTransform", true)
         })
         .child(render_media(card, &size, None))
         .apply_if(back_card.is_some(), |dom| {
             dom
-                .property("doubleSided", true)
+                .prop("doubleSided", true)
                 .child(render_media(back_card.unwrap_ji(), &size, Some("backSideContent")))
         })
         .apply_if(mixin.is_some(), |dom| {

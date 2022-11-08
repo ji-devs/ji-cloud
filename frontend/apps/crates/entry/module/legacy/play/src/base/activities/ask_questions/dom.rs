@@ -30,10 +30,10 @@ impl AskQuestions {
             .class(&*FULL_STAGE)
 
             .child(svg!("rect", {
-                .attribute_signal("width", resize_info_signal().map(|info| {
+                .attr_signal("width", resize_info_signal().map(|info| {
                     format!("{}px", info.width)
                 }))
-                .attribute_signal("height", resize_info_signal().map(|info| {
+                .attr_signal("height", resize_info_signal().map(|info| {
                     format!("{}px", info.height)
                 }))
                 .class(&*SVG_FILL_TRANSPARENT_CLICK_CLASS)

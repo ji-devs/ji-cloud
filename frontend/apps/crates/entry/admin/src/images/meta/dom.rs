@@ -35,7 +35,7 @@ impl ImageMetaPage {
 
         html!("empty-fragment", {
             .child(html!("window-loader-block", {
-                .property_signal("visible", state.loader.is_loading())
+                .prop_signal("visible", state.loader.is_loading())
             }))
             .child_signal(
                 state.loaded.signal().map(clone!(state, initial_data => move |loaded| {
@@ -85,23 +85,23 @@ impl ImageMetaPage {
                                             _ => { }
                                         }
                                     }))
-                                    .property("slot", "header")
-                                    .property_signal("section", state.section.signal_ref(|x| x.as_str()))
+                                    .prop("slot", "header")
+                                    .prop_signal("section", state.section.signal_ref(|x| x.as_str()))
                                 }),
 
                                 html!("img-ji", {
-                                    .property("slot", "image")
-                                    .property("size", "thumb")
-                                    .property("cacheBust", true)
-                                    .property_signal("id", image.id.signal_cloned().map(|id| {
+                                    .prop("slot", "image")
+                                    .prop("size", "thumb")
+                                    .prop("cacheBust", true)
+                                    .prop_signal("id", image.id.signal_cloned().map(|id| {
                                         id.0.to_string()
                                     }))
                                 }),
                                 html!("button-rect", {
-                                    .property("slot", "replace")
-                                    .property("kind", "text")
-                                    .property("color", "blue")
-                                    .property("size", "small")
+                                    .prop("slot", "replace")
+                                    .prop("kind", "text")
+                                    .prop("color", "blue")
+                                    .prop("size", "small")
                                     .text(STR_REPLACE)
                                     .event(clone!(state => move |_evt:events::Click| {
                                         if let Some(elem) = state.file_input.borrow().as_ref() {
@@ -110,43 +110,43 @@ impl ImageMetaPage {
                                     }))
                                 }),
                                 html!("button-rect", {
-                                    .property("slot", "delete")
-                                    .property("kind", "text")
-                                    .property("color", "blue")
-                                    .property("size", "small")
+                                    .prop("slot", "delete")
+                                    .prop("kind", "text")
+                                    .prop("color", "blue")
+                                    .prop("size", "small")
                                     .text(STR_DELETE)
                                     .event(clone!(state => move |_evt:events::Click| {
                                         state.delete_modal.set_neq(true);
                                     }))
                                 }),
                                 html!("input-checkbox", {
-                                    .property("slot", "premium")
-                                    .property("label", STR_PREMIUM)
-                                    .property_signal("checked", image.is_premium.signal())
+                                    .prop("slot", "premium")
+                                    .prop("label", STR_PREMIUM)
+                                    .prop_signal("checked", image.is_premium.signal())
                                     .event(clone!(state, image => move |evt:events::CustomToggle| {
                                         actions::toggle_premium(state.clone(), image.clone(), evt.value());
                                     }))
                                 }),
                                 html!("input-text-underline", {
-                                    .property("slot", "description")
-                                    .property("label", STR_IMAGENAME)
-                                    .property_signal("value", image.name.signal_cloned())
+                                    .prop("slot", "description")
+                                    .prop("label", STR_IMAGENAME)
+                                    .prop_signal("value", image.name.signal_cloned())
                                     .event(clone!(state, image => move |evt:events::CustomChange| {
                                         actions::change_name(state.clone(), image.clone(), evt.value());
                                     }))
                                 }),
                                 html!("input-textarea-underline", {
-                                    .property("slot", "description")
-                                    .property("label", STR_DESCRIPTION)
-                                    .property_signal("value", image.description.signal_cloned())
+                                    .prop("slot", "description")
+                                    .prop("label", STR_DESCRIPTION)
+                                    .prop_signal("value", image.description.signal_cloned())
                                     .event(clone!(state, image => move |evt:events::CustomChange| {
                                         actions::change_description(state.clone(), image.clone(), evt.value());
                                     }))
                                 }),
                                 html!("button-rect", {
-                                    .property("slot", "next")
-                                    .property("color", "red")
-                                    .property("size", "medium")
+                                    .prop("slot", "next")
+                                    .prop("color", "red")
+                                    .prop("size", "medium")
                                     .text_signal(state.section.signal().map(|section| {
                                         match section {
                                             Section::General | Section::Categories => STR_NEXT,
@@ -162,8 +162,8 @@ impl ImageMetaPage {
                                     }))
                                 }),
                                 html!("input" => HtmlInputElement, {
-                                    .property("type", "file")
-                                    .property("accept", "image/*")
+                                    .prop("type", "file")
+                                    .prop("accept", "image/*")
                                     .style("display", "none")
                                     .after_inserted(clone!(state => move |elem| {
                                         *state.file_input.borrow_mut() = Some(elem);
@@ -180,7 +180,7 @@ impl ImageMetaPage {
                                     }))
                                 }),
                                 html!("div", {
-                                    .property("slot", "right")
+                                    .prop("slot", "right")
                                     .child_signal(state.section.signal().map(clone!(state, image, categories, metadata => move |section| {
                                         match section {
                                             Section::General => Some(GeneralDom::render(state.clone(), image.clone(), metadata.clone())),
@@ -193,13 +193,13 @@ impl ImageMetaPage {
                             .child_signal(state.delete_modal.signal().map(clone!(state => move |delete_modal| {
                                 if delete_modal {
                                     Some(html!("modal-confirm", {
-                                        .property("slot", "modal")
-                                        .property("dangerous", true)
-                                        .property("title", STR_DELETE_TITLE)
-                                        .property("content", STR_DELETE_CONTENT)
-                                        .property("cancel_text", STR_DELETE_CANCEL)
-                                        .property("confirm_text", STR_DELETE_CONFIRM)
-                                        .property("confirmIcon", "core/menus/delete-white.svg")
+                                        .prop("slot", "modal")
+                                        .prop("dangerous", true)
+                                        .prop("title", STR_DELETE_TITLE)
+                                        .prop("content", STR_DELETE_CONTENT)
+                                        .prop("cancel_text", STR_DELETE_CANCEL)
+                                        .prop("confirm_text", STR_DELETE_CONFIRM)
+                                        .prop("confirmIcon", "core/menus/delete-white.svg")
                                         .event(clone!(state => move |_evt: events::CustomCancel| state.delete_modal.set_neq(false)))
                                         .event(clone!(state => move |_evt: events::CustomConfirm| {
                                             state.delete_modal.set_neq(false);

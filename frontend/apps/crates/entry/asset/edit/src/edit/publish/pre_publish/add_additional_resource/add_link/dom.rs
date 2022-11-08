@@ -23,11 +23,11 @@ impl AddLink {
         html!("jig-edit-publish-resource-add-link", {
             .children(&mut [
                 html!("button-rect", {
-                    .property("slot", "back")
-                    .property("color", "blue")
-                    .property("kind", "text")
+                    .prop("slot", "back")
+                    .prop("color", "blue")
+                    .prop("kind", "text")
                     .child(html!("fa-icon", {
-                        .property("icon", "fa-solid fa-angle-left")
+                        .prop("icon", "fa-solid fa-angle-left")
                     }))
                     .text(STR_BACK)
                     .event(clone!(state => move|_: events::Click| {
@@ -35,16 +35,16 @@ impl AddLink {
                     }))
                 }),
                 html!("fa-button", {
-                    .property("icon", "fa-light fa-xmark")
-                    .property("slot", "close")
+                    .prop("icon", "fa-light fa-xmark")
+                    .prop("slot", "close")
                     .event(clone!(state => move|_: events::Click| {
                         state.add_resources_state.active_popup.set(None);
                     }))
                 }),
                 html!("textarea" => HtmlTextAreaElement, {
                     .with_node!(elem => {
-                        .property("slot", "textarea")
-                        .property("spellcheck", "false")
+                        .prop("slot", "textarea")
+                        .prop("spellcheck", "false")
                         .event(clone!(state, elem => move |_: events::Change| {
                             let val = elem.value().trim().to_string();
                             let url = Url::from_str(&val);
@@ -73,20 +73,20 @@ impl AddLink {
                     })
                 }),
                 html!("button-rect", {
-                    .property("slot", "actions")
-                    .property("color", "blue")
-                    .property("kind", "text")
+                    .prop("slot", "actions")
+                    .prop("color", "blue")
+                    .prop("kind", "text")
                     .text(STR_CANCEL)
                     .event(clone!(state => move|_: events::Click| {
                         state.add_resources_state.active_popup.set(None);
                     }))
                 }),
                 html!("button-rect", {
-                    .property("slot", "actions")
-                    .property("color", "blue")
-                    .property("kind", "filled")
+                    .prop("slot", "actions")
+                    .prop("color", "blue")
+                    .prop("kind", "filled")
                     .text(STR_SAVE)
-                    .property_signal("disabled", not(state.form_filled_out()))
+                    .prop_signal("disabled", not(state.form_filled_out()))
                     .event(clone!(state => move|_: events::Click| {
                         state.save();
                     }))
@@ -94,10 +94,10 @@ impl AddLink {
             ])
             .child_signal(state.add_resources_state.publish_state.resource_types.signal_ref(clone!(state => move|resource_types| {
                 Some(html!("input-select", {
-                    .property("slot", "type")
-                    .property("label", "Select type")
-                    .property("placeholder", "Select one")
-                    .property_signal("value", state.resource_type.signal_ref(|resource_type| {
+                    .prop("slot", "type")
+                    .prop("label", "Select type")
+                    .prop("placeholder", "Select one")
+                    .prop_signal("value", state.resource_type.signal_ref(|resource_type| {
                         match resource_type {
                             Some(resource_type) => resource_type.display_name.clone(),
                             None => String::new(),

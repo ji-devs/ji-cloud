@@ -17,12 +17,12 @@ impl PrePublish {
     pub fn render_ages(self: Rc<Self>) -> Dom {
         let state = Rc::clone(&self);
         html!("input-select", {
-            .property("slot", "age")
-            .property("label", STR_AGE_LABEL)
-            .property("placeholder", STR_AGE_PLACEHOLDER)
-            .property("multiple", true)
-            .property_signal("value", age_value_signal(state.clone()))
-            // .property_signal("error", {
+            .prop("slot", "age")
+            .prop("label", STR_AGE_LABEL)
+            .prop("placeholder", STR_AGE_PLACEHOLDER)
+            .prop("multiple", true)
+            .prop_signal("value", age_value_signal(state.clone()))
+            // .prop_signal("error", {
             //     (map_ref! {
             //         let submission_tried = state.submission_tried.signal(),
             //         let value = state.jig.age_ranges.signal_cloned()
@@ -34,7 +34,7 @@ impl PrePublish {
             // })
             .child(html!("input-select-option", {
                 .text(STR_ALL_AGES)
-                .property_signal("selected", state.asset.age_ranges().signal_cloned().map(|age_ranges| {
+                .prop_signal("selected", state.asset.age_ranges().signal_cloned().map(|age_ranges| {
                     age_ranges.is_empty()
                 }))
                 .event(clone!(state => move |_: events::CustomSelectedChange| {
@@ -58,7 +58,7 @@ fn render_age(age: &AgeRange, state: Rc<PrePublish>) -> Dom {
     let age_id = age.id;
     html!("input-select-option", {
         .text(&age.display_name)
-        .property_signal("selected", state.asset.age_ranges().signal_cloned().map(clone!(age_id => move |ages| {
+        .prop_signal("selected", state.asset.age_ranges().signal_cloned().map(clone!(age_id => move |ages| {
             ages.contains(&age_id)
         })))
         .event(clone!(state => move |_: events::CustomSelectedChange| {

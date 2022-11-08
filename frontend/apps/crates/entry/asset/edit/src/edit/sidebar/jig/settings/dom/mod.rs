@@ -21,17 +21,17 @@ pub fn render(state: Rc<State>) -> Dom {
                 .style("z-index", "2")
             })
         })
-        .property("slot", "settings")
-        .property("positionX", "right-out")
-        .property("positionY", "top-in")
-        .property("styled", true)
-        .property_signal("open", state.active_popup.signal_cloned().map(|x| x.is_some()))
+        .prop("slot", "settings")
+        .prop("positionX", "right-out")
+        .prop("positionY", "top-in")
+        .prop("styled", true)
+        .prop_signal("open", state.active_popup.signal_cloned().map(|x| x.is_some()))
         .event(clone!(state => move |_: events::Close| {
             state.active_popup.set(None);
         }))
         .child(html!("fa-button", {
-            .property("slot", "anchor")
-            .property("icon", "fa-solid fa-gear")
+            .prop("slot", "anchor")
+            .prop("icon", "fa-solid fa-gear")
             .style("color", "#ffffff")
             .event(clone!(state => move |_: events::Click| {
                 let mut active_popup = state.active_popup.lock_mut();

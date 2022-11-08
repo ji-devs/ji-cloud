@@ -54,13 +54,13 @@ impl TalkTypeItem {
                     }
                 })
             })))
-            .property("largestText", state.hint_letters.borrow().largest_text.clone())
-            .property("y", bounds.y)
-            .property("x", bounds.x)
-            .property("width", bounds.width)
-            .property("height", bounds.height)
-            .property_signal("value", state.value.signal_cloned())
-            .property_signal("color", state.phase.signal().map(|phase| {
+            .prop("largestText", state.hint_letters.borrow().largest_text.clone())
+            .prop("y", bounds.y)
+            .prop("x", bounds.x)
+            .prop("width", bounds.width)
+            .prop("height", bounds.height)
+            .prop_signal("value", state.value.signal_cloned())
+            .prop_signal("color", state.phase.signal().map(|phase| {
                 match phase {
                     TalkTypeItemPhase::Wrong => "red",
                     TalkTypeItemPhase::Correct => "green",
@@ -85,9 +85,9 @@ impl TalkTypeItem {
                                 TalkTypeItemPhase::Wrong => {
                                     Some(html!("overlay-tooltip-bubble", {
                                         .text(&state.hint_letters.borrow().to_string())
-                                        .property("target", web_sys::DomRect::from(abs_bounds))
-                                        .property("targetAnchor", "bm")
-                                        .property("contentAnchor", "oppositeV")
+                                        .prop("target", web_sys::DomRect::from(abs_bounds))
+                                        .prop("targetAnchor", "bm")
+                                        .prop("contentAnchor", "oppositeV")
                                     }))
                                 },
                                 _ => None

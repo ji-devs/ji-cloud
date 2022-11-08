@@ -26,8 +26,8 @@ pub fn render_transform(
                     *state.dom_ref.borrow_mut() = None;
                 }))
                 .child(html!("button-icon" => HtmlElement, {
-                    .property("slot", "menu-btn")
-                    .property("icon", "circle-kebab-grey")
+                    .prop("slot", "menu-btn")
+                    .prop("icon", "circle-kebab-grey")
                     .style("display", "block")
                     .style_signal("transform", state.invert_rotation_matrix_string_signal())
                     .with_node!(elem => {
@@ -47,12 +47,12 @@ pub fn render_transform(
                 .style_signal("left", state.x_px_signal().map(|x| format!("{}px", x)))
                 .style_signal("width", state.width_px_signal().map(|x| format!("{}px", x)))
                 .style_signal("height", state.height_px_signal().map(|x| format!("{}px", x)))
-                .property_signal("isTransforming", state.is_transforming.signal())
-                .property("hasMenu", get_menu_contents.is_some())
-                .property("resizeLevel", resize_level.to_str())
-                .property_signal("width", state.width_px_signal())
-                .property_signal("height", state.height_px_signal())
-                .property_signal("screenScale", resize_info_signal().map(|resize| resize.scale))
+                .prop_signal("isTransforming", state.is_transforming.signal())
+                .prop("hasMenu", get_menu_contents.is_some())
+                .prop("resizeLevel", resize_level.to_str())
+                .prop_signal("width", state.width_px_signal())
+                .prop_signal("height", state.height_px_signal())
+                .prop_signal("screenScale", resize_info_signal().map(|resize| resize.scale))
                 .event(clone!(state => move |_evt:super::events::RectDblClick| {
                     if let Some(on_double_click) = &state.callbacks.on_double_click {
                         (on_double_click) ();
@@ -118,7 +118,7 @@ pub fn render_transform(
                                         clone!(pos, state, get_menu_contents => move || {
                                             html!("overlay-drag" => HtmlElement, {
                                                 .with_node!(elem => {
-                                                    .property("target", web_sys::DomRect::new_with_x_and_y_and_width_and_height(pos.0 + 32.0, pos.1, 1.0, 1.0).unwrap_ji())
+                                                    .prop("target", web_sys::DomRect::new_with_x_and_y_and_width_and_height(pos.0 + 32.0, pos.1, 1.0, 1.0).unwrap_ji())
                                                     .child(html!("menu-container", {
                                                         .child((get_menu_contents.as_ref())())
                                                     }))

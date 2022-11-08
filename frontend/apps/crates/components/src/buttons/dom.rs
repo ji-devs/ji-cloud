@@ -12,13 +12,13 @@ impl Button {
 
         html!(state.element_str(), {
             .apply_if(icon_prop.is_some(), |dom| {
-                dom.property("icon", icon_prop.unwrap_ji())
+                dom.prop("icon", icon_prop.unwrap_ji())
             })
             .apply_if(slot.is_some(), |dom| {
-                dom.property("slot", slot.unwrap_ji())
+                dom.prop("slot", slot.unwrap_ji())
             })
             .apply_if(label.is_some(), |dom| {
-                dom.property("label", label.unwrap_ji())
+                dom.prop("label", label.unwrap_ji())
             })
             .apply_if(state.on_click.is_some(), |dom| {
                 dom.event(clone!(state => move |_evt:events::Click| {

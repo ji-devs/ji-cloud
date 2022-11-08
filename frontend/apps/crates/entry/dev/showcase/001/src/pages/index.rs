@@ -1,28 +1,32 @@
-use std::rc::Rc;
-use std::cell::RefCell;
-use wasm_bindgen::UnwrapThrowExt;
-use wasm_bindgen::JsCast;
+use awsm_web::dom::*;
+use components::module::page::*;
+use dominator::{apply_methods, clone, events, html, stylesheet, Dom, DomBuilder};
+use dominator_helpers::{
+    elem,
+    futures::{spawn_future, AsyncLoader},
+    with_data_id,
+};
+use futures::future::ready;
 use futures_signals::{
     map_ref,
-    signal::{Mutable, SignalExt, Signal, always},
+    signal::{always, Mutable, Signal, SignalExt},
     signal_vec::{MutableVec, SignalVec, SignalVecExt},
-    CancelableFutureHandle, 
+    CancelableFutureHandle,
 };
-use web_sys::{HtmlElement, Element, HtmlInputElement};
-use dominator::{DomBuilder, stylesheet, Dom, html, events, clone, apply_methods};
-use dominator_helpers::{elem, with_data_id,futures::{spawn_future, AsyncLoader}};
-use awsm_web::dom::*;
-use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
-use futures::future::ready;
-use components::module::page::*;
-use std::pin::Pin;
+use std::cell::RefCell;
 use std::future::Future;
-use utils::routes::{Route, DevRoute};
+use std::pin::Pin;
+use std::rc::Rc;
+use utils::routes::{DevRoute, Route};
+use wasm_bindgen::JsCast;
+use wasm_bindgen::UnwrapThrowExt;
+use wasm_bindgen_futures::{future_to_promise, spawn_local, JsFuture};
+use web_sys::{Element, HtmlElement, HtmlInputElement};
 pub struct Page {}
 
 impl Page {
     pub fn render() -> Rc<Self> {
-        let _self = Rc::new(Page{});
+        let _self = Rc::new(Page {});
 
         stylesheet!("A", {
             .style("text-decoration", "none")
@@ -45,11 +49,11 @@ fn render_dom() -> Dom {
         .style("margin", "10px")
         .children(vec![
             html!("a",  {
-                .attribute("href", &Route::Dev(DevRoute::Showcase("001".to_string(), "grid".to_string())).to_string())
+                .attr("href", &Route::Dev(DevRoute::Showcase("001".to_string(), "grid".to_string())).to_string())
                 .text("grid")
             }),
             html!("a",  {
-                .attribute("href", &Route::Dev(DevRoute::Showcase("001".to_string(), "renderer".to_string())).to_string())
+                .attr("href", &Route::Dev(DevRoute::Showcase("001".to_string(), "renderer".to_string())).to_string())
                 .text("renderer")
             })
         ])

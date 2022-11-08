@@ -50,8 +50,8 @@ impl Confirm {
                             })
                             .child(html!("popup-body", {
                                 .child(html!("fa-button", {
-                                    .property("slot", "close")
-                                    .property("icon", "fa-regular fa-xmark")
+                                    .prop("slot", "close")
+                                    .prop("icon", "fa-regular fa-xmark")
                                     .event(clone!(resolve, dom_handle => move |_: events::Click| {
                                         let resolve = resolve.borrow_mut().take().unwrap_ji();
                                         (resolve)(false);
@@ -60,19 +60,19 @@ impl Confirm {
                                     }))
                                 }))
                                 .child(html!("h3", {
-                                    .property("slot", "heading")
+                                    .prop("slot", "heading")
                                     .text(&self.title)
                                 }))
                                 .child(html!("div", {
-                                    .property("slot", "body")
+                                    .prop("slot", "body")
                                     .children(&mut [
                                         html!("p", {
                                             .text(&self.message)
                                         }),
                                         html!("button-rect", {
-                                            .property("size", "small")
-                                            .property("color", "red")
-                                            .property("kind", "outline")
+                                            .prop("size", "small")
+                                            .prop("color", "red")
+                                            .prop("kind", "outline")
                                             .text(&self.cancel_text)
                                             .event(clone!(resolve, dom_handle => move |_: events::Click| {
                                                 let resolve = resolve.borrow_mut().take().unwrap_ji();
@@ -82,9 +82,9 @@ impl Confirm {
                                             }))
                                         }),
                                         html!("button-rect", {
-                                            .property("size", "small")
-                                            .property("color", "red")
-                                            .property("kind", "filled")
+                                            .prop("size", "small")
+                                            .prop("color", "red")
+                                            .prop("kind", "filled")
                                             .text(&self.confirm_text)
                                             .event(clone!(resolve, dom_handle => move |_: events::Click| {
                                                 let resolve_fn = resolve.borrow_mut().take().unwrap_ji();

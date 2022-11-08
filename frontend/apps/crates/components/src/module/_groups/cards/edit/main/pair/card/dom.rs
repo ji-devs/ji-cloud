@@ -44,12 +44,12 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
                     .apply(OverlayHandle::lifecycle(clone!(state => move || {
                         let confirm_action = confirm_action.clone();
                         html!("modal-confirm", {
-                            .property("dangerous", true)
-                            .property("title", confirm_action.title)
-                            .property("content", confirm_action.content)
-                            .property("cancel_text", confirm_action.cancel)
-                            .property("confirm_text", confirm_action.confirm)
-                            .property("confirmIcon", "core/menus/delete-white.svg")
+                            .prop("dangerous", true)
+                            .prop("title", confirm_action.title)
+                            .prop("content", confirm_action.content)
+                            .prop("cancel_text", confirm_action.cancel)
+                            .prop("confirm_text", confirm_action.confirm)
+                            .prop("confirmIcon", "core/menus/delete-white.svg")
                             .event(clone!(state => move |_evt: events::CustomCancel| state.confirm_action.set(None)))
                             .event(clone!(state => move |_evt: events::CustomConfirm| {
                                 state.confirm_action.set(None);
@@ -59,11 +59,11 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
                     })))
                 }))
         })))
-        .property("slot", state.side.as_str_id())
-        .property("side", state.side.as_str_id())
-        .property("flippable", state.step == Step::Two)
-        .property("editing", state.step == Step::One)
-        .property_signal("selected", state.base.selected_pair.signal_cloned().map(clone!(state => move |selected| {
+        .prop("slot", state.side.as_str_id())
+        .prop("side", state.side.as_str_id())
+        .prop("flippable", state.step == Step::Two)
+        .prop("editing", state.step == Step::One)
+        .prop_signal("selected", state.base.selected_pair.signal_cloned().map(clone!(state => move |selected| {
             selected.map_or(false, |(idx, side)| {
                 let correct_idx = state.index.get().unwrap_or_default() == idx;
 
@@ -75,13 +75,13 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
                 correct_idx && correct_side
             })
         })))
-        .property_signal("dragOver", state.editing_active.signal())
-        .property_signal("theme", state.base.theme_id_str_signal())
-        .property("mode", state.base.mode.as_str_id())
+        .prop_signal("dragOver", state.editing_active.signal())
+        .prop_signal("theme", state.base.theme_id_str_signal())
+        .prop("mode", state.base.mode.as_str_id())
         .apply_if(state.card.audio.is_some(), |dom| {
             dom.child(html!("button-icon", {
-                .property("slot", "audio")
-                .property("icon", "audio")
+                .prop("slot", "audio")
+                .prop("icon", "audio")
                 .event(clone!(state => move |_evt:events::Click| {
                     let audio = state.card.audio.as_ref().unwrap_ji();
                     AUDIO_MIXER.with(|mixer| {
@@ -92,20 +92,20 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
         })
         .apply_if(state.step == Step::One, |dom| {
             dom.child(html!("menu-kebab", {
-                .property("slot", "menu")
-                .property("positioningEnabled", false)
-                .property_signal("customContainer", state.menu_container_elem.signal_cloned())
-                .property_signal("visible", state.menu_open.signal_cloned())
+                .prop("slot", "menu")
+                .prop("positioningEnabled", false)
+                .prop_signal("customContainer", state.menu_container_elem.signal_cloned())
+                .prop_signal("visible", state.menu_open.signal_cloned())
                 .with_node!(button_elem => {
                     .child_signal(state.menu_open.signal_cloned().map(clone!(state => move |is_open| {
                         if is_open {
                             Some(html!("empty-fragment", {
                                 .apply(OverlayHandle::lifecycle(clone!(state, button_elem => move || {
                                     html!("menu-items", {
-                                        .property("target", button_elem.clone())
+                                        .prop("target", button_elem.clone())
                                         .apply_if(matches!(state.card.card_content, CardContent::Text(_)), clone!(state => move |dom| {
                                             dom.child(html!("menu-line", {
-                                                .property("icon", "text")
+                                                .prop("icon", "text")
                                                 .event(clone!(state => move |_evt:events::Click| {
                                                     state.close_menu();
                                                     state.editing_active.set_neq(true);
@@ -119,8 +119,8 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
                                         .apply_if(matches!(state.card.card_content, CardContent::Image(_)), clone!(state => move |dom| {
                                             dom.child_signal(state.card.as_image_mutable().signal_cloned().map(clone!(state => move |image| {
                                                 image.map(|_| html!("menu-line", {
-                                                            .property("icon", "image")
-                                                            .property("customLabel", "Remove image")
+                                                            .prop("icon", "image")
+                                                            .prop("customLabel", "Remove image")
                                                             .event(clone!(state => move |_evt:events::Click| {
                                                                 state.close_menu();
                                                                 state.confirm_action.set(Some(Rc::new(ModalAction::new(
@@ -139,8 +139,8 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
                                         }))
                                         .apply_if(state.card.audio.is_some(), clone!(state => move |dom| {
                                             dom.child(html!("menu-line", {
-                                                .property("icon", "record-sound")
-                                                .property("customLabel", "Remove audio")
+                                                .prop("icon", "record-sound")
+                                                .prop("customLabel", "Remove audio")
                                                 .event(clone!(state => move |_evt:events::Click| {
                                                     state.close_menu();
                                                     state.confirm_action.set(Some(Rc::new(ModalAction::new(
@@ -164,8 +164,8 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
                                             }))
                                         }))
                                         .child(html!("menu-line", {
-                                            .property("icon", "delete")
-                                            .property("customLabel", "Delete pair")
+                                            .prop("icon", "delete")
+                                            .prop("customLabel", "Delete pair")
                                             .event(clone!(state => move |_evt:events::Click| {
                                                 state.close_menu();
                                                 state.confirm_action.set(Some(Rc::new(ModalAction::new(
@@ -226,14 +226,14 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
             match &state.card.card_content {
                 CardContent::Text(data) => {
                     html!("input-textarea-content", {
-                        .property_signal("value", data.signal_cloned())
-                        .property_signal("fontSize", data.signal_cloned().map(|value| {
+                        .prop_signal("value", data.signal_cloned())
+                        .prop_signal("fontSize", data.signal_cloned().map(|value| {
                             lookup::get_card_font_size(&value, None)
                         }))
-                        .property_signal("editing", state.editing_active.signal_cloned())
-                        .property("clickMode", "none")
-                        .property("constrainWidth", config::CARD_TEXT_LIMIT_WIDTH)
-                        .property("constrainHeight", config::CARD_TEXT_LIMIT_HEIGHT)
+                        .prop_signal("editing", state.editing_active.signal_cloned())
+                        .prop("clickMode", "none")
+                        .prop("constrainWidth", config::CARD_TEXT_LIMIT_WIDTH)
+                        .prop("constrainHeight", config::CARD_TEXT_LIMIT_HEIGHT)
                         .event(clone!(state => move |evt:events::CustomInput| {
                             let _index = state.index.get().unwrap_or_default();
                             let value = evt.value();
@@ -298,7 +298,7 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
                             Some(match image {
                                 None => {
                                     html!("img-ui", {
-                                        .property("path", "core/_common/image-empty.svg")
+                                        .prop("path", "core/_common/image-empty.svg")
                                     })
                                 },
                                 Some(image) => {
@@ -307,9 +307,9 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
                                         .style("height", "148px")
                                         .style("width", "148px")
                                         .style("object-fit", "contain")
-                                        .property("size", "full")
-                                        .property("id", image.id.0.to_string())
-                                        .property("lib", image.lib.to_str())
+                                        .prop("size", "full")
+                                        .prop("id", image.id.0.to_string())
+                                        .prop("lib", image.lib.to_str())
                                     })
                                 }
                             })

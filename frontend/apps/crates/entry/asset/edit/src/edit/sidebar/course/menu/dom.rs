@@ -14,7 +14,7 @@ pub fn render(module_state: &Rc<SpotState>) -> Dom {
     let state = Rc::new(State::new());
 
     html!("menu-kebab", {
-        .property("slot", "menu")
+        .prop("slot", "menu")
         .child(html!("course-edit-sidebar-module-menu", {
             .children(menu_items(&state, module_state))
         }))
@@ -60,8 +60,8 @@ fn menu_items_course(
 
 fn cover_edit(_: &Rc<State>, module: &Rc<SpotState>) -> Dom {
     html!("menu-line", {
-        .property("slot", "lines")
-        .property("icon", "edit")
+        .prop("slot", "lines")
+        .prop("icon", "edit")
         .event(clone!(module => move |_:events::Click| {
             todo!("{:?}", module.kind_str());
         }))
@@ -70,8 +70,8 @@ fn cover_edit(_: &Rc<State>, module: &Rc<SpotState>) -> Dom {
 
 fn item_info(_: &Rc<State>, module: &Rc<SpotState>) -> Dom {
     html!("menu-line", {
-        .property("slot", "lines")
-        .property("icon", "edit")
+        .prop("slot", "lines")
+        .prop("icon", "edit")
         .event(clone!(module => move |_:events::Click| {
             todo!("{:?}", module.kind_str());
         }))
@@ -80,8 +80,8 @@ fn item_info(_: &Rc<State>, module: &Rc<SpotState>) -> Dom {
 
 fn item_play(_: &Rc<State>, module: &Rc<SpotState>) -> Dom {
     html!("menu-line", {
-        .property("slot", "lines")
-        .property("icon", "edit")
+        .prop("slot", "lines")
+        .prop("icon", "edit")
         .event(clone!(module => move |_:events::Click| {
             todo!("{:?}", module.kind_str());
         }))
@@ -90,8 +90,8 @@ fn item_play(_: &Rc<State>, module: &Rc<SpotState>) -> Dom {
 
 fn item_move_up(state: &Rc<State>, module: &Rc<SpotState>) -> Dom {
     html!("menu-line", {
-        .property("slot", "lines")
-        .property("icon", "move-up")
+        .prop("slot", "lines")
+        .prop("icon", "move-up")
         .event(clone!(state, module => move |_:events::Click| {
             state.close_menu();
             actions::move_index(module.clone(), MoveTarget::Up);
@@ -101,8 +101,8 @@ fn item_move_up(state: &Rc<State>, module: &Rc<SpotState>) -> Dom {
 
 fn item_move_down(state: &Rc<State>, module: &Rc<SpotState>) -> Dom {
     html!("menu-line", {
-        .property("slot", "lines")
-        .property("icon", "move-down")
+        .prop("slot", "lines")
+        .prop("icon", "move-down")
         .event(clone!(state, module => move |_:events::Click| {
             state.close_menu();
             actions::move_index(module.clone(), MoveTarget::Down);
@@ -112,8 +112,8 @@ fn item_move_down(state: &Rc<State>, module: &Rc<SpotState>) -> Dom {
 
 fn item_delete(state: &Rc<State>, module: &Rc<SpotState>) -> Dom {
     html!("menu-line", {
-        .property("slot", "lines")
-        .property("icon", "delete")
+        .prop("slot", "lines")
+        .prop("icon", "delete")
         .event(clone!(state, module => move |_:events::Click| {
             module.confirm_delete.set_neq(true);
             state.close_menu();

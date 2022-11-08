@@ -45,13 +45,13 @@ pub fn render_step_3(state: Rc<Step3>) -> Dom {
             render_tab(state.clone(), MenuTabKind::Trace),
             render_tab(state.clone(), MenuTabKind::Place),
             html!("module-sidebar-body", {
-                .property("slot", "body")
+                .prop("slot", "body")
                 .child_signal(state.tab.signal_cloned().map(clone!(state => move |tab| {
                     match tab {
                         Tab::Select => {
                             Some(html!("sidebar-empty", {
-                                .property("label", crate::strings::STR_SIDEBAR_SELECT)
-                                .property("imagePath", "module/_common/edit/sidebar/illustration-select-item.svg")
+                                .prop("label", crate::strings::STR_SIDEBAR_SELECT)
+                                .prop("imagePath", "module/_common/edit/sidebar/illustration-select-item.svg")
                             }))
                         },
                         Tab::Audio(audio_signal_fn) => {
@@ -59,8 +59,8 @@ pub fn render_step_3(state: Rc<Step3>) -> Dom {
                         },
                         Tab::Trace => {
                             Some(html!("sidebar-empty", {
-                                .property("label", crate::strings::STR_SIDEBAR_TRACE)
-                                .property("imagePath", "module/_common/edit/sidebar/illustration-trace-area.svg")
+                                .prop("label", crate::strings::STR_SIDEBAR_TRACE)
+                                .prop("imagePath", "module/_common/edit/sidebar/illustration-trace-area.svg")
                             }))
                         },
                         Tab::Place => {

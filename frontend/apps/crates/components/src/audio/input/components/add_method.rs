@@ -10,15 +10,15 @@ pub const STR_OPTION_UPLOAD: &str = "Upload a file";
 
 pub fn render(state: Rc<AudioInput>, add_method: AudioInputAddMethod) -> Dom {
     html!("label", {
-        .property("slot", "options")
+        .prop("slot", "options")
         .child(html!("input", {
-            .property("type", "radio")
-            .property("name", "type")
-            .property("value", { match add_method {
+            .prop("type", "radio")
+            .prop("name", "type")
+            .prop("value", { match add_method {
                 AudioInputAddMethod::Record => "record",
                 AudioInputAddMethod::Upload => "upload",
             }})
-            .property_signal("checked", state.add_method.signal_cloned().map(clone!(add_method => move |selected_add_method| {
+            .prop_signal("checked", state.add_method.signal_cloned().map(clone!(add_method => move |selected_add_method| {
                 selected_add_method == add_method
             })))
         }))

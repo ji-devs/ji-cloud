@@ -20,9 +20,9 @@ impl CategoriesInput {
 
         html!("input" => HtmlInputElement, {
             .with_node!(input_elem => {
-                .property("placeholder", &state.placeholder)
+                .prop("placeholder", &state.placeholder)
                 .apply_if(slot.is_some(), |dom| {
-                    dom.property("slot", slot.unwrap_ji())
+                    dom.prop("slot", slot.unwrap_ji())
                 })
                 .event(clone!(state, input_elem => move |_:events::Input| {
                     state.input.set(input_elem.value());
@@ -43,10 +43,10 @@ impl CategoriesInput {
                 .apply(OverlayHandle::lifecycle(
                     clone!(input_elem => move || {
                         html!("overlay-content", {
-                            .property("target", &input_elem)
-                            .property("targetAnchor", "bm")
-                            .property("contentAnchor", "tm")
-                            .property("styled", true)
+                            .prop("target", &input_elem)
+                            .prop("targetAnchor", "bm")
+                            .prop("contentAnchor", "tm")
+                            .prop("styled", true)
                             .child_signal(state.focused.signal().map(clone!(state, input_elem => move|focused| {
                                 match focused {
                                     false => None,
@@ -92,7 +92,7 @@ impl CategoriesInput {
             .apply_if(range.end < category.name.len(), |dom| {
                 dom.text(&category.name[range.end..])
             })
-            .property_signal("selected", state.selected_categories.signal_ref(clone!(category_id => move |selected_categories| {
+            .prop_signal("selected", state.selected_categories.signal_ref(clone!(category_id => move |selected_categories| {
                 selected_categories.contains(&category_id)
             })))
             .event(clone!(state => move |_: events::CustomSelectedChange| {

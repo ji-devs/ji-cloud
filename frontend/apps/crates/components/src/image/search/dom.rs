@@ -31,7 +31,7 @@ pub fn render_with_action(
 ) -> Dom {
     html!("empty-fragment", {
         .apply_if(slot.is_some(), move |dom| {
-            dom.property("slot", slot.unwrap_ji())
+            dom.prop("slot", slot.unwrap_ji())
         })
         .child_signal(state.init_loader.is_loading().map(clone!(state => move |init_loading| {
             if init_loading {
@@ -50,28 +50,28 @@ pub fn render_loaded(state: Rc<State>, action: Option<Dom>) -> Dom {
     actions::fetch_init_data(Rc::clone(&state));
 
     html!("image-select", {
-        .property("label", state.options.kind.label())
-        .property("imageMode", {
+        .prop("label", state.options.kind.label())
+        .prop("imageMode", {
             match &state.options.kind {
                 ImageSearchKind::Sticker => "image",
                 _ => "background"
             }
         })
-        .property_signal("loading", state.loader.is_loading())
-        .property_signal("recent", state.recent_list.signal_vec_cloned().len().map(clone!(state => move |len| {
+        .prop_signal("loading", state.loader.is_loading())
+        .prop_signal("recent", state.recent_list.signal_vec_cloned().len().map(clone!(state => move |len| {
             state.recent && len > 0
         })))
         .apply_if(action.is_some(), |dom| {
             dom.child(html!("empty-fragment", {
-                .property("slot", "action")
+                .prop("slot", "action")
                 .child(action.unwrap_ji())
             }))
         })
         .children(render_controls(state.clone()))
         .apply_if(state.options.kind != ImageSearchKind::Sticker, clone!(state => move |dom| {
             dom.child(html!("img-ui", {
-                .property("slot", "images")
-                .property("path", {
+                .prop("slot", "images")
+                .prop("path", {
                     match state.options.kind {
                         ImageSearchKind::Background => "module/_common/edit/widgets/sidebar/image-select/clear-image-background.svg",
                         ImageSearchKind::Overlay => "module/_common/edit/widgets/sidebar/image-select/clear-image-overlay.svg",
@@ -147,10 +147,10 @@ fn images_signal_vec(
 
 fn render_image(state: Rc<State>, image: Image, slot: &str) -> Dom {
     html!("img-ji", {
-        .property("slot", slot)
-        .property("size", "thumb")
-        .property("lib", image.lib.to_str())
-        .property("id", image.id.0.to_string())
+        .prop("slot", slot)
+        .prop("size", "thumb")
+        .prop("lib", image.lib.to_str())
+        .prop("id", image.id.0.to_string())
         .event(clone!(state, image => move |_: events::Click| {
             state.set_selected(image.clone());
         }))
@@ -169,10 +169,10 @@ fn render_image(state: Rc<State>, image: Image, slot: &str) -> Dom {
 
 fn render_web_image(state: Rc<State>, image: WebImageSearchItem, slot: &str) -> Dom {
     html!("img", {
-        .property("slot", slot)
-        .property("size", "thumb")
-        .property("src", &image.thumbnail_url.to_string())
-        .property("loading", "lazy")
+        .prop("slot", slot)
+        .prop("size", "thumb")
+        .prop("src", &image.thumbnail_url.to_string())
+        .prop("loading", "lazy")
         .event(clone!(state, image => move |_: events::Click| {
             actions::on_web_image_click(Rc::clone(&state), image.url.clone());
         }))
@@ -199,13 +199,13 @@ fn render_controls(state: Rc<State>) -> Vec<Dom> {
         }
         ImageSearchKind::Background | ImageSearchKind::Sticker => {
             vec.push(html!("label", {
-                .property("slot", "source-options")
+                .prop("slot", "source-options")
                 .child(html!("input", {
-                    .property("type", "radio")
-                    .property("name", "type")
-                    .property("value", "web")
+                    .prop("type", "radio")
+                    .prop("name", "type")
+                    .prop("value", "web")
                     .style("margin", "0")
-                    .property_signal("checked", state.search_mode.signal_ref(|search_mode| {
+                    .prop_signal("checked", state.search_mode.signal_ref(|search_mode| {
                         matches!(search_mode, &SearchMode::Sticker(_))
                     }))
                     .event(clone!(state => move |_: events::Change| {
@@ -216,13 +216,13 @@ fn render_controls(state: Rc<State>) -> Vec<Dom> {
                 .text(STR_JIGZI)
             }));
             vec.push(html!("label", {
-                .property("slot", "source-options")
+                .prop("slot", "source-options")
                 .child(html!("input", {
-                    .property("type", "radio")
-                    .property("name", "type")
-                    .property("value", "stickers")
+                    .prop("type", "radio")
+                    .prop("name", "type")
+                    .prop("value", "stickers")
                     .style("margin", "0")
-                    .property_signal("checked", state.search_mode.signal_ref(|search_mode| {
+                    .prop_signal("checked", state.search_mode.signal_ref(|search_mode| {
                         matches!(search_mode, &SearchMode::Web(_))
                     }))
                     .event(clone!(state => move |_: events::Change| {
@@ -235,8 +235,8 @@ fn render_controls(state: Rc<State>) -> Vec<Dom> {
 
             if options.upload {
                 vec.push(html!("image-search-upload", {
-                    .property("slot", "upload")
-                    .property("label", "Upload")
+                    .prop("slot", "upload")
+                    .prop("label", "Upload")
                     .event(clone!(state => move |e: events::CustomFile| {
                         let file = e.file();
                         state.loader.load(clone!(state => async move {
@@ -253,14 +253,14 @@ fn render_controls(state: Rc<State>) -> Vec<Dom> {
     };
 
     vec.push(html!("input-search", {
-        .property_signal("placeholder", state.search_mode.signal_ref(|search_mode| {
+        .prop_signal("placeholder", state.search_mode.signal_ref(|search_mode| {
             let s = match search_mode {
                 SearchMode::Sticker(_) => STR_JIGZI,
                 SearchMode::Web(_) => STR_WEB,
             };
             format!("{} {}", STR_SEARCH, s)
         }))
-        .property("slot", "search-input")
+        .prop("slot", "search-input")
         .event(clone!(state => move |e: events::CustomSearch| {
             state.query.set(e.query());
             actions::search(state.clone(), None);
@@ -272,7 +272,7 @@ fn render_controls(state: Rc<State>) -> Vec<Dom> {
 
 fn render_filters(state: &Rc<State>) -> Dom {
     html!("empty-fragment", {
-        .property("slot", "filters")
+        .prop("slot", "filters")
         .child_signal(state.search_mode.signal_cloned().map(clone!(state => move |search_mode| {
             Some(match search_mode {
                 SearchMode::Sticker(_) => render_filters_sticker(&state),
@@ -286,14 +286,14 @@ fn render_filters_sticker(state: &Rc<State>) -> Dom {
     html!("image-search-filters", {
         .apply(|dom| {
             dom.child(html!("input-checkbox", {
-                .property("label", {
+                .prop("label", {
                     match &state.options.kind {
                         ImageSearchKind::Background | ImageSearchKind::Overlay => STR_SHOW_ONLY_BACKGROUNDS,
                         ImageSearchKind::Sticker => STR_DONT_INCLUDE_BACKGROUND,
                     }
                 })
-                .property("slot", "background-checkbox")
-                .property("checked", true)
+                .prop("slot", "background-checkbox")
+                .prop("checked", true)
                 .event(clone!(state => move |evt: events::CustomToggle| {
                     state.checkbox_checked.set(evt.value());
                     actions::search(state.clone(), None);
@@ -310,8 +310,8 @@ fn render_filters_sticker(state: &Rc<State>) -> Dom {
                 .iter()
                 .map(clone!(state => move |style| {
                     html!("image-search-style-option", {
-                        .property("slot", "style-options")
-                        .property("label", &style.display_name)
+                        .prop("slot", "style-options")
+                        .prop("label", &style.display_name)
                         .apply(|dom| {
                             let style_id = style.id;
                             dom.event(clone!(state => move |e: events::CustomToggle| {
@@ -331,15 +331,15 @@ fn render_filters_sticker(state: &Rc<State>) -> Dom {
 
 fn render_filters_web(state: &Rc<State>) -> Dom {
     html!("image-search-filters", {
-        .property("slot", "filters")
+        .prop("slot", "filters")
         .children(
             ImageType::iter()
                 .filter(|it| it != &ImageType::AnimatedGif)
                 .map(clone!(state => move |image_type| {
                     html!("image-search-style-option", {
-                        .property("slot", "style-options")
-                        .property("label", image_type.to_str())
-                        .property_signal("selected", state.selected_image_type.signal().map(move |selected_image_type| {
+                        .prop("slot", "style-options")
+                        .prop("label", image_type.to_str())
+                        .prop_signal("selected", state.selected_image_type.signal().map(move |selected_image_type| {
                             match selected_image_type {
                                 Some(selected) => selected == image_type,
                                 None => false,

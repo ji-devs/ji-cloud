@@ -32,7 +32,7 @@ impl JigziHelp {
         html!("jigzi-help", {
             .apply(move |dom| {
                 match slot {
-                    Some(slot) => dom.property("slot", slot),
+                    Some(slot) => dom.prop("slot", slot),
                     None => dom,
                 }
             })
@@ -49,14 +49,14 @@ impl JigziHelp {
                                 .apply(OverlayHandle::lifecycle(
                                     clone!(state, get_action => move || {
                                         html!("overlay-tooltip-info", {
-                                            .property("marginX", MARGIN_X)
-                                            .property("target", &elem)
-                                            .attribute("targetAnchor", "br")
-                                            .attribute("contentAnchor", "oppositeV")
-                                            .property("title", &state.title)
-                                            .property("body", &state.body)
-                                            .property("closeable", true)
-                                            .property("strategy", "track")
+                                            .prop("marginX", MARGIN_X)
+                                            .prop("target", &elem)
+                                            .attr("targetAnchor", "br")
+                                            .attr("contentAnchor", "oppositeV")
+                                            .prop("title", &state.title)
+                                            .prop("body", &state.body)
+                                            .prop("closeable", true)
+                                            .prop("strategy", "track")
                                             .event(clone!(state => move |_evt: events::Close| {
                                                 state.show_info_tooltip.set(false);
                                             }))
@@ -65,7 +65,7 @@ impl JigziHelp {
                                                     Some(get_action) => {
                                                         let child = get_action();
                                                         dom.child(html!("empty-fragment", {
-                                                            .property("slot", "actions")
+                                                            .prop("slot", "actions")
                                                             .child(child)
                                                         }))
                                                     },
@@ -73,9 +73,9 @@ impl JigziHelp {
                                                 }
                                             }))
                                             .child(html!("button-rect", {
-                                                .property("slot", "actions")
-                                                .property("kind", "text")
-                                                .property("color", "lightBlue")
+                                                .prop("slot", "actions")
+                                                .prop("kind", "text")
+                                                .prop("color", "lightBlue")
                                                 .style("margin-left", "auto")
                                                 .text(STR_NO_SHOW_AGAIN)
                                                 .event(clone!(state => move |_evt: events::Click| {

@@ -50,16 +50,16 @@ pub fn render_text(state: Rc<State>) -> Dom {
     };
 
     html!("input-wrapper", {
-        .property_signal("label", char_limit_signal.map(clone!(state => move |count_text| {
+        .prop_signal("label", char_limit_signal.map(clone!(state => move |count_text| {
             format!("{} {}", state.instructions_text.label, count_text)
         })))
         .child(HebrewButtons::reveal().render(Some("hebrew-inputs")))
         .child(html!("textarea" => HtmlTextAreaElement, {
             .with_node!(elem => {
-                .attribute("dir", "auto")
+                .attr("dir", "auto")
                 .text_signal(state.text_signal())
-                .property("placeholder", state.instructions_text.placeholder)
-                .property("rows", 4)
+                .prop("placeholder", state.instructions_text.placeholder)
+                .prop("rows", 4)
                 //Input saves every character
                 //Change also pushes history
                 .event(clone!(state => move |_: events::Input| {

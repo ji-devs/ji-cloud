@@ -11,9 +11,9 @@ use wasm_bindgen_futures::spawn_local;
 pub fn render(state: Rc<AudioInput>, mode: AudioInputMode, add_method: AudioInputAddMethod) -> Dom {
     if let AudioInputMode::Uploading = mode {
         html!("button-rect", {
-            .property("slot", "main-action")
-            .property("kind", "text")
-            .property("color", "blue")
+            .prop("slot", "main-action")
+            .prop("kind", "text")
+            .prop("color", "blue")
             .text("Cancel")
             .event(clone!(state => move |_: events::Click| {
                 actions::cancel_upload(Rc::clone(&state));
@@ -21,8 +21,8 @@ pub fn render(state: Rc<AudioInput>, mode: AudioInputMode, add_method: AudioInpu
         })
     } else {
         html!("audio-input-action", {
-            .property("slot", "main-action")
-            .property("kind", {
+            .prop("slot", "main-action")
+            .prop("kind", {
 
                 match mode {
                     AudioInputMode::Empty => {

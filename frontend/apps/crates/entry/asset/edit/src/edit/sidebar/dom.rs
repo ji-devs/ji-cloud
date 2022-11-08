@@ -36,7 +36,7 @@ impl SidebarDom {
         let asset = Mutable::new(None);
 
         html!("empty-fragment", {
-            .property("slot", "sidebar")
+            .prop("slot", "sidebar")
             .future(clone!(asset, asset_id => async move {
                 match asset_id {
                     AssetId::JigId(jig_id) => {
@@ -89,16 +89,16 @@ impl SidebarDom {
                         ready(())
                     })).await
                 }))
-                .property_signal("collapsed", state.collapsed.signal())
-                .property_signal("isModulePage", state.asset_edit_state.route.signal_cloned().map(|route| {
+                .prop_signal("collapsed", state.collapsed.signal())
+                .prop_signal("isModulePage", state.asset_edit_state.route.signal_cloned().map(|route| {
                     // TODO: change?
                     matches!(route, AssetEditRoute::Jig(_, JigEditRoute::Landing))
                 }))
-                .property_signal("loading", state.loader.is_loading())
+                .prop_signal("loading", state.loader.is_loading())
                 .child(html!("button-empty", {
-                    .property("slot", "side-head")
+                    .prop("slot", "side-head")
                     .child(html!("img-ui", {
-                        .property("path", "entry/jig/jiggling/yellow/face-small.png")
+                        .prop("path", "entry/jig/jiggling/yellow/face-small.png")
                     }))
                     .event(clone!(state => move |_ :events::Click| {
                         state.collapsed.set(false);
@@ -106,12 +106,12 @@ impl SidebarDom {
                 }))
                 .child(HeaderDom::render(state.clone()))
                 .child(html!("jig-edit-sidebar-publish", {
-                    .property("slot", "publish")
-                    .property_signal("publish", state.publish_at.signal_cloned().map(|publish_at| {
+                    .prop("slot", "publish")
+                    .prop_signal("publish", state.publish_at.signal_cloned().map(|publish_at| {
                         publish_at.is_some()
                     }))
-                    .property_signal("collapsed", state.collapsed.signal())
-                    .property_signal("selected", state.asset_edit_state.route.signal_cloned().map(|route| {
+                    .prop_signal("collapsed", state.collapsed.signal())
+                    .prop_signal("selected", state.asset_edit_state.route.signal_cloned().map(|route| {
                         matches!(
                             route,
                             AssetEditRoute::Jig(_, JigEditRoute::Publish) | AssetEditRoute::Course(_, CourseEditRoute::Publish)
@@ -125,9 +125,9 @@ impl SidebarDom {
                         }
                     }))
                     .child(html!("menu-kebab", {
-                        .property("slot", "menu")
+                        .prop("slot", "menu")
                         .child(html!("menu-line", {
-                            .property("icon", "edit")
+                            .prop("icon", "edit")
                         }))
                     }))
                     .with_node!(elem => {
@@ -140,11 +140,11 @@ impl SidebarDom {
                                         .apply(OverlayHandle::lifecycle(clone!(state, elem => move || {
                                             html!("overlay-tooltip-error", {
                                                 .text("Your JIG has no content.")
-                                                .property("target", elem.clone())
-                                                .property("targetAnchor", "tr")
-                                                .property("contentAnchor", "oppositeH")
-                                                .property("closeable", true)
-                                                .property("strategy", "track")
+                                                .prop("target", elem.clone())
+                                                .prop("targetAnchor", "tr")
+                                                .prop("contentAnchor", "oppositeH")
+                                                .prop("closeable", true)
+                                                .prop("strategy", "track")
                                                 .style("width", "350px")
                                                 .event(clone!(state => move |_:events::Close| {
                                                     state.highlight_modules.set_neq(None);

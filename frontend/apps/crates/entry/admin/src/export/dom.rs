@@ -19,15 +19,15 @@ impl Export {
 
         html!("admin-export", {
             .child(html!("input-select", {
-                .property("label", "Data to export")
-                .property("multiple", false)
-                .property_signal("value", state.export_type.signal_cloned().map(|export_type| {
+                .prop("label", "Data to export")
+                .prop("multiple", false)
+                .prop_signal("value", state.export_type.signal_cloned().map(|export_type| {
                         JsValue::from_str(&format!("{}", export_type))
                 }))
                 .children(ExportType::iter().map(|export_type| {
                     html!("input-select-option", {
                         .text(&format!("{}", export_type))
-                        .property_signal("selected", state.export_type.signal_cloned().map(clone!(export_type => move |current_type| {
+                        .prop_signal("selected", state.export_type.signal_cloned().map(clone!(export_type => move |current_type| {
                             export_type == current_type
                         })))
                         .event(clone!(state => move |_: events::CustomSelectedChange| {
@@ -37,15 +37,15 @@ impl Export {
                 }))
             }))
             .child(html!("input-select", {
-                .property("label", "Filter by")
-                .property("multiple", false)
-                .property_signal("value", state.date_filter_type.signal_cloned().map(|date_filter_type| {
+                .prop("label", "Filter by")
+                .prop("multiple", false)
+                .prop_signal("value", state.date_filter_type.signal_cloned().map(|date_filter_type| {
                         JsValue::from_str(&format!("{}", date_filter_type))
                 }))
                 .children(DateFilterType::iter().map(|date_filter_type| {
                     html!("input-select-option", {
                         .text(&format!("{}", date_filter_type))
-                        .property_signal("selected", state.date_filter_type.signal_cloned().map(clone!(date_filter_type => move |current_type| {
+                        .prop_signal("selected", state.date_filter_type.signal_cloned().map(clone!(date_filter_type => move |current_type| {
                             date_filter_type == current_type
                         })))
                         .event(clone!(state => move |_: events::CustomSelectedChange| {
@@ -55,10 +55,10 @@ impl Export {
                 }))
             }))
             .child(html!("input-wrapper", {
-                .property("label", "From date")
+                .prop("label", "From date")
                 .child(html!("input" => HtmlInputElement, {
-                    .property("type", "date")
-                    .property("pattern", "\\d{4}-\\d{2}-\\d{2}")
+                    .prop("type", "date")
+                    .prop("pattern", "\\d{4}-\\d{2}-\\d{2}")
                     .with_node!(input => {
                         .event(clone!(state => move |_: events::Input| {
                             state.set_date(&state.from_date, &input.value().into());
@@ -67,10 +67,10 @@ impl Export {
                 }))
             }))
             .child(html!("input-wrapper", {
-                .property("label", "To date")
+                .prop("label", "To date")
                 .child(html!("input" => HtmlInputElement, {
-                    .property("type", "date")
-                    .property("pattern", "\\d{4}-\\d{2}-\\d{2}")
+                    .prop("type", "date")
+                    .prop("pattern", "\\d{4}-\\d{2}-\\d{2}")
                     .with_node!(input => {
                         .event(clone!(state => move |_: events::Input| {
                             state.set_date(&state.to_date, &input.value().into());
@@ -79,9 +79,9 @@ impl Export {
                 }))
             }))
             .child(html!("button-rect", {
-                .property("kind", "filled")
-                .property("color", "blue")
-                .property_signal("href", map_ref! {
+                .prop("kind", "filled")
+                .prop("color", "blue")
+                .prop_signal("href", map_ref! {
                     let export_type = state.export_type.signal_cloned(),
                     let date_filter_type = state.date_filter_type.signal_cloned(),
                     let from_date = state.from_date.signal_cloned(),

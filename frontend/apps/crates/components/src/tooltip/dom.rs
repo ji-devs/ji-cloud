@@ -30,14 +30,14 @@ where
                     .text(body)
 
                     .apply_if(state.container.is_some(), |dom| {
-                        dom.property("container", state.container.as_ref().unwrap_ji().as_value())
+                        dom.prop("container", state.container.as_ref().unwrap_ji().as_value())
                     })
-                    .property("target", elem)
-                    .property("targetAnchor", target_anchor.as_str())
-                    .property("contentAnchor", content_anchor.as_str())
-                    .property("strategy", move_strategy.as_str())
+                    .prop("target", elem)
+                    .prop("targetAnchor", target_anchor.as_str())
+                    .prop("contentAnchor", content_anchor.as_str())
+                    .prop("strategy", move_strategy.as_str())
                     .apply_if(max_width.is_some(), |dom| {
-                        dom.property("maxWidth", max_width.unwrap_ji())
+                        dom.prop("maxWidth", max_width.unwrap_ji())
                     })
                     .event(clone!(data => move |_evt:events::Close| {
                         if let Some(on_close) = data.callbacks.on_close.as_ref() {
@@ -59,19 +59,19 @@ where
                 } = &**data;
                 html!("overlay-tooltip-confirm", {
                     .apply(mixin)
-                    .property("header", header)
-                    .property("confirmLabel", confirm_label)
-                    .property("cancelLabel", cancel_label)
+                    .prop("header", header)
+                    .prop("confirmLabel", confirm_label)
+                    .prop("cancelLabel", cancel_label)
                     .apply_if(max_width.is_some(), |dom| {
-                        dom.property("maxWidth", max_width.unwrap_ji())
+                        dom.prop("maxWidth", max_width.unwrap_ji())
                     })
                     .apply_if(state.container.is_some(), |dom| {
-                        dom.property("container", state.container.as_ref().unwrap_ji().as_value())
+                        dom.prop("container", state.container.as_ref().unwrap_ji().as_value())
                     })
-                    .property("target", elem)
-                    .property("targetAnchor", target_anchor.as_str())
-                    .property("contentAnchor", content_anchor.as_str())
-                    .property("strategy", move_strategy.as_str())
+                    .prop("target", elem)
+                    .prop("targetAnchor", target_anchor.as_str())
+                    .prop("contentAnchor", content_anchor.as_str())
+                    .prop("strategy", move_strategy.as_str())
                     .event(clone!(data => move |_evt:events::Accept| {
                         if let Some(on_confirm) = data.callbacks.on_confirm.as_ref() {
                             (on_confirm) ();
@@ -97,14 +97,14 @@ where
                     .apply(mixin)
                     .text(body)
                     .apply_if(state.container.is_some(), |dom| {
-                        dom.property("container", state.container.as_ref().unwrap_ji().as_value())
+                        dom.prop("container", state.container.as_ref().unwrap_ji().as_value())
                     })
-                    .property("target", elem)
-                    .property("targetAnchor", target_anchor.as_str())
-                    .property("contentAnchor", content_anchor.as_str())
-                    .property("strategy", move_strategy.as_str())
+                    .prop("target", elem)
+                    .prop("targetAnchor", target_anchor.as_str())
+                    .prop("contentAnchor", content_anchor.as_str())
+                    .prop("strategy", move_strategy.as_str())
                     .apply_if(max_width.is_some(), |dom| {
-                        dom.property("maxWidth", max_width.unwrap_ji())
+                        dom.prop("maxWidth", max_width.unwrap_ji())
                     })
                 })
             }
@@ -124,7 +124,7 @@ where
                     html!("overlay-tooltip-bubble", {
                         .apply(mixin)
                         .text(body)
-                        .property_signal("target", bounds.denormalize_fixed_signal().map(|bounds| {
+                        .prop_signal("target", bounds.denormalize_fixed_signal().map(|bounds| {
                             let rect:DomRect = bounds.into();
                             log::info!("{:?}", bounds);
                             rect
@@ -135,13 +135,13 @@ where
                         }))
                         */
                         .apply_if(state.container.is_some(), |dom| {
-                            dom.property("container", state.container.as_ref().unwrap_ji().as_value())
+                            dom.prop("container", state.container.as_ref().unwrap_ji().as_value())
                         })
-                        .property("targetAnchor", target_anchor.as_str())
-                        .property("contentAnchor", content_anchor.as_str())
-                        .property("strategy", move_strategy.as_str())
+                        .prop("targetAnchor", target_anchor.as_str())
+                        .prop("contentAnchor", content_anchor.as_str())
+                        .prop("strategy", move_strategy.as_str())
                         .apply_if(max_width.is_some(), |dom| {
-                            dom.property("maxWidth", max_width.unwrap_ji())
+                            dom.prop("maxWidth", max_width.unwrap_ji())
                         })
                     })
                 }

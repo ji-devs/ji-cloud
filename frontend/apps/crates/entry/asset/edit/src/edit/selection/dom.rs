@@ -33,7 +33,7 @@ pub struct SelectionDom {}
 impl SelectionDom {
     pub fn render(state: Rc<AssetEditState>) -> Dom {
         html!("jig-edit-selection", {
-            .property("slot", "main")
+            .prop("slot", "main")
             .children(
                 MODULE_KINDS
                     .iter()
@@ -52,8 +52,8 @@ impl SelectionDom {
                     Some("help"),
                     Rc::new(Some(move || {
                         html!("button-rect", {
-                            .property("kind", "text")
-                            .property("color", "lightBlue")
+                            .prop("kind", "text")
+                            .prop("color", "lightBlue")
                             .text(STR_SHOW_ONBOARDING)
                             .event(clone!(state => move |_evt: events::Click| {
                                 state.show_onboarding.set_neq(true);

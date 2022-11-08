@@ -89,16 +89,16 @@ fn render_youtube_video(
                 false => "none",
             }
         }))
-        .property("videoId", youtube.url.get_id())
+        .prop("videoId", youtube.url.get_id())
         // always autoplay since there's another layer for the play button
-        .property("autoplay", true)
-        .property_signal("captions", opts.captions.signal())
-        .property_signal("muted", opts.muted.signal())
-        .property_signal("loop", opts.done_action.signal().map(|done_action| {
+        .prop("autoplay", true)
+        .prop_signal("captions", opts.captions.signal())
+        .prop_signal("muted", opts.muted.signal())
+        .prop_signal("loop", opts.done_action.signal().map(|done_action| {
             matches!(done_action, Some(DoneAction::Loop))
         }))
-        .property_signal("start", video.start_at.signal())
-        .property_signal("end", video.end_at.signal())
+        .prop_signal("start", video.start_at.signal())
+        .prop_signal("end", video.end_at.signal())
         .apply(|dom| apply_transform(dom, &video.transform))
         .event(clone!(video, opts => move |_: events::YoutubeEnded| {
             video.is_playing.set_neq(false);
@@ -185,7 +185,7 @@ pub fn render_sticker_video<T: AsSticker>(
                             match host {
                                 VideoHost::Youtube(youtube) => Some(
                                     html!("video-youtube-thumbnail", {
-                                        .property("videoId", youtube.url.get_id())
+                                        .prop("videoId", youtube.url.get_id())
                                         .apply(|dom| apply_transform(dom, &video.transform))
                                     })
                                 ),
@@ -282,17 +282,17 @@ pub fn render_sticker_video_raw(video: &RawVideo, opts: Option<VideoRawRenderOpt
             match &video.host {
                 VideoHost::Youtube(youtube_video) => {
                     html!("video-youtube-player" => HtmlElement, {
-                        .property("videoId", youtube_video.url.get_id())
-                        .property_signal("autoplay", opts.autoplay.signal())
-                        .property_signal("loop", opts._loop.signal())
-                        .property_signal("captions", opts.captions.signal())
-                        .property_signal("muted", opts.muted.signal())
+                        .prop("videoId", youtube_video.url.get_id())
+                        .prop_signal("autoplay", opts.autoplay.signal())
+                        .prop_signal("loop", opts._loop.signal())
+                        .prop_signal("captions", opts.captions.signal())
+                        .prop_signal("muted", opts.muted.signal())
                         .apply(|mut dom| {
                             if let Some(start_at) = video.start_at {
-                                dom = dom.property("start", start_at);
+                                dom = dom.prop("start", start_at);
                             }
                             if let Some(end_at) = video.end_at {
-                                dom = dom.property("end", end_at);
+                                dom = dom.prop("end", end_at);
                             }
                             dom
                         })

@@ -13,7 +13,7 @@ use crate::module::_groups::cards::edit::state::*;
 
 pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainPair<RawData, E>>) -> Dom {
     html!("main-card-pair", {
-        .property_signal("index", state.index.signal().map(|x| {
+        .prop_signal("index", state.index.signal().map(|x| {
             JsValue::from_f64(x.unwrap_or_default() as f64)
         }))
         .child_signal(show_hebrew_buttons_signal(&state).dedupe().map(clone!(state => move |editing| {
