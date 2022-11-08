@@ -2,21 +2,20 @@
 ## BUILDER        ##
 ####################
 
-FROM messense/rust-musl-cross:x86_64-musl AS api-builder
-
+FROM clux/muslrust:stable AS api-builder
 
 # Add our source code.
 
-RUN mkdir -p ./backend/api
-COPY ./shared ./shared
-COPY ./backend/core ./backend/core
-COPY ./backend/api ./backend/api
+RUN mkdir -p /workspace/backend/api
+COPY ./shared /workspace/shared
+COPY ./backend/core /workspace/backend/core
+COPY ./backend/api /workspace/backend/api
 
 # Fix permissions on source code.
 # RUN sudo chown -R rust:rust /home/rust
 
 # Build our application.
-WORKDIR ./backend/api
+WORKDIR /workspace/backend/api
 RUN cargo build --release --no-default-features
 
 ####################
@@ -33,7 +32,7 @@ RUN apk --no-cache add ca-certificates
 RUN mkdir /usr/local/bin/cloud-run-app
 
 COPY --from=api-builder \
-    /home/rust/src/backend/api/target/x86_64-unknown-linux-musl/release/ji-cloud-api \
+    /workspace/backend/api/target/x86_64-unknown-linux-musl/release/ji-cloud-api \
     /usr/local/bin/cloud-run-app/ji-cloud-api
 
 WORKDIR /usr/local/bin/cloud-run-app/
@@ -55,7 +54,7 @@ RUN apk --no-cache add ca-certificates
 RUN mkdir /usr/local/bin/cloud-run-app
 
 COPY --from=api-builder \
-    /home/rust/src/backend/api/target/x86_64-unknown-linux-musl/release/ji-cloud-api \
+    /workspace/backend/api/target/x86_64-unknown-linux-musl/release/ji-cloud-api \
     /usr/local/bin/cloud-run-app/ji-cloud-api
 
 WORKDIR /usr/local/bin/cloud-run-app/
@@ -79,7 +78,7 @@ RUN apk --no-cache add ca-certificates
 RUN mkdir /usr/local/bin/cloud-run-app
 
 COPY --from=api-builder \
-    /home/rust/src/backend/api/target/x86_64-unknown-linux-musl/release/media-watch \
+    /workspace/backend/api/target/x86_64-unknown-linux-musl/release/media-watch \
     /usr/local/bin/cloud-run-app/media-watch
 
 WORKDIR /usr/local/bin/cloud-run-app/
@@ -101,7 +100,7 @@ RUN apk --no-cache add ca-certificates
 RUN mkdir /usr/local/bin/cloud-run-app
 
 COPY --from=api-builder \
-    /home/rust/src/backend/api/target/x86_64-unknown-linux-musl/release/media-watch \
+    /workspace/backend/api/target/x86_64-unknown-linux-musl/release/media-watch \
     /usr/local/bin/cloud-run-app/media-watch
 
 WORKDIR /usr/local/bin/cloud-run-app/
