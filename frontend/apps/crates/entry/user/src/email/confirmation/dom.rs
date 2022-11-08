@@ -11,14 +11,14 @@ impl SendEmailConfirmationPage {
     pub fn render(state: Rc<SendEmailConfirmationPage>) -> Dom {
         html!("page-email-send", {
             .child(html!("window-loader-block", {
-                .property_signal("visible", state.loader.is_loading())
+                .prop_signal("visible", state.loader.is_loading())
             }))
             //this doesn't actually make sense here... the *only* thing we have is their email
             //it's equivilent to just creating a new account which is simpler
             /*
             .child(html!("button-rect", {
-                .property("slot", "change")
-                .property("color", "blue")
+                .prop("slot", "change")
+                .prop("color", "blue")
                 .text(crate::strings::STR_CHANGE_EMAIL)
             }))
             */
@@ -26,11 +26,11 @@ impl SendEmailConfirmationPage {
                 match mode {
                     Mode::Send => {
                         Some(html!("p", {
-                            .property("slot", "send")
+                            .prop("slot", "send")
                             .text(STR_DIDNT_RECEIVE)
                             .child(html!("button-rect", {
-                                .property("color", "blue")
-                                .property("kind", "text")
+                                .prop("color", "blue")
+                                .prop("kind", "text")
                                 .text(STR_SEND_AGAIN)
                                 .event(clone!(state => move |_:events::Click| {
                                     state.resend();
@@ -40,8 +40,8 @@ impl SendEmailConfirmationPage {
                     },
                     Mode::Sent => {
                         Some(html!("button-email-send", {
-                            .property("slot", "send")
-                            .property_signal("mode", state.mode_str())
+                            .prop("slot", "send")
+                            .prop_signal("mode", state.mode_str())
                             .event(clone!(state => move |_:events::Click| {
                                 state.resend();
                             }))

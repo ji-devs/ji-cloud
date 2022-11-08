@@ -67,7 +67,7 @@ where
     Overlay: OverlayExt + 'static,
 {
     html!("module-sidebar", {
-        .property("slot", "sidebar")
+        .prop("slot", "sidebar")
         .child(render_nav(state.clone()))
         .child(add_slot_to_dom(Sidebar::render(state.sidebar.clone()), "content"))
     })
@@ -152,13 +152,13 @@ where
 
             header_config.set(data);
         }))
-        .property("slot", "header")
-        .property_signal("headerTitle", {
+        .prop("slot", "header")
+        .prop_signal("headerTitle", {
             header_config.signal_ref(|h| {
                 h.title.clone()
             })
         })
-        .property("subtitle", state.mode.map_or(JsValue::UNDEFINED, |m| JsValue::from_str(m.label())))
+        .prop("subtitle", state.mode.map_or(JsValue::UNDEFINED, |m| JsValue::from_str(m.label())))
         .child_signal(tab_config_sig().map(|tab| {
             match tab {
                 Some(tab) => {
@@ -205,11 +205,11 @@ where
     Overlay: OverlayExt + 'static,
 {
     html!("module-footer", {
-        .property("slot", "footer")
+        .prop("slot", "footer")
         .child(Footer::render(state.footer.clone()))
         .child(html!("module-footer-continue-button", {
-            .property("slot", "btn")
-            .property_signal("enabled", state.base.can_continue_next().signal_cloned())
+            .prop("slot", "btn")
+            .prop_signal("enabled", state.base.can_continue_next().signal_cloned())
             .event(clone!(state => move |_evt:events::Next| {
                 state.try_next_step();
             }))
@@ -237,7 +237,7 @@ where
 fn add_slot_to_dom(dom: Dom, slot: &str) -> Dom {
     //there might be a better way, like Dom->DomBuilder->Dom
     html!("empty-fragment", {
-        .property("slot", slot)
+        .prop("slot", slot)
         .style("display", "contents")
         .child(dom)
     })

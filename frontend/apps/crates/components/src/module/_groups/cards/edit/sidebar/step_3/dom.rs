@@ -43,7 +43,7 @@ where
     }
 
     tabs.push(html!("module-sidebar-body", {
-        .property("slot", "body")
+        .prop("slot", "body")
         .style("overflow", "inherit") // Inherit overflow otherwise the Hebrew controls will be hidden
         .child_signal(state.tab.signal_cloned().map(clone!(render_settings => move |tab| {
             match tab {

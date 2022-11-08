@@ -43,9 +43,9 @@ where
 
             //FIXME: the + 100 is a fudge-factor to account for stroke size
             svg!("svg", {
-                .attribute("style", &styles)
-                .attribute("width", &format!("{}px", width + 100.0))
-                .attribute("height", &format!("{}px", height + 100.0))
+                .attr("style", &styles)
+                .attr("width", &format!("{}px", width + 100.0))
+                .attr("height", &format!("{}px", height + 100.0))
                 .child(render_single_trace_shape(shape_style, resize_info, trace, Some(TransformSize::new_static(&transform, size)), callbacks))
             })
         })
@@ -150,20 +150,20 @@ where
 {
     svg!("svg", {
         .class(&*SVG_CLASS)
-        .attribute_signal("width", resize_info_signal().map(|info| {
+        .attr_signal("width", resize_info_signal().map(|info| {
             format!("{}px", info.width)
         }))
-        .attribute_signal("height", resize_info_signal().map(|info| {
+        .attr_signal("height", resize_info_signal().map(|info| {
             format!("{}px", info.height)
         }))
         .child(svg!("rect", {
-            .attribute("mask", "url(#maskPath)")
-            .attribute("x", "0")
-            .attribute("y", "0")
-            .attribute_signal("width", resize_info_signal().map(|info| {
+            .attr("mask", "url(#maskPath)")
+            .attr("x", "0")
+            .attr("y", "0")
+            .attr_signal("width", resize_info_signal().map(|info| {
                 format!("{}px", info.width)
             }))
-            .attribute_signal("height", resize_info_signal().map(|info| {
+            .attr_signal("height", resize_info_signal().map(|info| {
                 format!("{}px", info.height)
             }))
             .class(&*BG_FILL_CLASS)
@@ -173,14 +173,14 @@ where
         }))
         .child(svg!("defs", {
             .child(svg!("mask", {
-                .attribute("id", "maskPath")
+                .attr("id", "maskPath")
                 .child(svg!("rect", {
-                    .attribute("x", "0")
-                    .attribute("y", "0")
-                    .attribute_signal("width", resize_info_signal().map(|info| {
+                    .attr("x", "0")
+                    .attr("y", "0")
+                    .attr_signal("width", resize_info_signal().map(|info| {
                         format!("{}px", info.width)
                     }))
-                    .attribute_signal("height", resize_info_signal().map(|info| {
+                    .attr_signal("height", resize_info_signal().map(|info| {
                         format!("{}px", info.height)
                     }))
                     .class(&*BG_MASK_CLASS)
@@ -213,10 +213,10 @@ where
 {
     svg!("svg", {
         .class(&*SVG_CLASS)
-        .attribute_signal("width", resize_info_signal().map(|info| {
+        .attr_signal("width", resize_info_signal().map(|info| {
             format!("{}px", info.width)
         }))
-        .attribute_signal("height", resize_info_signal().map(|info| {
+        .attr_signal("height", resize_info_signal().map(|info| {
             format!("{}px", info.height)
         }))
         .children_signal_vec(children)
@@ -255,7 +255,7 @@ where
 
     svg!("path", {
         .apply(|dom| shape_style.apply(dom))
-        .attribute_signal("d", path_string)
+        .attr_signal("d", path_string)
         .apply_if(transform_size.is_some(), |dom| {
             transform_size.unwrap_ji().mixin(dom, &resize_info)
         })
@@ -287,7 +287,7 @@ where
 
     svg!("path", {
         .apply(|dom| shape_style.apply(dom))
-        .attribute_signal("d", path_string)
+        .attr_signal("d", path_string)
         .apply_if(transform_size.is_some(), |dom| {
             transform_size.unwrap_ji().mixin(dom, &resize_info)
         })
@@ -312,7 +312,7 @@ where
 
     svg!("path" => SvgElement, {
         .apply(|dom| shape_style.apply(dom))
-        .attribute("d", &path_string)
+        .attr("d", &path_string)
         .apply_if(transform_size.is_some(), |dom| {
             transform_size.unwrap_ji().mixin(dom, resize_info)
         })
@@ -339,7 +339,7 @@ where
 
     svg!("path" => SvgElement, {
         .apply(|dom| shape_style.apply(dom))
-        .attribute("d", &path_string)
+        .attr("d", &path_string)
         .apply_if(transform_size.is_some(), |dom| {
             transform_size.unwrap_ji().mixin(dom, resize_info)
         })
@@ -363,8 +363,8 @@ where
 
     svg!("rect", {
         .apply(|dom| shape_style.apply(dom))
-        .attribute("width", &format!("{}px", width))
-        .attribute("height", &format!("{}px", height))
+        .attr("width", &format!("{}px", width))
+        .attr("height", &format!("{}px", height))
         .apply_if(transform_size.is_some(), |dom| {
             transform_size.unwrap_ji().mixin(dom, resize_info)
         })
@@ -388,10 +388,10 @@ where
 
     svg!("ellipse", {
         .apply(|dom| shape_style.apply(dom))
-        .attribute("cx", &format!("{}px", radius_x))
-        .attribute("cy", &format!("{}px", radius_y))
-        .attribute("rx", &format!("{}px", radius_x))
-        .attribute("ry", &format!("{}px", radius_y))
+        .attr("cx", &format!("{}px", radius_x))
+        .attr("cy", &format!("{}px", radius_y))
+        .attr("rx", &format!("{}px", radius_x))
+        .attr("ry", &format!("{}px", radius_y))
         .apply_if(transform_size.is_some(), |dom| {
             transform_size.unwrap_ji().mixin(dom, resize_info)
         })

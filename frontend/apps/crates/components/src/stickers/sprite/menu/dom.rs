@@ -19,7 +19,7 @@ pub fn render_sticker_sprite_menu<T: AsSticker>(
         .style("gap", "10px")
         .children(&mut [
             html!("menu-line", {
-                .property("icon", "duplicate")
+                .prop("icon", "duplicate")
                 .event(clone!(stickers, index, sprite => move |_evt:events::Click| {
                     sprite.transform.close_menu();
                     if let Some(index) = index.get() {
@@ -28,7 +28,7 @@ pub fn render_sticker_sprite_menu<T: AsSticker>(
                 }))
             }),
             html!("menu-line", {
-                .property("icon", "move-to-front")
+                .prop("icon", "move-to-front")
                 .event(clone!(stickers, index, sprite => move |_ :events::Click| {
                     sprite.transform.close_menu();
                     if let Some(index) = index.get() {
@@ -37,7 +37,7 @@ pub fn render_sticker_sprite_menu<T: AsSticker>(
                 }))
             }),
             html!("menu-line", {
-                .property("icon", "move-forward")
+                .prop("icon", "move-forward")
                 .event(clone!(stickers, index, sprite => move |_evt:events::Click| {
                     sprite.transform.close_menu();
                     if let Some(index) = index.get() {
@@ -46,7 +46,7 @@ pub fn render_sticker_sprite_menu<T: AsSticker>(
                 }))
             }),
             html!("menu-line", {
-                .property("icon", "move-backward")
+                .prop("icon", "move-backward")
                 .event(clone!(stickers, index, sprite => move |_evt:events::Click| {
                     sprite.transform.close_menu();
                     if let Some(index) = index.get() {
@@ -55,7 +55,7 @@ pub fn render_sticker_sprite_menu<T: AsSticker>(
                 }))
             }),
             html!("menu-line", {
-                .property("icon", "move-to-back")
+                .prop("icon", "move-to-back")
                 .event(clone!(stickers, index, sprite => move |_evt:events::Click| {
                     sprite.transform.close_menu();
                     if let Some(index) = index.get() {
@@ -65,14 +65,14 @@ pub fn render_sticker_sprite_menu<T: AsSticker>(
             }),
             /* post-beta
             html!("menu-line", {
-                .property("icon", "crop")
+                .prop("icon", "crop")
                 .event(clone!(stickers, sprite => move |evt:events::Click| {
                     log::info!("TODO!");
                 }))
             }),
             */
             html!("menu-line", {
-                .property("icon", "remove-white")
+                .prop("icon", "remove-white")
                 .event(clone!(stickers, sprite => move |_evt:events::Click| {
                     sprite.transform.close_menu();
                     sprite.remove_white();
@@ -80,7 +80,7 @@ pub fn render_sticker_sprite_menu<T: AsSticker>(
                 }))
             }),
             html!("menu-line", {
-                .property("icon", "flip-horizontal")
+                .prop("icon", "flip-horizontal")
                 .event(clone!(stickers, sprite => move |_evt:events::Click| {
                     sprite.transform.close_menu();
                     sprite.toggle_flip_horizontal();
@@ -88,7 +88,7 @@ pub fn render_sticker_sprite_menu<T: AsSticker>(
                 }))
             }),
             html!("menu-line", {
-                .property("icon", "flip-vertical")
+                .prop("icon", "flip-vertical")
                 .event(clone!(stickers, sprite => move |_evt:events::Click| {
                     sprite.transform.close_menu();
                     sprite.toggle_flip_vertical();
@@ -96,7 +96,7 @@ pub fn render_sticker_sprite_menu<T: AsSticker>(
                 }))
             }),
             html!("menu-line", {
-                .property("icon", "delete")
+                .prop("icon", "delete")
                 .event(clone!(stickers, index => move |_evt:events::Click| {
                     sprite.transform.close_menu();
                     if let Some(index) = index.get() {

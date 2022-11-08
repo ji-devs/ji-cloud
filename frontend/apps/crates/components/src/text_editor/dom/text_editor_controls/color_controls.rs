@@ -54,27 +54,27 @@ pub fn render(state: Rc<TextEditor>) -> Dom {
     let color_state = state.color_state.borrow().as_ref().unwrap_ji().clone();
 
     html!("anchored-overlay", {
-        .property("slot", "colors")
-        .property("positionY", "top-in")
-        .property("positionX", "right-out")
-        .property("styled", true)
+        .prop("slot", "colors")
+        .prop("positionY", "top-in")
+        .prop("positionX", "right-out")
+        .prop("styled", true)
         .class(class! {
             .pseudo!("::part(overlay)", {
                 .style("padding", "16px")
             })
         })
-        .property_signal("open", color_state.select_for.signal_cloned().map(|select_for| select_for.is_some()))
+        .prop_signal("open", color_state.select_for.signal_cloned().map(|select_for| select_for.is_some()))
         .event(clone!(color_state => move |_: events::Close| {
             color_state.select_for.set(None);
         }))
         .child(html!("div", {
-            .property("slot", "anchor")
+            .prop("slot", "anchor")
             .style("display", "flex")
             .style("justify-content", "space-evenly")
             .children(&mut [
                 html!("text-editor-controls-button", {
-                    .property("kind", "color")
-                    .property_signal("active", color_state.select_for.signal_cloned().map(|select_for| {
+                    .prop("kind", "color")
+                    .prop_signal("active", color_state.select_for.signal_cloned().map(|select_for| {
                         matches!(select_for, Some(ColorSelectFor::Text))
                     }))
                     .event(clone!(state, color_state => move |_: events::Click| {
@@ -84,8 +84,8 @@ pub fn render(state: Rc<TextEditor>) -> Dom {
                     }))
                 }),
                 html!("text-editor-controls-button", {
-                    .property("kind", "highlight-color")
-                    .property_signal("active", color_state.select_for.signal_cloned().map(|select_for| {
+                    .prop("kind", "highlight-color")
+                    .prop_signal("active", color_state.select_for.signal_cloned().map(|select_for| {
                         matches!(select_for, Some(ColorSelectFor::Highlight))
                     }))
                     .event(clone!(state, color_state => move |_: events::Click| {
@@ -95,8 +95,8 @@ pub fn render(state: Rc<TextEditor>) -> Dom {
                     }))
                 }),
                 html!("text-editor-controls-button", {
-                    .property("kind", "box-color")
-                    .property_signal("active", color_state.select_for.signal_cloned().map(|select_for| {
+                    .prop("kind", "box-color")
+                    .prop_signal("active", color_state.select_for.signal_cloned().map(|select_for| {
                         matches!(select_for, Some(ColorSelectFor::Box))
                     }))
                     .event(clone!(state, color_state => move |_: events::Click| {

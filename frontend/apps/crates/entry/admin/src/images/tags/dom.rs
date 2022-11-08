@@ -13,7 +13,7 @@ impl ImageTags {
             .style("margin", "20px")
             .child(
                 html!("window-loader-block", {
-                    .property_signal("visible", state.loader.is_loading())
+                    .prop_signal("visible", state.loader.is_loading())
                 })
             )
             .child(html!("button", {

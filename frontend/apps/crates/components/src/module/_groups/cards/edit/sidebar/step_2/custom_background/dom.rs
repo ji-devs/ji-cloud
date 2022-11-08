@@ -22,11 +22,11 @@ impl<RawData: RawDataExt, E: ExtraExt> CustomBackground<RawData, E> {
     pub fn render(self: &Rc<Self>) -> Dom {
         let state = self;
         html!("theme-custom-background", {
-            .property("header", STR_CHANGE_BACKGROUND)
-            .property("tabbed", false)
+            .prop("header", STR_CHANGE_BACKGROUND)
+            .prop("tabbed", false)
             .child(html!("fa-button", {
-                .property("slot", "close")
-                .property("icon", "fa-light fa-xmark")
+                .prop("slot", "close")
+                .prop("icon", "fa-light fa-xmark")
                 .event(clone!(state => move |_: events::Click| {
                     (state.on_close)();
                 }))
@@ -41,10 +41,10 @@ impl<RawData: RawDataExt, E: ExtraExt> CustomBackground<RawData, E> {
             html!("empty-fragment" => HtmlElement, {
                 .with_node!(elem => {
                     .child(html!("button-rect", {
-                        .property("kind", "text")
-                        .property("color", "blue")
+                        .prop("kind", "text")
+                        .prop("color", "blue")
                         .child(html!("fa-icon", {
-                            .property("icon", "fa-light fa-fill-drip")
+                            .prop("icon", "fa-light fa-fill-drip")
                         }))
                         .text(STR_FILL_COLOR)
                         .event(clone!(state => move |_: events::Click|{
@@ -55,9 +55,9 @@ impl<RawData: RawDataExt, E: ExtraExt> CustomBackground<RawData, E> {
                     .apply(OverlayHandle::lifecycle(
                         clone!(state, elem => move || {
                             html!("overlay-content", {
-                                .property("target", &elem)
-                                .property("contentAnchor", "rt")
-                                .property("marginX", 10)
+                                .prop("target", &elem)
+                                .prop("contentAnchor", "rt")
+                                .prop("marginX", 10)
                                 .child_signal(state.colors_open.signal_ref(clone!(state => move |colors_open| {
                                     match colors_open {
                                         false => None,
@@ -68,8 +68,8 @@ impl<RawData: RawDataExt, E: ExtraExt> CustomBackground<RawData, E> {
                                                 }))
                                                 .children(&mut [
                                                     html!("fa-button", {
-                                                        .property("slot", "close")
-                                                        .property("icon", "fa-light fa-xmark")
+                                                        .prop("slot", "close")
+                                                        .prop("icon", "fa-light fa-xmark")
                                                         .event(clone!(state => move |_: events::Click| {
                                                             state.colors_open.set(false)
                                                         }))

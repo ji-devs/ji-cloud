@@ -8,7 +8,7 @@ use components::module::_groups::cards::play::card::dom::{render_card_mixin, Car
 
 pub fn render(state: Rc<Base>) -> Dom {
     html!("play-main", {
-        .property("nCards", state.cards.len() as f64)
+        .prop("nCards", state.cards.len() as f64)
         .children(
             //Always render the cards so they take the grid spots
             //"hiding" is via `visiblity`, not `display`
@@ -39,7 +39,7 @@ fn render_main_card(state: Rc<Base>, card_state: Rc<CardState>) -> Dom {
                 .is_found()
                 .map(|found| if found { "hidden" } else { "visible" }),
         )
-        .property_signal("flipped", card_state.is_flipped(&state))
+        .prop_signal("flipped", card_state.is_flipped(&state))
         .event(clone!(state, card_id => move |_evt:events::Click| {
             if let Some((id_1, id_2)) = super::actions::card_click(state.clone(), card_id) {
                 super::actions::evaluate(state.clone(), id_1, id_2);

@@ -17,11 +17,11 @@ fn render_list(
 ) -> Dom {
     html!("div", {
         .style("display", "contents")
-        .property("slot", slot)
+        .prop("slot", slot)
         .children_signal_vec(list
             .map(clone!(selected => move |column: Column| html!("locale-select-columns-item", {
                 .text(&column.to_string())
-                .property_signal("active", selected.signal_cloned().map(clone!(column => move |e| {
+                .prop_signal("active", selected.signal_cloned().map(clone!(column => move |e| {
                     e.is_some() && e.unwrap_ji() == column
                 })))
                 .event(clone!(selected, column => move |_: events::Click| {
@@ -44,9 +44,9 @@ fn render_move_button(
 ) -> Dom {
     html!("button-rect", {
         .text(button_content)
-        .property("slot", "move-actions")
-        .property("kind", "text")
-        .property("weight", "bold")
+        .prop("slot", "move-actions")
+        .prop("kind", "text")
+        .prop("weight", "bold")
         .event(clone!(selected, list, other_list => move |_: events::Click| {
             let selected_ref = selected.lock_ref().clone();
             if selected_ref.is_some() {
@@ -69,9 +69,9 @@ fn render_sort_button(
 ) -> Dom {
     html!("button-rect", {
         .text(button_content)
-        .property("slot", "sort-actions")
-        .property("kind", "text")
-        .property("weight", "bold")
+        .prop("slot", "sort-actions")
+        .prop("kind", "text")
+        .prop("weight", "bold")
         .event(clone!(selected, list => move |_: events::Click| {
             let selected_ref = selected.lock_ref().clone();
             if selected_ref.is_some() {
@@ -94,7 +94,7 @@ pub fn render(state: Rc<State>) -> Dom {
     let hidden_selected: Mutable<Option<Column>> = Mutable::new(None);
 
     html!("locale-select-columns", {
-        .property("slot", "dialog-content")
+        .prop("slot", "dialog-content")
         .children(&mut [
             render_list("hidden-columns", state.hidden_columns.clone().signal_vec_cloned(), hidden_selected.clone()),
             render_move_button(

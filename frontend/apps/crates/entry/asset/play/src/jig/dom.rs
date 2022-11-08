@@ -118,11 +118,11 @@ impl JigPlayer {
                 }
                 async {}
             })))
-            .property_signal("rtl", state.jig.signal_cloned().map(|jig| {
+            .prop_signal("rtl", state.jig.signal_cloned().map(|jig| {
                 jig.map(|jig| jig.jig_data.default_player_settings.direction.is_rtl())
             }))
-            .property_signal("paused", state.paused.signal())
-            .property_signal("isLegacy", state.jig.signal_ref(|jig| {
+            .prop_signal("paused", state.paused.signal())
+            .prop_signal("isLegacy", state.jig.signal_ref(|jig| {
                 if let Some(jig) = jig {
                     if let Some(first_module) = jig.jig_data.modules.get(0) {
                         if first_module.kind == ModuleKind::Legacy {
@@ -132,7 +132,7 @@ impl JigPlayer {
                 };
                 false
             }))
-            .property("inIframe", is_in_iframe())
+            .prop("inIframe", is_in_iframe())
             .global_event(clone!(state => move |evt:Message| {
                 match evt.try_serde_data::<IframeAction<ModuleToJigPlayerMessage>>() {
                     Err(_) => {},
@@ -153,8 +153,8 @@ impl JigPlayer {
                 if state.player_options.display_score {
                     dom.child(html!("jig-play-points-indicator", {
                         .visible(state.player_options.display_score)
-                        .property("slot", "indicators")
-                        .property_signal("value", state.points.signal())
+                        .prop("slot", "indicators")
+                        .prop_signal("value", state.points.signal())
                     }))
                 } else {
                     dom
@@ -166,8 +166,8 @@ impl JigPlayer {
                     // music configured.
                     Some(jig) if jig.jig_data.audio_background.is_some() => {
                         Some(html!("jig-play-background-music", {
-                            .property("slot", "background")
-                            .property_signal("playing", state.bg_audio_playing.signal())
+                            .prop("slot", "background")
+                            .prop_signal("playing", state.bg_audio_playing.signal())
                             .event(clone!(state => move|_: events::Click| {
                                 actions::toggle_background_audio(Rc::clone(&state));
                             }))
@@ -179,7 +179,7 @@ impl JigPlayer {
             .child_signal(active_module_valid_signal(Rc::clone(&state)).map(|valid| {
                 if !valid {
                     Some(html!("main-empty", {
-                        .property("slot", "message")
+                        .prop("slot", "message")
                     }))
                 } else {
                     None
@@ -188,9 +188,9 @@ impl JigPlayer {
             .child_signal(active_module_valid_signal(Rc::clone(&state)).map(clone!(state => move |valid| {
                 if valid {
                     Some(html!("iframe" => HtmlIFrameElement, {
-                        .property("allow", "autoplay; fullscreen")
-                        .property("slot", "iframe")
-                        .property_signal("src", jig_and_active_module_signal(Rc::clone(&state)).map(clone!(state => move|(jig, active_module_index)| {
+                        .prop("allow", "autoplay; fullscreen")
+                        .prop("slot", "iframe")
+                        .prop_signal("src", jig_and_active_module_signal(Rc::clone(&state)).map(clone!(state => move|(jig, active_module_index)| {
                             match (jig, active_module_index) {
                                 (Some(jig), Some(active_module_index)) => {
                                     let active_module = &jig.jig_data.modules.get(active_module_index);
@@ -236,12 +236,12 @@ impl JigPlayer {
             .child_signal(state.instructions.signal_cloned().map(clone!(state => move |instructions| {
                 instructions.map(clone!(state => move |instructions| {
                     html!("empty-fragment", {
-                        .property("slot", "instructions")
+                        .prop("slot", "instructions")
                         .child(html!("button-icon", {
                             .style("width", "40px")
                             .style("height", "40px")
-                            .property("iconPath", "jig/play/icn-instructions.svg")
-                            .property("iconHoverPath", "jig/play/icn-instructions-hover.svg")
+                            .prop("iconPath", "jig/play/icn-instructions.svg")
+                            .prop("iconHoverPath", "jig/play/icn-instructions-hover.svg")
                             .event(clone!(state => move |_evt: events::Click| {
                                 let instructions = state.instructions.get_cloned();
                                 let timer = state.timer.get_cloned();
@@ -261,44 +261,44 @@ impl JigPlayer {
                                         .apply(OverlayHandle::lifecycle(
                                             clone!(state, instructions => move || {
                                                 html!("overlay-tooltip-info", {
-                                                    .property("centeredContent", true)
-                                                    .property("marginX", -16)
-                                                    .property("target", &elem)
-                                                    .attribute("targetAnchor", "br")
-                                                    .attribute("contentAnchor", "oppositeV")
-                                                    .property("size", "large")
-                                                    .property("color", "dark-blue")
+                                                    .prop("centeredContent", true)
+                                                    .prop("marginX", -16)
+                                                    .prop("target", &elem)
+                                                    .attr("targetAnchor", "br")
+                                                    .attr("contentAnchor", "oppositeV")
+                                                    .prop("size", "large")
+                                                    .prop("color", "dark-blue")
                                                     .apply(clone!(instructions => move |dom| {
                                                         match instructions.instructions_type {
                                                             InstructionsType::Instructions => {
-                                                                dom.property("body", &instructions.text.unwrap_or(DEFAULT_INSTRUCTIONS_TEXT.to_owned()))
+                                                                dom.prop("body", &instructions.text.unwrap_or(DEFAULT_INSTRUCTIONS_TEXT.to_owned()))
                                                             }
                                                             InstructionsType::Feedback => {
                                                                 if let Some(text) = &instructions.text {
-                                                                    dom.property("body", text)
+                                                                    dom.prop("body", text)
                                                                 } else {
                                                                     dom
                                                                 }
                                                             }
                                                         }
                                                     }))
-                                                    .property("closeable", true)
-                                                    .property("strategy", "track")
+                                                    .prop("closeable", true)
+                                                    .prop("strategy", "track")
                                                     .event(clone!(state => move |_evt: events::Close| {
                                                         actions::show_instructions(state.clone(), false);
                                                     }))
                                                     .apply_if(instructions.audio.is_some(), clone!(state => move |dom| {
                                                         let hover = Mutable::new(false);
                                                         dom.child(html!("button-rect", {
-                                                            .property("slot", "actions")
-                                                            .property("kind", "text")
-                                                            .property("color", "lightBlue")
-                                                            .property("size", "small")
+                                                            .prop("slot", "actions")
+                                                            .prop("kind", "text")
+                                                            .prop("color", "lightBlue")
+                                                            .prop("size", "small")
                                                             .event(clone!(hover => move |_evt: events::PointerEnter| hover.set_neq(true)))
                                                             .event(clone!(hover => move |_evt: events::PointerLeave| hover.set_neq(false)))
                                                             .child(html!("img-ui", {
                                                                 .style("height", "24px")
-                                                                .property_signal("path", hover.signal_ref(|hover| {
+                                                                .prop_signal("path", hover.signal_ref(|hover| {
                                                                     if *hover {
                                                                         "jig/play/icon-repeat-hover.svg"
                                                                     } else {
@@ -315,16 +315,16 @@ impl JigPlayer {
                                                     .apply(clone!(state => move |dom| {
                                                         let hover = Mutable::new(false);
                                                         dom.child(html!("button-rect", {
-                                                            .property("slot", "actions")
-                                                            .property("kind", "filled")
-                                                            .property("color", "blue")
-                                                            .property("size", "small")
+                                                            .prop("slot", "actions")
+                                                            .prop("kind", "filled")
+                                                            .prop("color", "blue")
+                                                            .prop("size", "small")
                                                             .style("margin-left", "auto")
                                                             .event(clone!(hover => move |_evt: events::PointerEnter| hover.set_neq(true)))
                                                             .event(clone!(hover => move |_evt: events::PointerLeave| hover.set_neq(false)))
                                                             .child(html!("img-ui", {
                                                                 .style("height", "24px")
-                                                                .property_signal("path", hover.signal_ref(|hover| {
+                                                                .prop_signal("path", hover.signal_ref(|hover| {
                                                                     if *hover {
                                                                         "jig/play/icon-thumbsup-hover.svg"
                                                                     } else {
@@ -352,11 +352,11 @@ impl JigPlayer {
             })))
             .children(&mut [
                 html!("jig-play-play-button", {
-                    .property("slot", "play-button")
+                    .prop("slot", "play-button")
                 }),
                 html!("jig-play-play-pause", {
-                    .property("slot", "play-pause-button")
-                    .property_signal("mode", state.paused.signal().map(|paused| {
+                    .prop("slot", "play-pause-button")
+                    .prop_signal("mode", state.paused.signal().map(|paused| {
                         match paused {
                             true =>  "play",
                             false =>  "pause",
@@ -367,8 +367,8 @@ impl JigPlayer {
                     }))
                 }),
                 html!("jig-play-move-button", {
-                    .property("slot", "back")
-                    .property("kind", "back")
+                    .prop("slot", "back")
+                    .prop("kind", "back")
                     .visible_signal(jig_and_active_module_signal(Rc::clone(&state)).map(|(jig, active_module)| {
                         // if module already loaded and not first module
                         match (jig, active_module) {
@@ -383,12 +383,12 @@ impl JigPlayer {
                     }))
                 }),
                 html!("jig-play-progress-bar", {
-                    .property("slot", "progress")
-                    .property_signal("percent", progress_signal(state.clone()))
+                    .prop("slot", "progress")
+                    .prop_signal("percent", progress_signal(state.clone()))
                 }),
                 html!("jig-play-move-button", {
-                    .property("slot", "forward")
-                    .property("kind", "forward")
+                    .prop("slot", "forward")
+                    .prop("kind", "forward")
                     .event(clone!(state => move |_: events::Click| {
                         actions::navigate_forward(Rc::clone(&state));
                     }))
@@ -473,19 +473,19 @@ fn render_done_popup(state: Rc<JigPlayer>) -> impl Signal<Item = Option<Dom>> {
             false => None,
             true => {
                 Some(html!("dialog-overlay", {
-                    .property("slot", "dialog")
-                    .property("open", true)
-                    .property("autoClose", false)
+                    .prop("slot", "dialog")
+                    .prop("open", true)
+                    .prop("autoClose", false)
                     .child(html!("jig-play-done-popup", {
                         .apply(|mut dom| {
                             if state.player_options.display_score {
-                                dom = dom.property_signal("score", state.points.signal());
+                                dom = dom.prop_signal("score", state.points.signal());
                             };
                             if !state.player_options.track_assessments {
                                 dom = dom.child(
                                     html!("jig-play-done-action", {
-                                        .property("slot", "actions")
-                                        .property("kind", "replay")
+                                        .prop("slot", "actions")
+                                        .prop("kind", "replay")
                                         .event(clone!(state => move |_: events::Click| {
                                             actions::navigate_to_index(
                                                 Rc::clone(&state),
@@ -501,7 +501,7 @@ fn render_done_popup(state: Rc<JigPlayer>) -> impl Signal<Item = Option<Dom>> {
                                         ShareAsset::new(jig.into()).render(
                                             html!("jig-play-done-action", {
                                                 .text("share")
-                                                .property("kind", "share")
+                                                .prop("kind", "share")
                                             }),
                                             Some("actions")
                                         )
@@ -511,8 +511,8 @@ fn render_done_popup(state: Rc<JigPlayer>) -> impl Signal<Item = Option<Dom>> {
                             if is_iframe() {
                                 dom = dom.child(
                                     html!("jig-play-done-action", {
-                                        .property("slot", "actions")
-                                        .property("kind", "exit")
+                                        .prop("slot", "actions")
+                                        .prop("kind", "exit")
                                         .text("exit")
                                         .event(|_: events::Click| {
                                             let _ = IframeAction::new(AssetPlayerToPlayerPopup::Close).try_post_message_to_parent();
@@ -548,16 +548,16 @@ fn render_time_up_popup(state: Rc<JigPlayer>) -> impl Signal<Item = Option<Dom>>
             false => None,
             true => {
                 Some(html!("dialog-overlay", {
-                    .property("slot", "dialog")
-                    .property("open", true)
-                    .property("autoClose", false)
+                    .prop("slot", "dialog")
+                    .prop("open", true)
+                    .prop("autoClose", false)
                     .child(html!("jig-play-time-up-popup", {
                         .apply(|mut dom| {
                             if !state.player_options.track_assessments {
                                 dom = dom.child(
                                     html!("jig-play-done-action", {
-                                        .property("slot", "actions")
-                                        .property("kind", "replay")
+                                        .prop("slot", "actions")
+                                        .prop("kind", "replay")
                                         .event(clone!(state => move |_: events::Click| {
                                             actions::reload_iframe(Rc::clone(&state));
                                         }))
@@ -579,8 +579,8 @@ fn render_time_indicator(state: Rc<JigPlayer>) -> impl Signal<Item = Option<Dom>
             None => None,
             Some(timer) => {
                 Some(html!("jig-play-timer-indicator" => HtmlElement, {
-                    .property("slot", "indicators")
-                    .property_signal("value", timer.time.signal().map(|time| {
+                    .prop("slot", "indicators")
+                    .prop_signal("value", timer.time.signal().map(|time| {
                         let minutes = (time as f32 / 60.0).floor();
                         let seconds = time % 60;
                         format!("{}:{:0>2}", minutes, seconds)

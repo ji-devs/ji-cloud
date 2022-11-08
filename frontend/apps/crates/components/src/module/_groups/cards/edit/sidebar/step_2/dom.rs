@@ -8,7 +8,7 @@ use super::state::{Step2, STR_CHANGE_BACKGROUND};
 
 pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step2<RawData, E>>) -> Dom {
     html!("module-sidebar-body", {
-        .property("slot", "body")
+        .prop("slot", "body")
         .child_signal(state.custom_background.signal_ref(clone!(state => move |custom_background| {
             match custom_background {
                 Some(custom_background) => {
@@ -16,10 +16,10 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step2<RawData, E>>) ->
                 },
                 None => {
                     let action = html!("button-rect", {
-                        .property("kind", "text")
-                        .property("color", "blue")
+                        .prop("kind", "text")
+                        .prop("color", "blue")
                         .child(html!("fa-icon", {
-                            .property("icon", "fa-light fa-paint-brush")
+                            .prop("icon", "fa-light fa-paint-brush")
                         }))
                         .text(STR_CHANGE_BACKGROUND)
                         .event(clone!(state => move |_: events::Click|{

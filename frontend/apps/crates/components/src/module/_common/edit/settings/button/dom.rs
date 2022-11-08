@@ -25,15 +25,15 @@ where
     F: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
 {
     html!("module-settings-button", {
-        .property("kind", state.kind.as_str_id())
-        .property_signal("active", (state.active_signal) ())
-        .property_signal("bubbleOpen", state.bubble_open.signal())
+        .prop("kind", state.kind.as_str_id())
+        .prop_signal("active", (state.active_signal) ())
+        .prop_signal("bubbleOpen", state.bubble_open.signal())
         .event(clone!(state => move |_evt: events::Close| {
             state.bubble_open.set_neq(false);
         }))
         .apply(clone!(state => move |dom| {
             if let SettingsButtonKind::Custom(_, label) = state.kind {
-                dom.property("label", label)
+                dom.prop("label", label)
             } else {
                 dom
             }
@@ -70,17 +70,17 @@ where
             let input_kind = get_input_kind(state.kind);
 
             dom
-                .property_signal("num", value.string_signal())
+                .prop_signal("num", value.string_signal())
                 .child_signal(state.bubble_open.signal_cloned().map(clone!(state => move |bubble_open| {
                     if bubble_open {
                         Some(html!("module-settings-bubble", {
-                            .property("slot", "bubble")
+                            .prop("slot", "bubble")
                             .event(clone!(state => move |_evt: events::Close| {
                                 state.bubble_open.set_neq(false);
                             }))
                             .child(html!("module-settings-bubble-content", {
-                                .property("kind", state.kind.as_str_id())
-                                .property_signal("value", state.value.as_ref().unwrap_ji().string_signal())
+                                .prop("kind", state.kind.as_str_id())
+                                .prop_signal("value", state.value.as_ref().unwrap_ji().string_signal())
                                 .apply_if(input_kind.is_some(), clone!(state => move |dom| {
                                     dom.child(
                                         match input_kind.unwrap_ji() {
@@ -108,7 +108,7 @@ where
 
 pub fn render_input_field(state: Rc<SettingsButton>) -> Dom {
     html!("input" => web_sys::HtmlInputElement, {
-        .property_signal("value", state.value.as_ref().unwrap_ji().string_signal())
+        .prop_signal("value", state.value.as_ref().unwrap_ji().string_signal())
         .after_inserted(|elem| {
             wasm_bindgen_futures::spawn_local(clone!(elem => async move {
                 gloo_timers::future::TimeoutFuture::new(0).await;
@@ -126,7 +126,7 @@ pub fn render_input_field(state: Rc<SettingsButton>) -> Dom {
 
 pub fn render_input_select(state: Rc<SettingsButton>, max: usize) -> Dom {
     html!("select" => web_sys::HtmlSelectElement, {
-        .property_signal("value", state.value.as_ref().unwrap_ji().string_signal())
+        .prop_signal("value", state.value.as_ref().unwrap_ji().string_signal())
         .children(
             (1..max)
                 .map(|index| {
@@ -134,7 +134,7 @@ pub fn render_input_select(state: Rc<SettingsButton>, max: usize) -> Dom {
 
                     html!("option", {
                         .text(&value_str)
-                        .property("value", &value_str)
+                        .prop("value", &value_str)
                     })
                 })
         )

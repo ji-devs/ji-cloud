@@ -10,7 +10,7 @@ pub fn render_menu(state: Rc<TracesEdit>, index: ReadOnlyMutable<Option<usize>>)
     html!("div", {
         .children(&mut [
             html!("menu-line", {
-                .property("icon", "edit")
+                .prop("icon", "edit")
                 .event(clone!(state, index => move |_evt:events::Click| {
                     if let Some(index) = index.get() {
                         TracesEdit::start_draw(state.clone(), Some(index), None);
@@ -18,7 +18,7 @@ pub fn render_menu(state: Rc<TracesEdit>, index: ReadOnlyMutable<Option<usize>>)
                 }))
             }),
             html!("menu-line", {
-                .property("icon", "duplicate")
+                .prop("icon", "duplicate")
                 .event(clone!(state, index => move |_evt:events::Click| {
                     if let Some(index) = index.get() {
                         state.duplicate(index);
@@ -26,7 +26,7 @@ pub fn render_menu(state: Rc<TracesEdit>, index: ReadOnlyMutable<Option<usize>>)
                 }))
             }),
             html!("menu-line", {
-                .property("icon", "delete")
+                .prop("icon", "delete")
                 .event(clone!(state, index => move |_evt:events::Click| {
                     if let Some(index) = index.get() {
                         state.delete_index(index);

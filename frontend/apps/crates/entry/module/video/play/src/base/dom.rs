@@ -18,7 +18,7 @@ use super::state::*;
 impl DomRenderable for Base {
     fn render(state: Rc<Base>) -> Dom {
         html!("empty-fragment", {
-            .property("slot", "main")
+            .prop("slot", "main")
             .child(
                 render_backgrounds_raw(&state.backgrounds, state.theme_id, None)
             )

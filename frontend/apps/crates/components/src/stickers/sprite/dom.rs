@@ -65,7 +65,7 @@ pub fn render_sticker_sprite<T: AsSticker>(
                 .child_signal(sprite.src.signal_ref(clone!(stickers, index, sprite => move |src| {
                     src.as_ref().map(|src| {
                         html!("img", {
-                            .attribute("src", src)
+                            .attr("src", src)
                             .style("display", "block")
                             .style("position", "relative")
                             .style_signal("width", sprite.width_signal())
@@ -156,7 +156,7 @@ pub fn render_sticker_sprite_raw(sprite: &RawSprite, opts: Option<SpriteRawRende
             src.signal_ref(clone!(size, flip_horizontal, flip_vertical => move |src| {
                 src.as_ref().map(|src| {
                     html!("img", {
-                        .attribute("src", src)
+                        .attr("src", src)
                         // Prevent sprites from being selected if a student attempts to drag
                         // a non-interactive sticker.
                         .style("user-select", "none")

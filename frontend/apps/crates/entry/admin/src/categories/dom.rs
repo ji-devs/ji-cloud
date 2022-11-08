@@ -23,12 +23,12 @@ impl CategoriesPage {
         html!("empty-fragment", {
             .child_signal(state.deleting.signal_cloned().map(clone!(state => move |deleting| {
                 deleting.map(|content_state| html!("modal-confirm", {
-                        .property("dangerous", true)
-                        .property("title", STR_DELETE_TITLE)
-                        .property("content", STR_DELETE_CONTENT.replace("{category}", &content_state.cat.name.get_cloned()))
-                        .property("cancel_text", STR_DELETE_CANCEL)
-                        .property("confirm_text", STR_DELETE_CONFIRM)
-                        .property("confirmIcon", "core/menus/delete-white.svg")
+                        .prop("dangerous", true)
+                        .prop("title", STR_DELETE_TITLE)
+                        .prop("content", STR_DELETE_CONTENT.replace("{category}", &content_state.cat.name.get_cloned()))
+                        .prop("cancel_text", STR_DELETE_CANCEL)
+                        .prop("confirm_text", STR_DELETE_CONFIRM)
+                        .prop("confirmIcon", "core/menus/delete-white.svg")
                         .event(clone!(state => move |_evt: events::CustomCancel| state.deleting.set(None)))
                         .event(clone!(state => move |_evt: events::CustomConfirm| {
                             state.deleting.set(None);
@@ -40,8 +40,8 @@ impl CategoriesPage {
                 html!("category-page", {
                     .children(&mut [
                         html!("button-expand", {
-                            .property("slot", "expand")
-                            .property("expanded", false)
+                            .prop("slot", "expand")
+                            .prop("expanded", false)
                             .event(clone!(state => move |evt:events::CustomToggle| {
                                 let flag = evt.value();
                                 for cat in state.categories.lock_ref().iter() {
@@ -50,13 +50,13 @@ impl CategoriesPage {
                             }))
                         }),
                         html!("category-button-add", {
-                            .property("slot", "add")
+                            .prop("slot", "add")
                             .event(clone!(state => move |_evt:events::Click| {
                                 actions::add_category_root(state.clone());
                             }))
                         }),
                         html!("div", {
-                            .property("slot", "middle")
+                            .prop("slot", "middle")
                             .children_signal_vec(state.categories.signal_vec_cloned().map(clone!(state => move |category| {
                                 CategoryDom::render(None, category, state.clone())
                             })))
@@ -67,7 +67,7 @@ impl CategoriesPage {
             )
             .child(
                 html!("window-loader-block", {
-                    .property_signal("visible", state.loader.is_loading())
+                    .prop_signal("visible", state.loader.is_loading())
                 })
             )
 
@@ -80,10 +80,10 @@ pub struct CategoryDom {}
 impl CategoryDom {
     pub fn render(parent: Option<Rc<Category>>, cat: Rc<Category>, state: Rc<State>) -> Dom {
         html!("dropdown-tree", {
-            .property_signal("label", cat.name.signal_cloned())
-            .property_signal("expanded", cat.expanded.signal())
-            .property_signal("hasChildren", cat.has_children_signal())
-            .property("isChild", parent.is_some())
+            .prop_signal("label", cat.name.signal_cloned())
+            .prop_signal("expanded", cat.expanded.signal())
+            .prop_signal("hasChildren", cat.has_children_signal())
+            .prop("isChild", parent.is_some())
             .event(clone!(cat => move |_evt:events::ExpandAll| {
                 actions::toggle_expand_all(&cat, true)
             }))
@@ -95,7 +95,7 @@ impl CategoryDom {
             })
             .child(ContentDom::render(parent, cat.clone(), state.clone()))
             .child(html!("div", {
-                .property("slot", "children")
+                .prop("slot", "children")
                 .children_signal_vec(cat.children.signal_vec_cloned().map(clone!(state, cat => move |category| {
                     CategoryDom::render(Some(cat.clone()), category, state.clone())
                 })))
@@ -112,7 +112,7 @@ impl ContentDom {
 
         let _visible_signal = Mutable::new(false);
         html!("menu-ellipses", {
-            .property("slot", "content")
+            .prop("slot", "content")
             .children(ContentLineDom::render(content_state.clone()))
             .child(MenuDom::render(content_state.clone()))
 
@@ -128,9 +128,9 @@ pub struct ContentLineDom {}
 impl ContentLineDom {
     pub fn render(content_state: Rc<ContentState>) -> Vec<Dom> {
         let mut children: Vec<Dom> = vec![html!("input-text-content", {
-            .property("slot", "content")
-            .property_signal("editing", content_state.cat.editing.signal_cloned())
-            .property_signal("value", content_state.cat.name.signal_cloned())
+            .prop("slot", "content")
+            .prop_signal("editing", content_state.cat.editing.signal_cloned())
+            .prop_signal("value", content_state.cat.name.signal_cloned())
             .event(clone!(content_state => move |evt: events::CustomChange| {
                 actions::rename_category(&content_state.cat, content_state.state.clone(), evt.value());
             }))
@@ -138,8 +138,8 @@ impl ContentLineDom {
 
         if content_state.parent.is_none() {
             children.push(html!("button-expand", {
-                .property("slot", "content")
-                .property("expanded", false)
+                .prop("slot", "content")
+                .prop("expanded", false)
                 .event(clone!(content_state => move |evt: events::CustomToggle| {
                     actions::toggle_expand_all(&content_state.cat, evt.value());
                 }))
@@ -155,39 +155,39 @@ pub struct MenuDom {}
 impl MenuDom {
     pub fn render(content_state: Rc<ContentState>) -> Dom {
         html!("div", {
-            .property("slot", "menu-content")
+            .prop("slot", "menu-content")
             .children(&mut [
                 html!("button-rect", {
-                    .property("kind", "text")
-                    .property("color", "darkGray")
-                    .property("hoverColor", "blue")
+                    .prop("kind", "text")
+                    .prop("color", "darkGray")
+                    .prop("hoverColor", "blue")
                     .text("Add")
                     .event(clone!(content_state => move |_evt: events::Click| {
                         actions::add_category_child(content_state.clone());
                     }))
                 }),
                 html!("button-rect", {
-                    .property("kind", "text")
-                    .property("color", "darkGray")
-                    .property("hoverColor", "blue")
+                    .prop("kind", "text")
+                    .prop("color", "darkGray")
+                    .prop("hoverColor", "blue")
                     .text("Move up")
                     .event(clone!(content_state => move |_evt: events::Click| {
                         actions::move_category(content_state.clone(), actions::Direction::Up);
                     }))
                 }),
                 html!("button-rect", {
-                    .property("kind", "text")
-                    .property("color", "darkGray")
-                    .property("hoverColor", "blue")
+                    .prop("kind", "text")
+                    .prop("color", "darkGray")
+                    .prop("hoverColor", "blue")
                     .text("Move down")
                     .event(clone!(content_state => move |_evt: events::Click| {
                         actions::move_category(content_state.clone(), actions::Direction::Down);
                     }))
                 }),
                 html!("button-rect", {
-                    .property("kind", "text")
-                    .property("color", "darkGray")
-                    .property("hoverColor", "blue")
+                    .prop("kind", "text")
+                    .prop("color", "darkGray")
+                    .prop("hoverColor", "blue")
                     .text("Rename")
                     .event(clone!(content_state => move |_evt: events::Click| {
                         content_state.cat.editing.set(true);
@@ -196,9 +196,9 @@ impl MenuDom {
                     }))
                 }),
                 html!("button-rect", {
-                    .property("kind", "text")
-                    .property("color", "red")
-                    .property("hoverColor", "red")
+                    .prop("kind", "text")
+                    .prop("color", "red")
+                    .prop("hoverColor", "red")
                     .text("Delete")
                     .event(clone!(content_state => move |_evt: events::Click| {
                         content_state.close_menu();

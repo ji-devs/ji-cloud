@@ -16,12 +16,12 @@ impl Publish {
     pub fn render_categories_select(self: Rc<Self>) -> Dom {
         let state = Rc::clone(&self);
         html!("input-select", {
-            .property("slot", "catagories-select")
-            .property("label", STR_CATEGORIES_LABEL)
-            .property("placeholder", STR_CATEGORIES_PLACEHOLDER)
-            .property("multiple", true)
-            .property_signal("value", category_value_signal(state.clone()))
-            .property_signal("error", {
+            .prop("slot", "catagories-select")
+            .prop("label", STR_CATEGORIES_LABEL)
+            .prop("placeholder", STR_CATEGORIES_PLACEHOLDER)
+            .prop("multiple", true)
+            .prop_signal("value", category_value_signal(state.clone()))
+            .prop_signal("error", {
                 (map_ref! {
                     let submission_tried = state.submission_tried.signal(),
                     let value = state.jig.categories.signal_cloned()
@@ -44,7 +44,7 @@ fn render_categories(state: Rc<Publish>, categories: &Vec<Category>) -> Vec<Dom>
             let category_id = category.id.clone();
             html!("input-select-option", {
                 .text(&category.name)
-                .property_signal("selected", state.jig.categories.signal_cloned().map(clone!(category_id => move |selected_categories| {
+                .prop_signal("selected", state.jig.categories.signal_cloned().map(clone!(category_id => move |selected_categories| {
                     selected_categories.contains(&category_id)
                 })))
                 .event(clone!(state => move |_: events::CustomSelectedChange| {
@@ -59,7 +59,7 @@ fn render_categories(state: Rc<Publish>, categories: &Vec<Category>) -> Vec<Dom>
         } else {
             html!("input-select-option-group", {
                 .child(html!("span", {
-                    .property("slot", "label")
+                    .prop("slot", "label")
                     .text(&category.name)
                 }))
                 .children(render_categories(state.clone(), &category.children))

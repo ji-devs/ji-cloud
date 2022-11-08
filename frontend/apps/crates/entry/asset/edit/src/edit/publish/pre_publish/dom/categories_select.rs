@@ -14,8 +14,8 @@ impl PrePublish {
         let state = Rc::clone(&self);
 
         html!("input-wrapper", {
-            .property("slot", "catagories-select")
-            .property("label", STR_CATEGORIES_LABEL)
+            .prop("slot", "catagories-select")
+            .prop("label", STR_CATEGORIES_LABEL)
             .child(categories_input::CategoriesInput::new(
                 Box::pin(state.category_value_signal()),
                 STR_CATEGORIES_PLACEHOLDER.to_string(),

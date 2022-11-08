@@ -7,7 +7,7 @@ use components::module::_groups::cards::play::card::dom::{render_card_mixin, Car
 
 pub fn render(state: Rc<Base>) -> Dom {
     html!("play-sidebar", {
-        .property("slot", "sidebar")
+        .prop("slot", "sidebar")
         .children(
 
             //It's simpler to just always render but hide via CSS until we start the animation
@@ -38,7 +38,7 @@ fn render_sidebar_card(state: Rc<Base>, card_state: Rc<CardState>) -> Dom {
                 .is_found()
                 .map(|found| if !found { "none" } else { "block" }),
         )
-        .property("flipped", true)
+        .prop("flipped", true)
         .apply(clone!(card_state => move |dom| {
             dom
                 .style_signal("transform", {
@@ -55,7 +55,7 @@ fn render_sidebar_card(state: Rc<Base>, card_state: Rc<CardState>) -> Dom {
                             }
                         })
                 })
-                .property("hasTransform", true)
+                .prop("hasTransform", true)
         }))
         .future(card_state.found_index.signal().for_each(
             clone!(state, card_state => move |found_index| {

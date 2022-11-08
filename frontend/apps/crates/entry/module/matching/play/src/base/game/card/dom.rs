@@ -15,7 +15,7 @@ pub fn render_top(state: Rc<CardTop>) -> Dom {
     let side = state.side;
 
     html!("matching-column", {
-        .property("slot", "top")
+        .prop("slot", "top")
         .child({
             let card = &state.card;
             let mut options = CardOptions::new(card, theme_id, mode, side, Size::Matching);
@@ -32,7 +32,7 @@ pub fn render_top(state: Rc<CardTop>) -> Dom {
                             .event(|_evt:events::Click| {
                                 log::info!("empty space clicked...")
                             })
-                            .property_signal("active", is_drag_over.signal())
+                            .prop_signal("active", is_drag_over.signal())
                             .after_inserted(clone!(state => move |elem| {
                                 *state.elem.borrow_mut() = Some(elem);
                             }))
@@ -55,7 +55,7 @@ pub fn render_top(state: Rc<CardTop>) -> Dom {
 
 pub fn render_bottom(state: Rc<CardBottom>) -> Dom {
     html!("div", {
-        .property("slot", "bottom")
+        .prop("slot", "bottom")
         .style("touch-action", "none")
         .event(clone!(state => move |evt:events::PointerDown| {
             let elem: HtmlElement = evt.dyn_target().unwrap_ji();
@@ -98,7 +98,7 @@ pub fn render_drag(state: Rc<CardDrag>) -> Dom {
     options.style_kind = StyleKind::Dragging;
 
     render_card_mixin(options, |dom| {
-        dom.property("hasTransform", true)
+        dom.prop("hasTransform", true)
             .style_signal("transform", state.drag.transform_signal())
             .global_event(clone!(state => move |_evt:events::PointerUp| {
                 state.on_release();

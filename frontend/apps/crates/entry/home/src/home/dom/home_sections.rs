@@ -23,20 +23,20 @@
 //             html!("home-quick-search", {
 //                 .children(state.quick_searches.iter().map(|item| {
 //                     html!("home-quick-search-item", {
-//                         .property("href", actions::search_url(&item.search_term))
+//                         .prop("href", actions::search_url(&item.search_term))
 //                         .children(&mut [
 //                             html!("img-ui", {
-//                                 .property("slot", "image")
-//                                 .property("path", {
+//                                 .prop("slot", "image")
+//                                 .prop("path", {
 //                                     format!("entry/home/quick-search/{}.svg", &item.search_term.to_lowercase().replace(" ", "-"))
 //                                 })
 //                             }),
 //                             html!("h4", {
-//                                 .property("slot", "title")
+//                                 .prop("slot", "title")
 //                                 .text(&item.search_term)
 //                             }),
 //                             // html!("h5", {
-//                             //     .property("slot", "subtitle")
+//                             //     .prop("slot", "subtitle")
 //                             //     .text(&item.jigs_count.to_string())
 //                             //     .text(STR_JIGS)
 //                             // }),
@@ -48,52 +48,52 @@
 //             html!("home-why-ji", {
 //                 .children(&mut [
 //                     html!("home-why-ji-item", {
-//                         .property("kind", "content")
+//                         .prop("kind", "content")
 //                         .children(&mut [
 //                             html!("button-rect", {
-//                                 .property("kind", "text")
-//                                 .property("color", "blue")
-//                                 .property("size", "small")
-//                                 .property("weight", "normal")
-//                                 .property("href", actions::search_url(""))
+//                                 .prop("kind", "text")
+//                                 .prop("color", "blue")
+//                                 .prop("size", "small")
+//                                 .prop("weight", "normal")
+//                                 .prop("href", actions::search_url(""))
 //                                 .text(STR_CONTENT_ACTION)
 //                             }),
 //                         ])
 //                     }),
 //                     html!("home-why-ji-item", {
-//                         .property("kind", "create")
+//                         .prop("kind", "create")
 //                         .children(&mut [
 //                             html!("button-rect", {
-//                                 .property("kind", "text")
-//                                 .property("color", "blue")
-//                                 .property("size", "small")
-//                                 .property("weight", "normal")
-//                                 .property("href", &Route::Jig(JigRoute::Gallery).to_string())
+//                                 .prop("kind", "text")
+//                                 .prop("color", "blue")
+//                                 .prop("size", "small")
+//                                 .prop("weight", "normal")
+//                                 .prop("href", &Route::Jig(JigRoute::Gallery).to_string())
 //                                 .text(STR_CREATE_ACTION)
 //                             }),
 //                         ])
 //                     }),
 //                     html!("home-why-ji-item", {
-//                         .property("kind", "customize")
+//                         .prop("kind", "customize")
 //                         .children(&mut [
 //                             html!("button-rect", {
-//                                 .property("kind", "text")
-//                                 .property("color", "blue")
-//                                 .property("size", "small")
-//                                 .property("weight", "normal")
-//                                 .property("href", &Route::Jig(JigRoute::Gallery).to_string())
+//                                 .prop("kind", "text")
+//                                 .prop("color", "blue")
+//                                 .prop("size", "small")
+//                                 .prop("weight", "normal")
+//                                 .prop("href", &Route::Jig(JigRoute::Gallery).to_string())
 //                                 .text(STR_CUSTOMIZE_ACTION)
 //                             }),
 //                         ])
 //                     }),
 //                     html!("home-why-ji-item", {
-//                         .property("kind", "community")
+//                         .prop("kind", "community")
 //                         .children(&mut [
 //                             html!("button-rect", {
-//                                 .property("kind", "text")
-//                                 .property("color", "blue")
-//                                 .property("size", "small")
-//                                 .property("weight", "normal")
+//                                 .prop("kind", "text")
+//                                 .prop("color", "blue")
+//                                 .prop("size", "small")
+//                                 .prop("weight", "normal")
 //                                 .text(STR_COMMUNITY_ACTION)
 //                                 .child(html!("br"))
 //                                 .text(STR_COMING_SOON)
@@ -101,13 +101,13 @@
 //                         ])
 //                     }),
 //                     html!("home-why-ji-item", {
-//                         .property("kind", "classroom")
+//                         .prop("kind", "classroom")
 //                         .children(&mut [
 //                             html!("button-rect", {
-//                                 .property("kind", "text")
-//                                 .property("color", "blue")
-//                                 .property("size", "small")
-//                                 .property("weight", "normal")
+//                                 .prop("kind", "text")
+//                                 .prop("color", "blue")
+//                                 .prop("size", "small")
+//                                 .prop("weight", "normal")
 //                                 .text(STR_CLASSROOM_ACTION)
 //                                 .child(html!("br"))
 //                                 .text(STR_COMING_SOON)
@@ -118,30 +118,30 @@
 //             }),
 //             html!("home-whats-new", {
 //                 .visible(false)
-//                 .property("pageCount", state.whats_new.len() as u32)
+//                 .prop("pageCount", state.whats_new.len() as u32)
 //                 .children(state.whats_new.iter().map(|item| {
 //                     html!("home-new-item", {
-//                         .property("slot", "items")
+//                         .prop("slot", "items")
 //                         .children(&mut [
 //                             html!("img-ji", {
-//                                 .property("slot", "image")
-//                                 .property("id", &item.image_id)
-//                                 .property("lib", &item.image_lib)
-//                                 .property("size", "original")
+//                                 .prop("slot", "image")
+//                                 .prop("id", &item.image_id)
+//                                 .prop("lib", &item.image_lib)
+//                                 .prop("size", "original")
 //                             }),
 //                             html!("h2", {
-//                                 .property("slot", "subtitle")
+//                                 .prop("slot", "subtitle")
 //                                 .text(&item.header)
 //                             }),
 //                             html!("p", {
-//                                 .property("slot", "lines")
+//                                 .prop("slot", "lines")
 //                                 .text(&item.paragraph)
 //                             }),
 //                             html!("button-rect", {
-//                                 .property("slot", "button")
-//                                 .property("size", "large")
-//                                 .property("color", "red")
-//                                 .property("bold", "")
+//                                 .prop("slot", "button")
+//                                 .prop("size", "large")
+//                                 .prop("color", "red")
+//                                 .prop("bold", "")
 //                                 .text(STR_PLAY)
 //                             }),
 //                         ])
@@ -149,8 +149,8 @@
 //                 }))
 //             }),
 //             html!("home-testimonials", {
-//                 .property("teachersPageCount", state.teachers_testimonials.len() as u32)
-//                 .property("parentsPageCount", state.parents_testimonials.len() as u32)
+//                 .prop("teachersPageCount", state.teachers_testimonials.len() as u32)
+//                 .prop("parentsPageCount", state.parents_testimonials.len() as u32)
 //                 .children(state.teachers_testimonials.iter().map(|t| {
 //                     testimonial(t, "teachers")
 //                 }))
@@ -164,23 +164,23 @@
 
 // fn testimonial(testimonial: &Testimonial, slot: &str) -> Dom {
 //     html!("home-testimonial-item", {
-//         .property("slot", slot)
+//         .prop("slot", slot)
 //         .children(&mut [
 //             html!("img-ui", {
-//                 .property("slot", "image")
-//                 .property("path", format!("entry/home/testimonials/{}", &testimonial.image_id))
-//                 .property("size", "original")
+//                 .prop("slot", "image")
+//                 .prop("path", format!("entry/home/testimonials/{}", &testimonial.image_id))
+//                 .prop("size", "original")
 //             }),
 //             html!("h4", {
-//                 .property("slot", "name")
+//                 .prop("slot", "name")
 //                 .text(&testimonial.name)
 //             }),
 //             html!("h6", {
-//                 .property("slot", "bio")
+//                 .prop("slot", "bio")
 //                 .text(&testimonial.bio)
 //             }),
 //             html!("p", {
-//                 .property("slot", "paragraph")
+//                 .prop("slot", "paragraph")
 //                 .text(&testimonial.paragraph)
 //             }),
 //         ])

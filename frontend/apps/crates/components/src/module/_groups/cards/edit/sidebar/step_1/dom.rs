@@ -74,7 +74,7 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) ->
                     render_tab(state.clone(), tab.kind(), enabled)
                 }))
                 .child(html!("module-sidebar-body", {
-                        .property("slot", "body")
+                        .prop("slot", "body")
                         .child_signal(state.tab_kind.signal_cloned().map(clone!(state, is_empty => move |current_tab_kind| {
                             let tab = match current_tab_kind {
                                 Some(current_tab_kind) => match state.tabs.get() {
@@ -213,22 +213,22 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) ->
 
 fn render_empty_audio() -> Dom {
     html!("sidebar-empty", {
-        .property("label", STR_EMPTY_AUDIO_SELECTION)
-        .property("imagePath", "module/_groups/cards/edit/sidebar/edit-words.svg")
-        .property("imageOffset", 32)
+        .prop("label", STR_EMPTY_AUDIO_SELECTION)
+        .prop("imagePath", "module/_groups/cards/edit/sidebar/edit-words.svg")
+        .prop("imageOffset", 32)
     })
 }
 
 fn render_non_empty<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) -> Dom {
     html!("sidebar-empty", {
-        .property("label", STR_NONEMPTY_LIST_LABEL)
-        .property("imagePath", "module/_groups/cards/edit/sidebar/edit-words.svg")
-        .property("imageOffset", 32)
+        .prop("label", STR_NONEMPTY_LIST_LABEL)
+        .prop("imagePath", "module/_groups/cards/edit/sidebar/edit-words.svg")
+        .prop("imageOffset", 32)
         .child(
             html!("button-rect", {
-                .property("slot", "clear")
-                .property("kind", "text")
-                .property("color", "blue")
+                .prop("slot", "clear")
+                .prop("kind", "text")
+                .prop("color", "blue")
                 .text(strings::STR_CREATE_NEW_LIST)
                 .event(clone!(state => move |_evt:events::Click| {
                     state.confirm_clear.set_neq(true);
@@ -241,12 +241,12 @@ fn render_non_empty<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E
                     .style("display", "none")
                     .apply(OverlayHandle::lifecycle(clone!(state => move || {
                         html!("modal-confirm", {
-                            .property("dangerous", true)
-                            .property("title", STR_DELETE_TITLE)
-                            .property("content", STR_DELETE_CONTENT)
-                            .property("cancel_text", STR_DELETE_CANCEL)
-                            .property("confirm_text", STR_DELETE_CONFIRM)
-                            .property("confirmIcon", "core/menus/delete-white.svg")
+                            .prop("dangerous", true)
+                            .prop("title", STR_DELETE_TITLE)
+                            .prop("content", STR_DELETE_CONTENT)
+                            .prop("cancel_text", STR_DELETE_CANCEL)
+                            .prop("confirm_text", STR_DELETE_CONFIRM)
+                            .prop("confirmIcon", "core/menus/delete-white.svg")
                             .event(clone!(state => move |_evt: events::CustomCancel| state.confirm_clear.set_neq(false)))
                             .event(clone!(state => move |_evt: events::CustomConfirm| {
                                 state.confirm_clear.set_neq(false);

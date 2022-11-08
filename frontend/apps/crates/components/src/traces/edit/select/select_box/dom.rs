@@ -77,7 +77,7 @@ impl EditSelectTrace {
                             html!("empty-fragment", {
                                 .apply(OverlayHandle::lifecycle(
                                     clone!(pos, parent, index, select_box => move || html!("overlay-drag", {
-                                        .property("target", web_sys::DomRect::new_with_x_and_y_and_width_and_height(pos.0 + 32.0, pos.1, 1.0, 1.0).unwrap_ji())
+                                        .prop("target", web_sys::DomRect::new_with_x_and_y_and_width_and_height(pos.0 + 32.0, pos.1, 1.0, 1.0).unwrap_ji())
                                         .child(html!("menu-container", {
                                             .child(render_menu(parent.clone(), index.clone()))
                                         }))

@@ -45,9 +45,9 @@ where
         match self {
             Self::Static(transform, size) => {
                 let style = Self::get_style_string(transform, size, resize_info);
-                dom.attribute("style", &style)
+                dom.attr("style", &style)
             }
-            Self::Dynamic(s) => dom.attribute_signal(
+            Self::Dynamic(s) => dom.attr_signal(
                 "style",
                 s.map(clone!(resize_info => move |(transform, size)| {
                     Self::get_style_string(&transform, size, &resize_info)
@@ -74,7 +74,7 @@ fn _apply_transform<A: AsRef<web_sys::Element>>(
             height
         );
 
-        dom.attribute("style", &style)
+        dom.attr("style", &style)
     })
 }
 

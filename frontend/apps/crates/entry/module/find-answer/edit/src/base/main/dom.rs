@@ -35,7 +35,7 @@ impl DomRenderable for Main {
                 async {}
             })))
             .child(html!("img-ui", {
-                .property("path", "jig/play/design-grid.svg")
+                .prop("path", "jig/play/design-grid.svg")
                 .style("height", "100%")
             }))
             .children_signal_vec(

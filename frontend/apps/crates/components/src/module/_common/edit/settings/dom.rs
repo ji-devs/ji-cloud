@@ -26,7 +26,7 @@ where
         .children(
             state.lines.iter().map(|(line_kind, buttons)| {
               html!("module-settings-line", {
-                  .property("kind", line_kind.as_str_id())
+                  .prop("kind", line_kind.as_str_id())
                     .children(buttons.iter().map(|button| {
                         match button {
                             Some(button) => render_button(button.clone()),

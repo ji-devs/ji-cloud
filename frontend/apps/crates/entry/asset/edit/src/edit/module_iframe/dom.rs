@@ -12,12 +12,12 @@ impl ModuleIframe {
         state.load_module_kind();
 
         html!("iframe" => web_sys::HtmlIFrameElement, {
-            .property("allow", "autoplay; fullscreen")
-            .property("slot", "main")
+            .prop("allow", "autoplay; fullscreen")
+            .prop("slot", "main")
             .style("width", "100%")
             .style("height", "100%")
             .style("border", "none")
-            .property_signal("src", state.module_kind.signal().map(clone!(state => move |module_kind| {
+            .prop_signal("src", state.module_kind.signal().map(clone!(state => move |module_kind| {
                 match module_kind {
                     None => String::new(),
                     Some(module_kind) => {

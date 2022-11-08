@@ -11,16 +11,16 @@ where
     Step: StepExt + 'static,
 {
     vec![html!("choose-mode", {
-        .property("slot", "main")
-        .property("module", RawData::kind().as_str())
+        .prop("slot", "main")
+        .prop("module", RawData::kind().as_str())
         .children(
             RawData::choose_mode_list()
                 .into_iter()
                 .map(|mode| {
                     html!("choose-mode-option", {
-                        .property("mode", mode.as_str_id())
-                        .property("label", mode.label())
-                        .property("module", RawData::kind().as_str())
+                        .prop("mode", mode.as_str_id())
+                        .prop("label", mode.label())
+                        .prop("module", RawData::kind().as_str())
                         .event(clone!(state => move |_evt:events::Click| {
                             (state.on_mode_change) (mode);
                         }))

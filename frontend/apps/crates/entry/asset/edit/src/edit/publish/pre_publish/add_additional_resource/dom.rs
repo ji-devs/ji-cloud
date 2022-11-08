@@ -19,12 +19,12 @@ impl AddAdditionalResource {
         let state = self;
         html!("empty-fragment", {
             .style("display", "contents")
-            .property("slot", "resources")
+            .prop("slot", "resources")
             .child_signal(state.loader.is_loading().map(clone!(state => move|is_loading| {
                 match is_loading {
                     true => Some(
                         html!("progress-bar", {
-                            .property("progress", "infinite")
+                            .prop("progress", "infinite")
                         })
                     ),
                     false => Some(
@@ -55,9 +55,9 @@ impl AddAdditionalResource {
                 .apply(OverlayHandle::lifecycle(
                     move || {
                         html!("overlay-content", {
-                            .property("target", &elem)
-                            .property("contentAnchor", "oppositeV")
-                            .property("targetAnchor", "bm")
+                            .prop("target", &elem)
+                            .prop("contentAnchor", "oppositeV")
+                            .prop("targetAnchor", "bm")
                             .child({
                                 match popup {
                                     ActivePopup::Main => {
@@ -83,20 +83,20 @@ impl AddAdditionalResource {
         html!("jig-edit-publish-resource-add", {
             .children(&mut [
                 html!("fa-button", {
-                    .property("icon", "fa-light fa-xmark")
-                    .property("slot", "close")
+                    .prop("icon", "fa-light fa-xmark")
+                    .prop("slot", "close")
                     .event(clone!(state => move|_: events::Click| {
                         state.active_popup.set(None);
                     }))
                 }),
                 html!("button", {
-                    .property("slot", "options")
+                    .prop("slot", "options")
                     .event(clone!(state => move |_: events::Click| {
                         state.active_popup.set(Some(ActivePopup::File));
                     }))
                     .children(&mut [
                         html!("fa-icon", {
-                            .property("icon", "fa-light fa-arrow-up-from-bracket")
+                            .prop("icon", "fa-light fa-arrow-up-from-bracket")
                         }),
                         html!("span", {
                             .text(STR_UPLOAD_FILE)
@@ -104,13 +104,13 @@ impl AddAdditionalResource {
                     ])
                 }),
                 html!("button", {
-                    .property("slot", "options")
+                    .prop("slot", "options")
                     .event(clone!(state => move |_: events::Click| {
                         state.active_popup.set(Some(ActivePopup::Link));
                     }))
                     .children(&mut [
                         html!("fa-icon", {
-                            .property("icon", "fa-light fa-link-simple")
+                            .prop("icon", "fa-light fa-link-simple")
                         }),
                         html!("span", {
                             .text(STR_ADD_LINK)

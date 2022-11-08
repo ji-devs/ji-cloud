@@ -14,8 +14,8 @@ const STR_CATEGORIES_PLACEHOLDER: &str = "Select one or more from the list";
 
 pub fn render(state: Rc<Home>) -> Dom {
     html!("input-wrapper", {
-        .property("slot", "categories")
-        .property("label", STR_CATEGORIES_LABEL)
+        .prop("slot", "categories")
+        .prop("label", STR_CATEGORIES_LABEL)
         .child_signal(state.search_options.categories.signal_cloned().map(clone!(state => move |category_options| {
             Some(categories_input::CategoriesInput::new(
                 Box::pin(category_value_signal(Rc::clone(&state))),

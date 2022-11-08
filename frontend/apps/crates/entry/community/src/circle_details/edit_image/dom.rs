@@ -20,18 +20,18 @@ impl Component<EditImage> for Rc<EditImage> {
 
         dom.child(html!("popup-body", {
             .child(html!("fa-button", {
-                .property("slot", "close")
-                .property("icon", "fa-regular fa-xmark")
+                .prop("slot", "close")
+                .prop("icon", "fa-regular fa-xmark")
                 .event(clone!(state => move |_: events::Click| {
                     (state.callbacks.close)();
                 }))
             }))
             .child(html!("h3", {
-                .property("slot", "heading")
+                .prop("slot", "heading")
                 .text(STR_HEADING)
             }))
             .child(html!("div", {
-                .property("slot", "body")
+                .prop("slot", "body")
                 .class("body")
                 .class("field-grid")
                 .child_signal(
@@ -46,19 +46,19 @@ impl Component<EditImage> for Rc<EditImage> {
                                         .child(match image {
                                             ImageIfOrFile::ImageId(image_id) => {
                                                 html!("profile-image", {
-                                                    .property("imageId", &image_id.0.to_string())
+                                                    .prop("imageId", &image_id.0.to_string())
                                                 })
                                             },
                                             ImageIfOrFile::File(file) => {
                                                 html!("img", {
-                                                    .property("src", file_to_object_url(&file))
+                                                    .prop("src", file_to_object_url(&file))
                                                 })
                                             },
                                         })
                                         .child(html!("button-rect", {
                                             .text("Delete")
-                                            .property("color", "blue")
-                                            .property("kind", "text")
+                                            .prop("color", "blue")
+                                            .prop("kind", "text")
                                             .event(clone!(state => move |_: events::Click| {
                                                 // using set_neq otherwise FileInput would be reinitialized and won't show errors
                                                 state.image.set_neq(None);
@@ -91,12 +91,12 @@ impl Component<EditImage> for Rc<EditImage> {
                 //                     .child(match image {
                 //                         ImageIfOrFile::ImageId(image_id) => {
                 //                             html!("profile-image", {
-                //                                 .property("imageId", &image_id.0.to_string())
+                //                                 .prop("imageId", &image_id.0.to_string())
                 //                             })
                 //                         },
                 //                         ImageIfOrFile::File(file) => {
                 //                             html!("img", {
-                //                                 .property("src", file_to_object_url(&file))
+                //                                 .prop("src", file_to_object_url(&file))
                 //                             })
                 //                         },
                 //                     })
@@ -106,8 +106,8 @@ impl Component<EditImage> for Rc<EditImage> {
                 // )
                 .child(html!("button-rect", {
                     .text(STR_SAVE)
-                    .property("slot", "submit")
-                    .property_signal("disabled", map_ref! {
+                    .prop("slot", "submit")
+                    .prop_signal("disabled", map_ref! {
                         let is_loading = state.loader.is_loading(),
                         let image = state.image.signal_cloned() => move {
                             *is_loading || image.is_none()

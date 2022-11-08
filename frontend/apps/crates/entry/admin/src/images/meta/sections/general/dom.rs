@@ -22,9 +22,9 @@ impl GeneralDom {
             .children(state.metadata.image_styles.iter().map(|style| {
                 let id = style.id;
                 html!("input-checkbox", {
-                    .property("slot", "styles")
-                    .property("label", &style.display_name)
-                    .property_signal("checked", state.style_selected(id))
+                    .prop("slot", "styles")
+                    .prop("label", &style.display_name)
+                    .prop_signal("checked", state.style_selected(id))
                     .event(clone!(state, id => move |evt:events::CustomToggle| {
                         actions::toggle_style(state.clone(), id, evt.value());
                     }))
@@ -33,9 +33,9 @@ impl GeneralDom {
             .children(state.metadata.age_ranges.iter().map(|age_range| {
                 let id = age_range.id;
                 html!("input-checkbox", {
-                    .property("slot", "age_ranges")
-                    .property("label", &age_range.display_name)
-                    .property_signal("checked", state.age_range_selected(id))
+                    .prop("slot", "age_ranges")
+                    .prop("label", &age_range.display_name)
+                    .prop_signal("checked", state.age_range_selected(id))
                     .event(clone!(state, id => move |evt:events::CustomToggle| {
                         actions::toggle_age_range(state.clone(), id, evt.value());
                     }))
@@ -44,9 +44,9 @@ impl GeneralDom {
             .children(state.metadata.affiliations.iter().map(|affiliation| {
                 let id = affiliation.id;
                 html!("input-checkbox", {
-                    .property("slot", "affiliations")
-                    .property("label", &affiliation.display_name)
-                    .property_signal("checked", state.affiliation_selected(id))
+                    .prop("slot", "affiliations")
+                    .prop("label", &affiliation.display_name)
+                    .prop_signal("checked", state.affiliation_selected(id))
                     .event(clone!(state, id => move |evt:events::CustomToggle| {
                         actions::toggle_affiliation(state.clone(), id, evt.value());
                     }))
@@ -54,9 +54,9 @@ impl GeneralDom {
             }))
             .children(ImageTag::iter().map(|tag| {
                 html!("input-checkbox", {
-                    .property("slot", "tags")
-                    .property("label", tag.display_name())
-                    .property_signal("checked", state.tag_selected(tag.as_index()))
+                    .prop("slot", "tags")
+                    .prop("label", tag.display_name())
+                    .prop_signal("checked", state.tag_selected(tag.as_index()))
                     .event(clone!(state, tag => move |evt:events::CustomToggle| {
                         actions::toggle_tag(state.clone(), tag.as_index(), evt.value());
                     }))

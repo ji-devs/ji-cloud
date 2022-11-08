@@ -19,19 +19,19 @@ impl PostPreview {
         html!("post-preview-container", {
             .child(html!("post-preview", {
                 .child(html!("window-loader-block", {
-                    .property("slot", "loader")
-                    .property_signal("visible", state.loader.is_loading())
+                    .prop("slot", "loader")
+                    .prop_signal("visible", state.loader.is_loading())
                 }))
-                .property("module", state.module_kind.as_str())
-                .property("hasConvertable", !RawData::convertable_list().is_empty())
+                .prop("module", state.module_kind.as_str())
+                .prop("hasConvertable", !RawData::convertable_list().is_empty())
                 .children(
                     RawData::convertable_list()
                         .iter()
                         .enumerate()
                         .map(|(index, kind)| {
                             html!("post-preview-action", {
-                                .property("slot", format!("module-{}", index+1))
-                                .property("kind", kind.as_str())
+                                .prop("slot", format!("module-{}", index+1))
+                                .prop("kind", kind.as_str())
                                 .event(clone!(state, kind, raw_data => move |_evt:events::Click| {
                                     state.duplicate_module(kind, raw_data.clone());
                                 }))
@@ -42,8 +42,8 @@ impl PostPreview {
                 /* Leaving off fo now...
                 .child(
                     html!("post-preview-action", {
-                        .property("slot", "action-print")
-                        .property("kind", "print")
+                        .prop("slot", "action-print")
+                        .prop("kind", "print")
                         .event(clone!(state => move |evt:events::Click| {
                             log::info!("TODO - print!")
                         }))
@@ -55,8 +55,8 @@ impl PostPreview {
                     match RawData::kind() {
                         ModuleKind::Memory | ModuleKind::Flashcards | ModuleKind::Matching | ModuleKind::CardQuiz => {
                             dom.child(html!("post-preview-action", {
-                                .property("slot", "action-print")
-                                .property("kind", "print-cards")
+                                .prop("slot", "action-print")
+                                .prop("kind", "print-cards")
                                 .event(clone!(state => move |_evt:events::Click| {
                                     analytics::event("Jig Edit Print Cards", None);
 
@@ -70,8 +70,8 @@ impl PostPreview {
                         }
                         ModuleKind::Poster | ModuleKind::Cover | ModuleKind::ResourceCover => {
                             dom.child(html!("post-preview-action", {
-                                .property("slot", "action-print")
-                                .property("kind", "print")
+                                .prop("slot", "action-print")
+                                .prop("kind", "print")
                                 .event(clone!(state => move |_evt:events::Click| {
                                     analytics::event("Jig Edit Print Design", None);
                                     state.print_design();
@@ -83,8 +83,8 @@ impl PostPreview {
                 })
                 .child(
                     html!("post-preview-action", {
-                        .property("slot", "action-publish")
-                        .property("kind", "publish")
+                        .prop("slot", "action-publish")
+                        .prop("kind", "publish")
                         .event(clone!(state => move |_evt:events::Click| {
                             state.publish();
                         }))
@@ -92,8 +92,8 @@ impl PostPreview {
                 )
                 .child(
                     html!("post-preview-action", {
-                        .property("slot", "action-continue")
-                        .property("kind", "continue")
+                        .prop("slot", "action-continue")
+                        .prop("kind", "continue")
                         .event(clone!(state => move |_evt:events::Click| {
                             state.next();
                         }))

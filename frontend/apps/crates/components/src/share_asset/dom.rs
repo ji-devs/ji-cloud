@@ -36,7 +36,7 @@ impl ShareAsset {
         html!("empty-fragment" => HtmlElement, {
             .with_node!(elem => {
                 .apply_if(slot.is_some(), |dom| {
-                    dom.property("slot", slot.unwrap_ji())
+                    dom.prop("slot", slot.unwrap_ji())
                 })
                 .event(clone!(state => move |_: events::Close| {
                     state.active_popup.set(None);
@@ -55,9 +55,9 @@ impl ShareAsset {
                 .apply(OverlayHandle::lifecycle(
                     move || {
                         html!("overlay-content", {
-                            .property("target", &elem)
-                            .property("contentAnchor", "oppositeH")
-                            .property("targetAnchor", "tr")
+                            .prop("target", &elem)
+                            .prop("contentAnchor", "oppositeH")
+                            .prop("targetAnchor", "tr")
                             .event(clone!(state => move |_:events::Close| {
                                 state.active_popup.set(None);
                             }))
@@ -87,10 +87,10 @@ impl ShareAsset {
     fn render_share_main(self: &Rc<Self>) -> Dom {
         let state = self;
         html!("share-jig-main", {
-            .property("slot", "overlay")
+            .prop("slot", "overlay")
             .apply_if(state.asset.is_jig(), |dom| {
                 dom.child(html!("share-jig-option", {
-                    .property("kind", "students")
+                    .prop("kind", "students")
                     .text(STR_STUDENTS_LABEL)
                     .event(clone!(state => move |_: events::Click| {
                         state.active_popup.set(Some(ActivePopup::ShareStudents));
@@ -98,7 +98,7 @@ impl ShareAsset {
                 }))
             })
             .child(html!("share-jig-option", {
-                .property("kind", "google-classroom")
+                .prop("kind", "google-classroom")
                 .text(STR_CLASSROOM)
                 .event(clone!(state => move |_: events::Click| {
                     if let Some(window) = window() {
@@ -109,7 +109,7 @@ impl ShareAsset {
             }))
             .apply_if(!state.asset.is_resource(), |dom| {
                 dom.child(html!("share-jig-option", {
-                    .property("kind", "embed")
+                    .prop("kind", "embed")
                     .text(&format!("{STR_EMBED_LABEL}{}", state.asset_type_name()))
                     .event(clone!(state => move |_: events::Click| {
                         state.active_popup.set(Some(ActivePopup::ShareEmbed));
@@ -117,7 +117,7 @@ impl ShareAsset {
                 }))
             })
             .child(html!("share-jig-option", {
-                .property("kind", "copy")
+                .prop("kind", "copy")
                 .text_signal(state.link_copied.signal().map(clone!(state => move |copied| {
                     match copied {
                         false => format!("{}{}{}", STR_COPY_LABEL_1, state.asset_type_name(), STR_COPY_LABEL_2),
@@ -130,8 +130,8 @@ impl ShareAsset {
                 }))
             }))
             .child(html!("fa-button", {
-                .property("slot", "close")
-                .property("icon", "fa-light fa-xmark")
+                .prop("slot", "close")
+                .prop("icon", "fa-light fa-xmark")
                 .event(clone!(state => move |_: events::Click| {
                     state.active_popup.set(None);
                 }))
@@ -142,8 +142,8 @@ impl ShareAsset {
     fn render_share_students(self: &Rc<Self>) -> Dom {
         let state = self;
         html!("share-jig-students", {
-            .property("slot", "overlay")
-            .property_signal("url", state.student_code.signal_cloned().map(|student_code| {
+            .prop("slot", "overlay")
+            .prop_signal("url", state.student_code.signal_cloned().map(|student_code| {
                 match student_code {
                     None => String::new(),
                     Some(student_code) => {
@@ -152,34 +152,34 @@ impl ShareAsset {
                     },
                 }
             }))
-            .property_signal("code", state.student_code.signal_cloned().map(|student_code| {
+            .prop_signal("code", state.student_code.signal_cloned().map(|student_code| {
                 match student_code {
                     None => String::new(),
                     Some(student_code) => student_code,
                 }
             }))
-            .property_signal("secondsToExpire", state.student_code.signal_cloned().map(|student_code| {
+            .prop_signal("secondsToExpire", state.student_code.signal_cloned().map(|student_code| {
                 student_code.map(|_| JIG_PLAYER_SESSION_VALID_DURATION_SECS)
             }))
             .children(&mut [
                 html!("share-jig-gen-code-button", {
-                    .property("slot", "gen-code-button")
-                    .property_signal("disabled", state.student_code.signal_ref(|x| x.is_some()))
+                    .prop("slot", "gen-code-button")
+                    .prop_signal("disabled", state.student_code.signal_ref(|x| x.is_some()))
                     .event(clone!(state => move |_: events::Click| {
                         state.generate_student_code();
                     }))
                 }),
                 html!("button-empty", {
-                    .property("slot", "close")
+                    .prop("slot", "close")
                     .text("×")
                     .event(clone!(state => move |_: events::Click| {
                         state.active_popup.set(None);
                     }))
                 }),
                 html!("button-rect", {
-                    .property("slot", "back")
-                    .property("color", "blue")
-                    .property("kind", "text")
+                    .prop("slot", "back")
+                    .prop("color", "blue")
+                    .prop("kind", "text")
                     .text("< ")
                     .text(STR_BACK)
                     .event(clone!(state => move |_: events::Click| {
@@ -187,13 +187,13 @@ impl ShareAsset {
                     }))
                 }),
                 html!("button-rect", {
-                    .property("slot", "copy-url")
-                    .property("color", "blue")
-                    .property("kind", "text")
+                    .prop("slot", "copy-url")
+                    .prop("color", "blue")
+                    .prop("kind", "text")
                     .text_signal(state.copied_student_url.signal().map(|copied| {
                         if copied { STR_STUDENTS_COPIED_URL_LABEL } else { STR_STUDENTS_COPY_URL_LABEL }
                     }))
-                    .property_signal("disabled", state.student_code.signal_ref(|x| x.is_none()))
+                    .prop_signal("disabled", state.student_code.signal_ref(|x| x.is_none()))
                     .event(clone!(state => move |_: events::Click| {
                         if let Some(student_code) = &*state.student_code.lock_ref() {
                             let url = unsafe { SETTINGS.get_unchecked().remote_target.pages_url_iframe() };
@@ -204,10 +204,10 @@ impl ShareAsset {
                     }))
                 }),
                 html!("button-rect", {
-                    .property("slot", "copy-code")
-                    .property("kind", "text")
-                    .property("color", "blue")
-                    .property_signal("disabled", state.student_code.signal_ref(|x| x.is_none()))
+                    .prop("slot", "copy-code")
+                    .prop("kind", "text")
+                    .prop("color", "blue")
+                    .prop_signal("disabled", state.student_code.signal_ref(|x| x.is_none()))
                     .text_signal(state.copied_student_code.signal().map(|copied| {
                         if copied { STR_STUDENTS_COPIED_CODE_LABEL } else { STR_STUDENTS_COPY_CODE_LABEL }
                     }))
@@ -224,20 +224,20 @@ impl ShareAsset {
     fn render_share_embed(self: &Rc<Self>) -> Dom {
         let state = Rc::clone(self);
         html!("share-jig-embed", {
-            .property("slot", "overlay")
-            .property("assetTypeName", state.asset_type_name())
-            .property("value", state.embed_code())
+            .prop("slot", "overlay")
+            .prop("assetTypeName", state.asset_type_name())
+            .prop("value", state.embed_code())
             .children(&mut [
                 html!("button-empty", {
-                    .property("slot", "close")
+                    .prop("slot", "close")
                     .text("×")
                     .event(clone!(state => move |_: events::Click| {
                         state.active_popup.set(None);
                     }))
                 }),
                 html!("button-rect", {
-                    .property("slot", "back")
-                    .property("kind", "text")
+                    .prop("slot", "back")
+                    .prop("kind", "text")
                     .text("< ")
                     .text(STR_BACK)
                     .event(clone!(state => move |_: events::Click| {
@@ -245,9 +245,9 @@ impl ShareAsset {
                     }))
                 }),
                 html!("div", {
-                    .property("slot", "copy")
+                    .prop("slot", "copy")
                     .child(html!("button-rect", {
-                        .property("kind", "text")
+                        .prop("kind", "text")
                         .text_signal(state.copied_embed.signal().map(|copied| {
                             if copied { STR_EMBED_COPIED_CODE_LABEL } else { STR_EMBED_COPY_CODE_LABEL }
                         }))

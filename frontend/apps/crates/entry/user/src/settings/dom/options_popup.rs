@@ -33,20 +33,20 @@ where
 {
     let callbacks = Rc::new(callbacks);
     html!("user-profile-options-popup", {
-        .property("header", header)
-        .property("subheader", subheader)
+        .prop("header", header)
+        .prop("subheader", subheader)
         .children(&mut [
             html!("fa-button", {
-                .property("slot", "close")
-                .property("icon", "fa-light fa-xmark")
+                .prop("slot", "close")
+                .prop("icon", "fa-light fa-xmark")
                 .event(clone!(state => move |_: events::Click| {
                     state.active_popup.set(ActivePopup::None);
                     state.save_profile();
                 }))
             }),
             html!("button-rect", {
-                .property("slot", "done")
-                .property("color", "blue")
+                .prop("slot", "done")
+                .prop("color", "blue")
                 .text(STR_DONE)
                 .event(clone!(state => move |_: events::Click| {
                     state.active_popup.set(ActivePopup::None);
@@ -62,9 +62,9 @@ where
                     options.iter().map(clone!(state, callbacks => move |age| {
                         let age_id = (callbacks.get_id_from_struct)(age).clone();
                         html!("input-checkbox", {
-                            .property("slot", "options")
-                            .property("label", &*(callbacks.get_display_name)(age))
-                            .property_signal("checked", (callbacks.get_selected_list)(&state.user).signal_vec_cloned().to_signal_cloned().map(clone!(age_id => move |ages| {
+                            .prop("slot", "options")
+                            .prop("label", &*(callbacks.get_display_name)(age))
+                            .prop_signal("checked", (callbacks.get_selected_list)(&state.user).signal_vec_cloned().to_signal_cloned().map(clone!(age_id => move |ages| {
                                 ages.contains(&age_id)
                             })))
                             .event(clone!(state, callbacks => move |_: events::CustomToggle| {

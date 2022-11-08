@@ -32,11 +32,11 @@ where
     pub fn render(self: &Rc<Self>) -> Dom {
         let state = self;
         html!("theme-custom-background", {
-            .property("header", STR_DESIGN_FROM_SCRATCH)
-            .property("tabbed", true)
+            .prop("header", STR_DESIGN_FROM_SCRATCH)
+            .prop("tabbed", true)
             .child(html!("fa-button", {
-                .property("slot", "close")
-                .property("icon", "fa-light fa-xmark")
+                .prop("slot", "close")
+                .prop("icon", "fa-light fa-xmark")
                 .event(clone!(state => move |_: events::Click| {
                     (state.on_close)();
                 }))
@@ -50,7 +50,7 @@ where
                     state.render_tab(MenuTabKind::BackgroundImage),
                     state.render_tab(MenuTabKind::Overlay),
                     html!("module-sidebar-body", {
-                        .property("slot", "body")
+                        .prop("slot", "body")
                         .child_signal(state.tab.signal_cloned().map(clone!(state => move |tab| {
                             let state = Rc::clone(&state);
                             match tab {
@@ -92,10 +92,10 @@ where
             html!("empty-fragment" => HtmlElement, {
                 .with_node!(elem => {
                     .child(html!("button-rect", {
-                        .property("kind", "text")
-                        .property("color", "blue")
+                        .prop("kind", "text")
+                        .prop("color", "blue")
                         .child(html!("fa-icon", {
-                            .property("icon", "fa-light fa-fill-drip")
+                            .prop("icon", "fa-light fa-fill-drip")
                         }))
                         .text(STR_FILL_COLOR)
                         .event(clone!(state => move |_: events::Click|{
@@ -106,9 +106,9 @@ where
                     .apply(OverlayHandle::lifecycle(
                         clone!(state, elem => move || {
                             html!("overlay-content", {
-                                .property("target", &elem)
-                                .property("contentAnchor", "rt")
-                                .property("marginX", 10)
+                                .prop("target", &elem)
+                                .prop("contentAnchor", "rt")
+                                .prop("marginX", 10)
                                 .child_signal(state.colors_open.signal_ref(clone!(state => move |colors_open| {
                                     match colors_open {
                                         false => None,
@@ -119,8 +119,8 @@ where
                                                 }))
                                                 .children(&mut [
                                                     html!("fa-button", {
-                                                        .property("slot", "close")
-                                                        .property("icon", "fa-light fa-xmark")
+                                                        .prop("slot", "close")
+                                                        .prop("icon", "fa-light fa-xmark")
                                                         .event(clone!(state => move |_: events::Click| {
                                                             state.colors_open.set(false)
                                                         }))
@@ -147,10 +147,10 @@ where
         let state = self;
         let delete = clone!(state => move|| {
             html!("button-rect", {
-                .property("kind", "text")
-                .property("color", "blue")
+                .prop("kind", "text")
+                .prop("color", "blue")
                 .child(html!("fa-icon", {
-                    .property("icon", "fa-light fa-trash-can")
+                    .prop("icon", "fa-light fa-trash-can")
                     .event(clone!(state => move |_: events::Click| {
                         state.remove_overlay();
                     }))

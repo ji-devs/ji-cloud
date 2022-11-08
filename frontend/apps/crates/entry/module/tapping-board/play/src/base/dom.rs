@@ -11,7 +11,7 @@ use super::game::{dom::render as render_game, state::Game};
 impl DomRenderable for Base {
     fn render(state: Rc<Base>) -> Dom {
         html!("empty-fragment", {
-            .property("slot", "main")
+            .prop("slot", "main")
             .children(&mut [
                 render_backgrounds_raw(&state.backgrounds, state.theme_id, None),
                 render_stickers_raw(&state.stickers, state.theme_id),

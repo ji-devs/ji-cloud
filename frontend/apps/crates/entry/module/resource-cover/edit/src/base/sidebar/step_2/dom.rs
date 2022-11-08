@@ -17,7 +17,7 @@ pub fn render(state: Rc<Step2>) -> Dom {
             render_tab(state.clone(), MenuTabKind::Text),
             render_tab(state.clone(), MenuTabKind::Image),
             html!("module-sidebar-body", {
-                .property("slot", "body")
+                .prop("slot", "body")
                 .child_signal(state.tab.signal_cloned().map(clone!(state => move|tab| {
                     match tab {
                         Tab::Text => {

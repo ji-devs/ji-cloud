@@ -13,25 +13,25 @@ impl ModuleThumbnail {
         let state = self;
         html!("img-module-screenshot", {
             .apply_if(slot.is_some(), |dom| {
-                dom.property("slot", slot.unwrap_ji())
+                dom.prop("slot", slot.unwrap_ji())
             })
             .event(clone!(state => move |_evt:events::ImageError| {
                 state.on_image_load_error();
             }))
-            .property("jigId", state.asset_id.uuid().to_string())
+            .prop("jigId", state.asset_id.uuid().to_string())
             .apply_if(state.hight_res, |dom| {
-                dom.property("size", "full")
+                dom.prop("size", "full")
             })
             .apply(clone!(state => move |dom| {
                 match &state.module {
-                    Some(module) => dom.property("moduleId", module.id.0.to_string()),
+                    Some(module) => dom.prop("moduleId", module.id.0.to_string()),
                     None => dom,
                 }
             }))
             .apply(clone!(state => move |dom| {
                 match &state.module {
                     Some(module) if state.fallback == ThumbnailFallback::Module => {
-                        dom.property("moduleKind", module.kind.as_str())
+                        dom.prop("moduleKind", module.kind.as_str())
                     },
                     _ => dom
                 }
@@ -55,30 +55,30 @@ impl ModuleThumbnail {
 
         html!("img-module-screenshot", {
             .apply_if(slot.is_some(), |dom| {
-                dom.property("slot", slot.unwrap_ji())
+                dom.prop("slot", slot.unwrap_ji())
             })
             .event(clone!(state => move |_evt: events::ImageError| {
                 state.on_image_load_error();
             }))
-            .property("jigId", state.asset_id.uuid().to_string())
+            .prop("jigId", state.asset_id.uuid().to_string())
             .apply_if(state.hight_res, |dom| {
-                dom.property("size", "full")
+                dom.prop("size", "full")
             })
             .apply(clone!(state => move |dom| {
                 match &state.module {
                     None => dom,
                     Some(module) => {
-                        dom.property_signal("moduleId", mutable.signal_ref(clone!(module => move |_| {
+                        dom.prop_signal("moduleId", mutable.signal_ref(clone!(module => move |_| {
                             module.id.0.to_string()
                         })))
                     },
                 }
             }))
-            .property("cacheBust", true)
+            .prop("cacheBust", true)
             .apply(clone!(state => move |dom| {
                 match &state.module {
                     Some(module) if state.fallback == ThumbnailFallback::Module => {
-                        dom.property("moduleKind", module.kind.as_str())
+                        dom.prop("moduleKind", module.kind.as_str())
                     },
                     _ => dom
                 }

@@ -106,14 +106,14 @@ pub fn render(state: Rc<State>) -> Dom {
 fn render_hint_choice(state: Rc<State>, hint:Hint) -> Dom {
     html!("label", {
         .child(html!("input", {
-            .attribute("type", "radio")
-            .attribute("name", "hint")
+            .attr("type", "radio")
+            .attr("name", "hint")
             .event(clone!(state, hint => move |evt:events::Change| {
                 if evt.checked().unwrap_or_default() {
                     state.set_hint(hint.clone());
                 }
             }))
-            .property_signal("checked", state.base.play_settings.hint.signal_ref(clone!(hint => move |curr| *curr == hint)))
+            .prop_signal("checked", state.base.play_settings.hint.signal_ref(clone!(hint => move |curr| *curr == hint)))
         }))
         .text(match hint {
             Hint::None => crate::strings::step_4::STR_HINT_NONE,
@@ -126,14 +126,14 @@ fn render_hint_choice(state: Rc<State>, hint:Hint) -> Dom {
 fn render_next_choice_simple(state: Rc<State>, next:Next) -> Dom {
     html!("label", {
         .child(html!("input", {
-            .attribute("type", "radio")
-            .attribute("name", "next")
+            .attr("type", "radio")
+            .attr("name", "next")
             .event(clone!(state, next => move |evt:events::Change| {
                 if evt.checked().unwrap_or_default() {
                     state.set_next(next.clone());
                 }
             }))
-            .property_signal("checked", state.base.play_settings.next.signal_ref(clone!(next => move |curr| {
+            .prop_signal("checked", state.base.play_settings.next.signal_ref(clone!(next => move |curr| {
                 std::mem::discriminant(curr) == std::mem::discriminant(&next)
             })))
         }))
@@ -147,14 +147,14 @@ fn render_next_choice_simple(state: Rc<State>, next:Next) -> Dom {
 fn render_next_select_some(state: Rc<State>) -> Dom {
     html!("label", {
         .child(html!("input", {
-            .attribute("type", "radio")
-            .attribute("name", "next")
+            .attr("type", "radio")
+            .attr("name", "next")
             .event(clone!(state => move |evt:events::Change| {
                 if evt.checked().unwrap_or_default() {
                     state.set_next_amount();
                 }
             }))
-            .property_signal("checked", state.base.play_settings.next.signal_ref(|curr| {
+            .prop_signal("checked", state.base.play_settings.next.signal_ref(|curr| {
                 std::mem::discriminant(curr) == std::mem::discriminant(&Next::SelectSome(0))
             }))
         }))
@@ -163,9 +163,9 @@ fn render_next_select_some(state: Rc<State>) -> Dom {
                 .text(crate::strings::step_4::STR_NEXT_SELECT_SOME_PREFIX)
             }),
             html!("input" => web_sys::HtmlInputElement, {
-                .property("type", "text")
-                .property("size", "3")
-                .property("value", state.some_amount.borrow().to_string())
+                .prop("type", "text")
+                .prop("size", "3")
+                .prop("value", state.some_amount.borrow().to_string())
                 .with_node!(elem => {
                     .event(clone!(state => move |evt:events::Input| {
                         let value = evt.value().and_then(|value| value.parse::<usize>().ok());

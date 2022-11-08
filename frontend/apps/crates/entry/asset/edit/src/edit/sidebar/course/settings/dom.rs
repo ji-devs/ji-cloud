@@ -13,17 +13,17 @@ pub fn render(state: Rc<State>) -> Dom {
                 .style("z-index", "2")
             })
         })
-        .property("slot", "settings")
-        .property("positionX", "right-out")
-        .property("positionY", "top-in")
-        .property("styled", true)
-        .property_signal("open", state.popup_open.signal())
+        .prop("slot", "settings")
+        .prop("positionX", "right-out")
+        .prop("positionY", "top-in")
+        .prop("styled", true)
+        .prop_signal("open", state.popup_open.signal())
         .event(clone!(state => move |_: events::Close| {
             state.popup_open.set(false);
         }))
         .child(html!("fa-button", {
-            .property("slot", "anchor")
-            .property("icon", "fa-solid fa-gear")
+            .prop("slot", "anchor")
+            .prop("icon", "fa-solid fa-gear")
             .style("color", "#ffffff")
             .event(clone!(state => move |_: events::Click| {
                 // let popup_open = state.popup_open.get();
@@ -44,18 +44,18 @@ pub fn render(state: Rc<State>) -> Dom {
 
 pub fn render_settings(state: Rc<State>) -> Dom {
     html!("course-settings", {
-        .property("slot", "overlay")
+        .prop("slot", "overlay")
         .children(&mut [
             html!("button-icon", {
-                .property("icon", "x")
-                .property("slot", "close")
+                .prop("icon", "x")
+                .prop("slot", "close")
                 .event(clone!(state => move |_:events::Click| {
                     state.popup_open.set(false);
                 }))
             }),
             html!("label", {
                 .child(html!("input-switch", {
-                    .property_signal("enabled", state.play_in_order.signal())
+                    .prop_signal("enabled", state.play_in_order.signal())
                     .event(clone!(state => move|evt :events::CustomToggle| {
                         state.play_in_order.set(evt.value());
                         update_course_settings(Rc::clone(&state));

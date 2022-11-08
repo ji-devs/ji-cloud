@@ -18,9 +18,9 @@ impl Sidebar {
 impl SidebarItem {
     pub fn render(state: Rc<Self>) -> Dom {
         html!("admin-sidebar-item", {
-            .property("id", state.id)
-            .property("locked", state.locked)
-            .property("selected", state.selected)
+            .prop("id", state.id)
+            .prop("locked", state.locked)
+            .prop("selected", state.selected)
             .event(clone!(state => move |_evt:events::Click| {
                 state.on_click();
             }))

@@ -69,10 +69,10 @@ pub(super) fn render_media(card: &Card, size: &Size, slot: Option<&str>) -> Dom 
         CardContent::Text(s) => {
             html!("card-text", {
                 .apply_if(slot.is_some(), |dom| {
-                    dom.property("slot", slot.unwrap_ji())
+                    dom.prop("slot", slot.unwrap_ji())
                 })
-                .property("value", s)
-                .property("fontSize", {
+                .prop("value", s)
+                .prop("fontSize", {
                     lookup::get_card_font_size(s, Some(size))
                 })
             })
@@ -82,9 +82,9 @@ pub(super) fn render_media(card: &Card, size: &Size, slot: Option<&str>) -> Dom 
             None => {
                 html!("img-ui", {
                     .apply_if(slot.is_some(), |dom| {
-                        dom.property("slot", slot.unwrap_ji())
+                        dom.prop("slot", slot.unwrap_ji())
                     })
-                    .property("path", "core/_common/image-empty.svg")
+                    .prop("path", "core/_common/image-empty.svg")
                 })
             }
         },

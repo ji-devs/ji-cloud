@@ -23,9 +23,9 @@ pub struct HeaderDom {}
 impl HeaderDom {
     pub fn render(sidebar_state: Rc<SidebarState>) -> Dom {
         html!("jig-edit-sidebar-header", {
-            .property("slot", "header")
-            .property_signal("collapsed", sidebar_state.collapsed.signal())
-            .property_signal("isModulePage", sidebar_state.asset_edit_state.route.signal_cloned().map(|route| {
+            .prop("slot", "header")
+            .prop_signal("collapsed", sidebar_state.collapsed.signal())
+            .prop_signal("isModulePage", sidebar_state.asset_edit_state.route.signal_cloned().map(|route| {
                 // TODO: change?
                 matches!(route, AssetEditRoute::Jig(_, JigEditRoute::Landing))
             }))
@@ -41,17 +41,17 @@ impl HeaderDom {
             })
             .children(&mut [
                 html!("jig-edit-sidebar-close-button", {
-                    .property("slot", "close")
+                    .prop("slot", "close")
                     .event(clone!(sidebar_state => move |_: events::Click| {
                         let mut collapsed = sidebar_state.collapsed.lock_mut();
                         *collapsed = !*collapsed;
                     }))
                 }),
                 html!("button-rect", {
-                    .property("slot", "gallery")
-                    .property("kind", "text")
-                    .property("color", "blue")
-                    .property("weight", "medium")
+                    .prop("slot", "gallery")
+                    .prop("kind", "text")
+                    .prop("color", "blue")
+                    .prop("weight", "medium")
                     .text(STR_MY_JIGS)
                     .event(|_:events::Click| {
                         let url:String = Route::Asset(AssetRoute::JigGallery).into();
@@ -59,11 +59,11 @@ impl HeaderDom {
                     })
                 }),
                 html!("input-wrapper", {
-                    .property("slot", "input")
+                    .prop("slot", "input")
                     .child(html!("input" => HtmlInputElement, {
                         .with_node!(input => {
-                            .property("placeholder", STR_SEARCH_PLACEHOLDER)
-                            .property_signal("value", sidebar_state.name.signal_cloned())
+                            .prop("placeholder", STR_SEARCH_PLACEHOLDER)
+                            .prop_signal("value", sidebar_state.name.signal_cloned())
                             .event(clone!(sidebar_state => move |_: events::Input| {
                                 let value = input.value();
                                 sidebar_actions::update_display_name(sidebar_state.clone(), value);
@@ -71,12 +71,12 @@ impl HeaderDom {
                         })
                     }))
                     .child(html!("img-ui", {
-                        .property("slot", "icon")
-                        .property("path", "core/inputs/pencil-blue-darker.svg")
+                        .prop("slot", "icon")
+                        .prop("path", "core/inputs/pencil-blue-darker.svg")
                     }))
                 }),
                 html!("jig-edit-sidebar-preview-button", {
-                    .property("slot", "preview")
+                    .prop("slot", "preview")
                     .event(clone!(sidebar_state => move |_: events::Click| {
                         match &sidebar_state.settings {
                             SidebarSetting::Jig(jig) => {
@@ -99,8 +99,8 @@ impl HeaderDom {
             .apply(clone!(sidebar_state => move|dom| {
                 if let Asset::Jig(_) = &sidebar_state.asset {
                     dom.child(html!("fa-button", {
-                        .property("slot", "modules")
-                        .property("icon", "fa-light fa-grid")
+                        .prop("slot", "modules")
+                        .prop("icon", "fa-light fa-grid")
                         .event(clone!(sidebar_state => move |_:events::Click| {
                             sidebar_state.asset_edit_state.set_route_jig(JigEditRoute::Landing);
                             let jig = sidebar_state.asset.unwrap_jig();

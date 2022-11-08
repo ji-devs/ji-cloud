@@ -14,7 +14,7 @@ use utils::prelude::*;
 
 pub fn render(state: Rc<Game>) -> Dom {
     html!("flashcards-main", {
-        .property("slot", "main")
+        .prop("slot", "main")
         .children_signal_vec(
             state.current.signal_cloned()
                 .map(clone!(state => move |current| {
@@ -49,8 +49,8 @@ pub fn render(state: Rc<Game>) -> Dom {
                 .to_signal_vec()
         )
         .child(html!("button-icon", {
-            .property("icon", "white-circle-blue-arrow")
-            .property("slot", "next")
+            .prop("icon", "white-circle-blue-arrow")
+            .prop("slot", "next")
             .event(clone!(state => move |_evt:events::Click| {
                 state.next();
             }))
@@ -63,7 +63,7 @@ fn flip_controller(
     initial: bool,
 ) -> impl FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
     move |dom| {
-        dom.property_signal(
+        dom.prop_signal(
             "flipped",
             state.gate.signal().map(move |gate| {
                 if gate == Gate::Waiting || gate == Gate::FinishingFlip {

@@ -30,9 +30,9 @@ impl<T: SimpleSelectItem + 'static, P: ToString + 'static, L: ToString + 'static
     {
         html!("input-select", {
             .apply_if(slot.is_some(), |dom| {
-                dom.property("slot", slot.unwrap_ji())
+                dom.prop("slot", slot.unwrap_ji())
             })
-            .property_signal("value", state.value.signal_cloned().map(|value| {
+            .prop_signal("value", state.value.signal_cloned().map(|value| {
                 match value {
                     None => JsValue::NULL,
                     // Use the label here because the input-select element uses the value as the
@@ -41,10 +41,10 @@ impl<T: SimpleSelectItem + 'static, P: ToString + 'static, L: ToString + 'static
                 }
             }))
             .apply_if(state.label.is_some(), |dom| {
-                dom.property("label", state.label.as_ref().unwrap_ji().to_string())
+                dom.prop("label", state.label.as_ref().unwrap_ji().to_string())
             })
             .apply_if(state.placeholder.is_some(), |dom| {
-                dom.property("placeholder", state.placeholder.as_ref().unwrap_ji().to_string())
+                dom.prop("placeholder", state.placeholder.as_ref().unwrap_ji().to_string())
             })
             .children(state.values.iter().map(clone!(state => move |value| {
                 html!("input-select-option", {

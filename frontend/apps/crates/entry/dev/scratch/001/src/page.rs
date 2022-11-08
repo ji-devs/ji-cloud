@@ -45,7 +45,7 @@ pub fn render_steps() -> Dom {
     let state = State::new(1);
 
     html!("steps-nav", {
-        .property("steps", 4)
+        .prop("steps", 4)
         .children(vec![
             render_button(1, "This", state.clone()),
             render_button(2, "Is", state.clone()),
@@ -57,10 +57,10 @@ pub fn render_steps() -> Dom {
 
 fn render_button(step: u32, label: &str, state: Rc<State>) -> Dom {
     html!("circle-button", {
-        .property("text", format!("{}", step))
-        .property("label", label)
-        .property("slot", format!("btn-{}", step))
-        .property_signal("active", state.current_step.signal().map(move |current_step| {
+        .prop("text", format!("{}", step))
+        .prop("label", label)
+        .prop("slot", format!("btn-{}", step))
+        .prop_signal("active", state.current_step.signal().map(move |current_step| {
             current_step == step
         }))
         .event(clone!(step, state => move |_evt: events::Click| {
@@ -192,8 +192,8 @@ pub fn render_wysiwyg_output(value: Rc<Mutable<Option<String>>>, theme: Mutable<
         .style("align-self", "baseline")
         .style("justify-self", "start")
         .child(html!("wysiwyg-output-renderer", {
-            .property_signal("valueAsString", value.signal_cloned())
-            .property_signal("theme", theme.signal_cloned().map(|theme| theme.as_str_id()))
+            .prop_signal("valueAsString", value.signal_cloned())
+            .prop_signal("theme", theme.signal_cloned().map(|theme| theme.as_str_id()))
         }))
     })
 }
@@ -250,9 +250,9 @@ fn render_text() -> Dom {
                                 .text("Happy brush")
                                 .child(
                                     html!("input", {
-                                        .property("type", "radio")
-                                        .property("name", "them")
-                                        .property("checked", true)
+                                        .prop("type", "radio")
+                                        .prop("name", "them")
+                                        .prop("checked", true)
                                         .event(clone!(theme => move |_: events::Change| {
                                             theme.set(ThemeId::HappyBrush);
                                         }))
@@ -263,8 +263,8 @@ fn render_text() -> Dom {
                                 .text("Chalkboard")
                                 .child(
                                     html!("input", {
-                                        .property("type", "radio")
-                                        .property("name", "them")
+                                        .prop("type", "radio")
+                                        .prop("name", "them")
                                         .event(clone!(theme => move |_: events::Change| {
                                             theme.set(ThemeId::Chalkboard)
                                         }))

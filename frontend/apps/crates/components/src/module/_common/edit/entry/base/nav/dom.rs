@@ -21,18 +21,18 @@ where
     Overlay: OverlayExt + 'static,
 {
     html!("steps-nav", {
-        .property("slot", "nav")
+        .prop("slot", "nav")
         .children(
             Step::get_list()
                 .into_iter()
                 .map(clone!(state => move |step| {
                     html!("step-nav", {
-                        .property("number", JsValue::from_f64(step.as_number() as f64))
-                        .property("label", step.label())
-                        .property_signal("active", state.step.signal().map(move |curr| {
+                        .prop("number", JsValue::from_f64(step.as_number() as f64))
+                        .prop("label", step.label())
+                        .prop_signal("active", state.step.signal().map(move |curr| {
                             curr == step
                         }))
-                        .property_signal("completed", state.steps_completed.signal_ref(move |steps_completed| {
+                        .prop_signal("completed", state.steps_completed.signal_ref(move |steps_completed| {
                             steps_completed.contains(&step)
                         }))
                         .event(clone!(state => move |_evt:events::Click| {

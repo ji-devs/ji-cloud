@@ -17,7 +17,7 @@ impl LocalePage {
                     Some(state) => Some(LocaleOuterDom::render(state)),
                     None => {
                         Some(html!("window-loader-block", {
-                            .property("visible", true)
+                            .prop("visible", true)
                         }))
                     }
                 }

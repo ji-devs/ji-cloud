@@ -49,33 +49,33 @@ impl CircleDetails {
             .child_signal(state.circle.signal_ref(clone!(state => move |circle| {
                 circle.as_ref().map(|circle| {
                     html!("community-circle-details", {
-                        .property("name", &circle.display_name)
-                        .property("description", &circle.description)
-                        .property("memberCount", circle.member_count)
+                        .prop("name", &circle.display_name)
+                        .prop("description", &circle.description)
+                        .prop("memberCount", circle.member_count)
                         .children(&mut [
                             html!("img-ji", {
-                                .property("slot", "image")
-                                .property("lib", MediaLibrary::User.to_str())
-                                .property("id", &circle.image.0.to_string())
+                                .prop("slot", "image")
+                                .prop("lib", MediaLibrary::User.to_str())
+                                .prop("id", &circle.image.0.to_string())
                             }),
                             // html!("button-rect", {
-                            //     .property("slot", "actions")
-                            //     .property("kind", "outline")
-                            //     .property("size", "small")
-                            //     .property("color", "blue")
+                            //     .prop("slot", "actions")
+                            //     .prop("kind", "outline")
+                            //     .prop("size", "small")
+                            //     .prop("color", "blue")
                             //     .text(STR_CONTACT_ADMIN)
                             // }),
                             // html!("button-rect", {
-                            //     .property("slot", "actions")
-                            //     .property("kind", "outline")
-                            //     .property("size", "small")
-                            //     .property("color", "blue")
+                            //     .prop("slot", "actions")
+                            //     .prop("kind", "outline")
+                            //     .prop("size", "small")
+                            //     .prop("color", "blue")
                             //     .text(STR_INVITE)
                             // }),
                             // member-images
                             html!("input-search", {
-                                .property("slot", "member-search")
-                                .property("placeholder", STR_SEARCH_MEMBER)
+                                .prop("slot", "member-search")
+                                .prop("placeholder", STR_SEARCH_MEMBER)
                             }),
                         ])
                         .apply_if(
@@ -83,34 +83,34 @@ impl CircleDetails {
                             clone!(state => move |dom| {
                                 dom.children(&mut [
                                     html!("button-rect", {
-                                        .property("slot", "actions")
-                                        .property("kind", "outline")
-                                        .property("size", "small")
-                                        .property("color", "red")
+                                        .prop("slot", "actions")
+                                        .prop("kind", "outline")
+                                        .prop("size", "small")
+                                        .prop("color", "red")
                                         .text(STR_DELETE_CIRCLE)
                                         .event(clone!(state => move |_: events::Click| {
                                             state.delete_circle();
                                         }))
                                     }),
                                     html!("fa-button", {
-                                        .property("slot", "edit-image")
-                                        .property("icon", "fa-light fa-pen")
+                                        .prop("slot", "edit-image")
+                                        .prop("icon", "fa-light fa-pen")
                                         .text("about")
                                         .event(clone!(state => move |_: events::Click| {
                                             state.active_popup.set(Some(ActivePopup::Image))
                                         }))
                                     }),
                                     html!("fa-button", {
-                                        .property("slot", "edit-name")
-                                        .property("icon", "fa-light fa-pen")
+                                        .prop("slot", "edit-name")
+                                        .prop("icon", "fa-light fa-pen")
                                         .text("about")
                                         .event(clone!(state => move |_: events::Click| {
                                             state.active_popup.set(Some(ActivePopup::Name))
                                         }))
                                     }),
                                     html!("fa-button", {
-                                        .property("slot", "edit-about")
-                                        .property("icon", "fa-light fa-pen")
+                                        .prop("slot", "edit-about")
+                                        .prop("icon", "fa-light fa-pen")
                                         .text("about")
                                         .event(clone!(state => move |_: events::Click| {
                                             state.active_popup.set(Some(ActivePopup::About))
@@ -127,12 +127,12 @@ impl CircleDetails {
                             Some(match is_member {
                                 true => {
                                     html!("button-rect", {
-                                        .property("slot", "actions")
-                                        .property("kind", "outline")
-                                        .property("size", "small")
-                                        .property("color", "green")
+                                        .prop("slot", "actions")
+                                        .prop("kind", "outline")
+                                        .prop("size", "small")
+                                        .prop("color", "green")
                                         .child(html!("fa-icon", {
-                                            .property("icon", "fa-solid fa-check")
+                                            .prop("icon", "fa-solid fa-check")
                                         }))
                                         .text(STR_MEMBER)
                                         .event(clone!(state => move |_: events::Click| {
@@ -142,10 +142,10 @@ impl CircleDetails {
                                 },
                                 false => {
                                     html!("button-rect", {
-                                        .property("slot", "actions")
-                                        .property("kind", "outline")
-                                        .property("size", "small")
-                                        .property("color", "blue")
+                                        .prop("slot", "actions")
+                                        .prop("kind", "outline")
+                                        .prop("size", "small")
+                                        .prop("color", "blue")
                                         .text(STR_JOIN)
                                         .event(clone!(state => move |_: events::Click| {
                                             state.join_circle();
@@ -205,16 +205,16 @@ impl CircleDetails {
 
     fn render_member(self: &Rc<Self>, member: &PublicUser) -> Dom {
         html!("community-list-member", {
-            .property("slot", "members")
+            .prop("slot", "members")
             .class(&*MEMBER_LIST_GRID_COLUMNS)
-            .property("name", &format!("{} {}", member.given_name, member.family_name))
-            // .property("city", "New York")
-            // .property("state", "NY")
+            .prop("name", &format!("{} {}", member.given_name, member.family_name))
+            // .prop("city", "New York")
+            // .prop("state", "NY")
             .apply(|mut dom| {
                 if let Some(languages_spoken) = &member.languages_spoken {
                     if languages_spoken.len() > 0 {
                         let languages = languages_spoken.iter().map(|l| Language::code_to_display_name(l)).join(", ");
-                        dom = dom.property("language", languages);
+                        dom = dom.prop("language", languages);
                     };
                 }
                 dom
@@ -223,8 +223,8 @@ impl CircleDetails {
                 Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(member.id))).to_string()
             }))
             .child(html!("profile-image", {
-                .property("slot", "img")
-                .property("imageId", {
+                .prop("slot", "img")
+                .prop("imageId", {
                     match &member.profile_image {
                         Some(image_id) => JsValue::from_str(&image_id.0.to_string()),
                         None => JsValue::UNDEFINED,

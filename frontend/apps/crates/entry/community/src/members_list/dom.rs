@@ -22,19 +22,19 @@ impl MembersList {
         state.load_members();
 
         html!("community-list", {
-            .property("header", "Connect with members")
+            .prop("header", "Connect with members")
             .child(html!("community-list-member-header", {
                 .class(&*MEMBER_LIST_GRID_COLUMNS)
-                .property("slot", "sort-header")
+                .prop("slot", "sort-header")
             }))
             .child(html!("community-pagination", {
-                .property("slot", "sort-header")
-                .property_signal("total", state.total_pages.signal())
+                .prop("slot", "sort-header")
+                .prop_signal("total", state.total_pages.signal())
                 .children(&mut [
                     html!("fa-button", {
-                        .property("slot", "back")
-                        .property("icon", "fa-solid fa-angle-left")
-                        .property_signal("disabled", state.active_page.signal().map(|active_page| {
+                        .prop("slot", "back")
+                        .prop("icon", "fa-solid fa-angle-left")
+                        .prop_signal("disabled", state.active_page.signal().map(|active_page| {
                             active_page <= 1
                         }))
                         .event(clone!(state => move |_: events::Click| {
@@ -57,11 +57,11 @@ impl MembersList {
                                     .style("margin", "0")
                                 })
                             })
-                            .property("slot", "active-page")
-                            .property("type", "number")
-                            .property("min", 1)
-                            .property_signal("max", state.total_pages.signal())
-                            .property_signal("value", state.active_page.signal().map(|active_page| {
+                            .prop("slot", "active-page")
+                            .prop("type", "number")
+                            .prop("min", 1)
+                            .prop_signal("max", state.total_pages.signal())
+                            .prop_signal("value", state.active_page.signal().map(|active_page| {
                                 active_page.to_string()
                             }))
                             .event(clone!(state, elem => move |_: events::Input| {
@@ -76,9 +76,9 @@ impl MembersList {
                         })
                     }),
                     html!("fa-button", {
-                        .property("slot", "forward")
-                        .property("icon", "fa-solid fa-angle-right")
-                        .property_signal("disabled", map_ref! {
+                        .prop("slot", "forward")
+                        .prop("icon", "fa-solid fa-angle-right")
+                        .prop_signal("disabled", map_ref! {
                             let active_page = state.active_page.signal(),
                             let total_pages = state.total_pages.signal() => {
                                 active_page >= total_pages
@@ -97,7 +97,7 @@ impl MembersList {
                 match members {
                     None => {
                         vec![html!("progress", {
-                            .property("slot", "items")
+                            .prop("slot", "items")
                         })]
                     },
                     Some(members) => {
@@ -113,15 +113,15 @@ impl MembersList {
     fn render_member(self: &Rc<Self>, member: &PublicUser) -> Dom {
         html!("community-list-member", {
             .class(&*MEMBER_LIST_GRID_COLUMNS)
-            .property("slot", "items")
-            .property("name", &format!("{} {}", member.given_name, member.family_name))
-            // .property("city", "New York")
-            // .property("state", "NY")
+            .prop("slot", "items")
+            .prop("name", &format!("{} {}", member.given_name, member.family_name))
+            // .prop("city", "New York")
+            // .prop("state", "NY")
             .apply(|mut dom| {
                 if let Some(languages_spoken) = &member.languages_spoken {
                     if languages_spoken.len() > 0 {
                         let languages = languages_spoken.iter().map(|l| Language::code_to_display_name(l)).join(", ");
-                        dom = dom.property("language", languages);
+                        dom = dom.prop("language", languages);
                     }
                 };
                 dom
@@ -130,8 +130,8 @@ impl MembersList {
                 Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(member.id))).to_string()
             }))
             .child(html!("profile-image", {
-                .property("slot", "img")
-                .property("imageId", {
+                .prop("slot", "img")
+                .prop("imageId", {
                     match &member.profile_image {
                         Some(image_id) => JsValue::from_str(&image_id.0.to_string()),
                         None => JsValue::UNDEFINED,

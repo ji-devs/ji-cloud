@@ -68,8 +68,8 @@ pub fn render_sticker_text<T: AsSticker>(
             //invisible element for measuring text size
             //required so that the transform will match
             html!("wysiwyg-output-renderer" => HtmlElement, {
-                .property_signal("valueAsString", text.value.signal_cloned())
-                .property_signal("theme", text.editor.theme_id.signal_cloned().map(|theme_id| theme_id.as_str_id()))
+                .prop_signal("valueAsString", text.value.signal_cloned())
+                .prop_signal("theme", text.editor.theme_id.signal_cloned().map(|theme_id| theme_id.as_str_id()))
                 .apply(|dom| mixin_measured_text(dom, clone!(text => move |(width, height)| {
                     if width > 0.0 && height > 0.0 {
                         text.transform.size.set(Some((width, height)));
@@ -83,8 +83,8 @@ pub fn render_sticker_text<T: AsSticker>(
             if !is_active || !is_editing {
                 //non-interactive rendering of wysiwyg text
                 Some(html!("wysiwyg-output-renderer", {
-                    .property_signal("valueAsString", text.value.signal_cloned())
-                    .property_signal("theme", text.editor.theme_id.signal_cloned().map(|theme_id| theme_id.as_str_id()))
+                    .prop_signal("valueAsString", text.value.signal_cloned())
+                    .prop_signal("theme", text.editor.theme_id.signal_cloned().map(|theme_id| theme_id.as_str_id()))
                     .style("cursor", "pointer")
                     .apply(|dom| apply_transform(dom, &text.transform))
                     .event(clone!(index, stickers, text => move |_evt:events::Click| {
@@ -179,8 +179,8 @@ pub fn render_sticker_text_raw(
             //invisible element for measuring text size
             //required so that the transform will match
             html!("wysiwyg-output-renderer" => HtmlElement, {
-                .property("valueAsString", &text.value)
-                .property("theme", theme_id.as_str_id())
+                .prop("valueAsString", &text.value)
+                .prop("theme", theme_id.as_str_id())
                 .apply(|dom| mixin_measured_text(dom, clone!(size => move |(width, height)| {
                     if width > 0.0 && height > 0.0 {
                         size.set(Some((width, height)));
@@ -202,8 +202,8 @@ pub fn render_sticker_text_raw(
                 .style_signal("top", y_signal.map(|x| format!("{}px", x)))
                 .child(
                     html!("wysiwyg-output-renderer", {
-                        .property("valueAsString", &text.value)
-                        .property("theme", theme_id.as_str_id())
+                        .prop("valueAsString", &text.value)
+                        .prop("theme", theme_id.as_str_id())
                         // Prevent text from being selected if a student attempts to drag
                         // a non-interactive text sticker.
                         .style("user-select", "none")

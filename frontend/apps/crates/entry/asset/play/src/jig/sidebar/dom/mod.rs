@@ -21,30 +21,30 @@ pub fn render(state: Rc<State>) -> Dom {
     load_ages(Rc::clone(&state));
 
     html!("jig-play-sidebar", {
-        .property("slot", "sidebar")
-        .property_signal("jigName", state.player_state.jig.signal_cloned().map(|jig| {
+        .prop("slot", "sidebar")
+        .prop_signal("jigName", state.player_state.jig.signal_cloned().map(|jig| {
             match jig {
                 None => String::new(),
                 Some(jig) => jig.jig_data.display_name,
             }
         }))
-        .property_signal("open", state.sidebar_open.signal())
+        .prop_signal("open", state.sidebar_open.signal())
         .child(html!("button-empty", {
-            .property("slot", "close")
+            .prop("slot", "close")
             .text("<")
             .event(clone!(state => move |_: events::Click| {
                 state.sidebar_open.set(false);
             }))
         }))
         .child(html!("button", {
-            .property("slot", "opener")
+            .prop("slot", "opener")
             .event(clone!(state => move |_: events::Click| {
                 state.sidebar_open.set(true);
                 analytics::event("Jig Play Sidebar Jiggling", None);
             }))
         }))
         .child(html!("button", {
-            .property("slot", "closer")
+            .prop("slot", "closer")
             .text("<")
             .event(clone!(state => move |_: events::Click| {
                 state.sidebar_open.set(false);
@@ -79,14 +79,14 @@ pub fn render(state: Rc<State>) -> Dom {
                     let module_count = jig.jig_data.modules.len();
 
                     Some(html!("empty-fragment", {
-                        .property("slot", "modules")
+                        .prop("slot", "modules")
                         .children(jig.jig_data.modules.iter().enumerate().map(|(i, module)| {
                             html!("jig-sidebar-module", {
-                                .property("module", module.kind.as_str())
-                                .property("index", i as u32)
-                                .property("isLastModule", i == module_count - 1)
-                                .property("selected", true)
-                                .property_signal("selected", state.player_state.active_module.signal().map(move |active_module_index| {
+                                .prop("module", module.kind.as_str())
+                                .prop("index", i as u32)
+                                .prop("isLastModule", i == module_count - 1)
+                                .prop("selected", true)
+                                .prop_signal("selected", state.player_state.active_module.signal().map(move |active_module_index| {
                                     Some(i) == active_module_index
                                 }))
                                 .event(clone!(state => move |_: events::Click| {

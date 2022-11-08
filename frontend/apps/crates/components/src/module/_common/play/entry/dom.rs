@@ -33,10 +33,10 @@ pub fn render_page_body<RawData, Mode, Step, Base>(
 
                 html!(page_kind.element_name(), {
                         .apply_if(page_kind.add_scrollable_attribute(), |dom| {
-                            dom.property("scrollable", true)
+                            dom.prop("scrollable", true)
                         })
                         .apply_if(RawData::is_legacy(), |dom| {
-                            dom.property("legacy", true)
+                            dom.prop("legacy", true)
                         })
                         .event(clone!(has_resized_once => move |event:ModuleResizeEvent| {
                             //in utils / global static
@@ -137,7 +137,7 @@ where
     let is_screenshot = utils::screenshot::is_screenshot_url();
 
     html!("empty-fragment", {
-        .property("slot", "main")
+        .prop("slot", "main")
         .child(Base::render(base.clone()))
         .future(feedback.signal_cloned().for_each(move |feedback| async move {
             let msg = IframeAction::new(ModuleToJigPlayerMessage::Instructions(feedback.map(|feedback| (feedback, InstructionsType::Feedback))));

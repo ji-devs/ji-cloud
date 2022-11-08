@@ -18,6 +18,6 @@ where
     RawData: BodyExt<Mode, Step> + 'static,
 {
     html!("div", {
-        .property("slot", "main")
+        .prop("slot", "main")
     })
 }

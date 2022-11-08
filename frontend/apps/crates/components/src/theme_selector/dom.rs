@@ -19,20 +19,20 @@ fn render(
 ) -> Dom {
     html!("theme-selector", {
         .apply_if(slot.is_some(), |dom| {
-            dom.property("slot", slot.unwrap_ji())
+            dom.prop("slot", slot.unwrap_ji())
         })
         .apply_if(action.is_some(), |dom| {
             dom.child(html!("empty-fragment", {
-                .property("slot", "action")
+                .prop("slot", "action")
                 .child(action.unwrap_ji())
             }))
         })
         .children(ThemeId::iter()
           .map(|theme_id| {
             html!("theme-selector-option", {
-                .property("theme", theme_id.as_str_id())
-                .property("optionType", option_type)
-                .property_signal("selected", state.selected_signal(theme_id))
+                .prop("theme", theme_id.as_str_id())
+                .prop("optionType", option_type)
+                .prop_signal("selected", state.selected_signal(theme_id))
                 .event(clone!(state => move |_evt:events::Click| {
                     state.set_theme(theme_id);
                 }))

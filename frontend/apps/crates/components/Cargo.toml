@@ -7,8 +7,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-utils = {path = "../utils"}
-shared = {path = "../../../../shared/rust", features = ["wasm"]}
+utils = { path = "../utils" }
+shared = { path = "../../../../shared/rust", features = ["wasm"] }
 chrono = { workspace = true }
 futures = { workspace = true }
 itertools = { workspace = true }
@@ -40,6 +40,7 @@ web-sys = { workspace = true }
 awsm_web = { workspace = true }
 anyhow = { workspace = true }
 gloo-timers = { workspace = true }
+gloo-utils = { workspace = true }
 rgb = { workspace = true }
 regex = { workspace = true }
 futures-channel = { workspace = true }
@@ -93,7 +94,7 @@ tabs = []
 overlay = []
 
 default = ["all"]
-all= [
+all = [
     "animation",
     "audio_input",
     "audio_player_button",

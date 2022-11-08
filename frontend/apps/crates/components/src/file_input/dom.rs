@@ -16,7 +16,7 @@ impl Component<FileInput> for Rc<FileInput> {
 
     fn apply_on_host(&self, mut dom: DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
         if let Some(slot) = self.slot {
-            dom = dom.property("slot", slot);
+            dom = dom.prop("slot", slot);
         }
         dom
     }
@@ -29,7 +29,7 @@ impl Component<FileInput> for Rc<FileInput> {
                 value.as_ref().map(|_| {
                     html!("fa-button", {
                         .class("remove")
-                        .property("icon", "fa-regular fa-xmark")
+                        .prop("icon", "fa-regular fa-xmark")
                         .event(clone!(state => move |_: events::Click| {
                             state.delete_file();
                         }))
@@ -37,7 +37,7 @@ impl Component<FileInput> for Rc<FileInput> {
                 })
             })))
             .child(html!("input-file", {
-                .property("accept", state.accept)
+                .prop("accept", state.accept)
                 .apply_if(state.show_border, |dom| {
                     dom.style("border", "dashed 2px var(--light-blue-4)")
                 })
@@ -52,7 +52,7 @@ impl Component<FileInput> for Rc<FileInput> {
                                 .style("overflow", "hidden")
                                 .style("max-width", "100%")
                                 .style("max-height", "100%")
-                                .property("src", file_to_object_url(&value))
+                                .prop("src", file_to_object_url(&value))
                             }))
                         },
                         Some(value) => {
@@ -63,7 +63,7 @@ impl Component<FileInput> for Rc<FileInput> {
                         _ => Some(html!("div", {
                             .class("empty")
                             .child(html!("fa-icon", {
-                                .property("icon", "fa-light fa-cloud-arrow-up")
+                                .prop("icon", "fa-light fa-cloud-arrow-up")
                             }))
                             .children_signal_vec(state.has_error_signal().map(clone!(state => move|has_error| {
                                 match has_error {

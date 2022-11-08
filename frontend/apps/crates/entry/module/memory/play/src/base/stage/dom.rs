@@ -20,7 +20,7 @@ pub fn render(state: Rc<Base>) -> Dom {
             }
             async {}
         })))
-        .property("slot", "main")
+        .prop("slot", "main")
         .child_signal(
             state.all_cards_ended_signal()
                 .map(clone!(state => move |ended| {

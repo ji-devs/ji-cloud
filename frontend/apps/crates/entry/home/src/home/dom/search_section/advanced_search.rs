@@ -18,31 +18,31 @@ const STR_AFFILIATION_PLACEHOLDER: &str = "Select one or more from the list";
 
 pub fn render(state: Rc<Home>) -> Dom {
     html!("home-search-section-advanced", {
-        .property("slot", "advanced")
+        .prop("slot", "advanced")
         .children(&mut [
             html!("button-rect", {
-                .attribute("style", "height: 48px")
-                .property("slot", "opener")
-                .property("kind", "text")
-                .property("color", "white")
-                .property("bold", true)
+                .attr("style", "height: 48px")
+                .prop("slot", "opener")
+                .prop("kind", "text")
+                .prop("color", "white")
+                .prop("bold", true)
                 .text(STR_SEARCH)
             }),
 
             html!("input-select", {
-                .property("slot", "affiliation")
-                .property("label", STR_AFFILIATION_LABEL)
-                .property("placeholder", STR_AFFILIATION_PLACEHOLDER)
-                .property("multiple", true)
+                .prop("slot", "affiliation")
+                .prop("label", STR_AFFILIATION_LABEL)
+                .prop("placeholder", STR_AFFILIATION_PLACEHOLDER)
+                .prop("multiple", true)
                 .visible_signal(state.is_logged_in.signal().map(|is_logged_in| {
                     !is_logged_in
                 }))
-                .property_signal("value", affiliation_value_signal(state.clone()))
+                .prop_signal("value", affiliation_value_signal(state.clone()))
                 .children_signal_vec(state.search_options.affiliations.signal_cloned().map(clone!(state => move|affiliations| {
                     affiliations.iter().map(|affiliation| {
                         html!("input-select-option", {
                             .text(&affiliation.display_name)
-                            .property_signal("selected", state.search_selected.affiliations.signal_cloned().map(clone!(affiliation => move |affiliations| {
+                            .prop_signal("selected", state.search_selected.affiliations.signal_cloned().map(clone!(affiliation => move |affiliations| {
                                 affiliations.contains(&affiliation.id)
                             })))
                             .event(clone!(state, affiliation => move |_: events::CustomSelectedChange| {
@@ -60,8 +60,8 @@ pub fn render(state: Rc<Home>) -> Dom {
             categories_select::render(state.clone()),
 
             html!("button-rect", {
-                .property("slot", "search-button")
-                .property("color", "blue")
+                .prop("slot", "search-button")
+                .prop("color", "blue")
                 .text(STR_SEARCH)
                 .event(clone!(state => move |_: events::Click| {
                     search(Rc::clone(&state));

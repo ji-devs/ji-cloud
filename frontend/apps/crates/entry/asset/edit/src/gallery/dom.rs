@@ -65,13 +65,13 @@ impl Gallery {
             .child_signal(state.confirm_delete.signal().map(clone!(state => move |confirm_delete| {
                 confirm_delete.map(|jig_id| {
                     html!("modal-confirm", {
-                        .property("dangerous", true)
-                        .property("title", STR_DELETE_TITLE)
-                        .property("cancel_text", STR_DELETE_CANCEL)
-                        .property("confirm_text", STR_DELETE_CONFIRM)
-                        .property("confirmIcon", "core/menus/delete-white.svg")
+                        .prop("dangerous", true)
+                        .prop("title", STR_DELETE_TITLE)
+                        .prop("cancel_text", STR_DELETE_CANCEL)
+                        .prop("confirm_text", STR_DELETE_CONFIRM)
+                        .prop("confirmIcon", "core/menus/delete-white.svg")
                         .child(html!("div", {
-                            .property("slot", "content")
+                            .prop("slot", "content")
                             .child(html!("p", {
                                 .text(STR_DELETE_CONTENT)
                             }))
@@ -93,9 +93,9 @@ impl Gallery {
             })))
             .child(
                 html!("jig-gallery", {
-                    .property("assetDisplayName", state.asset_type_name())
+                    .prop("assetDisplayName", state.asset_type_name())
                     .child(html!("jig-gallery-create", {
-                        .property("slot", "create-jig")
+                        .prop("slot", "create-jig")
                         .event(clone!(state => move |_: events::Click| {
                             state.create_asset();
                             analytics::event("Jig Gallery Create", None);
@@ -104,15 +104,15 @@ impl Gallery {
                     // .apply_if(state.focus.is_modules(), move |dom| {
                     //     dom.children(TEMPLATE_KINDS.iter().map(|kind| {
                     //         html!("jig-gallery-template", {
-                    //             .property("slot", "jig-templates")
-                    //             .property("kind", *kind)
+                    //             .prop("slot", "jig-templates")
+                    //             .prop("kind", *kind)
                     //         })
                     //     }))
                     // })
                     .child(html!("input-search", {
                         .style("grid-column", "3") // TODO: remove once draft filter is enabled
-                        .property("slot", "search-input")
-                        .property("placeholder", STR_SEARCH)
+                        .prop("slot", "search-input")
+                        .prop("placeholder", STR_SEARCH)
                         .event(clone!(state => move |evt: events::CustomSearch| {
                             let value = evt.query();
                             if !value.is_empty() {
@@ -124,13 +124,13 @@ impl Gallery {
                     }))
                     .child(html!("input-select", {
                         .visible(false)
-                        .property("slot", "filters")
-                        .property_signal("value", state.visible_assets.signal_cloned().map(|visible_jigs| Self::visible_assets_option_string(&visible_jigs)))
+                        .prop("slot", "filters")
+                        .prop_signal("value", state.visible_assets.signal_cloned().map(|visible_jigs| Self::visible_assets_option_string(&visible_jigs)))
                         .children(VisibleAssets::iter().map(|option| {
                             html!("input-select-option", {
-                                .property("value", &option.to_string())
+                                .prop("value", &option.to_string())
                                 .text(Self::visible_assets_option_string(&option))
-                                .property_signal("selected", state.visible_assets.signal_cloned().map(clone!(option => move |visible_jigs| {
+                                .prop_signal("selected", state.visible_assets.signal_cloned().map(clone!(option => move |visible_jigs| {
                                     visible_jigs == option
                                 })))
                                 .event(clone!(state, option => move |evt: events::CustomSelectedChange| {
@@ -144,17 +144,17 @@ impl Gallery {
                     }))
                     // todo: deal with loading
                     // .child(html!("window-loader-block", {
-                    //     .property("slot", "recent-items")
-                    //     .property_signal("visible", state.loader.is_loading())
+                    //     .prop("slot", "recent-items")
+                    //     .prop_signal("visible", state.loader.is_loading())
                     // }))
                     .children_signal_vec(state.assets.signal_vec_cloned().map(clone!(state => move |asset| {
                         let asset_ages = asset.age_ranges().clone();
 
                         html!("jig-gallery-recent", {
-                            .property("slot", "recent-items")
-                            .property("label", asset.display_name())
-                            .property("draft", !asset.live_up_to_date())
-                            .property("href", {
+                            .prop("slot", "recent-items")
+                            .prop("label", asset.display_name())
+                            .prop("draft", !asset.live_up_to_date())
+                            .prop("href", {
                                 match &asset {
                                     Asset::Jig(jig) => {
                                         String::from(Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
@@ -188,20 +188,20 @@ impl Gallery {
                                 };
                                 let range = age_ranges.range(&asset_ages);
                                 Some(html!("age-range", {
-                                    .property("slot", "ages")
-                                    .property("icon", icon)
-                                    .property("from", range.0)
-                                    .property("to", range.1)
+                                    .prop("slot", "ages")
+                                    .prop("icon", icon)
+                                    .prop("from", range.0)
+                                    .prop("to", range.1)
                                 }))
                             })))
                             .apply(|dom| {
                                 match asset.published_at() {
                                     None => {
-                                        // dom.property("draft", true)
+                                        // dom.prop("draft", true)
                                         dom
                                     },
                                     Some(published_at) => {
-                                        dom.property("publishedAt", published_at_string(published_at, true))
+                                        dom.prop("publishedAt", published_at_string(published_at, true))
                                     },
                                 }
                             })
@@ -215,16 +215,16 @@ impl Gallery {
                             )
                             .children(&mut [
                                 html!("menu-line", {
-                                    .property("slot", "menu-content")
-                                    .property("icon", "duplicate")
+                                    .prop("slot", "menu-content")
+                                    .prop("icon", "duplicate")
                                     .text(STR_DUPLICATE)
                                     .event(clone!(state, asset => move |_: events::Click| {
                                         state.copy_asset(asset.id());
                                     }))
                                 }),
                                 html!("menu-line", {
-                                    .property("slot", "menu-content")
-                                    .property("icon", "delete")
+                                    .prop("slot", "menu-content")
+                                    .prop("icon", "delete")
                                     .text(STR_DELETE)
                                     .event(clone!(state, asset => move |_: events::Click| {
                                         state.confirm_delete.set_neq(Some(asset.id()));
@@ -236,10 +236,10 @@ impl Gallery {
                     .child_signal(load_more_signal.map(clone!(state => move |load_more| {
                         if load_more {
                             Some(html!("button-rect", {
-                                .property("slot", "load-more")
-                                .property("color", "blue")
-                                .property("type", "filled")
-                                .property_signal("disabled", state.loader.is_loading())
+                                .prop("slot", "load-more")
+                                .prop("color", "blue")
+                                .prop("type", "filled")
+                                .prop_signal("disabled", state.loader.is_loading())
                                 .text(STR_LOAD_MORE)
                                 .event(clone!(state => move |_: events::Click| {
                                     state.loader.load(clone!(state => async move {

@@ -29,8 +29,8 @@ pub fn render(state: Rc<State>) -> impl Signal<Item = Vec<Dom>> {
 
 fn render_button(state: Rc<State>) -> Dom {
     html!("button-rect", {
-        .property("slot", "report")
-        .property("color", "blue")
+        .prop("slot", "report")
+        .prop("color", "blue")
         .text(STR_REPORT)
         .event(clone!(state => move |_: events::Click| {
             state.report_status.set(ReportStatus::Active);
@@ -46,7 +46,7 @@ fn render_sent(state: Rc<State>) -> Vec<Dom> {
     vec![
         render_button(state),
         html!("span", {
-            .property("slot", "report-sent")
+            .prop("slot", "report-sent")
             .text(STR_REPORT_SENT)
         }),
     ]
@@ -54,15 +54,15 @@ fn render_sent(state: Rc<State>) -> Vec<Dom> {
 
 fn render_active(state: Rc<State>) -> Vec<Dom> {
     vec![html!("jig-play-sidebar-report", {
-        .property("slot", "report")
+        .prop("slot", "report")
         .children(&mut [
             html!("select" => HtmlSelectElement, {
                 .with_node!(select => {
-                    .property("slot", "select")
+                    .prop("slot", "select")
                     .child(html!("option"))
                     .children(JigReportType::iter().map(|option| {
                         html!("option", {
-                            .property("value", option.to_value_str())
+                            .prop("value", option.to_value_str())
                             .text(option.as_str())
                         })
                     }))
@@ -78,7 +78,7 @@ fn render_active(state: Rc<State>) -> Vec<Dom> {
                 })
             }),
             html!("button", {
-                .property("slot", "button")
+                .prop("slot", "button")
                 .text(STR_REPORT)
                 .event(clone!(state => move |_: events::Click| {
                     actions::send_report(Rc::clone(&state));

@@ -15,7 +15,7 @@ impl JigSelection {
         html!("div", {
             .style("max-height", "100vh")
             .style("overflow", "auto")
-            .property("slot", "main")
+            .prop("slot", "main")
             .children_signal_vec(state.jigs.signal_vec_cloned().map(clone!(state => move|jig| {
                 state.render_jig(&jig, vec![
                     html!("button", {
@@ -62,7 +62,7 @@ impl JigSelection {
                             })
                         }),
                         html!("button", {
-                            .property("type", "submit")
+                            .prop("type", "submit")
                             .text("Search")
                         })
                     ])

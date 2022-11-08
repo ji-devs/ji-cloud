@@ -30,7 +30,7 @@ pub fn render(module_state: &Rc<SpotState>) -> Dom {
     let state = Rc::new(State::new());
 
     html!("menu-kebab", {
-        .property("slot", "menu")
+        .prop("slot", "menu")
         .child(html!("jig-edit-sidebar-module-menu", {
             .children(menu_items(&state, module_state))
         }))
@@ -89,8 +89,8 @@ fn menu_items_jig(
 
 fn item_edit(_: &Rc<State>, module: &Rc<SpotState>) -> Dom {
     html!("menu-line", {
-        .property("slot", "lines")
-        .property("icon", "edit")
+        .prop("slot", "lines")
+        .prop("icon", "edit")
         .event(clone!(module => move |_:events::Click| {
             jig_spot_actions::edit(module.clone());
         }))
@@ -99,8 +99,8 @@ fn item_edit(_: &Rc<State>, module: &Rc<SpotState>) -> Dom {
 
 fn item_move_up(state: &Rc<State>, module: &Rc<SpotState>) -> Dom {
     html!("menu-line", {
-        .property("slot", "lines")
-        .property("icon", "move-up")
+        .prop("slot", "lines")
+        .prop("icon", "move-up")
         .event(clone!(state, module => move |_:events::Click| {
             state.close_menu();
             actions::move_index(module.clone(), MoveTarget::Up);
@@ -110,8 +110,8 @@ fn item_move_up(state: &Rc<State>, module: &Rc<SpotState>) -> Dom {
 
 fn item_move_down(state: &Rc<State>, module: &Rc<SpotState>) -> Dom {
     html!("menu-line", {
-        .property("slot", "lines")
-        .property("icon", "move-down")
+        .prop("slot", "lines")
+        .prop("icon", "move-down")
         .event(clone!(state, module => move |_:events::Click| {
             state.close_menu();
             actions::move_index(module.clone(), MoveTarget::Down);
@@ -121,8 +121,8 @@ fn item_move_down(state: &Rc<State>, module: &Rc<SpotState>) -> Dom {
 
 fn item_duplicate(state: &Rc<State>, sidebar_state: &Rc<SidebarState>, module_id: ModuleId) -> Dom {
     html!("menu-line", {
-        .property("slot", "lines")
-        .property("icon", "duplicate")
+        .prop("slot", "lines")
+        .prop("icon", "duplicate")
         .event(clone!(state, sidebar_state => move |_:events::Click| {
             state.close_menu();
             jig_actions::duplicate_module(sidebar_state.clone(), &module_id);
@@ -132,8 +132,8 @@ fn item_duplicate(state: &Rc<State>, sidebar_state: &Rc<SidebarState>, module_id
 
 fn item_delete(state: &Rc<State>, module: &Rc<SpotState>) -> Dom {
     html!("menu-line", {
-        .property("slot", "lines")
-        .property("icon", "delete")
+        .prop("slot", "lines")
+        .prop("icon", "delete")
         .event(clone!(state, module => move |_:events::Click| {
             module.confirm_delete.set_neq(true);
             state.close_menu();
@@ -143,9 +143,9 @@ fn item_delete(state: &Rc<State>, module: &Rc<SpotState>) -> Dom {
 
 fn item_copy(state: &Rc<State>, sidebar_state: &Rc<SidebarState>, module_id: ModuleId) -> Dom {
     html!("menu-line", {
-        .property("slot", "advanced")
-        .property("customLabel", STR_COPY)
-        .property("icon", "copy")
+        .prop("slot", "advanced")
+        .prop("customLabel", STR_COPY)
+        .prop("icon", "copy")
         .event(clone!(state, sidebar_state => move |_:events::Click| {
             state.close_menu();
             copy_module(sidebar_state.clone(), &module_id);
@@ -155,9 +155,9 @@ fn item_copy(state: &Rc<State>, sidebar_state: &Rc<SidebarState>, module_id: Mod
 
 fn item_paste(state: &Rc<State>, sidebar_state: &Rc<SidebarState>) -> Dom {
     html!("menu-line", {
-        .property("slot", "advanced")
-        .property("customLabel", STR_PASTE)
-        .property("icon", "copy")
+        .prop("slot", "advanced")
+        .prop("customLabel", STR_PASTE)
+        .prop("icon", "copy")
         .event(clone!(state, sidebar_state => move |_:events::Click| {
             state.close_menu();
             paste_module(sidebar_state.clone());
@@ -173,15 +173,15 @@ fn item_duplicate_as(
     let is_card = CARD_KINDS.contains(&module.kind);
 
     html!("empty-fragment", {
-        .property("slot", "advanced")
+        .prop("slot", "advanced")
         .apply_if(is_card, |dom| {
             let card_kinds = CARD_KINDS.into_iter().filter(|kind| &module.kind != kind);
             let module_id = module.id;
 
             dom.child(html!("menu-line", {
-                .property("customLabel", STR_DUPLICATE_AS)
-                .property("icon", "reuse")
-                .property_signal("active", state.dup_as_active.signal())
+                .prop("customLabel", STR_DUPLICATE_AS)
+                .prop("icon", "reuse")
+                .prop_signal("active", state.dup_as_active.signal())
                 .event(clone!(state => move |_:events::Click| {
                     let mut dup_as_active = state.dup_as_active.lock_mut();
                     *dup_as_active = !*dup_as_active;
@@ -190,7 +190,7 @@ fn item_duplicate_as(
             .children(card_kinds.map(|card_kind| {
                 html!("menu-line", {
                     .visible_signal(state.dup_as_active.signal())
-                    .property("customLabel", String::from("• ") + card_kind.as_str())
+                    .prop("customLabel", String::from("• ") + card_kind.as_str())
                     .event(clone!(state, sidebar_state, module_id => move |_:events::Click| {
                         jig_actions::use_module_as(Rc::clone(&sidebar_state), card_kind, module_id);
                         state.close_menu();
@@ -203,9 +203,9 @@ fn item_duplicate_as(
 
 // fn item_edit_settings(state: Rc<State>, sidebar_state: Rc<SidebarState>) -> Dom {
 //     html!("menu-line", {
-//         .property("slot", "lines")
-//         .property("customLabel", STR_EDIT_SETTINGS)
-//         .property("icon", "edit")
+//         .prop("slot", "lines")
+//         .prop("customLabel", STR_EDIT_SETTINGS)
+//         .prop("icon", "edit")
 //         .event(clone!(state => move |_:events::Click| {
 //             state.close_menu();
 //             // sidebar_state.settings_shown.set(true);

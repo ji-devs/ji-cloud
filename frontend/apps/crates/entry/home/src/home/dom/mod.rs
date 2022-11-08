@@ -62,8 +62,8 @@ impl Home {
                             .apply(OverlayHandle::lifecycle(clone!(state => move || {
                                 html!("home-login-before-play", {
                                     .child(html!("fa-button", {
-                                        .property("slot", "close")
-                                        .property("icon", "fa-solid fa-xmark")
+                                        .prop("slot", "close")
+                                        .prop("icon", "fa-solid fa-xmark")
                                         .event(clone!(state => move |_: events::Click| {
                                             state.play_login_popup_shown.set(false);
                                         }))

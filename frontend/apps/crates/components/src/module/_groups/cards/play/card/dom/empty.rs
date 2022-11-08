@@ -67,12 +67,12 @@ where
 
     html!("empty-card", {
         .apply_if(slot.is_some(), |dom|
-            dom.property("slot", slot.unwrap_ji())
+            dom.prop("slot", slot.unwrap_ji())
         )
-        .property("active", active)
-        .property("size", size.as_str_id())
-        .property("theme", theme_id.as_str_id())
-        .property("kind", kind.as_str_id())
+        .prop("active", active)
+        .prop("size", size.as_str_id())
+        .prop("theme", theme_id.as_str_id())
+        .prop("kind", kind.as_str_id())
         .apply_if(mixin.is_some(), |dom| {
             (mixin.unwrap_ji()) (dom)
         })

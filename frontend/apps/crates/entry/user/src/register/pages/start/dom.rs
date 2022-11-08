@@ -16,28 +16,28 @@ impl RegisterStart {
 
         html!("empty-fragment", {
             .child(html!("window-loader-block", {
-                .property_signal("visible", state.loader.is_loading())
+                .prop_signal("visible", state.loader.is_loading())
             }))
             .child(html!("page-register-start", {
                 .apply_if(state.login_before_register, |dom| {
                     dom.child(html!("p", {
-                        .property("slot", "alert")
+                        .prop("slot", "alert")
                         .text(STR_REGISTER_FIRST)
                     }))
                 })
-                .property_signal("passwordStrength", state.password.strength_signal())
+                .prop_signal("passwordStrength", state.password.strength_signal())
                 .children(vec![
                     html!("input-wrapper", {
-                        .property("slot", "email")
-                        .property("label", strings::STR_EMAIL_LABEL)
-                        .property_signal("error", state.show_email_error_signal().map(|err| {
+                        .prop("slot", "email")
+                        .prop("label", strings::STR_EMAIL_LABEL)
+                        .prop_signal("error", state.show_email_error_signal().map(|err| {
                             err.is_some()
                         }))
-                        .property_signal("hint", state.show_email_error_signal())
+                        .prop_signal("hint", state.show_email_error_signal())
                         .child(html!("input" => HtmlInputElement, {
                             .with_node!(elem => {
-                                .property("type", "email")
-                                .attribute("autocomplete", "email")
+                                .prop("type", "email")
+                                .attr("autocomplete", "email")
                                 .event(clone!(state => move |_:events::Input| {
                                     state.email.update_value(elem.value());
                                 }))
@@ -45,30 +45,30 @@ impl RegisterStart {
                         }))
                     }),
                     html!("input-password", {
-                        .property("slot", "password")
-                        .property("label", strings::STR_PASSWORD_CREATE_LABEL)
-                        .property("placeholder", strings::STR_PASSWORD_PLACEHOLDER)
-                        .property("autocomplete", "new-password")
-                        .property_signal("error", state.show_password_error_signal().map(|err| {
+                        .prop("slot", "password")
+                        .prop("label", strings::STR_PASSWORD_CREATE_LABEL)
+                        .prop("placeholder", strings::STR_PASSWORD_PLACEHOLDER)
+                        .prop("autocomplete", "new-password")
+                        .prop_signal("error", state.show_password_error_signal().map(|err| {
                             err.is_some()
                         }))
-                        .property_signal("hint", state.show_password_error_signal())
+                        .prop_signal("hint", state.show_password_error_signal())
                         .event(clone!(state => move |evt:events::CustomInput| {
                             state.password.update_value(evt.value());
                         }))
                     }),
                     html!("button-google", {
-                        .property("slot", "google")
-                        .property("label", STR_GOOGLE_LABEL)
+                        .prop("slot", "google")
+                        .prop("label", STR_GOOGLE_LABEL)
                         .event(clone!(state => move |_evt:events::Click| {
                             state.register_google()
                         }))
                     }),
                     html!("button-rect-icon", {
-                        .property("slot", "submit")
-                        .property("color", "red")
-                        .property("size", "medium")
-                        .property("iconAfter", "arrow")
+                        .prop("slot", "submit")
+                        .prop("color", "red")
+                        .prop("size", "medium")
+                        .prop("iconAfter", "arrow")
                         .text(strings::STR_CONTINUE)
                         .event(clone!(state => move |_evt:events::Click| {
                             state.register_email()

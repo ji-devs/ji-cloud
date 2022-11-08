@@ -11,7 +11,7 @@ use futures_signals::{
 
 pub fn render(state: Rc<MainSettings>) -> Dom {
     html!("card-quiz-main", {
-        .property("slot", "main")
+        .prop("slot", "main")
         .child_signal(render_top_card(state.clone()).map(Some))
         .children_signal_vec(render_choices(state))
     })

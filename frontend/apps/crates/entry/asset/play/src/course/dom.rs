@@ -51,12 +51,12 @@ impl CoursePlayer {
         let state = self;
         let language = Language::code_to_display_name(&course.course_data.language);
         html!("jig-play-course-main", {
-            .property("name", &course.course_data.display_name)
-            .property("description", &course.course_data.description)
-            .property("language", language)
-            .property("author", &course.author_name.to_owned().unwrap_or_default())
-            .property("itemsCount", course.course_data.items.len())
-            .property("hasAdditionalResources", !course.course_data.additional_resources.is_empty())
+            .prop("name", &course.course_data.display_name)
+            .prop("description", &course.course_data.description)
+            .prop("language", language)
+            .prop("author", &course.author_name.to_owned().unwrap_or_default())
+            .prop("itemsCount", course.course_data.items.len())
+            .prop("hasAdditionalResources", !course.course_data.additional_resources.is_empty())
             .child(
                 ModuleThumbnail::new_hight_res(
                     course.id.into(),
@@ -72,20 +72,20 @@ impl CoursePlayer {
             })).to_signal_vec())
             .children(course.course_data.additional_resources.iter().map(|resource| {
                 html!("a", {
-                    .property("slot", "additional-resources")
-                    .property("target", "_BLANK")
-                    .property("title", &resource.display_name)
-                    .property("href", resource.resource_content.get_link())
+                    .prop("slot", "additional-resources")
+                    .prop("target", "_BLANK")
+                    .prop("title", &resource.display_name)
+                    .prop("href", resource.resource_content.get_link())
                     .child(html!("fa-icon", {
-                        .property("icon", "fa-light fa-file")
+                        .prop("icon", "fa-light fa-file")
                     }))
                     .text(" ")
                     .text_signal(state.resource_type_name_signal(resource.resource_type_id))
                 })
             }))
             .child(html!("fa-button", {
-                .property("slot", "play")
-                .property("icon", "fa-solid fa-circle-play")
+                .prop("slot", "play")
+                .prop("icon", "fa-solid fa-circle-play")
                 .event(clone!(state => move |_: events::Click| {
                     let jigs = state.jigs.lock_mut();
                     let jig_id = jigs.first().map(|jig| jig.id);
@@ -96,7 +96,7 @@ impl CoursePlayer {
             .child(ShareAsset::new(course.clone().into()).render(
                 html!("button-empty", {
                     .child(html!("fa-icon", {
-                        .property("icon", "fa-light fa-share-nodes")
+                        .prop("icon", "fa-light fa-share-nodes")
                     }))
                     .text(STR_SHARE_COURSE)
                 }),
@@ -116,10 +116,10 @@ impl CoursePlayer {
         let state = self;
         let jig_id = jig.id;
         html!("jig-play-course-item", {
-            .property("slot", "items")
-            .property("name", &jig.jig_data.display_name)
-            .property("description", &jig.jig_data.description)
-            .property("index", i + 1)
+            .prop("slot", "items")
+            .prop("name", &jig.jig_data.display_name)
+            .prop("description", &jig.jig_data.description)
+            .prop("index", i + 1)
             .child(
                 ModuleThumbnail::new(
                     jig_id.into(),
@@ -129,8 +129,8 @@ impl CoursePlayer {
                 ).render(Some("thumbnail"))
             )
             .child(html!("fa-button", {
-                .property("slot", "play-button")
-                .property("icon", "fa-solid fa-play")
+                .prop("slot", "play-button")
+                .prop("icon", "fa-solid fa-play")
             }))
             .event(clone!(state, jig_id => move |_: events::Click| {
                 state.play_jig(jig_id);

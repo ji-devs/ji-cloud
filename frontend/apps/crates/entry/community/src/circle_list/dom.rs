@@ -20,10 +20,10 @@ impl CirclesList {
         state.load_circles();
 
         html!("community-list", {
-            .property("header", "Join a circle")
+            .prop("header", "Join a circle")
             .child(html!("button-rect", {
-                .property("slot", "create-button")
-                .property("color", "blue")
+                .prop("slot", "create-button")
+                .prop("color", "blue")
                 .text("Start a circle")
                 .event(clone!(state => move |_: events::Click| {
                     state.create_popup_open.set(true);
@@ -31,16 +31,16 @@ impl CirclesList {
             }))
             .child(html!("community-list-circle-header", {
                 .class(&*CIRCLE_LIST_GRID_COLUMNS)
-                .property("slot", "sort-header")
+                .prop("slot", "sort-header")
             }))
             .child(html!("community-pagination", {
-                .property("slot", "sort-header")
-                .property_signal("total", state.total_pages.signal())
+                .prop("slot", "sort-header")
+                .prop_signal("total", state.total_pages.signal())
                 .children(&mut [
                     html!("fa-button", {
-                        .property("slot", "back")
-                        .property("icon", "fa-solid fa-angle-left")
-                        .property_signal("disabled", state.active_page.signal().map(|active_page| {
+                        .prop("slot", "back")
+                        .prop("icon", "fa-solid fa-angle-left")
+                        .prop_signal("disabled", state.active_page.signal().map(|active_page| {
                             active_page <= 1
                         }))
                         .event(clone!(state => move |_: events::Click| {
@@ -63,11 +63,11 @@ impl CirclesList {
                                     .style("margin", "0")
                                 })
                             })
-                            .property("slot", "active-page")
-                            .property("type", "number")
-                            .property("min", 1)
-                            .property_signal("max", state.total_pages.signal())
-                            .property_signal("value", state.active_page.signal().map(|active_page| {
+                            .prop("slot", "active-page")
+                            .prop("type", "number")
+                            .prop("min", 1)
+                            .prop_signal("max", state.total_pages.signal())
+                            .prop_signal("value", state.active_page.signal().map(|active_page| {
                                 active_page.to_string()
                             }))
                             .event(clone!(state, elem => move |_: events::Input| {
@@ -82,9 +82,9 @@ impl CirclesList {
                         })
                     }),
                     html!("fa-button", {
-                        .property("slot", "forward")
-                        .property("icon", "fa-solid fa-angle-right")
-                        .property_signal("disabled", map_ref! {
+                        .prop("slot", "forward")
+                        .prop("icon", "fa-solid fa-angle-right")
+                        .prop_signal("disabled", map_ref! {
                             let active_page = state.active_page.signal(),
                             let total_pages = state.total_pages.signal() => {
                                 active_page >= total_pages
@@ -103,7 +103,7 @@ impl CirclesList {
                 match circles {
                     None => {
                         vec![html!("progress", {
-                            .property("slot", "items")
+                            .prop("slot", "items")
                         })]
                     },
                     Some(circles) => {
@@ -131,21 +131,21 @@ impl CirclesList {
     fn render_circle(self: &Rc<Self>, circle: &Circle) -> Dom {
         html!("community-list-circle", {
             .class(&*CIRCLE_LIST_GRID_COLUMNS)
-            .property("slot", "items")
-            .property("name", &circle.display_name)
-            .property("memberCount", circle.member_count)
-            .property("description", &circle.description)
+            .prop("slot", "items")
+            .prop("name", &circle.display_name)
+            .prop("memberCount", circle.member_count)
+            .prop("description", &circle.description)
             .apply(move |dom| dominator::on_click_go_to_url!(dom, {
                 Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::Circle(circle.id))).to_string()
             }))
             .child(html!("img-ji", {
-                .property("slot", "img")
-                .property("lib", MediaLibrary::User.to_str())
-                .property("id", &circle.image.0.to_string())
+                .prop("slot", "img")
+                .prop("lib", MediaLibrary::User.to_str())
+                .prop("id", &circle.image.0.to_string())
             }))
             .child(html!("community-list-circle-status", {
-                .property("slot", "status")
-                .property("status", "")
+                .prop("slot", "status")
+                .prop("status", "")
             }))
         })
     }

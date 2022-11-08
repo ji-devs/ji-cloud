@@ -12,7 +12,7 @@ use futures_signals::{
 
 pub fn render(state: Rc<MainSettings>) -> Dom {
     html!("matching-main", {
-        .property("slot", "main")
+        .prop("slot", "main")
         .children_signal_vec(render_top_choices(state.clone()))
         //.children_signal_vec(render_top_choices(state.clone(), state.top_choices_signal(), None))
         .children_signal_vec(render_bottom_choices(state))
@@ -29,7 +29,7 @@ fn render_top_choices(state: Rc<MainSettings>) -> impl SignalVec<Item = Dom> {
             state.base.theme_id.signal_cloned()
                 .map(move |theme_id| {
                     html!("matching-column", {
-                        .property("slot", "top")
+                        .prop("slot", "top")
                         .child({
                             let (card, side) = &choice;
                             let mut options = CardOptions::new(card, theme_id, mode, *side, Size::Matching);

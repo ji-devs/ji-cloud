@@ -13,7 +13,7 @@ use futures_signals::signal::SignalExt;
 impl DomRenderable for Base {
     fn render(state: Rc<Base>) -> Dom {
         html!("empty-fragment", {
-            .property("slot", "main")
+            .prop("slot", "main")
             .child(render_single_background_raw(&state.background, state.theme_id, None))
             .child_signal(state.phase.signal_cloned().map(|phase| {
                 match phase {

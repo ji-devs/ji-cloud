@@ -20,20 +20,20 @@ impl SendResetLink {
             .apply(OverlayHandle::lifecycle(
                 move || {
                     html!("overlay-content", {
-                        .property("flowContentAnchor", "mm")
-                        .property("contentAnchor", "mm")
+                        .prop("flowContentAnchor", "mm")
+                        .prop("contentAnchor", "mm")
                         .child(html!("dialog-backdrop" => HtmlElement, {
                             .child(html!("popup-body", {
                                 .children(&mut [
                                     html!("fa-button", {
-                                        .property("slot", "close")
-                                        .property("icon", "fa-light fa-xmark")
+                                        .prop("slot", "close")
+                                        .prop("icon", "fa-light fa-xmark")
                                         .event(clone!(state => move |_: events::Click| {
                                             (state.callbacks.on_close)();
                                         }))
                                     }),
                                     html!("h3", {
-                                        .property("slot", "heading")
+                                        .prop("slot", "heading")
                                         .text(STR_RESET_PASSWORD)
                                     }),
                                 ])
@@ -59,7 +59,7 @@ impl SendResetLink {
             .style("display", "grid")
             .style("row-gap", "50px")
             .style("justify-items", "center")
-            .property("slot", "body")
+            .prop("slot", "body")
             .event_with_options(
                 &EventOptions::preventable(),
                 clone!(state => move |evt: events::Submit| {
@@ -69,14 +69,14 @@ impl SendResetLink {
             )
             .children(&mut [
                 html!("input-wrapper", {
-                    .property("slot", "email")
-                    .property("label", crate::strings::STR_EMAIL_LABEL)
+                    .prop("slot", "email")
+                    .prop("label", crate::strings::STR_EMAIL_LABEL)
                     .child(html!("input" => HtmlInputElement, {
                         .with_node!(elem => {
-                            .property("name", "email")
-                            .property("type", "email")
-                            .property("required", true)
-                            .attribute("autocomplete", "email")
+                            .prop("name", "email")
+                            .prop("type", "email")
+                            .prop("required", true)
+                            .attr("autocomplete", "email")
                             .event(clone!(state => move |_:events::Input| {
                                 state.email.update_value(elem.value());
                             }))
@@ -84,9 +84,9 @@ impl SendResetLink {
                     }))
                 }),
                 html!("button-rect", {
-                    .property("submit", true)
+                    .prop("submit", true)
                     .text("Reset password")
-                    .property_signal("disabled", not(state.email.email_acceptable_signal()))
+                    .prop_signal("disabled", not(state.email.email_acceptable_signal()))
                     .event(clone!(state => move |_:events::Click| {
                         state.submit();
                     }))
@@ -99,7 +99,7 @@ impl SendResetLink {
         let state = self;
         html!("div", {
             .style("padding", "30px")
-            .property("slot", "body")
+            .prop("slot", "body")
             .children(&mut [
                 html!("h2", {
                     .text("Check your inbox")

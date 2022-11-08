@@ -21,8 +21,8 @@ impl ImageSearchPage {
                     actions::search(state.clone(), query);
                     async {}
                 })))
-                .property_signal("query", state.query_string_signal())
-                .property_signal("nResults", state.n_results_signal())
+                .prop_signal("query", state.query_string_signal())
+                .prop_signal("nResults", state.n_results_signal())
                 .event(clone!(state => move |evt:events::CustomSearch| {
                     let mut query = state.query.lock_mut();
                     query.q = evt.query();
@@ -40,14 +40,14 @@ impl ImageSearchPage {
                 .children_signal_vec(state.images_signal_vec().map(|image| {
                     let id = &image.id;
                     html!("a", {
-                        .property("slot", "images")
-                        .property("href", {
+                        .prop("slot", "images")
+                        .prop("href", {
                             let route:String = Route::Admin(AdminRoute::ImageMeta(*id, false)).into();
                             route
                         })
                         .child(html!("search-image-cell", {
-                            .property("name", image.name)
-                            .property("mode", {
+                            .prop("name", image.name)
+                            .prop("mode", {
                                 //Technically it could be only set to be published in the future
                                 //so comparing to now would be more correct
                                 //but we aren't using that functionality
@@ -60,17 +60,17 @@ impl ImageSearchPage {
                                 }
                             })
                             .child(html!("img-ji", {
-                                .property("slot", "image")
-                                .property("size", "thumb")
-                                .property("cacheBust", true)
-                                .property("id", id.0.to_string())
+                                .prop("slot", "image")
+                                .prop("size", "thumb")
+                                .prop("cacheBust", true)
+                                .prop("id", id.0.to_string())
                             }))
                         }))
                     })
                 }))
             }))
             .child(html!("window-loader-block", {
-                .property_signal("visible", state.loader.is_loading())
+                .prop_signal("visible", state.loader.is_loading())
             }))
         })
     }
@@ -81,9 +81,9 @@ struct PaginationDom {}
 impl PaginationDom {
     pub fn render(state: Rc<State>, slot: &str) -> Dom {
         html!("pagination-widget", {
-            .property_signal("page", state.page_signal())
-            .property_signal("total", state.total_page_signal())
-            .property("slot", slot)
+            .prop_signal("page", state.page_signal())
+            .prop_signal("total", state.total_page_signal())
+            .prop("slot", slot)
             .event(clone!(state => move |evt:events::CustomChange| {
                 let page:u32 = evt.value().parse().unwrap_ji();
                 let mut query = state.query.lock_mut();
@@ -111,12 +111,12 @@ impl FilterDom {
         });
 
         html!("dropdown-underlined", {
-            .property("slot", slot)
-            .property_signal("value", state.filter_value_signal())
+            .prop("slot", slot)
+            .prop_signal("value", state.filter_value_signal())
             .children(&mut [
                 html!("image-search-publish-filter", {
-                    .property("slot", "options")
-                    .property("mode", "all")
+                    .prop("slot", "options")
+                    .prop("mode", "all")
                     .event(clone!(state, _self => move |_evt:events::Click| {
                         let mut query = state.query.lock_mut();
                         query.is_published = None;
@@ -125,8 +125,8 @@ impl FilterDom {
                     }))
                 }),
                 html!("image-search-publish-filter", {
-                    .property("slot", "options")
-                    .property("mode", "published")
+                    .prop("slot", "options")
+                    .prop("mode", "published")
                     .event(clone!(state, _self => move |_evt:events::Click| {
                         let mut query = state.query.lock_mut();
                         query.is_published = Some(true);
@@ -135,8 +135,8 @@ impl FilterDom {
                     }))
                 }),
                 html!("image-search-publish-filter", {
-                    .property("slot", "options")
-                    .property("mode", "saved")
+                    .prop("slot", "options")
+                    .prop("mode", "saved")
                     .event(clone!(state, _self => move |_evt:events::Click| {
                         let mut query = state.query.lock_mut();
                         query.is_published = Some(false);

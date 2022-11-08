@@ -66,12 +66,12 @@ impl PrePublish {
                 let _state = PrePublish::load_data(publish_state, asset).await;
                 state.set(Some(Rc::new(_state)));
             }))
-            .property("slot", "main")
+            .prop("slot", "main")
             .child_signal(state.signal_cloned().map(|state| {
                 state.map(render_page)
             }))
             .child(html!("window-loader-block", {
-                .property_signal("visible", state.signal_ref(|state| state.is_none()))
+                .prop_signal("visible", state.signal_ref(|state| state.is_none()))
             }))
         })
     }
@@ -79,8 +79,8 @@ impl PrePublish {
 
 fn render_page(state: Rc<PrePublish>) -> Dom {
     html!("jig-edit-publish", {
-        .property("assetDisplayName", state.asset_type_name())
-        .property("resourceOnTop", state.asset.is_resource())
+        .prop("assetDisplayName", state.asset_type_name())
+        .prop("resourceOnTop", state.asset.is_resource())
         // .apply_if(state.jig.jig_focus.is_resources(), |dom| {
         //     // TODO set content for no activities and content for incomplete activities.
         //     if !has_modules {
@@ -98,15 +98,15 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                 DraftOrLive::Draft,
             ).render_live(Some("img")),
             html!("fa-icon", {
-                .property("icon", "fa-thin fa-pen")
-                .property("slot", "edit-cover")
+                .prop("icon", "fa-thin fa-pen")
+                .prop("slot", "edit-cover")
                 .event(clone!(state => move |_: events::Click| {
                     state.navigate_to_cover();
                 }))
             }),
             html!("label", {
                 .with_node!(elem => {
-                    .property("slot", "public")
+                    .prop("slot", "public")
                     .text(STR_PUBLIC_LABEL_1)
                     .text(state.asset_type_name())
                     .text(STR_PUBLIC_LABEL_2)
@@ -118,7 +118,7 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                         }
                     }))
                     .child(html!("input-switch", {
-                        .property_signal("enabled", state.asset.privacy_level().signal().map(|privacy_level| {
+                        .prop_signal("enabled", state.asset.privacy_level().signal().map(|privacy_level| {
                             privacy_level == PrivacyLevel::Public
                         }))
                         .event(clone!(state => move |evt: events::CustomToggle| {
@@ -137,8 +137,8 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                             false => None,
                             true => {
                                 Some(html!("tooltip-info", {
-                                    .property("title", STR_PUBLIC_POPUP_TITLE)
-                                    .property("body", format!(
+                                    .prop("title", STR_PUBLIC_POPUP_TITLE)
+                                    .prop("body", format!(
                                         "{}{}{}{}{}",
                                         STR_PUBLIC_POPUP_BODY_1,
                                         state.asset_type_name(),
@@ -146,9 +146,9 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                                         state.asset_type_name(),
                                         STR_PUBLIC_POPUP_BODY_3
                                     ))
-                                    .property("closeable", true)
-                                    .property("target", elem.clone())
-                                    .property("placement", "bottom")
+                                    .prop("closeable", true)
+                                    .prop("target", elem.clone())
+                                    .prop("placement", "bottom")
                                     .event(clone!(state => move |_: events::Close| {
                                         state.show_public_popup.set(false);
                                     }))
@@ -159,9 +159,9 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                 })
             }),
             html!("input-wrapper", {
-                .property("slot", "name")
-                .property("label", format!("{}{}",  state.asset_type_name(), STR_NAME_LABEL))
-                .property_signal("error", {
+                .prop("slot", "name")
+                .prop("label", format!("{}{}",  state.asset_type_name(), STR_NAME_LABEL))
+                .prop_signal("error", {
                     (map_ref! {
                         let submission_tried = state.submission_tried.signal(),
                         let value = state.asset.display_name().signal_cloned()
@@ -176,9 +176,9 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                 })
                 .child(html!("input" => HtmlInputElement, {
                     .with_node!(elem => {
-                        .attribute("dir", "auto")
-                        .property("placeholder", format!("{}{}{}", STR_NAME_PLACEHOLDER_1, state.asset_type_name(), STR_NAME_PLACEHOLDER_2))
-                        .property_signal("value", state.asset.display_name().signal_cloned())
+                        .attr("dir", "auto")
+                        .prop("placeholder", format!("{}{}{}", STR_NAME_PLACEHOLDER_1, state.asset_type_name(), STR_NAME_PLACEHOLDER_2))
+                        .prop_signal("value", state.asset.display_name().signal_cloned())
                         .event(clone!(state => move |_evt: events::Input| {
                             let value = elem.value();
                             state.asset.display_name().set(value);
@@ -187,9 +187,9 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                 }))
             }),
             html!("input-wrapper", {
-                .property("slot", "description")
-                .property("label", STR_DESCRIPTION_LABEL)
-                // .property_signal("error", {
+                .prop("slot", "description")
+                .prop("label", STR_DESCRIPTION_LABEL)
+                // .prop_signal("error", {
                 //     (map_ref! {
                 //         let submission_tried = state.submission_tried.signal(),
                 //         let value = state.asset.description().signal_cloned()
@@ -204,8 +204,8 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                 })
                 .child(html!("textarea" => HtmlTextAreaElement, {
                     .with_node!(elem => {
-                        .attribute("dir", "auto")
-                        .property("placeholder", format!(
+                        .attr("dir", "auto")
+                        .prop("placeholder", format!(
                             "{}{}{}",
                             STR_DESCRIPTION_PLACEHOLDER_1,
                             state.asset_type_name(),
@@ -226,9 +226,9 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
             PrePublish::render_category_pills(state.clone()),
 
             html!("button-rect", {
-                .property("slot", "publish-later")
-                .property("color", "blue")
-                .property("kind", "text")
+                .prop("slot", "publish-later")
+                .prop("color", "blue")
+                .prop("kind", "text")
                 .text(STR_PUBLISH_LATER)
                 .event(clone!(state => move |_: events::Click| {
                     let url = match &state.asset {
@@ -259,14 +259,14 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
             }),
 
             html!("div" => HtmlElement, {
-                .property("slot", "publish")
+                .prop("slot", "publish")
                 .with_node!(elem => {
                     .child(html!("button-rect", {
                         .text(STR_PUBLISH)
                         .text(state.asset_type_name())
-                        .property("disabled", !state.is_ready_to_publish())
+                        .prop("disabled", !state.is_ready_to_publish())
                         .child(html!("fa-icon", {
-                            .property("icon", "fa-light fa-rocket-launch")
+                            .prop("icon", "fa-light fa-rocket-launch")
                             .style("color", "var(--main-yellow)")
                         }))
                         .event(clone!(state => move |_: events::Click| {

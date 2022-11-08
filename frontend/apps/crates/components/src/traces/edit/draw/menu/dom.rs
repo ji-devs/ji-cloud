@@ -22,39 +22,39 @@ pub fn render_draw_menu(state: Rc<Draw>, menu: Menu, resize_info: &ResizeInfo) -
         .apply(OverlayHandle::lifecycle(
         move || {
             html!("overlay-drag", {
-                .property("target", menu.get_dom_rect(&resize_info))
-                .property("targetAnchor", "bm")
-                .property("contentAnchor", "tl")
-                .property("marginY", 24.0)
+                .prop("target", menu.get_dom_rect(&resize_info))
+                .prop("targetAnchor", "bm")
+                .prop("contentAnchor", "tl")
+                .prop("marginY", 24.0)
                 .child(html!("trace-edit-reshape-menu", {
 
-                    .property_signal("noGap", state.reshape_menu_options_signal().map(|x| !x))
+                    .prop_signal("noGap", state.reshape_menu_options_signal().map(|x| !x))
                     .visible_signal(state.trace.transform.is_transforming.signal().map(|x| !x))
                     .children(&mut [
                         html!("trace-edit-reshape-menu-btn", {
-                            .property("kind", "free")
+                            .prop("kind", "free")
                             .event(clone!(state => move |_evt:events::Click| {
                                 state.shape_free();
                             }))
                             .visible_signal(state.reshape_menu_options_signal())
                         }),
                         html!("trace-edit-reshape-menu-btn", {
-                            .property("kind", "rect")
+                            .prop("kind", "rect")
                             .event(clone!(state => move |_evt:events::Click| {
                                 state.shape_rect();
                             }))
                             .visible_signal(state.reshape_menu_options_signal())
                         }),
                         html!("trace-edit-reshape-menu-btn", {
-                            .property("kind", "ellipse")
+                            .prop("kind", "ellipse")
                             .event(clone!(state => move |_evt:events::Click| {
                                 state.shape_ellipse();
                             }))
                             .visible_signal(state.reshape_menu_options_signal())
                         }),
                         html!("trace-edit-reshape-menu-btn", {
-                            .property("kind", "confirm")
-                            .property_signal("bothSidesRounded", state.reshape_menu_options_signal().map(|x| !x))
+                            .prop("kind", "confirm")
+                            .prop_signal("bothSidesRounded", state.reshape_menu_options_signal().map(|x| !x))
                             .event(clone!(state => move |_evt:events::Click| {
                                 state.done();
                             }))
@@ -62,8 +62,8 @@ pub fn render_draw_menu(state: Rc<Draw>, menu: Menu, resize_info: &ResizeInfo) -
                         }),
 
                         html!("button-icon", {
-                            .property("icon", "circle-x-blue")
-                            .property("slot", "close")
+                            .prop("icon", "circle-x-blue")
+                            .prop("slot", "close")
                             .event(clone!(state => move |_evt:events::Click| {
                                 state.cancel();
                             }))

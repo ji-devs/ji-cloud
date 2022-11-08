@@ -43,7 +43,7 @@ impl Iframe {
                     }
                 }
             }))
-            .property("src", STR_IFRAME_URL)
+            .prop("src", STR_IFRAME_URL)
         })
     }
 }

@@ -19,29 +19,29 @@ impl Component<EditBio> for Rc<EditBio> {
 
         dom.child(html!("popup-body", {
             .child(html!("fa-button", {
-                .property("slot", "close")
-                .property("icon", "fa-regular fa-xmark")
+                .prop("slot", "close")
+                .prop("icon", "fa-regular fa-xmark")
                 .event(clone!(state => move |_: events::Click| {
                     (state.callbacks.close)();
                 }))
             }))
             .child(html!("h3", {
-                .property("slot", "heading")
+                .prop("slot", "heading")
                 .text(STR_BIO)
             }))
             .child(html!("div", {
-                .property("slot", "body")
+                .prop("slot", "body")
                 .class("field-grid")
                 .child(html!("div", {
                     .class("body")
                     .children(&mut [
                         html!("input-wrapper", {
-                            .property("slot", "organization")
-                            .property("label", STR_MY_BIO)
+                            .prop("slot", "organization")
+                            .prop("label", STR_MY_BIO)
                             .child(html!("textarea" => HtmlTextAreaElement, {
-                                .property("placeholder", STR_BIO_PLACEHOLDER)
+                                .prop("placeholder", STR_BIO_PLACEHOLDER)
                                 .with_node!(elem => {
-                                    .property_signal("value", state.bio.signal_cloned())
+                                    .prop_signal("value", state.bio.signal_cloned())
                                     .event(clone!(state => move |_: events::Input| {
                                         state.bio.set(elem.value());
                                     }))
@@ -49,15 +49,15 @@ impl Component<EditBio> for Rc<EditBio> {
                             }))
                         }),
                         html!("community-private-public-switch", {
-                            .property("type", "checkbox")
-                            .property_signal("isPublic", state.bio_public.signal())
+                            .prop("type", "checkbox")
+                            .prop_signal("isPublic", state.bio_public.signal())
                             .event(clone!(state => move |evt: events::CustomToggle| {
                                 state.bio_public.set_neq(evt.value());
                             }))
                         }),
                         html!("button-rect", {
                             .text("Save")
-                            .property("slot", "submit")
+                            .prop("slot", "submit")
                             .event(clone!(state => move |_: events::Click| {
                                 let user = state.get_user_profile_from_fields();
                                 (state.callbacks.save_changes)(user);

@@ -5,7 +5,7 @@ use std::rc::Rc;
 
 pub fn render(state: Rc<Step3>) -> Dom {
     html!("module-sidebar-body", {
-        .property("slot", "body")
+        .prop("slot", "body")
         .child({
             AudioInput::render(
                 Rc::clone(&state.audio),

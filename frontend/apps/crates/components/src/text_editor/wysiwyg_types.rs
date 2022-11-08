@@ -1,5 +1,6 @@
 // this file needs to be in sync with frontend\elements\src\core\wysiwyg\wysiwyg-types.ts
 
+use gloo_utils::format::JsValueSerdeExt;
 use serde::{Deserialize, Serialize};
 use utils::unwrap::UnwrapJiExt;
 use wasm_bindgen::JsValue;
@@ -158,7 +159,7 @@ impl WysiwygControlsChange {
     pub fn value(&self) -> ControlsState {
         // log::info!("{:#?}", self.detail());
 
-        self.detail().into_serde().unwrap_ji()
+        JsValueSerdeExt::into_serde(&self.detail()).unwrap_ji()
     }
 }
 

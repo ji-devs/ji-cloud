@@ -94,18 +94,18 @@ impl AnimationPlayer {
         // html!("video" => web_sys:: HtmlVideoElement, {
         //     .children(&mut[
         //         html!("source", {
-        //             .attribute("src", &format!("{}.webm", &state.base.design_media_url(&state.raw.src)))
-        //             .attribute("type", "video/webm; codecs=vp9")
+        //             .attr("src", &format!("{}.webm", &state.base.design_media_url(&state.raw.src)))
+        //             .attr("type", "video/webm; codecs=vp9")
         //         }),
         //         html!("source", {
-        //             .attribute("src", &format!("{}.mp4", &state.base.design_media_url(&state.raw.src)))
-        //             .attribute("type", "video/mp4; codecs=hvc1")
+        //             .attr("src", &format!("{}.mp4", &state.base.design_media_url(&state.raw.src)))
+        //             .attr("type", "video/mp4; codecs=hvc1")
         //         }),
         //     ])
-        //     .property("autoplay", true)
-        //     .property("muted", true)
-        //     .property("loop", true)
-        //     .property("playsinline", true)
+        //     .prop("autoplay", true)
+        //     .prop("muted", true)
+        //     .prop("loop", true)
+        //     .prop("playsinline", true)
         //     .style("cursor", "pointer")
         //     .style("display", "block")
         //     .style("position", "absolute")

@@ -20,7 +20,7 @@ pub fn render_sticker_text_menu<T: AsSticker>(
         .style("gap", "10px")
         .children(&mut [
             html!("menu-line", {
-                .property("icon", "edit")
+                .prop("icon", "edit")
                 .event(clone!(stickers, index, text => move |_evt:events::Click| {
                     text.transform.close_menu();
                     if let Some(index) = index.get() {
@@ -31,7 +31,7 @@ pub fn render_sticker_text_menu<T: AsSticker>(
                 }))
             }),
             html!("menu-line", {
-                .property("icon", "duplicate")
+                .prop("icon", "duplicate")
                 .event(clone!(stickers, index, text => move |_evt:events::Click| {
                     text.transform.close_menu();
                     if let Some(index) = index.get() {
@@ -40,7 +40,7 @@ pub fn render_sticker_text_menu<T: AsSticker>(
                 }))
             }),
             html!("menu-line", {
-                .property("icon", "move-to-front")
+                .prop("icon", "move-to-front")
                 .event(clone!(stickers, index, text => move |_ :events::Click| {
                     text.transform.close_menu();
                     if let Some(index) = index.get() {
@@ -49,7 +49,7 @@ pub fn render_sticker_text_menu<T: AsSticker>(
                 }))
             }),
             html!("menu-line", {
-                .property("icon", "move-forward")
+                .prop("icon", "move-forward")
                 .event(clone!(stickers, index, text => move |_evt:events::Click| {
                     text.transform.close_menu();
                     if let Some(index) = index.get() {
@@ -58,7 +58,7 @@ pub fn render_sticker_text_menu<T: AsSticker>(
                 }))
             }),
             html!("menu-line", {
-                .property("icon", "move-backward")
+                .prop("icon", "move-backward")
                 .event(clone!(stickers, index, text => move |_evt:events::Click| {
                     text.transform.close_menu();
                     if let Some(index) = index.get() {
@@ -67,7 +67,7 @@ pub fn render_sticker_text_menu<T: AsSticker>(
                 }))
             }),
             html!("menu-line", {
-                .property("icon", "move-to-back")
+                .prop("icon", "move-to-back")
                 .event(clone!(stickers, index, text => move |_ :events::Click| {
                     text.transform.close_menu();
                     if let Some(index) = index.get() {
@@ -76,7 +76,7 @@ pub fn render_sticker_text_menu<T: AsSticker>(
                 }))
             }),
             html!("menu-line", {
-                .property("icon", "delete")
+                .prop("icon", "delete")
                 .event(clone!(stickers, text => move |_evt:events::Click| {
                     text.transform.close_menu();
                     if let Some(index) = index.get() {

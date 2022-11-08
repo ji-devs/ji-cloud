@@ -12,11 +12,11 @@ impl PrePublish {
     pub fn render_languages(self: Rc<Self>) -> Dom {
         let state = Rc::clone(&self);
         html!("input-select", {
-            .property("slot", "language")
-            .property("label", STR_LANGUAGE_LABEL)
-            .property("placeholder", STR_LANGUAGE_PLACEHOLDER)
-            .property_signal("value", language_value_signal(state.clone()))
-            // .property_signal("error", {
+            .prop("slot", "language")
+            .prop("label", STR_LANGUAGE_LABEL)
+            .prop("placeholder", STR_LANGUAGE_PLACEHOLDER)
+            .prop_signal("value", language_value_signal(state.clone()))
+            // .prop_signal("error", {
             //     (map_ref! {
             //         let submission_tried = state.submission_tried.signal(),
             //         let value = state.jig.language.signal_cloned()
@@ -36,7 +36,7 @@ impl PrePublish {
 fn render_language(Language(lang_code, land_label): &Language, state: Rc<PrePublish>) -> Dom {
     html!("input-select-option", {
         .text(land_label)
-        .property_signal("selected", state.asset.language().signal_cloned().map(clone!(lang_code => move |selected_lang| {
+        .prop_signal("selected", state.asset.language().signal_cloned().map(clone!(lang_code => move |selected_lang| {
             lang_code == selected_lang
         })))
         .event(clone!(state, lang_code => move |evt: events::CustomSelectedChange| {

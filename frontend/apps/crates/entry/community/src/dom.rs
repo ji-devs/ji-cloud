@@ -40,7 +40,7 @@ impl Community {
                 ),
                 self.render_nav(),
                 html!("form", {
-                    .property("slot", "search-bar")
+                    .prop("slot", "search-bar")
                     .event_with_options(
                         &EventOptions::preventable(),
                         clone!(state => move |e: events::Submit| {
@@ -52,10 +52,10 @@ impl Community {
                         .children(&mut [
                             html!("input" => HtmlInputElement, {
                                 .with_node!(elem => {
-                                    .property("slot", "search-input")
-                                    .property("type", "search")
-                                    .property("placeholder", STR_SEARCH)
-                                    .property_signal("value", state.q.signal_cloned())
+                                    .prop("slot", "search-input")
+                                    .prop("type", "search")
+                                    .prop("placeholder", STR_SEARCH)
+                                    .prop_signal("value", state.q.signal_cloned())
                                     .event(clone!(state => move |_: events::Input| {
                                         let value = elem.value();
                                         state.q.set(value);
@@ -63,8 +63,8 @@ impl Community {
                                 })
                             }),
                             html!("fa-button", {
-                                .property("slot", "search-button")
-                                .property("icon", "fa-solid fa-magnifying-glass")
+                                .prop("slot", "search-button")
+                                .prop("icon", "fa-solid fa-magnifying-glass")
                                 .event(clone!(state => move |_: events::Click| {
                                     state.on_search_click();
                                 }))
@@ -113,7 +113,7 @@ impl Community {
     fn render_nav(self: &Rc<Self>) -> Dom {
         let user_id = get_user_id();
         html!("nav", {
-            .property("slot", "nav")
+            .prop("slot", "nav")
             .children(&mut [
                 {
                     let route = match user_id {
@@ -129,19 +129,19 @@ impl Community {
                             match get_user_cloned() {
                                 Some(UserProfile { profile_image: Some(image_id), .. }) => {
                                     html!("profile-image", {
-                                        .property("imageId", &image_id.0.to_string())
+                                        .prop("imageId", &image_id.0.to_string())
                                     })
                                 },
                                 _ => {
                                     html!("fa-icon", {
-                                        .property("icon", "fa-thin fa-user-tie-hair")
+                                        .prop("icon", "fa-thin fa-user-tie-hair")
                                     })
                                 },
                             }
                         })
-                        .property("label", "My profile")
-                        .property("href", &route)
-                        .property_signal("active", Community::route_signal().map(move |route| {
+                        .prop("label", "My profile")
+                        .prop("href", &route)
+                        .prop_signal("active", Community::route_signal().map(move |route| {
                             matches!(route, Route::Community(CommunityRoute::Members(route)) if is_current_users_page(&user_id, &route))
                         }))
                         // only use local router if logged in, otherwise full redirect
@@ -156,13 +156,13 @@ impl Community {
                 {
                     let route = Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::List)).to_string();
                     html!("community-nav-item", {
-                        .property("label", "Circles")
-                        .property("href", &route)
-                        .property_signal("active", Community::route_signal().map(|route| {
+                        .prop("label", "Circles")
+                        .prop("href", &route)
+                        .prop_signal("active", Community::route_signal().map(|route| {
                             matches!(route, Route::Community(CommunityRoute::Circles(_)))
                         }))
                         .child(html!("fa-icon", {
-                            .property("icon", "fa-thin fa-circle-nodes")
+                            .prop("icon", "fa-thin fa-circle-nodes")
                         }))
                         .event(|_: events::Click| {
                             track_nav_item("Circles");
@@ -175,13 +175,13 @@ impl Community {
                 {
                     let route = Route::Community(CommunityRoute::Members(CommunityMembersRoute::List)).to_string();
                     html!("community-nav-item", {
-                        .property("label", "Members")
-                        .property("href", &route)
-                        .property_signal("active", Community::route_signal().map(clone!(user_id => move |route| {
+                        .prop("label", "Members")
+                        .prop("href", &route)
+                        .prop_signal("active", Community::route_signal().map(clone!(user_id => move |route| {
                             matches!(route, Route::Community(CommunityRoute::Members(route)) if !is_current_users_page(&user_id, &route))
                         })))
                         .child(html!("fa-icon", {
-                            .property("icon", "fa-thin fa-people-group")
+                            .prop("icon", "fa-thin fa-people-group")
                         }))
                         .event(|_: events::Click| {
                             track_nav_item("Members");
@@ -193,9 +193,9 @@ impl Community {
                 },
                 {
                     html!("community-nav-item", {
-                        .property("label", "ProDev")
+                        .prop("label", "ProDev")
                         .child(html!("fa-icon", {
-                            .property("icon", "fa-thin fa-clapperboard-play")
+                            .prop("icon", "fa-thin fa-clapperboard-play")
                         }))
                         .event_with_options(
                             &EventOptions::preventable(),

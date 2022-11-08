@@ -42,9 +42,9 @@ impl Step3Page {
                         for (id, label) in options.age_ranges.iter() {
                             children.push(
                                 html!("input-checkbox", {
-                                    .property("slot", "ages")
-                                    .property("label", label)
-                                    .property("checked", state.age_ranges.borrow().contains(id))
+                                    .prop("slot", "ages")
+                                    .prop("label", label)
+                                    .prop("checked", state.age_ranges.borrow().contains(id))
                                     .event(clone!(state, id => move |evt:events::CustomToggle| {
                                         if evt.value() {
                                             state.age_ranges.borrow_mut().insert(id.clone());
@@ -58,9 +58,9 @@ impl Step3Page {
                         for (id, label) in options.affiliations.iter() {
                             children.push(
                                 html!("input-checkbox", {
-                                    .property("slot", "affiliations")
-                                    .property("label", label)
-                                    .property("checked", state.affiliations.borrow().contains(id))
+                                    .prop("slot", "affiliations")
+                                    .prop("label", label)
+                                    .prop("checked", state.affiliations.borrow().contains(id))
                                     .event(clone!(state, id => move |evt:events::CustomToggle| {
                                         if evt.value() {
                                             state.affiliations.borrow_mut().insert(id.clone());
@@ -74,9 +74,9 @@ impl Step3Page {
                         for (id, label) in options.subjects.iter() {
                             children.push(
                                 html!("input-checkbox", {
-                                    .property("slot", "subjects")
-                                    .property("label", label)
-                                    .property("checked", state.subjects.borrow().contains(id))
+                                    .prop("slot", "subjects")
+                                    .prop("label", label)
+                                    .prop("checked", state.subjects.borrow().contains(id))
                                     .event(clone!(state, id => move |evt:events::CustomToggle| {
                                         if evt.value() {
                                             state.subjects.borrow_mut().insert(id.clone());
@@ -90,10 +90,10 @@ impl Step3Page {
 
                         children.push(
                             html!("button-rect-icon", {
-                                .property("slot", "submit")
-                                .property("color", "red")
-                                .property("size", "medium")
-                                .property("iconAfter", "arrow")
+                                .prop("slot", "submit")
+                                .prop("color", "red")
+                                .prop("size", "medium")
+                                .prop("iconAfter", "arrow")
                                 .text(STR_SUBMIT)
                                 .event(clone!(state => move |_evt:events::Click| {
                                     actions::submit(state.clone());

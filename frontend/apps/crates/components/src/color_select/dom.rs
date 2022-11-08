@@ -24,13 +24,13 @@ pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
             state.user_colors.lock_mut().replace_cloned(user_colors);
         }))
         .apply_if(slot.is_some(), move |dom| {
-            dom.property("slot", slot.unwrap_ji())
+            dom.prop("slot", slot.unwrap_ji())
         })
         .apply_if(state.label.is_some(), clone!(state => move |dom| {
-            dom.property("label", state.label.clone().unwrap_ji())
+            dom.prop("label", state.label.clone().unwrap_ji())
         }))
         .child(html!("empty-fragment", { // TODO: once we can have multiple child signals we wont need this
-            .property("slot", "sections")
+            .prop("slot", "sections")
             .child_signal(state.theme_colors.signal_cloned().map(clone!(state => move |theme_colors| {
                 Some(render_static_section(state.clone(), &theme_colors, STR_THEME_COLORS_LABEL))
             })))
@@ -50,13 +50,13 @@ pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
 
 fn render_static_section(state: Rc<State>, color_options: &[RGBA8], label: &str) -> Dom {
     html!("color-select-section", {
-        .property("slot", "sections")
-        .property("label", label)
+        .prop("slot", "sections")
+        .prop("label", label)
         .children(color_options.iter().map(|color| {
             html!("color-select-item", {
-                .property("color", rgba8_to_hex(color))
-                .property("slot", "items")
-                .property_signal("selected", state.value.signal_cloned().map(clone!(color => move |selected_color| {
+                .prop("color", rgba8_to_hex(color))
+                .prop("slot", "items")
+                .prop_signal("selected", state.value.signal_cloned().map(clone!(color => move |selected_color| {
                     match selected_color {
                         Some(selected_color) => color == selected_color,
                         None => false
@@ -72,13 +72,13 @@ fn render_static_section(state: Rc<State>, color_options: &[RGBA8], label: &str)
 
 fn render_user_section(state: Rc<State>) -> Dom {
     html!("color-select-section", {
-        .property("slot", "sections")
-        .property("label", STR_USER_COLORS_LABEL)
+        .prop("slot", "sections")
+        .prop("label", STR_USER_COLORS_LABEL)
         .children_signal_vec(state.user_colors.signal_vec_cloned().enumerate().map(clone!(state => move |(index, color)| {
             html!("color-select-item", {
-                .property("slot", "items")
-                .property("color", rgba8_to_hex(&color))
-                .property_signal("selected", state.value.signal_cloned().map(clone!(color => move |selected_color| {
+                .prop("slot", "items")
+                .prop("color", rgba8_to_hex(&color))
+                .prop_signal("selected", state.value.signal_cloned().map(clone!(color => move |selected_color| {
                     if selected_color.is_some() {
                         let selected_color = selected_color.unwrap_ji();
                         return selected_color == color;
@@ -88,10 +88,10 @@ fn render_user_section(state: Rc<State>) -> Dom {
                 .event(clone!(color, state => move |_:events::Click| {
                     set_selected(Rc::clone(&state), Some(color));
                 }))
-                .attribute("deletable", "")
+                .attr("deletable", "")
                 .child(html!("button-icon", {
-                    .property("slot", "delete-button")
-                    .property("icon", "circle-x-blue")
+                    .prop("slot", "delete-button")
+                    .prop("icon", "circle-x-blue")
                     .event(clone!(state => move |_:events::Click| {
                         let index: usize = index.lock_ref().unwrap_or_default();
                         spawn_local(clone!(state => async move {
@@ -106,10 +106,10 @@ fn render_user_section(state: Rc<State>) -> Dom {
 
 fn render_add_color(state: Rc<State>) -> Dom {
     html!("input-color", {
-        .property("slot", "add-color")
+        .prop("slot", "add-color")
         .child(html!("button-rect", {
-            .property("kind", "filled")
-            .property("color", "blue")
+            .prop("kind", "filled")
+            .prop("color", "blue")
             .text(STR_ADD_COLOR)
         }))
         .event(clone!(state => move |e: events::CustomChange| {

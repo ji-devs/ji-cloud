@@ -19,20 +19,20 @@ impl CategoriesDom {
         html!("image-meta-section-categories", {
             .children(&mut [
                 html!("div", {
-                    .property("slot", "category-select")
+                    .prop("slot", "category-select")
                     .children(state.categories.iter().map(|cat| {
                         render_select(None, cat.clone(), state.clone())
                     }))
                 }),
                 html!("div", {
-                    .property("slot", "category-report")
+                    .prop("slot", "category-report")
                     .children(state.categories.iter().map(|cat| {
                         render_report(state.image.categories.clone(), None, cat.clone())
                     }))
                 }),
                 html!("button-expand", {
-                    .property("slot", "expand")
-                    .property("expanded", false)
+                    .prop("slot", "expand")
+                    .prop("expanded", false)
                     .event(clone!(state => move |evt:events::CustomToggle| {
                         let flag = evt.value();
                         for cat in state.categories.iter() {
@@ -56,26 +56,24 @@ pub fn render_select(
 
     if has_children {
         content.push(html!("div", {
-            .property("slot", "content")
+            .prop("slot", "content")
             .text(&cat.name)
         }));
     } else {
-        content.push(
-            html!("input-checkbox", {
-                .property("slot", "content")
-                .property("label", &cat.name)
-                .property_signal("checked", category_selected(state.image.categories.clone(), cat.clone()))
-                .event(clone!(cat, state => move |evt:events::CustomToggle| {
-                    actions::on_toggle(cat.id, state.clone(), evt.value());
-                }))
-            })
-        );
+        content.push(html!("input-checkbox", {
+            .prop("slot", "content")
+            .prop("label", &cat.name)
+            .prop_signal("checked", category_selected(state.image.categories.clone(), cat.clone()))
+            .event(clone!(cat, state => move |evt:events::CustomToggle| {
+                actions::on_toggle(cat.id, state.clone(), evt.value());
+            }))
+        }));
     }
 
     if parent.is_none() && has_children {
         content.push(html!("button-expand", {
-            .property("slot", "content")
-            .property("expanded", false)
+            .prop("slot", "content")
+            .prop("expanded", false)
             .event(clone!(cat => move |evt:events::CustomToggle| {
                 actions::toggle_expand_all(&cat, evt.value());
             }))
@@ -83,9 +81,9 @@ pub fn render_select(
     }
 
     html!("dropdown-tree", {
-        .property_signal("expanded", cat.expanded.signal())
-        .property("hasChildren", has_children)
-        .property("isChild", parent.is_some())
+        .prop_signal("expanded", cat.expanded.signal())
+        .prop("hasChildren", has_children)
+        .prop("isChild", parent.is_some())
         .event(clone!(cat => move |_evt:events::ExpandAll| {
             actions::toggle_expand_all(&cat, true);
         }))
@@ -94,7 +92,7 @@ pub fn render_select(
         }))
         .children(content)
         .child(html!("div", {
-            .property("slot", "children")
+            .prop("slot", "children")
             .children(cat.children.iter().map(|child| {
                 render_select(Some(cat.clone()), child.clone(), state.clone())
             }))

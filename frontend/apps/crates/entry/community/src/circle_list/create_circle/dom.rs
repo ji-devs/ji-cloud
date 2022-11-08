@@ -16,13 +16,13 @@ impl CreateCircle {
         let state = self;
 
         html!("community-create-circle", {
-            .property("slot", "popup")
+            .prop("slot", "popup")
             .children(&mut [
                 html!("input-wrapper", {
-                    .property("label", STR_CIRCLE_NAME)
-                    .property("slot", "name")
+                    .prop("label", STR_CIRCLE_NAME)
+                    .prop("slot", "name")
                     .child(html!("input" => HtmlInputElement, {
-                        .property("placeholder", "Type a name")
+                        .prop("placeholder", "Type a name")
                         .with_node!(input => {
                             .event(clone!(state => move |_: events::Input| {
                                 let value = input.value();
@@ -32,10 +32,10 @@ impl CreateCircle {
                     }))
                 }),
                 html!("input-wrapper", {
-                    .property("label", STR_DESCRIPTION)
-                    .property("slot", "description")
+                    .prop("label", STR_DESCRIPTION)
+                    .prop("slot", "description")
                     .child(html!("textarea" => HtmlTextAreaElement, {
-                        .property("placeholder", "Describe why members would want to join this circle")
+                        .prop("placeholder", "Describe why members would want to join this circle")
                         .with_node!(input => {
                             .event(clone!(state => move |_: events::Input| {
                                 let value = input.value();
@@ -46,16 +46,16 @@ impl CreateCircle {
                 }),
                 html!("button-rect", {
                     .text("Create")
-                    .property("slot", "submit")
-                    .property_signal("disabled", not(state.can_save_signal()))
+                    .prop("slot", "submit")
+                    .prop_signal("disabled", not(state.can_save_signal()))
                     .event(clone!(state => move |_: events::Click| {
                         state.save_circles();
                     }))
                 }),
                 html!("fa-button", {
-                    .property("slot", "close")
-                    .property("icon", "fa-regular fa-xmark")
-                    .property_signal("disabled", state.loader.is_loading())
+                    .prop("slot", "close")
+                    .prop("icon", "fa-regular fa-xmark")
+                    .prop_signal("disabled", state.loader.is_loading())
                     .event(clone!(state => move |_: events::Click| {
                         state.circle_list_state.create_popup_open.set(false);
                     }))

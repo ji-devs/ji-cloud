@@ -13,7 +13,7 @@ impl ImageAddPage {
 
         html!("image-add-page", {
             .child(html!("button-add", {
-                .property("slot", "button")
+                .prop("slot", "button")
                 .event(clone!(state => move |_evt:events::Click| {
                     if let Some(elem) = state.file_input.borrow().as_ref() {
                         elem.click();
@@ -40,8 +40,8 @@ impl ImageAddPage {
                 dominator::routing::go_to_url(&route);
             })
             .child(html!("input" => HtmlInputElement, {
-                .property("type", "file")
-                .property("accept", "image/*")
+                .prop("type", "file")
+                .prop("accept", "image/*")
                 .style("display", "none")
                 .after_inserted(clone!(state => move |elem| {
                     *state.file_input.borrow_mut() = Some(elem);
@@ -59,7 +59,7 @@ impl ImageAddPage {
             }))
             .child(
                 html!("window-loader-block", {
-                    .property_signal("visible", state.loader.is_loading())
+                    .prop_signal("visible", state.loader.is_loading())
                 })
             )
             .event(clone!(state => move |evt:events::CustomChange| {

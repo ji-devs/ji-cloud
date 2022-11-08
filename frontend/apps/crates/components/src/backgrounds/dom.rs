@@ -37,7 +37,7 @@ pub fn render_backgrounds(bg: Rc<Backgrounds>, slot: Option<&str>) -> Dom {
     .to_signal_vec();
 
     html!("empty-fragment", {
-        .apply_if(slot.is_some(), |dom| dom.property("slot", slot.unwrap_ji()))
+        .apply_if(slot.is_some(), |dom| dom.prop("slot", slot.unwrap_ji()))
         .style("width", "100%")
         .style("height", "100%")
         .children_signal_vec(children)
@@ -67,7 +67,7 @@ pub fn render_single_background(
     .to_signal_vec();
 
     html!("empty-fragment", {
-        .apply_if(slot.is_some(), |dom| dom.property("slot", slot.unwrap_ji()))
+        .apply_if(slot.is_some(), |dom| dom.prop("slot", slot.unwrap_ji()))
         .style("width", "100%")
         .style("height", "100%")
         .children_signal_vec(children)
@@ -89,7 +89,7 @@ pub fn render_backgrounds_raw(bg: &RawBackgrounds, theme_id: ThemeId, slot: Opti
     }
 
     html!("empty-fragment", {
-        .apply_if(slot.is_some(), |dom| dom.property("slot", slot.unwrap_ji()))
+        .apply_if(slot.is_some(), |dom| dom.prop("slot", slot.unwrap_ji()))
         .style("width", "100%")
         .style("height", "100%")
         .children(children)
@@ -111,7 +111,7 @@ pub fn render_single_background_raw(
     }
 
     html!("empty-fragment", {
-        .apply_if(slot.is_some(), |dom| dom.property("slot", slot.unwrap_ji()))
+        .apply_if(slot.is_some(), |dom| dom.prop("slot", slot.unwrap_ji()))
         .style("width", "100%")
         .style("height", "100%")
         .children(children)
@@ -138,9 +138,9 @@ fn render_bg(bg: &Background) -> Option<Dom> {
             .style("object-fit", "contain")
             .style("width", "100%")
             .style("height", "100%")
-            .property("id", image.id.0.to_string())
-            .property("lib", image.lib.to_str())
-            .property("size", "full")
+            .prop("id", image.id.0.to_string())
+            .prop("lib", image.lib.to_str())
+            .prop("size", "full")
         })),
     }
 }
@@ -153,7 +153,7 @@ fn render_theme_bg(theme_id: ThemeId) -> Dom {
         .style("display", "block")
         .style("width", "100%")
         .style("height", "100%")
-        .property("path", {
+        .prop("path", {
             &format!("theme/{}/bg.jpg", theme_id.as_str_id())
         })
     })

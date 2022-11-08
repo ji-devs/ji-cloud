@@ -31,7 +31,7 @@ impl EntryRow {
 
     pub fn render(entry: Rc<Mutable<DisplayableEntry>>, state: Rc<State>) -> Dom {
         html!("locale-row", {
-            .property("slot", "rows")
+            .prop("slot", "rows")
             .children_signal_vec(state.visible_columns.signal_vec_cloned()
                 .map(clone!(state, entry => move |column| {
                     let entry_ref = entry.lock_ref();
@@ -40,8 +40,8 @@ impl EntryRow {
                             html!("locale-cell", {
                                 .child(html!("input" =>  HtmlInputElement, {
                                     .with_node!(elem => {
-                                        .property("value", entry_ref.id)
-                                        .attribute("readonly", "")
+                                        .prop("value", entry_ref.id)
+                                        .attr("readonly", "")
                                         .event(clone!(state, entry => move |_: events::Input| {
                                             let value: u32 = elem.value().parse().unwrap_ji();
                                             let mut entry = entry.lock_mut();
@@ -57,9 +57,9 @@ impl EntryRow {
                                 .child(html!("input" => HtmlInputElement, {
                                     .with_node!(elem => {
                                         .apply_if(entry_ref.section.is_some(), |dom| {
-                                            dom.property("value", &entry_ref.section.clone().unwrap_ji())
+                                            dom.prop("value", &entry_ref.section.clone().unwrap_ji())
                                         })
-                                        .attribute("list", "sections")
+                                        .attr("list", "sections")
                                         .event(clone!(state, entry => move |_: events::Input| {
                                             let value: Section = elem.value();
                                             let mut entry = entry.lock_mut();
@@ -77,7 +77,7 @@ impl EntryRow {
                             html!("locale-cell", {
                                 .child(html!("select" => HtmlSelectElement, {
                                     .with_node!(elem => {
-                                        .property("value", {
+                                        .prop("value", {
                                             match entry_ref.item_kind_id {
                                                 Some(item_kind_id) => item_kind_id.to_string(),
                                                 None => String::new(),
@@ -94,17 +94,17 @@ impl EntryRow {
                                             Self::save_entry(state.clone(), entry.clone());
                                         }))
                                         .child(html!("option", {
-                                            .property("value", String::new())
-                                            .property("selected", entry_ref.item_kind_id.is_none())
+                                            .prop("value", String::new())
+                                            .prop("selected", entry_ref.item_kind_id.is_none())
                                         }))
                                         .children(
                                             state.item_kind_options
                                                 .iter()
                                                 .map(|item_kind| {
                                                     html!("option", {
-                                                        .property("text", &item_kind.name)
-                                                        .property("value", &item_kind.id.to_string())
-                                                        .property("selected", entry_ref.item_kind_id.is_some() && entry_ref.item_kind_id.unwrap_ji() == item_kind.id)
+                                                        .prop("text", &item_kind.name)
+                                                        .prop("value", &item_kind.id.to_string())
+                                                        .prop("selected", entry_ref.item_kind_id.is_some() && entry_ref.item_kind_id.unwrap_ji() == item_kind.id)
                                                     })
                                                 })
                                         )
@@ -158,9 +158,9 @@ impl EntryRow {
                                             .iter()
                                             .map(|o| {
                                                 html!("option", {
-                                                    .property("text", o.to_string())
-                                                    .property("value", o.to_string())
-                                                    .property("selected", o == &entry_ref.status)
+                                                    .prop("text", o.to_string())
+                                                    .prop("value", o.to_string())
+                                                    .prop("selected", o == &entry_ref.status)
                                                 })
                                             })
                                     )
@@ -170,12 +170,12 @@ impl EntryRow {
                         Column::ZeplinReference => {
                             html!("locale-cell", {
                                 .child(html!("locale-hover-link", {
-                                    .property_signal("link", entry_ref.zeplin_reference.signal_ref(Self::url_option_string))
+                                    .prop_signal("link", entry_ref.zeplin_reference.signal_ref(Self::url_option_string))
                                     .child(html!("input" => HtmlInputElement, {
                                         .with_node!(elem => {
-                                            .property("type", "url")
+                                            .prop("type", "url")
                                             .apply_if(entry_ref.zeplin_reference.lock_ref().is_some(), |dom| {
-                                                dom.property("value", &entry_ref.zeplin_reference.lock_ref().clone().unwrap_ji().to_string())
+                                                dom.prop("value", &entry_ref.zeplin_reference.lock_ref().clone().unwrap_ji().to_string())
                                             })
                                             .event(clone!(state, entry => move |_: events::Input| {
                                                 let value: String = elem.value();
@@ -197,7 +197,7 @@ impl EntryRow {
                             html!("locale-cell", {
                                 .child(html!("input" => HtmlInputElement, {
                                     .with_node!(elem => {
-                                        .property("value", &entry_ref.comments)
+                                        .prop("value", &entry_ref.comments)
                                         .event(clone!(state, entry => move |_: events::Input| {
                                             let value: String = elem.value();
                                             let mut entry = entry.lock_mut();
@@ -211,8 +211,8 @@ impl EntryRow {
                         Column::App => {
                             html!("locale-cell", {
                                 .child(html!("input", {
-                                    .attribute("type", "checkbox")
-                                    .property("checked", entry_ref.in_app)
+                                    .attr("type", "checkbox")
+                                    .prop("checked", entry_ref.in_app)
                                     .event(clone!(state, entry => move |event: events::Change| {
                                         let value: bool = event.checked().unwrap_ji();
                                         let mut entry = entry.lock_mut();
@@ -225,8 +225,8 @@ impl EntryRow {
                         Column::Element => {
                             html!("locale-cell", {
                                 .child(html!("input", {
-                                    .attribute("type", "checkbox")
-                                    .property("checked", entry_ref.in_element)
+                                    .attr("type", "checkbox")
+                                    .prop("checked", entry_ref.in_element)
                                     .event(clone!(state, entry => move |event: events::Change| {
                                         let value: bool = event.checked().unwrap_ji();
                                         let mut entry = entry.lock_mut();
@@ -239,8 +239,8 @@ impl EntryRow {
                         Column::Mock => {
                             html!("locale-cell", {
                                 .child(html!("input", {
-                                    .attribute("type", "checkbox")
-                                    .property("checked", entry_ref.in_mock)
+                                    .attr("type", "checkbox")
+                                    .prop("checked", entry_ref.in_mock)
                                     .event(clone!(state, entry => move |event: events::Change| {
                                         let value: bool = event.checked().unwrap_ji();
                                         let mut entry = entry.lock_mut();
@@ -256,8 +256,8 @@ impl EntryRow {
                                     html!("locale-actions-wrapper", {
                                         .children(&mut [
                                             html!("button-rect", {
-                                                .property("slot", "first")
-                                                .property("kind", "text")
+                                                .prop("slot", "first")
+                                                .prop("kind", "text")
                                                 .text("Clone")
                                                 .event(clone!(state, entry => move |_event: events::Click| {
                                                     state.loader.load(clone!(state, entry => async move {
@@ -266,8 +266,8 @@ impl EntryRow {
                                                 }))
                                             }),
                                             html!("button-rect", {
-                                                .property("slot", "second")
-                                                .property("kind", "text")
+                                                .prop("slot", "second")
+                                                .prop("kind", "text")
                                                 .text("Delete")
                                                 .event(clone!(state, entry => move |_event: events::Click| {
                                                     state.loader.load(clone!(state, entry => async move {
@@ -297,9 +297,9 @@ impl EntryRow {
                                                 .iter()
                                                 .map(|(bundle, _)| {
                                                     html!("option", {
-                                                        .property("text", &bundle.name)
-                                                        .property("value", &bundle.id.to_string())
-                                                        .property("selected", entry_ref.bundle_id == bundle.id)
+                                                        .prop("text", &bundle.name)
+                                                        .prop("value", &bundle.id.to_string())
+                                                        .prop("selected", entry_ref.bundle_id == bundle.id)
                                                     })
                                                 })
                                         )

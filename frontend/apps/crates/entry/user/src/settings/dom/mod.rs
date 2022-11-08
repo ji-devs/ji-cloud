@@ -45,12 +45,12 @@ impl SettingsPage {
 
         html!("user-profile", {
             .child(page_header::dom::render(Rc::new(page_header::state::State::new()), Some("page-header"), None, true))
-            .property_signal("email", state.user.email.signal_cloned())
-            .property_signal("name", state.full_name_signal())
+            .prop_signal("email", state.user.email.signal_cloned())
+            .prop_signal("name", state.full_name_signal())
             .children(&mut [
                 html!("profile-image", {
-                    .property("slot", "profile-image")
-                    .property_signal("imageId", state.user.profile_image.signal_ref(|profile_image| {
+                    .prop("slot", "profile-image")
+                    .prop_signal("imageId", state.user.profile_image.signal_ref(|profile_image| {
                         log::info!("imageId: {:?}", profile_image);
                         match profile_image {
                             Some(image_id) => JsValue::from_str(&image_id.0.to_string()),
@@ -59,21 +59,21 @@ impl SettingsPage {
                     }))
                 }),
                 html!("input-wrapper", {
-                    .property("slot", "email")
+                    .prop("slot", "email")
                     .child(html!("input" => HtmlInputElement, {
-                        .property_signal("value", state.user.email.signal_cloned())
-                        .property("readOnly", true)
+                        .prop_signal("value", state.user.email.signal_cloned())
+                        .prop("readOnly", true)
                     }))
                     .child(html!("img-ui", {
-                        .property("slot", "icon")
-                        .property("path", "core/inputs/pencil-blue-darker.svg")
+                        .prop("slot", "icon")
+                        .prop("path", "core/inputs/pencil-blue-darker.svg")
                     }))
                 }),
                 html!("input-wrapper", {
-                    .property("slot", "first-name")
+                    .prop("slot", "first-name")
                     .child(html!("input" => HtmlInputElement, {
                         .with_node!(elem => {
-                            .property_signal("value", state.user.given_name.signal_cloned())
+                            .prop_signal("value", state.user.given_name.signal_cloned())
                             .event(clone!(state => move |_: events::Input| {
                                 state.user.given_name.set(elem.value());
                                 state.save_profile();
@@ -81,15 +81,15 @@ impl SettingsPage {
                         })
                     }))
                     .child(html!("img-ui", {
-                        .property("slot", "icon")
-                        .property("path", "core/inputs/pencil-blue-darker.svg")
+                        .prop("slot", "icon")
+                        .prop("path", "core/inputs/pencil-blue-darker.svg")
                     }))
                 }),
                 html!("input-wrapper", {
-                    .property("slot", "family-name")
+                    .prop("slot", "family-name")
                     .child(html!("input" => HtmlInputElement, {
                         .with_node!(elem => {
-                            .property_signal("value", state.user.family_name.signal_cloned())
+                            .prop_signal("value", state.user.family_name.signal_cloned())
                             .event(clone!(state => move |_: events::Input| {
                                 state.user.family_name.set(elem.value());
                                 state.save_profile();
@@ -97,36 +97,36 @@ impl SettingsPage {
                         })
                     }))
                     .child(html!("img-ui", {
-                        .property("slot", "icon")
-                        .property("path", "core/inputs/pencil-blue-darker.svg")
+                        .prop("slot", "icon")
+                        .prop("path", "core/inputs/pencil-blue-darker.svg")
                     }))
                 }),
                 html!("input-wrapper" => HtmlElement, {
                     .with_node!(wrapper => {
-                        .property("slot", "username")
+                        .prop("slot", "username")
                         .child(html!("input", {
-                            .property_signal("value", state.user.username.signal_cloned())
-                            .attribute("readonly", "")
+                            .prop_signal("value", state.user.username.signal_cloned())
+                            .attr("readonly", "")
                             .event(move |_: events::KeyDown| {
                                 let _ = wrapper.set_attribute("error", "");
                             })
                         }))
                         .child(html!("img-ui", {
-                            .property("slot", "icon")
-                            .property("path", "entry/user/profile/lock-blue.svg")
+                            .prop("slot", "icon")
+                            .prop("path", "entry/user/profile/lock-blue.svg")
                             .style("width", "14px")
                         }))
                     })
                 }),
                 html!("input-select", {
-                    .property("slot", "preferred-language")
-                    .property_signal("value", state.user.language_emails.signal_cloned().map(|code| {
+                    .prop("slot", "preferred-language")
+                    .prop_signal("value", state.user.language_emails.signal_cloned().map(|code| {
                         Language::code_to_display_name(&code)
                     }))
                     .children(EMAIL_LANGUAGES.iter().map(|lang| {
                         html!("input-select-option", {
                             .text(lang.display_name())
-                            .property_signal("selected", state.user.language_emails.signal_ref(clone!(lang => move |language_emails| {
+                            .prop_signal("selected", state.user.language_emails.signal_ref(clone!(lang => move |language_emails| {
                                 language_emails == lang.code()
                             })))
                             .event(clone!(state => move |_: events::CustomSelectedChange| {
@@ -138,10 +138,10 @@ impl SettingsPage {
                 }),
                 html!("empty-fragment", {
                     .style("display", "contents")
-                    .property("slot", "age-groups")
+                    .prop("slot", "age-groups")
                     .children_signal_vec(state.user.age_ranges.signal_vec_cloned().map(clone!(state => move|age_range_id| {
                         html!("pill-close", {
-                            .property_signal("label", state.metadata.signal_ref(clone!(age_range_id => move |metadata| {
+                            .prop_signal("label", state.metadata.signal_ref(clone!(age_range_id => move |metadata| {
                                 match metadata {
                                     None => String::new(),
                                     Some(metadata) => {
@@ -159,10 +159,10 @@ impl SettingsPage {
                     })))
                 }),
                 html!("button-rect", {
-                    .property("kind", "outline")
-                    .property("color", "blue")
-                    .property("size", "small")
-                    .property("slot", "age-groups-edit")
+                    .prop("kind", "outline")
+                    .prop("color", "blue")
+                    .prop("size", "small")
+                    .prop("slot", "age-groups-edit")
                     .text(STR_EDIT)
                     .event(clone!(state => move |_: events::Click| {
                         state.active_popup.set(ActivePopup::Age)
@@ -170,10 +170,10 @@ impl SettingsPage {
                 }),
                 html!("empty-fragment", {
                     .style("display", "contents")
-                    .property("slot", "relevant-subjects")
+                    .prop("slot", "relevant-subjects")
                     .children_signal_vec(state.user.subjects.signal_vec_cloned().map(clone!(state => move|subject_id| {
                         html!("pill-close", {
-                            .property_signal("label", state.metadata.signal_ref(clone!(subject_id => move |metadata| {
+                            .prop_signal("label", state.metadata.signal_ref(clone!(subject_id => move |metadata| {
                                 match metadata {
                                     None => String::new(),
                                     Some(metadata) => {
@@ -191,10 +191,10 @@ impl SettingsPage {
                     })))
                 }),
                 html!("button-rect", {
-                    .property("kind", "outline")
-                    .property("color", "blue")
-                    .property("size", "small")
-                    .property("slot", "relevant-subjects-edit")
+                    .prop("kind", "outline")
+                    .prop("color", "blue")
+                    .prop("size", "small")
+                    .prop("slot", "relevant-subjects-edit")
                     .text(STR_EDIT)
                     .event(clone!(state => move |_: events::Click| {
                         state.active_popup.set(ActivePopup::Subjects)
@@ -202,10 +202,10 @@ impl SettingsPage {
                 }),
                 html!("empty-fragment", {
                     .style("display", "contents")
-                    .property("slot", "affiliations")
+                    .prop("slot", "affiliations")
                     .children_signal_vec(state.user.affiliations.signal_vec_cloned().map(clone!(state => move|affiliation_id| {
                         html!("pill-close", {
-                            .property_signal("label", state.metadata.signal_ref(clone!(affiliation_id => move |metadata| {
+                            .prop_signal("label", state.metadata.signal_ref(clone!(affiliation_id => move |metadata| {
                                 match metadata {
                                     None => String::new(),
                                     Some(metadata) => {
@@ -223,10 +223,10 @@ impl SettingsPage {
                     })))
                 }),
                 html!("button-rect", {
-                    .property("kind", "outline")
-                    .property("color", "blue")
-                    .property("size", "small")
-                    .property("slot", "affiliations-edit")
+                    .prop("kind", "outline")
+                    .prop("color", "blue")
+                    .prop("size", "small")
+                    .prop("slot", "affiliations-edit")
                     .text(STR_EDIT)
                     .event(clone!(state => move |_: events::Click| {
                         state.active_popup.set(ActivePopup::Affiliation)
@@ -237,13 +237,13 @@ impl SettingsPage {
                 Some(match status {
                     ResetPasswordStatus::Ready | ResetPasswordStatus::Loading => {
                         html!("div", {
-                            .property("slot", "reset-password")
+                            .prop("slot", "reset-password")
                             .child(html!("button-rect", {
-                                .property("kind", "outline")
-                                .property("color", "blue")
-                                .property("size", "small")
-                                .property("slot", "relevant-subjects-edit")
-                                .property("disabled", status == ResetPasswordStatus::Loading)
+                                .prop("kind", "outline")
+                                .prop("color", "blue")
+                                .prop("size", "small")
+                                .prop("slot", "relevant-subjects-edit")
+                                .prop("disabled", status == ResetPasswordStatus::Loading)
                                 .text(STR_EDIT)
                                 .event(clone!(state => move |_: events::Click| {
                                     state.send_reset_password();
@@ -253,7 +253,7 @@ impl SettingsPage {
                     },
                     ResetPasswordStatus::Sent => {
                         html!("p", {
-                            .property("slot", "reset-password")
+                            .prop("slot", "reset-password")
                             .text(STR_RESET_PASSWORD_SENT)
                         })
                     },
@@ -270,9 +270,9 @@ impl SettingsPage {
                 ActivePopup::None => None,
                 _ => {
                     Some(html!("dialog-overlay", {
-                        .property("slot", "popup")
-                        .property("open", true)
-                        .property("autoClose", false)
+                        .prop("slot", "popup")
+                        .prop("open", true)
+                        .prop("autoClose", false)
                         .event(clone!(state => move |_: events::Close| {
                             log::info!("hay");
                             state.active_popup.set(ActivePopup::None);
