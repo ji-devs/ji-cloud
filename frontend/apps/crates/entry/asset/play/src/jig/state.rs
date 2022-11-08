@@ -109,6 +109,7 @@ pub struct Instructions {
     pub text: Option<String>,
     pub audio: Option<Audio>,
     pub instructions_type: InstructionsType,
+    pub audio_handle: Rc<RefCell<Option<AudioHandle>>>,
 }
 
 impl Instructions {
@@ -120,6 +121,7 @@ impl Instructions {
             text: instructions.text,
             audio: instructions.audio,
             instructions_type,
+            audio_handle: Rc::new(RefCell::new(None)),
         }
     }
 }
