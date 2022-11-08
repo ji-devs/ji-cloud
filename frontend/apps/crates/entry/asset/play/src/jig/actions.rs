@@ -152,6 +152,7 @@ pub fn show_instructions(state: Rc<JigPlayer>, visible: bool) {
         if visible {
             play_instructions_audio(state);
         } else {
+            *instructions.audio_handle.borrow_mut() = None;
             if instructions.instructions_type.is_feedback() {
                 set_instructions(state.clone(), None);
                 send_iframe_message(
