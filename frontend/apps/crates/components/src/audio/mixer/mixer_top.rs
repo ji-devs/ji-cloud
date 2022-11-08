@@ -93,6 +93,10 @@ impl AudioMixerTop {
         let el = active.remove(&handle_id);
         if let Some(el) = &el {
             spawn_local(clone!(el => async move {
+                // We need to make sure that the audio has stopped playing once the handle was "dropped"
+                // otherwise it'll keep playing even while in the inactive queue.
+                // Alternatively, set_url("") might be better than pausing it.
+                let _ = el.pause();
                 // wait for next cycle as ended_callbacks is currently locked because handle_dropped is called from within a callback
                 TimeoutFuture::new(0).await;
                 ENDED_CALLBACKS.with(clone!(el => move |ended_callbacks| {
