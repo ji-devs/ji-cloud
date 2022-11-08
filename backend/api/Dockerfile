@@ -3,7 +3,7 @@
 ####################
 
 FROM messense/rust-musl-cross:x86_64-musl AS api-builder
-RUN apt-get install libssl-dev
+
 
 # Add our source code.
 
