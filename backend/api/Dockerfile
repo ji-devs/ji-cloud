@@ -11,9 +11,6 @@ COPY ./shared /workspace/shared
 COPY ./backend/core /workspace/backend/core
 COPY ./backend/api /workspace/backend/api
 
-# Fix permissions on source code.
-# RUN sudo chown -R rust:rust /home/rust
-
 # Build our application.
 WORKDIR /workspace/backend/api
 RUN cargo build --release --no-default-features
