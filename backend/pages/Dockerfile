@@ -32,8 +32,8 @@ COPY --from=pages-builder \
     /workspace/backend/pages/target/x86_64-unknown-linux-musl/release/ji-cloud-pages \
     /usr/local/bin/cloud-run-app/ji-cloud-pages
 
-COPY /workspace/backend/pages/public /usr/local/bin/cloud-run-app/public
-COPY /workspace/backend/pages/templates /usr/local/bin/cloud-run-app/templates
+COPY ./backend/pages/public /usr/local/bin/cloud-run-app/public
+COPY ./backend/pages/templates /usr/local/bin/cloud-run-app/templates
 
 
 WORKDIR /usr/local/bin/cloud-run-app/
@@ -57,7 +57,7 @@ COPY --from=pages-builder \
     /workspace/backend/pages/target/x86_64-unknown-linux-musl/release/ji-cloud-pages \
     /usr/local/bin/cloud-run-app/ji-cloud-pages
 
-COPY /workspace/backend/pages/public /usr/local/bin/cloud-run-app/public
+COPY ./backend/pages/public /usr/local/bin/cloud-run-app/public
 
 WORKDIR /usr/local/bin/cloud-run-app/
 
