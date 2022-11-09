@@ -1,0 +1,157 @@
+name: Entry - App
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - sandbox
+    paths:
+      - '.github/workflows/frontend-entry-app.yml'
+      - 'shared/**'
+      - 'frontend/config/**'
+      - 'frontend/apps/crates/components/**'
+      - 'frontend/apps/crates/utils/**'
+      - 'frontend/apps/crates/entry/admin/**'
+      - 'frontend/apps/crates/entry/home/**'
+      - 'frontend/apps/crates/entry/asset/**'
+      - 'frontend/apps/crates/entry/user/**'
+      - 'frontend/apps/crates/entry/community/**'
+      - 'frontend/apps/crates/entry/kids/**'
+
+jobs:
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-22.04
+    outputs:
+      branch: "${{ steps.branch.outputs.value }}"
+    steps:
+      - name: Get branch from ref
+        id: branch
+        run: echo "value=$(echo $GITHUB_REF | cut -d'/' -f 3-)" >> $GITHUB_OUTPUT
+      - name: Ensure valid branch
+        if: false == contains(fromJson('["master", "sandbox"]'), steps.branch.outputs.value)
+        run: |
+          echo "::error ${{ steps.branch.outputs.value }} cannot be deployed"
+          exit 1
+
+  check:
+    needs: [prepare]
+    name: Check (deny warning, fmt, clippy)
+    runs-on: ubuntu-latest
+    env:
+      RUSTFLAGS: -D warnings
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly
+          override: true
+          components: rustfmt
+
+      - uses: actions-rs/cargo@v1
+        with:
+          command: check
+          args: --all --manifest-path frontend/apps/Cargo.toml
+
+      - uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all --manifest-path frontend/apps/Cargo.toml -- --check
+
+  build:
+    needs: [prepare]
+    name: "[${{ needs.prepare.outputs.branch }}] Build"
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        app: [admin, home, asset/edit, asset/play, community, user, kids]
+    steps:
+
+      - name: "Set environment"
+        env:
+          BRANCH: ${{ needs.prepare.outputs.branch }}
+        run: |
+          if [[ ${BRANCH} == 'chore/sandbox then
+            echo "ENVIRONMENT=release" >> $GITHUB_ENV
+            echo "MIXPANEL_PROJECT_TOKEN=${{ secrets.MIXPANEL_PROJECT_TOKEN_RELEASE }}" >> $GITHUB_ENV
+            echo "GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY=${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY }}" >> $GITHUB_ENV
+          elif [[ ${BRANCH} == 'sandbox' ]]; then
+            echo "ENVIRONMENT=sandbox" >> $GITHUB_ENV
+            echo "MIXPANEL_PROJECT_TOKEN=${{ secrets.MIXPANEL_PROJECT_TOKEN_SANDBOX }}" >> $GITHUB_ENV
+            echo "GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY=${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX }}" >> $GITHUB_ENV
+          fi
+
+      - name: checkout repo
+        uses: actions/checkout@v1
+
+      - name: Extract label
+        shell: bash
+        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - module/${{ matrix.app }} - app]\")"
+        id: extract_label
+
+      - name: Notify slack
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.label}} starting...\"}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: make nightly the default
+        run: rustup default nightly
+
+      - name: update rust
+        run: rustup update
+
+      - name: install node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      - name: download cargo-make
+        run: curl -u jewish-interactive:"$GITHUB_TOKEN" -s https://api.github.com/repos/sagiegurari/cargo-make/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' | xargs -I {} wget -c https://github.com/sagiegurari/cargo-make/releases/latest/download/cargo-make-v{}-x86_64-unknown-linux-musl.zip -O cargo-make.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: extract cargo-make to folder
+        run: unzip -j cargo-make.zip -d cargo-make
+
+      - name: add cargo-make to path
+        uses: dakom/actions-path@master
+        with:
+          path: ${{github.workspace}}/cargo-make
+
+      - name: install npm deps
+        run: npm ci
+        working-directory: "./frontend/apps"
+
+      - name: install npm deps (build-utils)
+        run: npm ci
+        working-directory: "./frontend/build-utils"
+
+      - name: build
+        run: cargo make ${{ env.ENVIRONMENT }} "${{ matrix.app }}"
+        working-directory: "./frontend/apps"
+        env:
+          LOCAL_CDN_FRONTEND_DIR: ${{ github.workspace }}/frontend
+
+      - name: install google cloud sdk
+        uses: google-github-actions/setup-gcloud@v0
+        with:
+          version: '295.0.0'
+          service_account_key: ${{ env.GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY }}
+
+      # - name: deploy to google cloud
+      #   # run: gsutil -m rsync -d -r frontend/apps/dist/${{ matrix.app }}/js gs://ji-cloud-sandbox-frontend-origin-eu-001/${{ matrix.app }}/js
+      #   run: gsutil -m cp -Z -r frontend/apps/dist/${{ matrix.app }}/js gs://ji-cloud-${{ env.ENVIRONMENT }}-frontend-origin-eu-001/${{ matrix.app }}
+
+      # - name: Notify slack of all status
+      #   uses: pullreminders/slack-action@master
+      #   with:
+      #     args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.label}} ${{job.status}}\"}'
+      #   env:
+      #     SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      #   if: always()
