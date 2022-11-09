@@ -175,7 +175,7 @@ pub enum JigToModulePlayerMessage {
     // remove play and pause? might need for video
     Play,
     Pause,
-    InstructionsDone,
+    InstructionsDone(InstructionsType),
 }
 
 #[derive(Debug, Serialize, Deserialize)]
