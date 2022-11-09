@@ -7,6 +7,7 @@ use shared::{
                 Background, Instructions,
                 _groups::cards::{CardPair as RawCardPair, Mode, Step},
                 memory::{ModuleData as RawData, PlayerSettings},
+                InstructionsType,
             },
             ModuleId,
         },
@@ -168,8 +169,10 @@ impl BaseExt for Base {
         self.feedback_signal.read_only()
     }
 
-    fn handle_instructions_ended(&self) {
-        self.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Positive)));
+    fn handle_instructions_ended(&self, instructions_type: InstructionsType) {
+        if let InstructionsType::Feedback = instructions_type {
+            self.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Positive)));
+        }
     }
 
     fn get_timer_minutes(&self) -> Option<u32> {

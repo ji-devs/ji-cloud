@@ -45,7 +45,7 @@ impl JigPlayer {
             let timer = state.timer.signal_cloned(),
             let started = state.started.signal_cloned().dedupe()
             => {
-                let result = if *started {
+                if *started {
                     if let Some(instructions) = instructions {
                         if timer.is_some() || instructions.text.is_some() {
                             let is_instructions = instructions.instructions_type.is_instructions();
@@ -71,9 +71,7 @@ impl JigPlayer {
                     }
                 } else {
                     None
-                };
-
-                result
+                }
             }
         };
 

@@ -4,7 +4,7 @@ use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
 use shared::domain::asset::{Asset, AssetId, AssetType, DraftOrLive, PrivacyLevel};
 use shared::domain::course::CourseGetDraftPath;
-use shared::domain::module::body::Instructions;
+use shared::domain::module::body::{Instructions, InstructionsType};
 use shared::domain::resource::ResourceGetDraftPath;
 use shared::{
     api::endpoints::{self, module::*},
@@ -325,6 +325,7 @@ pub enum InitSource {
 pub enum ModulePlayPhase {
     Preload,
     Init,
+    PreStart,
     Playing,
     Ending(Option<ModuleEnding>),
 }
@@ -404,7 +405,7 @@ pub trait BaseExt: DomRenderable {
         Mutable::new(None).read_only()
     }
 
-    fn handle_instructions_ended(&self) {
+    fn handle_instructions_ended(&self, _instructions_type: InstructionsType) {
         // Do nothing. Activities which have custom ended logic/rules should implement this.
     }
 

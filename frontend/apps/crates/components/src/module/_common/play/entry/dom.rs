@@ -154,9 +154,17 @@ where
                             },
                             JigToModulePlayerMessage::TimerDone => {
                             },
-                            JigToModulePlayerMessage::InstructionsDone => {
+                            JigToModulePlayerMessage::InstructionsDone(instructions_type) => {
                                 if let InitPhase::Ready(base) = &*state.phase.get_cloned() {
-                                    base.base.handle_instructions_ended();
+                                    if let ModulePlayPhase::PreStart = base.base.play_phase().get_cloned() {
+                                        // When instructions have completed during the *PreStart* phase, then we move on
+                                        // to the Playing phase.
+                                        base.base.set_play_phase(ModulePlayPhase::Playing);
+                                    } else {
+                                        // During subsequent phases, we let the individual activities decide how to handle
+                                        // the completion of instructions.
+                                        base.base.handle_instructions_ended(instructions_type);
+                                    }
                                 }
                             },
                         }
@@ -193,11 +201,11 @@ where
                         }))
                     },
 
-                    ModulePlayPhase::Playing => {
+                    ModulePlayPhase::PreStart => {
+                        // Everything gets set up in the JIG player in PreStart phase.
+                        // This will mark the activity as started in the player, but the activity itself would
+                        // only start playing once it's in the Playing phase.
                         if jig_player {
-                            let msg = IframeAction::new(ModuleToJigPlayerMessage::Instructions(instructions.clone().map(|instructions| (instructions, InstructionsType::Instructions))));
-                            let _ = msg.try_post_message_to_player();
-
                             let timer_seconds = base.get_timer_minutes().map(|minutes| minutes * 60);
 
                             let msg = IframeAction::new(ModuleToJigPlayerMessage::Start(timer_seconds));
@@ -209,7 +217,22 @@ where
 
                             //let the player know we're starting
                             msg.try_post_message_to_player().unwrap_ji();
+                            match &instructions {
+                                Some(instructions) if instructions.has_content() => {
+                                    let msg = IframeAction::new(ModuleToJigPlayerMessage::Instructions(Some((instructions.clone(), InstructionsType::Instructions))));
+                                    let _ = msg.try_post_message_to_player();
+                                },
+                                _ => {
+                                    base.play_phase().set_neq(ModulePlayPhase::Playing);
+                                }
+                            }
                         }
+                        None
+                    },
+
+                    ModulePlayPhase::Playing => {
+                        // Playing phase will affect how the individual activities render their content.
+                        // So nothing to do here.
                         None
                     },
                     ModulePlayPhase::Ending(ending) => {
@@ -225,6 +248,6 @@ fn start_playback<Base>(base: Rc<Base>)
 where
     Base: BaseExt + 'static,
 {
-    base.play_phase().set_neq(ModulePlayPhase::Playing);
+    base.play_phase().set_neq(ModulePlayPhase::PreStart);
     Base::play(base);
 }

@@ -9,6 +9,7 @@ use shared::domain::{
                 Item, Mode, ModuleData as RawData, Next, PlaySettings, Step, TargetArea,
                 TargetTransform,
             },
+            InstructionsType,
         },
         ModuleId,
     },
@@ -74,9 +75,11 @@ impl BaseExt for Base {
         self.feedback_signal.read_only()
     }
 
-    fn handle_instructions_ended(&self) {
-        if let Next::PlaceAll = self.settings.next {
-            self.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
+    fn handle_instructions_ended(&self, instructions_type: InstructionsType) {
+        if let InstructionsType::Feedback = instructions_type {
+            if let Next::PlaceAll = self.settings.next {
+                self.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
+            }
         }
     }
 
