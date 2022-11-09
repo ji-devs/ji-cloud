@@ -109,6 +109,7 @@ pub fn navigate_to_index(state: Rc<JigPlayer>, index: usize) {
     state.active_module.set(Some(index));
     state.timer.set(None);
     state.done.set(false);
+    set_paused(&state, false);
 }
 
 pub fn navigate_to_module(state: Rc<JigPlayer>, module_id: &ModuleId) {
