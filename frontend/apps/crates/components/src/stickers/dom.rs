@@ -19,7 +19,10 @@ use futures_signals::{
 };
 use shared::domain::module::body::{Transform, _groups::design::Sticker as RawSticker};
 use std::rc::Rc;
-use utils::prelude::*;
+use utils::{
+    keyboard::{Key, KeyEvent},
+    prelude::*,
+};
 use web_sys::HtmlElement;
 
 pub fn mixin_sticker_button_signal(
@@ -229,7 +232,7 @@ pub fn render_sticker<T: AsSticker>(
 ) -> Dom {
     html!("empty-fragment", {
         .global_event(clone!(stickers, index => move |evt:events::KeyDown| {
-            if evt.key() == "Delete" && !evt.repeat() {
+            if let Key::Delete = KeyEvent::from(evt).key {
                 if let Some(selected) = stickers.selected_index.get_cloned() {
                     if Some(selected) == index.get_cloned() {
                         // If we don't deselect the currently selected sticker, then this event will

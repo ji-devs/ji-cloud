@@ -4,6 +4,7 @@ use crate::transform::actions::focus_within;
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
 use std::rc::Rc;
+use utils::keyboard::{KeyEvent, MOVE_MULTIPLIER};
 use utils::prelude::*;
 use utils::resize::resize_info_signal;
 use wasm_bindgen::JsCast;
@@ -76,19 +77,18 @@ pub fn render_transform(
                 }))
                 .global_event(clone!(state => move |evt:events::KeyDown| {
                     let mut transform = state.transform.lock_mut();
-                    let key = Key::from(evt.key());
+                    let key_event = KeyEvent::from(evt);
 
-                    match key {
-                        Key::Shift => *state.shift_pressed.borrow_mut() = true,
-                        Key::Alt => *state.alt_pressed.borrow_mut() = true,
-                        _ => {},
+                    if key_event.alt {
+                        *state.alt_pressed.borrow_mut() = true;
                     }
 
+                    let key = key_event.key;
                     if key.is_move_key() {
                         let current = transform.get_translation_2d();
                         let mut translation = key.translation_from_key();
 
-                        if *state.shift_pressed.borrow() {
+                        if key_event.shift {
                             translation.0 *= MOVE_MULTIPLIER;
                             translation.1 *= MOVE_MULTIPLIER;
                         }
@@ -98,14 +98,13 @@ pub fn render_transform(
                     }
                 }))
                 .global_event(clone!(state => move |evt:events::KeyUp| {
-                    let key = Key::from(evt.key());
-                    match key {
-                        Key::Shift => *state.shift_pressed.borrow_mut() = false,
-                        Key::Alt => *state.alt_pressed.borrow_mut() = false,
-                        _ => {},
+                    let key_event = KeyEvent::from(evt);
+
+                    if key_event.alt {
+                        *state.alt_pressed.borrow_mut() = false;
                     }
 
-                    if key.is_move_key() {
+                    if key_event.key.is_move_key() {
                         if let Some(on_action_finished) = &state.callbacks.on_action_finished {
                             on_action_finished(state.transform.get_cloned());
                         }

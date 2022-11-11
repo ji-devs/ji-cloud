@@ -12,9 +12,6 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{DomRect, HtmlElement};
 
-pub const MOVE_MULTIPLIER: f64 = 10.0;
-pub const MOVE_AMOUNT_PX: f64 = 1.0;
-
 pub struct TransformState {
     pub size: Mutable<Option<(f64, f64)>>,
     pub menu_pos: Mutable<Option<(f64, f64)>>,
@@ -25,7 +22,6 @@ pub struct TransformState {
     pub(super) action: RefCell<Option<Action>>,
     pub(super) rot_stash: RefCell<Option<InitRotation>>,
     pub(super) scale_stash: RefCell<Option<InitScale>>,
-    pub(super) shift_pressed: RefCell<bool>,
     pub(super) alt_pressed: RefCell<bool>,
     pub(super) dom_ref: RefCell<Option<TransformBoxElement>>,
     pub(super) callbacks: TransformCallbacks,
@@ -85,7 +81,6 @@ impl TransformState {
             action: RefCell::new(None),
             rot_stash: RefCell::new(None),
             scale_stash: RefCell::new(None),
-            shift_pressed: RefCell::new(false),
             alt_pressed: RefCell::new(false),
             is_transforming: Mutable::new(false),
             menu_pos: Mutable::new(None),
@@ -302,51 +297,6 @@ pub enum Action {
     Move,
     Rotate,
     Scale(ScaleFrom, LockAspect),
-}
-
-#[derive(Debug)]
-#[non_exhaustive]
-pub enum Key {
-    ArrowLeft,
-    ArrowUp,
-    ArrowRight,
-    ArrowDown,
-    Shift,
-    Alt,
-    Other,
-}
-
-impl Key {
-    pub fn is_move_key(&self) -> bool {
-        match self {
-            Self::ArrowLeft | Self::ArrowRight | Self::ArrowUp | Self::ArrowDown => true,
-            _ => false,
-        }
-    }
-    pub fn translation_from_key(&self) -> (f64, f64) {
-        let resize_info = get_resize_info();
-        match self {
-            Self::ArrowLeft => resize_info.get_px_normalized(-MOVE_AMOUNT_PX, 0.0),
-            Self::ArrowRight => resize_info.get_px_normalized(MOVE_AMOUNT_PX, 0.0),
-            Self::ArrowUp => resize_info.get_px_normalized(0.0, -MOVE_AMOUNT_PX),
-            Self::ArrowDown => resize_info.get_px_normalized(0.0, MOVE_AMOUNT_PX),
-            _ => (0.0, 0.0),
-        }
-    }
-}
-
-impl From<String> for Key {
-    fn from(value: String) -> Self {
-        match value.as_str() {
-            "ArrowLeft" => Self::ArrowLeft,
-            "ArrowUp" => Self::ArrowUp,
-            "ArrowRight" => Self::ArrowRight,
-            "ArrowDown" => Self::ArrowDown,
-            "Shift" => Self::Shift,
-            "Alt" => Self::Alt,
-            _ => Self::Other,
-        }
-    }
 }
 
 pub type LockAspect = bool;
