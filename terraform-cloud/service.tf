@@ -33,3 +33,4 @@ resource "google_cloud_run_service" "pages" {
     latest_revision = true
   }
 }
+

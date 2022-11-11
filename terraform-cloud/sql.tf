@@ -25,8 +25,6 @@ resource "google_sql_database_instance" "postgres" {
       }
     }
 
-    # Which networks we want to use 
-    # ipv4_enabled or private
     ip_configuration {
       ipv4_enabled = true
     }
@@ -59,5 +57,5 @@ resource "google_sql_user" "database" {
 ## Fetches latest version of secret
 ##
 data "google_secret_manager_secret_version" "basic" { 
-  secret = "DB_PASSWORD"
+  secret = "DB_PASS"
 }
