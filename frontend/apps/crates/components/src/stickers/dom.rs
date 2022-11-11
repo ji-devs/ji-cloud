@@ -227,26 +227,43 @@ pub fn render_sticker<T: AsSticker>(
     sticker: T,
     opts: Option<StickerRenderOptions>,
 ) -> Dom {
-    match sticker.as_ref() {
-        Sticker::Sprite(sprite) => render_sticker_sprite(
-            stickers,
-            index,
-            sprite.clone(),
-            opts.map(|opts| opts.into_sprite_unchecked()),
-        ),
-        Sticker::Text(text) => render_sticker_text(
-            stickers,
-            index,
-            text.clone(),
-            opts.map(|opts| opts.into_text_unchecked()),
-        ),
-        Sticker::Video(video) => render_sticker_video(
-            stickers,
-            index,
-            video.clone(),
-            opts.map(|opts| opts.into_video_unchecked()),
-        ),
-    }
+    html!("empty-fragment", {
+        .global_event(clone!(stickers, index => move |evt:events::KeyDown| {
+            if evt.key() == "Delete" && !evt.repeat() {
+                if let Some(selected) = stickers.selected_index.get_cloned() {
+                    if Some(selected) == index.get_cloned() {
+                        // If we don't deselect the currently selected sticker, then this event will
+                        // trigger on each sticker which moves into this index after the current one is
+                        // deleted.
+                        stickers.selected_index.set(None);
+                        stickers.delete_index(selected);
+                    }
+                }
+            }
+        }))
+        .child(
+            match sticker.as_ref() {
+                Sticker::Sprite(sprite) => render_sticker_sprite(
+                    stickers,
+                    index,
+                    sprite.clone(),
+                    opts.map(|opts| opts.into_sprite_unchecked()),
+                ),
+                Sticker::Text(text) => render_sticker_text(
+                    stickers,
+                    index,
+                    text.clone(),
+                    opts.map(|opts| opts.into_text_unchecked()),
+                ),
+                Sticker::Video(video) => render_sticker_video(
+                    stickers,
+                    index,
+                    video.clone(),
+                    opts.map(|opts| opts.into_video_unchecked()),
+                ),
+            }
+        )
+    })
 }
 
 pub fn render_stickers_raw(stickers: &[RawSticker], theme_id: ThemeId) -> Dom {
