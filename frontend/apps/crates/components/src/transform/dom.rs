@@ -75,13 +75,40 @@ pub fn render_transform(
                     state.start_tracking_action(Action::Scale(from, lock_aspect), data.x as i32, data.y as i32);
                 }))
                 .global_event(clone!(state => move |evt:events::KeyDown| {
-                    if evt.key() == "Alt" {
-                        *state.alt_pressed.borrow_mut() = true;
+                    let mut transform = state.transform.lock_mut();
+                    let key = Key::from(evt.key());
+
+                    match key {
+                        Key::Shift => *state.shift_pressed.borrow_mut() = true,
+                        Key::Alt => *state.alt_pressed.borrow_mut() = true,
+                        _ => {},
+                    }
+
+                    if key.is_move_key() {
+                        let current = transform.get_translation_2d();
+                        let mut translation = key.translation_from_key();
+
+                        if *state.shift_pressed.borrow() {
+                            translation.0 *= MOVE_MULTIPLIER;
+                            translation.1 *= MOVE_MULTIPLIER;
+                        }
+
+                        let next = (current.0 + translation.0, current.1 + translation.1);
+                        transform.set_translation_2d(next.0, next.1);
                     }
                 }))
                 .global_event(clone!(state => move |evt:events::KeyUp| {
-                    if evt.key() == "Alt" {
-                        *state.alt_pressed.borrow_mut() = false;
+                    let key = Key::from(evt.key());
+                    match key {
+                        Key::Shift => *state.shift_pressed.borrow_mut() = false,
+                        Key::Alt => *state.alt_pressed.borrow_mut() = false,
+                        _ => {},
+                    }
+
+                    if key.is_move_key() {
+                        if let Some(on_action_finished) = &state.callbacks.on_action_finished {
+                            on_action_finished(state.transform.get_cloned());
+                        }
                     }
                 }))
 
