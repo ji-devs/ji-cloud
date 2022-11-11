@@ -1,7 +1,10 @@
 use dominator::{clone, html, Dom};
 
 use std::{fmt::Debug, rc::Rc};
-use utils::events;
+use utils::{
+    events,
+    keyboard::{Key, KeyEvent},
+};
 
 use crate::module::_common::edit::history::state::HistoryState;
 
@@ -37,6 +40,25 @@ impl ControllerDom {
                     }
                     _ => {}
                 };
+            }))
+            .global_event(clone!(history => move |evt: events::KeyDown| {
+                let key_event = KeyEvent::from(evt);
+                let key = &key_event.key;
+
+                if let Key::Other(other) = key {
+                    let other = other.to_uppercase();
+                    let other: &str = other.as_ref();
+                    if key_event.ctrl_cmd && !key_event.shift && other == "Z" {
+                        history.undo();
+                    } else {
+                        let is_osx_redo = key_event.is_osx && key_event.ctrl_cmd && key_event.shift && other == "Z";
+                        let is_regular_redo = !key_event.is_osx && key_event.ctrl_cmd && other == "Y";
+
+                        if is_osx_redo || is_regular_redo {
+                            history.redo();
+                        }
+                    }
+                }
             }))
         })
     }

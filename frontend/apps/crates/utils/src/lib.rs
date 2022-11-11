@@ -17,6 +17,7 @@ pub mod image;
 pub mod image_effects;
 pub mod init;
 pub mod js_wrappers;
+pub mod keyboard;
 pub mod languages;
 pub mod logging;
 pub mod math;
