@@ -1,4 +1,4 @@
-name: Entry - App
+name: Entry - Elements
 
 on:
   workflow_dispatch:
@@ -7,17 +7,10 @@ on:
       - master
       - sandbox
     paths:
-      - '.github/workflows/frontend-entry-app.yml'
-      - 'shared/**'
+      - '.github/workflows/frontend-entry-elements.yml'
       - 'frontend/config/**'
-      - 'frontend/apps/crates/components/**'
-      - 'frontend/apps/crates/utils/**'
-      - 'frontend/apps/crates/entry/admin/**'
-      - 'frontend/apps/crates/entry/home/**'
-      - 'frontend/apps/crates/entry/asset/**'
-      - 'frontend/apps/crates/entry/user/**'
-      - 'frontend/apps/crates/entry/community/**'
-      - 'frontend/apps/crates/entry/kids/**'
+      - 'frontend/ts-utils/**'
+      - 'frontend/elements/**'
 
 jobs:
   prepare:
@@ -35,54 +28,16 @@ jobs:
           echo "::error ${{ steps.branch.outputs.value }} cannot be deployed"
           exit 1
 
-  check:
+  test:
     needs: [prepare]
-    name: Check (deny warning, fmt, clippy)
     runs-on: ubuntu-latest
-    env:
-      RUSTFLAGS: -D warnings
     steps:
-      - uses: actions/checkout@v3
-
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: nightly
-          components: rustfmt
-
-      - run: cargo check --all --manifest-path frontend/apps/Cargo.toml
-      - run: cargo fmt --all --manifest-path frontend/apps/Cargo.toml --check
-
-  build:
-    needs: [prepare]
-    name: "[${{ needs.prepare.outputs.branch }}] Build"
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        app: [admin, home, asset/edit, asset/play, community, user, kids]
-    steps:
-
-      - name: "Set environment"
-        env:
-          BRANCH: ${{ needs.prepare.outputs.branch }}
-        run: |
-          if [[ ${BRANCH} == 'master' ]]; then
-            echo "ENVIRONMENT=release" >> $GITHUB_ENV
-            echo "MIXPANEL_PROJECT_TOKEN=${{ secrets.MIXPANEL_PROJECT_TOKEN_RELEASE }}" >> $GITHUB_ENV
-            echo "GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY=${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY }}" >> $GITHUB_ENV
-            echo "STORAGE_BUCKET=ji-cloud-frontend-origin-eu-001" >> $GITHUB_ENV
-          elif [[ ${BRANCH} == 'sandbox' ]]; then
-            echo "ENVIRONMENT=sandbox" >> $GITHUB_ENV
-            echo "MIXPANEL_PROJECT_TOKEN=${{ secrets.MIXPANEL_PROJECT_TOKEN_SANDBOX }}" >> $GITHUB_ENV
-            echo "GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY=${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX }}" >> $GITHUB_ENV
-            echo "STORAGE_BUCKET=ji-cloud-sandbox-frontend-origin-eu-001" >> $GITHUB_ENV
-          fi
 
       - uses: actions/checkout@v3
 
       - name: Extract label
         shell: bash
-        run: echo "value=\"[${{needs.prepare.outputs.branch}} - module/${{ matrix.app }} - app]\"" >> $GITHUB_OUTPUT
+        run: echo "value=\"[${{needs.prepare.outputs.branch}} - test - elements]\"" >> $GITHUB_OUTPUT
         id: extract_label
 
       - name: Notify slack
@@ -92,11 +47,67 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
-      - uses: dtolnay/rust-toolchain@master
+      - name: install node
+        uses: actions/setup-node@v3
         with:
-          toolchain: nightly
+          node-version: '16'
 
-      - uses: johnnynotsolucky/rust-cargo-make@node16
+      - name: install npm deps
+        run: npm ci
+        working-directory: "./frontend/elements"
+        env:
+          FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+
+      - name: test elements
+        run: npm run test
+        working-directory: "./frontend/elements"
+        env:
+          FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+
+      - name: Notify slack of all status
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.value}} ${{job.status}}\"}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        if: always()
+
+  build:
+    needs: [prepare, test]
+    name: "[${{ needs.prepare.outputs.branch }}] Build"
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        app: [admin, home, asset/edit, asset/play, community, user, kids]
+    steps:
+      - name: "Set environment"
+        env:
+          BRANCH: ${{ needs.prepare.outputs.branch }}
+        run: |
+          if [[ ${BRANCH} == 'master' ]]; then
+            echo "ENVIRONMENT=release" >> $GITHUB_ENV
+            echo "GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY=${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY }}" >> $GITHUB_ENV
+            echo "STORAGE_BUCKET=ji-cloud-frontend-origin-eu-001" >> $GITHUB_ENV
+          elif [[ ${BRANCH} == 'sandbox' ]]; then
+            echo "ENVIRONMENT=sandbox" >> $GITHUB_ENV
+            echo "GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY=${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX }}" >> $GITHUB_ENV
+            echo "STORAGE_BUCKET=ji-cloud-sandbox-frontend-origin-eu-001" >> $GITHUB_ENV
+          fi
+
+      - uses: actions/checkout@v3
+
+      - name: Extract label
+        shell: bash
+        run: echo "value=\"[${{needs.prepare.outputs.branch}} - module/${{ matrix.app }} - elements]\"" >> $GITHUB_OUTPUT
+        id: extract_label
+
+      - name: Notify slack
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.value}} starting...\"}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: install node
         uses: actions/setup-node@v3
@@ -105,17 +116,16 @@ jobs:
 
       - name: install npm deps
         run: npm ci
-        working-directory: "./frontend/apps"
-
-      - name: install npm deps (build-utils)
-        run: npm ci
-        working-directory: "./frontend/build-utils"
-
-      - name: build
-        run: cargo make ${{ env.ENVIRONMENT }} "${{ matrix.app }}"
-        working-directory: "./frontend/apps"
+        working-directory: "./frontend/elements"
         env:
-          LOCAL_CDN_FRONTEND_DIR: ${{ github.workspace }}/frontend
+          FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+
+      - name: build elements
+        run: npm run build:${{ env.ENVIRONMENT }}
+        working-directory: "./frontend/elements"
+        env:
+          APP_NAME: "${{ matrix.app }}"
+          FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - id: 'auth'
         uses: 'google-github-actions/auth@v1'
@@ -126,8 +136,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@v1
 
       # - name: deploy to google cloud
-      #   # run: gsutil -m rsync -d -r frontend/apps/dist/${{ matrix.app }}/js gs://ji-cloud-sandbox-frontend-origin-eu-001/${{ matrix.app }}/js
-      #   run: gsutil -m cp -Z -r frontend/apps/dist/${{ matrix.app }}/js gs://${{ env.STORAGE_BUCKET }}/${{ matrix.app }}
+      #   run: gsutil -m rsync -d -r frontend/elements/dist/${{ matrix.app }} gs://${{ env.STORAGE_BUCKET }}/${{ matrix.app }}/elements
 
       # - name: Notify slack of all status
       #   uses: pullreminders/slack-action@master
