@@ -342,6 +342,9 @@ pub fn on_iframe_message(state: Rc<JigPlayer>, message: ModuleToJigPlayerMessage
         ModuleToJigPlayerMessage::Start(time) => {
             start_player(state, time);
         }
+        ModuleToJigPlayerMessage::Previous => {
+            navigate_back(state);
+        }
         ModuleToJigPlayerMessage::Next => {
             navigate_forward(state);
         }

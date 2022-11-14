@@ -32,6 +32,18 @@ pub fn render_page_body<RawData, Mode, Step, Base>(
                 let has_resized_once = Mutable::new(!page_kind.is_resize());
 
                 html!(page_kind.element_name(), {
+                        .global_event(move |e: events::KeyUp| {
+                            let msg = match e.key().as_str() {
+                                "ArrowLeft" => Some(ModuleToJigPlayerMessage::Previous),
+                                "ArrowRight" => Some(ModuleToJigPlayerMessage::Next),
+                                _ => None,
+                            };
+
+                            if let Some(msg) = msg {
+                                let msg = IframeAction::new(msg);
+                                let _ = msg.try_post_message_to_player();
+                            }
+                        })
                         .apply_if(page_kind.add_scrollable_attribute(), |dom| {
                             dom.prop("scrollable", true)
                         })

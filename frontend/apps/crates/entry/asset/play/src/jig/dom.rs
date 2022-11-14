@@ -379,6 +379,11 @@ impl JigPlayer {
                     .event(clone!(state => move |_: events::Click| {
                         actions::navigate_back(Rc::clone(&state));
                     }))
+                    .global_event(clone!(state => move |e: events::KeyUp| {
+                        if &e.key() == "ArrowLeft" {
+                            actions::navigate_back(Rc::clone(&state));
+                        }
+                    }))
                 }),
                 html!("jig-play-progress-bar", {
                     .prop("slot", "progress")
@@ -389,6 +394,11 @@ impl JigPlayer {
                     .prop("kind", "forward")
                     .event(clone!(state => move |_: events::Click| {
                         actions::navigate_forward(Rc::clone(&state));
+                    }))
+                    .global_event(clone!(state => move |e: events::KeyUp| {
+                        if &e.key() == "ArrowRight" {
+                            actions::navigate_forward(Rc::clone(&state));
+                        }
                     }))
                 }),
             ])

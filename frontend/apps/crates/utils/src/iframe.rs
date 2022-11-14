@@ -183,6 +183,7 @@ pub enum ModuleToJigPlayerMessage {
     AddPoints(u32),
     Start(Option<u32>),
     Stop,
+    Previous,
     Next,
     JumpToIndex(usize),
     JumpToId(ModuleId),
