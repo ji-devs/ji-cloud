@@ -14,7 +14,7 @@ export class _ extends LitElement {
     }
 
     render() {
-        const STR_CONTACT = "If you need help, contact us at: ";
+        const STR_CONTACT = "Need help? Contact us at: ";
         return html`
             <p>
                 ${STR_CONTACT}

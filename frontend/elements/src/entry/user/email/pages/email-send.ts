@@ -1,14 +1,11 @@
-import { LitElement, html, css, customElement } from "lit-element";
+import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/entry/user/_common/footer/contact";
 import "@elements/entry/user/email/buttons/email-send";
 import "@elements/entry/user/_common/auth-page";
 
-const STR_TITLE = "Woohoo! We just sent you an email.";
-const STR_SUBTITLE1 = "You're one step closer to the Jigzi family!";
-const STR_SUBTITLE2 =
-    "Please check your inbox and click the verification button.";
-const STR_SUBTITLE3 =
-    "If you don't see it within minutes, check your filters and spam folders.";
+const STR_TITLE = "Heads up! We sent an email to ";
+const STR_SUBTITLE1 = "Please check your inbox and click the verification button.";
+const STR_SUBTITLE2 = "If you do not see an email from us, check your spam folder.";
 
 @customElement("page-email-send")
 export class _ extends LitElement {
@@ -46,16 +43,17 @@ export class _ extends LitElement {
         ];
     }
 
+    @property()
+    email: string = "";
+
     render() {
         return html`
             <auth-page img="entry/user/side/confirm-email.webp">
-                <div class="title">${STR_TITLE}</div>
+                <div class="title">${STR_TITLE} ${this.email}</div>
                 <div class="subtitle">
                     ${STR_SUBTITLE1}
                     <br />
                     ${STR_SUBTITLE2}
-                    <br />
-                    ${STR_SUBTITLE3}
                 </div>
                 <slot name="send"></slot>
                 <slot name="submit"></slot>
