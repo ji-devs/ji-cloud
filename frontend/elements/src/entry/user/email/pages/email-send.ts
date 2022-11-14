@@ -4,8 +4,9 @@ import "@elements/entry/user/email/buttons/email-send";
 import "@elements/entry/user/_common/auth-page";
 
 const STR_TITLE = "Heads up! We sent an email to ";
-const STR_SUBTITLE1 = "Please check your inbox and click the verification button.";
-const STR_SUBTITLE2 = "If you do not see an email from us, check your spam folder.";
+const STR_SUBTITLE1 = "Your verification link will only be valid for 1 hour.";
+const STR_SUBTITLE2 = "Please check your inbox and click the verification button.";
+const STR_SUBTITLE3 = "If you do not see an email from us, check your spam folder.";
 
 @customElement("page-email-send")
 export class _ extends LitElement {
@@ -54,6 +55,8 @@ export class _ extends LitElement {
                     ${STR_SUBTITLE1}
                     <br />
                     ${STR_SUBTITLE2}
+                    <br />
+                    ${STR_SUBTITLE3}
                 </div>
                 <slot name="send"></slot>
                 <slot name="submit"></slot>
