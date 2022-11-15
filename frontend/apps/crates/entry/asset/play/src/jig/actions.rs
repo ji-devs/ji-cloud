@@ -11,7 +11,10 @@ use shared::{
     api::endpoints::{self, jig},
     domain::{
         asset::DraftOrLive,
-        jig::{AudioBackground, JigGetDraftPath, JigGetLivePath, JigLikedPath, JigPlayPath},
+        jig::{
+            AudioBackground, JigGetDraftPath, JigGetLivePath, JigLikedPath, JigPlayPath,
+            TextDirection,
+        },
         meta::GetMetadataPath,
         module::{
             body::{Instructions as ModuleInstructions, InstructionsType},
@@ -21,6 +24,7 @@ use shared::{
 };
 use utils::{
     iframe::{IframeAction, JigToModulePlayerMessage, ModuleToJigPlayerMessage},
+    keyboard::{Key, KeyEvent},
     prelude::{ApiEndpointExt, SETTINGS},
     routes::{HomeRoute, Route},
     unwrap::UnwrapJiExt,
@@ -101,6 +105,24 @@ pub fn navigate_back(state: Rc<JigPlayer>) {
     if let Some(active_module) = state.active_module.get() {
         if active_module != 0 {
             navigate_to_index(state, active_module - 1);
+        }
+    }
+}
+
+pub fn navigate_from_keyboard_event(state: Rc<JigPlayer>, key_event: KeyEvent) {
+    if let Some(jig) = state.jig.get_cloned() {
+        let direction = jig.jig_data.default_player_settings.direction;
+        match direction {
+            TextDirection::LeftToRight => match key_event.key {
+                Key::ArrowLeft => navigate_back(state.clone()),
+                Key::ArrowRight => navigate_forward(state.clone()),
+                _ => {}
+            },
+            TextDirection::RightToLeft => match key_event.key {
+                Key::ArrowRight => navigate_back(state.clone()),
+                Key::ArrowLeft => navigate_forward(state.clone()),
+                _ => {}
+            },
         }
     }
 }
@@ -359,6 +381,9 @@ pub fn on_iframe_message(state: Rc<JigPlayer>, message: ModuleToJigPlayerMessage
         }
         ModuleToJigPlayerMessage::Instructions(instructions) => {
             set_instructions(state, instructions);
+        }
+        ModuleToJigPlayerMessage::KeyEvent(key_event) => {
+            navigate_from_keyboard_event(state, key_event)
         }
     };
 }

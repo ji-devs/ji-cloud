@@ -15,6 +15,7 @@ use utils::events;
 use utils::iframe::{AssetPlayerToPlayerPopup, IframeMessageExt};
 use utils::init::analytics;
 use utils::js_wrappers::is_iframe;
+use utils::keyboard::KeyEvent;
 use utils::prelude::is_in_iframe;
 use utils::{
     iframe::{IframeAction, ModuleToJigPlayerMessage},
@@ -380,9 +381,7 @@ impl JigPlayer {
                         actions::navigate_back(Rc::clone(&state));
                     }))
                     .global_event(clone!(state => move |e: events::KeyUp| {
-                        if &e.key() == "ArrowLeft" {
-                            actions::navigate_back(Rc::clone(&state));
-                        }
+                        actions::navigate_from_keyboard_event(state.clone(), KeyEvent::from(e));
                     }))
                 }),
                 html!("jig-play-progress-bar", {
@@ -396,9 +395,7 @@ impl JigPlayer {
                         actions::navigate_forward(Rc::clone(&state));
                     }))
                     .global_event(clone!(state => move |e: events::KeyUp| {
-                        if &e.key() == "ArrowRight" {
-                            actions::navigate_forward(Rc::clone(&state));
-                        }
+                        actions::navigate_from_keyboard_event(state.clone(), KeyEvent::from(e));
                     }))
                 }),
             ])
