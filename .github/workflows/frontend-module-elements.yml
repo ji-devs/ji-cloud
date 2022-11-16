@@ -1,11 +1,11 @@
 name: Module - Elements
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - sandbox
       - master
-      - chore/merged-ci
     paths:
       - '.github/workflows/frontend-module-elements.yml'
       - 'frontend/config/**'
@@ -23,7 +23,7 @@ jobs:
         id: branch
         run: echo "value=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
       - name: Ensure valid branch
-        if: false == contains(fromJson('["master", "sandbox", "chore/merged-ci"]'), steps.branch.outputs.value)
+        if: false == contains(fromJson('["master", "sandbox"]'), steps.branch.outputs.value)
         run: |
           echo "::error ${{ steps.branch.outputs.value }} cannot be deployed"
           exit 1
@@ -32,8 +32,7 @@ jobs:
     needs: [prepare]
     runs-on: ubuntu-latest
     steps:
-      - name: checkout repo
-        uses: actions/checkout@v1
+      - uses: actions/checkout@v3
 
       - name: Extract label
         shell: bash
@@ -90,14 +89,13 @@ jobs:
             echo "ENVIRONMENT=release" >> $GITHUB_ENV
             echo "GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY=${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY }}" >> $GITHUB_ENV
             echo "STORAGE_BUCKET=ji-cloud-frontend-origin-eu-001" >> $GITHUB_ENV
-          elif [[ ${BRANCH} == 'chore/merged-ci' ]]; then
+          elif [[ ${BRANCH} == 'sandbox' ]]; then
             echo "ENVIRONMENT=sandbox" >> $GITHUB_ENV
             echo "GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY=${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX }}" >> $GITHUB_ENV
             echo "STORAGE_BUCKET=ji-cloud-sandbox-frontend-origin-eu-001" >> $GITHUB_ENV
           fi
 
-      - name: checkout repo
-        uses: actions/checkout@v1
+      - uses: actions/checkout@v3
 
       - name: Extract label
         shell: bash

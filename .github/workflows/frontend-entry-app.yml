@@ -54,7 +54,7 @@ jobs:
 
   build:
     needs: [prepare]
-    name: "[${{ needs.prepare.outputs.branch }}] Build"
+    name: "[${{ needs.prepare.outputs.branch }}] Build (${{matrix.app}})"
     runs-on: ubuntu-latest
 
     strategy:
