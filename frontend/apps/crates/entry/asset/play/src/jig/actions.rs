@@ -175,7 +175,6 @@ pub fn show_instructions(state: Rc<JigPlayer>, visible: bool) {
         if visible {
             play_instructions_audio(state);
         } else {
-            *instructions.audio_handle.borrow_mut() = None;
             if instructions.instructions_type.is_feedback() {
                 // Clear the instructions to prevent any audio possibly playing again.
                 set_instructions(state.clone(), None);
@@ -188,18 +187,20 @@ pub fn show_instructions(state: Rc<JigPlayer>, visible: bool) {
 pub fn play_instructions_audio(state: Rc<JigPlayer>) {
     if let Some(instructions) = state.instructions.get_cloned() {
         if let Some(audio) = &instructions.audio {
-            *instructions.audio_handle.borrow_mut() = Some(AUDIO_MIXER.with(clone!(state, instructions => move |mixer| mixer.play_on_ended(audio.into(), false, clone!(state => move || {
-                if instructions.instructions_type.is_feedback() && instructions.text.is_none() {
-                    // Clear the instructions to prevent any audio possibly playing again. But only if this is Feedbaack and
-                    // there is not text
-                    set_instructions(state.clone(), None);
-                }
+            *state.instructions_audio_handle.borrow_mut() = Some(AUDIO_MIXER.with(clone!(state, instructions => move |mixer| mixer
+                .play_on_ended(audio.into(), false, clone!(state => move || {
+                    if instructions.instructions_type.is_feedback() && instructions.text.is_none() {
+                        // Clear the instructions to prevent any audio possibly playing again. But only if this is Feedbaack and
+                        // there is not text
+                        set_instructions(state.clone(), None);
+                    }
 
-                if instructions.text.is_none() {
-                    // If there is no text, then we can notify the activity that the instructions audio has completed.
-                    instructions_done(state.clone(), instructions.clone());
-                }
-            })))));
+                    if instructions.text.is_none() {
+                        // If there is no text, then we can notify the activity that the instructions audio has completed.
+                        instructions_done(state.clone(), instructions.clone());
+                    }
+                }))
+            )));
         }
     }
 }
