@@ -76,10 +76,10 @@ impl Tab {
 
                     let callbacks = AudioInputCallbacks::new(
                         Some(clone!(base => move |audio: Audio| {
-                            base.audio.set(Some(audio))
+                            base.set_audio(Some(audio));
                         })),
                         Some(clone!(base => move || {
-                            base.audio.set(None)
+                            base.set_audio(None);
                         })),
                     );
 
