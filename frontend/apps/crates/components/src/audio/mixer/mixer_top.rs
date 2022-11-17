@@ -38,6 +38,9 @@ impl AudioMixerTop {
                     AUDIO_MIXER.with(|mixer| mixer.done_playing(handle_id.clone()))
                 });
             }
+            AudioMessageToTop::InitSilently => {
+                self.init_if_not_ready();
+            }
             AudioMessageToTop::PauseHandleCalled(handle_id) => {
                 self.pause_handle_called(handle_id);
             }

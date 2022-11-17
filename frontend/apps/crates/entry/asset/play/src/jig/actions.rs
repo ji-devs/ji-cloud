@@ -393,8 +393,15 @@ fn start_player(state: Rc<JigPlayer>, time: Option<u32>) {
     // If bg audio is not yet set (i.e. first module to be ready) initialize the audio once the jig is started
     if state.bg_audio_handle.borrow().is_none() {
         if let Some(jig) = state.jig.get_cloned() {
-            if let Some(audio_background) = jig.jig_data.audio_background {
-                init_audio(&state, audio_background);
+            match jig.jig_data.audio_background {
+                Some(audio_background) => {
+                    init_audio(&state, audio_background);
+                }
+                None => {
+                    AUDIO_MIXER.with(move |mixer| {
+                        mixer.init_silently();
+                    });
+                }
             }
         }
     }

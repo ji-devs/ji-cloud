@@ -138,6 +138,11 @@ impl AudioMixer {
         handle
     }
 
+    // init pool of audio objects, but don't play actual audio
+    pub fn init_silently(&self) {
+        self.run_audio_message(AudioMessageToTop::InitSilently);
+    }
+
     pub fn play_on_ended<F>(&self, path: AudioPath, is_loop: bool, on_ended: F) -> AudioHandle
     where
         F: FnMut() + 'static,
@@ -328,6 +333,7 @@ impl Drop for AudioHandle {
 #[derive(Debug, Deserialize, Serialize)]
 pub(super) enum AudioMessageToTop {
     Play(PlayAudioMessage),
+    InitSilently,
     PauseHandleCalled(AudioHandleId),
     PlayHandleCalled(AudioHandleId),
     PauseAll,
