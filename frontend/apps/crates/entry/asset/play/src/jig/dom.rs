@@ -112,7 +112,8 @@ impl JigPlayer {
                         actions::show_instructions(state.clone(), true);
                     }
                     _ => {
-
+                        // Always drop the audio_handle whenever this signal fires and nothing should be shown/played
+                        *state.instructions_audio_handle.borrow_mut() = None;
                     }
                 }
                 async {}
