@@ -6,6 +6,8 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::convert::TryFrom;
 
+use super::Audio;
+
 /// The body for [`Poster`](crate::domain::module::ModuleKind::Poster) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 pub struct ModuleData {
@@ -99,10 +101,11 @@ impl TryFrom<Body> for ModuleData {
 pub struct Content {
     /// The editor state
     pub editor_state: EditorState,
-
     /// The mode
     pub mode: Mode,
-
+    /// Optional audio for the activity
+    #[serde(default)]
+    pub audio: Option<Audio>,
     /// The base content for all design modules
     pub base: BaseContent,
 }

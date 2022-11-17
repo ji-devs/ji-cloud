@@ -1,38 +1,76 @@
-use crate::base::sidebar::state::Sidebar;
-use components::audio::input::{AudioInput, AudioInputCallbacks, AudioInputOptions};
+use crate::base::{sidebar::state::Sidebar, state::Base};
+use components::{
+    instructions::editor::{
+        callbacks::Callbacks as InstructionsEditorCallbacks,
+        state::{InstructionsType, State as InstructionsEditorState},
+    },
+    tabs::MenuTabKind,
+};
 use dominator::clone;
-use futures_signals::signal::SignalExt;
-use shared::domain::module::body::Audio;
+use futures_signals::signal::Mutable;
 use std::rc::Rc;
 
 pub struct Step3 {
+    pub tab: Mutable<Tab>,
     pub sidebar: Rc<Sidebar>,
-    pub audio: Rc<AudioInput>,
 }
 
 impl Step3 {
     pub fn new(sidebar: Rc<Sidebar>) -> Rc<Self> {
-        let audio = {
-            let base = Rc::clone(&sidebar.base);
+        // let kind = MenuTabKind::PlaySettings;
+        let kind = MenuTabKind::Instructions;
+        let tab = Mutable::new(Tab::new(sidebar.base.clone(), kind));
 
-            let opts = AudioInputOptions::new(Some(
-                base.instructions
-                    .signal_cloned()
-                    .map(|instructions| instructions.audio),
-            ));
+        Rc::new(Self { sidebar, tab })
+    }
+}
 
-            let callbacks = AudioInputCallbacks::new(
-                Some(clone!(base => move |audio:Audio| {
-                    base.set_instructions_audio(Some(audio));
-                })),
-                Some(clone!(base => move || {
-                    base.set_instructions_audio(None);
-                })),
-            );
+#[derive(Clone)]
+pub enum Tab {
+    // Settings(Rc<PlaySettingsState>),
+    Instructions(Rc<InstructionsEditorState>),
+}
 
-            AudioInput::new(opts, callbacks)
-        };
+impl Tab {
+    pub fn new(base: Rc<Base>, kind: MenuTabKind) -> Self {
+        match kind {
+            // MenuTabKind::PlaySettings => Self::Settings(Rc::new(PlaySettingsState::new(base))),
+            MenuTabKind::Instructions => {
+                let callbacks = InstructionsEditorCallbacks::new(
+                    clone!(base => move |instructions, also_history| {
+                        if also_history {
+                            base.history.push_modify(|raw| {
+                                if let Some(content) = raw.content.as_mut() {
+                                    content.base.instructions = instructions;
+                                }
+                            });
+                        } else {
+                            base.history.save_current_modify(|raw| {
+                                if let Some(content) = raw.content.as_mut() {
+                                    content.base.instructions = instructions;
+                                }
+                            });
+                        }
+                    }),
+                );
 
-        Rc::new(Self { sidebar, audio })
+                let state = InstructionsEditorState::new(
+                    base.instructions.clone(),
+                    callbacks,
+                    InstructionsType::Instructions,
+                );
+
+                Self::Instructions(Rc::new(state))
+            }
+
+            _ => unimplemented!("unsupported tab kind!"),
+        }
+    }
+
+    pub fn kind(&self) -> MenuTabKind {
+        match self {
+            // Self::Settings(_) => MenuTabKind::PlaySettings,
+            Self::Instructions(_) => MenuTabKind::Instructions,
+        }
     }
 }

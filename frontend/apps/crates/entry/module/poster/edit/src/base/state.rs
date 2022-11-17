@@ -11,7 +11,7 @@ use components::{
 };
 use dominator::clone;
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
-use shared::domain::module::body::BodyExt;
+use shared::domain::module::body::{Audio, BodyExt};
 use shared::domain::{
     asset::AssetId,
     module::{
@@ -31,6 +31,7 @@ pub struct Base {
     pub step: ReadOnlyMutable<Step>,
     pub theme_id: Mutable<ThemeId>,
     pub instructions: Mutable<Instructions>,
+    pub audio: Mutable<Option<Audio>>,
     pub asset_id: AssetId,
     pub module_id: ModuleId,
     pub continue_next_fn: ContinueNextFn,
@@ -131,6 +132,7 @@ impl Base {
             step: step.read_only(),
             theme_id,
             instructions,
+            audio: Mutable::new(content.audio),
             text_editor,
             backgrounds,
             stickers,

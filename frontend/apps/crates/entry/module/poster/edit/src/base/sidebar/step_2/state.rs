@@ -1,5 +1,6 @@
 use crate::base::{sidebar::state::Sidebar, state::Base};
 use components::{
+    audio::input::{AudioInput, AudioInputCallbacks, AudioInputOptions},
     image::search::{
         callbacks::Callbacks as ImageSearchCallbacks,
         state::{ImageSearchKind, ImageSearchOptions, State as ImageSearchState},
@@ -10,6 +11,7 @@ use components::{
 };
 use dominator::clone;
 use futures_signals::signal::Mutable;
+use shared::domain::module::body::Audio;
 use std::rc::Rc;
 use utils::unwrap::UnwrapJiExt;
 
@@ -42,6 +44,7 @@ impl Step2 {
 pub enum Tab {
     Text, // uses top-level state since it must be toggled from main too
     Image(Rc<ImageSearchState>),
+    Audio(Rc<AudioInput>),
 }
 
 impl Tab {
@@ -65,7 +68,26 @@ impl Tab {
 
                 Self::Image(Rc::new(state))
             }
+            MenuTabKind::Audio => {
+                let audio = {
+                    let base = Rc::clone(&base);
 
+                    let opts = AudioInputOptions::new(Some(base.audio.signal_cloned()));
+
+                    let callbacks = AudioInputCallbacks::new(
+                        Some(clone!(base => move |audio: Audio| {
+                            base.audio.set(Some(audio))
+                        })),
+                        Some(clone!(base => move || {
+                            base.audio.set(None)
+                        })),
+                    );
+
+                    AudioInput::new(opts, callbacks)
+                };
+
+                Self::Audio(audio)
+            }
             _ => unimplemented!("unsupported tab kind!"),
         }
     }
@@ -74,6 +96,7 @@ impl Tab {
         match self {
             Self::Text => MenuTabKind::Text,
             Self::Image(_) => MenuTabKind::Image,
+            Self::Audio(_) => MenuTabKind::Audio,
         }
     }
 }
