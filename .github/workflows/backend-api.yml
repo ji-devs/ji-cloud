@@ -63,7 +63,7 @@ jobs:
         with:
           toolchain: stable
 
-      - uses: johnnynotsolucky/rust-cargo-make@node16
+      - uses: davidB/rust-cargo-make@master
 
       - id: 'auth'
         uses: 'google-github-actions/auth@v1'

@@ -95,7 +95,7 @@ jobs:
         with:
           toolchain: nightly
 
-      - uses: johnnynotsolucky/rust-cargo-make@node16
+      - uses: davidB/rust-cargo-make@master
 
       - name: install node
         uses: actions/setup-node@v3
