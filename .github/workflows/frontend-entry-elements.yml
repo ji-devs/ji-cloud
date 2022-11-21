@@ -135,13 +135,13 @@ jobs:
       - name: install google cloud sdk
         uses: google-github-actions/setup-gcloud@v1
 
-      # - name: deploy to google cloud
-      #   run: gsutil -m rsync -d -r frontend/elements/dist/${{ matrix.app }} gs://${{ env.STORAGE_BUCKET }}/${{ matrix.app }}/elements
+      - name: deploy to google cloud
+        run: gsutil -m rsync -d -r frontend/elements/dist/${{ matrix.app }} gs://${{ env.STORAGE_BUCKET }}/${{ matrix.app }}/elements
 
-      # - name: Notify slack of all status
-      #   uses: pullreminders/slack-action@master
-      #   with:
-      #     args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.value}} ${{job.status}}\"}'
-      #   env:
-      #     SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-      #   if: always()
+      - name: Notify slack of all status
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.value}} ${{job.status}}\"}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        if: always()

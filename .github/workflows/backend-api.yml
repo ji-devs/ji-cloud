@@ -73,8 +73,8 @@ jobs:
       - name: install google cloud sdk
         uses: google-github-actions/setup-gcloud@v1
 
-      # - name: build and deploy api
-      #   run: cargo make ${{ env.ENVIRONMENT }}-api
+      - name: build and deploy api
+        run: cargo make ${{ env.ENVIRONMENT }}-api
 
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master
