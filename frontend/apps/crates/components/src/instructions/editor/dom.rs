@@ -12,7 +12,7 @@ use futures_signals::{map_ref, signal::SignalExt};
 use shared::domain::module::body::Audio;
 use unicode_segmentation::UnicodeSegmentation;
 
-const MAX_INSTRUCTION_TEXT_LEN: usize = 200;
+const MAX_INSTRUCTION_TEXT_LEN: usize = 250;
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("div", {
