@@ -6,6 +6,8 @@ use serde::{de::IntoDeserializer, Deserialize, Serialize};
 use std::collections::HashSet;
 use std::convert::TryFrom;
 
+use super::Audio;
+
 /// The body for [`Cover`](crate::domain::module::ModuleKind::Cover) modules.
 #[derive(Clone, Serialize, Deserialize, Debug, Default)]
 pub struct ModuleData {
@@ -98,9 +100,11 @@ impl TryFrom<Body> for ModuleData {
 pub struct Content {
     /// The editor state
     pub editor_state: EditorState,
-
     /// The base content for all design modules
     pub base: BaseContent,
+    /// Optional audio for the activity
+    #[serde(default)]
+    pub audio: Option<Audio>,
 }
 
 /// Editor state
@@ -128,6 +132,8 @@ pub enum Step {
     Two,
     /// Step 3
     Three,
+    /// Step 4
+    Four,
 }
 
 impl<'de> Deserialize<'de> for Step {
@@ -164,7 +170,8 @@ impl StepExt for Step {
         match self {
             Self::One => Some(Self::Two),
             Self::Two => Some(Self::Three),
-            Self::Three => None,
+            Self::Three => Some(Self::Four),
+            Self::Four => None,
         }
     }
 
@@ -173,25 +180,28 @@ impl StepExt for Step {
             Self::One => 1,
             Self::Two => 2,
             Self::Three => 3,
+            Self::Four => 4,
         }
     }
 
     fn label(&self) -> &'static str {
         const STR_DESIGN: &'static str = "Design";
         const STR_CONTENT: &'static str = "Content";
+        const STR_SETTINGS: &'static str = "Settings";
         const STR_PREVIEW: &'static str = "Preview";
 
         match self {
             Self::One => STR_DESIGN,
             Self::Two => STR_CONTENT,
-            Self::Three => STR_PREVIEW,
+            Self::Three => STR_SETTINGS,
+            Self::Four => STR_PREVIEW,
         }
     }
 
     fn get_list() -> Vec<Self> {
-        vec![Self::One, Self::Two, Self::Three]
+        vec![Self::One, Self::Two, Self::Three, Self::Four]
     }
     fn get_preview() -> Self {
-        Self::Three
+        Self::Four
     }
 }
