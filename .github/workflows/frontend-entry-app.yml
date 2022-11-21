@@ -115,6 +115,7 @@ jobs:
         working-directory: "./frontend/apps"
         env:
           LOCAL_CDN_FRONTEND_DIR: ${{ github.workspace }}/frontend
+          MIXPANEL_PROJECT_TOKEN: ${{ env.MIXPANEL_PROJECT_TOKEN }}
 
       - id: 'auth'
         uses: 'google-github-actions/auth@v1'
@@ -124,14 +125,14 @@ jobs:
       - name: install google cloud sdk
         uses: google-github-actions/setup-gcloud@v1
 
-      # - name: deploy to google cloud
-      #   # run: gsutil -m rsync -d -r frontend/apps/dist/${{ matrix.app }}/js gs://ji-cloud-sandbox-frontend-origin-eu-001/${{ matrix.app }}/js
-      #   run: gsutil -m cp -Z -r frontend/apps/dist/${{ matrix.app }}/js gs://${{ env.STORAGE_BUCKET }}/${{ matrix.app }}
+      - name: deploy to google cloud
+        # run: gsutil -m rsync -d -r frontend/apps/dist/${{ matrix.app }}/js gs://${{ env.STORAGE_BUCKET }}/${{ matrix.app }}/js
+        run: gsutil -m cp -Z -r frontend/apps/dist/${{ matrix.app }}/js gs://${{ env.STORAGE_BUCKET }}/${{ matrix.app }}
 
-      # - name: Notify slack of all status
-      #   uses: pullreminders/slack-action@master
-      #   with:
-      #     args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.value}} ${{job.status}}\"}'
-      #   env:
-      #     SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-      #   if: always()
+      - name: Notify slack of all status
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.value}} ${{job.status}}\"}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        if: always()
