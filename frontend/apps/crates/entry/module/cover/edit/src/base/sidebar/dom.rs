@@ -8,6 +8,7 @@ use std::rc::Rc;
 use super::{
     step_1::{dom::render as render_step_1, state::Step1},
     step_2::{dom::render as render_step_2, state::Step2},
+    step_3::{dom::render as render_step_3, state::Step3},
 };
 
 impl DomRenderable for Sidebar {
@@ -22,6 +23,7 @@ impl DomRenderable for Sidebar {
                 match step {
                     Step::One => Some(render_step_1(Step1::new(state.clone()))),
                     Step::Two => Some(render_step_2(Step2::new(state.clone()))),
+                    Step::Three => Some(render_step_3(Step3::new(state.clone()))),
                     _ => None
                 }
             })))
