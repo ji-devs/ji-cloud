@@ -10,7 +10,7 @@ use components::{
     tabs::MenuTabKind,
 };
 use dominator::clone;
-use futures_signals::signal::{Mutable, SignalExt};
+use futures_signals::signal::Mutable;
 use shared::domain::module::body::Audio;
 use std::rc::Rc;
 use utils::unwrap::UnwrapJiExt;
