@@ -10,6 +10,7 @@ export const cardStyles = [
     css`
         :host {
             --img-padding: 10rem;
+            --border-radius: 16px;
         }
 
         :host([size="matching"]),
@@ -43,7 +44,7 @@ export const cardStyles = [
         }
 
         .content {
-            border-radius: 16px;
+            border-radius: var(--border-radius);
             border-style: solid;
             border-width: var(--border-size);
             background-color: white;
