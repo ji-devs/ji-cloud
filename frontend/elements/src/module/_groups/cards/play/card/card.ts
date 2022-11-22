@@ -36,6 +36,10 @@ export class _ extends LitElement {
                     z-index: 1001;
                 }
 
+                :host([side="left"][size="flashcards"]) .front.content {
+                    border-radius: 56px;
+                }
+
                 section {
                     transition: transform 0.8s;
                     transform-style: preserve-3d;
@@ -186,18 +190,18 @@ export class _ extends LitElement {
                 </div>
                 <div class="back">
                     ${doubleSided
-                        ? html`<div
+                ? html`<div
                               class="content"
                               style=${getContentStyle(
-                                  styleKind,
-                                  theme,
-                                  mode,
-                                  backSide
-                              )}
+                    styleKind,
+                    theme,
+                    mode,
+                    backSide
+                )}
                           >
                               <slot name="backSideContent"></slot>
                           </div>`
-                        : html`<img-ui
+                : html`<img-ui
                               path="${cardBackFullPath(theme)}"
                           ></img-ui>`}
                 </div>
