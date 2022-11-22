@@ -1,0 +1,98 @@
+name: Documentation
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - sandbox
+    paths:
+      - '.github/workflows/documentation.yml'
+      - 'documentation/**'
+      - 'shared/rust/**'
+
+jobs:
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-22.04
+    outputs:
+      branch: "${{ steps.branch.outputs.value }}"
+    steps:
+      - name: Get branch from ref
+        id: branch
+        run: echo "value=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+      - name: Ensure valid branch
+        if: false == contains(fromJson('["master", "sandbox"]'), steps.branch.outputs.value)
+        run: |
+          echo "::error ${{ steps.branch.outputs.value }} cannot be deployed"
+          exit 1
+
+  build:
+    needs: [prepare]
+    name: "[${{ needs.prepare.outputs.branch }}] Build"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Set environment"
+        env:
+          BRANCH: ${{ needs.prepare.outputs.branch }}
+        run: |
+          if [[ ${BRANCH} == 'master' ]]; then
+            echo "ENVIRONMENT=release" >> $GITHUB_ENV
+            echo "PROJECT=ji-cloud" >> $GITHUB_ENV
+            echo "HOSTING=ji-cloud-docs" >> $GITHUB_ENV
+          elif [[ ${BRANCH} == 'sandbox' ]]; then
+            echo "ENVIRONMENT=sandbox" >> $GITHUB_ENV
+            echo "PROJECT=ji-cloud-developer-sandbox" >> $GITHUB_ENV
+            echo "HOSTING=ji-cloud-sandbox-docs" >> $GITHUB_ENV
+          fi
+
+      - uses: actions/checkout@v3
+
+      - name: Extract label
+        shell: bash
+        run: echo "value=\"[${{needs.prepare.outputs.branch}} - documentation]\"" >> $GITHUB_OUTPUT
+        id: extract_label
+
+      - name: Notify slack
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.value}} starting...\"}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: Setup mdBook
+        uses: peaceiris/actions-mdbook@v1
+        with:
+          mdbook-version: 'latest'
+
+      - name: make tmp docs directory
+        run: mkdir ./temp-docs
+
+      - name: build book
+        run: mdbook build
+        working-directory: ./documentation
+
+      - name: build shared-crate
+        run: cargo doc
+        working-directory: ./shared/rust
+
+      - name: copy book
+        run: cp -R documentation/output ./temp-docs/book
+
+      - name: copy shared-crate
+        run: cp -R shared/rust/target/doc ./temp-docs/crate
+
+      - name: deploy to firebase
+        uses: w9jds/firebase-action@v11
+        with:
+          args: deploy --project ${{ env.PROJECT }} --only hosting:${{ env.HOSTING }}
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+      - name: Notify slack of all status
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.value}} ${{job.status}}\"}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        if: always()
