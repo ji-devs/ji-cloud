@@ -114,7 +114,7 @@ impl BaseExt for Base {
                 Next::SelectAll | Next::SelectSome(_) => {
                     self.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
                 }
-                _ => {}
+                _ => self.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Positive))),
             }
         }
     }

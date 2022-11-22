@@ -372,7 +372,8 @@ pub fn on_iframe_message(state: Rc<JigPlayer>, message: ModuleToJigPlayerMessage
             navigate_forward(state);
         }
         ModuleToJigPlayerMessage::Stop => {
-            state.timer.set(None);
+            // Instead of stopping the timer altogether, we pause it
+            set_timer_paused(&state, true);
         }
         ModuleToJigPlayerMessage::JumpToIndex(index) => {
             navigate_to_index(state, index);
