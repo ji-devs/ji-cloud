@@ -97,7 +97,7 @@ jobs:
           FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - name: deploy to firebase
-        uses: w9jds/firebase-action@v11
+        uses: w9jds/firebase-action@v11.16.0
         with:
           args: deploy --project ${{ env.PROJECT }} --only hosting:${{ env.HOSTING }}
         env:
