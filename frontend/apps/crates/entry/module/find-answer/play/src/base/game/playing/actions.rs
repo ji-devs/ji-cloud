@@ -110,7 +110,10 @@ impl PlayState {
                                 .base
                                 .set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
                         }
-                        _ => {}
+                        _ => state
+                            .game
+                            .base
+                            .set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Positive))),
                     }
                 }
             }

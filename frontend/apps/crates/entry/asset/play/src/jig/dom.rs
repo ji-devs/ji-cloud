@@ -41,14 +41,23 @@ impl JigPlayer {
         let state = self;
         actions::load_data(state.clone());
 
+        // Timer is not Copy and cannot be deduped, so any change to timer, even if it is the same value
+        // will trigger an updated which will cause the instructions popup to show again when it is not
+        // supposed to.
+        let has_timer = state
+            .timer
+            .signal_cloned()
+            .map(|timer| timer.is_some())
+            .dedupe();
+
         let should_show_instructions = map_ref! {
             let instructions = state.instructions.signal_cloned(),
-            let timer = state.timer.signal_cloned(),
+            let has_timer = has_timer,
             let started = state.started.signal_cloned().dedupe()
             => {
                 if *started {
                     if let Some(instructions) = instructions {
-                        if timer.is_some() || instructions.text.is_some() {
+                        if *has_timer || instructions.text.is_some() {
                             let is_instructions = instructions.instructions_type.is_instructions();
                             // if there is text or a timer, and
                             if is_instructions || instructions.text.is_some() {
