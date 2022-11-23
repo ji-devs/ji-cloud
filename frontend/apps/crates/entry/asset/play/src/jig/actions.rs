@@ -175,6 +175,9 @@ pub fn show_instructions(state: Rc<JigPlayer>, visible: bool) {
         if visible {
             play_instructions_audio(state);
         } else {
+            // Always drop the audio handle whenever the popup is hidden
+            *state.instructions_audio_handle.borrow_mut() = None;
+
             if instructions.instructions_type.is_feedback() {
                 // Clear the instructions to prevent any audio possibly playing again.
                 set_instructions(state.clone(), None);
