@@ -22,6 +22,7 @@ export const cardStyles = [
         :host([size="flashcards"]) {
             --card-size: 500rem;
             --border-size: 16rem;
+            --border-radius: 16%;
         }
 
         :host([size="memory"]) {
