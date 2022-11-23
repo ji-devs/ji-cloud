@@ -141,7 +141,12 @@ export class _ extends LitElement {
                     text-align: center;
                     color: var(--dark-gray-6);
                     max-width: 100px;
-                    font-size: 13px;
+                    font-size: 14px;
+                }
+
+                :host([active]) .label {
+                    font-weight: 600;
+                    color: #5893f9;
                 }
                 @media (min-width: 1920px) {
                     .label {
@@ -179,7 +184,7 @@ export class _ extends LitElement {
     @property({ type: Boolean })
     bubbleOpen: boolean = false;
 
-    @property({ type: Boolean })
+    @property({ type: Boolean, reflect: true })
     active: boolean = false;
 
     @property({ type: Number })
