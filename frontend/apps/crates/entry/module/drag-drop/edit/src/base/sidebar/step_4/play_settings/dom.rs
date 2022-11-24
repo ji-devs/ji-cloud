@@ -14,17 +14,6 @@ pub fn render(state: Rc<PlaySettingsState>) -> Dom {
                 LineKind::Next,
                 vec![
                     Some(SettingsButton::new_click(
-                        SettingsButtonKind::ContinueClick,
-                        clone!(state => move || {
-                            state.base.play_settings.next.signal_ref(|curr| {
-                                std::mem::discriminant(curr) == std::mem::discriminant(&Next::ClickContinue)
-                            })
-                        }),
-                        clone!(state => move || {
-                            state.set_next(Next::ClickContinue);
-                        }),
-                    )),
-                    Some(SettingsButton::new_click(
                         SettingsButtonKind::ContinueAll,
                         clone!(state => move || {
                             state.base.play_settings.next.signal_ref(|curr| {
@@ -33,6 +22,17 @@ pub fn render(state: Rc<PlaySettingsState>) -> Dom {
                         }),
                         clone!(state => move || {
                             state.set_next(Next::PlaceAll);
+                        }),
+                    )),
+                    Some(SettingsButton::new_click(
+                        SettingsButtonKind::ContinueClick,
+                        clone!(state => move || {
+                            state.base.play_settings.next.signal_ref(|curr| {
+                                std::mem::discriminant(curr) == std::mem::discriminant(&Next::ClickContinue)
+                            })
+                        }),
+                        clone!(state => move || {
+                            state.set_next(Next::ClickContinue);
                         }),
                     )),
                 ],
@@ -73,17 +73,6 @@ pub fn render(state: Rc<PlaySettingsState>) -> Dom {
                 LineKind::Hint,
                 vec![
                     Some(SettingsButton::new_click(
-                        SettingsButtonKind::Highlight,
-                        clone!(state => move || {
-                            state.base.play_settings.hint.signal_ref(|curr| {
-                                *curr == Hint::Highlight
-                            })
-                        }),
-                        clone!(state => move || {
-                            state.set_hint(Hint::Highlight);
-                        }),
-                    )),
-                    Some(SettingsButton::new_click(
                         SettingsButtonKind::HighlightOff,
                         clone!(state => move || {
                             state.base.play_settings.hint.signal_ref(|curr| {
@@ -92,6 +81,17 @@ pub fn render(state: Rc<PlaySettingsState>) -> Dom {
                         }),
                         clone!(state => move || {
                             state.set_hint(Hint::None);
+                        }),
+                    )),
+                    Some(SettingsButton::new_click(
+                        SettingsButtonKind::Highlight,
+                        clone!(state => move || {
+                            state.base.play_settings.hint.signal_ref(|curr| {
+                                *curr == Hint::Highlight
+                            })
+                        }),
+                        clone!(state => move || {
+                            state.set_hint(Hint::Highlight);
                         }),
                     )),
                 ],
