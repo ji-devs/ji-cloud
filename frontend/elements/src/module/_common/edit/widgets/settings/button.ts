@@ -50,7 +50,7 @@ const STR_LABEL: Record<Kind, string> = {
     "score-off": "don't include in\nfinal score",
     "time-limit-off": "no time limit",
     "time-limit": "time limit",
-    "continue-click": "clicking on continue",
+    "continue-click": "clicking next",
     "continue-all": "clicking all items",
     "continue-some": "clicking\na minimum",
     "highlight": "highlight at start",

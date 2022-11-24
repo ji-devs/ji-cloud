@@ -25,7 +25,7 @@ const STR_LABEL: Record<Kind, string> = {
     "game-display": "How should your cards be displayed?",
     "rounds": "How many pages should student complete?",
     "hint": "Highlight clickable areas:",
-    "next": "Student finishes this activity by...",
+    "next": "Student views this page until...",
     "time-limit": "Would you like to set a time limit?",
     "attempts": "How many tries does the student get?",
     "score": "Would you like to include score?",

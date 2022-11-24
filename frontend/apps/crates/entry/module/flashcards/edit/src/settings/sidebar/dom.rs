@@ -11,8 +11,8 @@ pub fn render(state: Rc<SidebarSettings>) -> Dom {
         lines: vec![(
             LineKind::CardView,
             vec![
-                Some(make_button(state.clone(), DisplayMode::Single)),
                 Some(make_button(state.clone(), DisplayMode::Double)),
+                Some(make_button(state.clone(), DisplayMode::Single)),
                 Some(SettingsButton::new_click(
                     SettingsButtonKind::Swap,
                     clone!(state => move || {
