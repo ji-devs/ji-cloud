@@ -10,7 +10,7 @@ const STR_USE_IN_PREFIX = "Use the content from this";
 const STR_USE_IN_SUFFIX = "activity in:";
 
 const STR_HEADER_LINE_1_PREFIX = "Your";
-const STR_HEADER_LINE_1_SUFFIX = "is ready!";
+const STR_HEADER_LINE_1_SUFFIX = "activity is ready!";
 const STR_HEADER_LINE_2 = "It’s now part of your JIG.";
 
 @customElement("post-preview")
