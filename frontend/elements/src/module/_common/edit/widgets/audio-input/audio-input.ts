@@ -9,7 +9,7 @@ export class _ extends LitElement {
             css`
                 :host {
                     display: grid;
-                    row-gap: 10px;
+                    row-gap: 4px;
                     grid-template-rows: 24px 220px auto;
                 }
                 @media (min-width: 1920px) {

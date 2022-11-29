@@ -18,7 +18,7 @@ pub fn render(state: Rc<State>) -> Dom {
     html!("div", {
         .style("display", "grid")
         .style("grid-template-rows", "auto auto")
-        .style("row-gap", "16px")
+        .style("row-gap", "20px")
 
         .children(&mut [
             render_text(state.clone()),
