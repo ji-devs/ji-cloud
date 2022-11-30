@@ -3,7 +3,7 @@ use std::rc::Rc;
 use components::jigzi_help::JigziHelp;
 use dominator::{clone, html, Dom};
 
-use super::super::state::AssetEditState;
+use super::super::super::state::AssetEditState;
 use super::module::dom::ModuleDom;
 use shared::domain::module::ModuleKind;
 use utils::events;

@@ -3,7 +3,7 @@ mod course;
 mod dom;
 mod module_iframe;
 mod publish;
-mod selection;
+mod jig;
 mod sidebar;
 mod state;
 

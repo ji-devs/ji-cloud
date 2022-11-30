@@ -1,8 +1,11 @@
 use std::rc::Rc;
 
 use super::{
-    super::edit::publish::Publish, course::jig_selection::state::JigSelection,
-    module_iframe::ModuleIframe, selection::dom::SelectionDom, sidebar::dom::SidebarDom,
+    super::edit::publish::Publish,
+    course::jig_selection::state::JigSelection,
+    module_iframe::ModuleIframe,
+    jig::module_selection::dom::SelectionDom,
+    sidebar::dom::SidebarDom,
     state::AssetEditState,
 };
 use components::{
