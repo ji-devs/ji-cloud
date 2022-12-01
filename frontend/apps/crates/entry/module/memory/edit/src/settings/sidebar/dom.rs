@@ -12,7 +12,7 @@ pub fn render(state: Rc<SidebarSettings>) -> Dom {
 
     render_settings(Rc::new(ModuleSettings {
         lines: vec![
-            (
+            ModuleSettingsLine::new(
                 LineKind::GameDisplay,
                 vec![Some(SettingsButton::new_value_click(
                     SettingsButtonKind::NumPairs,
@@ -30,7 +30,7 @@ pub fn render(state: Rc<SidebarSettings>) -> Dom {
                     }),
                 ))],
             ),
-            (
+            ModuleSettingsLine::new(
                 LineKind::TimeLimit,
                 vec![
                     Some(SettingsButton::new_click(

@@ -9,7 +9,7 @@ use components::module::_common::edit::settings::prelude::*;
 pub fn render(state: Rc<SidebarSettings>) -> Dom {
     render_settings(Rc::new(ModuleSettings {
         lines: vec![
-            (
+            ModuleSettingsLine::new(
                 LineKind::GameDisplay,
                 vec![
                     Some(SettingsButton::new_value(
@@ -33,7 +33,7 @@ pub fn render(state: Rc<SidebarSettings>) -> Dom {
                     )),
                 ],
             ),
-            (
+            ModuleSettingsLine::new(
                 LineKind::Rounds,
                 vec![Some(SettingsButton::new_value(
                     SettingsButtonKind::Rounds,
@@ -46,7 +46,7 @@ pub fn render(state: Rc<SidebarSettings>) -> Dom {
                     ),
                 ))],
             ),
-            (
+            ModuleSettingsLine::new(
                 LineKind::TimeLimit,
                 vec![
                     Some(SettingsButton::new_click(
@@ -78,7 +78,7 @@ pub fn render(state: Rc<SidebarSettings>) -> Dom {
                     )),
                 ],
             ),
-            (
+            ModuleSettingsLine::new(
                 LineKind::Attempts,
                 vec![
                     Some(SettingsButton::new_click(

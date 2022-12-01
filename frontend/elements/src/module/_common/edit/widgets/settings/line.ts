@@ -75,19 +75,30 @@ export class _ extends LitElement {
     }
 
     @property()
-    kind: Kind = "card-view";
+    kind?: Kind = "card-view";
+
+    @property({ type: String })
+    label?: String;
 
     @property({ type: Boolean })
     borderTop: boolean = false;
 
     render() {
-        const { kind } = this;
-
-        const label = STR_LABEL[kind];
-
         return html`
-            <div class="label">${label}</div>
+            <div class="label">${this.getLabel()}</div>
             <div class="options"><slot></slot></div>
         `;
+    }
+
+    getLabel() {
+        const { kind, label } = this;
+
+        if (label) {
+            return label;
+        } else if (kind) {
+            return STR_LABEL[kind];
+        } else {
+            return undefined;
+        }
     }
 }

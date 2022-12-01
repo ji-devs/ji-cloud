@@ -8,12 +8,17 @@ use shared::domain::module::body::flashcards::DisplayMode;
 
 pub fn render(state: Rc<SidebarSettings>) -> Dom {
     render_settings(Rc::new(ModuleSettings {
-        lines: vec![(
-            LineKind::CardView,
-            vec![
-                Some(make_button(state.clone(), DisplayMode::Double)),
-                Some(make_button(state.clone(), DisplayMode::Single)),
-                Some(SettingsButton::new_click(
+        lines: vec![
+            ModuleSettingsLine::new_with_label(
+                "How should card pairs be displayed?".to_string(),
+                vec![
+                    Some(make_button(state.clone(), DisplayMode::Double)),
+                    Some(make_button(state.clone(), DisplayMode::Single)),
+                ],
+            ),
+            ModuleSettingsLine::new_with_label(
+                "Which card should be face-up?".to_string(),
+                vec![Some(SettingsButton::new_click(
                     SettingsButtonKind::Swap,
                     clone!(state => move || {
                         state.base.extra.settings.swap.signal()
@@ -21,9 +26,9 @@ pub fn render(state: Rc<SidebarSettings>) -> Dom {
                     clone!(state => move || {
                         state.toggle_swap();
                     }),
-                )),
-            ],
-        )],
+                ))],
+            ),
+        ],
     }))
 }
 

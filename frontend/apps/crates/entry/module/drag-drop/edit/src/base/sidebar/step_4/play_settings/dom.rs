@@ -10,7 +10,7 @@ use components::module::_common::edit::settings::prelude::*;
 pub fn render(state: Rc<PlaySettingsState>) -> Dom {
     render_settings(Rc::new(ModuleSettings {
         lines: vec![
-            (
+            ModuleSettingsLine::new(
                 LineKind::Next,
                 vec![
                     Some(SettingsButton::new_click(
@@ -37,7 +37,7 @@ pub fn render(state: Rc<PlaySettingsState>) -> Dom {
                     )),
                 ],
             ),
-            (
+            ModuleSettingsLine::new(
                 LineKind::TimeLimit,
                 vec![
                     Some(SettingsButton::new_click(
@@ -69,7 +69,7 @@ pub fn render(state: Rc<PlaySettingsState>) -> Dom {
                     )),
                 ],
             ),
-            (
+            ModuleSettingsLine::new(
                 LineKind::Hint,
                 vec![
                     Some(SettingsButton::new_click(
