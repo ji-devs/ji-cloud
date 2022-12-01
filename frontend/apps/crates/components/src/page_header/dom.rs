@@ -7,8 +7,8 @@ use strum::IntoEnumIterator;
 use utils::{
     events,
     init::analytics,
-    routes::{AdminRoute, AssetRoute, Route, UserRoute, CommunityRoute, CommunityMembersRoute,},
-    unwrap::UnwrapJiExt
+    routes::{AdminRoute, AssetRoute, CommunityMembersRoute, CommunityRoute, Route, UserRoute},
+    unwrap::UnwrapJiExt,
 };
 use wasm_bindgen::JsValue;
 use web_sys::HtmlElement;
@@ -209,7 +209,7 @@ fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {
             }))
             .text(STR_MY_SETTINGS)
         }))
-        .child(html!("a", {        
+        .child(html!("a", {
             .prop("slot", "user-links")
             .prop("href",  Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(user.id))).to_string())
 
