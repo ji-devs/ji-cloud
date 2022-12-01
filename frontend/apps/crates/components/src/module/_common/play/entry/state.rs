@@ -414,7 +414,7 @@ pub trait BaseExt: DomRenderable {
         // Do nothing. Activities which have custom ended logic/rules should implement this.
     }
 
-    fn get_timer_minutes(&self) -> Option<u32> {
+    fn get_timer_seconds(&self) -> Option<u32> {
         None
     }
 
