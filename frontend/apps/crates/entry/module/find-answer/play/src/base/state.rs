@@ -119,7 +119,7 @@ impl BaseExt for Base {
         }
     }
 
-    fn get_timer_minutes(&self) -> Option<u32> {
+    fn get_timer_seconds(&self) -> Option<u32> {
         self.settings.time_limit
     }
 }

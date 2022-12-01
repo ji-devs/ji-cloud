@@ -69,7 +69,7 @@ pub struct PlaySettings {
 }
 
 const DEFAULT_ATTEMPTS_LIMIT: u8 = 2;
-const DEFAULT_TIME_LIMIT: u32 = 3;
+const DEFAULT_TIME_LIMIT: u32 = 10;
 
 impl PlaySettings {
     pub fn new(settings: RawPlaySettings) -> Self {

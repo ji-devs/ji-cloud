@@ -49,7 +49,7 @@ const STR_LABEL: Record<Kind, string> = {
     "score": "include in\nfinal score",
     "score-off": "don't include in\nfinal score",
     "time-limit-off": "no time limit",
-    "time-limit": "time limit",
+    "time-limit": "time limit (seconds)",
     "continue-click": "clicking next",
     "continue-all": "clicking all items",
     "continue-some": "clicking\na minimum",
@@ -117,13 +117,13 @@ export class _ extends LitElement {
                 .circle {
                     background-color: #afcbf4;
                     border-radius: 50%;
-                    width: 24px;
-                    height: 24px;
+                    width: 32px;
+                    height: 32px;
                     text-align: center;
                     font-size: 14px;
                     display: inline-grid;
                     align-content: center;
-                    transform: translate(210%, -65%);
+                    transform: translate(135%, -65%);
                     color: #ffffff;
                 }
 
