@@ -8,6 +8,7 @@ set contents = jsonb_set(
     '{content,play_settings,time_limit}',
     to_jsonb((contents->'content'->'play_settings'->>'time_limit')::INTEGER * 60)
 )
+where contents->'content'->'play_settings'->>'time_limit' IS NOT NULL
 ;
 
 -- Update where module uses `player_settings`
@@ -18,4 +19,5 @@ set contents = jsonb_set(
     '{content,player_settings,time_limit}',
     to_jsonb((contents->'content'->'player_settings'->>'time_limit')::INTEGER * 60)
 )
+where contents->'content'->'player_settings'->>'time_limit' IS NOT NULL
 ;
