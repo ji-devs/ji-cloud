@@ -29,6 +29,7 @@ use web_sys::{HtmlElement, HtmlIFrameElement};
 use super::state::JigPlayer;
 
 const DEFAULT_INSTRUCTIONS_TEXT: &str = "1, 2, 3 Go!";
+const STR_EMPTY: &str = "Oops! Looks like you have some empty content in your deck!";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum ShowInstructions {
@@ -189,6 +190,7 @@ impl JigPlayer {
                 if !valid {
                     Some(html!("main-empty", {
                         .prop("slot", "message")
+                        .prop("message", STR_EMPTY)
                     }))
                 } else {
                     None
