@@ -57,6 +57,7 @@ export const cardStyles = [
             display: flex;
             justify-content: center;
             align-items: center;
+            overflow: hidden;
         }
     `,
 ];
