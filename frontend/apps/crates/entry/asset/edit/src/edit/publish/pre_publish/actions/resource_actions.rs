@@ -4,7 +4,7 @@ use shared::{
 };
 use utils::prelude::ApiEndpointExt;
 
-use super::super::editable_assets::EditableResource;
+use utils::editable_asset::EditableResource;
 
 pub async fn save_and_publish_resource(resource: &EditableResource) -> Result<(), ()> {
     // let path = resource::UpdateDraftData::PATH.replace("{id}", &resource.id.0.to_string());

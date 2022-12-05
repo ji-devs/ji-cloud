@@ -4,7 +4,7 @@ use shared::{
 };
 use utils::prelude::ApiEndpointExt;
 
-use super::super::editable_assets::EditableJig;
+use utils::editable_asset::EditableJig;
 
 pub async fn save_and_publish_jig(jig: &EditableJig) -> Result<(), ()> {
     let req = jig.to_jig_update_request();

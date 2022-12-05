@@ -17,7 +17,6 @@ use crate::edit::publish::Publish;
 use super::add_additional_resource::AddAdditionalResource;
 use super::additional_resource::AdditionalResourceComponent;
 
-use super::editable_assets::EditableAsset;
 use super::state::PrePublish;
 use components::{
     hebrew_buttons::HebrewButtons,
@@ -32,6 +31,7 @@ use components::{
     },
 };
 use std::rc::Rc;
+use utils::editable_asset::EditableAsset;
 
 pub mod age;
 pub mod categories_select;

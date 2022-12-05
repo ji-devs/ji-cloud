@@ -6,9 +6,12 @@ use shared::domain::{
     category::{Category, CategoryId},
     meta::{Affiliation, AgeRange, ResourceType},
 };
-use utils::languages::{Language, JIG_LANGUAGES};
+use utils::{
+    editable_asset::EditableAsset,
+    languages::{Language, JIG_LANGUAGES},
+};
 
-use super::{super::Publish, editable_assets::EditableAsset};
+use super::super::Publish;
 
 const STR_JIG: &str = "JIG";
 const STR_RESOURCE: &str = "Resource";

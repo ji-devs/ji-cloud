@@ -15,9 +15,9 @@ use utils::{
     routes::{CourseEditRoute, JigEditRoute, ResourceEditRoute},
 };
 
-use super::editable_assets::EditableAsset;
 use super::state::PrePublish;
 use crate::edit::publish::Publish;
+use utils::editable_asset::EditableAsset;
 
 mod course_actions;
 mod jig_actions;

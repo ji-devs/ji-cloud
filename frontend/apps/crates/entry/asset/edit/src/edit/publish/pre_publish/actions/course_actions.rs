@@ -4,7 +4,7 @@ use shared::{
 };
 use utils::prelude::ApiEndpointExt;
 
-use super::super::editable_assets::EditableCourse;
+use utils::editable_asset::EditableCourse;
 
 pub async fn save_and_publish_course(course: &EditableCourse) -> anyhow::Result<()> {
     let req = course.to_course_update_request();
