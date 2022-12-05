@@ -6,12 +6,10 @@ import {
 } from "@elements/module/_common/types";
 
 const STR_ACTION_HEADER = "What do you want to do next?";
-const STR_USE_IN_PREFIX = "Use the content from this";
-const STR_USE_IN_SUFFIX = "activity in:";
+const STR_USE_IN= "Use this content in:";
 
 const STR_HEADER_LINE_1_PREFIX = "Your";
 const STR_HEADER_LINE_1_SUFFIX = "activity is ready!";
-const STR_HEADER_LINE_2 = "It’s now part of your JIG.";
 
 @customElement("post-preview")
 export class _ extends LitElement {
@@ -85,7 +83,7 @@ export class _ extends LitElement {
                     grid-column: 1 / -1;
                     text-align: center;
                     margin: 0;
-                    margin-bottom: 24px;
+                    margin-bottom: 30px;
                     font-weight: 900;
                 }
                 .action-use-in-header {
@@ -147,8 +145,6 @@ function renderMessage(module: ModuleKind) {
             ${STR_HEADER_LINE_1_PREFIX}
             ${STR_MODULE_DISPLAY_NAME[module]}
             ${STR_HEADER_LINE_1_SUFFIX}
-            <br />
-            ${STR_HEADER_LINE_2}
         </div>
     `;
 }
@@ -173,18 +169,17 @@ function renderConvertable(module: ModuleKind) {
             <h3 class="action-header">${STR_ACTION_HEADER}</h3>
             <div class="actions">
                 <div>
-                    <slot class="action-print" name="action-print"></slot>
-                    <slot class="action-publish" name="action-publish"></slot>
-                    <slot class="action-continue" name="action-continue"></slot>
-                </div>
-                <div>
                     <h4 class="action-use-in-header">
-                        ${STR_USE_IN_PREFIX} ${STR_MODULE_DISPLAY_NAME[module]}
-                        ${STR_USE_IN_SUFFIX}
+                        ${STR_USE_IN}
                     </h4>
                     <slot class="module-1" name="module-1"></slot>
                     <slot class="module-2" name="module-2"></slot>
                     <slot class="module-3" name="module-3"></slot>
+                </div>
+                <div>
+                    <slot class="action-continue" name="action-continue"></slot>
+                    <slot class="action-print" name="action-print"></slot>
+                    <slot class="action-publish" name="action-publish"></slot>
                 </div>
             </div>
         </div>
