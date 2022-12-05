@@ -100,8 +100,8 @@ impl ModuleDom {
                         .global_event(clone!(state, drag => move |evt: events::PointerMove| {
                             state.on_pointer_move(&drag, evt.x(), evt.y());
                         }))
-                        .global_event(clone!(state => move |evt: events::PointerUp| {
-                            state.on_pointer_up(evt.x(), evt.y());
+                        .global_event(clone!(state, drag => move |evt: events::PointerUp| {
+                            state.on_pointer_up(&drag, evt.x(), evt.y());
                         }))
                         .global_event(clone!(state => move |_:events::PointerCancel| {
                             state.stop_drag();

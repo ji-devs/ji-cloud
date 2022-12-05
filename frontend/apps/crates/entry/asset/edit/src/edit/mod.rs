@@ -1,9 +1,9 @@
 mod actions;
 mod course;
 mod dom;
+mod jig;
 mod module_iframe;
 mod publish;
-mod jig;
 mod sidebar;
 mod state;
 

@@ -83,7 +83,7 @@ impl SidebarDom {
                     state.asset_edit_state.route.signal_cloned().for_each(clone!(state => move |route| {
                         let should_collapse = !matches!(
                             route,
-                            AssetEditRoute::Course(_, _) | AssetEditRoute::Jig(_, JigEditRoute::Landing)
+                            AssetEditRoute::Jig(_, JigEditRoute::Landing) | AssetEditRoute::Course(_, CourseEditRoute::Landing)
                         );
                         state.collapsed.set(should_collapse);
                         ready(())
@@ -92,7 +92,10 @@ impl SidebarDom {
                 .prop_signal("collapsed", state.collapsed.signal())
                 .prop_signal("isModulePage", state.asset_edit_state.route.signal_cloned().map(|route| {
                     // TODO: change?
-                    matches!(route, AssetEditRoute::Jig(_, JigEditRoute::Landing))
+                    matches!(
+                        route,
+                        AssetEditRoute::Jig(_, JigEditRoute::Landing) | AssetEditRoute::Course(_, CourseEditRoute::Landing)
+                    )
                 }))
                 .prop_signal("loading", state.loader.is_loading())
                 .child(html!("button-empty", {

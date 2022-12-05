@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::rc::Rc;
 
 use futures_signals::{
     map_ref,
@@ -6,12 +6,10 @@ use futures_signals::{
 };
 use shared::domain::module::ModuleKind;
 use utils::drag::Drag;
-use web_sys::HtmlElement;
 
 pub struct State {
     pub kind: ModuleKind,
     pub drag: Mutable<Option<Rc<Drag>>>,
-    pub element_hovered: Rc<RefCell<Option<HtmlElement>>>,
     pub hover: Mutable<bool>,
     pub show_autogen_tooltip: Mutable<bool>,
 }
@@ -22,7 +20,6 @@ impl State {
             kind,
             drag: Mutable::new(None),
             hover: Mutable::new(false),
-            element_hovered: Rc::new(RefCell::new(None)),
             show_autogen_tooltip: Mutable::new(false),
         }
     }

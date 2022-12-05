@@ -1,12 +1,9 @@
 use std::rc::Rc;
 
 use super::{
-    super::edit::publish::Publish,
-    course::jig_selection::state::JigSelection,
-    module_iframe::ModuleIframe,
-    jig::module_selection::dom::SelectionDom,
-    sidebar::dom::SidebarDom,
-    state::AssetEditState,
+    super::edit::publish::Publish, course::jig_selection::state::JigSelection,
+    jig::module_selection::dom::SelectionDom, module_iframe::ModuleIframe,
+    sidebar::dom::SidebarDom, state::AssetEditState,
 };
 use components::{
     overlay::handle::OverlayHandle,

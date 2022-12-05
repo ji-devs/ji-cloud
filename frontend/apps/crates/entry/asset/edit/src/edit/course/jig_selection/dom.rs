@@ -3,7 +3,7 @@ use std::rc::Rc;
 use dominator::{clone, html, with_node, Dom, EventOptions};
 use futures_signals::signal_vec::SignalVecExt;
 use shared::domain::jig::JigResponse;
-use utils::events;
+use utils::{events, unwrap::UnwrapJiExt};
 use web_sys::HtmlInputElement;
 
 use super::state::JigSelection;
@@ -76,16 +76,50 @@ impl JigSelection {
                     }))
                 })])
             })))
+            .child_signal(state.drag.signal_ref(clone!(state => move|drag| {
+                drag.as_ref().map(|drag| {
+                    html!("input", {
+                        .prop("slot", "dragged")
+                        // .prop("path", &format!("entry/jig/modules/large/{}-hover.svg", state.kind.as_str()))
+                        .style("position", "fixed")
+                        .style("top", "0")
+                        .style("left", "0")
+                        .style("z-index", "1")
+                        .style("cursor", "grabbing")
+                        /* for elementFromPoint not to return the dragged element */
+                        .style("pointer-events", "none")
+                        .prop("readOnly", true)
+                        // .prop("value", )
+                        .style_signal("transform", drag.transform_signal())
+                        .global_event(clone!(state, drag => move |evt: events::PointerMove| {
+                            state.on_pointer_move(&drag, evt.x(), evt.y());
+                        }))
+                        .global_event(clone!(state, drag => move |evt: events::PointerUp| {
+                            state.on_pointer_up(&drag, evt.x(), evt.y());
+                        }))
+                        .global_event(clone!(state => move |_:events::PointerCancel| {
+                            state.stop_drag();
+                        }))
+                    })
+                })
+            })))
         })
     }
 
     fn render_jig(self: &Rc<Self>, jig: &JigResponse, actions: Vec<Dom>) -> Dom {
+        let state = self;
         html!("p", {
             .text(&jig.jig_data.display_name)
             .child(html!("br"))
             .text("by: ")
             .text(&jig.author_name.clone().unwrap_or_default())
             .children(actions)
+            .style("touch-action", "none")
+            .style("user-select", "none")
+            .event(clone!(state => move |evt: events::PointerDown| {
+                let elem = evt.dyn_target().unwrap_ji();
+                state.on_pointer_down(&elem, evt.x(), evt.y());
+            }))
         })
     }
 }
