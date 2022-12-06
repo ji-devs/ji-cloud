@@ -15,6 +15,7 @@ pub enum Key {
     ArrowRight,
     ArrowDown,
     Delete,
+    Backspace,
     Other(String),
 }
 
@@ -27,6 +28,12 @@ pub struct KeyEvent {
     pub key: Key,
 }
 
+impl KeyEvent {
+    pub fn is_delete_key(&self) -> bool {
+        (self.is_osx && self.ctrl_cmd && self.key == Key::Backspace) || self.key == Key::Delete
+    }
+}
+
 impl Key {
     pub fn is_move_key(&self) -> bool {
         match self {
@@ -34,6 +41,7 @@ impl Key {
             _ => false,
         }
     }
+
     pub fn translation_from_key(&self) -> (f64, f64) {
         let resize_info = get_resize_info();
         match self {
@@ -54,6 +62,7 @@ impl From<String> for Key {
             "ArrowRight" => Self::ArrowRight,
             "ArrowDown" => Self::ArrowDown,
             "Delete" => Self::Delete,
+            "Backspace" => Self::Backspace,
             other => Self::Other(other.into()),
         }
     }
