@@ -20,7 +20,7 @@ use futures_signals::{
 use shared::domain::module::body::{Transform, _groups::design::Sticker as RawSticker};
 use std::rc::Rc;
 use utils::{
-    keyboard::{Key, KeyEvent},
+    keyboard::KeyEvent,
     prelude::*,
 };
 use web_sys::HtmlElement;
