@@ -45,10 +45,9 @@ export class _ extends LitElement {
                 .bottom-section {
                     background-color: var(--white);
                     display: grid;
-                    grid-gap: 16px;
                     align-items: center;
                     align-content: center;
-                    padding: 30px 0;
+                    padding: 40px 0;
                 }
                 .bottom-section .actions {
                     display: flex;
