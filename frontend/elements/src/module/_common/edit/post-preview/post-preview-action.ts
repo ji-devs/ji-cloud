@@ -27,7 +27,7 @@ export class _ extends LitElement {
                 }
                 .circle {
                     height: 116px;
-                    width: 140px;
+                    width: 130px;
                     border-radius: 50%;
                     transition: background-color 0.3s;
                     display: grid;
@@ -44,9 +44,9 @@ export class _ extends LitElement {
                 .label {
                     text-align: center;
                     transition: color 0.3s;
-                    line-height: 1.5;
+                    line-height: 1.2;
                     font-weight: 600;
-                    width: 140px;
+                    width: 130px;
                     font-size: 16px;
                 }
                 :host(:hover) .label {

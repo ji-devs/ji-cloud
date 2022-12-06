@@ -37,7 +37,7 @@ export class _ extends LitElement {
                 .message {
                     text-align: center;
                     line-height: 1.18;
-                    font-size: 24px;
+                    font-size: 22px;
                     font-weight: 500;
                     color: #fd7076;
                     margin: 0;
@@ -53,9 +53,13 @@ export class _ extends LitElement {
                     display: flex;
                     flex-direction: column;
                     justify-content: center;
-                    grid-gap: 48px;
+                    grid-gap: 15px;
                 }
-
+                .bottom-section .actions .middle-plane {
+                    background-color: var(--light-orange-1);
+                    height: 220px;
+                    padding-bottom: 12px;
+                }
                 .bottom-section .actions > div {
                     display: grid;
                     grid-template-columns: repeat(auto-fit, 116px);
@@ -71,14 +75,13 @@ export class _ extends LitElement {
                 .bottom-section-centered {
                     background-color: var(--white);
                     display: grid;
-                    grid-gap: 16px;
                     justify-content: center;
                     align-items: center;
-                    padding: 46px 0;
+                    padding: 50px 0;
                 }
                 .action-header {
                     color: #fd7076;
-                    font-size: 32px;
+                    font-size: 22px;
                     grid-column: 1 / -1;
                     text-align: center;
                     margin: 0;
@@ -89,8 +92,8 @@ export class _ extends LitElement {
                     grid-column: 1 / span 3;
                     text-align: center;
                     color: #4a4a4a;
-                    margin: 0;
-                    margin-bottom: 12px;
+                    margin: auto;
+                    margin-bottom: 10px;
                     font-weight: 500;
                 }
                 .bottom-section .actions ::slotted([slot="module-1"]) {
@@ -154,9 +157,9 @@ function renderNonConvertable(module: ModuleKind) {
             ${renderMessage(module)}
             <h3 class="action-header">${STR_ACTION_HEADER}</h3>
             <div class="actions">
+                <slot class="action-continue" name="action-continue"></slot>
                 <slot class="action-print" name="action-print"></slot>
                 <slot class="action-publish" name="action-publish"></slot>
-                <slot class="action-continue" name="action-continue"></slot>
             </div>
         </div>
     `;
@@ -167,7 +170,7 @@ function renderConvertable(module: ModuleKind) {
             ${renderMessage(module)}
             <h3 class="action-header">${STR_ACTION_HEADER}</h3>
             <div class="actions">
-                <div>
+                <div class= "middle-plane">
                     <h4 class="action-use-in-header">
                         ${STR_USE_IN}
                     </h4>
