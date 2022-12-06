@@ -232,7 +232,7 @@ pub fn render_sticker<T: AsSticker>(
 ) -> Dom {
     html!("empty-fragment", {
         .global_event(clone!(stickers, index => move |evt:events::KeyDown| {
-            if let Key::Delete = KeyEvent::from(evt).key {
+            if KeyEvent::from(evt).is_delete_key() {
                 if let Some(selected) = stickers.selected_index.get_cloned() {
                     if Some(selected) == index.get_cloned() {
                         // If we don't deselect the currently selected sticker, then this event will
