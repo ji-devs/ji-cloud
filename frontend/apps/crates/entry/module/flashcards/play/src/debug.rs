@@ -48,6 +48,7 @@ impl DebugSettings {
                 RawData {
                     content: Some(Content {
                         player_settings: PlayerSettings {
+                            view_pairs: None,
                             display_mode:
                                 shared::domain::module::body::flashcards::DisplayMode::Double,
                             swap: false,

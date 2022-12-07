@@ -45,6 +45,7 @@ impl DebugSettings {
                         player_settings: PlayerSettings {
                             display_mode:
                                 shared::domain::module::body::flashcards::DisplayMode::Single,
+                            view_pairs: None,
                             swap: false,
                         },
                         base: BaseContent {

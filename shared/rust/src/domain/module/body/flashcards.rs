@@ -28,6 +28,10 @@ pub struct PlayerSettings {
     /// display mode
     pub display_mode: DisplayMode,
 
+    /// view pairs
+    #[serde(default)]
+    pub view_pairs: Option<u32>,
+
     /// swap the display to be primary left vs. right
     #[serde(default)]
     pub swap: bool,

@@ -7,12 +7,14 @@ use rand::prelude::*;
 use shared::domain::module::body::_groups::cards::{Card, CardPair};
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::sync::atomic::AtomicUsize;
 use utils::prelude::*;
 
 pub struct Game {
     pub base: Rc<Base>,
     pub rng: RefCell<ThreadRng>,
     pub deck: RefCell<Vec<CardPair>>,
+    pub rounds_played: AtomicUsize,
     pub current: Mutable<Current>,
     pub gate: Mutable<Gate>,
     pub animation_loader: AsyncLoader,
@@ -42,6 +44,7 @@ impl Game {
         Self {
             base,
             deck: RefCell::new(deck),
+            rounds_played: AtomicUsize::new(0),
             rng: RefCell::new(rng),
             current: Mutable::new(current),
             gate: Mutable::new(Gate::Waiting),
