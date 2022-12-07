@@ -67,7 +67,7 @@ where
         }))
         .apply_if(state.value.is_some(), |dom| {
             let value = state.value.as_ref().unwrap_ji();
-            let input_kind = get_input_kind(state.kind);
+            let input_kind = get_input_kind(&state.kind);
 
             dom
                 .prop_signal("num", value.string_signal())
@@ -151,15 +151,22 @@ enum InputKind {
     Field,
     Select(usize),
 }
-fn get_input_kind(kind: SettingsButtonKind) -> Option<InputKind> {
+fn get_input_kind(kind: &SettingsButtonKind) -> Option<InputKind> {
+    // If the kind is a CustomKind, then we need to check whether the variant is Kind first. If it is
+    // return that so we can determine whether or not show an input field on it.
+    let kind = match kind {
+        SettingsButtonKind::Custom(SettingsButtonCustomKind::Kind(kind), _) => &*kind,
+        _ => kind,
+    };
+
     match kind {
         SettingsButtonKind::Attempts => Some(InputKind::Select(6)),
         SettingsButtonKind::NumChoices => Some(InputKind::Select(6)),
         SettingsButtonKind::NumPairs => Some(InputKind::Field),
-
         SettingsButtonKind::TimeLimit => Some(InputKind::Field),
         SettingsButtonKind::ContinueSome => Some(InputKind::Field),
         SettingsButtonKind::Rounds => Some(InputKind::Field),
+        SettingsButtonKind::CardsShowSome => Some(InputKind::Field),
         _ => None,
     }
 }

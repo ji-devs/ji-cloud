@@ -14,6 +14,8 @@ export type Kind =
     | "attempts"
     | "card-double"
     | "card-single"
+    | "cards-show-all"
+    | "cards-show-some"
     | "continue-all"
     | "continue-click"
     | "continue-some"
@@ -57,6 +59,8 @@ const STR_LABEL: Record<Kind, string> = {
     "highlight-off": "don't highlight",
     "card-single": "double-sided",
     "card-double": "side-by-side",
+    "cards-show-all": "show all",
+    "cards-show-some": "show some",
     "rounds": "pages per game",
     "n_choices": "cards per page",
     "n_pairs": "pairs per game",

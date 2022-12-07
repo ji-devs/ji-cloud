@@ -96,7 +96,7 @@ pub async fn init_from_raw(
             base.clone(),
             SidebarSettings::new,
             settings::sidebar::dom::render,
-            false,
+            true,
         )),
         header: Rc::new(Header::new(base.clone())),
         footer: Rc::new(Footer::new(base.clone())),

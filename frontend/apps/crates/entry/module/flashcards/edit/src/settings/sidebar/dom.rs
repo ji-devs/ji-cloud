@@ -1,4 +1,5 @@
 use dominator::{clone, Dom};
+use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 
 use super::state::*;
@@ -12,14 +13,14 @@ pub fn render(state: Rc<SidebarSettings>) -> Dom {
             ModuleSettingsLine::new_with_label(
                 "How should card pairs be displayed?".to_string(),
                 vec![
-                    Some(make_button(state.clone(), DisplayMode::Double)),
-                    Some(make_button(state.clone(), DisplayMode::Single)),
+                    Some(make_display_mode_button(state.clone(), DisplayMode::Double)),
+                    Some(make_display_mode_button(state.clone(), DisplayMode::Single)),
                 ],
             ),
             ModuleSettingsLine::new_with_label(
                 "Which card should be face-up?".to_string(),
                 vec![Some(SettingsButton::new_click(
-                    SettingsButtonKind::Swap,
+                    SettingsButtonKind::custom_kind(SettingsButtonKind::Swap, "swap"),
                     clone!(state => move || {
                         state.base.extra.settings.swap.signal()
                     }),
@@ -28,11 +29,46 @@ pub fn render(state: Rc<SidebarSettings>) -> Dom {
                     }),
                 ))],
             ),
+            ModuleSettingsLine::new_with_label(
+                "Should student view all pairs?".to_string(),
+                vec![
+                    Some(SettingsButton::new_click(
+                        SettingsButtonKind::CardsShowAll,
+                        clone!(state => move || {
+                            state.base.extra.settings.view_all
+                                .signal()
+                        }),
+                        clone!(state => move || {
+                            state.set_view_all(true);
+                        }),
+                    )),
+                    Some(SettingsButton::new_value_click(
+                        SettingsButtonKind::CardsShowSome,
+                        clone!(state => move || {
+                            state.base.extra.settings.view_all
+                                .signal()
+                                .map(|view_all| !view_all)
+                        }),
+                        SettingsValue::new_mutable(
+                            state.base.extra.settings.view_pairs.clone(),
+                            clone!(state => move |value| {
+                                state.set_view_pairs(value);
+                            }),
+                        ),
+                        clone!(state => move || {
+                            state.set_view_all(false);
+                        }),
+                    )),
+                ],
+            ),
         ],
     }))
 }
 
-pub fn make_button(state: Rc<SidebarSettings>, display_mode: DisplayMode) -> Rc<SettingsButton> {
+pub fn make_display_mode_button(
+    state: Rc<SidebarSettings>,
+    display_mode: DisplayMode,
+) -> Rc<SettingsButton> {
     SettingsButton::new_click(
         if display_mode == DisplayMode::Single {
             SettingsButtonKind::CardSingle

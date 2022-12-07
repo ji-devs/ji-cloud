@@ -15,6 +15,7 @@ const STR_LABEL: Partial<Record<Kind, string>> = {
     rounds: "Complete",
     n_choices: "Display",
     n_pairs: "Display",
+    "cards-show-some": "Display",
 };
 
 const STR_LABEL_SUFFIX: Partial<Record<Kind, string[]>> = {
@@ -24,6 +25,7 @@ const STR_LABEL_SUFFIX: Partial<Record<Kind, string[]>> = {
     rounds: ["page", "pages"],
     n_choices: ["card", "cards"],
     n_pairs: ["pair", "pairs"],
+    "cards-show-some": ["pair", "pairs"],
 };
 
 @customElement("module-settings-bubble-content")

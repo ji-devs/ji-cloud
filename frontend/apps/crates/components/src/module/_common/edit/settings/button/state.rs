@@ -114,12 +114,14 @@ impl<T: Copy + Display + Default + Eq + FromStr + 'static> SettingsValueExt for 
 }
 
 // These must match the typescript / custom element variants
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum SettingsButtonKind {
     Attempts,
     Autoplay,
     CardDouble,
     CardSingle,
+    CardsShowAll,
+    CardsShowSome,
     ContinueAll,
     ContinueClick,
     ContinueAutomatically,
@@ -141,16 +143,32 @@ pub enum SettingsButtonKind {
     TimeLimitOff,
     VideoCaptions,
     /// Special type for overriding the label
-    Custom(&'static str, &'static str),
+    Custom(SettingsButtonCustomKind, &'static str),
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum SettingsButtonCustomKind {
+    Kind(Box<SettingsButtonKind>),
+    Value(&'static str),
 }
 
 impl SettingsButtonKind {
+    pub fn custom_kind(kind: SettingsButtonKind, label: &'static str) -> Self {
+        Self::Custom(SettingsButtonCustomKind::Kind(Box::new(kind)), label)
+    }
+
+    pub fn custom_value(value: &'static str, label: &'static str) -> Self {
+        Self::Custom(SettingsButtonCustomKind::Value(value), label)
+    }
+
     pub fn as_str_id(&self) -> &'static str {
         match self {
             Self::Attempts => "attempts",
             Self::Autoplay => "autoplay",
             Self::CardDouble => "card-double",
             Self::CardSingle => "card-single",
+            Self::CardsShowAll => "cards-show-all",
+            Self::CardsShowSome => "cards-show-some",
             Self::ContinueAll => "continue-all",
             Self::ContinueAutomatically => "continue-automatically",
             Self::ContinueClick => "continue-click",
@@ -171,7 +189,10 @@ impl SettingsButtonKind {
             Self::TimeLimit => "time-limit",
             Self::TimeLimitOff => "time-limit-off",
             Self::VideoCaptions => "video-captions",
-            Self::Custom(id, _) => id,
+            Self::Custom(id, _) => match id {
+                SettingsButtonCustomKind::Kind(kind) => kind.as_str_id(),
+                SettingsButtonCustomKind::Value(value) => *value,
+            },
         }
     }
 }
