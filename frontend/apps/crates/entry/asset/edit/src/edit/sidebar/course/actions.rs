@@ -42,7 +42,6 @@ pub async fn update_course(
     .await
 }
 
-#[allow(dead_code)] // TODO: remove once used
 pub async fn update_display_name(course_id: CourseId, value: String) {
     let req = CourseUpdateDraftDataRequest {
         display_name: Some(value),

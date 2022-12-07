@@ -20,9 +20,9 @@ use shared::domain::{
 pub struct EditableCourse {
     pub id: CourseId,
     // cover and modules only for read
-    pub cover: Option<LiteModule>,
-    pub items: Vec<JigId>,
-    pub published_at: Option<DateTime<Utc>>,
+    pub cover: Mutable<Option<LiteModule>>,
+    pub items: MutableVec<JigId>,
+    pub published_at: Mutable<Option<DateTime<Utc>>>,
     pub display_name: Mutable<String>,
     pub description: Mutable<String>,
     pub age_ranges: Mutable<HashSet<AgeRangeId>>,
@@ -37,8 +37,8 @@ impl From<CourseResponse> for EditableCourse {
     fn from(course: CourseResponse) -> Self {
         Self {
             id: course.id,
-            cover: course.course_data.cover,
-            items: course.course_data.items,
+            cover: Mutable::new(course.course_data.cover),
+            items: MutableVec::new_with_values(course.course_data.items),
             display_name: Mutable::new(course.course_data.display_name),
             description: Mutable::new(course.course_data.description),
             age_ranges: Mutable::new(HashSet::from_iter(course.course_data.age_ranges)),
@@ -49,12 +49,50 @@ impl From<CourseResponse> for EditableCourse {
                 course.course_data.additional_resources,
             )),
             privacy_level: Mutable::new(course.course_data.privacy_level),
-            published_at: course.published_at,
+            published_at: Mutable::new(course.published_at),
+        }
+    }
+}
+
+impl From<CourseId> for EditableCourse {
+    fn from(course_id: CourseId) -> Self {
+        Self {
+            id: course_id,
+            cover: Default::default(),
+            display_name: Default::default(),
+            description: Default::default(),
+            age_ranges: Default::default(),
+            language: Default::default(),
+            categories: Default::default(),
+            affiliations: Default::default(),
+            additional_resources: Default::default(),
+            privacy_level: Default::default(),
+            published_at: Default::default(),
+            items: Default::default(),
         }
     }
 }
 
 impl EditableCourse {
+    pub fn fill_from_course(&self, course: CourseResponse) {
+        self.cover.set(course.course_data.cover);
+        self.items.lock_mut().replace(course.course_data.items);
+        self.display_name.set(course.course_data.display_name);
+        self.description.set(course.course_data.description.clone());
+        self.age_ranges
+            .set(HashSet::from_iter(course.course_data.age_ranges));
+        self.language.set(course.course_data.language);
+        self.categories
+            .set(HashSet::from_iter(course.course_data.categories));
+        self.affiliations
+            .set(HashSet::from_iter(course.course_data.affiliations));
+        self.additional_resources
+            .lock_mut()
+            .replace_cloned(course.course_data.additional_resources);
+        self.privacy_level.set(course.course_data.privacy_level);
+        self.published_at.set(course.published_at);
+    }
+
     pub fn to_course_update_request(&self) -> CourseUpdateDraftDataRequest {
         // don't include additional_resources here since they're handled in separately
         CourseUpdateDraftDataRequest {

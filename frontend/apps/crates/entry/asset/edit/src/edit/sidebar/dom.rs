@@ -111,9 +111,7 @@ impl SidebarDom {
                 .child(HeaderDom::render(state.clone()))
                 .child(html!("jig-edit-sidebar-publish", {
                     .prop("slot", "publish")
-                    .prop_signal("publish", state.publish_at.signal_cloned().map(|publish_at| {
-                        publish_at.is_some()
-                    }))
+                    .prop("publish", state.asset_edit_state.asset.published_at().lock_ref().is_some())
                     .prop_signal("collapsed", state.collapsed.signal())
                     .prop_signal("selected", state.asset_edit_state.route.signal_cloned().map(|route| {
                         matches!(
@@ -162,12 +160,12 @@ impl SidebarDom {
                         })))
                     })
                 }))
-                .children_signal_vec(state.modules
+                .children_signal_vec(state.spots
                     .signal_vec_cloned()
                     .enumerate()
                     .map_signal(clone!(state => move |(index, module)| {
                         map_ref! {
-                            let len = state.modules.signal_vec_cloned().len(),
+                            let len = state.spots.signal_vec_cloned().len(),
                             let index = index.signal(),
                             let drag_target_index = state.drag_target_index.signal()
                                 => move {

@@ -53,7 +53,7 @@ pub async fn update_display_name(jig_id: JigId, value: String) {
 
 pub fn duplicate_module(state: Rc<State>, module_id: &ModuleId) {
     state.loader.load(clone!(state, module_id => async move {
-        let jig_id = state.asset.unwrap_jig().id;
+        let jig_id = state.asset_edit_state.asset_id.unwrap_jig();
         let module = super::module_cloner::clone_module(&module_id, &jig_id).await.unwrap_ji();
         populate_added_module(state, module);
     }));
@@ -79,10 +79,10 @@ pub fn duplicate_module(state: Rc<State>, module_id: &ModuleId) {
 // }
 
 pub fn get_player_settings(settings_state: Rc<SettingsState>) -> JigPlayerOptions {
-    let direction = settings_state.direction.get_cloned();
-    let display_score = settings_state.display_score.get();
-    let track_assessments = settings_state.track_assessments.get();
-    let drag_assist = settings_state.drag_assist.get();
+    let direction = settings_state.jig.direction.get_cloned();
+    let display_score = settings_state.jig.display_score.get();
+    let track_assessments = settings_state.jig.track_assessments.get();
+    let drag_assist = settings_state.jig.drag_assist.get();
 
     JigPlayerOptions {
         direction,
@@ -101,7 +101,7 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
             populate_added_module(Rc::clone(&state), module);
         }
         ModuleToJigEditorMessage::Complete(complete_module_id, is_complete) => {
-            let modules = state.modules.lock_ref();
+            let modules = state.spots.lock_ref();
             let module = modules.iter().find(|module| {
                 // Oh my.
                 // only modules should be here, either jig.modules or any asset cover
@@ -124,10 +124,9 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
         }
         ModuleToJigEditorMessage::Next => {
             state.asset_edit_state.set_route_jig(JigEditRoute::Landing);
-            let jig_id = state.asset.unwrap_jig().id;
+            let jig_id = *state.asset_edit_state.asset_id.unwrap_jig();
             Route::push_state(Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                 jig_id,
-                // JigFocus::Modules,
                 JigEditRoute::Landing,
             ))));
         }
@@ -136,12 +135,12 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
 
 fn populate_added_module(state: Rc<State>, module: LiteModule) {
     // Assumes that the final module in the list is always the placeholder module.
-    let insert_at_idx = state.modules.lock_ref().len() - 1;
+    let insert_at_idx = state.spots.lock_ref().len() - 1;
 
     let module_id = module.id;
 
     state
-        .modules
+        .spots
         .lock_mut()
         .insert_cloned(insert_at_idx, SidebarSpot::new_jig_module(Some(module)));
 
@@ -153,11 +152,7 @@ fn populate_added_module(state: Rc<State>, module: LiteModule) {
 pub fn use_module_as(state: Rc<State>, target_kind: ModuleKind, source_module_id: ModuleId) {
     state.loader.load(clone!(state => async move {
         let target_module_id: anyhow::Result<(ModuleId, bool)> = async {
-            let asset_type = match state.asset {
-                Asset::Jig(_) => AssetType::Jig,
-                Asset::Course(_) => AssetType::Course,
-                Asset::Resource(_) => unimplemented!(),
-            };
+            let asset_type: AssetType = (&state.asset_edit_state.asset_id).into();
             let source_module = endpoints::module::GetDraft::api_with_auth(
                 ModuleGetDraftPath(asset_type, source_module_id.clone()),
                 None
@@ -167,7 +162,7 @@ pub fn use_module_as(state: Rc<State>, target_kind: ModuleKind, source_module_id
 
             let req = ModuleCreateRequest {
                 body: target_body,
-                parent_id: state.asset.id(),
+                parent_id: state.asset_edit_state.asset.id(),
             };
 
             let res = endpoints::module::Create::api_with_auth(

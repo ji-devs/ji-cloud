@@ -11,6 +11,8 @@ use utils::{
     languages::{Language, JIG_LANGUAGES},
 };
 
+use crate::edit::AssetEditState;
+
 use super::super::Publish;
 
 const STR_JIG: &str = "JIG";
@@ -25,17 +27,16 @@ pub struct PrePublish {
     pub resource_types: Mutable<Vec<ResourceType>>,
     pub ages: Mutable<Vec<AgeRange>>,
     pub affiliations: Mutable<Vec<Affiliation>>,
-    pub asset: EditableAsset,
     pub submission_tried: Mutable<bool>,
     pub show_missing_info_popup: Mutable<bool>,
     pub languages: Vec<Language>,
     pub publish_state: Rc<Publish>,
+    pub asset_edit_state: Rc<AssetEditState>,
     pub show_public_popup: Mutable<bool>,
 }
 
 impl PrePublish {
     pub fn new(
-        jig: EditableAsset,
         categories: Vec<Category>,
         category_label_lookup: HashMap<CategoryId, String>,
         ages: Vec<AgeRange>,
@@ -45,7 +46,6 @@ impl PrePublish {
     ) -> Self {
         Self {
             loader: AsyncLoader::new(),
-            asset: jig,
             categories: Mutable::new(categories),
             category_label_lookup: Mutable::new(category_label_lookup),
             ages: Mutable::new(ages),
@@ -55,13 +55,14 @@ impl PrePublish {
             show_missing_info_popup: Mutable::new(false),
             languages: JIG_LANGUAGES.clone(),
             show_public_popup: Mutable::new(false),
+            asset_edit_state: Rc::clone(&publish_state.asset_edit_state),
             publish_state,
         }
     }
 
     /// a displayable string for the asset type
     pub fn asset_type_name(&self) -> &'static str {
-        match &self.asset {
+        match &self.asset_edit_state.asset {
             EditableAsset::Jig(_) => STR_JIG,
             EditableAsset::Resource(_) => STR_RESOURCE,
             EditableAsset::Course(_) => STR_COURSE,

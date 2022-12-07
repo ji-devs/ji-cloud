@@ -80,7 +80,7 @@ fn line(
                 .with_node!(elem =>{
                     .prop("slot", "checkbox")
                     .prop("type", "checkbox")
-                    .prop_signal("checked", state.background_audio.signal_cloned().map(clone!(option => move|selected_audio| {
+                    .prop_signal("checked", state.jig.audio_background.signal_cloned().map(clone!(option => move|selected_audio| {
                         match selected_audio {
                             Some(selected_audio) if selected_audio == option => {
                                 true

@@ -2,19 +2,19 @@ use super::course::actions as course_actions;
 use super::jig::actions as jig_actions;
 use super::state::*;
 use dominator::clone;
-use shared::domain::asset::Asset;
+use shared::domain::asset::AssetId;
 use std::rc::Rc;
 
 pub fn navigate_to_publish(state: Rc<State>) {
     state.collapsed.set(true);
-    match &state.asset {
-        Asset::Jig(_) => {
+    match &state.asset_edit_state.asset_id {
+        AssetId::JigId(_) => {
             jig_actions::navigate_to_publish(Rc::clone(&state));
         }
-        Asset::Course(_) => {
+        AssetId::CourseId(_) => {
             course_actions::navigate_to_publish(Rc::clone(&state));
         }
-        Asset::Resource(_) => unimplemented!(),
+        AssetId::ResourceId(_) => unimplemented!(),
     }
 }
 
@@ -22,7 +22,7 @@ pub fn set_highlight_modules(state: &Rc<State>, highlight: bool) {
     if highlight {
         state.collapsed.set_neq(false);
 
-        let modules = state.modules.lock_ref();
+        let modules = state.spots.lock_ref();
 
         if modules
             .iter()
@@ -49,14 +49,16 @@ pub fn set_highlight_modules(state: &Rc<State>, highlight: bool) {
 
 pub fn update_display_name(state: Rc<State>, value: String) {
     state.loader.load(clone!(state => async move {
-        state.name.set(value.clone());
+        state.asset_edit_state.asset.display_name().set(value.clone());
 
-        match &state.asset {
-            Asset::Jig(jig) => {
-                jig_actions::update_display_name(jig.id, value).await;
+        match &state.asset_edit_state.asset_id {
+            AssetId::JigId(jig_id) => {
+                jig_actions::update_display_name(*jig_id, value).await;
             },
-            Asset::Course(_) => todo!(),
-            Asset::Resource(_) => unimplemented!(),
+            AssetId::CourseId(course_id) => {
+                course_actions::update_display_name(*course_id, value).await;
+            },
+            AssetId::ResourceId(_) => unimplemented!(),
         }
     }));
 }

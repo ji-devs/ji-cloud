@@ -7,7 +7,7 @@ use std::rc::Rc;
 use utils::prelude::*;
 
 pub fn edit(state: Rc<SpotState>) {
-    let jig_id = state.sidebar.asset.unwrap_jig().id;
+    let jig_id = *state.sidebar.asset_edit_state.asset_id.unwrap_jig();
 
     if let SidebarSpotItem::Jig(Some(module)) = &state.module.item {
         let module_id = module.id;
@@ -28,7 +28,7 @@ pub fn edit(state: Rc<SpotState>) {
 pub async fn delete(state: Rc<SpotState>) {
     if let Some(module) = &*state.module.item.unwrap_jig() {
         let req = ModuleDeleteRequest {
-            parent_id: state.sidebar.asset.id(),
+            parent_id: state.sidebar.asset_edit_state.asset_id,
         };
 
         endpoints::module::Delete::api_with_auth_empty(ModuleDeletePath(module.id), Some(req))
@@ -39,7 +39,7 @@ pub async fn delete(state: Rc<SpotState>) {
 
 pub fn assign_kind(state: Rc<SpotState>, kind: ModuleKind) {
     state.sidebar.loader.load(clone!(state => async move {
-        let jig_id = state.sidebar.asset.unwrap_jig().id;
+        let jig_id = *state.sidebar.asset_edit_state.asset_id.unwrap_jig();
 
         let req = Some(ModuleCreateRequest {
             parent_id: jig_id.into(),
@@ -65,7 +65,7 @@ pub fn assign_kind(state: Rc<SpotState>, kind: ModuleKind) {
                     // add the new one. This is slightly less efficient because it fires signals
                     // for the entire list of modules, however, it is necessary so that the modules
                     // before and after this one can have their views updated.
-                    let mut modules = state.sidebar.modules.lock_mut();
+                    let mut modules = state.sidebar.spots.lock_mut();
                     modules.remove(index);
                     modules.insert_cloned(index, module);
 
@@ -83,7 +83,7 @@ pub fn assign_kind(state: Rc<SpotState>, kind: ModuleKind) {
 
                     // if this is the empty module at the end
                     if !placeholder_exists {
-                        modules.push_cloned(Rc::new(SidebarSpot::new_empty(&state.sidebar.asset)));
+                        modules.push_cloned(Rc::new(SidebarSpot::new_empty(&state.sidebar.asset_edit_state.asset_id)));
                     }
                 }
 
@@ -119,7 +119,7 @@ pub fn assign_kind(state: Rc<SpotState>, kind: ModuleKind) {
 pub async fn update_module_index(state: Rc<SpotState>, module: &LiteModule, index: u16) {
     let req = ModuleUpdateRequest {
         // id: StableOrUniqueId::Unique(module.id),
-        parent_id: state.sidebar.asset.id(),
+        parent_id: state.sidebar.asset_edit_state.asset.id(),
         index: Some(index),
         body: None,
         is_complete: None,

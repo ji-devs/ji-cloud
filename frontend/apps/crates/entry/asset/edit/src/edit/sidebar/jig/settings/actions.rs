@@ -15,9 +15,9 @@ pub fn on_background_audio_click(
     audio_background: AudioBackground,
 ) {
     if selected {
-        state.background_audio.set(Some(audio_background));
+        state.jig.audio_background.set(Some(audio_background));
     } else {
-        state.background_audio.set(None);
+        state.jig.audio_background.set(None);
     }
     update_jig_settings(Rc::clone(&state));
 }
@@ -31,7 +31,7 @@ pub fn update_jig_settings(state: Rc<State>) {
 
     state.loader.load(clone!(state => async move {
         let _ = endpoints::jig::UpdateDraftData::api_with_auth_empty(
-            JigUpdateDraftDataPath(state.jig_id.clone()),
+            JigUpdateDraftDataPath(state.jig.id.clone()),
             Some(req),
         )
         .await;

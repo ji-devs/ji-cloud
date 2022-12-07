@@ -18,9 +18,11 @@ pub fn mouse_down(state: Rc<State>, x: i32, y: i32) {
 }
 
 pub fn add_empty_module_after(state: Rc<State>) {
-    state.sidebar.modules.lock_mut().insert_cloned(
+    state.sidebar.spots.lock_mut().insert_cloned(
         state.index + 1,
-        Rc::new(SidebarSpot::new_empty(&state.sidebar.asset)),
+        Rc::new(SidebarSpot::new_empty(
+            &state.sidebar.asset_edit_state.asset_id,
+        )),
     );
     state
         .sidebar
@@ -46,7 +48,7 @@ pub fn move_index(state: Rc<State>, move_target: MoveTarget) {
                 _ => None
             }
         } {
-            state.sidebar.modules.lock_mut().move_from_to(state.index, target);
+            state.sidebar.spots.lock_mut().move_from_to(state.index, target);
 
             match &state.module.item {
                 SidebarSpotItem::Jig(module) => {
@@ -67,7 +69,7 @@ pub fn move_index(state: Rc<State>, move_target: MoveTarget) {
 pub fn delete(state: Rc<State>) {
     state.sidebar.loader.load(clone!(state => async move {
         jig_spot_actions::delete(Rc::clone(&state)).await;
-        state.sidebar.modules.lock_mut().remove(state.index);
+        state.sidebar.spots.lock_mut().remove(state.index);
     }));
 }
 

@@ -150,7 +150,7 @@ impl ItemDom {
                                         (Some(module), _) => {
                                             Some(
                                                 ModuleThumbnail::new(
-                                                    state.sidebar.asset.id(),
+                                                    state.sidebar.asset_edit_state.asset.id(),
                                                     Some((**module).clone()),
                                                     ThumbnailFallback::Module,
                                                     DraftOrLive::Draft,
@@ -165,7 +165,7 @@ impl ItemDom {
                                         match &**course_spot {
                                             CourseSpot::Cover(cover) => {
                                                 ModuleThumbnail::new(
-                                                    state.sidebar.asset.id(),
+                                                    state.sidebar.asset_edit_state.asset.id(),
                                                     Some((*cover).clone()),
                                                     ThumbnailFallback::Module,
                                                     DraftOrLive::Draft,
@@ -283,13 +283,7 @@ impl ItemDom {
             // If this module is anything other than a placeholder, the add button could be displayed.
             let current_module_should_add = state.module.item.is_some();
             let next_module_should_show_add = {
-                match state
-                    .sidebar
-                    .modules
-                    .lock_ref()
-                    .to_vec()
-                    .get(state.index + 1)
-                {
+                match state.sidebar.spots.lock_ref().to_vec().get(state.index + 1) {
                     // If the next module is anything other than a placeholder, then this module can
                     // potentially display the the add button.
                     Some(module) => module.item.is_some(),

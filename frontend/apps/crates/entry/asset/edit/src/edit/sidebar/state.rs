@@ -8,15 +8,13 @@ use futures_signals::{
     signal_vec::MutableVec,
 };
 use shared::domain::{
-    asset::Asset,
+    asset::{Asset, AssetId},
     course::CourseResponse,
     jig::{JigId, JigResponse},
     module::{LiteModule, ModuleKind},
 };
 use std::{rc::Rc, vec};
-use utils::math::PointI32;
-
-use chrono::{DateTime, Utc};
+use utils::{editable_asset::EditableAsset, math::PointI32};
 
 use super::super::state::AssetEditState;
 
@@ -30,11 +28,8 @@ pub enum ModuleHighlight {
 }
 
 pub struct State {
-    pub asset: Asset,
     pub asset_edit_state: Rc<AssetEditState>,
-    pub name: Mutable<String>,
-    pub publish_at: Mutable<Option<DateTime<Utc>>>,
-    pub modules: MutableVec<Rc<SidebarSpot>>,
+    pub spots: MutableVec<Rc<SidebarSpot>>,
     pub collapsed: Mutable<bool>,
     pub drag: Mutable<Option<Rc<DragState>>>,
     pub drag_target_index: Mutable<Option<usize>>,
@@ -47,34 +42,28 @@ pub struct State {
 }
 
 impl State {
-    pub fn new(jig: Asset, asset_edit_state: Rc<AssetEditState>) -> Self {
-        let mut modules = match &jig {
+    pub fn new(asset: Asset, asset_edit_state: Rc<AssetEditState>) -> Self {
+        let mut modules = match &asset {
             Asset::Jig(jig) => Self::get_jig_spots(jig),
             Asset::Course(course) => Self::get_course_spots(course),
             Asset::Resource(_) => unimplemented!(),
         };
 
-        modules.push(Rc::new(SidebarSpot::new_empty(&jig)));
+        modules.push(Rc::new(SidebarSpot::new_empty(&asset.id())));
 
-        // Initialize these here so that we can move `jig` into the initialization of Self and
-        // still keep the ordering of the fields.
-        let jig_display_name = jig.display_name().clone();
-        // let jig_published_at = jig.published_at;
-        let jig_published_at = None;
-        let settings_state = match &jig {
-            Asset::Jig(jig) => SidebarSetting::Jig(Rc::new(JigSettingsState::new(jig))),
-            Asset::Course(course) => {
+        let settings_state = match &asset_edit_state.asset {
+            EditableAsset::Jig(jig) => SidebarSetting::Jig(Rc::new(JigSettingsState::new(jig))),
+            EditableAsset::Course(course) => {
                 SidebarSetting::Course(Rc::new(CourseSettingsState::new(course)))
             }
-            Asset::Resource(_) => unimplemented!(),
+            EditableAsset::Resource(_) => {
+                unimplemented!()
+            }
         };
 
         Self {
-            asset: jig,
             asset_edit_state,
-            name: Mutable::new(jig_display_name),
-            publish_at: Mutable::new(jig_published_at),
-            modules: MutableVec::new_with_values(modules),
+            spots: MutableVec::new_with_values(modules),
             collapsed: Mutable::new(false),
             settings: settings_state,
             drag: Mutable::new(None),
@@ -131,7 +120,7 @@ impl State {
 
     /// Returns whether this JIG is publishable
     pub fn can_publish(&self) -> bool {
-        let modules = self.modules.lock_ref();
+        let modules = self.spots.lock_ref();
 
         let modules_len = modules
             .iter()
@@ -168,11 +157,11 @@ pub struct SidebarSpot {
 }
 
 impl SidebarSpot {
-    pub fn new_empty(asset: &Asset) -> Self {
-        let item = match asset {
-            Asset::Jig(_) => SidebarSpotItem::Jig(None),
-            Asset::Course(_) => SidebarSpotItem::Course(None),
-            Asset::Resource(_) => unimplemented!(),
+    pub fn new_empty(asset_id: &AssetId) -> Self {
+        let item = match asset_id {
+            AssetId::JigId(_) => SidebarSpotItem::Jig(None),
+            AssetId::CourseId(_) => SidebarSpotItem::Course(None),
+            AssetId::ResourceId(_) => unimplemented!(),
         };
         Self {
             item,

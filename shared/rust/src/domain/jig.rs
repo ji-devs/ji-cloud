@@ -145,7 +145,7 @@ pub struct JigData {
 }
 
 /// These fields can be edited by admin and can be viewed by everyone
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct JigAdminData {
     /// Rating for jig, weighted for jig search

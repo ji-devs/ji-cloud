@@ -19,8 +19,8 @@ use shared::domain::{
 pub struct EditableResource {
     pub id: ResourceId,
     // cover and modules only for read
-    pub cover: Option<LiteModule>,
-    pub published_at: Option<DateTime<Utc>>,
+    pub cover: Mutable<Option<LiteModule>>,
+    pub published_at: Mutable<Option<DateTime<Utc>>>,
     pub display_name: Mutable<String>,
     pub description: Mutable<String>,
     pub age_ranges: Mutable<HashSet<AgeRangeId>>,
@@ -35,7 +35,7 @@ impl From<ResourceResponse> for EditableResource {
     fn from(resource: ResourceResponse) -> Self {
         Self {
             id: resource.id,
-            cover: resource.resource_data.cover,
+            cover: Mutable::new(resource.resource_data.cover),
             display_name: Mutable::new(resource.resource_data.display_name),
             description: Mutable::new(resource.resource_data.description.clone()),
             age_ranges: Mutable::new(HashSet::from_iter(resource.resource_data.age_ranges)),
@@ -46,12 +46,49 @@ impl From<ResourceResponse> for EditableResource {
                 resource.resource_data.additional_resources,
             )),
             privacy_level: Mutable::new(resource.resource_data.privacy_level),
-            published_at: resource.published_at,
+            published_at: Mutable::new(resource.published_at),
+        }
+    }
+}
+
+impl From<ResourceId> for EditableResource {
+    fn from(resource_id: ResourceId) -> Self {
+        Self {
+            id: resource_id,
+            cover: Default::default(),
+            display_name: Default::default(),
+            description: Default::default(),
+            age_ranges: Default::default(),
+            language: Default::default(),
+            categories: Default::default(),
+            affiliations: Default::default(),
+            additional_resources: Default::default(),
+            privacy_level: Default::default(),
+            published_at: Default::default(),
         }
     }
 }
 
 impl EditableResource {
+    pub fn fill_from_resource(&self, resource: ResourceResponse) {
+        self.cover.set(resource.resource_data.cover);
+        self.display_name.set(resource.resource_data.display_name);
+        self.description
+            .set(resource.resource_data.description.clone());
+        self.age_ranges
+            .set(HashSet::from_iter(resource.resource_data.age_ranges));
+        self.language.set(resource.resource_data.language);
+        self.categories
+            .set(HashSet::from_iter(resource.resource_data.categories));
+        self.affiliations
+            .set(HashSet::from_iter(resource.resource_data.affiliations));
+        self.additional_resources
+            .lock_mut()
+            .replace_cloned(resource.resource_data.additional_resources);
+        self.privacy_level.set(resource.resource_data.privacy_level);
+        self.published_at.set(resource.published_at);
+    }
+
     pub fn to_resource_update_request(&self) -> ResourceUpdateDraftDataRequest {
         // don't include additional_resources here since they're handled in separately
         ResourceUpdateDraftDataRequest {

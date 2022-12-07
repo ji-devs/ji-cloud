@@ -1,13 +1,40 @@
+use std::rc::Rc;
+
 use super::state::AssetEditState;
-use shared::domain::asset::AssetId;
+use dominator::clone;
+use shared::domain::asset::{Asset, AssetId};
 use utils::{
     prelude::ModuleToAssetEditorMessage,
     routes::{AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, ResourceEditRoute, Route},
     storage,
     unwrap::UnwrapJiExt,
 };
+use wasm_bindgen_futures::spawn_local;
+
+mod course_actions;
+mod jig_actions;
+mod resource_actions;
 
 impl AssetEditState {
+    pub fn load_data(self: &Rc<Self>) {
+        let state = self;
+        spawn_local(clone!(state => async move {
+            let asset = state.load_asset().await.unwrap_ji();
+            state.asset.fill_from_asset(asset);
+        }));
+    }
+
+    async fn load_asset(self: &Rc<Self>) -> anyhow::Result<Asset> {
+        let asset: Asset = match self.asset_id {
+            AssetId::JigId(jig_id) => jig_actions::load_jig(jig_id).await?.into(),
+            AssetId::ResourceId(resource_id) => {
+                resource_actions::load_resource(resource_id).await?.into()
+            }
+            AssetId::CourseId(course_id) => course_actions::load_course(course_id).await?.into(),
+        };
+        Ok(asset)
+    }
+
     pub fn set_permanently_closed(&self) {
         let _ = storage::get_local_storage()
             .unwrap_ji()

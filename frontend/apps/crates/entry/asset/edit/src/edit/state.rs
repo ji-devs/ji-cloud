@@ -4,14 +4,16 @@ use futures_signals::signal::Mutable;
 use shared::domain::asset::AssetId;
 use utils::{
     asset::AssetPlayerOptions,
+    editable_asset::EditableAsset,
     routes::{AssetEditRoute, CourseEditRoute, JigEditRoute, ResourceEditRoute},
     storage,
     unwrap::UnwrapJiExt,
 };
 
 pub struct AssetEditState {
-    pub route: Mutable<AssetEditRoute>,
     pub asset_id: AssetId,
+    pub asset: EditableAsset,
+    pub route: Mutable<AssetEditRoute>,
     pub show_onboarding: Mutable<bool>,
     pub(super) play_jig: Mutable<Option<AssetPlayerOptions>>,
 }
@@ -25,6 +27,7 @@ impl AssetEditState {
             .is_none(); // We don't care about the value, only that the item is present
 
         Rc::new(Self {
+            asset: asset_id.into(),
             asset_id,
             route: Mutable::new(route),
             play_jig: Mutable::new(None),

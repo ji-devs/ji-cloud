@@ -19,6 +19,9 @@ const STR_YT_VIDEO_ID: &str = "x4FYtTpQAt0";
 impl AssetEditState {
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self;
+
+        state.load_data();
+
         html!("empty-fragment", {
             .child(html!("jig-edit-page", {
                 /*

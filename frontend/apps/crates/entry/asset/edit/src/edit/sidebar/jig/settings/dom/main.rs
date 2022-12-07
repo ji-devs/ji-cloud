@@ -45,14 +45,14 @@ pub fn render(state: Rc<State>) -> Dom {
                 .prop("slot", "preview")
                 .children(&mut [
                     html!("jig-preview-settings-direction", {
-                        .prop_signal("direction", state.direction.signal().map(|dir| {
+                        .prop_signal("direction", state.jig.direction.signal().map(|dir| {
                             match dir {
                                 TextDirection::LeftToRight => "ltr",
                                 TextDirection::RightToLeft => "rtl",
                             }
                         }))
                         .event(clone!(state => move|evt :events::CustomDirection| {
-                            state.direction.set(evt.direction());
+                            state.jig.direction.set(evt.direction());
                             update_jig_settings(Rc::clone(&state));
                         }))
                     }),
@@ -68,9 +68,9 @@ pub fn render(state: Rc<State>) -> Dom {
                     // }),
                     html!("label", {
                         .child(html!("input-switch", {
-                            .prop_signal("enabled", state.track_assessments.signal())
+                            .prop_signal("enabled", state.jig.track_assessments.signal())
                             .event(clone!(state => move|evt :events::CustomToggle| {
-                                state.track_assessments.set(evt.value());
+                                state.jig.track_assessments.set(evt.value());
                                 update_jig_settings(Rc::clone(&state));
                             }))
                         }))
@@ -78,9 +78,9 @@ pub fn render(state: Rc<State>) -> Dom {
                     }),
                     html!("label", {
                         .child(html!("input-switch", {
-                            .prop_signal("enabled", state.drag_assist.signal())
+                            .prop_signal("enabled", state.jig.drag_assist.signal())
                             .event(clone!(state => move|evt :events::CustomToggle| {
-                                state.drag_assist.set(evt.value());
+                                state.jig.drag_assist.set(evt.value());
                                 update_jig_settings(Rc::clone(&state));
                             }))
                         }))

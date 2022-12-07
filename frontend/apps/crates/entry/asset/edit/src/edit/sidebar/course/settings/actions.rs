@@ -11,7 +11,7 @@ pub fn update_course_settings(state: Rc<State>) {
 
     state.loader.load(clone!(state => async move {
         let _ = endpoints::course::UpdateDraftData::api_with_auth_empty(
-            CourseUpdateDraftDataPath(state.course_id.clone()),
+            CourseUpdateDraftDataPath(state.course.id),
             Some(req),
         )
         .await;

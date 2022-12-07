@@ -11,16 +11,16 @@ pub use editable_resource::EditableResource;
 use futures_signals::{signal::Mutable, signal_vec::MutableVec};
 use shared::domain::{
     additional_resource::AdditionalResource,
-    asset::{Asset, AssetId, PrivacyLevel},
+    asset::{Asset, AssetId, AssetType, PrivacyLevel},
     category::CategoryId,
     meta::{AffiliationId, AgeRangeId},
     module::LiteModule,
 };
 
 pub enum EditableAsset {
-    Jig(EditableJig),
-    Resource(EditableResource),
-    Course(EditableCourse),
+    Jig(Rc<EditableJig>),
+    Resource(Rc<EditableResource>),
+    Course(Rc<EditableCourse>),
 }
 
 impl EditableAsset {
@@ -32,7 +32,7 @@ impl EditableAsset {
         }
     }
 
-    pub fn cover(&self) -> &Option<LiteModule> {
+    pub fn cover(&self) -> &Mutable<Option<LiteModule>> {
         match self {
             EditableAsset::Jig(jig) => &jig.cover,
             EditableAsset::Resource(resource) => &resource.cover,
@@ -104,12 +104,31 @@ impl EditableAsset {
         }
     }
 
-    pub fn published_at(&self) -> &Option<DateTime<Utc>> {
+    pub fn published_at(&self) -> &Mutable<Option<DateTime<Utc>>> {
         match self {
             EditableAsset::Jig(jig) => &jig.published_at,
             EditableAsset::Resource(resource) => &resource.published_at,
             EditableAsset::Course(course) => &course.published_at,
         }
+    }
+
+    pub fn fill_from_asset(&self, asset: Asset) {
+        assert_eq!(self.asset_type(), asset.asset_type());
+        match self {
+            EditableAsset::Jig(jig) => {
+                jig.fill_from_jig(asset.unwrap_jig().clone())
+            },
+            EditableAsset::Course(course) => {
+                course.fill_from_course(asset.unwrap_course().clone())
+            },
+            EditableAsset::Resource(resource) => {
+                resource.fill_from_resource(asset.unwrap_resource().clone())
+            }
+        }
+    }
+
+    pub fn asset_type(&self) -> AssetType {
+        (&self.id()).into()
     }
 
     pub fn _is_jig(&self) -> bool {
@@ -128,9 +147,21 @@ impl EditableAsset {
 impl From<Asset> for EditableAsset {
     fn from(asset: Asset) -> Self {
         match asset {
-            Asset::Jig(jig) => EditableAsset::Jig(jig.into()),
-            Asset::Course(course) => EditableAsset::Course(course.into()),
-            Asset::Resource(resource) => EditableAsset::Resource(resource.into()),
+            Asset::Jig(jig) => EditableAsset::Jig(Rc::new(jig.into())),
+            Asset::Course(course) => EditableAsset::Course(Rc::new(course.into())),
+            Asset::Resource(resource) => EditableAsset::Resource(Rc::new(resource.into())),
+        }
+    }
+}
+
+impl From<AssetId> for EditableAsset {
+    fn from(asset_id: AssetId) -> Self {
+        match asset_id {
+            AssetId::JigId(jig_id) => EditableAsset::Jig(Rc::new(jig_id.into())),
+            AssetId::CourseId(course_id) => EditableAsset::Course(Rc::new(course_id.into())),
+            AssetId::ResourceId(resource_id) => {
+                EditableAsset::Resource(Rc::new(resource_id.into()))
+            }
         }
     }
 }

@@ -11,7 +11,7 @@ impl PrePublish {
         let state = Rc::clone(&self);
         html!("div", {
             .prop("slot", "category-labels")
-            .children_signal_vec(state.asset.categories().signal_cloned().map(clone!(state => move|categories| {
+            .children_signal_vec(state.asset_edit_state.asset.categories().signal_cloned().map(clone!(state => move|categories| {
                 categories.iter()
                     .map(|category_id| render_pill(state.clone(), *category_id))
                     .collect()
@@ -28,7 +28,7 @@ fn render_pill(state: Rc<PrePublish>, category_id: CategoryId) -> Dom {
         .child(html!("pill-close-delete", {
             .prop("slot", "delete")
             .event(clone!(state => move |_: events::Click| {
-                state.asset.categories().lock_mut().remove(&category_id);
+                state.asset_edit_state.asset.categories().lock_mut().remove(&category_id);
             }))
         }))
     })
