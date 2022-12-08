@@ -12,7 +12,7 @@ export class _ extends LitElement {
                     https://stackoverflow.com/a/52861514/5253155
                     https://stackoverflow.com/a/43312314/5253155
                 */
-                    grid-template-rows: 50px minmax(0, 1fr);
+                    grid-template-rows: 40px minmax(0, 1fr);
                     height: 100%;
                 }
                 .tabs-wrapper {
@@ -20,12 +20,7 @@ export class _ extends LitElement {
                 }
                 .body {
                     background-color: #e9eff8;
-                    padding-top: 40px;
-                }
-                @media (min-width: 1920px) {
-                    .body {
-                        padding-top: 48px;
-                    }
+                    padding-top: 20px;
                 }
             `,
         ];

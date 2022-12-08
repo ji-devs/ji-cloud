@@ -20,7 +20,7 @@ export class _ extends LitElement {
 
                 section {
                     box-sizing: border-box;
-                    padding: 0 20px;
+                    padding: 0 8px;
                     flex: 1;
                 }
 

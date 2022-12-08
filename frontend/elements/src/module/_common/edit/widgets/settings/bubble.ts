@@ -24,11 +24,12 @@ export class _ extends LitElement {
                     display: flex;
                     align-items: center;
                     border-radius: 12px;
-                    padding: 12px;
+                    padding: 10px 8px;
                     box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.08);
                     color: var(--dark-gray-6);
                     background: #ffe1a7;
                     border: ${OUTLINE_SIZE}px solid #fdd994;
+                    font-size: 13px;
                 }
 
                 .tri,
@@ -105,26 +106,20 @@ function renderSvgArrow() {
     //then draw the outlines on right and left sides
     //then fill in the small gap left by the hole due to round edges
     return svg`
-		<svg xmlns="http://www.w3.org/2000/svg" version="1.1" class="tri" width='${boxWidth}' height='${boxHeight}'>
-    			<path d="M ${left},${bottom} ${middle},${top} ${right},${bottom} z"/>
-  		</svg>
-		  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" class="tri-repaint" width='${boxWidth}' height='${boxHeight}'>
-    			<path d="M ${left},${bottom - OUTLINE_SIZE / 2} ${middle},${top} z"/>
-  		   </svg>
-		  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" class="tri-repaint" width='${boxWidth}' height='${boxHeight}'>
-    			<path d="M 0,${bottom - OUTLINE_SIZE / 2} ${left},${
-        bottom - OUTLINE_SIZE / 2
-    } z"/>
-  		   </svg>
-		  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" class="tri-repaint" width='${boxWidth}' height='${boxHeight}'>
-    			<path d="M ${right},${bottom - OUTLINE_SIZE / 2} ${middle},${top} z"/>
-  		   </svg>
-		  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" class="tri-repaint" width='${boxWidth}' height='${boxHeight}'>
-    			<path d="M ${boxWidth},${bottom - OUTLINE_SIZE / 2} ${right},${
-        bottom - OUTLINE_SIZE / 2
-    } z"/>
-  		   </svg>
-		  `;
+        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" class="tri" width='${boxWidth}' height='${boxHeight}'>
+            <path d="M ${left},${bottom} ${middle},${top} ${right},${bottom} z"/>
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" class="tri-repaint" width='${boxWidth}' height='${boxHeight}'>
+            <path d="M ${left},${bottom - OUTLINE_SIZE / 2} ${middle},${top} z"/>
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" class="tri-repaint" width='${boxWidth}' height='${boxHeight}'>
+            <path d="M 0,${bottom - OUTLINE_SIZE / 2} ${left},${bottom - OUTLINE_SIZE / 2} z"/>
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" class="tri-repaint" width='${boxWidth}' height='${boxHeight}'>
+            <path d="M ${right},${bottom - OUTLINE_SIZE / 2} ${middle},${top} z"/>
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" class="tri-repaint" width='${boxWidth}' height='${boxHeight}'>
+            <path d="M ${boxWidth},${bottom - OUTLINE_SIZE / 2} ${right},${bottom - OUTLINE_SIZE / 2} z"/>
+        </svg>
+    `;
 }
-/*
- */

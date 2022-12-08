@@ -10,16 +10,13 @@ export class _ extends LitElement {
                 :host {
                     display: grid;
                     row-gap: 4px;
-                    grid-template-rows: 24px 220px auto;
-                }
-                @media (min-width: 1920px) {
-                    :host {
-                        grid-template-rows: 24px 320px auto;
-                    }
+                    grid-template-rows: 24px auto auto;
                 }
                 .options {
                     display: flex;
                     column-gap: 24px;
+                    height: 30px;
+                    font-size: 14px;
                 }
                 .main-content {
                     border-radius: 16px;
@@ -27,6 +24,7 @@ export class _ extends LitElement {
                     border-width: 2px;
                     display: grid;
                     place-items: center;
+                    aspect-ratio: 16 / 9;
                 }
                 :host([mode="default"]) .main-content {
                     border-color: var(--light-blue-4);

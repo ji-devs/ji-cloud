@@ -8,32 +8,24 @@ export class _ extends LitElement {
         return [
             css`
                 .options {
-                    margin-top: 48px;
+                    margin-top: 14px;
                     display: grid;
                     grid-template-columns: repeat(2, auto);
                     justify-content: space-between;
-                    row-gap: 18px;
-                }
-                @media (min-width: 1920px) {
-                    .options {
-                        row-gap: 47px;
-                    }
+                    row-gap: 14px;
                 }
                 .top-line {
                     display: grid;
                     grid-template-columns: auto auto;
                     justify-content: space-between;
+                    align-items: center;
+                    line-height: 30px;
                 }
                 h2 {
                     margin: 0px;
                     font-family: Poppins;
                     font-weight: normal;
-                    font-size: 16px;
-                }
-                @media (min-width: 1920px) {
-                    h2 {
-                        font-size: 18px;
-                    }
+                    font-size: 14px;
                 }
             `,
         ];

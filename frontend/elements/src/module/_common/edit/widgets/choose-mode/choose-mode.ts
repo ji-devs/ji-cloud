@@ -32,27 +32,22 @@ export class _ extends LitElement {
                     --visible-items: 1;
                     --item-width: 340px;
                 }
-                @media (min-width: 1920px) {
-                    :host {
-                        --item-width: 388px;
-                    }
-                }
-                @media only screen and (min-width: 1000px) {
+                @media (min-width: 960px) {
                     :host {
                         --visible-items: 2;
                     }
                 }
-                @media only screen and (min-width: 1280px) {
+                @media (min-width: 1280px) {
                     :host {
                         --visible-items: 3;
                     }
                 }
-                @media only screen and (min-width: 1800px) {
+                @media (min-width: 1800px) {
                     :host {
                         --visible-items: 4;
                     }
                 }
-                @media only screen and (min-width: 2200px) {
+                @media (min-width: 2200px) {
                     :host {
                         --visible-items: 5;
                     }
@@ -68,14 +63,14 @@ export class _ extends LitElement {
                     box-sizing: border-box;
                     height: 100vh;
                     align-content: start;
-                    row-gap: 77px;
+                    row-gap: 62px;
                 }
                 header {
                     margin: 0 auto;
                 }
                 .title {
                     font-family: Poppins;
-                    font-size: 40px;
+                    font-size: 30px;
                     font-weight: 900;
                     letter-spacing: -0.4px;
                     text-align: left;
@@ -83,7 +78,7 @@ export class _ extends LitElement {
                 }
                 .subtitle {
                     font-family: Poppins;
-                    font-size: 24px;
+                    font-size: 18px;
                     letter-spacing: normal;
                     text-align: left;
                     color: var(--dark-gray-6);

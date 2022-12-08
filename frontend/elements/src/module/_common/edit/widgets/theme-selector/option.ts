@@ -19,14 +19,8 @@ export class _ extends LitElement {
                     border-radius: 16px;
                     border: solid 3px rgba(0, 0, 0, 0);
                     box-sizing: border-box;
-                    width: 168px;
-                    height: 150px;
-                }
-                @media (min-width: 1920px) {
-                    section {
-                        width: 232px;
-                        height: 196px;
-                    }
+                    width: 136px;
+                    height: 120px;
                 }
 
                 section.hover {
@@ -45,23 +39,12 @@ export class _ extends LitElement {
                     display: flex;
                     flex-direction: column;
                     align-items: center;
-                    margin-top: 20px;
-                }
-                @media (min-width: 1920px) {
-                    .content {
-                        margin-top: 30px;
-                    }
+                    margin-top: 16px;
                 }
 
                 img-ui {
-                    margin-bottom: 14px;
-                    width: 136px;
-                }
-                @media (min-width: 1920px) {
-                    img-ui {
-                        margin-bottom: 16px;
-                        width: 200px;
-                    }
+                    margin-bottom: 12px;
+                    width: 106px;
                 }
 
                 .menu {

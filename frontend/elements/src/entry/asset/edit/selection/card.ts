@@ -31,14 +31,13 @@ export class _ extends LitElement {
                 section {
                     grid-row: 1;
                     grid-column: 1;
-                    width: 248px;
-                    height: 224px;
-                    padding: 24px 0 0;
+                    width: 188px;
+                    height: 174px;
                     border-radius: 16px;
                     box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
                     background-color: var(--white);
                     display: grid;
-                    grid-template-rows: 1fr 40px;
+                    grid-template-rows: 1fr 32px;
                     cursor: grab;
                 }
                 .bottom {
@@ -46,7 +45,7 @@ export class _ extends LitElement {
                     justify-content: center;
                     align-items: center;
                     text-align: center;
-                    font-size: 16px;
+                    font-size: 14px;
                     border-bottom-left-radius: 16px;
                     border-bottom-right-radius: 16px;
                     font-weight: 500;
@@ -71,6 +70,11 @@ export class _ extends LitElement {
                     display: flex;
                     justify-content: center;
                     align-items: center;
+                }
+                ::slotted([slot=stationery]),
+                ::slotted([slot=dragged]) {
+                    max-width: 110px;
+                    max-height: 110px;
                 }
                 ::slotted([slot=stationery]) {
                     cursor: grab;

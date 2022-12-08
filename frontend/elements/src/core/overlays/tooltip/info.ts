@@ -60,8 +60,8 @@ export class _ extends LitElement {
                     font-size: 20px;
                     border: 0;
                     padding: 0;
-                    height: 24px;
-                    width: 24px;
+                    height: 30px;
+                    width: 30px;
                     cursor: pointer;
                     color: var(--light-blue-4);
                 }

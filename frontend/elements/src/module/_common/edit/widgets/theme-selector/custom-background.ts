@@ -46,21 +46,24 @@ export class _ extends LitElement {
                     height: 8px;
                 }
                 h2 {
-                    font-size: 24px;
+                    font-size: 20px;
                     font-weight: 600;
                     color: #fd7076;
                     margin: 0;
                 }
                 :host([tabbed]) h2 {
-                    margin: 0 12px;
+                    margin: 0 10px;
                 }
                 ::slotted([slot=close]) {
                     grid-area: 1 / 1;
                     justify-self: end;
                     align-self: start;
-                    margin-top: 16px;
-                    margin-right: 16px;
+                    padding-top: 16px;
+                    padding-right: 16px;
                     z-index: 1;
+                    min-width: 34px;
+                    box-sizing: border-box;
+                    text-align: end;
                 }
             `,
         ];

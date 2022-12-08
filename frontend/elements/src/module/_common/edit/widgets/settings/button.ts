@@ -1,11 +1,4 @@
-import {
-    LitElement,
-    html,
-    svg,
-    css,
-    customElement,
-    property,
-} from "lit-element";
+import { LitElement, html, css, customElement, property } from "lit-element";
 import { nothing } from "lit-html";
 import { classMap } from "lit-html/directives/class-map";
 import "@elements/core/images/ui";
@@ -48,13 +41,13 @@ const STR_LABEL: Record<Kind, string> = {
     "order": "ask in order",
     "no-limit": "no limit",
     "attempts": "multiple tries",
-    "score": "include in\nfinal score",
-    "score-off": "don't include in\nfinal score",
+    "score": "include in final score",
+    "score-off": "don't include in final score",
     "time-limit-off": "no time limit",
     "time-limit": "time limit (seconds)",
     "continue-click": "clicking next",
     "continue-all": "clicking all items",
-    "continue-some": "clicking\na minimum",
+    "continue-some": "clicking a minimum",
     "highlight": "highlight at start",
     "highlight-off": "don't highlight",
     "card-single": "double-sided",
@@ -65,7 +58,7 @@ const STR_LABEL: Record<Kind, string> = {
     "n_choices": "cards per page",
     "n_pairs": "pairs per game",
     "swap": "card position",
-    "video-captions": "play with\ncaptions",
+    "video-captions": "play with captions",
     "autoplay": "start automatically",
     "mute": "play without sound",
     "loop": "play on loop",
@@ -96,8 +89,8 @@ export class _ extends LitElement {
                     top: 0;
                     left: 0;
                     cursor: pointer;
-                    width: 64px;
-                    height: 64px;
+                    width: 60px;
+                    height: 60px;
                 }
                 img-ui {
                     display: inherit;
@@ -121,13 +114,13 @@ export class _ extends LitElement {
                 .circle {
                     background-color: #afcbf4;
                     border-radius: 50%;
-                    width: 32px;
-                    height: 32px;
+                    width: 26px;
+                    height: 26px;
                     text-align: center;
-                    font-size: 14px;
+                    font-size: 13px;
                     display: inline-grid;
                     align-content: center;
-                    transform: translate(135%, -65%);
+                    transform: translate(170%, -70%);
                     color: #ffffff;
                 }
 
@@ -137,30 +130,24 @@ export class _ extends LitElement {
 
                 .label {
                     pointer-events: none;
-                    width: 126px;
-                    margin-top: 12px;
-                    white-space: pre-wrap;
+                    margin-top: 10px;
                     line-height: 1.14;
                     letter-spacing: normal;
                     text-align: center;
                     color: var(--dark-gray-6);
                     max-width: 100px;
-                    font-size: 14px;
+                    font-size: 13px;
                 }
 
                 :host([active]) .label {
                     font-weight: 600;
                     color: #5893f9;
                 }
-                @media (min-width: 1920px) {
-                    .label {
-                        font-size: 14px;
-                    }
-                }
 
-                /* Position the bubble origin so that it's in the middle here
-		the bubble will nudge itself to the left;
-		*/
+                /*
+                    Position the bubble origin so that it's in the middle here
+                    the bubble will nudge itself to the left;
+                */
                 .bubble {
                     display: block;
                     position: relative;

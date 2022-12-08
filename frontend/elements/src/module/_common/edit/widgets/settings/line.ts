@@ -41,14 +41,8 @@ export class _ extends LitElement {
             css`
                 :host {
                     display: grid;
-                    grid-template-columns: 116px 1fr;
-                    gap: 0px 32px;
-                }
-                @media (min-width: 1920px) {
-                    :host {
-                        grid-template-columns: 123px 1fr;
-                        gap: 0px 70px;
-                    }
+                    grid-template-columns: 90px 1fr;
+                    column-gap: 18px;
                 }
 
                 .label {
@@ -57,18 +51,13 @@ export class _ extends LitElement {
                     line-height: 20px;
                     text-align: left;
                     color: var(--dark-gray-4);
-                    font-size: 14px;
-                }
-                @media (min-width: 1920px) {
-                    .label {
-                        font-size: 16px;
-                    }
+                    font-size: 13px;
                 }
 
                 .options {
                     display: grid;
-                    grid-template-columns: 64px 64px;
-                    gap: 24px 52px;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 12px;
                 }
             `,
         ];

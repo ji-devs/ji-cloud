@@ -18,12 +18,6 @@ export class _ extends LitElement {
                     margin: 24px;
                     gap: 24px;
                 }
-                @media (min-width: 1920px) {
-                    section {
-                        margin: 30px;
-                        gap: 30px;
-                    }
-                }
             `,
         ];
     }

@@ -15,7 +15,7 @@ export class _ extends LitElement {
                     display: block;
                     height: 100vh;
                     overflow-y: auto;
-                    padding: 48px 56px;
+                    padding: 36px 30px;
                     box-sizing: border-box;
                 }
                 .header {
@@ -58,9 +58,9 @@ export class _ extends LitElement {
 
                 .modules {
                     margin-top: 56px;
-                    display: flex;
-                    gap: 64px;
-                    flex-wrap: wrap;
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, 188px);
+                    gap: 38px;
                 }
             `,
         ];

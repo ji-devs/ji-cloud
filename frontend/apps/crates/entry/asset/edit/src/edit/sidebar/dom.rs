@@ -98,6 +98,7 @@ impl SidebarDom {
                 .child(html!("button-empty", {
                     .prop("slot", "side-head")
                     .child(html!("img-ui", {
+                        .style("height", "60px")
                         .prop("path", "entry/jig/jiggling/yellow/face-small.png")
                     }))
                     .event(clone!(state => move |_ :events::Click| {

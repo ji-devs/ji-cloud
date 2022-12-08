@@ -149,11 +149,12 @@ where
             html!("button-rect", {
                 .prop("kind", "text")
                 .prop("color", "blue")
+                .style("min-width", "30px")
                 .child(html!("fa-icon", {
                     .prop("icon", "fa-light fa-trash-can")
-                    .event(clone!(state => move |_: events::Click| {
-                        state.remove_overlay();
-                    }))
+                }))
+                .event(clone!(state => move |_: events::Click| {
+                    state.remove_overlay();
                 }))
             })
         });

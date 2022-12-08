@@ -11,27 +11,26 @@ export class _ extends LitElement {
                 :host {
                     display: inline-block;
                     box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
-                    padding: 32px 32px;
+                    padding: 24px;
                     display: grid;
-                    row-gap: 10px;
                     border-radius: 8px;
                     background-color: #ffffff;
                 }
                 img-ui {
-                    height: 32px;
-                    margin-bottom: 46px;
+                    height: 24px;
+                    margin-bottom: 36px;
                 }
                 ::slotted([slot="delete"]) {
                     justify-self: end;
                 }
                 ::slotted([slot="clip-checkbox"]) {
-                    margin-top: 16px;
+                    margin-top: 12px;
                 }
                 .start-end {
                     display: grid;
                     grid-template-columns: auto auto;
                     justify-content: space-between;
-                    column-gap: 10px;
+                    column-gap: 8px;
                 }
             `,
         ];

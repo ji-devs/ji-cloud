@@ -45,13 +45,13 @@ export class _ extends LitElement {
                     grid-template-columns: 1fr min-content;
                     grid-template-rows: min-content 1fr;
                     column-gap: 2px;
-                    font-size: 16px;
-                    line-height: 1.5;
+                    font-size: 14px;
+                    line-height: 1.2;
                     background-color: var(--background-color);
                     grid-row: 2;
                 }
                 :host([pad]) .inner-wrapper {
-                    padding: 8px 16px;
+                    padding: 6px 12px;
                 }
                 .inner-wrapper:focus-within,
                 :host([focus-within]) .inner-wrapper {
@@ -109,7 +109,7 @@ export class _ extends LitElement {
                     background-color: #e7f0fe;
                 }
                 .hint {
-                    font-size: 14px;
+                    font-size: 12px;
                     font-weight: 500;
                     display: block;
                     margin: 0 8px;

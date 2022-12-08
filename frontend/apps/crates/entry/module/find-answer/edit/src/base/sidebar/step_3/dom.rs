@@ -373,6 +373,7 @@ fn render_tab_body(state: Rc<Step3>, tab: Tab) -> Dom {
     match tab {
         Tab::Question => {
             html!("div", {
+                .style("padding-top", "18px")
                 .child_signal(current_question_signal(state.clone()).map(clone!(state => move |question| {
                     question.map(clone!(state => move |(index, question)| {
                         let opts = AudioInputOptions::new(Some(

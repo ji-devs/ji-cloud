@@ -11,6 +11,8 @@ export class _ extends LitElement {
                     display: inherit;
                     width: inherit;
                     height: inherit;
+                    max-width: inherit;
+                    max-height: inherit;
                     object-fit: inherit;
                     object-position: inherit;
                 }

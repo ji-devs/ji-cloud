@@ -9,7 +9,7 @@ export class _ extends LitElement {
                     display: inline-grid;
                     border-top-left-radius: 10px;
                     border-top-right-radius: 10px;
-                    padding: 13px 11px;
+                    padding: 8px 10px;
                     cursor: pointer;
                 }
                 :host([active]) {

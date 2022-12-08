@@ -1,4 +1,4 @@
-import { LitElement, html, css, customElement, property } from "lit-element";
+import { LitElement, html, css, customElement, property, PropertyValues } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
 import { nothing } from "lit-html";
 import "@elements/core/images/ui";
@@ -23,6 +23,30 @@ export type TabKind =
     | "video"
     | "trace"
     | "place";
+
+/*
+font awesome icons
+answer = message-dots
+audio = volume
+audio-file = file-audio
+audio-record = microphone
+background = ??
+feedback = thumbs-up
+fill-color = fill-drip
+image = image
+instructions = book-open
+label = ??
+overlay = ??
+place = ??
+play-settings = clapperboard-play
+question = comment-question
+select = ??
+text = text
+theme = ??
+tooltip = ??
+trace = circle-dashed
+video ??
+*/
 
 const STR_ICON_OVERRIDE: Partial<{
     [key in TabKind]: TabKind;
@@ -76,13 +100,8 @@ export class _ extends LitElement {
                     font-family: Poppins;
                     font-weight: 500;
                     align-items: center;
-                    font-size: 14px;
+                    font-size: 13px;
                     line-height: 1.2;
-                }
-                @media (min-width: 1920px) {
-                    :host {
-                        font-size: 16px;
-                    }
                 }
 
                 .highlight {
@@ -93,8 +112,8 @@ export class _ extends LitElement {
                 }
 
                 img-ui {
-                    max-width: 24px;
-                    max-height: 24px;
+                    max-width: 20px;
+                    max-height: 20px;
                     margin-right: 8px;
                     display: flex;
                 }
@@ -128,6 +147,12 @@ export class _ extends LitElement {
 
     @property({ type: Boolean })
     small: boolean = false;
+
+    updated(propertyValues: PropertyValues) {
+        if (propertyValues.has("kind")) {
+            this.title = STR_LABEL_LOOKUP[this.kind];
+        }
+    }
 
     connectedCallback() {
         super.connectedCallback();

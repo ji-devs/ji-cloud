@@ -24,11 +24,12 @@ export class _ extends LitElement {
         return [
             css`
                 :host {
+                    --size: 36px;
                     border-radius: 50%;
                     font-size: 18px;
-                    height: 36px;
-                    width: 36px;
-                    line-height: 36px;
+                    height: var(--size);
+                    width: var(--size);
+                    line-height: var(--size);
                     text-align: center;
                     font-family: "Poppins", sans-serif;
                     color: var(--dark-gray-6);
@@ -52,6 +53,12 @@ export class _ extends LitElement {
                     font-family: inherit;
                     font-weight: inherit;
                     cursor: pointer;
+                    display: inline-grid;
+                    place-content: center;
+                }
+                img-ui {
+                    height: 30px;
+                    width: 30px;
                 }
             `,
         ];

@@ -37,6 +37,7 @@ input-file img {
 .empty {
     display: grid;
     justify-items: center;
+    row-gap: 10px;
 }
 
 .empty fa-icon {
@@ -48,6 +49,10 @@ input-file img {
     background-color: #e7f0fe;
     color: #afccf1;
     font-size: 26px;
+}
+
+p {
+    margin: 0;
 }
 
 .empty .pick-file-message {

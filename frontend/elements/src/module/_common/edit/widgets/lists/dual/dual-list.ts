@@ -16,11 +16,6 @@ export class _ extends LitElement {
                     scrollbar-color: #d3d4dd transparent;
                     gap: 6px;
                 }
-                @media (min-width: 1920px) {
-                    .lists {
-                        gap: 12px;
-                    }
-                }
                 .header {
                     top: 0;
                     position: sticky;
@@ -42,18 +37,13 @@ export class _ extends LitElement {
                 header {
                     display: flex;
                     justify-content: space-between;
+                    align-items: center;
                 }
 
                 .input-buttons {
                     padding: 12px 0;
                     display: flex;
                     justify-content: flex-end;
-                }
-                @media (min-width: 1920px) {
-                    .input-buttons {
-                        margin-bottom: 18px;
-                        margin-right: 0px;
-                    }
                 }
 
                 .done-btn {

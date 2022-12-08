@@ -19,7 +19,7 @@ pub fn render(state: Rc<State>) -> Dom {
         .style("display", "grid")
         .style("grid-template-rows", "auto auto")
         .style("row-gap", "20px")
-
+        .style("padding-top", "20px")
         .children(&mut [
             render_text(state.clone()),
             render_audio(state)

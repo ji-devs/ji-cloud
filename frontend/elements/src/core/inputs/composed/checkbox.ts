@@ -12,12 +12,13 @@ export class _ extends LitElement {
                     justify-content: start;
                     padding: 2px;
                     font-size: 14px;
+                    line-height: 30px;
                 }
-                @media (min-width: 1920px) {
+                /* @media (min-width: 1024px) {
                     label {
                         font-size: 16px;
                     }
-                }
+                } */
                 :host([error]:not([error=''])) label {
                     border: solid 1px #f00813;
                     background-color: #fff4f4;

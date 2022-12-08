@@ -64,7 +64,7 @@ fn render_tab(state: Rc<Step4>, tab_kind: MenuTabKind) -> Dom {
     MenuTab::render(
         MenuTab::new(
             tab_kind,
-            false,
+            true,
             true,
             clone!(state => move || state.tab.signal_ref(clone!(tab_kind => move |curr| {
                 curr.kind() == tab_kind

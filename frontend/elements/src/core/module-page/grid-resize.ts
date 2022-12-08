@@ -71,7 +71,7 @@ export class _ extends BgBlue {
                         "sidebar fillLeft header fillRight"
                         "sidebar fillLeft main fillRight"
                         "sidebar fillLeft footer fillRight";
-                    grid-template-columns: auto 40px 1fr 40px;
+                    grid-template-columns: auto 20px 1fr 20px;
                     grid-template-rows: auto 1fr auto;
                     height: 100%;
                     width: 100%;

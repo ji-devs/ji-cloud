@@ -18,22 +18,12 @@ export class _ extends LitElement {
                 img-ui {
                     width: 280px;
                 }
-                @media (min-width: 1920px) {
-                    img-ui {
-                        width: 315px;
-                    }
-                }
                 .label {
                     font-weight: 500;
                     color: var(--dark-gray-6);
                     text-align: center;
                     margin-top: 20px;
                     font-size: 14px;
-                }
-                @media (min-width: 1920px) {
-                    .label {
-                        font-size: 18px;
-                    }
                 }
             `,
         ];

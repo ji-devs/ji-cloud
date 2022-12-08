@@ -20,13 +20,16 @@ where
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
 {
+    let dense = Step::get_list().len() >= 5;
     html!("steps-nav", {
         .prop("slot", "nav")
+        .prop("dense", dense)
         .children(
             Step::get_list()
                 .into_iter()
                 .map(clone!(state => move |step| {
                     html!("step-nav", {
+                        .prop("dense", dense)
                         .prop("number", JsValue::from_f64(step.as_number() as f64))
                         .prop("label", step.label())
                         .prop_signal("active", state.step.signal().map(move |curr| {

@@ -22,11 +22,7 @@ export class _ extends LitElement {
                     align-items: center;
                     column-gap: 8px;
                     font-size: 14px;
-                }
-                @media (min-width: 1920px) {
-                    button {
-                        font-size: 16px;
-                    }
+                    min-height: 30px;
                 }
                 .caret {
                     transition: transform 0.2s;

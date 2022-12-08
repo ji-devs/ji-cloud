@@ -17,6 +17,7 @@ export class _ extends LitElement {
                 img-ui {
                     margin-bottom: 24px;
                     transform: translateX(var(--image-offset));
+                    max-width: 100%;
                 }
                 .label {
                     font-size: 18px;

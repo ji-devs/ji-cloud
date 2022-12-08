@@ -18,12 +18,6 @@ export class _ extends LitElement {
                     width: 340px;
                     height: 340px;
                 }
-                @media (min-width: 1920px) {
-                    section {
-                        width: 388px;
-                        height: 388px;
-                    }
-                }
 
                 :host([hover]) section {
                     background-color: #bed8ff;
@@ -36,12 +30,6 @@ export class _ extends LitElement {
                     color: var(--dark-gray-6);
                     margin-top: 50px;
                     margin-bottom: 10px;
-                }
-                @media (min-width: 1920px) {
-                    .label {
-                        margin-top: 64px;
-                        margin-bottom: 32px;
-                    }
                 }
 
                 .hidden {

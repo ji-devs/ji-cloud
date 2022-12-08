@@ -11,7 +11,7 @@ export class _ extends LitElement {
             collapseStyles,
             css`
                 :host {
-                    padding: 20px;
+                    padding: 16px;
                     padding-bottom: 0;
                     display: block;
 
@@ -20,7 +20,7 @@ export class _ extends LitElement {
                     transition-duration: var(--collapsing-phase-duration);
                 }
                 :host([collapsed]) {
-                    padding: 10px;
+                    padding: 8px;
                     transition-delay: var(--fading-phase-duration);
                 }
                 .close-wrapper {
@@ -48,7 +48,7 @@ export class _ extends LitElement {
                 }
                 .logo-nav-wrapper {
                     margin-top: 16px;
-                    height: 40px;
+                    height: 30px;
                     display: flex;
                     justify-content: space-between;
                 }
@@ -56,14 +56,14 @@ export class _ extends LitElement {
                     object-fit: cover;
                     object-position: 0 0;
                     overflow: hidden;
-                    height: 40px;
-                    width: 115px;
+                    height: 30px;
+                    width: 86px;
                     transition-property: height, width;
                     transition-duration: var(--collapsing-phase-duration);
                 }
                 :host([collapsed]) .logo {
-                    height: 28px;
-                    width: 50px;
+                    height: 22px;
+                    width: 40px;
                     transition-delay: var(--fading-phase-duration);
                 }
                 .divider {
@@ -82,7 +82,7 @@ export class _ extends LitElement {
                 }
                 :host([collapsed]) .settings-preview {
                     column-gap: 0px;
-                    padding: 0 12px;
+                    padding: 0 6px;
                 }
                 ::slotted([slot="modules"]) {
                     font-size: 24px;

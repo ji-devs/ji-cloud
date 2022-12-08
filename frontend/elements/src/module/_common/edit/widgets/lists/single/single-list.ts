@@ -10,22 +10,18 @@ export class _ extends LitElement {
                 header {
                     display: flex;
                     justify-content: space-between;
+                    align-items: center;
                 }
                 .input-buttons {
-                    padding: 12px 0;
+                    padding: 10px 0;
                     display: flex;
                     justify-content: flex-end;
-                }
-                @media (min-width: 1920px) {
-                    .input-buttons {
-                        margin-bottom: 18px;
-                        margin-right: 0px;
-                    }
                 }
                 .header {
                     top: 0;
                     position: sticky;
                     background-color: #e9eff8;
+                    font-size: 14px;
                 }
                 .list {
                     box-sizing: border-box;
@@ -60,7 +56,7 @@ export class _ extends LitElement {
                 .done-btn {
                     display: flex;
                     justify-content: flex-end;
-                    padding: 16px 0;
+                    padding: 12px 0;
                     bottom: 0;
                     position: sticky;
                     background-color: #e9eff8;
