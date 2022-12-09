@@ -5,19 +5,19 @@ use futures_signals::signal::Mutable;
 use shared::domain::jig::{AudioEffects, JigPlayerSettings, JigUpdateDraftDataRequest};
 use utils::editable_asset::EditableJig;
 
-pub struct State {
+pub struct JigSettings {
     pub jig: Rc<EditableJig>,
     pub active_popup: Mutable<Option<ActiveSettingsPopup>>,
     pub loader: AsyncLoader,
 }
 
-impl State {
-    pub fn new(jig: &Rc<EditableJig>) -> Self {
-        Self {
+impl JigSettings {
+    pub fn new(jig: &Rc<EditableJig>) -> Rc<Self> {
+        Rc::new(Self {
             jig: Rc::clone(jig),
             active_popup: Mutable::new(None),
             loader: AsyncLoader::new(),
-        }
+        })
     }
 
     pub fn get_jig_update_req(&self) -> JigUpdateDraftDataRequest {

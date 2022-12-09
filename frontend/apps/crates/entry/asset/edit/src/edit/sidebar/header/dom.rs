@@ -7,7 +7,7 @@ use web_sys::HtmlInputElement;
 use crate::edit::sidebar::{jig::actions::get_player_settings, state::SidebarSetting};
 
 use super::super::{
-    actions as sidebar_actions, course::settings as course_settings, jig::settings as jig_settings,
+    actions as sidebar_actions,
     state::Sidebar as SidebarState,
 };
 use utils::{
@@ -33,10 +33,10 @@ impl HeaderDom {
             .apply(|dom| {
                 match &sidebar_state.settings {
                     SidebarSetting::Jig(settings) => {
-                        dom.child(jig_settings::dom::render(Rc::clone(settings)))
+                        dom.child(settings.render())
                     },
                     SidebarSetting::Course(settings) => {
-                        dom.child(course_settings::dom::render(Rc::clone(settings)))
+                        dom.child(settings.render())
                     },
                 }
             })

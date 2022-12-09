@@ -5,21 +5,21 @@ use futures_signals::signal::Mutable;
 use shared::domain::course::CourseUpdateDraftDataRequest;
 use utils::editable_asset::EditableCourse;
 
-pub struct State {
+pub struct CourseSettings {
     pub course: Rc<EditableCourse>,
     pub popup_open: Mutable<bool>,
     pub play_in_order: Mutable<bool>,
     pub loader: AsyncLoader,
 }
 
-impl State {
-    pub fn new(course: &Rc<EditableCourse>) -> Self {
-        Self {
+impl CourseSettings {
+    pub fn new(course: &Rc<EditableCourse>) -> Rc<Self> {
+        Rc::new(Self {
             course: Rc::clone(course),
             popup_open: Mutable::new(false),
             play_in_order: Mutable::new(false),
             loader: AsyncLoader::new(),
-        }
+        })
     }
 
     pub fn get_course_update_req(&self) -> CourseUpdateDraftDataRequest {

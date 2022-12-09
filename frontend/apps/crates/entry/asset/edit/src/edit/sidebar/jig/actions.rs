@@ -1,7 +1,7 @@
 use crate::edit::sidebar::state::{CourseSpot, SidebarSpot, SidebarSpotItem};
 
 use super::super::state::Sidebar;
-use super::settings::state::State as SettingsState;
+use super::settings::JigSettings as SettingsState;
 use dominator::clone;
 use shared::{
     api::endpoints::{self},

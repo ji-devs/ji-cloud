@@ -7,10 +7,10 @@ use shared::{
 };
 use utils::prelude::ApiEndpointExt;
 
-use super::state::{ActiveSettingsPopup, State};
+use super::state::{ActiveSettingsPopup, JigSettings};
 
 pub fn on_background_audio_click(
-    state: Rc<State>,
+    state: Rc<JigSettings>,
     selected: bool,
     audio_background: AudioBackground,
 ) {
@@ -22,11 +22,11 @@ pub fn on_background_audio_click(
     update_jig_settings(Rc::clone(&state));
 }
 
-pub fn set_active_popup(state: Rc<State>, active_popup: ActiveSettingsPopup) {
+pub fn set_active_popup(state: Rc<JigSettings>, active_popup: ActiveSettingsPopup) {
     state.active_popup.set(Some(active_popup));
 }
 
-pub fn update_jig_settings(state: Rc<State>) {
+pub fn update_jig_settings(state: Rc<JigSettings>) {
     let req = state.get_jig_update_req();
 
     state.loader.load(clone!(state => async move {
