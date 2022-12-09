@@ -1,11 +1,8 @@
 use std::rc::Rc;
 
 use super::{
-    super::edit::publish::Publish,
-    course::jig_selection::state::JigSelection,
-    jig::module_selection::dom::SelectionDom,
-    module_iframe::ModuleIframe,
-    sidebar::{dom::SidebarDom, state::State as Sidebar},
+    super::edit::publish::Publish, course::jig_selection::state::JigSelection,
+    jig::module_selection::dom::SelectionDom, module_iframe::ModuleIframe, sidebar::Sidebar,
     state::AssetEditState,
 };
 use components::{
@@ -47,8 +44,8 @@ impl AssetEditState {
                 })))
                 */
                 .apply_if(!state.asset_id.is_resource_id(), |dom| {
-                    let state = Rc::new(Sidebar::new(Rc::clone(&state)));
-                    dom.child(SidebarDom::render(state))
+                    let state = Sidebar::new(Rc::clone(&state));
+                    dom.child(state.render())
                 })
                 .child_signal(state.route.signal_cloned().map(clone!(state => move |route| {
                     match route {

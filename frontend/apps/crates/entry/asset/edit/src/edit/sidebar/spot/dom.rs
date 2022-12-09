@@ -11,7 +11,7 @@ use super::super::spot::actions as spot_actions;
 use super::jig::actions as jig_spot_actions;
 use super::{actions, state::*};
 use crate::edit::sidebar::state::{
-    CourseSpot, ModuleHighlight, SidebarSpot, SidebarSpotItem, State as SidebarState,
+    CourseSpot, ModuleHighlight, Sidebar as SidebarState, SidebarSpot, SidebarSpotItem,
 };
 use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
 use futures_signals::signal::{not, SignalExt};

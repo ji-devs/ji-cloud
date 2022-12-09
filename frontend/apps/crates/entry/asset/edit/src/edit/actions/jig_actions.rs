@@ -9,7 +9,7 @@ use shared::{
 };
 use utils::prelude::ApiEndpointExt;
 
-use crate::edit::{sidebar::state::SidebarSpot, AssetEditState};
+use crate::edit::{sidebar::SidebarSpot, AssetEditState};
 
 pub async fn load_jig(jig_id: JigId) -> anyhow::Result<JigResponse> {
     jig::GetDraft::api_with_auth(JigGetDraftPath(jig_id), None).await

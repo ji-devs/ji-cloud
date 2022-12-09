@@ -1,10 +1,13 @@
 pub mod dom;
 
-pub(super) mod actions;
-pub(super) mod course;
-pub(super) mod debug;
-pub(super) mod dragging;
-pub(super) mod header;
-pub(super) mod jig;
-pub(super) mod spot;
-pub(super) mod state;
+mod actions;
+mod course;
+mod debug;
+mod dragging;
+mod header;
+mod jig;
+mod spot;
+mod state;
+
+pub use dom::*;
+pub use state::*;

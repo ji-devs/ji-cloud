@@ -19,7 +19,7 @@ pub enum ModuleHighlight {
     Publish,
 }
 
-pub struct State {
+pub struct Sidebar {
     pub asset_edit_state: Rc<AssetEditState>,
     // pub spots: MutableVec<Rc<SidebarSpot>>,
     pub collapsed: Mutable<bool>,
@@ -33,8 +33,8 @@ pub struct State {
     pub(super) settings: SidebarSetting,
 }
 
-impl State {
-    pub fn new(asset_edit_state: Rc<AssetEditState>) -> Self {
+impl Sidebar {
+    pub fn new(asset_edit_state: Rc<AssetEditState>) -> Rc<Self> {
         let settings_state = match &asset_edit_state.asset {
             EditableAsset::Jig(jig) => SidebarSetting::Jig(Rc::new(JigSettingsState::new(jig))),
             EditableAsset::Course(course) => {
@@ -45,7 +45,7 @@ impl State {
             }
         };
 
-        Self {
+        Rc::new(Self {
             asset_edit_state,
             // spots: MutableVec::new_with_values(modules),
             collapsed: Mutable::new(false),
@@ -54,7 +54,7 @@ impl State {
             drag_target_index: Mutable::new(None),
             highlight_modules: Mutable::new(None), // By default we don't want modules highlighted yet.
             loader: AsyncLoader::new(),
-        }
+        })
     }
 
     //There's probably a way of making this simpler

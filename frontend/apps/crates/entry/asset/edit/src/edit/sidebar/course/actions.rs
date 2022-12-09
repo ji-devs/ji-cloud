@@ -1,4 +1,4 @@
-use super::super::state::State;
+use super::super::state::Sidebar;
 use shared::{
     api::endpoints,
     domain::course::{CourseId, CourseUpdateDraftDataPath, CourseUpdateDraftDataRequest},
@@ -7,7 +7,7 @@ use std::rc::Rc;
 use utils::prelude::*;
 
 #[allow(dead_code)] // TODO: remove once used
-pub fn navigate_to_publish(state: Rc<State>) {
+pub fn navigate_to_publish(state: Rc<Sidebar>) {
     state.collapsed.set(true);
     state.asset_edit_state.navigate_to_publish();
 }

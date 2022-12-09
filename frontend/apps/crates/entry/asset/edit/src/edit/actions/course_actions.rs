@@ -4,7 +4,7 @@ use shared::{
 };
 use utils::prelude::ApiEndpointExt;
 
-use crate::edit::{sidebar::state::SidebarSpot, AssetEditState};
+use crate::edit::{sidebar::SidebarSpot, AssetEditState};
 
 pub async fn load_course(course_id: CourseId) -> anyhow::Result<CourseResponse> {
     course::GetDraft::api_with_auth(CourseGetDraftPath(course_id.clone()), None).await

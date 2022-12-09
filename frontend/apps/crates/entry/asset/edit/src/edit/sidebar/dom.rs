@@ -20,10 +20,9 @@ use utils::{
     prelude::*,
 };
 
-pub struct SidebarDom {}
-
-impl SidebarDom {
-    pub fn render(state: Rc<State>) -> Dom {
+impl Sidebar {
+    pub fn render(self: Rc<Self>) -> Dom {
+        let state = self;
         html!("empty-fragment", {
             .prop("slot", "sidebar")
             .global_event(clone!(state => move |evt: Message| {

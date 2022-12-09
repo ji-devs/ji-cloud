@@ -5,7 +5,7 @@ use dominator::clone;
 use shared::domain::asset::AssetId;
 use std::rc::Rc;
 
-pub fn navigate_to_publish(state: Rc<State>) {
+pub fn navigate_to_publish(state: Rc<Sidebar>) {
     state.collapsed.set(true);
     match &state.asset_edit_state.asset_id {
         AssetId::JigId(_) => {
@@ -18,7 +18,7 @@ pub fn navigate_to_publish(state: Rc<State>) {
     }
 }
 
-pub fn set_highlight_modules(state: &Rc<State>, highlight: bool) {
+pub fn set_highlight_modules(state: &Rc<Sidebar>, highlight: bool) {
     if highlight {
         state.collapsed.set_neq(false);
 
@@ -47,7 +47,7 @@ pub fn set_highlight_modules(state: &Rc<State>, highlight: bool) {
     }
 }
 
-pub fn update_display_name(state: Rc<State>, value: String) {
+pub fn update_display_name(state: Rc<Sidebar>, value: String) {
     state.loader.load(clone!(state => async move {
         state.asset_edit_state.asset.display_name().set(value.clone());
 

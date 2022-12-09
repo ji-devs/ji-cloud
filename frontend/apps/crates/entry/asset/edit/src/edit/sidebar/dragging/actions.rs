@@ -1,4 +1,4 @@
-use crate::edit::sidebar::state::State as SidebarState;
+use crate::edit::sidebar::state::Sidebar as SidebarState;
 use std::rc::Rc;
 
 //Mouse movements are triggered from sidebar regardless of

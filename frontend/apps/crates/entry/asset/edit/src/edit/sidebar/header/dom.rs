@@ -8,7 +8,7 @@ use crate::edit::sidebar::{jig::actions::get_player_settings, state::SidebarSett
 
 use super::super::{
     actions as sidebar_actions, course::settings as course_settings, jig::settings as jig_settings,
-    state::State as SidebarState,
+    state::Sidebar as SidebarState,
 };
 use utils::{
     asset::{AssetPlayerOptions, CoursePlayerOptions},

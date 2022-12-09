@@ -1,4 +1,4 @@
-use crate::edit::sidebar::state::{SidebarSpot, SidebarSpotItem, State as SidebarState};
+use crate::edit::sidebar::state::{Sidebar as SidebarState, SidebarSpot, SidebarSpotItem};
 use dominator::clone;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use std::cell::RefCell;

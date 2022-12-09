@@ -2,7 +2,7 @@ use dominator::{html, Dom};
 
 use std::rc::Rc;
 
-use crate::edit::sidebar::state::State as SidebarState;
+use crate::edit::sidebar::state::Sidebar as SidebarState;
 use futures_signals::signal::SignalExt;
 
 use super::super::spot::state::State as ItemState;

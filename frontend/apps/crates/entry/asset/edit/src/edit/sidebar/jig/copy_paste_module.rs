@@ -7,10 +7,10 @@ use uuid::Uuid;
 
 use crate::edit::sidebar::state::SidebarSpot;
 
-use super::super::state::State;
+use super::super::state::Sidebar;
 
 pub const COPY_MODULE_KEY: &str = "COPY_MODULE";
-pub fn copy_module(state: Rc<State>, module_id: &ModuleId) {
+pub fn copy_module(state: Rc<Sidebar>, module_id: &ModuleId) {
     let value = format!(
         "{},{}",
         &state.asset_edit_state.asset_id.uuid(),
@@ -40,7 +40,7 @@ fn get_module_to_paste() -> Option<ModuleId> {
         }
     }
 }
-pub fn paste_module(state: Rc<State>) {
+pub fn paste_module(state: Rc<Sidebar>) {
     match get_module_to_paste() {
         None => log::warn!("No module to paste"),
         Some(module_id) => {

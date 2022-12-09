@@ -7,7 +7,7 @@ use crate::edit::sidebar::{
         actions::{self, MoveTarget},
         state::State as SpotState,
     },
-    state::State as SidebarState,
+    state::Sidebar as SidebarState,
 };
 use dominator::{clone, html, Dom, EventOptions};
 use shared::domain::module::{LiteModule, ModuleId, ModuleKind};

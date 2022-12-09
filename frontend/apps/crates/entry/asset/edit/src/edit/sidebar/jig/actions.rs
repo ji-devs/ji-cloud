@@ -1,6 +1,6 @@
 use crate::edit::sidebar::state::{CourseSpot, SidebarSpot, SidebarSpotItem};
 
-use super::super::state::State;
+use super::super::state::Sidebar;
 use super::settings::state::State as SettingsState;
 use dominator::clone;
 use shared::{
@@ -17,7 +17,7 @@ use shared::{
 use std::rc::Rc;
 use utils::{asset::JigPlayerOptions, iframe::ModuleToJigEditorMessage, prelude::*};
 
-pub fn navigate_to_publish(state: Rc<State>) {
+pub fn navigate_to_publish(state: Rc<Sidebar>) {
     state.collapsed.set(true);
     state.asset_edit_state.navigate_to_publish();
 }
@@ -39,7 +39,7 @@ pub async fn update_display_name(jig_id: JigId, value: String) {
     let _ = update_jig(&jig_id, req).await;
 }
 
-pub fn duplicate_module(state: Rc<State>, module_id: &ModuleId) {
+pub fn duplicate_module(state: Rc<Sidebar>, module_id: &ModuleId) {
     state.loader.load(clone!(state, module_id => async move {
         let jig_id = state.asset_edit_state.asset_id.unwrap_jig();
         let module = super::module_cloner::clone_module(&module_id, &jig_id).await.unwrap_ji();
@@ -83,7 +83,7 @@ pub fn get_player_settings(settings_state: Rc<SettingsState>) -> JigPlayerOption
 }
 
 // TODO: move out of jig dir
-pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
+pub fn on_iframe_message(state: Rc<Sidebar>, message: ModuleToJigEditorMessage) {
     match message {
         ModuleToJigEditorMessage::AppendModule(module) => {
             populate_added_module(Rc::clone(&state), module);
@@ -121,7 +121,7 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
     }
 }
 
-fn populate_added_module(state: Rc<State>, module: LiteModule) {
+fn populate_added_module(state: Rc<Sidebar>, module: LiteModule) {
     // Assumes that the final module in the list is always the placeholder module.
     let insert_at_idx = state.asset_edit_state.sidebar_spots.lock_ref().len() - 1;
 
@@ -138,7 +138,7 @@ fn populate_added_module(state: Rc<State>, module: LiteModule) {
         .set_route_jig(JigEditRoute::Module(module_id));
 }
 
-pub fn use_module_as(state: Rc<State>, target_kind: ModuleKind, source_module_id: ModuleId) {
+pub fn use_module_as(state: Rc<Sidebar>, target_kind: ModuleKind, source_module_id: ModuleId) {
     state.loader.load(clone!(state => async move {
         let target_module_id: anyhow::Result<(ModuleId, bool)> = async {
             let asset_type: AssetType = (&state.asset_edit_state.asset_id).into();

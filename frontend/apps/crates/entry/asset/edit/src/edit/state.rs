@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use super::sidebar::state::SidebarSpot;
+use super::sidebar::SidebarSpot;
 use futures_signals::{signal::Mutable, signal_vec::MutableVec};
 use shared::domain::asset::AssetId;
 use utils::{
