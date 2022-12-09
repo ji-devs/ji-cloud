@@ -6,10 +6,7 @@ use web_sys::HtmlInputElement;
 
 use crate::edit::sidebar::{jig::actions::get_player_settings, state::SidebarSetting};
 
-use super::super::{
-    actions as sidebar_actions,
-    state::Sidebar as SidebarState,
-};
+use super::super::{actions as sidebar_actions, state::Sidebar as SidebarState};
 use utils::{
     asset::{AssetPlayerOptions, CoursePlayerOptions},
     prelude::*,

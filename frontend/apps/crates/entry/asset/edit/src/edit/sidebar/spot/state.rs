@@ -7,34 +7,37 @@ use utils::drag::Drag;
 use utils::routes::{AssetEditRoute, JigEditRoute};
 use web_sys::HtmlElement;
 
-pub struct State {
+pub struct SpotState {
     pub module: Rc<SidebarSpot>,
     pub tried_module_at_cover: Mutable<bool>,
     pub sidebar: Rc<SidebarState>,
     pub drag: Mutable<Option<Drag>>,
     pub index: usize,
+    pub drag_target_index: Option<usize>,
     pub total_len: usize,
     pub elem: RefCell<Option<HtmlElement>>,
     pub confirm_delete: Mutable<bool>,
 }
 
-impl State {
+impl SpotState {
     pub fn new(
         sidebar: Rc<SidebarState>,
         index: usize,
+        drag_target_index: Option<usize>,
         total_len: usize,
         module: Rc<SidebarSpot>,
-    ) -> Self {
-        Self {
+    ) -> Rc<Self> {
+        Rc::new(Self {
             module,
             sidebar,
             index,
+            drag_target_index,
             total_len,
             tried_module_at_cover: Mutable::new(false),
             drag: Mutable::new(None),
             elem: RefCell::new(None),
             confirm_delete: Mutable::new(false),
-        }
+        })
     }
 
     pub fn kind_str(&self) -> &'static str {
@@ -54,7 +57,7 @@ impl State {
             && matches!(&self.module.item, SidebarSpotItem::Jig(Some(_)))
     }
 
-    pub fn window_state_signal(state: Rc<State>) -> impl Signal<Item = &'static str> {
+    pub fn window_state_signal(state: Rc<SpotState>) -> impl Signal<Item = &'static str> {
         state.sidebar.asset_edit_state.route.signal_ref(clone!(state => move |route| {
             match &state.module.item {
                 SidebarSpotItem::Jig(module) => {

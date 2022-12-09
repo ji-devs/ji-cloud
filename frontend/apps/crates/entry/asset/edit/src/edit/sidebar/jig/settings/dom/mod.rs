@@ -37,7 +37,7 @@ impl JigSettings {
                 .style("color", "#ffffff")
                 .event(clone!(state => move |_: events::Click| {
                     let mut active_popup = state.active_popup.lock_mut();
-    
+
                     *active_popup = match *active_popup {
                         Some(_) => None,
                         None => Some(ActiveSettingsPopup::Main),

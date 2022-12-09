@@ -9,7 +9,7 @@ use super::{
     dragging::{actions as drag_actions, dom::DraggingDom},
     header::dom::HeaderDom,
     jig::actions as jig_actions,
-    spot::dom::ItemDom,
+    spot::state::SpotState,
     state::*,
 };
 use futures_signals::{map_ref, signal::SignalExt, signal_vec::SignalVecExt};
@@ -21,7 +21,7 @@ use utils::{
 };
 
 impl Sidebar {
-    pub fn render(self: Rc<Self>) -> Dom {
+    pub fn render(self: &Rc<Self>) -> Dom {
         let state = self;
         html!("empty-fragment", {
             .prop("slot", "sidebar")
@@ -136,7 +136,13 @@ impl Sidebar {
                         }
                     }))
                     .map(clone!(state => move |(index, len, drag_target_index, module)| {
-                        ItemDom::render(state.clone(), index, drag_target_index, len, module)
+                        SpotState::new(
+                            state.clone(),
+                            index,
+                            drag_target_index,
+                            len,
+                            module
+                        ).render()
                     }))
                 )
                 .global_event(clone!(state => move |evt:events::MouseUp| {
@@ -146,7 +152,7 @@ impl Sidebar {
                     drag_actions::mouse_move(state.clone(), evt.x(), evt.y());
                 }))
             }))
-            .child(DraggingDom::render(state))
+            .child(DraggingDom::render(Rc::clone(&state)))
         })
     }
 }

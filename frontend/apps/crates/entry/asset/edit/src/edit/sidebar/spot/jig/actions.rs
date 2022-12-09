@@ -1,5 +1,5 @@
 use super::super::super::jig::actions as jig_actions;
-use super::super::super::spot::state::State as SpotState;
+use super::super::super::spot::state::SpotState;
 use crate::edit::sidebar::state::{SidebarSpot, SidebarSpotItem};
 use dominator::clone;
 use shared::{api::endpoints, domain::module::*};

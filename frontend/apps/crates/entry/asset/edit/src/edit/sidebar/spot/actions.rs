@@ -1,5 +1,5 @@
 use super::jig::actions as jig_spot_actions;
-use super::state::State;
+use super::state::SpotState;
 use crate::edit::sidebar::{
     dragging::state::State as DragState,
     state::{SidebarSpot, SidebarSpotItem},
@@ -10,14 +10,14 @@ use std::rc::Rc;
 use utils::prelude::*;
 
 #[allow(dead_code)] // this should be removed eventually
-pub fn mouse_down(state: Rc<State>, x: i32, y: i32) {
+pub fn mouse_down(state: Rc<SpotState>, x: i32, y: i32) {
     state
         .sidebar
         .drag
         .set(Some(Rc::new(DragState::new(state.clone(), x, y))));
 }
 
-pub fn add_empty_module_after(state: Rc<State>) {
+pub fn add_empty_module_after(state: Rc<SpotState>) {
     state
         .sidebar
         .asset_edit_state
@@ -40,7 +40,7 @@ pub enum MoveTarget {
     Down,
 }
 
-pub fn move_index(state: Rc<State>, move_target: MoveTarget) {
+pub fn move_index(state: Rc<SpotState>, move_target: MoveTarget) {
     state.sidebar.loader.load(clone!(state => async move {
         if let Some(target) = {
             match move_target {
@@ -71,14 +71,14 @@ pub fn move_index(state: Rc<State>, move_target: MoveTarget) {
     }));
 }
 
-pub fn delete(state: Rc<State>) {
+pub fn delete(state: Rc<SpotState>) {
     state.sidebar.loader.load(clone!(state => async move {
         jig_spot_actions::delete(Rc::clone(&state)).await;
         state.sidebar.asset_edit_state.sidebar_spots.lock_mut().remove(state.index);
     }));
 }
 
-pub fn on_module_kind_drop(state: Rc<State>, module_kind: ModuleKind) {
+pub fn on_module_kind_drop(state: Rc<SpotState>, module_kind: ModuleKind) {
     if state.index == 0 && module_kind != ModuleKind::Cover {
         return;
     }

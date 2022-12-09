@@ -75,7 +75,7 @@ impl JigSettings {
                     FeedbackTab::Positive => {
                         let audio_handles: Vec<Mutable<Option<AudioHandle>>> = AudioFeedbackPositive::variants().iter().map(|_| Mutable::new(None)).collect();
                         let audio_handles = Rc::new(audio_handles);
-    
+
                         dom.children(AudioFeedbackPositive::variants().iter().enumerate().map(clone!(state, audio_handles => move|(index, option)| {
                             state.feedback_line(state.jig.feedback_positive.clone(), option, audio_handles.clone(), index)
                         })).collect::<Vec<Dom>>())
@@ -93,7 +93,7 @@ impl JigSettings {
                     FeedbackTab::Negative => {
                         let audio_handles: Vec<Mutable<Option<AudioHandle>>> = AudioFeedbackNegative::variants().iter().map(|_| Mutable::new(None)).collect();
                         let audio_handles = Rc::new(audio_handles);
-    
+
                         dom.children(AudioFeedbackNegative::variants().iter().enumerate().map(clone!(state, audio_handles => move|(index, option)| {
                             state.feedback_line(state.jig.feedback_negative.clone(), option, audio_handles.clone(), index)
                         })).collect::<Vec<Dom>>())
@@ -112,7 +112,7 @@ impl JigSettings {
             })
         })
     }
-    
+
     fn feedback_line<'a, T>(
         self: &Rc<Self>,
         list: Mutable<HashSet<T>>,
@@ -126,7 +126,7 @@ impl JigSettings {
         let state = self;
 
         let audio_handle = &audio_handles[index];
-    
+
         html!("jig-audio-line", {
             .prop("slot", "lines")
             .prop("label", option.display_name())
@@ -160,9 +160,9 @@ impl JigSettings {
                         let on_ended = clone!(audio_handles => move|| {
                             audio_handles[index].set(None);
                         });
-    
+
                         let mut audio_handles = audio_handles.iter().map(|x| x.lock_mut()).collect::<Vec<MutableLockMut<Option<AudioHandle>>>>();
-    
+
                         match *audio_handles[index] {
                             Some(_) => *audio_handles[index] = None,
                             None => {
@@ -170,9 +170,9 @@ impl JigSettings {
                                     *o = None;
                                     o
                                 }).collect();
-    
+
                                 let path:AudioPath = option.clone().into();
-    
+
                                 let handle = AUDIO_MIXER.with(move |mixer| mixer.play_on_ended(path, false, on_ended));
                                 *audio_handles[index] = Some(handle);
                             },

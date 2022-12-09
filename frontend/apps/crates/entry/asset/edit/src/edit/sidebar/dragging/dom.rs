@@ -2,15 +2,15 @@ use dominator::{html, Dom};
 
 use std::rc::Rc;
 
-use crate::edit::sidebar::state::Sidebar as SidebarState;
+use crate::edit::sidebar::state::Sidebar;
 use futures_signals::signal::SignalExt;
 
-use super::super::spot::state::State as ItemState;
+use super::super::spot::state::SpotState;
 
 pub struct DraggingDom {}
 
 impl DraggingDom {
-    pub fn render(sidebar: Rc<SidebarState>) -> Dom {
+    pub fn render(sidebar: Rc<Sidebar>) -> Dom {
         html!("empty-fragment", {
             .child_signal(
                 sidebar
@@ -40,7 +40,7 @@ impl DraggingDom {
                                 .prop("dragging", true)
                                 .child(html!("jig-edit-sidebar-module-window", {
                                     .prop("slot", "window")
-                                    .prop_signal("state", ItemState::window_state_signal(Rc::clone(module)))
+                                    .prop_signal("state", SpotState::window_state_signal(Rc::clone(module)))
                                 }))
                             })
                         })

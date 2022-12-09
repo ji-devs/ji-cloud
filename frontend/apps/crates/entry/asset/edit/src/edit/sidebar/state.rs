@@ -1,7 +1,6 @@
 use super::{
-    course::settings::CourseSettings,
+    course::settings::CourseSettings, dragging::state::State as DragState,
     jig::settings::JigSettings,
-    dragging::state::State as DragState,
 };
 use dominator_helpers::{futures::AsyncLoader, signals::OptionSignal};
 use futures_signals::signal::{Mutable, Signal, SignalExt};
@@ -37,12 +36,8 @@ pub struct Sidebar {
 impl Sidebar {
     pub fn new(asset_edit_state: Rc<AssetEditState>) -> Rc<Self> {
         let settings_state = match &asset_edit_state.asset {
-            EditableAsset::Jig(jig) => {
-                SidebarSetting::Jig(JigSettings::new(jig))
-            },
-            EditableAsset::Course(course) => {
-                SidebarSetting::Course(CourseSettings::new(course))
-            }
+            EditableAsset::Jig(jig) => SidebarSetting::Jig(JigSettings::new(jig)),
+            EditableAsset::Course(course) => SidebarSetting::Course(CourseSettings::new(course)),
             EditableAsset::Resource(_) => {
                 unimplemented!()
             }

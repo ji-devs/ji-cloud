@@ -1,4 +1,4 @@
-use crate::edit::sidebar::spot::state::State as SpotState;
+use crate::edit::sidebar::spot::state::SpotState;
 use futures_signals::signal::Mutable;
 use js_sys::Reflect;
 use std::cell::RefCell;
