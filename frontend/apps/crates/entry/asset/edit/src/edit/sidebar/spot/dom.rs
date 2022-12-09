@@ -5,8 +5,8 @@ use shared::domain::asset::DraftOrLive;
 use utils::init::analytics;
 use web_sys::{HtmlElement, Node, ScrollBehavior, ScrollIntoViewOptions};
 
-use super::super::course::menu::dom as CourseMenuDom;
-use super::super::jig::menu::dom as JigMenuDom;
+use super::super::course::menu::CourseMenu;
+use super::super::jig::menu::JigMenu;
 use super::super::spot::actions as spot_actions;
 use super::jig::actions as jig_spot_actions;
 use super::{actions, state::*};
@@ -264,8 +264,8 @@ impl ItemDom {
                     // }
 
                     match module.item {
-                        SidebarSpotItem::Jig(_) => dom.child(JigMenuDom::render(&state)),
-                        SidebarSpotItem::Course(_) => dom.child(CourseMenuDom::render(&state)),
+                        SidebarSpotItem::Jig(_) => dom.child(JigMenu::new(&state).render()),
+                        SidebarSpotItem::Course(_) => dom.child(CourseMenu::new(&state).render()),
                     }
                 }))
                 .apply(Self::render_add_button(&state))
