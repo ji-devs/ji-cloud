@@ -20,6 +20,17 @@ impl AssetEditState {
         let state = self;
         spawn_local(clone!(state => async move {
             let asset = state.load_asset().await.unwrap_ji();
+            match &asset {
+                Asset::Jig(jig) => {
+                    state.get_jig_spots(jig);
+                },
+                Asset::Course(course) => {
+                    state.get_course_spots(course);
+                },
+                Asset::Resource(_) => {
+                    // do nothing, resource doesn't have the sidebar
+                },
+            };
             state.asset.fill_from_asset(asset);
         }));
     }

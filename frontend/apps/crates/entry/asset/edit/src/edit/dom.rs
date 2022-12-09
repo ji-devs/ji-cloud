@@ -1,9 +1,12 @@
 use std::rc::Rc;
 
 use super::{
-    super::edit::publish::Publish, course::jig_selection::state::JigSelection,
-    jig::module_selection::dom::SelectionDom, module_iframe::ModuleIframe,
-    sidebar::dom::SidebarDom, state::AssetEditState,
+    super::edit::publish::Publish,
+    course::jig_selection::state::JigSelection,
+    jig::module_selection::dom::SelectionDom,
+    module_iframe::ModuleIframe,
+    sidebar::{dom::SidebarDom, state::State as Sidebar},
+    state::AssetEditState,
 };
 use components::{
     overlay::handle::OverlayHandle,
@@ -44,7 +47,8 @@ impl AssetEditState {
                 })))
                 */
                 .apply_if(!state.asset_id.is_resource_id(), |dom| {
-                    dom.child(SidebarDom::render(state.asset_id, state.clone()))
+                    let state = Rc::new(Sidebar::new(Rc::clone(&state)));
+                    dom.child(SidebarDom::render(state))
                 })
                 .child_signal(state.route.signal_cloned().map(clone!(state => move |route| {
                     match route {

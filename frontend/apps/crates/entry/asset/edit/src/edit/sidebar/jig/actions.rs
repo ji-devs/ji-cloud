@@ -3,12 +3,11 @@ use crate::edit::sidebar::state::{CourseSpot, SidebarSpot, SidebarSpotItem};
 use super::super::state::State;
 use super::settings::state::State as SettingsState;
 use dominator::clone;
-use futures_signals::signal::Mutable;
 use shared::{
     api::endpoints::{self},
     domain::{
-        asset::{Asset, AssetType, DraftOrLive},
-        jig::{JigGetDraftPath, JigId, JigUpdateDraftDataPath, JigUpdateDraftDataRequest},
+        asset::{AssetType, DraftOrLive},
+        jig::{JigId, JigUpdateDraftDataPath, JigUpdateDraftDataRequest},
         module::{
             LiteModule, ModuleCreatePath, ModuleCreateRequest, ModuleGetDraftPath, ModuleId,
             ModuleKind, ModuleUpdateRequest, ModuleUploadPath,
@@ -17,17 +16,6 @@ use shared::{
 };
 use std::rc::Rc;
 use utils::{asset::JigPlayerOptions, iframe::ModuleToJigEditorMessage, prelude::*};
-
-pub async fn load_jig(jig_id: JigId, jig_mutable: Mutable<Option<Asset>>) {
-    match endpoints::jig::GetDraft::api_with_auth(JigGetDraftPath(jig_id), None).await {
-        Ok(resp) => {
-            jig_mutable.set(Some(resp.into()));
-        }
-        Err(_) => {
-            todo!();
-        }
-    }
-}
 
 pub fn navigate_to_publish(state: Rc<State>) {
     state.collapsed.set(true);
@@ -101,7 +89,7 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
             populate_added_module(Rc::clone(&state), module);
         }
         ModuleToJigEditorMessage::Complete(complete_module_id, is_complete) => {
-            let modules = state.spots.lock_ref();
+            let modules = state.asset_edit_state.sidebar_spots.lock_ref();
             let module = modules.iter().find(|module| {
                 // Oh my.
                 // only modules should be here, either jig.modules or any asset cover
@@ -135,12 +123,13 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigEditorMessage) {
 
 fn populate_added_module(state: Rc<State>, module: LiteModule) {
     // Assumes that the final module in the list is always the placeholder module.
-    let insert_at_idx = state.spots.lock_ref().len() - 1;
+    let insert_at_idx = state.asset_edit_state.sidebar_spots.lock_ref().len() - 1;
 
     let module_id = module.id;
 
     state
-        .spots
+        .asset_edit_state
+        .sidebar_spots
         .lock_mut()
         .insert_cloned(insert_at_idx, SidebarSpot::new_jig_module(Some(module)));
 

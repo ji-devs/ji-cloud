@@ -65,7 +65,7 @@ pub fn assign_kind(state: Rc<SpotState>, kind: ModuleKind) {
                     // add the new one. This is slightly less efficient because it fires signals
                     // for the entire list of modules, however, it is necessary so that the modules
                     // before and after this one can have their views updated.
-                    let mut modules = state.sidebar.spots.lock_mut();
+                    let mut modules = state.sidebar.asset_edit_state.sidebar_spots.lock_mut();
                     modules.remove(index);
                     modules.insert_cloned(index, module);
 

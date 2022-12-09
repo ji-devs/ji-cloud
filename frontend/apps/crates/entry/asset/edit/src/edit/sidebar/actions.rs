@@ -22,7 +22,7 @@ pub fn set_highlight_modules(state: &Rc<State>, highlight: bool) {
     if highlight {
         state.collapsed.set_neq(false);
 
-        let modules = state.spots.lock_ref();
+        let modules = state.asset_edit_state.sidebar_spots.lock_ref();
 
         if modules
             .iter()

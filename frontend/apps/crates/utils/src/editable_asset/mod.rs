@@ -115,12 +115,8 @@ impl EditableAsset {
     pub fn fill_from_asset(&self, asset: Asset) {
         assert_eq!(self.asset_type(), asset.asset_type());
         match self {
-            EditableAsset::Jig(jig) => {
-                jig.fill_from_jig(asset.unwrap_jig().clone())
-            },
-            EditableAsset::Course(course) => {
-                course.fill_from_course(asset.unwrap_course().clone())
-            },
+            EditableAsset::Jig(jig) => jig.fill_from_jig(asset.unwrap_jig().clone()),
+            EditableAsset::Course(course) => course.fill_from_course(asset.unwrap_course().clone()),
             EditableAsset::Resource(resource) => {
                 resource.fill_from_resource(asset.unwrap_resource().clone())
             }

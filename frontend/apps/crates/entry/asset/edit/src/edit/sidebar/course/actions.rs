@@ -1,29 +1,10 @@
 use super::super::state::State;
-use futures_signals::signal::Mutable;
 use shared::{
-    api::endpoints::{self},
-    domain::{
-        asset::Asset,
-        course::{
-            CourseGetDraftPath, CourseId, CourseUpdateDraftDataPath, CourseUpdateDraftDataRequest,
-        },
-    },
+    api::endpoints,
+    domain::course::{CourseId, CourseUpdateDraftDataPath, CourseUpdateDraftDataRequest},
 };
 use std::rc::Rc;
 use utils::prelude::*;
-
-pub async fn load_course(course_id: CourseId, jig_mutable: Mutable<Option<Asset>>) {
-    match endpoints::course::GetDraft::api_with_auth(CourseGetDraftPath(course_id.clone()), None)
-        .await
-    {
-        Ok(resp) => {
-            jig_mutable.set(Some(resp.into()));
-        }
-        Err(_) => {
-            todo!();
-        }
-    }
-}
 
 #[allow(dead_code)] // TODO: remove once used
 pub fn navigate_to_publish(state: Rc<State>) {

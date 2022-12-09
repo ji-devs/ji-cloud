@@ -3,17 +3,9 @@ use super::{
     jig::settings::state::State as JigSettingsState,
 };
 use dominator_helpers::{futures::AsyncLoader, signals::OptionSignal};
-use futures_signals::{
-    signal::{Mutable, Signal, SignalExt},
-    signal_vec::MutableVec,
-};
-use shared::domain::{
-    asset::{Asset, AssetId},
-    course::CourseResponse,
-    jig::{JigId, JigResponse},
-    module::{LiteModule, ModuleKind},
-};
-use std::{rc::Rc, vec};
+use futures_signals::signal::{Mutable, Signal, SignalExt};
+use shared::domain::{asset::AssetId, jig::JigId, module::LiteModule};
+use std::rc::Rc;
 use utils::{editable_asset::EditableAsset, math::PointI32};
 
 use super::super::state::AssetEditState;
@@ -29,7 +21,7 @@ pub enum ModuleHighlight {
 
 pub struct State {
     pub asset_edit_state: Rc<AssetEditState>,
-    pub spots: MutableVec<Rc<SidebarSpot>>,
+    // pub spots: MutableVec<Rc<SidebarSpot>>,
     pub collapsed: Mutable<bool>,
     pub drag: Mutable<Option<Rc<DragState>>>,
     pub drag_target_index: Mutable<Option<usize>>,
@@ -42,15 +34,7 @@ pub struct State {
 }
 
 impl State {
-    pub fn new(asset: Asset, asset_edit_state: Rc<AssetEditState>) -> Self {
-        let mut modules = match &asset {
-            Asset::Jig(jig) => Self::get_jig_spots(jig),
-            Asset::Course(course) => Self::get_course_spots(course),
-            Asset::Resource(_) => unimplemented!(),
-        };
-
-        modules.push(Rc::new(SidebarSpot::new_empty(&asset.id())));
-
+    pub fn new(asset_edit_state: Rc<AssetEditState>) -> Self {
         let settings_state = match &asset_edit_state.asset {
             EditableAsset::Jig(jig) => SidebarSetting::Jig(Rc::new(JigSettingsState::new(jig))),
             EditableAsset::Course(course) => {
@@ -63,7 +47,7 @@ impl State {
 
         Self {
             asset_edit_state,
-            spots: MutableVec::new_with_values(modules),
+            // spots: MutableVec::new_with_values(modules),
             collapsed: Mutable::new(false),
             settings: settings_state,
             drag: Mutable::new(None),
@@ -71,41 +55,6 @@ impl State {
             highlight_modules: Mutable::new(None), // By default we don't want modules highlighted yet.
             loader: AsyncLoader::new(),
         }
-    }
-
-    fn get_jig_spots(jig: &JigResponse) -> Vec<Rc<SidebarSpot>> {
-        let mut add_cover = false;
-
-        if !matches!(
-            jig.jig_data.modules.get(0),
-            Some(cover) if cover.kind == ModuleKind::Cover
-        ) {
-            // not cover exists
-            add_cover = true;
-        };
-
-        let mut modules: Vec<Rc<SidebarSpot>> = jig
-            .jig_data
-            .modules
-            .iter()
-            .map(|module| SidebarSpot::new_jig_module(Some(module.clone())))
-            .collect();
-
-        if add_cover {
-            modules.insert(0, SidebarSpot::new_jig_module(None));
-        };
-
-        modules
-    }
-
-    fn get_course_spots(course: &CourseResponse) -> Vec<Rc<SidebarSpot>> {
-        let mut v = vec![SidebarSpot::new_course_cover(
-            course.course_data.cover.clone().unwrap(),
-        )];
-        for item in &course.course_data.items {
-            v.push(SidebarSpot::new_course_item(*item));
-        }
-        v
     }
 
     //There's probably a way of making this simpler
@@ -120,7 +69,7 @@ impl State {
 
     /// Returns whether this JIG is publishable
     pub fn can_publish(&self) -> bool {
-        let modules = self.spots.lock_ref();
+        let modules = self.asset_edit_state.sidebar_spots.lock_ref();
 
         let modules_len = modules
             .iter()

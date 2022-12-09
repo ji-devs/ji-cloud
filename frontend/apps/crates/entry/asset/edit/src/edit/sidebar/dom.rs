@@ -5,24 +5,15 @@ use futures::future::ready;
 use web_sys::{ScrollBehavior, ScrollIntoViewOptions};
 
 use super::{
-    super::state::AssetEditState,
     actions,
-    course::actions as course_actions,
-    debug,
     dragging::{actions as drag_actions, dom::DraggingDom},
     header::dom::HeaderDom,
     jig::actions as jig_actions,
     spot::dom::ItemDom,
     state::*,
 };
-use futures_signals::{
-    map_ref,
-    signal::{Mutable, SignalExt},
-    signal_vec::SignalVecExt,
-};
-use shared::domain::{asset::AssetId, course::CourseId, jig::JigId};
+use futures_signals::{map_ref, signal::SignalExt, signal_vec::SignalVecExt};
 use std::rc::Rc;
-use uuid::Uuid;
 
 use utils::{
     iframe::{IframeAction, ModuleToJigEditorMessage},
@@ -32,42 +23,9 @@ use utils::{
 pub struct SidebarDom {}
 
 impl SidebarDom {
-    pub fn render(asset_id: AssetId, asset_edit_state: Rc<AssetEditState>) -> Dom {
-        let asset = Mutable::new(None);
-
+    pub fn render(state: Rc<State>) -> Dom {
         html!("empty-fragment", {
             .prop("slot", "sidebar")
-            .future(clone!(asset, asset_id => async move {
-                match asset_id {
-                    AssetId::JigId(jig_id) => {
-                        if jig_id == JigId(Uuid::from_u128(0)) {
-                            asset.set(Some(debug::get_jig().into()));
-                        } else {
-                            jig_actions::load_jig(jig_id, asset.clone()).await;
-                        }
-                    },
-                    AssetId::CourseId(course_id) => {
-                        if course_id == CourseId(Uuid::from_u128(0)) {
-                            // asset.set(Some(debug::get_course().into()));
-                            todo!()
-                        } else {
-                            course_actions::load_course(course_id, asset.clone()).await;
-                        }
-                    },
-                    AssetId::ResourceId(_) => unimplemented!(),
-                };
-            }))
-            .child_signal(asset.signal_cloned().map(clone!(asset_edit_state => move |asset| {
-                asset.map(|asset| {
-                    let state = Rc::new(State::new(asset, Rc::clone(&asset_edit_state)));
-                    Self::render_loaded(state)
-                })
-            })))
-        })
-    }
-
-    fn render_loaded(state: Rc<State>) -> Dom {
-        html!("empty-fragment", {
             .global_event(clone!(state => move |evt: Message| {
                 match evt.try_serde_data::<IframeAction<ModuleToJigEditorMessage>>() {
                     Err(_e) => {
@@ -160,12 +118,12 @@ impl SidebarDom {
                         })))
                     })
                 }))
-                .children_signal_vec(state.spots
+                .children_signal_vec(state.asset_edit_state.sidebar_spots
                     .signal_vec_cloned()
                     .enumerate()
                     .map_signal(clone!(state => move |(index, module)| {
                         map_ref! {
-                            let len = state.spots.signal_vec_cloned().len(),
+                            let len = state.asset_edit_state.sidebar_spots.signal_vec_cloned().len(),
                             let index = index.signal(),
                             let drag_target_index = state.drag_target_index.signal()
                                 => move {
