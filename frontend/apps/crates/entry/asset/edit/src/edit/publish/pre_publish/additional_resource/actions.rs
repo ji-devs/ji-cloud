@@ -13,7 +13,7 @@ impl AdditionalResourceComponent {
         let state = self;
         state.loader.load(clone!(state => async move {
             let req = AssetIdResource {
-                asset_id: Some(state.publish_state.asset_edit_state.asset.id()),
+                asset_id: Some(state.publish_state.asset.id()),
             };
             let res = endpoints::additional_resource::Delete::api_with_auth_empty(
                 DeleteAssetResourcePath(state.additional_resource.id.clone()),
@@ -25,7 +25,7 @@ impl AdditionalResourceComponent {
                     todo!();
                 },
                 Ok(_) => {
-                    let mut additional_resources = state.publish_state.asset_edit_state.asset.additional_resources().lock_mut();
+                    let mut additional_resources = state.publish_state.asset.additional_resources().lock_mut();
                     let current_additional_resource_id = state.additional_resource.id;
                     let index = additional_resources.iter().position(move |additional_resource| {
                         additional_resource.id == current_additional_resource_id

@@ -135,6 +135,33 @@ impl EditableJig {
             .set(jig.jig_data.default_player_settings.drag_assist);
     }
 
+    pub fn deep_clone(&self) -> Self {
+        Self {
+            id: self.id,
+            cover: Mutable::new(self.cover.get_cloned()),
+            modules: MutableVec::new_with_values(self.modules.lock_ref().to_vec()),
+            published_at: Mutable::new(self.published_at.get()),
+            display_name: Mutable::new(self.display_name.get_cloned()),
+            description: Mutable::new(self.description.get_cloned()),
+            age_ranges: Mutable::new(self.age_ranges.get_cloned()),
+            language: Mutable::new(self.language.get_cloned()),
+            categories: Mutable::new(self.categories.get_cloned()),
+            affiliations: Mutable::new(self.affiliations.get_cloned()),
+            additional_resources: Rc::new(MutableVec::new_with_values(
+                self.additional_resources.lock_ref().to_vec(),
+            )),
+            privacy_level: Mutable::new(self.privacy_level.get()),
+            theme: Mutable::new(self.theme.get()),
+            audio_background: Mutable::new(self.audio_background.get()),
+            feedback_positive: Mutable::new(self.feedback_positive.get_cloned()),
+            feedback_negative: Mutable::new(self.feedback_negative.get_cloned()),
+            direction: Mutable::new(self.direction.get()),
+            display_score: Mutable::new(self.display_score.get()),
+            track_assessments: Mutable::new(self.track_assessments.get()),
+            drag_assist: Mutable::new(self.drag_assist.get()),
+        }
+    }
+
     pub fn to_jig_update_request(&self) -> JigUpdateDraftDataRequest {
         // don't include additional_resources here since they're handled in separately
         JigUpdateDraftDataRequest {

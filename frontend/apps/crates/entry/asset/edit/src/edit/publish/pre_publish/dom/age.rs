@@ -34,12 +34,11 @@ impl PrePublish {
             // })
             .child(html!("input-select-option", {
                 .text(STR_ALL_AGES)
-                .prop_signal("selected", state.asset_edit_state.asset.age_ranges().signal_cloned().map(|age_ranges| {
+                .prop_signal("selected", state.asset.age_ranges().signal_cloned().map(|age_ranges| {
                     age_ranges.is_empty()
                 }))
                 .event(clone!(state => move |_: events::CustomSelectedChange| {
                     state
-                        .asset_edit_state
                         .asset
                         .age_ranges()
                         .lock_mut()
@@ -59,11 +58,11 @@ fn render_age(age: &AgeRange, state: Rc<PrePublish>) -> Dom {
     let age_id = age.id;
     html!("input-select-option", {
         .text(&age.display_name)
-        .prop_signal("selected", state.asset_edit_state.asset.age_ranges().signal_cloned().map(clone!(age_id => move |ages| {
+        .prop_signal("selected", state.asset.age_ranges().signal_cloned().map(clone!(age_id => move |ages| {
             ages.contains(&age_id)
         })))
         .event(clone!(state => move |_: events::CustomSelectedChange| {
-            let mut ages = state.asset_edit_state.asset.age_ranges().lock_mut();
+            let mut ages = state.asset.age_ranges().lock_mut();
             if ages.contains(&age_id) {
                 ages.remove(&age_id);
             } else {
@@ -75,7 +74,7 @@ fn render_age(age: &AgeRange, state: Rc<PrePublish>) -> Dom {
 
 fn age_value_signal(state: Rc<PrePublish>) -> impl Signal<Item = String> {
     map_ref! {
-        let selected_ages = state.asset_edit_state.asset.age_ranges().signal_cloned(),
+        let selected_ages = state.asset.age_ranges().signal_cloned(),
         let available_ages = state.ages.signal_cloned() => {
             let mut output = vec![];
             selected_ages.iter().for_each(|age_id| {

@@ -80,7 +80,7 @@ impl PrePublish {
 fn render_page(state: Rc<PrePublish>) -> Dom {
     html!("jig-edit-publish", {
         .prop("assetDisplayName", state.asset_type_name())
-        .prop("resourceOnTop", state.asset_edit_state.asset.is_resource())
+        .prop("resourceOnTop", state.asset.is_resource())
         // .apply_if(state.jig.jig_focus.is_resources(), |dom| {
         //     // TODO set content for no activities and content for incomplete activities.
         //     if !has_modules {
@@ -92,8 +92,8 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
         // })
         .children(&mut [
             ModuleThumbnail::new(
-                state.asset_edit_state.asset.id(),
-                state.asset_edit_state.asset.cover().get_cloned(),
+                state.asset.id(),
+                state.asset.cover().get_cloned(),
                 ThumbnailFallback::Asset,
                 DraftOrLive::Draft,
             ).render_live(Some("img")),
@@ -110,7 +110,7 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                     .text(STR_PUBLIC_LABEL_1)
                     .text(state.asset_type_name())
                     .text(STR_PUBLIC_LABEL_2)
-                    .text_signal(state.asset_edit_state.asset.privacy_level().signal().map(|privacy_level| {
+                    .text_signal(state.asset.privacy_level().signal().map(|privacy_level| {
                         match privacy_level {
                             PrivacyLevel::Public => STR_PUBLIC_PUBLIC,
                             PrivacyLevel::Unlisted => STR_PUBLIC_UNLISTED,
@@ -118,16 +118,16 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                         }
                     }))
                     .child(html!("input-switch", {
-                        .prop_signal("enabled", state.asset_edit_state.asset.privacy_level().signal().map(|privacy_level| {
+                        .prop_signal("enabled", state.asset.privacy_level().signal().map(|privacy_level| {
                             privacy_level == PrivacyLevel::Public
                         }))
                         .event(clone!(state => move |evt: events::CustomToggle| {
                             let value = evt.value();
                             if value {
-                                state.asset_edit_state.asset.privacy_level().set(PrivacyLevel::Public);
+                                state.asset.privacy_level().set(PrivacyLevel::Public);
                                 state.show_public_popup.set(false);
                             } else {
-                                state.asset_edit_state.asset.privacy_level().set(PrivacyLevel::Unlisted);
+                                state.asset.privacy_level().set(PrivacyLevel::Unlisted);
                                 state.show_public_popup.set(true);
                             }
                         }))
@@ -164,7 +164,7 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                 .prop_signal("error", {
                     (map_ref! {
                         let submission_tried = state.submission_tried.signal(),
-                        let value = state.asset_edit_state.asset.display_name().signal_cloned()
+                        let value = state.asset.display_name().signal_cloned()
                             => (*submission_tried, value.clone())
                     })
                         .map(|(submission_tried, value)| {
@@ -178,10 +178,10 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                     .with_node!(elem => {
                         .attr("dir", "auto")
                         .prop("placeholder", format!("{}{}{}", STR_NAME_PLACEHOLDER_1, state.asset_type_name(), STR_NAME_PLACEHOLDER_2))
-                        .prop_signal("value", state.asset_edit_state.asset.display_name().signal_cloned())
+                        .prop_signal("value", state.asset.display_name().signal_cloned())
                         .event(clone!(state => move |_evt: events::Input| {
                             let value = elem.value();
-                            state.asset_edit_state.asset.display_name().set(value);
+                            state.asset.display_name().set(value);
                         }))
                     })
                 }))
@@ -211,10 +211,10 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                             state.asset_type_name(),
                             STR_DESCRIPTION_PLACEHOLDER_2
                         ))
-                        .text_signal(state.asset_edit_state.asset.description().signal_cloned())
+                        .text_signal(state.asset.description().signal_cloned())
                         .event(clone!(state => move |_: events::Input| {
                             let value = elem.value();
-                            state.asset_edit_state.asset.description().set(value);
+                            state.asset.description().set(value);
                         }))
                     })
                 }))
@@ -231,7 +231,7 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                 .prop("kind", "text")
                 .text(STR_PUBLISH_LATER)
                 .event(clone!(state => move |_: events::Click| {
-                    let url = match &state.asset_edit_state.asset {
+                    let url = match &state.asset {
                         EditableAsset::Jig(jig) => {
                             state.publish_state.asset_edit_state.set_route_jig(JigEditRoute::Landing);
                             Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
@@ -298,9 +298,9 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                 })
             }),
         ])
-        .apply_if(!state.asset_edit_state.asset.is_resource(), clone!(state => move |dom|{
+        .apply_if(!state.asset.is_resource(), clone!(state => move |dom|{
             dom
-                .children_signal_vec(state.asset_edit_state.asset.additional_resources().signal_vec_cloned().map(clone!(state => move |additional_resource| {
+                .children_signal_vec(state.asset.additional_resources().signal_vec_cloned().map(clone!(state => move |additional_resource| {
                     AdditionalResourceComponent::new(
                         additional_resource,
                         Rc::clone(&state)
@@ -308,12 +308,12 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                 })))
                 .child(AddAdditionalResource::new(Rc::clone(&state)).render())
         }))
-        .apply_if(state.asset_edit_state.asset.is_resource(), |dom|{
-            dom.child_signal(state.asset_edit_state.asset.additional_resources().signal_vec_cloned().len().map(clone!(state => move|len| {
+        .apply_if(state.asset.is_resource(), |dom|{
+            dom.child_signal(state.asset.additional_resources().signal_vec_cloned().len().map(clone!(state => move|len| {
                 if len == 0 {
                     Some(AddAdditionalResource::new(Rc::clone(&state)).render())
                 } else {
-                    let resource = state.asset_edit_state.asset.additional_resources().lock_ref()[0].clone();
+                    let resource = state.asset.additional_resources().lock_ref()[0].clone();
                     Some(
                         AdditionalResourceComponent::new(
                             resource,

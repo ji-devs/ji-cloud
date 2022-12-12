@@ -11,8 +11,6 @@ use utils::{
     languages::{Language, JIG_LANGUAGES},
 };
 
-use crate::edit::AssetEditState;
-
 use super::super::Publish;
 
 const STR_JIG: &str = "JIG";
@@ -21,6 +19,7 @@ const STR_COURSE: &str = "Course";
 
 pub struct PrePublish {
     pub loader: AsyncLoader,
+    pub asset: EditableAsset,
     pub categories: Mutable<Vec<Category>>,
     // categories has label lookup since it's both more complex to lookup and used more then others (pills)
     pub category_label_lookup: Mutable<HashMap<CategoryId, String>>,
@@ -31,7 +30,6 @@ pub struct PrePublish {
     pub show_missing_info_popup: Mutable<bool>,
     pub languages: Vec<Language>,
     pub publish_state: Rc<Publish>,
-    pub asset_edit_state: Rc<AssetEditState>,
     pub show_public_popup: Mutable<bool>,
 }
 
@@ -45,6 +43,8 @@ impl PrePublish {
         publish_state: Rc<Publish>,
     ) -> Self {
         Self {
+            // Separate asset for publish as it doesn't auto save 
+            asset: publish_state.asset_edit_state.asset.deep_clone(),
             loader: AsyncLoader::new(),
             categories: Mutable::new(categories),
             category_label_lookup: Mutable::new(category_label_lookup),
@@ -55,14 +55,13 @@ impl PrePublish {
             show_missing_info_popup: Mutable::new(false),
             languages: JIG_LANGUAGES.clone(),
             show_public_popup: Mutable::new(false),
-            asset_edit_state: Rc::clone(&publish_state.asset_edit_state),
             publish_state,
         }
     }
 
     /// a displayable string for the asset type
     pub fn asset_type_name(&self) -> &'static str {
-        match &self.asset_edit_state.asset {
+        match &self.asset {
             EditableAsset::Jig(_) => STR_JIG,
             EditableAsset::Resource(_) => STR_RESOURCE,
             EditableAsset::Course(_) => STR_COURSE,

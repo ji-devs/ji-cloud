@@ -20,7 +20,7 @@ impl AddAdditionalResource {
         let state = Rc::clone(self);
 
         let req = AdditionalResourceCreateRequest {
-            asset_id: state.publish_state.asset_edit_state.asset.id(),
+            asset_id: state.publish_state.asset.id(),
             display_name: display_name.clone(),
             resource_type_id,
             resource_content: resource_content.clone(),
@@ -42,7 +42,6 @@ impl AddAdditionalResource {
                 };
                 state
                     .publish_state
-                    .asset_edit_state
                     .asset
                     .additional_resources()
                     .lock_mut()

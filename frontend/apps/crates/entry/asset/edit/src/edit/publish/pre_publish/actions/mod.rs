@@ -58,15 +58,9 @@ impl PrePublish {
 
     pub fn navigate_to_cover(&self) {
         // navigate to cover if exists otherwise navigate to landing
-        let cover_module_id = self
-            .asset_edit_state
-            .asset
-            .cover()
-            .lock_ref()
-            .as_ref()
-            .map(|m| m.id);
+        let cover_module_id = self.asset.cover().lock_ref().as_ref().map(|m| m.id);
 
-        match &self.asset_edit_state.asset {
+        match &self.asset {
             EditableAsset::Jig(_) => {
                 let route = match cover_module_id {
                     Some(cover_module_id) => JigEditRoute::Module(cover_module_id),
@@ -90,11 +84,7 @@ impl PrePublish {
 
     // used to show tooltip, can probably be combined with `is_ready_to_publish` somehow
     fn form_invalid(self: &Rc<Self>) -> bool {
-        self.asset_edit_state
-            .asset
-            .display_name()
-            .lock_ref()
-            .is_empty()
+        self.asset.display_name().lock_ref().is_empty()
         // || self.jig.description.lock_ref().is_empty()
         // || self.jig.language.lock_ref().is_empty()
         // || self.jig.age_ranges.lock_ref().is_empty()
@@ -103,7 +93,7 @@ impl PrePublish {
 
     // used to disable button
     pub fn is_ready_to_publish(self: &Rc<Self>) -> bool {
-        match &self.asset_edit_state.asset {
+        match &self.asset {
             EditableAsset::Jig(jig) => jig.modules.lock_ref().iter().all(|m| m.is_complete),
             EditableAsset::Resource(resource) => resource.cover.lock_ref().is_some(),
             EditableAsset::Course(course) => course.cover.lock_ref().is_some(),
@@ -119,7 +109,7 @@ impl PrePublish {
         };
 
         state.loader.load(clone!(state => async move {
-            match &state.asset_edit_state.asset {
+            match &state.asset {
                 EditableAsset::Jig(jig) => {
                     jig_actions::save_and_publish_jig(jig)
                         .await

@@ -20,7 +20,7 @@ impl PrePublish {
                 Box::pin(state.category_value_signal()),
                 STR_CATEGORIES_PLACEHOLDER.to_string(),
                 state.categories.get_cloned(),
-                state.asset_edit_state.asset.categories().clone()
+                state.asset.categories().clone()
             ).render(None))
         })
     }
@@ -28,7 +28,7 @@ impl PrePublish {
     fn category_value_signal(self: &Rc<Self>) -> impl Signal<Item = String> {
         let state = self;
         map_ref! {
-            let selected_categories = state.asset_edit_state.asset.categories().signal_cloned(),
+            let selected_categories = state.asset.categories().signal_cloned(),
             let category_label_lookup = state.category_label_lookup.signal_cloned() => {
 
                 let len = selected_categories.len();

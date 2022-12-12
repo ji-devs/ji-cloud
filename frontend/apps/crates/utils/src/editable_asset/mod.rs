@@ -112,6 +112,16 @@ impl EditableAsset {
         }
     }
 
+    pub fn deep_clone(&self) -> Self {
+        match self {
+            EditableAsset::Jig(jig) => EditableAsset::Jig(Rc::new(jig.deep_clone())),
+            EditableAsset::Resource(resource) => {
+                EditableAsset::Resource(Rc::new(resource.deep_clone()))
+            }
+            EditableAsset::Course(course) => EditableAsset::Course(Rc::new(course.deep_clone())),
+        }
+    }
+
     pub fn fill_from_asset(&self, asset: Asset) {
         assert_eq!(self.asset_type(), asset.asset_type());
         match self {

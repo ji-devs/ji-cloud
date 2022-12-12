@@ -89,6 +89,24 @@ impl EditableResource {
         self.published_at.set(resource.published_at);
     }
 
+    pub fn deep_clone(&self) -> Self {
+        Self {
+            id: self.id,
+            cover: Mutable::new(self.cover.get_cloned()),
+            published_at: Mutable::new(self.published_at.get()),
+            display_name: Mutable::new(self.display_name.get_cloned()),
+            description: Mutable::new(self.description.get_cloned()),
+            age_ranges: Mutable::new(self.age_ranges.get_cloned()),
+            language: Mutable::new(self.language.get_cloned()),
+            categories: Mutable::new(self.categories.get_cloned()),
+            affiliations: Mutable::new(self.affiliations.get_cloned()),
+            additional_resources: Rc::new(MutableVec::new_with_values(
+                self.additional_resources.lock_ref().to_vec(),
+            )),
+            privacy_level: Mutable::new(self.privacy_level.get()),
+        }
+    }
+
     pub fn to_resource_update_request(&self) -> ResourceUpdateDraftDataRequest {
         // don't include additional_resources here since they're handled in separately
         ResourceUpdateDraftDataRequest {
