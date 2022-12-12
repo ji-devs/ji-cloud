@@ -1,25 +1,27 @@
 use shared::{
     api::endpoints::resource,
-    domain::resource::{ResourcePublishPath, ResourceUpdateDraftDataPath},
+    domain::resource::{
+        ResourceGetDraftPath, ResourcePublishPath, ResourceResponse, ResourceUpdateDraftDataPath,
+    },
 };
 use utils::prelude::ApiEndpointExt;
 
 use utils::editable_asset::EditableResource;
 
-pub async fn save_and_publish_resource(resource: &EditableResource) -> Result<(), ()> {
-    // let path = resource::UpdateDraftData::PATH.replace("{id}", &resource.id.0.to_string());
+pub async fn save_and_publish_resource(
+    resource: &EditableResource,
+) -> anyhow::Result<ResourceResponse> {
     let req = resource.to_resource_update_request();
     resource::UpdateDraftData::api_with_auth_empty(
         ResourceUpdateDraftDataPath(resource.id),
         Some(req),
     )
-    .await
-    .map_err(|_| ())?;
+    .await?;
 
-    // let path = PATH.replace("{id}", &resource.id.0.to_string());
-    resource::Publish::api_with_auth_empty(ResourcePublishPath(resource.id), None)
-        .await
-        .map_err(|_| ())?;
+    resource::Publish::api_with_auth_empty(ResourcePublishPath(resource.id), None).await?;
 
-    Ok(())
+    let resource =
+        resource::GetDraft::api_with_auth(ResourceGetDraftPath(resource.id), None).await?;
+
+    Ok(resource)
 }

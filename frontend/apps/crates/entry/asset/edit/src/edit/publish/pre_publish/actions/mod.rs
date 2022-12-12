@@ -5,7 +5,7 @@ use futures::join;
 use shared::{
     api::endpoints::{category, meta},
     domain::{
-        asset::PrivacyLevel,
+        asset::{Asset, PrivacyLevel},
         category::{Category, CategoryId, CategoryTreeScope, GetCategoryPath, GetCategoryRequest},
         meta::{GetMetadataPath, MetadataResponse},
     },
@@ -109,25 +109,29 @@ impl PrePublish {
         };
 
         state.loader.load(clone!(state => async move {
-            match &state.asset {
+            let asset = match &state.asset {
                 EditableAsset::Jig(jig) => {
-                    jig_actions::save_and_publish_jig(jig)
+                    let jig = jig_actions::save_and_publish_jig(jig)
                         .await
                         .unwrap_ji();
+                    Asset::Jig(jig)
                 },
                 EditableAsset::Resource(resource) => {
-                    resource_actions::save_and_publish_resource(resource)
+                    let resource = resource_actions::save_and_publish_resource(resource)
                         .await
                         .unwrap_ji();
+                    Asset::Resource(resource)
                 }
                 EditableAsset::Course(course) => {
-                    course_actions::save_and_publish_course(course)
+                    let course = course_actions::save_and_publish_course(course)
                         .await
                         .unwrap_ji();
+                    Asset::Course(course)
                 }
             };
 
-            state.publish_state.post_publish.set(true);
+            state.publish_state.asset_edit_state.asset.fill_from_asset(asset.clone());
+            state.publish_state.published_asset.set(Some(asset));
             state.submission_tried.set(false);
         }));
     }
