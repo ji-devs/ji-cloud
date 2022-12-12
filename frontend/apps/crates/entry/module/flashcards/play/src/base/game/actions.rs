@@ -28,7 +28,9 @@ impl Game {
             .base
             .settings
             .view_pairs
-            .unwrap_or_else(|| self.base.raw_pairs.len() as u32);
+            .unwrap_or_else(|| self.base.raw_pairs.len() as u32)
+            .min(self.base.raw_pairs.len() as u32);
+
         let has_ended = rounds_played >= max_rounds as usize;
 
         log::info!("{:?}", self.base.settings.view_pairs);
