@@ -93,7 +93,7 @@ export class _ extends LitElement {
                     )
                 }
                 <div class="signature">
-                    <img-ui path="core/page-header/logo.svg"></img-ui> Jigzi.org
+                    <img-ui path="core/page-header/logo.svg"></img-ui>.org
                 </div>
             </div>
         `;
