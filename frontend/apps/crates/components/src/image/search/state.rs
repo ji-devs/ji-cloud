@@ -55,7 +55,7 @@ impl State {
             loader: AsyncLoader::new(),
             selected_styles: Rc::new(RefCell::new(selected_styles)),
             selected_image_type: Mutable::new(None),
-            checkbox_checked: Mutable::new(true),
+            checkbox_checked: Mutable::new(false),
             query: Mutable::new(String::new()),
             styles,
             callbacks,
