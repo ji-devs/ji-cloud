@@ -11,58 +11,58 @@ pub struct SettingsButton {
     pub(super) bubble_open: Mutable<bool>,
 }
 
-impl SettingsButton {
+pub struct SettingsButtonBuilder {
+    kind: SettingsButtonKind,
+    active_signal: BoxSignalFn<bool>,
+    value: Option<Box<dyn SettingsValueExt>>,
+    on_click: Option<Box<dyn Fn()>>,
+    bubble_open: Option<Mutable<bool>>,
+}
+
+impl SettingsButtonBuilder {
+    /// Create a new builder with `kind` and an `active_signal` which are the minimum required
+    /// fields for a [`SettingsButton`].
     pub fn new<S: Signal<Item = bool> + 'static>(
         kind: SettingsButtonKind,
         active_signal: impl Fn() -> S + 'static,
-        value: Option<impl SettingsValueExt + 'static>,
-        on_click: Option<impl Fn() + 'static>,
-    ) -> Rc<Self> {
-        Rc::new(Self {
+    ) -> Self {
+        Self {
             kind,
             active_signal: box_signal_fn(active_signal),
-            value: value.map(|v| Box::new(v) as _),
-            on_click: on_click.map(|f| Box::new(f) as _),
-            bubble_open: Mutable::new(false),
+            value: None,
+            on_click: None,
+            bubble_open: None,
+        }
+    }
+
+    /// Apply a [`SettingsValue`] to the builder
+    pub fn value(mut self, value: impl SettingsValueExt + 'static) -> Self {
+        self.value = Some(Box::new(value));
+        self
+    }
+
+    /// Apply an on_click function to the builder
+    pub fn on_click(mut self, on_click: impl Fn() + 'static) -> Self {
+        self.on_click = Some(Box::new(on_click));
+        self
+    }
+
+    /// Apply a boolean [`Mutable`] to the builder which will tell the [`SettingsButton`] whether
+    /// the bubble is open or not. Defaults to `false`.
+    pub fn bubble_open(mut self, bubble_open: Mutable<bool>) -> Self {
+        self.bubble_open = Some(bubble_open);
+        self
+    }
+
+    /// Build the final `SettingsButton`
+    pub fn build(self) -> Rc<SettingsButton> {
+        Rc::new(SettingsButton {
+            kind: self.kind,
+            active_signal: self.active_signal,
+            value: self.value,
+            on_click: self.on_click,
+            bubble_open: self.bubble_open.unwrap_or_else(|| Mutable::new(false)),
         })
-    }
-
-    //Convience helpers to avoid specifying the None casting
-    pub fn new_none<S: Signal<Item = bool> + 'static>(
-        kind: SettingsButtonKind,
-        active_signal: impl Fn() -> S + 'static,
-    ) -> Rc<Self> {
-        Self::new(kind, active_signal, None::<SettingsValue<u8>>, None::<fn()>)
-    }
-
-    pub fn new_value<S: Signal<Item = bool> + 'static>(
-        kind: SettingsButtonKind,
-        active_signal: impl Fn() -> S + 'static,
-        value: impl SettingsValueExt + 'static,
-    ) -> Rc<Self> {
-        Self::new(kind, active_signal, Some(value), None::<fn()>)
-    }
-
-    pub fn new_click<S: Signal<Item = bool> + 'static>(
-        kind: SettingsButtonKind,
-        active_signal: impl Fn() -> S + 'static,
-        on_click: impl Fn() + 'static,
-    ) -> Rc<Self> {
-        Self::new(
-            kind,
-            active_signal,
-            None::<SettingsValue<u8>>,
-            Some(on_click),
-        )
-    }
-
-    pub fn new_value_click<S: Signal<Item = bool> + 'static>(
-        kind: SettingsButtonKind,
-        active_signal: impl Fn() -> S + 'static,
-        value: impl SettingsValueExt + 'static,
-        on_click: impl Fn() + 'static,
-    ) -> Rc<Self> {
-        Self::new(kind, active_signal, Some(value), Some(on_click))
     }
 }
 

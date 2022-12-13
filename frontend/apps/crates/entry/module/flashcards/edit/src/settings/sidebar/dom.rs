@@ -29,46 +29,45 @@ pub fn render(state: Rc<SidebarSettings>) -> Dom {
                     ),
                     ModuleSettingsLine::new_with_label(
                         "Which card should be face-up?".to_string(),
-                        vec![Some(SettingsButton::new_click(
-                            SettingsButtonKind::custom_kind(SettingsButtonKind::Swap, "swap"),
-                            clone!(state => move || {
-                                state.base.extra.settings.swap.signal()
-                            }),
-                            clone!(state => move || {
-                                state.toggle_swap();
-                            }),
-                        ))],
+                        vec![
+                            Some(SettingsButtonBuilder::new(
+                                    SettingsButtonKind::custom_kind(SettingsButtonKind::Swap, "swap"),
+                                    clone!(state => move || {
+                                        state.base.extra.settings.swap.signal()
+                                    }),
+                                )
+                                .on_click(clone!(state => move || state.toggle_swap()))
+                                .build())
+                        ],
                     ),
                     ModuleSettingsLine::new_with_label(
                         "Should student view all pairs?".to_string(),
                         vec![
-                            Some(SettingsButton::new_click(
-                                SettingsButtonKind::CardsShowAll,
-                                clone!(state => move || {
-                                    state.base.extra.settings.view_all
-                                        .signal()
-                                }),
-                                clone!(state => move || {
-                                    state.set_view_all(true);
-                                }),
-                            )),
-                            Some(SettingsButton::new_value_click(
-                                SettingsButtonKind::CardsShowSome,
-                                clone!(state => move || {
-                                    state.base.extra.settings.view_all
-                                        .signal()
-                                        .map(|view_all| !view_all)
-                                }),
-                                SettingsValue::new_mutable(
+                            Some(SettingsButtonBuilder::new(
+                                    SettingsButtonKind::CardsShowAll,
+                                    clone!(state => move || {
+                                        state.base.extra.settings.view_all
+                                            .signal()
+                                    }),
+                                )
+                                .on_click(clone!(state => move || state.set_view_all(true)))
+                                .build()),
+                            Some(SettingsButtonBuilder::new(
+                                    SettingsButtonKind::CardsShowSome,
+                                    clone!(state => move || {
+                                        state.base.extra.settings.view_all
+                                            .signal()
+                                            .map(|view_all| !view_all)
+                                    }),
+                                )
+                                .value(SettingsValue::new_mutable(
                                     state.base.extra.settings.view_pairs.clone(),
                                     clone!(state => move |value| {
                                         state.set_view_pairs(value);
                                     }),
-                                ),
-                                clone!(state => move || {
-                                    state.set_view_all(false);
-                                }),
-                            )),
+                                ))
+                                .on_click(clone!(state => move || state.set_view_all(false)))
+                                .build()),
                         ],
                     ),
                 ],
@@ -81,7 +80,7 @@ pub fn make_display_mode_button(
     state: Rc<SidebarSettings>,
     display_mode: DisplayMode,
 ) -> Rc<SettingsButton> {
-    SettingsButton::new_click(
+    SettingsButtonBuilder::new(
         if display_mode == DisplayMode::Single {
             SettingsButtonKind::CardSingle
         } else {
@@ -92,8 +91,7 @@ pub fn make_display_mode_button(
                 *curr == display_mode
             })
         }),
-        clone!(state => move || {
-            state.set_display_mode(display_mode);
-        }),
     )
+    .on_click(clone!(state => move || state.set_display_mode(display_mode)))
+    .build()
 }
