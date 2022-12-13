@@ -14,52 +14,55 @@ pub fn render(state: Rc<SidebarSettings>) -> Dom {
         lines: vec![
             ModuleSettingsLine::new(
                 LineKind::GameDisplay,
-                vec![Some(SettingsButton::new_value_click(
-                    SettingsButtonKind::NumPairs,
-                    clone!(state => move || {
-                        state.base.extra.settings.use_default_pairs.signal().map(|v| !v)
-                    }),
-                    SettingsValue::new_mutable(
+                vec![Some(
+                    SettingsButtonBuilder::new(
+                        SettingsButtonKind::NumPairs,
+                        clone!(state => move || {
+                            state.base.extra.settings.use_default_pairs.signal().map(|v| !v)
+                        }),
+                    )
+                    .value(SettingsValue::new_mutable(
                         state.settings().pairs_to_display.clone(),
                         clone!(state => move |value| {
                             state.set_pairs_to_display(value);
                         }),
-                    ),
-                    clone!(state => move || {
-                        state.toggle_use_default_pairs();
-                    }),
-                ))],
+                    ))
+                    .on_click(clone!(state => move || state.toggle_use_default_pairs()))
+                    .build(),
+                )],
             ),
             ModuleSettingsLine::new(
                 LineKind::TimeLimit,
                 vec![
-                    Some(SettingsButton::new_click(
-                        SettingsButtonKind::TimeLimitOff,
-                        clone!(state => move || {
-                            state.base.extra.settings.has_time_limit
-                                .signal()
-                                .map(|flag| !flag)
-                        }),
-                        clone!(state => move || {
-                            state.set_has_time_limit(false);
-                        }),
-                    )),
-                    Some(SettingsButton::new_value_click(
-                        SettingsButtonKind::TimeLimit,
-                        clone!(state => move || {
-                            state.base.extra.settings.has_time_limit
-                                .signal()
-                        }),
-                        SettingsValue::new(
+                    Some(
+                        SettingsButtonBuilder::new(
+                            SettingsButtonKind::TimeLimitOff,
+                            clone!(state => move || {
+                                state.base.extra.settings.has_time_limit
+                                    .signal()
+                                    .map(|flag| !flag)
+                            }),
+                        )
+                        .on_click(clone!(state => move || state.set_has_time_limit(false)))
+                        .build(),
+                    ),
+                    Some(
+                        SettingsButtonBuilder::new(
+                            SettingsButtonKind::TimeLimit,
+                            clone!(state => move || {
+                                state.base.extra.settings.has_time_limit
+                                    .signal()
+                            }),
+                        )
+                        .value(SettingsValue::new(
                             state.settings().time_limit.get(),
                             clone!(state => move |value| {
                                 state.set_time_limit(value);
                             }),
-                        ),
-                        clone!(state => move || {
-                            state.set_has_time_limit(true);
-                        }),
-                    )),
+                        ))
+                        .on_click(clone!(state => move || state.set_has_time_limit(true)))
+                        .build(),
+                    ),
                 ],
             ),
             // NOTE - not including score until player/jig story is resolved
