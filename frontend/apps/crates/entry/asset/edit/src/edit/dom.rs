@@ -75,7 +75,7 @@ impl AssetEditState {
                         AssetEditRoute::Course(course_id, course_edit_route) => {
                             match course_edit_route {
                                 CourseEditRoute::Landing => {
-                                    Some(JigSelection::new(course_id).render())
+                                    Some(JigSelection::new(course_id, &state).render())
                                 },
                                 CourseEditRoute::Cover(cover_id) => {
                                     Some(ModuleIframe::new(state.asset_id, cover_id).render())

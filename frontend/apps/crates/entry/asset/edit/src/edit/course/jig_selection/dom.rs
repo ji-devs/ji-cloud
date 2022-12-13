@@ -16,28 +16,28 @@ impl JigSelection {
             .style("max-height", "100vh")
             .style("overflow", "auto")
             .prop("slot", "main")
-            .children_signal_vec(state.jigs.signal_vec_cloned().map(clone!(state => move|jig| {
-                state.render_jig(&jig, vec![
-                    html!("button", {
-                        .text("X")
-                        .event(clone!(state, jig => move |_: events::Click| {
-                            state.remove_jig(&jig.id);
-                        }))
-                    }),
-                    html!("button", {
-                        .text("↥")
-                        .event(clone!(state, jig => move |_: events::Click| {
-                            state.move_up_jig(&jig.id);
-                        }))
-                    }),
-                    html!("button", {
-                        .text("↧")
-                        .event(clone!(state, jig => move |_: events::Click| {
-                            state.move_down_jig(&jig.id);
-                        }))
-                    }),
-                ])
-            })))
+            // .children_signal_vec(state.asset_edit_state.sidebar_spots.signal_vec_cloned().map(clone!(state => move|spot| {
+            //     state.render_jig(&spot, vec![
+            //         html!("button", {
+            //             .text("X")
+            //             .event(clone!(state, spot => move |_: events::Click| {
+            //                 state.remove_jig(&jig.id);
+            //             }))
+            //         }),
+            //         html!("button", {
+            //             .text("↥")
+            //             .event(clone!(state, spot => move |_: events::Click| {
+            //                 state.move_up_jig(&jig.id);
+            //             }))
+            //         }),
+            //         html!("button", {
+            //             .text("↧")
+            //             .event(clone!(state, spot => move |_: events::Click| {
+            //                 state.move_down_jig(&jig.id);
+            //             }))
+            //         }),
+            //     ])
+            // })))
             .children(&mut [
                 html!("hr"),
                 html!("h4", {

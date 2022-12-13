@@ -156,10 +156,10 @@ impl SpotState {
                                                     DraftOrLive::Draft,
                                                 ).render_live(Some("thumbnail"))
                                             },
-                                            CourseSpot::Item(jig_id) => {
+                                            CourseSpot::Item(jig) => {
                                                 ModuleThumbnail::new(
-                                                    (*jig_id).into(),
-                                                    None,
+                                                    jig.id.into(),
+                                                    jig.jig_data.modules.get(0).cloned(),
                                                     ThumbnailFallback::Module,
                                                     DraftOrLive::Draft,
                                                 ).render_live(Some("thumbnail"))

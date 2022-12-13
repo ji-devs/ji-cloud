@@ -25,7 +25,7 @@ impl AssetEditState {
                     state.get_jig_spots(jig);
                 },
                 Asset::Course(course) => {
-                    state.get_course_spots(course);
+                    state.get_course_spots(course).await;
                 },
                 Asset::Resource(_) => {
                     // do nothing, resource doesn't have the sidebar

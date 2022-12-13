@@ -4,7 +4,7 @@ use super::{
 };
 use dominator_helpers::{futures::AsyncLoader, signals::OptionSignal};
 use futures_signals::signal::{Mutable, Signal, SignalExt};
-use shared::domain::{asset::AssetId, jig::JigId, module::LiteModule};
+use shared::domain::{asset::AssetId, jig::JigResponse, module::LiteModule};
 use std::rc::Rc;
 use utils::{editable_asset::EditableAsset, math::PointI32};
 
@@ -133,10 +133,10 @@ impl SidebarSpot {
         })
     }
 
-    pub fn new_course_item(jig_id: JigId) -> Rc<Self> {
+    pub fn new_course_item(jig: JigResponse) -> Rc<Self> {
         Rc::new(Self {
             is_incomplete: Mutable::new(false),
-            item: SidebarSpotItem::Course(Some(Rc::new(CourseSpot::Item(jig_id)))),
+            item: SidebarSpotItem::Course(Some(Rc::new(CourseSpot::Item(jig)))),
         })
     }
 }
@@ -177,7 +177,7 @@ impl SidebarSpotItem {
 #[derive(Clone, Debug)]
 pub enum CourseSpot {
     Cover(LiteModule),
-    Item(JigId),
+    Item(JigResponse),
 }
 
 // #[derive(Clone, Debug)]

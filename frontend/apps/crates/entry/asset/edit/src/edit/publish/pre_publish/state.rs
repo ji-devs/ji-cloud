@@ -43,7 +43,7 @@ impl PrePublish {
         publish_state: Rc<Publish>,
     ) -> Self {
         Self {
-            // Separate asset for publish as it doesn't auto save 
+            // Separate asset for publish as it doesn't auto save
             asset: publish_state.asset_edit_state.asset.deep_clone(),
             loader: AsyncLoader::new(),
             categories: Mutable::new(categories),
