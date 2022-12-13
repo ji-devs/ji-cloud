@@ -107,7 +107,7 @@ export class _ extends LitElement {
                         )
                     }
                     <div class="signature">
-                        <img-ui path="module/_common/edit/post-preview/print/signature-logo.png"></img-ui>
+                        <img-ui path="module/_common/edit/post-preview/print/signature-logo.svg"></img-ui>
                     </div>
                 </div>
                 <div class="card-side">
@@ -119,7 +119,7 @@ export class _ extends LitElement {
                         )
                     }
                     <div class="signature">
-                        <img-ui path="module/_common/edit/post-preview/print/signature-logo.png"></img-ui>
+                        <img-ui path="module/_common/edit/post-preview/print/signature-logo.svg"></img-ui>
                     </div>
                 </div>
             </div>
