@@ -122,6 +122,8 @@ impl EditableCourse {
             categories: Some(self.categories.get_cloned().into_iter().collect()),
             affiliations: Some(self.affiliations.get_cloned().into_iter().collect()),
             privacy_level: Some(self.privacy_level.get()),
+            // not updating because it'll override the existing items, need a better solution
+            // items: Some(self.items.lock_ref().to_vec()),
             ..Default::default()
         }
     }

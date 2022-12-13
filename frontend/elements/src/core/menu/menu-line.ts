@@ -18,6 +18,8 @@ type IconKind =
     | "text"
     | "record-sound"
     | "image"
+    | "jig-info"
+    | "jig-play"
 ;
 
 const STR_LABEL_LOOKUP: any = {
@@ -26,6 +28,8 @@ const STR_LABEL_LOOKUP: any = {
     delete: "Delete",
     duplicate: "Duplicate",
     edit: "Edit",
+    ["jig-info"]: "JIG info",
+    ["jig-play"]: "Play JIG",
     ["move-down"]: "Move Down",
     ["move-up"]: "Move Up",
     ["print"]: "Print",
@@ -55,6 +59,23 @@ const STR_LABEL_LOOKUP: any = {
     ["set-jig-theme"]: "Set JIG theme",
     ["text"]: "Edit text",
 };
+
+// possible fa icons
+// copy   <i class="fa-regular fa-copy"></i>
+// delete   <i class="fa-regular fa-trash-can"></i>
+// duplicate   <i class="fa-regular fa-copy"></i>
+// edit   <i class="fa-regular fa-pen"></i>
+// move-down   <i class="fa-regular fa-down-to-line"></i>
+// move-up   <i class="fa-regular fa-up-to-line"></i>
+// paste   <i class="fa-regular fa-paste"></i>
+// print   <i class="fa-regular fa-print"></i>
+// reuse   <i class="fa-regular fa-arrows-rotate"></i>
+// set-jig-theme   ???
+// text   <i class="fa-regular fa-text"></i>
+// record-sound   <i class="fa-regular fa-microphone"></i>
+// image   <i class="fa-regular fa-image"></i>
+// info   <i class="fa-regular fa-file-lines"></i>
+// play   <i class="fa-regular fa-clapperboard-play"></i>
 
 @customElement("menu-line")
 export class _ extends LitElement {

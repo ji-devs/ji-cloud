@@ -1,14 +1,45 @@
-// use super::super::super::jig::actions as jig_actions;
-// use super::super::super::spot::state::State as SpotState;
-// use crate::edit::sidebar::state::{SidebarSpot, SidebarSpotItem};
-// use dominator::clone;
-// use shared::{
-//     api::{endpoints, ApiEndpoint},
-//     domain::{jig::*, module::*, CreateResponse},
-//     error::EmptyError,
-// };
-// use std::rc::Rc;
-// use utils::prelude::*;
+use super::super::super::spot::state::SpotState;
+use crate::edit::sidebar::{CourseSpot, SidebarSpotItem};
+use itertools::Itertools;
+use shared::{
+    api::endpoints,
+    domain::course::{CourseUpdateDraftDataPath, CourseUpdateDraftDataRequest},
+};
+use std::rc::Rc;
+use utils::prelude::ApiEndpointExt;
+
+pub async fn save_course(state: &Rc<SpotState>) {
+    let items = state
+        .sidebar
+        .asset_edit_state
+        .sidebar_spots
+        .lock_ref()
+        .iter()
+        .filter_map(|spot| {
+            // filter out cover and empty spots
+            match &spot.item {
+                SidebarSpotItem::Jig(_) => unreachable!(),
+                SidebarSpotItem::Course(spot) => match spot {
+                    None => None,
+                    Some(spot) => match &**spot {
+                        CourseSpot::Cover(_) => None,
+                        CourseSpot::Item(jig) => Some(jig.id),
+                    },
+                },
+            }
+        })
+        .collect_vec();
+    let req = CourseUpdateDraftDataRequest {
+        items: Some(items),
+        ..Default::default()
+    };
+
+    let _ = endpoints::course::UpdateDraftData::api_with_auth_empty(
+        CourseUpdateDraftDataPath(*state.sidebar.asset_edit_state.asset_id.unwrap_course()),
+        Some(req),
+    )
+    .await;
+}
 
 // pub fn edit(state: Rc<SpotState>) {
 //     let jig_id = state.sidebar.asset.unwrap_course().id;

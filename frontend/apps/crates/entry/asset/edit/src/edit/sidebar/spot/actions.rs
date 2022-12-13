@@ -1,5 +1,5 @@
-use super::jig::actions as jig_spot_actions;
 use super::state::SpotState;
+use super::{course::actions as course_actions, jig::actions as jig_actions};
 use crate::edit::sidebar::{
     dragging::state::State as DragState,
     state::{SidebarSpot, SidebarSpotItem},
@@ -57,14 +57,14 @@ pub fn move_index(state: Rc<SpotState>, move_target: MoveTarget) {
 
             match &state.module.item {
                 SidebarSpotItem::Jig(module) => {
-                    jig_spot_actions::update_module_index(
+                    jig_actions::update_module_index(
                         Rc::clone(&state),
                         module.as_ref().unwrap(),
                         target as u16
                     ).await;
                 },
-                SidebarSpotItem::Course(_course_spot) => {
-                    todo!();
+                SidebarSpotItem::Course(_) => {
+                    course_actions::save_course(&state).await;
                 }
             }
         }
@@ -73,8 +73,16 @@ pub fn move_index(state: Rc<SpotState>, move_target: MoveTarget) {
 
 pub fn delete(state: Rc<SpotState>) {
     state.sidebar.loader.load(clone!(state => async move {
-        jig_spot_actions::delete(Rc::clone(&state)).await;
         state.sidebar.asset_edit_state.sidebar_spots.lock_mut().remove(state.index);
+
+        match &state.module.item {
+            SidebarSpotItem::Jig(module) => {
+                jig_actions::delete(&state, &module).await;
+            },
+            SidebarSpotItem::Course(_) => {
+                course_actions::save_course(&state).await;
+            },
+        }
     }));
 }
 
@@ -83,7 +91,7 @@ pub fn on_module_kind_drop(state: Rc<SpotState>, module_kind: ModuleKind) {
         return;
     }
     if state.module.item.is_none() {
-        jig_spot_actions::assign_kind(state.clone(), module_kind);
+        jig_actions::assign_kind(state.clone(), module_kind);
     }
 
     // Remove module highlights whenever a new module is added to the list.

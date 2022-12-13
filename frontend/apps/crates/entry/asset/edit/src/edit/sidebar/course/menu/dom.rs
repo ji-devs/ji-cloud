@@ -68,7 +68,7 @@ impl CourseMenu {
         let state = self;
         html!("menu-line", {
             .prop("slot", "lines")
-            .prop("icon", "edit")
+            .prop("icon", "jig-info")
             .event(clone!(state => move |_:events::Click| {
                 todo!("{:?}", state.spot_state.kind_str());
             }))
@@ -79,7 +79,7 @@ impl CourseMenu {
         let state = self;
         html!("menu-line", {
             .prop("slot", "lines")
-            .prop("icon", "edit")
+            .prop("icon", "jig-play")
             .event(clone!(state => move |_:events::Click| {
                 todo!("{:?}", state.spot_state.kind_str());
             }))

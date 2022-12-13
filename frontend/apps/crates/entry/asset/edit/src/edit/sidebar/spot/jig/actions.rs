@@ -25,8 +25,8 @@ pub fn edit(state: Rc<SpotState>) {
     }
 }
 
-pub async fn delete(state: Rc<SpotState>) {
-    if let Some(module) = &*state.module.item.unwrap_jig() {
+pub async fn delete(state: &Rc<SpotState>, module: &Option<Rc<LiteModule>>) {
+    if let Some(module) = module {
         let req = ModuleDeleteRequest {
             parent_id: state.sidebar.asset_edit_state.asset_id,
         };
