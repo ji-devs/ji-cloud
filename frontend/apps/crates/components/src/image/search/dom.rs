@@ -293,7 +293,6 @@ fn render_filters_sticker(state: &Rc<State>) -> Dom {
                     }
                 })
                 .prop("slot", "background-checkbox")
-                .prop("checked", true)
                 .event(clone!(state => move |evt: events::CustomToggle| {
                     state.checkbox_checked.set(evt.value());
                     actions::search(state.clone(), None);
