@@ -13,7 +13,7 @@ pub struct JigSelection {
     pub asset_edit_state: Rc<AssetEditState>,
     pub loader: AsyncLoader,
     pub search_results: MutableVec<Rc<JigResponse>>,
-    pub drag: Mutable<Option<Rc<Drag>>>,
+    pub drag: Mutable<Option<Rc<Drag<()>>>>,
 }
 
 impl JigSelection {

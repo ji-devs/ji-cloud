@@ -18,7 +18,7 @@ pub struct TransformState {
     pub coords_in_center: bool,
     pub is_transforming: Mutable<bool>,
     pub(super) transform: Mutable<Transform>,
-    pub(super) drag: Mutable<Option<Drag>>,
+    pub(super) drag: Mutable<Option<Drag<()>>>,
     pub(super) action: RefCell<Option<Action>>,
     pub(super) rot_stash: RefCell<Option<InitRotation>>,
     pub(super) scale_stash: RefCell<Option<InitScale>>,

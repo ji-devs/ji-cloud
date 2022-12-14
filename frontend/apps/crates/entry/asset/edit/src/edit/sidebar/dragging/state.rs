@@ -9,14 +9,14 @@ const ANCHOR_Y: f64 = 100.0;
 
 pub struct State {
     pub module: Rc<SpotState>,
-    pub inner: Drag,
+    pub inner: Drag<()>,
 }
 
 impl State {
     pub fn new(module: Rc<SpotState>, x: i32, y: i32) -> Self {
         Self {
             module,
-            inner: Drag::new(x, y, ANCHOR_X, ANCHOR_Y, false),
+            inner: Drag::new(x, y, ANCHOR_X, ANCHOR_Y, false, ()),
         }
     }
 }

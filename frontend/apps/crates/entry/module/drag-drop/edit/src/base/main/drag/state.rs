@@ -69,7 +69,7 @@ pub struct DragItem {
     pub item: Item,
     /// Index of this item in the list of stickers
     pub index: usize,
-    pub drag: Mutable<Option<Rc<Drag>>>,
+    pub drag: Mutable<Option<Rc<Drag<()>>>>,
     pub base: Rc<Base>,
     /// Whether this is an item which has been placed in a trace
     pub is_placed_item: bool,

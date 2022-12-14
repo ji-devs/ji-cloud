@@ -9,7 +9,7 @@ use utils::drag::Drag;
 
 pub struct State {
     pub kind: ModuleKind,
-    pub drag: Mutable<Option<Rc<Drag>>>,
+    pub drag: Mutable<Option<Rc<Drag<()>>>>,
     pub hover: Mutable<bool>,
     pub show_autogen_tooltip: Mutable<bool>,
 }

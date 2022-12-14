@@ -235,7 +235,7 @@ impl PuzzleGame {
 
 impl PuzzleItem {
     pub fn start_drag(&self, x: i32, y: i32) {
-        *self.drag.borrow_mut() = Some(Rc::new(Drag::new(x, y, 0.0, 0.0, true)));
+        *self.drag.borrow_mut() = Some(Rc::new(Drag::new(x, y, 0.0, 0.0, true, ())));
 
         if let Some(audio_filename) = self.raw.audio_filename.as_ref() {
             self.base

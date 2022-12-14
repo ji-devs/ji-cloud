@@ -52,7 +52,7 @@ pub struct PuzzleItem {
     pub raw: RawPuzzleItem,
     pub orig_transform_matrix: Matrix4,
     pub curr_transform_matrix: RefCell<Matrix4>,
-    pub drag: RefCell<Option<Rc<Drag>>>,
+    pub drag: RefCell<Option<Rc<Drag<()>>>>,
 }
 
 #[derive(Clone)]

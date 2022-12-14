@@ -166,7 +166,7 @@ impl InteractiveItem {
             self.try_play_user_audio();
 
             self.drag
-                .set(Some(Rc::new(Drag::new(x, y, 0.0, 0.0, true))));
+                .set(Some(Rc::new(Drag::new(x, y, 0.0, 0.0, true, ()))));
         }
     }
 

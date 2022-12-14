@@ -11,7 +11,7 @@ pub struct SpotState {
     pub module: Rc<SidebarSpot>,
     pub tried_module_at_cover: Mutable<bool>,
     pub sidebar: Rc<SidebarState>,
-    pub drag: Mutable<Option<Drag>>,
+    pub drag: Mutable<Option<Drag<()>>>,
     pub index: usize,
     pub drag_target_index: Option<usize>,
     pub total_len: usize,

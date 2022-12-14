@@ -30,7 +30,8 @@ use wasm_bindgen::{JsCast, JsValue};
 
 const MOVE_THRESHHOLD: i32 = 3;
 
-pub struct Drag {
+pub struct Drag<T> {
+    pub data: T,
     state: Mutable<DragState>,
     pos: Mutable<PointI32>,
     mouse_x: AtomicI32,
@@ -39,9 +40,17 @@ pub struct Drag {
     element_hovered: RefCell<Option<HtmlElement>>,
 }
 
-impl Drag {
-    pub fn new(mouse_x: i32, mouse_y: i32, anchor_x: f64, anchor_y: f64, immediate: bool) -> Self {
+impl<T> Drag<T> {
+    pub fn new(
+        mouse_x: i32,
+        mouse_y: i32,
+        anchor_x: f64,
+        anchor_y: f64,
+        immediate: bool,
+        data: T,
+    ) -> Self {
         let _self = Self {
+            data,
             state: Mutable::new(DragState::Waiting(DragWait {
                 anchor: PointF64::new(anchor_x, anchor_y),
                 accum: PointI32::new(0, 0),
@@ -64,6 +73,7 @@ impl Drag {
         mouse_y: i32,
         elem: &HtmlElement,
         immediate: bool,
+        data: T,
     ) -> Self {
         let resize_info = get_resize_info();
 
@@ -72,7 +82,7 @@ impl Drag {
         let anchor_x = (mouse_x as f64) - elem_x;
         let anchor_y = (mouse_y as f64) - elem_y;
 
-        Self::new(mouse_x, mouse_y, anchor_x, anchor_y, immediate)
+        Self::new(mouse_x, mouse_y, anchor_x, anchor_y, immediate, data)
     }
 }
 
@@ -88,7 +98,7 @@ pub struct DragWait {
     pub accum: PointI32,
 }
 
-impl Drag {
+impl<T> Drag<T> {
     //Top-level state changes
     pub fn get_active(&self) -> bool {
         matches!(*self.state.lock_ref(), DragState::Active)

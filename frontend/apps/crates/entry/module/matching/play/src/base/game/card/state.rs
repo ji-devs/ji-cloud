@@ -42,7 +42,7 @@ pub enum BottomPhase {
 
 pub struct CardDrag {
     pub game: Rc<Game>,
-    pub drag: Drag,
+    pub drag: Drag<()>,
     pub elem: RefCell<Option<HtmlElement>>,
     pub is_over: Mutable<Option<usize>>,
     pub card: Card,
@@ -138,7 +138,7 @@ impl CardDrag {
             ..
         } = choice;
 
-        let drag = Drag::new_anchor_element_resize(x, y, &elem, true);
+        let drag = Drag::new_anchor_element_resize(x, y, &elem, true, ());
 
         CardDrag {
             is_over: Mutable::new(None),

@@ -66,7 +66,7 @@ impl MainSelect {
 pub struct SelectItem {
     pub item: Item,
     pub index: usize,
-    pub drag: Mutable<Option<Rc<Drag>>>,
+    pub drag: Mutable<Option<Rc<Drag<()>>>>,
     pub base: Rc<Base>,
 }
 

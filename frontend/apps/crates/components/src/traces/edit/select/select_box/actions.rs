@@ -18,7 +18,7 @@ impl SelectBox {
 
     pub fn start_drag(&self, x: i32, y: i32) {
         self.drag
-            .set(Some(Rc::new(Drag::new(x, y, 0.0, 0.0, true))));
+            .set(Some(Rc::new(Drag::new(x, y, 0.0, 0.0, true, ()))));
     }
 
     pub fn try_move_drag(&self, x: i32, y: i32) {
