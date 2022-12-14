@@ -62,6 +62,16 @@ export class _ extends LitElement {
                     grid-template-columns: repeat(auto-fill, 188px);
                     gap: 38px;
                 }
+
+                ::slotted([slot=dragged]) {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    z-index: 1;
+                    cursor: grabbing;
+                    /* for elementFromPoint not to return the dragged element */
+                    pointer-events: none;
+                }
             `,
         ];
     }
@@ -79,6 +89,7 @@ export class _ extends LitElement {
             <div class="modules">
                 <slot name="modules"> </slot>
             </div>
+            <slot name="dragged"></slot>
         `;
     }
 }

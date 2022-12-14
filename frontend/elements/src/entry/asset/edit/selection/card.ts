@@ -79,15 +79,6 @@ export class _ extends LitElement {
                 ::slotted([slot=stationery]) {
                     cursor: grab;
                 }
-                ::slotted([slot=dragged]) {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    z-index: 1;
-                    cursor: grabbing;
-                    /* for elementFromPoint not to return the dragged element */
-                    pointer-events: none;
-                }
                 .overlay {
                     display: none;
                 }
@@ -138,7 +129,6 @@ export class _ extends LitElement {
             <section @click=${this.showOverlay}>
                 <div class="top">
                     <slot name="stationery"></slot>
-                    <slot name="dragged"></slot>
                 </div>
                 <div class="bottom">
                     ${STR_MODULE_DISPLAY_NAME[this.module]}

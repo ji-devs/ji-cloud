@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use super::{
     super::edit::publish::Publish, course::jig_selection::state::JigSelection,
-    jig::module_selection::dom::SelectionDom, module_iframe::ModuleIframe, sidebar::Sidebar,
+    jig::module_selection::ModuleSelection, module_iframe::ModuleIframe, sidebar::Sidebar,
     state::AssetEditState,
 };
 use components::{
@@ -52,7 +52,7 @@ impl AssetEditState {
                         AssetEditRoute::Jig(_jig_id, jig_edit_route) => {
                             match jig_edit_route {
                                 JigEditRoute::Landing => {
-                                    Some(SelectionDom::render(state.clone()))
+                                    Some(ModuleSelection::new(&state).render())
                                 },
                                 JigEditRoute::Module(module_id) => {
                                     Some(ModuleIframe::new(state.asset_id, module_id).render())
