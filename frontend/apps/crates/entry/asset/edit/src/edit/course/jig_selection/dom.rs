@@ -106,7 +106,7 @@ impl JigSelection {
         })
     }
 
-    fn render_jig(self: &Rc<Self>, jig: &JigResponse, actions: Vec<Dom>) -> Dom {
+    fn render_jig(self: &Rc<Self>, jig: &Rc<JigResponse>, actions: Vec<Dom>) -> Dom {
         let state = self;
         html!("p", {
             .text(&jig.jig_data.display_name)
@@ -116,9 +116,9 @@ impl JigSelection {
             .children(actions)
             .style("touch-action", "none")
             .style("user-select", "none")
-            .event(clone!(state => move |evt: events::PointerDown| {
+            .event(clone!(state, jig => move |evt: events::PointerDown| {
                 let elem = evt.dyn_target().unwrap_ji();
-                state.on_pointer_down(&elem, evt.x(), evt.y());
+                state.on_pointer_down(&elem, evt.x(), evt.y(), &jig);
             }))
         })
     }

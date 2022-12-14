@@ -5,6 +5,7 @@ use itertools::Itertools;
 use shared::{
     api::endpoints,
     domain::{
+        asset::Asset,
         course::{CourseGetDraftPath, CourseUpdateDraftDataPath, CourseUpdateDraftDataRequest},
         jig::{JigGetLivePath, JigId, JigResponse, JigSearchPath, JigSearchQuery},
     },
@@ -136,18 +137,24 @@ impl JigSelection {
         }));
     }
 
-    pub fn on_pointer_down(self: &Rc<Self>, elem: &HtmlElement, x: i32, y: i32) {
-        let drag = Drag::new_anchor_element_resize(x, y, elem, true, ());
+    pub fn on_pointer_down(
+        self: &Rc<Self>,
+        elem: &HtmlElement,
+        x: i32,
+        y: i32,
+        jig: &Rc<JigResponse>,
+    ) {
+        let drag = Drag::new_anchor_element_resize(x, y, elem, true, (**jig).clone().into());
         self.drag.set(Some(Rc::new(drag)));
     }
 
-    pub fn on_pointer_move(self: &Rc<Self>, drag: &Rc<Drag<()>>, x: i32, y: i32) {
+    pub fn on_pointer_move(self: &Rc<Self>, drag: &Rc<Drag<Asset>>, x: i32, y: i32) {
         drag.update(x, y);
     }
 
-    pub fn on_pointer_up(self: &Rc<Self>, _drag: &Rc<Drag<()>>, _x: i32, _y: i32) {
-        // let asset_id = AssetId::Jig();
-        // drag.trigger_drop_event(x, y, self.kind.as_str());
+    pub fn on_pointer_up(self: &Rc<Self>, drag: &Rc<Drag<Asset>>, x: i32, y: i32) {
+        let data = serde_json::to_string(&drag.data).unwrap_ji();
+        drag.trigger_drop_event(x, y, &data);
         self.stop_drag();
     }
 

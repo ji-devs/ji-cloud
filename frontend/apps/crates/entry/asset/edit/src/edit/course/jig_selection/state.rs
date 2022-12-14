@@ -2,7 +2,7 @@ use std::{cell::RefCell, rc::Rc};
 
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::{signal::Mutable, signal_vec::MutableVec};
-use shared::domain::{course::CourseId, jig::JigResponse};
+use shared::domain::{asset::Asset, course::CourseId, jig::JigResponse};
 use utils::drag::Drag;
 
 use crate::edit::AssetEditState;
@@ -13,7 +13,7 @@ pub struct JigSelection {
     pub asset_edit_state: Rc<AssetEditState>,
     pub loader: AsyncLoader,
     pub search_results: MutableVec<Rc<JigResponse>>,
-    pub drag: Mutable<Option<Rc<Drag<()>>>>,
+    pub drag: Mutable<Option<Rc<Drag<Asset>>>>,
 }
 
 impl JigSelection {

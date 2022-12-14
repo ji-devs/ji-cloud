@@ -26,7 +26,7 @@ impl CourseMenu {
 
     fn menu_items(self: &Rc<Self>) -> Vec<Dom> {
         let state = self;
-        let module = state.spot_state.module.item.unwrap_course();
+        let module = state.spot_state.spot.item.unwrap_course();
         state.menu_items_course(module)
     }
 

@@ -2,7 +2,6 @@ use components::overlay::handle::OverlayHandle;
 use dominator::{clone, html, with_node, Dom, DomBuilder, EventOptions};
 use futures_signals::map_ref;
 use shared::domain::asset::DraftOrLive;
-use utils::init::analytics;
 use web_sys::{HtmlElement, Node, ScrollBehavior, ScrollIntoViewOptions};
 
 use super::super::course::menu::CourseMenu;
@@ -13,10 +12,7 @@ use super::{actions, state::*};
 use crate::edit::sidebar::state::{CourseSpot, ModuleHighlight, SidebarSpotItem};
 use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
 use futures_signals::signal::{not, SignalExt};
-use shared::domain::module::ModuleKind;
-use std::collections::HashMap;
 use std::rc::Rc;
-use std::str::FromStr;
 use utils::prelude::*;
 
 const STR_DELETE_TITLE: &str = "Warning";
@@ -31,7 +27,7 @@ impl SpotState {
         let is_filler = Some(state.index) == state.drag_target_index;
 
         let is_incomplete_signal = map_ref! {
-            let is_complete = not(state.module.is_incomplete.signal()),
+            let is_complete = not(state.spot.is_incomplete.signal()),
             let highlight_modules = state.sidebar.highlight_modules.signal_cloned()
                 => {
                     !is_complete && highlight_modules.is_some()
@@ -89,19 +85,14 @@ impl SpotState {
                 .event_with_options(
                     &EventOptions::bubbles(),
                     clone!(state => move |_evt:events::Click| {
-                        match &state.module.item {
-                            SidebarSpotItem::Jig(module) => {
-                                match module {
-                                    Some(_) => {
-                                        jig_spot_actions::edit(state.clone())
-                                    },
-                                    None => {
-                                        state.sidebar.asset_edit_state.set_route_jig(JigEditRoute::Landing);
-                                    },
-                                }
-                            },
-                            SidebarSpotItem::Course(_course_spot) => {
-                                todo!()
+                        if let SidebarSpotItem::Jig(module) = &state.spot.item {
+                            match module {
+                                Some(_) => {
+                                    jig_spot_actions::edit(state.clone())
+                                },
+                                None => {
+                                    state.sidebar.asset_edit_state.set_route_jig(JigEditRoute::Landing);
+                                },
                             }
                         }
                     })
@@ -114,21 +105,12 @@ impl SpotState {
                         .prop("activeModuleKind", state.kind_str())
                         .prop("coverOnly", state.index == 0)
                         .event(clone!(state => move |evt:events::CustomDrop| {
-                            if let Some(detail) = evt.detail().as_string() {
-                                if let Ok(kind) = ModuleKind::from_str(&detail) {
-                                    let mut properties = HashMap::new();
-                                    properties.insert("Activity Kind", detail.to_owned());
-                                    analytics::event("Jig Edit Add Activity", Some(properties));
-
-                                    actions::on_module_kind_drop(
-                                        Rc::clone(&state),
-                                        kind
-                                    );
-                                }
+                            if let Some(data) = evt.detail().as_string() {
+                                spot_actions::assign_to_empty_spot(&state, data);
                             }
                         }))
                         .child_signal(state.sidebar.asset_edit_state.route.signal_ref(clone!(state => move |route| {
-                            match &state.module.item {
+                            match &state.spot.item {
                                 SidebarSpotItem::Jig(module) => {
                                     match (&*module, route) {
                                         (Some(module), AssetEditRoute::Jig(_, JigEditRoute::Module(module_id))) if module_id == &module.id => None,
@@ -248,7 +230,7 @@ impl SpotState {
                     //     Asset::Course(_) => todo!(),
                     // }
 
-                    match state.module.item {
+                    match state.spot.item {
                         SidebarSpotItem::Jig(_) => dom.child(JigMenu::new(&state).render()),
                         SidebarSpotItem::Course(_) => dom.child(CourseMenu::new(&state).render()),
                     }
@@ -266,7 +248,7 @@ impl SpotState {
     {
         move |dom: DomBuilder<A>| {
             // If this module is anything other than a placeholder, the add button could be displayed.
-            let current_module_should_add = state.module.item.is_some();
+            let current_module_should_add = state.spot.item.is_some();
             let next_module_should_show_add = {
                 match state
                     .sidebar

@@ -42,7 +42,7 @@ impl JigMenu {
 
     fn menu_items(self: &Rc<Self>) -> Vec<Dom> {
         let state = self;
-        let module = state.spot_state.module.item.unwrap_jig();
+        let module = state.spot_state.spot.item.unwrap_jig();
         state.menu_items_jig(module)
     }
 

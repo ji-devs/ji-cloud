@@ -8,7 +8,7 @@ use utils::routes::{AssetEditRoute, JigEditRoute};
 use web_sys::HtmlElement;
 
 pub struct SpotState {
-    pub module: Rc<SidebarSpot>,
+    pub spot: Rc<SidebarSpot>,
     pub tried_module_at_cover: Mutable<bool>,
     pub sidebar: Rc<SidebarState>,
     pub drag: Mutable<Option<Drag<()>>>,
@@ -28,7 +28,7 @@ impl SpotState {
         module: Rc<SidebarSpot>,
     ) -> Rc<Self> {
         Rc::new(Self {
-            module,
+            spot: module,
             sidebar,
             index,
             drag_target_index,
@@ -45,7 +45,7 @@ impl SpotState {
         //     None => "",
         //     Some(module) => module.kind().as_str(),
         // }
-        match &self.module.item {
+        match &self.spot.item {
             SidebarSpotItem::Jig(Some(module)) => module.kind.as_str(),
             _ => "",
         }
@@ -53,13 +53,12 @@ impl SpotState {
 
     pub fn is_last_module(&self) -> bool {
         // self.index < self.total_len - 2 && (&*self.module).is_some()
-        self.index < self.total_len - 2
-            && matches!(&self.module.item, SidebarSpotItem::Jig(Some(_)))
+        self.index < self.total_len - 2 && matches!(&self.spot.item, SidebarSpotItem::Jig(Some(_)))
     }
 
     pub fn window_state_signal(state: Rc<SpotState>) -> impl Signal<Item = &'static str> {
         state.sidebar.asset_edit_state.route.signal_ref(clone!(state => move |route| {
-            match &state.module.item {
+            match &state.spot.item {
                 SidebarSpotItem::Jig(module) => {
                     match module {
                         None => "empty",
@@ -71,9 +70,11 @@ impl SpotState {
                         }
                     }
                 },
-                SidebarSpotItem::Course(_course_spot) => {
-                    // TODO:
-                    "thumbnail"
+                SidebarSpotItem::Course(course_spot) => {
+                    match course_spot {
+                        None => "empty",
+                        Some(_) => "thumbnail",
+                    }
                 },
             }
         }))
@@ -103,7 +104,7 @@ impl SpotState {
             .asset_edit_state
             .route
             .signal_ref(clone!(state => move|route| {
-                match &state.module.item {
+                match &state.spot.item {
                     SidebarSpotItem::Jig(Some(module)) => {
                         matches!(
                             route,
