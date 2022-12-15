@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use shared::{
     api::endpoints::{self, course},
     domain::{
@@ -23,6 +25,9 @@ impl AssetEditState {
 
             items.push(SidebarSpot::new_course_item(jig));
         }
+
+        // add empty at the end
+        items.push(Rc::new(SidebarSpot::new_empty(&course.id.into())));
 
         let mut spots = self.sidebar_spots.lock_mut();
         for item in items {
