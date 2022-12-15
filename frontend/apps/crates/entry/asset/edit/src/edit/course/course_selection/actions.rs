@@ -6,114 +6,15 @@ use shared::{
     api::endpoints,
     domain::{
         asset::Asset,
-        course::CourseGetDraftPath,
-        jig::{JigGetLivePath, JigId, JigResponse, JigSearchPath, JigSearchQuery},
+        jig::{JigResponse, JigSearchPath, JigSearchQuery},
     },
 };
 use utils::{drag::Drag, prelude::ApiEndpointExt, unwrap::UnwrapJiExt};
 use web_sys::HtmlElement;
 
-use crate::edit::sidebar::SidebarSpot;
-
 use super::state::CourseSelection;
 
 impl CourseSelection {
-    pub fn load_course(self: &Rc<Self>) {
-        let state = Rc::clone(self);
-        state.loader.load(clone!(state => async move {
-            let res = endpoints::course::GetDraft::api_with_auth(
-                CourseGetDraftPath(state.course_id),
-                None,
-            )
-            .await;
-
-            match res {
-                Ok(course) => {
-                    let mut items = Vec::with_capacity(course.course_data.items.len());
-                    for jig_id in course.course_data.items {
-                        let jig = state.get_jig(&jig_id).await;
-                        items.push(SidebarSpot::new_course_item(jig));
-                    }
-                    state.asset_edit_state.sidebar_spots.lock_mut().replace_cloned(items);
-                },
-                Err(_) => todo!(),
-            }
-        }));
-    }
-
-    // pub fn save_course(self: &Rc<Self>) {
-    //     let state = Rc::clone(self);
-    //     state.loader.load(clone!(state => async move {
-    //         let items = state
-    //             .asset_edit_state
-    //             .sidebar_spots
-    //             .lock_ref()
-    //             .iter()
-    //             .filter_map(|spot| {
-    //                 // filter out cover and empty spots
-    //                 match &spot.item {
-    //                     SidebarSpotItem::Jig(_) => unreachable!(),
-    //                     SidebarSpotItem::Course(spot) => {
-    //                         match spot {
-    //                             None => None,
-    //                             Some(spot) => {
-    //                                 match &**spot {
-    //                                     CourseSpot::Cover(_) => None,
-    //                                     CourseSpot::Item(jig) => Some(jig.id),
-    //                                 }
-    //                             },
-    //                         }
-    //                     },
-    //                 }
-    //             })
-    //             .collect_vec();
-    //         let req = CourseUpdateDraftDataRequest {
-    //             items: Some(items),
-    //             ..Default::default()
-    //         };
-
-    //         let _ = endpoints::course::UpdateDraftData::api_with_auth_empty(
-    //             CourseUpdateDraftDataPath(state.course_id.clone()),
-    //             Some(req),
-    //         )
-    //         .await;
-    //     }));
-    // }
-
-    // pub fn add_jig(self: &Rc<Self>, jig: Rc<JigResponse>) {
-    //     let item = SidebarSpot::new_course_item((*jig).clone());
-    //     self.asset_edit_state
-    //         .sidebar_spots
-    //         .lock_mut()
-    //         .push_cloned(item);
-    //     self.save_course();
-    // }
-
-    // pub fn remove_jig(self: &Rc<Self>, to_remove: &JigId) {
-    //     self.asset_edit_state.sidebar_spots.lock_mut().retain(|jig| &jig.id != to_remove);
-    //     self.save_course();
-    // }
-
-    // pub fn move_up_jig(self: &Rc<Self>, jig_id: &JigId) {
-    //     let mut items = self.asset_edit_state.sidebar_spots.lock_mut();
-    //     let pos = items.iter().position(|jig| &jig.id == jig_id).unwrap();
-    //     items.move_from_to(pos, pos - 1);
-    //     self.save_course();
-    // }
-
-    // pub fn move_down_jig(self: &Rc<Self>, jig_id: &JigId) {
-    //     let mut items = self.asset_edit_state.sidebar_spots.lock_mut();
-    //     let pos = items.iter().position(|jig| &jig.id == jig_id).unwrap();
-    //     items.move_from_to(pos, pos + 1);
-    //     self.save_course();
-    // }
-
-    async fn get_jig(self: &Rc<Self>, jig_id: &JigId) -> JigResponse {
-        endpoints::jig::GetLive::api_with_auth(JigGetLivePath(jig_id.clone()), None)
-            .await
-            .unwrap_ji()
-    }
-
     pub fn search(self: &Rc<Self>) {
         let state = Rc::clone(self);
         state.loader.load(clone!(state => async move {

@@ -12,7 +12,6 @@ use super::state::CourseSelection;
 impl CourseSelection {
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self;
-        state.load_course();
         html!("div", {
             .style("max-height", "100vh")
             .style("overflow", "auto")
