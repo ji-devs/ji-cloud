@@ -15,9 +15,9 @@ use web_sys::HtmlElement;
 
 use crate::edit::sidebar::SidebarSpot;
 
-use super::state::JigSelection;
+use super::state::CourseSelection;
 
-impl JigSelection {
+impl CourseSelection {
     pub fn load_course(self: &Rc<Self>) {
         let state = Rc::clone(self);
         state.loader.load(clone!(state => async move {

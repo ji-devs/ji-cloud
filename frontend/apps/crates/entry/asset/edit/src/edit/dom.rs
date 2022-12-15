@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use super::{
-    super::edit::publish::Publish, course::jig_selection::state::JigSelection,
+    super::edit::publish::Publish, course::course_selection::state::CourseSelection,
     jig::module_selection::ModuleSelection, module_iframe::ModuleIframe, sidebar::Sidebar,
     state::AssetEditState,
 };
@@ -75,7 +75,7 @@ impl AssetEditState {
                         AssetEditRoute::Course(course_id, course_edit_route) => {
                             match course_edit_route {
                                 CourseEditRoute::Landing => {
-                                    Some(JigSelection::new(course_id, &state).render())
+                                    Some(CourseSelection::new(course_id, &state).render())
                                 },
                                 CourseEditRoute::Cover(cover_id) => {
                                     Some(ModuleIframe::new(state.asset_id, cover_id).render())

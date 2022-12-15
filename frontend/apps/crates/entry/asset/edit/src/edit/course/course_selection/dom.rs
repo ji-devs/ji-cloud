@@ -7,9 +7,9 @@ use shared::domain::{asset::DraftOrLive, jig::JigResponse};
 use utils::{events, unwrap::UnwrapJiExt};
 use web_sys::HtmlInputElement;
 
-use super::state::JigSelection;
+use super::state::CourseSelection;
 
-impl JigSelection {
+impl CourseSelection {
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self;
         state.load_course();

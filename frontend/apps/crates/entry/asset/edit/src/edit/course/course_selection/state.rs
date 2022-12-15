@@ -7,7 +7,7 @@ use utils::drag::Drag;
 
 use crate::edit::AssetEditState;
 
-pub struct JigSelection {
+pub struct CourseSelection {
     pub course_id: CourseId,
     pub input: RefCell<String>,
     pub asset_edit_state: Rc<AssetEditState>,
@@ -16,7 +16,7 @@ pub struct JigSelection {
     pub drag: Mutable<Option<Rc<Drag<Asset>>>>,
 }
 
-impl JigSelection {
+impl CourseSelection {
     pub fn new(course_id: CourseId, asset_edit_state: &Rc<AssetEditState>) -> Rc<Self> {
         Rc::new(Self {
             course_id,
