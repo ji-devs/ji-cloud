@@ -1,5 +1,6 @@
 import "@elements/_bundles/_sub-bundles/page/header";
 import "@elements/_bundles/_sub-bundles/all";
+import "@elements/core/asset/asset-card";
 import "@elements/core/inputs/composed/search";
 import "@elements/core/inputs/composed/select/select";
 import "@elements/core/inputs/composed/select/option";

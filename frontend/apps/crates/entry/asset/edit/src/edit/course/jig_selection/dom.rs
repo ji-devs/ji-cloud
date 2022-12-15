@@ -1,8 +1,9 @@
 use std::rc::Rc;
 
+use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
 use dominator::{clone, html, with_node, Dom, EventOptions};
 use futures_signals::signal_vec::SignalVecExt;
-use shared::domain::jig::JigResponse;
+use shared::domain::{asset::DraftOrLive, jig::JigResponse};
 use utils::{events, unwrap::UnwrapJiExt};
 use web_sys::HtmlInputElement;
 
@@ -16,28 +17,6 @@ impl JigSelection {
             .style("max-height", "100vh")
             .style("overflow", "auto")
             .prop("slot", "main")
-            // .children_signal_vec(state.asset_edit_state.sidebar_spots.signal_vec_cloned().map(clone!(state => move|spot| {
-            //     state.render_jig(&spot, vec![
-            //         html!("button", {
-            //             .text("X")
-            //             .event(clone!(state, spot => move |_: events::Click| {
-            //                 state.remove_jig(&jig.id);
-            //             }))
-            //         }),
-            //         html!("button", {
-            //             .text("↥")
-            //             .event(clone!(state, spot => move |_: events::Click| {
-            //                 state.move_up_jig(&jig.id);
-            //             }))
-            //         }),
-            //         html!("button", {
-            //             .text("↧")
-            //             .event(clone!(state, spot => move |_: events::Click| {
-            //                 state.move_down_jig(&jig.id);
-            //             }))
-            //         }),
-            //     ])
-            // })))
             .children(&mut [
                 html!("hr"),
                 html!("h4", {
@@ -68,28 +47,42 @@ impl JigSelection {
                     ])
                 })
             ])
-            .children_signal_vec(state.search_results.signal_vec_cloned().map(clone!(state => move |jig| {
-                state.render_jig(&jig, vec![html!("button", {
-                    .text("+")
-                    .event(clone!(state, jig => move |_: events::Click| {
-                        state.add_jig(Rc::clone(&jig));
-                    }))
-                })])
-            })))
+            .child(html!("div", {
+                .style("display", "grid")
+                .style("grid-template-columns", "repeat(auto-fill, 280px)")
+                .style("gap", "20px")
+                .style("padding", "20px")
+                .children_signal_vec(state.search_results.signal_vec_cloned().map(clone!(state => move |jig| {
+                    state.render_asset(&jig)
+                })))
+            }))
             .child_signal(state.drag.signal_ref(clone!(state => move|drag| {
                 drag.as_ref().map(|drag| {
-                    html!("input", {
-                        .prop("slot", "dragged")
-                        // .prop("path", &format!("entry/jig/modules/large/{}-hover.svg", state.kind.as_str()))
+                    let asset = &drag.data;
+
+                    html!("asset-card", {
                         .style("position", "fixed")
                         .style("top", "0")
                         .style("left", "0")
                         .style("z-index", "1")
                         .style("cursor", "grabbing")
-                        /* for elementFromPoint not to return the dragged element */
+                        .style("touch-action", "none")
+                        .style("user-select", "none")
                         .style("pointer-events", "none")
-                        .prop("readOnly", true)
-                        // .prop("value", )
+                        .prop("title", asset.display_name())
+                        .prop("playedCount", asset.plays())
+                        .prop("likedCount", asset.likes())
+                        .prop("author", asset.author_name().clone().unwrap_or_default())
+                        .prop("language", asset.language())
+                        .prop("kind", "jig")
+                        .child(
+                            ModuleThumbnail::new(
+                                asset.id(),
+                                asset.cover().cloned(),
+                                ThumbnailFallback::Asset,
+                                DraftOrLive::Live
+                            ).render(Some("image"))
+                        )
                         .style_signal("transform", drag.transform_signal())
                         .global_event(clone!(state, drag => move |evt: events::PointerMove| {
                             state.on_pointer_move(&drag, evt.x(), evt.y());
@@ -106,16 +99,32 @@ impl JigSelection {
         })
     }
 
-    fn render_jig(self: &Rc<Self>, jig: &Rc<JigResponse>, actions: Vec<Dom>) -> Dom {
+    fn render_asset(self: &Rc<Self>, jig: &Rc<JigResponse>) -> Dom {
         let state = self;
-        html!("p", {
-            .text(&jig.jig_data.display_name)
-            .child(html!("br"))
-            .text("by: ")
-            .text(&jig.author_name.clone().unwrap_or_default())
-            .children(actions)
+        html!("asset-card", {
+            .style("cursor", "grab")
             .style("touch-action", "none")
             .style("user-select", "none")
+            .prop("title", &jig.jig_data.display_name)
+            .prop("playedCount", jig.plays)
+            .prop("likedCount", jig.likes)
+            .prop("author", jig.author_name.clone().unwrap_or_default())
+            .prop("language", &jig.jig_data.language)
+            .prop("kind", "jig")
+            .child(
+                ModuleThumbnail::new(
+                    jig.id.into(),
+                    jig.jig_data.modules.first().cloned(),
+                    ThumbnailFallback::Asset,
+                    DraftOrLive::Live
+                ).render(Some("image"))
+            )
+            .style_signal("filter", state.drag.signal_ref(clone!(jig => move |drag| {
+                match drag {
+                    Some(drag) if drag.data.unwrap_jig().id == jig.id => "grayscale(100%) opacity(0.5)",
+                    _ => "none",
+                }
+            })))
             .event(clone!(state, jig => move |evt: events::PointerDown| {
                 let elem = evt.dyn_target().unwrap_ji();
                 state.on_pointer_down(&elem, evt.x(), evt.y(), &jig);
