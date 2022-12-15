@@ -3,11 +3,11 @@ mod layer;
 mod manifest;
 mod shape;
 mod slide;
-mod media;
+mod id;
 
 pub use activity::*;
 pub use layer::*;
 pub use manifest::*;
 pub use shape::*;
 pub use slide::*;
-pub use media::*;
+pub use id::*;
