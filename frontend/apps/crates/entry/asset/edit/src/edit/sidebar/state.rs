@@ -104,16 +104,16 @@ pub struct SidebarSpot {
 }
 
 impl SidebarSpot {
-    pub fn new_empty(asset_id: &AssetId) -> Self {
+    pub fn new_empty(asset_id: &AssetId) -> Rc<Self> {
         let item = match asset_id {
             AssetId::JigId(_) => SidebarSpotItem::Jig(None),
             AssetId::CourseId(_) => SidebarSpotItem::Course(None),
             AssetId::ResourceId(_) => unimplemented!(),
         };
-        Self {
+        Rc::new(Self {
             item,
             is_incomplete: Mutable::new(false),
-        }
+        })
     }
 
     pub fn new_jig_module(module: Option<LiteModule>) -> Rc<Self> {

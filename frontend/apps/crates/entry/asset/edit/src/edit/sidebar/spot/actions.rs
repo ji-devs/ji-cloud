@@ -31,9 +31,7 @@ pub fn add_empty_module_after(state: Rc<SpotState>) {
         .lock_mut()
         .insert_cloned(
             state.index + 1,
-            Rc::new(SidebarSpot::new_empty(
-                &state.sidebar.asset_edit_state.asset_id,
-            )),
+            SidebarSpot::new_empty(&state.sidebar.asset_edit_state.asset_id),
         );
 
     if state.sidebar.asset_edit_state.asset_id.is_jig_id() {
@@ -143,7 +141,7 @@ pub fn assign_to_empty_spot(state: &Rc<SpotState>, data: String) {
 
                 // if this is the empty module at the end
                 if !placeholder_exists {
-                    modules.push_cloned(Rc::new(SidebarSpot::new_empty(&state.sidebar.asset_edit_state.asset_id)));
+                    modules.push_cloned(SidebarSpot::new_empty(&state.sidebar.asset_edit_state.asset_id));
                 }
 
                 // jigs are already saved in `assign_module_to_empty_spot`,
