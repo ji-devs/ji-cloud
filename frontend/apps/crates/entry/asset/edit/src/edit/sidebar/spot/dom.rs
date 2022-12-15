@@ -85,15 +85,26 @@ impl SpotState {
                 .event_with_options(
                     &EventOptions::bubbles(),
                     clone!(state => move |_evt:events::Click| {
-                        if let SidebarSpotItem::Jig(module) = &state.spot.item {
-                            match module {
-                                Some(_) => {
-                                    jig_spot_actions::edit(state.clone())
-                                },
-                                None => {
-                                    state.sidebar.asset_edit_state.set_route_jig(JigEditRoute::Landing);
-                                },
-                            }
+                        match &state.spot.item {
+                            SidebarSpotItem::Jig(module) => {
+                                match module {
+                                    Some(_) => {
+                                        jig_spot_actions::edit(state.clone())
+                                    },
+                                    None => {
+                                        state.sidebar.asset_edit_state.set_route_jig(JigEditRoute::Landing);
+                                    },
+                                }
+                            },
+                            SidebarSpotItem::Course(item) => {
+                                if let Some(item) = item {
+                                    if let CourseSpot::Cover(cover) = &**item {
+                                        state.sidebar.asset_edit_state.set_route_course(CourseEditRoute::Cover(cover.id));
+                                        return;
+                                    }
+                                }
+                                state.sidebar.asset_edit_state.set_route_course(CourseEditRoute::Landing);
+                            },
                         }
                     })
                 )

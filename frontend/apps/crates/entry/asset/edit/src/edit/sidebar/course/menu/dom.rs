@@ -6,7 +6,10 @@ use crate::edit::sidebar::{
 use dominator::{clone, html, Dom, EventOptions};
 use shared::domain::module::ModuleId;
 use std::rc::Rc;
-use utils::{events, routes::{Route, AssetRoute, AssetEditRoute, CourseEditRoute}};
+use utils::{
+    events,
+    routes::{AssetEditRoute, AssetRoute, CourseEditRoute, Route},
+};
 
 impl CourseMenu {
     pub fn render(self: Rc<Self>) -> Dom {
