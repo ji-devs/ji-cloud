@@ -4,8 +4,9 @@ use crate::edit::sidebar::{
     state::CourseSpot,
 };
 use dominator::{clone, html, Dom, EventOptions};
+use shared::domain::module::ModuleId;
 use std::rc::Rc;
-use utils::events;
+use utils::{events, routes::{Route, AssetRoute, AssetEditRoute, CourseEditRoute}};
 
 impl CourseMenu {
     pub fn render(self: Rc<Self>) -> Dom {
@@ -34,8 +35,8 @@ impl CourseMenu {
         let state = self;
         match module {
             Some(module) => match &**module {
-                CourseSpot::Cover(_cover) => {
-                    vec![state.cover_edit()]
+                CourseSpot::Cover(cover) => {
+                    vec![state.cover_edit(cover.id)]
                 }
                 CourseSpot::Item(_jig_id) => {
                     vec![
@@ -53,13 +54,36 @@ impl CourseMenu {
         }
     }
 
-    fn cover_edit(self: &Rc<Self>) -> Dom {
+    fn cover_edit(self: &Rc<Self>, cover_id: ModuleId) -> Dom {
         let state = self;
         html!("menu-line", {
             .prop("slot", "lines")
             .prop("icon", "edit")
             .event(clone!(state => move |_:events::Click| {
-                todo!("{:?}", state.spot_state.kind_str());
+                let course_id = *state
+                    .spot_state
+                    .sidebar
+                    .asset_edit_state
+                    .asset_id
+                    .unwrap_course();
+
+                state
+                    .spot_state
+                    .sidebar
+                    .asset_edit_state
+                    .route
+                    .set(AssetEditRoute::Course(course_id, CourseEditRoute::Cover(cover_id)));
+
+                state
+                    .spot_state
+                    .sidebar
+                    .collapsed
+                    .set(true);
+
+                Route::push_state(Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
+                    course_id,
+                    CourseEditRoute::Cover(cover_id),
+                ))));
             }))
         })
     }
