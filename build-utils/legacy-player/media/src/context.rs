@@ -40,20 +40,24 @@ pub struct Options {
     #[structopt(long, default_value = "release")]
     pub remote_target: String,
 
-    #[structopt(long, default_value="/Users/dakom/Downloads/jigzi-data/csv/input.csv", parse(from_os_str))]
+    #[structopt(long, default_value="/home/david/archive/csv/input.csv", parse(from_os_str))]
+    //#[structopt(long, default_value="/Users/dakom/Downloads/jigzi-data/csv/input.csv", parse(from_os_str))]
     pub input_csv_path: PathBuf,
 
     #[structopt(long, default_value="/home/david/archive/legacy-cdn/transcode/games", parse(from_os_str))]
     //#[structopt(long, default_value="/Users/dakom/Downloads/jigzi-data/games", parse(from_os_str))]
     pub games_dir: PathBuf,
 
-    #[structopt(long, default_value="/Users/dakom/Downloads/jigzi-data/media-infos.json", parse(from_os_str))]
+    #[structopt(long, default_value="/home/david/archive/media-infos.json", parse(from_os_str))]
+    //#[structopt(long, default_value="/Users/dakom/Downloads/jigzi-data/media-infos.json", parse(from_os_str))]
     pub media_infos_file_path: PathBuf,
 
-    #[structopt(long, default_value="/Users/dakom/Downloads/jigzi-data/transcode-infos.json", parse(from_os_str))]
+    #[structopt(long, default_value="/home/david/archive/transcode-infos.json", parse(from_os_str))]
+    //#[structopt(long, default_value="/Users/dakom/Downloads/jigzi-data/transcode-infos.json", parse(from_os_str))]
     pub transcode_infos_file_path: PathBuf,
 
-    #[structopt(long, default_value="/Users/dakom/Downloads/jigzi-data/missing-media.json", parse(from_os_str))]
+    #[structopt(long, default_value="/home/david/archive/missing-media.json", parse(from_os_str))]
+    //#[structopt(long, default_value="/Users/dakom/Downloads/jigzi-data/missing-media.json", parse(from_os_str))]
     pub missing_media_downloads_file_path: PathBuf,
 
     #[structopt(parse(try_from_str), default_value = "false")]
