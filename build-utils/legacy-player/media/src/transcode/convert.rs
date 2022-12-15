@@ -52,7 +52,7 @@ fn set_transcodes_from_disk(ctx:Arc<Context>) {
         let path = ctx.opts.games_dir.join(format!("**/*.{ext}")).display().to_string();
         for entry in glob_with(&path, options).unwrap() {
             let src = entry.unwrap();
-            let dest_name = format!("{}.mov", Path::new(&src).file_stem().unwrap().to_str().unwrap().to_string());
+            let dest_name = format!("{}.mp4", Path::new(&src).file_stem().unwrap().to_str().unwrap().to_string());
             let dest = format!("{}/{}", Path::new(&src).parent().unwrap().display(), dest_name);
 
             let cmd = TranscodeCommand {
