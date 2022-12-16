@@ -47,7 +47,7 @@ pub fn print(asset_id: AssetId, module_id: ModuleId) {
         <div>
             <img src="{screenshot_url}">
             <span>
-                <img-ui path="core/page-header/logo.svg"></img-ui>.org
+                <img-ui path="module/_common/edit/post-preview/print/signature-logo.svg"></img-ui>
             </span>
         </div>
     "#
