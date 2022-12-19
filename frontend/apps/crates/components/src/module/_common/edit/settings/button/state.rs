@@ -126,7 +126,7 @@ impl<T: Copy + Display + Default + Eq + FromStr + 'static> SettingsValueExt for 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum SettingsButtonKind {
     Attempts,
-    Autoplay,
+    PlayClick,
     CardDouble,
     CardSingle,
     CardsShowAll,
@@ -173,7 +173,7 @@ impl SettingsButtonKind {
     pub fn as_str_id(&self) -> &'static str {
         match self {
             Self::Attempts => "attempts",
-            Self::Autoplay => "autoplay",
+            Self::PlayClick => "play-click",
             Self::CardDouble => "card-double",
             Self::CardSingle => "card-single",
             Self::CardsShowAll => "cards-show-all",
