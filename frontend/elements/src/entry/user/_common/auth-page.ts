@@ -16,9 +16,9 @@ export class _ extends LitElement {
                     height: 100vh;
                     justify-content: center;
                 }
-                @media (min-width: 1920px) {
+                @media (min-width: 1024px) {
                     :host {
-                        grid-template-columns: 480px 1fr;
+                        grid-template-columns: 360px 1fr;
                     }
                 }
                 aside {
@@ -26,7 +26,7 @@ export class _ extends LitElement {
                     background-color: #def4ff;
                     display: none;
                 }
-                @media (min-width: 1920px) {
+                @media (min-width: 1024px) {
                     aside {
                         display: block;
                     }
@@ -41,14 +41,14 @@ export class _ extends LitElement {
                     box-sizing: border-box;
                     display: flex;
                     flex-direction: column;
-                    gap: 20px;
+                    gap: 16px;
                     height: 100%;
                     overflow: auto;
-                    padding: 30px;
+                    padding: 24px;
                 }
-                @media (min-width: 1920px) {
+                @media (min-width: 1024px) {
                     .main {
-                        padding: 80px;
+                        padding: 60px;
                     }
                 }
             `,

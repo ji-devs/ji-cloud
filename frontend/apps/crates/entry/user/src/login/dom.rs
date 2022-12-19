@@ -33,7 +33,7 @@ impl LoginPage {
             .child(html!("window-loader-block", {
                 .prop_signal("visible", state.loader.is_loading())
             }))
-            .child(html!("page-login-landing", {
+            .child(html!("user-login", {
                 .apply_if(state.basic_tried_oauth, |dom| {
                     dom.child(html!("p", {
                         .prop("slot", "alert")
@@ -96,8 +96,11 @@ impl LoginPage {
                             actions::signin_email(state.clone())
                         }))
                     }),
-                    html!("footer-login-register", {
-                        .prop("slot", "footer")
+                    html!("button-rect", {
+                        .prop("slot", "register")
+                        .prop("kind", "text")
+                        .prop("color", "blue")
+                        .text(crate::strings::STR_LOGIN)
                         .event(clone!(state => move |_evt:events::Click| {
                             actions::go_register(state.clone())
                         }))

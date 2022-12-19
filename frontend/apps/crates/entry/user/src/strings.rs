@@ -3,6 +3,7 @@ pub const STR_CONTINUE: &str = "Continue";
 pub const STR_EMAIL_LABEL: &str = "Email *";
 pub const STR_PASSWORD_CREATE_LABEL: &str = "Create password *";
 pub const STR_PASSWORD_PLACEHOLDER: &str = "********";
+pub const STR_LOGIN: &str = "Register";
 
 pub const STR_NOT_AUTHORIZED: &str = "Not authorized!";
 pub const STR_USER_EXISTS: &str = "User already exists!";

@@ -3,8 +3,9 @@ import "@elements/core/dividers/or-divider";
 import "@elements/entry/user/_common/auth-page";
 
 const STR_TITLE = "Login";
+const STR_ACCOUNT = "Don't have an account yet?";
 
-@customElement("page-login-landing")
+@customElement("user-login")
 export class _ extends LitElement {
     static get styles() {
         return [
@@ -21,22 +22,23 @@ export class _ extends LitElement {
                     background-color: var(--light-red-1);
                     border-radius: 3px;
                     margin: 0;
-                    padding: 26px;
-                    font-size: 18px;
+                    padding: 20px;
+                    font-size: 16px;
                 }
                 h1 {
-                    font-size: 32px;
+                    font-size: 30px;
                     font-weight: 900;
                     color: #5662a3;
                 }
                 ::slotted([slot="google"]) {
-                    margin-bottom: 20px;
+                    margin-bottom: 16px;
                 }
                 ::slotted([slot="input"]) {
-                    margin-top: 20px;
+                    margin-top: 16px;
                 }
                 ::slotted([slot="password-forgot"]) {
                     text-align: end;
+/* <<<<<<< HEAD:frontend/elements/src/entry/user/login/pages/landing.ts
                 }
                 ::slotted([slot="submit"]) {
                     margin-top: 40px;
@@ -84,9 +86,22 @@ export class _ extends LitElement {
                     white-space: nowrap;
                 }
                 ::slotted([slot="password-forgot"]) {
+=======
+>>>>>>> 94a4024d4 (feat(fe/user/login): New sizes and element refactoring):frontend/elements/src/entry/user/login.ts */
                     margin-top: 16px;
                     margin-bottom: 56px;
                     display: block;
+                }
+                ::slotted([slot="submit"]) {
+                    margin-top: 30px;
+                    margin-bottom: 16px;
+                }
+                .spacer {
+                    height: 16px;
+                }
+                footer {
+                    margin-top: 16px;
+                    font-size: 14px;
                 }
             `,
         ];
@@ -115,7 +130,9 @@ export class _ extends LitElement {
                     </form>
                 </div>
 
-                <slot name="footer"></slot>
+                <footer>
+                    ${STR_ACCOUNT} <slot name="register"></slot>
+                </footer>
             </auth-page>
         `;
     }
