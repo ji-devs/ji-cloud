@@ -4,7 +4,7 @@ use shared::domain::{
     module::{
         body::{
             _groups::design::{Backgrounds, Sticker},
-            poster::{Mode, ModuleData as RawData, Step},
+            poster::{Mode, ModuleData as RawData, Step, PlaySettings},
             Audio, Instructions,
         },
         ModuleId,
