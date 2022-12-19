@@ -10,7 +10,7 @@ export class _ extends LitElement {
         return [
             css`
                 h1 {
-                    font-size: 32px;
+                    font-size: 30px;
                     font-weight: 900;
                     color: #5662a3;
                 }
@@ -18,9 +18,9 @@ export class _ extends LitElement {
                     max-width: 650px;
                     display: grid;
                     align-items: start;
-                    gap: 32px;
+                    gap: 30px;
                 }
-                @media (min-width: 1920px) {
+                @media (min-width: 1024px) {
                     .inside-wrapper {
                         grid-template-columns: 1fr 1fr;
                     }
@@ -32,6 +32,7 @@ export class _ extends LitElement {
                 }
                 ::slotted([slot="committed-to-privacy"]) {
                     width: 60%;
+                    font-size: 13px;
                 }
             `,
         ];

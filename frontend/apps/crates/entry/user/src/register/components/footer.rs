@@ -14,7 +14,7 @@ pub struct Footer {}
 
 impl Footer {
     pub fn render() -> Dom {
-        html!("footer-register-login", {
+        html!("user-register-footer", {
             .prop("slot", "footer")
             .event(|_evt:events::Click| {
                 go_login()

@@ -44,11 +44,11 @@ export class _ extends LitElement {
                     gap: 16px;
                     height: 100%;
                     overflow: auto;
-                    padding: 24px;
+                    padding: 20px;
                 }
                 @media (min-width: 1024px) {
                     .main {
-                        padding: 60px;
+                        padding: 45px;
                     }
                 }
             `,

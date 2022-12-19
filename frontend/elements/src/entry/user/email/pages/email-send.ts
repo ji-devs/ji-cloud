@@ -14,19 +14,19 @@ export class _ extends LitElement {
         return [
             css`
                 .inside-wrapper {
-                    width: 624px;
+                    max-width: 624px;
                 }
                 .title {
-                    font-size: 32px;
+                    font-size: 30px;
                     font-weight: 900;
                     color: #5662a3;
                 }
                 .subtitle {
-                    font-size: 20px;
+                    font-size: 18px;
                     font-weight: 300;
                     text-align: left;
                     color: #4a4a4a;
-                    margin-bottom: 40px;
+                    margin-bottom: 30px;
                 }
                 footer-contact {
                     position: absolute;

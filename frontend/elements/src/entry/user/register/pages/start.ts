@@ -18,27 +18,28 @@ export class _ extends LitElement {
                     background-color: var(--light-red-1);
                     border-radius: 3px;
                     margin: 0;
-                    padding: 26px;
-                    font-size: 18px;
+                    padding: 20px;
+                    font-size: 16px;
                 }
                 h1 {
-                    font-size: 32px;
+                    font-size: 30px;
                     font-weight: 900;
                     color: #5662a3;
                 }
                 ::slotted([slot="google"]) {
-                    margin-bottom: 20px;
+                    margin-bottom: 16px;
                 }
                 ::slotted([slot="input"]) {
-                    margin-top: 20px;
+                    margin-top: 16px;
                 }
                 ::slotted([slot="passwordreminder"]) {
                     text-align: end;
                 }
                 ::slotted([slot="submit"]) {
-                    margin-top: 40px;
-                    margin-bottom: 24px;
+                    margin-top: 30px;
+                    margin-bottom: 16px;
                 }
+/* <<<<<<< HEAD
                 .logo {
                     grid-column: 1;
                     position:absolute;
@@ -50,11 +51,10 @@ export class _ extends LitElement {
                 .logo img-ui{
                     width: 85px;
                 }
+=======
+>>>>>>> 3fa277a37 (feat(fe/user/register): New sizes) */
                 .spacer {
-                    height: 20px;
-                }
-                .text-hidden {
-                    display: none;
+                    height: 16px;
                 }
                 .password-wrapper {
                     position: relative;
@@ -63,21 +63,6 @@ export class _ extends LitElement {
                     position: absolute;
                     top: 33%;
                     right: -76px;
-                }
-                ::slotted([slot="contact"]) {
-                    position: absolute;
-                    bottom: 20px;
-                    white-space: nowrap;
-                }
-                .account-wrapper {
-                    display: flex;
-                    align-items: center;
-                }
-                ::slotted([slot="noaccount"]:last-child) {
-                    margin-left: 4px;
-                }
-                ::slotted([slot="sub"]) {
-                    white-space: nowrap;
                 }
             `,
         ];

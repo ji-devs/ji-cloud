@@ -7,12 +7,10 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
-                main {
-                    padding-left: 8px;
-                    padding-right: 80px;
-                }
                 ul {
                     padding-left: 0;
+                    margin: 0;
+                    margin-top: 10px;
                 }
                 li {
                     margin-bottom: 12px;
@@ -20,7 +18,9 @@ export class _ extends LitElement {
                 p {
                     color: #5590fc;
                     font-weight: 500;
-                    margin-top: 0;
+                    margin: 0;
+                    margin-bottom: 10px;
+                    font-size: 14px;
                 }
                 .error ul {
                     border-right: solid 2px #e36486;

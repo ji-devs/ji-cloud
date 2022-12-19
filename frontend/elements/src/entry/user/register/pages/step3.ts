@@ -27,12 +27,15 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
+                h1, h4, p {
+                    margin: 0;
+                }
                 .grid {
                     display: grid;
-                    gap: 16px 16px;
+                    gap: 12px;
                     grid-auto-flow: row;
                 }
-                @media (min-width: 1920px) {
+                @media (min-width: 1024px) {
                     .grid {
                         grid-template-columns: 1fr 1fr;
                     }
@@ -46,14 +49,17 @@ export class _ extends LitElement {
                     grid-column: 1 / -1;
                 }
                 .card-grey {
-                    padding: 32px 32px 32px 32px;
+                    padding: 14px;
                     border-radius: 14px;
                     background-color: #f7f7f7;
                 }
                 h1 {
-                    font-size: 32px;
+                    font-size: 30px;
                     font-weight: 900;
                     color: #5662a3;
+                }
+                .subtitle, .filter-message {
+                    font-size: 14px;
                 }
                 .subtitle {
                     font-weight: 500;
@@ -75,7 +81,7 @@ export class _ extends LitElement {
                     ${STR_SUBTITLE}<br />${STR_SUBSUBTITLE}
                 </h4>
 
-                <p>${STR_FILTER_MESSAGE}</p>
+                <p class="filter-message">${STR_FILTER_MESSAGE}</p>
 
                 <div class="grid">
                     <div class="ages card-grey">

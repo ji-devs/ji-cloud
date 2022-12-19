@@ -6,7 +6,7 @@ import "@elements/entry/user/register-complete/pages/landing";
 import "@elements/entry/user/email/pages/email-send";
 import "@elements/entry/user/login";
 import "@elements/entry/user/password/pages/reset";
-import "@elements/entry/user/register/footer/login";
+import "@elements/entry/user/register/footer";
 import "@elements/entry/user/register/pages/start";
 import "@elements/entry/user/register/pages/step1";
 import "@elements/entry/user/register/pages/step2";
