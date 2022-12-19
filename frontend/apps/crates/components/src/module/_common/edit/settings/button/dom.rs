@@ -1,3 +1,5 @@
+use crate::overlay::handle::OverlayHandle;
+
 use super::state::*;
 use dominator::{clone, html, with_node, Dom, DomBuilder};
 use futures_signals::signal::SignalExt;
@@ -100,6 +102,32 @@ where
                     }
                 })))
         })
+        .child_signal(state.tooltip.signal_cloned().map(clone!(state => move |tooltip| {
+            if let Some(tooltip) = tooltip {
+                Some(html!("empty-fragment" => HtmlElement, {
+                    .with_node!(elem => {
+                        .apply(OverlayHandle::lifecycle(
+                            clone!(state => move || {
+                                html!("overlay-tooltip-info", {
+                                    .prop("marginX", -32)
+                                    .prop("target", &elem)
+                                    .attr("targetAnchor", "br")
+                                    .attr("contentAnchor", "oppositeV")
+                                    .prop("body", &tooltip)
+                                    .prop("closeable", true)
+                                    .prop("strategy", "track")
+                                    .event(clone!(state => move |_evt: events::Close| {
+                                        state.tooltip.set_neq(None);
+                                    }))
+                                })
+                            })
+                        ))
+                    })
+                }))
+            } else {
+                None
+            }
+        })))
         .apply_if(mixin.is_some(), |dom| {
             dom.apply(mixin.unwrap_ji())
         })

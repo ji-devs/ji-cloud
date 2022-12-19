@@ -212,6 +212,7 @@ export class _ extends LitElement {
             ${active
                 ? html`<div class="bubble"><slot name="bubble"></slot></div>`
                 : nothing}
+            <slot></slot>
         `;
     }
 }

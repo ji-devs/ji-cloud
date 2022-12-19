@@ -4,7 +4,7 @@ use shared::domain::{
     module::{
         body::{
             _groups::design::{Backgrounds, Sticker},
-            cover::{ModuleData as RawData, Step},
+            cover::{ModuleData as RawData, PlaySettings, Step},
             Audio, Instructions,
         },
         ModuleId,
@@ -26,6 +26,7 @@ pub struct Base {
     pub backgrounds: Backgrounds,
     pub stickers: Vec<Sticker>,
     pub module_phase: Mutable<ModulePlayPhase>,
+    pub play_settings: PlaySettings,
 }
 
 impl Base {
@@ -53,6 +54,7 @@ impl Base {
             backgrounds: base_content.backgrounds,
             stickers: base_content.stickers,
             module_phase: init_args.play_phase,
+            play_settings: content.play_settings,
         })
     }
 }

@@ -9,6 +9,7 @@ pub struct SettingsButton {
     pub(super) value: Option<Box<dyn SettingsValueExt>>,
     pub(super) on_click: Option<Box<dyn Fn()>>,
     pub(super) bubble_open: Mutable<bool>,
+    pub(super) tooltip: Mutable<Option<String>>,
 }
 
 pub struct SettingsButtonBuilder {
@@ -17,6 +18,7 @@ pub struct SettingsButtonBuilder {
     value: Option<Box<dyn SettingsValueExt>>,
     on_click: Option<Box<dyn Fn()>>,
     bubble_open: Option<Mutable<bool>>,
+    tooltip: Option<Mutable<Option<String>>>,
 }
 
 impl SettingsButtonBuilder {
@@ -32,6 +34,7 @@ impl SettingsButtonBuilder {
             value: None,
             on_click: None,
             bubble_open: None,
+            tooltip: None,
         }
     }
 
@@ -54,6 +57,11 @@ impl SettingsButtonBuilder {
         self
     }
 
+    pub fn tooltip(mut self, tooltip: Mutable<Option<String>>) -> Self {
+        self.tooltip = Some(tooltip);
+        self
+    }
+
     /// Build the final `SettingsButton`
     pub fn build(self) -> Rc<SettingsButton> {
         Rc::new(SettingsButton {
@@ -62,6 +70,7 @@ impl SettingsButtonBuilder {
             value: self.value,
             on_click: self.on_click,
             bubble_open: self.bubble_open.unwrap_or_else(|| Mutable::new(false)),
+            tooltip: self.tooltip.unwrap_or_else(|| Mutable::new(None)),
         })
     }
 }
