@@ -26,7 +26,7 @@ export type Kind =
     | "time-limit"
     | "time-limit-off"
     | "video-captions"
-    | "autoplay"
+    | "play-click"
     | "mute"
     | "loop"
     | "continue-automatically";
@@ -59,10 +59,10 @@ const STR_LABEL: Record<Kind, string> = {
     "n_pairs": "pairs per game",
     "swap": "card position",
     "video-captions": "play with captions",
-    "autoplay": "start automatically",
+    "play-click": "play on click",
     "mute": "play without sound",
     "loop": "play on loop",
-    "continue-automatically": "automatically after video",
+    "continue-automatically": "after video",
 };
 
 @customElement("module-settings-button")

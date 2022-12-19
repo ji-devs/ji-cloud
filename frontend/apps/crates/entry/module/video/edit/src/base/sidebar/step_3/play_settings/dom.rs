@@ -1,5 +1,6 @@
 use super::state::State;
 use dominator::{clone, Dom};
+use futures_signals::signal::SignalExt;
 use shared::domain::module::body::video::DoneAction;
 use std::rc::Rc;
 
@@ -12,8 +13,8 @@ pub fn render(state: Rc<State>) -> Dom {
                 vec![
                     Some(
                         SettingsButtonBuilder::new(
-                            SettingsButtonKind::Autoplay,
-                            clone!(state => move || state.base.play_settings.autoplay.signal()),
+                            SettingsButtonKind::PlayClick,
+                            clone!(state => move || state.base.play_settings.autoplay.signal().map(|autoplay| !autoplay)),
                         )
                         .on_click(clone!(state => move || state.toggle_autoplay()))
                         .build()

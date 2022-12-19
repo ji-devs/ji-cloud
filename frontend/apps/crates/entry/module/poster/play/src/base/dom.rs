@@ -1,9 +1,7 @@
 use super::state::*;
 use components::{
-    audio::mixer::AUDIO_MIXER,
-    backgrounds::dom::render_backgrounds_raw,
-    module::_common::play::prelude::*,
-    stickers::dom::render_stickers_raw,
+    audio::mixer::AUDIO_MIXER, backgrounds::dom::render_backgrounds_raw,
+    module::_common::play::prelude::*, stickers::dom::render_stickers_raw,
 };
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
