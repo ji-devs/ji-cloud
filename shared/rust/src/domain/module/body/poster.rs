@@ -108,6 +108,9 @@ pub struct Content {
     pub audio: Option<Audio>,
     /// The base content for all design modules
     pub base: BaseContent,
+    /// play settings
+    #[serde(default)]
+    pub play_settings: PlaySettings,
 }
 
 /// Editor state
@@ -248,5 +251,27 @@ impl StepExt for Step {
     }
     fn get_preview() -> Self {
         Self::Four
+    }
+}
+
+/// Play settings
+#[derive(Clone, Default, Serialize, Deserialize, Debug)]
+pub struct PlaySettings {
+    /// next style
+    pub next: Next,
+}
+
+/// Next
+#[derive(Copy, Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
+pub enum Next {
+    /// After audio has played
+    AfterAudio,
+    /// Student clicks next
+    ClickNext,
+}
+
+impl Default for Next {
+    fn default() -> Self {
+        Self::ClickNext
     }
 }

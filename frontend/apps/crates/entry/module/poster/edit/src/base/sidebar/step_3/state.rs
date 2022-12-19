@@ -10,6 +10,8 @@ use dominator::clone;
 use futures_signals::signal::Mutable;
 use std::rc::Rc;
 
+use super::play_settings::state::PlaySettingsState;
+
 pub struct Step3 {
     pub tab: Mutable<Tab>,
     pub sidebar: Rc<Sidebar>,
@@ -17,24 +19,30 @@ pub struct Step3 {
 
 impl Step3 {
     pub fn new(sidebar: Rc<Sidebar>) -> Rc<Self> {
-        // let kind = MenuTabKind::PlaySettings;
-        let kind = MenuTabKind::Instructions;
+        let kind = MenuTabKind::PlaySettings;
         let tab = Mutable::new(Tab::new(sidebar.base.clone(), kind));
 
         Rc::new(Self { sidebar, tab })
+    }
+
+    pub fn next_kind(&self) -> Option<MenuTabKind> {
+        match self.tab.get_cloned().kind() {
+            MenuTabKind::PlaySettings => Some(MenuTabKind::Instructions),
+            _ => None,
+        }
     }
 }
 
 #[derive(Clone)]
 pub enum Tab {
-    // Settings(Rc<PlaySettingsState>),
+    Settings(Rc<PlaySettingsState>),
     Instructions(Rc<InstructionsEditorState>),
 }
 
 impl Tab {
     pub fn new(base: Rc<Base>, kind: MenuTabKind) -> Self {
         match kind {
-            // MenuTabKind::PlaySettings => Self::Settings(Rc::new(PlaySettingsState::new(base))),
+            MenuTabKind::PlaySettings => Self::Settings(Rc::new(PlaySettingsState::new(base))),
             MenuTabKind::Instructions => {
                 let callbacks = InstructionsEditorCallbacks::new(
                     clone!(base => move |instructions, also_history| {
@@ -69,7 +77,7 @@ impl Tab {
 
     pub fn kind(&self) -> MenuTabKind {
         match self {
-            // Self::Settings(_) => MenuTabKind::PlaySettings,
+            Self::Settings(_) => MenuTabKind::PlaySettings,
             Self::Instructions(_) => MenuTabKind::Instructions,
         }
     }

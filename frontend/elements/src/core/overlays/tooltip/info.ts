@@ -77,9 +77,12 @@ export class _ extends LitElement {
                     letter-spacing: -0.18px;
                     color: #ffffff;
                     width: 304px;
-                    margin: 8px 0 36px 0;
+                    margin: 8px 0 8px 0;
                     white-space: pre-wrap;
                     overflow-wrap: break-word;
+                }
+                ::slotted([slot="actions"]) {
+                    margin-top: 28px;
                 }
                 :host([size="large"]) .body {
                     font-size: 22px;

@@ -11,6 +11,7 @@ use components::{
 };
 use dominator::clone;
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
+use shared::domain::module::body::poster::{Next, PlaySettings as RawPlaySettings};
 use shared::domain::module::body::{Audio, BodyExt};
 use shared::domain::{
     asset::AssetId,
@@ -39,6 +40,7 @@ pub struct Base {
     pub backgrounds: Rc<Backgrounds>,
     pub stickers: Rc<Stickers<Sticker>>,
     pub text_editor: Rc<TextEditor>,
+    pub play_settings: Rc<PlaySettings>,
 }
 
 impl Base {
@@ -137,6 +139,7 @@ impl Base {
             backgrounds,
             stickers,
             continue_next_fn: Mutable::new(None),
+            play_settings: Rc::new(PlaySettings::new(content.play_settings)),
         });
 
         *_self_ref.borrow_mut() = Some(_self.clone());
@@ -156,7 +159,7 @@ impl BaseExt<Step> for Base {
 
     fn continue_next(&self) -> bool {
         match self.step.get() {
-            Step::Two => match self.continue_next_fn.get_cloned() {
+            Step::Two | Step::Three => match self.continue_next_fn.get_cloned() {
                 Some(continue_next_fn) => continue_next_fn(),
                 None => false,
             },
@@ -200,5 +203,17 @@ impl DesignExt<Mode> for Base {
             Mode::Poster => vec![],
             Mode::HearASong => vec![ImageTag::Music],
         })
+    }
+}
+
+pub struct PlaySettings {
+    pub next: Mutable<Next>,
+}
+
+impl PlaySettings {
+    pub fn new(settings: RawPlaySettings) -> Self {
+        Self {
+            next: Mutable::new(settings.next),
+        }
     }
 }

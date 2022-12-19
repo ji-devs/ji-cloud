@@ -22,6 +22,12 @@ impl DomRenderable for Base {
                                 false,
                                 clone!(state => move || {
                                     state.audio_handle.borrow_mut().take();
+                                    match state.play_settings.next {
+                                        Next::Auto | Next::AfterAudio => {
+                                            state.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
+                                        }
+                                        _ => {}
+                                    }
                                 }),
                             )
                         })
