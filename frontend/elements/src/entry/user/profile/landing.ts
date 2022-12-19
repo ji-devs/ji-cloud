@@ -30,7 +30,7 @@ export class _ extends LitElement {
                 :host {
                     display: grid;
                     grid-template-rows: auto 1fr;
-                    grid-template-columns: 400px 1fr;
+                    grid-template-columns: 300px 1fr;
                     height: 100vh;
                 }
                 ::slotted([slot="page-header"]) {
@@ -38,15 +38,15 @@ export class _ extends LitElement {
                 }
                 aside {
                     background-color: var(--light-blue-2);
-                    padding-top: 80px;
+                    padding-top: 60px;
                     text-align: center;
                 }
-                aside ::slotted([slot=profile-image]) {
-                    display: inline-grid;
-                    height: 156px;
-                    width: 156px;
+                ::slotted(profile-image) {
+                    height: 120px;
+                    width: 120px;
                     border-radius: 50%;
-                    margin: 0 auto 20px auto;
+                    overflow: hidden;
+                    margin: 0 auto 16px auto;
                 }
                 aside ::slotted([slot=profile-image]) .fa-icon {
                     justify-items: end;
@@ -58,7 +58,7 @@ export class _ extends LitElement {
                     font-size: 14px;
                 }
                 .name {
-                    font-size: 22px;
+                    font-size: 17px;
                     font-weight: 500;
                     color: var(--dark-gray-6);
                 }
@@ -67,12 +67,12 @@ export class _ extends LitElement {
                     color: var(--dark-gray-5);
                 }
                 nav {
-                    margin: 40px;
+                    margin: 30px;
                     border-top: solid 1px var(--main-blue);
                     border-bottom: solid 1px var(--main-blue);
                     display: grid;
-                    row-gap: 24px;
-                    padding: 32px 0;
+                    row-gap: 18px;
+                    padding: 24px 0;
                     text-align: left;
                 }
                 nav a {
@@ -87,38 +87,38 @@ export class _ extends LitElement {
                     overflow-y: auto;
                 }
                 .main-width-holder {
-                    max-width: 1060px;
+                    max-width: 950px;
                     margin: 0 auto;
-                    padding: 88px 20px;
+                    padding: 66px 16px;
                     display: grid;
-                    row-gap: 48px;
+                    row-gap: 36px;
                 }
                 h1 {
                     color: var(--main-red);
-                    font-size: 40px;
+                    font-size: 30px;
                     font-weight: 900;
                     margin: 0;
                 }
                 section {
                     border-radius: 24px;
                     background-color: var(--white);
-                    padding: 48px;
+                    padding: 36px;
                     display: grid;
-                    row-gap: 40px;
+                    row-gap: 30px;
                 }
                 h2 {
-                    font-size: 24px;
+                    font-size: 20px;
                     font-weight: bold;
                     color: var(--dark-blue-4);
                     margin: 0;
-                    margin-bottom: 8px;
+                    margin-bottom: 6px;
                 }
                 label {
-                    font-size: 16px;
+                    font-size: 14px;
                     font-weight: 500;
                     color: #4a4a4a;
                     display: grid;
-                    grid-template-columns: 248px 440px auto;
+                    grid-template-columns: 196px 330px auto;
                     align-items: center;
                     justify-content: start;
                 }
@@ -127,29 +127,26 @@ export class _ extends LitElement {
                 }
                 section#basic-info .left-side {
                     display: grid;
-                    row-gap: 40px;
+                    row-gap: 30px;
                 }
                 section#basic-info .password-wrapper {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
                 }
+                .filter-message {
+                    font-size: 14px;
+                }
                 .tags-label .tags-wrapper {
                     border-radius: 14px;
                     border: solid 1px var(--light-blue-5);
-                    padding: 20px;
+                    padding: 16px;
                     display: flex;
                     flex-wrap: wrap;
-                    gap: 14px;
+                    gap: 12px;
                 }
                 .tags-label ::slotted(button-rect) {
-                    margin-left: 40px;
-                }
-                .profile-image-wrapper {
-                    display: grid;
-                    justify-items: center;
-                    row-gap: 16px;
-                    width: 156px;
+                    margin-left: 30px;
                 }
                 ::slotted(dialog-overlay) {
                     background-color: #00000080;
@@ -266,7 +263,7 @@ export class _ extends LitElement {
                     </section>
                     <section id="jigzi-filters">
                         <h2>${STR_JIGZI_FILTERS}</h2>
-                        <p>${STR_FILTER_MESSAGE}</p>
+                        <p class="filter-message">${STR_FILTER_MESSAGE}</p>
                         <label class="tags-label">
                             <span>${STR_RELEVANT_AGE_GROUPS}</span>
                             <div class="tags-wrapper">
