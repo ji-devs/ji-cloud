@@ -41,12 +41,15 @@ export class _ extends LitElement {
                     padding-top: 80px;
                     text-align: center;
                 }
-                .profile-image {
+                aside ::slotted([slot=profile-image]) {
+                    display: inline-grid;
                     height: 156px;
                     width: 156px;
                     border-radius: 50%;
-                    overflow: hidden;
                     margin: 0 auto 20px auto;
+                }
+                aside ::slotted([slot=profile-image]) .fa-icon {
+                    justify-items: end;
                 }
                 ::slotted(p[slot=reset-password]) {
                     margin: 0;
@@ -76,9 +79,9 @@ export class _ extends LitElement {
                     color: var(--main-blue);
                     text-decoration: none;
                 }
-                nav a.active {
+                /* nav a.active {
                     /* font-weight: bold; */
-                }
+                /* } */ 
                 main {
                     background-color: var(--light-blue-1);
                     overflow-y: auto;
@@ -209,9 +212,10 @@ export class _ extends LitElement {
         return html`
             <slot name="page-header"></slot>
             <aside>
-                <div class="profile-image">
-                    <slot name="profile-image"></slot>
+                <div slot="profile-image">
+                        <slot name="profile-image"><slot name="edit-profile-image"></slot></slot>
                 </div>
+
                 <div class="name">${this.name}</div>
                 <div class="email-address">${this.email}</div>
                 <nav>

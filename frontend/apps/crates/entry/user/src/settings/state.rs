@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use dominator_helpers::futures::AsyncLoader;
-use futures_signals::{signal::Mutable, signal_vec::MutableVec};
+use futures_signals::{signal::{Mutable}, signal_vec::MutableVec};
 use shared::domain::{
     image::ImageId,
     meta::{AffiliationId, AgeRangeId, MetadataResponse, SubjectId},

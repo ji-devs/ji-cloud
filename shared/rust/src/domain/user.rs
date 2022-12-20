@@ -18,7 +18,7 @@ use crate::{
 pub mod public_user;
 
 /// Wrapper type around [`Uuid`], represents the ID of a User.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart, Default)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct UserId(pub Uuid);
@@ -291,6 +291,42 @@ pub struct UserProfileExport {
     pub country: Option<String>,
     /// Whether this user has opted in to receive educational resources
     pub opt_into_edu_resources: bool,
+}
+
+impl Default for UserProfile {
+    fn default() -> Self {
+        Self {
+            id: Default::default(),
+            username: Default::default(),
+            email: Default::default(),
+            is_oauth: Default::default(),
+            given_name: Default::default(),
+            family_name: Default::default(),
+            profile_image: Default::default(),
+            language_app: Default::default(),
+            language_emails: Default::default(),
+            languages_spoken: Default::default(),
+            opt_into_edu_resources: Default::default(),
+            over_18: Default::default(),
+            timezone: chrono_tz::Tz::Africa__Banjul,
+            bio: Default::default(),
+            location_public: Default::default(),
+            organization_public: Default::default(),
+            persona_public: Default::default(),
+            languages_spoken_public: Default::default(),
+            bio_public: Default::default(),
+            circles: Default::default(),
+            scopes: Default::default(),
+            created_at: Default::default(),
+            updated_at: Default::default(),
+            organization: Default::default(),
+            persona: Default::default(),
+            subjects: Default::default(),
+            age_ranges: Default::default(),
+            affiliations: Default::default(),
+            location: Default::default(),
+        }
+    }
 }
 
 fn serialize_list<S, T>(list: &Vec<T>, serializer: S) -> Result<S::Ok, S::Error>

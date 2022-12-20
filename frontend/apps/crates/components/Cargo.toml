@@ -92,6 +92,7 @@ box_outline = []
 buttons = []
 tabs = []
 overlay = []
+profile_image =[]
 
 default = ["all"]
 all = [
@@ -135,4 +136,5 @@ all = [
     "buttons",
     "tabs",
     "overlay",
+    "profile_image"
 ]
