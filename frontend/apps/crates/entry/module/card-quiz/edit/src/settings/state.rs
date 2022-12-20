@@ -9,8 +9,6 @@ pub struct Settings {
     pub n_choices: Mutable<u8>,
     pub swap: Mutable<bool>,
     pub n_rounds: Mutable<u32>,
-    pub attempts_limit: Mutable<u8>,
-    pub has_attempts_limit: Mutable<bool>,
     pub time_limit: Mutable<u32>,
     pub has_time_limit: Mutable<bool>,
 }
@@ -24,12 +22,6 @@ impl Settings {
             n_choices: Mutable::new(settings.n_choices),
             swap: Mutable::new(settings.swap),
             n_rounds: Mutable::new(settings.n_rounds),
-            attempts_limit: Mutable::new(
-                settings
-                    .n_attempts
-                    .unwrap_or(crate::config::DEFAULT_ATTEMPTS_LIMIT),
-            ),
-            has_attempts_limit: Mutable::new(settings.n_attempts.is_some()),
             time_limit: Mutable::new(
                 settings
                     .time_limit
