@@ -15,6 +15,7 @@ const STR_LABEL: Partial<Record<Kind, string>> = {
     rounds: "Complete",
     n_choices: "Display",
     n_pairs: "Display",
+    "n_pairs-alt": "Display",
     "cards-show-some": "Display",
 };
 
@@ -25,6 +26,7 @@ const STR_LABEL_SUFFIX: Partial<Record<Kind, string[]>> = {
     rounds: ["page", "pages"],
     n_choices: ["card", "cards"],
     n_pairs: ["pair", "pairs"],
+    "n_pairs-alt": ["pair", "pairs"],
     "cards-show-some": ["pair", "pairs"],
 };
 
@@ -70,7 +72,6 @@ export class _ extends LitElement {
         const { kind } = this;
 
         const label = STR_LABEL[kind];
-        const label_suffix = STR_LABEL_SUFFIX[kind];
 
         return html`
             ${label ? html`<span>${label}</span>` : nothing}

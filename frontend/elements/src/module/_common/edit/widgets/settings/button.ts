@@ -17,6 +17,7 @@ export type Kind =
     | "no-limit"
     | "n_choices"
     | "n_pairs"
+    | "n_pairs-alt"
     | "order"
     | "randomize"
     | "rounds"
@@ -57,6 +58,7 @@ const STR_LABEL: Record<Kind, string> = {
     "rounds": "pages per game",
     "n_choices": "cards per page",
     "n_pairs": "pairs per game",
+    "n_pairs-alt": "pairs per game",
     "swap": "card position",
     "video-captions": "play with captions",
     "play-click": "play on click",

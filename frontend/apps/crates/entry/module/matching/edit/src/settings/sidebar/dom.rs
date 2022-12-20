@@ -13,16 +13,6 @@ pub fn render(state: Rc<SidebarSettings>) -> Dom {
                 LineKind::GameDisplay,
                 vec![
                     Some(
-                        SettingsButtonBuilder::new(SettingsButtonKind::NumChoices, || always(true))
-                            .value(SettingsValue::new(
-                                state.settings().n_choices.get(),
-                                clone!(state => move |value| {
-                                    state.set_n_choices(value);
-                                }),
-                            ))
-                            .build(),
-                    ),
-                    Some(
                         SettingsButtonBuilder::new(
                             SettingsButtonKind::Swap,
                             clone!(state => move || {
@@ -30,6 +20,18 @@ pub fn render(state: Rc<SidebarSettings>) -> Dom {
                             }),
                         )
                         .on_click(clone!(state => move || state.toggle_swap()))
+                        .build(),
+                    ),
+                    Some(
+                        SettingsButtonBuilder::new(SettingsButtonKind::NumPairsAlt, || {
+                            always(true)
+                        })
+                        .value(SettingsValue::new(
+                            state.settings().n_choices.get(),
+                            clone!(state => move |value| {
+                                state.set_n_choices(value);
+                            }),
+                        ))
                         .build(),
                     ),
                 ],

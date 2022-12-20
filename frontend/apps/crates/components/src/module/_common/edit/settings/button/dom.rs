@@ -156,7 +156,7 @@ pub fn render_input_select(state: Rc<SettingsButton>, max: usize) -> Dom {
     html!("select" => web_sys::HtmlSelectElement, {
         .prop_signal("value", state.value.as_ref().unwrap_ji().string_signal())
         .children(
-            (1..max)
+            (1..max + 1)
                 .map(|index| {
                     let value_str = state.value.as_ref().unwrap_ji().get_select_value(index);
 
@@ -191,6 +191,7 @@ fn get_input_kind(kind: &SettingsButtonKind) -> Option<InputKind> {
         SettingsButtonKind::Attempts => Some(InputKind::Select(6)),
         SettingsButtonKind::NumChoices => Some(InputKind::Select(6)),
         SettingsButtonKind::NumPairs => Some(InputKind::Field),
+        SettingsButtonKind::NumPairsAlt => Some(InputKind::Select(6)),
         SettingsButtonKind::TimeLimit => Some(InputKind::Field),
         SettingsButtonKind::ContinueSome => Some(InputKind::Field),
         SettingsButtonKind::Rounds => Some(InputKind::Field),
