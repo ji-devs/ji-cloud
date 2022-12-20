@@ -58,29 +58,4 @@ impl SidebarSettings {
             })
         }
     }
-    pub fn set_has_attempts_limit(&self, flag: bool) {
-        self.base.extra.settings.has_attempts_limit.set_neq(flag);
-
-        self.base.history.push_modify(|raw| {
-            if let Some(content) = &mut raw.content {
-                if !flag {
-                    content.player_settings.n_attempts = None;
-                } else {
-                    let value = self.base.extra.settings.attempts_limit.get();
-                    content.player_settings.n_attempts = Some(value);
-                }
-            }
-        })
-    }
-    pub fn set_attempts_limit(&self, n_attempts: u8) {
-        self.base.extra.settings.attempts_limit.set_neq(n_attempts);
-
-        if self.base.extra.settings.has_attempts_limit.get() {
-            self.base.history.push_modify(|raw| {
-                if let Some(content) = &mut raw.content {
-                    content.player_settings.n_attempts = Some(n_attempts);
-                }
-            })
-        }
-    }
 }

@@ -36,9 +36,6 @@ pub struct PlayerSettings {
 
     /// time limit in minutes
     pub time_limit: Option<u32>,
-
-    /// number of attempts
-    pub n_attempts: Option<u8>,
 }
 
 impl Default for PlayerSettings {
@@ -48,7 +45,6 @@ impl Default for PlayerSettings {
             swap: false,
             n_rounds: 3,
             time_limit: None,
-            n_attempts: None,
         }
     }
 }

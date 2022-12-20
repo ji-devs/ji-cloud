@@ -24,7 +24,7 @@ const STR_LABEL_SUFFIX: Partial<Record<Kind, string[]>> = {
     "time-limit": ["second", "seconds"],
     "continue-some": ["item", "items"],
     rounds: ["page", "pages"],
-    n_choices: ["card", "cards"],
+    n_choices: ["choice", "choices"],
     n_pairs: ["pair", "pairs"],
     "n_pairs-alt": ["pair", "pairs"],
     "cards-show-some": ["pair", "pairs"],

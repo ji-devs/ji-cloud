@@ -81,40 +81,6 @@ pub fn render(state: Rc<SidebarSettings>) -> Dom {
                     ),
                 ],
             ),
-            ModuleSettingsLine::new(
-                LineKind::Attempts,
-                vec![
-                    Some(
-                        SettingsButtonBuilder::new(
-                            SettingsButtonKind::NoLimit,
-                            clone!(state => move || {
-                                state.base.extra.settings.has_attempts_limit
-                                    .signal()
-                                    .map(|flag| !flag)
-                            }),
-                        )
-                        .on_click(clone!(state => move || state.set_has_attempts_limit(false)))
-                        .build(),
-                    ),
-                    Some(
-                        SettingsButtonBuilder::new(
-                            SettingsButtonKind::Attempts,
-                            clone!(state => move || {
-                                state.base.extra.settings.has_attempts_limit
-                                    .signal()
-                            }),
-                        )
-                        .value(SettingsValue::new(
-                            state.settings().attempts_limit.get(),
-                            clone!(state => move |value| {
-                                state.set_attempts_limit(value);
-                            }),
-                        ))
-                        .on_click(clone!(state => move || state.set_has_attempts_limit(true)))
-                        .build(),
-                    ),
-                ],
-            ),
             // NOTE - not including score until player/jig story is resolved
         ],
     }))
