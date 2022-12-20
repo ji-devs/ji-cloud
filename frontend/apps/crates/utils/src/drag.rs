@@ -294,12 +294,20 @@ impl<T> Drag<T> {
 }
 
 fn element_from_point(x: f32, y: f32) -> Option<HtmlElement> {
-    web_sys::window()
+    match web_sys::window()
         .unwrap_ji()
         .document()
         .unwrap_ji()
         .element_from_point(x, y)
-        .map(|elem| elem.dyn_into().unwrap_ji())
+    {
+        // [Ty]: Unwrap was failing on dyn_into() for drawing traces. This makes sure that any error
+        // returns a None instead.
+        Some(elem) => match elem.dyn_into() {
+            Ok(elem) => Some(elem),
+            Err(_) => None,
+        },
+        None => None,
+    }
 }
 
 fn create_event(name: &str) -> CustomEvent {
