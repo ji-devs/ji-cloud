@@ -1,14 +1,24 @@
-.div {
-    display: grid;
-    row-gap: 24px;
-    max-width: 400px;
-    width: 90vw;
+.edit-button {
+    grid-row: 1;
+    grid-column: 1;
+    position: relative;
+    left: 60px;
+}
+.image-slot {
+    height: auto;
+    width: auto;
+    border-radius: 50%;
+    grid-row: 1;
+    grid-column: 1;
 }
 popup-body {
+    display: grid;
+    max-width: 400px;
+    width: 90vw;
     border-radius: 16px;
     box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
 }
-fa-button {
+popup-body fa-button {
     justify-self: end;
     font-size: 18px;
 }
@@ -55,7 +65,7 @@ input-file fa-icon {
 }
 input-file .pick-file-message {
     color: var(--dark-gray-3);
-    font-size: 14px;        
+    font-size: 14px;
 }
 input-file .file-size {
     color: var(--dark-gray-4);

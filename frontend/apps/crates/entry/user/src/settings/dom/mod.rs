@@ -1,4 +1,4 @@
-use components::page_header;
+use components::{page_header, profile_image::{ProfileImage, ProfileImageConfig}};
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::{
     map_ref,
@@ -11,8 +11,8 @@ use utils::{
     events,
     languages::{Language, EMAIL_LANGUAGES},
     unwrap::UnwrapJiExt,
+    component::Component
 };
-use wasm_bindgen::JsValue;
 use web_sys::{HtmlElement, HtmlInputElement};
 
 use crate::settings::{
@@ -44,20 +44,22 @@ impl SettingsPage {
         state.load_initial_data();
 
         html!("user-profile", {
+            .child(ProfileImage::new(state.user.profile_image.read_only(), 
+                ProfileImageConfig {
+                    close: Box::new(clone!(state => move || {
+                        state.active_popup.set(ActivePopup::None);
+                        log::info!("In Close")
+                    })), 
+                    save_changes: Box::new(clone!(state => move |user| {
+                        state.user.profile_image.set(user);
+                        state.save_profile();
+                        log::info!("Save Change")
+                    })), 
+            }).render())
             .child(page_header::dom::render(Rc::new(page_header::state::State::new()), Some("page-header"), None, true))
             .prop_signal("email", state.user.email.signal_cloned())
             .prop_signal("name", state.full_name_signal())
             .children(&mut [
-                html!("profile-image", {
-                    .prop("slot", "profile-image")
-                    .prop_signal("imageId", state.user.profile_image.signal_ref(|profile_image| {
-                        log::info!("imageId: {:?}", profile_image);
-                        match profile_image {
-                            Some(image_id) => JsValue::from_str(&image_id.0.to_string()),
-                            None => JsValue::UNDEFINED,
-                        }
-                    }))
-                }),
                 html!("input-wrapper", {
                     .prop("slot", "email")
                     .child(html!("input" => HtmlInputElement, {
@@ -232,6 +234,7 @@ impl SettingsPage {
                         state.active_popup.set(ActivePopup::Affiliation)
                     }))
                 }),
+
             ])
             .child_signal(state.reset_password_status.signal().map(clone!(state => move |status| {
                 Some(match status {
@@ -274,7 +277,7 @@ impl SettingsPage {
                         .prop("open", true)
                         .prop("autoClose", false)
                         .event(clone!(state => move |_: events::Close| {
-                            log::info!("hay");
+                            log::info!("Closed perm");
                             state.active_popup.set(ActivePopup::None);
                         }))
                         .apply(|dom| {
@@ -295,7 +298,6 @@ impl SettingsPage {
                                             &affiliation.display_name
                                         }),
                                     };
-
                                     options_popup::render::<AffiliationId, Affiliation>(Rc::clone(&state), STR_AFFILIATION_HEADER, STR_AFFILIATION_SUBHEADER, callbacks)
                                 },
                                 ActivePopup::Subjects => {
@@ -334,6 +336,7 @@ impl SettingsPage {
 
                                     options_popup::render::<AgeRangeId, AgeRange>(Rc::clone(&state), STR_AGE_HEADER, STR_AGE_SUBHEADER, callbacks)
                                 },
+                                
                             };
 
                             dom.child(child)

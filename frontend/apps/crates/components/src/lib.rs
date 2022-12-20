@@ -69,3 +69,7 @@ pub mod tooltip;
 pub mod traces;
 #[cfg(feature = "transform")]
 pub mod transform;
+
+#[cfg(feature = "profile_image")]
+pub mod profile_image;
+
