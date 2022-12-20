@@ -64,24 +64,6 @@ pub fn render(state: Rc<State>) -> Dom {
                         .on_click(clone!(state => move || state.set_next(Next::SelectAll)))
                         .build()
                     ),
-                    Some(
-                        SettingsButtonBuilder::new(
-                            SettingsButtonKind::ContinueSome,
-                            clone!(state => move || {
-                                state.base.play_settings.next.signal_ref(|curr| {
-                                    std::mem::discriminant(curr) == std::mem::discriminant(&Next::SelectSome(0))
-                                })
-                            }),
-                        )
-                        .value(SettingsValue::new(
-                            state.base.play_settings.next_value.get(),
-                            clone!(state => move |value| {
-                                state.set_next_value(value);
-                            }),
-                        ))
-                        .on_click(clone!(state => move || state.set_next_some()))
-                        .build()
-                    ),
                 ],
             ),
         ],

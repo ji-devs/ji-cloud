@@ -23,7 +23,6 @@ impl PlayState {
         let n_target = {
             match self.game.base.settings.next {
                 Next::SelectAll => Some(self.traces.len()),
-                Next::SelectSome(n) => Some(n),
                 Next::Continue => None,
             }
         };

@@ -20,18 +20,4 @@ impl State {
             }
         })
     }
-
-    pub fn set_next_value(&self, amount: usize) {
-        self.base.play_settings.next_value.set(amount);
-
-        if std::mem::discriminant(&*self.base.play_settings.next.lock_ref())
-            == std::mem::discriminant(&Next::SelectSome(0))
-        {
-            self.set_next_some();
-        }
-    }
-
-    pub fn set_next_some(&self) {
-        self.set_next(Next::SelectSome(self.base.play_settings.next_value.get()));
-    }
 }

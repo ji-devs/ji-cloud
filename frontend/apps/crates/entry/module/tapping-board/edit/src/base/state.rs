@@ -56,19 +56,13 @@ pub struct Base {
 pub struct PlaySettings {
     pub hint: Mutable<Hint>,
     pub next: Mutable<Next>,
-    pub next_value: Mutable<usize>,
 }
 
 impl PlaySettings {
     pub fn new(settings: RawPlaySettings) -> Self {
-        let next_value = Mutable::new(match &settings.next {
-            Next::SelectSome(value) => *value,
-            _ => crate::config::DEFAULT_SELECT_AMOUNT,
-        });
         Self {
             hint: Mutable::new(settings.hint),
             next: Mutable::new(settings.next),
-            next_value,
         }
     }
 }
