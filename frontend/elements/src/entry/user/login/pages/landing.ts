@@ -50,11 +50,9 @@ export class _ extends LitElement {
                     left:0;
                     padding: 25px;
                 }
-
                 .logo img-ui{
                     width: 85px;
                 }
-
                 .spacer {
                     height: 20px;
                 }
