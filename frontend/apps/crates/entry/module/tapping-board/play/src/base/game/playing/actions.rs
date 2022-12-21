@@ -2,19 +2,27 @@ use super::state::*;
 use components::module::_common::play::prelude::*;
 use shared::domain::module::body::tapping_board::Next;
 use std::rc::Rc;
+use utils::unwrap::UnwrapJiExt;
 
 impl PlayState {
     pub fn select(state: Rc<Self>, index: usize) {
+        // Kill playback for all already selected traces
+        state
+            .selected_set
+            .lock_ref()
+            .iter()
+            .for_each(|index| state.traces.get(*index).unwrap_ji().kill_playback());
+
         // mark the selected set
         state.selected_set.lock_mut().insert(index);
 
-        for (trace_index, trace) in state.traces.iter().enumerate() {
-            if trace_index == index {
-                trace.select(state.clone());
-            } else {
-                trace.kill_playback();
-            }
+        {
+            let mut current_set = state.current_set.lock_mut();
+            current_set.clear();
+            current_set.insert(index);
         }
+
+        state.traces.get(index).unwrap_ji().select(state.clone());
     }
 
     pub fn evaluate_end(&self) {
