@@ -3,7 +3,6 @@ use std::rc::Rc;
 use super::state::*;
 use components::module::_common::play::prelude::{BaseExt, ModuleEnding, ModulePlayPhase};
 use shared::domain::module::body::_groups::design::Trace;
-use shared::domain::module::body::drag_drop::Next;
 use utils::{drag::Drag, prelude::*, resize::get_resize_info};
 
 use crate::debug::*;
@@ -115,11 +114,9 @@ impl PlayState {
                             if feedback.has_content() {
                                 state.game.base.feedback_signal.set(Some(feedback.clone()));
                             } else {
-                                if let Next::PlaceAll = state.game.base.settings.next {
-                                    state.game.base.set_play_phase(ModulePlayPhase::Ending(Some(
-                                        ModuleEnding::Next,
-                                    )));
-                                }
+                                state.game.base.set_play_phase(ModulePlayPhase::Ending(Some(
+                                    ModuleEnding::Next,
+                                )));
                             }
                         });
                     });

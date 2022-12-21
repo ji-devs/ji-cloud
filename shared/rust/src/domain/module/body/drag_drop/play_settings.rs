@@ -3,9 +3,6 @@ use serde::{Deserialize, Serialize};
 /// Play settings
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
 pub struct PlaySettings {
-    /// next style
-    pub next: Next,
-
     /// time limit in minutes
     pub time_limit: Option<u32>,
 
@@ -26,21 +23,5 @@ pub enum Hint {
 impl Default for Hint {
     fn default() -> Self {
         Self::None
-    }
-}
-
-/// Next
-#[derive(Clone, Serialize, Deserialize, Debug)]
-pub enum Next {
-    /// Place all
-    PlaceAll,
-
-    /// click continue
-    ClickContinue,
-}
-
-impl Default for Next {
-    fn default() -> Self {
-        Self::PlaceAll
     }
 }

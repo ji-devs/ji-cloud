@@ -3,39 +3,39 @@ use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 
 use super::state::PlaySettingsState;
-use shared::domain::module::body::drag_drop::{Hint, Next};
+use shared::domain::module::body::drag_drop::Hint;
 
 use components::module::_common::edit::settings::prelude::*;
 
 pub fn render(state: Rc<PlaySettingsState>) -> Dom {
     render_settings(Rc::new(ModuleSettings {
         lines: vec![
-            ModuleSettingsLine::new(
-                LineKind::Next,
+            ModuleSettingsLine::new_with_label(
+                "Highlight area to drop items:".into(),
                 vec![
                     Some(
                         SettingsButtonBuilder::new(
-                            SettingsButtonKind::ContinueAll,
+                            SettingsButtonKind::HighlightOff,
                             clone!(state => move || {
-                                state.base.play_settings.next.signal_ref(|curr| {
-                                    std::mem::discriminant(curr) == std::mem::discriminant(&Next::PlaceAll)
+                                state.base.play_settings.hint.signal_ref(|curr| {
+                                    *curr == Hint::None
                                 })
                             }),
                         )
-                        .on_click(clone!(state => move || state.set_next(Next::PlaceAll)))
-                        .build()
+                        .on_click(clone!(state => move || state.set_hint(Hint::None)))
+                        .build(),
                     ),
                     Some(
                         SettingsButtonBuilder::new(
-                            SettingsButtonKind::ContinueClick,
+                            SettingsButtonKind::Highlight,
                             clone!(state => move || {
-                                state.base.play_settings.next.signal_ref(|curr| {
-                                    std::mem::discriminant(curr) == std::mem::discriminant(&Next::ClickContinue)
+                                state.base.play_settings.hint.signal_ref(|curr| {
+                                    *curr == Hint::Highlight
                                 })
                             }),
                         )
-                        .on_click(clone!(state => move || state.set_next(Next::ClickContinue)))
-                        .build()
+                        .on_click(clone!(state => move || state.set_hint(Hint::Highlight)))
+                        .build(),
                     ),
                 ],
             ),
@@ -52,7 +52,7 @@ pub fn render(state: Rc<PlaySettingsState>) -> Dom {
                             }),
                         )
                         .on_click(clone!(state => move || state.set_has_time_limit(false)))
-                        .build()
+                        .build(),
                     ),
                     Some(
                         SettingsButtonBuilder::new(
@@ -69,36 +69,7 @@ pub fn render(state: Rc<PlaySettingsState>) -> Dom {
                             }),
                         ))
                         .on_click(clone!(state => move || state.set_has_time_limit(true)))
-                        .build()
-                    ),
-                ],
-            ),
-            ModuleSettingsLine::new(
-                LineKind::Hint,
-                vec![
-                    Some(
-                        SettingsButtonBuilder::new(
-                            SettingsButtonKind::HighlightOff,
-                            clone!(state => move || {
-                                state.base.play_settings.hint.signal_ref(|curr| {
-                                    *curr == Hint::None
-                                })
-                            }),
-                        )
-                        .on_click(clone!(state => move || state.set_hint(Hint::None)))
-                        .build()
-                    ),
-                    Some(
-                        SettingsButtonBuilder::new(
-                            SettingsButtonKind::Highlight,
-                            clone!(state => move || {
-                                state.base.play_settings.hint.signal_ref(|curr| {
-                                    *curr == Hint::Highlight
-                                })
-                            }),
-                        )
-                        .on_click(clone!(state => move || state.set_hint(Hint::Highlight)))
-                        .build()
+                        .build(),
                     ),
                 ],
             ),

@@ -29,8 +29,7 @@ use shared::domain::{
             _groups::design::{Trace as RawTrace, TraceKind},
             drag_drop::{
                 Hint, Interactive as RawInteractive, Item as RawItem, ItemKind as RawItemKind,
-                Mode, ModuleData as RawData, Next, PlaySettings as RawPlaySettings, Step,
-                TargetArea,
+                Mode, ModuleData as RawData, PlaySettings as RawPlaySettings, Step, TargetArea,
             },
             BodyExt,
         },
@@ -72,7 +71,6 @@ pub struct StickerTarget {
 
 pub struct PlaySettings {
     pub hint: Mutable<Hint>,
-    pub next: Mutable<Next>,
     pub time_limit: Mutable<u32>,
     pub has_time_limit: Mutable<bool>,
 }
@@ -81,7 +79,6 @@ impl PlaySettings {
     pub fn new(settings: RawPlaySettings) -> Self {
         Self {
             hint: Mutable::new(settings.hint),
-            next: Mutable::new(settings.next),
             time_limit: Mutable::new(
                 settings
                     .time_limit
