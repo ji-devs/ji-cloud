@@ -12,7 +12,7 @@ use shared::{
                     Backgrounds, Sprite, Sticker, Text, Trace, TraceKind, TraceShape,
                 },
                 drag_drop::{
-                    Content, Hint, Interactive, Item, ItemKind, Mode, ModuleData as RawData, Next,
+                    Content, Hint, Interactive, Item, ItemKind, Mode, ModuleData as RawData,
                     PlaySettings, TargetArea,
                 },
             },
@@ -196,7 +196,6 @@ impl DebugSettings {
                         },
                         play_settings: PlaySettings {
                             hint: Hint::Highlight,
-                            next: Next::ClickContinue,
                             ..PlaySettings::default()
                         },
                         ..Content::default()

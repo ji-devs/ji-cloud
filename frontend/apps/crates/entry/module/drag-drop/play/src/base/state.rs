@@ -6,8 +6,7 @@ use shared::domain::{
             Instructions,
             _groups::design::Backgrounds,
             drag_drop::{
-                Item, Mode, ModuleData as RawData, Next, PlaySettings, Step, TargetArea,
-                TargetTransform,
+                Item, Mode, ModuleData as RawData, PlaySettings, Step, TargetArea, TargetTransform,
             },
             InstructionsType,
         },
@@ -77,9 +76,7 @@ impl BaseExt for Base {
 
     fn handle_instructions_ended(&self, instructions_type: InstructionsType) {
         if let InstructionsType::Feedback = instructions_type {
-            if let Next::PlaceAll = self.settings.next {
-                self.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
-            }
+            self.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
         }
     }
 
