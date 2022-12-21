@@ -75,7 +75,6 @@ impl TracesShow {
                                     TracesShowMode::HiddenSolidMap(lookup) => {
                                         let interactive = state.on_select.is_some();
                                         EitherSignal::Right(lookup.signal_ref(move |lookup| {
-
                                             ShapeStyle {
                                                 interactive,
                                                 mode: {
