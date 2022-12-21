@@ -71,8 +71,7 @@ export class _ extends LitElement {
                     justify-content: center;
                     align-items: center;
                 }
-                ::slotted([slot=stationery]),
-                ::slotted([slot=dragged]) {
+                ::slotted([slot=stationery]) {
                     max-width: 110px;
                     max-height: 110px;
                 }

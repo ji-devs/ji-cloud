@@ -69,6 +69,8 @@ export class _ extends LitElement {
                     left: 0;
                     z-index: 1;
                     cursor: grabbing;
+                    max-width: 110px;
+                    max-height: 110px;
                     /* for elementFromPoint not to return the dragged element */
                     pointer-events: none;
                 }
