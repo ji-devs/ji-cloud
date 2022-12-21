@@ -16,16 +16,17 @@ export class _ extends LitElement {
             css`
                 :host {
                     display: block;
-                    width: 530px;
+                    width: 400px;
                     background-color: #ffffff;
+                    font-size: 14px;
                 }
                 .body {
-                    padding: 0 32px;
+                    padding: 0 24px;
                 }
                 section {
-                    padding: 24px 0;
+                    padding: 20px 0;
                     display: grid;
-                    row-gap: 20px;
+                    row-gap: 16px;
                 }
                 section:not(:last-child) {
                     border-bottom: solid 1px #d5e4ff;
@@ -36,7 +37,7 @@ export class _ extends LitElement {
                 h4 {
                     margin: 0;
                     color: var(--dark-gray-6);
-                    font-size: 16px;
+                    font-size: inherit;
                     font-weight: 500;
                 }
                 .first-line {
@@ -56,12 +57,12 @@ export class _ extends LitElement {
                     white-space: pre-wrap;
                 }
                 .published-at {
-                    font-size: 14px;
+                    font-size: 12px;
                     font-weight: 500;
                     color: #818b93;
                     display: flex;
                     align-items: center;
-                    column-gap: 6px;
+                    column-gap: 5px;
                 }
                 .second-line {
                     display: flex;
@@ -70,35 +71,35 @@ export class _ extends LitElement {
                 .second-line span {
                     display: flex;
                     align-items: center;
-                    column-gap: 6px;
+                    column-gap: 5px;
                 }
                 .description {
-                    font-size: 14px;
+                    font-size: 12px;
                     color: var(--dark-gray-6);
                     margin: 0;
                 }
                 .categories {
                     display: flex;
                     flex-wrap: wrap;
-                    grid-gap: 10px;
+                    grid-gap: 8px;
                 }
                 .additional-resources-items {
                     display: flex;
                     flex-wrap: wrap;
-                    gap: 16px;
-                    padding: 10px 0;
+                    gap: 12px;
+                    padding: 8px 0;
                 }
                 ::slotted(a[slot=additional-resources]) {
                     color: var(--main-blue);
                     font-weight: 500;
                     text-decoration: none;
-                    font-size: 14px;
+                    font-size: 12px;
                     display: flex;
-                    column-gap: 6px;
+                    column-gap: 5px;
                 }
                 .courses-section h5 {
                     margin: 0;
-                    font-size: 14px;
+                    font-size: 12px;
                     font-weight: normal;
                     color: var(--dark-gray-6);
                 }
@@ -109,11 +110,11 @@ export class _ extends LitElement {
                     grid-template-columns: auto auto;
                     align-items: center;
                     justify-content: start;
-                    column-gap: 16px;
+                    column-gap: 12px;
                 }
                 .report-section ::slotted([slot="report-sent"]) {
                     color: var(--dark-green-1);
-                    font-size: 14px;
+                    font-size: 12px;
                 }
             `,
         ];

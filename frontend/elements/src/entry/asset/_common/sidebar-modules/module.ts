@@ -28,8 +28,8 @@ export class _ extends LitElement {
 
                 .drag-overlay,
                 section {
-                    width: 324px;
                     height: 128px;
+                    padding: 14px 0;
                     transition-property: height, width;
                     transition-duration: var(--collapsing-phase-duration);
                     transition-timing-function: linear;
@@ -67,7 +67,6 @@ export class _ extends LitElement {
                     border-bottom-color: #e7f0fd;
                 }
                 .grid-container {
-                    margin-top: 23px;
                     display: grid;
                     grid-template-columns: 98px auto auto;
                 }
@@ -133,7 +132,7 @@ export class _ extends LitElement {
                     overflow: hidden;
                 }
                 .window ::slotted([slot="window"]) {
-                    height: 123px;
+                    height: 96px;
                     border-radius: 16px;
                 }
                 .decorations {

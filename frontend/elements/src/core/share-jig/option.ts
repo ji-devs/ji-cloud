@@ -11,16 +11,17 @@ export class _ extends LitElement {
                     display: grid;
                     grid-template-columns: auto 1fr auto;
                     align-items: center;
-                    column-gap: 12px;
-                    padding: 8px;
+                    column-gap: 10px;
+                    padding: 6px;
                     cursor: pointer;
+                    font-size: 14px;
                 }
                 :host(:hover) {
                     background-color: var(--light-blue-1);
                 }
                 .help {
-                    height: 24px;
-                    width: 24px;
+                    height: 20px;
+                    width: 20px;
                     display: inline-grid;
                     place-content: center;
                     color: var(--main-blue);
@@ -28,7 +29,7 @@ export class _ extends LitElement {
                     border-radius: 50%;
                 }
                 img-ui {
-                    width: 32px;
+                    width: 24px;
                 }
             `,
         ];

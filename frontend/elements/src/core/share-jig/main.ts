@@ -14,9 +14,11 @@ export class _ extends LitElement {
                     background-color: #ffffff;
                 }
                 .body {
-                    padding: 0px 24px 32px 24px;
+                    padding: 0px 24px 24px 24px;
                     display: grid;
-                    width: 420px;
+                    width: 305px;
+                    max-width: 100vw;
+                    box-sizing: border-box;
                 }
             `,
         ];
