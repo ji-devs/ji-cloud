@@ -13,6 +13,7 @@ export class _ extends LitElement {
                     align-items: center;
                     padding: 0 20px;
                     height: 68px;
+                    background-color: #ffffff;
                 }
                 @media (min-width: 1920px) {
                     :host {
@@ -60,7 +61,7 @@ export class _ extends LitElement {
                 }
 
                 /* mobile */
-                @media (max-width: 1000px) {
+                @media (max-width: 1024px) {
                     :host {
                         justify-content: center;
                     }
