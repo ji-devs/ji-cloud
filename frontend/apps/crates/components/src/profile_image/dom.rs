@@ -1,12 +1,15 @@
 use std::rc::Rc;
 
-use super::{ProfileImage, ImageIdOrFile};
-use crate::{file_input::{FileInput, FileInputConfig}, dialog::Dialog};
-use dominator::{clone, html, DomBuilder, Dom};
+use super::{ImageIdOrFile, ProfileImage};
+use crate::{
+    dialog::Dialog,
+    file_input::{FileInput, FileInputConfig},
+};
+use dominator::{clone, html, Dom, DomBuilder};
 use futures_signals::signal::SignalExt;
 use utils::{component::Component, events};
 use wasm_bindgen::JsValue;
-use web_sys::{File, ShadowRoot, Url, HtmlElement};
+use web_sys::{File, HtmlElement, ShadowRoot, Url};
 
 const STR_HEADING: &str = "Profile picture";
 const STR_SAVE: &str = "Save";
@@ -18,14 +21,12 @@ impl Component<ProfileImage> for Rc<ProfileImage> {
 
     fn apply_on_host(&self, dom: DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
         dom.class("profile-image").prop("slot", "profile-image")
-    }   
+    }
 
     fn dom(&self, dom: DomBuilder<ShadowRoot>) -> DomBuilder<ShadowRoot> {
         let state = self;
 
-        dom
-        .child( 
-            html!("profile-image", {
+        dom.child(html!("profile-image", {
                 .class("image-slot")
                 .prop("slot", "profile-image")
                 .prop_signal("imageId", state.profile_image.signal_ref(|profile_image| {
@@ -35,38 +36,32 @@ impl Component<ProfileImage> for Rc<ProfileImage> {
                     }
             }))
         }))
-        .child(               
-            html!("fa-button", {
+        .child(html!("fa-button", {
             .class("edit-button")
             .prop("slot", "edit-profile-image")
             .prop("icon", "fa-light fa-pen")
             .event(clone!(state => move |_: events::Click| {
                 state.popup_open.set(true);
             }))
-            .child_signal(state.popup_open.signal().map(clone!(state => move |popup_open| {  
+            .child_signal(state.popup_open.signal().map(clone!(state => move |popup_open| {
                     if popup_open {
                         Some(Dialog::render(
                             clone!(state => move || {
-                                render_popup(&state)}),                        
+                                render_popup(&state)}),
                                 Some(Box::new(clone!(state => move || {
                                     state.popup_open.set(false);
                                 })))
                         ))
                     } else {
-                        Some(Box::new(clone!(state => move || {
-                            state.popup_open.set(false);
-                        })));
                         None
                     }
                 }))
             )
         }))
     }
-
 }
 
-fn render_popup(state: &Rc<ProfileImage>) -> Dom { 
-
+fn render_popup(state: &Rc<ProfileImage>) -> Dom {
     html!("popup-image", {
         .child(html!("style", {
             .text(include_str!("./styles.css"))
@@ -144,7 +139,6 @@ fn render_popup(state: &Rc<ProfileImage>) -> Dom {
             }))
         }))
     })
-   
 }
 
 pub fn file_to_object_url(file: &File) -> String {

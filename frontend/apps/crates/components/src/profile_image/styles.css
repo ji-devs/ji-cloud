@@ -1,8 +1,10 @@
 .edit-button {
     grid-row: 1;
     grid-column: 1;
-    position: relative;
-    left: 60px;
+    justify-self: end;
+    align-self: start;
+    min-width: 30px;
+    min-height: 30px;
 }
 .image-slot {
     height: auto;

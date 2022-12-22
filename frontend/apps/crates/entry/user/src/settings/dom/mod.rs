@@ -1,4 +1,7 @@
-use components::{page_header, profile_image::{ProfileImage, ProfileImageConfig}};
+use components::{
+    page_header,
+    profile_image::{ProfileImage, ProfileImageConfig},
+};
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::{
     map_ref,
@@ -8,10 +11,10 @@ use futures_signals::{
 use shared::domain::meta::{Affiliation, AffiliationId, AgeRange, AgeRangeId, Subject, SubjectId};
 use std::rc::Rc;
 use utils::{
+    component::Component,
     events,
     languages::{Language, EMAIL_LANGUAGES},
     unwrap::UnwrapJiExt,
-    component::Component
 };
 use web_sys::{HtmlElement, HtmlInputElement};
 
@@ -44,17 +47,12 @@ impl SettingsPage {
         state.load_initial_data();
 
         html!("user-profile", {
-            .child(ProfileImage::new(state.user.profile_image.read_only(), 
+            .child(ProfileImage::new(state.user.profile_image.read_only(),
                 ProfileImageConfig {
-                    close: Box::new(clone!(state => move || {
-                        state.active_popup.set(ActivePopup::None);
-                        log::info!("In Close")
-                    })), 
                     save_changes: Box::new(clone!(state => move |user| {
                         state.user.profile_image.set(user);
                         state.save_profile();
-                        log::info!("Save Change")
-                    })), 
+                    })),
             }).render())
             .child(page_header::dom::render(Rc::new(page_header::state::State::new()), Some("page-header"), None, true))
             .prop_signal("email", state.user.email.signal_cloned())
@@ -336,7 +334,6 @@ impl SettingsPage {
 
                                     options_popup::render::<AgeRangeId, AgeRange>(Rc::clone(&state), STR_AGE_HEADER, STR_AGE_SUBHEADER, callbacks)
                                 },
-                                
                             };
 
                             dom.child(child)
