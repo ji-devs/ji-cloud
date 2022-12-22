@@ -7,7 +7,7 @@ export default {
 
 export const JigDetails = () => {
   return `
-    <admin-curation-jig-details>
+    <admin-jig-details>
       <div slot="buttons">
         <button-rect kind="text" color="blue">Cancel</button-rect>
         <button-rect kind="outline" color="blue">Save Changes</button-rect>
@@ -42,7 +42,7 @@ export const JigDetails = () => {
           <textarea rows="6" value=""></textarea>
         </input-wrapper>
       </div>
-    </admin-curation-jig-details>
+    </admin-jig-details>
   `
 };
 JigDetails.args = {}

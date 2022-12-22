@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 
-@customElement("admin-curation-table")
+@customElement("admin-table")
 export class _ extends LitElement {
     static styles = [
         css`
@@ -74,11 +74,11 @@ export class _ extends LitElement {
                 </div>
             </div>
             <div class="table">
-                <admin-curation-table-line>
+                <admin-table-line>
                     ${this.headers.map(
                         (header) => html`<div class="header-cell">${header}</div>`
                     )}
-                </admin-curation-table-line>
+                </admin-table-line>
                 <slot></slot>
             </div>
         `;

@@ -22,7 +22,7 @@ impl CurationTable {
         let order_by_options = vec![OrderBy::PublishedAt, OrderBy::CreatedAt];
 
         let state = self;
-        html!("admin-curation-table", {
+        html!("admin-table", {
             .child(html!("input-search", {
                 .prop("slot", "search")
                 .prop("placeholder", "Search...")
@@ -111,7 +111,7 @@ impl CurationTable {
             }))
             .children_signal_vec(state.curation_state.jigs.signal_vec_cloned().map(clone!(state => move |jig: Rc<EditableJig>| {
                 let jig_id = jig.id;
-                html!("admin-curation-table-line", {
+                html!("admin-table-line", {
                     .child(html!("div", {
                         .style("display", "grid")
                         .style("grid-template-columns", "repeat(3, 100px)")

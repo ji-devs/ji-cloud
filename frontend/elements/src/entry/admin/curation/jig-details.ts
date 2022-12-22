@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement } from "lit-element";
 
-@customElement("admin-curation-jig-details")
+@customElement("admin-jig-details")
 export class _ extends LitElement {
     static styles = [
         css`

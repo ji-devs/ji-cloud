@@ -127,6 +127,7 @@ pub enum AdminRoute {
     Categories,
     Locale,
     Curation(AdminCurationRoute),
+    Users(AdminUsersRoute),
     ImageSearch(Option<ImageSearchQuery>),
     ImageAdd,
     ImageTags,
@@ -187,6 +188,7 @@ impl AdminRoute {
             Self::Categories => scopes.contains(&UserScope::ManageCategory),
             Self::Locale => false,
             Self::Curation(_) => scopes.contains(&UserScope::AdminJig),
+            Self::Users(_) => scopes.contains(&UserScope::Admin),
             Self::ImageSearch(_) | Self::ImageAdd | Self::ImageTags | Self::ImageMeta(_, _) => {
                 scopes.contains(&UserScope::ManageImage)
             }
@@ -199,6 +201,12 @@ impl AdminRoute {
 pub enum AdminCurationRoute {
     Table,
     Jig(JigId),
+}
+
+#[derive(Debug, Clone)]
+pub enum AdminUsersRoute {
+    Table,
+    User(UserId),
 }
 
 #[derive(Debug, Clone)]
@@ -389,6 +397,11 @@ impl Route {
             ["user", "no-auth"] => Self::User(UserRoute::NoAuth),
             ["admin", "curation"] => Self::Admin(AdminRoute::Curation(AdminCurationRoute::Table)),
             ["admin", "curation", jig_id] => {
+                let jig_id = JigId(Uuid::from_str(jig_id).unwrap_ji());
+                Self::Admin(AdminRoute::Curation(AdminCurationRoute::Jig(jig_id)))
+            }
+            ["admin", "users"] => Self::Admin(AdminRoute::Curation(AdminCurationRoute::Table)),
+            ["admin", "users", jig_id] => {
                 let jig_id = JigId(Uuid::from_str(jig_id).unwrap_ji());
                 Self::Admin(AdminRoute::Curation(AdminCurationRoute::Jig(jig_id)))
             }
@@ -658,6 +671,12 @@ impl From<&Route> for String {
                     AdminCurationRoute::Table => "/admin/curation".to_string(),
                     AdminCurationRoute::Jig(jig_id) => {
                         format!("/admin/curation/{}", jig_id.0)
+                    }
+                },
+                AdminRoute::Users(users_route) => match users_route {
+                    AdminUsersRoute::Table => "/admin/users".to_string(),
+                    AdminUsersRoute::User(user_id) => {
+                        format!("/admin/users/{}", user_id.0)
                     }
                 },
                 AdminRoute::Locale => "/admin/locale".to_string(),

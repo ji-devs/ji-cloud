@@ -14,11 +14,11 @@ mod affiliation;
 mod age;
 mod language;
 
-impl CurationJig {
+impl AdminUser {
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self;
-        html!("admin-jig-details", {
-            .prop("slot", "jig-details")
+        html!("admin-user-details", {
+            .prop("slot", "user-details")
             .child(html!("window-loader-block", {
                 .prop("slot", "loader")
                 .prop_signal("visible", state.jig.loader.is_loading())
