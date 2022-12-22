@@ -13,7 +13,7 @@ use shared::{
 use utils::{prelude::ApiEndpointExt, unwrap::UnwrapJiExt};
 use web_sys::File;
 
-use super::{ProfileImage, ImageIdOrFile};
+use super::{ImageIdOrFile, ProfileImage};
 
 impl ProfileImage {
     pub fn apply_changes(self: &Rc<Self>) {
@@ -28,6 +28,8 @@ impl ProfileImage {
             };
 
             (state.config.save_changes)(image_id);
+
+            state.popup_open.set(false)
         }));
     }
 }

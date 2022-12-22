@@ -1,8 +1,8 @@
 mod actions;
+mod config;
 mod dom;
 mod state;
-mod config;
 
+pub use config::*;
 pub use dom::*;
 pub use state::*;
-pub use config::*;
