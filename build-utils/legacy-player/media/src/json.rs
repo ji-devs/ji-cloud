@@ -314,10 +314,15 @@ mod slide {
 
 
         let validate_jump_index = |index: i128| -> Option<usize> {
-            if index >= (max_slides as i128) || index < 0 {
+            let max_slides = max_slides as i128;
+            
+            if index > (max_slides + 1) || index < 0 {
                 log::warn!("invalid jump index: {} (there are only {} slides!)", index, max_slides);
                 None
-            } else {
+            } else if index >= max_slides {
+                log::warn!("index points very close to the very end... not quite right, but close enough that we count it, hehe. rewriting to be end-1");
+                (max_slides-1).try_into().ok()
+            }  else {
                 index.try_into().ok()
             }
         };

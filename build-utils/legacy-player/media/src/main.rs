@@ -18,7 +18,7 @@ async fn main() {
     dotenv().ok();
     let ctx = Context::new();
 
-    //json::run(ctx.clone()).await;
+    json::run(ctx.clone()).await;
     //transcode::download::run(ctx.clone()).await;
-    transcode::convert::run(ctx.clone()).await;
+    //transcode::convert::run(ctx.clone()).await;
 }

@@ -28,7 +28,7 @@ async fn main() {
     //download_jigs::run(ctx.clone()).await;
     //download_modules::run(ctx.clone()).await;
     //report::run(ctx.clone()).await;
-    create_or_update_jigs::run(ctx.clone()).await;
+    //create_or_update_jigs::run(ctx.clone()).await;
 }
 
 fn init_logger(ctx: &Context) {
