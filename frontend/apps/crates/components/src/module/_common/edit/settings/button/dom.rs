@@ -69,7 +69,10 @@ where
         }))
         .apply_if(state.value.is_some(), |dom| {
             let value = state.value.as_ref().unwrap_ji();
-            let input_kind = get_input_kind(&state.kind);
+            let input_kind = match value.get_input_kind() {
+                Some(input_kind) => Some(input_kind),
+                None => get_input_kind(&state.kind),
+            };
 
             dom
                 .prop_signal("num", value.string_signal())
@@ -83,6 +86,16 @@ where
                             .child(html!("module-settings-bubble-content", {
                                 .prop("kind", state.kind.as_str_id())
                                 .prop_signal("value", state.value.as_ref().unwrap_ji().string_signal())
+                                .apply_if(state.value.as_ref().unwrap_ji().get_label_template().is_some(), clone!(state => move |dom| {
+                                    let template = serde_json::to_string(
+                                        &state.value
+                                            .as_ref()
+                                            .unwrap_ji()
+                                            .get_label_template()
+                                            .unwrap_ji()
+                                    ).unwrap_ji();
+                                    dom.prop("valueLabelTemplateFromString", template)
+                                }))
                                 .apply_if(input_kind.is_some(), clone!(state => move |dom| {
                                     dom.child(
                                         match input_kind.unwrap_ji() {
@@ -173,29 +186,4 @@ pub fn render_input_select(state: Rc<SettingsButton>, max: usize) -> Dom {
             }))
         })
     })
-}
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-enum InputKind {
-    Field,
-    Select(usize),
-}
-fn get_input_kind(kind: &SettingsButtonKind) -> Option<InputKind> {
-    // If the kind is a CustomKind, then we need to check whether the variant is Kind first. If it is
-    // return that so we can determine whether or not show an input field on it.
-    let kind = match kind {
-        SettingsButtonKind::Custom(SettingsButtonCustomKind::Kind(kind), _) => &*kind,
-        _ => kind,
-    };
-
-    match kind {
-        SettingsButtonKind::Attempts => Some(InputKind::Select(6)),
-        SettingsButtonKind::NumChoices => Some(InputKind::Select(6)),
-        SettingsButtonKind::NumPairs => Some(InputKind::Field),
-        SettingsButtonKind::NumPairsAlt => Some(InputKind::Select(6)),
-        SettingsButtonKind::TimeLimit => Some(InputKind::Field),
-        SettingsButtonKind::ContinueSome => Some(InputKind::Field),
-        SettingsButtonKind::Rounds => Some(InputKind::Field),
-        SettingsButtonKind::CardsShowSome => Some(InputKind::Field),
-        _ => None,
-    }
 }

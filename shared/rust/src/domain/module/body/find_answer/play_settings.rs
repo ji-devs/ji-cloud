@@ -1,19 +1,30 @@
 use serde::{Deserialize, Serialize};
 
+/// Default limit for attempts a student can make on an answer before a trace
+/// is highlighted.
+pub const DEFAULT_ATTEMPTS_LIMIT: u32 = 3;
+
 /// Play settings
-#[derive(Clone, Default, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct PlaySettings {
     /// Question ordering
     pub ordering: Ordering,
 
     /// number of attempts
-    pub n_attempts: Option<u8>,
+    pub n_attempts: Option<u32>,
 
     /// time limit in minutes
     pub time_limit: Option<u32>,
+}
 
-    /// Next style
-    pub next: Next,
+impl Default for PlaySettings {
+    fn default() -> Self {
+        Self {
+            n_attempts: Some(DEFAULT_ATTEMPTS_LIMIT),
+            ordering: Default::default(),
+            time_limit: Default::default(),
+        }
+    }
 }
 
 /// Ordering of questions
@@ -28,25 +39,6 @@ pub enum Ordering {
 
 impl Default for Ordering {
     fn default() -> Self {
-        Self::Randomize
-    }
-}
-
-/// Next
-#[derive(Clone, Serialize, Deserialize, Debug)]
-pub enum Next {
-    /// Continue
-    Continue,
-
-    /// SelectAll
-    SelectAll,
-
-    /// Select Some
-    SelectSome(usize),
-}
-
-impl Default for Next {
-    fn default() -> Self {
-        Self::Continue
+        Self::InOrder
     }
 }
