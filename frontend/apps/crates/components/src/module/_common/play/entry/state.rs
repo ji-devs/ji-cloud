@@ -334,6 +334,8 @@ pub enum ModuleEnding {
     // [Ty] I'm not 100% sure about these endings, but afaict they are not implemented except
     // for Next.
     /// The student completed the module correctly
+    ///
+    /// Don't move on to the next module though.
     Positive,
     /// The student completed the module, but there were mistakes
     Negative,

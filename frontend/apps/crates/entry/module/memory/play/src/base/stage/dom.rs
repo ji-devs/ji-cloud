@@ -15,7 +15,7 @@ pub fn render(state: Rc<Base>) -> Dom {
                         .feedback_signal
                         .set(Some(state.feedback.clone()));
                 } else {
-                    state.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Positive)));
+                    state.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
                 }
             }
             async {}

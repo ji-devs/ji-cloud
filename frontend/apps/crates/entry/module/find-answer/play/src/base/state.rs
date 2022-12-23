@@ -7,8 +7,7 @@ use shared::domain::{
         body::{
             _groups::design::{Backgrounds, Sticker},
             find_answer::{
-                Mode, ModuleData as RawData, Next, Ordering, PlaySettings, Question, QuestionField,
-                Step,
+                Mode, ModuleData as RawData, Ordering, PlaySettings, Question, QuestionField, Step,
             },
             Instructions, InstructionsType,
         },
@@ -110,12 +109,7 @@ impl BaseExt for Base {
 
     fn handle_instructions_ended(&self, instructions_type: InstructionsType) {
         if let InstructionsType::Feedback = instructions_type {
-            match self.settings.next {
-                Next::SelectAll | Next::SelectSome(_) => {
-                    self.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
-                }
-                _ => self.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Positive))),
-            }
+            self.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)))
         }
     }
 

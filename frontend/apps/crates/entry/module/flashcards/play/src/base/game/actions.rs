@@ -58,7 +58,7 @@ impl Game {
             } else {
                 self.base.phase.set(Phase::Ending);
                 self.base
-                    .set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Positive)));
+                    .set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
             }
         }
     }

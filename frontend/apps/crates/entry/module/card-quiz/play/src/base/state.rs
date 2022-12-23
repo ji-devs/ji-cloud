@@ -87,7 +87,7 @@ impl BaseExt for Base {
     fn handle_instructions_ended(&self, instructions_type: InstructionsType) {
         if let InstructionsType::Feedback = instructions_type {
             self.phase.set(Phase::Ending);
-            self.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Positive)));
+            self.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
         }
     }
 

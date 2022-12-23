@@ -18,7 +18,7 @@ impl Ending {
 
         if let Some(kind) = state.kind {
             match kind {
-                ModuleEnding::Next | ModuleEnding::Positive => {
+                ModuleEnding::Next => {
                     log::info!("ending is next, transitioning...");
                     let msg = IframeAction::new(ModuleToJigPlayerMessage::Next);
 
