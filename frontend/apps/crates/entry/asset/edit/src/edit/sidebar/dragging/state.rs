@@ -1,4 +1,4 @@
-use crate::edit::sidebar::spot::state::State as ItemState;
+use crate::edit::sidebar::spot::state::SpotState;
 use std::rc::Rc;
 use utils::drag::Drag;
 
@@ -8,15 +8,15 @@ const ANCHOR_X: f64 = 20.0;
 const ANCHOR_Y: f64 = 100.0;
 
 pub struct State {
-    pub module: Rc<ItemState>,
-    pub inner: Drag,
+    pub module: Rc<SpotState>,
+    pub inner: Drag<()>,
 }
 
 impl State {
-    pub fn new(module: Rc<ItemState>, x: i32, y: i32) -> Self {
+    pub fn new(module: Rc<SpotState>, x: i32, y: i32) -> Self {
         Self {
             module,
-            inner: Drag::new(x, y, ANCHOR_X, ANCHOR_Y, false),
+            inner: Drag::new(x, y, ANCHOR_X, ANCHOR_Y, false, ()),
         }
     }
 }

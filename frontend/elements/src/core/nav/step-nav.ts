@@ -7,6 +7,7 @@ export class _ extends LitElement {
             css`
                 :host {
                     display: contents;
+                    --circle-size: 40px;
                 }
 
                 :host {
@@ -24,13 +25,13 @@ export class _ extends LitElement {
                     flex-direction: column;
                     align-items: center;
 
-                    width: 50px;
+                    width: calc(var(--circle-size) + 2px);
                     color: var(--color);
                 }
                 .circle {
                     border-radius: 9999px;
-                    height: 48px;
-                    width: 48px;
+                    height: var(--circle-size);
+                    width: var(--circle-size);
                     border-style: solid;
                     border-width: 1px;
                     border-color: var(--light-gray-1);
@@ -55,14 +56,11 @@ export class _ extends LitElement {
                     letter-spacing: 0.14px;
                     text-align: center;
                     color: var(--color);
-                    margin: 6px 0;
+                    margin: 5px 0;
                     font-size: 12px;
                 }
-                @media (min-width: 1920px) {
-                    p.label {
-                        margin: 12px 0;
-                        font-size: 14px;
-                    }
+                :host([dense]) p.label {
+                    font-size: 11px;
                 }
 
                 :host(:last-child) .line {
@@ -70,7 +68,7 @@ export class _ extends LitElement {
                 }
                 .line {
                     width: 100%;
-                    margin-top: 25px;
+                    margin-top: 20px;
                     display: grid;
                 }
                 .line::after {
@@ -78,8 +76,7 @@ export class _ extends LitElement {
                     display: inline-block;
                     background-color: var(--light-gray-1);
                     height: 2px;
-                    /* 50px matches the width of the circle-button */
-                    width: calc(100% + 50px);
+                    width: calc(100% + var(--circle-size) + 2px);
                 }
             `,
         ];
@@ -96,6 +93,9 @@ export class _ extends LitElement {
 
     @property({ type: Boolean, reflect: true })
     active: boolean = false;
+
+    @property({ type: Boolean, reflect: true })
+    dense: boolean = false;
 
     render() {
         return html`

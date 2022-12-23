@@ -1,4 +1,5 @@
 use dominator::events::{KeyDown, KeyUp};
+use serde::{Deserialize, Serialize};
 
 use crate::{resize::get_resize_info, unwrap::UnwrapJiExt};
 
@@ -6,7 +7,7 @@ pub const MOVE_MULTIPLIER: f64 = 10.0;
 pub const MOVE_AMOUNT_PX: f64 = 1.0;
 
 /// Map of keyboard keys used to perform various actions in the system.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[non_exhaustive]
 pub enum Key {
     ArrowLeft,
@@ -14,16 +15,23 @@ pub enum Key {
     ArrowRight,
     ArrowDown,
     Delete,
+    Backspace,
     Other(String),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct KeyEvent {
     pub is_osx: bool,
     pub shift: bool,
     pub alt: bool,
     pub ctrl_cmd: bool,
     pub key: Key,
+}
+
+impl KeyEvent {
+    pub fn is_delete_key(&self) -> bool {
+        (self.is_osx && self.ctrl_cmd && self.key == Key::Backspace) || self.key == Key::Delete
+    }
 }
 
 impl Key {
@@ -33,6 +41,7 @@ impl Key {
             _ => false,
         }
     }
+
     pub fn translation_from_key(&self) -> (f64, f64) {
         let resize_info = get_resize_info();
         match self {
@@ -53,6 +62,7 @@ impl From<String> for Key {
             "ArrowRight" => Self::ArrowRight,
             "ArrowDown" => Self::ArrowDown,
             "Delete" => Self::Delete,
+            "Backspace" => Self::Backspace,
             other => Self::Other(other.into()),
         }
     }

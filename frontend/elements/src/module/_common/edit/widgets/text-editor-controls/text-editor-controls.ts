@@ -11,16 +11,16 @@ export class _ extends LitElement {
                 }
                 .divider {
                     background-color: var(--light-blue-4);
-                    margin: 40px 0;
+                    margin: 20px 0;
                     height: 1px;
                 }
                 .controls {
                     display: grid;
-                    row-gap: 22px;
+                    row-gap: 10px;
                 }
                 ::slotted(hebrew-buttons) {
                     place-self: end;
-                    margin-bottom: 18px;
+                    margin-bottom: 14px;
                 }
                 :host([controlsDisabled]) .controls {
                     filter: opacity(0.5);
@@ -29,15 +29,15 @@ export class _ extends LitElement {
                 .button-collection {
                     display: flex;
                     border: solid 1px var(--light-blue-5);
-                    border-radius: 14px;
+                    border-radius: 12px;
                     justify-content: space-evenly;
-                    padding: 14px 0;
+                    padding: 4px 0;
                 }
                 .row {
                     display: grid;
                     justify-content: space-between;
-                    column-gap: 22px;
-                    row-gap: 22px;
+                    column-gap: 10px;
+                    row-gap: 10px;
                 }
                 .first {
                     grid-template-columns: 1fr min-content;
@@ -50,17 +50,6 @@ export class _ extends LitElement {
                 }
                 .fourth .alignment {
                     grid-column: 1 / -1;
-                }
-                @media (min-width: 1920px) {
-                    .first {
-                        grid-template-columns: 1fr 1fr;
-                    }
-                    .fourth {
-                        grid-template-columns: 124px 124px 200px;
-                    }
-                    .fourth .alignment {
-                        grid-column: unset;
-                    }
                 }
                 ::slotted(input-select) {
                     /* use background color of sidebar */

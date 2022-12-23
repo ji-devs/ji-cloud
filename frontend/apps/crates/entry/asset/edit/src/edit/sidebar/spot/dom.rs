@@ -2,23 +2,17 @@ use components::overlay::handle::OverlayHandle;
 use dominator::{clone, html, with_node, Dom, DomBuilder, EventOptions};
 use futures_signals::map_ref;
 use shared::domain::asset::DraftOrLive;
-use utils::init::analytics;
 use web_sys::{HtmlElement, Node, ScrollBehavior, ScrollIntoViewOptions};
 
-use super::super::course::menu::dom as CourseMenuDom;
-use super::super::jig::menu::dom as JigMenuDom;
+use super::super::course::menu::CourseMenu;
+use super::super::jig::menu::JigMenu;
 use super::super::spot::actions as spot_actions;
 use super::jig::actions as jig_spot_actions;
 use super::{actions, state::*};
-use crate::edit::sidebar::state::{
-    CourseSpot, ModuleHighlight, SidebarSpot, SidebarSpotItem, State as SidebarState,
-};
+use crate::edit::sidebar::state::{CourseSpot, ModuleHighlight, SidebarSpotItem};
 use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
 use futures_signals::signal::{not, SignalExt};
-use shared::domain::module::ModuleKind;
-use std::collections::HashMap;
 use std::rc::Rc;
-use std::str::FromStr;
 use utils::prelude::*;
 
 const STR_DELETE_TITLE: &str = "Warning";
@@ -26,35 +20,22 @@ const STR_DELETE_CONTENT: &str = "Are you sure you want to delete this activity?
 const STR_DELETE_CONFIRM: &str = "Yes, delete";
 const STR_DELETE_CANCEL: &str = "Don't delete";
 
-pub struct ItemDom {}
+impl SpotState {
+    pub fn render(self: &Rc<Self>) -> Dom {
+        let state = self;
 
-impl ItemDom {
-    pub fn render(
-        sidebar_state: Rc<SidebarState>,
-        index: usize,
-        drag_target_index: Option<usize>,
-        total_len: usize,
-        module: Rc<SidebarSpot>,
-    ) -> Dom {
-        let state = Rc::new(State::new(
-            sidebar_state.clone(),
-            index,
-            total_len,
-            module.clone(),
-        ));
-
-        let is_filler = Some(index) == drag_target_index;
+        let is_filler = Some(state.index) == state.drag_target_index;
 
         let is_incomplete_signal = map_ref! {
-            let is_complete = not(state.module.is_incomplete.signal()),
-            let highlight_modules = sidebar_state.highlight_modules.signal_cloned()
+            let is_complete = not(state.spot.is_incomplete.signal()),
+            let highlight_modules = state.sidebar.highlight_modules.signal_cloned()
                 => {
                     !is_complete && highlight_modules.is_some()
                 }
         };
 
         html!("empty-fragment", {
-            .prop("slot", if index == 0 { "cover-module" } else { "modules" })
+            .prop("slot", if state.index == 0 { "cover-module" } else { "modules" })
             .child_signal(state.confirm_delete.signal().map(clone!(state => move |confirm_delete| {
                 if confirm_delete {
                     Some(html!("modal-confirm", {
@@ -80,7 +61,7 @@ impl ItemDom {
                 })
             }))
             .child(html!("jig-sidebar-module", {
-                .future(State::drag_overlap_signal(state.clone()).for_each(clone!(state => move |overlap| {
+                .future(SpotState::drag_overlap_signal(state.clone()).for_each(clone!(state => move |overlap| {
                     if overlap {
                         state.sidebar.drag_target_index.set(Some(state.index));
                     }
@@ -94,7 +75,7 @@ impl ItemDom {
                     if is_filler { "none" } else {"block"}
                 })
                 .prop("module", state.kind_str())
-                .prop("index", index as u32)
+                .prop("index", state.index as u32)
                 .prop_signal("collapsed", state.sidebar.collapsed.signal())
                 .prop_signal("selected", state.is_selected_signal())
                 // TODO:
@@ -104,7 +85,7 @@ impl ItemDom {
                 .event_with_options(
                     &EventOptions::bubbles(),
                     clone!(state => move |_evt:events::Click| {
-                        match &state.module.item {
+                        match &state.spot.item {
                             SidebarSpotItem::Jig(module) => {
                                 match module {
                                     Some(_) => {
@@ -115,42 +96,39 @@ impl ItemDom {
                                     },
                                 }
                             },
-                            SidebarSpotItem::Course(_course_spot) => {
-                                todo!()
-                            }
+                            SidebarSpotItem::Course(item) => {
+                                if let Some(item) = item {
+                                    if let CourseSpot::Cover(cover) = &**item {
+                                        state.sidebar.asset_edit_state.set_route_course(CourseEditRoute::Cover(cover.id));
+                                        return;
+                                    }
+                                }
+                                state.sidebar.asset_edit_state.set_route_course(CourseEditRoute::Landing);
+                            },
                         }
                     })
                 )
                 .child(html!("jig-edit-sidebar-module-window" => HtmlElement, {
                     .with_node!(elem => {
                         .prop("slot", "window")
-                        .prop_signal("state", State::window_state_signal(Rc::clone(&state)))
+                        .prop_signal("state", SpotState::window_state_signal(Rc::clone(&state)))
                         .prop_signal("incomplete", is_incomplete_signal)
                         .prop("activeModuleKind", state.kind_str())
                         .prop("coverOnly", state.index == 0)
                         .event(clone!(state => move |evt:events::CustomDrop| {
-                            if let Some(detail) = evt.detail().as_string() {
-                                if let Ok(kind) = ModuleKind::from_str(&detail) {
-                                    let mut properties = HashMap::new();
-                                    properties.insert("Activity Kind", detail.to_owned());
-                                    analytics::event("Jig Edit Add Activity", Some(properties));
-
-                                    actions::on_module_kind_drop(
-                                        Rc::clone(&state),
-                                        kind
-                                    );
-                                }
+                            if let Some(data) = evt.detail().as_string() {
+                                spot_actions::assign_to_empty_spot(&state, data);
                             }
                         }))
-                        .child_signal(state.sidebar.asset_edit_state.route.signal_ref(clone!(state, module => move |route| {
-                            match &module.item {
+                        .child_signal(state.sidebar.asset_edit_state.route.signal_ref(clone!(state => move |route| {
+                            match &state.spot.item {
                                 SidebarSpotItem::Jig(module) => {
                                     match (&*module, route) {
                                         (Some(module), AssetEditRoute::Jig(_, JigEditRoute::Module(module_id))) if module_id == &module.id => None,
                                         (Some(module), _) => {
                                             Some(
                                                 ModuleThumbnail::new(
-                                                    state.sidebar.asset.id(),
+                                                    state.sidebar.asset_edit_state.asset.id(),
                                                     Some((**module).clone()),
                                                     ThumbnailFallback::Module,
                                                     DraftOrLive::Draft,
@@ -165,16 +143,16 @@ impl ItemDom {
                                         match &**course_spot {
                                             CourseSpot::Cover(cover) => {
                                                 ModuleThumbnail::new(
-                                                    state.sidebar.asset.id(),
+                                                    state.sidebar.asset_edit_state.asset.id(),
                                                     Some((*cover).clone()),
                                                     ThumbnailFallback::Module,
                                                     DraftOrLive::Draft,
                                                 ).render_live(Some("thumbnail"))
                                             },
-                                            CourseSpot::Item(jig_id) => {
+                                            CourseSpot::Item(jig) => {
                                                 ModuleThumbnail::new(
-                                                    (*jig_id).into(),
-                                                    None,
+                                                    jig.id.into(),
+                                                    jig.jig_data.modules.get(0).cloned(),
                                                     ThumbnailFallback::Module,
                                                     DraftOrLive::Draft,
                                                 ).render_live(Some("thumbnail"))
@@ -263,9 +241,9 @@ impl ItemDom {
                     //     Asset::Course(_) => todo!(),
                     // }
 
-                    match module.item {
-                        SidebarSpotItem::Jig(_) => dom.child(JigMenuDom::render(&state)),
-                        SidebarSpotItem::Course(_) => dom.child(CourseMenuDom::render(&state)),
+                    match state.spot.item {
+                        SidebarSpotItem::Jig(_) => dom.child(JigMenu::new(&state).render()),
+                        SidebarSpotItem::Course(_) => dom.child(CourseMenu::new(&state).render()),
                     }
                 }))
                 .apply(Self::render_add_button(&state))
@@ -274,18 +252,19 @@ impl ItemDom {
     }
 
     pub fn render_add_button<A>(
-        state: &Rc<State>,
+        state: &Rc<SpotState>,
     ) -> impl FnOnce(DomBuilder<A>) -> DomBuilder<A> + '_
     where
         A: AsRef<Node>,
     {
         move |dom: DomBuilder<A>| {
             // If this module is anything other than a placeholder, the add button could be displayed.
-            let current_module_should_add = state.module.item.is_some();
+            let current_module_should_add = state.spot.item.is_some();
             let next_module_should_show_add = {
                 match state
                     .sidebar
-                    .modules
+                    .asset_edit_state
+                    .sidebar_spots
                     .lock_ref()
                     .to_vec()
                     .get(state.index + 1)

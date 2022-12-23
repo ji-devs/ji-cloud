@@ -28,8 +28,8 @@ export class _ extends LitElement {
 
                 .drag-overlay,
                 section {
-                    width: 416px;
-                    height: 168px;
+                    height: 128px;
+                    padding: 14px 0;
                     transition-property: height, width;
                     transition-duration: var(--collapsing-phase-duration);
                     transition-timing-function: linear;
@@ -47,7 +47,7 @@ export class _ extends LitElement {
                     cursor: pointer;
                     box-sizing: border-box;
                     border: solid 1px transparent;
-                    border-left: solid 8px transparent;
+                    border-left: solid 4px transparent;
                     border-bottom: solid 2px transparent;
                 }
                 :host([collapsed]) section {
@@ -61,15 +61,14 @@ export class _ extends LitElement {
                 }
 
                 :host([collapsed]) section {
-                    height: 136px;
-                    width: 72px;
+                    height: 106px;
+                    width: 58px;
                     transition-delay: var(--fading-phase-duration);
                     border-bottom-color: #e7f0fd;
                 }
                 .grid-container {
-                    margin-top: 23px;
                     display: grid;
-                    grid-template-columns: 126px auto auto;
+                    grid-template-columns: 98px auto auto;
                 }
 
                 .left {
@@ -83,7 +82,7 @@ export class _ extends LitElement {
                     transition-timing-function: linear;
                 }
                 :host([collapsed]) .left {
-                    width: 64px;
+                    width: 50px;
                     padding-left: 0;
                     transition-delay: var(--fading-phase-duration);
                 }
@@ -93,19 +92,19 @@ export class _ extends LitElement {
                 }
 
                 .right {
-                    margin-left: 16px;
+                    margin-left: 5px;
                     display: flex;
                     z-index: 1;
                 }
 
                 .title {
-                    font-size: 20px;
+                    font-size: 14px;
                     font-weight: bold;
                     line-height: 1.5;
                     color: var(--main-blue);
                 }
                 .subtitle {
-                    font-size: 16px;
+                    font-size: 14px;
                     font-weight: 500;
                     line-height: 1.5;
                     color: #4a4a4a;
@@ -121,22 +120,27 @@ export class _ extends LitElement {
                     transition-delay: var(--collapsing-phase-duration), 0s;
                 }
                 .icon {
-                    margin-top: 8px;
+                    margin-top: 6px;
+                }
+                .icon img-ui {
+                    width: 28px;
                 }
                 .window {
                     position: relative;
                     z-index: 1;
-                    width: 218px;
+                    width: 170px;
                     overflow: hidden;
                 }
                 .window ::slotted([slot="window"]) {
-                    height: 123px;
+                    height: 96px;
                     border-radius: 16px;
                 }
                 .decorations {
                     position: relative;
                     top: 0;
                     left: 0;
+                    scale: 75%;
+                    translate: -18px;
                 }
 
                 .add-container {
@@ -148,7 +152,7 @@ export class _ extends LitElement {
                 .add {
                     position: absolute;
                     top: -15px;
-                    left: calc(416px - (30px + 17px));
+                    left: calc(324px - (30px + 17px));
                 }
                 .arm-left,
                 .arm-right,

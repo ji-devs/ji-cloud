@@ -1,5 +1,5 @@
 use super::state::State;
-use shared::domain::module::body::find_answer::{Next, Ordering};
+use shared::domain::module::body::find_answer::Ordering;
 
 impl State {
     pub fn set_ordering(&self, ordering: Ordering) {
@@ -31,7 +31,7 @@ impl State {
 
     // TODO: Once attempt limits functionality has been implemented, remove this `allow`
     #[allow(dead_code)]
-    pub fn set_attempts_limit(&self, n_attempts: u8) {
+    pub fn set_attempts_limit(&self, n_attempts: u32) {
         self.base.play_settings.n_attempts.set_neq(n_attempts);
 
         if self.base.play_settings.has_attempts_limit.get() {
@@ -67,29 +67,5 @@ impl State {
                 }
             })
         }
-    }
-
-    pub fn set_next(&self, next: Next) {
-        self.base.play_settings.next.set(next.clone());
-
-        self.base.history.push_modify(move |raw| {
-            if let Some(content) = &mut raw.content {
-                content.play_settings.next = next;
-            }
-        })
-    }
-
-    pub fn set_next_value(&self, amount: usize) {
-        self.base.play_settings.next_value.set(amount);
-
-        if std::mem::discriminant(&*self.base.play_settings.next.lock_ref())
-            == std::mem::discriminant(&Next::SelectSome(0))
-        {
-            self.set_next_some();
-        }
-    }
-
-    pub fn set_next_some(&self) {
-        self.set_next(Next::SelectSome(self.base.play_settings.next_value.get()));
     }
 }

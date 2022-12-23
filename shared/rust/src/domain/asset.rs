@@ -226,6 +226,11 @@ impl From<ResourceResponse> for Asset {
 }
 
 impl Asset {
+    /// get asset type
+    pub fn asset_type(&self) -> AssetType {
+        (&self.id()).into()
+    }
+
     /// get jig value as ref
     pub fn unwrap_jig(&self) -> &JigResponse {
         match self {

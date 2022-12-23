@@ -193,11 +193,11 @@ export class _ extends LitElement {
                                   theme,
                                   mode,
                                   backSide
-                              )}
-                          >
-                              <slot name="backSideContent"></slot>
-                          </div>`
-                        : html`<img-ui
+                            )}
+                    >
+                            <slot name="backSideContent"></slot>
+                      </div>`
+                    : html`<img-ui
                               path="${cardBackFullPath(theme)}"
                           ></img-ui>`}
                 </div>

@@ -19,29 +19,14 @@ export class _ extends LitElement {
                     justify-content: space-between;
                     align-items: center;
                 }
-                @media (min-width: 1920px) {
-                    section {
-                        height: 150px;
-                    }
-                }
                 .nav {
-                    width: 392px;
+                    width: 300px;
                     box-sizing: border-box;
                     height: 100%;
                     padding-top: 24px;
-                    padding-left: 20px;
-                    padding-right: 20px;
                     grid-row: 1;
                     grid-column: 1;
                     z-index: 1;
-                }
-                @media (min-width: 1920px) {
-                    .nav {
-                        width: 556px;
-                        padding-top: 40px;
-                        padding-left: 50px;
-                        padding-right: 50px;
-                    }
                 }
                 .btn {
                     grid-row: 1;

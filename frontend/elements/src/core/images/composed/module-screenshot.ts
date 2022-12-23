@@ -53,6 +53,7 @@ export class _ extends LitElement {
                         lib="screenshot"
                         id="${jigId}/${moduleId}"
                         size="${size}"
+                        .draggable=${false}
                         .cacheBust=${cacheBust ? Date.now() : false}
                     >
                         ${this.fallbackImage(fallbackPath)}

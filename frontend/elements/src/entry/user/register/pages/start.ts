@@ -39,7 +39,17 @@ export class _ extends LitElement {
                     margin-top: 40px;
                     margin-bottom: 24px;
                 }
-
+                .logo {
+                    grid-column: 1;
+                    position:absolute;
+                    z-index:1;
+                    top:0;
+                    left:0;
+                    padding: 25px;
+                }
+                .logo img-ui{
+                    width: 85px;
+                }
                 .spacer {
                     height: 20px;
                 }
@@ -81,6 +91,9 @@ export class _ extends LitElement {
 
         return html`
             <auth-page img="entry/user/side/main.webp">
+                <div class="logo">
+                    <img-ui path="core/page-header/logo.svg"></img-ui>
+                </div>
                 <slot name="alert"></slot>
                 <h1>${STR_TITLE}</h1>
                 <div class="inside-wrapper">

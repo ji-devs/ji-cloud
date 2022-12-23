@@ -15,9 +15,9 @@ export class _ extends LitElement {
             css`
                 :host {
                     display: grid;
-                    grid-template-columns: 416px auto;
+                    grid-template-columns: 316px auto;
                     justify-content: start;
-                    transform: translateX(-424px);
+                    transform: translateX(-324px);
                     transition: transform 0.3s;
                     height: 100%;
                 }
@@ -29,11 +29,11 @@ export class _ extends LitElement {
                     padding: 0;
                     grid-column: 2;
                     align-self: start;
-                    margin-top: 80px;
-                    height: 120px;
-                    width: 120px;
+                    margin-top: 60px;
+                    height: 90px;
+                    width: 90px;
                     cursor: pointer;
-                    margin-left: -40px;
+                    margin-left: -26px;
                     transition: transform 0.2s, opacity 0.2s;
                     transform-origin: left top;
                     border-radius: 50%;
@@ -42,6 +42,7 @@ export class _ extends LitElement {
                     )});
                     background-position: center;
                     background-color: transparent;
+                    background-size: 118px;
                     box-shadow: 0 3px 6px 0 rgb(0 0 0 / 16%);
                 }
                 :host([open]) ::slotted([slot="opener"]) {
@@ -56,7 +57,7 @@ export class _ extends LitElement {
                     grid-column: 1;
                     display: grid;
                     grid-template-rows: auto 1fr;
-                    width: 424px;
+                    width: 324px;
                     height: 100vh;
                     box-shadow: 0 3px 20px 0 rgba(0, 0, 0, 0.08);
                     background-color: #fff;
@@ -64,19 +65,22 @@ export class _ extends LitElement {
                 }
                 h2 {
                     color: #3558af;
-                    font-size: 22px;
+                    font-size: 20px;
                     font-weight: bold;
                     margin: 0;
                 }
                 .heading {
                     border-bottom: solid 1px #e2e5eb;
-                    padding: 20px 24px;
+                    padding: 16px 20px;
                     display: grid;
-                    row-gap: 14px;
+                    row-gap: 12px;
                     grid-template-columns: 1fr auto;
                 }
                 .logo {
                     place-self: start;
+                }
+                .logo img-ui {
+                    height: 30px;
                 }
                 ::slotted([slot="close"]) {
                     align-self: start;
@@ -96,7 +100,7 @@ export class _ extends LitElement {
                 .actions {
                     grid-column: 1;
                     grid-row: 1;
-                    padding: 16px 24px;
+                    padding: 12px 20px;
                     display: flex;
                     column-gap: 16px;
                     z-index: 2;
@@ -113,7 +117,7 @@ export class _ extends LitElement {
                 .modules {
                     grid-column: 1;
                     grid-row: 1;
-                    padding-top: 210px;
+                    padding: 184px 0 60px 0;
                     overflow-y: auto;
                     scrollbar-width: thin;
                     scrollbar-color: var(--light-gray-1) transparent;
@@ -122,35 +126,11 @@ export class _ extends LitElement {
                     background-color: #fff;
                 }
                 .modules::-webkit-scrollbar {
-                    width: 8px;
+                    width: 6px;
                 }
                 .modules::-webkit-scrollbar-thumb {
                     border-radius: 4px;
                     background-color: var(--light-gray-1);
-                }
-
-                /* mobile */
-                @media (max-width: 1000px) {
-                    ::slotted([slot="opener"]) {
-                        margin-top: 10px;
-                        height: 60px;
-                        width: 60px;
-                        margin-left: -10px;
-                        background-size: 80px;
-                    }
-                    h2 {
-                        font-size: 16px;
-                    }
-                    .heading {
-                        padding: 4px 6px;
-                        row-gap: 0;
-                    }
-                    .logo img-ui {
-                        height: 24px;
-                    }
-                    ::slotted([slot="close"]) {
-                        margin: -8px -12px 0px 0px;
-                    }
                 }
             `,
         ];

@@ -22,8 +22,8 @@ export class _ extends LitElement {
                 .wrapper {
                     display: grid;
                     place-content: center;
-                    width: 218px;
-                    height: 123px;
+                    width: 170px;
+                    height: 96px;
                     border-radius: 16px;
                     box-sizing: border-box;
                 }
@@ -51,7 +51,7 @@ export class _ extends LitElement {
                     border: solid var(--light-red-4) 3px;
                 }
                 :host([state="active"]) img-ui {
-                    height: 100px;
+                    height: 82px;
                 }
 
                 slot[name="thumbnail"] {
@@ -69,7 +69,7 @@ export class _ extends LitElement {
 
                 .drag-here-text {
                     white-space: pre-wrap;
-                    font-size: 14px;
+                    font-size: 12px;
                     font-weight: bold;
                     text-align: center;
                     margin: 0;

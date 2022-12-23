@@ -5,12 +5,14 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
-                button {
-                    all: unset;
+                :host {
                     cursor: pointer;
                 }
                 :host([disabled]) {
                     pointer-events: none;
+                }
+                button {
+                    all: unset;
                 }
             `,
         ];

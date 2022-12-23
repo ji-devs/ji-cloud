@@ -7,26 +7,27 @@ export class _ extends LitElement {
             css`
                 :host {
                     display: grid;
-                    align-items: start;
+                    align-content: start;
                     column-gap: 48px;
                     background-color: var(--light-blue-1);
                     min-height: 100vh;
+                    box-sizing: border-box;
                 }
-                @media (min-width: 1920px) {
+                @media (min-width: 1024px) {
                     :host {
-                        padding: 30px 60px;
+                        padding: 24px 48px;
                         grid-template-columns: 4fr 6fr;
                     }
                 }
                 .course-info-side {
                     display: grid;
                     align-content: start;
-                    row-gap: 14px;
+                    row-gap: 12px;
                     justify-content: center;
                     text-align: center;
-                    padding: 10px;
+                    padding: 8px;
                 }
-                @media (min-width: 1920px) {
+                @media (min-width: 1024px) {
                     .course-info-side {
                         justify-content: auto;
                         text-align: left;
@@ -38,7 +39,7 @@ export class _ extends LitElement {
                     aspect-ratio: 16 / 9;
                 }
                 .name {
-                    font-size: 32px;
+                    font-size: 28px;
                     font-weight: 900;
                     margin: 0;
                     color: var(--dark-blue-4);
@@ -46,21 +47,29 @@ export class _ extends LitElement {
                 .count-lang-author {
                     display: grid;
                     align-items: center;
-                    grid-template-columns: repeat(4, auto);
-                    column-gap: 16px;
+                    column-gap: 12px;
+                    row-gap: 6px;
                     color: var(--dark-gray-6);
+                    font-size: 14px;
                     justify-content: center;
                 }
-                @media (min-width: 1920px) {
+                @media (min-width: 1024px) {
                     .count-lang-author {
                         justify-content: start;
+                        grid-template-columns: repeat(4, auto);
                     }
                 }
                 .count-lang-author img-ui {
-                    height: 26px;
+                    display: none;
+                }
+                @media (min-width: 1024px) {
+                    .count-lang-author img-ui {
+                        display: inline-block;
+                        height: 20px;
+                    }
                 }
                 .items-count {
-                    font-size: 18px;
+                    font-size: 16px;
                     font-weight: 600;
                 }
                 .description {
@@ -79,11 +88,11 @@ export class _ extends LitElement {
                     color: var(--main-blue);
                     font-weight: 500;
                     text-decoration: none;
-                    font-size: 14px;
+                    font-size: 12px;
                     display: flex;
-                    column-gap: 6px;
+                    column-gap: 5px;
                 }
-                @media (min-width: 1920px) {
+                @media (min-width: 1024px) {
                     .course-items {
                         border-radius: 12px;
                         overflow: hidden;
@@ -91,28 +100,28 @@ export class _ extends LitElement {
                 }
                 .items-header {
                     background-color: var(--light-blue-3);
-                    padding: 24px 20px;
+                    padding: 20px 16px;
                     display: grid;
                     grid-template-columns: auto auto;
                     align-items: center;
                     justify-content: space-between;
                 }
                 .items-header ::slotted([slot=play]) {
-                    height: 64px;
-                    width: 64px;
+                    height: 50px;
+                    width: 50px;
                     border-radius: 50%;
                     background-color: #fff;
                     color: var(--dark-blue-8);
                     display: grid;
                     place-content: center;
-                    font-size: 64px;
+                    font-size: 50px;
                 }
                 .items-header ::slotted([slot=share]) {
                     color: var(--main-blue);
-                    font-size: 20px;
+                    font-size: 18px;
                     font-weight: 500;
                     display: flex;
-                    column-gap: 10px;
+                    column-gap: 8px;
                 }
             `,
         ];

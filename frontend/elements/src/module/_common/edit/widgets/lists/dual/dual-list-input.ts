@@ -12,10 +12,11 @@ export class _ extends LitElement {
                 textarea {
                     outline: none;
                     border: none;
-                    font-size: 16px;
+                    font-size: 14px;
                     text-align: center;
                     resize: none;
                     background-color: transparent;
+                    height: 32px;
                 }
                 :host([placeholder]) textarea {
                     color: var(--light-gray-4);

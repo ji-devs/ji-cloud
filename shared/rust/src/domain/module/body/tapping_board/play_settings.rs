@@ -34,9 +34,6 @@ pub enum Next {
 
     /// SelectAll
     SelectAll,
-
-    /// Select Some
-    SelectSome(usize),
 }
 
 impl Default for Next {

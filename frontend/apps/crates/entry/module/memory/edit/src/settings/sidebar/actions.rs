@@ -49,11 +49,11 @@ impl SidebarSettings {
     }
 
     pub fn toggle_use_default_pairs(&self) {
-        let use_default_pairs = !self.base.extra.settings.use_default_pairs.get();
+        let use_default_pairs = !self.base.extra.settings.show_all_pairs.get();
         self.base
             .extra
             .settings
-            .use_default_pairs
+            .show_all_pairs
             .set_neq(use_default_pairs);
 
         if use_default_pairs {
@@ -63,7 +63,7 @@ impl SidebarSettings {
         self.base.history.push_modify(|raw| {
             if let Some(content) = &mut raw.content {
                 content.player_settings.pairs_to_display =
-                    if self.base.extra.settings.use_default_pairs.get() {
+                    if self.base.extra.settings.show_all_pairs.get() {
                         None
                     } else {
                         Some(self.base.extra.settings.pairs_to_display.get())
@@ -72,16 +72,20 @@ impl SidebarSettings {
         })
     }
 
-    pub fn set_pairs_to_display(&self, pairs_to_display: u32) {
+    /// Returns `false` if the teacher attempted to set the pairs to more than [`MAX_LIST_WORDS`].
+    pub fn set_pairs_to_display(&self, pairs_to_display: u32) -> bool {
+        let pairs_len = self.base.pairs.lock_ref().len() as u32;
+
+        let mut more_than_max = false;
         // Ensure that the entered amount is not greater than the maximum amount of pairs.
         let mut pairs_to_display = if pairs_to_display > MAX_LIST_WORDS as u32 {
+            more_than_max = MAX_LIST_WORDS < pairs_len as usize;
             MAX_LIST_WORDS as u32
         } else {
             pairs_to_display
         };
 
         // Make sure that the amount is not greater than the actual amount of pairs.
-        let pairs_len = self.base.pairs.lock_ref().len() as u32;
         if pairs_to_display > pairs_len {
             pairs_to_display = pairs_len
         }
@@ -90,7 +94,7 @@ impl SidebarSettings {
             pairs_to_display = MIN_LIST_WORDS as u32;
         }
 
-        self.base.extra.settings.use_default_pairs.set_neq(false);
+        self.base.extra.settings.show_all_pairs.set_neq(false);
         self.base
             .extra
             .settings
@@ -100,12 +104,14 @@ impl SidebarSettings {
         self.base.history.push_modify(|raw| {
             if let Some(content) = &mut raw.content {
                 content.player_settings.pairs_to_display =
-                    if self.base.extra.settings.use_default_pairs.get() {
+                    if self.base.extra.settings.show_all_pairs.get() {
                         None
                     } else {
                         Some(pairs_to_display)
                     }
             }
-        })
+        });
+
+        more_than_max
     }
 }

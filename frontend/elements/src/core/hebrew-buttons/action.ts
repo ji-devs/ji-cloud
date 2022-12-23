@@ -14,10 +14,11 @@ export class _ extends LitElement {
                     padding: 0;
                     display: grid;
                     place-content: center;
+                    height: 34px;
                 }
                 button img-ui {
                     display: none;
-                    height: 28px;
+                    height: 20px;
                 }
                 :host(:not([active]):not(:hover)) .img-default {
                     display: block;

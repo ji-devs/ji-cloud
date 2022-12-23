@@ -10,6 +10,7 @@ export const cardStyles = [
     css`
         :host {
             --img-padding: 10rem;
+            --border-radius: 16px;
         }
 
         :host([size="matching"]),
@@ -21,6 +22,7 @@ export const cardStyles = [
         :host([size="flashcards"]) {
             --card-size: 500rem;
             --border-size: 16rem;
+            --border-radius: 16%;
         }
 
         :host([size="memory"]) {
@@ -43,7 +45,7 @@ export const cardStyles = [
         }
 
         .content {
-            border-radius: 16px;
+            border-radius: var(--border-radius);
             border-style: solid;
             border-width: var(--border-size);
             background-color: white;
@@ -55,6 +57,7 @@ export const cardStyles = [
             display: flex;
             justify-content: center;
             align-items: center;
+            overflow: hidden;
         }
     `,
 ];

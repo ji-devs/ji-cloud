@@ -42,6 +42,7 @@ pub mod register {
 
         pub const STR_PERSONA_OPTIONS: &[&str] = &[
             "Teacher",
+            "Student teacher",
             "Parent",
             "Therapist",
             "Grandparent",

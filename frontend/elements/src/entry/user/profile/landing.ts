@@ -9,7 +9,7 @@ import {
 
 const STR_BASIC_INFO = "Basic info";
 const STR_JIGZI_FILTERS = "Jigzi Filters";
-const STR_MY_PROFILE = "My Profile";
+const STR_MY_SETTINGS = "My Settings";
 
 const STR_EMAIL = "Email";
 const STR_PASSWORD = "Password";
@@ -227,7 +227,7 @@ export class _ extends LitElement {
             </aside>
             <main @scroll="${this.recalculateActive}">
                 <div class="main-width-holder">
-                    <h1>${STR_MY_PROFILE}</h1>
+                    <h1>${STR_MY_SETTINGS}</h1>
                     <section id="basic-info">
                         <div class="left-side">
                             <h2>${STR_BASIC_INFO}</h2>

@@ -1,11 +1,11 @@
-use components::module::_common::play::prelude::*;
+use components::{audio::mixer::AudioHandle, module::_common::play::prelude::*};
 use shared::domain::{
     asset::{Asset, AssetId},
     module::{
         body::{
             _groups::design::{Backgrounds, Sticker},
-            poster::{Mode, ModuleData as RawData, Step},
-            Instructions,
+            poster::{Mode, ModuleData as RawData, PlaySettings, Step},
+            Audio, Instructions,
         },
         ModuleId,
     },
@@ -13,7 +13,7 @@ use shared::domain::{
 use utils::prelude::*;
 
 use futures_signals::signal::Mutable;
-use std::rc::Rc;
+use std::{cell::RefCell, rc::Rc};
 
 pub struct Base {
     pub asset_id: AssetId,
@@ -21,9 +21,12 @@ pub struct Base {
     pub asset: Asset,
     pub theme_id: ThemeId,
     pub instructions: Instructions,
+    pub audio: Option<Audio>,
+    pub audio_handle: Rc<RefCell<Option<AudioHandle>>>,
     pub backgrounds: Backgrounds,
     pub stickers: Vec<Sticker>,
     pub module_phase: Mutable<ModulePlayPhase>,
+    pub play_settings: PlaySettings,
 }
 
 impl Base {
@@ -46,9 +49,12 @@ impl Base {
             asset,
             theme_id,
             instructions: base_content.instructions,
+            audio: content.audio,
+            audio_handle: Rc::new(RefCell::new(None)),
             backgrounds: base_content.backgrounds,
             stickers: base_content.stickers,
             module_phase: init_args.play_phase,
+            play_settings: content.play_settings,
         })
     }
 }

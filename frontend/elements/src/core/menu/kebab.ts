@@ -34,8 +34,8 @@ export class _ extends LitElement {
                 }
 
                 #button {
-                    width: 32px;
-                    height: 32px;
+                    width: 30px;
+                    height: 30px;
                 }
             `,
         ];

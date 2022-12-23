@@ -10,6 +10,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use utils::js_wrappers::{is_iframe, set_event_listener};
 use utils::{path, prelude::*};
+use wasm_bindgen::JsValue;
 use web_sys::{HtmlIFrameElement, MessageEvent};
 
 use super::{mixer_iframe::AudioMixerIframe, mixer_top::AudioMixerTop};
@@ -35,8 +36,10 @@ fn setup_iframe_to_parent_listener() {
                     if let Ok(m) = serde_wasm_bindgen::from_value::<IframeAction<AudioMessageToTop>>(
                         evt.data(),
                     ) {
+                        // crashing when I try to cast it to Window, don't know why
+                        // let source: Window = source.dyn_into().unwrap_ji();
                         AUDIO_MIXER.with(|mixer| {
-                            mixer.run_audio_message(m.data);
+                            mixer.run_audio_message_from_iframe(m.data, &source);
                         })
                     };
                 }
@@ -55,7 +58,7 @@ pub struct AudioMixer {
     context_available: RefCell<bool>,
 
     // having a channel would probably be better here, but wasted to much time on this already
-    iframes: RefCell<Vec<HtmlIFrameElement>>,
+    iframes: RefCell<Vec<(HtmlIFrameElement, Vec<AudioHandleId>)>>,
 }
 
 /// Public interface, designed to be as close as possible to old interface
@@ -135,6 +138,11 @@ impl AudioMixer {
         handle
     }
 
+    // init pool of audio objects, but don't play actual audio
+    pub fn init_silently(&self) {
+        self.run_audio_message(AudioMessageToTop::InitSilently);
+    }
+
     pub fn play_on_ended<F>(&self, path: AudioPath, is_loop: bool, on_ended: F) -> AudioHandle
     where
         F: FnMut() + 'static,
@@ -212,7 +220,7 @@ impl AudioMixer {
     }
 
     pub(super) fn message_all_iframes(&self, message: AudioMessageFromTop) {
-        self.iframes.borrow().iter().for_each(move |iframe| {
+        self.iframes.borrow().iter().for_each(move |(iframe, _)| {
             let message = IframeAction::new(message.clone());
 
             // might be a good idea to add iframe IDs in all messages and only send the the relevant iframe
@@ -221,6 +229,48 @@ impl AudioMixer {
                 .unwrap_ji()
                 .post_message(&message.into(), "*");
         });
+    }
+
+    fn get_iframe_position(&self, iframe_window: &JsValue) -> Option<usize> {
+        self.iframes
+            .borrow()
+            .iter()
+            .position(|(iframe, _)| match &iframe.content_window() {
+                Some(content_window) if iframe_window.loose_eq(content_window) => true,
+                _ => false,
+            })
+    }
+
+    pub(super) fn run_audio_message_from_iframe(
+        &self,
+        message: AudioMessageToTop,
+        iframe_window: &JsValue,
+    ) {
+        match &message {
+            AudioMessageToTop::Play(message) => {
+                let pos = self
+                    .get_iframe_position(iframe_window)
+                    // iframe should always be in vec, so unwrapping
+                    .unwrap_ji();
+
+                let mut iframes = self.iframes.borrow_mut();
+                iframes[pos].1.push(message.handle_id.clone());
+            }
+            AudioMessageToTop::HandleDropped(handle_id) => {
+                let iframe_pos = self
+                    .get_iframe_position(iframe_window)
+                    // iframe should always be in vec, so unwrapping
+                    .unwrap_ji();
+
+                let mut iframes = self.iframes.borrow_mut();
+                let handle_pos = iframes[iframe_pos].1.iter().position(|i| i == handle_id);
+                if let Some(handle_pos) = handle_pos {
+                    iframes[iframe_pos].1.remove(handle_pos);
+                }
+            }
+            _ => {}
+        }
+        self.run_audio_message(message);
     }
 
     // would probably have named this handle_audio_message, but can make it look like it's related to AudioHandle
@@ -283,6 +333,7 @@ impl Drop for AudioHandle {
 #[derive(Debug, Deserialize, Serialize)]
 pub(super) enum AudioMessageToTop {
     Play(PlayAudioMessage),
+    InitSilently,
     PauseHandleCalled(AudioHandleId),
     PlayHandleCalled(AudioHandleId),
     PauseAll,
@@ -326,15 +377,18 @@ pub fn play_random_negative() {
 pub fn audio_iframe_messenger(dom: DomBuilder<HtmlIFrameElement>) -> DomBuilder<HtmlIFrameElement> {
     dom.after_inserted(move |iframe| {
         AUDIO_MIXER.with(|mixer| {
-            mixer.iframes.borrow_mut().push(iframe);
+            mixer.iframes.borrow_mut().push((iframe, vec![]));
         })
     })
     .after_removed(move |iframe| {
         AUDIO_MIXER.with(|mixer| {
             let mut iframes = mixer.iframes.borrow_mut();
-            let pos = iframes.iter().position(|i| i == &iframe);
+            let pos = iframes.iter().position(|i| i.0 == iframe);
             if let Some(pos) = pos {
-                iframes.swap_remove(pos);
+                let (_, iframe_handles) = iframes.swap_remove(pos);
+                iframe_handles.iter().for_each(|handle| {
+                    mixer.run_audio_message(AudioMessageToTop::HandleDropped(handle.clone()));
+                });
             }
         })
     })

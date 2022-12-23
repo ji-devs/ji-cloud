@@ -19,6 +19,7 @@ pub const STR_PERSONA: &str = "What I do";
 pub const STR_LANGUAGE: &str = "Language";
 pub const STR_PERSONA_OPTIONS: &[&str] = &[
     "Teacher",
+    "Student teacher",
     "Parent",
     "Therapist",
     "Grandparent",

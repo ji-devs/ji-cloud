@@ -7,6 +7,7 @@ pub mod clipboard;
 pub mod colors;
 pub mod component;
 pub mod drag;
+pub mod editable_asset;
 pub mod env;
 pub mod events;
 pub mod fetch;

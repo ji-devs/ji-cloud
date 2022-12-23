@@ -82,7 +82,7 @@ where
     MenuTab::render(
         MenuTab::new(
             tab_kind,
-            false,
+            true,
             true,
             clone!(state => move || state.tab.signal_ref(clone!(tab_kind => move |curr| {
                 curr.kind() == tab_kind

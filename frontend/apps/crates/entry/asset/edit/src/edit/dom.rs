@@ -1,8 +1,8 @@
 use std::rc::Rc;
 
 use super::{
-    super::edit::publish::Publish, course::jig_selection::state::JigSelection,
-    module_iframe::ModuleIframe, selection::dom::SelectionDom, sidebar::dom::SidebarDom,
+    super::edit::publish::Publish, course::course_selection::state::CourseSelection,
+    jig::module_selection::ModuleSelection, module_iframe::ModuleIframe, sidebar::Sidebar,
     state::AssetEditState,
 };
 use components::{
@@ -19,6 +19,9 @@ const STR_YT_VIDEO_ID: &str = "x4FYtTpQAt0";
 impl AssetEditState {
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self;
+
+        state.load_data();
+
         html!("empty-fragment", {
             .child(html!("jig-edit-page", {
                 /*
@@ -41,14 +44,15 @@ impl AssetEditState {
                 })))
                 */
                 .apply_if(!state.asset_id.is_resource_id(), |dom| {
-                    dom.child(SidebarDom::render(state.asset_id, state.clone()))
+                    let state = Sidebar::new(Rc::clone(&state));
+                    dom.child(state.render())
                 })
                 .child_signal(state.route.signal_cloned().map(clone!(state => move |route| {
                     match route {
                         AssetEditRoute::Jig(_jig_id, jig_edit_route) => {
                             match jig_edit_route {
                                 JigEditRoute::Landing => {
-                                    Some(SelectionDom::render(state.clone()))
+                                    Some(ModuleSelection::new(&state).render())
                                 },
                                 JigEditRoute::Module(module_id) => {
                                     Some(ModuleIframe::new(state.asset_id, module_id).render())
@@ -71,7 +75,7 @@ impl AssetEditState {
                         AssetEditRoute::Course(course_id, course_edit_route) => {
                             match course_edit_route {
                                 CourseEditRoute::Landing => {
-                                    Some(JigSelection::new(course_id).render())
+                                    Some(CourseSelection::new(course_id, &state).render())
                                 },
                                 CourseEditRoute::Cover(cover_id) => {
                                     Some(ModuleIframe::new(state.asset_id, cover_id).render())

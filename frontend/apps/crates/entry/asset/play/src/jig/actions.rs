@@ -11,7 +11,10 @@ use shared::{
     api::endpoints::{self, jig},
     domain::{
         asset::DraftOrLive,
-        jig::{AudioBackground, JigGetDraftPath, JigGetLivePath, JigLikedPath, JigPlayPath},
+        jig::{
+            AudioBackground, JigGetDraftPath, JigGetLivePath, JigLikedPath, JigPlayPath,
+            TextDirection,
+        },
         meta::GetMetadataPath,
         module::{
             body::{Instructions as ModuleInstructions, InstructionsType},
@@ -21,6 +24,7 @@ use shared::{
 };
 use utils::{
     iframe::{IframeAction, JigToModulePlayerMessage, ModuleToJigPlayerMessage},
+    keyboard::{Key, KeyEvent},
     prelude::{ApiEndpointExt, SETTINGS},
     routes::{HomeRoute, Route},
     unwrap::UnwrapJiExt,
@@ -105,6 +109,24 @@ pub fn navigate_back(state: Rc<JigPlayer>) {
     }
 }
 
+pub fn navigate_from_keyboard_event(state: Rc<JigPlayer>, key_event: KeyEvent) {
+    if let Some(jig) = state.jig.get_cloned() {
+        let direction = jig.jig_data.default_player_settings.direction;
+        match direction {
+            TextDirection::LeftToRight => match key_event.key {
+                Key::ArrowLeft => navigate_back(state.clone()),
+                Key::ArrowRight => navigate_forward(state.clone()),
+                _ => {}
+            },
+            TextDirection::RightToLeft => match key_event.key {
+                Key::ArrowRight => navigate_back(state.clone()),
+                Key::ArrowLeft => navigate_forward(state.clone()),
+                _ => {}
+            },
+        }
+    }
+}
+
 pub fn navigate_to_index(state: Rc<JigPlayer>, index: usize) {
     state.active_module.set(Some(index));
     state.timer.set(None);
@@ -153,7 +175,9 @@ pub fn show_instructions(state: Rc<JigPlayer>, visible: bool) {
         if visible {
             play_instructions_audio(state);
         } else {
-            *instructions.audio_handle.borrow_mut() = None;
+            // Always drop the audio handle whenever the popup is hidden
+            *state.instructions_audio_handle.borrow_mut() = None;
+
             if instructions.instructions_type.is_feedback() {
                 // Clear the instructions to prevent any audio possibly playing again.
                 set_instructions(state.clone(), None);
@@ -166,18 +190,20 @@ pub fn show_instructions(state: Rc<JigPlayer>, visible: bool) {
 pub fn play_instructions_audio(state: Rc<JigPlayer>) {
     if let Some(instructions) = state.instructions.get_cloned() {
         if let Some(audio) = &instructions.audio {
-            *instructions.audio_handle.borrow_mut() = Some(AUDIO_MIXER.with(clone!(state, instructions => move |mixer| mixer.play_on_ended(audio.into(), false, clone!(state => move || {
-                if instructions.instructions_type.is_feedback() && instructions.text.is_none() {
-                    // Clear the instructions to prevent any audio possibly playing again. But only if this is Feedbaack and
-                    // there is not text
-                    set_instructions(state.clone(), None);
-                }
+            *state.instructions_audio_handle.borrow_mut() = Some(AUDIO_MIXER.with(clone!(state, instructions => move |mixer| mixer
+                .play_on_ended(audio.into(), false, clone!(state => move || {
+                    if instructions.instructions_type.is_feedback() && instructions.text.is_none() {
+                        // Clear the instructions to prevent any audio possibly playing again. But only if this is Feedbaack and
+                        // there is not text
+                        set_instructions(state.clone(), None);
+                    }
 
-                if instructions.text.is_none() {
-                    // If there is no text, then we can notify the activity that the instructions audio has completed.
-                    instructions_done(state.clone(), instructions.clone());
-                }
-            })))));
+                    if instructions.text.is_none() {
+                        // If there is no text, then we can notify the activity that the instructions audio has completed.
+                        instructions_done(state.clone(), instructions.clone());
+                    }
+                }))
+            )));
         }
     }
 }
@@ -342,11 +368,15 @@ pub fn on_iframe_message(state: Rc<JigPlayer>, message: ModuleToJigPlayerMessage
         ModuleToJigPlayerMessage::Start(time) => {
             start_player(state, time);
         }
+        ModuleToJigPlayerMessage::Previous => {
+            navigate_back(state);
+        }
         ModuleToJigPlayerMessage::Next => {
             navigate_forward(state);
         }
         ModuleToJigPlayerMessage::Stop => {
-            state.timer.set(None);
+            // Instead of stopping the timer altogether, we pause it
+            set_timer_paused(&state, true);
         }
         ModuleToJigPlayerMessage::JumpToIndex(index) => {
             navigate_to_index(state, index);
@@ -357,6 +387,9 @@ pub fn on_iframe_message(state: Rc<JigPlayer>, message: ModuleToJigPlayerMessage
         ModuleToJigPlayerMessage::Instructions(instructions) => {
             set_instructions(state, instructions);
         }
+        ModuleToJigPlayerMessage::KeyEvent(key_event) => {
+            navigate_from_keyboard_event(state, key_event)
+        }
     };
 }
 
@@ -364,8 +397,15 @@ fn start_player(state: Rc<JigPlayer>, time: Option<u32>) {
     // If bg audio is not yet set (i.e. first module to be ready) initialize the audio once the jig is started
     if state.bg_audio_handle.borrow().is_none() {
         if let Some(jig) = state.jig.get_cloned() {
-            if let Some(audio_background) = jig.jig_data.audio_background {
-                init_audio(&state, audio_background);
+            match jig.jig_data.audio_background {
+                Some(audio_background) => {
+                    init_audio(&state, audio_background);
+                }
+                None => {
+                    AUDIO_MIXER.with(move |mixer| {
+                        mixer.init_silently();
+                    });
+                }
             }
         }
     }

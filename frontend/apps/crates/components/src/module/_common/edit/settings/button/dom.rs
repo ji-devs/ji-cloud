@@ -1,3 +1,5 @@
+use crate::overlay::handle::OverlayHandle;
+
 use super::state::*;
 use dominator::{clone, html, with_node, Dom, DomBuilder};
 use futures_signals::signal::SignalExt;
@@ -67,7 +69,10 @@ where
         }))
         .apply_if(state.value.is_some(), |dom| {
             let value = state.value.as_ref().unwrap_ji();
-            let input_kind = get_input_kind(state.kind);
+            let input_kind = match value.get_input_kind() {
+                Some(input_kind) => Some(input_kind),
+                None => get_input_kind(&state.kind),
+            };
 
             dom
                 .prop_signal("num", value.string_signal())
@@ -81,6 +86,16 @@ where
                             .child(html!("module-settings-bubble-content", {
                                 .prop("kind", state.kind.as_str_id())
                                 .prop_signal("value", state.value.as_ref().unwrap_ji().string_signal())
+                                .apply_if(state.value.as_ref().unwrap_ji().get_label_template().is_some(), clone!(state => move |dom| {
+                                    let template = serde_json::to_string(
+                                        &state.value
+                                            .as_ref()
+                                            .unwrap_ji()
+                                            .get_label_template()
+                                            .unwrap_ji()
+                                    ).unwrap_ji();
+                                    dom.prop("valueLabelTemplateFromString", template)
+                                }))
                                 .apply_if(input_kind.is_some(), clone!(state => move |dom| {
                                     dom.child(
                                         match input_kind.unwrap_ji() {
@@ -100,6 +115,32 @@ where
                     }
                 })))
         })
+        .child_signal(state.tooltip.signal_cloned().map(clone!(state => move |tooltip| {
+            if let Some(tooltip) = tooltip {
+                Some(html!("empty-fragment" => HtmlElement, {
+                    .with_node!(elem => {
+                        .apply(OverlayHandle::lifecycle(
+                            clone!(state => move || {
+                                html!("overlay-tooltip-info", {
+                                    .prop("marginX", -32)
+                                    .prop("target", &elem)
+                                    .attr("targetAnchor", "br")
+                                    .attr("contentAnchor", "oppositeV")
+                                    .prop("body", &tooltip)
+                                    .prop("closeable", true)
+                                    .prop("strategy", "track")
+                                    .event(clone!(state => move |_evt: events::Close| {
+                                        state.tooltip.set_neq(None);
+                                    }))
+                                })
+                            })
+                        ))
+                    })
+                }))
+            } else {
+                None
+            }
+        })))
         .apply_if(mixin.is_some(), |dom| {
             dom.apply(mixin.unwrap_ji())
         })
@@ -128,7 +169,7 @@ pub fn render_input_select(state: Rc<SettingsButton>, max: usize) -> Dom {
     html!("select" => web_sys::HtmlSelectElement, {
         .prop_signal("value", state.value.as_ref().unwrap_ji().string_signal())
         .children(
-            (1..max)
+            (1..max + 1)
                 .map(|index| {
                     let value_str = state.value.as_ref().unwrap_ji().get_select_value(index);
 
@@ -145,21 +186,4 @@ pub fn render_input_select(state: Rc<SettingsButton>, max: usize) -> Dom {
             }))
         })
     })
-}
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-enum InputKind {
-    Field,
-    Select(usize),
-}
-fn get_input_kind(kind: SettingsButtonKind) -> Option<InputKind> {
-    match kind {
-        SettingsButtonKind::Attempts => Some(InputKind::Select(6)),
-        SettingsButtonKind::NumChoices => Some(InputKind::Select(6)),
-        SettingsButtonKind::NumPairs => Some(InputKind::Field),
-
-        SettingsButtonKind::TimeLimit => Some(InputKind::Field),
-        SettingsButtonKind::ContinueSome => Some(InputKind::Field),
-        SettingsButtonKind::Rounds => Some(InputKind::Field),
-        _ => None,
-    }
 }

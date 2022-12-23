@@ -23,7 +23,7 @@ export class _ extends PopupBase {
         return html`
             ${this.renderBase(() => {
                 return html`
-                    <img-ui path="entry/jig/play/time-up.png"></img-ui>
+                    <img-ui path="entry/jig/play/time-up.svg"></img-ui>
                     <h2>${STR_TIMES_UP}</h2>
                 `;
             })}

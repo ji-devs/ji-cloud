@@ -4,12 +4,13 @@ use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 use utils::prelude::*;
 
-const STR_DIDNT_RECEIVE: &str = "Didn't receive our email? ";
+const STR_DIDNT_RECEIVE: &str = "Still nothing? ";
 const STR_SEND_AGAIN: &str = "Send again";
 
 impl SendEmailConfirmationPage {
     pub fn render(state: Rc<SendEmailConfirmationPage>) -> Dom {
         html!("page-email-send", {
+            .prop("email", &state.email)
             .child(html!("window-loader-block", {
                 .prop_signal("visible", state.loader.is_loading())
             }))

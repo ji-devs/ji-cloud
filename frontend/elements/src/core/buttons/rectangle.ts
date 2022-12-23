@@ -32,11 +32,7 @@ export class _ extends LitElement {
                     padding: 0;
                     user-select: none;
                     font-size: 14px;
-                }
-                @media (min-width: 1920px) {
-                    :host {
-                        font-size: 16px;
-                    }
+                    line-height: 30px;
                 }
 
                 :host([disabled]) {
@@ -110,13 +106,13 @@ export class _ extends LitElement {
                 }
 
                 :host([size="small"]:not([kind="text"])) .inner {
-                    padding: 8px 22px;
+                    padding: 6px 16px;
                 }
                 :host([size="medium"]:not([kind="text"])) .inner {
-                    padding: 12px 24px;
+                    padding: 10px 18px;
                 }
                 :host([size="large"]:not([kind="text"])) .inner {
-                    padding: 16px 40px;
+                    padding: 12px 30px;
                 }
 
                 :host([disabled][kind="filled"]) {

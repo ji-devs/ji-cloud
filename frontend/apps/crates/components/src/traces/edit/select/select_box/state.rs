@@ -10,7 +10,7 @@ use std::cell::RefCell;
 
 pub struct SelectBox {
     pub menu_pos: Mutable<Option<(f64, f64)>>,
-    pub drag: Mutable<Option<Rc<Drag>>>,
+    pub drag: Mutable<Option<Rc<Drag<()>>>>,
     pub transform_override: Mutable<Transform>,
     pub bounds: Mutable<Option<BoundsF64>>,
     pub elem: RefCell<Option<web_sys::SvgElement>>,

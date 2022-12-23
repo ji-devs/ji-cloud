@@ -5,7 +5,7 @@ use futures_signals::signal::{Mutable, SignalExt};
 
 use dominator::{clone, events, html, Dom};
 
-use utils::{events::ModuleResizeEvent, iframe::*, prelude::*, resize::*};
+use utils::{events::ModuleResizeEvent, iframe::*, keyboard::KeyEvent, prelude::*, resize::*};
 
 use super::{ending::*, loading::dom::render_loading, state::*};
 use crate::{
@@ -32,6 +32,16 @@ pub fn render_page_body<RawData, Mode, Step, Base>(
                 let has_resized_once = Mutable::new(!page_kind.is_resize());
 
                 html!(page_kind.element_name(), {
+                        .global_event(move |e: events::KeyUp| {
+                            // We only want to handle navigating between activities using the arrow keys at this stage, so
+                            // first check that this event is from a movement key. Otherwise we'll potentially spam the parent
+                            // with keyboard events.
+                            let key_event = KeyEvent::from(e);
+                            if key_event.key.is_move_key() {
+                                let msg = IframeAction::new(ModuleToJigPlayerMessage::KeyEvent(key_event));
+                                let _ = msg.try_post_message_to_player();
+                            }
+                        })
                         .apply_if(page_kind.add_scrollable_attribute(), |dom| {
                             dom.prop("scrollable", true)
                         })
@@ -206,7 +216,7 @@ where
                         // This will mark the activity as started in the player, but the activity itself would
                         // only start playing once it's in the Playing phase.
                         if jig_player {
-                            let timer_seconds = base.get_timer_minutes().map(|minutes| minutes * 60);
+                            let timer_seconds = base.get_timer_seconds();
 
                             let msg = IframeAction::new(ModuleToJigPlayerMessage::Start(timer_seconds));
 

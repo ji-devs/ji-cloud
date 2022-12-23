@@ -7,7 +7,7 @@ use strum::IntoEnumIterator;
 use utils::{
     events,
     init::analytics,
-    routes::{AdminRoute, AssetRoute, Route, UserRoute},
+    routes::{AdminRoute, AssetRoute, CommunityMembersRoute, CommunityRoute, Route, UserRoute},
     unwrap::UnwrapJiExt,
 };
 use wasm_bindgen::JsValue;
@@ -29,6 +29,7 @@ const STR_ADMIN: &str = "Admin";
 const STR_DONATE: &str = "Donate";
 
 const STR_MY_SETTINGS: &str = "My settings";
+const STR_MY_PROFILE: &str = "My profile";
 const STR_MY_JIGS: &str = "My JIGs";
 const STR_MY_RESOURCES: &str = "My resources";
 
@@ -207,6 +208,15 @@ fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {
                 .prop("icon", "fa-light fa-gear")
             }))
             .text(STR_MY_SETTINGS)
+        }))
+        .child(html!("a", {
+            .prop("slot", "user-links")
+            .prop("href",  Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(user.id))).to_string())
+
+            .child(html!("fa-icon", {
+                .prop("icon", "fa-light fa-user")
+            }))
+            .text(STR_MY_PROFILE)
         }))
         .child_signal(has_privileges(Rc::clone(&state), UserScope::Admin).map(|admin_privileges| {
             match admin_privileges {

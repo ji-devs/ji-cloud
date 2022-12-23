@@ -1,0 +1,86 @@
+name: Pages - Backend
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - sandbox
+    paths:
+      - '.github/workflows/backend-pages.yml'
+      - 'shared/**'
+      - 'backend/_core/rust/**'
+      - 'backend/pages/**'
+
+jobs:
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-22.04
+    outputs:
+      branch: "${{ steps.branch.outputs.value }}"
+    steps:
+      - name: Get branch from ref
+        id: branch
+        run: echo "value=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+      - name: Ensure valid branch
+        if: false == contains(fromJson('["master", "sandbox"]'), steps.branch.outputs.value)
+        run: |
+          echo "::error ${{ steps.branch.outputs.value }} cannot be deployed"
+          exit 1
+
+  bundle:
+    needs: [prepare]
+    name: "[${{ needs.prepare.outputs.branch }}] Bundle"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Set environment"
+        env:
+          BRANCH: ${{ needs.prepare.outputs.branch }}
+        run: |
+          if [[ ${BRANCH} == 'master' ]]; then
+            echo "ENVIRONMENT=release" >> $GITHUB_ENV
+            echo "GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY=${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY }}" >> $GITHUB_ENV
+          elif [[ ${BRANCH} == 'sandbox' ]]; then
+            echo "ENVIRONMENT=sandbox" >> $GITHUB_ENV
+            echo "GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY=${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX }}" >> $GITHUB_ENV
+          fi
+
+      - uses: actions/checkout@v3
+
+      - name: Extract label
+        shell: bash
+        run: echo "value=\"[${{needs.prepare.outputs.branch}} - backend/pages]\"" >> $GITHUB_OUTPUT
+        id: extract_label
+
+      - name: Notify slack
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.value}} starting...\"}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: '${{ env.GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY }}'
+
+      - name: install google cloud sdk
+        uses: google-github-actions/setup-gcloud@v1
+
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly
+
+      - uses: davidB/rust-cargo-make@master
+
+      - name: build and deploy
+        run: cargo make ${{ env.ENVIRONMENT }}-pages
+
+      - name: Notify slack of all status
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.value}} ${{job.status}}\"}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        if: always()

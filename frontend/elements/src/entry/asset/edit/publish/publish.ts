@@ -3,7 +3,7 @@ import "@elements/core/images/ui";
 import { nothing } from "lit-html";
 
 const STR_HEADER_FIRST = "Publish your";
-const STR_HEADER_SECOND = "This information helps users find your JIG";
+const STR_HEADER_SECOND = "This information helps users find your";
 
 @customElement("jig-edit-publish")
 export class _ extends LitElement {
@@ -154,11 +154,8 @@ export class _ extends LitElement {
                 <main>
                     <div class="width-holder">
                         <div class="header">
-                            <h1>
-                                ${STR_HEADER_FIRST}
-                                ${this.assetDisplayName}!
-                            </h1>
-                            <h3>${STR_HEADER_SECOND}</h3>
+                            <h1>${STR_HEADER_FIRST} ${this.assetDisplayName}!</h1>
+                            <h3>${STR_HEADER_SECOND} ${this.assetDisplayName}</h3>
                             ${
                                 this.resourceOnTop ? html`
                                     <slot name="resources"></slot>

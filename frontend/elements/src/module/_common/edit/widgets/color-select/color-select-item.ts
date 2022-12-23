@@ -16,12 +16,6 @@ export class _ extends LitElement {
                     height: 54px;
                     width: 54px;
                 }
-                @media (min-width: 1920px) {
-                    :host {
-                        height: 56px;
-                        width: 56px;
-                    }
-                }
                 :host(:focus) {
                     outline: none;
                 }

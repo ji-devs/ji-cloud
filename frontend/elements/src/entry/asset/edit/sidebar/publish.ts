@@ -17,10 +17,10 @@ export class _ extends LitElement {
                     cursor: pointer;
                     box-sizing: border-box;
                     border: solid 1px transparent;
-                    border-left: solid 8px transparent;
+                    border-left: solid 4px transparent;
                     border-bottom: solid 2px transparent;
-                    width: 416px;
-                    height: 168px;
+                    width: 324px;
+                    height: 136px;
                     transition-property: height, width;
                     transition-duration: var(--collapsing-phase-duration);
                     transition-timing-function: linear;
@@ -31,18 +31,18 @@ export class _ extends LitElement {
                     border-left-color: var(--main-blue);
                 }
                 :host([collapsed]) section {
-                    height: 136px;
-                    width: 72px;
+                    height: 106px;
+                    width: 58px;
                     transition-delay: var(--fading-phase-duration);
                     border-bottom-color: #e7f0fd;
                 }
                 .grid-container {
-                    margin-top: 23px;
+                    margin-top: 18px;
                     display: grid;
-                    grid-template-columns: 126px auto auto;
+                    grid-template-columns: 98px auto auto;
                 }
                 .left {
-                    padding-left: 16px;
+                    padding-left: 14px;
                     display: flex;
                     flex-direction: column;
                     text-align: center;
@@ -53,22 +53,22 @@ export class _ extends LitElement {
                     transition-timing-function: linear;
                 }
                 :host([collapsed]) .left {
-                    width: 64px;
+                    width: 50px;
                     padding-left: 0;
                     transition-delay: var(--fading-phase-duration);
                     opacity: 1;
                 }
                 .middle {
-                    width: 218px;
+                    width: 168px;
                 }
                 .right {
-                    margin-left: 16px;
+                    margin-left: 5px;
                     display: flex;
                     z-index: 1;
                 }
 
                 .side-title {
-                    font-size: 20px;
+                    font-size: 14px;
                     font-weight: bold;
                     line-height: 1.5;
                     color: var(--main-blue);
@@ -76,12 +76,14 @@ export class _ extends LitElement {
                 .icon {
                     margin-top: 8px;
                 }
+                .icon img-ui {
+                    width: 28px;
+                }
                 .window {
                     position: relative;
                     z-index: 1;
-
-                    width: 164px;
-                    height: 123px;
+                    width: 130px;
+                    height: 100px;
                     border-radius: 62px;
                     border: solid 2px var(--light-blue-3);
                     background-color: var(--light-blue-2);
@@ -91,8 +93,12 @@ export class _ extends LitElement {
                     flex-direction: column;
                     align-items: center;
                 }
+                .window-icon {
+                    height: 32px;
+                    width: 32px;
+                }
                 .window-title {
-                    font-size: 14px;
+                    font-size: 12px;
                     font-weight: bold;
                     color: var(--main-blue);
                 }
@@ -104,6 +110,8 @@ export class _ extends LitElement {
                     top: 0;
                     left: 0;
                     pointer-events: none;
+                    scale: 75%;
+                    translate: -18px;
                 }
                 .feet-spring,
                 .feet-rollers {
@@ -115,7 +123,7 @@ export class _ extends LitElement {
                     transform: translate(92px, 90px);
                 }
                 .feet-rollers {
-                    transform: translate(49px, 150px);
+                    transform: translate(49px, 162px);
                 }
             `,
         ];
@@ -155,10 +163,8 @@ export class _ extends LitElement {
                         </div>
                         <div class="window">
                             <img-ui
-                                path="entry/jig/modules/small/publish-${this
-                                    .published
-                                    ? "green"
-                                    : "blue"}-bg.svg"
+                                class="window-icon"
+                                path="entry/jig/modules/small/publish-${this.published ? "green" : "blue"}-bg.svg"
                             ></img-ui>
                             <span class="window-title">${STR_PUBLISH}</span>
                         </div>

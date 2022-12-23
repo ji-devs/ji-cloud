@@ -1,11 +1,4 @@
-import {
-    LitElement,
-    html,
-    svg,
-    css,
-    customElement,
-    property,
-} from "lit-element";
+import { LitElement, html, css, customElement, property } from "lit-element";
 import { nothing } from "lit-html";
 import { classMap } from "lit-html/directives/class-map";
 import "@elements/core/images/ui";
@@ -14,6 +7,8 @@ export type Kind =
     | "attempts"
     | "card-double"
     | "card-single"
+    | "cards-show-all"
+    | "cards-show-some"
     | "continue-all"
     | "continue-click"
     | "continue-some"
@@ -22,6 +17,7 @@ export type Kind =
     | "no-limit"
     | "n_choices"
     | "n_pairs"
+    | "n_pairs-alt"
     | "order"
     | "randomize"
     | "rounds"
@@ -31,7 +27,7 @@ export type Kind =
     | "time-limit"
     | "time-limit-off"
     | "video-captions"
-    | "autoplay"
+    | "play-click"
     | "mute"
     | "loop"
     | "continue-automatically";
@@ -46,26 +42,29 @@ const STR_LABEL: Record<Kind, string> = {
     "order": "ask in order",
     "no-limit": "no limit",
     "attempts": "multiple tries",
-    "score": "include in\nfinal score",
-    "score-off": "don't include in\nfinal score",
+    "score": "include in final score",
+    "score-off": "don't include in final score",
     "time-limit-off": "no time limit",
-    "time-limit": "time limit",
-    "continue-click": "clicking on continue",
+    "time-limit": "time limit (seconds)",
+    "continue-click": "clicking next",
     "continue-all": "clicking all items",
-    "continue-some": "clicking\na minimum",
+    "continue-some": "clicking a minimum",
     "highlight": "highlight at start",
     "highlight-off": "don't highlight",
-    "card-single": "double sided",
-    "card-double": "side by side",
+    "card-single": "double-sided",
+    "card-double": "side-by-side",
+    "cards-show-all": "show all",
+    "cards-show-some": "show some",
     "rounds": "pages per game",
     "n_choices": "cards per page",
     "n_pairs": "pairs per game",
+    "n_pairs-alt": "pairs per game",
     "swap": "card position",
-    "video-captions": "play with\ncaptions",
-    "autoplay": "start automatically",
+    "video-captions": "play with captions",
+    "play-click": "play on click",
     "mute": "play without sound",
     "loop": "play on loop",
-    "continue-automatically": "automatically after video",
+    "continue-automatically": "after video",
 };
 
 @customElement("module-settings-button")
@@ -92,8 +91,8 @@ export class _ extends LitElement {
                     top: 0;
                     left: 0;
                     cursor: pointer;
-                    width: 64px;
-                    height: 64px;
+                    width: 60px;
+                    height: 60px;
                 }
                 img-ui {
                     display: inherit;
@@ -117,13 +116,13 @@ export class _ extends LitElement {
                 .circle {
                     background-color: #afcbf4;
                     border-radius: 50%;
-                    width: 24px;
-                    height: 24px;
+                    width: 26px;
+                    height: 26px;
                     text-align: center;
-                    font-size: 14px;
+                    font-size: 13px;
                     display: inline-grid;
                     align-content: center;
-                    transform: translate(210%, -65%);
+                    transform: translate(170%, -70%);
                     color: #ffffff;
                 }
 
@@ -133,9 +132,7 @@ export class _ extends LitElement {
 
                 .label {
                     pointer-events: none;
-                    width: 126px;
-                    margin-top: 12px;
-                    white-space: pre-wrap;
+                    margin-top: 10px;
                     line-height: 1.14;
                     letter-spacing: normal;
                     text-align: center;
@@ -143,15 +140,16 @@ export class _ extends LitElement {
                     max-width: 100px;
                     font-size: 13px;
                 }
-                @media (min-width: 1920px) {
-                    .label {
-                        font-size: 14px;
-                    }
+
+                :host([active]) .label {
+                    font-weight: 600;
+                    color: #5893f9;
                 }
 
-                /* Position the bubble origin so that it's in the middle here
-		the bubble will nudge itself to the left;
-		*/
+                /*
+                    Position the bubble origin so that it's in the middle here
+                    the bubble will nudge itself to the left;
+                */
                 .bubble {
                     display: block;
                     position: relative;
@@ -179,7 +177,7 @@ export class _ extends LitElement {
     @property({ type: Boolean })
     bubbleOpen: boolean = false;
 
-    @property({ type: Boolean })
+    @property({ type: Boolean, reflect: true })
     active: boolean = false;
 
     @property({ type: Number })
@@ -216,6 +214,7 @@ export class _ extends LitElement {
             ${active
                 ? html`<div class="bubble"><slot name="bubble"></slot></div>`
                 : nothing}
+            <slot></slot>
         `;
     }
 }

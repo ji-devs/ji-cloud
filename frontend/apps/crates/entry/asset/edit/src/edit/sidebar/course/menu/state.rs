@@ -1,3 +1,4 @@
+use crate::edit::sidebar::spot::state::SpotState;
 use futures_signals::signal::Mutable;
 use js_sys::Reflect;
 use std::cell::RefCell;
@@ -5,17 +6,19 @@ use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use web_sys::HtmlElement;
 
-pub struct State {
+pub struct CourseMenu {
+    pub spot_state: Rc<SpotState>,
     pub menu_ref: Rc<RefCell<Option<HtmlElement>>>,
     pub dup_as_active: Mutable<bool>,
 }
 
-impl State {
-    pub fn new() -> Self {
-        Self {
+impl CourseMenu {
+    pub fn new(spot_state: &Rc<SpotState>) -> Rc<Self> {
+        Rc::new(Self {
+            spot_state: Rc::clone(&spot_state),
             menu_ref: Rc::new(RefCell::new(None)),
             dup_as_active: Mutable::new(false),
-        }
+        })
     }
 
     pub fn close_menu(&self) {

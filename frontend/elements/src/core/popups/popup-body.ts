@@ -12,7 +12,7 @@ export class _ extends LitElement {
                     background-color: #fff;
                 }
                 header {
-                    padding: 16px;
+                    padding: 12px;
                 }
                 nav {
                     display: flex;
@@ -20,12 +20,16 @@ export class _ extends LitElement {
                 }
                 ::slotted([slot="back"]) {
                     /* only add margin in back exists */
-                    margin-bottom: 16px;
+                    margin-bottom: 12px;
                 }
                 ::slotted([slot="close"]) {
-                    font-size: 24px;
+                    font-size: 20px;
                     color: var(--dark-gray-5);
                     font-weight: 300;
+                    min-width: 30px;
+                    min-width: 30px;
+                    display: inline-grid;
+                    place-content: center;
                 }
                 ::slotted(button-icon[slot="close"]) {
                     width: 12px;
@@ -33,10 +37,11 @@ export class _ extends LitElement {
                 }
                 ::slotted([slot="heading"]) {
                     color: #fd7076;
-                    font-size: 24px;
+                    font-size: 20px;
+                    line-height: 1em;
                     font-weight: 600;
-                    margin: 0 16px;
-                    padding-bottom: 16px;
+                    margin: 0 12px;
+                    padding-bottom: 12px;
                     border-bottom: solid 1px #d5e4ff;
                 }
             `,

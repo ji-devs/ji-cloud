@@ -40,6 +40,7 @@ pub struct JigPlayer {
     pub player_options: JigPlayerOptions,
     pub bg_audio_handle: Rc<RefCell<Option<AudioHandle>>>,
     pub bg_audio_playing: Mutable<bool>,
+    pub instructions_audio_handle: Rc<RefCell<Option<AudioHandle>>>,
     pub resource_types: Mutable<Vec<ResourceType>>,
     pub instructions: Mutable<Option<Instructions>>,
     pub instructions_visible: Mutable<bool>,
@@ -77,6 +78,7 @@ impl JigPlayer {
             player_options,
             bg_audio_handle: Rc::new(RefCell::new(None)),
             bg_audio_playing: Mutable::new(true),
+            instructions_audio_handle: Rc::new(RefCell::new(None)),
             resource_types: Default::default(),
             instructions: Mutable::new(None),
             instructions_visible: Mutable::new(false),
@@ -109,7 +111,6 @@ pub struct Instructions {
     pub text: Option<String>,
     pub audio: Option<Audio>,
     pub instructions_type: InstructionsType,
-    pub audio_handle: Rc<RefCell<Option<AudioHandle>>>,
 }
 
 impl Instructions {
@@ -121,7 +122,6 @@ impl Instructions {
             text: instructions.text,
             audio: instructions.audio,
             instructions_type,
-            audio_handle: Rc::new(RefCell::new(None)),
         }
     }
 }

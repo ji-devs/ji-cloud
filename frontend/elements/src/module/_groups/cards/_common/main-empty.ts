@@ -2,8 +2,6 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
 import { nothing } from "lit-html";
 
-const STR_EMPTY = "Add words to get started";
-
 @customElement("main-empty")
 export class _ extends LitElement {
     static get styles() {
@@ -37,13 +35,16 @@ export class _ extends LitElement {
         ];
     }
 
+    @property({ type: String })
+    message!: string;
+
     render() {
         return html`
             <section class="empty">
                 <img-ui
                     path="module/_groups/cards/edit/main/no-preview.svg"
                 ></img-ui>
-                <div class="label">${STR_EMPTY}</div>
+                <div class="label">${this.message}</div>
             </section>
         `;
     }

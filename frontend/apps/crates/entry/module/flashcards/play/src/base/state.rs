@@ -5,12 +5,13 @@ use shared::domain::{
             Background, Instructions,
             _groups::cards::{CardPair, Mode, Step},
             flashcards::{ModuleData as RawData, PlayerSettings},
+            InstructionsType,
         },
         ModuleId,
     },
 };
 
-use futures_signals::signal::Mutable;
+use futures_signals::signal::{Mutable, ReadOnlyMutable};
 use std::rc::Rc;
 
 use components::module::_common::play::prelude::*;
@@ -25,6 +26,8 @@ pub struct Base {
     pub theme_id: ThemeId,
     pub background: Option<Background>,
     pub instructions: Instructions,
+    pub feedback: Instructions,
+    pub feedback_signal: Mutable<Option<Instructions>>,
     pub settings: PlayerSettings,
     pub raw_pairs: Vec<CardPair>,
     pub phase: Mutable<Phase>,
@@ -35,6 +38,7 @@ pub struct Base {
 pub enum Phase {
     Init,
     Playing(Rc<Game>),
+    Ending,
 }
 
 impl Base {
@@ -57,6 +61,8 @@ impl Base {
             theme_id,
             background: content.base.background,
             instructions: content.base.instructions,
+            feedback: content.base.feedback,
+            feedback_signal: Mutable::new(None),
             settings: content.player_settings,
             raw_pairs: content.base.pairs,
             phase: Mutable::new(Phase::Init),
@@ -74,6 +80,17 @@ impl Base {
 impl BaseExt for Base {
     fn get_instructions(&self) -> Option<Instructions> {
         Some(self.instructions.clone())
+    }
+
+    fn get_feedback(&self) -> ReadOnlyMutable<Option<Instructions>> {
+        self.feedback_signal.read_only()
+    }
+
+    fn handle_instructions_ended(&self, instructions_type: InstructionsType) {
+        if let InstructionsType::Feedback = instructions_type {
+            self.phase.set(Phase::Ending);
+            self.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Positive)));
+        }
     }
 
     fn play_phase(&self) -> Mutable<ModulePlayPhase> {

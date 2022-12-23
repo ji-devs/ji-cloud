@@ -1,4 +1,5 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
+import "@elements/core/buttons/empty";
 
 const STR_PREVIEW = "Preview";
 
@@ -22,24 +23,29 @@ export class _ extends LitElement {
 
                 .arrows {
                     /* Not sure why, but this looks more centered */
-                    margin-top: 3px;
                     display: flex;
-                    gap: 10px;
                 }
-                img-ui {
+                .arrows button-empty {
                     cursor: pointer;
+                    height: 30px;
+                    width: 30px;
+                    display: inline-grid;
+                    place-content: center;
                 }
 
-                .preview {
-                    /* Not sure why, but this looks more centered */
-                    margin-top: 4px;
-                    display: flex;
-                    gap: 8px;
-                }
                 .divider {
                     margin: 0 16px;
                     height: 32px;
                     border: solid 1px #606060;
+                }
+
+                .preview {
+                    /* Not sure why, but this looks more centered */
+                    display: flex;
+                    gap: 8px;
+                }
+                .preview-label {
+                    line-height: 30px;
                 }
             `,
         ];
@@ -85,14 +91,12 @@ export class _ extends LitElement {
         return html`
             <section>
                 <div class="arrows">
-                    <img-ui
-                        @click=${this.onUndo}
-                        path="module/_common/edit/header/${undoButton}.svg"
-                    ></img-ui>
-                    <img-ui
-                        @click=${this.onRedo}
-                        path="module/_common/edit/header/${redoButton}.svg"
-                    ></img-ui>
+                    <button-empty @click=${this.onUndo}>
+                        <img-ui path="module/_common/edit/header/${undoButton}.svg"></img-ui>
+                    </button-empty>
+                    <button-empty @click=${this.onRedo}>
+                        <img-ui path="module/_common/edit/header/${redoButton}.svg"></img-ui>
+                    </button-empty>
                 </div>
                 <div class="divider"></div>
                 <div class="preview" @click=${this.onPreview}>
@@ -103,5 +107,3 @@ export class _ extends LitElement {
         `;
     }
 }
-/*
- */

@@ -1,6 +1,4 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
-import { classMap } from "lit-html/directives/class-map";
-import { nothing } from "lit-html";
 import { live } from "lit-html/directives/live";
 
 @customElement("sidebar-widget-single-list-input")
@@ -13,11 +11,11 @@ export class _ extends LitElement {
                     justify-content: center;
                 }
                 input {
-                    height: 40px;
+                    height: 30px;
                     width: calc(100% - 32px); /*to not go into rounded corners*/
                     outline: none;
                     border: none;
-                    font-size: 24px;
+                    font-size: 18px;
                     text-align: center;
                 }
 
@@ -69,14 +67,12 @@ export class _ extends LitElement {
         const { value } = this;
 
         return html`
-            <!-- <div class="row"> -->
             <input
                 type="text"
                 @input="${this.onInput}"
                 @change="${this.onChange}"
                 .value="${live(value)}"
             />
-            <!-- </div> -->
         `;
     }
 }

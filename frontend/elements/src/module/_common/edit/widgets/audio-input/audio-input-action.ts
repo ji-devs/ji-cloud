@@ -25,18 +25,18 @@ export class _ extends LitElement {
         return [
             css`
                 button {
-                    height: 40px;
+                    height: 30px;
                     border: 0;
                     box-sizing: border-box;
                     background-color: var(--dark-blue-3);
                     color: #fff;
-                    padding: 0 24px;
+                    padding: 0 20px;
                     border-radius: 20px;
                     display: flex;
                     align-items: center;
                     column-gap: 12px;
                     font-family: Poppins;
-                    font-size: 16px;
+                    font-size: 14px;
                     font-weight: 500;
                     cursor: pointer;
                     transition: filter 100ms;
@@ -52,7 +52,7 @@ export class _ extends LitElement {
                 }
                 img-ui {
                     display: inline-block;
-                    height: 18px;
+                    height: 16px;
                 }
             `,
         ];

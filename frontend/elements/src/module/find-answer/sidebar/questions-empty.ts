@@ -40,11 +40,14 @@ export class _ extends LitElement {
                 }
 
                 .break {
-                    font-size: 24px;
+                    font-size: 20px;
                     font-weight: 500;
                     text-align: center;
                     color: var(--dark-gray-6);
                     margin: 16px 0;
+                }
+                .block img-ui {
+                    max-width: 94%;
                 }
             `,
         ];

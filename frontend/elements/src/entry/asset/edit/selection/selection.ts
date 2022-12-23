@@ -15,7 +15,7 @@ export class _ extends LitElement {
                     display: block;
                     height: 100vh;
                     overflow-y: auto;
-                    padding: 48px 56px;
+                    padding: 36px 30px;
                     box-sizing: border-box;
                 }
                 .header {
@@ -58,9 +58,21 @@ export class _ extends LitElement {
 
                 .modules {
                     margin-top: 56px;
-                    display: flex;
-                    gap: 64px;
-                    flex-wrap: wrap;
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, 188px);
+                    gap: 38px;
+                }
+
+                ::slotted([slot=dragged]) {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    z-index: 1;
+                    cursor: grabbing;
+                    max-width: 110px;
+                    max-height: 110px;
+                    /* for elementFromPoint not to return the dragged element */
+                    pointer-events: none;
                 }
             `,
         ];
@@ -79,6 +91,7 @@ export class _ extends LitElement {
             <div class="modules">
                 <slot name="modules"> </slot>
             </div>
+            <slot name="dragged"></slot>
         `;
     }
 }

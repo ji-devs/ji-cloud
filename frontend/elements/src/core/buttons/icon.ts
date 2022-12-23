@@ -36,8 +36,8 @@ export class _ extends LitElement {
             css`
                 :host {
                     cursor: pointer;
-                    width: var(--button-width, 32px);
-                    height: var(--button-height, 32px);
+                    width: var(--button-width, 30px);
+                    height: var(--button-height, 30px);
                 }
                 :host([size="x-small"]) {
                     width: 16px;

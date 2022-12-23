@@ -114,12 +114,12 @@ impl BaseExt for Base {
                 Next::SelectAll | Next::SelectSome(_) => {
                     self.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
                 }
-                _ => {}
+                _ => self.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Positive))),
             }
         }
     }
 
-    fn get_timer_minutes(&self) -> Option<u32> {
+    fn get_timer_seconds(&self) -> Option<u32> {
         self.settings.time_limit
     }
 }

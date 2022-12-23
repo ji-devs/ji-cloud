@@ -12,11 +12,13 @@ use components::{
 };
 use dominator::clone;
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
+use shared::domain::module::body::cover::Next;
+use shared::domain::module::body::Audio;
 use shared::domain::{
     asset::AssetId,
     module::{
         body::{
-            cover::{ModuleData as RawData, Step},
+            cover::{ModuleData as RawData, PlaySettings as RawPlaySettings, Step},
             BodyExt, Instructions,
         },
         ModuleId,
@@ -31,6 +33,7 @@ pub struct Base {
     pub step: ReadOnlyMutable<Step>,
     pub theme_id: Mutable<ThemeId>,
     pub instructions: Mutable<Instructions>,
+    pub audio: Mutable<Option<Audio>>,
     pub asset_id: AssetId,
     pub module_id: ModuleId,
     pub continue_next_fn: ContinueNextFn,
@@ -38,6 +41,7 @@ pub struct Base {
     pub backgrounds: Rc<Backgrounds>,
     pub stickers: Rc<Stickers<Sticker>>,
     pub text_editor: Rc<TextEditor>,
+    pub play_settings: Rc<PlaySettings>,
 }
 
 impl Base {
@@ -142,9 +146,11 @@ impl Base {
             continue_next_fn: Mutable::new(None),
             theme_id,
             instructions,
+            audio: Mutable::new(content.audio),
             text_editor,
             backgrounds,
             stickers,
+            play_settings: Rc::new(PlaySettings::new(content.play_settings)),
         });
 
         *_self_ref.borrow_mut() = Some(_self.clone());
@@ -164,7 +170,7 @@ impl BaseExt<Step> for Base {
 
     fn continue_next(&self) -> bool {
         match self.step.get() {
-            Step::Two => match self.continue_next_fn.get_cloned() {
+            Step::Two | Step::Three => match self.continue_next_fn.get_cloned() {
                 Some(continue_next_fn) => continue_next_fn(),
                 None => false,
             },
@@ -200,5 +206,17 @@ impl DesignExt<()> for Base {
 
     fn get_image_tag_priorities(&self) -> Option<Vec<ImageTag>> {
         None
+    }
+}
+
+pub struct PlaySettings {
+    pub next: Mutable<Next>,
+}
+
+impl PlaySettings {
+    pub fn new(settings: RawPlaySettings) -> Self {
+        Self {
+            next: Mutable::new(settings.next),
+        }
     }
 }

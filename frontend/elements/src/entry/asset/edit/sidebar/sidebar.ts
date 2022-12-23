@@ -11,11 +11,11 @@ export class _ extends LitElement {
             css`
                 :host {
                     display: block;
-                    width: 72px;
+                    width: 56px;
                     height: 100%;
                 }
                 :host([isModulePage]) {
-                    width: 416px;
+                    width: 324px;
                 }
                 .page-overlay {
                     position: fixed;
@@ -38,7 +38,7 @@ export class _ extends LitElement {
                     display: flex;
                     flex-flow: column;
                     height: 100vh;
-                    width: 416px;
+                    width: 324px;
                     box-shadow: 0 3px 20px 0 rgba(0, 0, 0, 0.08);
                     background-color: var(--white);
                     transition-property: width;
@@ -48,7 +48,7 @@ export class _ extends LitElement {
                     background-color: #ffffff;
                 }
                 :host([collapsed]) .sidebar-content {
-                    width: 72px;
+                    width: 56px;
                     transition-delay: var(--fading-phase-duration);
                 }
                 .side-head {
@@ -91,7 +91,7 @@ export class _ extends LitElement {
                 }
                 .publish {
                     /* Allow room for jiggling feet */
-                    margin-bottom: 100px;
+                    margin-bottom: 84px;
                 }
             `,
         ];

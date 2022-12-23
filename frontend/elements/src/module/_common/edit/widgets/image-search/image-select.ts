@@ -24,21 +24,13 @@ export class _ extends LitElement {
                     display: grid;
                 }
                 :host {
-                    --image-height: 104px;
+                    --image-height: 82px;
                 }
                 :host([imageMode="image"]) {
                     --image-width: var(--image-height);
                 }
                 :host([imageMode="background"]) {
-                    --image-width: 142px;
-                }
-                @media (min-width: 1920px) {
-                    :host {
-                        --image-height: 118px;
-                    }
-                    :host([imageMode="background"]) {
-                        --image-width: 190px;
-                    }
+                    --image-width: 114px;
                 }
 
                 .main {
@@ -46,27 +38,24 @@ export class _ extends LitElement {
                     grid-column: 1;
                     display: flex;
                     flex-direction: column;
-                    row-gap: 18px;
+                    row-gap: 10px;
                     column-gap: 24px;
-                }
-                @media (min-width: 1920px) {
-                    .main {
-                        row-gap: 18px;
-                    }
                 }
                 .top-row {
                     grid-column: 1 / -1;
                     display: flex;
                     justify-content: space-between;
+                    line-height: 30px;
                 }
                 h2 {
                     margin: 0;
-                    font-size: 16px;
+                    font-size: 14px;
                     font-weight: normal;
                 }
                 .controls {
                     display: grid;
-                    row-gap: 16px;
+                    row-gap: 10px;
+                    min-height: 30px;
                 }
                 .search-row {
                     display: grid;
@@ -86,6 +75,7 @@ export class _ extends LitElement {
                     grid-template-columns: min-content min-content;
                     justify-content: space-between;
                     align-items: center;
+                    line-height: 30px;
                 }
                 .bottom-row ::slotted([slot="upload"]) {
                     grid-column: 2;
@@ -112,19 +102,14 @@ export class _ extends LitElement {
                     display: grid;
                     grid-template-columns: auto auto;
                     justify-content: space-between;
-                    row-gap: 24px;
+                    row-gap: 18px;
                 }
                 :host([recent]) .images-section {
                     border-top: solid 1px #b0ccf2;
                 }
                 .images-section.recent {
                     overflow: hidden;
-                    max-height: 142px;
-                }
-                @media (min-width: 1920px) {
-                    .images-section.recent {
-                        max-height: 156px;
-                    }
+                    max-height: calc(var(--image-height) + 40px);
                 }
                 :host([moreShown]) .images-section.recent {
                     max-height: revert;
@@ -134,11 +119,6 @@ export class _ extends LitElement {
                     color: #4a4a4a;
                     margin: 0;
                     font-size: 15px;
-                }
-                @media (min-width: 1920px) {
-                    .images-section h4 {
-                        font-size: 16px;
-                    }
                 }
                 .images-section.recent button-rect .icon {
                     display: inline-block;
@@ -155,13 +135,7 @@ export class _ extends LitElement {
                     justify-content: space-between;
                     grid-auto-rows: var(--image-height);
                     row-gap: 12px;
-                    column-gap: 10px;
-                }
-                @media (min-width: 1920px) {
-                    .images-section {
-                        row-gap: 24px;
-                        column-gap: 15px;
-                    }
+                    column-gap: 8px;
                 }
                 ::slotted(img) {
                     height: 100%;
@@ -292,27 +266,25 @@ export class _ extends LitElement {
                     </div>
                 </div>
                 <section class="all-images">
-                    ${this.recent
-                        ? html`
-                              <div class="images-section recent">
-                                  <h4>${STR_MY_RECENT}</h4>
-                                  <button-rect
-                                      kind="text"
-                                      color="blue"
-                                      @click=${() =>
-                                          (this.moreShown = !this.moreShown)}
-                                  >
-                                      ${this.moreShown
-                                          ? STR_SEE_LESS
-                                          : STR_SEE_MORE}
-                                      <span class="icon">></span>
-                                  </button-rect>
-                                  <div class="images-wrapper">
-                                      <slot name="recent"></slot>
-                                  </div>
-                              </div>
-                          `
-                        : nothing}
+                    ${ this.recent ? html`
+                        <div class="images-section recent">
+                            <h4>${STR_MY_RECENT}</h4>
+                            <button-rect
+                                class=""
+                                kind="text"
+                                color="blue"
+                                @click=${() => (this.moreShown = !this.moreShown)}
+                            >
+                                ${this.moreShown
+                                    ? STR_SEE_LESS
+                                    : STR_SEE_MORE}
+                                <span class="icon">></span>
+                            </button-rect>
+                            <div class="images-wrapper">
+                                <slot name="recent"></slot>
+                            </div>
+                        </div>
+                    ` : nothing }
                     <div class="images-section main">
                         <h4>${STR_ALL_IMAGES}</h4>
                         <div id="main-images-wrapper" class="images-wrapper">

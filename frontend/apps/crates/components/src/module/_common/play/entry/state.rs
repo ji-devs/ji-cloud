@@ -331,8 +331,13 @@ pub enum ModulePlayPhase {
 }
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum ModuleEnding {
+    // [Ty] I'm not 100% sure about these endings, but afaict they are not implemented except
+    // for Next.
+    /// The student completed the module correctly
     Positive,
+    /// The student completed the module, but there were mistakes
     Negative,
+    /// Move on to the next module
     Next,
 }
 
@@ -409,7 +414,7 @@ pub trait BaseExt: DomRenderable {
         // Do nothing. Activities which have custom ended logic/rules should implement this.
     }
 
-    fn get_timer_minutes(&self) -> Option<u32> {
+    fn get_timer_seconds(&self) -> Option<u32> {
         None
     }
 

@@ -24,10 +24,15 @@ where
 {
     html!("module-settings-container", {
         .children(
-            state.lines.iter().map(|(line_kind, buttons)| {
+            state.lines.iter().map(|line| {
               html!("module-settings-line", {
-                  .prop("kind", line_kind.as_str_id())
-                    .children(buttons.iter().map(|button| {
+                    .apply(|dom| {
+                        match &line.line_type {
+                            ModuleSettingsLineType::Kind(kind) => dom.prop("kind", kind.as_str_id()),
+                            ModuleSettingsLineType::Label(label) => dom.prop("label", label),
+                        }
+                    })
+                    .children(line.settings.iter().map(|button| {
                         match button {
                             Some(button) => render_button(button.clone()),
                             None => html!("span"),

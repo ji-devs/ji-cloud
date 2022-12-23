@@ -11,7 +11,7 @@ pub struct Draw {
     pub trace: DrawTrace,
     pub draw_points: Mutable<Vec<(f64, f64)>>,
     pub display_trace: Mutable<bool>,
-    pub drag: Mutable<Option<Drag>>,
+    pub drag: Mutable<Option<Drag<()>>>,
     pub menu: Mutable<Option<Menu>>,
     pub on_finished: Box<dyn Fn(Option<RawTrace>)>,
     pub init_index: Option<usize>,

@@ -10,7 +10,7 @@ use components::{
     tabs::MenuTabKind,
 };
 use dominator::clone;
-use futures_signals::signal::{Mutable, SignalExt};
+use futures_signals::signal::Mutable;
 use shared::domain::module::body::Audio;
 use std::rc::Rc;
 use utils::unwrap::UnwrapJiExt;
@@ -69,24 +69,24 @@ impl Tab {
                 Self::Image(Rc::new(state))
             }
             MenuTabKind::Audio => {
-                let opts = AudioInputOptions::new(Some(
-                    base.instructions
-                        .signal_cloned()
-                        .map(|instructions| instructions.audio),
-                ));
+                let audio = {
+                    let base = Rc::clone(&base);
 
-                let callbacks = AudioInputCallbacks::new(
-                    Some(clone!(base => move |audio:Audio| {
-                        base.set_instructions_audio(Some(audio));
-                    })),
-                    Some(clone!(base => move || {
-                        base.set_instructions_audio(None);
-                    })),
-                );
+                    let opts = AudioInputOptions::new(Some(base.audio.signal_cloned()));
 
-                let state = AudioInput::new(opts, callbacks);
+                    let callbacks = AudioInputCallbacks::new(
+                        Some(clone!(base => move |audio: Audio| {
+                            base.set_audio(Some(audio));
+                        })),
+                        Some(clone!(base => move || {
+                            base.set_audio(None);
+                        })),
+                    );
 
-                Self::Audio(state)
+                    AudioInput::new(opts, callbacks)
+                };
+
+                Self::Audio(audio)
             }
             _ => unimplemented!("unsupported tab kind!"),
         }

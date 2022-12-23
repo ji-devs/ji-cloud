@@ -4,7 +4,7 @@ use futures_signals::{
     signal::{Mutable, SignalExt},
     signal_vec::SignalVecExt,
 };
-use shared::domain::asset::{Asset, DraftOrLive, PrivacyLevel};
+use shared::domain::asset::{DraftOrLive, PrivacyLevel};
 use utils::{
     events,
     init::analytics,
@@ -17,7 +17,6 @@ use crate::edit::publish::Publish;
 use super::add_additional_resource::AddAdditionalResource;
 use super::additional_resource::AdditionalResourceComponent;
 
-use super::editable_assets::EditableAsset;
 use super::state::PrePublish;
 use components::{
     hebrew_buttons::HebrewButtons,
@@ -32,6 +31,7 @@ use components::{
     },
 };
 use std::rc::Rc;
+use utils::editable_asset::EditableAsset;
 
 pub mod age;
 pub mod categories_select;
@@ -58,12 +58,12 @@ const STR_PUBLIC_POPUP_BODY_3: &str = " with the Jigzi community.";
 const STR_MISSING_INFO_TOOLTIP: &str = "Please fill in the missing information.";
 
 impl PrePublish {
-    pub fn render(publish_state: Rc<Publish>, asset: Asset) -> Dom {
+    pub fn render(publish_state: Rc<Publish>) -> Dom {
         let state: Mutable<Option<Rc<PrePublish>>> = Mutable::new(None);
 
         html!("empty-fragment", {
             .future(clone!(state => async move {
-                let _state = PrePublish::load_data(publish_state, asset).await;
+                let _state = PrePublish::load_data(publish_state).await;
                 state.set(Some(Rc::new(_state)));
             }))
             .prop("slot", "main")
@@ -93,7 +93,7 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
         .children(&mut [
             ModuleThumbnail::new(
                 state.asset.id(),
-                state.asset.cover().clone(),
+                state.asset.cover().get_cloned(),
                 ThumbnailFallback::Asset,
                 DraftOrLive::Draft,
             ).render_live(Some("img")),

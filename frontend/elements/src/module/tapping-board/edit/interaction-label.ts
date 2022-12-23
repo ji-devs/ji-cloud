@@ -11,11 +11,7 @@ export class _ extends LitElement {
                     display: flex;
                     flex-direction: column;
                     row-gap: 20px;
-                }
-                @media (min-width: 1920px) {
-                    :host {
-                        grid-template-rows: 24px 320px auto;
-                    }
+                    padding-top: 20px
                 }
                 .main-content {
                     border-radius: 16px;

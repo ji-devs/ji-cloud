@@ -15,6 +15,7 @@ use utils::events;
 use utils::iframe::{AssetPlayerToPlayerPopup, IframeMessageExt};
 use utils::init::analytics;
 use utils::js_wrappers::is_iframe;
+use utils::keyboard::KeyEvent;
 use utils::prelude::is_in_iframe;
 use utils::{
     iframe::{IframeAction, ModuleToJigPlayerMessage},
@@ -28,6 +29,7 @@ use web_sys::{HtmlElement, HtmlIFrameElement};
 use super::state::JigPlayer;
 
 const DEFAULT_INSTRUCTIONS_TEXT: &str = "1, 2, 3 Go!";
+const STR_EMPTY: &str = "Oops! Looks like you have some empty content in your deck!";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum ShowInstructions {
@@ -40,14 +42,23 @@ impl JigPlayer {
         let state = self;
         actions::load_data(state.clone());
 
+        // Timer is not Copy and cannot be deduped, so any change to timer, even if it is the same value
+        // will trigger an updated which will cause the instructions popup to show again when it is not
+        // supposed to.
+        let has_timer = state
+            .timer
+            .signal_cloned()
+            .map(|timer| timer.is_some())
+            .dedupe();
+
         let should_show_instructions = map_ref! {
             let instructions = state.instructions.signal_cloned(),
-            let timer = state.timer.signal_cloned(),
+            let has_timer = has_timer,
             let started = state.started.signal_cloned().dedupe()
             => {
                 if *started {
                     if let Some(instructions) = instructions {
-                        if timer.is_some() || instructions.text.is_some() {
+                        if *has_timer || instructions.text.is_some() {
                             let is_instructions = instructions.instructions_type.is_instructions();
                             // if there is text or a timer, and
                             if is_instructions || instructions.text.is_some() {
@@ -111,7 +122,8 @@ impl JigPlayer {
                         actions::show_instructions(state.clone(), true);
                     }
                     _ => {
-
+                        // Always drop the audio_handle whenever this signal fires and nothing should be shown/played
+                        *state.instructions_audio_handle.borrow_mut() = None;
                     }
                 }
                 async {}
@@ -178,6 +190,7 @@ impl JigPlayer {
                 if !valid {
                     Some(html!("main-empty", {
                         .prop("slot", "message")
+                        .prop("message", STR_EMPTY)
                     }))
                 } else {
                     None
@@ -379,6 +392,9 @@ impl JigPlayer {
                     .event(clone!(state => move |_: events::Click| {
                         actions::navigate_back(Rc::clone(&state));
                     }))
+                    .global_event(clone!(state => move |e: events::KeyUp| {
+                        actions::navigate_from_keyboard_event(state.clone(), KeyEvent::from(e));
+                    }))
                 }),
                 html!("jig-play-progress-bar", {
                     .prop("slot", "progress")
@@ -389,6 +405,9 @@ impl JigPlayer {
                     .prop("kind", "forward")
                     .event(clone!(state => move |_: events::Click| {
                         actions::navigate_forward(Rc::clone(&state));
+                    }))
+                    .global_event(clone!(state => move |e: events::KeyUp| {
+                        actions::navigate_from_keyboard_event(state.clone(), KeyEvent::from(e));
                     }))
                 }),
             ])

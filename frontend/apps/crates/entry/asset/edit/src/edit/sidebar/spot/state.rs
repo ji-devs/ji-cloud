@@ -1,4 +1,4 @@
-use crate::edit::sidebar::state::{SidebarSpot, SidebarSpotItem, State as SidebarState};
+use crate::edit::sidebar::state::{Sidebar as SidebarState, SidebarSpot, SidebarSpotItem};
 use dominator::clone;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use std::cell::RefCell;
@@ -7,34 +7,37 @@ use utils::drag::Drag;
 use utils::routes::{AssetEditRoute, JigEditRoute};
 use web_sys::HtmlElement;
 
-pub struct State {
-    pub module: Rc<SidebarSpot>,
+pub struct SpotState {
+    pub spot: Rc<SidebarSpot>,
     pub tried_module_at_cover: Mutable<bool>,
     pub sidebar: Rc<SidebarState>,
-    pub drag: Mutable<Option<Drag>>,
+    pub drag: Mutable<Option<Drag<()>>>,
     pub index: usize,
+    pub drag_target_index: Option<usize>,
     pub total_len: usize,
     pub elem: RefCell<Option<HtmlElement>>,
     pub confirm_delete: Mutable<bool>,
 }
 
-impl State {
+impl SpotState {
     pub fn new(
         sidebar: Rc<SidebarState>,
         index: usize,
+        drag_target_index: Option<usize>,
         total_len: usize,
         module: Rc<SidebarSpot>,
-    ) -> Self {
-        Self {
-            module,
+    ) -> Rc<Self> {
+        Rc::new(Self {
+            spot: module,
             sidebar,
             index,
+            drag_target_index,
             total_len,
             tried_module_at_cover: Mutable::new(false),
             drag: Mutable::new(None),
             elem: RefCell::new(None),
             confirm_delete: Mutable::new(false),
-        }
+        })
     }
 
     pub fn kind_str(&self) -> &'static str {
@@ -42,7 +45,7 @@ impl State {
         //     None => "",
         //     Some(module) => module.kind().as_str(),
         // }
-        match &self.module.item {
+        match &self.spot.item {
             SidebarSpotItem::Jig(Some(module)) => module.kind.as_str(),
             _ => "",
         }
@@ -50,13 +53,12 @@ impl State {
 
     pub fn is_last_module(&self) -> bool {
         // self.index < self.total_len - 2 && (&*self.module).is_some()
-        self.index < self.total_len - 2
-            && matches!(&self.module.item, SidebarSpotItem::Jig(Some(_)))
+        self.index < self.total_len - 2 && matches!(&self.spot.item, SidebarSpotItem::Jig(Some(_)))
     }
 
-    pub fn window_state_signal(state: Rc<State>) -> impl Signal<Item = &'static str> {
+    pub fn window_state_signal(state: Rc<SpotState>) -> impl Signal<Item = &'static str> {
         state.sidebar.asset_edit_state.route.signal_ref(clone!(state => move |route| {
-            match &state.module.item {
+            match &state.spot.item {
                 SidebarSpotItem::Jig(module) => {
                     match module {
                         None => "empty",
@@ -68,9 +70,11 @@ impl State {
                         }
                     }
                 },
-                SidebarSpotItem::Course(_course_spot) => {
-                    // TODO:
-                    "thumbnail"
+                SidebarSpotItem::Course(course_spot) => {
+                    match course_spot {
+                        None => "empty",
+                        Some(_) => "thumbnail",
+                    }
                 },
             }
         }))
@@ -100,7 +104,7 @@ impl State {
             .asset_edit_state
             .route
             .signal_ref(clone!(state => move|route| {
-                match &state.module.item {
+                match &state.spot.item {
                     SidebarSpotItem::Jig(Some(module)) => {
                         matches!(
                             route,

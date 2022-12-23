@@ -15,22 +15,20 @@ use utils::{
     routes::{CourseEditRoute, JigEditRoute, ResourceEditRoute},
 };
 
-use super::editable_assets::EditableAsset;
 use super::state::PrePublish;
 use crate::edit::publish::Publish;
+use utils::editable_asset::EditableAsset;
 
 mod course_actions;
 mod jig_actions;
 mod resource_actions;
 
 impl PrePublish {
-    pub async fn load_data(publish_state: Rc<Publish>, asset: Asset) -> Self {
+    pub async fn load_data(publish_state: Rc<Publish>) -> Self {
         let categories = load_categories();
         let meta = load_metadata();
 
         let (categories, meta) = join!(categories, meta);
-
-        let asset = EditableAsset::from(asset);
 
         let categories = categories.unwrap_ji();
         let mut category_label_lookup = HashMap::new();
@@ -38,12 +36,17 @@ impl PrePublish {
 
         let meta = meta.unwrap_ji();
 
-        if asset.published_at().is_none() {
-            set_default_values(&asset, &meta);
+        if publish_state
+            .asset_edit_state
+            .asset
+            .published_at()
+            .lock_ref()
+            .is_none()
+        {
+            set_default_values(&publish_state.asset_edit_state.asset, &meta);
         }
 
         Self::new(
-            asset,
             categories,
             category_label_lookup,
             meta.age_ranges,
@@ -55,7 +58,7 @@ impl PrePublish {
 
     pub fn navigate_to_cover(&self) {
         // navigate to cover if exists otherwise navigate to landing
-        let cover_module_id = self.asset.cover().as_ref().map(|m| m.id);
+        let cover_module_id = self.asset.cover().lock_ref().as_ref().map(|m| m.id);
 
         match &self.asset {
             EditableAsset::Jig(_) => {
@@ -91,9 +94,9 @@ impl PrePublish {
     // used to disable button
     pub fn is_ready_to_publish(self: &Rc<Self>) -> bool {
         match &self.asset {
-            EditableAsset::Jig(jig) => jig.modules.iter().all(|m| m.is_complete),
-            EditableAsset::Resource(resource) => resource.cover.is_some(),
-            EditableAsset::Course(course) => course.cover.is_some(),
+            EditableAsset::Jig(jig) => jig.modules.lock_ref().iter().all(|m| m.is_complete),
+            EditableAsset::Resource(resource) => resource.cover.lock_ref().is_some(),
+            EditableAsset::Course(course) => course.cover.lock_ref().is_some(),
         }
     }
 
@@ -106,25 +109,29 @@ impl PrePublish {
         };
 
         state.loader.load(clone!(state => async move {
-            match &state.asset {
+            let asset = match &state.asset {
                 EditableAsset::Jig(jig) => {
-                    jig_actions::save_and_publish_jig(jig)
+                    let jig = jig_actions::save_and_publish_jig(jig)
                         .await
                         .unwrap_ji();
+                    Asset::Jig(jig)
                 },
                 EditableAsset::Resource(resource) => {
-                    resource_actions::save_and_publish_resource(resource)
+                    let resource = resource_actions::save_and_publish_resource(resource)
                         .await
                         .unwrap_ji();
+                    Asset::Resource(resource)
                 }
                 EditableAsset::Course(course) => {
-                    course_actions::save_and_publish_course(course)
+                    let course = course_actions::save_and_publish_course(course)
                         .await
                         .unwrap_ji();
+                    Asset::Course(course)
                 }
             };
 
-            state.publish_state.post_publish.set(true);
+            state.publish_state.asset_edit_state.asset.fill_from_asset(asset.clone());
+            state.publish_state.published_asset.set(Some(asset));
             state.submission_tried.set(false);
         }));
     }

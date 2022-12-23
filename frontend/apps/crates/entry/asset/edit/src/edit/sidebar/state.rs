@@ -1,22 +1,12 @@
 use super::{
-    course::settings::state::State as CourseSettingsState, dragging::state::State as DragState,
-    jig::settings::state::State as JigSettingsState,
+    course::settings::CourseSettings, dragging::state::State as DragState,
+    jig::settings::JigSettings,
 };
 use dominator_helpers::{futures::AsyncLoader, signals::OptionSignal};
-use futures_signals::{
-    signal::{Mutable, Signal, SignalExt},
-    signal_vec::MutableVec,
-};
-use shared::domain::{
-    asset::Asset,
-    course::CourseResponse,
-    jig::{JigId, JigResponse},
-    module::{LiteModule, ModuleKind},
-};
-use std::{rc::Rc, vec};
-use utils::math::PointI32;
-
-use chrono::{DateTime, Utc};
+use futures_signals::signal::{Mutable, Signal, SignalExt};
+use shared::domain::{asset::AssetId, jig::JigResponse, module::LiteModule};
+use std::rc::Rc;
+use utils::{editable_asset::EditableAsset, math::PointI32};
 
 use super::super::state::AssetEditState;
 
@@ -29,12 +19,9 @@ pub enum ModuleHighlight {
     Publish,
 }
 
-pub struct State {
-    pub asset: Asset,
+pub struct Sidebar {
     pub asset_edit_state: Rc<AssetEditState>,
-    pub name: Mutable<String>,
-    pub publish_at: Mutable<Option<DateTime<Utc>>>,
-    pub modules: MutableVec<Rc<SidebarSpot>>,
+    // pub spots: MutableVec<Rc<SidebarSpot>>,
     pub collapsed: Mutable<bool>,
     pub drag: Mutable<Option<Rc<DragState>>>,
     pub drag_target_index: Mutable<Option<usize>>,
@@ -46,77 +33,26 @@ pub struct State {
     pub(super) settings: SidebarSetting,
 }
 
-impl State {
-    pub fn new(jig: Asset, asset_edit_state: Rc<AssetEditState>) -> Self {
-        let mut modules = match &jig {
-            Asset::Jig(jig) => Self::get_jig_spots(jig),
-            Asset::Course(course) => Self::get_course_spots(course),
-            Asset::Resource(_) => unimplemented!(),
-        };
-
-        modules.push(Rc::new(SidebarSpot::new_empty(&jig)));
-
-        // Initialize these here so that we can move `jig` into the initialization of Self and
-        // still keep the ordering of the fields.
-        let jig_display_name = jig.display_name().clone();
-        // let jig_published_at = jig.published_at;
-        let jig_published_at = None;
-        let settings_state = match &jig {
-            Asset::Jig(jig) => SidebarSetting::Jig(Rc::new(JigSettingsState::new(jig))),
-            Asset::Course(course) => {
-                SidebarSetting::Course(Rc::new(CourseSettingsState::new(course)))
+impl Sidebar {
+    pub fn new(asset_edit_state: Rc<AssetEditState>) -> Rc<Self> {
+        let settings_state = match &asset_edit_state.asset {
+            EditableAsset::Jig(jig) => SidebarSetting::Jig(JigSettings::new(jig)),
+            EditableAsset::Course(course) => SidebarSetting::Course(CourseSettings::new(course)),
+            EditableAsset::Resource(_) => {
+                unimplemented!()
             }
-            Asset::Resource(_) => unimplemented!(),
         };
 
-        Self {
-            asset: jig,
+        Rc::new(Self {
             asset_edit_state,
-            name: Mutable::new(jig_display_name),
-            publish_at: Mutable::new(jig_published_at),
-            modules: MutableVec::new_with_values(modules),
+            // spots: MutableVec::new_with_values(modules),
             collapsed: Mutable::new(false),
             settings: settings_state,
             drag: Mutable::new(None),
             drag_target_index: Mutable::new(None),
             highlight_modules: Mutable::new(None), // By default we don't want modules highlighted yet.
             loader: AsyncLoader::new(),
-        }
-    }
-
-    fn get_jig_spots(jig: &JigResponse) -> Vec<Rc<SidebarSpot>> {
-        let mut add_cover = false;
-
-        if !matches!(
-            jig.jig_data.modules.get(0),
-            Some(cover) if cover.kind == ModuleKind::Cover
-        ) {
-            // not cover exists
-            add_cover = true;
-        };
-
-        let mut modules: Vec<Rc<SidebarSpot>> = jig
-            .jig_data
-            .modules
-            .iter()
-            .map(|module| SidebarSpot::new_jig_module(Some(module.clone())))
-            .collect();
-
-        if add_cover {
-            modules.insert(0, SidebarSpot::new_jig_module(None));
-        };
-
-        modules
-    }
-
-    fn get_course_spots(course: &CourseResponse) -> Vec<Rc<SidebarSpot>> {
-        let mut v = vec![SidebarSpot::new_course_cover(
-            course.course_data.cover.clone().unwrap(),
-        )];
-        for item in &course.course_data.items {
-            v.push(SidebarSpot::new_course_item(*item));
-        }
-        v
+        })
     }
 
     //There's probably a way of making this simpler
@@ -131,7 +67,7 @@ impl State {
 
     /// Returns whether this JIG is publishable
     pub fn can_publish(&self) -> bool {
-        let modules = self.modules.lock_ref();
+        let modules = self.asset_edit_state.sidebar_spots.lock_ref();
 
         let modules_len = modules
             .iter()
@@ -168,16 +104,16 @@ pub struct SidebarSpot {
 }
 
 impl SidebarSpot {
-    pub fn new_empty(asset: &Asset) -> Self {
-        let item = match asset {
-            Asset::Jig(_) => SidebarSpotItem::Jig(None),
-            Asset::Course(_) => SidebarSpotItem::Course(None),
-            Asset::Resource(_) => unimplemented!(),
+    pub fn new_empty(asset_id: &AssetId) -> Rc<Self> {
+        let item = match asset_id {
+            AssetId::JigId(_) => SidebarSpotItem::Jig(None),
+            AssetId::CourseId(_) => SidebarSpotItem::Course(None),
+            AssetId::ResourceId(_) => unimplemented!(),
         };
-        Self {
+        Rc::new(Self {
             item,
             is_incomplete: Mutable::new(false),
-        }
+        })
     }
 
     pub fn new_jig_module(module: Option<LiteModule>) -> Rc<Self> {
@@ -197,10 +133,10 @@ impl SidebarSpot {
         })
     }
 
-    pub fn new_course_item(jig_id: JigId) -> Rc<Self> {
+    pub fn new_course_item(jig: JigResponse) -> Rc<Self> {
         Rc::new(Self {
             is_incomplete: Mutable::new(false),
-            item: SidebarSpotItem::Course(Some(Rc::new(CourseSpot::Item(jig_id)))),
+            item: SidebarSpotItem::Course(Some(Rc::new(CourseSpot::Item(jig)))),
         })
     }
 }
@@ -241,7 +177,7 @@ impl SidebarSpotItem {
 #[derive(Clone, Debug)]
 pub enum CourseSpot {
     Cover(LiteModule),
-    Item(JigId),
+    Item(JigResponse),
 }
 
 // #[derive(Clone, Debug)]
@@ -267,6 +203,6 @@ pub enum CourseSpot {
 // }
 
 pub(super) enum SidebarSetting {
-    Jig(Rc<JigSettingsState>),
-    Course(Rc<CourseSettingsState>),
+    Jig(Rc<JigSettings>),
+    Course(Rc<CourseSettings>),
 }

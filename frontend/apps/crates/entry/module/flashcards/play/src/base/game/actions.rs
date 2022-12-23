@@ -1,34 +1,66 @@
 use super::state::*;
 use components::{
     audio::mixer::{AudioPath, AUDIO_MIXER},
-    module::_groups::cards::{lookup::Side, play::card::dom::FLIPPED_AUDIO_EFFECT},
+    module::{
+        _common::play::prelude::{BaseExt, ModuleEnding, ModulePlayPhase},
+        _groups::cards::{lookup::Side, play::card::dom::FLIPPED_AUDIO_EFFECT},
+    },
 };
 use gloo_timers::future::TimeoutFuture;
 use shared::domain::module::body::_groups::cards::{Card, CardPair};
 
-use crate::base::state::Base;
+use crate::base::state::{Base, Phase};
 
 use dominator::clone;
 use rand::prelude::*;
-use std::rc::Rc;
+use std::{rc::Rc, sync::atomic::Ordering};
 use utils::prelude::*;
 
 impl Game {
     pub fn next(&self) {
-        //Cancel flip if it exists
-        self.animation_loader.cancel();
-        self.gate.set_neq(Gate::Waiting);
+        // Update rounds played before anything else happens so that we can
+        // be sure that it represent the actual amount of pairs the student
+        // has played through.
+        let rounds_played = self.rounds_played.load(Ordering::SeqCst) + 1;
+        self.rounds_played.store(rounds_played, Ordering::SeqCst);
 
-        //borrow-checker fails with if/else here
-        {
-            if let Some(next) = get_current(&self.base, &mut self.deck.borrow_mut()) {
-                self.current.set(next);
-                return;
+        let max_rounds = self
+            .base
+            .settings
+            .view_pairs
+            .unwrap_or_else(|| self.base.raw_pairs.len() as u32)
+            .min(self.base.raw_pairs.len() as u32);
+
+        let has_ended = rounds_played >= max_rounds as usize;
+
+        log::info!("{:?}", self.base.settings.view_pairs);
+        log::info!("{:?}", self.base.raw_pairs.len());
+        log::info!("{rounds_played} >= {max_rounds}");
+
+        if !has_ended {
+            //Cancel flip if it exists
+            self.animation_loader.cancel();
+            self.gate.set_neq(Gate::Waiting);
+
+            //borrow-checker fails with if/else here
+            {
+                if let Some(next) = get_current(&self.base, &mut self.deck.borrow_mut()) {
+                    self.current.set(next);
+                    return;
+                }
+            }
+
+            self.reset_deck();
+        } else {
+            let feedback = &self.base.feedback;
+            if feedback.has_content() {
+                self.base.feedback_signal.set(Some(feedback.clone()));
+            } else {
+                self.base.phase.set(Phase::Ending);
+                self.base
+                    .set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Positive)));
             }
         }
-
-        self.reset_deck();
-        // self.base.phase.set(Phase::Ending(Rc::new(Ending::new(self.base.clone()))));
     }
 
     pub fn flip(state: Rc<Self>) {

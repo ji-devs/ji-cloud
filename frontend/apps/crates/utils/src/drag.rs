@@ -4,14 +4,15 @@
  * 2. The current drag position
  *
  * The consumer is expected to:
- * 1. create/stash it on mouse down
- * 2. update it on global mouse move
- * 3. drop it on global mouse up
+ * 1. create/stash it on pointer down
+ * 2. update it on global pointer move
+ * 3. call trigger_drop_event, and drop it on global pointer up
+ * 3. drop it on global pointer cancel
  *
  * In addition to the _tracking_ it provides signals of all the required state
  */
 
-use web_sys::HtmlElement;
+use web_sys::{CustomEvent, CustomEventInit, HtmlElement};
 
 use futures_signals::{
     map_ref,
@@ -21,23 +22,35 @@ use futures_signals::{
 use crate::{
     math::*,
     resize::{get_resize_info, resize_info_signal},
+    unwrap::UnwrapJiExt,
 };
-use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering::SeqCst;
+use std::{cell::RefCell, sync::atomic::AtomicI32};
+use wasm_bindgen::{JsCast, JsValue};
 
 const MOVE_THRESHHOLD: i32 = 3;
 
-pub struct Drag {
+pub struct Drag<T> {
+    pub data: T,
     state: Mutable<DragState>,
     pos: Mutable<PointI32>,
     mouse_x: AtomicI32,
     mouse_y: AtomicI32,
     immediate: bool,
+    element_hovered: RefCell<Option<HtmlElement>>,
 }
 
-impl Drag {
-    pub fn new(mouse_x: i32, mouse_y: i32, anchor_x: f64, anchor_y: f64, immediate: bool) -> Self {
+impl<T> Drag<T> {
+    pub fn new(
+        mouse_x: i32,
+        mouse_y: i32,
+        anchor_x: f64,
+        anchor_y: f64,
+        immediate: bool,
+        data: T,
+    ) -> Self {
         let _self = Self {
+            data,
             state: Mutable::new(DragState::Waiting(DragWait {
                 anchor: PointF64::new(anchor_x, anchor_y),
                 accum: PointI32::new(0, 0),
@@ -46,6 +59,7 @@ impl Drag {
             mouse_x: AtomicI32::new(mouse_x),
             mouse_y: AtomicI32::new(mouse_y),
             immediate,
+            element_hovered: Default::default(),
         };
 
         if _self.immediate {
@@ -59,6 +73,7 @@ impl Drag {
         mouse_y: i32,
         elem: &HtmlElement,
         immediate: bool,
+        data: T,
     ) -> Self {
         let resize_info = get_resize_info();
 
@@ -67,7 +82,7 @@ impl Drag {
         let anchor_x = (mouse_x as f64) - elem_x;
         let anchor_y = (mouse_y as f64) - elem_y;
 
-        Self::new(mouse_x, mouse_y, anchor_x, anchor_y, immediate)
+        Self::new(mouse_x, mouse_y, anchor_x, anchor_y, immediate, data)
     }
 }
 
@@ -83,7 +98,7 @@ pub struct DragWait {
     pub accum: PointI32,
 }
 
-impl Drag {
+impl<T> Drag<T> {
     //Top-level state changes
     pub fn get_active(&self) -> bool {
         matches!(*self.state.lock_ref(), DragState::Active)
@@ -197,6 +212,7 @@ impl Drag {
         self.mouse_y.store(mouse.y, SeqCst);
     }
     pub fn update(&self, x: i32, y: i32) -> Option<(PointI32, PointI32)> {
+        self.trigger_enter_leave_events(x, y);
         let prev_mouse = self.get_mouse();
         let next_mouse = PointI32::new(x, y);
         let diff = prev_mouse - next_mouse;
@@ -238,4 +254,62 @@ impl Drag {
 
         next_pos.map(|next_pos| (next_pos, diff))
     }
+
+    fn trigger_enter_leave_events(&self, x: i32, y: i32) {
+        let state = self;
+        let current_elem = element_from_point(x as f32, y as f32);
+        let mut previous_elem = state.element_hovered.borrow_mut();
+
+        // if still over same element: do nothing
+        if let Some(previous_elem) = &*previous_elem {
+            if let Some(current_elem) = &current_elem {
+                if previous_elem == current_elem {
+                    return;
+                }
+            }
+        }
+
+        if let Some(previous_elem) = &*previous_elem {
+            let event = create_event("custom-drag-leave");
+            let _ = previous_elem.dispatch_event(&event);
+        }
+
+        if let Some(current_elem) = &current_elem {
+            let event = create_event("custom-drag-enter");
+            let _ = current_elem.dispatch_event(&event);
+        }
+
+        *previous_elem = current_elem;
+    }
+
+    pub fn trigger_drop_event(&self, x: i32, y: i32, data: &str) {
+        let mut options = CustomEventInit::new();
+        options.detail(&JsValue::from_str(&data));
+        let event = CustomEvent::new_with_event_init_dict("custom-drop", &options).unwrap_ji();
+
+        if let Some(elem) = element_from_point(x as f32, y as f32) {
+            let _ = elem.dispatch_event(&event);
+        }
+    }
+}
+
+fn element_from_point(x: f32, y: f32) -> Option<HtmlElement> {
+    match web_sys::window()
+        .unwrap_ji()
+        .document()
+        .unwrap_ji()
+        .element_from_point(x, y)
+    {
+        // [Ty]: Unwrap was failing on dyn_into() for drawing traces. This makes sure that any error
+        // returns a None instead.
+        Some(elem) => match elem.dyn_into() {
+            Ok(elem) => Some(elem),
+            Err(_) => None,
+        },
+        None => None,
+    }
+}
+
+fn create_event(name: &str) -> CustomEvent {
+    CustomEvent::new(name).unwrap_ji()
 }

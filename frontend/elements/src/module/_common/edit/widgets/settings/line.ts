@@ -25,7 +25,7 @@ const STR_LABEL: Record<Kind, string> = {
     "game-display": "How should your cards be displayed?",
     "rounds": "How many pages should student complete?",
     "hint": "Highlight clickable areas:",
-    "next": "Student finishes this activity by...",
+    "next": "Student views this page until...",
     "time-limit": "Would you like to set a time limit?",
     "attempts": "How many tries does the student get?",
     "score": "Would you like to include score?",
@@ -41,14 +41,8 @@ export class _ extends LitElement {
             css`
                 :host {
                     display: grid;
-                    grid-template-columns: 116px 1fr;
-                    gap: 0px 32px;
-                }
-                @media (min-width: 1920px) {
-                    :host {
-                        grid-template-columns: 123px 1fr;
-                        gap: 0px 70px;
-                    }
+                    grid-template-columns: 90px 1fr;
+                    column-gap: 18px;
                 }
 
                 .label {
@@ -57,37 +51,43 @@ export class _ extends LitElement {
                     line-height: 20px;
                     text-align: left;
                     color: var(--dark-gray-4);
-                    font-size: 14px;
-                }
-                @media (min-width: 1920px) {
-                    .label {
-                        font-size: 16px;
-                    }
+                    font-size: 13px;
                 }
 
                 .options {
                     display: grid;
-                    grid-template-columns: 64px 64px;
-                    gap: 24px 52px;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 12px;
                 }
             `,
         ];
     }
 
     @property()
-    kind: Kind = "card-view";
+    kind?: Kind = "card-view";
+
+    @property({ type: String })
+    label?: String;
 
     @property({ type: Boolean })
     borderTop: boolean = false;
 
     render() {
-        const { kind } = this;
-
-        const label = STR_LABEL[kind];
-
         return html`
-            <div class="label">${label}</div>
+            <div class="label">${this.getLabel()}</div>
             <div class="options"><slot></slot></div>
         `;
+    }
+
+    getLabel() {
+        const { kind, label } = this;
+
+        if (label) {
+            return label;
+        } else if (kind) {
+            return STR_LABEL[kind];
+        } else {
+            return undefined;
+        }
     }
 }

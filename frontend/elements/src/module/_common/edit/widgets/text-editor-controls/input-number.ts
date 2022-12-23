@@ -11,26 +11,14 @@ export class _ extends LitElement {
                     border: solid 1px var(--light-blue-5);
                     border-radius: 14px;
                     justify-content: space-evenly;
-                    padding: 14px 1px;
-                }
-                @media (min-width: 1920px) {
-                    :host {
-                        padding: 14px 24px;
-                        column-gap: 24px;
-                    }
+                    padding: 4px 1px;
                 }
                 :host(:focus-within) {
                     border: solid 2px var(--dark-blue-3);
                 }
                 :host(:focus-within) {
                     /* removing one pixel to account for thicker border */
-                    padding: 13px 0;
-                }
-                @media (min-width: 1920px) {
-                    :host(:focus-within) {
-                        /* removing one pixel to account for thicker border */
-                        padding: 13px 23px;
-                    }
+                    padding: 3px 0;
                 }
                 button {
                     padding: 0px;

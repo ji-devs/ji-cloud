@@ -6,6 +6,8 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::convert::TryFrom;
 
+use super::Audio;
+
 /// The body for [`Poster`](crate::domain::module::ModuleKind::Poster) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 pub struct ModuleData {
@@ -99,12 +101,16 @@ impl TryFrom<Body> for ModuleData {
 pub struct Content {
     /// The editor state
     pub editor_state: EditorState,
-
     /// The mode
     pub mode: Mode,
-
+    /// Optional audio for the activity
+    #[serde(default)]
+    pub audio: Option<Audio>,
     /// The base content for all design modules
     pub base: BaseContent,
+    /// play settings
+    #[serde(default)]
+    pub play_settings: PlaySettings,
 }
 
 /// Editor state
@@ -245,5 +251,27 @@ impl StepExt for Step {
     }
     fn get_preview() -> Self {
         Self::Four
+    }
+}
+
+/// Play settings
+#[derive(Clone, Default, Serialize, Deserialize, Debug)]
+pub struct PlaySettings {
+    /// next style
+    pub next: Next,
+}
+
+/// Next
+#[derive(Copy, Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
+pub enum Next {
+    /// After audio has played
+    AfterAudio,
+    /// Student clicks next
+    ClickNext,
+}
+
+impl Default for Next {
+    fn default() -> Self {
+        Self::ClickNext
     }
 }

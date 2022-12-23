@@ -67,7 +67,7 @@ pub struct InteractiveItem {
     pub audio: Option<Audio>,
     pub target_transform: Transform,
     pub curr_transform: Mutable<Transform>,
-    pub drag: Mutable<Option<Rc<Drag>>>,
+    pub drag: Mutable<Option<Rc<Drag<()>>>>,
     pub size: Mutable<Option<(f64, f64)>>,
     pub target_index: RefCell<Option<usize>>,
 }

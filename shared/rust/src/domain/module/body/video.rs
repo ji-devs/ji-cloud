@@ -232,7 +232,7 @@ impl StepExt for Step {
 }
 
 /// Video play settings
-#[derive(Default, Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PlaySettings {
     /// show captions
     pub captions: bool,
@@ -245,6 +245,17 @@ pub struct PlaySettings {
 
     /// what to do when done
     pub done_action: Option<DoneAction>,
+}
+
+impl Default for PlaySettings {
+    fn default() -> Self {
+        Self {
+            autoplay: true,
+            muted: Default::default(),
+            captions: Default::default(),
+            done_action: Default::default(),
+        }
+    }
 }
 
 /// what to do when done playing video

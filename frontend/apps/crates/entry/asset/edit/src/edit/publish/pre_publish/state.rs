@@ -6,9 +6,12 @@ use shared::domain::{
     category::{Category, CategoryId},
     meta::{Affiliation, AgeRange, ResourceType},
 };
-use utils::languages::{Language, JIG_LANGUAGES};
+use utils::{
+    editable_asset::EditableAsset,
+    languages::{Language, JIG_LANGUAGES},
+};
 
-use super::{super::Publish, editable_assets::EditableAsset};
+use super::super::Publish;
 
 const STR_JIG: &str = "JIG";
 const STR_RESOURCE: &str = "Resource";
@@ -16,13 +19,13 @@ const STR_COURSE: &str = "Course";
 
 pub struct PrePublish {
     pub loader: AsyncLoader,
+    pub asset: EditableAsset,
     pub categories: Mutable<Vec<Category>>,
     // categories has label lookup since it's both more complex to lookup and used more then others (pills)
     pub category_label_lookup: Mutable<HashMap<CategoryId, String>>,
     pub resource_types: Mutable<Vec<ResourceType>>,
     pub ages: Mutable<Vec<AgeRange>>,
     pub affiliations: Mutable<Vec<Affiliation>>,
-    pub asset: EditableAsset,
     pub submission_tried: Mutable<bool>,
     pub show_missing_info_popup: Mutable<bool>,
     pub languages: Vec<Language>,
@@ -32,7 +35,6 @@ pub struct PrePublish {
 
 impl PrePublish {
     pub fn new(
-        jig: EditableAsset,
         categories: Vec<Category>,
         category_label_lookup: HashMap<CategoryId, String>,
         ages: Vec<AgeRange>,
@@ -41,8 +43,9 @@ impl PrePublish {
         publish_state: Rc<Publish>,
     ) -> Self {
         Self {
+            // Separate asset for publish as it doesn't auto save
+            asset: publish_state.asset_edit_state.asset.deep_clone(),
             loader: AsyncLoader::new(),
-            asset: jig,
             categories: Mutable::new(categories),
             category_label_lookup: Mutable::new(category_label_lookup),
             ages: Mutable::new(ages),

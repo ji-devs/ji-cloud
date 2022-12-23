@@ -20,16 +20,16 @@ use futures_signals::{
 use shared::domain::asset::AssetId;
 use shared::domain::module::body::Audio;
 use shared::domain::module::body::_groups::design::Trace;
-use shared::domain::module::body::find_answer::{Ordering, Question as RawQuestion, QuestionField};
+use shared::domain::module::body::find_answer::{
+    Ordering, Question as RawQuestion, QuestionField, DEFAULT_ATTEMPTS_LIMIT,
+};
 use shared::domain::{
     jig::JigId,
     module::{
         body::{
             BodyExt, Instructions,
             _groups::design::TraceKind,
-            find_answer::{
-                Mode, ModuleData as RawData, Next, PlaySettings as RawPlaySettings, Step,
-            },
+            find_answer::{Mode, ModuleData as RawData, PlaySettings as RawPlaySettings, Step},
         },
         ModuleId,
     },
@@ -61,30 +61,21 @@ pub struct Base {
 pub struct PlaySettings {
     pub ordering: Mutable<Ordering>,
     pub has_attempts_limit: Mutable<bool>,
-    pub n_attempts: Mutable<u8>,
+    pub n_attempts: Mutable<u32>,
     pub has_time_limit: Mutable<bool>,
     pub time_limit: Mutable<u32>,
-    pub next: Mutable<Next>,
-    pub next_value: Mutable<usize>,
 }
 
-const DEFAULT_ATTEMPTS_LIMIT: u8 = 2;
-const DEFAULT_TIME_LIMIT: u32 = 3;
+const DEFAULT_TIME_LIMIT: u32 = 10;
 
 impl PlaySettings {
     pub fn new(settings: RawPlaySettings) -> Self {
-        let next_value = Mutable::new(match &settings.next {
-            Next::SelectSome(value) => *value,
-            _ => crate::config::DEFAULT_SELECT_AMOUNT,
-        });
         Self {
             ordering: Mutable::new(settings.ordering),
             has_attempts_limit: Mutable::new(settings.n_attempts.is_some()),
             n_attempts: Mutable::new(settings.n_attempts.unwrap_or(DEFAULT_ATTEMPTS_LIMIT)),
             has_time_limit: Mutable::new(settings.time_limit.is_some()),
             time_limit: Mutable::new(settings.time_limit.unwrap_or(DEFAULT_TIME_LIMIT)),
-            next: Mutable::new(settings.next),
-            next_value,
         }
     }
 }

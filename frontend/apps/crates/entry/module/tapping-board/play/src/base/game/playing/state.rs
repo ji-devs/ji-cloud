@@ -10,6 +10,8 @@ use std::collections::HashSet;
 pub struct PlayState {
     pub game: Rc<Game>,
     pub traces: Vec<Rc<PlayTrace>>,
+    /// Used for highlighting the last selected trace.
+    pub current_set: Mutable<HashSet<usize>>,
     pub selected_set: Mutable<HashSet<usize>>,
 }
 
@@ -25,6 +27,7 @@ impl PlayState {
         Rc::new(Self {
             game,
             traces,
+            current_set: Mutable::new(HashSet::new()),
             selected_set: Mutable::new(HashSet::new()),
         })
     }
@@ -62,6 +65,8 @@ impl PlayTrace {
                 self.audio.clone(),
                 self.text.clone(),
                 Some(clone!(play_state => move || {
+                    // Clear the current trace highlight if it is set
+                    play_state.current_set.lock_mut().clear();
                     play_state.evaluate_end();
                 })),
             );

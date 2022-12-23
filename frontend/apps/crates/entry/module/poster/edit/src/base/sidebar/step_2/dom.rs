@@ -1,5 +1,6 @@
 use super::state::*;
 use components::{
+    audio::input::AudioInput,
     image::search::dom::render as render_image_search,
     tabs::{MenuTab, MenuTabKind},
 };
@@ -29,6 +30,7 @@ pub fn render(state: Rc<Step2>) -> Dom {
         .children(&mut [
             render_tab(state.clone(), MenuTabKind::Text),
             render_tab(state.clone(), MenuTabKind::Image),
+            render_tab(state.clone(), MenuTabKind::Audio),
             html!("module-sidebar-body", {
                 .prop("slot", "body")
                 .child_signal(state.tab.signal_cloned().map(clone!(state => move |tab| {
@@ -39,6 +41,12 @@ pub fn render(state: Rc<Step2>) -> Dom {
                         Tab::Image(state) => {
                             Some(render_image_search(state, None))
                         },
+                        Tab::Audio(audio) => {
+                            Some(AudioInput::render(
+                                audio.clone(),
+                                None,
+                            ))
+                        }
                     }
                 })))
             })

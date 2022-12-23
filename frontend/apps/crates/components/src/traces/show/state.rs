@@ -15,7 +15,7 @@ pub enum TracesShowMode {
     Cutout,
     Solid,
     Hidden,
-    //Items in the hashset will be solid, otherwise hidden
+    /// Items in the hashset will be solid, otherwise hidden
     HiddenSolidMap(Mutable<HashSet<usize>>),
 }
 

@@ -10,6 +10,8 @@ use shared::domain::module::body::_groups::cards::Step;
 use std::rc::Rc;
 use utils::events;
 
+const STR_EMPTY: &str = "Add content to get started";
+
 impl<RawData, E, GetSettingsStateFn, RenderSettingsStateFn, SettingsState> DomRenderable
     for Main<RawData, E, GetSettingsStateFn, RenderSettingsStateFn, SettingsState>
 where
@@ -26,7 +28,9 @@ where
             .child_signal(state.base.is_empty_signal().map(clone!(state => move |is_empty| {
                 Some(
                     if is_empty {
-                        html!("main-empty")
+                        html!("main-empty", {
+                            .prop("message", STR_EMPTY)
+                        })
                     } else {
                         html!("empty-fragment", {
                             .child_signal(state.base.step.signal_cloned().map(clone!(state => move |step| {

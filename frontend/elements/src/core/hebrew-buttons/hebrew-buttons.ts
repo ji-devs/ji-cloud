@@ -18,7 +18,7 @@ export class _ extends LitElement {
                 }
                 ::slotted(.divider) {
                     width: 1px;
-                    height: 20px;
+                    height: 16px;
                     background-color: var(--main-blue);
                 }
             `,
