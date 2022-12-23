@@ -1,5 +1,4 @@
 use cfg_if::cfg_if;
-use wasm_bindgen::prelude::*;
 
 /*
  * debug switching between unwrap_ji() and unwrap_ji()

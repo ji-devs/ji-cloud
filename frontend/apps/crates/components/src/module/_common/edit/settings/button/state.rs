@@ -1,8 +1,28 @@
 use dominator_helpers::signals::{box_signal_fn, BoxSignalFn};
 use futures_signals::signal::{Mutable, Signal, SignalExt};
+use serde::Serialize;
+use std::borrow::Cow;
 use std::pin::Pin;
 use std::{fmt::Display, rc::Rc, str::FromStr};
 
+#[derive(Debug, Serialize)]
+pub struct ValueLabelTemplate {
+    pub prefix: Cow<'static, str>,
+    pub postfix_singular: Cow<'static, str>,
+    pub postfix_plural: Cow<'static, str>,
+}
+
+type TemplateTuple = (&'static str, &'static str, &'static str);
+
+impl From<TemplateTuple> for ValueLabelTemplate {
+    fn from((prefix, singular, plural): TemplateTuple) -> Self {
+        Self {
+            prefix: prefix.into(),
+            postfix_singular: singular.into(),
+            postfix_plural: plural.into(),
+        }
+    }
+}
 pub struct SettingsButton {
     pub(super) kind: SettingsButtonKind,
     pub(super) active_signal: BoxSignalFn<bool>,
@@ -82,11 +102,15 @@ pub trait SettingsValueExt {
     fn string_signal(&self) -> Pin<Box<dyn Signal<Item = String>>>;
     fn handle_event(&self, event_value: &str);
     fn get_select_value(&self, index: usize) -> String;
+    fn get_label_template(&self) -> Option<&ValueLabelTemplate>;
+    fn get_input_kind(&self) -> Option<InputKind>;
 }
 
 pub struct SettingsValue<T> {
     pub(super) curr: Mutable<T>,
     pub(super) on_change: Box<dyn Fn(T)>,
+    pub(super) label_template: Option<ValueLabelTemplate>,
+    pub(super) input_kind: Option<InputKind>,
 }
 
 impl<T: Copy + Display + Eq + Default + FromStr + 'static> SettingsValue<T> {
@@ -94,6 +118,8 @@ impl<T: Copy + Display + Eq + Default + FromStr + 'static> SettingsValue<T> {
         Self {
             curr: Mutable::new(value),
             on_change: Box::new(on_change),
+            input_kind: None,
+            label_template: None,
         }
     }
 
@@ -101,7 +127,21 @@ impl<T: Copy + Display + Eq + Default + FromStr + 'static> SettingsValue<T> {
         Self {
             curr: value,
             on_change: Box::new(on_change),
+            input_kind: None,
+            label_template: None,
         }
+    }
+
+    /// Set custom template value for the bubble label
+    pub fn value_label_template(mut self, template: ValueLabelTemplate) -> Self {
+        self.label_template = Some(template);
+        self
+    }
+
+    /// Overwrite the default input kind for this value
+    pub fn value_input_kind(mut self, input_kind: InputKind) -> Self {
+        self.input_kind = Some(input_kind);
+        self
     }
 }
 
@@ -119,6 +159,14 @@ impl<T: Copy + Display + Default + Eq + FromStr + 'static> SettingsValueExt for 
 
     fn get_select_value(&self, index: usize) -> String {
         format!("{}", index)
+    }
+
+    fn get_label_template(&self) -> Option<&ValueLabelTemplate> {
+        self.label_template.as_ref()
+    }
+
+    fn get_input_kind(&self) -> Option<InputKind> {
+        self.input_kind
     }
 }
 
@@ -205,5 +253,32 @@ impl SettingsButtonKind {
                 SettingsButtonCustomKind::Value(value) => *value,
             },
         }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum InputKind {
+    Field,
+    Select(usize),
+}
+
+pub fn get_input_kind(kind: &SettingsButtonKind) -> Option<InputKind> {
+    // If the kind is a CustomKind, then we need to check whether the variant is Kind first. If it is
+    // return that so we can determine whether or not show an input field on it.
+    let kind = match kind {
+        SettingsButtonKind::Custom(SettingsButtonCustomKind::Kind(kind), _) => &*kind,
+        _ => kind,
+    };
+
+    match kind {
+        SettingsButtonKind::Attempts => Some(InputKind::Select(6)),
+        SettingsButtonKind::NumChoices => Some(InputKind::Select(6)),
+        SettingsButtonKind::NumPairs => Some(InputKind::Field),
+        SettingsButtonKind::NumPairsAlt => Some(InputKind::Select(6)),
+        SettingsButtonKind::TimeLimit => Some(InputKind::Field),
+        SettingsButtonKind::ContinueSome => Some(InputKind::Field),
+        SettingsButtonKind::Rounds => Some(InputKind::Field),
+        SettingsButtonKind::CardsShowSome => Some(InputKind::Field),
+        _ => None,
     }
 }

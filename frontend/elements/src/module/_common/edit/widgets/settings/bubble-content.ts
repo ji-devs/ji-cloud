@@ -9,6 +9,13 @@ import { nothing } from "lit-html";
 import "@elements/core/images/ui";
 import { Kind } from "./button";
 
+// TS copy of ValueLabelTemplate
+interface ValueLabelTemplate {
+    prefix: string,
+    postfix_singular: string,
+    postfix_plural: string,
+}
+
 const STR_LABEL: Partial<Record<Kind, string>> = {
     attempts: "Player gets",
     "continue-some": "of",
@@ -56,22 +63,42 @@ export class _ extends LitElement {
     kind: Kind = "attempts";
 
     @property()
+    private valueLabelTemplate?: ValueLabelTemplate;
+
+    @property()
     value?: any;
 
+    public set valueLabelTemplateFromString(template: string) {
+        this.valueLabelTemplate = JSON.parse(template);
+    }
+
     renderLabelSuffix() {
-        const suffix = STR_LABEL_SUFFIX[this.kind];
+        if (this.valueLabelTemplate) {
+            return html`<span>${
+                this.value > 1
+                ? this.valueLabelTemplate.postfix_plural
+                : this.valueLabelTemplate.postfix_singular
+            }</span>`;
+        } else {
+            const suffix = STR_LABEL_SUFFIX[this.kind];
 
-        if (!suffix) {
-            return nothing;
+            if (!suffix) {
+                return nothing;
+            }
+
+            return html`<span>${this.value > 1 ? suffix[1] : suffix[0]}</span>`;
         }
-
-        return html`<span>${this.value > 1 ? suffix[1] : suffix[0]}</span>`;
     }
 
     render() {
         const { kind } = this;
 
-        const label = STR_LABEL[kind];
+        let label = null;
+        if (this.valueLabelTemplate) {
+            label = this.valueLabelTemplate.prefix;
+        } else {
+            label = STR_LABEL[kind];
+        }
 
         return html`
             ${label ? html`<span>${label}</span>` : nothing}
