@@ -1,7 +1,6 @@
 import "@elements/_bundles/_sub-bundles/page/header";
 import "@elements/entry/user/_common/buttons/google";
 import "@elements/entry/user/email/buttons/email-send";
-import "@elements/entry/user/email/pages/email-change";
 import "@elements/entry/user/register-complete/pages/landing";
 import "@elements/entry/user/email/pages/email-send";
 import "@elements/entry/user/login";

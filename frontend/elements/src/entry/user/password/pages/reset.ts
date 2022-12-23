@@ -1,4 +1,3 @@
-import { MEDIA_UI } from "@utils/path";
 import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/entry/user/_common/auth-page";
 import { Strength as PasswordStrength } from "@elements/entry/user/register/widgets/password-strength";
@@ -20,26 +19,10 @@ export class _ extends LitElement {
                     font-weight: 900;
                     color: #5662a3;
                 }
-                ::slotted([slot="google"]) {
-                    margin-bottom: 20px;
-                }
-                ::slotted([slot="input"]) {
-                    margin-top: 20px;
-                }
-                ::slotted([slot="passwordreminder"]) {
-                    text-align: end;
-                }
                 ::slotted([slot="submit"]) {
                     margin-top: 40px;
                     margin-bottom: 24px;
                     display: block;
-                }
-
-                .spacer {
-                    height: 20px;
-                }
-                .text-hidden {
-                    display: none;
                 }
                 .password-wrapper {
                     position: relative;
@@ -49,21 +32,10 @@ export class _ extends LitElement {
                     top: 33%;
                     right: -76px;
                 }
-                ::slotted([slot="contact"]) {
-                    position: absolute;
-                    bottom: 20px;
-                    white-space: nowrap;
-                }
                 .account-wrapper {
                     display: flex;
                     align-items: center;
                     margin-top: 24px;
-                }
-                ::slotted([slot="noaccount"]:last-child) {
-                    margin-left: 4px;
-                }
-                ::slotted([slot="sub"]) {
-                    white-space: nowrap;
                 }
             `,
         ];

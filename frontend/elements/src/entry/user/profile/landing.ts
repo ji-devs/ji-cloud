@@ -310,13 +310,6 @@ export class _ extends LitElement {
                                 <slot class="edit-button" name="reset-password"></slot>
                             </div>
                         </label>
-                        <!-- <label>
-                            <span class="key">${STR_PASSWORD}</span>
-                            <div class="value password-wrapper">
-                                <span>************</span>
-                            </div>
-                            <slot class="edit-button" name="reset-password"></slot>
-                        </label> -->
                         <label>
                             <span class="key">${STR_FIRST_NAME}</span>
                             <slot class="value" name="first-name"></slot>

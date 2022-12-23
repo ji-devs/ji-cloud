@@ -14,7 +14,6 @@ export class _ extends LitElement {
                 :host {
                     display: grid;
                     height: 100vh;
-                    justify-content: center;
                 }
                 @media (min-width: 1024px) {
                     :host {
@@ -34,20 +33,25 @@ export class _ extends LitElement {
                 img-ui {
                     width: 100%;
                     height: 100%;
+                    max-height: 100vh;
                     object-fit: cover;
                     display: block;
                 }
-                .main {
+                .main-wrapper {
+                    height: 100%;
+                    overflow: auto;
+                    display: grid;
+                    justify-content: center;
+                }
+                main {
                     box-sizing: border-box;
                     display: flex;
                     flex-direction: column;
                     gap: 16px;
-                    height: 100%;
-                    overflow: auto;
                     padding: 20px;
                 }
                 @media (min-width: 1024px) {
-                    .main {
+                    main {
                         padding: 45px;
                     }
                 }
@@ -63,8 +67,10 @@ export class _ extends LitElement {
             <aside>
                 <img-ui .path="${this.img}"></img-ui>
             </aside>
-            <div class="main">
-                <slot></slot>
+            <div class="main-wrapper">
+                <main>
+                    <slot></slot>
+                </main>
             </div>
         `;
     }

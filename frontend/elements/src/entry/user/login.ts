@@ -30,9 +30,6 @@ export class _ extends LitElement {
                     font-weight: 900;
                     color: #5662a3;
                 }
-                ::slotted([slot="google"]) {
-                    margin-bottom: 16px;
-                }
                 ::slotted([slot="input"]) {
                     margin-top: 16px;
                 }

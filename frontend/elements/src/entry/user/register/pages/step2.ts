@@ -31,7 +31,7 @@ export class _ extends LitElement {
                     grid-column: 1 / -1;
                 }
                 ::slotted([slot="committed-to-privacy"]) {
-                    width: 60%;
+                    max-width: 370px;
                     font-size: 13px;
                 }
             `,
