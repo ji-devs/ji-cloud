@@ -1,5 +1,5 @@
 use cfg_if::cfg_if;
-
+use wasm_bindgen::UnwrapThrowExt;
 /*
  * debug switching between unwrap_ji() and unwrap_ji()
  * just use unwrap_ji() and expect_ji() everywhere
