@@ -10,7 +10,7 @@ use shared::{
             body::{
                 Image, Instructions,
                 _groups::design::{Backgrounds, BaseContent, Sprite, Sticker, Text},
-                find_answer::{Content, Mode, ModuleData as RawData, Next, Ordering, PlaySettings},
+                find_answer::{Content, Mode, ModuleData as RawData, Ordering, PlaySettings},
             },
             ModuleId,
         },
@@ -64,7 +64,6 @@ impl DebugSettings {
                             ordering: Ordering::InOrder,
                             n_attempts: Some(1),
                             time_limit: None,
-                            next: Next::SelectAll,
                         },
                         base: BaseContent {
                             theme: ThemeId::Chalkboard,

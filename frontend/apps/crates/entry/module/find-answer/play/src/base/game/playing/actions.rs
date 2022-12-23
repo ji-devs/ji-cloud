@@ -4,7 +4,6 @@ use components::{
     module::_common::play::prelude::{BaseExt, ModuleEnding, ModulePlayPhase},
 };
 use dominator::clone;
-use shared::domain::module::body::find_answer::Next;
 use std::rc::Rc;
 
 impl PlayState {
@@ -59,62 +58,24 @@ impl PlayState {
         // At this point, we know that the student has selected all the traces and that this question is done.
         self.ended.set(true);
 
-        // We need to know how many questions have been completed so that if the settings have the
-        // activity ending after _n_ questions, we can move on to the next activity.
-        let n_questions_completed = match self.game.question.get_cloned() {
-            Some((index, ..)) => index + 1,
-            None => 0,
-        };
-
-        let total_questions = self.game.base.questions.len();
-        let n_target = {
-            match self.game.base.settings.next {
-                Next::SelectAll => Some(total_questions),
-                Next::SelectSome(n) => Some(n),
-                Next::Continue => None,
-            }
-        };
-
-        // This gets complex - We have three possible transitions here...
-        // 1. The student hasn't completed enough questions, and we can move on to the next question;
-        // 2. or, they have completed the required amount of questions, and we move to the next activity;
-        // 3. or, they need to click continue to move on the next activity.
-        //
-        // For #3, we don't handle any state change.
-        let completed_minimum = match n_target {
-            // Have they completed the minimum required questions?
-            Some(n_target) if n_questions_completed >= n_target => true,
-            // They haven't, or the settings don't require them to.
-            _ => false,
-        };
         let next_question = self.game.next_question_index();
         let state = self;
 
-        match (completed_minimum, next_question) {
-            // If they haven't completed the minimum questions, or don't need to, _and_ we can move on to the next
-            // question
-            (false, Some(next_index)) => {
+        match next_question {
+            // We can move on to the next question if one exists
+            Some(next_index) => {
                 state.game.move_next_question(next_index);
             }
-            // If they've completed the minimum, then we can end this activity, or
-            // There are noo more questions to ask, but the activity is configured so that the student can click continue.
-            _ => {
+            // Otherwise, there are no more questions to ask, move on to the next activity, or play the feedback
+            None => {
                 let feedback = &state.game.base.feedback;
                 if feedback.has_content() {
                     state.game.base.feedback_signal.set(Some(feedback.clone()));
                 } else {
-                    match state.game.base.settings.next {
-                        Next::SelectAll | Next::SelectSome(_) => {
-                            state
-                                .game
-                                .base
-                                .set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
-                        }
-                        _ => state
-                            .game
-                            .base
-                            .set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Positive))),
-                    }
+                    state
+                        .game
+                        .base
+                        .set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
                 }
             }
         }
