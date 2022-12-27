@@ -30,6 +30,7 @@ use wasm_bindgen::{JsCast, JsValue};
 
 const MOVE_THRESHHOLD: i32 = 3;
 
+#[derive(Debug)]
 pub struct Drag<T> {
     pub data: T,
     state: Mutable<DragState>,

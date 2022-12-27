@@ -25,10 +25,17 @@ impl ModuleSelectionItem {
     }
 
     pub fn hover_or_drag_signal(self: &Rc<Self>) -> impl Signal<Item = bool> {
+        let state = Rc::clone(self);
+
         map_ref! {
             let hover = self.hover.signal(),
             let drag = self.module_selection_state.drag.signal_cloned() => move {
-                *hover || drag.is_some()
+                let dragging = matches!(
+                    drag,
+                    Some(drag) if drag.data == state.kind
+                );
+
+                *hover || dragging
             }
         }
     }
