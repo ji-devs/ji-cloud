@@ -158,9 +158,11 @@ export class _ extends LitElement {
                     background-color: #00844c;
                 }
                 .hover .scrollable-content {
-                    padding: 16px 24px;
+                    padding: 0px 24px;
                     padding-right: 12px;
                     margin-right: 12px;
+                    margin-top: 16px;
+                    margin-bottom: 16px;
                     overflow: auto;
                     scrollbar-width: thin;
                 }
@@ -169,7 +171,7 @@ export class _ extends LitElement {
                     scrollbar-color: var(--light-gray-2) transparent;
                 }
                 :host([kind=resource]) .hover {
-                    scrollbar-color: #3f9c6f transparent;
+                    scrollbar-color: #d2ddea transparent;
                 }
                 .hover .scrollable-content::-webkit-scrollbar-track {
                     background-color: transparent;
@@ -183,10 +185,10 @@ export class _ extends LitElement {
                 }
                 :host([kind=jig]) .scrollable-content::-webkit-scrollbar-thumb,
                 :host([kind=course]) .scrollable-content::-webkit-scrollbar-thumb {
-                    background-color: var(--light-blue-5);
+                    background-color: #d2ddea;
                 }
                 :host([kind=resource]) .scrollable-content::-webkit-scrollbar-thumb {
-                    background-color: #3f9c6f;
+                    background-color: #d2ddea;
                 }
                 .hover .title {
                     margin: 0;
