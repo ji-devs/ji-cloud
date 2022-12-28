@@ -7,13 +7,13 @@ export class _ extends LitElement {
             css`
                 a {
                     display: grid;
-                    row-gap: 8px;
+                    row-gap: 6px;
                     text-decoration: none;
                     justify-items: center;
                 }
                 ::slotted(*) {
-                    width: 56px;
-                    height: 56px;
+                    width: 42px;
+                    height: 42px;
                     border-radius: 50%;
                     overflow: hidden;
                 }
@@ -23,7 +23,7 @@ export class _ extends LitElement {
                     color: #f2777f;
                     display: inline-grid;
                     place-content: center;
-                    font-size: 28px;
+                    font-size: 22px;
                     box-sizing: border-box;
                 }
                 :host([active]) ::slotted(*) {
@@ -33,7 +33,7 @@ export class _ extends LitElement {
                     background-color: #ffffff;
                 }
                 .label {
-                    font-size: 14px;
+                    font-size: 13px;
                     color: #383838;
                 }
                 :host([active]) .label {

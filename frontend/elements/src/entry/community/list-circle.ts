@@ -1,40 +1,37 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
+import { listItemStyles } from "./list-item-styles";
 
 @customElement("community-list-circle")
 export class _ extends LitElement {
     static get styles() {
         return [
+            listItemStyles,
             css`
                 p {
                     margin: 0;
                 }
                 :host {
-                    min-height: 136px;
-                    padding: 0 24px;
-                    display: grid;
-                    align-items: center;
-                    justify-content: space-between;
-                    column-gap: 24px;
-                    border-radius: 16px;
+                    min-height: 106px;
+                    border-radius: 12px;
                     box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.08);
                     border: solid 1px var(--light-orange-3);
                     background-color: #ffffff;
                     cursor: pointer;
                 }
                 ::slotted([slot=img]) {
-                    height: 104px;
-                    width: 104px;
+                    height: 80px;
+                    width: 80px;
                     border-radius: 50%;
                     overflow: hidden;
                     border: solid 2px #faef9c;
                 }
                 .name {
-                    font-size: 16px;
+                    font-size: 14px;
                     font-weight: 500;
                     color: var(--dark-gray-6);
                 }
                 .member-count {
-                    font-size: 16px;
+                    font-size: 14px;
                     font-weight: 500;
                     color: var(--dark-gray-6);
                 }
@@ -42,7 +39,7 @@ export class _ extends LitElement {
                     color: var(--main-blue);
                 }
                 .description {
-                    font-size: 14px;
+                    font-size: 12px;
                     color: var(--dark-gray-6);
                 }
             `,
@@ -62,12 +59,12 @@ export class _ extends LitElement {
         return html`
             <slot name="img"></slot>
             <p class="name">${this.name}</p>
-            <p class="member-count">
+            <p class="desktop-only member-count">
                 <fa-icon icon="fa-thin fa-people-group"></fa-icon>
                 ${this.memberCount}
             </p>
-            <p class="description">${this.description}</p>
-            <slot name="status"></slot>
+            <p class="desktop-only description">${this.description}</p>
+            <slot class="desktop-only status" name="status"></slot>
         `;
     }
 }

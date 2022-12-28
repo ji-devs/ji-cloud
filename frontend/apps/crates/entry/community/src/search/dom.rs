@@ -16,8 +16,6 @@ use wasm_bindgen::JsValue;
 
 use super::CommunitySearch;
 
-use crate::state::{CIRCLE_LIST_GRID_COLUMNS, MEMBER_LIST_GRID_COLUMNS};
-
 const STR_SEE_MORE: &str = "See more";
 
 impl CommunitySearch {
@@ -42,7 +40,6 @@ impl CommunitySearch {
 
     fn render_member(self: &Rc<Self>, member: &PublicUser) -> Dom {
         html!("community-list-member", {
-            .class(&*MEMBER_LIST_GRID_COLUMNS)
             .prop("slot", "members")
             .prop("name", &format!("{} {}", member.given_name, member.family_name))
             // .prop("city", "New York")
@@ -73,7 +70,6 @@ impl CommunitySearch {
 
     fn render_circle(self: &Rc<Self>, circle: &Circle) -> Dom {
         html!("community-list-circle", {
-            .class(&*CIRCLE_LIST_GRID_COLUMNS)
             .prop("slot", "circles")
             .prop("name", &circle.display_name)
             .prop("memberCount", circle.member_count)

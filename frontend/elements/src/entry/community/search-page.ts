@@ -13,14 +13,13 @@ export class _ extends LitElement {
             css`
                 :host {
                     align-items: center;
-                    padding: 40px 30px;
                     display: grid;
-                    row-gap: 24px;
+                    row-gap: 20px;
                 }
                 h2 {
                     text-align: center;
                     color: var(--dark-gray-6);
-                    font-size: 24px;
+                    font-size: 16px;
                     font-weight: 500;
                     margin: 0;
                 }
@@ -33,17 +32,17 @@ export class _ extends LitElement {
                     display: grid;
                     grid-template-columns: auto auto;
                     justify-content: space-between;
-                    row-gap: 20px;
+                    row-gap: 16px;
                 }
                 section h4 {
-                    font-size: 20px;
+                    font-size: 18px;
                     font-weight: bold;
                     color: var(--dark-blue-4);
                     margin: 0;
                 }
                 section .items {
                     display: grid;
-                    row-gap: 24px;
+                    row-gap: 20px;
                     grid-column: 1 / -1;
                 }
                 section ::slotted([slot$=see-more]) {

@@ -25,14 +25,13 @@ export class _ extends LitElement {
                 header .width-holder {
                     display: grid;
                     justify-content: center;
-                    padding: 40px 14px;
-                    row-gap: 40px;
+                    padding: 30px 24px;
+                    row-gap: 30px;
                 }
-                @media (min-width: 1920px) {
+                @media (min-width: 1024px) {
                     header .width-holder {
+                        row-gap: 0;
                         justify-content: space-between;
-                        padding: 40px 30px;
-                        row-gap: 10px;
                         grid-template-columns: auto auto;
                     }
                 }
@@ -40,39 +39,36 @@ export class _ extends LitElement {
                     margin: 0;
                     color: #fed758;
                     font-weight: 900;
-                    font-size: 36px;
+                    font-size: 32px;
                     text-align: center;
                 }
-                @media (min-width: 1920px) {
+                @media (min-width: 1024px) {
                     h2 {
-                        font-size: 48px;
                         text-align: left;
                     }
                 }
                 ::slotted([slot=nav]) {
                     display: flex;
                     justify-content: center;
-                    column-gap: 20px;
-                }
-                @media (min-width: 1920px) {
-                    ::slotted([slot=nav]) {
-                        column-gap: 40px;
-                    }
+                    column-gap: 16px;
                 }
                 main {
-                    padding: 40px 30px;
+                    padding: 30px 24px;
                     background-color: #fff6d9;
                 }
                 .pincus {
                     display: grid;
                     justify-items: center;
-                    margin-top: 80px;
-                    row-gap: 30px;
+                    margin-top: 60px;
+                    row-gap: 24px;
                 }
                 .pincus h4 {
-                    font-size: 18px;
+                    font-size: 16px;
                     font-weight: normal;
                     color: #383838;
+                }
+                .pincus a img-ui {
+                    width: 312px;
                 }
             `,
         ];

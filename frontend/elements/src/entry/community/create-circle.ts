@@ -28,18 +28,29 @@ export class _ extends LitElement {
                     transform: translate(-50%, -50%);
                     z-index: 10;
 
-                    border-radius: 16px;
+                    border-radius: 12px;
                     box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+                    max-width: 620px;
+                    width: 80vw;
                 }
                 .body {
-                    padding: 0 30px 30px 30px;
+                    padding: 0 24px 24px 24px;
                     display: grid;
-                    grid-template-columns: 1fr 1fr;
+                    grid-gap: 30px;
                     grid-template-areas: 
-                        "name        image"
-                        "description image"
-                        "submit      submit";
-                    grid-gap: 40px;
+                        "name"
+                        "description"
+                        "image"
+                        "submit";
+                }
+                @media (min-width: 1024px) {
+                    .body {
+                        grid-template-columns: 1fr 1fr;
+                        grid-template-areas: 
+                            "name        image"
+                            "description image"
+                            "submit      submit";
+                    }
                 }
                 ::slotted([slot=close]) {
                     font-size: 14px;
@@ -49,12 +60,12 @@ export class _ extends LitElement {
                 }
                 ::slotted([slot=description]) {
                     grid-area: description;
-                    height: 130px;
+                    height: 100px;
                 }
                 ::slotted([slot=image]) {
                     grid-area: image;
                     display: grid;
-                    height: 238px;
+                    height: 188px;
                 }
                 ::slotted([slot=submit]) {
                     grid-area: submit;

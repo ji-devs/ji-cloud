@@ -28,7 +28,7 @@ export class _ extends LitElement {
                 input {
                     min-width: 100%;
                     border: 0;
-                    font-size: 16px;
+                    font-size: 14px;
                     padding: 0;
                     margin-left: 8px;
                     background-color: transparent;

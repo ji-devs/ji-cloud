@@ -6,12 +6,12 @@ export class _ extends LitElement {
         return [
             css`
                 :host {
-                    font-size: 18px;
+                    font-size: 16px;
                     font-weight: 500;
                     color: var(--dark-gray-5);
                     border-bottom: solid #fff 3px;
                     text-align: center;
-                    min-width: 140px;
+                    min-width: 100px;
                     display: inline-block;
                     cursor: pointer;
                 }

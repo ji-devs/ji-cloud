@@ -14,27 +14,32 @@ export class _ extends LitElement {
                 hr {
                     border: 0;
                     border-top: 1px solid var(--main-yellow);
-                    margin: 20px 0;
+                    margin: 16px 0;
                     margin: 0;
                 }
                 :host {
                     display: grid;
-                    grid-template-columns: 300px 1fr;
-                    gap: 40px;
+                    align-items: start;
+                    gap: 30px;
+                }
+                @media (min-width: 1024px) {
+                    :host {
+                        grid-template-columns: 300px 1fr;
+                    }
                 }
                 .top-section {
                     grid-column: 1 / -1;
                     display: grid;
-                    grid-template-columns: 120px auto auto;
-                    grid-template-rows: 58px 4px 58px;
+                    grid-template-columns: 90px auto auto;
+                    grid-template-rows: 50px 4px 34px;
                     /* grid-template-rows: auto 1px auto; */
-                    height: 120px;
-                    column-gap: 32px;
+                    height: 90px;
+                    column-gap: 24px;
                 }
                 .top-section .image {
                     grid-row: 1 / -1;
-                    height: 120px;
-                    width: 120px;
+                    height: 90px;
+                    width: 90px;
                     box-sizing: border-box;
                     display: inline-grid;
                 }
@@ -52,26 +57,26 @@ export class _ extends LitElement {
                     grid-row: 1;
                     grid-column: 1;
                     justify-self: end;
-                    font-size: 14px;
+                    font-size: 12px;
                 }
                 .top-section header {
                     display: grid;
                     grid-template-columns: auto auto;
                     justify-content: start;
-                    column-gap: 10px;
+                    column-gap: 8px;
                 }
                 .top-section header ::slotted(fa-button) {
-                    font-size: 14px;
+                    font-size: 12px;
                 }
                 .top-section h1 {
-                    font-size: 40px;
+                    font-size: 30px;
                     font-weight: 800;
                     color: var(--dark-blue-4);
                     display: inline-block;
                 }
                 .top-section .actions {
                     display: flex;
-                    gap: 24px;
+                    gap: 20px;
                     align-items: center;
                     justify-content: end;
                 }
@@ -80,20 +85,20 @@ export class _ extends LitElement {
                 }
                 .top-section .member-count {
                     align-self: end;
-                    font-size: 18px;
+                    font-size: 16px;
                     font-weight: 600;
                 }
                 .top-section .member-count b {
                     font-weight: 900;
                 }
                 .about-section {
-                    padding: 40px;
-                    border-radius: 16px;
+                    padding: 30px;
+                    border-radius: 12px;
                     border: solid 1px var(--light-orange-3);
                     background-color: var(--white);
-                    font-size: 14px;
+                    font-size: 12px;
                     display: grid;
-                    row-gap: 16px;
+                    row-gap: 12px;
                 }
                 .about-section header {
                     display: grid;
@@ -103,25 +108,25 @@ export class _ extends LitElement {
                 }
                 .about-section h3 {
                     color: var(--dark-blue-4);
-                    font-size: 24px;
+                    font-size: 20px;
                     font-weight: bold;
                 }
                 .members-section {
                     display: grid;
                     align-items: start;
-                    row-gap: 24px;
+                    row-gap: 20px;
                 }
                 .members-section .member-heading {
                     display: grid;
                     grid-template-columns: auto auto;
                     justify-content: space-between;
-                    border-radius: 8px;
+                    border-radius: 6px;
                     background-color: #ffecad;
-                    padding: 14px 16px;
+                    padding: 12px;
                 }
                 .members-section .member-count {
                     color: var(--dark-blue-4);
-                    font-size: 24px;
+                    font-size: 20px;
                     font-weight: bold;
                 }
                 .members-section .member-count span {
@@ -129,7 +134,7 @@ export class _ extends LitElement {
                 }
                 .members-section .members {
                     display: grid;
-                    row-gap: 10px;
+                    row-gap: 8px;
                 }
             `,
         ];

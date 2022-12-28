@@ -87,8 +87,8 @@ impl MemberDetails {
                                     .prop("slot", "circles")
                                     .prop("title", &circle.display_name)
                                     .child(html!("img-ji", {
-                                        .style("height", "90px")
-                                        .style("width", "90px")
+                                        .style("height", "70px")
+                                        .style("width", "70px")
                                         .style("box-shadow", "0 0 8px 0 rgba(0, 0, 0, 0.06)")
                                         .style("border", "solid 1px var(--light-gray-1)")
                                         .style("border-radius", "50%")

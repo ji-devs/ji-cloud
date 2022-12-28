@@ -78,27 +78,29 @@ export class _ extends LitElement {
                     background-color: var(--dark-blue-8);
                     display: block;
                     color: #ffffff;
-                    font-size: 14px;
+                    font-size: 12px;
                     font-weight: 500;
-                    padding: 100px 0 30px 0;
+                    padding: 76px 0 24px 0;
                 }
                 .width-holder {
                     display: grid;
                     grid-template-columns: 3fr auto 2fr;
-                    column-gap: 100px;
+                    column-gap: 38px;
                 }
                 .divider {
+                     
                     height: 210px;
+                       
                     width: 1px;
                     background-color: #63759d;
-                    margin-top: 130px;
+                    margin-top: 100px;
                 }
                 h2 {
-                    font-size: 48px;
+                    font-size: 36px;
                     font-weight: bold;
                     color: var(--light-blue-6);
                     margin: 0;
-                    margin-bottom: 50px;
+                    margin-bottom: 38px;
                 }
                 ul {
                     list-style: none;
@@ -106,7 +108,7 @@ export class _ extends LitElement {
                     margin: 0;
                 }
                 h4 {
-                    font-size: 20px;
+                    font-size: 14px;
                     font-weight: 800;
                     margin: 0;
                 }
@@ -120,6 +122,7 @@ export class _ extends LitElement {
                 a {
                     color: inherit;
                     text-decoration: none;
+                    line-height: 30px;
                 }
                 a:hover,
                 a:active {
@@ -127,7 +130,7 @@ export class _ extends LitElement {
                 }
                 .columns {
                     display: grid;
-                    column-gap: 50px;
+                    column-gap: 38px;
                 }
                 .ji-section .columns {
                     grid-template-columns: repeat(3, auto) min-content;
@@ -137,8 +140,8 @@ export class _ extends LitElement {
                 }
                 .social {
                     display: flex;
-                    column-gap: 24px;
-                    margin-top: 32px;
+                    column-gap: 20px;
+                    margin-top: 26px;
                 }
                 .social img-ui {
                     display: inline-block;
@@ -153,27 +156,27 @@ export class _ extends LitElement {
                 }
                 .donate-link {
                     display: inline-block;
-                    margin-top: 60px;
+                    margin-top: 48px;
                 }
                 .bottom-section {
                     grid-column: 1 / -1;
                     display: flex;
                     align-items: center;
-                    column-gap: 20px;
+                    column-gap: 16px;
                 }
                 .bottom-section .kid-safe img {
-                    width: 156px;
+                    width: 120px;
                 }
                 .horizontal-slider {
                     width: 87%;
-                    margin: 40px auto 28px auto;
+                    margin: 30px auto 22px auto;
                     height: 0;
                     opacity: 0.35;
                     border: solid 1px var(--white);
                 }
                 .dedication-text {
                     font-family: Poppins;
-                    font-size: 16px;
+                    font-size: 14px;
                     font-weight: 500;
                     font-stretch: normal;
                     font-style: normal;
@@ -188,8 +191,7 @@ export class _ extends LitElement {
                     align-items: center;
                 }
 
-                /* mobile */
-                @media (max-width: 1000px) {
+                @media (max-width: 1023px) {
                     .width-holder {
                         display: block;
                     }

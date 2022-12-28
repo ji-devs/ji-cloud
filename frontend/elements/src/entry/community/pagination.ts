@@ -13,15 +13,15 @@ export class _ extends LitElement {
                     grid-template-columns: repeat(3, auto);
                     justify-content: center;
                     align-items: center;
-                    gap: 48px;
-                    font-size: 18px;
+                    column-gap: 36px;
+                    font-size: 16px;
                     font-weight: 500;
                     color: #383838;
                 }
                 ::slotted(fa-button) {
-                    width: 32px;
-                    height: 24px;
-                    border-radius: 16px;
+                    width: 36px;
+                    height: 30px;
+                    border-radius: 20px;
                     box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.08);
                     border: solid 1px var(--light-gray-2);
                     text-align: center;
@@ -36,7 +36,7 @@ export class _ extends LitElement {
                 ::slotted(input) {
                     font: inherit;
                     color: inherit;
-                    width: 36px;
+                    width: 30px;
                     text-align: right;
                     -moz-appearance: textfield;
                 }

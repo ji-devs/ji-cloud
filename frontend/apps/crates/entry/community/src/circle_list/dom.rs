@@ -10,8 +10,6 @@ use utils::{
 };
 use web_sys::HtmlInputElement;
 
-use crate::state::CIRCLE_LIST_GRID_COLUMNS;
-
 use super::{create_circle::CreateCircle, CirclesList};
 
 impl CirclesList {
@@ -30,7 +28,6 @@ impl CirclesList {
                 }))
             }))
             .child(html!("community-list-circle-header", {
-                .class(&*CIRCLE_LIST_GRID_COLUMNS)
                 .prop("slot", "sort-header")
             }))
             .child(html!("community-pagination", {
@@ -130,7 +127,6 @@ impl CirclesList {
 
     fn render_circle(self: &Rc<Self>, circle: &Circle) -> Dom {
         html!("community-list-circle", {
-            .class(&*CIRCLE_LIST_GRID_COLUMNS)
             .prop("slot", "items")
             .prop("name", &circle.display_name)
             .prop("memberCount", circle.member_count)

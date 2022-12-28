@@ -6,23 +6,23 @@ export class _ extends LitElement {
         return [
             css`
                 :host {
-                    height: 112px;
+                    height: 86px;
                     display: grid;
                     grid-template-columns: auto 1fr auto;
                     align-items: center;
-                    column-gap: 24px;
+                    column-gap: 20px;
                     cursor: pointer;
                 }
                 :host(:not(:last-of-type)) {
                     border-bottom: solid 1px #ffe2bf;
                 }
                 ::slotted([slot=profile-image]) {
-                    height: 80px;
-                    width: 80px;
+                    height: 60px;
+                    width: 60px;
                 }
                 p {
                     margin: 0;
-                    font-size: 16px;
+                    font-size: 14px;
                     font-weight: 500;
                 }
             `,

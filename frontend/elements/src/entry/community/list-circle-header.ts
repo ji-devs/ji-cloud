@@ -1,4 +1,5 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
+import { listItemStyles } from "./list-item-styles";
 
 const STR_NAME = "Name";
 const STR_MEMBERS = "Members";
@@ -9,20 +10,22 @@ const STR_STATUS = "Status";
 export class _ extends LitElement {
     static get styles() {
         return [
+            listItemStyles,
             css`
                 :host {
-                    border-radius: 8px;
-                    min-height: 48px;
-                    font-size: 16px;
-                    color: var(--dark-gray-5);
-                    background-color: #ffecad;
-                    border-radius: 8px;
-                    display: grid;
-                    align-items: center;
-                    justify-content: space-between;
+                    display: none;
                 }
-                .name {
-                    grid-column: 2;
+                @media (min-width: 1024px) {
+                    :host {
+                        border-radius: 6px;
+                        min-height: 36px;
+                        font-size: 14px;
+                        color: var(--dark-gray-5);
+                        background-color: #ffecad;
+                    }
+                    .name {
+                        grid-column: 2;
+                    }
                 }
             `,
         ];
@@ -31,9 +34,9 @@ export class _ extends LitElement {
     render() {
         return html`
             <span class="name">${STR_NAME}</span>
-            <span>${STR_MEMBERS}</span>
-            <span>${STR_ABOUT}</span>
-            <span>${STR_STATUS}</span>
+            <span class="desktop-only">${STR_MEMBERS}</span>
+            <span class="desktop-only">${STR_ABOUT}</span>
+            <span class="desktop-only">${STR_STATUS}</span>
         `;
     }
 }

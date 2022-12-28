@@ -12,8 +12,6 @@ use utils::{
 use wasm_bindgen::JsValue;
 use web_sys::HtmlInputElement;
 
-use crate::state::MEMBER_LIST_GRID_COLUMNS;
-
 use super::MembersList;
 
 impl MembersList {
@@ -24,7 +22,6 @@ impl MembersList {
         html!("community-list", {
             .prop("header", "Connect with members")
             .child(html!("community-list-member-header", {
-                .class(&*MEMBER_LIST_GRID_COLUMNS)
                 .prop("slot", "sort-header")
             }))
             .child(html!("community-pagination", {
@@ -112,7 +109,6 @@ impl MembersList {
 
     fn render_member(self: &Rc<Self>, member: &PublicUser) -> Dom {
         html!("community-list-member", {
-            .class(&*MEMBER_LIST_GRID_COLUMNS)
             .prop("slot", "items")
             .prop("name", &format!("{} {}", member.given_name, member.family_name))
             // .prop("city", "New York")

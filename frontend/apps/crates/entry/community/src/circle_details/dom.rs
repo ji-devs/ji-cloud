@@ -4,7 +4,6 @@ use super::{
     callbacks::EditCirclesCallbacks, edit_about::EditAbout, edit_image::EditImage,
     edit_name::EditName, ActivePopup, CircleDetails,
 };
-use crate::state::MEMBER_LIST_GRID_COLUMNS;
 use components::dialog::Dialog;
 use dominator::{clone, html, Dom};
 use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
@@ -206,7 +205,6 @@ impl CircleDetails {
     fn render_member(self: &Rc<Self>, member: &PublicUser) -> Dom {
         html!("community-list-member", {
             .prop("slot", "members")
-            .class(&*MEMBER_LIST_GRID_COLUMNS)
             .prop("name", &format!("{} {}", member.given_name, member.family_name))
             // .prop("city", "New York")
             // .prop("state", "NY")

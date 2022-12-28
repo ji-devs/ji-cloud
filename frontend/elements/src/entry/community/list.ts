@@ -7,28 +7,47 @@ export class _ extends LitElement {
             css`
                 :host {
                     display: grid;
-                    grid-template-columns: auto auto;
-                    justify-content: space-between;
                     align-items: center;
+                    gap: 24px;
+                }
+                @media (min-width: 1024px) {
+                    :host {
+                        gap: 10px;
+                        grid-template-columns: auto auto;
+                        justify-content: space-between;
+                    }
                 }
                 h1 {
                     color: var(--dark-blue-4);
-                    font-size: 40px;
+                    font-size: 25px;
+                    line-height: 1em;
                     font-weight: 800;
                     margin: 0;
+                    text-align: center;
+                    grid-column: 1 / -1;
+                }
+                @media (min-width: 1024px) {
+                    h1 {
+                        grid-column: 1;
+                        text-align: left;
+                    }
                 }
                 ::slotted([slot=create-button]) {
-                    justify-self: end;
+                    justify-self: center;
+                }
+                @media (min-width: 1024px) {
+                    ::slotted([slot=create-button]) {
+                        justify-self: end;
+                    }
                 }
                 ::slotted([slot=pagination]),
                 .items {
-                    grid-column: 1 / span 2;
+                    grid-column: 1 / -1;
                 }
                 .items {
                     display: grid;
-                    /* grid-template-columns: auto auto auto auto auto; */
-                    row-gap: 24px;
-                    column-gap: 24px;
+                    row-gap: 20px;
+                    column-gap: 20px;
                     align-items: center;
                 }
             `,
