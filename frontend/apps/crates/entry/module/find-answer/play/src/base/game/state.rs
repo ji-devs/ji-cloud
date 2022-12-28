@@ -3,7 +3,6 @@ use std::rc::Rc;
 
 use futures_signals::signal::Mutable;
 use shared::domain::module::body::find_answer::Question;
-use utils::prelude::*;
 
 pub struct Game {
     pub base: Rc<Base>,
