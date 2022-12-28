@@ -78,7 +78,7 @@ pub fn render(state: Rc<State>) -> Dom {
             //     ],
             // ),
             ModuleSettingsLine::new_with_label(
-                "Would you like to set a time limit?".into(), //  per question?
+                "Would you like to set a time limit per question?".into(),
                 vec![
                     Some(
                         SettingsButtonBuilder::new(
@@ -94,7 +94,7 @@ pub fn render(state: Rc<State>) -> Dom {
                         SettingsButtonBuilder::new(
                             SettingsButtonKind::custom_kind(
                                 SettingsButtonKind::TimeLimit,
-                                "Time limit (seconds)", // per question
+                                "Time limit (seconds) per question",
                             ),
                             clone!(state => move || {
                                 state.base.play_settings.has_time_limit

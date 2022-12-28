@@ -3,6 +3,7 @@ use std::rc::Rc;
 
 use futures_signals::signal::Mutable;
 use shared::domain::module::body::find_answer::Question;
+use utils::prelude::*;
 
 pub struct Game {
     pub base: Rc<Base>,
@@ -18,7 +19,6 @@ impl Game {
         //     Hint::None => Phase::Playing,
         // });
 
-        // TODO We need to choose random questions if that setting is enabled for the activity.
         // Fetch the first question. It should be guaranteed that at least one question always exists when playing.
         // However, there is always the possibility that a teacher wants to preview an incomplete activity which has
         // no questions yet, so we leave this value as optional.
@@ -29,10 +29,12 @@ impl Game {
             .cloned()
             .map(|question| (0, question));
 
+        base.current_question.set(first_question);
+
         Rc::new(Self {
+            question: base.current_question.clone(),
             base,
             phase: Mutable::new(Phase::Playing),
-            question: Mutable::new(first_question),
         })
     }
 
@@ -45,12 +47,6 @@ impl Game {
         }
 
         None
-    }
-
-    pub fn move_next_question(self: &Rc<Game>, index: usize) {
-        if let Some(next_question) = self.base.questions.get(index) {
-            self.question.set(Some((index, next_question.clone())));
-        }
     }
 }
 

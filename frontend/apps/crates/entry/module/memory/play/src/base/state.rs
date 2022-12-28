@@ -2,6 +2,7 @@ use shared::{
     config::MAX_LIST_WORDS,
     domain::{
         asset::AssetId,
+        jig::player::{ModuleConfig, Seconds},
         module::{
             body::{
                 Background, Instructions,
@@ -175,8 +176,11 @@ impl BaseExt for Base {
         }
     }
 
-    fn get_timer_seconds(&self) -> Option<u32> {
-        self.settings.time_limit
+    fn get_module_config(&self) -> ModuleConfig {
+        ModuleConfig {
+            timer: self.settings.time_limit.map(|t| Seconds(t)),
+            ..Default::default()
+        }
     }
 
     fn play_phase(&self) -> Mutable<ModulePlayPhase> {

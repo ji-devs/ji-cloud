@@ -5,11 +5,14 @@ use components::{
 };
 use dominator::clone;
 use std::rc::Rc;
+use utils::prelude::*;
 
 impl PlayState {
     pub fn select(state: Rc<Self>, index: usize) {
-        // mark the selected set
+        // Mark the selected set
         state.selected_set.lock_mut().insert(index);
+
+        state.clone().evaluate_question_ended();
 
         // Play the correct sound effect always. But we also need to make sure that it is finished playing before
         // moving on to the next activity.
@@ -42,8 +45,7 @@ impl PlayState {
         });
     }
 
-    /// Evaluate whether the _question_ is complete. If it is, move on to the next question.
-    pub fn evaluate_end(self: Rc<Self>) {
+    pub fn evaluate_question_ended(self: Rc<Self>) {
         // In the next iteration of this, we'll be adding the ability to configure incorrect traces. For that
         // we'll need to probably update the selected_set to include selected trace kinds so that we can filter
         // for only traces which are correct.
@@ -55,27 +57,38 @@ impl PlayState {
             return;
         }
 
+        // Stop the timer from ticking once a question is done
+        IframeAction::new(ModuleToJigPlayerMessage::PauseTimer)
+            .try_post_message_to_player()
+            .unwrap_ji();
+
         // At this point, we know that the student has selected all the traces and that this question is done.
         self.ended.set(true);
+    }
 
-        let next_question = self.game.next_question_index();
-        let state = self;
+    /// Evaluate whether the _question_ is complete. If it is, move on to the next question.
+    pub fn evaluate_end(self: Rc<Self>) {
+        if self.ended.get() {
+            let next_question = self.game.next_question_index();
+            let state = self;
 
-        match next_question {
-            // We can move on to the next question if one exists
-            Some(next_index) => {
-                state.game.move_next_question(next_index);
-            }
-            // Otherwise, there are no more questions to ask, move on to the next activity, or play the feedback
-            None => {
-                let feedback = &state.game.base.feedback;
-                if feedback.has_content() {
-                    state.game.base.feedback_signal.set(Some(feedback.clone()));
-                } else {
-                    state
-                        .game
-                        .base
-                        .set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
+            match next_question {
+                // We can move on to the next question if one exists
+                Some(next_index) => {
+                    state.game.base.move_to_question(next_index);
+                    state.ended.set_neq(false);
+                }
+                // Otherwise, there are no more questions to ask, move on to the next activity, or play the feedback
+                None => {
+                    let feedback = &state.game.base.feedback;
+                    if feedback.has_content() {
+                        state.game.base.feedback_signal.set(Some(feedback.clone()));
+                    } else {
+                        state
+                            .game
+                            .base
+                            .set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
+                    }
                 }
             }
         }

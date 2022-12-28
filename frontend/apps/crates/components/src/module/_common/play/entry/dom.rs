@@ -177,6 +177,11 @@ where
                                     }
                                 }
                             },
+                            message => {
+                                if let InitPhase::Ready(base) = &*state.phase.get_cloned() {
+                                    base.base.handle_navigation(message);
+                                }
+                            }
                         }
                     } else {
                         log::info!("hmmm got other iframe message...");
@@ -216,14 +221,7 @@ where
                         // This will mark the activity as started in the player, but the activity itself would
                         // only start playing once it's in the Playing phase.
                         if jig_player {
-                            let timer_seconds = base.get_timer_seconds();
-
-                            let msg = IframeAction::new(ModuleToJigPlayerMessage::Start(timer_seconds));
-
-                            match timer_seconds {
-                                Some(x) => log::info!("Starting with a {} seconds timer", x),
-                                None => log::info!("Starting without a timer")
-                            }
+                            let msg = IframeAction::new(ModuleToJigPlayerMessage::Start(base.get_module_config()));
 
                             //let the player know we're starting
                             msg.try_post_message_to_player().unwrap_ji();
