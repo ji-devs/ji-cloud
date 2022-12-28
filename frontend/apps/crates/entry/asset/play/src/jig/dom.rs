@@ -390,7 +390,7 @@ impl JigPlayer {
                         }
                     }))
                     .event(clone!(state => move |_: events::Click| {
-                        actions::navigate_back(Rc::clone(&state));
+                        actions::navigate_back_or_handle(Rc::clone(&state));
                     }))
                     .global_event(clone!(state => move |e: events::KeyUp| {
                         actions::navigate_from_keyboard_event(state.clone(), KeyEvent::from(e));
@@ -404,7 +404,7 @@ impl JigPlayer {
                     .prop("slot", "forward")
                     .prop("kind", "forward")
                     .event(clone!(state => move |_: events::Click| {
-                        actions::navigate_forward(Rc::clone(&state));
+                        actions::navigate_forward_or_handle(Rc::clone(&state));
                     }))
                     .global_event(clone!(state => move |e: events::KeyUp| {
                         actions::navigate_from_keyboard_event(state.clone(), KeyEvent::from(e));
@@ -610,7 +610,6 @@ fn render_time_indicator(state: Rc<JigPlayer>) -> impl Signal<Item = Option<Dom>
                                     &JsValue::from_str("buzz")
                                 )
                                     .unwrap_ji();
-                                log::info!("{:?}", buzz_method);
                                 let buzz_method = buzz_method.dyn_ref::<js_sys::Function>().unwrap_ji();
                                 let _ = buzz_method.call0(&elem);
                             }

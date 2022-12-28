@@ -1,5 +1,7 @@
 //! Types for Jig short codes for sharing
 
+use std::ops::Deref;
+
 use chrono::{DateTime, Utc};
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
@@ -166,5 +168,41 @@ pub mod instance {
     pub struct PlayerSessionInstanceCompleteRequest {
         /// Token that will be passed to confirm a JIG was played all the way through
         pub token: String,
+    }
+}
+
+#[derive(Clone, Default, Serialize, Deserialize, Debug, Eq, PartialEq)]
+/// Module config passed to the JIG player when a module starts
+pub struct ModuleConfig {
+    /// How player navigation should be handled
+    pub navigation_handler: PlayerNavigationHandler,
+    /// Optional timer to use for the module
+    pub timer: Option<Seconds>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
+/// How JIG player navigation should be handled
+pub enum PlayerNavigationHandler {
+    /// The JIG player handles the navigation
+    Player,
+    /// The module handles navigation
+    Module,
+}
+
+impl Default for PlayerNavigationHandler {
+    fn default() -> Self {
+        Self::Player
+    }
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, Eq, PartialEq)]
+/// Newtype for timer seconds
+pub struct Seconds(pub u32);
+
+impl Deref for Seconds {
+    type Target = u32;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }

@@ -5,7 +5,7 @@ use components::audio::mixer::AudioHandle;
 use futures_signals::signal::Mutable;
 use serde::{Deserialize, Serialize};
 use shared::domain::{
-    jig::{JigId, JigPlayerSettings, JigResponse},
+    jig::{player::PlayerNavigationHandler, JigId, JigPlayerSettings, JigResponse},
     meta::ResourceType,
     module::{
         body::{Audio, Instructions as ModuleInstructions, InstructionsType},
@@ -28,6 +28,7 @@ pub struct JigPlayer {
     pub played_modules: RefCell<usize>,
     pub play_tracked: RefCell<bool>,
     pub start_module_id: Option<ModuleId>,
+    pub navigation_handler: Mutable<Option<PlayerNavigationHandler>>,
     pub timer: Mutable<Option<Timer>>,
     pub points: Mutable<u32>,
     pub iframe: Rc<RefCell<Option<HtmlIFrameElement>>>,
@@ -70,6 +71,7 @@ impl JigPlayer {
             play_tracked: RefCell::new(false),
             start_module_id: module_id,
             timer: Mutable::new(None),
+            navigation_handler: Mutable::new(None),
             points: Mutable::new(0),
             iframe: Rc::new(RefCell::new(None)),
             started: Mutable::new(false),

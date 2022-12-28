@@ -4,6 +4,7 @@ use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
 use shared::domain::asset::{Asset, AssetId, AssetType, DraftOrLive, PrivacyLevel};
 use shared::domain::course::CourseGetDraftPath;
+use shared::domain::jig::player::ModuleConfig;
 use shared::domain::module::body::{Instructions, InstructionsType};
 use shared::domain::resource::ResourceGetDraftPath;
 use shared::{
@@ -416,8 +417,12 @@ pub trait BaseExt: DomRenderable {
         // Do nothing. Activities which have custom ended logic/rules should implement this.
     }
 
-    fn get_timer_seconds(&self) -> Option<u32> {
-        None
+    fn handle_navigation(&self, _message: JigToModulePlayerMessage) {
+        // Do nothing. Acitivities which control navigation should implement this.
+    }
+
+    fn get_module_config(&self) -> ModuleConfig {
+        ModuleConfig::default()
     }
 
     fn set_play_phase(&self, phase: ModulePlayPhase) {

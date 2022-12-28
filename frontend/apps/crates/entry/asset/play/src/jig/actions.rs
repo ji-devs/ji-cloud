@@ -12,6 +12,7 @@ use shared::{
     domain::{
         asset::DraftOrLive,
         jig::{
+            player::{ModuleConfig, PlayerNavigationHandler, Seconds},
             AudioBackground, JigGetDraftPath, JigGetLivePath, JigLikedPath, JigPlayPath,
             TextDirection,
         },
@@ -58,6 +59,15 @@ pub fn pause_background_audio(state: &JigPlayer, audio_handle: &AudioHandle) {
     state.bg_audio_playing.set(false);
 }
 
+pub fn navigate_forward_or_handle(state: Rc<JigPlayer>) {
+    match state.navigation_handler.get_cloned() {
+        Some(PlayerNavigationHandler::Module) => {
+            send_iframe_message(Rc::clone(&state), JigToModulePlayerMessage::Next);
+        }
+        _ => navigate_forward(state.clone()),
+    }
+}
+
 pub fn navigate_forward(state: Rc<JigPlayer>) {
     if let Some(active_module) = state.active_module.get() {
         let module_count = (&*state.jig.lock_ref())
@@ -101,6 +111,15 @@ pub fn navigate_forward(state: Rc<JigPlayer>) {
     }
 }
 
+pub fn navigate_back_or_handle(state: Rc<JigPlayer>) {
+    match state.navigation_handler.get_cloned() {
+        Some(PlayerNavigationHandler::Module) => {
+            send_iframe_message(Rc::clone(&state), JigToModulePlayerMessage::Previous);
+        }
+        _ => navigate_back(state.clone()),
+    }
+}
+
 pub fn navigate_back(state: Rc<JigPlayer>) {
     if let Some(active_module) = state.active_module.get() {
         if active_module != 0 {
@@ -114,13 +133,13 @@ pub fn navigate_from_keyboard_event(state: Rc<JigPlayer>, key_event: KeyEvent) {
         let direction = jig.jig_data.default_player_settings.direction;
         match direction {
             TextDirection::LeftToRight => match key_event.key {
-                Key::ArrowLeft => navigate_back(state.clone()),
-                Key::ArrowRight => navigate_forward(state.clone()),
+                Key::ArrowLeft => navigate_back_or_handle(state.clone()),
+                Key::ArrowRight => navigate_forward_or_handle(state.clone()),
                 _ => {}
             },
             TextDirection::RightToLeft => match key_event.key {
-                Key::ArrowRight => navigate_back(state.clone()),
-                Key::ArrowLeft => navigate_forward(state.clone()),
+                Key::ArrowRight => navigate_back_or_handle(state.clone()),
+                Key::ArrowLeft => navigate_forward_or_handle(state.clone()),
                 _ => {}
             },
         }
@@ -296,8 +315,8 @@ fn init_audio(state: &JigPlayer, background_audio: AudioBackground) {
     state.bg_audio_playing.set(true);
 }
 
-pub fn start_timer(state: Rc<JigPlayer>, time: u32) {
-    let timer = Timer::new(time);
+pub fn start_timer(state: Rc<JigPlayer>, time: Seconds) {
+    let timer = Timer::new(*time);
 
     spawn_local(timer.time.signal().for_each(clone!(state => move|time| {
         if time == 0 {
@@ -365,18 +384,25 @@ pub fn on_iframe_message(state: Rc<JigPlayer>, message: ModuleToJigPlayerMessage
             let mut points = state.points.lock_mut();
             *points += amount;
         }
-        ModuleToJigPlayerMessage::Start(time) => {
-            start_player(state, time);
+        ModuleToJigPlayerMessage::Start(config) => {
+            start_player(state, config);
+        }
+        ModuleToJigPlayerMessage::ResetTimer(time) => {
+            start_timer(state, time);
+        }
+        ModuleToJigPlayerMessage::PauseTimer => {
+            set_timer_paused(&state, true);
+        }
+        ModuleToJigPlayerMessage::UnpauseTimer => {
+            set_timer_paused(&state, false);
         }
         ModuleToJigPlayerMessage::Previous => {
+            state.navigation_handler.set(None);
             navigate_back(state);
         }
         ModuleToJigPlayerMessage::Next => {
+            state.navigation_handler.set(None);
             navigate_forward(state);
-        }
-        ModuleToJigPlayerMessage::Stop => {
-            // Instead of stopping the timer altogether, we pause it
-            set_timer_paused(&state, true);
         }
         ModuleToJigPlayerMessage::JumpToIndex(index) => {
             navigate_to_index(state, index);
@@ -393,7 +419,7 @@ pub fn on_iframe_message(state: Rc<JigPlayer>, message: ModuleToJigPlayerMessage
     };
 }
 
-fn start_player(state: Rc<JigPlayer>, time: Option<u32>) {
+fn start_player(state: Rc<JigPlayer>, config: ModuleConfig) {
     // If bg audio is not yet set (i.e. first module to be ready) initialize the audio once the jig is started
     if state.bg_audio_handle.borrow().is_none() {
         if let Some(jig) = state.jig.get_cloned() {
@@ -417,9 +443,13 @@ fn start_player(state: Rc<JigPlayer>, time: Option<u32>) {
         }
     }
 
-    if let Some(time) = time {
+    if let Some(time) = config.timer {
         start_timer(Rc::clone(&state), time);
     }
+
+    state
+        .navigation_handler
+        .set(Some(config.navigation_handler));
 
     state.started.set_neq(true);
 }

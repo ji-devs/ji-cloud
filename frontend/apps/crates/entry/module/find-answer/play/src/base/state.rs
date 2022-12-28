@@ -3,6 +3,7 @@ use once_cell::sync::OnceCell;
 use rand::prelude::*;
 use shared::domain::{
     asset::{Asset, AssetId},
+    jig::player::{ModuleConfig, PlayerNavigationHandler, Seconds},
     module::{
         body::{
             _groups::design::{Backgrounds, Sticker},
@@ -29,6 +30,7 @@ pub struct Base {
     pub backgrounds: Backgrounds,
     pub stickers: Vec<Sticker>,
     pub questions: Vec<Rc<Question>>,
+    pub current_question: Mutable<Option<(usize, Rc<Question>)>>,
     /// List of references to sticker elements. This is used primarily for finding the WYSIWYG renderer for text stickers.
     pub sticker_refs: Vec<OnceCell<HtmlElement>>,
     pub question_field: QuestionField,
@@ -80,6 +82,7 @@ impl Base {
             backgrounds: content.base.backgrounds,
             stickers: content.base.stickers,
             questions,
+            current_question: Mutable::new(None),
             sticker_refs,
             question_field: content.question_field,
             module_phase: init_args.play_phase,
@@ -91,6 +94,20 @@ impl Base {
         *base_ref.borrow_mut() = Some(base.clone());
 
         base
+    }
+
+    pub fn move_to_question(&self, index: usize) {
+        if let Some(next_question) = self.questions.get(index) {
+            self.current_question
+                .set(Some((index, next_question.clone())));
+
+            let module_config = self.get_module_config();
+            if let Some(seconds) = module_config.timer {
+                IframeAction::new(ModuleToJigPlayerMessage::ResetTimer(seconds))
+                    .try_post_message_to_player()
+                    .unwrap_ji();
+            }
+        }
     }
 }
 
@@ -113,7 +130,38 @@ impl BaseExt for Base {
         }
     }
 
-    fn get_timer_seconds(&self) -> Option<u32> {
-        self.settings.time_limit
+    fn handle_navigation(&self, message: JigToModulePlayerMessage) {
+        match message {
+            JigToModulePlayerMessage::Previous => {
+                if let Some((idx, _)) = self.current_question.get_cloned() {
+                    if idx > 0 {
+                        self.move_to_question(idx - 1);
+                    } else {
+                        IframeAction::new(ModuleToJigPlayerMessage::Previous)
+                            .try_post_message_to_player()
+                            .unwrap_ji();
+                    }
+                }
+            }
+            JigToModulePlayerMessage::Next => {
+                if let Some((idx, _)) = self.current_question.get_cloned() {
+                    if idx < self.questions.len() - 1 {
+                        self.move_to_question(idx + 1);
+                    } else {
+                        IframeAction::new(ModuleToJigPlayerMessage::Next)
+                            .try_post_message_to_player()
+                            .unwrap_ji();
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+
+    fn get_module_config(&self) -> ModuleConfig {
+        ModuleConfig {
+            navigation_handler: PlayerNavigationHandler::Module,
+            timer: self.settings.time_limit.map(|t| Seconds(t)),
+        }
     }
 }

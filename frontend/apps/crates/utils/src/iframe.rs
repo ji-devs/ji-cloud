@@ -1,8 +1,11 @@
 use crate::{keyboard::KeyEvent, unwrap::UnwrapJiExt};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use shared::domain::module::{
-    body::{Instructions, InstructionsType},
-    LiteModule, ModuleId,
+use shared::domain::{
+    jig::player::{ModuleConfig, Seconds},
+    module::{
+        body::{Instructions, InstructionsType},
+        LiteModule, ModuleId,
+    },
 };
 use std::cell::Cell;
 use wasm_bindgen::prelude::*;
@@ -175,14 +178,22 @@ pub enum JigToModulePlayerMessage {
     // remove play and pause? might need for video
     Play,
     Pause,
+    /// Sent if the player is configured to forward navigation events to
+    /// the module
+    Previous,
+    /// Sent if the player is configured to forward navigation events to
+    /// the module
+    Next,
     InstructionsDone(InstructionsType),
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum ModuleToJigPlayerMessage {
     AddPoints(u32),
-    Start(Option<u32>),
-    Stop,
+    Start(ModuleConfig),
+    ResetTimer(Seconds),
+    PauseTimer,
+    UnpauseTimer,
     Previous,
     Next,
     JumpToIndex(usize),

@@ -9,8 +9,7 @@ use gloo_timers::future::TimeoutFuture;
 
 impl Ending {
     pub fn render(state: Rc<Self>) -> Dom {
-        log::info!("MODULE ENDED");
-        let msg = IframeAction::new(ModuleToJigPlayerMessage::Stop);
+        let msg = IframeAction::new(ModuleToJigPlayerMessage::PauseTimer);
 
         if msg.try_post_message_to_player().is_err() {
             log::info!("Couldn't post message to player!");
