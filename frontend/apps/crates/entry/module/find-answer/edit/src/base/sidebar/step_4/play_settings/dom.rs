@@ -37,46 +37,46 @@ pub fn render(state: Rc<State>) -> Dom {
                     ),
                 ],
             ),
-            // ModuleSettingsLine::new_with_label(
-            //     "Highlight correct answer...".into(),
-            //     vec![
-            //         Some(
-            //             SettingsButtonBuilder::new(
-            //                 SettingsButtonKind::custom_kind(
-            //                     SettingsButtonKind::Highlight,
-            //                     "after tries",
-            //                 ),
-            //                 clone!(state => move || {
-            //                     state.base.play_settings.has_attempts_limit.signal()
-            //                 }),
-            //             )
-            //             .value(
-            //                 SettingsValue::new(
-            //                     state.base.play_settings.n_attempts.get(),
-            //                     clone!(state => move |value| {
-            //                         state.set_attempts_limit(value);
-            //                     }),
-            //                 )
-            //                 .value_label_template(ValueLabelTemplate::from((
-            //                     "after", "try", "tries",
-            //                 )))
-            //                 .value_input_kind(InputKind::Field),
-            //             )
-            //             .on_click(clone!(state => move || state.set_has_attempts_limit(true)))
-            //             .build(),
-            //         ),
-            //         Some(
-            //             SettingsButtonBuilder::new(
-            //                 SettingsButtonKind::HighlightOff,
-            //                 clone!(state => move || {
-            //                     state.base.play_settings.has_attempts_limit.signal_ref(|flag| !flag)
-            //                 }),
-            //             )
-            //             .on_click(clone!(state => move || state.set_has_attempts_limit(false)))
-            //             .build(),
-            //         ),
-            //     ],
-            // ),
+            ModuleSettingsLine::new_with_label(
+                "Highlight correct answer...".into(),
+                vec![
+                    Some(
+                        SettingsButtonBuilder::new(
+                            SettingsButtonKind::custom_kind(
+                                SettingsButtonKind::Highlight,
+                                "after tries",
+                            ),
+                            clone!(state => move || {
+                                state.base.play_settings.has_attempts_limit.signal()
+                            }),
+                        )
+                        .value(
+                            SettingsValue::new(
+                                state.base.play_settings.n_attempts.get(),
+                                clone!(state => move |value| {
+                                    state.set_attempts_limit(value);
+                                }),
+                            )
+                            .value_label_template(ValueLabelTemplate::from((
+                                "after", "try", "tries",
+                            )))
+                            .value_input_kind(InputKind::Field),
+                        )
+                        .on_click(clone!(state => move || state.set_has_attempts_limit(true)))
+                        .build(),
+                    ),
+                    Some(
+                        SettingsButtonBuilder::new(
+                            SettingsButtonKind::HighlightOff,
+                            clone!(state => move || {
+                                state.base.play_settings.has_attempts_limit.signal_ref(|flag| !flag)
+                            }),
+                        )
+                        .on_click(clone!(state => move || state.set_has_attempts_limit(false)))
+                        .build(),
+                    ),
+                ],
+            ),
             ModuleSettingsLine::new_with_label(
                 "Would you like to set a time limit per question?".into(),
                 vec![

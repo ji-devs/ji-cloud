@@ -24,6 +24,10 @@ pub struct PlayState {
     /// Flag indicating whether the question has already ended. When true, subsequent taps on the answer traces will
     /// not trigger any logic.
     pub ended: Mutable<bool>,
+    /// Number of times the student has selected the incorrect choice.
+    pub incorrect_choice_count: Mutable<u32>,
+    /// Whether trace hints should be shown.
+    pub show_hint: Mutable<bool>,
 }
 
 impl PlayState {
@@ -40,6 +44,8 @@ impl PlayState {
             traces,
             selected_set: Mutable::new(HashSet::new()),
             ended: Mutable::new(false),
+            incorrect_choice_count: Mutable::new(0),
+            show_hint: Mutable::new(false),
         })
     }
 }
