@@ -47,48 +47,62 @@ extern "C" {
 }
 
 pub trait IframeMessageExt {
-    fn try_post_message_to_top<'a>(&'a self) -> Result<(), JsValue>
-    where
-        &'a Self: Into<JsValue>,
-    {
-        let window = web_sys::window().unwrap_ji();
-        let top = window.top()?.unwrap_ji();
+    fn try_post_message_to_top(&self) -> Result<(), JsValue>;
 
-        top.post_message(&self.into(), "*")
-    }
-    fn try_post_message_to_parent<'a>(&'a self) -> Result<(), JsValue>
-    where
-        &'a Self: Into<JsValue>,
-    {
-        let window = web_sys::window().unwrap_ji();
-        let parent = window.parent()?.unwrap_ji();
+    fn try_post_message_to_parent(&self) -> Result<(), JsValue>;
 
-        parent.post_message(&self.into(), "*")
-    }
+    fn try_post_message_to_player(&self) -> Result<(), JsValue>;
 
-    fn try_post_message_to_player<'a>(&'a self) -> Result<(), JsValue>
-    where
-        &'a Self: Into<JsValue>,
-    {
-        match get_player_target() {
-            IframeTarget::Top => self.try_post_message_to_top(),
-            IframeTarget::Parent => self.try_post_message_to_parent(),
-        }
-    }
-
-    fn try_post_message_to_editor<'a>(&'a self) -> Result<(), JsValue>
-    where
-        &'a Self: Into<JsValue>,
-    {
-        match get_editor_target() {
-            IframeTarget::Top => self.try_post_message_to_top(),
-            IframeTarget::Parent => self.try_post_message_to_parent(),
-        }
-    }
+    fn try_post_message_to_editor(&self) -> Result<(), JsValue>;
 }
 
-impl<T: Serialize> IframeMessageExt for IframeInit<T> {}
-impl<T: Serialize> IframeMessageExt for IframeAction<T> {}
+macro_rules! impl_iframe_msg_ext {
+    ($s:ident) => {
+        impl<T: Serialize> IframeMessageExt for $s<T> {
+            fn try_post_message_to_top(&self) -> Result<(), JsValue>
+            where
+                Self: Into<JsValue>,
+            {
+                let window = web_sys::window().unwrap_ji();
+                let top = window.top()?.unwrap_ji();
+
+                top.post_message(&self.into(), "*")
+            }
+            fn try_post_message_to_parent(&self) -> Result<(), JsValue>
+            where
+                Self: Into<JsValue>,
+            {
+                let window = web_sys::window().unwrap_ji();
+                let parent = window.parent()?.unwrap_ji();
+
+                parent.post_message(&self.into(), "*")
+            }
+
+            fn try_post_message_to_player(&self) -> Result<(), JsValue>
+            where
+                Self: Into<JsValue>,
+            {
+                match get_player_target() {
+                    IframeTarget::Top => self.try_post_message_to_top(),
+                    IframeTarget::Parent => self.try_post_message_to_parent(),
+                }
+            }
+
+            fn try_post_message_to_editor(&self) -> Result<(), JsValue>
+            where
+                Self: Into<JsValue>,
+            {
+                match get_editor_target() {
+                    IframeTarget::Top => self.try_post_message_to_top(),
+                    IframeTarget::Parent => self.try_post_message_to_parent(),
+                }
+            }
+        }
+    };
+}
+
+impl_iframe_msg_ext!(IframeInit);
+impl_iframe_msg_ext!(IframeAction);
 
 /// Init is used for bootstrapping and passing initial loaded data
 #[derive(Serialize, Deserialize, Debug)]
