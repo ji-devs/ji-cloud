@@ -1,15 +1,19 @@
-name: Pages - Backend - PR 
+name: Pages - Backend - PR
 
 on:
   pull_request:
     paths:
-    - 'shared/**'
-    - 'backend/core/**'
-    - 'backend/pages/**'
+      - 'shared/**'
+      - 'backend/core/**'
+      - 'backend/pages/**'
   push:
     branches:
-    - master
-    - sandbox
+      - master
+      - sandbox
+    paths:
+      - 'shared/**'
+      - 'backend/core/**'
+      - 'backend/pages/**'
 
 jobs:
   format:

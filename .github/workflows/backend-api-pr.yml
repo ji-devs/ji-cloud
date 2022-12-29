@@ -1,15 +1,19 @@
-name: Api - Backend - PR 
+name: Api - Backend - PR
 
 on:
   pull_request:
     paths:
-    - 'shared/**'
-    - 'backend/core/**'
-    - 'backend/api/**'
+      - 'shared/**'
+      - 'backend/core/**'
+      - 'backend/api/**'
   push:
-    branches: 
-    - master
-    - sandbox
+    branches:
+      - master
+      - sandbox
+    paths:
+      - 'shared/**'
+      - 'backend/core/**'
+      - 'backend/api/**'
 
 jobs:
   format:
@@ -17,14 +21,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      
+
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
           toolchain: stable
           override: true
           components: rustfmt
-      
+
       - uses: actions-rs/cargo@v1
         with:
           command: fmt
@@ -101,6 +105,6 @@ jobs:
           args: >
             --manifest-path backend/api/Cargo.toml
             --no-default-features
-        env: 
+        env:
           DATABASE_URL: postgres://postgres:password@localhost
           SQLX_OFFLINE: 1
