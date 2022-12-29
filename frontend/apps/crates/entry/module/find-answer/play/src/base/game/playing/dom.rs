@@ -11,6 +11,7 @@ use futures_signals::{
     signal::SignalExt,
     signal_vec::{self, SignalVecExt},
 };
+use gloo_timers::future::TimeoutFuture;
 use js_sys::Reflect;
 use shared::domain::module::body::find_answer::QuestionField;
 use std::rc::Rc;
@@ -20,11 +21,27 @@ use web_sys::HtmlElement;
 
 use super::state::*;
 
+const HINT_TIME: u32 = 500;
+
 pub fn render(state: Rc<PlayState>) -> Dom {
     html!("empty-fragment", {
         // We don't want the cursor to change when the student mouses over an answer trace, or even an incorrect trace.
         // Make the entire playable area use the pointer cursor.
         .style("cursor", "pointer")
+        .future(state.incorrect_choice_count.signal_cloned().for_each(clone!(state => move |count| {
+            let state = state.clone();
+            async move {
+                match state.game.base.settings.n_attempts {
+                    Some(attempts) if count >= attempts => {
+                        state.incorrect_choice_count.set(0);
+                        state.show_hint.set_neq(true);
+                        TimeoutFuture::new(HINT_TIME).await;
+                        state.show_hint.set_neq(false);
+                    },
+                    _ => {}
+                }
+            }
+        })))
         .future(state.game.base.module_phase.signal_cloned().dedupe().for_each(clone!(state => move |phase| {
             // Only play audio and update the text if we're in the playing phase.
             if let ModulePlayPhase::Playing = phase {
@@ -65,6 +82,17 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                 Some(html!("question-banner", {
                     .text(&state.question.question_text)
                 }))
+            } else {
+                None
+            }
+        })))
+        .child_signal(state.show_hint.signal_cloned().map(clone!(state => move |show| {
+            if show {
+                Some(TracesShow::render(TracesShow::new(
+                    state.traces.iter().map(|t| t.inner.clone()).collect(),
+                    TracesShowMode::Cutout,
+                    TracesShow::on_select_noop()
+                )))
             } else {
                 None
             }

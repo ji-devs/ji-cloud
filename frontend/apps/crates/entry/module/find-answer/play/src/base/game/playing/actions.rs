@@ -27,7 +27,10 @@ impl PlayState {
         }));
     }
 
-    pub fn incorrect_choice(_state: Rc<Self>, _incorrect_index: Option<usize>) {
+    pub fn incorrect_choice(state: Rc<Self>, _incorrect_index: Option<usize>) {
+        state
+            .incorrect_choice_count
+            .set(state.incorrect_choice_count.get() + 1);
         AUDIO_MIXER.with(move |mixer| {
             let audio_path: AudioPath<'_> = mixer.get_random_negative().into();
             mixer.play_oneshot_on_ended(audio_path, move || {
