@@ -11,7 +11,7 @@ pub struct StageClick {
 #[derive(Clone, Debug, Copy)]
 pub enum StageClickContinuation {
     KeepGoing,
-    Stop
+    Stop,
 }
 pub enum NavigationTarget {
     Next,
@@ -29,7 +29,7 @@ impl Base {
             let stage_click = StageClick { mouse_x, mouse_y };
             for f in self.stage_click_listeners.borrow_mut().iter_mut() {
                 match f(stage_click.clone()) {
-                    StageClickContinuation::KeepGoing => {},
+                    StageClickContinuation::KeepGoing => {}
                     StageClickContinuation::Stop => {
                         break;
                     }
