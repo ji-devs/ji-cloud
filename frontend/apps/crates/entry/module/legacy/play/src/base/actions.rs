@@ -8,6 +8,11 @@ pub struct StageClick {
     pub mouse_y: f64,
 }
 
+#[derive(Clone, Debug, Copy)]
+pub enum StageClickContinuation {
+    KeepGoing,
+    Stop
+}
 pub enum NavigationTarget {
     Next,
     Index(usize),
@@ -23,7 +28,12 @@ impl Base {
         if self.stage_click_allowed.load(Ordering::SeqCst) {
             let stage_click = StageClick { mouse_x, mouse_y };
             for f in self.stage_click_listeners.borrow_mut().iter_mut() {
-                f(stage_click.clone());
+                match f(stage_click.clone()) {
+                    StageClickContinuation::KeepGoing => {},
+                    StageClickContinuation::Stop => {
+                        break;
+                    }
+                }
             }
         }
     }

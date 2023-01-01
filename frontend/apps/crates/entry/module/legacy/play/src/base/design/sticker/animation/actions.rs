@@ -14,11 +14,13 @@ use utils::prelude::*;
 use wasm_bindgen::prelude::*;
 
 use super::state::*;
-use crate::base::actions::StageClick;
+use crate::base::actions::{StageClick, StageClickContinuation};
 use utils::math::bounds::BoundsF64;
 
 impl Controller {
-    pub fn handle_click(&self, stage_click: StageClick) {
+    pub fn handle_click(&self, stage_click: StageClick) -> StageClickContinuation {
+        let mut continuation = StageClickContinuation::KeepGoing;
+
         let is_target = {
             match self.elem.borrow().as_ref() {
                 None => false,
@@ -30,7 +32,7 @@ impl Controller {
         };
 
         if !is_target || !self.interactive {
-            return;
+            return continuation;
         }
 
         let has_toggled_once = self.has_toggled_once.load(Ordering::SeqCst);
@@ -39,6 +41,7 @@ impl Controller {
             if !has_toggled_once || hide_toggle == HideToggle::Always {
                 let val = self.hidden.get();
                 self.hidden.set(!val);
+                continuation = StageClickContinuation::Stop;
             }
         }
 
@@ -78,6 +81,8 @@ impl Controller {
                     .play_clip_next_tick(self.base.design_media_url(&audio_filename));
             }
         }
+
+        continuation
     }
 }
 
