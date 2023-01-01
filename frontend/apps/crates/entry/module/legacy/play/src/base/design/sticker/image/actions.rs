@@ -37,7 +37,7 @@ impl Controller {
 
         self.has_toggled_once.store(true, Ordering::SeqCst);
 
-        // in theory we would only play sound for visible images 
+        // in theory we would only play sound for visible images
         // i.e. the first tuple element should be `self.hidden.get()`
         // but it turns out audio is also supposed to play when the image gets hidden
         // so we use toggle_triggered instead
@@ -52,6 +52,5 @@ impl Controller {
         }
 
         continuation
-        
     }
 }
