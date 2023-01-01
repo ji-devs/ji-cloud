@@ -7,7 +7,7 @@ use dominator::{html, Dom};
 impl SaySomething {
     pub fn render(self: Rc<Self>) -> Dom {
         html!("div", {
-            .class(&*styles::FULL_STAGE)
+            .class(&*styles::FULL_STAGE_NO_POINTER)
         })
     }
 }
