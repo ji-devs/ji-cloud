@@ -37,16 +37,22 @@ impl Controller {
 
         let has_toggled_once = self.has_toggled_once.load(Ordering::SeqCst);
 
+        let mut toggle_triggered = false;
         if let Some(hide_toggle) = self.hide_toggle {
             if !has_toggled_once || hide_toggle == HideToggle::Always {
                 let val = self.hidden.get();
                 self.hidden.set(!val);
                 continuation = StageClickContinuation::Stop;
+                toggle_triggered;
             }
         }
 
         self.has_toggled_once.store(true, Ordering::SeqCst);
 
+        // this will only sync the audio with _visible_ animations
+        // which is, in theory, more correct
+        // but for static images audio also plays when the image gets hidden
+        // so if that's a requirement, use toggle_triggered instead (like for static images)
         let (playing_anim, playing_audio) = if self.hidden.get() {
             (false, false)
         } else {

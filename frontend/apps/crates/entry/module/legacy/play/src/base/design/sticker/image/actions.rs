@@ -24,18 +24,25 @@ impl Controller {
 
         let has_toggled_once = self.has_toggled_once.load(Ordering::SeqCst);
 
+        let mut toggle_triggered = false;
+
         if let Some(hide_toggle) = self.hide_toggle {
             if !has_toggled_once || hide_toggle == HideToggle::Always {
                 let val = self.hidden.get();
                 self.hidden.set(!val);
+                toggle_triggered = true;
                 continuation = StageClickContinuation::Stop;
             }
         }
 
         self.has_toggled_once.store(true, Ordering::SeqCst);
 
-        match (self.hidden.get(), self.audio_filename.as_ref()) {
-            (false, Some(audio_filename)) => {
+        // in theory we would only play sound for visible images 
+        // i.e. the first tuple element should be `self.hidden.get()`
+        // but it turns out audio is also supposed to play when the image gets hidden
+        // so we use toggle_triggered instead
+        match (toggle_triggered, self.audio_filename.as_ref()) {
+            (true, Some(audio_filename)) => {
                 //win the race condition with hotspots
                 self.base
                     .audio_manager
