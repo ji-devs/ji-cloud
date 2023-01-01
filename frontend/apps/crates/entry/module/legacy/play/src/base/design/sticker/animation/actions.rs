@@ -37,13 +37,13 @@ impl Controller {
 
         let has_toggled_once = self.has_toggled_once.load(Ordering::SeqCst);
 
-        let mut toggle_triggered = false;
+        let mut _toggle_triggered = false;
         if let Some(hide_toggle) = self.hide_toggle {
             if !has_toggled_once || hide_toggle == HideToggle::Always {
                 let val = self.hidden.get();
                 self.hidden.set(!val);
                 continuation = StageClickContinuation::Stop;
-                toggle_triggered;
+                _toggle_triggered = true;
             }
         }
 
