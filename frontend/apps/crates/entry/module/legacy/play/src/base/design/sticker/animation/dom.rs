@@ -73,7 +73,7 @@ impl AnimationPlayer {
 
                         *state.controller.elem.borrow_mut() = Some(elem.unchecked_into());
                         state.base.insert_stage_click_listener(clone!(state => move |stage_click| {
-                            state.controller.handle_click(stage_click);
+                            state.controller.handle_click(stage_click)
                         }));
 
                         state.request_frame();

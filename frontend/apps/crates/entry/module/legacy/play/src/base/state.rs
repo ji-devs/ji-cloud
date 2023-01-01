@@ -1,4 +1,4 @@
-use super::{actions::StageClick, audio::AudioManager, design::sticker::animation::WorkerKind};
+use super::{actions::{StageClick, StageClickContinuation}, audio::AudioManager, design::sticker::animation::WorkerKind};
 use awsm_web::loaders::fetch::fetch_url;
 use components::module::_common::play::prelude::*;
 use futures_signals::signal::Mutable;
@@ -13,6 +13,7 @@ use shared::domain::{
         ModuleId,
     },
 };
+use std::collections::VecDeque;
 use std::{
     cell::RefCell,
     collections::HashMap,
@@ -34,7 +35,7 @@ pub struct Base {
     pub workers: RefCell<HashMap<WorkerKind, WorkerList>>,
     pub bg_click_listener: RefCell<Option<Box<dyn FnMut()>>>,
     pub start_listeners: RefCell<Vec<Box<dyn FnMut()>>>,
-    pub stage_click_listeners: RefCell<Vec<Box<dyn FnMut(StageClick)>>>,
+    pub stage_click_listeners: RefCell<VecDeque<Box<dyn FnMut(StageClick) -> StageClickContinuation>>>,
     pub audio_manager: AudioManager,
     pub stage_click_allowed: AtomicBool,
     pub has_started: AtomicBool,
@@ -105,7 +106,7 @@ impl Base {
             workers: RefCell::new(HashMap::new()),
             bg_click_listener: RefCell::new(None),
             start_listeners: RefCell::new(Vec::new()),
-            stage_click_listeners: RefCell::new(Vec::new()),
+            stage_click_listeners: RefCell::new(VecDeque::new()),
             audio_manager: AudioManager::new(),
             stage_click_allowed: AtomicBool::new(false),
             has_started: AtomicBool::new(false),
@@ -129,8 +130,8 @@ impl Base {
         self.start_listeners.borrow_mut().push(Box::new(f));
     }
 
-    pub fn insert_stage_click_listener(&self, f: impl FnMut(StageClick) + 'static) {
-        self.stage_click_listeners.borrow_mut().push(Box::new(f));
+    pub fn insert_stage_click_listener(&self, f: impl FnMut(StageClick) -> StageClickContinuation + 'static) {
+        self.stage_click_listeners.borrow_mut().push_front(Box::new(f));
     }
 
     pub fn activity_media_url<T: AsRef<str>>(&self, path: T) -> String {
