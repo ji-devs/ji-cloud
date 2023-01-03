@@ -7,7 +7,7 @@ use components::{
     },
 };
 use gloo_timers::future::TimeoutFuture;
-use shared::domain::module::body::_groups::cards::{Card, CardPair};
+use shared::domain::module::body::_groups::cards::CardPair;
 
 use crate::base::state::{Base, Phase};
 
@@ -70,7 +70,11 @@ impl Game {
                 mixer.play_oneshot_on_ended(
                     // Then play the cards audio clip
                     AudioPath::new_cdn(FLIPPED_AUDIO_EFFECT.to_string()),
-                    move || play_card_audio(&state.current.get_cloned().other)
+                    move || {
+                        if let Some(audio) = &state.current.get_cloned().other.audio {
+                            AUDIO_MIXER.with(|mixer| mixer.play_oneshot(audio.into()));
+                        }
+                    }
                 )
             }));
 
@@ -121,14 +125,6 @@ pub(super) fn get_current(base: &Base, deck: &mut Vec<CardPair>) -> Option<Curre
             }
         };
 
-        play_card_audio(&current.card);
-
         current
     })
-}
-
-fn play_card_audio(card: &Card) {
-    if let Some(audio) = &card.audio {
-        AUDIO_MIXER.with(|mixer| mixer.play_oneshot(audio.into()));
-    }
 }
