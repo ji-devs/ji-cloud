@@ -6,10 +6,7 @@ use std::sync::atomic::Ordering;
 
 use components::{
     audio::mixer::{AudioMixer, AudioPath, AUDIO_MIXER},
-    module::{
-        _common::play::prelude::{BaseExt, ModuleEnding, ModulePlayPhase},
-        _groups::cards::play::card::dom::FLIPPED_AUDIO_EFFECT,
-    },
+    module::_common::play::prelude::{BaseExt, ModuleEnding, ModulePlayPhase},
 };
 
 use dominator::clone;
@@ -119,7 +116,7 @@ impl Game {
                     Self::next(state);
                 } else {
                     AUDIO_MIXER.with(|mixer| {
-                        let audio_path = AudioPath::new_cdn(FLIPPED_AUDIO_EFFECT.to_string());
+                        let audio_path: AudioPath<'_> = mixer.get_random_negative().into();
 
                         // Play the negative effect and then the card audio
                         mixer.play_oneshot_on_ended(audio_path, clone!(state => move || {
