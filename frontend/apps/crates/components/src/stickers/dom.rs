@@ -232,11 +232,19 @@ pub fn render_sticker<T: AsSticker>(
             if KeyEvent::from(evt).is_delete_key() {
                 if let Some(selected) = stickers.selected_index.get_cloned() {
                     if Some(selected) == index.get_cloned() {
-                        // If we don't deselect the currently selected sticker, then this event will
-                        // trigger on each sticker which moves into this index after the current one is
-                        // deleted.
-                        stickers.selected_index.set(None);
-                        stickers.delete_index(selected);
+                        let can_delete = if let Some(text) = stickers.get_as_text(selected) {
+                            !text.is_editing.get()
+                        } else {
+                            true
+                        };
+
+                        if can_delete {
+                            // If we don't deselect the currently selected sticker, then this event will
+                            // trigger on each sticker which moves into this index after the current one is
+                            // deleted.
+                            stickers.selected_index.set(None);
+                            stickers.delete_index(selected);
+                        }
                     }
                 }
             }
