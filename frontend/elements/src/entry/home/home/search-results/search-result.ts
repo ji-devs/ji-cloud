@@ -446,12 +446,12 @@ export class _ extends LitElement {
                 </div>
                 <div class="hover">
                     <div class="scrollable-content">
-                        <h3 class="title">${this.title}</h3>
+                        <h3 class="title" dir="auto">${this.title}</h3>
                         <div class="collapsibles">
                             <slot name="categories"></slot>
                             <home-search-result-details>
                                 <h4>${STR_DESCRIPTION}</h4>
-                                <p class="description">${this.description}</p>
+                                <p class="description" dir="auto">${this.description}</p>
                             </home-search-result-details>
                             ${
                                 this.showAdditionalResources ? html`
