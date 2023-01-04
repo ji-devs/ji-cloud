@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 
-export type Kind = "students" | "embed" | "copy" | "google-classroom";
+export type Kind = "students" | "embed" | "copy" | "google-classroom" | "ms-teams";
 
 @customElement("share-jig-option")
 export class _ extends LitElement {
