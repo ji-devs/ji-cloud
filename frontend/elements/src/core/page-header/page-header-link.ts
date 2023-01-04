@@ -36,22 +36,26 @@ export class _ extends LitElement {
                     background-color: var(--light-blue-1);
                 }
                 .center {
-                    box-sizing: border-box;
                     border-top: solid 6px transparent;
-                    display: grid;
-                    grid-template-columns: auto auto;
-                    column-gap: 6px;
+                    display: flex;
+                    flex-direction: column;
+                    row-gap: 4px;
                     align-items: center;
-                    justify-content: space-between;
+                    justify-content: center;
                     cursor: pointer;
                     font-weight: 500;
                     font-size: 14px;
-                    margin: 0 12px;
+                    padding-right: 16px;
+                    padding-left: 16px;
+                }
+                img-ui {
+                    align-items: center;
                 }
                 @media (min-width: 1920px) {
                     .center {
                         font-size: 16px;
-                        margin: 0 26px;
+                        margin: 0 auto;
+                        align-items: center;
                     }
                 }
                 :host([active]) .center {
