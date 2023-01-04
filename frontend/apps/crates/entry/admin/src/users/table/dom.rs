@@ -1,22 +1,15 @@
+use crate::users::editable_user::EditableUser;
 
 use super::state::*;
 use dominator::{clone, html, Dom};
-use futures_signals::{
-    map_ref,
-    signal::{SignalExt},
-    signal_vec::SignalVecExt,
-};
-use shared::domain::{
-    user::public_user::PublicUser,
-};
+use futures_signals::{map_ref, signal::SignalExt, signal_vec::SignalVecExt};
 use std::rc::Rc;
 use utils::{events, routes::AdminUsersRoute};
 
 impl UsersTable {
     pub fn render(self: Rc<Self>) -> Dom {
-
         let state = self;
-        html!("admin-table", {
+        html!("admin-table-user", {
             .child(html!("input-search", {
                 .prop("slot", "search")
                 .prop("placeholder", "Search...")
@@ -24,7 +17,7 @@ impl UsersTable {
                     state.search_users(e.query());
                 }))
             }))
-            .child(html!("table-pagination", {
+            .child(html!("table-pagination-user", {
                 .prop("slot", "controls")
                 .child(html!("fa-button", {
                     .prop("slot", "back")
@@ -82,17 +75,11 @@ impl UsersTable {
                     })
                 })))
             }))
-            .children_signal_vec(state.users_state.users.signal_vec_cloned().map(clone!(state => move |user: Rc<PublicUser>| {
+            .children_signal_vec(state.users_state.users.signal_vec_cloned().map(clone!(state => move |user: Rc<EditableUser>| {
                 let user_id = user.id;
-                html!("admin-table-line", {
-                    .child(html!("div", {
-                        .style("display", "grid")
-                        .style("grid-template-columns", "repeat(3, 100px)")
-                        .style("align-items", "start")
-                        .style("padding", "0")
-                    }))
+                html!("admin-table-line-user", {
                     .children(&mut [
-                        html!("a", {
+                        html!("span", {
                             .text(&user.username)
                             .event(clone!(state => move |_: events::Click| {
                                 let route = AdminUsersRoute::User(user_id);
@@ -100,10 +87,10 @@ impl UsersTable {
                             }))
                         }),
                         html!("span", {
-                            .text(&user.given_name)
+                            .text(&user.first_name)
                         }),
                         html!("span", {
-                            .text(&user.family_name)
+                            .text(&user.last_name)
                         }),
                     ])
                 })

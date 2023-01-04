@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 
-@customElement("admin-table-jig")
+@customElement("admin-table-user")
 export class _ extends LitElement {
     static styles = [
         css`
@@ -45,19 +45,9 @@ export class _ extends LitElement {
 
     @property({ attribute: false })
     headers: string[] = [
-        "Preview",
-        "Jig Name",
-        "Blocked",
-        "Author",
-        "Rating",
-        "Privacy",
-        // "Author's Badge",
-        "Created",
-        "Last published",
-        "Language",
-        // "Curators",
-        "Age Ranges",
-        "Affiliation"
+        "Username",
+        "First Name",
+        "Last Name",
     ];
 
     render() {
@@ -74,11 +64,11 @@ export class _ extends LitElement {
                 </div>
             </div>
             <div class="table">
-                <admin-table-line-jig>
+                <admin-table-line-user>
                     ${this.headers.map(
                         (header) => html`<div class="header-cell">${header}</div>`
                     )}
-                </admin-table-line-jig>
+                </admin-table-line-user>
                 <slot></slot>
             </div>
         `;

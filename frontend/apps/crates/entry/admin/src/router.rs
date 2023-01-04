@@ -23,7 +23,8 @@ use crate::{
         tags::ImageTags,
     },
     locale::{dom::LocalePage, state::LoaderState as LocaleLoaderState},
-    sidebar::Sidebar, users::Users,
+    sidebar::Sidebar,
+    users::Users,
 };
 use std::cell::RefCell;
 pub struct Router {

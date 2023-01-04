@@ -400,10 +400,10 @@ impl Route {
                 let jig_id = JigId(Uuid::from_str(jig_id).unwrap_ji());
                 Self::Admin(AdminRoute::Curation(AdminCurationRoute::Jig(jig_id)))
             }
-            ["admin", "users"] => Self::Admin(AdminRoute::Curation(AdminCurationRoute::Table)),
-            ["admin", "users", jig_id] => {
-                let jig_id = JigId(Uuid::from_str(jig_id).unwrap_ji());
-                Self::Admin(AdminRoute::Curation(AdminCurationRoute::Jig(jig_id)))
+            ["admin", "users"] => Self::Admin(AdminRoute::Users(AdminUsersRoute::Table)),
+            ["admin", "users", user_id] => {
+                let user_id = UserId(Uuid::from_str(user_id).unwrap_ji());
+                Self::Admin(AdminRoute::Users(AdminUsersRoute::User(user_id)))
             }
             ["admin", "locale"] => Self::Admin(AdminRoute::Locale),
             ["admin", "categories"] => Self::Admin(AdminRoute::Categories),

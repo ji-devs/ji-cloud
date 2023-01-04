@@ -4,7 +4,7 @@ use dominator::clone;
 
 use crate::users::FetchMode;
 
-use super::state::{UsersTable};
+use super::state::UsersTable;
 
 impl UsersTable {
     pub fn search_users(self: &Rc<Self>, query: String) {
