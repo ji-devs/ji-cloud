@@ -24,6 +24,7 @@ const STR_STUDENTS_COPIED_URL_LABEL: &str = "URL copied";
 const STR_EMBED_COPY_CODE_LABEL: &str = "Copy code";
 const STR_EMBED_COPIED_CODE_LABEL: &str = "Embed code copied";
 const STR_CLASSROOM: &str = "Share to Google Classroom";
+const STR_MS_TEAMS: &str = "Share to Microsoft Teams";
 const STR_STUDENTS_LABEL: &str = "Share with students";
 const STR_EMBED_LABEL: &str = "Embed this ";
 const STR_COPY_LABEL_1: &str = "Copy ";
@@ -85,6 +86,13 @@ impl ShareAsset {
     }
 
     fn render_share_main(self: &Rc<Self>) -> Dom {
+        fn share_to(base: &str, url: &str) {
+            if let Some(window) = window() {
+                let share_url = format!("{}{}", base, encode_uri_component(url));
+                let _ = window.open_with_url_and_target(&share_url, "_blank");
+            }
+        }
+
         let state = self;
         html!("share-jig-main", {
             .prop("slot", "overlay")
@@ -101,10 +109,14 @@ impl ShareAsset {
                 .prop("kind", "google-classroom")
                 .text(STR_CLASSROOM)
                 .event(clone!(state => move |_: events::Click| {
-                    if let Some(window) = window() {
-                        let share_url = format!("https://classroom.google.com/share?url={}", encode_uri_component(&state.asset_link(true)));
-                        let _ = window.open_with_url_and_target(&share_url, "_blank");
-                    }
+                    share_to("https://classroom.google.com/share?url=", &state.asset_link(true));
+                }))
+            }))
+            .child(html!("share-jig-option", {
+                .prop("kind", "ms-teams")
+                .text(STR_MS_TEAMS)
+                .event(clone!(state => move |_: events::Click| {
+                    share_to("https://teams.microsoft.com/share?href=", &state.asset_link(true));
                 }))
             }))
             .apply_if(!state.asset.is_resource(), |dom| {
