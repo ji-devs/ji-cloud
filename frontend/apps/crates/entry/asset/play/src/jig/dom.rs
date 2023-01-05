@@ -257,7 +257,8 @@ impl JigPlayer {
                                 let instructions = state.instructions.get_cloned();
                                 let timer = state.timer.get_cloned();
                                 if let Some(instructions) = instructions {
-                                    if timer.is_some() || instructions.text.is_some() {
+                                    if (timer.is_some() && instructions.instructions_type.is_instructions()) || instructions.text.is_some() {
+                                        // If there is a timer and the type is `Instructions`, or if there is text, show the popup
                                         actions::show_instructions(state.clone(), true);
                                     } else if instructions.audio.is_some() {
                                         actions::play_instructions_audio(state.clone());
@@ -284,7 +285,7 @@ impl JigPlayer {
                                                             InstructionsType::Instructions => {
                                                                 dom.prop("body", &instructions.text.unwrap_or(DEFAULT_INSTRUCTIONS_TEXT.to_owned()))
                                                             }
-                                                            InstructionsType::Feedback => {
+                                                            InstructionsType::Feedback | InstructionsType::InActivity => {
                                                                 if let Some(text) = &instructions.text {
                                                                     dom.prop("body", text)
                                                                 } else {
@@ -576,6 +577,9 @@ fn render_time_up_popup(state: Rc<JigPlayer>) -> impl Signal<Item = Option<Dom>>
                                         .prop("slot", "actions")
                                         .prop("kind", "replay")
                                         .event(clone!(state => move |_: events::Click| {
+                                            // Clear the instructions so that they don't play/show once the
+                                            // activity is reloaded.
+                                            actions::set_instructions(state.clone(), None);
                                             actions::reload_iframe(Rc::clone(&state));
                                         }))
                                     })

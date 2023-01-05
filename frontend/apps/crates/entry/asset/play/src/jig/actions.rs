@@ -179,6 +179,9 @@ pub fn set_instructions(
         _ => None,
     };
 
+    state.instructions_visible.set_neq(false);
+    *state.instructions_audio_handle.borrow_mut() = None;
+
     state
         .instructions
         .set(instructions.map(|(instructions, instructions_type)| {
@@ -213,11 +216,13 @@ pub fn play_instructions_audio(state: Rc<JigPlayer>) {
                 .play_on_ended(audio.into(), false, clone!(state => move || {
                     if instructions.instructions_type.is_feedback() && instructions.text.is_none() {
                         // Clear the instructions to prevent any audio possibly playing again. But only if this is Feedbaack and
-                        // there is not text
+                        // there is no text
                         set_instructions(state.clone(), None);
                     }
 
-                    if instructions.text.is_none() {
+                    // For the `Instructions` variant, we display a default text in the popup when a _timer_ is set. In that case
+                    // we don't want to fire the done event when audio completes.
+                    if !(state.timer.get_cloned().is_some() && instructions.instructions_type.is_instructions()) && instructions.text.is_none() {
                         // If there is no text, then we can notify the activity that the instructions audio has completed.
                         instructions_done(state.clone(), instructions.clone());
                     }
@@ -277,14 +282,11 @@ async fn load_jig(state: Rc<JigPlayer>) {
 
         match jig {
             Ok(jig) => {
-                log::info!("IS JIG");
                 // state.active_module.set(Some(resp.jig.modules[0].clone()));
                 if let Some(start_module_id) = state.start_module_id {
-                    log::info!("MODULE ID {start_module_id:?}");
                     if let Some((index, _)) = jig.jig_data.modules.iter().enumerate().find(|module| {
                         module.1.id == start_module_id
                     }) {
-                        log::info!("Found at idx {index}");
                         state.active_module.set_neq(Some(index));
                     };
                 }

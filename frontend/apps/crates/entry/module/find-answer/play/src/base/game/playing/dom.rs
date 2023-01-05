@@ -13,7 +13,7 @@ use futures_signals::{
 };
 use gloo_timers::future::TimeoutFuture;
 use js_sys::Reflect;
-use shared::domain::module::body::find_answer::QuestionField;
+use shared::domain::module::body::{find_answer::QuestionField, Instructions, InstructionsType};
 use std::rc::Rc;
 use utils::{prelude::*, resize::resize_info_signal};
 use wasm_bindgen::JsValue;
@@ -47,9 +47,22 @@ pub fn render(state: Rc<PlayState>) -> Dom {
             if let ModulePlayPhase::Playing = phase {
                 // Play audio if we have any for this question
                 if let Some(audio) = &state.question.question_audio {
-                    AUDIO_MIXER.with(|mixer| {
-                        mixer.play_oneshot(audio.into());
-                    });
+                    if is_in_iframe() {
+                        // If we're in an iframe, send a message to the player to play the audio from
+                        // the instructions component. This allows students to replay the question audio.
+                        let instructions = Instructions {
+                            text: None,
+                            audio: Some(audio.clone()),
+                        };
+                        let msg = IframeAction::new(ModuleToJigPlayerMessage::Instructions(Some((instructions, InstructionsType::InActivity))));
+                        let _ = msg.try_post_message_to_player();
+                    } else {
+                        // Otherwise, play the audio directly from the activity. It isn't possible to
+                        // replay the audio in this case.
+                        AUDIO_MIXER.with(|mixer| {
+                            mixer.play_oneshot(audio.into());
+                        });
+                    }
                 }
 
                 // Update the question sticker if it is set and the question has text
