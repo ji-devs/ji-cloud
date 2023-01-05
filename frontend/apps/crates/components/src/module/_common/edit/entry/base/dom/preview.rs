@@ -5,7 +5,7 @@ use super::super::{
     nav::dom::render_nav,
     state::*,
 };
-use dominator::{clone, html, Dom, with_node};
+use dominator::{clone, html, with_node, Dom};
 use dominator_helpers::events::Message;
 use std::rc::Rc;
 
