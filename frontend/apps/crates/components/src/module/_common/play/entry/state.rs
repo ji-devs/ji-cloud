@@ -193,7 +193,7 @@ where
                 LoadingKind::Direct(raw) => Some((raw.clone(), InitSource::ForceRaw, false)),
                 LoadingKind::Iframe => {
                     _self.phase.set(Rc::new(InitPhase::WaitingIframeRaw(
-                        Rc::new(Box::new(clone!(init_from_raw, _self => move |raw| {
+                        Rc::new(clone!(init_from_raw, _self => move |raw| {
                             _self.raw_loader.load(clone!(init_from_raw, _self => async move {
 
                                 let (asset_id, module_id, jig) = (
@@ -204,11 +204,14 @@ where
                                 let base = init_from_raw(InitFromRawArgs::new(asset_id, module_id, jig, raw, InitSource::IframeData)).await;
 
                                 _self.phase.set(Rc::new(InitPhase::Ready(Ready {
-                                    base,
+                                    base: Rc::clone(&base),
                                     jig_player: false,
                                 })));
+
+                                // auto play
+                                start_playback(base);
                             }));
-                        })))
+                        }))
                     )));
 
                     None
@@ -261,6 +264,14 @@ where
     }
 }
 
+pub fn start_playback<Base>(base: Rc<Base>)
+where
+    Base: BaseExt + 'static,
+{
+    base.play_phase().set_neq(ModulePlayPhase::PreStart);
+    Base::play(base);
+}
+
 #[derive(Debug, Clone)]
 pub struct StateOpts<RawData> {
     pub asset_id: AssetId,
@@ -288,7 +299,7 @@ pub type RawDirect = bool;
 
 pub enum InitPhase<RawData, Base> {
     Loading(LoadingKind<RawData>),
-    WaitingIframeRaw(Rc<Box<dyn Fn(RawData)>>),
+    WaitingIframeRaw(Rc<dyn Fn(RawData)>),
     Ready(Ready<Base>),
 }
 

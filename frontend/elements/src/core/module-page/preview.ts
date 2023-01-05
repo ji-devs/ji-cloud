@@ -3,8 +3,6 @@ import { BgBlue } from "@elements/_styles/bg";
 
 @customElement("module-page-preview")
 export class _ extends BgBlue {
-    private cancelResize: (() => any) | null = null;
-
     static get styles() {
         return [
             ...super.styles,
@@ -16,29 +14,24 @@ export class _ extends BgBlue {
                     padding: 0;
                     margin: 0;
                 }
-
+                .content {
+                    height: 100%;
+                    width: 100%;
+                    display: grid;
+                    row-gap: 10px;
+                    grid-template-rows: auto 1fr;
+                }
+                :host main {
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: center;
+                }
                 #overlay {
                     position: fixed;
                     top: 0;
                     left: 0;
                     display: block;
                     z-index: 1000;
-                }
-
-                :host main {
-                    display: flex;
-                    flex-direction: row;
-                    justify-content: center;
-                }
-
-                header {
-                    grid-area: header;
-                    z-index: 1;
-                }
-
-                footer {
-                    grid-area: footer;
-                    z-index: 1;
                 }
             `,
         ];
@@ -70,11 +63,7 @@ export class _ extends BgBlue {
     // Define the element's template
     render() {
         return html`
-            <div>
-                <aside id="sidebar">
-                    <slot name="sidebar"></slot>
-                </aside>
-
+            <div class="content">
                 <header id="header">
                     <slot name="header"></slot>
                 </header>

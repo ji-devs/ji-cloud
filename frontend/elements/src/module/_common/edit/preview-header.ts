@@ -18,6 +18,9 @@ export class _ extends LitElement {
                     background-color: var(--white);
                     justify-content: space-between;
                     align-items: center;
+                    box-sizing: border-box;
+                    /* not adding padding to left as it already has if from <steps-nav> */
+                    padding-right: 16px;
                 }
                 .nav {
                     width: 300px;

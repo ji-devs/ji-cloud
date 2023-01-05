@@ -101,7 +101,7 @@ pub fn render_page_body<RawData, Mode, Step, Base>(
 //It'll be replaced when the iframe data arrives
 fn render_iframe_wait_raw<RawData, Mode, Step, Base>(
     _state: Rc<GenericState<RawData, Mode, Step, Base>>,
-    on_raw: Rc<Box<dyn Fn(RawData)>>,
+    on_raw: Rc<dyn Fn(RawData)>,
 ) -> Dom
 where
     Base: BaseExt + 'static,
@@ -250,12 +250,4 @@ where
             })))
         })
     })
-}
-
-fn start_playback<Base>(base: Rc<Base>)
-where
-    Base: BaseExt + 'static,
-{
-    base.play_phase().set_neq(ModulePlayPhase::PreStart);
-    Base::play(base);
 }
