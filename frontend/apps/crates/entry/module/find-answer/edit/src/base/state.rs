@@ -66,7 +66,7 @@ pub struct PlaySettings {
     pub time_limit: Mutable<u32>,
 }
 
-const DEFAULT_TIME_LIMIT: u32 = 10;
+const DEFAULT_TIME_LIMIT: u32 = 20;
 
 impl PlaySettings {
     pub fn new(settings: RawPlaySettings) -> Self {
