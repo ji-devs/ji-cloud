@@ -445,6 +445,8 @@ pub enum InstructionsType {
     Instructions,
     /// Feedback is shown at the end of an activity
     Feedback,
+    /// Replayable activity-specific audio or text
+    InActivity,
 }
 
 impl InstructionsType {
@@ -456,6 +458,11 @@ impl InstructionsType {
     /// Whether this variant is `Feedback`
     pub fn is_feedback(&self) -> bool {
         matches!(self, Self::Feedback)
+    }
+
+    /// Whether this variant is `InActivity`
+    pub fn is_in_activity(&self) -> bool {
+        matches!(self, Self::InActivity)
     }
 }
 
