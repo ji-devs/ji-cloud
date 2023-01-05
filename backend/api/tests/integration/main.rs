@@ -14,6 +14,7 @@ mod image;
 mod jig;
 mod locale;
 mod meta;
+mod pro_dev;
 mod resource;
 mod service;
 mod session;

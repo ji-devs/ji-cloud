@@ -40,6 +40,10 @@ async fn create(
             db::resource::authz(&*db, user_id, Some(resource_id)).await?;
             db::resource::module::create(&*db, resource_id, req.body, is_complete).await?
         }
+        AssetId::ProDevId(pro_dev_id) => {
+            db::pro_dev::authz(&*db, user_id, Some(pro_dev_id)).await?;
+            db::pro_dev::module::create(&*db, pro_dev_id, req.body, is_complete).await?
+        }
     };
 
     Ok(HttpResponse::Created().json(CreateResponse { id }))
@@ -63,6 +67,9 @@ async fn get_live(
         AssetType::Resource => db::resource::module::get_live(&db, module_id)
             .await?
             .ok_or(error::NotFound::ResourceNotFound)?,
+        AssetType::ProDev => db::resource::module::get_live(&db, module_id)
+            .await?
+            .ok_or(error::NotFound::ResourceNotFound)?,
     };
 
     Ok(Json(ModuleResponse { module }))
@@ -84,6 +91,9 @@ async fn get_draft(
             .await?
             .ok_or(error::NotFound::ResourceNotFound)?,
         AssetType::Resource => db::resource::module::get_draft(&db, module_id)
+            .await?
+            .ok_or(error::NotFound::ResourceNotFound)?,
+        AssetType::ProDev => db::resource::module::get_draft(&db, module_id)
             .await?
             .ok_or(error::NotFound::ResourceNotFound)?,
     };
@@ -141,6 +151,19 @@ async fn update(
             )
             .await?
         }
+        AssetId::ProDevId(pro_dev_id) => {
+            db::pro_dev::authz(&*db, user_id, Some(pro_dev_id)).await?;
+
+            db::pro_dev::module::update(
+                &*db,
+                pro_dev_id,
+                module_id,
+                req.body.as_ref(),
+                req.index,
+                req.is_complete,
+            )
+            .await?
+        }
     };
 
     if !exists {
@@ -175,6 +198,11 @@ async fn delete(
             db::resource::authz(&*db, user_id, Some(resource_id)).await?;
 
             db::resource::module::delete(&*db, resource_id, module_id).await?;
+        }
+        AssetId::ProDevId(pro_dev_id) => {
+            db::pro_dev::authz(&*db, user_id, Some(pro_dev_id)).await?;
+
+            db::pro_dev::module::delete(&*db, pro_dev_id, module_id).await?;
         }
     };
 
