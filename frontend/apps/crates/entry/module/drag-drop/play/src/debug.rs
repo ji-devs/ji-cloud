@@ -7,7 +7,7 @@ use shared::{
         image::ImageId,
         module::{
             body::{
-                Audio, Image, Instructions, Transform,
+                Audio, Image, ModuleAssist, Transform,
                 _groups::design::{
                     Backgrounds, Sprite, Sticker, Text, Trace, TraceKind, TraceShape,
                 },
@@ -181,9 +181,9 @@ impl DebugSettings {
                             )
                             .collect(),
                         theme: ThemeId::Chalkboard,
-                        instructions: Instructions::default(),
+                        instructions: ModuleAssist::default(),
                         //feedback: Instructions::default(),
-                        feedback: Instructions {
+                        feedback: ModuleAssist {
                             text: Some("good job!".to_string()),
                             audio: Some(Audio {
                                 id: AudioId(Uuid::parse_str(AUDIO_UUID).unwrap_ji()),

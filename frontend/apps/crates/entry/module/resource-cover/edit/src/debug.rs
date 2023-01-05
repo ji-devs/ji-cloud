@@ -7,7 +7,7 @@ use shared::{
         asset::AssetId,
         image::ImageId,
         module::body::{
-            Image, Instructions,
+            Image, ModuleAssist,
             _groups::design::{Backgrounds, BaseContent, Sprite, Sticker, Text},
             resource_cover::{Content, ModuleData as RawData, Step},
         },
@@ -61,8 +61,8 @@ impl DebugSettings {
                     content: Some(Content {
                         base: BaseContent {
                             theme: ThemeId::Chalkboard,
-                            instructions: Instructions::default(),
-                            feedback: Instructions::default(),
+                            instructions: ModuleAssist::default(),
+                            feedback: ModuleAssist::default(),
                             stickers: init_data
                                 .stickers
                                 .iter()

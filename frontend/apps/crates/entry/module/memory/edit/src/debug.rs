@@ -11,7 +11,7 @@ use shared::domain::{
     jig::JigId,
     module::{
         body::{
-            Instructions,
+            ModuleAssist,
             _groups::cards::{
                 BaseContent, Card as RawCard, CardContent as RawCardContent,
                 CardPair as RawCardPair, Mode, Step,
@@ -60,7 +60,7 @@ impl DebugSettings {
                         base: BaseContent {
                             mode,
                             theme: ThemeId::Chalkboard,
-                            instructions: Instructions::default(),
+                            instructions: ModuleAssist::default(),
                             pairs: if init_data.with_pairs {
                                 config::get_debug_pairs(mode)
                                     .into_iter()

@@ -5,7 +5,7 @@ use shared::domain::{
         body::{
             _groups::design::{Backgrounds, Sticker},
             cover::{ModuleData as RawData, PlaySettings, Step},
-            Audio, Instructions,
+            Audio, ModuleAssist,
         },
         ModuleId,
     },
@@ -20,7 +20,7 @@ pub struct Base {
     pub module_id: ModuleId,
     pub asset: Asset,
     pub theme_id: ThemeId,
-    pub instructions: Instructions,
+    pub instructions: ModuleAssist,
     pub audio: Option<Audio>,
     pub audio_handle: Rc<RefCell<Option<AudioHandle>>>,
     pub backgrounds: Backgrounds,
@@ -60,7 +60,7 @@ impl Base {
 }
 
 impl BaseExt for Base {
-    fn get_instructions(&self) -> Option<Instructions> {
+    fn get_module_assist(&self) -> Option<ModuleAssist> {
         Some(self.instructions.clone())
     }
 

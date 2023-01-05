@@ -6,7 +6,7 @@ use shared::{
         asset::AssetId,
         image::ImageId,
         module::body::{
-            Image, Instructions,
+            Image, ModuleAssist,
             _groups::cards::{
                 BaseContent, Card as RawCard, CardContent as RawCardContent,
                 CardPair as RawCardPair, Mode,
@@ -56,7 +56,7 @@ impl DebugSettings {
                         base: BaseContent {
                             mode,
                             theme: ThemeId::Chalkboard,
-                            instructions: Instructions {
+                            instructions: ModuleAssist {
                                 text: Some(String::from("Hello world!")),
                                 audio: None,
                             },

@@ -3,10 +3,10 @@ use shared::domain::{
     jig::player::{ModuleConfig, Seconds},
     module::{
         body::{
-            Background, Instructions,
+            Background, ModuleAssist,
             _groups::cards::{CardPair, Mode, Step},
             card_quiz::{ModuleData as RawData, PlayerSettings},
-            InstructionsType,
+            ModuleAssistType,
         },
         ModuleId,
     },
@@ -26,10 +26,10 @@ pub struct Base {
     pub mode: Mode,
     pub theme_id: ThemeId,
     pub background: Option<Background>,
-    pub instructions: Instructions,
+    pub instructions: ModuleAssist,
     /// Feedback to play when the activity ends
-    pub feedback: Instructions,
-    pub feedback_signal: Mutable<Option<Instructions>>,
+    pub feedback: ModuleAssist,
+    pub feedback_signal: Mutable<Option<ModuleAssist>>,
     pub settings: PlayerSettings,
     pub raw_pairs: Vec<CardPair>,
     pub phase: Mutable<Phase>,
@@ -77,16 +77,16 @@ impl Base {
 }
 
 impl BaseExt for Base {
-    fn get_instructions(&self) -> Option<Instructions> {
+    fn get_module_assist(&self) -> Option<ModuleAssist> {
         Some(self.instructions.clone())
     }
 
-    fn get_feedback(&self) -> ReadOnlyMutable<Option<Instructions>> {
+    fn get_feedback(&self) -> ReadOnlyMutable<Option<ModuleAssist>> {
         self.feedback_signal.read_only()
     }
 
-    fn handle_instructions_ended(&self, instructions_type: InstructionsType) {
-        if let InstructionsType::Feedback = instructions_type {
+    fn handle_module_assist_ended(&self, module_assist_type: ModuleAssistType) {
+        if let ModuleAssistType::Feedback = module_assist_type {
             self.phase.set(Phase::Ending);
             self.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
         }

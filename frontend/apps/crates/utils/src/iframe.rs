@@ -3,7 +3,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use shared::domain::{
     jig::player::{ModuleConfig, Seconds},
     module::{
-        body::{Instructions, InstructionsType},
+        body::{ModuleAssist, ModuleAssistType},
         LiteModule, ModuleId,
     },
 };
@@ -198,7 +198,7 @@ pub enum JigToModulePlayerMessage {
     /// Sent if the player is configured to forward navigation events to
     /// the module
     Next,
-    InstructionsDone(InstructionsType),
+    ModuleAssistDone(ModuleAssistType),
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -215,8 +215,8 @@ pub enum ModuleToJigPlayerMessage {
     /// Useful for acting on key press events such as arrow keys for navigating between activities
     KeyEvent(KeyEvent),
 
-    /// Optional instructions, and their type
-    Instructions(Option<(Instructions, InstructionsType)>),
+    /// Optional module assistance, and it's type
+    ModuleAssist(Option<(ModuleAssist, ModuleAssistType)>),
 }
 
 #[derive(Debug, Serialize, Deserialize)]

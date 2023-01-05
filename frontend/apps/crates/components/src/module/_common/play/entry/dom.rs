@@ -12,7 +12,7 @@ use crate::{
     audio::mixer::AUDIO_MIXER, module::_common::play::prelude::*,
     overlay::container::OverlayContainer,
 };
-use shared::domain::module::body::{BodyExt, InstructionsType, ModeExt, StepExt};
+use shared::domain::module::body::{BodyExt, ModeExt, ModuleAssistType, StepExt};
 
 pub fn render_page_body<RawData, Mode, Step, Base>(
     state: Rc<GenericState<RawData, Mode, Step, Base>>,
@@ -142,7 +142,7 @@ where
     Mode: ModeExt + 'static,
     Step: StepExt + 'static,
 {
-    let instructions = base.get_instructions();
+    let module_assist = base.get_module_assist();
     let feedback = base.get_feedback();
     let is_screenshot = utils::screenshot::is_screenshot_url();
 
@@ -150,7 +150,7 @@ where
         .prop("slot", "main")
         .child(Base::render(base.clone()))
         .future(feedback.signal_cloned().for_each(move |feedback| async move {
-            let msg = IframeAction::new(ModuleToJigPlayerMessage::Instructions(feedback.map(|feedback| (feedback, InstructionsType::Feedback))));
+            let msg = IframeAction::new(ModuleToJigPlayerMessage::ModuleAssist(feedback.map(|feedback| (feedback, ModuleAssistType::Feedback))));
             let _ = msg.try_post_message_to_player();
         }))
         .apply_if(jig_player, |dom| {
@@ -164,16 +164,16 @@ where
                             },
                             JigToModulePlayerMessage::TimerDone => {
                             },
-                            JigToModulePlayerMessage::InstructionsDone(instructions_type) => {
+                            JigToModulePlayerMessage::ModuleAssistDone(module_assist_type) => {
                                 if let InitPhase::Ready(base) = &*state.phase.get_cloned() {
                                     if let ModulePlayPhase::PreStart = base.base.play_phase().get_cloned() {
-                                        // When instructions have completed during the *PreStart* phase, then we move on
+                                        // When module assist has completed during the *PreStart* phase, then we move on
                                         // to the Playing phase.
                                         base.base.set_play_phase(ModulePlayPhase::Playing);
                                     } else {
                                         // During subsequent phases, we let the individual activities decide how to handle
-                                        // the completion of instructions.
-                                        base.base.handle_instructions_ended(instructions_type);
+                                        // the completion of module assistance.
+                                        base.base.handle_module_assist_ended(module_assist_type);
                                     }
                                 }
                             },
@@ -225,9 +225,9 @@ where
 
                             //let the player know we're starting
                             msg.try_post_message_to_player().unwrap_ji();
-                            match &instructions {
-                                Some(instructions) if instructions.has_content() => {
-                                    let msg = IframeAction::new(ModuleToJigPlayerMessage::Instructions(Some((instructions.clone(), InstructionsType::Instructions))));
+                            match &module_assist {
+                                Some(module_assist) if module_assist.has_content() => {
+                                    let msg = IframeAction::new(ModuleToJigPlayerMessage::ModuleAssist(Some((module_assist.clone(), ModuleAssistType::Instructions))));
                                     let _ = msg.try_post_message_to_player();
                                 },
                                 _ => {

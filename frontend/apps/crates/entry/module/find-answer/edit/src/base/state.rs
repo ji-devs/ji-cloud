@@ -27,7 +27,7 @@ use shared::domain::{
     jig::JigId,
     module::{
         body::{
-            BodyExt, Instructions,
+            BodyExt, ModuleAssist,
             _groups::design::TraceKind,
             find_answer::{Mode, ModuleData as RawData, PlaySettings as RawPlaySettings, Step},
         },
@@ -41,8 +41,8 @@ pub struct Base {
     pub history: Rc<HistoryStateImpl<RawData>>,
     pub step: ReadOnlyMutable<Step>,
     pub theme_id: Mutable<ThemeId>,
-    pub instructions: Mutable<Instructions>,
-    pub feedback: Mutable<Instructions>,
+    pub instructions: Mutable<ModuleAssist>,
+    pub feedback: Mutable<ModuleAssist>,
     pub jig_id: JigId,
     pub module_id: ModuleId,
     // FindAnswer-specific

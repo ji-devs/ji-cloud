@@ -10,7 +10,7 @@ use shared::domain::{
             find_answer::{
                 Mode, ModuleData as RawData, Ordering, PlaySettings, Question, QuestionField, Step,
             },
-            Instructions, InstructionsType,
+            ModuleAssist, ModuleAssistType,
         },
         ModuleId,
     },
@@ -36,10 +36,10 @@ pub struct Base {
     pub question_field: QuestionField,
     pub module_phase: Mutable<ModulePlayPhase>,
     /// Custom instructions player so that we can handle the on_ended event.
-    pub instructions: Instructions,
+    pub instructions: ModuleAssist,
     /// Feedback to play when the activity ends
-    pub feedback: Instructions,
-    pub feedback_signal: Mutable<Option<Instructions>>,
+    pub feedback: ModuleAssist,
+    pub feedback_signal: Mutable<Option<ModuleAssist>>,
 }
 
 impl Base {
@@ -116,16 +116,16 @@ impl BaseExt for Base {
         self.module_phase.clone()
     }
 
-    fn get_instructions(&self) -> Option<Instructions> {
+    fn get_module_assist(&self) -> Option<ModuleAssist> {
         Some(self.instructions.clone())
     }
 
-    fn get_feedback(&self) -> ReadOnlyMutable<Option<Instructions>> {
+    fn get_feedback(&self) -> ReadOnlyMutable<Option<ModuleAssist>> {
         self.feedback_signal.read_only()
     }
 
-    fn handle_instructions_ended(&self, instructions_type: InstructionsType) {
-        if let InstructionsType::Feedback = instructions_type {
+    fn handle_module_assist_ended(&self, module_assist_type: ModuleAssistType) {
+        if let ModuleAssistType::Feedback = module_assist_type {
             self.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)))
         }
     }

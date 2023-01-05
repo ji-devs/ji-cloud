@@ -8,7 +8,7 @@ use shared::{
         asset::AssetId,
         image::ImageId,
         module::body::{
-            Image, Instructions,
+            Image, ModuleAssist,
             _groups::design::{Backgrounds, BaseContent, Sprite, Sticker, Text},
             video::{Content, Mode, ModuleData as RawData, Step},
         },
@@ -63,8 +63,8 @@ impl DebugSettings {
                         mode: Mode::Introduction,
                         base: BaseContent {
                             theme: ThemeId::Chalkboard,
-                            instructions: Instructions::default(),
-                            feedback: Instructions::default(),
+                            instructions: ModuleAssist::default(),
+                            feedback: ModuleAssist::default(),
                             stickers: init_data
                                 .stickers
                                 .iter()

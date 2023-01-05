@@ -4,7 +4,7 @@
  */
 use crate::{
     config,
-    domain::module::body::{Audio, Background, Image, Instructions, ModeExt, StepExt, ThemeId},
+    domain::module::body::{Audio, Background, Image, ModeExt, ModuleAssist, StepExt, ThemeId},
 };
 use serde::{de, Deserialize, Serialize};
 use std::collections::HashSet;
@@ -17,11 +17,11 @@ pub struct BaseContent {
     pub editor_state: EditorState,
 
     /// The instructions for the module.
-    pub instructions: Instructions,
+    pub instructions: ModuleAssist,
 
     /// The feedback for the module.
     #[serde(default)]
-    pub feedback: Instructions,
+    pub feedback: ModuleAssist,
 
     /// The mode the module uses.
     pub mode: Mode,

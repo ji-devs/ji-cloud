@@ -1,4 +1,4 @@
-use crate::domain::module::body::{Audio, Background, Image, Instructions, ThemeId, Transform};
+use crate::domain::module::body::{Audio, Background, Image, ModuleAssist, ThemeId, Transform};
 use serde::{Deserialize, Serialize};
 
 /// Default text for `Text`
@@ -8,11 +8,11 @@ pub const DEFAULT_TEXT_VALUE: &str = "Shalom שָׁלוֹם";
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct BaseContent {
     /// The instructions for the module.
-    pub instructions: Instructions,
+    pub instructions: ModuleAssist,
 
     /// The feedback for the module.
     #[serde(default)]
-    pub feedback: Instructions,
+    pub feedback: ModuleAssist,
 
     /// The module's theme.
     pub theme: ThemeId,

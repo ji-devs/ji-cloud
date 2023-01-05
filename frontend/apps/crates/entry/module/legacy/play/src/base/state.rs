@@ -12,7 +12,7 @@ use shared::domain::{
     module::{
         body::{
             legacy::{slide::Slide, ModuleData as RawData},
-            Instructions,
+            ModuleAssist,
         },
         ModuleId,
     },
@@ -205,7 +205,7 @@ impl BaseExt for Base {
         }
     }
 
-    fn get_instructions(&self) -> Option<Instructions> {
+    fn get_module_assist(&self) -> Option<ModuleAssist> {
         None
     }
 

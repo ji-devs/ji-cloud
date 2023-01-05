@@ -12,7 +12,7 @@ use shared::{
         {
             jig::JigId,
             module::body::{
-                Image, Instructions,
+                Image, ModuleAssist,
                 _groups::cards::{
                     BaseContent, Card as RawCard, CardContent as RawCardContent,
                     CardPair as RawCardPair, Mode,
@@ -58,7 +58,7 @@ impl DebugSettings {
                         base: BaseContent {
                             mode,
                             theme: ThemeId::Chalkboard,
-                            instructions: Instructions::default(),
+                            instructions: ModuleAssist::default(),
                             pairs: if init_data.with_pairs {
                                 crate::config::get_debug_pairs(mode, 3)
                                     .into_iter()

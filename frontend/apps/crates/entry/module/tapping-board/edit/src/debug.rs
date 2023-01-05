@@ -8,7 +8,7 @@ use shared::{
         audio::AudioId,
         image::ImageId,
         module::body::{
-            Audio, Image, Instructions, Transform,
+            Audio, Image, ModuleAssist, Transform,
             _groups::design::{
                 Backgrounds, BaseContent, Sprite, Sticker, Text, Trace, TraceKind, TraceShape,
             },
@@ -89,8 +89,8 @@ impl DebugSettings {
                             .collect(),
                         base: BaseContent {
                             theme: ThemeId::Chalkboard,
-                            instructions: Instructions::default(),
-                            feedback: Instructions::default(),
+                            instructions: ModuleAssist::default(),
+                            feedback: ModuleAssist::default(),
                             stickers: init_data
                                 .stickers
                                 .iter()

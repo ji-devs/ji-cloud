@@ -13,7 +13,7 @@ use futures_signals::{
 };
 use gloo_timers::future::TimeoutFuture;
 use js_sys::Reflect;
-use shared::domain::module::body::{find_answer::QuestionField, Instructions, InstructionsType};
+use shared::domain::module::body::{find_answer::QuestionField, ModuleAssist, ModuleAssistType};
 use std::rc::Rc;
 use utils::{prelude::*, resize::resize_info_signal};
 use wasm_bindgen::JsValue;
@@ -49,12 +49,12 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                 if let Some(audio) = &state.question.question_audio {
                     if is_in_iframe() {
                         // If we're in an iframe, send a message to the player to play the audio from
-                        // the instructions component. This allows students to replay the question audio.
-                        let instructions = Instructions {
+                        // the module assist component. This allows students to replay the question audio.
+                        let module_assist = ModuleAssist {
                             text: None,
                             audio: Some(audio.clone()),
                         };
-                        let msg = IframeAction::new(ModuleToJigPlayerMessage::Instructions(Some((instructions, InstructionsType::InActivity))));
+                        let msg = IframeAction::new(ModuleToJigPlayerMessage::ModuleAssist(Some((module_assist, ModuleAssistType::InActivity))));
                         let _ = msg.try_post_message_to_player();
                     } else {
                         // Otherwise, play the audio directly from the activity. It isn't possible to

@@ -11,7 +11,7 @@ use shared::{
         image::ImageId,
         module::{
             body::{
-                Image, Instructions,
+                Image, ModuleAssist,
                 _groups::design::{
                     Backgrounds, BaseContent, Sprite, Sticker, Text, Video, VideoHost, YoutubeUrl,
                     YoutubeVideo,
@@ -65,11 +65,11 @@ impl DebugSettings {
                         },
                         base: BaseContent {
                             theme: ThemeId::Chalkboard,
-                            instructions: Instructions {
+                            instructions: ModuleAssist {
                                 text: Some("Heya World!".to_string()),
-                                ..Instructions::default()
+                                ..ModuleAssist::default()
                             },
-                            feedback: Instructions::default(),
+                            feedback: ModuleAssist::default(),
                             stickers: init_data
                                 .stickers
                                 .iter()

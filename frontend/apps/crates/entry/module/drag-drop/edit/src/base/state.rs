@@ -25,7 +25,7 @@ use shared::domain::{
     asset::AssetId,
     module::{
         body::{
-            Audio, Instructions, Transform,
+            Audio, ModuleAssist, Transform,
             _groups::design::{Trace as RawTrace, TraceKind},
             drag_drop::{
                 Hint, Interactive as RawInteractive, Item as RawItem, ItemKind as RawItemKind,
@@ -42,7 +42,7 @@ use utils::prelude::*;
 pub struct Base {
     pub history: Rc<HistoryStateImpl<RawData>>,
     pub step: ReadOnlyMutable<Step>,
-    pub instructions: Mutable<Instructions>,
+    pub instructions: Mutable<ModuleAssist>,
     pub asset_id: AssetId,
     pub module_id: ModuleId,
     pub continue_next_fn: ContinueNextFn,
@@ -59,7 +59,7 @@ pub struct Base {
     pub play_settings: Rc<PlaySettings>,
 
     pub drag_item_selected_index: Mutable<Option<usize>>,
-    pub feedback: Mutable<Instructions>,
+    pub feedback: Mutable<ModuleAssist>,
 }
 
 #[derive(Clone)]
