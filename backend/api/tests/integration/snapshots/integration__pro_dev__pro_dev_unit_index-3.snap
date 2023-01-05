@@ -1,0 +1,30 @@
+---
+source: tests/integration/pro_dev.rs
+expression: body
+---
+{
+  "id": "f77222a6-906b-11ed-b4f6-2f6dfab2ea0a",
+  "publishedAt": "2022-06-24T18:35:33.636556Z",
+  "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+  "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+  "authorName": "Bobby Tables",
+  "likes": 0,
+  "plays": 0,
+  "liveUpToDate": false,
+  "proDevData": {
+    "draftOrLive": "live",
+    "displayName": "pro_dev name1",
+    "language": "en",
+    "description": "live test description",
+    "lastEdited": "[last_edited]",
+    "duration": null,
+    "privacyLevel": "public",
+    "otherKeywords": "",
+    "translatedKeywords": "",
+    "translatedDescription": {},
+    "cover": null,
+    "categories": [],
+    "additionalResources": [],
+    "units": []
+  }
+}

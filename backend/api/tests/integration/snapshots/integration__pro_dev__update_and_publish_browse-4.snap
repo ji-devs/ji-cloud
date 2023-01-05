@@ -1,0 +1,76 @@
+---
+source: tests/integration/pro_dev.rs
+expression: body
+---
+{
+  "proDevs": [
+    {
+      "id": "[id]",
+      "publishedAt": "[published_at]",
+      "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorName": "Bobby Tables",
+      "likes": 0,
+      "plays": 0,
+      "liveUpToDate": false,
+      "proDevData": {
+        "draftOrLive": "draft",
+        "displayName": "pro_dev name1",
+        "language": "en-us",
+        "description": "asdasdasd",
+        "lastEdited": "[last_edited]",
+        "duration": null,
+        "privacyLevel": "public",
+        "otherKeywords": "",
+        "translatedKeywords": "",
+        "translatedDescription": {},
+        "cover": {
+          "id": "[id]",
+          "kind": "Cover",
+          "is_complete": true
+        },
+        "categories": [],
+        "additionalResources": [],
+        "units": [
+          "e0984370-906c-11ed-b4f6-3f864931e86f",
+          "e098451e-906c-11ed-b4f6-d3927726efad",
+          "09225240-906d-11ed-b4f6-ffc72cfa1509"
+        ]
+      }
+    },
+    {
+      "id": "[id]",
+      "publishedAt": "[published_at]",
+      "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorName": "Bobby Tables",
+      "likes": 0,
+      "plays": 0,
+      "liveUpToDate": false,
+      "proDevData": {
+        "draftOrLive": "draft",
+        "displayName": "pro_dev name2",
+        "language": "en",
+        "description": "draft test description",
+        "lastEdited": "[last_edited]",
+        "duration": null,
+        "privacyLevel": "public",
+        "otherKeywords": "",
+        "translatedKeywords": "",
+        "translatedDescription": {},
+        "cover": {
+          "id": "[id]",
+          "kind": "Cover",
+          "is_complete": true
+        },
+        "categories": [],
+        "additionalResources": [],
+        "units": [
+          "092253c6-906d-11ed-b4f6-87e87e8212af"
+        ]
+      }
+    }
+  ],
+  "pages": 1,
+  "totalProDevCount": 2
+}

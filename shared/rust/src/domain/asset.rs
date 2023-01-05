@@ -28,6 +28,7 @@ use super::{
     course::{CourseId, CourseResponse},
     jig::{JigId, JigResponse},
     module::body::ThemeId,
+    pro_dev::{ProDevId, ProDevResponse},
     resource::{ResourceId, ResourceResponse},
     user::UserId,
 };
@@ -45,6 +46,9 @@ pub enum AssetType {
 
     /// Course
     Course,
+
+    /// Pro Dev
+    ProDev,
 }
 
 impl AssetType {
@@ -69,6 +73,7 @@ impl AssetType {
             Self::Jig => "jig",
             Self::Resource => "resource",
             Self::Course => "course",
+            Self::ProDev => "pro_dev",
         }
     }
 
@@ -78,6 +83,7 @@ impl AssetType {
             AssetType::Jig => JigId(uuid).into(),
             AssetType::Course => CourseId(uuid).into(),
             AssetType::Resource => ResourceId(uuid).into(),
+            AssetType::ProDev => ProDevId(uuid).into(),
         }
     }
 }
@@ -88,6 +94,7 @@ impl From<&AssetId> for AssetType {
             AssetId::JigId(_) => AssetType::Jig,
             AssetId::CourseId(_) => AssetType::Course,
             AssetId::ResourceId(_) => AssetType::Resource,
+            AssetId::ProDevId(_) => AssetType::ProDev,
         }
     }
 }
@@ -100,6 +107,7 @@ impl TryFrom<&str> for AssetType {
             "jig" => Ok(Self::Jig),
             "course" => Ok(Self::Course),
             "resource" => Ok(Self::Resource),
+            "pro_dev" => Ok(Self::ProDev),
             _ => Err(()),
         }
     }
@@ -123,6 +131,9 @@ pub enum AssetId {
 
     /// Resource ID
     ResourceId(ResourceId),
+
+    /// Pro Dev ID
+    ProDevId(ProDevId),
 }
 
 impl From<JigId> for AssetId {
@@ -140,6 +151,12 @@ impl From<CourseId> for AssetId {
 impl From<ResourceId> for AssetId {
     fn from(resource_id: ResourceId) -> Self {
         Self::ResourceId(resource_id)
+    }
+}
+
+impl From<ProDevId> for AssetId {
+    fn from(pro_dev_id: ProDevId) -> Self {
+        Self::ProDevId(pro_dev_id)
     }
 }
 
@@ -168,12 +185,21 @@ impl AssetId {
         }
     }
 
+    /// get pro_dev id value as ref
+    pub fn unwrap_pro_dev(&self) -> &ProDevId {
+        match self {
+            Self::ProDevId(pro_dev_id) => pro_dev_id,
+            _ => panic!(),
+        }
+    }
+
     /// get the id uuid
     pub fn uuid(&self) -> &Uuid {
         match self {
             Self::JigId(jig_id) => &jig_id.0,
             Self::CourseId(course_id) => &course_id.0,
             Self::ResourceId(resource_id) => &resource_id.0,
+            Self::ProDevId(pro_dev_id) => &pro_dev_id.0,
         }
     }
 
@@ -191,6 +217,11 @@ impl AssetId {
     pub fn is_resource_id(&self) -> bool {
         matches!(self, Self::ResourceId(_))
     }
+
+    /// check if pro_dev
+    pub fn is_pro_dev_id(&self) -> bool {
+        matches!(self, Self::ProDevId(_))
+    }
 }
 
 /// Asset
@@ -205,6 +236,9 @@ pub enum Asset {
 
     /// Resource ID associated with the module.
     Resource(ResourceResponse),
+
+    /// ProDev ID associated with the module.
+    ProDev(ProDevResponse),
 }
 
 impl From<JigResponse> for Asset {
@@ -222,6 +256,12 @@ impl From<CourseResponse> for Asset {
 impl From<ResourceResponse> for Asset {
     fn from(resource: ResourceResponse) -> Self {
         Self::Resource(resource)
+    }
+}
+
+impl From<ProDevResponse> for Asset {
+    fn from(pro_dev: ProDevResponse) -> Self {
+        Self::ProDev(pro_dev)
     }
 }
 
@@ -255,6 +295,14 @@ impl Asset {
         }
     }
 
+    /// get pro_dev value as ref
+    pub fn unwrap_pro_dev(&self) -> &ProDevResponse {
+        match self {
+            Self::ProDev(pro_dev) => pro_dev,
+            _ => panic!(),
+        }
+    }
+
     /// check if is jig
     pub fn is_jig(&self) -> bool {
         matches!(self, Self::Jig(_))
@@ -270,12 +318,18 @@ impl Asset {
         matches!(self, Self::Resource(_))
     }
 
+    /// check if is pro dev
+    pub fn is_pro_dev(&self) -> bool {
+        matches!(self, Self::ProDev(_))
+    }
+
     /// get id
     pub fn id(&self) -> AssetId {
         match self {
             Self::Jig(jig) => jig.id.into(),
             Self::Course(course) => course.id.into(),
             Self::Resource(resource) => resource.id.into(),
+            Self::ProDev(pro_dev) => pro_dev.id.into(),
         }
     }
 
@@ -285,6 +339,7 @@ impl Asset {
             Self::Jig(jig) => jig.published_at,
             Self::Course(course) => course.published_at,
             Self::Resource(resource) => resource.published_at,
+            Self::ProDev(pro_dev) => pro_dev.published_at,
         }
     }
 
@@ -294,6 +349,7 @@ impl Asset {
             Self::Jig(jig) => &jig.jig_data.display_name,
             Self::Course(course) => &course.course_data.display_name,
             Self::Resource(resource) => &resource.resource_data.display_name,
+            Self::ProDev(pro_dev) => &pro_dev.pro_dev_data.display_name,
         }
     }
 
@@ -303,6 +359,7 @@ impl Asset {
             Self::Jig(jig) => &jig.jig_data.language,
             Self::Course(course) => &course.course_data.language,
             Self::Resource(resource) => &resource.resource_data.language,
+            Self::ProDev(pro_dev) => &pro_dev.pro_dev_data.language,
         }
     }
 
@@ -312,6 +369,7 @@ impl Asset {
             Self::Jig(jig) => &jig.jig_data.description,
             Self::Course(course) => &course.course_data.description,
             Self::Resource(resource) => &resource.resource_data.description,
+            Self::ProDev(pro_dev) => &pro_dev.pro_dev_data.description,
         }
     }
 
@@ -321,6 +379,7 @@ impl Asset {
             Self::Jig(jig) => jig.jig_data.modules.first(),
             Self::Course(course) => course.course_data.cover.as_ref(),
             Self::Resource(resource) => resource.resource_data.cover.as_ref(),
+            Self::ProDev(pro_dev) => pro_dev.pro_dev_data.cover.as_ref(),
         }
     }
 
@@ -330,6 +389,7 @@ impl Asset {
             Self::Jig(jig) => &jig.jig_data.privacy_level,
             Self::Course(course) => &course.course_data.privacy_level,
             Self::Resource(resource) => &resource.resource_data.privacy_level,
+            Self::ProDev(pro_dev) => &pro_dev.pro_dev_data.privacy_level,
         }
     }
 
@@ -339,6 +399,7 @@ impl Asset {
             Self::Jig(jig) => &jig.jig_data.other_keywords,
             Self::Course(course) => &course.course_data.other_keywords,
             Self::Resource(resource) => &resource.resource_data.other_keywords,
+            Self::ProDev(pro_dev) => &pro_dev.pro_dev_data.other_keywords,
         }
     }
 
@@ -348,6 +409,7 @@ impl Asset {
             Self::Jig(jig) => &jig.jig_data.translated_keywords,
             Self::Course(course) => &course.course_data.translated_keywords,
             Self::Resource(resource) => &resource.resource_data.translated_keywords,
+            Self::ProDev(pro_dev) => &pro_dev.pro_dev_data.translated_keywords,
         }
     }
 
@@ -357,6 +419,7 @@ impl Asset {
             Self::Jig(jig) => &jig.jig_data.age_ranges,
             Self::Course(course) => &course.course_data.age_ranges,
             Self::Resource(resource) => &resource.resource_data.age_ranges,
+            Self::ProDev(_) => panic!(),
         }
     }
 
@@ -366,6 +429,7 @@ impl Asset {
             Self::Jig(jig) => &jig.jig_data.affiliations,
             Self::Course(course) => &course.course_data.affiliations,
             Self::Resource(resource) => &resource.resource_data.affiliations,
+            Self::ProDev(_) => panic!(),
         }
     }
 
@@ -375,6 +439,7 @@ impl Asset {
             Self::Jig(jig) => &jig.jig_data.categories,
             Self::Course(course) => &course.course_data.categories,
             Self::Resource(resource) => &resource.resource_data.categories,
+            Self::ProDev(pro_dev) => &pro_dev.pro_dev_data.categories,
         }
     }
 
@@ -384,6 +449,7 @@ impl Asset {
             Self::Jig(jig) => jig.likes,
             Self::Course(course) => course.likes,
             Self::Resource(resource) => resource.likes,
+            Self::ProDev(pro_dev) => pro_dev.likes,
         }
     }
 
@@ -393,6 +459,7 @@ impl Asset {
             Self::Jig(jig) => jig.plays,
             Self::Course(course) => course.plays,
             Self::Resource(resource) => resource.views,
+            Self::ProDev(pro_dev) => pro_dev.plays,
         }
     }
 
@@ -402,6 +469,7 @@ impl Asset {
             Self::Jig(jig) => &jig.author_id,
             Self::Course(course) => &course.author_id,
             Self::Resource(resource) => &resource.author_id,
+            Self::ProDev(pro_dev) => &pro_dev.author_id,
         }
     }
 
@@ -411,6 +479,7 @@ impl Asset {
             Self::Jig(jig) => &jig.author_name,
             Self::Course(course) => &course.author_name,
             Self::Resource(resource) => &resource.author_name,
+            Self::ProDev(pro_dev) => &pro_dev.author_name,
         }
     }
 
@@ -420,6 +489,7 @@ impl Asset {
             Self::Jig(jig) => &jig.jig_data.additional_resources,
             Self::Course(course) => &course.course_data.additional_resources,
             Self::Resource(resource) => &resource.resource_data.additional_resources,
+            Self::ProDev(pro_dev) => &pro_dev.pro_dev_data.additional_resources,
         }
     }
 
@@ -429,6 +499,7 @@ impl Asset {
             Self::Jig(jig) => &jig.jig_data.translated_description,
             Self::Course(course) => &course.course_data.translated_description,
             Self::Resource(resource) => &resource.resource_data.translated_description,
+            Self::ProDev(pro_dev) => &pro_dev.pro_dev_data.translated_description,
         }
     }
 
@@ -438,6 +509,7 @@ impl Asset {
             Self::Jig(jig) => jig.jig_data.theme,
             Self::Course(_) => ThemeId::default(),
             Self::Resource(_) => ThemeId::default(),
+            Self::ProDev(_) => ThemeId::default(),
         }
     }
 
@@ -447,6 +519,7 @@ impl Asset {
             Self::Jig(jig) => jig.live_up_to_date,
             Self::Course(course) => course.live_up_to_date,
             Self::Resource(resource) => resource.live_up_to_date,
+            Self::ProDev(pro_dev) => pro_dev.live_up_to_date,
         }
     }
 }

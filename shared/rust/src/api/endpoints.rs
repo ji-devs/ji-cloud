@@ -78,6 +78,9 @@ pub mod circle;
 /// Module endpoints
 pub mod module;
 
+/// ProDev endpoints
+pub mod pro_dev;
+
 /// Item that can be part of PathParts
 pub trait PathPart {
     /// string value to replace placeholder with

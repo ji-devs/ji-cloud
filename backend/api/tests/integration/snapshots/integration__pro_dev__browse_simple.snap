@@ -1,0 +1,68 @@
+---
+source: tests/integration/pro_dev.rs
+expression: body
+---
+{
+  "proDevs": [
+    {
+      "id": "be5a6ee6-906c-11ed-b4f6-4788ec1806f1",
+      "publishedAt": "2022-06-22T18:35:33.636556Z",
+      "creatorId": "7b96a41c-e406-11eb-8176-efd86dd7f444",
+      "authorId": "7b96a41c-e406-11eb-8176-efd86dd7f444",
+      "authorName": "Post Gres",
+      "likes": 0,
+      "plays": 0,
+      "liveUpToDate": false,
+      "proDevData": {
+        "draftOrLive": "draft",
+        "displayName": "pro_dev name3",
+        "language": "he",
+        "description": "draft test description",
+        "lastEdited": "[last_edited]",
+        "duration": null,
+        "privacyLevel": "public",
+        "otherKeywords": "",
+        "translatedKeywords": "",
+        "translatedDescription": {},
+        "cover": {
+          "id": "3a272eec-906d-11ed-b4f6-cfd352276766",
+          "kind": "Cover",
+          "is_complete": true
+        },
+        "categories": [],
+        "additionalResources": [],
+        "units": []
+      }
+    },
+    {
+      "id": "47b3c062-906c-11ed-b4f6-9b0c5b1939a1",
+      "publishedAt": "2022-06-23T18:35:33.636556Z",
+      "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorName": "Bobby Tables",
+      "likes": 0,
+      "plays": 0,
+      "liveUpToDate": false,
+      "proDevData": {
+        "draftOrLive": "live",
+        "displayName": "pro_dev name2",
+        "language": "en",
+        "description": "live test description",
+        "lastEdited": "[last_edited]",
+        "duration": null,
+        "privacyLevel": "public",
+        "otherKeywords": "",
+        "translatedKeywords": "",
+        "translatedDescription": {},
+        "cover": null,
+        "categories": [],
+        "additionalResources": [],
+        "units": [
+          "09225312-906d-11ed-b4f6-afb0e90115b3"
+        ]
+      }
+    }
+  ],
+  "pages": 1,
+  "totalProDevCount": 2
+}

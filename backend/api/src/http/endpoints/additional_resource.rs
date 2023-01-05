@@ -66,6 +66,18 @@ async fn create(
             )
             .await?
         }
+        AssetId::ProDevId(pro_dev_id) => {
+            db::pro_dev::authz(&*db, user_id, Some(pro_dev_id)).await?;
+
+            db::pro_dev::additional_resource::create(
+                &*db,
+                pro_dev_id,
+                req.display_name,
+                req.resource_type_id,
+                req.resource_content,
+            )
+            .await?
+        }
     };
 
     Ok((Json(CreateResponse { id }), http::StatusCode::CREATED))
@@ -126,6 +138,20 @@ async fn update(
                 )
                 .await?;
             }
+            AssetId::ProDevId(pro_dev_id) => {
+                db::pro_dev::authz(&*db, user_id, Some(pro_dev_id)).await?;
+
+                db::pro_dev::additional_resource::update(
+                    &*db,
+                    pro_dev_id,
+                    DraftOrLive::Draft,
+                    additional_resource_id,
+                    req.display_name,
+                    req.resource_type_id,
+                    req.resource_content,
+                )
+                .await?;
+            }
         }
     } else {
         return Err(error::Auth::InternalServerError(anyhow::anyhow!(
@@ -171,6 +197,15 @@ async fn get_draft(
                 db::resource::additional_resource::get(
                     &db,
                     resource_id,
+                    DraftOrLive::Draft,
+                    additional_resource_id,
+                )
+                .await?
+            }
+            AssetId::ProDevId(pro_dev_id) => {
+                db::pro_dev::additional_resource::get(
+                    &db,
+                    pro_dev_id,
                     DraftOrLive::Draft,
                     additional_resource_id,
                 )
@@ -231,6 +266,15 @@ async fn get_live(
                 )
                 .await?
             }
+            AssetId::ProDevId(pro_dev_id) => {
+                db::pro_dev::additional_resource::get(
+                    &db,
+                    pro_dev_id,
+                    DraftOrLive::Live,
+                    additional_resource_id,
+                )
+                .await?
+            }
         }
     } else {
         return Err(error::NotFound::InternalServerError(anyhow::anyhow!(
@@ -279,6 +323,12 @@ async fn delete(
                     additional_resource_id,
                 )
                 .await?;
+            }
+            AssetId::ProDevId(pro_dev_id) => {
+                db::pro_dev::authz(&*db, user_id, Some(pro_dev_id)).await?;
+
+                db::pro_dev::additional_resource::delete(&*db, pro_dev_id, additional_resource_id)
+                    .await?;
             }
         }
     } else {

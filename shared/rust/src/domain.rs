@@ -51,6 +51,7 @@ pub mod search;
 pub mod ser;
 pub mod session;
 pub mod user;
+pub mod pro_dev;
 
 #[deprecated]
 /// auth types (deprecated)

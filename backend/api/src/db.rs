@@ -9,6 +9,7 @@ pub(crate) mod locale;
 pub(crate) mod media;
 pub(crate) mod meta;
 pub(crate) mod pdf;
+pub(crate) mod pro_dev;
 pub(crate) mod resource;
 pub(crate) mod session;
 pub(crate) mod user;
