@@ -4,12 +4,12 @@ use shared::domain::{
     jig::player::{ModuleConfig, Seconds},
     module::{
         body::{
-            Instructions,
+            ModuleAssist,
             _groups::design::Backgrounds,
             drag_drop::{
                 Item, Mode, ModuleData as RawData, PlaySettings, Step, TargetArea, TargetTransform,
             },
-            InstructionsType,
+            ModuleAssistType,
         },
         ModuleId,
     },
@@ -24,9 +24,9 @@ pub struct Base {
     pub module_id: ModuleId,
     pub asset: Asset,
     pub theme_id: ThemeId,
-    pub instructions: Instructions,
-    pub feedback: Instructions,
-    pub feedback_signal: Mutable<Option<Instructions>>,
+    pub instructions: ModuleAssist,
+    pub feedback: ModuleAssist,
+    pub feedback_signal: Mutable<Option<ModuleAssist>>,
     pub settings: PlaySettings,
     pub backgrounds: Backgrounds,
     pub items: Vec<Item>,
@@ -67,16 +67,16 @@ impl Base {
 }
 
 impl BaseExt for Base {
-    fn get_instructions(&self) -> Option<Instructions> {
+    fn get_module_assist(&self) -> Option<ModuleAssist> {
         Some(self.instructions.clone())
     }
 
-    fn get_feedback(&self) -> ReadOnlyMutable<Option<Instructions>> {
+    fn get_feedback(&self) -> ReadOnlyMutable<Option<ModuleAssist>> {
         self.feedback_signal.read_only()
     }
 
-    fn handle_instructions_ended(&self, instructions_type: InstructionsType) {
-        if let InstructionsType::Feedback = instructions_type {
+    fn handle_module_assist_ended(&self, module_assist_type: ModuleAssistType) {
+        if let ModuleAssistType::Feedback = module_assist_type {
             self.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
         }
     }

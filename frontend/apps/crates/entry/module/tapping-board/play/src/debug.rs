@@ -8,7 +8,7 @@ use shared::{
         image::ImageId,
         module::{
             body::{
-                Audio, Image, Instructions, Transform,
+                Audio, Image, ModuleAssist, Transform,
                 _groups::design::{
                     Backgrounds, BaseContent, Sprite, Sticker, Text, Trace, TraceKind, TraceShape,
                 },
@@ -90,11 +90,11 @@ impl DebugSettings {
                             .collect(),
                         base: BaseContent {
                             theme: ThemeId::Chalkboard,
-                            instructions: Instructions {
+                            instructions: ModuleAssist {
                                 text: Some("Heya World!".to_string()),
-                                ..Instructions::default()
+                                ..ModuleAssist::default()
                             },
-                            feedback: Instructions::default(),
+                            feedback: ModuleAssist::default(),
                             stickers: init_data
                                 .stickers
                                 .iter()

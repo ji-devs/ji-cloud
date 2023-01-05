@@ -4,7 +4,7 @@ use shared::domain::{
     asset::AssetId,
     module::{
         body::{
-            Instructions,
+            ModuleAssist,
             _groups::design::{Backgrounds, Sticker},
             video::{Mode, ModuleData as RawData, PlaySettings, Step},
         },
@@ -18,7 +18,7 @@ pub struct Base {
     pub asset_id: AssetId,
     pub module_id: ModuleId,
     pub theme_id: ThemeId,
-    pub instructions: Instructions,
+    pub instructions: ModuleAssist,
     pub backgrounds: Backgrounds,
     pub stickers: Vec<Sticker>,
     pub play_settings: PlaySettings,
@@ -52,7 +52,7 @@ impl Base {
 }
 
 impl BaseExt for Base {
-    fn get_instructions(&self) -> Option<Instructions> {
+    fn get_module_assist(&self) -> Option<ModuleAssist> {
         Some(self.instructions.clone())
     }
     fn play_phase(&self) -> Mutable<ModulePlayPhase> {

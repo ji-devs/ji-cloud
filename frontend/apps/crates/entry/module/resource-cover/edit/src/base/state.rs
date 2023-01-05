@@ -18,7 +18,7 @@ use shared::domain::{
     module::{
         body::{
             resource_cover::{ModuleData as RawData, Step},
-            Instructions,
+            ModuleAssist,
         },
         ModuleId,
     },
@@ -30,7 +30,7 @@ pub struct Base {
     pub history: Rc<HistoryStateImpl<RawData>>,
     pub step: ReadOnlyMutable<Step>,
     pub theme_id: Mutable<ThemeId>,
-    pub instructions: Mutable<Instructions>,
+    pub instructions: Mutable<ModuleAssist>,
     pub asset_id: AssetId,
     pub module_id: ModuleId,
     pub continue_next_fn: ContinueNextFn,

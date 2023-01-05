@@ -19,7 +19,7 @@ use shared::domain::{
     module::{
         body::{
             cover::{ModuleData as RawData, PlaySettings as RawPlaySettings, Step},
-            BodyExt, Instructions,
+            BodyExt, ModuleAssist,
         },
         ModuleId,
     },
@@ -32,7 +32,7 @@ pub struct Base {
     pub history: Rc<HistoryStateImpl<RawData>>,
     pub step: ReadOnlyMutable<Step>,
     pub theme_id: Mutable<ThemeId>,
-    pub instructions: Mutable<Instructions>,
+    pub instructions: Mutable<ModuleAssist>,
     pub audio: Mutable<Option<Audio>>,
     pub asset_id: AssetId,
     pub module_id: ModuleId,

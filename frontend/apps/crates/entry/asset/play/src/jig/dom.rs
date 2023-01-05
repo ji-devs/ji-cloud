@@ -7,7 +7,7 @@ use dominator_helpers::{events::Message, signals::DefaultSignal};
 use futures_signals::map_ref;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use js_sys::Reflect;
-use shared::domain::module::body::InstructionsType;
+use shared::domain::module::body::ModuleAssistType;
 use shared::domain::{jig::JigResponse, module::ModuleKind};
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -32,7 +32,7 @@ const DEFAULT_INSTRUCTIONS_TEXT: &str = "1, 2, 3 Go!";
 const STR_EMPTY: &str = "Oops! Looks like you have some empty content in your deck!";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum ShowInstructions {
+enum ShowAssist {
     AudioOnly,
     All,
 }
@@ -43,7 +43,7 @@ impl JigPlayer {
         actions::load_data(state.clone());
 
         // Timer is not Copy and cannot be deduped, so any change to timer, even if it is the same value
-        // will trigger an updated which will cause the instructions popup to show again when it is not
+        // will trigger an updated which will cause the assist popup to show again when it is not
         // supposed to.
         let has_timer = state
             .timer
@@ -51,33 +51,33 @@ impl JigPlayer {
             .map(|timer| timer.is_some())
             .dedupe();
 
-        let should_show_instructions = map_ref! {
-            let instructions = state.instructions.signal_cloned(),
+        let should_show_assist = map_ref! {
+            let module_assist = state.module_assist.signal_cloned(),
             let has_timer = has_timer,
             let started = state.started.signal_cloned().dedupe()
             => {
                 if *started {
-                    if let Some(instructions) = instructions {
-                        if *has_timer || instructions.text.is_some() {
-                            let is_instructions = instructions.instructions_type.is_instructions();
+                    if let Some(module_assist) = module_assist {
+                        if *has_timer || module_assist.text.is_some() {
+                            let is_instructions = module_assist.module_assist_type.is_instructions();
                             // if there is text or a timer, and
-                            if is_instructions || instructions.text.is_some() {
+                            if is_instructions || module_assist.text.is_some() {
                                 // this is an instructions type or there is text
-                                Some(ShowInstructions::All)
-                            } else if instructions.audio.is_some() {
+                                Some(ShowAssist::All)
+                            } else if module_assist.audio.is_some() {
                                 // otherwise play just audio
-                                Some(ShowInstructions::AudioOnly)
+                                Some(ShowAssist::AudioOnly)
                             } else {
                                 None
                             }
-                        } else if instructions.audio.is_some() {
+                        } else if module_assist.audio.is_some() {
                             // otherwise, if there is just audio, then play that
-                            Some(ShowInstructions::AudioOnly)
+                            Some(ShowAssist::AudioOnly)
                         } else {
                             None
                         }
                     } else {
-                        // No instructions have been set for this activity.
+                        // No module assist has been set for this activity.
                         None
                     }
                 } else {
@@ -108,22 +108,22 @@ impl JigPlayer {
             })))
             .future(state.active_module.signal_cloned().for_each(clone!(state => move |_active_module| {
                 state.started.set_neq(false);
-                state.instructions.set(None);
-                state.instructions_visible.set_neq(false);
+                state.module_assist.set(None);
+                state.module_assist_visible.set_neq(false);
                 async {}
             })))
-            .future(should_show_instructions.for_each(clone!(state => move |should_show| {
+            .future(should_show_assist.for_each(clone!(state => move |should_show| {
                 match should_show {
-                    Some(ShowInstructions::AudioOnly) => {
-                        actions::play_instructions_audio(state.clone());
+                    Some(ShowAssist::AudioOnly) => {
+                        actions::play_assist_audio(state.clone());
                     }
-                    Some(ShowInstructions::All) => {
+                    Some(ShowAssist::All) => {
                         // Only show, never hide from here. Otherwise we can cause a race condition between Play and Pause.
-                        actions::show_instructions(state.clone(), true);
+                        actions::show_assist(state.clone(), true);
                     }
                     _ => {
                         // Always drop the audio_handle whenever this signal fires and nothing should be shown/played
-                        *state.instructions_audio_handle.borrow_mut() = None;
+                        *state.module_assist_audio_handle.borrow_mut() = None;
                     }
                 }
                 async {}
@@ -244,34 +244,34 @@ impl JigPlayer {
                     None
                 }
             })))
-            .child_signal(state.instructions.signal_cloned().map(clone!(state => move |instructions| {
-                instructions.map(clone!(state => move |instructions| {
+            .child_signal(state.module_assist.signal_cloned().map(clone!(state => move |module_assist| {
+                module_assist.map(clone!(state => move |module_assist| {
                     html!("empty-fragment", {
-                        .prop("slot", "instructions")
+                        .prop("slot", "module-assist")
                         .child(html!("button-icon", {
                             .style("width", "40px")
                             .style("height", "40px")
                             .prop("iconPath", "jig/play/icn-instructions.svg")
                             .prop("iconHoverPath", "jig/play/icn-instructions-hover.svg")
                             .event(clone!(state => move |_evt: events::Click| {
-                                let instructions = state.instructions.get_cloned();
+                                let module_assist = state.module_assist.get_cloned();
                                 let timer = state.timer.get_cloned();
-                                if let Some(instructions) = instructions {
-                                    if (timer.is_some() && instructions.instructions_type.is_instructions()) || instructions.text.is_some() {
+                                if let Some(module_assist) = module_assist {
+                                    if (timer.is_some() && module_assist.module_assist_type.is_instructions()) || module_assist.text.is_some() {
                                         // If there is a timer and the type is `Instructions`, or if there is text, show the popup
-                                        actions::show_instructions(state.clone(), true);
-                                    } else if instructions.audio.is_some() {
-                                        actions::play_instructions_audio(state.clone());
+                                        actions::show_assist(state.clone(), true);
+                                    } else if module_assist.audio.is_some() {
+                                        actions::play_assist_audio(state.clone());
                                     }
                                 }
                             }))
                         }))
-                        .child_signal(state.instructions_visible.signal_ref(clone!(state, instructions => move |visible| {
+                        .child_signal(state.module_assist_visible.signal_ref(clone!(state, module_assist => move |visible| {
                             if *visible {
                                 Some(html!("empty-fragment" => HtmlElement, {
                                     .with_node!(elem => {
                                         .apply(OverlayHandle::lifecycle(
-                                            clone!(state, instructions => move || {
+                                            clone!(state, module_assist => move || {
                                                 html!("overlay-tooltip-info", {
                                                     .prop("centeredContent", true)
                                                     .prop("marginX", -16)
@@ -280,13 +280,13 @@ impl JigPlayer {
                                                     .attr("contentAnchor", "oppositeV")
                                                     .prop("size", "large")
                                                     .prop("color", "dark-blue")
-                                                    .apply(clone!(instructions => move |dom| {
-                                                        match instructions.instructions_type {
-                                                            InstructionsType::Instructions => {
-                                                                dom.prop("body", &instructions.text.unwrap_or(DEFAULT_INSTRUCTIONS_TEXT.to_owned()))
+                                                    .apply(clone!(module_assist => move |dom| {
+                                                        match module_assist.module_assist_type {
+                                                            ModuleAssistType::Instructions => {
+                                                                dom.prop("body", &module_assist.text.unwrap_or(DEFAULT_INSTRUCTIONS_TEXT.to_owned()))
                                                             }
-                                                            InstructionsType::Feedback | InstructionsType::InActivity => {
-                                                                if let Some(text) = &instructions.text {
+                                                            ModuleAssistType::Feedback | ModuleAssistType::InActivity => {
+                                                                if let Some(text) = &module_assist.text {
                                                                     dom.prop("body", text)
                                                                 } else {
                                                                     dom
@@ -297,9 +297,9 @@ impl JigPlayer {
                                                     .prop("closeable", true)
                                                     .prop("strategy", "track")
                                                     .event(clone!(state => move |_evt: events::Close| {
-                                                        actions::show_instructions(state.clone(), false);
+                                                        actions::show_assist(state.clone(), false);
                                                     }))
-                                                    .apply_if(instructions.audio.is_some(), clone!(state => move |dom| {
+                                                    .apply_if(module_assist.audio.is_some(), clone!(state => move |dom| {
                                                         let hover = Mutable::new(false);
                                                         dom.child(html!("button-rect", {
                                                             .prop("slot", "actions")
@@ -320,7 +320,7 @@ impl JigPlayer {
                                                             }))
                                                             .text("Repeat")
                                                             .event(clone!(state => move |_evt: events::Click| {
-                                                                actions::play_instructions_audio(state.clone());
+                                                                actions::play_assist_audio(state.clone());
                                                             }))
                                                         }))
                                                     }))
@@ -346,7 +346,7 @@ impl JigPlayer {
                                                             }))
                                                             .text("OK")
                                                             .event(clone!(state => move |_evt: events::Click| {
-                                                                actions::show_instructions(state.clone(), false);
+                                                                actions::show_assist(state.clone(), false);
                                                             }))
                                                         }))
                                                     }))
@@ -577,9 +577,9 @@ fn render_time_up_popup(state: Rc<JigPlayer>) -> impl Signal<Item = Option<Dom>>
                                         .prop("slot", "actions")
                                         .prop("kind", "replay")
                                         .event(clone!(state => move |_: events::Click| {
-                                            // Clear the instructions so that they don't play/show once the
+                                            // Clear the assist so that they don't play/show once the
                                             // activity is reloaded.
-                                            actions::set_instructions(state.clone(), None);
+                                            actions::set_module_assist(state.clone(), None);
                                             actions::reload_iframe(Rc::clone(&state));
                                         }))
                                     })

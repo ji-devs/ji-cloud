@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use super::{
-    state::{can_load_liked_status, Instructions, JigPlayer},
+    state::{can_load_liked_status, JigPlayer, PlayModuleAssist},
     timer::Timer,
 };
 use components::audio::mixer::{AudioHandle, AUDIO_MIXER};
@@ -18,7 +18,7 @@ use shared::{
         },
         meta::GetMetadataPath,
         module::{
-            body::{Instructions as ModuleInstructions, InstructionsType},
+            body::{ModuleAssist, ModuleAssistType},
             ModuleId,
         },
     },
@@ -167,64 +167,64 @@ pub fn navigate_to_module(state: Rc<JigPlayer>, module_id: &ModuleId) {
     }
 }
 
-pub fn set_instructions(
+pub fn set_module_assist(
     state: Rc<JigPlayer>,
-    instructions: Option<(ModuleInstructions, InstructionsType)>,
+    module_assist: Option<(ModuleAssist, ModuleAssistType)>,
 ) {
-    // Only set the instructions field if the Instructions has content. Otherwise, leave it at None.
-    let instructions = match instructions {
-        Some((instructions, instructions_type)) if instructions.has_content() => {
-            Some((instructions, instructions_type))
+    // Only set the module assist field if the module assist has content. Otherwise, leave it at None.
+    let module_assist = match module_assist {
+        Some((module_assist, module_assist_type)) if module_assist.has_content() => {
+            Some((module_assist, module_assist_type))
         }
         _ => None,
     };
 
-    state.instructions_visible.set_neq(false);
-    *state.instructions_audio_handle.borrow_mut() = None;
+    state.module_assist_visible.set_neq(false);
+    *state.module_assist_audio_handle.borrow_mut() = None;
 
     state
-        .instructions
-        .set(instructions.map(|(instructions, instructions_type)| {
-            Instructions::from_instructions(instructions, instructions_type)
+        .module_assist
+        .set(module_assist.map(|(module_assist, module_assist_type)| {
+            PlayModuleAssist::from_module_assist(module_assist, module_assist_type)
         }));
 }
 
-pub fn show_instructions(state: Rc<JigPlayer>, visible: bool) {
-    if let Some(instructions) = state.instructions.get_cloned() {
-        state.instructions_visible.set_neq(visible);
+pub fn show_assist(state: Rc<JigPlayer>, visible: bool) {
+    if let Some(module_assist) = state.module_assist.get_cloned() {
+        state.module_assist_visible.set_neq(visible);
         set_timer_paused(&state, visible);
 
         if visible {
-            play_instructions_audio(state);
+            play_assist_audio(state);
         } else {
             // Always drop the audio handle whenever the popup is hidden
-            *state.instructions_audio_handle.borrow_mut() = None;
+            *state.module_assist_audio_handle.borrow_mut() = None;
 
-            if instructions.instructions_type.is_feedback() {
-                // Clear the instructions to prevent any audio possibly playing again.
-                set_instructions(state.clone(), None);
+            if module_assist.module_assist_type.is_feedback() {
+                // Clear the assist to prevent any audio possibly playing again.
+                set_module_assist(state.clone(), None);
             }
-            instructions_done(state.clone(), instructions);
+            module_assist_done(state.clone(), module_assist);
         }
     }
 }
 
-pub fn play_instructions_audio(state: Rc<JigPlayer>) {
-    if let Some(instructions) = state.instructions.get_cloned() {
-        if let Some(audio) = &instructions.audio {
-            *state.instructions_audio_handle.borrow_mut() = Some(AUDIO_MIXER.with(clone!(state, instructions => move |mixer| mixer
+pub fn play_assist_audio(state: Rc<JigPlayer>) {
+    if let Some(module_assist) = state.module_assist.get_cloned() {
+        if let Some(audio) = &module_assist.audio {
+            *state.module_assist_audio_handle.borrow_mut() = Some(AUDIO_MIXER.with(clone!(state, module_assist => move |mixer| mixer
                 .play_on_ended(audio.into(), false, clone!(state => move || {
-                    if instructions.instructions_type.is_feedback() && instructions.text.is_none() {
-                        // Clear the instructions to prevent any audio possibly playing again. But only if this is Feedbaack and
+                    if module_assist.module_assist_type.is_feedback() && module_assist.text.is_none() {
+                        // Clear the assist to prevent any audio possibly playing again. But only if this is Feedbaack and
                         // there is no text
-                        set_instructions(state.clone(), None);
+                        set_module_assist(state.clone(), None);
                     }
 
                     // For the `Instructions` variant, we display a default text in the popup when a _timer_ is set. In that case
                     // we don't want to fire the done event when audio completes.
-                    if !(state.timer.get_cloned().is_some() && instructions.instructions_type.is_instructions()) && instructions.text.is_none() {
-                        // If there is no text, then we can notify the activity that the instructions audio has completed.
-                        instructions_done(state.clone(), instructions.clone());
+                    if !(state.timer.get_cloned().is_some() && module_assist.module_assist_type.is_instructions()) && module_assist.text.is_none() {
+                        // If there is no text, then we can notify the activity that the assist audio has completed.
+                        module_assist_done(state.clone(), module_assist.clone());
                     }
                 }))
             )));
@@ -232,11 +232,11 @@ pub fn play_instructions_audio(state: Rc<JigPlayer>) {
     }
 }
 
-fn instructions_done(state: Rc<JigPlayer>, instructions: Instructions) {
-    let instructions_type = instructions.instructions_type;
+fn module_assist_done(state: Rc<JigPlayer>, play_module_assist: PlayModuleAssist) {
+    let module_assist_type = play_module_assist.module_assist_type;
     send_iframe_message(
         Rc::clone(&state),
-        JigToModulePlayerMessage::InstructionsDone(instructions_type),
+        JigToModulePlayerMessage::ModuleAssistDone(module_assist_type),
     );
 }
 
@@ -412,8 +412,8 @@ pub fn on_iframe_message(state: Rc<JigPlayer>, message: ModuleToJigPlayerMessage
         ModuleToJigPlayerMessage::JumpToId(module_id) => {
             navigate_to_module(state, &module_id);
         }
-        ModuleToJigPlayerMessage::Instructions(instructions) => {
-            set_instructions(state, instructions);
+        ModuleToJigPlayerMessage::ModuleAssist(module_assist) => {
+            set_module_assist(state, module_assist);
         }
         ModuleToJigPlayerMessage::KeyEvent(key_event) => {
             navigate_from_keyboard_event(state, key_event)

@@ -76,14 +76,14 @@ export class _ extends LitElement {
                     flex-direction: column;
                     align-items: flex-end;
                 }
-                .top-bar .instructions {
+                .top-bar .module-assist {
                     margin: 16px;
                     margin-right: 22px;
                 }
-                :host([inIframe]) .top-bar .instructions {
+                :host([inIframe]) .top-bar .module-assist {
                     margin-right: 96px;
                 }
-                ::slotted([slot="instructions"]) {
+                ::slotted([slot="module-assist"]) {
                     width: 40px;
                     height: 40px;
                     background: none;
@@ -180,8 +180,8 @@ export class _ extends LitElement {
                         <slot name="indicators"></slot>
                     </div>
                     <div class="top-bar">
-                        <div class="instructions">
-                            <slot name="instructions"></slot>
+                        <div class="module-assist">
+                            <slot name="module-assist"></slot>
                         </div>
                     </div>
                     <div class="bottom-bar">

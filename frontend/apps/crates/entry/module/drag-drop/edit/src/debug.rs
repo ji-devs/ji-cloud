@@ -7,7 +7,7 @@ use shared::{
         image::ImageId,
         module::{
             body::{
-                Image, Instructions, Transform,
+                Image, ModuleAssist, Transform,
                 _groups::design::{
                     Backgrounds, Sprite, Sticker, Text, Trace, TraceKind, TraceShape,
                 },
@@ -136,7 +136,7 @@ impl DebugSettings {
                             )
                             .collect(),
                         theme: ThemeId::Chalkboard,
-                        instructions: Instructions::default(),
+                        instructions: ModuleAssist::default(),
                         backgrounds: Backgrounds {
                             layer_1: None, //Some(Background::Color(hex_to_rgba8("#ff0000"))),
                             layer_2: None,

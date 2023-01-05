@@ -16,7 +16,7 @@ use shared::domain::{
     jig::JigId,
     module::{
         body::{
-            Audio, Background, BodyExt, Image, Instructions,
+            Audio, Background, BodyExt, Image, ModuleAssist,
             _groups::cards::{self as raw, BaseContent, Mode, Step},
         },
         ModuleId, ModuleKind,
@@ -70,8 +70,8 @@ pub struct CardsBase<RawData: RawDataExt, E: ExtraExt> {
     pub history: Rc<HistoryStateImpl<RawData>>,
     pub step: ReadOnlyMutable<Step>,
     pub theme_id: Mutable<ThemeId>,
-    pub instructions: Mutable<Instructions>,
-    pub feedback: Mutable<Instructions>,
+    pub instructions: Mutable<ModuleAssist>,
+    pub feedback: Mutable<ModuleAssist>,
     pub mode: Mode,
     pub module_kind: ModuleKind,
     pub tooltips: Tooltips,

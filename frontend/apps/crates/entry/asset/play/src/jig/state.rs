@@ -8,7 +8,7 @@ use shared::domain::{
     jig::{player::PlayerNavigationHandler, JigId, JigPlayerSettings, JigResponse},
     meta::ResourceType,
     module::{
-        body::{Audio, Instructions as ModuleInstructions, InstructionsType},
+        body::{Audio, ModuleAssist, ModuleAssistType},
         ModuleId,
     },
 };
@@ -41,10 +41,10 @@ pub struct JigPlayer {
     pub player_options: JigPlayerOptions,
     pub bg_audio_handle: Rc<RefCell<Option<AudioHandle>>>,
     pub bg_audio_playing: Mutable<bool>,
-    pub instructions_audio_handle: Rc<RefCell<Option<AudioHandle>>>,
+    pub module_assist_audio_handle: Rc<RefCell<Option<AudioHandle>>>,
     pub resource_types: Mutable<Vec<ResourceType>>,
-    pub instructions: Mutable<Option<Instructions>>,
-    pub instructions_visible: Mutable<bool>,
+    pub module_assist: Mutable<Option<PlayModuleAssist>>,
+    pub module_assist_visible: Mutable<bool>,
 }
 
 impl JigPlayer {
@@ -80,10 +80,10 @@ impl JigPlayer {
             player_options,
             bg_audio_handle: Rc::new(RefCell::new(None)),
             bg_audio_playing: Mutable::new(true),
-            instructions_audio_handle: Rc::new(RefCell::new(None)),
+            module_assist_audio_handle: Rc::new(RefCell::new(None)),
             resource_types: Default::default(),
-            instructions: Mutable::new(None),
-            instructions_visible: Mutable::new(false),
+            module_assist: Mutable::new(None),
+            module_assist_visible: Mutable::new(false),
         })
     }
 }
@@ -109,21 +109,21 @@ pub fn can_load_liked_status(jig: &JigResponse) -> bool {
 }
 
 #[derive(Debug, Clone)]
-pub struct Instructions {
+pub struct PlayModuleAssist {
     pub text: Option<String>,
     pub audio: Option<Audio>,
-    pub instructions_type: InstructionsType,
+    pub module_assist_type: ModuleAssistType,
 }
 
-impl Instructions {
-    pub fn from_instructions(
-        instructions: ModuleInstructions,
-        instructions_type: InstructionsType,
+impl PlayModuleAssist {
+    pub fn from_module_assist(
+        module_assist: ModuleAssist,
+        module_assist_type: ModuleAssistType,
     ) -> Self {
         Self {
-            text: instructions.text,
-            audio: instructions.audio,
-            instructions_type,
+            text: module_assist.text,
+            audio: module_assist.audio,
+            module_assist_type,
         }
     }
 }

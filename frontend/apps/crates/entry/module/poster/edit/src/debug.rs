@@ -11,7 +11,7 @@ use shared::{
         image::ImageId,
         jig::JigId,
         module::body::{
-            Image, Instructions,
+            Image, ModuleAssist,
             _groups::design::{Backgrounds, BaseContent, Sprite, Sticker, Text},
             poster::{Content, Mode, ModuleData as RawData, Step},
         },
@@ -66,8 +66,8 @@ impl DebugSettings {
                         mode: Mode::Poster,
                         base: BaseContent {
                             theme: ThemeId::Chalkboard,
-                            instructions: Instructions::default(),
-                            feedback: Instructions::default(),
+                            instructions: ModuleAssist::default(),
+                            feedback: ModuleAssist::default(),
                             stickers: init_data
                                 .stickers
                                 .iter()

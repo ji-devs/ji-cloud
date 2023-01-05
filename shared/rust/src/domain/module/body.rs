@@ -421,9 +421,9 @@ pub struct Audio {
     pub lib: MediaLibrary,
 }
 
-/// Instructions for a module.
+/// Module-specific assistance during play.
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
-pub struct Instructions {
+pub struct ModuleAssist {
     /// Text displayed in banner
     pub text: Option<String>,
 
@@ -431,25 +431,26 @@ pub struct Instructions {
     pub audio: Option<Audio>,
 }
 
-impl Instructions {
+impl ModuleAssist {
     /// Whether the instructions actually have either text or audio content set
     pub fn has_content(&self) -> bool {
         self.text.is_some() || self.audio.is_some()
     }
 }
 
-/// Type of Instructions to be shown
+/// Type of assistance to be shown. This is only set during play and should never be
+/// persisted to the database.
 #[derive(Clone, Serialize, Deserialize, Debug)]
-pub enum InstructionsType {
-    /// Instructions are shown when an activity starts
+pub enum ModuleAssistType {
+    /// Instructions to be shown when an activity starts
     Instructions,
-    /// Feedback is shown at the end of an activity
+    /// Feedback to be shown at the end of an activity
     Feedback,
-    /// Replayable activity-specific audio or text
+    /// Replayable activity-specific assistance.
     InActivity,
 }
 
-impl InstructionsType {
+impl ModuleAssistType {
     /// Whether this variant is `Instructions`
     pub fn is_instructions(&self) -> bool {
         matches!(self, Self::Instructions)

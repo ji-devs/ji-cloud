@@ -5,7 +5,7 @@ use shared::domain::{
         body::{
             _groups::design::{Backgrounds, Sticker},
             resource_cover::{ModuleData as RawData, Step},
-            Instructions,
+            ModuleAssist,
         },
         ModuleId,
     },
@@ -20,7 +20,7 @@ pub struct Base {
     pub module_id: ModuleId,
     pub asset: Asset,
     pub theme_id: ThemeId,
-    pub instructions: Instructions,
+    pub instructions: ModuleAssist,
     pub backgrounds: Backgrounds,
     pub stickers: Vec<Sticker>,
     pub module_phase: Mutable<ModulePlayPhase>,
@@ -54,7 +54,7 @@ impl Base {
 }
 
 impl BaseExt for Base {
-    fn get_instructions(&self) -> Option<Instructions> {
+    fn get_module_assist(&self) -> Option<ModuleAssist> {
         Some(self.instructions.clone())
     }
 

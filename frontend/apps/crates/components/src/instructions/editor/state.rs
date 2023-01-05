@@ -1,5 +1,5 @@
 use futures_signals::signal::{Mutable, Signal, SignalExt};
-use shared::domain::module::body::{Audio, Instructions};
+use shared::domain::module::body::{Audio, ModuleAssist};
 
 use super::callbacks::Callbacks;
 
@@ -9,7 +9,7 @@ pub const STR_LABEL_FEEDBACK: &str = "Written feedback";
 pub const STR_PLACEHOLDER_FEEDBACK: &str = "Type feedback";
 
 pub struct State {
-    pub instructions: Mutable<Instructions>,
+    pub instructions: Mutable<ModuleAssist>,
     pub callbacks: Callbacks,
     pub instructions_text: InstructionsText,
 }
@@ -43,7 +43,7 @@ impl From<InstructionsType> for InstructionsText {
 
 impl State {
     pub fn new(
-        instructions: Mutable<Instructions>,
+        instructions: Mutable<ModuleAssist>,
         callbacks: Callbacks,
         instructions_type: InstructionsType,
     ) -> Self {

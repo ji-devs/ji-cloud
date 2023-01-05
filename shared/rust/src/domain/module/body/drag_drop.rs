@@ -1,6 +1,6 @@
 use crate::domain::module::{
     body::{
-        Audio, Body, BodyConvert, BodyExt, Instructions, ModeExt, StepExt, ThemeId, Transform,
+        Audio, Body, BodyConvert, BodyExt, ModeExt, ModuleAssist, StepExt, ThemeId, Transform,
         _groups::design::{Backgrounds, Sticker, Trace},
     },
     ModuleKind,
@@ -107,7 +107,7 @@ impl TryFrom<Body> for ModuleData {
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 pub struct Content {
     /// The instructions for the module.
-    pub instructions: Instructions,
+    pub instructions: ModuleAssist,
 
     /// The module's theme.
     pub theme: ThemeId,
@@ -138,7 +138,7 @@ pub struct Content {
     pub play_settings: PlaySettings,
 
     /// The feedback for the module.
-    pub feedback: Instructions,
+    pub feedback: ModuleAssist,
 }
 
 /// Editor state

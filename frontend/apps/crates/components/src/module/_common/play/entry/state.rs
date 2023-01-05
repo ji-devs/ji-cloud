@@ -5,7 +5,7 @@ use futures_signals::signal::{Mutable, ReadOnlyMutable};
 use shared::domain::asset::{Asset, AssetId, AssetType, DraftOrLive, PrivacyLevel};
 use shared::domain::course::CourseGetDraftPath;
 use shared::domain::jig::player::ModuleConfig;
-use shared::domain::module::body::{Instructions, InstructionsType};
+use shared::domain::module::body::{ModuleAssist, ModuleAssistType};
 use shared::domain::resource::ResourceGetDraftPath;
 use shared::{
     api::endpoints::{self, module::*},
@@ -405,15 +405,16 @@ pub trait DomRenderable {
 pub trait BaseExt: DomRenderable {
     fn play(_state: Rc<Self>) {}
 
-    fn get_instructions(&self) -> Option<Instructions> {
+    /// Get the module assistance which is set for the current activity
+    fn get_module_assist(&self) -> Option<ModuleAssist> {
         None
     }
 
-    fn get_feedback(&self) -> ReadOnlyMutable<Option<Instructions>> {
+    fn get_feedback(&self) -> ReadOnlyMutable<Option<ModuleAssist>> {
         Mutable::new(None).read_only()
     }
 
-    fn handle_instructions_ended(&self, _instructions_type: InstructionsType) {
+    fn handle_module_assist_ended(&self, _module_assist_type: ModuleAssistType) {
         // Do nothing. Activities which have custom ended logic/rules should implement this.
     }
 

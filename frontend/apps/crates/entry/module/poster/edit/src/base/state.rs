@@ -18,7 +18,7 @@ use shared::domain::{
     module::{
         body::{
             poster::{Mode, ModuleData as RawData, Step},
-            Instructions,
+            ModuleAssist,
         },
         ModuleId,
     },
@@ -31,7 +31,7 @@ pub struct Base {
     pub history: Rc<HistoryStateImpl<RawData>>,
     pub step: ReadOnlyMutable<Step>,
     pub theme_id: Mutable<ThemeId>,
-    pub instructions: Mutable<Instructions>,
+    pub instructions: Mutable<ModuleAssist>,
     pub audio: Mutable<Option<Audio>>,
     pub asset_id: AssetId,
     pub module_id: ModuleId,

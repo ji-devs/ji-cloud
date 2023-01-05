@@ -24,7 +24,7 @@ use shared::domain::{
     asset::AssetId,
     module::{
         body::{
-            Instructions,
+            ModuleAssist,
             _groups::design::TraceKind,
             tapping_board::{
                 Hint, Mode, ModuleData as RawData, Next, PlaySettings as RawPlaySettings, Step,
@@ -40,7 +40,7 @@ pub struct Base {
     pub history: Rc<HistoryStateImpl<RawData>>,
     pub step: ReadOnlyMutable<Step>,
     pub theme_id: Mutable<ThemeId>,
-    pub instructions: Mutable<Instructions>,
+    pub instructions: Mutable<ModuleAssist>,
     pub asset_id: AssetId,
     pub module_id: ModuleId,
     // TappingBoard-specific

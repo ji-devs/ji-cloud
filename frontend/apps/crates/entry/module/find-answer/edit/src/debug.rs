@@ -9,7 +9,7 @@ use shared::{
         jig::JigId,
         module::{
             body::{
-                Image, Instructions,
+                Image, ModuleAssist,
                 _groups::design::{Backgrounds, BaseContent, Sprite, Sticker, Text, TraceKind},
                 find_answer::{Content, Mode, ModuleData as RawData, Step},
             },
@@ -62,8 +62,8 @@ impl DebugSettings {
                         mode: Mode::Family,
                         base: BaseContent {
                             theme: ThemeId::Chalkboard,
-                            instructions: Instructions::default(),
-                            feedback: Instructions::default(),
+                            instructions: ModuleAssist::default(),
+                            feedback: ModuleAssist::default(),
                             stickers: init_data
                                 .stickers
                                 .iter()
