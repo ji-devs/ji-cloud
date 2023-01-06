@@ -52,7 +52,7 @@ serde_json = { version = "1.0.85", features = ["preserve_order"] }
 serde_urlencoded = "0.7.1"
 sha2 = "0.9.8"
 time = "0.3.16"
-tokio = { version = "1.21.2", default-features = false, features = ["full"] }
+tokio = { version = "1.23.1", default-features = false, features = ["full"] }
 tracing = "0.1.31"
 url = { version = "2.3.1", features = ["serde"] }
 uuid = "1.1.2"
