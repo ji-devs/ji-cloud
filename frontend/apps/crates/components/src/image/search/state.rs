@@ -47,6 +47,12 @@ impl State {
         // don't display recent in overlay
         let recent = image_search_options.kind != ImageSearchKind::Overlay;
 
+        let checkbox_checked = Mutable::new(match image_search_options.kind {
+            ImageSearchKind::Background => true,
+            ImageSearchKind::Sticker => false,
+            ImageSearchKind::Overlay => true, // overlays don't show the checkbox
+        });
+
         Self {
             options: image_search_options,
             search: Mutable::new(Some(String::new())),
@@ -55,7 +61,7 @@ impl State {
             loader: AsyncLoader::new(),
             selected_styles: Rc::new(RefCell::new(selected_styles)),
             selected_image_type: Mutable::new(None),
-            checkbox_checked: Mutable::new(false),
+            checkbox_checked,
             query: Mutable::new(String::new()),
             styles,
             callbacks,
