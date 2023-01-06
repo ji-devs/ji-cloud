@@ -1,6 +1,6 @@
-import { LitElement, html, css, customElement } from "lit-element";
+ import { LitElement, html, css, customElement } from "lit-element";
 
-@customElement("table-pagination")
+@customElement("table-pagination-jig")
 export class _ extends LitElement {
     static styles = [
         css`

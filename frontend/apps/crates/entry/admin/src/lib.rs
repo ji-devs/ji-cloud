@@ -12,6 +12,7 @@ mod locale;
 mod router;
 mod sidebar;
 mod strings;
+mod users;
 
 use router::Router;
 use wasm_bindgen::prelude::*;

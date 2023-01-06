@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement } from "lit-element";
 
-@customElement("admin-jig-details")
+@customElement("admin-user-details")
 export class _ extends LitElement {
     static styles = [
         css`
@@ -76,13 +76,6 @@ export class _ extends LitElement {
             </div>
             <div class="input-container">
                 <slot name="inputs"></slot>
-            </div>
-            <div class="right-side">
-                <div class="player">
-                    <slot name="player"></slot>
-                </div>
-                <slot name="rating"></slot>
-                <slot name="block"></slot>
             </div>
             <slot name="loader"></slot>
         `;

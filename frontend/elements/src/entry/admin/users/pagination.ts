@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement } from "lit-element";
 
-@customElement("table-order-by-jig")
+@customElement("table-pagination-user")
 export class _ extends LitElement {
     static styles = [
         css`
@@ -15,8 +15,10 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <span>Sort by</span>
+            <span>Page</span>
+            <slot name="back"></slot>
             <slot></slot>
+            <slot name="next"></slot>
         `;
     }
 }

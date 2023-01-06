@@ -8,7 +8,8 @@ const ids: Array<ID> = [
     "image-add",
     "image-tags",
     "image-search",
-    "jigs",
+    "curation",
+    "users",
     "category",
     "locale",
 ];

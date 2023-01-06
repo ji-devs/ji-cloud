@@ -17,7 +17,7 @@ mod language;
 impl CurationJig {
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self;
-        html!("admin-curation-jig-details", {
+        html!("admin-jig-details", {
             .prop("slot", "jig-details")
             .child(html!("window-loader-block", {
                 .prop("slot", "loader")
