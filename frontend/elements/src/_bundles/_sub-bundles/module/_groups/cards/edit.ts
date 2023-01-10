@@ -13,7 +13,6 @@ import "@elements/module/_groups/cards/play/card/empty";
 // theme selector
 import "@elements/module/_common/edit/widgets/theme-selector/container";
 import "@elements/module/_common/edit/widgets/theme-selector/option";
-import "@elements/module/_common/edit/widgets/theme-selector/custom-background";
 import "@elements/module/_common/edit/widgets/theme-selector/background-color";
 
 // lists
@@ -22,3 +21,5 @@ import "@elements/module/_common/edit/widgets/lists/single/single-list-input";
 import "@elements/module/_common/edit/widgets/lists/dual/dual-list";
 import "@elements/module/_common/edit/widgets/lists/dual/dual-list-column";
 import "@elements/module/_common/edit/widgets/lists/dual/dual-list-input";
+
+import "@elements/module/_common/edit/widgets/advanced-modal";

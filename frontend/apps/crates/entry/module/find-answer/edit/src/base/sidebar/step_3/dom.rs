@@ -33,6 +33,16 @@ fn empty_signal(state: Rc<Step3>) -> impl Signal<Item = bool> {
         .map(|len| len == 0)
 }
 
+fn questions_visible_signal(state: Rc<Step3>) -> impl Signal<Item = (bool, bool)> {
+    map_ref! {
+        let is_empty = empty_signal(state.clone()),
+        let advanced_visible = state.advanced_visible.signal()
+            => {
+                (*is_empty, *advanced_visible)
+            }
+    }
+}
+
 fn current_question_idx_signal(
     state: Rc<Step3>,
     question_index: impl Signal<Item = Option<usize>>,
@@ -86,12 +96,22 @@ pub fn render(state: Rc<Step3>) -> Dom {
     html!("module-sidebar-body", {
         .prop("slot", "body")
         .prop_signal("dark", empty_signal(state.clone()).map(|is_empty| !is_empty))
+        .child_signal(state.advanced_visible.signal().map(clone!(state => move |visible| {
+            if visible {
+                Some(render_advanced_modal(state.clone()))
+            } else {
+                None
+            }
+        })))
         .child_signal(empty_signal(state.clone()).map(clone!(state => move |is_empty| {
             if is_empty {
                 // Make sure that the tab_kind is reset so that we can display the correct Jiggling text.
                 state.sidebar.tab_kind.set(None);
 
                 Some(html!("questions-empty", {
+                    .style_signal("display", state.advanced_visible.signal().map(|visible| {
+                        if visible { Some("none") } else { None }
+                    }))
                     .child(html!("div", {
                         .child(html!("button-icon", {
                             .prop("size", "medium")
@@ -106,6 +126,9 @@ pub fn render(state: Rc<Step3>) -> Dom {
                 }))
             } else {
                 Some(html!("question-container", {
+                    .style_signal("display", state.advanced_visible.signal().map(|visible| {
+                        if visible { Some("none") } else { None }
+                    }))
                     .children_signal_vec(
                         state.sidebar.base.questions.signal_vec_cloned().enumerate().map(clone!(state => move |(index, question)| {
                             render_question(state.clone(), index, question.clone())
@@ -114,8 +137,8 @@ pub fn render(state: Rc<Step3>) -> Dom {
                 }))
             }
         })))
-        .child_signal(empty_signal(state.clone()).map(clone!(state => move |is_empty| {
-            if !is_empty {
+        .child_signal(questions_visible_signal(state.clone()).map(clone!(state => move |(is_empty, advanced_visible)| {
+            if !is_empty && !advanced_visible {
                 Some(html!("button-icon-label", {
                     .prop("slot", "action")
                     .prop("icon", "circle-+-blue")
@@ -132,6 +155,165 @@ pub fn render(state: Rc<Step3>) -> Dom {
             }
         })))
     })
+}
+
+pub fn render_advanced_modal(state: Rc<Step3>) -> Dom {
+    let current_tab = Mutable::new(MenuTabKind::Correct);
+
+    let current_question_signal = || {
+        map_ref! {
+            let current_tab = current_tab.clone().signal_cloned(),
+            let current_question = current_question_signal(state.clone())
+                => {
+                    // Advanced modal is only available on a question, so there should _always_
+                    // be a current question set at this point.
+                    let (index, current_question) = current_question.clone().unwrap_ji();
+                    (current_tab.clone(), index, current_question)
+                }
+        }
+    };
+    html!("module-sidebar-advanced-modal", {
+        .prop("header", "Advanced feedback options")
+        .prop("tabbed", true)
+        .child(html!("fa-button", {
+            .prop("slot", "close")
+            .prop("icon", "fa-light fa-xmark")
+            .event(clone!(state => move |_: events::Click| {
+                state.advanced_visible.set_neq(false);
+            }))
+        }))
+        .child(html!("empty-fragment", {
+            .child(html!("p", {
+                .style("margin", "0px 10px 10px 10px")
+                .child(html!("strong", {
+                    .text("Question: ")
+                }))
+                .text_signal(current_question_signal().map(|(_tab, index, question)| {
+                    match question.title.get_cloned() {
+                        Some(title) if title.len() > 0 => title,
+                        _ => format!("Question {}", index + 1)
+                    }
+                }))
+            }))
+            .child(html!("menu-tabs", {
+                .children(&mut [
+                    render_advanced_tab(current_tab.clone(), MenuTabKind::Correct),
+                    render_advanced_tab(current_tab.clone(), MenuTabKind::Incorrect),
+                    render_advanced_tab(current_tab.clone(), MenuTabKind::Specific),
+                    html!("module-sidebar-body", {
+                        .prop("slot", "body")
+                        .after_removed(clone!(state => move |_| {
+                            // Advanced feedback is only available on the Answer tab of a question, so when we remove
+                            // this modal, we need to reset the TraceKind to the Correct variant so that the teacher
+                            // can continue adding correct answer traces.
+                            state.sidebar.base.phase.set(
+                                Phase::new_trace_unchecked(state.sidebar.base.clone(), TraceKind::Correct)
+                            );
+                        }))
+                        .child(html!("empty-fragment", {
+                            .style("display", "block")
+                            .style("margin", "10px 0 20px 0")
+                            .child_signal(current_question_signal().map(clone!(state => move |(tab, index, question)| {
+                                let state = Rc::clone(&state);
+                                match tab {
+                                    MenuTabKind::Correct => {
+                                        state.sidebar.base.phase.set(Phase::Layout);
+                                        let audio_input = get_question_audio_input(state.clone(), question.correct_audio.clone(), index, question.clone());
+                                        Some(html!("empty-fragment", {
+                                            .child(html!("div", {
+                                                .style("margin-bottom", "20px")
+                                                .text("Tell students the answer is correct. “That's right! This is red.”")
+                                            }))
+                                            .child(AudioInput::render(audio_input, None))
+                                        }))
+                                    },
+                                    MenuTabKind::Incorrect => {
+                                        state.sidebar.base.phase.set(Phase::Layout);
+                                        let audio_input = get_question_audio_input(state.clone(), question.incorrect_audio.clone(), index, question.clone());
+                                        Some(html!("empty-fragment", {
+                                            .child(html!("div", {
+                                                .style("margin-bottom", "20px")
+                                                .text("Offer hints or encouragement. “Try again! Red is the color of a stop sign.”")
+                                            }))
+                                            .child(AudioInput::render(audio_input, None))
+                                        }))
+                                    },
+                                    MenuTabKind::Specific => {
+                                        state.sidebar.base.phase.set(
+                                            Phase::new_trace_unchecked(state.sidebar.base.clone(), TraceKind::Wrong)
+                                        );
+
+                                        if let Phase::Trace(traces) = state.sidebar.base.phase.get_cloned() {
+                                            Some(html!("empty-fragment", {
+
+                                                .child_signal(traces.selected_index.signal_cloned().map(clone!(traces => move |index| {
+                                                    let input = match index {
+                                                        Some(index) => match traces.get(index) {
+                                                            Some(trace) if trace.kind == TraceKind::Wrong => {
+                                                                let opts = AudioInputOptions::new(Some(traces.audio_signal(index)));
+
+                                                                let callbacks = AudioInputCallbacks::new(
+                                                                    Some(clone!(traces, index => move |audio:Audio| {
+                                                                        traces.set_audio(index, Some(audio));
+                                                                    })),
+                                                                    Some(clone!(traces, index => move || {
+                                                                        traces.set_audio(index, None);
+                                                                    })),
+                                                                );
+
+                                                                Some(html!("empty-fragment", {
+                                                                    .child(html!("div", {
+                                                                        .style("margin-bottom", "20px")
+                                                                        .text("Explain why this answer is incorrect. “Oops! This is yellow. You're looking for red.”")
+                                                                    }))
+                                                                    .child(AudioInput::render(AudioInput::new(opts, callbacks), None))
+                                                                }))
+                                                            },
+                                                            _ => None,
+                                                        },
+                                                        None => None,
+                                                    };
+
+                                                    input.or_else(|| {
+                                                        Some(html!("sidebar-empty", {
+                                                            .prop("label", "Trace an incorrect area to add specific feedback")
+                                                            .prop("imagePath", "module/_common/edit/sidebar/illustration-trace-area.svg")
+                                                        }))
+                                                    })
+                                                })))
+                                            }))
+                                        } else {
+                                            // We're setting the phase directly above this match statement, so this should
+                                            // never be reachable.
+                                            unreachable!()
+                                        }
+                                    }
+                                    _ => None
+                                }
+                            })))
+                        }))
+                    })
+                ])
+            }))
+        }))
+    })
+}
+
+fn render_advanced_tab(current_tab: Mutable<MenuTabKind>, tab_kind: MenuTabKind) -> Dom {
+    MenuTab::render(
+        MenuTab::new(
+            tab_kind,
+            false,
+            true,
+            clone!(current_tab => move || current_tab.signal_ref(clone!(tab_kind => move |curr| {
+                *curr == tab_kind
+            }))),
+            clone!(current_tab, tab_kind => move || {
+                current_tab.set(tab_kind);
+            }),
+        ),
+        Some("tabs"),
+    )
 }
 
 fn close_kebab_menu(elem: &HtmlElement) {
@@ -305,6 +487,26 @@ pub fn render_question(
                                                             })
                                                         }))
                                                 )
+                                                .child_signal(
+                                                    state.sidebar.tab_kind.signal_cloned()
+                                                        .map(clone!(state => move |tab| {
+                                                            match tab {
+                                                                Some(MenuTabKind::Answer) => {
+                                                                    Some(html!("button-rect", {
+                                                                        .prop("slot", "action")
+                                                                        .prop("color", "blue")
+                                                                        .prop("kind", "text")
+                                                                        .text("Advanced feedback options")
+                                                                        .event(clone!(state => move|_: events::Click| {
+                                                                            state.advanced_visible.set_neq(true);
+                                                                        }))
+                                                                    }))
+                                                                },
+                                                                _ => None,
+                                                            }
+                                                        }))
+
+                                                )
                                             })
                                         ])
                                     }))
@@ -369,6 +571,28 @@ fn render_tab(tab_kind: MenuTabKind, selected_tab: Mutable<Option<MenuTabKind>>)
     )
 }
 
+fn get_question_audio_input(
+    state: Rc<Step3>,
+    audio: Mutable<Option<Audio>>,
+    question_index: usize,
+    question: Rc<Question>,
+) -> Rc<AudioInput> {
+    let opts = AudioInputOptions::new(Some(audio.signal_cloned()));
+
+    let callbacks = AudioInputCallbacks::new(
+        Some(clone!(state, audio, question => move |add_audio: Audio| {
+            *audio.lock_mut() = Some(add_audio);
+            state.sidebar.base.save_question(question_index, question.clone());
+        })),
+        Some(clone!(state, audio, question => move || {
+            *audio.lock_mut() = None;
+            state.sidebar.base.save_question(question_index, question.clone());
+        })),
+    );
+
+    AudioInput::new(opts, callbacks)
+}
+
 fn render_tab_body(state: Rc<Step3>, tab: Tab) -> Dom {
     match tab {
         Tab::Question => {
@@ -376,28 +600,7 @@ fn render_tab_body(state: Rc<Step3>, tab: Tab) -> Dom {
                 .style("padding-top", "18px")
                 .child_signal(current_question_signal(state.clone()).map(clone!(state => move |question| {
                     question.map(clone!(state => move |(index, question)| {
-                        let opts = AudioInputOptions::new(Some(
-                            question
-                                .question_audio
-                                .signal_cloned()
-                        ));
-
-                        let callbacks = AudioInputCallbacks::new(
-                            Some(clone!(state, question => move |audio: Audio| {
-                                {
-                                    let mut lock = question.question_audio.lock_mut();
-                                    *lock = Some(audio);
-                                }
-                                state.sidebar.base.save_question(index, question.clone());
-                            })),
-                            Some(clone!(state, question => move || {
-                                {
-                                    let mut lock = question.question_audio.lock_mut();
-                                    *lock = None;
-                                }
-                                state.sidebar.base.save_question(index, question.clone());
-                            })),
-                        );
+                        let audio_input = get_question_audio_input(state.clone(), question.question_audio.clone(), index, question.clone());
 
                         html!("empty-fragment", {
                             .child(html!("input-wrapper", {
@@ -427,10 +630,7 @@ fn render_tab_body(state: Rc<Step3>, tab: Tab) -> Dom {
                             .child(html!("empty-fragment", {
                                 .style("display", "block")
                                 .style("margin", "20px 0")
-                                .child(AudioInput::render(AudioInput::new(
-                                    opts,
-                                    callbacks,
-                                ), None))
+                                .child(AudioInput::render(audio_input, None))
                             }))
                         })
                     }))

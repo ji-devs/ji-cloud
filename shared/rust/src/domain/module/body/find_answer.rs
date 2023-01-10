@@ -181,11 +181,12 @@ pub struct Question {
     /// Optional audio for the question
     pub question_audio: Option<Audio>,
 
-    /// Optional text for incorrect choices
-    pub incorrect_text: Option<String>,
-
     /// Optional audio for incorrect choices
     pub incorrect_audio: Option<Audio>,
+
+    #[serde(default)]
+    /// Optional audio for correct choices
+    pub correct_audio: Option<Audio>,
 
     /// Traces
     pub traces: Vec<Trace>,

@@ -21,7 +21,7 @@ const STR_FILL_COLOR: &str = "Fill color";
 impl<RawData: RawDataExt, E: ExtraExt> CustomBackground<RawData, E> {
     pub fn render(self: &Rc<Self>) -> Dom {
         let state = self;
-        html!("theme-custom-background", {
+        html!("module-sidebar-advanced-modal", {
             .prop("header", STR_CHANGE_BACKGROUND)
             .prop("tabbed", false)
             .child(html!("fa-button", {

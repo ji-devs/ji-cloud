@@ -22,7 +22,10 @@ export type TabKind =
     | "tooltip"
     | "video"
     | "trace"
-    | "place";
+    | "place"
+    | "correct"
+    | "incorrect"
+    | "specific";
 
 /*
 font awesome icons
@@ -48,14 +51,6 @@ trace = circle-dashed
 video ??
 */
 
-const STR_ICON_OVERRIDE: Partial<{
-    [key in TabKind]: TabKind;
-}> = {
-    // "add-text": "tooltip",
-    // "background-image-full": "background-image"
-    // "background-color": "color"
-};
-
 const STR_LABEL_LOOKUP: {
     [key in TabKind]: string;
 } = {
@@ -78,16 +73,17 @@ const STR_LABEL_LOOKUP: {
     video: "Video", //Not in Zeplin
     trace: "Trace",
     place: "Place",
+    correct: "Correct",
+    incorrect: "Incorrect",
+    specific: "Specific",
 };
 
-const getIcon = (kind: TabKind): TabKind => {
-    const override = STR_ICON_OVERRIDE[kind];
-
-    if (override != null) {
-        return override;
-    } else {
-        return kind;
+const hasIcon = (kind: TabKind): boolean => {
+    if (["correct", "incorrect", "specific"].includes(kind)) {
+        return false;
     }
+
+    return true;
 };
 
 @customElement("menu-tab-title")
@@ -161,36 +157,41 @@ export class _ extends LitElement {
         this.addEventListener("mouseleave", this.onLeave);
     }
 
+    renderIcon(highlight: boolean) {
+        const { kind } = this;
+
+        const regularClass = classMap({ hidden: highlight });
+        const activeClass = classMap({ hidden: !highlight });
+
+        const iconUrl = `module/_common/edit/widgets/sidebar/menu-tabs/${kind}.svg`;
+        const iconUrlActive = `module/_common/edit/widgets/sidebar/menu-tabs/${kind}-active.svg`;
+
+        return this.kind === "" || !hasIcon(kind)
+            ? nothing
+            : html`
+                <img-ui class=${regularClass} path="${iconUrl}"></img-ui>
+                <img-ui
+                    class=${activeClass}
+                    path="${iconUrlActive}"
+                ></img-ui>
+            `
+    }
+
     render() {
         const { kind, active, hover, disabled, small } = this;
 
         const highlight = active || hover;
 
         const label = STR_LABEL_LOOKUP[this.kind];
-        const iconUrl = `module/_common/edit/widgets/sidebar/menu-tabs/${getIcon(
-            kind
-        )}.svg`;
-        const iconUrlActive = `module/_common/edit/widgets/sidebar/menu-tabs/${getIcon(
-            kind
-        )}-active.svg`;
-
-        const regularClass = classMap({ hidden: highlight });
-        const activeClass = classMap({ hidden: !highlight });
 
         const labelClass = classMap({
             highlight: highlight && !disabled,
             disabled,
         });
+
+
         return html`
-            ${this.kind === ""
-                ? nothing
-                : html`
-                      <img-ui class=${regularClass} path="${iconUrl}"></img-ui>
-                      <img-ui
-                          class=${activeClass}
-                          path="${iconUrlActive}"
-                      ></img-ui>
-                  `}
+            ${this.renderIcon(highlight)}
             ${small ? nothing : html`<div class=${labelClass}>${label}</div>`}
         `;
     }

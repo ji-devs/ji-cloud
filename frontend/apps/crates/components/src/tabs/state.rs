@@ -57,4 +57,7 @@ pub enum MenuTabKind {
     Video,
     Trace,
     Place,
+    Correct,
+    Incorrect,
+    Specific,
 }

@@ -95,6 +95,7 @@ export class _ extends LitElement {
                 }
                 :host([kind="text"]) {
                     color: var(--color);
+                    border-radius: 0;
                 }
 
                 :host([bold]) {

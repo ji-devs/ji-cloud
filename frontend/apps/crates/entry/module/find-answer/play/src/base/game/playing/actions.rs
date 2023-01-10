@@ -4,6 +4,7 @@ use components::{
     module::_common::play::prelude::{BaseExt, ModuleEnding, ModulePlayPhase},
 };
 use dominator::clone;
+use shared::domain::module::body::_groups::design::TraceKind;
 use std::rc::Rc;
 use utils::prelude::*;
 
@@ -14,46 +15,83 @@ impl PlayState {
 
         state.clone().evaluate_question_ended();
 
-        // Play the correct sound effect always. But we also need to make sure that it is finished playing before
-        // moving on to the next activity.
-        state.play_correct_sound(clone!(state => move || {
-            for (trace_index, trace) in state.traces.iter().enumerate() {
-                if trace_index == index {
-                    trace.select(state.clone());
-                } else {
-                    trace.kill_playback();
-                }
+        state
+            .selected_set
+            .lock_mut()
+            .iter()
+            .for_each(|index| state.traces.get(*index).unwrap_ji().kill_playback());
+        let selected_trace = state.traces.get(index).unwrap_ji();
+        match selected_trace.kind {
+            TraceKind::Correct => {
+                state.incorrect_choice_count.set(0);
+                state.play_correct_sound(clone!(state, selected_trace => move || {
+                    if selected_trace.inner.audio.is_none() {
+                        if let Some(audio) = &state.question.correct_audio {
+                            state.selection_audio.set(Some(audio.clone()));
+                        }
+                    }
+                    selected_trace.select(state.clone())
+                }));
             }
-        }));
+            TraceKind::Wrong => {
+                state
+                    .clone()
+                    .incorrect_choice(clone!(state, selected_trace => move || {
+                        if selected_trace.inner.audio.is_none() {
+                            if let Some(audio) = &state.question.incorrect_audio {
+                                state.selection_audio.set(Some(audio.clone()));
+                            }
+                        }
+                        selected_trace.select(state.clone())
+                    }));
+            }
+            _ => {}
+        }
     }
 
-    pub fn incorrect_choice(state: Rc<Self>, _incorrect_index: Option<usize>) {
+    pub fn incorrect_choice<F: Fn() + 'static>(self: Rc<Self>, f: F) {
+        let state = self;
         state
             .incorrect_choice_count
             .set(state.incorrect_choice_count.get() + 1);
-        AUDIO_MIXER.with(move |mixer| {
+
+        AUDIO_MIXER.with(clone!(state => move |mixer| {
             let audio_path: AudioPath<'_> = mixer.get_random_negative().into();
-            mixer.play_oneshot_on_ended(audio_path, move || {
-                // TODO once the advanced modal has been added, negative feedback audio can be added here.
-            });
-        });
+            *state.selection_audio_handle.borrow_mut() = Some(mixer.play_on_ended(audio_path, false, clone!(state => move || {
+                *state.selection_audio_handle.borrow_mut() = None;
+                f()
+            })));
+        }));
     }
 
-    fn play_correct_sound<R, F: Fn() -> R + 'static>(self: &Rc<Self>, f: F) {
-        AUDIO_MIXER.with(move |mixer| {
+    fn play_correct_sound<F: Fn() + 'static>(self: &Rc<Self>, f: F) {
+        let state = self;
+        AUDIO_MIXER.with(clone!(state => move |mixer| {
             let audio_path: AudioPath<'_> = mixer.get_random_positive().into();
-            mixer.play_oneshot_on_ended(audio_path, move || {
-                f();
-            });
-        });
+            *state.selection_audio_handle.borrow_mut() = Some(mixer.play_on_ended(audio_path, false, clone!(state => move || {
+                *state.selection_audio_handle.borrow_mut() = None;
+                f()
+            })));
+        }));
     }
 
     pub fn evaluate_question_ended(self: Rc<Self>) {
-        // In the next iteration of this, we'll be adding the ability to configure incorrect traces. For that
-        // we'll need to probably update the selected_set to include selected trace kinds so that we can filter
-        // for only traces which are correct.
-        let selected_traces = self.selected_set.get_cloned().len();
-        let total_traces = self.question.traces.len();
+        // We only want to evaluate _correct_ answers. Incorrect answers are included in the
+        // selected_traces field, so filter them out. Same applies to the questions traces.
+        let selected_traces = self
+            .selected_set
+            .get_cloned()
+            .iter()
+            .filter(|trace| {
+                self.question.traces.get(**trace).unwrap_ji().kind == TraceKind::Correct
+            })
+            .count();
+        let total_traces = self
+            .question
+            .traces
+            .iter()
+            .filter(|trace| trace.kind == TraceKind::Correct)
+            .count();
 
         // Return early if the student still has traces left to select. No point in continuing with other checks.
         if selected_traces < total_traces {
