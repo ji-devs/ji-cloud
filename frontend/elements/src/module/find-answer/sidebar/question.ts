@@ -41,7 +41,7 @@ export class _ extends LitElement {
                 }
 
                 .body {
-                    grid-column-start: 2;
+                    grid-column: 1 / 3;
                 }
 
                 ::slotted(fa-button) {

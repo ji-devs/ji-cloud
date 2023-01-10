@@ -1,9 +1,12 @@
 use crate::base::game::state::*;
+use components::audio::mixer::AudioHandle;
 use components::traces::{bubble::TraceBubble, utils::TraceExt};
 use dominator::clone;
 use futures_signals::signal::Mutable;
+use shared::domain::module::body::Audio;
 use shared::domain::module::body::_groups::design::Trace;
 use shared::domain::module::body::find_answer::Question;
+use std::cell::RefCell;
 use std::{ops::Deref, rc::Rc};
 
 use std::collections::HashSet;
@@ -28,6 +31,14 @@ pub struct PlayState {
     pub incorrect_choice_count: Mutable<u32>,
     /// Whether trace hints should be shown.
     pub show_hint: Mutable<bool>,
+    /// Audio to play for the selected trace/incorrect choice.
+    ///
+    /// This is necessary to prevent an issue where playing audio from within AUDIO_MIXER.with(..) causes the
+    /// `ENDED_CALLBACKS` RefCell to be mutably locked multiple times.
+    pub selection_audio: Mutable<Option<Audio>>,
+    /// Audio handle for currently playing choice. Required so that we can end the audio if the student clicks
+    /// another answer while audio is already playing.
+    pub selection_audio_handle: RefCell<Option<AudioHandle>>,
 }
 
 impl PlayState {
@@ -46,6 +57,8 @@ impl PlayState {
             ended: Mutable::new(false),
             incorrect_choice_count: Mutable::new(0),
             show_hint: Mutable::new(false),
+            selection_audio: Mutable::new(None),
+            selection_audio_handle: RefCell::new(None),
         })
     }
 }

@@ -31,7 +31,7 @@ where
 {
     pub fn render(self: &Rc<Self>) -> Dom {
         let state = self;
-        html!("theme-custom-background", {
+        html!("module-sidebar-advanced-modal", {
             .prop("header", STR_DESIGN_FROM_SCRATCH)
             .prop("tabbed", true)
             .child(html!("fa-button", {

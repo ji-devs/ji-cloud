@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/buttons/fa-button";
 
-@customElement("theme-custom-background")
+@customElement("module-sidebar-advanced-modal")
 export class _ extends LitElement {
     static get styles() {
         return [
@@ -9,7 +9,6 @@ export class _ extends LitElement {
                 :host {
                     display: grid;
                     padding: 12px 0;
-                    height: 100%;
                     grid-template-rows: minmax(0px, 1fr);
                     box-sizing: border-box;
                 }
@@ -23,6 +22,7 @@ export class _ extends LitElement {
                     row-gap: 24px;
                     scrollbar-width: thin;
                     scrollbar-color: #e7f0fe transparent;
+                    background-color: var(--white);
                 }
                 :host([tabbed]) .main {
                     overflow: hidden;
@@ -85,3 +85,4 @@ export class _ extends LitElement {
         `;
     }
 }
+

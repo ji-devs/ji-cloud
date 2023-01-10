@@ -147,8 +147,8 @@ impl Base {
                     title: question.title.get_cloned().unwrap_or_default(),
                     question_text: question.question_text.get_cloned().unwrap_or_default(),
                     question_audio: question.question_audio.get_cloned(),
-                    incorrect_text: question.incorrect_text.get_cloned(),
                     incorrect_audio: question.incorrect_audio.get_cloned(),
+                    correct_audio: question.correct_audio.get_cloned(),
                     traces,
                 };
 

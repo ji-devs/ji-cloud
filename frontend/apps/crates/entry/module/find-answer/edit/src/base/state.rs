@@ -92,11 +92,11 @@ pub struct Question {
     /// Optional audio for the question
     pub question_audio: Mutable<Option<Audio>>,
 
-    /// Optional text for incorrect choices
-    pub incorrect_text: Mutable<Option<String>>,
-
     /// Optional audio for incorrect choices
     pub incorrect_audio: Mutable<Option<Audio>>,
+
+    /// Optional audio for correct choices
+    pub correct_audio: Mutable<Option<Audio>>,
 
     /// Traces
     pub traces: Rc<MutableVec<Trace>>,
@@ -123,8 +123,8 @@ impl Default for Question {
             title: Mutable::new(None),
             question_text: Mutable::new(None),
             question_audio: Mutable::new(None),
-            incorrect_text: Mutable::new(None),
             incorrect_audio: Mutable::new(None),
+            correct_audio: Mutable::new(None),
             traces: Rc::new(MutableVec::new()),
             is_editing_title: Mutable::new(false),
             confirm_delete: Mutable::new(false),
@@ -138,8 +138,8 @@ impl From<&RawQuestion> for Question {
             title: Mutable::new(Some(raw_question.title.clone())),
             question_text: Mutable::new(Some(raw_question.question_text.clone())),
             question_audio: Mutable::new(raw_question.question_audio.clone()),
-            incorrect_text: Mutable::new(raw_question.incorrect_text.clone()),
             incorrect_audio: Mutable::new(raw_question.incorrect_audio.clone()),
+            correct_audio: Mutable::new(raw_question.correct_audio.clone()),
             traces: Rc::new(MutableVec::new_with_values(raw_question.traces.clone())),
             is_editing_title: Mutable::new(false),
             confirm_delete: Mutable::new(false),

@@ -42,6 +42,19 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                 }
             }
         })))
+        .future(state.selection_audio.signal_cloned().for_each(clone!(state => move |audio| {
+            let state = state.clone();
+            async move {
+                if let Some(audio) = audio {
+                    AUDIO_MIXER.with(move |mixer| {
+                        *state.selection_audio_handle.borrow_mut() = Some(mixer.play_on_ended(audio.into(), false, clone!(state => move || {
+                            state.selection_audio.set(None);
+                            *state.selection_audio_handle.borrow_mut() = None;
+                        })));
+                    });
+                }
+            }
+        })))
         .future(state.game.base.module_phase.signal_cloned().dedupe().for_each(clone!(state => move |phase| {
             // Only play audio and update the text if we're in the playing phase.
             if let ModulePlayPhase::Playing = phase {
@@ -131,7 +144,11 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                     // SVGs created for traces are either path, ellipse or rect. So check that the student hasn't
                     // clicked on any of those types of SVG to determine whether they clicked in the wrong place.
                     if tag_name != "path" && tag_name != "ellipse" && tag_name != "rect" {
-                        PlayState::incorrect_choice(state.clone(), None);
+                        state.clone().incorrect_choice(clone!(state => move || {
+                            if let Some(audio) = &state.question.incorrect_audio {
+                                state.selection_audio.set(Some(audio.clone()));
+                            }
+                        }));
                     }
                 }
             }

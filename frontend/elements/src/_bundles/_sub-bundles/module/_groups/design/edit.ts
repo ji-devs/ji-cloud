@@ -20,5 +20,6 @@ import "@elements/module/_common/edit/widgets/trace/edit-reshape-menu-btn";
 //theme selector
 import "@elements/module/_common/edit/widgets/theme-selector/container";
 import "@elements/module/_common/edit/widgets/theme-selector/option";
-import "@elements/module/_common/edit/widgets/theme-selector/custom-background";
 import "@elements/module/_common/edit/widgets/theme-selector/background-color";
+
+import "@elements/module/_common/edit/widgets/advanced-modal";
