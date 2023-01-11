@@ -4,7 +4,7 @@ use futures::TryStreamExt;
 use reqwest::{self};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use sqlx::PgPool;
+use sqlx::{PgConnection, PgPool};
 use std::collections::HashMap;
 
 use shared::domain::image::ImageId;
@@ -13,9 +13,10 @@ use uuid::Uuid;
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct TranslateTextRequest {
-    q: Vec<String>,
-    target: String,
+    q: String,
     source: String,
+    target: String,
+    format: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -102,6 +103,22 @@ struct CourseTranslate {
     text: String,
 }
 
+/// Translation status for assets
+#[derive(Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[serde(rename_all = "camelCase")]
+#[repr(i8)]
+pub enum TranslationStatus {
+    /// Google Translation response for strings that can't detect a language
+    Undefined = 0,
+
+    /// API cannot translate language
+    NoTranslation = 1,
+
+    /// Successful Translation
+    Success = 2,
+}
+
 #[derive(Clone)]
 pub struct GoogleTranslate {
     pub db: PgPool,
@@ -139,7 +156,6 @@ impl GoogleTranslate {
                     .update_resource_translations()
                     .await
                     .context("update resource translation task errored"),
-
                 _ => continue,
             };
 
@@ -170,8 +186,9 @@ from image_metadata
      inner join image_upload on id = image_id
 where description <> '' and translated_description = '{}'
 and processed_at is not null
+and description_translate_status is null
 order by coalesce(updated_at, created_at) desc
-limit 50 for no key update skip locked;
+limit 10 for no key update skip locked;
  "#
         )
         .fetch(&mut txn)
@@ -191,8 +208,9 @@ from image_metadata
      inner join image_upload on id = image_id
 where name <> '' and translated_name = '{}'
 and processed_at is not null
+and name_translate_status is null
 order by coalesce(updated_at, created_at) desc
-limit 50 for no key update skip locked;
+limit 10 for no key update skip locked;
  "#
         )
         .fetch(&mut txn)
@@ -218,16 +236,32 @@ limit 50 for no key update skip locked;
                             r#"
                                 update image_metadata
                                 set translated_description = $2,
-                                last_synced_at = null
+                                    last_synced_at = null
                                 where id = $1
-                                "#,
+                            "#,
                             t.image_id.0,
                             json!(descriptions)
                         )
                         .execute(&mut txn)
                         .await?;
+                        update_image_translation_status(
+                            &mut txn,
+                            "image_metadata",
+                            "description",
+                            t.image_id.0,
+                            TranslationStatus::Success,
+                        )
+                        .await?;
                     } else {
                         log::warn!("Empty translation list for image_id: {}", t.image_id.0,);
+                        update_image_translation_status(
+                            &mut txn,
+                            "image_metadata",
+                            "description",
+                            t.image_id.0,
+                            TranslationStatus::Undefined,
+                        )
+                        .await?;
                         continue;
                     };
                 }
@@ -237,6 +271,14 @@ limit 50 for no key update skip locked;
                         t.image_id.0,
                         error,
                     );
+                    update_image_translation_status(
+                        &mut txn,
+                        "image_metadata",
+                        "description",
+                        t.image_id.0,
+                        TranslationStatus::NoTranslation,
+                    )
+                    .await?;
 
                     continue;
                 }
@@ -254,7 +296,7 @@ limit 50 for no key update skip locked;
                             r#"
                                 update image_metadata
                                 set translated_name = $2,
-                                last_synced_at = null
+                                    last_synced_at = null
                                 where id = $1
                                 "#,
                             t.image_id.0,
@@ -262,8 +304,24 @@ limit 50 for no key update skip locked;
                         )
                         .execute(&mut txn)
                         .await?;
+                        update_image_translation_status(
+                            &mut txn,
+                            "image_metadata",
+                            "name",
+                            t.image_id.0,
+                            TranslationStatus::Success,
+                        )
+                        .await?;
                     } else {
                         log::warn!("Empty translation list for image_id: {}", t.image_id.0,);
+                        update_image_translation_status(
+                            &mut txn,
+                            "image_metadata",
+                            "name",
+                            t.image_id.0,
+                            TranslationStatus::Undefined,
+                        )
+                        .await?;
                         continue;
                     };
                 }
@@ -273,6 +331,14 @@ limit 50 for no key update skip locked;
                         t.image_id.0,
                         error,
                     );
+                    update_image_translation_status(
+                        &mut txn,
+                        "image_metadata",
+                        "name",
+                        t.image_id.0,
+                        TranslationStatus::NoTranslation,
+                    )
+                    .await?;
 
                     continue;
                 }
@@ -299,6 +365,7 @@ from jig_data
 inner join jig on live_id = jig_data.id
 where description <> '' and translated_description = '{}'
 and published_at is not null
+and description_translate_status is null
 order by coalesce(updated_at, created_at) desc
 limit 50 for no key update skip locked;
  "#
@@ -320,6 +387,7 @@ from jig_data
 inner join jig on live_id = jig_data.id
 where display_name <> '' and translated_name = '{}'
 and published_at is not null
+and name_translate_status is null
 order by coalesce(updated_at, created_at) desc
 limit 50 for no key update skip locked;
          "#
@@ -354,8 +422,24 @@ limit 50 for no key update skip locked;
                     )
                     .execute(&mut txn)
                     .await?;
+                    update_asset_translation_status(
+                        &mut txn,
+                        "jig",
+                        "description",
+                        t.jig_data_id,
+                        TranslationStatus::Success,
+                    )
+                    .await?;
                 } else {
                     log::debug!("Empty translation list for jig_data_id: {}", t.jig_data_id);
+                    update_asset_translation_status(
+                        &mut txn,
+                        "jig",
+                        "description",
+                        t.jig_data_id,
+                        TranslationStatus::Undefined,
+                    )
+                    .await?;
                     continue;
                 };
             } else {
@@ -364,6 +448,14 @@ limit 50 for no key update skip locked;
                     t.jig_data_id,
                     t.text
                 );
+                update_asset_translation_status(
+                    &mut txn,
+                    "jig",
+                    "description",
+                    t.jig_data_id,
+                    TranslationStatus::NoTranslation,
+                )
+                .await?;
 
                 continue;
             };
@@ -387,8 +479,25 @@ limit 50 for no key update skip locked;
                     )
                     .execute(&mut txn)
                     .await?;
+                    update_asset_translation_status(
+                        &mut txn,
+                        "jig",
+                        "name",
+                        t.jig_data_id,
+                        TranslationStatus::Success,
+                    )
+                    .await?;
                 } else {
                     log::debug!("Empty translation list for jig_data_id: {}", t.jig_data_id);
+                    update_asset_translation_status(
+                        &mut txn,
+                        "jig",
+                        "name",
+                        t.jig_data_id,
+                        TranslationStatus::Undefined,
+                    )
+                    .await?;
+
                     continue;
                 };
             } else {
@@ -397,6 +506,14 @@ limit 50 for no key update skip locked;
                     t.jig_data_id,
                     t.text
                 );
+                update_asset_translation_status(
+                    &mut txn,
+                    "jig",
+                    "name",
+                    t.jig_data_id,
+                    TranslationStatus::NoTranslation,
+                )
+                .await?;
 
                 continue;
             };
@@ -422,8 +539,9 @@ from resource_data
 inner join resource on live_id = resource_data.id
 where description <> '' and translated_description = '{}'
 and published_at is not null
+and description_translate_status is null
 order by coalesce(updated_at, created_at) desc
-limit 5 for no key update skip locked;
+limit 10 for no key update skip locked;
  "#
         )
         .fetch(&mut txn)
@@ -443,8 +561,9 @@ from resource_data
 inner join resource on live_id = resource_data.id
 where display_name <> '' and translated_name = '{}'
 and published_at is not null
+and name_translate_status is null
 order by coalesce(updated_at, created_at) desc
-limit 5 for no key update skip locked;
+limit 10 for no key update skip locked;
          "#
         )
         .fetch(&mut txn)
@@ -477,11 +596,27 @@ limit 5 for no key update skip locked;
                     )
                     .execute(&mut txn)
                     .await?;
+                    update_asset_translation_status(
+                        &mut txn,
+                        "resource",
+                        "description",
+                        t.resource_data_id,
+                        TranslationStatus::Success,
+                    )
+                    .await?;
                 } else {
                     log::debug!(
                         "Empty translation list for resource_data_id: {}",
                         t.resource_data_id
                     );
+                    update_asset_translation_status(
+                        &mut txn,
+                        "resource",
+                        "description",
+                        t.resource_data_id,
+                        TranslationStatus::Undefined,
+                    )
+                    .await?;
                     continue;
                 };
             } else {
@@ -490,6 +625,14 @@ limit 5 for no key update skip locked;
                     t.resource_data_id,
                     t.text
                 );
+                update_asset_translation_status(
+                    &mut txn,
+                    "resource",
+                    "description",
+                    t.resource_data_id,
+                    TranslationStatus::NoTranslation,
+                )
+                .await?;
 
                 continue;
             };
@@ -513,11 +656,29 @@ limit 5 for no key update skip locked;
                     )
                     .execute(&mut txn)
                     .await?;
+
+                    update_asset_translation_status(
+                        &mut txn,
+                        "resource",
+                        "name",
+                        t.resource_data_id,
+                        TranslationStatus::Success,
+                    )
+                    .await?;
                 } else {
                     log::debug!(
                         "Empty translation list for resource_data_id: {}",
                         t.resource_data_id
                     );
+                    update_asset_translation_status(
+                        &mut txn,
+                        "resource",
+                        "name",
+                        t.resource_data_id,
+                        TranslationStatus::Undefined,
+                    )
+                    .await?;
+
                     continue;
                 };
             } else {
@@ -526,6 +687,15 @@ limit 5 for no key update skip locked;
                     t.resource_data_id,
                     t.text
                 );
+
+                update_asset_translation_status(
+                    &mut txn,
+                    "resource",
+                    "name",
+                    t.resource_data_id,
+                    TranslationStatus::NoTranslation,
+                )
+                .await?;
 
                 continue;
             };
@@ -552,6 +722,7 @@ inner join course on live_id = course_data.id
 where description <> ''
       and translated_description = '{}'
       and published_at is not null
+      and description_translate_status is null
 order by coalesce(updated_at, created_at) desc
 limit 50 for no key update skip locked;
  "#
@@ -574,6 +745,7 @@ inner join course on live_id = course_data.id
 where display_name <> ''
       and translated_name = '{}'
       and published_at is not null
+      and name_translate_status is null
 order by coalesce(updated_at, created_at) desc
 limit 50 for no key update skip locked;
  "#
@@ -604,12 +776,30 @@ limit 50 for no key update skip locked;
                             where id = $1
                             "#,
                         &t.course_data_id,
-                        json!(res)
+                        json!(res),
                     )
                     .execute(&mut txn)
                     .await?;
+
+                    update_asset_translation_status(
+                        &mut txn,
+                        "course",
+                        "description",
+                        t.course_data_id,
+                        TranslationStatus::Success,
+                    )
+                    .await?;
                 } else {
                     log::debug!("Empty translation list for course_id: {}", t.course_data_id);
+                    update_asset_translation_status(
+                        &mut txn,
+                        "course",
+                        "description",
+                        t.course_data_id,
+                        TranslationStatus::Undefined,
+                    )
+                    .await?;
+
                     continue;
                 };
             } else {
@@ -618,6 +808,15 @@ limit 50 for no key update skip locked;
                     t.course_data_id,
                     t.text
                 );
+
+                update_asset_translation_status(
+                    &mut txn,
+                    "course",
+                    "description",
+                    t.course_data_id,
+                    TranslationStatus::NoTranslation,
+                )
+                .await?;
 
                 continue;
             };
@@ -641,8 +840,25 @@ limit 50 for no key update skip locked;
                     )
                     .execute(&mut txn)
                     .await?;
+
+                    update_asset_translation_status(
+                        &mut txn,
+                        "course",
+                        "name",
+                        t.course_data_id,
+                        TranslationStatus::Success,
+                    )
+                    .await?;
                 } else {
                     log::debug!("Empty translation list for course_id: {}", t.course_data_id);
+                    update_asset_translation_status(
+                        &mut txn,
+                        "course",
+                        "name",
+                        t.course_data_id,
+                        TranslationStatus::Undefined,
+                    )
+                    .await?;
                     continue;
                 };
             } else {
@@ -652,6 +868,14 @@ limit 50 for no key update skip locked;
                     t.text
                 );
 
+                update_asset_translation_status(
+                    &mut txn,
+                    "course",
+                    "name",
+                    t.course_data_id,
+                    TranslationStatus::NoTranslation,
+                )
+                .await?;
                 continue;
             };
         }
@@ -669,17 +893,16 @@ pub async fn translate_text(
     source: &str,
     api_key: &str,
 ) -> anyhow::Result<Option<String>> {
-    let queries = vec![query.to_string()];
-
     //https://cloud.google.com/translate/docs/languages
     //https://cloud.google.com/translate/docs/reference/rest/v2/translate
     let res = reqwest::Client::new()
         .post("https://translation.googleapis.com/language/translate/v2")
         .query(&[("key", &api_key.to_owned())])
         .json(&TranslateTextRequest {
-            q: queries,
+            q: query.to_string(),
             target: target.to_string(),
             source: source.to_string(),
+            format: "text".to_string(),
         })
         .send()
         .await?
@@ -704,7 +927,7 @@ pub async fn translate_text(
 }
 
 pub async fn multi_translation(
-    description: &str,
+    query: &str,
     api_key: &str,
 ) -> anyhow::Result<Option<HashMap<String, String>>> {
     //https://cloud.google.com/translate/docs/languages
@@ -713,7 +936,7 @@ pub async fn multi_translation(
         .post("https://translation.googleapis.com/language/translate/v2/detect")
         .query(&[("key", &api_key.to_owned())])
         .json(&DetectLanguageRequest {
-            q: description.to_string(),
+            q: query.to_string(),
         })
         .send()
         .await?
@@ -732,31 +955,68 @@ pub async fn multi_translation(
         s
     };
 
-    let src = &v[0];
+    if &v[0] == "und" {
+        return Ok(None);
+    }
+
+    let src = &v[0][..2];
 
     let mut translation_list = HashMap::new();
 
     for l in LANGUAGES {
-        let text = if l != src {
-            let text: Option<String> =
-                translate_text(description, l, src, &api_key.to_owned()).await?;
+        let text = if l != &src {
+            let text: Option<String> = translate_text(query, l, src, &api_key.to_owned()).await?;
             text
         } else {
             None
         };
 
-        if let Some(meep) = text {
-            translation_list.insert(l.to_owned().to_owned(), meep);
+        if let Some(text) = text {
+            translation_list.insert(l.to_owned().to_owned(), text);
         } else {
-            translation_list.insert(l.to_owned().to_owned(), description.to_owned());
+            translation_list.insert(l.to_owned().to_owned(), query.to_owned());
         };
     }
 
-    if translation_list.is_empty() {
-        return Ok(None);
-    }
-
     Ok(Some(translation_list))
+}
+
+async fn update_asset_translation_status(
+    conn: &mut PgConnection,
+    table: &str,
+    field: &str,
+    id: Uuid,
+    status: TranslationStatus,
+) -> sqlx::Result<()> {
+    sqlx::query(&format!(
+        "update {0} set {1}_translate_status = $2 where {0}.live_id = $1",
+        table, field
+    ))
+    .bind(id)
+    .bind(status as i16)
+    .execute(&mut *conn)
+    .await?;
+
+    Ok(())
+}
+
+async fn update_image_translation_status(
+    conn: &mut PgConnection,
+    table: &str,
+    field: &str,
+    id: Uuid,
+    status: TranslationStatus,
+) -> sqlx::Result<()> {
+    sqlx::query(&format!(
+        "update {0} set {1}_translate_status = $2 where {0}.id = $1",
+        table, field
+    ))
+    .bind(id)
+    .bind(status as i16)
+    .execute(&mut *conn)
+    .await?;
+
+    Ok(())
 }
 
 // #[test_service(setup = "setup_service", fixtures(""))]
