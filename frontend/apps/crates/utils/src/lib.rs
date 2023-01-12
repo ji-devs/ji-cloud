@@ -23,6 +23,7 @@ pub mod keyboard;
 pub mod languages;
 pub mod logging;
 pub mod math;
+pub mod metadata;
 pub mod mixin;
 pub mod panic_hook;
 pub mod path;

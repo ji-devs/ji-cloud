@@ -77,7 +77,7 @@ into_i16_index!(ImageTagIndex);
 make_path_parts!(GetMetadataPath => "/v1/metadata");
 
 /// Represents an image style.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ImageStyle {
     /// The id of the image style.
     pub id: ImageStyleId,
@@ -93,7 +93,7 @@ pub struct ImageStyle {
 }
 
 /// Represents an animation style.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct AnimationStyle {
     /// The id of the animation style.
     pub id: AnimationStyleId,
@@ -176,7 +176,7 @@ pub struct ResourceType {
 }
 
 /// Represents a subject.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Subject {
     /// The id of the subject.
     pub id: SubjectId,
@@ -192,7 +192,7 @@ pub struct Subject {
 }
 
 /// Represents a tag.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ImageTag {
     /// Index of the tag.
     pub index: ImageTagIndex,
@@ -208,7 +208,7 @@ pub struct ImageTag {
 }
 
 /// Response for fetching all metadata.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MetadataResponse {
     /// All image styles the server has.
     pub image_styles: Vec<ImageStyle>,
