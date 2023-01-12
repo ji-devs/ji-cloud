@@ -1,17 +1,15 @@
 use super::state::*;
-use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
+use components::asset_card::{render_asset_card, AssetCardBottomIndicator, AssetCardConfig};
 use components::page_header::state::PageLinks;
 use components::{page_footer, page_header};
 use dominator::{clone, html, Dom};
 use futures_signals::map_ref;
 use futures_signals::signal::SignalExt;
 use futures_signals::signal_vec::SignalVecExt;
-use shared::domain::asset::{Asset, DraftOrLive};
+use shared::domain::asset::Asset;
 use std::collections::HashMap;
 use std::rc::Rc;
 use strum::IntoEnumIterator;
-use utils::ages::AgeRangeVecExt;
-use utils::asset::published_at_string;
 use utils::init::analytics;
 use utils::prelude::*;
 
@@ -148,12 +146,14 @@ impl Gallery {
                     //     .prop_signal("visible", state.loader.is_loading())
                     // }))
                     .children_signal_vec(state.assets.signal_vec_cloned().map(clone!(state => move |asset| {
-                        let asset_ages = asset.age_ranges().clone();
-
-                        html!("jig-gallery-recent", {
+                        let asset_id = asset.id();
+                        html!("a", {
                             .prop("slot", "recent-items")
-                            .prop("label", asset.display_name())
-                            .prop("draft", !asset.live_up_to_date())
+                            .event(clone!(asset => move |_: events::Click| {
+                                let mut properties = HashMap::new();
+                                properties.insert("Asset ID", asset.id().uuid().to_string());
+                                analytics::event("Asset Gallery Edit", Some(properties));
+                            }))
                             .prop("href", {
                                 match &asset {
                                     Asset::Jig(jig) => {
@@ -176,61 +176,35 @@ impl Gallery {
                                     },
                                 }
                             })
-                            .event(clone!(asset => move |_: events::Click| {
-                                let mut properties = HashMap::new();
-                                properties.insert("Asset ID", asset.id().uuid().to_string());
-                                analytics::event("Asset Gallery Edit", Some(properties));
-                            }))
-                            .child_signal(state.age_ranges.signal_cloned().map(clone!(asset => move |age_ranges| {
-                                let icon = match asset.published_at() {
-                                    None => "entry/jig/gallery/age-icon-draft.svg",
-                                    Some(_) => "entry/jig/gallery/age-icon.svg",
-                                };
-                                let range = age_ranges.range(&asset_ages);
-                                Some(html!("age-range", {
-                                    .prop("slot", "ages")
-                                    .prop("icon", icon)
-                                    .prop("from", range.0)
-                                    .prop("to", range.1)
-                                }))
-                            })))
-                            .apply(|dom| {
-                                match asset.published_at() {
-                                    None => {
-                                        // dom.prop("draft", true)
-                                        dom
-                                    },
-                                    Some(published_at) => {
-                                        dom.prop("publishedAt", published_at_string(published_at, true))
-                                    },
-                                }
-                            })
-                            .child(
-                                ModuleThumbnail::new(
-                                    asset.id(),
-                                    asset.cover().cloned(),
-                                    ThumbnailFallback::Asset,
-                                    DraftOrLive::Draft
-                                ).render(Some("thumbnail"))
-                            )
-                            .children(&mut [
-                                html!("menu-line", {
-                                    .prop("slot", "menu-content")
-                                    .prop("icon", "duplicate")
-                                    .text(STR_DUPLICATE)
-                                    .event(clone!(state, asset => move |_: events::Click| {
-                                        state.copy_asset(asset.id());
-                                    }))
-                                }),
-                                html!("menu-line", {
-                                    .prop("slot", "menu-content")
-                                    .prop("icon", "delete")
-                                    .text(STR_DELETE)
-                                    .event(clone!(state, asset => move |_: events::Click| {
-                                        state.confirm_delete.set_neq(Some(asset.id()));
-                                    }))
-                                }),
-                            ])
+                            .child(render_asset_card(
+                                &asset,
+                                AssetCardConfig {
+                                    bottom_indicator: AssetCardBottomIndicator::Status,
+                                    dense: true,
+                                    menu: Some(Rc::new(clone!(state => move || {
+                                        html!("menu-kebab", {
+                                            .prop("slot", "menu")
+                                            .children(&mut [
+                                                html!("menu-line", {
+                                                    .prop("icon", "duplicate")
+                                                    .text(STR_DUPLICATE)
+                                                    .event(clone!(state, asset_id => move |_: events::Click| {
+                                                        state.copy_asset(asset_id);
+                                                    }))
+                                                }),
+                                                html!("menu-line", {
+                                                    .prop("icon", "delete")
+                                                    .text(STR_DELETE)
+                                                    .event(clone!(state, asset_id => move |_: events::Click| {
+                                                        state.confirm_delete.set_neq(Some(asset_id));
+                                                    }))
+                                                }),
+                                            ])
+                                        })
+                                    }))),
+                                    ..Default::default()
+                                },
+                            ))
                         })
                     })))
                     .child_signal(load_more_signal.map(clone!(state => move |load_more| {

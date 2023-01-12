@@ -1,9 +1,9 @@
 use std::rc::Rc;
 
-use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
+use components::asset_card::{render_asset_card, AssetCardBottomIndicator, AssetCardConfig};
 use dominator::{clone, html, with_node, Dom, EventOptions};
 use futures_signals::signal_vec::SignalVecExt;
-use shared::domain::{asset::DraftOrLive, jig::JigResponse};
+use shared::domain::{asset::Asset, jig::JigResponse};
 use utils::{events, unwrap::UnwrapJiExt};
 use web_sys::HtmlInputElement;
 
@@ -48,7 +48,7 @@ impl CourseSelection {
             ])
             .child(html!("div", {
                 .style("display", "grid")
-                .style("grid-template-columns", "repeat(auto-fill, 280px)")
+                .style("grid-template-columns", "repeat(auto-fill, 216px)")
                 .style("gap", "20px")
                 .style("padding", "20px")
                 .children_signal_vec(state.search_results.signal_vec_cloned().map(clone!(state => move |jig| {
@@ -59,7 +59,7 @@ impl CourseSelection {
                 drag.as_ref().map(|drag| {
                     let asset = &drag.data;
 
-                    html!("asset-card", {
+                    html!("div", {
                         .style("position", "fixed")
                         .style("top", "0")
                         .style("left", "0")
@@ -68,20 +68,6 @@ impl CourseSelection {
                         .style("touch-action", "none")
                         .style("user-select", "none")
                         .style("pointer-events", "none")
-                        .prop("title", asset.display_name())
-                        .prop("playedCount", asset.plays())
-                        .prop("likedCount", asset.likes())
-                        .prop("author", asset.author_name().clone().unwrap_or_default())
-                        .prop("language", asset.language())
-                        .prop("kind", "jig")
-                        .child(
-                            ModuleThumbnail::new(
-                                asset.id(),
-                                asset.cover().cloned(),
-                                ThumbnailFallback::Asset,
-                                DraftOrLive::Live
-                            ).render(Some("image"))
-                        )
                         .style_signal("transform", drag.transform_signal())
                         .global_event(clone!(state, drag => move |evt: events::PointerMove| {
                             state.on_pointer_move(&drag, evt.x(), evt.y());
@@ -92,6 +78,14 @@ impl CourseSelection {
                         .global_event(clone!(state => move |_:events::PointerCancel| {
                             state.stop_drag();
                         }))
+                        .child(render_asset_card(
+                            &asset,
+                            AssetCardConfig {
+                                bottom_indicator: AssetCardBottomIndicator::Author,
+                                dense: true,
+                                ..Default::default()
+                            }
+                        ))
                     })
                 })
             })))
@@ -100,34 +94,40 @@ impl CourseSelection {
 
     fn render_asset(self: &Rc<Self>, jig: &Rc<JigResponse>) -> Dom {
         let state = self;
-        html!("asset-card", {
+        let asset: Asset = (**jig).clone().into();
+        html!("div", {
             .style("cursor", "grab")
             .style("touch-action", "none")
             .style("user-select", "none")
-            .prop("title", &jig.jig_data.display_name)
-            .prop("playedCount", jig.plays)
-            .prop("likedCount", jig.likes)
-            .prop("author", jig.author_name.clone().unwrap_or_default())
-            .prop("language", &jig.jig_data.language)
-            .prop("kind", "jig")
-            .child(
-                ModuleThumbnail::new(
-                    jig.id.into(),
-                    jig.jig_data.modules.first().cloned(),
-                    ThumbnailFallback::Asset,
-                    DraftOrLive::Live
-                ).render(Some("image"))
-            )
             .style_signal("filter", state.drag.signal_ref(clone!(jig => move |drag| {
                 match drag {
                     Some(drag) if drag.data.unwrap_jig().id == jig.id => "grayscale(100%) opacity(0.5)",
                     _ => "none",
                 }
             })))
-            .event(clone!(state, jig => move |evt: events::PointerDown| {
-                let elem = evt.dyn_target().unwrap_ji();
-                state.on_pointer_down(&elem, evt.x(), evt.y(), &jig);
-            }))
+            .event_with_options(
+                &EventOptions::bubbles(),
+                clone!(state, jig => move |evt: events::PointerDown| {
+                    log::info!("hay");
+                    let elem = evt.dyn_target().unwrap_ji();
+                    state.on_pointer_down(&elem, evt.x(), evt.y(), &jig);
+                })
+            )
+            .child(render_asset_card(
+                &asset,
+                AssetCardConfig {
+                    bottom_indicator: AssetCardBottomIndicator::Author,
+                    dense: true,
+                    menu: Some(Rc::new(move || {
+                        html!("menu-kebab", {
+                            .prop("slot", "menu")
+                            .children(&mut [
+                            ])
+                        })
+                    })),
+                    ..Default::default()
+                },
+            ))
         })
     }
 }

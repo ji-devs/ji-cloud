@@ -164,9 +164,13 @@ export class _ extends LitElement {
                 }
                 .recent-items {
                     display: grid;
-                    grid-template-columns: repeat(auto-fill, 230px);
+                    grid-template-columns: repeat(auto-fill, 216px);
                     gap: 34px;
                     justify-content: space-between;
+                }
+                ::slotted(a[slot=recent-items]) {
+                    text-decoration: none;
+                    color: inherit;
                 }
                 .load-more {
                     display: grid;
@@ -178,7 +182,7 @@ export class _ extends LitElement {
     }
 
     @property()
-    title: string = "";
+    name: string = "";
 
     @property()
     assetDisplayName: string = "";
