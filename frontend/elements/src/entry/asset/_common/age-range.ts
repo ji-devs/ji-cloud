@@ -7,11 +7,12 @@ export class _ extends LitElement {
         return [
             css`
                 :host {
-                    font-size: 14px;
+                    font-size: 13px;
                     display: flex;
-                    font-weight: 600;
-                    column-gap: 4px;
                     align-items: center;
+                    font-weight: 400;
+                    column-gap: 4px;
+                    color: var(--dark-gray-3);
                 }
             `,
         ];

@@ -4,7 +4,6 @@ import { nothing } from "lit-html";
 const STR_PLAYED = "Plays";
 const STR_VIEWED = "Views";
 const STR_LIKED = "Likes";
-const STR_JI_TEAM = "Ji Team";
 
 type Kind = "jig" | "resource" | "course";
 
@@ -14,75 +13,139 @@ export class _ extends LitElement {
         return [
             css`
                 :host {
-                    border-radius: 20px;
-                    box-shadow: 0 3px 12px 0 rgba(0, 0, 0, 0.12);
                     display: grid;
-                    grid-template-rows: 165px auto auto 34px 40px;
-                    background-color: #ffffff;
+                    border-radius: 20px;
+                    box-shadow: 2px 3px 10px 0 rgba(215, 215, 215, 0.5);
+                    overflow: hidden;
+                    background-color: white;
                     width: 280px;
-                    height: 288px;
+                    height: 246px;
+                    grid-template-rows: auto 0px 1fr;
                 }
-                ::slotted([slot="image"]) {
-                    border-radius: 20px 20px 0 0;
+                :host([dense]) {
+                    width: 216px;
                 }
-                .title {
-                    font-size: 22px;
+                :host([showBottomIndicator]) {
+                    height: 278px;
+                    grid-template-rows: auto 0px 1fr 32px;
+                }
+                ::slotted([slot=menu]) {
+                    grid-row: 1;
+                    grid-column: 1;
+                    justify-self: end;
+                    align-self: start;
+                    margin: 8px;
+                    border-radius: 50%;
+                    z-index: 1;
+                }
+                ::slotted([slot=image]) {
+                    grid-row: 1;
+                    grid-column: 1;
+                    aspect-ratio: 16 / 9;
+                }
+                .middle {
+                    height: 30px;
+                    translate: 0 -50%;
+                    display: grid;
+                    grid-template-columns: 30px auto 30px;
+                    column-gap: 8px;
+                    justify-content: center;
+                }
+                :host([kind=jig]) .middle {
+                    /* jig doesn't have a middle indicator */
+                    grid-template-columns: 30px;
+                }
+                .middle ::slotted([slot=like]) {
+                    border-radius: 50%;
+                    border: solid 1px #5590fc;
+                    background-color: #fff;
+                    display: inline-grid;
+                    place-content: center;
+                    font-size: 18px;
+                }
+                .middle ::slotted([slot=like][icon^=fa-regular]) {
+                    color: #5590fc;
+                }
+                .middle ::slotted([slot=like][icon^=fa-solid]) {
+                    color: #fa4048;
+                }
+                .middle ::slotted([slot=middle-indicator]) {
+                    grid-column: 2;
+                    box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+                    background-color: #fee13c;
+                    border-radius: 15px;
+                    font-size: 12px;
+                    font-weight: bold;
+                    text-align: center;
+                    color: var(--dark-gray-5);
+                    padding: 0 8px;
+                    line-height: 30px;
+                }
+                .white-section {
+                    padding: 24px 12px 6px 12px;
+                    display: grid;
+                    align-content: space-between;
+                }
+                .name {
+                    font-size: 16px;
                     font-weight: 600;
-                    color: #555555;
+                    color: #555;
                     text-align: center;
                     margin: 0;
-                    margin-top: 8px;
-                    white-space: nowrap;
+
+                    /* max 2 lines */
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
                     overflow: hidden;
                     text-overflow: ellipsis;
                 }
                 .played-liked {
-                    align-self: flex-start;
+                    font-size: 13px;
+                    color: var(--dark-gray-5);
                     display: flex;
                     justify-content: center;
-                    align-items: center;
-                    column-gap: 12px;
+                    column-gap: 8px;
                 }
                 .played-liked .count {
                     font-weight: 800;
                 }
-                .played-liked-divider {
+                .played-liked .played-liked-divider {
                     width: 2px;
                     height: 16px;
                     background-color: var(--dark-gray-5);
                 }
                 .ages-language {
-                    display: flex;
+                    display: grid;
+                    grid-template-columns: auto auto;
                     justify-content: space-between;
-                    padding: 8px 16px;
                 }
-                .ages-language,
                 .language {
-                    display: flex;
-                    align-items: center;
-                    column-gap: 4px;
-                }
-                .author-section {
+                    font-size: 13px;
                     font-weight: 500;
-                    line-height: 40px;
+                    color: var(--dark-gray-3);
+                    grid-column: 2;
+                }
+                .bottom-indicator {
+                    display: none;
+                }
+                :host([showBottomIndicator]) .bottom-indicator {
                     display: flex;
-                    align-items: center;
                     justify-content: center;
+                    align-items: center;
+                    column-gap: 18px;
+                    font-size: 13px;
+                    font-weight: 500;
+                    color: var(--dark-gray-5);
                 }
-                :host([kind=jig]) .author-section,
-                :host([kind=course]) .author-section {
-                    color: var(--main-blue);
-                    border-top: solid 1px var(--light-blue-2);
+                :host([kind=jig]) .bottom-indicator {
+                    background-color: #fff6d9;
                 }
-                :host([kind=resource]) .author-section {
-                    background-color: #b4eacb;
+                :host([kind=resource]) .bottom-indicator {
+                    background-color: #e3f5fd;
                 }
-                :host([byJiTeam]) .author-section {
-                    background-color: var(--light-blue-2);
-                }
-                .author-section .by-ji-team {
-                    font-weight: 800;
-                    white-space: pre-wrap;
+                :host([kind=course]) .bottom-indicator {
+                    background-color: #e9fae5;
                 }
             `,
         ];
@@ -91,8 +154,11 @@ export class _ extends LitElement {
     @property({ reflect: true })
     kind: Kind = "jig";
 
+    @property({ type: Boolean, reflect: true })
+    dense: boolean = false;
+
     @property()
-    title: string = "";
+    name: string = "";
 
     @property({ type: Number })
     playedCount: number = 0;
@@ -104,13 +170,7 @@ export class _ extends LitElement {
     language: string = "";
 
     @property({ type: Boolean, reflect: true })
-    byJiTeam: boolean = false;
-
-    @property()
-    author: string = "";
-
-    @property({ type: Boolean, reflect: true })
-    flipped: boolean = false;
+    showBottomIndicator: boolean = true;
 
     renderCount(label: string, count: number) {
         // See related comment in renderCountDivider.
@@ -142,32 +202,39 @@ export class _ extends LitElement {
     render() {
         let playedLabel = this.kind === 'resource' ? STR_VIEWED : STR_PLAYED;
         return html`
+            <slot
+                name="menu" 
+                @click=${(e: Event) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }}
+                @pointerdown=${(e: Event) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }}
+            ></slot>
             <slot name="image"></slot>
-            <h3 class="title">${this.title}</h3>
-            <div class="played-liked">
-                ${this.renderCount(playedLabel, this.playedCount)}
-                ${this.renderCountDivider()}
-                ${this.renderCount(STR_LIKED, this.likedCount)}
+            <div class="middle">
+                <slot name="like"></slot>
+                <slot name="middle-indicator"></slot>
             </div>
-            <div class="ages-language">
-                <slot name="ages"></slot>
-                <div class="language">
-                    <img-ui
-                        path="entry/home/search-results/language.svg"
-                    ></img-ui>
-                    <span class="count">${this.language}</span>
+            <div class="white-section">
+                <h3 class="name">${this.name}</h3>
+                <div class="played-liked">
+                    ${this.renderCount(playedLabel, this.playedCount)}
+                    ${this.renderCountDivider()}
+                    ${this.renderCount(STR_LIKED, this.likedCount)}
+                </div>
+                <div class="ages-language">
+                    <slot name="ages"></slot>
+                    <div class="language">
+                        <fa-icon icon="fa-light fa-globe"></fa-icon>
+                        <span class="language-code">${this.language}</span>
+                    </div>
                 </div>
             </div>
-            <div class="author-section">
-                ${this.byJiTeam ? html`
-                    <img-ui
-                        path="entry/home/search-results/ji-logo-blue.svg"
-                    ></img-ui>
-                    <span class="by-ji-team"
-                        >${STR_JI_TEAM} -
-                    </span>
-                ` : nothing}
-                ${this.author}
+            <div class="bottom-indicator">
+                <slot name="bottom-indicator"></slot>
             </div>
         `;
     }

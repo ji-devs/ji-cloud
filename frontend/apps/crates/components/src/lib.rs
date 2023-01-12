@@ -11,6 +11,8 @@ pub mod image;
 
 #[cfg(feature = "animation")]
 pub mod animation;
+#[cfg(feature = "asset_card")]
+pub mod asset_card;
 #[cfg(feature = "backgrounds")]
 pub mod backgrounds;
 #[cfg(feature = "box_outline")]

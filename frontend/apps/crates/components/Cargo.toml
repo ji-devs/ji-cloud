@@ -52,6 +52,7 @@ sandbox = []
 iframe_audio = []
 
 animation = []
+asset_card = []
 audio_input = []
 audio_player_button = []
 backgrounds = []
@@ -95,6 +96,7 @@ profile_image =[]
 default = ["all"]
 all = [
     "animation",
+    "asset_card",
     "audio_input",
     "audio_player_button",
     "backgrounds",

@@ -55,9 +55,7 @@ pub async fn get_metadata() -> MetadataResponse {
 
             future.await
         }
-        State::Ready(metadata) => {
-            metadata.clone()
-        }
+        State::Ready(metadata) => metadata.clone(),
     }
 }
 
