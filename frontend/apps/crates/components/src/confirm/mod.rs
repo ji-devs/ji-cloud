@@ -1,7 +1,7 @@
-use crate::callback_future::CallbackFuture;
 use discard::Discard;
 use dominator::{self, clone, html, shadow_root, DomHandle, ShadowRootMode};
 use std::{cell::RefCell, rc::Rc};
+use utils::callback_future::CallbackFuture;
 use utils::{events, unwrap::UnwrapJiExt};
 use web_sys::HtmlDialogElement;
 

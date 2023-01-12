@@ -1,8 +1,8 @@
-use crate::callback_future::CallbackFuture;
 use awsm_web::dom::StyleExt;
 use futures::future::join_all;
 use gloo_timers::future::TimeoutFuture;
 use js_sys::Reflect;
+use utils::callback_future::CallbackFuture;
 use utils::{js_wrappers::set_event_listener_once, unwrap::UnwrapJiExt};
 use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen_futures::spawn_local;

@@ -43,7 +43,6 @@ gloo-timers = { workspace = true }
 gloo-utils = { workspace = true }
 rgb = { workspace = true }
 regex = { workspace = true }
-futures-channel = { workspace = true }
 
 [features]
 quiet = ["utils/quiet"]
@@ -56,7 +55,6 @@ animation = []
 audio_input = []
 audio_player_button = []
 backgrounds = []
-callback_future = []
 categories_input = []
 color_select = []
 confirm = []
@@ -100,7 +98,6 @@ all = [
     "audio_input",
     "audio_player_button",
     "backgrounds",
-    "callback_future",
     "categories_input",
     "color_select",
     "confirm",
