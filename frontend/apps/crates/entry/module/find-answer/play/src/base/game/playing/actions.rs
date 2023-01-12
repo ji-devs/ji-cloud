@@ -10,27 +10,39 @@ use utils::prelude::*;
 
 impl PlayState {
     pub fn select(state: Rc<Self>, index: usize) {
-        // Mark the selected set
-        state.selected_set.lock_mut().insert(index);
+        let selected_trace = state.traces.get(index).unwrap_ji();
+
+        // If an incorrect trace is selected that doesn't have audio associated, then don't highlight it.
+        if selected_trace.kind != TraceKind::Wrong
+            || selected_trace.audio.is_some()
+            || state.question.incorrect_audio.is_some()
+        {
+            state.selected_set.lock_mut().insert(index);
+        }
 
         state.clone().evaluate_question_ended();
 
+        // Make sure that all playback is stopped so that we can play any new audio for the
+        // latest selection.
         state
             .selected_set
             .lock_mut()
             .iter()
             .for_each(|index| state.traces.get(*index).unwrap_ji().kill_playback());
-        let selected_trace = state.traces.get(index).unwrap_ji();
+
         match selected_trace.kind {
             TraceKind::Correct => {
                 state.incorrect_choice_count.set(0);
-                state.play_correct_sound(clone!(state, selected_trace => move || {
-                    if selected_trace.inner.audio.is_none() {
-                        if let Some(audio) = &state.question.correct_audio {
-                            state.selection_audio.set(Some(audio.clone()));
-                        }
+                state.correct_choice(clone!(state, selected_trace => move || {
+                    if let Some(audio) = &state.question.correct_audio {
+                        state.selection_audio.set(Some(audio.clone()));
+                    } else {
+                        // evaluate_end is called by the dom too, but only when audio playback ends.
+                        // If there is no correct audio for the question, we need to make sure that the
+                        // question ends correctly.
+                        state.clone().evaluate_end();
                     }
-                    selected_trace.select(state.clone())
+                    selected_trace.select(state.clone());
                 }));
             }
             TraceKind::Wrong => {
@@ -64,7 +76,16 @@ impl PlayState {
         }));
     }
 
-    fn play_correct_sound<F: Fn() + 'static>(self: &Rc<Self>, f: F) {
+    pub fn remove_incorrect_highlights(self: Rc<Self>) {
+        let state = self;
+        state
+            .clone()
+            .selected_set
+            .lock_mut()
+            .retain(clone!(state => move |index| state.traces.get(*index).unwrap_ji().kind == TraceKind::Correct));
+    }
+
+    fn correct_choice<F: Fn() + 'static>(self: &Rc<Self>, f: F) {
         let state = self;
         AUDIO_MIXER.with(clone!(state => move |mixer| {
             let audio_path: AudioPath<'_> = mixer.get_random_positive().into();

@@ -13,7 +13,9 @@ use futures_signals::{
 };
 use gloo_timers::future::TimeoutFuture;
 use js_sys::Reflect;
-use shared::domain::module::body::{find_answer::QuestionField, ModuleAssist, ModuleAssistType};
+use shared::domain::module::body::{
+    find_answer::QuestionField, ModuleAssist, ModuleAssistType, _groups::design::TraceKind,
+};
 use std::rc::Rc;
 use utils::{prelude::*, resize::resize_info_signal};
 use wasm_bindgen::JsValue;
@@ -50,6 +52,12 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                         *state.selection_audio_handle.borrow_mut() = Some(mixer.play_on_ended(audio.into(), false, clone!(state => move || {
                             state.selection_audio.set(None);
                             *state.selection_audio_handle.borrow_mut() = None;
+                            state.clone().evaluate_end();
+
+                            // Necessary to do this here for cases where an incorrect trace does *not*
+                            // have specific audio attached for some reason, and the incorrect audio
+                            // plays instead.
+                            state.clone().remove_incorrect_highlights();
                         })));
                     });
                 }
@@ -115,7 +123,7 @@ pub fn render(state: Rc<PlayState>) -> Dom {
         .child_signal(state.show_hint.signal_cloned().map(clone!(state => move |show| {
             if show {
                 Some(TracesShow::render(TracesShow::new(
-                    state.traces.iter().map(|t| t.inner.clone()).collect(),
+                    state.traces.iter().filter(|t| t.kind == TraceKind::Correct).map(|t| t.inner.clone()).collect(),
                     TracesShowMode::Cutout,
                     TracesShow::on_select_noop()
                 )))
@@ -124,14 +132,16 @@ pub fn render(state: Rc<PlayState>) -> Dom {
             }
         })))
         .child(TracesShow::render(TracesShow::new(
-                state.traces
-                    .iter()
-                    .map(|t| t.inner.clone())
-                    .collect(),
-                TracesShowMode::HiddenSolidMap(state.selected_set.clone()),
-                Some(clone!(state => move |index| {
+            state.traces
+                .iter()
+                .map(|t| t.inner.clone())
+                .collect(),
+            TracesShowMode::HiddenSolidMap(state.selected_set.clone()),
+            Some(clone!(state => move |index| {
+                if !state.ended.get() {
                     PlayState::select(state.clone(), index);
-                }))
+                }
+            }))
         )))
         .event(clone!(state => move |evt: events::Click| {
             // Check for incorrect choice.
