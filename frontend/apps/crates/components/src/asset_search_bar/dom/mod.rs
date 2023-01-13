@@ -3,9 +3,9 @@ use std::rc::Rc;
 use dominator::{clone, html, with_node, Dom, EventOptions};
 use futures_signals::{
     map_ref,
-    signal::{Signal, SignalExt},
+    signal::{from_future, Signal, SignalExt},
 };
-use utils::{events, unwrap::UnwrapJiExt};
+use utils::{events, languages::JIG_LANGUAGES, metadata::get_age_ranges, unwrap::UnwrapJiExt};
 use web_sys::HtmlInputElement;
 
 use super::AssetSearchBar;
@@ -60,7 +60,7 @@ impl AssetSearchBar {
                                     .clear();
                             }))
                         }))
-                        .children_signal_vec(state.search_options.age_ranges.signal_cloned().map(clone!(state => move|age_ranges| {
+                        .children_signal_vec(from_future(get_age_ranges()).map(|x| x.unwrap_or_default()).map(clone!(state => move|age_ranges| {
                             age_ranges.iter().map(|age_range| {
                                 let age_id = age_range.id;
                                 html!("input-select-option", {
@@ -92,9 +92,7 @@ impl AssetSearchBar {
                             }))
                         }))
                         .children(
-                            state
-                                .search_options
-                                .languages
+                            JIG_LANGUAGES
                                 .iter()
                                 .map(|lang| {
                                     html!("input-select-option", {
@@ -137,7 +135,7 @@ impl AssetSearchBar {
     fn age_value_signal(self: &Rc<Self>) -> impl Signal<Item = String> {
         map_ref! {
             let selected_ages = self.search_selected.age_ranges.signal_cloned(),
-            let available_ages = self.search_options.age_ranges.signal_cloned() => {
+            let available_ages = from_future(get_age_ranges()).map(|x| x.unwrap_or_default()) => {
                 let mut output = vec![];
                 selected_ages.iter().for_each(|age_id| {
                     // only search list if already populated
@@ -158,22 +156,20 @@ impl AssetSearchBar {
     fn language_value_signal(self: &Rc<Self>) -> impl Signal<Item = &'static str> {
         let state = self;
 
-        state.search_selected.language.signal_cloned().map(
-            clone!(state => move |selected_language| {
-                let lang = state
-                    .search_options
-                    .languages
-                    .iter()
-                    .find(|lang| match &selected_language {
-                        Some(selected_language) => lang.code() == selected_language,
-                        None => false,
-                    });
+        state
+            .search_selected
+            .language
+            .signal_cloned()
+            .map(move |selected_language| {
+                let lang = JIG_LANGUAGES.iter().find(|lang| match &selected_language {
+                    Some(selected_language) => lang.code() == selected_language,
+                    None => false,
+                });
 
                 match lang {
                     Some(lang) => lang.display_name(),
-                    None => STR_ALL_LANGUAGES
+                    None => STR_ALL_LANGUAGES,
                 }
-            }),
-        )
+            })
     }
 }

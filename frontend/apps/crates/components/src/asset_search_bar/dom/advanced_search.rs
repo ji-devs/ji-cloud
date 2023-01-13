@@ -1,6 +1,8 @@
 use dominator::{html, Dom};
+use futures_signals::signal::{from_future, SignalExt};
 use futures_signals::{map_ref, signal::Signal};
 use std::rc::Rc;
+use utils::metadata::get_affiliations;
 use utils::{events, unwrap::UnwrapJiExt};
 
 use super::categories_select;
@@ -71,7 +73,7 @@ pub fn render(state: Rc<AssetSearchBar>, on_search: Rc<dyn Fn()>) -> Dom {
 fn affiliation_value_signal(state: Rc<AssetSearchBar>) -> impl Signal<Item = String> {
     map_ref! {
         let selected_affiliations = state.search_selected.affiliations.signal_cloned(),
-        let available_affiliations = state.search_options.affiliations.signal_cloned() => {
+        let available_affiliations = from_future(get_affiliations()).map(|x| x.unwrap_or_default()) => {
             let mut output = vec![];
             selected_affiliations.iter().for_each(|affiliation_id| {
                 // only search list if already populated

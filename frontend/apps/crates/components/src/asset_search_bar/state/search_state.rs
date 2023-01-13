@@ -1,26 +1,15 @@
-use std::{
-    collections::{HashMap, HashSet},
-    iter::FromIterator,
-    rc::Rc,
-};
+use std::{collections::HashSet, iter::FromIterator};
 
-use futures::join;
 use futures_signals::signal::Mutable;
-use shared::{
-    api::endpoints::{category, meta},
-    domain::{
-        category::{Category, CategoryId, CategoryTreeScope, GetCategoryPath, GetCategoryRequest},
-        course::CourseSearchQuery,
-        jig::JigSearchQuery,
-        meta::{Affiliation, AffiliationId, AgeRange, AgeRangeId, GetMetadataPath, ResourceType},
-        resource::ResourceSearchQuery,
-        user::UserProfile,
-    },
+use shared::domain::{
+    category::CategoryId,
+    course::CourseSearchQuery,
+    jig::JigSearchQuery,
+    meta::{AffiliationId, AgeRangeId},
+    resource::ResourceSearchQuery,
+    user::UserProfile,
 };
-use utils::{
-    languages::{Language, JIG_LANGUAGES},
-    prelude::*,
-};
+use utils::prelude::*;
 
 #[derive(Debug)]
 pub struct SearchSelected {
@@ -111,80 +100,6 @@ impl SearchSelected {
             page: Some(0),
             language: self.language.get_cloned(),
             ..Default::default()
-        }
-    }
-}
-
-pub struct SearchOptions {
-    pub age_ranges: Mutable<Vec<AgeRange>>,
-    pub affiliations: Mutable<Vec<Affiliation>>,
-    pub resource_types: Mutable<Vec<ResourceType>>,
-    pub categories: Mutable<Vec<Category>>,
-    pub category_label_lookup: Mutable<HashMap<CategoryId, String>>,
-    pub languages: Rc<Vec<Language>>,
-}
-
-impl Default for SearchOptions {
-    fn default() -> Self {
-        Self {
-            age_ranges: Mutable::new(vec![]),
-            affiliations: Mutable::new(vec![]),
-            resource_types: Mutable::new(vec![]),
-            categories: Mutable::new(vec![]),
-            category_label_lookup: Mutable::new(HashMap::new()),
-            languages: Rc::new(JIG_LANGUAGES.clone()),
-        }
-    }
-}
-
-impl SearchOptions {
-    pub async fn populate_options(&self) {
-        let _ = join!(self.load_metadata(), self.load_categories());
-    }
-
-    async fn load_metadata(&self) -> Result<(), anyhow::Error> {
-        match meta::Get::api_no_auth(GetMetadataPath(), None).await {
-            Err(e) => Err(e),
-            Ok(res) => {
-                // only set values if they're not set yet from the profile
-                if self.affiliations.lock_ref().is_empty() {
-                    self.affiliations.set(res.affiliations);
-                }
-                if self.age_ranges.lock_ref().is_empty() {
-                    self.age_ranges.set(res.age_ranges);
-                }
-                if self.resource_types.lock_ref().is_empty() {
-                    self.resource_types.set(res.resource_types);
-                }
-                Ok(())
-            }
-        }
-    }
-
-    async fn load_categories(&self) -> Result<(), anyhow::Error> {
-        let req = GetCategoryRequest {
-            ids: Vec::new(),
-            scope: Some(CategoryTreeScope::Descendants),
-        };
-
-        match category::Get::api_no_auth(GetCategoryPath(), Some(req)).await {
-            Err(e) => Err(e),
-            Ok(res) => {
-                let mut category_label_lookup = HashMap::new();
-                Self::get_categories_labels(&res.categories, &mut category_label_lookup);
-                self.category_label_lookup.set(category_label_lookup);
-                if self.categories.lock_ref().is_empty() {
-                    self.categories.set(res.categories);
-                }
-                Ok(())
-            }
-        }
-    }
-
-    fn get_categories_labels(categories: &Vec<Category>, lookup: &mut HashMap<CategoryId, String>) {
-        for category in categories {
-            lookup.insert(category.id, category.name.clone());
-            Self::get_categories_labels(&category.children, lookup);
         }
     }
 }

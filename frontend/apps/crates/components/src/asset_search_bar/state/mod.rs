@@ -1,7 +1,6 @@
 use std::rc::Rc;
 
 use dominator_helpers::futures::AsyncLoader;
-use search_state::SearchOptions;
 use shared::domain::{
     course::CourseSearchQuery, jig::JigSearchQuery, resource::ResourceSearchQuery,
 };
@@ -11,7 +10,6 @@ mod search_state;
 pub use search_state::SearchSelected;
 
 pub struct AssetSearchBar {
-    pub search_options: Rc<SearchOptions>,
     pub search_selected: Rc<SearchSelected>,
     pub loader: AsyncLoader,
 }
@@ -22,15 +20,10 @@ impl AssetSearchBar {
     }
 
     pub fn new_with_search_selected(search_selected: SearchSelected) -> Rc<Self> {
-        let state = Rc::new(Self {
-            search_options: Default::default(),
+        Rc::new(Self {
             search_selected: Rc::new(search_selected),
             loader: AsyncLoader::new(),
-        });
-
-        state.load_data();
-
-        state
+        })
     }
 
     pub fn get_search_request_jig(&self) -> JigSearchQuery {

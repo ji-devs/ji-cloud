@@ -4,7 +4,7 @@ use components::{
 };
 use dominator::{clone, html, Dom};
 use futures_signals::{
-    signal::{Signal, SignalExt},
+    signal::{from_future, Signal, SignalExt},
     signal_vec::SignalVecExt,
 };
 use shared::{
@@ -21,6 +21,7 @@ use utils::{
     asset::{published_at_string, ResourceContentExt},
     events,
     init::analytics,
+    metadata::{get_age_ranges, get_category_label_lookup, get_resource_types},
     prelude::{get_user_cloned, ApiEndpointExt},
     routes::{AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, ResourceEditRoute, Route},
 };
@@ -86,7 +87,7 @@ impl SearchResultsSection {
                     None => String::new(),
                 }
             })
-            .child_signal(state.home_state.search_bar.search_options.age_ranges.signal_cloned().map(move |age_ranges| {
+            .child_signal(from_future(get_age_ranges()).map(|x| x.unwrap_or_default()).map(move |age_ranges| {
                 let range = age_ranges.range(&jig_ages);
                 Some(html!("age-range", {
                     .prop("slot", "ages")
@@ -104,14 +105,14 @@ impl SearchResultsSection {
                     DraftOrLive::Live
                 ).render(Some("image"))
             )
-            .apply_if(!asset.categories().is_empty(), clone!(state, asset => move |dom| {
+            .apply_if(!asset.categories().is_empty(), clone!(asset => move |dom| {
                 dom.child(html!("home-search-result-details", {
                     .prop("slot", "categories")
                     .child(html!("div", {
                         .children(asset.categories().iter().map(|category_id| {
                             html!("home-search-result-category", {
                                 .prop_signal("label", {
-                                    state.home_state.search_bar.search_options.category_label_lookup.signal_cloned().map(clone!(category_id => move |category_label_lookup| {
+                                    from_future(get_category_label_lookup()).map(|x| x.unwrap_or_default()).map(clone!(category_id => move |category_label_lookup| {
                                         match category_label_lookup.get(&category_id) {
                                             Some(label) => label.to_owned(),
                                             None => String::new(),
@@ -250,11 +251,9 @@ impl SearchResultsSection {
     // byJiTeam
 
     fn resource_type_name(self: &Rc<Self>, id: ResourceTypeId) -> impl Signal<Item = String> {
-        self.home_state
-            .search_bar
-            .search_options
-            .resource_types
-            .signal_ref(move |resource_types| {
+        from_future(get_resource_types())
+            .map(|x| x.unwrap_or_default())
+            .map(move |resource_types| {
                 let resource_type = resource_types
                     .iter()
                     .find(move |resource_type| resource_type.id == id);

@@ -6,7 +6,7 @@ use futures::join;
 
 use shared::{api::endpoints::jig, domain::jig::JigCountPath};
 use std::{collections::HashMap, rc::Rc};
-use utils::{init::analytics, prelude::*};
+use utils::{init::analytics, metadata::get_age_ranges, prelude::*};
 
 use super::state::Home;
 
@@ -77,12 +77,12 @@ async fn search_async(state: Rc<Home>) {
     search_state.loading.set(false);
 
     // Analytics event tracking
+    let age_ranges = get_age_ranges().await;
     let mut properties = HashMap::new();
     let ages = query_params
         .age_ranges
         .iter()
         .map(|v| {
-            let age_ranges = state.search_bar.search_options.age_ranges.get_cloned();
             let age = age_ranges.iter().find(|age| age.id == *v).unwrap_ji();
             age.display_name.clone()
         })
