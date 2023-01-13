@@ -1,8 +1,13 @@
-use std::sync::{Mutex, Arc};
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 
 use crate::callback_future::CallbackFuture;
 use crate::{fetch::*, unwrap::UnwrapJiExt};
+use futures::join;
 use futures::{future::Shared, FutureExt};
+use shared::domain::category::{
+    Category, CategoryId, CategoryResponse, CategoryTreeScope, GetCategoryPath, GetCategoryRequest,
+};
 use shared::{
     api::endpoints,
     domain::meta::{
@@ -15,6 +20,7 @@ use wasm_bindgen_futures::spawn_local;
 #[derive(Clone, Debug)]
 enum State {
     Init,
+    // using `CallbackFuture` just to get around this being an opaque future, there are probably simpler ways to do this
     Loading(Shared<CallbackFuture<Arc<Metadata>>>),
     Ready(Arc<Metadata>),
 }
@@ -30,10 +36,14 @@ pub struct Metadata {
     pub resource_types: Arc<Vec<ResourceType>>,
     pub subjects: Arc<Vec<Subject>>,
     pub image_tags: Arc<Vec<ImageTag>>,
+    pub categories: Arc<Vec<Category>>,
+    pub category_label_lookup: Arc<HashMap<CategoryId, String>>,
 }
 
-impl From<MetadataResponse> for Metadata {
-    fn from(meta: MetadataResponse) -> Self {
+impl From<(MetadataResponse, CategoryResponse)> for Metadata {
+    fn from((meta, category): (MetadataResponse, CategoryResponse)) -> Self {
+        let mut category_label_lookup = HashMap::new();
+        get_categories_labels(&category.categories, &mut category_label_lookup);
         Self {
             image_styles: Arc::new(meta.image_styles),
             animation_styles: Arc::new(meta.animation_styles),
@@ -42,7 +52,16 @@ impl From<MetadataResponse> for Metadata {
             resource_types: Arc::new(meta.resource_types),
             subjects: Arc::new(meta.subjects),
             image_tags: Arc::new(meta.image_tags),
+            categories: Arc::new(category.categories),
+            category_label_lookup: Arc::new(category_label_lookup),
         }
+    }
+}
+
+fn get_categories_labels(categories: &Vec<Category>, lookup: &mut HashMap<CategoryId, String>) {
+    for category in categories {
+        lookup.insert(category.id, category.name.clone());
+        get_categories_labels(&category.children, lookup);
     }
 }
 
@@ -52,10 +71,8 @@ pub async fn get_metadata() -> Arc<Metadata> {
         State::Init => {
             let future = CallbackFuture::new(Box::new(move |resolve| {
                 spawn_local(async {
-                    let meta = endpoints::meta::Get::api_no_auth(GetMetadataPath(), None)
-                        .await
-                        .map(|meta| Arc::new(meta.into()))
-                        .unwrap_ji();
+                    let responses = join!(fetch_metadata(), fetch_categories());
+                    let meta = Arc::new(responses.into());
                     resolve(meta);
                 });
             }))
@@ -85,6 +102,23 @@ pub async fn get_metadata() -> Arc<Metadata> {
     }
 }
 
+async fn fetch_metadata() -> MetadataResponse {
+    endpoints::meta::Get::api_no_auth(GetMetadataPath(), None)
+        .await
+        .unwrap_ji()
+}
+
+async fn fetch_categories() -> CategoryResponse {
+    let req = GetCategoryRequest {
+        ids: Vec::new(),
+        scope: Some(CategoryTreeScope::Descendants),
+    };
+
+    endpoints::category::Get::api_no_auth(GetCategoryPath(), Some(req))
+        .await
+        .unwrap_ji()
+}
+
 pub async fn get_image_styles() -> Arc<Vec<ImageStyle>> {
     Arc::clone(&get_metadata().await.image_styles)
 }
@@ -111,4 +145,12 @@ pub async fn get_subjects() -> Arc<Vec<Subject>> {
 
 pub async fn get_image_tags() -> Arc<Vec<ImageTag>> {
     Arc::clone(&get_metadata().await.image_tags)
+}
+
+pub async fn get_categories() -> Arc<Vec<Category>> {
+    Arc::clone(&get_metadata().await.categories)
+}
+
+pub async fn get_category_label_lookup() -> Arc<HashMap<CategoryId, String>> {
+    Arc::clone(&get_metadata().await.category_label_lookup)
 }
