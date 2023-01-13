@@ -19,7 +19,7 @@ pub struct SearchResults {
 
 impl SearchResults {
     pub fn new(home_state: &Rc<Home>, loading: bool) -> Rc<Self> {
-        let query = home_state.search_selected.query.get_cloned();
+        let query = home_state.search_bar.search_selected.query.get_cloned();
 
         Rc::new(Self {
             loading: Mutable::new(loading),

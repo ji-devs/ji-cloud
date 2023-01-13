@@ -26,7 +26,6 @@ pub fn fetch_data(state: Rc<Home>, include_search: bool) {
             true => {
                 join!(
                     fetch_total_jigs_count(Rc::clone(&state)),
-                    fetch_metadata(Rc::clone(&state)),
                     fetch_profile(Rc::clone(&state)),
                     search_async(Rc::clone(&state)),
                 );
@@ -34,7 +33,6 @@ pub fn fetch_data(state: Rc<Home>, include_search: bool) {
             false => {
                 join!(
                     fetch_total_jigs_count(Rc::clone(&state)),
-                    fetch_metadata(Rc::clone(&state)),
                     fetch_profile(Rc::clone(&state)),
                 );
             },
@@ -51,15 +49,11 @@ async fn fetch_total_jigs_count(state: Rc<Home>) {
     };
 }
 
-async fn fetch_metadata(state: Rc<Home>) {
-    state.search_options.populate_options().await;
-}
-
 async fn fetch_profile(state: Rc<Home>) {
     match get_user_cloned() {
         Some(profile) => {
             state.is_logged_in.set(true);
-            state.search_selected.set_from_profile(&profile);
+            state.search_bar.search_selected.set_from_profile(&profile);
         }
         None => {}
     }
@@ -71,7 +65,7 @@ async fn search_async(state: Rc<Home>) {
         .mode
         .set(HomePageMode::Search(Rc::clone(&search_state)));
 
-    let query_params = state.search_selected.to_query_params();
+    let query_params = state.search_bar.search_selected.to_query_params();
     Route::Home(HomeRoute::Search(Some(Box::new(query_params.clone())))).push_state();
 
     join!(
@@ -88,7 +82,7 @@ async fn search_async(state: Rc<Home>) {
         .age_ranges
         .iter()
         .map(|v| {
-            let age_ranges = state.search_options.age_ranges.get_cloned();
+            let age_ranges = state.search_bar.search_options.age_ranges.get_cloned();
             let age = age_ranges.iter().find(|age| age.id == *v).unwrap_ji();
             age.display_name.clone()
         })

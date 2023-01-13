@@ -86,7 +86,7 @@ impl SearchResultsSection {
                     None => String::new(),
                 }
             })
-            .child_signal(state.home_state.search_options.age_ranges.signal_cloned().map(move |age_ranges| {
+            .child_signal(state.home_state.search_bar.search_options.age_ranges.signal_cloned().map(move |age_ranges| {
                 let range = age_ranges.range(&jig_ages);
                 Some(html!("age-range", {
                     .prop("slot", "ages")
@@ -111,7 +111,7 @@ impl SearchResultsSection {
                         .children(asset.categories().iter().map(|category_id| {
                             html!("home-search-result-category", {
                                 .prop_signal("label", {
-                                    state.home_state.search_options.category_label_lookup.signal_cloned().map(clone!(category_id => move |category_label_lookup| {
+                                    state.home_state.search_bar.search_options.category_label_lookup.signal_cloned().map(clone!(category_id => move |category_label_lookup| {
                                         match category_label_lookup.get(&category_id) {
                                             Some(label) => label.to_owned(),
                                             None => String::new(),
@@ -251,6 +251,7 @@ impl SearchResultsSection {
 
     fn resource_type_name(self: &Rc<Self>, id: ResourceTypeId) -> impl Signal<Item = String> {
         self.home_state
+            .search_bar
             .search_options
             .resource_types
             .signal_ref(move |resource_types| {

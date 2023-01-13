@@ -1,11 +1,10 @@
 use std::rc::Rc;
 
 use components::asset_card::{render_asset_card, AssetCardBottomIndicator, AssetCardConfig};
-use dominator::{clone, html, with_node, Dom, EventOptions};
+use dominator::{clone, html, Dom, EventOptions};
 use futures_signals::signal_vec::SignalVecExt;
 use shared::domain::{asset::Asset, jig::JigResponse};
 use utils::{events, unwrap::UnwrapJiExt};
-use web_sys::HtmlInputElement;
 
 use super::state::CourseSelection;
 
@@ -16,36 +15,13 @@ impl CourseSelection {
             .style("max-height", "100vh")
             .style("overflow", "auto")
             .prop("slot", "main")
-            .children(&mut [
-                html!("hr"),
-                html!("h4", {
-                    .text("Add new jigs")
-                }),
-                html!("form", {
-                    .event_with_options(
-                        &EventOptions::preventable(),
-                        clone!(state => move|e: events::Submit| {
-                            e.prevent_default();
-                            state.search();
-                        })
-                    )
-                    .children(&mut [
-                        html!("input" => HtmlInputElement, {
-                            .style("width", "400px")
-                            .with_node!(elem => {
-                                .event(clone!(state => move|_: events::Input| {
-                                    let value = elem.value();
-                                    *state.input.borrow_mut() = value;
-                                }))
-                            })
-                        }),
-                        html!("button", {
-                            .prop("type", "submit")
-                            .text("Search")
-                        })
-                    ])
-                })
-            ])
+            .child(html!("div", {
+                .style("display", "grid")
+                .style("margin", "20px")
+                .child(state.search_bar.render(Rc::new(clone!(state => move || {
+                    state.search();
+                }))))
+            }))
             .child(html!("div", {
                 .style("display", "grid")
                 .style("grid-template-columns", "repeat(auto-fill, 216px)")

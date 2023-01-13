@@ -53,6 +53,7 @@ iframe_audio = []
 
 animation = []
 asset_card = []
+asset_search_bar = []
 audio_input = []
 audio_player_button = []
 backgrounds = []
@@ -97,6 +98,7 @@ default = ["all"]
 all = [
     "animation",
     "asset_card",
+    "asset_search_bar",
     "audio_input",
     "audio_player_button",
     "backgrounds",

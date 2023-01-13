@@ -31,6 +31,8 @@ import "@elements/core/share-jig/students";
 import "@elements/core/share-jig/gen-code-button";
 import "@elements/core/player-popup/player-popup";
 import "@elements/core/help/jigzi-help";
+import "@elements/core/asset-search-bar/search-bar";
+import "@elements/core/asset-search-bar/select";
 import "@elements/entry/asset/edit/sidebar/sidebar";
 import "@elements/entry/asset/edit/pages/landing";
 import "@elements/entry/asset/edit/selection/card";

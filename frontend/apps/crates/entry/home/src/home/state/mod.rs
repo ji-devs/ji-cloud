@@ -4,21 +4,20 @@ use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::asset::AssetId;
 
-use components::page_header::state::PageLinks;
+use components::{
+    asset_search_bar::{AssetSearchBar, SearchSelected},
+    page_header::state::PageLinks,
+};
 use utils::routes::SearchQueryParams;
 
 use super::search_results::SearchResults;
 use strum_macros::Display;
 
-mod search_state;
-pub use search_state::*;
-
 pub struct Home {
     pub loader: AsyncLoader,
     pub mode: Mutable<HomePageMode>,
     pub is_logged_in: Mutable<bool>,
-    pub search_options: Rc<SearchOptions>,
-    pub search_selected: Rc<SearchSelected>,
+    pub search_bar: Rc<AssetSearchBar>,
     pub quick_searches: Vec<QuickSearch>,
     pub whats_new: Vec<WhatsNewItem>,
     pub parents_testimonials: Vec<Testimonial>,
@@ -30,7 +29,7 @@ pub struct Home {
 
 impl Home {
     pub fn new() -> Rc<Self> {
-        Rc::new(Self::new_with_search_selected(SearchSelected::default()))
+        Rc::new(Self::new_with_search_selected(Default::default()))
     }
     pub fn new_search(query_params: Option<SearchQueryParams>) -> Rc<Self> {
         let search_selected = match query_params {
@@ -41,11 +40,10 @@ impl Home {
     }
     fn new_with_search_selected(search_selected: SearchSelected) -> Self {
         Self {
-            search_selected: Rc::new(search_selected),
             loader: AsyncLoader::new(),
             mode: Mutable::new(HomePageMode::Home),
             is_logged_in: Mutable::new(false),
-            search_options: Rc::new(SearchOptions::default()),
+            search_bar: AssetSearchBar::new_with_search_selected(search_selected),
             quick_searches: Self::get_quick_searches(),
             whats_new: Self::get_whats_new(),
             parents_testimonials: Self::get_parents_testimonials(),

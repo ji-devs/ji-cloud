@@ -6,7 +6,7 @@ use shared::{
     api::endpoints,
     domain::{
         asset::Asset,
-        jig::{JigResponse, JigSearchPath, JigSearchQuery},
+        jig::{JigResponse, JigSearchPath},
     },
 };
 use utils::{drag::Drag, prelude::ApiEndpointExt, unwrap::UnwrapJiExt};
@@ -18,10 +18,7 @@ impl CourseSelection {
     pub fn search(self: &Rc<Self>) {
         let state = Rc::clone(self);
         state.loader.load(clone!(state => async move {
-            let req = JigSearchQuery {
-                q: String::from(state.input.borrow().clone()),
-                ..Default::default()
-            };
+            let req = state.search_bar.search_selected.to_jig_search_request();
 
             match endpoints::jig::Search::api_no_auth(JigSearchPath(), Some(req)).await {
                 Err(_) => todo!(),

@@ -1,4 +1,4 @@
-use components::categories_input;
+use crate::categories_input;
 use dominator::{clone, html, Dom};
 use futures_signals::{
     map_ref,
@@ -7,12 +7,12 @@ use futures_signals::{
 use std::rc::Rc;
 use utils::unwrap::UnwrapJiExt;
 
-use super::super::super::state::Home;
+use super::AssetSearchBar;
 
 const STR_CATEGORIES_LABEL: &str = "Categories";
 const STR_CATEGORIES_PLACEHOLDER: &str = "Select one or more from the list";
 
-pub fn render(state: Rc<Home>) -> Dom {
+pub fn render(state: Rc<AssetSearchBar>) -> Dom {
     html!("input-wrapper", {
         .prop("slot", "categories")
         .prop("label", STR_CATEGORIES_LABEL)
@@ -27,7 +27,7 @@ pub fn render(state: Rc<Home>) -> Dom {
     })
 }
 
-fn category_value_signal(state: Rc<Home>) -> impl Signal<Item = String> {
+fn category_value_signal(state: Rc<AssetSearchBar>) -> impl Signal<Item = String> {
     map_ref! {
         let selected_categories = state.search_selected.categories.signal_cloned(),
         let category_label_lookup = state.search_options.category_label_lookup.signal_cloned() => {

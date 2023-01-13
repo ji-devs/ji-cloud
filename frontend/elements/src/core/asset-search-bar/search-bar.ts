@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 
-@customElement("home-search-bar")
+@customElement("asset-search-bar")
 export class _ extends LitElement {
     static get styles() {
         return [

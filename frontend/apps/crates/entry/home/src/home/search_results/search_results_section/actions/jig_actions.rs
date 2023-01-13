@@ -7,7 +7,7 @@ use crate::home::search_results::search_results_section::SearchResultsSection;
 
 impl SearchResultsSection {
     pub async fn load_jigs(self: &Rc<Self>) {
-        let mut req = self.home_state.search_selected.to_jig_search_request();
+        let mut req = self.home_state.search_bar.get_search_request_jig();
 
         req.page = Some(self.next_page.get());
 

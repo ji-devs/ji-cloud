@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/overlays/anchored-overlay";
 
-@customElement("home-search-section-select")
+@customElement("asset-search-bar-select")
 export class _ extends LitElement {
     static get styles() {
         return [
