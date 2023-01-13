@@ -385,6 +385,30 @@
     },
     "query": "\n            update resource_curation_data\n            set curation_status = $2\n            where resource_id = $1 and $2 is distinct from curation_status\n             "
   },
+  "0c29acc93ccc665521dc52423ee077a1e441f975353cca6d8bd56d59867eeb4f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\nselect jig_data.id,\n       display_name\nfrom jig_data\ninner join jig on live_id = jig_data.id\nwhere display_name <> '' and translated_name = '{}'\nand published_at is not null\nand name_translate_status is null\norder by coalesce(updated_at, created_at) desc\nlimit 50 for no key update skip locked;\n         "
+  },
   "0d33ddd6d34bf4755b8ff298de37d678fc3d79222c8d193dc06d1e8fe25b2354": {
     "describe": {
       "columns": [],
@@ -424,7 +448,7 @@
     },
     "query": "\nselect id,  kind as \"kind: AnimationKind\"\nfrom animation_metadata\ninner join global_animation_upload on animation_metadata.id = global_animation_upload.animation_id\nwhere (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)\nfor no key update of global_animation_upload\nfor share of animation_metadata\nskip locked\n"
   },
-  "0e26cf9d0f13ce40db1480057d31803f42865192310075b6968afa88bed75567": {
+  "0e017d149a122349a05541153e31dcbcfb195b34b2daf5ad032019ae9ccca0c5": {
     "describe": {
       "columns": [
         {
@@ -446,7 +470,7 @@
         "Left": []
       }
     },
-    "query": "\nselect jig_data.id,\n       description\nfrom jig_data\ninner join jig on live_id = jig_data.id\nwhere description <> '' and translated_description = '{}'\nand published_at is not null\norder by coalesce(updated_at, created_at) desc\nlimit 50 for no key update skip locked;\n "
+    "query": "\nselect jig_data.id,\n       description\nfrom jig_data\ninner join jig on live_id = jig_data.id\nwhere description <> '' and translated_description = '{}'\nand published_at is not null\nand description_translate_status is null\norder by coalesce(updated_at, created_at) desc\nlimit 50 for no key update skip locked;\n "
   },
   "0e9cec4ea69218f08784c12a17bcd8b15c22486f0e76051fea80fd21b12af760": {
     "describe": {
@@ -1206,19 +1230,6 @@
       }
     },
     "query": "\nupdate course_data_resource\nset resource_type_id = coalesce($2, resource_type_id)\nwhere id = $1 and $2 is distinct from resource_type_id\n            "
-  },
-  "1bbd51e78f6b9ac183e18e47701ef5a3a9e5d3b723a36eca60a407432ebfdf3c": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Jsonb"
-        ]
-      }
-    },
-    "query": "\n                                update image_metadata\n                                set translated_description = $2,\n                                last_synced_at = null\n                                where id = $1\n                                "
   },
   "1c34eda829dd92980a83bf0ff3b38800febb950fd3b6e5f3e3694938b7bc19e3": {
     "describe": {
@@ -2048,30 +2059,6 @@
     },
     "query": "update category set name = $1, updated_at = now() where id = $2"
   },
-  "340db3cac5b03fde55e6096402047e51794ccefe2135e40455e5bc0515375179": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: ImageId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "description",
-          "ordinal": 1,
-          "type_info": "Text"
-        }
-      ],
-      "nullable": [
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "\nselect id                               as \"id!: ImageId\",\n       description\nfrom image_metadata\n     inner join image_upload on id = image_id\nwhere description <> '' and translated_description = '{}'\nand processed_at is not null\norder by coalesce(updated_at, created_at) desc\nlimit 50 for no key update skip locked;\n "
-  },
   "340e501a7da4700b5bccce3e503981333ee8176b2043bf55410d9292833ccea1": {
     "describe": {
       "columns": [],
@@ -2605,6 +2592,19 @@
     },
     "query": "\nselect cdm.id          as \"id!: ModuleId\",\n       contents    as \"body!\",\n       created_at  as \"created_at!\",\n       updated_at  as \"updated_at!\",\n       kind        as \"kind!: ModuleKind\",\n       is_complete as \"is_complete!\"\nfrom course_data_module \"cdm\"\ninner join course on course.live_id = cdm.course_data_id\nwhere cdm.id is not distinct from $1\n"
   },
+  "3baefe8f0818e61f1611c99aa8d808d7c2c9717a88bfeb161433b733f2928fd1": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Jsonb"
+        ]
+      }
+    },
+    "query": "\n                                update image_metadata\n                                set translated_description = $2,\n                                    last_synced_at = null\n                                where id = $1\n                            "
+  },
   "3bc3d5919da8639f36fa262d3f7294004774ae8c98b735b8c569301c6d9fba60": {
     "describe": {
       "columns": [
@@ -2846,6 +2846,30 @@
       }
     },
     "query": "\ndelete from user_recent_image\nwhere user_id = $1 and image_id = $2\n            "
+  },
+  "4808ae9f63ec5723740307315d7e321d5430e5163c3febb1aed395fa5e1db671": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\nselect resource_data.id,\n       display_name\nfrom resource_data\ninner join resource on live_id = resource_data.id\nwhere display_name <> '' and translated_name = '{}'\nand published_at is not null\nand name_translate_status is null\norder by coalesce(updated_at, created_at) desc\nlimit 10 for no key update skip locked;\n         "
   },
   "497d102ecb4180c0d121a24d6005b7bf078dd8c59dc68949b82c62bbb41951c0": {
     "describe": {
@@ -4807,30 +4831,6 @@
     },
     "query": "\nselect play_count from jig_play_count\nwhere jig_id = $1;\n            "
   },
-  "690f520dc1b431f9df728e2959186616f8bb7af8c7a2c79e106f56a5fe06ae6b": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "display_name",
-          "ordinal": 1,
-          "type_info": "Text"
-        }
-      ],
-      "nullable": [
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "\nselect course_data.id,\n       display_name\nfrom course_data\ninner join course on live_id = course_data.id\nwhere display_name <> ''\n      and translated_name = '{}'\n      and published_at is not null\norder by coalesce(updated_at, created_at) desc\nlimit 50 for no key update skip locked;\n "
-  },
   "695ed5200a6ec80ca01f9ca3950a0ff0bc60dee8bcbe4a0954376eb26a38af1b": {
     "describe": {
       "columns": [],
@@ -5067,30 +5067,6 @@
       }
     },
     "query": "\nselect size as \"size: ImageSize\"\nfrom user_image_library\ninner join user_image_upload on user_image_library.id = user_image_upload.image_id\nwhere (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)\nfor no key update of user_image_upload\nfor share of user_image_library\nskip locked\n        "
-  },
-  "6d3b3c8363db91c0ea121dbf82f2c0565715528efc5e29128ce312cae1b5cecb": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: ImageId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "name",
-          "ordinal": 1,
-          "type_info": "Text"
-        }
-      ],
-      "nullable": [
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "\nselect id                               as \"id!: ImageId\",\n       name\nfrom image_metadata\n     inner join image_upload on id = image_id\nwhere name <> '' and translated_name = '{}'\nand processed_at is not null\norder by coalesce(updated_at, created_at) desc\nlimit 50 for no key update skip locked;\n "
   },
   "6ea38ea0c905f9d7aa943145a64b10e5d0cdc86d8f365dfdac9a8c45bba8e67c": {
     "describe": {
@@ -5437,30 +5413,6 @@
     },
     "query": "\n        select user_id \"user_id: UserId\",\n        (\n           select\n             case \n                when exists(select 1 from user_auth_basic where lower(user_auth_basic.email) = lower($1::text)) = true then false\n                else true\n            end\n        )     as \"is_oauth!\"      \n         from user_email \n         where lower(email) = lower($1::text)"
   },
-  "776b863bc111466aca15a643f55b3f790005fbd61319bf6492f3328b062d2d20": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "display_name",
-          "ordinal": 1,
-          "type_info": "Text"
-        }
-      ],
-      "nullable": [
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "\nselect resource_data.id,\n       display_name\nfrom resource_data\ninner join resource on live_id = resource_data.id\nwhere display_name <> '' and translated_name = '{}'\nand published_at is not null\norder by coalesce(updated_at, created_at) desc\nlimit 5 for no key update skip locked;\n         "
-  },
   "79bce8bafae973dfdb2932091ebeeed4f007ecf2849cc8c859d45a1fea68a251": {
     "describe": {
       "columns": [],
@@ -5702,6 +5654,30 @@
       }
     },
     "query": "\ninsert into course_data_resource(course_data_id, resource_type_id, display_name, resource_content)\nselect $2, resource_type_id, display_name, resource_content\nfrom course_data_resource\nwhere course_data_id = $1\n        "
+  },
+  "8088fa34227c64a6cc93a0c00dd61b847e661c3483858a951cc21c947ea1b83d": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: ImageId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "description",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\nselect id                               as \"id!: ImageId\",\n       description\nfrom image_metadata\n     inner join image_upload on id = image_id\nwhere description <> '' and translated_description = '{}'\nand processed_at is not null\nand description_translate_status is null\norder by coalesce(updated_at, created_at) desc\nlimit 10 for no key update skip locked;\n "
   },
   "80e01d48b2deca10d1bbdd15cd319c204e235705bb642eaba2a05a7cf17c5036": {
     "describe": {
@@ -7503,30 +7479,6 @@
     },
     "query": "select exists(select 1 from global_animation_upload where animation_id = $1 for no key update) as \"exists!\""
   },
-  "9e9c844bb4a39d2e6c747e842567bc944f6328f7a2f9589e89c614350ef9dd95": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "description",
-          "ordinal": 1,
-          "type_info": "Text"
-        }
-      ],
-      "nullable": [
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "\nselect resource_data.id,\n       description\nfrom resource_data\ninner join resource on live_id = resource_data.id\nwhere description <> '' and translated_description = '{}'\nand published_at is not null\norder by coalesce(updated_at, created_at) desc\nlimit 5 for no key update skip locked;\n "
-  },
   "9f99518316804bde4081b2b71e262da9148de6f4a164b674e4bdd130eb34a2ee": {
     "describe": {
       "columns": [
@@ -8628,30 +8580,6 @@
     },
     "query": "\nupdate user_profile\nset organization = $2,\n    updated_at = now()\nwhere user_id = $1 and organization is distinct from $2"
   },
-  "b04dde8af4a66417fde7ce064d4a962e4dc001d3db505b6ff294bfdf7debaeec": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "display_name",
-          "ordinal": 1,
-          "type_info": "Text"
-        }
-      ],
-      "nullable": [
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "\nselect jig_data.id,\n       display_name\nfrom jig_data\ninner join jig on live_id = jig_data.id\nwhere display_name <> '' and translated_name = '{}'\nand published_at is not null\norder by coalesce(updated_at, created_at) desc\nlimit 50 for no key update skip locked;\n         "
-  },
   "b153140eaccffcd332c14aa694bdfcfed7e9d4f043e4c25e39da6766f9595ac8": {
     "describe": {
       "columns": [
@@ -8691,6 +8619,19 @@
       }
     },
     "query": "\nselect draft_id from course join course_data on course.draft_id = course_data.id where course.id = $1 for update\n"
+  },
+  "b17bcf3e2a8034de77c43c7aa649e0566fffcd75e75988362a2b79ba298bc803": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Jsonb"
+        ]
+      }
+    },
+    "query": "\n                                update image_metadata\n                                set translated_name = $2,\n                                    last_synced_at = null\n                                where id = $1\n                                "
   },
   "b211b1f87835114b657632739dc3502a1de67cb2c971b0e53c4283b9086eaa9c": {
     "describe": {
@@ -9413,6 +9354,30 @@
       }
     },
     "query": "\nselect jdm.id          as \"id!: ModuleId\",\n       contents    as \"body!\",\n       created_at  as \"created_at!\",\n       updated_at  as \"updated_at!\",\n       kind        as \"kind!: ModuleKind\",\n       is_complete as \"is_complete!\"\nfrom jig_data_module \"jdm\"\ninner join jig on jig.live_id = jdm.jig_data_id \nwhere jdm.id is not distinct from $1 \n"
+  },
+  "c965d419a0e46d766a5b22b3f96a9b56bcd985196ae9bf41d662c813ad189aa2": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "description",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\nselect resource_data.id,\n       description\nfrom resource_data\ninner join resource on live_id = resource_data.id\nwhere description <> '' and translated_description = '{}'\nand published_at is not null\nand description_translate_status is null\norder by coalesce(updated_at, created_at) desc\nlimit 10 for no key update skip locked;\n "
   },
   "c9871e12739d5ae1acd8e3026e00ed927a54f717d5e5cd12f78456b99a7aa23b": {
     "describe": {
@@ -10138,6 +10103,30 @@
     },
     "query": "\n        with follower as (\n            select (array_agg(follower_id))[1]\n            from user_follow\n            where user_id = $1\n            group by followed_at\n            order by followed_at desc\n        ),\n        cte as (\n            select * from unnest(array(select follower.array_agg from follower)) with ordinality t(id, ord) order by ord\n        )\n        select  \"user\".id         as \"id!: UserId\",\n                username               as \"username!\",\n                given_name             as \"given_name!\",\n                family_name            as \"family_name!\",\n                profile_image_id       as \"profile_image?: ImageId\",\n                (select languages_spoken from user_profile where user_profile.user_id = \"user\".id and languages_spoken_public is true)      as \"languages_spoken?: Vec<String>\",\n                (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n                (select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\",\n                (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n                (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n                (select array(select circle.id\n                    from circle_member bm\n                    left join circle on bm.id = circle.id\n                    where bm.user_id = \"user\".id or circle.creator_id = \"user\".id\n                )) as \"circles!: Vec<CircleId>\"\n        from cte\n        inner join user_profile on cte.id = user_profile.user_id\n        inner join \"user\" on (cte.id = \"user\".id)\n        where ord > (1 * $2 * $3)\n        limit $3;\n\n            "
   },
+  "d86986c5ee22e43f142a6b2343db2498733bb652441754e7731d17052cdf19e6": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\nselect course_data.id,\n       display_name\nfrom course_data\ninner join course on live_id = course_data.id\nwhere display_name <> ''\n      and translated_name = '{}'\n      and published_at is not null\n      and name_translate_status is null\norder by coalesce(updated_at, created_at) desc\nlimit 50 for no key update skip locked;\n "
+  },
   "d935de8ff747d8408644105a61f99219aee129fd49e240cd3843d8374b02ea29": {
     "describe": {
       "columns": [
@@ -10382,6 +10371,30 @@
     },
     "query": "\nwith cte as (\n    select distinct style_id as id\n    from image_style\n)\nselect id as \"id: ImageStyleId\", display_name, created_at, updated_at\nfrom cte inner join style using (id)\norder by index\n        "
   },
+  "e2b7e553e95da72d34812de664967b5239a39e7ee92d942b9d5ecb29b65000ac": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: ImageId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\nselect id                               as \"id!: ImageId\",\n       name\nfrom image_metadata\n     inner join image_upload on id = image_id\nwhere name <> '' and translated_name = '{}'\nand processed_at is not null\nand name_translate_status is null\norder by coalesce(updated_at, created_at) desc\nlimit 10 for no key update skip locked;\n "
+  },
   "e3ee149ba3066bd72758e68b8e0437b9a3e3e1dfa3e8b1d940ae002d4b285805": {
     "describe": {
       "columns": [],
@@ -10417,19 +10430,6 @@
       }
     },
     "query": "delete from \"user\" where id = $1"
-  },
-  "e48a97ed01438217b5aedad3de9edd1ba2325d7e0af901dbc50de1ce4d2f1cab": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Jsonb"
-        ]
-      }
-    },
-    "query": "\n                                update image_metadata\n                                set translated_name = $2,\n                                last_synced_at = null\n                                where id = $1\n                                "
   },
   "e507c5682a9424e1b2e0971c135667c3f9fc13894921c9a2690eb05c63f2ade1": {
     "describe": {
@@ -11337,30 +11337,6 @@
     },
     "query": "\ninsert into user_auth_basic (user_id, email, password)\nvalues ($1, $2::text, $3)\n"
   },
-  "fee13397c052bc80759750c1729392956393f6d5fcb0f0cbbd32124bfc818f8c": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "description",
-          "ordinal": 1,
-          "type_info": "Text"
-        }
-      ],
-      "nullable": [
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "\nselect course_data.id,\n       description\nfrom course_data\ninner join course on live_id = course_data.id\nwhere description <> ''\n      and translated_description = '{}'\n      and published_at is not null\norder by coalesce(updated_at, created_at) desc\nlimit 50 for no key update skip locked;\n "
-  },
   "fefa25a00dfa38c48c39a6cbf38baac8dd2232cdc288e5ad93bece3ada8d71d6": {
     "describe": {
       "columns": [
@@ -11442,5 +11418,29 @@
       }
     },
     "query": "\n        with cte as (\n            select (array_agg(up.user_id))[1]\n            from user_profile \"up\"\n            inner join \"user\" on up.user_id = \"user\".id \n            left join circle_member \"cm\" on cm.user_id = up.user_id\n            where cm.id = any($1) or $1 = array[]::uuid[]\n            group by \"user\".created_at\n            order by \"user\".created_at desc\n        ),\n        cte1 as (\n            select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n           , ord) order by ord\n        )\n        select  user_id                as \"id!: UserId\",\n                username               as \"username!\",\n                given_name             as \"given_name!\",\n                family_name            as \"family_name!\",\n                profile_image_id       as \"profile_image?: ImageId\",\n                (select languages_spoken from user_profile where user_profile.user_id = \"user\".id and languages_spoken_public is true)      as \"languages_spoken?: Vec<String>\",\n                (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n                (select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\",\n                (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n                (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n                (select array(select circle.id\n                    from circle_member bm\n                    inner join circle on bm.id = circle.id\n                    where bm.user_id = \"user\".id\n                )) as \"circles!: Vec<CircleId>\"\n        from cte1\n        inner join user_profile on cte1.id = user_profile.user_id\n        inner join \"user\" on cte1.id = \"user\".id\n        where ord > (1 * $2 * $3)\n        order by ord\n        limit $3\n            "
+  },
+  "ff5daa1752a36defe511c3108a43a6c4315c41f50ab20bc76df1591cc8f4b1b2": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "description",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\nselect course_data.id,\n       description\nfrom course_data\ninner join course on live_id = course_data.id\nwhere description <> ''\n      and translated_description = '{}'\n      and published_at is not null\n      and description_translate_status is null\norder by coalesce(updated_at, created_at) desc\nlimit 50 for no key update skip locked;\n "
   }
 }
