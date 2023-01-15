@@ -8,6 +8,8 @@ use dominator::clone;
 
 impl AskQuestions {
     pub fn on_start(self: Rc<Self>) {
+
+        self.base.allow_stage_click();
         self.item.lock_ref().clone().start_asking();
     }
 
