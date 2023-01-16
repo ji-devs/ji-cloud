@@ -36,7 +36,8 @@ import "@elements/core/asset-search-bar/select";
 import "@elements/entry/asset/edit/sidebar/sidebar";
 import "@elements/entry/asset/edit/pages/landing";
 import "@elements/entry/asset/edit/selection/card";
-import "@elements/entry/asset/edit/selection/selection";
+import "@elements/entry/asset/edit/selection/jig-selection";
+import "@elements/entry/asset/edit/selection/course-selection";
 import "@elements/entry/asset/edit/sidebar/module/menu";
 import "@elements/entry/asset/edit/sidebar/module/window";
 import "@elements/entry/asset/edit/sidebar/header";
@@ -72,3 +73,6 @@ import "@elements/entry/asset/edit/post-publish/post-publish-action";
 import "@elements/_bundles/_sub-bundles/hebrew-buttons";
 import "@elements/core/modals/confirm";
 import "@elements/core/modals/video";
+
+import "@elements/entry/home/home/search-results/search-results";
+import "@elements/entry/home/home/search-results/search-results-section";

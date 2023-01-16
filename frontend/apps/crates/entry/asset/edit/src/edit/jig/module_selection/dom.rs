@@ -30,7 +30,7 @@ const STR_SHOW_ONBOARDING: &str = "Take the tour";
 impl ModuleSelection {
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self;
-        html!("jig-edit-selection", {
+        html!("asset-edit-jig-selection", {
             .prop("slot", "main")
             .children(
                 MODULE_KINDS

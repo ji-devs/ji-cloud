@@ -6,7 +6,7 @@ const STR_TITLE_1 = "Add an Activity";
 const STR_TITLE_2 = "Create your own digital learning path";
 const STR_TITLE_3 = "Drag activities to your JIG";
 
-@customElement("jig-edit-selection")
+@customElement("asset-edit-jig-selection")
 export class _ extends LitElement {
     static get styles() {
         return [

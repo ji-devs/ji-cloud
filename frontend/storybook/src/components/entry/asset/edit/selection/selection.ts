@@ -1,5 +1,5 @@
 import { argsToAttrs } from "@utils/attributes";
-import "@elements/entry/jig/edit/selection/selection";
+import "@elements/entry/jig/edit/selection/jig-selection";
 import { mapToString, arrayIndex } from "@utils/array";
 import { Card } from "./card";
 import { ModuleKind, moduleKinds } from "@elements/module/_common/types";
@@ -22,11 +22,11 @@ export const ModuleSelection = (props?: Partial<Args> & { slot?: string }) => {
     const { slot, moduleKinds } = props;
 
     return `
-    <jig-edit-selection ${slot && `slot="${slot}"`}>
+    <asset-edit-jig-selection ${slot && `slot="${slot}"`}>
         ${mapToString(moduleKinds, (module) => {
             return Card({ module, slot: "modules" });
         })}
-    </jig-edit-selection>
+    </asset-edit-jig-selection>
     `;
 };
 

@@ -11,39 +11,33 @@ use super::state::CourseSelection;
 impl CourseSelection {
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self;
-        html!("div", {
-            .style("max-height", "100vh")
-            .style("overflow", "auto")
+
+        state.search();
+
+        html!("asset-edit-course-selection", {
             .prop("slot", "main")
-            .child(html!("div", {
-                .style("display", "grid")
-                .style("margin", "20px")
-                .child(state.search_bar.render(Rc::new(clone!(state => move || {
-                    state.search();
-                }))))
-            }))
-            .child(html!("div", {
-                .style("display", "grid")
-                .style("grid-template-columns", "repeat(auto-fill, 216px)")
-                .style("gap", "20px")
-                .style("padding", "20px")
-                .children_signal_vec(state.search_results.signal_vec_cloned().map(clone!(state => move |jig| {
-                    state.render_asset(&jig)
-                })))
+            .child(state.search_bar.render(Rc::new(clone!(state => move || {
+                state.search();
+            }))))
+            .child(html!("home-search-results", {
+                .prop("slot", "results")
+                .prop_signal("jigCount", state.search_results.signal_vec_cloned().len())
+                .prop_signal("query", state.search_bar.search_selected.query.signal_cloned())
+                .child(html!("home-search-results-section", {
+                    .prop("slot", "sections")
+                    .prop("kind", "jig")
+                    .prop_signal("resultsCount", state.search_results.signal_vec_cloned().len())
+                    .children_signal_vec(state.search_results.signal_vec_cloned().map(clone!(state => move |jig| {
+                        state.render_asset(&jig)
+                    })))
+                }))
             }))
             .child_signal(state.drag.signal_ref(clone!(state => move|drag| {
                 drag.as_ref().map(|drag| {
                     let asset = &drag.data;
 
                     html!("div", {
-                        .style("position", "fixed")
-                        .style("top", "0")
-                        .style("left", "0")
-                        .style("z-index", "1")
-                        .style("cursor", "grabbing")
-                        .style("touch-action", "none")
-                        .style("user-select", "none")
-                        .style("pointer-events", "none")
+                        .prop("slot", "dragging")
                         .style_signal("transform", drag.transform_signal())
                         .global_event(clone!(state, drag => move |evt: events::PointerMove| {
                             state.on_pointer_move(&drag, evt.x(), evt.y());
@@ -72,6 +66,7 @@ impl CourseSelection {
         let state = self;
         let asset: Asset = (**jig).clone().into();
         html!("div", {
+            .prop("slot", "results")
             .style("cursor", "grab")
             .style("touch-action", "none")
             .style("user-select", "none")
@@ -84,7 +79,6 @@ impl CourseSelection {
             .event_with_options(
                 &EventOptions::bubbles(),
                 clone!(state, jig => move |evt: events::PointerDown| {
-                    log::info!("hay");
                     let elem = evt.dyn_target().unwrap_ji();
                     state.on_pointer_down(&elem, evt.x(), evt.y(), &jig);
                 })
