@@ -22,17 +22,17 @@ export class _ extends LitElement {
             css`
                 :host {
                     display: block;
-                    padding: 50px 0;
+                    /* padding: 50px 0; */
                 }
                 h1 {
-                    font-size: 40px;
+                    font-size: 24px;
                     color: #383838;
                     text-align: center;
                     font-weight: normal;
                 }
                 h1 a {
                     color: #fd7076;
-                    font-weight: bold;
+                    font-weight: 600;
                 }
 
                 h1 a {
@@ -43,13 +43,6 @@ export class _ extends LitElement {
                     display: grid;
                     justify-content: center;
                     margin-top: 50px;
-                }
-
-                /* mobile */
-                @media (max-width: 1000px) {
-                    h1 {
-                        font-size: 20px;
-                    }
                 }
             `,
         ];

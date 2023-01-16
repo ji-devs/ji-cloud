@@ -10,6 +10,7 @@ export class _ extends LitElement {
                     cursor: pointer;
                     display: flex;
                     justify-content: space-between;
+                    align-items: center;
                     padding: 0 10px;
                 }
                 .value {
@@ -19,7 +20,7 @@ export class _ extends LitElement {
                     white-space: nowrap;
                 }
                 .anchor img-ui {
-                    width: 30px;
+                    width: 18px;
                     transition: transform 0.3s;
                 }
                 :host([open]) .anchor img-ui {

@@ -8,7 +8,7 @@ export class _ extends LitElement {
                 :host {
                     position: relative;
                     display: flex;
-                    font-size: 20px;
+                    font-size: 14px;
                 }
                 .bar {
                     border-radius: 36px;
@@ -18,7 +18,7 @@ export class _ extends LitElement {
                     grid-template-columns: 1fr 200px 200px auto;
                     align-items: center;
                     padding-left: 18px;
-                    height: 48px;
+                    height: 40px;
                     box-sizing: border-box;
                     border: solid 1px #ffffff;
                 }
@@ -27,9 +27,9 @@ export class _ extends LitElement {
                 }
                 ::slotted([slot="query"]) {
                     border: none;
-                    padding: 0 16px;
-                    height: 39px;
-                    font-size: 20px;
+                    padding: 0 10px;
+                    height: calc(100% - 2px);
+                    font-size: inherit;
                     color: var(--dark-gray-6);
                 }
                 ::slotted([slot="query"])::placeholder {
@@ -45,8 +45,9 @@ export class _ extends LitElement {
                 ::slotted([slot="button"]) {
                     /* cover .bar border */
                     margin: -1px -2px 0 0;
-                    height: 48px;
-                    font-size: 24px;
+                    height: 40px;
+                    font-size: 16px;
+                    font-weight: 600;
                 }
 
                 .advanced {
@@ -70,6 +71,8 @@ export class _ extends LitElement {
                     ::slotted([slot="query"]) {
                         grid-column: 1 / span 2;
                         border-bottom: solid 1px var(--light-gray-2);
+                        padding: 10px;
+                        font-size: 18px;
                     }
 
                     ::slotted([slot="age"]) {

@@ -41,11 +41,11 @@ export class _ extends LitElement {
                 .left-side img-ui {
                     position: absolute;
                     right: 100%;
-                    height: 55px;
+                    height: 45px;
                 }
                 h2 {
                     margin: 0;
-                    font-size: 40px;
+                    font-size: 24px;
                     font-weight: 800;
                     color: var(--dark-blue-4);
                 }
@@ -59,6 +59,7 @@ export class _ extends LitElement {
 
                     display: grid;
                     grid-template-columns: repeat(auto-fill, 354px);
+                    grid-template-columns: repeat(auto-fill, 216px);
 
                     justify-content: space-between;
                     row-gap: 80px;
@@ -73,7 +74,7 @@ export class _ extends LitElement {
                 }
 
                 /* mobile */
-                @media (max-width: 1000px) {
+                /* @media (max-width: 1000px) {
                     :host {
                         padding: 5px;
                     }
@@ -89,7 +90,7 @@ export class _ extends LitElement {
                     .results {
                         justify-content: center;
                     }
-                }
+                } */
             `,
         ];
     }
