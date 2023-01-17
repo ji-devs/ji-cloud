@@ -16,6 +16,7 @@ struct TranslateTextRequest {
     q: Vec<String>,
     target: String,
     source: String,
+    format: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -139,7 +140,6 @@ impl GoogleTranslate {
                     .update_resource_translations()
                     .await
                     .context("update resource translation task errored"),
-
                 _ => continue,
             };
 
@@ -171,7 +171,7 @@ from image_metadata
 where description <> '' and translated_description = '{}'
 and processed_at is not null
 order by coalesce(updated_at, created_at) desc
-limit 50 for no key update skip locked;
+limit 10 for no key update skip locked;
  "#
         )
         .fetch(&mut txn)
@@ -192,7 +192,7 @@ from image_metadata
 where name <> '' and translated_name = '{}'
 and processed_at is not null
 order by coalesce(updated_at, created_at) desc
-limit 50 for no key update skip locked;
+limit 10 for no key update skip locked;
  "#
         )
         .fetch(&mut txn)
@@ -227,13 +227,16 @@ limit 50 for no key update skip locked;
                         .execute(&mut txn)
                         .await?;
                     } else {
-                        log::warn!("Empty translation list for image_id: {}", t.image_id.0,);
+                        log::warn!(
+                            "Empty description translation list for image_id: {}",
+                            t.image_id.0,
+                        );
                         continue;
                     };
                 }
                 Err(error) => {
                     log::error!(
-                        "Could not translate image description. image_id: {}, error: {}",
+                        "Could not translate description for image_id: {}, error: {}",
                         t.image_id.0,
                         error,
                     );
@@ -263,13 +266,13 @@ limit 50 for no key update skip locked;
                         .execute(&mut txn)
                         .await?;
                     } else {
-                        log::warn!("Empty translation list for image_id: {}", t.image_id.0,);
+                        log::warn!("Empty name translation list for image_id: {}", t.image_id.0,);
                         continue;
                     };
                 }
                 Err(error) => {
                     log::error!(
-                        "Could not translate image name. image_id: {}, error: {}",
+                        "Could not translate name for image_id: {}, error: {}",
                         t.image_id.0,
                         error,
                     );
@@ -293,14 +296,14 @@ limit 50 for no key update skip locked;
         let descriptions: Vec<_> = sqlx::query!(
             //language=SQL
             r#"
-select jig_data.id,
+select jig_data.id ,
        description
 from jig_data
 inner join jig on live_id = jig_data.id
 where description <> '' and translated_description = '{}'
 and published_at is not null
 order by coalesce(updated_at, created_at) desc
-limit 50 for no key update skip locked;
+limit 30 for no key update skip locked;
  "#
         )
         .fetch(&mut txn)
@@ -321,7 +324,7 @@ inner join jig on live_id = jig_data.id
 where display_name <> '' and translated_name = '{}'
 and published_at is not null
 order by coalesce(updated_at, created_at) desc
-limit 50 for no key update skip locked;
+limit 30 for no key update skip locked;
          "#
         )
         .fetch(&mut txn)
@@ -355,12 +358,15 @@ limit 50 for no key update skip locked;
                     .execute(&mut txn)
                     .await?;
                 } else {
-                    log::debug!("Empty translation list for jig_data_id: {}", t.jig_data_id);
+                    log::debug!(
+                        "Empty description translation list for jig_data_id: {}",
+                        t.jig_data_id
+                    );
                     continue;
                 };
             } else {
                 log::debug!(
-                    "Could not translate jig_data_id: {}, string: {}",
+                    "Could not translate description for jig_data_id: {}, string: {}",
                     t.jig_data_id,
                     t.text
                 );
@@ -388,12 +394,15 @@ limit 50 for no key update skip locked;
                     .execute(&mut txn)
                     .await?;
                 } else {
-                    log::debug!("Empty translation list for jig_data_id: {}", t.jig_data_id);
+                    log::debug!(
+                        "Empty name translation list for jig_data_id: {}",
+                        t.jig_data_id
+                    );
                     continue;
                 };
             } else {
                 log::debug!(
-                    "Could not translate jig_data_id: {}, string: {}",
+                    "Could not translate name for jig_data_id: {}, string: {}",
                     t.jig_data_id,
                     t.text
                 );
@@ -479,14 +488,14 @@ limit 5 for no key update skip locked;
                     .await?;
                 } else {
                     log::debug!(
-                        "Empty translation list for resource_data_id: {}",
+                        "Empty description translation list for resource_data_id: {}",
                         t.resource_data_id
                     );
                     continue;
                 };
             } else {
                 log::debug!(
-                    "Could not translate resource_data_id: {}, string: {}",
+                    "Could not translate description for resource_data_id: {}, string: {}",
                     t.resource_data_id,
                     t.text
                 );
@@ -515,14 +524,14 @@ limit 5 for no key update skip locked;
                     .await?;
                 } else {
                     log::debug!(
-                        "Empty translation list for resource_data_id: {}",
+                        "Empty name translation list for resource_data_id: {}",
                         t.resource_data_id
                     );
                     continue;
                 };
             } else {
                 log::debug!(
-                    "Could not translate resource_data_id: {}, string: {}",
+                    "Could not translate name for resource_data_id: {}, string: {}",
                     t.resource_data_id,
                     t.text
                 );
@@ -553,7 +562,7 @@ where description <> ''
       and translated_description = '{}'
       and published_at is not null
 order by coalesce(updated_at, created_at) desc
-limit 50 for no key update skip locked;
+limit 20 for no key update skip locked;
  "#
         )
         .fetch(&mut txn)
@@ -575,7 +584,7 @@ where display_name <> ''
       and translated_name = '{}'
       and published_at is not null
 order by coalesce(updated_at, created_at) desc
-limit 50 for no key update skip locked;
+limit 20 for no key update skip locked;
  "#
         )
         .fetch(&mut txn)
@@ -609,12 +618,15 @@ limit 50 for no key update skip locked;
                     .execute(&mut txn)
                     .await?;
                 } else {
-                    log::debug!("Empty translation list for course_id: {}", t.course_data_id);
+                    log::debug!(
+                        "Empty description translation list for course_id: {}",
+                        t.course_data_id
+                    );
                     continue;
                 };
             } else {
                 log::debug!(
-                    "Could not translate course_id: {}, string: {}",
+                    "Could not translate description for course_id: {}, string: {}",
                     t.course_data_id,
                     t.text
                 );
@@ -642,12 +654,15 @@ limit 50 for no key update skip locked;
                     .execute(&mut txn)
                     .await?;
                 } else {
-                    log::debug!("Empty translation list for course_id: {}", t.course_data_id);
+                    log::debug!(
+                        "Empty name translation list for course_id: {}",
+                        t.course_data_id
+                    );
                     continue;
                 };
             } else {
                 log::debug!(
-                    "Could not translate course_id: {}, string: {}",
+                    "Could not translate name for course_id: {}, string: {}",
                     t.course_data_id,
                     t.text
                 );
@@ -680,6 +695,7 @@ pub async fn translate_text(
             q: queries,
             target: target.to_string(),
             source: source.to_string(),
+            format: "text".to_string(),
         })
         .send()
         .await?
@@ -704,7 +720,7 @@ pub async fn translate_text(
 }
 
 pub async fn multi_translation(
-    description: &str,
+    query: &str,
     api_key: &str,
 ) -> anyhow::Result<Option<HashMap<String, String>>> {
     //https://cloud.google.com/translate/docs/languages
@@ -713,7 +729,7 @@ pub async fn multi_translation(
         .post("https://translation.googleapis.com/language/translate/v2/detect")
         .query(&[("key", &api_key.to_owned())])
         .json(&DetectLanguageRequest {
-            q: description.to_string(),
+            q: query.to_string(),
         })
         .send()
         .await?
@@ -732,14 +748,17 @@ pub async fn multi_translation(
         s
     };
 
-    let src = &v[0];
+    if &v[0] == "und" {
+        return Ok(None);
+    }
+
+    let src = &v[0][..2];
 
     let mut translation_list = HashMap::new();
 
     for l in LANGUAGES {
-        let text = if l != src {
-            let text: Option<String> =
-                translate_text(description, l, src, &api_key.to_owned()).await?;
+        let text = if l != &src {
+            let text: Option<String> = translate_text(query, l, src, &api_key.to_owned()).await?;
             text
         } else {
             None
@@ -748,12 +767,8 @@ pub async fn multi_translation(
         if let Some(meep) = text {
             translation_list.insert(l.to_owned().to_owned(), meep);
         } else {
-            translation_list.insert(l.to_owned().to_owned(), description.to_owned());
+            translation_list.insert(l.to_owned().to_owned(), query.to_owned());
         };
-    }
-
-    if translation_list.is_empty() {
-        return Ok(None);
     }
 
     Ok(Some(translation_list))
