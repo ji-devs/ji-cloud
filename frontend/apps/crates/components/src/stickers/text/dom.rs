@@ -40,14 +40,21 @@ pub fn render_sticker_text<T: AsSticker>(
 ) -> Dom {
     let _opts = opts.unwrap_or_default();
 
-    let get_visible_signals = || {
-        map_ref! {
-            let is_editing = text.is_editing.signal(),
-            let is_active = stickers.selected_signal(index.clone())
-                => {
-                    (*is_active, *is_editing)
-                }
-        }
+    let show_renderer_signal = map_ref! {
+        let is_editing = text.is_editing.signal(),
+        let is_active = stickers.selected_signal(index.clone())
+            => {
+                !*is_active || !*is_editing
+            }
+    };
+
+    let sticker_menu_signal = map_ref! {
+        let is_editing = text.is_editing.signal(),
+        let is_active = stickers.selected_signal(index.clone()),
+        let is_editable = text.is_editable.signal()
+            => {
+                (*is_active && !*is_editing, *is_editable)
+            }
     };
 
     fn apply_transform<A: AsRef<HtmlElement>>(
@@ -79,8 +86,8 @@ pub fn render_sticker_text<T: AsSticker>(
                 })))
             })
         )
-        .child_signal(get_visible_signals().map(clone!(stickers, text, index => move |(is_active, is_editing)| {
-            if !is_active || !is_editing {
+        .child_signal(show_renderer_signal.dedupe().map(clone!(stickers, text, index => move |show_renderer| {
+            if show_renderer {
                 //non-interactive rendering of wysiwyg text
                 Some(html!("wysiwyg-output-renderer", {
                     .prop_signal("valueAsString", text.value.signal_cloned())
@@ -117,12 +124,17 @@ pub fn render_sticker_text<T: AsSticker>(
                 }))
             }
         })))
-        .child_signal(get_visible_signals().map(clone!(stickers, text, index => move |(is_active, is_editing)| {
-            if is_active && !is_editing {
+        .child_signal(sticker_menu_signal.map(clone!(stickers, text, index => move |(should_show, is_editable)| {
+            if should_show {
+                let menu = if is_editable {
+                    Some(clone!(stickers, index, text => move || render_sticker_text_menu(stickers.clone(), index.clone(), text.clone())))
+                } else {
+                    None
+                };
                 Some(render_transform(
                     text.transform.clone(),
                     ResizeLevel::None,
-                    Some(clone!(stickers, index, text => move || render_sticker_text_menu(stickers.clone(), index.clone(), text.clone())))
+                    menu,
                 ))
             } else {
                 None

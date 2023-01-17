@@ -9,6 +9,7 @@ use shared::domain::module::body::{
     find_answer::{Mode, ModuleData as RawData, Question as RawQuestion, QuestionField, Step},
 };
 use std::rc::Rc;
+use utils::unwrap::UnwrapJiExt;
 
 pub enum Direction {
     Up,
@@ -114,6 +115,14 @@ impl Base {
     pub fn delete_question(&self, index: usize) {
         self.questions.lock_mut().remove(index);
         if self.questions.lock_ref().is_empty() {
+            if let QuestionField::Text(index) = self.question_field.get_cloned() {
+                self.stickers
+                    .get_as_text(index)
+                    .unwrap_ji()
+                    .can_delete
+                    .set_neq(true);
+            }
+
             self.question_field.set(QuestionField::Dynamic(None));
         }
 
