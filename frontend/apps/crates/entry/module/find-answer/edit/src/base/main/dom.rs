@@ -4,20 +4,25 @@ use crate::base::state::Phase;
 use components::{
     backgrounds::dom::render_backgrounds,
     module::_common::edit::prelude::*,
-    stickers::{
-        dom::{render_stickers, render_stickers_raw},
-        state::Sticker,
-    },
+    stickers::{dom::render_stickers, state::Sticker},
     traces::edit::TracesEdit,
 };
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
-use shared::domain::module::body::find_answer::Step;
+use shared::domain::module::body::find_answer::{QuestionField, Step};
 use std::rc::Rc;
+use utils::unwrap::UnwrapJiExt;
 
 impl DomRenderable for Main {
     fn render(state: Rc<Main>) -> Dom {
         html!("empty-fragment", {
+            .future(state.base.question_field.signal_cloned().for_each(clone!(state => move |question| {
+                if let QuestionField::Text(index) = question {
+                    let text = state.base.stickers.get_as_text(index).unwrap_ji();
+                    text.can_delete.set_neq(false);
+                }
+                async {}
+            })))
             .future(state.base.stickers.selected_index.signal_ref(|selected| selected.clone()).for_each(clone!(state => move |selected| {
                 if state.base.step.get_cloned() == Step::Three {
                     let is_empty = state.base.questions.lock_ref().is_empty();
@@ -38,26 +43,18 @@ impl DomRenderable for Main {
                 .prop("path", "jig/play/design-grid.svg")
                 .style("height", "100%")
             }))
-            .children_signal_vec(
-                state.base.phase.signal_cloned().map(clone!(state => move |phase| {
+            // Normally we would render raw stickers for `Trace`, but because we need to have access to the renderer_ref on a sticker to
+            // show the question's text, we use regular stickers. The traces component will overlay the stickers so that they cannot be edited.
+            .child(render_stickers(state.base.stickers.clone()))
+            .child_signal(
+                state.base.phase.signal_cloned().map(move |phase| {
                     match phase {
-                        Phase::Layout => {
-                            vec![
-                                render_stickers(state.base.stickers.clone())
-                            ]
-                        },
                         Phase::Trace(traces) => {
-                            let raw_stickers = state.base.stickers.to_raw();
-                            let theme_id = state.base.theme_id.get();
-
-                            vec![
-                                render_stickers_raw(&raw_stickers, theme_id),
-                                TracesEdit::render(traces.clone()),
-                            ]
+                            Some(TracesEdit::render(traces.clone()))
                         }
+                        Phase::Layout => None,
                     }
-                }))
-                .to_signal_vec()
+                })
             )
         })
     }

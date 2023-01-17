@@ -22,6 +22,8 @@ pub struct Text {
     /// Optional reference to the wysiwyg-output-renderer
     pub renderer_ref: Mutable<Option<HtmlElement>>,
     pub is_editing: Mutable<bool>,
+    pub is_editable: Mutable<bool>,
+    pub can_delete: Mutable<bool>,
 }
 
 impl Text {
@@ -33,12 +35,15 @@ impl Text {
     ) -> Self {
         let text = text.clone();
         let is_editing = Mutable::new(false);
+        let is_editable = Mutable::new(true);
 
         let transform_callbacks = TransformCallbacks::new(
             on_transform_finished,
             //transform double-click
-            Some(clone!(is_editing => move || {
-                is_editing.set_neq(true)
+            Some(clone!(is_editable, is_editing => move || {
+                if is_editable.get() {
+                    is_editing.set_neq(true)
+                }
             })),
             on_blur.map(clone!(is_editing => move|on_blur| {
                 move || {
@@ -59,6 +64,8 @@ impl Text {
             editor,
             renderer_ref: Mutable::new(None),
             is_editing,
+            is_editable,
+            can_delete: Mutable::new(true),
         }
     }
 

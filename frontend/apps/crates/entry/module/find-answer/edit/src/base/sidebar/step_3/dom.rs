@@ -10,6 +10,7 @@ use components::{
     audio::input::{AudioInput, AudioInputCallbacks, AudioInputOptions},
     hebrew_buttons::HebrewButtons,
     overlay::handle::OverlayHandle,
+    stickers::state::Sticker,
     tabs::{MenuTab, MenuTabKind},
 };
 use dominator::{clone, html, with_node, Dom};
@@ -19,8 +20,14 @@ use futures_signals::{
     signal_vec::SignalVecExt,
 };
 use js_sys::Reflect;
-use shared::domain::module::body::{Audio, _groups::design::TraceKind};
+use shared::domain::module::body::{
+    Audio,
+    _groups::design::{Sticker as RawSticker, Text, TraceKind},
+    find_answer::QuestionField,
+};
 use utils::prelude::*;
+use wasm_bindgen::JsValue;
+use wasm_bindgen_futures::spawn_local;
 use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement};
 
 fn empty_signal(state: Rc<Step3>) -> impl Signal<Item = bool> {
@@ -94,6 +101,19 @@ pub fn render(state: Rc<Step3>) -> Dom {
     state.sidebar.base.continue_next_fn.set(None);
 
     html!("module-sidebar-body", {
+        .after_removed(clone!(state => move |_| {
+            if let QuestionField::Text(field_index) = state.sidebar.base.question_field.get_cloned() {
+                let field = state.sidebar.base.stickers.get_as_text(field_index).unwrap_ji();
+                field.is_editable.set_neq(true);
+            }
+        }))
+        .future(state.sidebar.base.question_field.signal_cloned().for_each(clone!(state => move |field| {
+            if let QuestionField::Text(field_index) = field {
+                let field = state.sidebar.base.stickers.get_as_text(field_index).unwrap_ji();
+                field.is_editable.set_neq(false);
+            }
+            async {}
+        })))
         .prop("slot", "body")
         .prop_signal("dark", empty_signal(state.clone()).map(|is_empty| !is_empty))
         .child_signal(state.advanced_visible.signal().map(clone!(state => move |visible| {
@@ -118,6 +138,17 @@ pub fn render(state: Rc<Step3>) -> Dom {
                             .prop("color", "blue")
                             .prop("icon", "circle-+-blue")
                             .event(clone!(state => move|_: events::Click| {
+                                let raw_sticker = RawSticker::Text(Text::from_value(format!(
+                                    r#"{{"version":"0.1.0","content":[{{"children":[{{"text":"{}","element":"H2"}}]}}]}}"#,
+                                    "Your question box"
+                                )));
+                                let text_sticker = Sticker::new(state.sidebar.base.stickers.clone(), &raw_sticker);
+                                if let Sticker::Text(text) = &text_sticker {
+                                    text.can_delete.set(false);
+                                }
+                                state.sidebar.base.stickers.add_sticker(text_sticker);
+                                let index = state.sidebar.base.stickers.list.lock_ref().len() - 1;
+                                state.sidebar.base.question_field.set(QuestionField::Text(index));
                                 state.sidebar.base.add_default_question();
                                 state.sidebar.base.current_question.set(Some(0))
                             }))
@@ -593,6 +624,28 @@ fn get_question_audio_input(
     AudioInput::new(opts, callbacks)
 }
 
+fn set_question_sticker_text(state: Rc<Step3>, value: String) {
+    if let QuestionField::Text(field_index) = state.sidebar.base.question_field.get_cloned() {
+        let text = state
+            .sidebar
+            .base
+            .stickers
+            .get_as_text(field_index)
+            .unwrap_ji();
+
+        // Weird bug: If the value is an empty string, the sticker's value will be updated,
+        // but future updates will not work correctly. Adding in some whitespace resolves this.
+        let value = if value.is_empty() { " ".into() } else { value };
+
+        Reflect::set(
+            &text.renderer_ref.get_cloned().unwrap_ji(),
+            &JsValue::from_str("textValue"),
+            &JsValue::from_str(&value),
+        )
+        .unwrap_ji();
+    }
+}
+
 fn render_tab_body(state: Rc<Step3>, tab: Tab) -> Dom {
     match tab {
         Tab::Question => {
@@ -601,6 +654,11 @@ fn render_tab_body(state: Rc<Step3>, tab: Tab) -> Dom {
                 .child_signal(current_question_signal(state.clone()).map(clone!(state => move |question| {
                     question.map(clone!(state => move |(index, question)| {
                         let audio_input = get_question_audio_input(state.clone(), question.question_audio.clone(), index, question.clone());
+
+                        spawn_local(clone!(state, question => async move {
+                            // Since the Question tab is always displayed first, we can set the text here
+                            set_question_sticker_text(state, question.question_text.get_cloned().unwrap_or_default());
+                        }));
 
                         html!("empty-fragment", {
                             .child(html!("input-wrapper", {
@@ -611,6 +669,10 @@ fn render_tab_body(state: Rc<Step3>, tab: Tab) -> Dom {
                                     .prop_signal("value", question.question_text.signal_cloned().map(|text| text.unwrap_or_default()))
                                     .prop("placeholder", crate::strings::step_3::STR_PLACEHOLDER)
                                     .prop("rows", 1)
+                                    .event(clone!(state => move |evt: events::Input| {
+                                        let target = evt.dyn_target::<HtmlTextAreaElement>().unwrap_ji();
+                                        set_question_sticker_text(state.clone(), target.value());
+                                    }))
                                     .event(move |evt: events::Change| {
                                         let target = evt.dyn_target::<HtmlTextAreaElement>().unwrap_ji();
                                         let value = target.value();

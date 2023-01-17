@@ -233,7 +233,7 @@ pub fn render_sticker<T: AsSticker>(
                 if let Some(selected) = stickers.selected_index.get_cloned() {
                     if Some(selected) == index.get_cloned() {
                         let can_delete = if let Some(text) = stickers.get_as_text(selected) {
-                            !text.is_editing.get()
+                            !text.is_editing.get() && text.can_delete.get()
                         } else {
                             true
                         };
