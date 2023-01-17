@@ -23,6 +23,7 @@ use shared::domain::{
         AffiliationId, AgeRangeId, AnimationStyleId, ImageStyleId, ImageTagIndex, ResourceTypeId,
         SubjectId,
     },
+    pro_dev::unit::ProDevUnitId,
 };
 use sqlx::{
     postgres::{PgConnectOptions, PgPool, PgPoolOptions},
@@ -119,6 +120,10 @@ impl Metadata for CategoryId {
 
 impl Metadata for SubjectId {
     const TABLE: &'static str = "subject";
+}
+
+impl Metadata for ProDevUnitId {
+    const TABLE: &'static str = "unit";
 }
 
 #[instrument(skip(conn, meta))]

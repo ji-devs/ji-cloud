@@ -19,6 +19,7 @@ use crate::error;
 
 pub(crate) mod additional_resource;
 pub(crate) mod module;
+pub(crate) mod unit;
 
 pub async fn create(
     pool: &PgPool,
@@ -169,7 +170,7 @@ select cte.pro_dev_id                                          as "pro_dev_id: P
              where pddr.pro_dev_data_id = cte.draft_or_live_id
        )                                                    as "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
        array(
-            select row(id)
+            select row(pddu.unit_id)
             from pro_dev_data_unit "pddu"
             where pddu.pro_dev_data_id = pro_dev_data.id
             order by "index"
@@ -437,7 +438,7 @@ select pro_dev.id                                                               
                 where pro_dev_data_id = pro_dev_data.id
           )                                          as "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
     array(
-            select row(id)
+            select row(unit_id)
             from pro_dev_data_unit "pddu"
             where pddu.pro_dev_data_id = pro_dev_data.id
             order by "index"
@@ -536,7 +537,6 @@ pub async fn update_draft(
     description: Option<&str>,
     privacy_level: Option<PrivacyLevel>,
     other_keywords: Option<String>,
-    units: Option<&[ProDevUnitId]>,
 ) -> Result<(), error::UpdateWithMetadata> {
     let mut txn = pool.begin().await?;
 
@@ -611,7 +611,6 @@ where id = $1 and $2 is distinct from other_keywords"#,
             r#"
 update pro_dev_data
 set display_name = $2,
-    translated_name = '{}',
     updated_at = now()
 where id = $1 and $2 is distinct from display_name"#,
             draft_id,
@@ -642,14 +641,6 @@ where id = $1
             .await
             .map_err(super::meta::handle_metadata_err)?;
     }
-
-    // ProDev Units
-    //
-    // if let Some(jig) = unit_ids {
-    //     super::recycle_metadata(&mut txn, "pro_dev_data", draft_id, jig)
-    //         .await
-    //         .map_err(super::meta::handle_metadata_err)?;
-    // }
 
     txn.commit().await?;
 
@@ -682,6 +673,7 @@ where id is not distinct from $3
     .await?;
 
     txn.commit().await?;
+
     Ok(())
 }
 
@@ -840,19 +832,19 @@ where pro_dev_data_id = $1
     .execute(&mut *txn)
     .await?;
 
-    //     sqlx::query!(
-    //         //language=SQL
-    //         r#"
-    // insert into pro_dev_data_unit(pro_dev_data_id, unit_id, index)
-    // select $2, unit_id, index
-    // from pro_dev_data_jig
-    // where pro_dev_data_id = $1
-    //         "#,
-    //         from_data_id,
-    //         new_id,
-    //     )
-    //     .execute(&mut *txn)
-    //     .await?;
+    sqlx::query!(
+        //language=SQL
+        r#"
+    insert into pro_dev_data_unit(pro_dev_data_id, display_name, description, index, value)
+    select $2, display_name, description, index, value 
+    from pro_dev_data_unit
+    where pro_dev_data_id = $1
+            "#,
+        from_data_id,
+        new_id,
+    )
+    .execute(&mut *txn)
+    .await?;
 
     Ok(new_id)
 }

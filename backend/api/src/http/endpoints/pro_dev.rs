@@ -24,6 +24,8 @@ use crate::{
     service::ServiceData,
 };
 
+pub mod unit;
+
 pub const DEFAULT_PAGE_LIMIT: u32 = 20;
 pub const MAX_PAGE_LIMIT: u32 = 100;
 
@@ -117,7 +119,6 @@ async fn update_draft(
         req.description.as_deref(),
         req.privacy_level,
         req.other_keywords,
-        req.units.as_deref(),
     )
     .await?;
 

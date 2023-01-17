@@ -67,7 +67,7 @@ async fn get_live(
         AssetType::Resource => db::resource::module::get_live(&db, module_id)
             .await?
             .ok_or(error::NotFound::ResourceNotFound)?,
-        AssetType::ProDev => db::resource::module::get_live(&db, module_id)
+        AssetType::ProDev => db::pro_dev::module::get_live(&db, module_id)
             .await?
             .ok_or(error::NotFound::ResourceNotFound)?,
     };
@@ -93,7 +93,7 @@ async fn get_draft(
         AssetType::Resource => db::resource::module::get_draft(&db, module_id)
             .await?
             .ok_or(error::NotFound::ResourceNotFound)?,
-        AssetType::ProDev => db::resource::module::get_draft(&db, module_id)
+        AssetType::ProDev => db::pro_dev::module::get_draft(&db, module_id)
             .await?
             .ok_or(error::NotFound::ResourceNotFound)?,
     };

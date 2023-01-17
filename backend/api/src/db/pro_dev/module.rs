@@ -86,7 +86,6 @@ where cdm.id is not distinct from $1
     }
 }
 
-/// FIXME dedup this from live JIG
 pub async fn get_draft(pool: &PgPool, id: ModuleId) -> anyhow::Result<Option<Module>> {
     let module = sqlx::query!(
         //language=SQL

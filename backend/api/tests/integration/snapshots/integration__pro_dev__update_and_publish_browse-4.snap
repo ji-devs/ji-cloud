@@ -12,7 +12,7 @@ expression: body
       "authorName": "Bobby Tables",
       "likes": 0,
       "plays": 0,
-      "liveUpToDate": false,
+      "liveUpToDate": true,
       "proDevData": {
         "draftOrLive": "draft",
         "displayName": "pro_dev name1",

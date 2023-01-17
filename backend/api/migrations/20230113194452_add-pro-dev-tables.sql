@@ -109,8 +109,8 @@ create index pro_dev_data_module_pro_dev_data_id_idx
 -- Holds ProDev units
 create table pro_dev_data_unit
 (
-    id           uuid                     default uuid_generate_v1mc()    not null
-            primary key,
+    unit_id           uuid                     default uuid_generate_v1mc()    not null
+        primary key,
     pro_dev_data_id uuid not null
             references pro_dev_data (id)
             on delete cascade,
@@ -118,13 +118,27 @@ create table pro_dev_data_unit
     description     text                           default ''::text       not null,
     created_at      timestamp with time zone       default now()          not null,
     updated_at      timestamp with time zone,
-    index           smallint
+    index           smallint                                              not null
             check (index >= 0),
     value        jsonb   default '{}'::jsonb                              not null,
 
-    unique (pro_dev_data_id, id, index)
+    unique (unit_id, pro_dev_data_id, index)
 
 );
 
 create index pro_dev_data_unit_pro_dev_data_id_idx
     on pro_dev_data_unit (pro_dev_data_id);
+
+-- Holds users who've liked Pro Devs
+create table pro_dev_like
+(
+    pro_dev_id  uuid                                   not null
+            references pro_dev (id)
+            on delete cascade,
+    user_id    uuid                                   not null,
+    created_at timestamp with time zone default now() not null,
+        primary key (pro_dev_id, user_id)
+);
+
+create index pro_dev_like_pro_dev_id_idx
+    on pro_dev_like (pro_dev_id);

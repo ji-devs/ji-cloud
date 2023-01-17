@@ -23,7 +23,7 @@ values ('f77222a6-906b-11ed-b4f6-2f6dfab2ea0a', '1f241e1b-b537-493f-a230-075cb16
        ('be5a6ee6-906c-11ed-b4f6-4788ec1806f1', '7b96a41c-e406-11eb-8176-efd86dd7f444', '7b96a41c-e406-11eb-8176-efd86dd7f444',
         'be5a701c-906c-11ed-b4f6-8b8201faa1c7', 'be5a7120-906c-11ed-b4f6-7f0ad0c66ee8', '2022-06-22 18:35:33.636556+00');
 
-insert into pro_dev_data_unit (pro_dev_data_id, id, display_name, description, created_at, updated_at, index, value)
+insert into pro_dev_data_unit (pro_dev_data_id, unit_id, display_name, description, created_at, updated_at, index, value)
 values ('f7722350-906b-11ed-b4f6-7f6f12b6b72a', 'e0984370-906c-11ed-b4f6-3f864931e86f', 'prod_dev1 unit 1', 'Image', '2023-01-09 22:36:40.694823 +00:00', '2023-01-09 23:36:40.694823 +00:00', 0, '{"imageId": "3095d05e-f2c7-11ea-89c3-3b621dd74a1f"}'),
        ('47b3bf86-906c-11ed-b4f6-87f9f72a1171', '09225312-906d-11ed-b4f6-afb0e90115b3', 'prod_dev2 unit 1', 'PDF', '2023-01-09 22:36:40.694823 +00:00', '2023-01-09 23:36:40.694823 +00:00', 0, '{"pdfId": "128e0870-6813-11ec-a1fd-73f800abf897"}'),
     --    ('f7722350-906b-11ed-b4f6-7f6f12b6b72a', 'e0984460-906c-11ed-b4f6-4f0e8e23980c', "prod_dev1 unit 2", "Video", "2023-01-09 22:36:40.694823 +00:00", "2023-01-09 23:36:40.694823 +00:00", 1, '{video: {video}}'),
