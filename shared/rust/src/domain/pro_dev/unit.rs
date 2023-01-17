@@ -4,8 +4,7 @@
 use crate::{
     api::endpoints::PathPart,
     domain::{
-        audio::AudioId, image::ImageId, meta::ResourceTypeId,
-        module::body::_groups::design::VideoHost, pdf::PdfId,
+        audio::AudioId, image::ImageId, module::body::_groups::design::VideoHost, pdf::PdfId,
     },
 };
 use macros::make_path_parts;
@@ -47,7 +46,7 @@ pub struct ProDevUnitCreateRequest {
     pub display_name: String,
 
     /// Type of Pro Dev Unit
-    pub description: ResourceTypeId,
+    pub description: String,
 
     /// Value of Pro Dev Unit
     #[serde(flatten)]
@@ -77,6 +76,10 @@ pub struct ProDevUnitUpdateRequest {
     #[serde(default)]
     #[serde(flatten)]
     pub value: Option<ProDevUnitValue>,
+
+    /// Kind of Pro Dev Unit
+    #[serde(default)]
+    pub index: Option<u16>,
 }
 
 make_path_parts!(GetProDevUnitDraftPath => "/v1/pro-dev/{}/unit/{}/draft" => ProDevId, ProDevUnitId);

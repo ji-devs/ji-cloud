@@ -1,0 +1,9 @@
+---
+source: tests/integration/pro_dev/unit.rs
+expression: body
+---
+{
+  "displayName": "prod_dev1 unit 1",
+  "description": "Image",
+  "imageId": "3095d05e-f2c7-11ea-89c3-3b621dd74a1f"
+}

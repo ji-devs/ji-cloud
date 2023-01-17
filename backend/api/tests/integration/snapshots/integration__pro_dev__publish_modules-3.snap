@@ -10,7 +10,7 @@ expression: body
   "authorName": "Bobby Tables",
   "likes": 0,
   "plays": 0,
-  "liveUpToDate": false,
+  "liveUpToDate": true,
   "proDevData": {
     "draftOrLive": "live",
     "displayName": "pro_dev name1",
@@ -29,6 +29,10 @@ expression: body
     },
     "categories": [],
     "additionalResources": [],
-    "units": []
+    "units": [
+      "9fdfb2b6-983f-11ed-8a4d-d79133f7cc7e",
+      "9fdfb4aa-983f-11ed-8a4d-f33ce1bab4aa",
+      "9fdfb518-983f-11ed-8a4d-cf629535715a"
+    ]
   }
 }

@@ -266,7 +266,7 @@ pub fn build(
             .configure(endpoints::resource::report::configure)
             .configure(endpoints::course::configure)
             .configure(endpoints::pro_dev::configure)
-            // .configure(endpoints::pro_dev::unit::configure)
+            .configure(endpoints::pro_dev::unit::configure)
             .configure(endpoints::admin::configure)
             .configure(endpoints::animation::configure)
             .configure(endpoints::search::configure)
