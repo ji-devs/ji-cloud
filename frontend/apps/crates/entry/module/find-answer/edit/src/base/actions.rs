@@ -4,12 +4,14 @@ use super::{
 };
 use components::module::_common::edit::prelude::*;
 use futures_signals::signal::Mutable;
+use js_sys::Reflect;
 use shared::domain::module::body::{
     _groups::design::Trace,
     find_answer::{Mode, ModuleData as RawData, Question as RawQuestion, QuestionField, Step},
 };
 use std::rc::Rc;
 use utils::unwrap::UnwrapJiExt;
+use wasm_bindgen::JsValue;
 
 pub enum Direction {
     Up,
@@ -116,11 +118,17 @@ impl Base {
         self.questions.lock_mut().remove(index);
         if self.questions.lock_ref().is_empty() {
             if let QuestionField::Text(index) = self.question_field.get_cloned() {
-                self.stickers
-                    .get_as_text(index)
-                    .unwrap_ji()
-                    .can_delete
-                    .set_neq(true);
+                let text = self.stickers.get_as_text(index).unwrap_ji();
+                text.can_delete.set_neq(true);
+
+                if let Some(value) = self.question_sticker_text.get_cloned() {
+                    Reflect::set(
+                        &text.renderer_ref.get_cloned().unwrap_ji(),
+                        &JsValue::from_str("textValue"),
+                        &JsValue::from_str(&value),
+                    )
+                    .unwrap_ji();
+                }
             }
 
             self.question_field.set(QuestionField::Dynamic(None));

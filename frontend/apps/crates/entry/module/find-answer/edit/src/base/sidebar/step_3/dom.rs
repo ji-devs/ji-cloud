@@ -633,6 +633,20 @@ fn set_question_sticker_text(state: Rc<Step3>, value: String) {
             .get_as_text(field_index)
             .unwrap_ji();
 
+        if state
+            .sidebar
+            .base
+            .question_sticker_text
+            .get_cloned()
+            .is_none()
+        {
+            state
+                .sidebar
+                .base
+                .question_sticker_text
+                .set(text.get_text_value());
+        }
+
         // Weird bug: If the value is an empty string, the sticker's value will be updated,
         // but future updates will not work correctly. Adding in some whitespace resolves this.
         let value = if value.is_empty() { " ".into() } else { value };
