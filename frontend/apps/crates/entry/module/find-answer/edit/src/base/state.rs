@@ -238,7 +238,7 @@ impl Base {
                         }
                         VecDiff::Move { old_index, new_index } => {
                             if old_index == field_index {
-                                // The sticker that was moved, is the question sticker.
+                                // The sticker being moved is the question sticker.
                                 _self.question_field.set(QuestionField::Text(new_index));
                                 true
                             } else if old_index < field_index && new_index >= field_index {
@@ -248,6 +248,10 @@ impl Base {
                                 // If the original index was before the field index, and the new index is the same or higher
                                 //  than field index, decrease the value.
                                 _self.question_field.set(QuestionField::Text(field_index - 1));
+                                true
+                            } else if old_index > field_index && new_index <= field_index {
+                                // As above, but we need to shift the index up
+                                _self.question_field.set(QuestionField::Text(field_index + 1));
                                 true
                             } else {
                                 false
