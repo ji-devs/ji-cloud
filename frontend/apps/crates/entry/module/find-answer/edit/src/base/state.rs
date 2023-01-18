@@ -51,6 +51,9 @@ pub struct Base {
     pub stickers: Rc<Stickers<Sticker>>,
     pub questions: MutableVec<Rc<Question>>,
     pub question_field: Mutable<QuestionField>,
+    // Original text that was in the question sticker. Required so that we can update
+    // the sticker with its original text when all questions have been deleted.
+    pub question_sticker_text: Mutable<Option<String>>,
     // Optional index of the currently open question.
     pub current_question: Mutable<Option<usize>>,
     pub text_editor: Rc<TextEditor>,
@@ -300,6 +303,7 @@ impl Base {
             stickers,
             questions: Question::from_raw_vec(content.questions),
             question_field: Mutable::new(content.question_field),
+            question_sticker_text: Mutable::new(None),
             current_question: Mutable::new(None),
             play_settings: Rc::new(PlaySettings::new(content.play_settings)),
             continue_next_fn: Mutable::new(None),
