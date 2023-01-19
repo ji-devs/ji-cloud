@@ -324,12 +324,6 @@ pub struct ProDevSearchQuery {
     #[serde(deserialize_with = "super::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub categories: Vec<CategoryId>,
-
-    /// Optionally filter by `units`
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    #[serde(default)]
-    #[serde(flatten)]
-    pub units: Vec<ProDevUnitId>,
 }
 
 /// Response for successful search.

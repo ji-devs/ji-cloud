@@ -21,6 +21,7 @@ use shared::{
         image::{ImageId, ImageSize},
         jig::JigId,
         meta::{AffiliationId, AgeRangeId, ImageStyleId, ImageTagIndex, ResourceTypeId},
+        pro_dev::ProDevId,
         resource::ResourceId,
         user::UserId,
     },
@@ -143,6 +144,29 @@ struct BatchCourse<'a> {
 }
 
 #[derive(Serialize)]
+struct BatchProDev<'a> {
+    name: &'a str,
+    language: &'a str,
+    description: &'a str,
+    resource_types: &'a [Uuid],
+    resource_type_names: &'a [String],
+    categories: &'a [Uuid],
+    category_names: &'a [String],
+    units: &'a [Uuid],
+    author_id: Option<Uuid>,
+    author_name: Option<String>,
+    #[serde(rename = "_tags")]
+    tags: Vec<&'static str>,
+    other_keywords: &'a str,
+    translated_keywords: &'a str,
+    likes: &'a i64,
+    plays: &'a i64,
+    published_at: Option<DateTime<Utc>>,
+    translated_name: &'a Vec<String>,
+    translated_description: &'a Vec<String>,
+}
+
+#[derive(Serialize)]
 struct BatchCircle<'a> {
     name: &'a str,
     description: &'a str,
@@ -178,6 +202,7 @@ enum AlgoliaIndices {
     CircleIndex,
     PublicUserIndex,
     ResourceIndex,
+    ProDevIndex,
 }
 
 impl AlgoliaIndices {
@@ -189,6 +214,7 @@ impl AlgoliaIndices {
             Self::CircleIndex => migration::CIRCLE_INDEX,
             Self::PublicUserIndex => migration::PUBLIC_USER_INDEX,
             Self::ResourceIndex => migration::RESOURCE_INDEX,
+            Self::ProDevIndex => migration::PRO_DEV_INDEX,
         }
     }
 }
@@ -205,6 +231,7 @@ pub struct Manager {
     pub course_index: String,
     pub circle_index: String,
     pub public_user_index: String,
+    pub pro_dev_index: String,
 }
 
 impl Manager {
@@ -218,6 +245,7 @@ impl Manager {
             course_index,
             circle_index,
             public_user_index,
+            pro_dev_index,
         ) = match settings {
             Some(settings) => match (
                 settings.management_key,
@@ -227,6 +255,7 @@ impl Manager {
                 settings.course_index,
                 settings.circle_index,
                 settings.public_user_index,
+                settings.pro_dev_index,
             ) {
                 (
                     Some(key),
@@ -236,6 +265,7 @@ impl Manager {
                     Some(course_index),
                     Some(circle_index),
                     Some(public_user_index),
+                    Some(pro_dev_index),
                 ) => (
                     settings.application_id,
                     key,
@@ -245,6 +275,7 @@ impl Manager {
                     course_index,
                     circle_index,
                     public_user_index,
+                    pro_dev_index,
                 ),
                 _ => return Ok(None),
             },
@@ -259,6 +290,7 @@ impl Manager {
             course_index,
             circle_index,
             public_user_index,
+            pro_dev_index,
             db,
         }))
     }
@@ -266,7 +298,7 @@ impl Manager {
     pub async fn spawn_cron_jobs(&self) -> anyhow::Result<()> {
         log::info!("reached updates for spawning jobs");
 
-        for count in 0..6 {
+        for count in 0..7 {
             let res = match count {
                 0 => self
                     .update_images()
@@ -287,6 +319,10 @@ impl Manager {
                     .context("update circles task errored"),
                 5 => self
                     .update_public_users()
+                    .await
+                    .context("update public users task errored"),
+                6 => self
+                    .update_pro_devs()
                     .await
                     .context("update public users task errored"),
                 _ => continue,
@@ -320,6 +356,7 @@ impl Manager {
             or (index_name = $7 and index_hash <> $8)
             or (index_name = $9 and index_hash <> $10)
             or (index_name = $11 and index_hash <> $12)
+            or (index_name = $13 and index_hash <> $14)
             "#,
             AlgoliaIndices::MediaIndex.as_str(),
             migration::MEDIA_HASH.to_owned(),
@@ -333,6 +370,8 @@ impl Manager {
             migration::PUBLIC_USER_HASH.to_owned(),
             AlgoliaIndices::ResourceIndex.as_str(),
             migration::RESOURCE_HASH.to_owned(),
+            AlgoliaIndices::ProDevIndex.as_str(),
+            migration::PRO_DEV_HASH.to_owned(),
         )
         .fetch_all(&mut txn)
         .await?
@@ -360,6 +399,9 @@ impl Manager {
                 migration::PUBLIC_USER_INDEX => {
                     migration::public_user_index(&mut txn, &self.inner, &self.public_user_index)
                         .await?
+                }
+                migration::PRO_DEV_INDEX => {
+                    migration::pro_dev_index(&mut txn, &self.inner, &self.pro_dev_index).await?
                 }
                 _ => {
                     println!("index name: {}", i);
@@ -435,6 +477,18 @@ impl Manager {
 
     async fn batch_public_users(&self, batch: BatchWriteRequests) -> anyhow::Result<Vec<Uuid>> {
         let resp = self.inner.batch(&self.public_user_index, &batch).await?;
+
+        let ids: Result<Vec<_>, _> = resp
+            .object_ids
+            .into_iter()
+            .map(|id| Uuid::parse_str(&id))
+            .collect();
+
+        Ok(ids?)
+    }
+
+    async fn batch_pro_devs(&self, batch: BatchWriteRequests) -> anyhow::Result<Vec<Uuid>> {
+        let resp = self.inner.batch(&self.pro_dev_index, &batch).await?;
 
         let ids: Result<Vec<_>, _> = resp
             .object_ids
@@ -1195,6 +1249,141 @@ limit 100 for no key update skip locked;
         Ok(true)
     }
 
+    async fn update_pro_devs(&self) -> anyhow::Result<bool> {
+        log::info!("reached update pro dev");
+        let mut txn = self.db.begin().await?;
+
+        // todo: allow for some way to do a partial update (for example, by having a channel for queueing partial updates)
+        let requests: Vec<_> = sqlx::query!(
+            //language=SQL
+            r#"
+select pro_dev.id,
+       display_name                                                                                                 as "name",
+       language                                                                                                     as "language!",
+       description                                                                                                  as "description!",
+       translated_description                                                                                       as "translated_description!: Json<HashMap<String, String>>",
+       translated_name                                                                                              as "translated_name!: Json<HashMap<String, String>>",
+       array((select resource_type_id
+               from pro_dev_data_resource
+               where pro_dev_data_id = pro_dev_data.id))                                                              as "resource_types!",
+       array((select resource_type.display_name
+             from resource_type
+                       inner join pro_dev_data_resource on resource_type.id = pro_dev_data_resource.resource_type_id
+            where pro_dev_data_resource.pro_dev_data_id = pro_dev_data.id))                                            as "resource_type_names!",
+       array((select category_id
+              from pro_dev_data_category
+              where pro_dev_data_id = pro_dev_data.id))                                                               as "categories!",
+       array((select name
+              from category
+                       inner join pro_dev_data_category on category.id = pro_dev_data_category.category_id
+              where pro_dev_data_category.pro_dev_data_id = pro_dev_data.id))                                          as "category_names!",
+        array(
+           (select unit_id
+            from pro_dev_data_unit
+            where pro_dev_data_unit.pro_dev_data_id = pro_dev_data.id)
+       )                                                                                                            as "units!",
+       privacy_level                                                                                                as "privacy_level!: PrivacyLevel",
+       author_id                                                                                                    as "author_id",
+       other_keywords                                                                                               as "other_keywords!",
+       translated_keywords                                                                                          as "translated_keywords!",
+       (select given_name || ' '::text || family_name
+        from user_profile
+        where user_profile.user_id = pro_dev.author_id)                                                             as "author_name",
+        likes                                                                                                       as "likes!",
+        plays                                                                                                       as "plays!",
+        published_at                                                                                                as "published_at"
+from pro_dev
+         inner join pro_dev_data on live_id = pro_dev_data.id
+where (last_synced_at is null and published_at is not null)
+    or (updated_at is not null and last_synced_at < updated_at)
+    or (published_at < now() is true and last_synced_at < published_at)
+limit 100 for no key update skip locked;
+     "#
+        )
+        .fetch(&mut txn)
+        .map_ok(|row| {
+            let mut tags = Vec::new();
+
+            tags.push(row.privacy_level.as_str());
+
+            if row.author_id.is_some() {
+                tags.push(HAS_AUTHOR_TAG);
+            }
+
+            let mut translation_description: Vec<String> = Vec::new();
+
+            for value in row.translated_description.0.values() {
+                translation_description.push(value.to_string());
+            }
+
+            let mut translation_name: Vec<String> = Vec::new();
+
+            for value in row.translated_name.0.values() {
+                translation_name.push(value.to_string());
+            }
+
+            algolia::request::BatchWriteRequest::UpdateObject {
+            body: match serde_json::to_value(&BatchProDev {
+                name: &row.name,
+                language: &row.language,
+                description: &row.description,
+                resource_types: &row.resource_types,
+                resource_type_names: &row.resource_type_names,
+                categories: &row.categories,
+                category_names: &row.category_names,
+                units: &row.units,
+                author_id: row.author_id,
+                author_name: row.author_name,
+                tags,
+                other_keywords: &row.other_keywords,
+                translated_keywords: &row.translated_keywords,
+                likes: &row.likes,
+                plays: &row.plays,
+                published_at: row.published_at,
+                translated_description: &translation_description,
+                translated_name: &translation_name,
+            })
+            .expect("failed to serialize BatchCourse to json")
+            {
+                serde_json::Value::Object(map) => map,
+                _ => panic!("failed to serialize BatchCourse to json map"),
+            },
+            object_id: row.id.to_string(),
+        }})
+        .try_collect()
+        .await?;
+
+        if requests.is_empty() {
+            log::warn!("Request is empty");
+            return Ok(true);
+        }
+
+        log::debug!("Updating a batch of {} pro_dev(s)", requests.len());
+
+        let request = algolia::request::BatchWriteRequests { requests };
+        let ids = self.batch_pro_devs(request).await?;
+
+        log::debug!("Updated a batch of {} pro_dev(s)", ids.len());
+
+        sqlx::query!(
+            //language=SQL
+            r#"
+update pro_dev_data
+set last_synced_at = now()
+where pro_dev_data.id = any (select live_id from pro_dev where pro_dev.id = any ($1))
+"#,
+            &ids
+        )
+        .execute(&mut txn)
+        .await?;
+
+        txn.commit().await?;
+
+        log::info!("completed update pro_dev");
+
+        Ok(true)
+    }
+
     pub async fn delete_image(&self, id: ImageId) {
         if let Err(e) = self.try_delete_image(id).await {
             log::warn!(
@@ -1298,6 +1487,24 @@ limit 100 for no key update skip locked;
     pub async fn try_delete_public_user(&self, id: Uuid) -> anyhow::Result<()> {
         self.inner
             .delete_object(&self.public_user_index, &id.to_string())
+            .await?;
+
+        Ok(())
+    }
+
+    pub async fn delete_pro_dev(&self, id: ProDevId) {
+        if let Err(e) = self.try_delete_pro_dev(id).await {
+            log::warn!(
+                "failed to delete pro_dev with id {} from algolia: {}",
+                id.0.hyphenated(),
+                e
+            );
+        }
+    }
+
+    pub async fn try_delete_pro_dev(&self, ProDevId(id): ProDevId) -> anyhow::Result<()> {
+        self.inner
+            .delete_object(&self.pro_dev_index, &id.to_string())
             .await?;
 
         Ok(())
@@ -1466,6 +1673,7 @@ pub struct Client {
     course_index: String,
     circle_index: String,
     public_user_index: String,
+    pro_dev_index: String,
 }
 
 impl Client {
@@ -1481,6 +1689,7 @@ impl Client {
                 course_index,
                 circle_index,
                 public_user_index,
+                pro_dev_index,
             ) = match (
                 settings.backend_search_key,
                 settings.media_index,
@@ -1489,6 +1698,7 @@ impl Client {
                 settings.course_index,
                 settings.circle_index,
                 settings.public_user_index,
+                settings.pro_dev_index,
             ) {
                 (
                     Some(key),
@@ -1498,6 +1708,7 @@ impl Client {
                     Some(course_index),
                     Some(circle_index),
                     Some(public_user_index),
+                    Some(pro_dev_index),
                 ) => (
                     Inner::new(app_id, ApiKey(key))?,
                     media_index,
@@ -1506,6 +1717,7 @@ impl Client {
                     course_index,
                     circle_index,
                     public_user_index,
+                    pro_dev_index,
                 ),
                 _ => return Ok(None),
             };
@@ -1518,6 +1730,7 @@ impl Client {
                 course_index,
                 circle_index,
                 public_user_index,
+                pro_dev_index,
             }))
         } else {
             Ok(None)
@@ -2108,6 +2321,110 @@ impl Client {
             .inner
             .search(
                 &self.public_user_index,
+                SearchQuery::<'_, String, AndFilter> {
+                    query: Some(query),
+                    page,
+                    get_ranking_info: true,
+                    filters: Some(and_filters),
+                    optional_filters: None,
+                    hits_per_page: Some(page_limit as u16),
+                    sum_or_filters_scores: false,
+                },
+            )
+            .instrument(tracing::info_span!("perform algolia search"))
+            .await?;
+
+        let pages = results.page_count.try_into()?;
+        let total_hits = results.hit_count as u64;
+
+        let results = results
+            .hits
+            .into_iter()
+            .map(|hit| hit.object_id.parse())
+            .collect::<Result<Vec<_>, _>>()?;
+
+        Ok(Some((results, pages, total_hits)))
+    }
+
+    #[instrument(skip_all)]
+    pub async fn search_pro_dev(
+        &self,
+        query: &str,
+        page: Option<u32>,
+        language: Option<String>,
+        resource_types: &[ResourceTypeId],
+        categories: &[CategoryId],
+        author_id: Option<UserId>,
+        author_name: Option<String>,
+        other_keywords: Option<String>,
+        translated_keywords: Option<String>,
+        privacy_level: &[PrivacyLevel],
+        page_limit: u32,
+    ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
+        let mut and_filters = algolia::filter::AndFilter { filters: vec![] };
+
+        if let Some(author_id) = author_id {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: TagFilter(HAS_AUTHOR_TAG.to_owned()),
+                invert: false,
+            }));
+
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "author_id".to_owned(),
+                    value: author_id.0.to_string(),
+                },
+                invert: false,
+            }))
+        }
+
+        if let Some(author_name) = author_name {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "author_name".to_owned(),
+                    value: author_name,
+                },
+                invert: false,
+            }))
+        }
+
+        if let Some(language) = language {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "language".to_owned(),
+                    value: language,
+                },
+                invert: false,
+            }))
+        }
+
+        if let Some(other_keywords) = other_keywords {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "other_keywords".to_owned(),
+                    value: other_keywords,
+                },
+                invert: false,
+            }))
+        }
+        if let Some(translated_keywords) = translated_keywords {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "translated_keywords".to_owned(),
+                    value: translated_keywords,
+                },
+                invert: false,
+            }))
+        }
+
+        filters_for_privacy(&mut and_filters.filters, privacy_level);
+        filters_for_ids_or(&mut and_filters.filters, "resource_types", resource_types);
+        filters_for_ids_or(&mut and_filters.filters, "categories", categories);
+
+        let results: SearchResponse = self
+            .inner
+            .search(
+                &self.pro_dev_index,
                 SearchQuery::<'_, String, AndFilter> {
                     query: Some(query),
                     page,

@@ -13,6 +13,7 @@ pub const COURSE_INDEX: &str = "course_index";
 pub const CIRCLE_INDEX: &str = "circle_index";
 pub const PUBLIC_USER_INDEX: &str = "public_user_index";
 pub const RESOURCE_INDEX: &str = "resource_index";
+pub const PRO_DEV_INDEX: &str = "pro_dev_index";
 
 #[hashfn(MEDIA_HASH)]
 pub(crate) async fn media_index(
@@ -235,6 +236,46 @@ pub(crate) async fn resource_index(
     client.set_settings(resource_index, &settings).await?;
 
     sqlx::query!(r#"update algolia_index_settings set updated_at = now(), index_hash = $1 where index_name = $2"#, RESOURCE_HASH, RESOURCE_INDEX).execute(txn).await?;
+
+    Ok(())
+}
+
+#[hashfn(PRO_DEV_HASH)]
+pub(crate) async fn pro_dev_index(
+    txn: &mut PgConnection,
+    client: &super::Inner,
+    resource_index: &str,
+) -> anyhow::Result<()> {
+    let settings = SetSettings {
+        searchable_attributes: Some(
+            SearchableAttributes::build()
+                .single(Attribute("name".to_owned()))
+                .single(Attribute("author_name".to_owned()))
+                .single(Attribute("translated_keywords".to_owned()))
+                .single(Attribute("description".to_owned()))
+                .single(Attribute("category_names".to_owned()))
+                .single(Attribute("translated_description".to_owned()))
+                .single(Attribute("resource_type_names".to_owned()))
+                .single(Attribute("language".to_owned()))
+                .single(Attribute("other_keywords".to_owned()))
+                .single(Attribute("translated_name".to_owned()))
+                .single(Attribute("units".to_owned()))
+                .finish(),
+        ),
+        attributes_for_faceting: Some(vec![
+            FacetAttribute::filter_only(Attribute("age_ranges".to_owned())),
+            FacetAttribute::filter_only(Attribute("_tags".to_owned())),
+            FacetAttribute::filter_only(Attribute("author_id".to_owned())),
+            FacetAttribute::filter_only(Attribute("author_name".to_owned())),
+            FacetAttribute::filter_only(Attribute("categories".to_owned())),
+            FacetAttribute::filter_only(Attribute("resource_types".to_owned())),
+            FacetAttribute::filter_only(Attribute("language".to_owned())),
+        ]),
+    };
+
+    client.set_settings(resource_index, &settings).await?;
+
+    sqlx::query!(r#"update algolia_index_settings set updated_at = now(), index_hash = $1 where index_name = $2"#, PRO_DEV_HASH, PRO_DEV_INDEX).execute(txn).await?;
 
     Ok(())
 }

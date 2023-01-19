@@ -124,6 +124,11 @@ pub mod algolia {
     /// search related routes will return a "501 - Not Implemented" and a warning will be emitted.
     pub const PUBLIC_USER_INDEX: &str = "ALGOLIA_PUBLIC_USER_INDEX";
 
+    /// The index to use for indexing and backend searches.
+    /// Is optional. If missing, *Pro Dev* indexing will be disabled,
+    /// search related routes will return a "501 - Not Implemented" and a warning will be emitted.
+    pub const PRO_DEV_INDEX: &str = "ALGOLIA_PRO_DEV_INDEX";
+
     /// The key the backend uses for managing- indexing- [`MEDIA_INDEX`] and [`JIG_INDEX`].
     /// Needs the `addObject`, `deleteObject`, `settings`, and `editSettings` ACLs, access to `MEDIA_INDEX`, and `JIG_INDEX`.
     /// Is optional. If missing, indexing will be disabled, and a warning will be logged.
