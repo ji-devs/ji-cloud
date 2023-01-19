@@ -73,7 +73,7 @@ impl AssetType {
             Self::Jig => "jig",
             Self::Resource => "resource",
             Self::Course => "course",
-            Self::ProDev => "pro_dev",
+            Self::ProDev => todo!(),
         }
     }
 
@@ -83,7 +83,7 @@ impl AssetType {
             AssetType::Jig => JigId(uuid).into(),
             AssetType::Course => CourseId(uuid).into(),
             AssetType::Resource => ResourceId(uuid).into(),
-            AssetType::ProDev => ProDevId(uuid).into(),
+            AssetType::ProDev => todo!(),
         }
     }
 }
@@ -94,7 +94,7 @@ impl From<&AssetId> for AssetType {
             AssetId::JigId(_) => AssetType::Jig,
             AssetId::CourseId(_) => AssetType::Course,
             AssetId::ResourceId(_) => AssetType::Resource,
-            AssetId::ProDevId(_) => AssetType::ProDev,
+            AssetId::ProDevId(_) => todo!(),
         }
     }
 }
@@ -107,7 +107,7 @@ impl TryFrom<&str> for AssetType {
             "jig" => Ok(Self::Jig),
             "course" => Ok(Self::Course),
             "resource" => Ok(Self::Resource),
-            "pro_dev" => Ok(Self::ProDev),
+            "pro_dev" => todo!(),
             _ => Err(()),
         }
     }

@@ -103,6 +103,8 @@ pub fn render_asset_card(asset: &Asset, config: AssetCardConfig) -> Dom {
                         None => dom
                     }
                 },
+                Asset::ProDev(_) => todo!(),
+
             }
         })
         // TODO: Hide age for ProDev

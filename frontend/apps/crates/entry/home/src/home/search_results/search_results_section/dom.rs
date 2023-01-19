@@ -186,6 +186,7 @@ impl SearchResultsSection {
                                     ResourceEditRoute::Landing
                                 )))
                             },
+                            AssetId::ProDevId(_) => todo!()
                         }.to_string()
                     })
                     .event(clone!(asset => move |_: events::Click| {
@@ -242,6 +243,7 @@ impl SearchResultsSection {
                             }
                         })
                     },
+                    AssetType::ProDev => todo!()
                 }
             })
         })
@@ -273,6 +275,7 @@ fn track_action(action: &str, asset: Rc<Asset>) {
         AssetId::JigId(_) => "Jig",
         AssetId::CourseId(_) => "Course",
         AssetId::ResourceId(_) => "Resource",
+        AssetId::ProDevId(_) => todo!(),
     };
 
     let mut properties = HashMap::new();

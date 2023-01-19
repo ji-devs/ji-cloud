@@ -38,6 +38,7 @@ impl Gallery {
             AssetType::Jig => jig_actions::load_jigs(state, is_published).await,
             AssetType::Resource => resource_actions::load_resources(state, is_published).await,
             AssetType::Course => course_actions::load_courses(state, is_published).await,
+            AssetType::ProDev => todo!(),
         };
 
         match res {
@@ -83,6 +84,7 @@ impl Gallery {
                 AssetType::Jig => jig_actions::search_jigs(q, is_published).await,
                 AssetType::Resource => resource_actions::search_resources(q, is_published).await,
                 AssetType::Course => course_actions::search_courses(q, is_published).await,
+                AssetType::ProDev => todo!(),
             };
 
             let assets = assets.unwrap_ji();
@@ -104,6 +106,7 @@ impl Gallery {
                 AssetType::Jig => jig_actions::create_jig().await,
                 AssetType::Resource => resource_actions::create_resource().await,
                 AssetType::Course => course_actions::create_course().await,
+                AssetType::ProDev => todo!(),
             };
         }));
     }
@@ -115,6 +118,8 @@ impl Gallery {
                 AssetId::JigId(jig_id) => jig_actions::copy_jig(jig_id).await,
                 AssetId::ResourceId(resource_id) => resource_actions::copy_resource(resource_id).await,
                 AssetId::CourseId(course_id) => course_actions::copy_course(course_id).await,
+                AssetId::ProDevId(_) => todo!(),
+
             };
             state.assets.lock_mut().push_cloned(asset.unwrap_ji());
         }));
@@ -133,6 +138,7 @@ impl Gallery {
                 AssetId::CourseId(course_id) => {
                     course_actions::delete_course(course_id).await
                 },
+                AssetId::ProDevId(_) => todo!(),
             };
 
             match result {

@@ -169,6 +169,7 @@ where
                                 .await
                                 .map(|course| Asset::Course(course))
                         },
+                        AssetId::ProDevId(_) => todo!()
                     };
 
                     match resp {

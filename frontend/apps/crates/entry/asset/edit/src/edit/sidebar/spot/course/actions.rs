@@ -58,6 +58,7 @@ pub async fn assign_asset_to_empty_spot(_state: &Rc<SpotState>, asset: Asset) ->
         Asset::Jig(jig) => jig,
         Asset::Resource(_) => todo!(),
         Asset::Course(_) => unreachable!(),
+        Asset::ProDev(_) => todo!(),
     };
     SidebarSpot::new_course_item(jig)
 }

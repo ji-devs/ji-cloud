@@ -40,6 +40,7 @@ impl PlayerPopup {
             AssetId::JigId(_) => JigPlayerOptions::default().into(),
             AssetId::CourseId(_) => CoursePlayerOptions::default().into(),
             AssetId::ResourceId(_) => unreachable!(),
+            AssetId::ProDevId(_) => todo!(),
         };
         Rc::new(Self {
             asset_id,

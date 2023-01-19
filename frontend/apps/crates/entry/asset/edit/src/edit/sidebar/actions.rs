@@ -15,6 +15,7 @@ pub fn navigate_to_publish(state: Rc<Sidebar>) {
             course_actions::navigate_to_publish(Rc::clone(&state));
         }
         AssetId::ResourceId(_) => unimplemented!(),
+        AssetId::ProDevId(_) => todo!(),
     }
 }
 
@@ -59,6 +60,7 @@ pub fn update_display_name(state: Rc<Sidebar>, value: String) {
                 course_actions::update_display_name(*course_id, value).await;
             },
             AssetId::ResourceId(_) => unimplemented!(),
+            AssetId::ProDevId(_) => todo!(),
         }
     }));
 }

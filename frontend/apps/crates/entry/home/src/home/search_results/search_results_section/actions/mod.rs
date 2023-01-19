@@ -24,6 +24,7 @@ impl SearchResultsSection {
             AssetType::Course => {
                 self.load_courses().await;
             }
+            AssetType::ProDev => todo!(),
         }
     }
 
