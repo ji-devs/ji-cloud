@@ -54,6 +54,19 @@
     },
     "query": "select exists(select 1 from user_auth_basic where lower(email) = lower($1)) as \"exists!\""
   },
+  "0180c4edeccf092f373dbb2f0e974fe2c36dc48e89ed9a631725e94733950805": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nupdate pro_dev_data\nset language         = coalesce($2, language),\n    updated_at = now()\nwhere id = $1\n  and ($2::text is not null and $2 is distinct from language)\n"
+  },
   "01a135ff430fa6ab0ac75454f6d1c25d2198d9f885e1abfdb4ca22c888df32a5": {
     "describe": {
       "columns": [],
@@ -191,6 +204,27 @@
     },
     "query": "\ninsert into jig_player_session (jig_id, index, direction, display_score, track_assessments, drag_assist, expires_at)\nvalues ($1, $2, $3, $4, $5, $6, $7)\n\n"
   },
+  "043a177c8da55d226c7b79feaf7b95de4f8951914ac52fe077f5d596878026a5": {
+    "describe": {
+      "columns": [
+        {
+          "name": "index",
+          "ordinal": 0,
+          "type_info": "Int2"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect index from pro_dev_data_module\nwhere pro_dev_data_id = $1 and pro_dev_data_module.id is not distinct from $2\n"
+  },
   "04fb89e42da5ea9503934560463dca443ce0dbb9ba2fc38977da4aeb355f8d77": {
     "describe": {
       "columns": [],
@@ -242,6 +276,19 @@
       }
     },
     "query": "\n        with cte as (\n            select jdar.id              as id,\n                   jdar.display_name,\n                   resource_type_id,\n                   resource_content,\n                   author_id,\n                   updated_at,\n                   created_at\n            from jig_data_additional_resource \"jdar\"\n            inner join jig on jig.live_id = jdar.jig_data_id\n            inner join jig_data on jig.live_id = jig_data.id\n            where author_id = $1 and jig.published_at is not null\n           ),\n           cte1 as (\n              select cdr.id              as id,\n                cdr.display_name,\n                resource_type_id,\n                resource_content,\n                author_id,\n                updated_at,\n                created_at\n          from course_data_resource \"cdr\"\n          inner join course on course.live_id = cdr.course_data_id\n          inner join course_data on course.live_id = course_data.id\n          where author_id = $1 and course.published_at is not null\n          ),\n          cte2 as (\n            select *\n            from unnest(array(\n                select\n                (array_agg(id))[1] as id\n                from (select id, updated_at, created_at from cte union all select id, updated_at, created_at from cte1)\n                resource\n                group by resource.updated_at, resource.created_at\n                order by coalesce(resource.updated_at, created_at))) with ordinality t(id\n                , ord) order by ord\n         )\n          select cte3.id                as \"id!: AddId\",\n                 display_name           as \"display_name!\",\n                 resource_type_id       as \"resource_type_id!: TypeId\",\n                 resource_content        as \"resource_content!\"\n         from\n          (select * from cte\n          union all\n          select * from cte1) cte3\n        inner join cte2 on cte2.id = cte3.id\n        where ord > (1 * $2 * $3)\n        order by ord asc\n        limit $3\n            "
+  },
+  "07b1496a54fbb0cebc203d43806992842291ecfbcac2c386eb550c8e4b694b7e": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nupdate pro_dev_data_resource\nset resource_type_id = coalesce($2, resource_type_id)\nwhere id = $1 and $2 is distinct from resource_type_id\n            "
   },
   "07c23d4be4038602fadd286c040a438b0366a8308e634d0ef4f5325c7b07b225": {
     "describe": {
@@ -308,37 +355,6 @@
       }
     },
     "query": "\nselect draft_id from resource join resource_data on resource.draft_id = resource_data.id where resource.id = $1 for update\n"
-  },
-  "09d5575a418348d2fd9924f38e0f6c37762a1ef80ffa2d20bb3d18fcd3cc3d11": {
-    "describe": {
-      "columns": [
-        {
-          "name": "name: String",
-          "ordinal": 0,
-          "type_info": "Text"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text"
-        ]
-      }
-    },
-    "query": "\n            select index_name as \"name: String\"\n            from algolia_index_settings\n            where (index_name = $1 and index_hash <> $2)\n            or (index_name = $3 and index_hash <> $4)\n            or (index_name = $5 and index_hash <> $6)\n            or (index_name = $7 and index_hash <> $8)\n            or (index_name = $9 and index_hash <> $10)\n            or (index_name = $11 and index_hash <> $12)\n            "
   },
   "0a1f9e5fee4b10a173b8723976cecfb920f90a4828d723abb14f6e0215cf880b": {
     "describe": {
@@ -528,6 +544,26 @@
       }
     },
     "query": "\nselect id                                   as \"id!: ReportId\",\n       jig_id                               as \"jig_id!: JigId\",    \n       report_type                          as \"report_type!: JigReportType\",                  \n       created_at,\n       reporter_id                          as \"reporter_id?: Uuid\",\n       (\n            select given_name || ' '::text || family_name\n            from user_profile\n            where user_profile.user_id = reporter_id\n        )                                       as \"name?\",\n        (\n            select email::text\n            from user_email\n            where user_email.user_id = reporter_id\n        )                                       as \"email?\"\nfrom jig_report\nwhere id = $1 and jig_id = $2\n"
+  },
+  "0ebb462ab87479329b633b79dae7dc50c801c23a532ccf259994bac0c73a1ea0": {
+    "describe": {
+      "columns": [
+        {
+          "name": "max_index!",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "select count(*) - 1 as \"max_index!\" from pro_dev_data_unit where pro_dev_data_id = $1"
   },
   "0f15170b401de47fa6e6ec802a12a8c00412902a4d3bf942897c8bb8e41f44fa": {
     "describe": {
@@ -790,6 +826,29 @@
       }
     },
     "query": "\nselect exists (\n    select 1 from user_scope where user_id = $1 and scope = any($2)\n) or (\n    exists (select 1 from user_scope where user_id = $1 and scope = $3) and\n    not exists (select 1 from jig where jig.id = $4 and jig.author_id <> $1)\n) as \"authed!\"\n"
+  },
+  "1399c07d7baa46d9dd2c824613b6dabefa92e6776adc62f0edab9590a9c0956b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "authed!",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2Array",
+          "Int2",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect exists (\n    select 1 from user_scope where user_id = $1 and scope = any($2)\n) or (\n    exists (select 1 from user_scope where user_id = $1 and scope = $3) and\n    not exists (select 1 from pro_dev where pro_dev.id = $4 and pro_dev.author_id <> $1)\n) as \"authed!\"\n"
   },
   "140ff97c5bd0b551e1c2b0026a53c713117faf011a3f7f9e6f7e420cc481204a": {
     "describe": {
@@ -1114,6 +1173,147 @@
     },
     "query": "select index as \"index: i16\" from image_tag where index = $1 for update"
   },
+  "195ea8ae04e08b6d2160963479defab93696d8a86177bc6789a0daf621d450c6": {
+    "describe": {
+      "columns": [
+        {
+          "name": "pro_dev_id: ProDevId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "creator_id?: UserId",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_id?: UserId",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_name",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "published_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "privacy_level!: PrivacyLevel",
+          "ordinal": 7,
+          "type_info": "Int2"
+        },
+        {
+          "name": "language",
+          "ordinal": 8,
+          "type_info": "Text"
+        },
+        {
+          "name": "description",
+          "ordinal": 9,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_description!: Json<HashMap<String, String>>",
+          "ordinal": 10,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "likes",
+          "ordinal": 11,
+          "type_info": "Int8"
+        },
+        {
+          "name": "plays",
+          "ordinal": 12,
+          "type_info": "Int8"
+        },
+        {
+          "name": "live_up_to_date",
+          "ordinal": 13,
+          "type_info": "Bool"
+        },
+        {
+          "name": "other_keywords",
+          "ordinal": 14,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_keywords",
+          "ordinal": 15,
+          "type_info": "Text"
+        },
+        {
+          "name": "duration",
+          "ordinal": 16,
+          "type_info": "Int8"
+        },
+        {
+          "name": "cover?: (ModuleId, ModuleKind, bool)",
+          "ordinal": 17,
+          "type_info": "Record"
+        },
+        {
+          "name": "categories!: Vec<(CategoryId,)>",
+          "ordinal": 18,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
+          "ordinal": 19,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "units!: Vec<(ProDevUnitId,)>",
+          "ordinal": 20,
+          "type_info": "RecordArray"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        true,
+        null,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        null,
+        null,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\nwith cte as (\n    select id      as \"pro_dev_id\",\n           creator_id,\n           author_id,\n           likes,\n           plays,\n           live_up_to_date,\n           case\n               when $2 = 0 then pro_dev.draft_id\n               when $2 = 1 then pro_dev.live_id\n               end as \"draft_or_live_id\",\n           published_at\n    from pro_dev\n    where id = $1\n)\nselect cte.pro_dev_id                                          as \"pro_dev_id: ProDevId\",\n       display_name,\n       creator_id                                             as \"creator_id?: UserId\",\n       author_id                                              as \"author_id?: UserId\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id)            as \"author_name\",\n       published_at,\n       updated_at,\n       privacy_level                                       as \"privacy_level!: PrivacyLevel\",\n       language,\n       description,\n       translated_description                              as \"translated_description!: Json<HashMap<String, String>>\",\n       likes,\n       plays,\n       live_up_to_date,\n       other_keywords,\n       translated_keywords,\n       duration,\n       (\n            select row(pro_dev_data_module.id, kind, is_complete)\n            from pro_dev_data_module\n            where pro_dev_data_id = cte.draft_or_live_id and \"index\" = 0\n            order by \"index\"\n        )                                                   as \"cover?: (ModuleId, ModuleKind, bool)\",\n       array(select row (category_id)\n             from pro_dev_data_category\n             where pro_dev_data_id = cte.draft_or_live_id)     as \"categories!: Vec<(CategoryId,)>\",\n       array(\n             select row (pddr.id, pddr.display_name, resource_type_id, resource_content)\n             from pro_dev_data_resource \"pddr\"\n             where pddr.pro_dev_data_id = cte.draft_or_live_id\n       )                                                    as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n       array(\n            select row(pddu.unit_id)\n            from pro_dev_data_unit \"pddu\"\n            where pddu.pro_dev_data_id = pro_dev_data.id\n            order by \"index\"\n    )                                                     as \"units!: Vec<(ProDevUnitId,)>\"\nfrom pro_dev_data\n         inner join cte on cte.draft_or_live_id = pro_dev_data.id\n"
+  },
   "1967c95aeff5916cbe0737394d29ceecb925877408c76f7e6518075e6d62a90e": {
     "describe": {
       "columns": [],
@@ -1314,6 +1514,29 @@
       }
     },
     "query": "\ninsert into resource_like(resource_id, user_id)\nvalues ($1, $2)\n            "
+  },
+  "1cb9a8cfbc7b3dbe553c36e60bd4f1ed65be693154e7c04798c41b6294ad032f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "count!",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int2Array",
+          "UuidArray"
+        ]
+      }
+    },
+    "query": "\n        with cte as (\n            select (array_agg(pro_dev.id))[1]\n            from pro_dev_data \"cd\"\n                  inner join pro_dev on (draft_id = cd.id or (live_id = cd.id and cd.last_synced_at is not null and published_at is not null))\n                  left join pro_dev_data_resource \"resource\" on cd.id = resource.pro_dev_data_id\n            where (author_id = $1 or $1 is null)\n                and (cd.draft_or_live = $2 or $2 is null)\n                and (cd.privacy_level = any($3) or $3 = array[]::smallint[])\n                and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n            group by coalesce(updated_at, created_at)\n        )\n        select count(*) as \"count!\" from unnest(array(select cte.array_agg from cte)) with ordinality t(id, ord)\n"
   },
   "1d1f0368934f600bc36f0955ac595e554d8d1aeb0632ddd325177529c983e0d9": {
     "describe": {
@@ -1699,6 +1922,93 @@
     },
     "query": "\ninsert into user_pdf_library(user_id)\nvalues($1)\nreturning id as \"id: PdfId\"\n        "
   },
+  "2ce41261121d9eb17da3b103a2d45263ff4064e8a491d9a9ba999b0e50b2b0b8": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      }
+    },
+    "query": "\nupdate pro_dev_data\nset privacy_level = coalesce($2, privacy_level),\n    updated_at = now()\nwhere id = $1\n  and $2 is distinct from privacy_level\n    "
+  },
+  "2d26ed241609b1723fe935c9c0408e2f19987626f774c64ae557b103ac42dd28": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: ProDevId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "creator_id?: UserId",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_id?: UserId",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_name",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "live_id!",
+          "ordinal": 4,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "draft_id!",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "published_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "likes!",
+          "ordinal": 7,
+          "type_info": "Int8"
+        },
+        {
+          "name": "plays!",
+          "ordinal": 8,
+          "type_info": "Int8"
+        },
+        {
+          "name": "live_up_to_date!",
+          "ordinal": 9,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        true,
+        true,
+        null,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      }
+    },
+    "query": "\nselect pro_dev.id                               as \"id!: ProDevId\",\n       creator_id                               as \"creator_id?: UserId\",\n       author_id                                as \"author_id?: UserId\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id) as \"author_name\",\n       live_id                                  as \"live_id!\",\n       draft_id                                 as \"draft_id!\",\n       published_at,\n       likes                                    as \"likes!\",\n       plays                                    as \"plays!\",\n       live_up_to_date                          as \"live_up_to_date!\"\nfrom pro_dev\ninner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\norder by ord asc\n    "
+  },
   "2d7bafd7b464bb3dd87cf57bc759efe7e5cb73de4ee63feed43f08e2edc1270f": {
     "describe": {
       "columns": [],
@@ -2010,6 +2320,18 @@
     },
     "query": "\nselect resource.id                                       as \"id!: ResourceId\",\n       creator_id                               as \"creator_id: UserId\",\n       author_id                                as \"author_id: UserId\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id) as \"author_name\",\n       live_id                                  as \"live_id!\",\n       draft_id                                 as \"draft_id!\",\n       published_at,\n       likes                                     as \"likes!\",\n       views                                    as \"views!\",\n       live_up_to_date                          as \"live_up_to_date!\",\n       rating                                   as \"rating?: ResourceRating\",\n       blocked                                  as \"blocked!\",\n       curated                                  as \"curated!\"\nfrom resource\ninner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\ninner join resource_admin_data \"admin\" on admin.resource_id = resource.id\norder by ord asc\n    "
   },
+  "32570ca7632e0f254fa15681ead459f2a97592e3c49a36d2273b2cf43c6c6d90": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      }
+    },
+    "query": "\nupdate pro_dev_data\nset last_synced_at = now()\nwhere pro_dev_data.id = any (select live_id from pro_dev where pro_dev.id = any ($1))\n"
+  },
   "32bbb9dc2446795abc480d132b14960dc9b5d636d4b95d75400cffae27762155": {
     "describe": {
       "columns": [
@@ -2046,6 +2368,157 @@
     },
     "query": "\n            select id as \"id: AffiliationId\", display_name, created_at, updated_at from affiliation\n            order by index\n        "
   },
+  "32d87258fd872c3ab1c4ed8d4ab4d39fa0addb851308a52b45ee24bee59b9bb9": {
+    "describe": {
+      "columns": [
+        {
+          "name": "pro_dev_id: ProDevId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "privacy_level: PrivacyLevel",
+          "ordinal": 1,
+          "type_info": "Int2"
+        },
+        {
+          "name": "creator_id?: UserId",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_id?: UserId",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_name",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "published_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "likes",
+          "ordinal": 6,
+          "type_info": "Int8"
+        },
+        {
+          "name": "plays",
+          "ordinal": 7,
+          "type_info": "Int8"
+        },
+        {
+          "name": "duration",
+          "ordinal": 8,
+          "type_info": "Int8"
+        },
+        {
+          "name": "live_up_to_date",
+          "ordinal": 9,
+          "type_info": "Bool"
+        },
+        {
+          "name": "display_name!",
+          "ordinal": 10,
+          "type_info": "Text"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 11,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "language!",
+          "ordinal": 12,
+          "type_info": "Text"
+        },
+        {
+          "name": "description!",
+          "ordinal": 13,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_description!: Json<HashMap<String,String>>",
+          "ordinal": 14,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "draft_or_live!: DraftOrLive",
+          "ordinal": 15,
+          "type_info": "Int2"
+        },
+        {
+          "name": "other_keywords!",
+          "ordinal": 16,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_keywords!",
+          "ordinal": 17,
+          "type_info": "Text"
+        },
+        {
+          "name": "cover?: (ModuleId, ModuleKind, bool)",
+          "ordinal": 18,
+          "type_info": "Record"
+        },
+        {
+          "name": "categories!: Vec<(CategoryId,)>",
+          "ordinal": 19,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
+          "ordinal": 20,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "units!: Vec<(ProDevUnitId,)>",
+          "ordinal": 21,
+          "type_info": "RecordArray"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        true,
+        null,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int2Array",
+          "UuidArray",
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\nwith cte as (\n    select (array_agg(pdd.id))[1]\n    from pro_dev_data \"pdd\"\n          left join pro_dev on (draft_id = pdd.id or (live_id = pdd.id and pdd.last_synced_at is not null and published_at is not null))\n          left join pro_dev_data_resource \"resource\" on pdd.id = resource.pro_dev_data_id\n    where (author_id = $1 or $1 is null)\n        and (pdd.draft_or_live = $2 or $2 is null)\n        and (pdd.privacy_level = any($3) or $3 = array[]::smallint[])\n        and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n    group by coalesce(updated_at, created_at)\n    order by coalesce(updated_at, created_at) desc\n),\ncte1 as (\n    select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n   , ord) order by ord\n)\nselect pro_dev.id                                                                as \"pro_dev_id: ProDevId\",\n    privacy_level                                                               as \"privacy_level: PrivacyLevel\",\n    creator_id                                                                  as \"creator_id?: UserId\",\n    author_id                                                                   as \"author_id?: UserId\",\n    (select given_name || ' '::text || family_name\n     from user_profile\n     where user_profile.user_id = author_id)                                     as \"author_name\",\n    published_at,\n    likes,\n    plays,\n    duration,\n    live_up_to_date,\n    display_name                                                                  as \"display_name!\",\n    updated_at,\n    language                                                                      as \"language!\",\n    description                                                                   as \"description!\",\n    translated_description                                                        as \"translated_description!: Json<HashMap<String,String>>\",\n    draft_or_live                                                                 as \"draft_or_live!: DraftOrLive\",\n    other_keywords                                                                as \"other_keywords!\",\n    translated_keywords                                                           as \"translated_keywords!\",\n    (\n        select row(pro_dev_data_module.id, kind, is_complete)\n        from pro_dev_data_module\n        where pro_dev_data_id = pro_dev_data.id and \"index\" = 0\n        order by \"index\"\n    )                                                   as \"cover?: (ModuleId, ModuleKind, bool)\",\n    array(select row (category_id)\n            from pro_dev_data_category\n            where pro_dev_data_id = pro_dev_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n    array(select row (id, display_name, resource_type_id, resource_content)\n                from pro_dev_data_resource\n                where pro_dev_data_id = pro_dev_data.id\n          )                                          as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n    array(\n            select row(unit_id)\n            from pro_dev_data_unit \"pddu\"\n            where pddu.pro_dev_data_id = pro_dev_data.id\n            order by \"index\"\n    )                                                     as \"units!: Vec<(ProDevUnitId,)>\"\nfrom cte1\ninner join pro_dev_data on cte1.id = pro_dev_data.id\ninner join pro_dev on (\n    pro_dev_data.id = pro_dev.draft_id\n    or (\n        pro_dev_data.id = pro_dev.live_id\n        and last_synced_at is not null\n        and pro_dev.published_at is not null\n    )\n)\nwhere ord > (1 * $5 * $6)\norder by ord asc\nlimit $6\n"
+  },
   "33b3def525f80ae097847489feda1bcb7cc23f2b24ae237dbb93e17802d5fb74": {
     "describe": {
       "columns": [],
@@ -2058,6 +2531,20 @@
       }
     },
     "query": "update category set name = $1, updated_at = now() where id = $2"
+  },
+  "33eae35ba2c6b48087df4ec760a3127f5fe6014305fc8526e21287a07c3296e4": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int2"
+        ]
+      }
+    },
+    "query": "\nupdate pro_dev_data_unit\nset\n    index = case when index = $2 then $3 else index + 1 end,\n    updated_at = now()\nwhere pro_dev_data_id = $1 and index between $3 and $2\n"
   },
   "340e501a7da4700b5bccce3e503981333ee8176b2043bf55410d9292833ccea1": {
     "describe": {
@@ -2072,6 +2559,19 @@
       }
     },
     "query": "\nupdate jig_data\nset language         = coalesce($2, language),\n    theme            = coalesce($3, theme),\n    updated_at = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from language) or\n       ($3::smallint is not null and $3 is distinct from theme))\n"
+  },
+  "34164d4f17fa0f192baa9e50f9d99c6f11a6a68eff92bda3b0d28d9ffcfd420f": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nupdate pro_dev_data\nset description = $2,\n    updated_at = now()\nwhere id = $1 and $2 is distinct from description"
   },
   "34b1dd32f76952aba5206b08017300b1a6bc63f329481d1fc5858d0a87fad235": {
     "describe": {
@@ -2639,6 +3139,19 @@
     },
     "query": "\ninsert into user_recent_image (user_id, image_id, media_library)\nvalues ($1, $2, $3)\nON CONFLICT (user_id, image_id) DO UPDATE\n  SET user_id = $1,\n    image_id = $2,\n    media_library = $3,\n    last_used = now()\nreturning image_id as \"id: ImageId\", media_library as \"library: MediaLibrary\", last_used as \"last_used: DateTime<Utc>\";\n        "
   },
+  "3cbc10cf802fd2a1c46401866da3a7166b9f0e0df4064843aa7f844d5a8ccba2": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nupdate pro_dev_data_resource\nset display_name = coalesce($2, display_name)\nwhere id = $1 and $2 is distinct from display_name\n            "
+  },
   "3cda9dc75a601fac9d7e1dea7520bafe04c37e7e3e761c8d0c2a11479fc03376": {
     "describe": {
       "columns": [
@@ -2687,6 +3200,39 @@
       }
     },
     "query": "\ndelete from resource_data where id = $1\n    "
+  },
+  "3f184055ba7d5c715b7ce17b496ac1d223dbc31c5ef0e2c009c0b6ca294ebfd7": {
+    "describe": {
+      "columns": [
+        {
+          "name": "display_name!",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "description!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "value!",
+          "ordinal": 2,
+          "type_info": "Jsonb"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect display_name         as \"display_name!\",\n       description          as \"description!\",\n       value                as \"value!\"\nfrom pro_dev_data_unit \"pddr\"\nwhere pro_dev_data_id = $1\n  and pddr.unit_id = $2\n        "
   },
   "3f7ad7f5eb03139f9584aa6928a1b805b4f8908a1df023a12a7cf8cba3d56d26": {
     "describe": {
@@ -2870,6 +3416,26 @@
       }
     },
     "query": "\nselect resource_data.id,\n       display_name\nfrom resource_data\ninner join resource on live_id = resource_data.id\nwhere display_name <> '' and translated_name = '{}'\nand published_at is not null\nand name_translate_status is null\norder by coalesce(updated_at, created_at) desc\nlimit 10 for no key update skip locked;\n         "
+  },
+  "483247c6086d71011de2c502d5eacb5ef5fa7ee56d88659004dfe2b0c73b98c0": {
+    "describe": {
+      "columns": [
+        {
+          "name": "draft_id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect draft_id from pro_dev join pro_dev_data on pro_dev.draft_id = pro_dev_data.id where pro_dev.id = $1 for update\n"
   },
   "497d102ecb4180c0d121a24d6005b7bf078dd8c59dc68949b82c62bbb41951c0": {
     "describe": {
@@ -3442,6 +4008,19 @@
     },
     "query": "\ninsert into course_data_age_range(course_data_id, age_range_id)\nselect $2, age_range_id\nfrom course_data_age_range\nwhere course_data_id = $1\n        "
   },
+  "4e18a97518014653877111d872e69acb9d4b6599f006fcf02380360025594a25": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\ninsert into pro_dev_data_category(pro_dev_data_id, category_id)\nselect $2, category_id\nfrom pro_dev_data_category\nwhere pro_dev_data_id = $1\n        "
+  },
   "4f6d2ddbd67bbb8151bfd7108517f9a2e6b8982cc7c98075c2f22969db1ef482": {
     "describe": {
       "columns": [
@@ -3851,6 +4430,26 @@
     },
     "query": "\ninsert into jig_data_affiliation(jig_data_id, affiliation_id)\nselect $2, affiliation_id\nfrom jig_data_affiliation\nwhere jig_data_id = $1\n        "
   },
+  "544a3bd268fe92ce593147fc040e1be6b62a7c8771518b239ac6afc5576196a2": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\ninsert into pro_dev_data\n(display_name, created_at, updated_at, language, last_synced_at, description, privacy_level, other_keywords, translated_keywords, translated_description)\nselect display_name,\n       created_at,\n       updated_at,\n       language,\n       last_synced_at,\n       description,\n       privacy_level,\n       other_keywords,\n       translated_keywords,\n       translated_description::jsonb\nfrom pro_dev_data\nwhere id = $1\nreturning id\n        "
+  },
   "5486fe6499a2253171fa11aaa873fe04f3136bd0f50e203ec4961bd1cff1d76e": {
     "describe": {
       "columns": [
@@ -3955,6 +4554,28 @@
       }
     },
     "query": "\nupdate jig_data\nset audio_feedback_positive = $2,\n    audio_feedback_negative = $3,\n    updated_at = now()\nwhere id = $1 and ($2 <> audio_feedback_positive or $3 <> audio_feedback_negative)\n            "
+  },
+  "5747a28fe18891687ae10c61c0aae94845dd38d73ab10b66cfb2998592f57b67": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "insert into pro_dev (creator_id, author_id, live_id, draft_id) values ($1, $1, $2, $3) returning id"
   },
   "57693aa7ccdb79cbaa9b0d32177b781785ab822732c8e156740692a8d160cc53": {
     "describe": {
@@ -4299,6 +4920,22 @@
     },
     "query": "\nupdate resource_admin_data\nset rating = coalesce($2, rating)\nwhere resource_id = $1 and $2 is distinct from rating\n            "
   },
+  "5d33bc73534fff84549ff5906ebd61644662ecef8d9f6d90084f4d02b5fea997": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Jsonb",
+          "Int2",
+          "Bool"
+        ]
+      }
+    },
+    "query": "\nupdate pro_dev_data_module\nset contents    = coalesce($3, contents),\n    kind        = coalesce($4, kind),\n    is_complete = coalesce($5, is_complete)\nwhere pro_dev_data_id = $1\n  and index = $2\n"
+  },
   "5d39b246259043965846dc0fd205dc25a7a1263d74d2a6451b15c70052ec4844": {
     "describe": {
       "columns": [],
@@ -4349,6 +4986,29 @@
       }
     },
     "query": "\n    update jig_curation_data\n    set age_ranges = $2\n    where jig_id = $1 and $2 is distinct from age_ranges\n                "
+  },
+  "5dd1a53747b3a316564e945302d0de059c4a90adce6434868eeac143c7b508e2": {
+    "describe": {
+      "columns": [
+        {
+          "name": "count!",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int2Array",
+          "UuidArray"
+        ]
+      }
+    },
+    "query": "\n        with cte as (\n            select (array_agg(pdd.id))[1]\n            from pro_dev_data \"pdd\"\n                  inner join pro_dev on (draft_id = pdd.id or (live_id = pdd.id and pdd.last_synced_at is not null and published_at is not null))\n                  left join pro_dev_data_resource \"resource\" on pdd.id = resource.pro_dev_data_id\n            where (author_id = $1 or $1 is null)\n                and (pdd.draft_or_live = $2 or $2 is null)\n                and (pdd.privacy_level = any($3) or $3 = array[]::smallint[])\n                and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n            group by coalesce(updated_at, created_at)\n        )\n        select count(*) as \"count!\" from unnest(array(select cte.array_agg from cte)) with ordinality t(id, ord)\n    "
   },
   "5e4bfa7c86f036663500b75df28a943c55cbc671a2dd296514568680f1b3733f": {
     "describe": {
@@ -4487,6 +5147,27 @@
     },
     "query": "\n        delete from \"user\" \n        using session\n        where \"user\".id = session.user_id \n        and (scope_mask & $1) = $1 \n        and expires_at <= now() \n     "
   },
+  "61c9c9b15bebc1eecf799235fe0cad3a853b4f45ea8d474dbf0c2f2e9574c9f1": {
+    "describe": {
+      "columns": [
+        {
+          "name": "index",
+          "ordinal": 0,
+          "type_info": "Int2"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect index from pro_dev_data_unit\nwhere pro_dev_data_id = $1 and pro_dev_data_unit.unit_id is not distinct from $2\n"
+  },
   "620638cd11c57d625c799e1d5ada2d57161cb59e06559bc3bd7ee3e3e3a8d5ee": {
     "describe": {
       "columns": [
@@ -4507,6 +5188,27 @@
       }
     },
     "query": "\nselect exists(select 1 from user_image_library where user_id = $1 and id = $2) as \"exists!\"\n    "
+  },
+  "62d55b6e6d3f58b4744cfefb6b9bc2f6376e29c0892ae8fa764f2dc5b42cd1aa": {
+    "describe": {
+      "columns": [
+        {
+          "name": "exists!",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect exists(select 1 from pro_dev_data_resource \"pddr\" where pro_dev_data_id = $1\n    and pddr.id = $2) as \"exists!\"\n    "
   },
   "62d96e4b30f7828cbc7255b3be93f16aa1a868bd5a9780ae80079dbbfe858694": {
     "describe": {
@@ -5068,6 +5770,56 @@
     },
     "query": "\nselect size as \"size: ImageSize\"\nfrom user_image_library\ninner join user_image_upload on user_image_library.id = user_image_upload.image_id\nwhere (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)\nfor no key update of user_image_upload\nfor share of user_image_library\nskip locked\n        "
   },
+  "6e80c37673b6c8fe9ca3ca2bb99bbbb0739cca8c3eee9d5eeb0054684004c384": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: ModuleId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "body!",
+          "ordinal": 1,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "created_at!",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at!",
+          "ordinal": 3,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "kind!: ModuleKind",
+          "ordinal": 4,
+          "type_info": "Int2"
+        },
+        {
+          "name": "is_complete!",
+          "ordinal": 5,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect cdm.id          as \"id!: ModuleId\",\n       contents    as \"body!\",\n       created_at  as \"created_at!\",\n       updated_at  as \"updated_at!\",\n       kind        as \"kind!: ModuleKind\",\n       is_complete as \"is_complete!\"\nfrom pro_dev_data_module \"cdm\"\ninner join pro_dev on pro_dev.live_id = cdm.pro_dev_data_id\nwhere cdm.id is not distinct from $1\n"
+  },
   "6ea38ea0c905f9d7aa943145a64b10e5d0cdc86d8f365dfdac9a8c45bba8e67c": {
     "describe": {
       "columns": [
@@ -5121,6 +5873,49 @@
       }
     },
     "query": "\nupdate user_profile\nset profile_image_id = $2,\n    updated_at = now()\nwhere user_id = $1 and profile_image_id is distinct from $2\n        "
+  },
+  "7240c26495cdb2a1be7384de57c57e9d527a956ec573378b7941b4ae4f79c609": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int2"
+        ]
+      }
+    },
+    "query": "\nupdate pro_dev_data_module\nset\n    index = case when index = $2 then $3 else index + 1 end,\n    updated_at = now()\nwhere pro_dev_data_id = $1 and index between $3 and $2\n"
+  },
+  "7271e3ca17abbeeea21c4ed83715832336d1bdad91288cf324071557bbb33958": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "index",
+          "ordinal": 1,
+          "type_info": "Int2"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Jsonb",
+          "Bool"
+        ]
+      }
+    },
+    "query": "\ninsert into pro_dev_data_module (pro_dev_data_id, kind, contents, index, is_complete)\nvalues ($1, $2, $3, (select count(*) from pro_dev_data_module where pro_dev_data_id = $1), $4)\nreturning id, \"index\"\n"
   },
   "72b024e92b7f83b7e9fbb725e9955b62d22c676d62a8bbe2ce46be9cb163a991": {
     "describe": {
@@ -5738,6 +6533,20 @@
     },
     "query": "update user_image_upload set processed_at = now(), processing_result = false where image_id = $1"
   },
+  "82c4d3a9b2749b56f062c990480ea20061a2b5ed8a6569774e7cd11a03ac7569": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Jsonb"
+        ]
+      }
+    },
+    "query": "\nupdate pro_dev_data_resource\nset resource_content = $3\nwhere pro_dev_data_id = $1 and id = $2\n            "
+  },
   "82d3b6f6a8a0e2efe1185cccb068899bb2a86cd873c3b473318e4c2946de637f": {
     "describe": {
       "columns": [
@@ -6316,6 +7125,20 @@
     },
     "query": "insert into web_media_library_url (media_id, media_url) values ($1, $2) on conflict (media_id, media_url) do nothing"
   },
+  "8ec1ad8eb682a4f1fc2acafd761c7f043d02e675c1182014bcfb3196c63aaee2": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Jsonb"
+        ]
+      }
+    },
+    "query": "\n    update pro_dev_data_unit\n    set value = coalesce($3, value)\n    where pro_dev_data_id = $1\n      and index = $2\n    "
+  },
   "8f373a91b6dab0b7b89a03f5479b2ebe6dd2657bc06ebbe3aca37b1bac312f0e": {
     "describe": {
       "columns": [
@@ -6375,6 +7198,19 @@
       }
     },
     "query": "\n        update resource_curation_data\n        set additional_resources = $2\n        where resource_id = $1 and $2 is distinct from additional_resources\n                    "
+  },
+  "910bf510c8510a9e95ccf9de6c4b12ba4a2477b70caed648db38bc6d93d855af": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      }
+    },
+    "query": "\nupdate pro_dev_data_unit\nset index = index - 1\nwhere pro_dev_data_id = $1\n  and index > $2\n"
   },
   "932508742699d5ebb198b02fc4f4bcaa9fd0e50c4206e6536279163533526826": {
     "describe": {
@@ -7278,6 +8114,132 @@
     },
     "query": "\nselect exists(select 1\nfrom user_audio_library\ninner join user_audio_upload on user_audio_library.id = user_audio_upload.audio_id\nwhere (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)\nfor no key update of user_audio_upload\nfor share of user_audio_library\nskip locked\n) as \"exists!\"\n        "
   },
+  "9b883cfecddb8deb9b469903aee25a9ad56742385eaf1e5c706fdb0e4f237f59": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "language!",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "description!",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_description!: Json<HashMap<String, String>>",
+          "ordinal": 4,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "translated_name!: Json<HashMap<String, String>>",
+          "ordinal": 5,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "resource_types!",
+          "ordinal": 6,
+          "type_info": "UuidArray"
+        },
+        {
+          "name": "resource_type_names!",
+          "ordinal": 7,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "categories!",
+          "ordinal": 8,
+          "type_info": "UuidArray"
+        },
+        {
+          "name": "category_names!",
+          "ordinal": 9,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "units!",
+          "ordinal": 10,
+          "type_info": "UuidArray"
+        },
+        {
+          "name": "privacy_level!: PrivacyLevel",
+          "ordinal": 11,
+          "type_info": "Int2"
+        },
+        {
+          "name": "author_id",
+          "ordinal": 12,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "other_keywords!",
+          "ordinal": 13,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_keywords!",
+          "ordinal": 14,
+          "type_info": "Text"
+        },
+        {
+          "name": "author_name",
+          "ordinal": 15,
+          "type_info": "Text"
+        },
+        {
+          "name": "likes!",
+          "ordinal": 16,
+          "type_info": "Int8"
+        },
+        {
+          "name": "plays!",
+          "ordinal": 17,
+          "type_info": "Int8"
+        },
+        {
+          "name": "published_at",
+          "ordinal": 18,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null,
+        false,
+        true,
+        false,
+        false,
+        null,
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\nselect pro_dev.id,\n       display_name                                                                                                 as \"name\",\n       language                                                                                                     as \"language!\",\n       description                                                                                                  as \"description!\",\n       translated_description                                                                                       as \"translated_description!: Json<HashMap<String, String>>\",\n       translated_name                                                                                              as \"translated_name!: Json<HashMap<String, String>>\",\n       array((select resource_type_id\n               from pro_dev_data_resource\n               where pro_dev_data_id = pro_dev_data.id))                                                              as \"resource_types!\",\n       array((select resource_type.display_name\n             from resource_type\n                       inner join pro_dev_data_resource on resource_type.id = pro_dev_data_resource.resource_type_id\n            where pro_dev_data_resource.pro_dev_data_id = pro_dev_data.id))                                            as \"resource_type_names!\",\n       array((select category_id\n              from pro_dev_data_category\n              where pro_dev_data_id = pro_dev_data.id))                                                               as \"categories!\",\n       array((select name\n              from category\n                       inner join pro_dev_data_category on category.id = pro_dev_data_category.category_id\n              where pro_dev_data_category.pro_dev_data_id = pro_dev_data.id))                                          as \"category_names!\",\n        array(\n           (select unit_id\n            from pro_dev_data_unit\n            where pro_dev_data_unit.pro_dev_data_id = pro_dev_data.id)\n       )                                                                                                            as \"units!\",\n       privacy_level                                                                                                as \"privacy_level!: PrivacyLevel\",\n       author_id                                                                                                    as \"author_id\",\n       other_keywords                                                                                               as \"other_keywords!\",\n       translated_keywords                                                                                          as \"translated_keywords!\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = pro_dev.author_id)                                                             as \"author_name\",\n        likes                                                                                                       as \"likes!\",\n        plays                                                                                                       as \"plays!\",\n        published_at                                                                                                as \"published_at\"\nfrom pro_dev\n         inner join pro_dev_data on live_id = pro_dev_data.id\nwhere (last_synced_at is null and published_at is not null)\n    or (updated_at is not null and last_synced_at < updated_at)\n    or (published_at < now() is true and last_synced_at < published_at)\nlimit 100 for no key update skip locked;\n     "
+  },
   "9baca0e0cc5e462bafb40e834a5c894d9f02dbb61ec75d81609cc32c946f5857": {
     "describe": {
       "columns": [
@@ -8122,6 +9084,20 @@
     },
     "query": "\nselect id,\n       name,\n       size                                                                                     as \"size!: ImageSize\",\n       description,\n       translated_description                                                                   as \"translated_description!: Json<HashMap<String, String>>\",\n       translated_name                                                                          as \"translated_name!: Json<HashMap<String, String>>\",\n       array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as \"affiliations!\",\n       array((select affiliation.display_name\n              from affiliation\n                       inner join image_affiliation on affiliation.id = image_affiliation.affiliation_id\n              where image_affiliation.image_id = image_metadata.id))                            as \"affiliation_names!\",\n       array((select style_id from image_style where image_id = image_metadata.id))             as \"styles!\",\n       array((select style.display_name\n              from style\n                       inner join image_style on style.id = image_style.style_id\n              where image_style.image_id = image_metadata.id))                                  as \"style_names!\",\n       array((select age_range_id from image_age_range where image_id = image_metadata.id))     as \"age_ranges!\",\n       array((select age_range.display_name\n              from age_range\n                       inner join image_age_range on age_range.id = image_age_range.age_range_id\n              where image_age_range.image_id = image_metadata.id))                              as \"age_range_names!\",\n       array((select category_id from image_category where image_id = image_metadata.id))       as \"categories!\",\n       array((select name\n              from category\n                       inner join image_category on category.id = image_category.category_id\n              where image_category.image_id = image_metadata.id))                               as \"category_names!\",\n       array((select index\n              from image_tag\n                       inner join image_tag_join on image_tag.index = image_tag_join.tag_index\n              where image_tag_join.image_id = image_metadata.id))                               as \"tags!\",\n       array((select display_name\n              from image_tag\n                       inner join image_tag_join on image_tag.index = image_tag_join.tag_index\n              where image_tag_join.image_id = image_metadata.id))                               as \"tag_names!\",\n       (publish_at < now() is true)                                                             as \"is_published!\",\n       is_premium,\n       usage                                                                               as \"usage!\"\nfrom image_metadata\n         join image_upload on id = image_id\nwhere ((last_synced_at is null and publish_at is not null) or\n       (updated_at is not null and last_synced_at < updated_at) or\n       (publish_at < now() is true and last_synced_at < publish_at))\n  and processed_at is not null\nlimit 100 for no key update skip locked;\n     "
   },
+  "a9f4b50041b4c42e5e67520a8bdc2c0f8c43f123c5eddb2f5053f5d27ade2660": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int2"
+        ]
+      }
+    },
+    "query": "\nupdate pro_dev_data_unit\nset\n    index = case when index = $2 then $3 else index - 1 end,\n    updated_at = now()\nwhere pro_dev_data_id = $1 and index between $2 and $3\n"
+  },
   "a9fa310e6fab6aa84b5500622f9a3e3b763ded6f006d11b500e90ae36d93bcab": {
     "describe": {
       "columns": [],
@@ -8218,6 +9194,104 @@
       }
     },
     "query": "\ninsert into jig_data\n(display_name, created_at, updated_at, language, last_synced_at, description, theme, audio_background,\n audio_feedback_negative, audio_feedback_positive, direction, display_score, drag_assist, track_assessments, privacy_level, other_keywords, translated_keywords, translated_description)\nselect display_name,\n       created_at,\n       updated_at,\n       language,\n       last_synced_at,\n       description,\n       theme,\n       audio_background,\n       audio_feedback_negative,\n       audio_feedback_positive,\n       direction,\n       display_score,\n       drag_assist,\n       track_assessments,\n       privacy_level,\n       other_keywords,\n       translated_keywords,\n       translated_description::jsonb\nfrom jig_data\nwhere id = $1\nreturning id\n        "
+  },
+  "ab6c682176e670014163298904adcab51e57b39a75233ae656e676b35d88d91c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "display_name!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "privacy_level!: PrivacyLevel",
+          "ordinal": 3,
+          "type_info": "Int2"
+        },
+        {
+          "name": "language!",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "description!",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_description!: Json<HashMap<String, String>>",
+          "ordinal": 6,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "duration",
+          "ordinal": 7,
+          "type_info": "Int8"
+        },
+        {
+          "name": "other_keywords!",
+          "ordinal": 8,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_keywords!",
+          "ordinal": 9,
+          "type_info": "Text"
+        },
+        {
+          "name": "cover?: (ModuleId, ModuleKind, bool)",
+          "ordinal": 10,
+          "type_info": "Record"
+        },
+        {
+          "name": "categories!: Vec<(CategoryId,)>",
+          "ordinal": 11,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
+          "ordinal": 12,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "units!: Vec<(ProDevUnitId,)>",
+          "ordinal": 13,
+          "type_info": "RecordArray"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      }
+    },
+    "query": "\nselect  id,\n        display_name                                       as \"display_name!\",\n        updated_at,\n        privacy_level                                      as \"privacy_level!: PrivacyLevel\",\n        language                                           as \"language!\",\n        description                                         as \"description!\",\n        translated_description                              as \"translated_description!: Json<HashMap<String, String>>\",\n        duration                                           as \"duration\",\n        other_keywords                             as \"other_keywords!\",\n        translated_keywords                        as \"translated_keywords!\",\n        (\n            select row(pro_dev_data_module.id, kind, is_complete)\n            from pro_dev_data_module\n            where pro_dev_data_id = pro_dev_data.id and \"index\" = 0\n            order by \"index\"\n        )                                                   as \"cover?: (ModuleId, ModuleKind, bool)\",\n        array(select row (category_id)\n            from pro_dev_data_category\n            where pro_dev_data_id = pro_dev_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n        array(\n            select row (pddr.id, pddr.display_name, resource_type_id, resource_content)\n            from pro_dev_data_resource \"pddr\"\n            where pddr.pro_dev_data_id = pro_dev_data.id\n        )                                                    as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n        array(\n            select row(unit_id)\n            from pro_dev_data_unit \"pddu\"\n            where pddu.pro_dev_data_id = pro_dev_data.id\n            order by \"index\"\n        )                                                     as \"units!: Vec<(ProDevUnitId,)>\"\nfrom pro_dev_data\ninner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\norder by ord asc\n"
   },
   "abe8fdba2626df204b680c636918cef5fa26f18f628d7bced58edacdb26e0b63": {
     "describe": {
@@ -8380,6 +9454,19 @@
       }
     },
     "query": "\nselect jig.id,\n       display_name                                                                                                 as \"name\",\n       language                                                                                                     as \"language!\",\n       description                                                                                                  as \"description!\",\n       translated_description                                                                                       as \"translated_description!: Json<HashMap<String, String>>\",\n       translated_name                                                                                              as \"translated_name!: Json<HashMap<String, String>>\",\n       array((select affiliation_id\n              from jig_data_affiliation\n              where jig_data_id = jig_data.id))                                                                     as \"affiliations!\",\n       array((select affiliation.display_name\n              from affiliation\n                       inner join jig_data_affiliation on affiliation.id = jig_data_affiliation.affiliation_id\n              where jig_data_affiliation.jig_data_id = jig_data.id))                                                as \"affiliation_names!\",\n        array((select resource_type_id\n                from jig_data_additional_resource\n                where jig_data_id = jig_data.id))                                                                     as \"resource_types!\",\n        array((select resource_type.display_name\n              from resource_type\n                        inner join jig_data_additional_resource on resource_type.id = jig_data_additional_resource.resource_type_id\n             where jig_data_additional_resource.jig_data_id = jig_data.id))                                         as \"resource_type_names!\",\n       array((select age_range_id\n              from jig_data_age_range\n              where jig_data_id = jig_data.id))                                                                     as \"age_ranges!\",\n       array((select age_range.display_name\n              from age_range\n                       inner join jig_data_age_range on age_range.id = jig_data_age_range.age_range_id\n              where jig_data_age_range.jig_data_id = jig_data.id))                                                  as \"age_range_names!\",\n       array((select category_id\n              from jig_data_category\n              where jig_data_id = jig_data.id))                                                                     as \"categories!\",\n       array((select name\n              from category\n                       inner join jig_data_category on category.id = jig_data_category.category_id\n              where jig_data_category.jig_data_id = jig_data.id))                                                   as \"category_names!\",\n       privacy_level                                                                                                as \"privacy_level!: PrivacyLevel\",\n       author_id                                                                                                    as \"author_id\",\n       locked                                                                                                       as \"locked!\",\n       other_keywords                                                                                               as \"other_keywords!\",\n       translated_keywords                                                                                          as \"translated_keywords!\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = jig.author_id)                                                                 as \"author_name\",\n        rating                                                                                                      as \"rating\",\n        liked_count                                                                                                 as \"likes!\",\n        (\n            select play_count\n            from jig_play_count \"jpc\"\n            where jpc.jig_id = jig.id\n        )                                                                                                           as \"plays!\",\n        published_at                                                                                                as \"published_at\",\n        blocked                                                                                                     as \"blocked!\"\nfrom jig\n         inner join jig_data on live_id = jig_data.id\n         inner join jig_admin_data \"jad\" on jad.jig_id = jig.id\nwhere ((last_synced_at is null and published_at is not null)\n   or (updated_at is not null and last_synced_at < updated_at)\n    or (published_at < now() is true and last_synced_at < published_at))\nlimit 100 for no key update skip locked;\n     "
+  },
+  "acc469aafffd310ed6f963740286a27c62e30371d659a36e6e66a55f7fc5c819": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "update pro_dev set live_id = $1, published_at = now() where id = $2"
   },
   "acd90efacb1d27c44d05fbd12b9a105b0ff240fa7f8e55b4dbcf5a1aef39e936": {
     "describe": {
@@ -8680,6 +9767,56 @@
       }
     },
     "query": "update resource set live_id = $1, published_at = now() where id = $2"
+  },
+  "b4e8cf630cc7d970695cf2ce91916dbfc723aff58cf1e00456855d603d31bd7c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: ModuleId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "body!",
+          "ordinal": 1,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "created_at!",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at!",
+          "ordinal": 3,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "kind!: ModuleKind",
+          "ordinal": 4,
+          "type_info": "Int2"
+        },
+        {
+          "name": "is_complete!",
+          "ordinal": 5,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect cdm.id          as \"id!: ModuleId\",\n       contents    as \"body!\",\n       created_at  as \"created_at!\",\n       updated_at  as \"updated_at!\",\n       kind        as \"kind!: ModuleKind\",\n       is_complete as \"is_complete!\"\nfrom pro_dev_data_module \"cdm\"\ninner join pro_dev on pro_dev.draft_id = cdm.pro_dev_data_id\nwhere cdm.id is not distinct from $1\n"
   },
   "b4f3858831e1685ac7bf663ebddc340a804437258fce9803fd079c084b38e470": {
     "describe": {
@@ -9002,6 +10139,32 @@
     },
     "query": "\nupdate course_data\nset other_keywords = $2,\n    translated_keywords = (case when ($3::text is not null) then $3::text else (translated_keywords) end),\n    updated_at = now()\nwhere id = $1 and $2 is distinct from other_keywords"
   },
+  "b8d5c88744b20dcfb8a5ecdb82abefcf3ef7ab264a1d26d64c88a8ecf54f7e0f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "draft_id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "live_id",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect draft_id, live_id from pro_dev where id = $1\n"
+  },
   "b9595a3827091a7520dd91e64bfd465a6521548631244e2f37ab78227ddc9863": {
     "describe": {
       "columns": [],
@@ -9179,6 +10342,18 @@
     },
     "query": "\nupdate category\nset updated_at = now(),\n    index = index + 1\nwhere index >= $1 and index < $2 and parent_id is not distinct from $3\n                "
   },
+  "c187153c3a2f7cfb87147b59453fa34d3236e3c31ca84c9d4cf1bfa16b3902a0": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\ndelete from pro_dev_data where id = $1\n    "
+  },
   "c277e73647c164ad7ee2e84a60e0875cf19008dc3a846d23d78f59acf0b66394": {
     "describe": {
       "columns": [],
@@ -9265,6 +10440,52 @@
     },
     "query": "\nupdate resource_data\nset language         = coalesce($2, language),\n    updated_at = now()\nwhere id = $1\n  and ($2::text is not null and $2 is distinct from language)\n"
   },
+  "c5b8e58e6a6932bac86b90adda52e2b54309e4738c45fc3962bc3a5c68470342": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      }
+    },
+    "query": "\nupdate pro_dev_data\nset draft_or_live = $2\nwhere id = $1\n            "
+  },
+  "c6b06331ca0ec15bbb1bbcd24e4d37a25bf92e0dca2c1cd1f5c40a2bde39ab63": {
+    "describe": {
+      "columns": [
+        {
+          "name": "display_name!",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "resource_type_id!: ResourceTypeId",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "resource_content!",
+          "ordinal": 2,
+          "type_info": "Jsonb"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect display_name         as \"display_name!\",\n       resource_type_id     as \"resource_type_id!: ResourceTypeId\",\n       resource_content    as \"resource_content!\"\nfrom pro_dev_data_resource \"pddr\"\nwhere pro_dev_data_id = $1\n  and pddr.id = $2\n        "
+  },
   "c721caaa5f743b93aea15f85f31faf1a9eda5905e3a1469025d5c811a157ffdd": {
     "describe": {
       "columns": [
@@ -9284,6 +10505,19 @@
       }
     },
     "query": "\n        select count(user_id)  as \"count!: i64\"\n        from user_follow\n        where follower_id = $1\n            "
+  },
+  "c7d851009754944f955659acde49ad46ed670ddb3661ee3ecd8e5fd5aa60d0c3": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n    insert into pro_dev_data_unit(pro_dev_data_id, display_name, description, index, value)\n    select $2, display_name, description, index, value \n    from pro_dev_data_unit\n    where pro_dev_data_id = $1\n            "
   },
   "c877be5757f8787c2da80469a4fc50641fb63358e6516d05c7159d9c8060ac52": {
     "describe": {
@@ -9411,6 +10645,26 @@
       }
     },
     "query": "\nselect exists(select 1 from jig_data_additional_resource \"jdar\" where jig_data_id = $1\n    and jdar.id = $2) as \"exists!\"\n    "
+  },
+  "ca5b620eaf74e9f66dd0aa8d318e56b2aa7822fae7f8cf833f6465487d79530c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "max_index!",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "select count(*) - 1 as \"max_index!\" from pro_dev_data_module where pro_dev_data_id = $1"
   },
   "ca807853c119226252820e8cd0f9476d114f3e5e98ffed0dcd059d05063760a4": {
     "describe": {
@@ -9789,6 +11043,43 @@
     },
     "query": "\nwith cte as (\n    select (array_agg(cd.id))[1]\n    from course_data \"cd\"\n          left join course on (draft_id = cd.id or (live_id = cd.id and cd.last_synced_at is not null and published_at is not null))\n          left join course_data_resource \"resource\" on cd.id = resource.course_data_id\n    where (author_id = $1 or $1 is null)\n        and (cd.draft_or_live = $2 or $2 is null)\n        and (cd.privacy_level = any($3) or $3 = array[]::smallint[])\n        and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n    group by coalesce(updated_at, created_at)\n    order by coalesce(updated_at, created_at) desc\n),\ncte1 as (\n    select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n   , ord) order by ord\n)\nselect course.id                                                                as \"course_id: CourseId\",\n    privacy_level                                                               as \"privacy_level: PrivacyLevel\",\n    creator_id                                                                  as \"creator_id?: UserId\",\n    author_id                                                                   as \"author_id?: UserId\",\n    (select given_name || ' '::text || family_name\n     from user_profile\n     where user_profile.user_id = author_id)                                     as \"author_name\",\n    published_at,\n    likes,\n    plays,\n    live_up_to_date,\n    display_name                                                                  as \"display_name!\",\n    updated_at,\n    language                                                                      as \"language!\",\n    description                                                                   as \"description!\",\n    translated_description                                                        as \"translated_description!: Json<HashMap<String,String>>\",\n    draft_or_live                                                                 as \"draft_or_live!: DraftOrLive\",\n    other_keywords                                                                as \"other_keywords!\",\n    translated_keywords                                                           as \"translated_keywords!\",\n    (\n        select row(course_data_module.id, kind, is_complete)\n        from course_data_module\n        where course_data_id = course_data.id and \"index\" = 0\n        order by \"index\"\n    )                                                   as \"cover?: (ModuleId, ModuleKind, bool)\",\n    array(select row (category_id)\n            from course_data_category\n            where course_data_id = course_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n    array(select row (affiliation_id)\n            from course_data_affiliation\n            where course_data_id = course_data.id)          as \"affiliations!: Vec<(AffiliationId,)>\",\n    array(select row (age_range_id)\n            from course_data_age_range\n            where course_data_id = course_data.id)          as \"age_ranges!: Vec<(AgeRangeId,)>\",\n    array(select row (id, display_name, resource_type_id, resource_content)\n                from course_data_resource\n                where course_data_id = course_data.id\n          )                                          as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n    array(\n        select row(jig_id)\n        from course_data_jig\n        where course_data_jig.course_data_id = course_data.id\n        order by \"index\"\n    )                                                     as \"items!: Vec<(JigId,)>\"\nfrom cte1\ninner join course_data on cte1.id = course_data.id\ninner join course on (\n    course_data.id = course.draft_id\n    or (\n        course_data.id = course.live_id\n        and last_synced_at is not null\n        and course.published_at is not null\n    )\n)\nwhere ord > (1 * $5 * $6)\norder by ord asc\nlimit $6\n"
   },
+  "cf1d0807d549aca8d226a2808899ac14011e9f47f5470f912340af0e031b8bd6": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int2"
+        ]
+      }
+    },
+    "query": "\nupdate pro_dev_data_module\nset\n    index = case when index = $2 then $3 else index - 1 end,\n    updated_at = now()\nwhere pro_dev_data_id = $1 and index between $2 and $3\n"
+  },
+  "cf8ded4ccd71e7d30eff7731aadaf1b84c37fc71492b8b1c21e12172e0d8047c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text",
+          "Int2"
+        ]
+      }
+    },
+    "query": "\ninsert into pro_dev_data\n   (display_name, language, description, draft_or_live)\nvalues ($1, $2, $3, $4)\nreturning id\n"
+  },
   "d1095b2f79187d6c7b251d3f39a7470e5e97b69c4424b638aec44fcb0f1d3deb": {
     "describe": {
       "columns": [
@@ -9936,6 +11227,19 @@
     },
     "query": "\nwith cte as (\n    insert into user_color\n    (user_id, color, index)\n    values ($1, $2, (select count(*) from user_color where user_id = $1)) returning color\n), colors as (\n    select color\n    from user_color\n    where user_id = $1\n    order by index\n)\nselect color as \"color!\" from colors\nunion all\nselect color as \"color!\" from cte\n    "
   },
+  "d3c21e0e8047e0a307e609dd66a9ff0ab3d043f46056159d4e92dcf3fec6fd45": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nupdate pro_dev_data\nset display_name = $2,\n    updated_at = now()\nwhere id = $1 and $2 is distinct from display_name"
+  },
   "d4d6e14dd8b8d8af673fa0a1928526f5a35136a3af46272746667802200158e4": {
     "describe": {
       "columns": [
@@ -10021,6 +11325,27 @@
     },
     "query": "\nupdate jig_data_additional_resource\nset resource_content = $3\nwhere jig_data_id = $1 and id = $2\n            "
   },
+  "d669f488a65cde66e52d2a5fbf5ac35ac16e787ebf12fbfcb8822f0f79d90edb": {
+    "describe": {
+      "columns": [
+        {
+          "name": "index",
+          "ordinal": 0,
+          "type_info": "Int2"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\ndelete\nfrom pro_dev_data_module\nwhere pro_dev_data_id = $1 and pro_dev_data_module.id is not distinct from $2\nreturning index\n"
+  },
   "d7486ec8586f909ab5c8b39d7faa614b8dd870bd080ffb0da30e75ccb5c4c6d0": {
     "describe": {
       "columns": [
@@ -10103,6 +11428,26 @@
     },
     "query": "\n        with follower as (\n            select (array_agg(follower_id))[1]\n            from user_follow\n            where user_id = $1\n            group by followed_at\n            order by followed_at desc\n        ),\n        cte as (\n            select * from unnest(array(select follower.array_agg from follower)) with ordinality t(id, ord) order by ord\n        )\n        select  \"user\".id         as \"id!: UserId\",\n                username               as \"username!\",\n                given_name             as \"given_name!\",\n                family_name            as \"family_name!\",\n                profile_image_id       as \"profile_image?: ImageId\",\n                (select languages_spoken from user_profile where user_profile.user_id = \"user\".id and languages_spoken_public is true)      as \"languages_spoken?: Vec<String>\",\n                (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n                (select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\",\n                (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n                (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n                (select array(select circle.id\n                    from circle_member bm\n                    left join circle on bm.id = circle.id\n                    where bm.user_id = \"user\".id or circle.creator_id = \"user\".id\n                )) as \"circles!: Vec<CircleId>\"\n        from cte\n        inner join user_profile on cte.id = user_profile.user_id\n        inner join \"user\" on (cte.id = \"user\".id)\n        where ord > (1 * $2 * $3)\n        limit $3;\n\n            "
   },
+  "d838a1604d6ba7aea461d2c00ec97a42775427277a6324d4fd690f395438c95e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "draft_id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect draft_id from pro_dev where pro_dev.id = $1\n"
+  },
   "d86986c5ee22e43f142a6b2343db2498733bb652441754e7731d17052cdf19e6": {
     "describe": {
       "columns": [
@@ -10126,6 +11471,39 @@
       }
     },
     "query": "\nselect course_data.id,\n       display_name\nfrom course_data\ninner join course on live_id = course_data.id\nwhere display_name <> ''\n      and translated_name = '{}'\n      and published_at is not null\n      and name_translate_status is null\norder by coalesce(updated_at, created_at) desc\nlimit 50 for no key update skip locked;\n "
+  },
+  "d87bd3932cce5d8f7ff89c3d0b068377340656aa9f18d20e1d3be70541125529": {
+    "describe": {
+      "columns": [
+        {
+          "name": "name: String",
+          "ordinal": 0,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n            select index_name as \"name: String\"\n            from algolia_index_settings\n            where (index_name = $1 and index_hash <> $2)\n            or (index_name = $3 and index_hash <> $4)\n            or (index_name = $5 and index_hash <> $6)\n            or (index_name = $7 and index_hash <> $8)\n            or (index_name = $9 and index_hash <> $10)\n            or (index_name = $11 and index_hash <> $12)\n            or (index_name = $13 and index_hash <> $14)\n            "
   },
   "d935de8ff747d8408644105a61f99219aee129fd49e240cd3843d8374b02ea29": {
     "describe": {
@@ -10231,6 +11609,27 @@
       }
     },
     "query": "\nselect given_name\nfrom user_profile\nwhere user_id = $1\n        "
+  },
+  "dcf1c205342991479db185e57d7aef0339f4205a8e7fe6f1db2b89f02d0b0bd0": {
+    "describe": {
+      "columns": [
+        {
+          "name": "exists!",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect exists(select 1 from pro_dev_data_unit \"pddu\" where pro_dev_data_id = $1\n    and pddu.unit_id = $2) as \"exists!\"\n    "
   },
   "dd600a259ed3681915cc195311f529237e69284d80b248b34483c9fece560cbc": {
     "describe": {
@@ -10431,6 +11830,30 @@
     },
     "query": "delete from \"user\" where id = $1"
   },
+  "e4ae4bf489188636704e3124e0896f10beab26e9bf4e2c731e665b1a82084b09": {
+    "describe": {
+      "columns": [
+        {
+          "name": "unit_id!: ProDevUnitId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text",
+          "Jsonb",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\ninsert into pro_dev_data_unit (pro_dev_data_id, display_name, description, value, index)\nvalues ((select draft_id from pro_dev where id = $1), $2, $3, $4, (select count(*) from pro_dev_data_unit where pro_dev_data_id = $5))\nreturning unit_id as \"unit_id!: ProDevUnitId\"\n        "
+  },
   "e507c5682a9424e1b2e0971c135667c3f9fc13894921c9a2690eb05c63f2ade1": {
     "describe": {
       "columns": [
@@ -10567,6 +11990,27 @@
     },
     "query": "update user_pdf_upload set processed_at = now(), processing_result = true where pdf_id = $1"
   },
+  "e59959ded0c4fb016cbde212e032ab9e74aa9d6e1dba1d96edeff7e9eb7c3c0c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "index",
+          "ordinal": 0,
+          "type_info": "Int2"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\ndelete\nfrom pro_dev_data_unit\nwhere pro_dev_data_id = $1 and pro_dev_data_unit.unit_id is not distinct from $2\nreturning index\n"
+  },
   "e5ce362b6edf11adff2f1261b9b1c92c6bf77ae823f8dd2b58befb23761f0254": {
     "describe": {
       "columns": [
@@ -10652,6 +12096,19 @@
     },
     "query": "\n    update jig_curation_data\n    set affiliations = $2\n    where jig_id = $1 and $2 is distinct from affiliations\n                "
   },
+  "ed03d9a1309c7ecbf8f883f6f43b0cd57269ceb4e0d2765b181d765c8dd069de": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\ninsert into pro_dev_data_resource(pro_dev_data_id, resource_type_id, display_name, resource_content)\nselect $2, resource_type_id, display_name, resource_content\nfrom pro_dev_data_resource\nwhere pro_dev_data_id = $1\n        "
+  },
   "ed07a0bf0907ac9428772e386480174ad64a167e00993a53743e1c3b9b33ce08": {
     "describe": {
       "columns": [],
@@ -10679,6 +12136,20 @@
       }
     },
     "query": "\nupdate jig_data\nset direction = $2,\n    display_score = $3,\n    track_assessments = $4,\n    drag_assist = $5,\n    updated_at = now()\nwhere id = $1 and\n    (($2 is distinct from direction) or\n     ($3 is distinct from display_score) or\n     ($4 is distinct from track_assessments) or\n     ($5 is distinct from drag_assist))\n            "
+  },
+  "ed9526b0cf1b26bd1cc7faa416b07a242ca7952ab41a20d80a2cf7f6c1f22600": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nupdate pro_dev_data\nset other_keywords = $2,\n    translated_keywords = (case when ($3::text is not null) then $3::text else (translated_keywords) end),\n    updated_at = now()\nwhere id = $1 and $2 is distinct from other_keywords"
   },
   "edf5cb94b8714ed9995df1c7266d8837390d35250f6c20f3d65b73974e50da4b": {
     "describe": {
@@ -10995,6 +12466,20 @@
     },
     "query": "\ninsert into course_data_jig(course_data_id, jig_id, index)\nselect $2, jig_id, index\nfrom course_data_jig\nwhere course_data_id = $1\n        "
   },
+  "f030360c43278db52692e52d2028840cde304af4d2dd3be5dc5a41bbffb189be": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nwith del_data as (\n    delete from pro_dev_data\n        where id is not distinct from $1 or id is not distinct from $2)\ndelete\nfrom pro_dev\nwhere id is not distinct from $3\n\n"
+  },
   "f0690dfd7a2dab5daf86dbcf154b3e886c65c43baeae1d4337e6541f78357bfe": {
     "describe": {
       "columns": [],
@@ -11007,6 +12492,33 @@
       }
     },
     "query": "\nupdate jig_data\nset display_name = $2,\n    translated_name = '{}',\n    updated_at = now()\nwhere id = $1 and $2 is distinct from display_name"
+  },
+  "f1a045f00b0584f7a6ddcdaa1900811d5143438b30b03ed10d90f187f4b13021": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\ndelete\nfrom pro_dev_data_resource\nwhere pro_dev_data_id = $1\n   or pro_dev_data_id = $2\n    and id = $3\n        "
+  },
+  "f1ab790914b7f007bcfee514dc60aed3c2f021c3ee6ea77b506c2aa40fbcd2cd": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n insert into pro_dev_data_module (\"index\", pro_dev_data_id, kind, is_complete, contents)\n select \"index\", $2 as \"pro_dev_id\", kind, is_complete, contents\n from pro_dev_data_module\n where pro_dev_data_id = $1\n            "
   },
   "f1da735aa16c69d6e293d1c1b28cb018017f891f1e79dc7f3ed2a633880f493b": {
     "describe": {
@@ -11027,6 +12539,19 @@
       }
     },
     "query": "\nselect count(*) as \"count!: i64\"\nfrom resource_data\ninner join resource on resource.live_id = resource_data.id\nwhere (privacy_level = coalesce($1, privacy_level))\n"
+  },
+  "f22eb154024da3bdbf161129b7b54575fbb3142e98c741fdf07afb9d67cffc86": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      }
+    },
+    "query": "\nupdate pro_dev_data_module\nset index = index - 1\nwhere pro_dev_data_id = $1\n  and index > $2\n"
   },
   "f4463110f5544135bbcbb441792aad08a4e34be4dbf2994b9525b6ae031e3b5f": {
     "describe": {
@@ -11170,6 +12695,29 @@
     },
     "query": "\nwith del_data as (\n    delete from resource_data\n        where id is not distinct from $1 or id is not distinct from $2)\ndelete\nfrom resource\nwhere id is not distinct from $3\n\n"
   },
+  "f797852db725474f648066fe97f7d091abbd933f3f447aa057bbe9d9063d91ec": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: AdditionalResourceId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Jsonb",
+          "Text"
+        ]
+      }
+    },
+    "query": "\ninsert into pro_dev_data_resource (pro_dev_data_id, resource_type_id, resource_content, display_name)\nvalues ((select draft_id from pro_dev where id = $1), $2, $3, $4)\nreturning id as \"id!: AdditionalResourceId\"\n        "
+  },
   "f885c76fd750edde5adbd1d426d6f92c91f336d5ffbbcee318e1f18cf31ca72b": {
     "describe": {
       "columns": [
@@ -11286,6 +12834,21 @@
       }
     },
     "query": "delete from web_media_library where id = $1 returning kind as \"kind: MediaKind\""
+  },
+  "fb37bea2a884a12230ba490e6011a69ac212893bd9a2db9233a5cfee6a84fe3b": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nupdate pro_dev_data_unit\nset display_name    = coalesce($3, display_name),\n    description     = coalesce($4, description)\nwhere pro_dev_data_id = $1\n  and index = $2\n"
   },
   "fb5c18dc3493191c5c189cedb4c68c4962209491d47dc76fbce7222a9ca79002": {
     "describe": {
