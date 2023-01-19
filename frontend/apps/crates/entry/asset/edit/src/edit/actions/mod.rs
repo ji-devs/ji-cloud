@@ -30,6 +30,7 @@ impl AssetEditState {
                 Asset::Resource(_) => {
                     // do nothing, resource doesn't have the sidebar
                 },
+                Asset::ProDev(_) => todo!(),
             };
             state.asset.fill_from_asset(asset);
         }));
@@ -42,6 +43,7 @@ impl AssetEditState {
                 resource_actions::load_resource(resource_id).await?.into()
             }
             AssetId::CourseId(course_id) => course_actions::load_course(course_id).await?.into(),
+            AssetId::ProDevId(_) => todo!(),
         };
         Ok(asset)
     }
@@ -84,6 +86,7 @@ impl AssetEditState {
                     ResourceEditRoute::Landing,
                 ))));
             }
+            AssetId::ProDevId(_) => todo!(),
         }
     }
 }

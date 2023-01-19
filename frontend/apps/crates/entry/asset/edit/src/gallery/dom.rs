@@ -174,6 +174,8 @@ impl Gallery {
                                             CourseEditRoute::Landing
                                         ))))
                                     },
+                                    Asset::ProDev(_) => todo!(),
+
                                 }
                             })
                             .child(render_asset_card(

@@ -62,6 +62,7 @@ impl Gallery {
             AssetType::Jig => STR_JIG,
             AssetType::Resource => STR_RESOURCE,
             AssetType::Course => STR_COURSE,
+            AssetType::ProDev => todo!(),
         }
     }
 }

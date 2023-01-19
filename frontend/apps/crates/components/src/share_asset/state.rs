@@ -80,6 +80,7 @@ impl ShareAsset {
                 .to_string();
                 format!("{}{}", origin, path)
             }
+            Asset::ProDev(_) => todo!(),
         };
         url
     }
@@ -89,6 +90,7 @@ impl ShareAsset {
             Asset::Jig(_) => "JIG",
             Asset::Course(_) => "course",
             Asset::Resource(_) => "resource",
+            Asset::ProDev(_) => todo!(),
         }
     }
 }

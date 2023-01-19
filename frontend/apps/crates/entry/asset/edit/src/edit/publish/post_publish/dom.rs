@@ -20,6 +20,7 @@ impl PostPublish {
                     AssetType::Jig => "JIG",
                     AssetType::Course => "Course",
                     AssetType::Resource => "Resource",
+                    AssetType::ProDev => todo!()
                 })
             }))
             .apply(clone!(state => move |dom| {
@@ -33,6 +34,7 @@ impl PostPublish {
                     AssetType::Course => {
                         dom.children(state.render_course_actions())
                     },
+                    AssetType::ProDev => todo!()
                 }
             }))
         })

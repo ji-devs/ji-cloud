@@ -21,6 +21,7 @@ impl PlayerPopup {
                 AssetId::JigId(_) => "aspect-ratio",
                 AssetId::CourseId(_) => "full-screen",
                 AssetId::ResourceId(_) => unreachable!(),
+                AssetId::ProDevId(_) => todo!(),
             })
             .prop("preview", state.player_options.is_draft())
             .apply_if(slot.is_some(), |dom| {

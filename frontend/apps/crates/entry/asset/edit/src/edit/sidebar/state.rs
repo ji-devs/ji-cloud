@@ -109,6 +109,7 @@ impl SidebarSpot {
             AssetId::JigId(_) => SidebarSpotItem::Jig(None),
             AssetId::CourseId(_) => SidebarSpotItem::Course(None),
             AssetId::ResourceId(_) => unimplemented!(),
+            AssetId::ProDevId(_) => unimplemented!(),
         };
         Rc::new(Self {
             item,
