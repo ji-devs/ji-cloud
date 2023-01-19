@@ -156,6 +156,7 @@ impl From<Asset> for EditableAsset {
             Asset::Jig(jig) => EditableAsset::Jig(Rc::new(jig.into())),
             Asset::Course(course) => EditableAsset::Course(Rc::new(course.into())),
             Asset::Resource(resource) => EditableAsset::Resource(Rc::new(resource.into())),
+            Asset::ProDev(_) => todo!(),
         }
     }
 }
@@ -168,6 +169,7 @@ impl From<AssetId> for EditableAsset {
             AssetId::ResourceId(resource_id) => {
                 EditableAsset::Resource(Rc::new(resource_id.into()))
             }
+            AssetId::ProDevId(_) => todo!(),
         }
     }
 }
