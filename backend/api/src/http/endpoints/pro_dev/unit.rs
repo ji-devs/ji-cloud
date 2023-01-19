@@ -1,5 +1,5 @@
 use actix_web::{
-    web::{Data, Json, Path, Query, ServiceConfig},
+    web::{Data, Json, Path, ServiceConfig},
     HttpResponse,
 };
 use shared::{

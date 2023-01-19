@@ -296,7 +296,7 @@ select  id,
             where pddr.pro_dev_data_id = pro_dev_data.id
         )                                                    as "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
         array(
-            select row(id)
+            select row(unit_id)
             from pro_dev_data_unit "pddu"
             where pddu.pro_dev_data_id = pro_dev_data.id
             order by "index"

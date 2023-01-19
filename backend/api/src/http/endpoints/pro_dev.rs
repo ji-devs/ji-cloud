@@ -139,7 +139,7 @@ async fn delete(
 
     db::pro_dev::delete(&*db, id).await?;
 
-    // algolia.delete_pro_dev(id).await;
+    algolia.delete_pro_dev(id).await;
 
     Ok(HttpResponse::NoContent().finish())
 }
@@ -245,47 +245,46 @@ delete from pro_dev_data where id = $1
 }
 
 /// Search for ProDevs.
-// #[instrument(skip_all)]
-// async fn search(
-//     db: Data<PgPool>,
-//     claims: Option<TokenUser>,
-//     algolia: ServiceData<crate::algolia::Client>,
-//     query: Option<Query<<pro_dev::Search as ApiEndpoint>::Req>>,
-// ) -> Result<Json<<pro_dev::Search as ApiEndpoint>::Res>, error::Service> {
-//     let query = query.map_or_else(Default::default, Query::into_inner);
-//     let page_limit = page_limit(query.page_limit)
-//         .await
-//         .map_err(|e| error::Service::InternalServerError(e))?;
+#[instrument(skip_all)]
+async fn search(
+    db: Data<PgPool>,
+    claims: Option<TokenUser>,
+    algolia: ServiceData<crate::algolia::Client>,
+    query: Option<Query<<pro_dev::Search as ApiEndpoint>::Req>>,
+) -> Result<Json<<pro_dev::Search as ApiEndpoint>::Res>, error::Service> {
+    let query = query.map_or_else(Default::default, Query::into_inner);
+    let page_limit = page_limit(query.page_limit)
+        .await
+        .map_err(|e| error::Service::InternalServerError(e))?;
 
-//     let (author_id, privacy_level) =
-//         auth_claims(&*db, claims, query.author_id, query.privacy_level).await?;
+    let (author_id, privacy_level) =
+        auth_claims(&*db, claims, query.author_id, query.privacy_level).await?;
 
-//     let (ids, pages, total_hits) = algolia
-//         .search_pro_dev(
-//             &query.q,
-//             query.page,
-//             query.language,
-//             &query.resource_types,
-//             &query.categories,
-//             &query.units,
-//             author_id,
-//             query.author_name,
-//             query.other_keywords,
-//             query.translated_keywords,
-//             &privacy_level,
-//             page_limit,
-//         )
-//         .await?
-//         .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
+    let (ids, pages, total_hits) = algolia
+        .search_pro_dev(
+            &query.q,
+            query.page,
+            query.language,
+            &query.resource_types,
+            &query.categories,
+            author_id,
+            query.author_name,
+            query.other_keywords,
+            query.translated_keywords,
+            &privacy_level,
+            page_limit,
+        )
+        .await?
+        .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
 
-//     let pro_devs: Vec<_> = db::pro_dev::get_by_ids(db.as_ref(), &ids, DraftOrLive::Live).await?;
+    let pro_devs: Vec<_> = db::pro_dev::get_by_ids(db.as_ref(), &ids, DraftOrLive::Live).await?;
 
-//     Ok(Json(ProDevSearchResponse {
-//         pro_devs,
-//         pages,
-//         total_pro_dev_count: total_hits,
-//     }))
-// }
+    Ok(Json(ProDevSearchResponse {
+        pro_devs,
+        pages,
+        total_pro_dev_count: total_hits,
+    }))
+}
 
 #[instrument]
 async fn page_limit(page_limit: Option<u32>) -> anyhow::Result<u32> {
@@ -372,10 +371,10 @@ pub fn configure(cfg: &mut ServiceConfig) {
         <pro_dev::Browse as ApiEndpoint>::Path::PATH,
         pro_dev::Browse::METHOD.route().to(browse),
     )
-    // .route(
-    //     <pro_dev::Search as ApiEndpoint>::Path::PATH,
-    //     pro_dev::Search::METHOD.route().to(search),
-    // )
+    .route(
+        <pro_dev::Search as ApiEndpoint>::Path::PATH,
+        pro_dev::Search::METHOD.route().to(search),
+    )
     .route(
         <pro_dev::UpdateDraftData as ApiEndpoint>::Path::PATH,
         pro_dev::UpdateDraftData::METHOD.route().to(update_draft),

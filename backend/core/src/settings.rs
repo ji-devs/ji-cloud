@@ -244,6 +244,10 @@ pub struct AlgoliaSettings {
     /// The index to use for operations relating to Public User on the algolia client.
     /// If [`None`], indexing and searching will be disabled.
     pub public_user_index: Option<String>,
+
+    /// The index to use for operations relating to Pro Dev on the algolia client.
+    /// If [`None`], indexing and searching will be disabled.
+    pub pro_dev_index: Option<String>,
 }
 
 /// Settings to initialize a google translate client.
@@ -592,6 +596,10 @@ impl SettingsManager {
             .get_varying_secret(keys::algolia::PUBLIC_USER_INDEX)
             .await?;
 
+        let pro_dev_index = self
+            .get_varying_secret(keys::algolia::PRO_DEV_INDEX)
+            .await?;
+
         let management_key = self
             .get_varying_secret(keys::algolia::MANAGEMENT_KEY)
             .await?;
@@ -620,6 +628,7 @@ impl SettingsManager {
             course_index,
             circle_index,
             public_user_index,
+            pro_dev_index,
             frontend_search_key,
         }))
     }
