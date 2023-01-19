@@ -2,7 +2,7 @@ use dominator::{clone, html, Dom};
 use std::rc::Rc;
 use utils::prelude::*;
 
-use futures_signals::signal::ReadOnlyMutable;
+use futures_signals::signal::{ReadOnlyMutable, SignalExt};
 
 use super::{
     super::super::state::{AsSticker, Stickers},
@@ -75,15 +75,29 @@ pub fn render_sticker_text_menu<T: AsSticker>(
                     }
                 }))
             }),
-            html!("menu-line", {
-                .prop("icon", "delete")
-                .event(clone!(stickers, text => move |_evt:events::Click| {
-                    text.transform.close_menu();
-                    if let Some(index) = index.get() {
-                        stickers.delete_index(index);
-                    }
-                }))
-            }),
         ])
+        .child_signal(index.signal_cloned().map(clone!(stickers, index, text => move |sticker_index| {
+            let can_delete = match sticker_index {
+                Some(sticker_index) => match stickers.get_as_text(sticker_index) {
+                    Some(sticker) => sticker.can_delete.get(),
+                    None => true,
+                }
+                None => true,
+            };
+
+            if can_delete {
+                Some(html!("menu-line", {
+                    .prop("icon", "delete")
+                    .event(clone!(stickers, index, text => move |_evt:events::Click| {
+                        text.transform.close_menu();
+                        if let Some(index) = index.get() {
+                            stickers.delete_index(index);
+                        }
+                    }))
+                }))
+            } else {
+                None
+            }
+        })))
     })
 }
