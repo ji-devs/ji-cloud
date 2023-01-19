@@ -340,10 +340,16 @@ pub fn set_paused(state: &Rc<JigPlayer>, paused: bool) {
 
     set_timer_paused(state, paused);
 
+    let bg_audio_handle = state.bg_audio_handle.borrow();
+    let expectations = match &*bg_audio_handle {
+        Some(bg_handle) => vec![bg_handle],
+        None => vec![],
+    };
+
     AUDIO_MIXER.with(|mixer| {
         match paused {
-            true => mixer.pause_all(),
-            false => mixer.play_all(),
+            true => mixer.pause_all_except(&expectations[..]),
+            false => mixer.play_all_except(&expectations[..]),
         };
     });
 }

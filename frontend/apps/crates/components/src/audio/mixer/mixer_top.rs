@@ -50,14 +50,18 @@ impl AudioMixerTop {
             AudioMessageToTop::HandleDropped(handle_id) => {
                 self.handle_dropped(handle_id);
             }
-            AudioMessageToTop::PauseAll => {
-                for (_, el) in self.active.borrow().iter() {
-                    let _ = el.pause();
+            AudioMessageToTop::PauseAll { except } => {
+                for (handle, el) in self.active.borrow().iter() {
+                    if !except.contains(handle) {
+                        let _ = el.pause();
+                    }
                 }
             }
-            AudioMessageToTop::PlayAll => {
-                for (_, el) in self.active.borrow().iter() {
-                    let _ = el.play();
+            AudioMessageToTop::PlayAll { except } => {
+                for (handle, el) in self.active.borrow().iter() {
+                    if !except.contains(handle) {
+                        let _ = el.play();
+                    }
                 }
             }
             AudioMessageToTop::BroadcastContextAvailable => {

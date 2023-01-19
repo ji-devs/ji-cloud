@@ -6,7 +6,7 @@ use shared::domain::jig::{self, AudioFeedbackNegative, AudioFeedbackPositive, Ji
 use shared::domain::module::body::Audio;
 use std::borrow::Cow;
 use std::cell::RefCell;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 use utils::js_wrappers::{is_iframe, set_event_listener};
 use utils::{path, prelude::*};
@@ -159,11 +159,23 @@ impl AudioMixer {
     }
 
     pub fn play_all(&self) {
-        self.run_audio_message(AudioMessageToTop::PlayAll);
+        self.play_all_except(&[]);
+    }
+
+    pub fn play_all_except(&self, except: &[&AudioHandle]) {
+        self.run_audio_message(AudioMessageToTop::PlayAll {
+            except: except.iter().map(|handle| handle.id()).collect(),
+        });
     }
 
     pub fn pause_all(&self) {
-        self.run_audio_message(AudioMessageToTop::PauseAll);
+        self.pause_all_except(&[]);
+    }
+
+    pub fn pause_all_except(&self, except: &[&AudioHandle]) {
+        self.run_audio_message(AudioMessageToTop::PauseAll {
+            except: except.iter().map(|handle| handle.id()).collect(),
+        });
     }
 }
 
@@ -336,8 +348,12 @@ pub(super) enum AudioMessageToTop {
     InitSilently,
     PauseHandleCalled(AudioHandleId),
     PlayHandleCalled(AudioHandleId),
-    PauseAll,
-    PlayAll,
+    PauseAll {
+        except: HashSet<AudioHandleId>,
+    },
+    PlayAll {
+        except: HashSet<AudioHandleId>,
+    },
     HandleDropped(AudioHandleId),
 
     /// ask top to broadcast if the context is available
