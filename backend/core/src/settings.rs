@@ -245,6 +245,10 @@ pub struct AlgoliaSettings {
     /// If [`None`], indexing and searching will be disabled.
     pub public_user_index: Option<String>,
 
+    /// The index to use for operations relating to User on the algolia client.
+    /// If [`None`], indexing and searching will be disabled.
+    pub user_index: Option<String>,
+
     /// The index to use for operations relating to Pro Dev on the algolia client.
     /// If [`None`], indexing and searching will be disabled.
     pub pro_dev_index: Option<String>,
@@ -592,6 +596,8 @@ impl SettingsManager {
 
         let circle_index = self.get_varying_secret(keys::algolia::CIRCLE_INDEX).await?;
 
+        let user_index = self.get_varying_secret(keys::algolia::USER_INDEX).await?;
+
         let public_user_index = self
             .get_varying_secret(keys::algolia::PUBLIC_USER_INDEX)
             .await?;
@@ -628,6 +634,7 @@ impl SettingsManager {
             course_index,
             circle_index,
             public_user_index,
+            user_index,
             pro_dev_index,
             frontend_search_key,
         }))

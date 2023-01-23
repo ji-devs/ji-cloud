@@ -7,8 +7,10 @@ use crate::{
         user::{
             ChangePasswordPath, ChangePasswordRequest, CreateUserPath, CreateUserRequest,
             OtherUser, ResetEmailPath, ResetEmailRequest, ResetEmailResponse, ResetPasswordPath,
-            ResetPasswordRequest, UserDeletePath, UserLookupPath, UserLookupQuery, VerifyEmailPath,
-            VerifyEmailRequest, VerifyResetEmailPath, VerifyResetEmailRequest,
+            ResetPasswordRequest, UserBrowsePath, UserBrowseQuery, UserBrowseResponse,
+            UserDeletePath, UserLookupPath, UserLookupQuery, UserSearchPath, UserSearchQuery,
+            UserSearchResponse, VerifyEmailPath, VerifyEmailRequest, VerifyResetEmailPath,
+            VerifyResetEmailRequest,
         },
     },
     error::EmptyError,
@@ -169,4 +171,32 @@ impl ApiEndpoint for Delete {
     type Path = UserDeletePath;
     type Err = EmptyError;
     const METHOD: Method = Method::Delete;
+}
+
+/// Browse for users.
+///
+/// # Errors
+///
+/// If the user isn't an Admin ([`403 - Forbidden`](http::StatusCode::FORBIDDEN))
+pub struct Browse;
+impl ApiEndpoint for Browse {
+    type Req = UserBrowseQuery;
+    type Res = UserBrowseResponse;
+    type Path = UserBrowsePath;
+    type Err = EmptyError;
+    const METHOD: Method = Method::Get;
+}
+
+/// Browse for users.
+///
+/// # Errors
+///
+/// If the user isn't an Admin ([`403 - Forbidden`](http::StatusCode::FORBIDDEN))
+pub struct SearchUser;
+impl ApiEndpoint for SearchUser {
+    type Req = UserSearchQuery;
+    type Res = UserSearchResponse;
+    type Path = UserSearchPath;
+    type Err = EmptyError;
+    const METHOD: Method = Method::Get;
 }

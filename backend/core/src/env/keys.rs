@@ -125,6 +125,11 @@ pub mod algolia {
     pub const PUBLIC_USER_INDEX: &str = "ALGOLIA_PUBLIC_USER_INDEX";
 
     /// The index to use for indexing and backend searches.
+    /// Is optional. If missing, *User* indexing will be disabled,
+    /// search related routes will return a "501 - Not Implemented" and a warning will be emitted.
+    pub const USER_INDEX: &str = "ALGOLIA_USER_INDEX";
+
+    /// The index to use for indexing and backend searches.
     /// Is optional. If missing, *Pro Dev* indexing will be disabled,
     /// search related routes will return a "501 - Not Implemented" and a warning will be emitted.
     pub const PRO_DEV_INDEX: &str = "ALGOLIA_PRO_DEV_INDEX";

@@ -7,17 +7,18 @@ use actix_web::{
 use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
 use chrono::{Duration, Utc};
 use core::{config::IMAGE_BODY_SIZE_LIMIT, settings::RuntimeSettings};
+use futures::try_join;
 use rand::thread_rng;
 use sendgrid::v3::Email;
 use serde::{Deserialize, Serialize};
 use shared::{
     api::endpoints::{
         user::{
-            BrowseCourses, BrowseFollowers, BrowseFollowing, BrowsePublicUser, BrowseResources,
-            BrowseUserJigs, ChangePassword, Create, CreateColor, CreateFont, CreateProfile, Delete,
-            DeleteColor, DeleteFont, Follow, GetColors, GetFonts, GetPublicUser, PatchProfile,
-            Profile, ResetEmail, ResetPassword, Search, Unfollow, UpdateColor, UpdateFont,
-            UserLookup, VerifyEmail, VerifyResetEmail,
+            self, Browse, BrowseCourses, BrowseFollowers, BrowseFollowing, BrowsePublicUser,
+            BrowseResources, BrowseUserJigs, ChangePassword, Create, CreateColor, CreateFont,
+            CreateProfile, Delete, DeleteColor, DeleteFont, Follow, GetColors, GetFonts,
+            GetPublicUser, PatchProfile, Profile, ResetEmail, ResetPassword, Search, SearchUser,
+            Unfollow, UpdateColor, UpdateFont, UserLookup, VerifyEmail, VerifyResetEmail,
         },
         ApiEndpoint, PathParts,
     },
@@ -25,8 +26,9 @@ use shared::{
         image::{ImageId, ImageSize},
         session::{NewSessionResponse, OAuthProvider},
         user::{
-            ChangePasswordRequest, CreateProfileRequest, ResetEmailResponse, UserId,
-            UserLookupQuery, VerifyEmailRequest, VerifyResetEmailRequest,
+            ChangePasswordRequest, CreateProfileRequest, ResetEmailResponse, UserBrowseResponse,
+            UserId, UserLookupQuery, UserSearchResponse, VerifyEmailRequest,
+            VerifyResetEmailRequest,
         },
     },
     media::MediaLibrary,
@@ -34,15 +36,20 @@ use shared::{
 use sqlx::{postgres::PgDatabaseError, Acquire, PgConnection, PgPool};
 use tracing::{instrument, Instrument};
 
-use crate::token::{create_update_email_token, validate_token};
 use crate::{
     db::{self, user::upsert_profile},
     domain::NoContentClearAuth,
-    error,
-    extractor::{SessionCreateProfile, SessionDelete, TokenSessionOf, TokenUser},
+    error::{self, ServiceKind},
+    extractor::{ScopeAdmin, SessionCreateProfile, SessionDelete, TokenSessionOf, TokenUser},
     service::{mail, s3, ServiceData},
     token::{create_auth_token, SessionMask},
 };
+use crate::{
+    extractor::TokenUserWithScope,
+    token::{create_update_email_token, validate_token},
+};
+
+use super::jig::page_limit;
 
 mod color;
 mod font;
@@ -85,7 +92,7 @@ async fn send_welcome_jigzi_email(
     mail: &mail::Client,
     pages_url: &str,
 ) -> Result<(), error::Service> {
-    let first_name = db::user::get_first_name(&mut *txn, user_id).await?;
+    let first_name = db::user::get_given_name(&mut *txn, user_id).await?;
 
     let template = mail
         .welcome_jigzi_template()
@@ -122,7 +129,7 @@ async fn send_password_email(
         )
         .await?;
 
-        let first_name = db::user::get_first_name(&mut *txn, user_id).await?;
+        let first_name = db::user::get_given_name(&mut *txn, user_id).await?;
 
         let template = mail
             .password_reset_template()
@@ -157,7 +164,7 @@ async fn send_reset_email(
     )
     .await?;
 
-    let first_name = db::user::get_first_name(&mut *txn, user_id).await?;
+    let first_name = db::user::get_given_name(&mut *txn, user_id).await?;
 
     let template = mail
         .email_reset_template()
@@ -992,6 +999,66 @@ values ($1, $2::text, $3)
     Ok(HttpResponse::NoContent().finish())
 }
 
+#[instrument(skip_all)]
+async fn browse(
+    db: Data<PgPool>,
+    _auth: TokenUserWithScope<ScopeAdmin>,
+    query: Option<Query<<user::Browse as ApiEndpoint>::Req>>,
+) -> Result<Json<<user::Browse as ApiEndpoint>::Res>, error::Auth> {
+    let query = query.map_or_else(Default::default, Query::into_inner);
+
+    let page_limit = page_limit(query.page_limit)
+        .await
+        .map_err(|e| error::Auth::InternalServerError(e))?;
+
+    let browse_future = db::user::browse(
+        db.as_ref(),
+        query.user_id,
+        query.page.unwrap_or(0) as i32,
+        page_limit,
+    );
+
+    let total_count_future = db::user::filtered_count(db.as_ref(), query.user_id);
+
+    let (users, total_count) = try_join!(browse_future, total_count_future,)?;
+
+    let pages = (total_count / (page_limit as u64)
+        + (total_count % (page_limit as u64) != 0) as u64) as u32;
+
+    Ok(Json(UserBrowseResponse {
+        users,
+        pages,
+        total_user_count: total_count,
+    }))
+}
+
+/// Search for public user profile.
+pub async fn search(
+    db: Data<PgPool>,
+    _auth: TokenUserWithScope<ScopeAdmin>,
+    algolia: ServiceData<crate::algolia::Client>,
+    query: Option<Query<<user::SearchUser as ApiEndpoint>::Req>>,
+) -> Result<Json<<user::SearchUser as ApiEndpoint>::Res>, error::Service> {
+    let query = query.map_or_else(Default::default, Query::into_inner);
+
+    let page_limit = page_limit(query.page_limit)
+        .await
+        .map_err(|e| error::Service::InternalServerError(e))?;
+
+    let (ids, pages, total_hits) = algolia
+        .search_user(&query.q, query.user_id, page_limit, query.page)
+        .await?
+        .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
+
+    let users: Vec<_> = db::user::get_by_ids(db.as_ref(), &ids).await?;
+
+    Ok(Json(UserSearchResponse {
+        users,
+        pages,
+        total_user_count: total_hits,
+    }))
+}
+
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
         <ResetEmail as ApiEndpoint>::Path::PATH,
@@ -1008,6 +1075,14 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <Create as ApiEndpoint>::Path::PATH,
         Create::METHOD.route().to(create_user),
+    )
+    .route(
+        <Browse as ApiEndpoint>::Path::PATH,
+        Browse::METHOD.route().to(browse),
+    )
+    .route(
+        <SearchUser as ApiEndpoint>::Path::PATH,
+        SearchUser::METHOD.route().to(search),
     )
     .route(
         <VerifyEmail as ApiEndpoint>::Path::PATH,
