@@ -32,7 +32,7 @@ pub struct Base {
     pub questions: Vec<Rc<Question>>,
     pub current_question: Mutable<Option<(usize, Rc<Question>)>>,
     /// List of references to sticker elements. This is used primarily for finding the WYSIWYG renderer for text stickers.
-    pub sticker_refs: Vec<OnceCell<HtmlElement>>,
+    pub sticker_refs: Vec<(OnceCell<HtmlElement>, OnceCell<HtmlElement>)>,
     pub question_field: QuestionField,
     pub module_phase: Mutable<ModulePlayPhase>,
     /// Custom instructions player so that we can handle the on_ended event.
@@ -57,7 +57,7 @@ impl Base {
 
         // Initially we fill this list with `None`. Once we start rendering stickers, we will update the individual items with their relevant refs.
         let sticker_refs = (0..content.base.stickers.len())
-            .map(|_| OnceCell::default())
+            .map(|_| (OnceCell::default(), OnceCell::default()))
             .collect();
 
         let base_ref: Rc<RefCell<Option<Rc<Self>>>> = Rc::new(RefCell::new(None));

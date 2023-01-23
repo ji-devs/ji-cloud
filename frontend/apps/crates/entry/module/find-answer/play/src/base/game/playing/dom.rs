@@ -88,7 +88,9 @@ pub fn render(state: Rc<PlayState>) -> Dom {
 
                 // Update the question sticker if it is set and the question has text
                 if let QuestionField::Text(question_index) = state.game.base.question_field {
-                    let sticker_ref = state.game.base.sticker_refs.get(question_index).unwrap_ji().get().unwrap_ji();
+                    let (sticker_ref, measurer_ref) = state.game.base.sticker_refs.get(question_index).unwrap_ji();
+                    let sticker_ref = sticker_ref.get().unwrap_ji();
+                    let measurer_ref = measurer_ref.get().unwrap_ji();
 
                     // This is weird. If we use "", then subsequent calls to set textValue don't work correctly.
                     let question_text = if state.question.question_text.is_empty() {
@@ -99,6 +101,12 @@ pub fn render(state: Rc<PlayState>) -> Dom {
 
                     Reflect::set(
                         sticker_ref,
+                        &JsValue::from_str("textValue"),
+                        &JsValue::from_str(question_text)
+                    ).unwrap_ji();
+
+                    Reflect::set(
+                        measurer_ref,
                         &JsValue::from_str("textValue"),
                         &JsValue::from_str(question_text)
                     ).unwrap_ji();

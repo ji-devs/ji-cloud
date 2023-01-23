@@ -657,6 +657,13 @@ fn set_question_sticker_text(state: Rc<Step3>, value: String) {
             &JsValue::from_str(&value),
         )
         .unwrap_ji();
+
+        Reflect::set(
+            &text.measurer_ref.get_cloned().unwrap_ji(),
+            &JsValue::from_str("textValue"),
+            &JsValue::from_str(&value),
+        )
+        .unwrap_ji();
     }
 }
 

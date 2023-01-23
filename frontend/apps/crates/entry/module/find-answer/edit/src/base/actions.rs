@@ -128,6 +128,12 @@ impl Base {
                         &JsValue::from_str(&value),
                     )
                     .unwrap_ji();
+                    Reflect::set(
+                        &text.measurer_ref.get_cloned().unwrap_ji(),
+                        &JsValue::from_str("textValue"),
+                        &JsValue::from_str(&value),
+                    )
+                    .unwrap_ji();
                 }
             }
 

@@ -12,6 +12,7 @@ import "@elements/core/wysiwyg/wysiwyg-output-renderer";
 
 //transform tool
 import "@elements/module/_common/edit/widgets/transform/box";
+import "@elements/module/_common/edit/widgets/transform/highlight";
 
 //trace
 import "@elements/module/_common/edit/widgets/trace/edit-reshape-menu";

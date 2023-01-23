@@ -30,6 +30,18 @@ pub struct TextRenderOptions {
 #[derive(Default)]
 pub struct TextRawRenderOptions {
     pub base: BaseRawRenderOptions,
+
+    //For mixing in the measurer renderer
+    pub measurer_mixin: Option<Box<dyn Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>>>,
+}
+
+impl TextRawRenderOptions {
+    pub fn set_measurer_mixin(
+        &mut self,
+        f: impl Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> + 'static,
+    ) {
+        self.measurer_mixin = Some(Box::new(f) as _);
+    }
 }
 
 pub fn render_sticker_text<T: AsSticker>(
@@ -48,12 +60,23 @@ pub fn render_sticker_text<T: AsSticker>(
             }
     };
 
-    let sticker_menu_signal = map_ref! {
+    let sticker_menu_signal = || {
+        map_ref! {
+            let is_editing = text.is_editing.signal(),
+            let is_active = stickers.selected_signal(index.clone()),
+            let is_editable = text.is_editable.signal()
+                => {
+                    (*is_active && !*is_editing, *is_editable)
+                }
+        }
+    };
+
+    let highlight_signal = map_ref! {
+        let sticker_menu = sticker_menu_signal(),
         let is_editing = text.is_editing.signal(),
-        let is_active = stickers.selected_signal(index.clone()),
-        let is_editable = text.is_editable.signal()
+        let highlight = text.highlight.signal()
             => {
-                (*is_active && !*is_editing, *is_editable)
+                !sticker_menu.0 && *highlight && !is_editing
             }
     };
 
@@ -84,6 +107,12 @@ pub fn render_sticker_text<T: AsSticker>(
                         text.transform.size.set(None);
                     }
                 })))
+                .after_inserted(clone!(text => move |elem| {
+                    text.measurer_ref.set(Some(elem));
+                }))
+                .after_removed(clone!(text => move |_elem| {
+                    text.measurer_ref.set(None);
+                }))
             })
         )
         .child_signal(show_renderer_signal.dedupe().map(clone!(stickers, text, index => move |show_renderer| {
@@ -124,7 +153,7 @@ pub fn render_sticker_text<T: AsSticker>(
                 }))
             }
         })))
-        .child_signal(sticker_menu_signal.map(clone!(stickers, text, index => move |(should_show, is_editable)| {
+        .child_signal(sticker_menu_signal().map(clone!(stickers, text, index => move |(should_show, is_editable)| {
             if should_show {
                 let menu = if is_editable {
                     Some(clone!(stickers, index, text => move || render_sticker_text_menu(stickers.clone(), index.clone(), text.clone())))
@@ -140,6 +169,25 @@ pub fn render_sticker_text<T: AsSticker>(
                 None
             }
         })))
+        .child_signal(highlight_signal.map(clone!(text => move |highlight| {
+            if highlight {
+                Some(html!("highlight-box", {
+                    .style("display", "block")
+                    .style("position", "absolute")
+                    .style_signal("transform", text.transform.rotation_matrix_string_signal())
+                    .style_signal("top", text.transform.y_px_signal().map(|x| format!("{}px", x)))
+                    .style_signal("left", text.transform.x_px_signal().map(|x| format!("{}px", x)))
+                    .style_signal("width", text.transform.width_px_signal().map(|x| format!("{}px", x)))
+                    .style_signal("height", text.transform.height_px_signal().map(|x| format!("{}px", x)))
+                    .prop_signal("width", text.transform.width_px_signal())
+                    .prop_signal("height", text.transform.height_px_signal())
+                    .prop_signal("screenScale", resize_info_signal().map(|resize| resize.scale))
+                }))
+            } else {
+                None
+            }
+        }))
+        )
     })
 }
 
@@ -185,6 +233,7 @@ pub fn render_sticker_text_raw(
     );
 
     let mixin = opts.base.mixin;
+    let measurer_mixin = opts.measurer_mixin;
 
     html!("empty-fragment", {
         .child(
@@ -200,6 +249,9 @@ pub fn render_sticker_text_raw(
                         size.set(None);
                     }
                 })))
+                .apply_if(measurer_mixin.is_some(), move |dom| {
+                    dom.apply(measurer_mixin.unwrap_ji())
+                })
             })
         )
         .child(
