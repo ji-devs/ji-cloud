@@ -1,6 +1,6 @@
 //! Types for users.
 
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize, Serializer};
 use std::convert::TryFrom;
@@ -234,6 +234,45 @@ pub struct UserProfile {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub location: Option<serde_json::Value>,
+}
+
+/// User Response (used for Admin).
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct UserResponse {
+    /// The user's username.
+    pub username: String,
+
+    /// The user's given name (first name)
+    pub given_name: String,
+
+    /// The user's family name (last name)
+    pub family_name: String,
+
+    /// The user's email address.
+    pub email: String,
+
+    /// The user's country.
+    #[serde(default)]
+    pub country: Option<String>,
+
+    /// The user's state.
+    #[serde(default)]
+    pub state: Option<String>,
+
+    /// The user's city.
+    #[serde(default)]
+    pub city: Option<String>,
+
+    /// The user's associated organization/school.
+    #[serde(default)]
+    pub organization: Option<String>,
+
+    /// The date the user signed up on .
+    pub created_at: NaiveDate,
+
+    /// The user's preferred email language for newsletters.
+    pub language: String,
 }
 
 /// A user's profile export representation.
@@ -650,5 +689,94 @@ pub struct UserFontResponse {
 
 // i32 is font index
 make_path_parts!(UserFontDeletePath => "/v1/user/me/font/{}" => i32);
+
+//
+// Browse users
+//
+// Authorization:
+//  - Admin
+
+/// Query for [`Browse`](crate::api::endpoints::user::Browse).
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct UserBrowseQuery {
+    /// filter User by Id.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<UserId>,
+
+    /// The page number of the Users to get.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub page: Option<u32>,
+
+    /// The hits per page to be returned
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub page_limit: Option<u32>,
+}
+
+/// Response for [`Browse`](crate::api::endpoints::user::Browse).
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct UserBrowseResponse {
+    /// the Courses returned.
+    pub users: Vec<UserResponse>,
+
+    /// The number of pages found.
+    pub pages: u32,
+
+    /// The total number of Courses found
+    pub total_user_count: u64,
+}
+
+make_path_parts!(UserBrowsePath => "/v1/user/browse");
+
+//
+// Search users
+//
+// Authorization:
+//  - Admin
+
+/// Query for [`Search`](crate::api::endpoints::user::Search).
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct UserSearchQuery {
+    /// The query string.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "String::is_empty")]
+    pub q: String,
+
+    /// The query string.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<UserId>,
+
+    /// The page number of the Users to get.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub page: Option<u32>,
+
+    /// The hits per page to be returned
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub page_limit: Option<u32>,
+}
+
+/// Response for [`Search`](crate::api::endpoints::user::Search).
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct UserSearchResponse {
+    /// the Courses returned.
+    pub users: Vec<UserResponse>,
+
+    /// The number of pages found.
+    pub pages: u32,
+
+    /// The total number of Courses found
+    pub total_user_count: u64,
+}
+
+make_path_parts!(UserSearchPath => "/v1/user");
 
 into_uuid![UserId];

@@ -31,6 +31,8 @@ use sqlx::{types::Json, PgPool};
 use std::convert::TryInto;
 use uuid::Uuid;
 
+use crate::db::user::get_location;
+
 mod migration;
 
 const PREMIUM_TAG: &'static str = "premium";
@@ -189,6 +191,20 @@ struct BatchPublicUser<'a> {
 }
 
 #[derive(Serialize)]
+struct BatchUser<'a> {
+    username: &'a str,
+    given_name: &'a str,
+    family_name: &'a str,
+    email: &'a str,
+    country: Option<String>,
+    state: Option<String>,
+    city: Option<String>,
+    language_emails: &'a str,
+    created_at: DateTime<Utc>,
+    organization: Option<String>,
+}
+
+#[derive(Serialize)]
 #[serde(tag = "media_kind")]
 #[serde(rename_all = "camelCase")]
 enum BatchMedia<'a> {
@@ -201,6 +217,7 @@ enum AlgoliaIndices {
     CourseIndex,
     CircleIndex,
     PublicUserIndex,
+    UserIndex,
     ResourceIndex,
     ProDevIndex,
 }
@@ -215,6 +232,7 @@ impl AlgoliaIndices {
             Self::PublicUserIndex => migration::PUBLIC_USER_INDEX,
             Self::ResourceIndex => migration::RESOURCE_INDEX,
             Self::ProDevIndex => migration::PRO_DEV_INDEX,
+            Self::UserIndex => migration::USER_INDEX,
         }
     }
 }
@@ -231,6 +249,7 @@ pub struct Manager {
     pub course_index: String,
     pub circle_index: String,
     pub public_user_index: String,
+    pub user_index: String,
     pub pro_dev_index: String,
 }
 
@@ -246,6 +265,7 @@ impl Manager {
             circle_index,
             public_user_index,
             pro_dev_index,
+            user_index,
         ) = match settings {
             Some(settings) => match (
                 settings.management_key,
@@ -256,6 +276,7 @@ impl Manager {
                 settings.circle_index,
                 settings.public_user_index,
                 settings.pro_dev_index,
+                settings.user_index,
             ) {
                 (
                     Some(key),
@@ -265,6 +286,7 @@ impl Manager {
                     Some(course_index),
                     Some(circle_index),
                     Some(public_user_index),
+                    Some(user_index),
                     Some(pro_dev_index),
                 ) => (
                     settings.application_id,
@@ -275,6 +297,7 @@ impl Manager {
                     course_index,
                     circle_index,
                     public_user_index,
+                    user_index,
                     pro_dev_index,
                 ),
                 _ => return Ok(None),
@@ -290,6 +313,7 @@ impl Manager {
             course_index,
             circle_index,
             public_user_index,
+            user_index,
             pro_dev_index,
             db,
         }))
@@ -322,6 +346,10 @@ impl Manager {
                     .await
                     .context("update public users task errored"),
                 6 => self
+                    .update_users()
+                    .await
+                    .context("update users task errored"),
+                7 => self
                     .update_pro_devs()
                     .await
                     .context("update public users task errored"),
@@ -357,6 +385,7 @@ impl Manager {
             or (index_name = $9 and index_hash <> $10)
             or (index_name = $11 and index_hash <> $12)
             or (index_name = $13 and index_hash <> $14)
+            or (index_name = $15 and index_hash <> $16)
             "#,
             AlgoliaIndices::MediaIndex.as_str(),
             migration::MEDIA_HASH.to_owned(),
@@ -372,6 +401,8 @@ impl Manager {
             migration::RESOURCE_HASH.to_owned(),
             AlgoliaIndices::ProDevIndex.as_str(),
             migration::PRO_DEV_HASH.to_owned(),
+            AlgoliaIndices::UserIndex.as_str(),
+            migration::USER_HASH.to_owned(),
         )
         .fetch_all(&mut txn)
         .await?
@@ -395,6 +426,9 @@ impl Manager {
                 }
                 migration::CIRCLE_INDEX => {
                     migration::circle_index(&mut txn, &self.inner, &self.circle_index).await?
+                }
+                migration::USER_INDEX => {
+                    migration::user_index(&mut txn, &self.inner, &self.user_index).await?
                 }
                 migration::PUBLIC_USER_INDEX => {
                     migration::public_user_index(&mut txn, &self.inner, &self.public_user_index)
@@ -477,6 +511,18 @@ impl Manager {
 
     async fn batch_public_users(&self, batch: BatchWriteRequests) -> anyhow::Result<Vec<Uuid>> {
         let resp = self.inner.batch(&self.public_user_index, &batch).await?;
+
+        let ids: Result<Vec<_>, _> = resp
+            .object_ids
+            .into_iter()
+            .map(|id| Uuid::parse_str(&id))
+            .collect();
+
+        Ok(ids?)
+    }
+
+    async fn batch_users(&self, batch: BatchWriteRequests) -> anyhow::Result<Vec<Uuid>> {
+        let resp = self.inner.batch(&self.user_index, &batch).await?;
 
         let ids: Result<Vec<_>, _> = resp
             .object_ids
@@ -1105,7 +1151,7 @@ where course_data.id = any (select live_id from course where course.id = any ($1
     }
 
     async fn update_public_users(&self) -> anyhow::Result<bool> {
-        log::info!("reached update user profile");
+        log::info!("reached update public users");
         let mut txn = self.db.begin().await?;
 
         let requests: Vec<_> = sqlx::query!(
@@ -1159,10 +1205,90 @@ limit 100 for no key update skip locked;
             return Ok(true);
         }
 
-        log::debug!("Updating a batch of {} user profile(s)", requests.len());
+        log::debug!(
+            "Updating a batch of {} public user profile(s)",
+            requests.len()
+        );
 
         let request = algolia::request::BatchWriteRequests { requests };
         let ids = self.batch_public_users(request).await?;
+
+        log::debug!("Updated a batch of {} public user profile(s)", ids.len());
+
+        sqlx::query!(
+            "update user_profile set last_synced_at = now() where user_id = any($1)",
+            &ids
+        )
+        .execute(&mut txn)
+        .await?;
+
+        txn.commit().await?;
+
+        log::info!("completed update public user profiles");
+
+        Ok(true)
+    }
+
+    async fn update_users(&self) -> anyhow::Result<bool> {
+        log::info!("reached update users");
+        let mut txn = self.db.begin().await?;
+
+        let requests: Vec<_> = sqlx::query!(
+            //language=SQL
+            r#"
+     select up.user_id                               as "id!",
+            username                                 as "username!",
+            given_name                               as "given_name!",
+            family_name                              as "family_name!",
+            email                                    as "email!: String",
+            language_emails                          as "language_emails!",
+            organization                             as "organization?",
+            location                                 as "location?",
+            user_email.created_at                    as "created_at"                   
+from user_profile "up"
+        inner join "user" on "user".id = up.user_id
+        inner join user_email on user_email.user_id = up.user_id
+where (last_synced_at is null or
+       (up.updated_at is not null and last_synced_at < up.updated_at))
+limit 100 for no key update skip locked;
+     "#
+        )
+        .fetch(&mut txn)
+        .map_ok(|row| {
+            let (city, state, country) = get_location(row.location);
+
+            algolia::request::BatchWriteRequest::UpdateObject {
+                body: match serde_json::to_value(&BatchUser {
+                    username: &row.username,
+                    given_name: &row.given_name,
+                    family_name: &row.family_name,
+                    email: &row.email,
+                    language_emails: &row.language_emails,
+                    organization: row.organization,
+                    city,
+                    state,
+                    country,
+                    created_at: row.created_at,
+                })
+                .expect("failed to serialize BatchUser to json")
+                {
+                    serde_json::Value::Object(map) => map,
+                    _ => panic!("failed to serialize BatchUser to json map"),
+                },
+                object_id: row.id.to_string(),
+            }
+        })
+        .try_collect()
+        .await?;
+
+        if requests.is_empty() {
+            return Ok(true);
+        }
+
+        log::debug!("Updating a batch of {} user profile(s)", requests.len());
+
+        let request = algolia::request::BatchWriteRequests { requests };
+        let ids = self.batch_users(request).await?;
 
         log::debug!("Updated a batch of {} user profile(s)", ids.len());
 
@@ -1673,6 +1799,7 @@ pub struct Client {
     course_index: String,
     circle_index: String,
     public_user_index: String,
+    user_index: String,
     pro_dev_index: String,
 }
 
@@ -1689,6 +1816,7 @@ impl Client {
                 course_index,
                 circle_index,
                 public_user_index,
+                user_index,
                 pro_dev_index,
             ) = match (
                 settings.backend_search_key,
@@ -1698,6 +1826,7 @@ impl Client {
                 settings.course_index,
                 settings.circle_index,
                 settings.public_user_index,
+                settings.user_index,
                 settings.pro_dev_index,
             ) {
                 (
@@ -1708,6 +1837,7 @@ impl Client {
                     Some(course_index),
                     Some(circle_index),
                     Some(public_user_index),
+                    Some(user_index),
                     Some(pro_dev_index),
                 ) => (
                     Inner::new(app_id, ApiKey(key))?,
@@ -1717,6 +1847,7 @@ impl Client {
                     course_index,
                     circle_index,
                     public_user_index,
+                    user_index,
                     pro_dev_index,
                 ),
                 _ => return Ok(None),
@@ -1730,6 +1861,7 @@ impl Client {
                 course_index,
                 circle_index,
                 public_user_index,
+                user_index,
                 pro_dev_index,
             }))
         } else {
@@ -2321,6 +2453,55 @@ impl Client {
             .inner
             .search(
                 &self.public_user_index,
+                SearchQuery::<'_, String, AndFilter> {
+                    query: Some(query),
+                    page,
+                    get_ranking_info: true,
+                    filters: Some(and_filters),
+                    optional_filters: None,
+                    hits_per_page: Some(page_limit as u16),
+                    sum_or_filters_scores: false,
+                },
+            )
+            .instrument(tracing::info_span!("perform algolia search"))
+            .await?;
+
+        let pages = results.page_count.try_into()?;
+        let total_hits = results.hit_count as u64;
+
+        let results = results
+            .hits
+            .into_iter()
+            .map(|hit| hit.object_id.parse())
+            .collect::<Result<Vec<_>, _>>()?;
+
+        Ok(Some((results, pages, total_hits)))
+    }
+
+    #[instrument(skip_all)]
+    pub async fn search_user(
+        &self,
+        query: &str,
+        user_id: Option<UserId>,
+        page_limit: u32,
+        page: Option<u32>,
+    ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
+        let mut and_filters = algolia::filter::AndFilter { filters: vec![] };
+
+        if let Some(user_id) = user_id {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "user_id".to_owned(),
+                    value: user_id.to_string(),
+                },
+                invert: false,
+            }))
+        }
+
+        let results: SearchResponse = self
+            .inner
+            .search(
+                &self.user_index,
                 SearchQuery::<'_, String, AndFilter> {
                     query: Some(query),
                     page,

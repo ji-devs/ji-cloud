@@ -12,6 +12,7 @@ pub const MEDIA_INDEX: &str = "media_index";
 pub const COURSE_INDEX: &str = "course_index";
 pub const CIRCLE_INDEX: &str = "circle_index";
 pub const PUBLIC_USER_INDEX: &str = "public_user_index";
+pub const USER_INDEX: &str = "user_index";
 pub const RESOURCE_INDEX: &str = "resource_index";
 pub const PRO_DEV_INDEX: &str = "pro_dev_index";
 
@@ -158,6 +159,44 @@ pub(crate) async fn circle_index(
     client.set_settings(circle_index, &settings).await?;
 
     sqlx::query!(r#"update algolia_index_settings set updated_at = now(), index_hash = $1 where index_name = $2"#, CIRCLE_HASH, CIRCLE_INDEX).execute(txn).await?;
+
+    Ok(())
+}
+
+#[hashfn(USER_HASH)]
+pub(crate) async fn user_index(
+    txn: &mut PgConnection,
+    client: &super::Inner,
+    public_user_index: &str,
+) -> anyhow::Result<()> {
+    let settings = SetSettings {
+        searchable_attributes: Some(
+            SearchableAttributes::build()
+                .single(Attribute("username".to_owned()))
+                .single(Attribute("given_name".to_owned()))
+                .single(Attribute("family_name".to_owned()))
+                .single(Attribute("email".to_owned()))
+                .single(Attribute("language".to_owned()))
+                .single(Attribute("organization".to_owned()))
+                .single(Attribute("country".to_owned()))
+                .single(Attribute("state".to_owned()))
+                .single(Attribute("city".to_owned()))
+                .finish(),
+        ),
+        attributes_for_faceting: Some(vec![
+            FacetAttribute::filter_only(Attribute("creator_id".to_owned())),
+            FacetAttribute::filter_only(Attribute("creator_name".to_owned())),
+            FacetAttribute::filter_only(Attribute("bio".to_owned())),
+            FacetAttribute::filter_only(Attribute("languages_spoken".to_owned())),
+            FacetAttribute::filter_only(Attribute("organization".to_owned())),
+            FacetAttribute::filter_only(Attribute("persona".to_owned())),
+            FacetAttribute::filter_only(Attribute("location".to_owned())),
+        ]),
+    };
+
+    client.set_settings(public_user_index, &settings).await?;
+
+    sqlx::query!(r#"update algolia_index_settings set updated_at = now(), index_hash = $1 where index_name = $2"#, PUBLIC_USER_HASH, PUBLIC_USER_INDEX).execute(txn).await?;
 
     Ok(())
 }

@@ -10,11 +10,11 @@ use shared::domain::{
     },
     user::{
         CreateProfileRequest, OtherUser, PatchProfileRequest, UserId, UserProfile,
-        UserProfileExport, UserScope,
+        UserProfileExport, UserResponse, UserScope,
     },
 };
 use sqlx::{PgConnection, PgPool};
-use std::{convert::TryFrom, str::FromStr};
+use std::{convert::TryFrom, fmt::Debug, str::FromStr};
 use tracing::{instrument, Instrument};
 use uuid::Uuid;
 
@@ -129,6 +129,129 @@ where id = $1"#,
         affiliations: row.affiliations.into_iter().map(AffiliationId).collect(),
         circles: row.circles.into_iter().map(CircleId).collect(),
     }))
+}
+
+#[instrument(skip(db))]
+pub async fn browse(
+    db: &sqlx::Pool<sqlx::Postgres>,
+    author_id: Option<UserId>,
+    page: i32,
+    page_limit: u32,
+) -> sqlx::Result<Vec<UserResponse>> {
+    let mut txn = db.begin().await?;
+
+    let users = sqlx::query!(
+        //language=SQL
+        r#"
+with cte as (
+    select (array_agg("user".id))[1]
+    from "user"
+    inner join user_profile on "user".id = user_profile.user_id
+    inner join user_email using(user_id)
+    where ("user".id = $1 or $1 is null)
+    group by family_name
+    order by family_name desc
+),
+cte1 as (
+    select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id
+   , ord) order by ord
+)
+select  username,
+        given_name,
+        family_name,
+        user_email.email::text as "email!",
+        language_emails,
+        user_email.created_at  as "created_at!",
+        organization,
+        location
+from cte1
+        inner join user_profile on cte1.id = user_profile.user_id
+        inner join user_email using(user_id)
+where ord > (1 * $2 * $3)
+order by ord asc
+limit $3
+"#,
+        author_id.map(|x| x.0),
+        page,
+        page_limit as i32,
+    )
+    .fetch_all(&mut txn)
+    .instrument(tracing::info_span!("query user_profile"))
+    .await?;
+
+    let v: Vec<_> = users
+        .into_iter()
+        .map(|user_row| {
+            let (city, state, country) = get_location(user_row.location);
+
+            UserResponse {
+                username: user_row.username,
+                given_name: user_row.given_name,
+                family_name: user_row.family_name,
+                email: user_row.email,
+                city,
+                state,
+                country,
+                organization: user_row.organization,
+                created_at: user_row.created_at.date_naive(),
+                language: user_row.language_emails,
+            }
+        })
+        .collect();
+
+    txn.rollback().await?;
+
+    Ok(v)
+}
+
+pub async fn get_by_ids(db: &PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<UserResponse>> {
+    let mut txn = db.begin().await?;
+
+    let res: Vec<_> = sqlx::query!(
+        //language=SQL
+        r#"
+select  username,
+        given_name,
+        family_name,
+        user_email.email::text as "email!",
+        language_emails,
+        user_email.created_at  as "created_at!",
+        organization,
+        location
+from "user"
+inner join user_profile on "user".id = user_profile.user_id
+inner join user_email on user_email.user_id = "user".id
+inner join unnest($1::uuid[])
+with ordinality t(id, ord) using (id)
+"#,
+        ids
+    )
+    .fetch_all(&mut txn)
+    .await?;
+
+    let v = res
+        .into_iter()
+        .map(|row| {
+            let (city, state, country) = get_location(row.location);
+
+            UserResponse {
+                username: row.username,
+                given_name: row.given_name,
+                family_name: row.family_name,
+                email: row.email,
+                city,
+                state,
+                country,
+                organization: row.organization,
+                created_at: row.created_at.date_naive(),
+                language: row.language_emails,
+            }
+        })
+        .collect();
+
+    txn.rollback().await?;
+
+    Ok(v)
 }
 
 pub async fn user_profiles_by_date_range(
@@ -752,7 +875,7 @@ update user_font
     Ok(true)
 }
 
-pub async fn get_first_name(txn: &mut PgConnection, user_id: UserId) -> sqlx::Result<String> {
+pub async fn get_given_name(txn: &mut PgConnection, user_id: UserId) -> sqlx::Result<String> {
     let given_name = sqlx::query!(
         r#"
 select given_name
@@ -766,6 +889,42 @@ where user_id = $1
     .given_name;
 
     Ok(given_name)
+}
+
+pub fn get_location(
+    location: Option<serde_json::Value>,
+) -> (Option<String>, Option<String>, Option<String>) {
+    let location = location.map_or(None, |location_str| {
+        location_str.as_str().map_or(None, |location_str| {
+            serde_json::from_str(&location_str).ok()
+        })
+    });
+    let location: Option<GoogleLocation> = location.map_or(None, |location_value| {
+        serde_json::from_value(location_value).ok()
+    });
+
+    let city: Option<&GoogleAddressComponent> = location.as_ref().map_or(None, |l| {
+        l.place
+            .address_component_by_type(GoogleAddressType::Locality)
+    });
+
+    let state: Option<&GoogleAddressComponent> = location.as_ref().map_or(None, |l| {
+        l.place
+            .address_component_by_type(GoogleAddressType::AdministrativeAreaLevel1)
+    });
+
+    let country: Option<&GoogleAddressComponent> = location.as_ref().map_or(None, |l| {
+        l.place
+            .address_component_by_type(GoogleAddressType::Country)
+    });
+
+    let city = city.as_deref().map(|c| c.long_name.to_string());
+
+    let state = state.as_deref().map(|c| c.short_name.to_string());
+
+    let country = country.as_deref().map(|c| c.long_name.to_string());
+
+    (city, state, country)
 }
 
 pub async fn get_email(txn: &mut PgConnection, user_id: UserId) -> sqlx::Result<String> {
@@ -841,4 +1000,30 @@ where index > $2 and user_id = $1
     txn.commit().await?;
 
     Ok(())
+}
+
+// `None` here means do not filter.
+#[instrument(skip(db))]
+pub async fn filtered_count(db: &PgPool, user_id: Option<UserId>) -> sqlx::Result<u64> {
+    let users = sqlx::query!(
+        //language=SQL
+r#"
+        with cte as (
+            select (array_agg("user".id))[1]
+            from "user"
+            inner join user_profile on "user".id = user_profile.user_id
+            inner join user_email using(user_id)
+            where ("user".id = $1 or $1 is null)
+            group by family_name
+            order by family_name desc
+        )
+        select count(*) as "count!" from unnest(array(select cte.array_agg from cte)) with ordinality t(id, ord)
+"#,
+        user_id.map(|it| it.0),
+
+    )
+    .fetch_one(db)
+    .await?;
+
+    Ok(users.count as u64)
 }
