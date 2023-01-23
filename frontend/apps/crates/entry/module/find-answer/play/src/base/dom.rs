@@ -42,7 +42,7 @@ impl DomRenderable for Base {
                                         opts.base.set_mixin(clone!(state => move |dom| {
                                             apply_methods!(dom, {
                                                 .after_inserted(clone!(state => move |elem| {
-                                                    if let Some(sticker_ref) = state.sticker_refs.get(index) {
+                                                    if let Some((sticker_ref, _)) = state.sticker_refs.get(index) {
                                                         // If this is the question field sticker, then clear its content.
                                                         if let QuestionField::Text(question_index) = state.question_field {
                                                             if question_index == index {
@@ -55,6 +55,15 @@ impl DomRenderable for Base {
                                                         }
 
                                                         let _ = sticker_ref.set(elem);
+                                                    }
+                                                }))
+                                            })
+                                        }));
+                                        opts.set_measurer_mixin(clone!(state => move |dom| {
+                                            apply_methods!(dom, {
+                                                .after_inserted(clone!(state => move |elem| {
+                                                    if let Some((_, measurer_ref)) = state.sticker_refs.get(index) {
+                                                        let _ = measurer_ref.set(elem);
                                                     }
                                                 }))
                                             })

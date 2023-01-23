@@ -108,6 +108,7 @@ impl StickerRawRenderOptions {
             }),
             RawSticker::Text(_) => Self::Text(TextRawRenderOptions {
                 base: base.unwrap_or_default(),
+                measurer_mixin: None,
             }),
             RawSticker::Video(_) => Self::Video(VideoRawRenderOptions {
                 base: base.unwrap_or_default(),

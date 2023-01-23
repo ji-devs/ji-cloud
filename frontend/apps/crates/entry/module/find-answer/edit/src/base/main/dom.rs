@@ -20,6 +20,7 @@ impl DomRenderable for Main {
                 if let QuestionField::Text(index) = question {
                     let text = state.base.stickers.get_as_text(index).unwrap_ji();
                     text.can_delete.set_neq(false);
+                    text.highlight.set_neq(true);
                 }
                 async {}
             })))
@@ -36,7 +37,6 @@ impl DomRenderable for Main {
                         }
                     }
                 }
-
                 async {}
             })))
             .child(html!("img-ui", {

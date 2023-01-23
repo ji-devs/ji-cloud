@@ -21,9 +21,11 @@ pub struct Text {
     pub editor: Rc<TextEditor>,
     /// Optional reference to the wysiwyg-output-renderer
     pub renderer_ref: Mutable<Option<HtmlElement>>,
+    pub measurer_ref: Mutable<Option<HtmlElement>>,
     pub is_editing: Mutable<bool>,
     pub is_editable: Mutable<bool>,
     pub can_delete: Mutable<bool>,
+    pub highlight: Mutable<bool>,
 }
 
 impl Text {
@@ -63,9 +65,11 @@ impl Text {
             )),
             editor,
             renderer_ref: Mutable::new(None),
+            measurer_ref: Mutable::new(None),
             is_editing,
             is_editable,
             can_delete: Mutable::new(true),
+            highlight: Mutable::new(false),
         }
     }
 
