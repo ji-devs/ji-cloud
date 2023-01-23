@@ -438,6 +438,68 @@
     },
     "query": "insert into user_email (user_id, email) values ($1, $2::text)"
   },
+  "0d43420f812b2b9b32c150536d3a8e66693a0ae1db09a015f771628cd711cf3c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "username",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "given_name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "family_name",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "email!",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "language_emails",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "created_at!",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "organization",
+          "ordinal": 6,
+          "type_info": "Text"
+        },
+        {
+          "name": "location",
+          "ordinal": 7,
+          "type_info": "Jsonb"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        null,
+        false,
+        false,
+        true,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      }
+    },
+    "query": "\nselect  username,\n        given_name,\n        family_name,\n        user_email.email::text as \"email!\",\n        language_emails,\n        user_email.created_at  as \"created_at!\",\n        organization,\n        location\nfrom \"user\"\ninner join user_profile on \"user\".id = user_profile.user_id\ninner join user_email on user_email.user_id = \"user\".id\ninner join unnest($1::uuid[])\nwith ordinality t(id, ord) using (id)\n"
+  },
   "0db02aca55bd8f7c7ecdf168ac6d80c6a556ebf2efc5cdafe0afee57a49aeff1": {
     "describe": {
       "columns": [
@@ -7212,6 +7274,70 @@
     },
     "query": "\nupdate pro_dev_data_unit\nset index = index - 1\nwhere pro_dev_data_id = $1\n  and index > $2\n"
   },
+  "91bb47a03e30d7cfeedb573ae70b8267fdb962a1f26f4b8ef80c900a6105f915": {
+    "describe": {
+      "columns": [
+        {
+          "name": "username",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "given_name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "family_name",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "email!",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "language_emails",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "created_at!",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "organization",
+          "ordinal": 6,
+          "type_info": "Text"
+        },
+        {
+          "name": "location",
+          "ordinal": 7,
+          "type_info": "Jsonb"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        null,
+        false,
+        false,
+        true,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\nwith cte as (\n    select (array_agg(\"user\".id))[1]\n    from \"user\"\n    inner join user_profile on \"user\".id = user_profile.user_id\n    inner join user_email using(user_id)\n    where (\"user\".id = $1 or $1 is null)\n    group by family_name\n    order by family_name desc\n),\ncte1 as (\n    select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n   , ord) order by ord\n)\nselect  username,\n        given_name,\n        family_name,\n        user_email.email::text as \"email!\",\n        language_emails,\n        user_email.created_at  as \"created_at!\",\n        organization,\n        location\nfrom cte1\n        inner join user_profile on cte1.id = user_profile.user_id\n        inner join user_email using(user_id)\nwhere ord > (1 * $2 * $3)\norder by ord asc\nlimit $3\n"
+  },
   "932508742699d5ebb198b02fc4f4bcaa9fd0e50c4206e6536279163533526826": {
     "describe": {
       "columns": [
@@ -9544,6 +9670,77 @@
     },
     "query": "\nselect\n    user_id     as \"id!: UserId\",\n    password,\n    exists(select 1 from user_profile where user_id = user_auth_basic.user_id) as \"has_profile!\",\n    exists(select 1 from user_email where user_id = user_auth_basic.user_id) as \"has_verified_email!\"\nfrom user_auth_basic where email = $1::text\n"
   },
+  "ae9a2f92ec8e3eaf5099133fc495c243cfbbd95e41e54f985e8cf500a5ac60e4": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "username!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "given_name!",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "family_name!",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "email!: String",
+          "ordinal": 4,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "language_emails!",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "organization?",
+          "ordinal": 6,
+          "type_info": "Text"
+        },
+        {
+          "name": "location?",
+          "ordinal": 7,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\n     select up.user_id                               as \"id!\",\n            username                                 as \"username!\",\n            given_name                               as \"given_name!\",\n            family_name                              as \"family_name!\",\n            email                                    as \"email!: String\",\n            language_emails                          as \"language_emails!\",\n            organization                             as \"organization?\",\n            location                                 as \"location?\",\n            user_email.created_at                    as \"created_at\"                   \nfrom user_profile \"up\"\n        inner join \"user\" on \"user\".id = up.user_id\n        inner join user_email on user_email.user_id = up.user_id\nwhere (last_synced_at is null or\n       (up.updated_at is not null and last_synced_at < up.updated_at))\nlimit 100 for no key update skip locked;\n     "
+  },
   "aec729ae876f9816b6a64f6527c6e8497140391a8bebb7a00fc5418cb07682a8": {
     "describe": {
       "columns": [],
@@ -11126,6 +11323,41 @@
     },
     "query": "\n                            update course_data\n                            set translated_name = $2,\n                                last_synced_at = null\n                            where id = $1\n                            "
   },
+  "d1f58bf85a2a25f0b8de1b90427cc7313c57081dbc297a3237308bbdeeb46bd5": {
+    "describe": {
+      "columns": [
+        {
+          "name": "name: String",
+          "ordinal": 0,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n            select index_name as \"name: String\"\n            from algolia_index_settings\n            where (index_name = $1 and index_hash <> $2)\n            or (index_name = $3 and index_hash <> $4)\n            or (index_name = $5 and index_hash <> $6)\n            or (index_name = $7 and index_hash <> $8)\n            or (index_name = $9 and index_hash <> $10)\n            or (index_name = $11 and index_hash <> $12)\n            or (index_name = $13 and index_hash <> $14)\n            or (index_name = $15 and index_hash <> $16)\n            "
+  },
   "d2d8130135ba5fcf56cd25706a0c1d4bceef2c7c3c984c7827ec29ee32106dc9": {
     "describe": {
       "columns": [
@@ -11471,39 +11703,6 @@
       }
     },
     "query": "\nselect course_data.id,\n       display_name\nfrom course_data\ninner join course on live_id = course_data.id\nwhere display_name <> ''\n      and translated_name = '{}'\n      and published_at is not null\n      and name_translate_status is null\norder by coalesce(updated_at, created_at) desc\nlimit 50 for no key update skip locked;\n "
-  },
-  "d87bd3932cce5d8f7ff89c3d0b068377340656aa9f18d20e1d3be70541125529": {
-    "describe": {
-      "columns": [
-        {
-          "name": "name: String",
-          "ordinal": 0,
-          "type_info": "Text"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text"
-        ]
-      }
-    },
-    "query": "\n            select index_name as \"name: String\"\n            from algolia_index_settings\n            where (index_name = $1 and index_hash <> $2)\n            or (index_name = $3 and index_hash <> $4)\n            or (index_name = $5 and index_hash <> $6)\n            or (index_name = $7 and index_hash <> $8)\n            or (index_name = $9 and index_hash <> $10)\n            or (index_name = $11 and index_hash <> $12)\n            or (index_name = $13 and index_hash <> $14)\n            "
   },
   "d935de8ff747d8408644105a61f99219aee129fd49e240cd3843d8374b02ea29": {
     "describe": {
@@ -12610,6 +12809,26 @@
       }
     },
     "query": "\nupdate resource_data\nset description = $2,\n    translated_description = '{}',\n    updated_at = now()\nwhere id = $1 and $2 is distinct from description"
+  },
+  "f59291979e1a68a6b378cc8b024a3b59de3bb1fc546e397f9a8555bea0db0e47": {
+    "describe": {
+      "columns": [
+        {
+          "name": "count!",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        with cte as (\n            select (array_agg(\"user\".id))[1]\n            from \"user\"\n            inner join user_profile on \"user\".id = user_profile.user_id\n            inner join user_email using(user_id)\n            where (\"user\".id = $1 or $1 is null)\n            group by family_name\n            order by family_name desc\n        )\n        select count(*) as \"count!\" from unnest(array(select cte.array_agg from cte)) with ordinality t(id, ord)\n"
   },
   "f61ec8402e7de26b770073be29eee23dd893751db1fe71f55def28f880b32e3a": {
     "describe": {
