@@ -4,11 +4,8 @@ use dominator::clone;
 use shared::{
     api::endpoints,
     domain::user::{
-        public_user::{
-            PublicUser, PublicUserBrowsePath, PublicUserGetPath, PublicUserSearchPath,
-            SearchPublicUserQuery, UserBrowseQuery,
-        },
-        UserId,
+        UserBrowsePath, UserBrowseQuery, UserResponse, UserSearchPath,
+        UserSearchQuery,
     },
 };
 use utils::{
@@ -16,7 +13,7 @@ use utils::{
     routes::{AdminRoute, AdminUsersRoute, Route},
 };
 
-use super::{editable_user::EditableUser, FetchMode, Users};
+use super::{FetchMode, Users};
 
 impl Users {
     pub fn load_data(self: &Rc<Self>) {
@@ -51,9 +48,7 @@ impl Users {
             ..Default::default()
         };
 
-        match endpoints::user::BrowsePublicUser::api_with_auth(PublicUserBrowsePath(), Some(req))
-            .await
-        {
+        match endpoints::user::Browse::api_with_auth(UserBrowsePath(), Some(req)).await {
             Err(_) => todo!(),
             Ok(res) => UserListResponse {
                 users: res.users,
@@ -63,13 +58,13 @@ impl Users {
     }
 
     async fn load_users_search(&self, query: String) -> UserListResponse {
-        let req = SearchPublicUserQuery {
+        let req = UserSearchQuery {
             q: query,
             page: Some(self.active_page.get()),
             ..Default::default()
         };
 
-        match endpoints::user::Search::api_with_auth(PublicUserSearchPath(), Some(req)).await {
+        match endpoints::user::SearchUser::api_with_auth(UserSearchPath(), Some(req)).await {
             Err(_) => todo!(),
             Ok(res) => UserListResponse {
                 users: res.users,
@@ -91,36 +86,31 @@ impl Users {
         Route::Admin(AdminRoute::Users(route)).push_state();
     }
 
-    pub async fn get_user(self: Rc<Self>, user_id: UserId) -> Rc<EditableUser> {
-        let user = self
-            .users
-            .lock_ref()
-            .iter()
-            .find(|user| user.id == user_id)
-            .cloned();
-        match user {
-            Some(user) => user,
-            None => Rc::new(self.load_user(&user_id).await),
-        }
-    }
+    // pub async fn get_user(self: Rc<Self>, user_id: UserId) -> Rc<EditableUser> {
+    //     let user = self
+    //         .users
+    //         .lock_ref()
+    //         .iter()
+    //         .find(|user| user.id == user_id)
+    //         .cloned();
+    //     match user {
+    //         Some(user) => user,
+    //         None => Rc::new(self.load_user(&user_id).await),
+    //     }
+    // }
 
-    async fn load_user(self: &Rc<Self>, user_id: &UserId) -> EditableUser {
-        match endpoints::user::GetPublicUser::api_with_auth(
-            PublicUserGetPath(user_id.clone()),
-            None,
-        )
-        .await
-        {
-            Ok(user) => user.into(),
-            Err(_) => {
-                todo!()
-            }
-        }
-    }
+    // async fn load_user(self: &Rc<Self>, user_id: &UserId) -> EditableUser {
+    //     match endpoints::user::api_with_auth(GetProfilePath(user_id.clone()), None).await {
+    //         Ok(user) => user.into(),
+    //         Err(_) => {
+    //             todo!()
+    //         }
+    //     }
+    // }
 }
 
 #[derive(Clone, Debug)]
 struct UserListResponse {
-    users: Vec<PublicUser>,
+    users: Vec<UserResponse>,
     total_pages: u32,
 }

@@ -14,8 +14,11 @@ export class _ extends LitElement {
                 background-color: rgb(233 233 233);
             }
             ::slotted(*) {
-                padding: 5px;
+                padding: 8px;
+                padding-right: 15px;
+                padding-bottom: 30px;
                 font-size: 14px;
+                text-align: start;
                 border: solid 1px #eaebef;
             }
             ::slotted(a) {
