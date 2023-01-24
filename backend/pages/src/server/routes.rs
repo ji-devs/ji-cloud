@@ -1,9 +1,18 @@
 use crate::templates::{
     direct::direct_template_no_auth, epoch::epoch_page, info::info_template, spa,
 };
-use actix_web::web::{self, ServiceConfig};
+use actix_web::{
+    web::{self, ServiceConfig},
+    HttpResponse,
+};
 
 pub fn configure(config: &mut ServiceConfig) {
+    // [Ty] Temporary redirect so that requests to /plans go to the JI wordpress site.
+    async fn redirect() -> HttpResponse {
+        let mut response = HttpResponse::TemporaryRedirect();
+        response.append_header(("Location", "https://www.jewishinteractive.org/plans/"));
+        response.into()
+    }
     config
         .route("/kids/{path:.*}", web::get().to(spa::kids_template))
         .route("/kids", web::get().to(spa::kids_template))
@@ -40,5 +49,6 @@ pub fn configure(config: &mut ServiceConfig) {
         .route("/home/{path:.*}", web::get().to(spa::home_template))
         .route("/no-auth", web::get().to(direct_template_no_auth))
         .route("/info", web::get().to(info_template))
-        .route("/epoch", web::get().to(epoch_page));
+        .route("/epoch", web::get().to(epoch_page))
+        .route("/plans", web::get().to(redirect));
 }
