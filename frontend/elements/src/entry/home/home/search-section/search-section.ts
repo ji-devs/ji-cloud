@@ -57,10 +57,11 @@ export class _ extends LitElement {
                 .jigzi {
                     display: grid;
                     place-content: center;
+                    max-height: 64px;
                 }
                 h1 {
                     margin: 0;
-                    font-size: 64px;
+                    font-size: 50px;
                     font-weight: 900;
                     color: #fff;
                     text-align: center;
@@ -70,7 +71,7 @@ export class _ extends LitElement {
                 }
                 h4 {
                     color: var(--dark-gray-6);
-                    font-size: 32px;
+                    font-size: 26px;
                     font-weight: 300;
                     text-align: center;
                     margin: 0;
