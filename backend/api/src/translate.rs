@@ -267,7 +267,7 @@ limit 10 for no key update skip locked;
                 }
                 Err(error) => {
                     log::error!(
-                        "Could not translate image description. image_id: {}, error: {}",
+                        "Could not translate description for image_id: {}, error: {}",
                         t.image_id.0,
                         error,
                     );
@@ -327,7 +327,7 @@ limit 10 for no key update skip locked;
                 }
                 Err(error) => {
                     log::error!(
-                        "Could not translate image name. image_id: {}, error: {}",
+                        "Could not translate name for image_id: {}, error: {}",
                         t.image_id.0,
                         error,
                     );
@@ -359,7 +359,7 @@ limit 10 for no key update skip locked;
         let descriptions: Vec<_> = sqlx::query!(
             //language=SQL
             r#"
-select jig_data.id,
+select jig_data.id ,
        description
 from jig_data
 inner join jig on live_id = jig_data.id
@@ -367,7 +367,7 @@ where description <> '' and translated_description = '{}'
 and published_at is not null
 and description_translate_status is null
 order by coalesce(updated_at, created_at) desc
-limit 50 for no key update skip locked;
+limit 30 for no key update skip locked;
  "#
         )
         .fetch(&mut txn)
@@ -389,7 +389,7 @@ where display_name <> '' and translated_name = '{}'
 and published_at is not null
 and name_translate_status is null
 order by coalesce(updated_at, created_at) desc
-limit 50 for no key update skip locked;
+limit 30 for no key update skip locked;
          "#
         )
         .fetch(&mut txn)
@@ -444,7 +444,7 @@ limit 50 for no key update skip locked;
                 };
             } else {
                 log::debug!(
-                    "Could not translate jig_data_id: {}, string: {}",
+                    "Could not translate description for jig_data_id: {}, string: {}",
                     t.jig_data_id,
                     t.text
                 );
@@ -502,7 +502,7 @@ limit 50 for no key update skip locked;
                 };
             } else {
                 log::debug!(
-                    "Could not translate jig_data_id: {}, string: {}",
+                    "Could not translate name for jig_data_id: {}, string: {}",
                     t.jig_data_id,
                     t.text
                 );
@@ -606,7 +606,7 @@ limit 10 for no key update skip locked;
                     .await?;
                 } else {
                     log::debug!(
-                        "Empty translation list for resource_data_id: {}",
+                        "Empty description translation list for resource_data_id: {}",
                         t.resource_data_id
                     );
                     update_asset_translation_status(
@@ -621,7 +621,7 @@ limit 10 for no key update skip locked;
                 };
             } else {
                 log::debug!(
-                    "Could not translate resource_data_id: {}, string: {}",
+                    "Could not translate description for resource_data_id: {}, string: {}",
                     t.resource_data_id,
                     t.text
                 );
@@ -667,7 +667,7 @@ limit 10 for no key update skip locked;
                     .await?;
                 } else {
                     log::debug!(
-                        "Empty translation list for resource_data_id: {}",
+                        "Empty name translation list for resource_data_id: {}",
                         t.resource_data_id
                     );
                     update_asset_translation_status(
@@ -683,7 +683,7 @@ limit 10 for no key update skip locked;
                 };
             } else {
                 log::debug!(
-                    "Could not translate resource_data_id: {}, string: {}",
+                    "Could not translate name for resource_data_id: {}, string: {}",
                     t.resource_data_id,
                     t.text
                 );
@@ -724,7 +724,7 @@ where description <> ''
       and published_at is not null
       and description_translate_status is null
 order by coalesce(updated_at, created_at) desc
-limit 50 for no key update skip locked;
+limit 20 for no key update skip locked;
  "#
         )
         .fetch(&mut txn)
@@ -747,7 +747,7 @@ where display_name <> ''
       and published_at is not null
       and name_translate_status is null
 order by coalesce(updated_at, created_at) desc
-limit 50 for no key update skip locked;
+limit 20 for no key update skip locked;
  "#
         )
         .fetch(&mut txn)
@@ -804,7 +804,7 @@ limit 50 for no key update skip locked;
                 };
             } else {
                 log::debug!(
-                    "Could not translate course_id: {}, string: {}",
+                    "Could not translate description for course_id: {}, string: {}",
                     t.course_data_id,
                     t.text
                 );
@@ -863,7 +863,7 @@ limit 50 for no key update skip locked;
                 };
             } else {
                 log::debug!(
-                    "Could not translate course_id: {}, string: {}",
+                    "Could not translate name for course_id: {}, string: {}",
                     t.course_data_id,
                     t.text
                 );
