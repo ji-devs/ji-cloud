@@ -356,6 +356,74 @@
     },
     "query": "\nselect draft_id from resource join resource_data on resource.draft_id = resource_data.id where resource.id = $1 for update\n"
   },
+  "0a1aba0eb788c39ca21dd52146eda73cfe3f910f5e8c6c0e0a702d964aedd260": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: UserId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "username",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "given_name",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "family_name",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "email!",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "language_emails",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "created_at!",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "organization",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "location",
+          "ordinal": 8,
+          "type_info": "Jsonb"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        null,
+        false,
+        false,
+        true,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      }
+    },
+    "query": "\nselect  \"user\".id                 as \"id!: UserId\",\n        username,\n        given_name,\n        family_name,\n        user_email.email::text as \"email!\",\n        language_emails,\n        user_email.created_at  as \"created_at!\",\n        organization,\n        location\nfrom \"user\"\ninner join user_profile on \"user\".id = user_profile.user_id\ninner join user_email on user_email.user_id = \"user\".id\ninner join unnest($1::uuid[])\nwith ordinality t(id, ord) using (id)\n"
+  },
   "0a1f9e5fee4b10a173b8723976cecfb920f90a4828d723abb14f6e0215cf880b": {
     "describe": {
       "columns": [
@@ -437,68 +505,6 @@
       }
     },
     "query": "insert into user_email (user_id, email) values ($1, $2::text)"
-  },
-  "0d43420f812b2b9b32c150536d3a8e66693a0ae1db09a015f771628cd711cf3c": {
-    "describe": {
-      "columns": [
-        {
-          "name": "username",
-          "ordinal": 0,
-          "type_info": "Text"
-        },
-        {
-          "name": "given_name",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "family_name",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "email!",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "language_emails",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "created_at!",
-          "ordinal": 5,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "organization",
-          "ordinal": 6,
-          "type_info": "Text"
-        },
-        {
-          "name": "location",
-          "ordinal": 7,
-          "type_info": "Jsonb"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        null,
-        false,
-        false,
-        true,
-        true
-      ],
-      "parameters": {
-        "Left": [
-          "UuidArray"
-        ]
-      }
-    },
-    "query": "\nselect  username,\n        given_name,\n        family_name,\n        user_email.email::text as \"email!\",\n        language_emails,\n        user_email.created_at  as \"created_at!\",\n        organization,\n        location\nfrom \"user\"\ninner join user_profile on \"user\".id = user_profile.user_id\ninner join user_email on user_email.user_id = \"user\".id\ninner join unnest($1::uuid[])\nwith ordinality t(id, ord) using (id)\n"
   },
   "0db02aca55bd8f7c7ecdf168ac6d80c6a556ebf2efc5cdafe0afee57a49aeff1": {
     "describe": {
@@ -764,6 +770,76 @@
       }
     },
     "query": "\nselect jig.id                                       as \"id!: JigId\",\n       creator_id                               as \"creator_id: UserId\",\n       author_id                                as \"author_id: UserId\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id) as \"author_name\",\n       live_id                                  as \"live_id!\",\n       draft_id                                 as \"draft_id!\",\n       published_at,\n       liked_count                              as \"liked_count!\",\n       live_up_to_date                          as \"live_up_to_date!\",\n       (\n           select play_count\n           from jig_play_count\n           where jig_play_count.jig_id = jig.id\n       )                                        as \"play_count!\",\n       rating                                   as \"rating?: JigRating\",\n       blocked                                  as \"blocked!\",\n       curated                                  as \"curated!\"\nfrom jig\n         inner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\n    inner join jig_admin_data \"admin\" on admin.jig_id = jig.id\n    order by ord asc\n    "
+  },
+  "10bf0e316dde65365043a28b545dee88ac3a1c6dce8ddfc93608498fe0236fd1": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: UserId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "username",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "given_name",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "family_name",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "email!",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "language_emails",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "created_at!",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "organization",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "location",
+          "ordinal": 8,
+          "type_info": "Jsonb"
+        }
+      ],
+      "nullable": [
+        null,
+        false,
+        false,
+        false,
+        null,
+        false,
+        false,
+        true,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\nwith cte as (\n    select (array_agg(\"user\".id))[1]\n    from \"user\"\n    inner join user_profile on \"user\".id = user_profile.user_id\n    inner join user_email using(user_id)\n    where (\"user\".id = $1 or $1 is null)\n    group by family_name\n    order by family_name desc\n),\ncte1 as (\n    select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n   , ord) order by ord\n)\nselect  cte1.id                 as \"id!: UserId\",\n        username,\n        given_name,\n        family_name,\n        user_email.email::text as \"email!\",\n        language_emails,\n        user_email.created_at  as \"created_at!\",\n        organization,\n        location\nfrom cte1\n        inner join user_profile on cte1.id = user_profile.user_id\n        inner join user_email using(user_id)\nwhere ord > (1 * $2 * $3)\norder by ord asc\nlimit $3\n"
   },
   "11623dd925dc935401e7c2ef73941a1a46d253df579b98af410e69d1e578850d": {
     "describe": {
@@ -7273,70 +7349,6 @@
       }
     },
     "query": "\nupdate pro_dev_data_unit\nset index = index - 1\nwhere pro_dev_data_id = $1\n  and index > $2\n"
-  },
-  "91bb47a03e30d7cfeedb573ae70b8267fdb962a1f26f4b8ef80c900a6105f915": {
-    "describe": {
-      "columns": [
-        {
-          "name": "username",
-          "ordinal": 0,
-          "type_info": "Text"
-        },
-        {
-          "name": "given_name",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "family_name",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "email!",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "language_emails",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "created_at!",
-          "ordinal": 5,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "organization",
-          "ordinal": 6,
-          "type_info": "Text"
-        },
-        {
-          "name": "location",
-          "ordinal": 7,
-          "type_info": "Jsonb"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        null,
-        false,
-        false,
-        true,
-        true
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int4",
-          "Int4"
-        ]
-      }
-    },
-    "query": "\nwith cte as (\n    select (array_agg(\"user\".id))[1]\n    from \"user\"\n    inner join user_profile on \"user\".id = user_profile.user_id\n    inner join user_email using(user_id)\n    where (\"user\".id = $1 or $1 is null)\n    group by family_name\n    order by family_name desc\n),\ncte1 as (\n    select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n   , ord) order by ord\n)\nselect  username,\n        given_name,\n        family_name,\n        user_email.email::text as \"email!\",\n        language_emails,\n        user_email.created_at  as \"created_at!\",\n        organization,\n        location\nfrom cte1\n        inner join user_profile on cte1.id = user_profile.user_id\n        inner join user_email using(user_id)\nwhere ord > (1 * $2 * $3)\norder by ord asc\nlimit $3\n"
   },
   "932508742699d5ebb198b02fc4f4bcaa9fd0e50c4206e6536279163533526826": {
     "describe": {
