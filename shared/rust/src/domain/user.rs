@@ -240,6 +240,9 @@ pub struct UserProfile {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UserResponse {
+    /// The user's id.
+    pub id: UserId,
+    
     /// The user's username.
     pub username: String,
 

@@ -156,7 +156,8 @@ cte1 as (
     select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id
    , ord) order by ord
 )
-select  username,
+select  cte1.id                 as "id!: UserId",
+        username,
         given_name,
         family_name,
         user_email.email::text as "email!",
@@ -185,6 +186,7 @@ limit $3
             let (city, state, country) = get_location(user_row.location);
 
             UserResponse {
+                id: user_row.id,
                 username: user_row.username,
                 given_name: user_row.given_name,
                 family_name: user_row.family_name,
@@ -210,7 +212,8 @@ pub async fn get_by_ids(db: &PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<UserRespo
     let res: Vec<_> = sqlx::query!(
         //language=SQL
         r#"
-select  username,
+select  "user".id                 as "id!: UserId",
+        username,
         given_name,
         family_name,
         user_email.email::text as "email!",
@@ -235,6 +238,7 @@ with ordinality t(id, ord) using (id)
             let (city, state, country) = get_location(row.location);
 
             UserResponse {
+                id: row.id,
                 username: row.username,
                 given_name: row.given_name,
                 family_name: row.family_name,
