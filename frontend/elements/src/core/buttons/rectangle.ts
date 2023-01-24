@@ -107,7 +107,7 @@ export class _ extends LitElement {
                 }
 
                 :host([size="small"]:not([kind="text"])) .inner {
-                    padding: 6px 16px;
+                    padding: 0 10px;
                 }
                 :host([size="medium"]:not([kind="text"])) .inner {
                     padding: 10px 18px;

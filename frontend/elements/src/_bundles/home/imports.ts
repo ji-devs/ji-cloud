@@ -1,5 +1,6 @@
 import "@elements/_bundles/_sub-bundles/page/header";
 import "@elements/_bundles/_sub-bundles/all";
+import "@elements/core/asset/asset-card";
 import "@elements/core/buttons/empty";
 import "@elements/core/buttons/rectangle-icon";
 import "@elements/core/buttons/fa-button";

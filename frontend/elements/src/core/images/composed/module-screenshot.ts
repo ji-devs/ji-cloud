@@ -12,7 +12,7 @@ export class _ extends LitElement {
                 :host {
                     box-sizing: border-box;
                     overflow: hidden;
-                    display: inline-block;
+                    display: inline-grid;
                 }
                 img-ui,
                 img-ji {

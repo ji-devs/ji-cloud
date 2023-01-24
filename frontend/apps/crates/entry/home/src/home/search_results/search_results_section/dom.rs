@@ -1,4 +1,5 @@
 use components::{
+    asset_card::{render_asset_card, AssetCardBottomIndicator, AssetCardConfig},
     module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback},
     share_asset::ShareAsset,
 };
@@ -17,11 +18,10 @@ use shared::{
 };
 use std::{collections::HashMap, rc::Rc};
 use utils::{
-    ages::AgeRangeVecExt,
     asset::{published_at_string, ResourceContentExt},
     events,
     init::analytics,
-    metadata::{get_age_ranges, get_category_label_lookup, get_resource_types},
+    metadata::{get_category_label_lookup, get_resource_types},
     prelude::{get_user_cloned, ApiEndpointExt},
     routes::{AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, ResourceEditRoute, Route},
 };
@@ -68,13 +68,12 @@ impl SearchResultsSection {
 
     fn render_result(self: &Rc<Self>, asset: Rc<Asset>) -> Dom {
         let state = self;
-        let jig_ages = asset.age_ranges().clone();
         let share_asset = ShareAsset::new((*asset).clone());
         let user_id = state.user.get_cloned().map(|user| user.id);
 
         html!("home-search-result", {
             .prop("slot", "results")
-            .prop("title", asset.display_name())
+            .prop("name", asset.display_name())
             .prop("playedCount", asset.plays())
             .prop("likedCount", asset.likes())
             .prop("author", asset.author_name().clone().unwrap_or_default())
@@ -87,24 +86,32 @@ impl SearchResultsSection {
                     None => String::new(),
                 }
             })
-            .child_signal(from_future(get_age_ranges()).map(|x| x.unwrap_or_default()).map(move |age_ranges| {
-                let range = age_ranges.range(&jig_ages);
-                Some(html!("age-range", {
-                    .prop("slot", "ages")
-                    .prop("icon", "entry/home/search-results/age.svg")
-                    .prop("from", range.0)
-                    .prop("to", range.1)
-                }))
-            }))
+            .child(render_asset_card(
+                &asset,
+                AssetCardConfig {
+                    likeable: true,
+                    bottom_indicator: AssetCardBottomIndicator::Author,
+                    slot: Some("front"),
+                    ..Default::default()
+                },
+            ))
+            .apply(|dom| {
+                match &*asset {
+                    Asset::Course(_) | Asset::Resource(_) => dom,
+                    Asset::Jig(jig) => {
+                        dom.children(jig.jig_data.modules.iter().map(|module| {
+                            ModuleThumbnail::new(
+                                asset.id(),
+                                Some(module.clone()),
+                                ThumbnailFallback::Asset,
+                                DraftOrLive::Live
+                            ).render(Some("thumbnails"))
+                        }))
+                    },
+                    Asset::ProDev(_) => todo!()
+                }
+            })
             .prop("description", asset.description().clone())
-            .child(
-                ModuleThumbnail::new(
-                    asset.id(),
-                    asset.cover().cloned(),
-                    ThumbnailFallback::Asset,
-                    DraftOrLive::Live
-                ).render(Some("image"))
-            )
             .apply_if(!asset.categories().is_empty(), clone!(asset => move |dom| {
                 dom.child(html!("home-search-result-details", {
                     .prop("slot", "categories")
@@ -144,14 +151,15 @@ impl SearchResultsSection {
             }))
             .child(share_asset.render(
                 html!("button-empty", {
-                    .style("display", "flex")
-                    .style("align-items", "center")
-                    .style("gap", "10px")
+                    .style("height", "32px")
+                    .style("width", "32px")
+                    .style("display", "inline-grid")
+                    .style("place-content", "center")
+                    .prop("title", "Share")
                     .child(html!("fa-icon", {
-                        .prop("icon", "fa-thin fa-share-nodes")
-                        .style("font-size", "26px")
+                        .prop("icon", "fa-light fa-share-nodes")
+                        .style("font-size", "16px")
                     }))
-                    .text(" Share")
                     .event(clone!(asset => move |_: events::Click| {
                         track_action("share", asset.clone());
                     }))
@@ -163,9 +171,7 @@ impl SearchResultsSection {
                     .prop("slot", "actions")
                     .child(html!("fa-icon", {
                         .prop("icon", "fa-light fa-pencil")
-                        .style("font-size", "18px")
                     }))
-                    .text(" Edit")
                     .prop("href", {
                         match asset.id() {
                             AssetId::JigId(jig_id) => {
@@ -216,8 +222,9 @@ impl SearchResultsSection {
                                 Some(resource) => {
                                     html!("button-rect", {
                                         .prop("slot", "play-button")
-                                        .prop("color", "green")
+                                        .prop("color", "red")
                                         .prop("bold", true)
+                                        .prop("size", "small")
                                         .prop("href", resource.resource_content.get_link())
                                         .prop("target", "_BLANK")
                                         .text("View")

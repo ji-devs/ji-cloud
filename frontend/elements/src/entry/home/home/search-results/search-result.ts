@@ -1,9 +1,7 @@
-import { LitElement, html, css, customElement, property } from "lit-element";
+import { LitElement, html, css, customElement, property, query } from "lit-element";
 import { nothing } from "lit-html";
+import { CarouselSingle } from "@elements/core/carousel/single";
 
-const STR_PLAYED = "Plays";
-const STR_VIEWED = "Views";
-const STR_LIKED = "Likes";
 const STR_JI_TEAM = "Ji Team";
 const STR_DESCRIPTION = "Description";
 const STR_ADDITIONAL_RESOURCES = "Teacher resources";
@@ -44,267 +42,191 @@ export class _ extends LitElement {
                     display: inline-block;
                     perspective: 2000px;
                 }
+                /* --line-color is used for category borders and lines */
+                :host([kind=jig]) {
+                    --line-color: var(--light-orange-3);
+                }
+                :host([kind=resource]) {
+                    --line-color: #beedfe;
+                }
+                :host([kind=course]) {
+                    --line-color: var(--green-3);
+                }
                 .wrapper {
                     display: grid;
                     transition: transform 0.4s;
                     transform-style: preserve-3d;
-                    width: 354px;
-                    height: 384px;
+                    width: 280px;
+                    height: 288px;
                     perspective: 1000px;
                     position: relative;
                 }
                 :host(:hover) .wrapper, :host([flipped]) .wrapper {
+                /* .wrapper, :host([flipped]) .wrapper { */
                     transform: rotateY(180deg);
                 }
-                .main,
-                .hover {
+                ::slotted([slot=front]) {
+                    z-index: 2;
+                }
+                .back {
                     width: 100%;
                     height: 100%;
-                    /* prefix required for safari https://caniuse.com/?search=backface-visibility */
-                    -webkit-backface-visibility: hidden;
                     backface-visibility: hidden;
                     border-radius: 20px;
                     box-shadow: 0 3px 12px 0 rgba(0, 0, 0, 0.12);
                     overflow: hidden;
                     position: absolute;
-                }
-                .main {
-                    grid-column: 1;
-                    grid-row: 1;
-                    display: grid;
-                    grid-template-rows: 200px auto auto 34px 40px;
-                    height: 100%;
-                    background-color: #ffffff;
-                }
-                .main ::slotted([slot="image"]) {
-                    border-radius: 20px 20px 0 0;
-                }
-                .main .title {
-                    font-size: 22px;
-                    font-weight: 600;
-                    color: #555555;
-                    text-align: center;
-                    margin: 0;
-                    margin-top: 8px;
-                    display: -webkit-box;
-                    -webkit-line-clamp: 2;
-                    -webkit-box-orient: vertical;
-                    overflow: hidden;
-                }
-                .main .played-liked {
-                    align-self: flex-start;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    column-gap: 12px;
-                }
-                .main .played-liked .count {
-                    font-weight: 800;
-                }
-                .main .played-liked-divider {
-                    width: 2px;
-                    height: 16px;
-                    background-color: var(--dark-gray-5);
-                }
-                .main .ages-language {
-                    display: flex;
-                    justify-content: space-between;
-                    padding: 8px 16px;
-                }
-                .main .ages-language,
-                .main .language {
-                    display: flex;
-                    align-items: center;
-                    column-gap: 4px;
-                }
-                .main .author-section {
-                    font-weight: 500;
-                    line-height: 40px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-                :host([kind=jig]) .main .author-section,
-                :host([kind=course]) .main .author-section {
-                    color: var(--main-blue);
-                    border-top: solid 1px var(--light-blue-2);
-                }
-                :host([kind=resource]) .main .author-section {
-                    background-color: #b4eacb;
-                }
-                :host([byJiTeam]) .main .author-section {
-                    background-color: var(--light-blue-2);
-                }
-                .main .author-section .by-ji-team {
-                    font-weight: 800;
-                    white-space: pre-wrap;
-                }
-
-                .hover {
                     grid-column: 1;
                     grid-row: 1;
                     height: 100%;
-                    color: var(--white);
                     display: grid;
                     grid-template-rows: 1fr auto;
                     transform: rotateY(180deg);
+                    z-index: 3;
                 }
-                :host([kind=jig]) .hover,
-                :host([kind=course]) .hover {
+                :host([kind=jig]) .back {
                     background-color: var(--light-orange-1);
-                    color: var(--dark-gray-5);
                 }
-                :host([kind=resource]) .hover {
-                    background-color: #00844c;
+                :host([kind=resource]) .back {
+                    background-color: #e3f5fd;
                 }
-                .hover .scrollable-content {
-                    padding: 0px 24px;
-                    padding-right: 12px;
-                    margin-right: 12px;
-                    margin-top: 16px;
-                    margin-bottom: 16px;
+                :host([kind=course]) .back {
+                    background-color: #e9fae5;
+                }
+                .back .scrollable-content {
+                    padding: 16px 5px 16px 16px;
+                    margin-right: 5px;
                     overflow: auto;
                     scrollbar-width: thin;
+                    display: grid;
+                    /* row-gap: 10px; */
+                    align-content: start;
                 }
-                :host([kind=jig]) .hover,
-                :host([kind=course]) .hover {
+                :host([kind=jig]) .back,
+                :host([kind=course]) .back {
                     scrollbar-color: var(--light-gray-2) transparent;
                 }
-                :host([kind=resource]) .hover {
-                    scrollbar-color: #d2ddea transparent;
+                :host([kind=resource]) .back {
+                    scrollbar-color: var(--light-gray-2) transparent;
                 }
-                .hover .scrollable-content::-webkit-scrollbar-track {
+                .back .scrollable-content::-webkit-scrollbar-track {
                     background-color: transparent;
                     position: absolute;
+                    margin: 15px;
                 }
-                .hover .scrollable-content::-webkit-scrollbar {
-                    width: 4px;
+                .back .scrollable-content::-webkit-scrollbar {
+                    width: 6px;
                 }
-                .hover .scrollable-content::-webkit-scrollbar-thumb {
-                    border-radius: 4px;
+                .back .scrollable-content::-webkit-scrollbar-thumb {
+                    border-radius: 3px;
                 }
-                :host([kind=jig]) .scrollable-content::-webkit-scrollbar-thumb,
-                :host([kind=course]) .scrollable-content::-webkit-scrollbar-thumb {
-                    background-color: #d2ddea;
+                .scrollable-content::-webkit-scrollbar-thumb {
+                    background-color: var(--light-gray-2);
                 }
-                :host([kind=resource]) .scrollable-content::-webkit-scrollbar-thumb {
-                    background-color: #d2ddea;
+                .thumbnails {
+                    display: grid;
+                    grid-template-columns: auto auto auto;
+                    justify-content: space-between;
+                    align-items: center;
                 }
-                .hover .title {
-                    margin: 0;
-                    font-size: 16px;
+                .thumbnails fa-button {
+                    color: var(--dark-gray-6);
+                }
+                .thumbnails carousel-single {
+                    aspect-ratio: 16/9;
+                    height: 110px;
+                }
+                .thumbnails carousel-single ::slotted([slot=thumbnails]) {
+                    border-radius: 8px;
+                    margin: 1px;
+                }
+                .back .name {
+                    margin: 10px 0;
+                    font-size: 13px;
                     font-weight: 600;
-                }
-                :host([kind=jig]) .hover .title,
-                :host([kind=course]) .hover .title {
                     color: var(--dark-blue-4);
                 }
-                :host([kind=jig]) .hover home-search-result-details:not(:last-child),
-                :host([kind=course]) .hover home-search-result-details:not(:last-child) {
-                    border-bottom: solid 1px var(--light-orange-3);
+                .back .published-at {
+                    font-size: 13px;
+                    font-weight: 300;
+                    color: var(--dark-gray-5);
+                    display: flex;
+                    align-items: center;
+                    column-gap: 6px;
                 }
-                :host([kind=resource]) .hover home-search-result-details:not(:last-child) {
-                    border-bottom: solid 1px #3f9c6f;
+                ::slotted(home-search-result-details),
+                .back home-search-result-details:not(:last-child) {
+                    border-bottom: solid 1px var(--line-color);
                 }
-
                 ::slotted(home-search-result-details) {
                     --closed-height: 36px;
                 }
-                :host([kind=jig]) ::slotted(home-search-result-details),
-                :host([kind=course]) ::slotted(home-search-result-details) {
-                    border-bottom: solid 1px var(--light-orange-3);
-                }
-                :host([kind=resource]) ::slotted(home-search-result-details) {
-                    border-bottom: solid 1px #3f9c6f;
-                }
-                .hover .additional-resources-items {
+                .back .additional-resources-items {
                     display: flex;
                     flex-wrap: wrap;
                     gap: 16px;
                     padding: 10px 0;
                 }
-                .hover ::slotted(a[slot=additional-resources]) {
+                .back ::slotted(a[slot=additional-resources]) {
                     color: var(--dark-gray-5);
                     text-decoration: none;
                     font-size: 14px;
                     display: flex;
                     column-gap: 6px;
                 }
-                .hover h3 {
+                .back h3 {
                     font-size: 16px;
                     font-weight: 600;
                     margin: 0;
                 }
-                .hover .published-at {
-                    font-size: 14px;
-                    font-weight: 250;
-                    margin: 4px 0;
-                    display: flex;
-                    align-items: center;
-                    column-gap: 8px;
-                }
-                .hover .collapsibles {
-                    margin: 20px 0;
-                }
-                .hover .description {
-                    font-size: 14px;
+                .back .description {
+                    font-size: 13px;
                     font-weight: 300;
                     overflow-wrap: break-word;
                     white-space: pre-wrap;
                 }
-                .hover h4,
-                .hover .author-section {
-                    font-size: 14px;
+                .back h4,
+                .back .author-section {
+                    font-size: 13px;
                     font-weight: 500;
                 }
-                .hover .author-section {
+                .back .author-section {
                     display: flex;
                     justify-content: space-between;
                     flex-wrap: wrap;
                     padding: 10px 0;
-                    border-bottom: solid 1px #3f9c6f;
                 }
-                :host([kind=jig]) .hover .author-section,
-                :host([kind=course]) .hover .author-section {
-                    border-bottom: solid 1px var(--light-orange-3);
-                }
-                .hover .author-section .left-side {
+                .back .author-section .left-side {
                     display: flex;
                     align-items: center;
                     column-gap: 6px;
                 }
-                .hover .result-actions {
-                    height: 82px;
+                .back .result-actions {
+                    height: 40px;
                     box-shadow: 0 3px 12px 0 rgba(0, 0, 0, 0.12);
                     display: grid;
                     place-content: center;
                     display: grid;
                     grid-template-columns: 50% 50%;
-                    padding: 0 24px;
+                    padding: 0 16px;
                 }
-                .hover .extra-actions {
-                    margin-right: auto;
+                .back .extra-actions {
                     display: flex;
-                    gap: 16px;
                     align-items: center;
                 }
-                .hover .extra-actions ::slotted([slot=actions]) {
+                .back .extra-actions ::slotted([slot=actions]) {
                     text-decoration: none;
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
+                    font-size: 16px;
+                    height: 32px;
+                    width: 32px;
+                    display: inline-grid;
+                    place-content: center;
                     color: var(--dark-blue-1);
                 }
-                .hover .extra-actions ::slotted([slot=actions]:hover) {
+                .back .extra-actions ::slotted([slot=actions]:hover) {
                     color: var(--dark-blue-2);
                 }
-                :host([kind=resource]) .hover .extra-actions ::slotted([slot=actions]) {
-                    color: #ffffff;
-                }
-                :host([kind=resource]) .hover .extra-actions ::slotted([slot=actions]:hover) {
-                    color: #eeeeee;
-                }
-                .hover .primary-action {
+                .back .primary-action {
                     margin-left: auto;
                     align-self: center;
                 }
@@ -313,6 +235,7 @@ export class _ extends LitElement {
                     position: absolute;
                     top: 0%;
                     left: 5%;
+                    z-index: 1;
                 }
 
                 :host(:hover) img-ui.jiggling {
@@ -345,7 +268,7 @@ export class _ extends LitElement {
     leaningPathJigCount?: number = 0;
 
     @property()
-    title: string = "";
+    name: string = "";
 
     @property({ type: Number })
     playedCount: number = 0;
@@ -373,6 +296,9 @@ export class _ extends LitElement {
 
     @property({ type: Boolean, reflect: true })
     flipped: boolean = false;
+
+    @query("carousel-single")
+    carousel!: CarouselSingle;
 
     renderCount(label: string, count: number) {
         // See related comment in renderCountDivider.
@@ -402,51 +328,40 @@ export class _ extends LitElement {
     }
 
     render() {
-        let jiggling = this.kind === 'jig'
-            ? html`<img-ui
-                    class="jiggling"
-                    path="search/cards/jig-jiggling.svg"
-                ></img-ui>`
-            : nothing
+        let jiggling_file = this.kind === 'jig' ? "jig-jiggling.svg"
+            : this.kind === "resource" ? "resource-jiggling.png"
+            : this.kind === "course" ? "course-jiggling.png"
+            : "";
 
-        let playedLabel = this.kind === 'resource' ? STR_VIEWED : STR_PLAYED;
         return html`
             <div class="wrapper">
-                ${jiggling}
-                <div class="main">
-                    <slot name="image"></slot>
-                    <h3 class="title">${this.title}</h3>
-                    <div class="played-liked">
-                        ${this.renderCount(playedLabel, this.playedCount)}
-                        ${this.renderCountDivider()}
-                        ${this.renderCount(STR_LIKED, this.likedCount)}
-                    </div>
-                    <div class="ages-language">
-                        <slot name="ages"></slot>
-                        <div class="language">
-                            <img-ui
-                                path="entry/home/search-results/language.svg"
-                            ></img-ui>
-                            <span class="count">${this.language}</span>
-                        </div>
-                    </div>
-                    <div class="author-section">
-                        ${this.byJiTeam
-                            ? html`
-                                  <img-ui
-                                      path="entry/home/search-results/ji-logo-blue.svg"
-                                  ></img-ui>
-                                  <span class="by-ji-team"
-                                      >${STR_JI_TEAM} -
-                                  </span>
-                              `
-                            : nothing}
-                        ${this.author}
-                    </div>
-                </div>
-                <div class="hover">
+                <img-ui
+                    class="jiggling"
+                    path="search/cards/${jiggling_file}"
+                ></img-ui>
+                <slot name="front"></slot>
+                <div class="back">
                     <div class="scrollable-content">
-                        <h3 class="title" dir="auto">${this.title}</h3>
+                        ${ this.kind === "jig" ? html`
+                            <div class="thumbnails">
+                                <fa-button
+                                    @click=${() => this.carousel.back()}
+                                    icon="fa-regular fa-angle-left"
+                                ></fa-button>
+                                <carousel-single>
+                                    <slot name="thumbnails"></slot>
+                                </carousel-single>
+                                <fa-button
+                                    @click=${() => this.carousel.forward()}
+                                    icon="fa-regular fa-angle-right"
+                                ></fa-button>
+                            </div>
+                        ` : nothing }
+                        <h3 class="name" dir="auto">${this.name}</h3>
+                        <div class="published-at">
+                            <img-ui path="entry/home/search-results/clock.svg"></img-ui>
+                            ${this.publishedAt}
+                        </div>
                         <div class="collapsibles">
                             <slot name="categories"></slot>
                             <home-search-result-details>
@@ -483,14 +398,6 @@ export class _ extends LitElement {
                                         icon="fa-light fa-chevron-right"
                                     ></fa-icon>
                                 </a> -->
-                            </div>
-                            <div class="published-at">
-                                ${this.kind === "resource"
-                                    ? html`<img-ui path="entry/home/search-results/time.svg"></img-ui>`
-                                    : html`<img-ui path="entry/home/search-results/clock.svg"></img-ui>`
-                                }
-
-                                ${this.publishedAt}
                             </div>
                         </div>
                     </div>

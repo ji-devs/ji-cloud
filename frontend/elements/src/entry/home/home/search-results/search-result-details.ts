@@ -16,27 +16,38 @@ export class _ extends LitElement {
                     --closed-height: 38px;
                     display: grid;
                     grid-template-columns: 1fr min-content;
+                    align-items: start;
                     height: var(--closed-height);
                     overflow: hidden;
                 }
                 :host([open]) {
                     height: unset;
                 }
-                .collapse-icon::after {
-                    content: ">";
-                    cursor: pointer;
-                    display: inline-block;
-                    transform: rotate(90deg);
-                    transition: transform 0.3s;
+                button-empty {
+                    height: var(--closed-height);
+                    display: inline-grid;
+                    place-content: center;
                 }
-                :host([open]) .collapse-icon::after {
-                    transform: rotate(-90deg);
+                .collapse-icon {
+                    display: inline-block;
+                    font-size: 14px;
+                    text-align: center;
+                    transform: rotate(0deg);
+                    transition: transform 0.3s;
+                    width: 14px;
+                }
+                :host([open]) .collapse-icon {
+                    transform: rotate(90deg);
                 }
 
                 .content {
-                    padding: 10px 0;
+                    /* padding: 10px 0; */
                     display: grid;
                     row-gap: 7px;
+                }
+
+                ::slotted(h4) {
+                    line-height: var(--closed-height);
                 }
 
                 ::slotted(h4), ::slotted(p) {
@@ -46,14 +57,14 @@ export class _ extends LitElement {
                 ::slotted(div) {
                     display: flex;
                     flex-wrap: wrap;
-                    gap: 7px;
+                    column-gap: 7px;
                 }
             `,
         ];
     }
 
     @property({ type: Boolean, reflect: true })
-    open: boolean = true;
+    open: boolean = false;
 
     private toggleOpen = () => {
         this.open = !this.open;
@@ -64,10 +75,15 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <div class="content">
+            <div class="content" @click=${this.toggleOpen}>
                 <slot></slot>
             </div>
-            <!-- <span class="collapse-icon" @click="${this.toggleOpen}"></span> -->
+            <button-empty @click=${this.toggleOpen}>
+                <fa-icon
+                    class="collapse-icon"
+                    icon="fa-regular fa-chevron-right"
+                ></fa-icon>
+            </button-empty>
         `;
     }
 }

@@ -58,9 +58,7 @@ export class _ extends LitElement {
                     flex-wrap: wrap; */
 
                     display: grid;
-                    grid-template-columns: repeat(auto-fill, 354px);
-                    grid-template-columns: repeat(auto-fill, 216px);
-
+                    grid-template-columns: repeat(auto-fill, 280px);
                     justify-content: space-between;
                     row-gap: 80px;
                     column-gap: 40px;

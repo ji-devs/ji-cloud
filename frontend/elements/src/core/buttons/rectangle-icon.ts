@@ -11,6 +11,9 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
+                :host {
+                    display: grid;
+                }
                 .content {
                     display: inline-flex;
                     column-gap: 8px;
