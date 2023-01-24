@@ -10,7 +10,7 @@
 use dominator::{html, shadow_root, Dom, DomBuilder, ShadowRootMode};
 use web_sys::{HtmlElement, ShadowRoot};
 
-// using a T to get around orphan rules when implementing Component in dependents this crate,
+// using a T to get around orphan rules when implementing Component in dependents of this crate,
 // not entirely sure that this is the right way of doing things though
 pub trait Component<T> {
     const ROOT_ELEMENT: &'static str = "div";

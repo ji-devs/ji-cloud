@@ -127,6 +127,7 @@ pub enum AdminRoute {
     Categories,
     Locale,
     Curation(AdminCurationRoute),
+    Images,
     Users(AdminUsersRoute),
     ImageSearch(Option<ImageSearchQuery>),
     ImageAdd,
@@ -188,6 +189,7 @@ impl AdminRoute {
             Self::Categories => scopes.contains(&UserScope::ManageCategory),
             Self::Locale => false,
             Self::Curation(_) => scopes.contains(&UserScope::AdminJig),
+            Self::Images => scopes.contains(&UserScope::AdminJig),
             Self::Users(_) => scopes.contains(&UserScope::Admin),
             Self::ImageSearch(_) | Self::ImageAdd | Self::ImageTags | Self::ImageMeta(_, _) => {
                 scopes.contains(&UserScope::ManageImage)
@@ -400,6 +402,7 @@ impl Route {
                 let jig_id = JigId(Uuid::from_str(jig_id).unwrap_ji());
                 Self::Admin(AdminRoute::Curation(AdminCurationRoute::Jig(jig_id)))
             }
+            ["admin", "images"] => Self::Admin(AdminRoute::Images),
             ["admin", "users"] => Self::Admin(AdminRoute::Users(AdminUsersRoute::Table)),
             ["admin", "users", user_id] => {
                 let user_id = UserId(Uuid::from_str(user_id).unwrap_ji());
@@ -673,6 +676,7 @@ impl From<&Route> for String {
                         format!("/admin/curation/{}", jig_id.0)
                     }
                 },
+                AdminRoute::Images => "/admin/images".to_string(),
                 AdminRoute::Users(users_route) => match users_route {
                     AdminUsersRoute::Table => "/admin/users".to_string(),
                     AdminUsersRoute::User(user_id) => {

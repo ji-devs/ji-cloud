@@ -63,7 +63,7 @@ impl ImageSize {
 /// Wrapper type around [`Uuid`], represents the ID of a image.
 ///
 /// [`Uuid`]: ../../uuid/struct.Uuid.html
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart, Hash)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct ImageId(pub Uuid);

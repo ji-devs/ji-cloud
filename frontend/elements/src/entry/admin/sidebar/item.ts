@@ -3,6 +3,7 @@ import { nothing } from "lit-html";
 
 export type ID =
     | "locale"
+    | "images"
     | "image-add"
     | "image-search"
     | "curation"
@@ -13,6 +14,7 @@ export type ID =
 
 const STR_LABEL_LOOKUP: { [key in ID]: string } = {
     "image-add": "Add image",
+    "images": "Images",
     "image-tags": "Image tags",
     "image-search": "Edit images",
     "curation": "Curation",

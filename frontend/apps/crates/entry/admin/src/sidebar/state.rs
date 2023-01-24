@@ -26,6 +26,7 @@ impl Sidebar {
             .signal_ref(move |profile| match profile {
                 None => Vec::new(),
                 Some(profile) => vec![
+                    SidebarItem::new(AdminRoute::Images, profile, &curr_route),
                     SidebarItem::new(AdminRoute::ImageAdd, profile, &curr_route),
                     SidebarItem::new(AdminRoute::ImageSearch(None), profile, &curr_route),
                     SidebarItem::new(AdminRoute::ImageTags, profile, &curr_route),
@@ -70,6 +71,7 @@ impl SidebarItem {
             AdminRoute::ImageSearch(_) => "image-search",
             AdminRoute::Users(_) => "users",
             AdminRoute::Curation(_) => "curation",
+            AdminRoute::Images => "images",
             AdminRoute::Export => "export",
             AdminRoute::Landing => "",
         };

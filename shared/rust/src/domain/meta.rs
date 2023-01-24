@@ -67,7 +67,7 @@ into_uuid!(
 ///
 /// This is used instead of UUIDs for image tags as they aren't created dynamically and
 /// a simple and consistent way to identify them is desired.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Hash)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct ImageTagIndex(pub i16);

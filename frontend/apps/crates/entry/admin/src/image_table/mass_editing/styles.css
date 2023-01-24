@@ -1,0 +1,34 @@
+.main {
+    display: grid;
+    row-gap: 22px;
+}
+h2 {
+    margin: 0;
+}
+.add-remove-wrapper {
+    display: grid;
+    row-gap: 10px;
+}
+table {
+    border-collapse: collapse;
+    vertical-align: top;
+}
+th, td {
+    border: solid 1px #4a4a4a;
+    vertical-align: top;
+    padding: 8px;
+}
+.checkbox-list {
+    display: grid;
+    align-content: start;
+}
+.selected-count {
+    font-size: .8em;
+    color: #7b7b7b;
+    margin-left: 5px;
+}
+.actions {
+    display: flex;
+    justify-content: right;
+    column-gap: 30px;
+}

@@ -53,6 +53,9 @@ export class _ extends LitElement {
     @property({ type: Boolean })
     checked: boolean = false;
 
+    @property({ type: Boolean })
+    indeterminate: boolean = false;
+
     @property()
     label: string = "";
 
@@ -65,7 +68,7 @@ export class _ extends LitElement {
     render() {
         return html`
             <label>
-                <input ?disabled=${this.disabled} type="checkbox" .checked=${this.checked} @change="${this.onChange}" />
+                <input ?disabled=${this.disabled} type="checkbox" .checked=${this.checked} .indeterminate=${this.indeterminate} @change="${this.onChange}" />
                 <slot name="label">${this.label}</slot>
             </label>
             <p class="error">${this.error}</p>

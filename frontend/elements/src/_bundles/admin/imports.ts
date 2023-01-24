@@ -13,6 +13,8 @@ import "@elements/entry/admin/images/meta/sections/categories";
 import "@elements/entry/admin/images/meta/sections/summary";
 import "@elements/entry/admin/images/search/pages/landing";
 import "@elements/entry/admin/images/search/image-cell";
+import "@elements/entry/admin/images/table-line";
+import "@elements/entry/admin/images/table";
 import "@elements/entry/admin/locale/landing";
 import "@elements/entry/admin/locale/locale-cell-header";
 import "@elements/entry/admin/locale/locale-cell";
