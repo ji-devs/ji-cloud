@@ -242,7 +242,7 @@ pub struct UserProfile {
 pub struct UserResponse {
     /// The user's id.
     pub id: UserId,
-    
+
     /// The user's username.
     pub username: String,
 
