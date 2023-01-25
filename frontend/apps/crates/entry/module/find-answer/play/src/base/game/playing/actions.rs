@@ -22,46 +22,62 @@ impl PlayState {
 
         state.clone().evaluate_question_ended();
 
-        // Make sure that all playback is stopped so that we can play any new audio for the
-        // latest selection.
-        state
-            .selected_set
-            .lock_mut()
-            .iter()
-            .for_each(|index| state.traces.get(*index).unwrap_ji().kill_playback());
+        state.kill_all_playback();
 
         match selected_trace.kind {
             TraceKind::Correct => {
                 state.incorrect_choice_count.set(0);
                 state.correct_choice(clone!(state, selected_trace => move || {
-                    if let Some(audio) = &state.question.correct_audio {
-                        state.selection_audio.set(Some(audio.clone()));
+                    let has_audio = if selected_trace.inner.audio.is_some() {
+                        true
                     } else {
+                        if let Some(audio) = &state.question.correct_audio {
+                            state.selection_audio.set(Some(audio.clone()));
+                            true
+                        } else {
+                            false
+                        }
+                    };
+
+                    // To get around FnOnce requirements for TraceBubble
+                    fn evaluate_end(state: &Rc<PlayState>) {
+                        state.clone().evaluate_end();
+                    }
+
+                    if !has_audio {
                         // evaluate_end is called by the dom too, but only when audio playback ends.
                         // If there is no correct audio for the question, we need to make sure that the
                         // question ends correctly.
-                        state.clone().evaluate_end();
+                        evaluate_end(&state);
                     }
-                    selected_trace.select(state.clone());
+
+                    selected_trace.select(state.clone(), Some(evaluate_end));
                 }));
             }
             TraceKind::Wrong => {
-                state
-                    .clone()
-                    .incorrect_choice(clone!(state, selected_trace => move || {
-                        if selected_trace.inner.audio.is_none() {
-                            if let Some(audio) = &state.question.incorrect_audio {
-                                state.selection_audio.set(Some(audio.clone()));
-                            }
+                state.incorrect_choice(clone!(state, selected_trace => move || {
+                    if selected_trace.inner.audio.is_none() {
+                        if let Some(audio) = &state.question.incorrect_audio {
+                            state.selection_audio.set(Some(audio.clone()));
                         }
-                        selected_trace.select(state.clone())
-                    }));
+                    }
+                    selected_trace.select(state.clone(), None)
+                }));
             }
             _ => {}
         }
     }
 
-    pub fn incorrect_choice<F: Fn() + 'static>(self: Rc<Self>, f: F) {
+    pub fn kill_all_playback(self: &Rc<Self>) {
+        // Make sure that all playback is stopped so that we can play any new audio for the
+        // latest selection.
+        self.selected_set
+            .lock_mut()
+            .iter()
+            .for_each(|index| self.traces.get(*index).unwrap_ji().kill_playback());
+    }
+
+    pub fn incorrect_choice<F: Fn() + 'static>(self: &Rc<Self>, f: F) {
         let state = self;
         state
             .incorrect_choice_count

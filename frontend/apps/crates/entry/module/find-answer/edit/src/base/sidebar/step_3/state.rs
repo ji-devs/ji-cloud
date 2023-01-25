@@ -34,3 +34,9 @@ impl From<MenuTabKind> for Tab {
         }
     }
 }
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum AdvancedFeedbackSelection {
+    All,
+    Selected,
+}
