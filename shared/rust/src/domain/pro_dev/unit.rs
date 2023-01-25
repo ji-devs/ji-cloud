@@ -23,6 +23,8 @@ pub struct ProDevUnitId(pub Uuid);
 #[serde(rename_all = "camelCase")]
 /// Unit attached to a Pro Dev.
 pub struct ProDevUnit {
+    /// Unit Id
+    pub id: ProDevUnitId,
     /// Name for Pro Dev Unit
     pub display_name: String,
 

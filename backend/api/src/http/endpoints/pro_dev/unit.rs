@@ -87,10 +87,11 @@ async fn get_draft(
 ) -> Result<Json<<pro_dev::unit::GetDraft as ApiEndpoint>::Res>, error::NotFound> {
     let (pro_dev_id, pro_dev_unit_id) = path.into_inner();
 
-    let (display_name, description, unit_value) =
+    let (id, display_name, description, unit_value) =
         db::pro_dev::unit::get(&db, pro_dev_id, DraftOrLive::Draft, pro_dev_unit_id).await?;
 
     Ok(Json(ProDevUnit {
+        id,
         display_name,
         description,
         value: unit_value,
@@ -105,10 +106,11 @@ async fn get_live(
 ) -> Result<Json<<pro_dev::unit::GetLive as ApiEndpoint>::Res>, error::NotFound> {
     let (pro_dev_id, pro_dev_unit_id) = path.into_inner();
 
-    let (display_name, description, value) =
+    let (id, display_name, description, value) =
         db::pro_dev::unit::get(&db, pro_dev_id, DraftOrLive::Live, pro_dev_unit_id).await?;
 
     Ok(Json(ProDevUnit {
+        id,
         display_name,
         description,
         value,
