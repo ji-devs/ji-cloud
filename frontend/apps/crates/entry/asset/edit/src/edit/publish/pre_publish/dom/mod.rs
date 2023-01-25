@@ -239,12 +239,9 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                                 JigEditRoute::Landing
                             ))).to_string()
                         },
-                        EditableAsset::Resource(resource) => {
+                        EditableAsset::Resource(_) => {
                             state.publish_state.asset_edit_state.set_route_resource(ResourceEditRoute::Landing);
-                            Route::Asset(AssetRoute::Edit(AssetEditRoute::Resource(
-                                resource.id,
-                                ResourceEditRoute::Landing
-                            ))).to_string()
+                            Route::Asset(AssetRoute::ResourceGallery).to_string()
                         },
                         EditableAsset::Course(course) => {
                             state.publish_state.asset_edit_state.set_route_jig(JigEditRoute::Landing);
