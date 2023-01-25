@@ -86,16 +86,21 @@ impl PlayTrace {
         })
     }
 
-    pub fn select(&self, play_state: Rc<PlayState>) {
+    pub fn select(&self, play_state: Rc<PlayState>, on_ended: Option<fn(state: &Rc<PlayState>)>) {
         if self.audio.is_none() && self.text.is_none() {
             self.phase.set(PlayPhase::IdleSelected);
         } else if let Some(bounds) = self.inner.calc_bounds(true) {
+            let phase = self.phase.clone();
             let bubble = TraceBubble::new(
                 bounds,
                 self.audio.clone(),
                 self.text.clone(),
-                Some(clone!(play_state => move || {
+                Some(clone!(phase, play_state => move || {
                     play_state.clone().remove_incorrect_highlights();
+                    if let Some(on_ended) = on_ended {
+                        on_ended(&play_state)
+                    }
+                    phase.set(PlayPhase::IdleSelected);
                 })),
             );
             self.phase.set(PlayPhase::Playing(bubble));

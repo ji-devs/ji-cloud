@@ -162,6 +162,7 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                     // SVGs created for traces are either path, ellipse or rect. So check that the student hasn't
                     // clicked on any of those types of SVG to determine whether they clicked in the wrong place.
                     if tag_name != "path" && tag_name != "ellipse" && tag_name != "rect" {
+                        state.kill_all_playback();
                         state.clone().incorrect_choice(clone!(state => move || {
                             if let Some(audio) = &state.question.incorrect_audio {
                                 state.selection_audio.set(Some(audio.clone()));
@@ -180,9 +181,9 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                                 trace.phase.signal_cloned()
                             })
                             .map(|phase| {
-                                match phase {
+                                match &phase {
                                     PlayPhase::Playing(bubble) => {
-                                        Some(TraceBubble::render(bubble))
+                                        Some(TraceBubble::render(bubble.clone()))
                                     },
                                     _ => None
                                 }
