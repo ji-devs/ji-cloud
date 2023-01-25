@@ -275,7 +275,7 @@ pub fn render_sticker_text_raw(
                             dom.apply(mixin.unwrap_ji())
                         })
                     })
-            ).into_dom()
+                ).into_dom()
         )
     })
 }
@@ -301,6 +301,7 @@ fn mixin_measured_text(
             )
         })
         .style("position", "fixed")
+        .style("left", "-100%")
         .style("visibility", "hidden")
         .style("pointer-events", "none")
     })

@@ -6,16 +6,10 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
-                section,
-                .index {
-                    width: 350px;
+                :host {
+                    display: grid;
+                    gap: 10px;
                 }
-
-                section {
-                    border-radius: 24rem;
-                    height: 236px;
-                }
-
                 .close {
                     display: none;
                     position: relative;
@@ -33,7 +27,6 @@ export class _ extends LitElement {
 
                 .cards {
                     display: grid;
-                    padding: 27px;
                     grid-template-columns: 1fr 24px 1fr;
                     grid-template-rows: 24px 1fr 24px;
                 }
@@ -52,7 +45,7 @@ export class _ extends LitElement {
                     grid-column: 1 / 4;
                     margin-bottom: 70px;
                     background-color: #fff;
-                    padding: 10px;
+                    padding: 6px;
                     box-shadow: 0 3px 16px 0 rgba(0, 0, 0, 0.2);
                     border-radius: 8px;
                     z-index: 1;
@@ -60,6 +53,7 @@ export class _ extends LitElement {
                 .index {
                     font-size: 14px;
                     text-align: center;
+                    line-height: 1em;
                 }
             `,
         ];

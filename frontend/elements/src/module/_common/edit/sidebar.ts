@@ -8,7 +8,6 @@ export class _ extends LitElement {
                 :host {
                     display: grid;
                     height: 100%;
-                    box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
                     background-color: #f6fafe;
                     width: 300px;
                     grid-template-rows: 110px 1fr;

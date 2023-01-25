@@ -19,6 +19,8 @@ impl DomRenderable for Main {
             .child(html!("img-ui", {
                 .prop("path", "jig/play/design-grid.svg")
                 .style("height", "100%")
+                .style("width", "100%")
+                .style("display", "block")
             }))
             .child_signal(
                 state.sidebar.sticker_phase.signal_cloned().map(clone!(state => move |sticker_phase| {

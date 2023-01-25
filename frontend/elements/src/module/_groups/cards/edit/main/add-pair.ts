@@ -9,16 +9,14 @@ export class _ extends LitElement {
         return [
             css`
                 :host {
-                    --card-size: 160px;
+                    --card-size: 130px;
                     --border-size: 1px;
-                    --img-padding: 10px;
+                    --img-padding: 8px;
 
                     --theme-border-color: --theme-blank-cards-border-color;
                     --theme-border-color-light: --theme-blank-cards-border-color-light-hsl;
 
                     justify-self: left;
-                    padding: 27px;
-                    margin-top: 24px;
                 }
 
                 section {

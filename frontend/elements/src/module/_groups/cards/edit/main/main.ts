@@ -12,11 +12,12 @@ export class _ extends LitElement {
                 }
                 section {
                     display: grid;
-                    grid-template-columns: repeat(auto-fill, 353px);
+                    grid-template-columns: repeat(auto-fill, 242px);
                     justify-content: center;
                     width: 100%;
-                    margin: 24px;
-                    gap: 24px;
+                    margin: 48px 16px;
+                    column-gap: 28px;
+                    row-gap: 38px;
                 }
             `,
         ];

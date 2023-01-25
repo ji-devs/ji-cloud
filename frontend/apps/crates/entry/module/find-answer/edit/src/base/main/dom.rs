@@ -42,6 +42,8 @@ impl DomRenderable for Main {
             .child(html!("img-ui", {
                 .prop("path", "jig/play/design-grid.svg")
                 .style("height", "100%")
+                .style("width", "100%")
+                .style("display", "block")
             }))
             // Normally we would render raw stickers for `Trace`, but because we need to have access to the renderer_ref on a sticker to
             // show the question's text, we use regular stickers. The traces component will overlay the stickers so that they cannot be edited.

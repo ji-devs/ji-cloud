@@ -123,21 +123,11 @@ fn render_bg(bg: &Background) -> Option<Dom> {
     match bg {
         Background::Color(color) => color.map(|color| {
             html!("div", {
-                .style("position", "absolute")
-                .style("top", "0")
-                .style("left", "0")
-                .style("width", "100%")
-                .style("height", "100%")
                 .style("background-color", rgba8_to_hex(&color))
             })
         }),
         Background::Image(image) => Some(html!("img-ji", {
-            .style("position", "absolute")
-            .style("top", "0")
-            .style("left", "0")
             .style("object-fit", "contain")
-            .style("width", "100%")
-            .style("height", "100%")
             .prop("id", image.id.0.to_string())
             .prop("lib", image.lib.to_str())
             .prop("size", "full")
@@ -147,10 +137,6 @@ fn render_bg(bg: &Background) -> Option<Dom> {
 
 fn render_theme_bg(theme_id: ThemeId) -> Dom {
     html!("img-ui", {
-        .style("position", "absolute")
-        .style("top", "0")
-        .style("left", "0")
-        .style("display", "block")
         .style("width", "100%")
         .style("height", "100%")
         .prop("path", {

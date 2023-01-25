@@ -1,12 +1,6 @@
-import { LitElement, html, css, customElement, property } from "lit-element";
-import { nothing } from "lit-html";
+import { html, css, customElement, property } from "lit-element";
 import { BgBlue } from "@elements/_styles/bg";
-import {
-    startResizer,
-    setResizeOnStyle,
-    setResizeOnDocumentRoot,
-} from "@utils/resize";
-import { classMap } from "lit-html/directives/class-map";
+import { startResizer, setResizeOnDocumentRoot } from "@utils/resize";
 import { STAGE_PLAYER, STAGE_EDIT, STAGE_LEGACY } from "@utils/config";
 import { loadAllFonts, loadFonts } from "@elements/_themes/themes";
 
@@ -25,10 +19,52 @@ export class _ extends BgBlue {
                     padding: 0;
                     margin: 0;
                 }
+                :host(:not([fontsLoaded])) {
+                    display: none;
+                }
 
-                #outer {
+                .grid {
+                    display: grid;
+                    grid-template-columns: auto 1fr;
                     width: 100%;
                     height: 100%;
+                }
+
+                aside {
+                    overflow: auto;
+                    box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+                }
+
+                main {
+                    padding: 10px;
+                    box-sizing: border-box;
+                    display: grid;
+                    grid-template-rows: auto minmax(0, 1fr) auto;
+                    gap: 6px;
+                    height: 100vh;
+                }
+                .canvas {
+                    max-height: 100%;
+                    max-width: 100%;
+                    aspect-ratio: 16 / 9;
+                    position: relative;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background-color: white;
+                    display: grid;
+
+                    overflow: hidden;
+                }
+                :host([scrollable]) .canvas {
+                    overflow: auto;
+                }
+                .canvas > * {
+                    grid-column: 1;
+                    grid-row: 1;
+                }
+                .main-bg {
+                    overflow: hidden;
                 }
 
                 #overlay {
@@ -38,84 +74,6 @@ export class _ extends BgBlue {
                     display: block;
                     z-index: 1000;
                 }
-
-                #container {
-                    position: absolute;
-                    top: var(--y);
-                    left: var(--x);
-                    width: var(--width);
-                    height: var(--height);
-                    background-color: white;
-                }
-
-                .main {
-                    position: absolute;
-                    top: var(--content-y);
-                    left: var(--content-x);
-                    width: var(--content-width);
-                    height: var(--content-height);
-                }
-
-                .overflow-hidden {
-                    overflow: hidden;
-                }
-
-                .overflow-auto {
-                    overflow: auto;
-                }
-
-                .grid {
-                    display: grid;
-
-                    grid-template-areas:
-                        "sidebar fillLeft header fillRight"
-                        "sidebar fillLeft main fillRight"
-                        "sidebar fillLeft footer fillRight";
-                    grid-template-columns: auto 20px 1fr 20px;
-                    grid-template-rows: auto 1fr auto;
-                    height: 100%;
-                    width: 100%;
-                }
-                .grid-preview {
-                    display: grid;
-
-                    grid-template-areas:
-                        "sidebar fillLeft header fillRight"
-                        "sidebar fillLeft main fillRight"
-                        "sidebar fillLeft footer fillRight";
-                    grid-template-columns: auto 0 1fr 0;
-                    grid-template-rows: auto 1fr auto;
-                    height: 100%;
-                    width: 100%;
-                }
-
-                aside {
-                    grid-area: sidebar;
-                    z-index: 2;
-                }
-
-                header {
-                    grid-area: header;
-                    z-index: 1;
-                }
-
-                main {
-                    grid-area: main;
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                }
-
-                footer {
-                    grid-area: footer;
-                    z-index: 1;
-                }
-
-                .hidden {
-                    display: none;
-                }
             `,
         ];
     }
@@ -123,13 +81,13 @@ export class _ extends BgBlue {
     @property({ type: Boolean })
     legacy: boolean = false;
 
-    @property({ type: Boolean })
+    @property({ type: Boolean, reflect: true })
     scrollable: boolean = false;
 
     @property({ type: Boolean, reflect: true })
     preview: boolean = false;
 
-    @property({ type: Boolean })
+    @property({ type: Boolean, reflect: true })
     fontsLoaded: boolean = false;
 
     @property()
@@ -137,10 +95,9 @@ export class _ extends BgBlue {
 
     firstUpdated() {
         const shadowRoot = this.shadowRoot as ShadowRoot;
+        const canvas = shadowRoot.querySelector("#canvas") as HTMLElement;
 
-        const sidebar = shadowRoot.querySelector("aside") as HTMLElement;
-        const header = shadowRoot.querySelector("header") as HTMLElement;
-        const footer = shadowRoot.querySelector("footer") as HTMLElement;
+        console.log(STAGE_EDIT);
 
         const [_, cancelResize] = startResizer(
             {
@@ -149,19 +106,7 @@ export class _ extends BgBlue {
                     : this.preview
                     ? STAGE_PLAYER
                     : STAGE_EDIT,
-                observeTargets: [sidebar, header, footer],
-                adjustBounds: (bounds: DOMRect) => {
-                    const sidebarBounds = sidebar.getBoundingClientRect();
-                    const headerBounds = header.getBoundingClientRect();
-                    const footerBounds = footer.getBoundingClientRect();
-                    return new DOMRect(
-                        sidebarBounds.width,
-                        headerBounds.height,
-                        bounds.width - sidebarBounds.width,
-                        bounds.height -
-                            (headerBounds.height + footerBounds.height)
-                    );
-                },
+                canvas,
             },
             (info) => {
                 setResizeOnDocumentRoot(info);
@@ -194,50 +139,33 @@ export class _ extends BgBlue {
         this.cancelResize = null;
     }
 
-    // Define the element's template
     render() {
-        const { scrollable, preview } = this;
-
-        const scrollStyle = scrollable ? `overflow-auto` : `overflow-hidden`;
-
-        const gridClass = classMap({
-            "grid-preview": preview,
-            grid: !preview,
-            hidden: !this.fontsLoaded,
-        });
-
-        const overlayClass = classMap({
-            hidden: !this.fontsLoaded,
-        });
-
         return html`
-            <div class="${gridClass}">
-                <aside id="sidebar">
+            <div class="grid">
+                <aside>
                     <slot name="sidebar"></slot>
                 </aside>
 
-                <header id="header">
-                    <slot name="header"></slot>
-                </header>
-
                 <main>
-                    <div id="outer">
-                        <div id="container">
-                            <div class="main-bg">
-                                <slot name="main-bg"></slot>
-                            </div>
-                            <div id="main" class="main ${scrollStyle}">
-                                <slot name="main"></slot>
-                            </div>
+                    <header>
+                        <slot name="header"></slot>
+                    </header>
+
+                    <div id="canvas" class="canvas">
+                        <div class="main-bg">
+                            <slot name="main-bg"></slot>
+                        </div>
+                        <div id="main" class="main">
+                            <slot name="main"></slot>
                         </div>
                     </div>
-                </main>
 
-                <footer id="footer">
-                    <slot name="footer"></slot>
-                </footer>
+                    <footer>
+                        <slot name="footer"></slot>
+                    </footer>
+                </main>
             </div>
-            <div id="overlay" class=${overlayClass}>
+            <div id="overlay">
                 <slot name="overlay"></slot>
             </div>
         `;

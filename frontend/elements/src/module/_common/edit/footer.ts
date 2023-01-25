@@ -6,7 +6,6 @@ export class _ extends LitElement {
         return [
             css`
                 :host {
-                    margin: 40px 0;
                     display: flex;
                     justify-content: flex-end;
                 }

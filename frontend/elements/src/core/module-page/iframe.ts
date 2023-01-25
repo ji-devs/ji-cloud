@@ -1,11 +1,6 @@
-import { LitElement, html, css, customElement, property } from "lit-element";
-import { nothing } from "lit-html";
+import { html, css, customElement, property } from "lit-element";
 import { BgBlue } from "@elements/_styles/bg";
-import {
-    startResizer,
-    setResizeOnStyle,
-    setResizeOnDocumentRoot,
-} from "@utils/resize";
+import { startResizer, setResizeOnDocumentRoot } from "@utils/resize";
 import { STAGE_PLAYER, STAGE_LEGACY } from "@utils/config";
 import { loadAllFonts, loadFonts } from "@elements/_themes/themes";
 import { classMap } from "lit-html/directives/class-map";
@@ -39,22 +34,19 @@ export class _ extends BgBlue {
                     height: 100%;
                 }
 
-                #container {
-                    position: absolute;
-                    top: var(--y);
-                    left: var(--x);
-                    width: var(--width);
-                    height: var(--height);
-                    background-color: white;
-                }
-
                 #content {
-                    position: absolute;
-                    top: var(--content-y);
-                    left: var(--content-x);
-                    width: var(--content-width);
-                    height: var(--content-height);
+                    background-color: white;
+                    position: relative;
+                    max-height: 100%;
+                    max-width: 100%;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
                     overflow: hidden;
+                    aspect-ratio: 16 / 9;
+                }
+                :host([legacy]) #content {
+                    aspect-ratio: 4 / 3;
                 }
                 main {
                     position: absolute;
@@ -73,7 +65,7 @@ export class _ extends BgBlue {
     @property({ type: Boolean })
     scrollable: boolean = false;
 
-    @property({ type: Boolean })
+    @property({ type: Boolean, reflect: true })
     legacy: boolean = false;
 
     @property({ type: Boolean })
@@ -84,10 +76,12 @@ export class _ extends BgBlue {
 
     firstUpdated() {
         const shadowRoot = this.shadowRoot as ShadowRoot;
+        const content = shadowRoot.querySelector("#content") as HTMLElement;
 
         const [_, cancelResize] = startResizer(
             {
                 stage: this.legacy ? STAGE_LEGACY : STAGE_PLAYER,
+                canvas: content,
             },
             (info) => {
                 setResizeOnDocumentRoot(info);
@@ -131,10 +125,8 @@ export class _ extends BgBlue {
         return html`
             <main class=${classes}>
                 <div id="outer">
-                    <div id="container">
-                        <div id="content" class="${scrollStyle}">
-                            <slot name="main"></slot>
-                        </div>
+                    <div id="content" class="${scrollStyle}">
+                        <slot name="main"></slot>
                     </div>
                 </div>
             </main>

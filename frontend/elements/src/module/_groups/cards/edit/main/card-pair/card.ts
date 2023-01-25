@@ -22,9 +22,9 @@ export class _ extends LitElement {
         return [
             css`
                 :host {
-                    --card-size: 160px;
+                    --card-size: 130px;
                     --border-size: 1px;
-                    --img-padding: 10px;
+                    --img-padding: 8px;
 
                     --theme-color: --theme-blank-cards-color;
                     --theme-border-color: --theme-blank-cards-border-color;
@@ -56,7 +56,7 @@ export class _ extends LitElement {
 
                 .front {
                     border-style: solid;
-                    border-radius: 16px;
+                    border-radius: 12px;
                     border-width: var(--border-size);
 
                     border-color: hsl(var(--theme-border-color-light));
@@ -106,7 +106,7 @@ export class _ extends LitElement {
                 .back > img-ui {
                     object-fit: cover;
                 }
-                ::slotted(*) {
+                ::slotted(:not([slot])) {
                     display: grid;
                     place-content: center;
                     --img-size: calc(
@@ -120,11 +120,9 @@ export class _ extends LitElement {
                 }
                 slot[name="menu"]::slotted(*) {
                     position: absolute;
-                    top: -20px;
-                    left: 137px;
+                    top: -16px;
+                    left: 110px;
                     display: inline-block;
-                    width: 32px;
-                    height: 32px;
                 }
 
                 slot[name="audio"]::slotted(*) {

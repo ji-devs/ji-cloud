@@ -80,16 +80,10 @@ type ReturnTuple = [ResizeObserver, CancelFn];
 
 export interface Options {
     stage: ResizeStageConfig;
-    container?: Element | null;
-    observeTargets?: Array<Element | null | undefined>;
-    ignoreWindow?: boolean;
-    adjustBounds?: (rect: DOMRect) => DOMRect;
+    canvas: HTMLElement,
 }
 
-export function startResizer(
-    { container, ignoreWindow, observeTargets, adjustBounds, stage }: Options,
-    onResize: OnResize
-): ReturnTuple {
+export function startResizer({ canvas, stage }: Options, onResize: OnResize): ReturnTuple {
     let lastInfo: ResizeInfo = {
         scale: 0,
         x: 0,
@@ -103,28 +97,8 @@ export function startResizer(
     };
 
     const resize = () => {
-        const containerBounds = container
-            ? container.getBoundingClientRect()
-            : new DOMRect(0, 0, window.innerWidth, window.innerHeight);
+        const bounds = canvas!.getBoundingClientRect();
 
-        if (
-            !containerBounds ||
-            !containerBounds.width ||
-            !containerBounds.height
-        ) {
-            return;
-        }
-
-        let bounds = adjustBounds
-            ? adjustBounds(containerBounds)
-            : containerBounds;
-
-        bounds = new DOMRect(
-            bounds.x + stage.marginX,
-            bounds.y + stage.marginY,
-            bounds.width - stage.marginX * 2,
-            bounds.height - stage.marginY * 2
-        );
         const targetRatio = stage.width / stage.height;
 
         let width = bounds.width;
@@ -160,26 +134,12 @@ export function startResizer(
         }
     };
 
-    // @ts-ignore
     const observer = new ResizeObserver(resize);
 
-    if (observeTargets && observeTargets.length) {
-        observeTargets.forEach((target) => {
-            if (target) {
-                observer.observe(target);
-            }
-        });
-    }
-
-    if (!ignoreWindow) {
-        window.addEventListener("resize", resize);
-    }
+    observer.observe(canvas);
 
     const cancel = () => {
         observer.disconnect();
-        if (!ignoreWindow) {
-            window.removeEventListener("resize", resize);
-        }
     };
 
     resize();
