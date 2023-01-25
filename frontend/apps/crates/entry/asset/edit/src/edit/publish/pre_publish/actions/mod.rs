@@ -100,7 +100,37 @@ impl PrePublish {
         }
     }
 
-    pub fn save_asset(self: Rc<Self>) {
+    pub async fn save(self: &Rc<Self>) -> Asset {
+        let asset = match &self.asset {
+            EditableAsset::Jig(jig) => {
+                let jig = jig_actions::save_jig(jig).await.unwrap_ji();
+                Asset::Jig(jig)
+            }
+            EditableAsset::Resource(resource) => {
+                let resource = resource_actions::save_resource(resource).await.unwrap_ji();
+                Asset::Resource(resource)
+            }
+            EditableAsset::Course(course) => {
+                let course = course_actions::save_course(course).await.unwrap_ji();
+                Asset::Course(course)
+            }
+        };
+
+        self.publish_state
+            .asset_edit_state
+            .asset
+            .fill_from_asset(asset.clone());
+        asset
+    }
+
+    // pub fn save_draft(self: &Rc<Self>) {
+    //     let state = self;
+    //     state.loader.load(clone!(state => async move {
+    //         state.save_async().await;
+    //     }));
+    // }
+
+    pub fn publish(self: &Rc<Self>) {
         let state = Rc::clone(&self);
         if Rc::clone(&state).form_invalid() {
             state.submission_tried.set(true);
@@ -109,28 +139,18 @@ impl PrePublish {
         };
 
         state.loader.load(clone!(state => async move {
-            let asset = match &state.asset {
+            let asset = state.save().await;
+            match &state.asset {
                 EditableAsset::Jig(jig) => {
-                    let jig = jig_actions::save_and_publish_jig(jig)
-                        .await
-                        .unwrap_ji();
-                    Asset::Jig(jig)
+                    jig_actions::publish_jig(jig.id).await.unwrap_ji();
                 },
                 EditableAsset::Resource(resource) => {
-                    let resource = resource_actions::save_and_publish_resource(resource)
-                        .await
-                        .unwrap_ji();
-                    Asset::Resource(resource)
+                    resource_actions::publish_resource(resource.id).await.unwrap_ji();
                 }
                 EditableAsset::Course(course) => {
-                    let course = course_actions::save_and_publish_course(course)
-                        .await
-                        .unwrap_ji();
-                    Asset::Course(course)
+                    course_actions::publish_course(course.id).await.unwrap_ji();
                 }
             };
-
-            state.publish_state.asset_edit_state.asset.fill_from_asset(asset.clone());
             state.publish_state.published_asset.set(Some(asset));
             state.submission_tried.set(false);
         }));
