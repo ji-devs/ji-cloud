@@ -2810,6 +2810,45 @@
     },
     "query": "\nselect id,\n       display_name                                                                  as \"display_name!\",\n       created_at                                                                    as \"created_at!\",\n       updated_at,\n       language                                                                      as \"language!\",\n       description                                                                   as \"description!\",\n       translated_description                                                        as \"translated_description!: Json<HashMap<String,String>>\",\n       (\n                select row (resource_data_module.id, kind, is_complete)\n                from resource_data_module\n                where resource_data_id = resource_data.id\n       )                                                  as \"cover?: (ModuleId, ModuleKind, bool)\",\n       array(select row (category_id)\n             from resource_data_category\n             where resource_data_id = resource_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n       array(select row (affiliation_id)\n             from resource_data_affiliation\n             where resource_data_id = resource_data.id)     as \"affiliations!: Vec<(AffiliationId,)>\",\n       array(select row (age_range_id)\n             from resource_data_age_range\n             where resource_data_id = resource_data.id)     as \"age_ranges!: Vec<(AgeRangeId,)>\",\n       array(\n                select row (rdr.id, rdr.display_name, resource_type_id, resource_content)\n                from resource_data_resource \"rdr\"\n                where rdr.resource_data_id = resource_data.id\n            )                                               as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n       privacy_level                              as \"privacy_level!: PrivacyLevel\",\n       locked                                     as \"locked!\",\n       other_keywords                             as \"other_keywords!\",\n       translated_keywords                        as \"translated_keywords!\"\nfrom resource_data\ninner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\norder by ord asc\n"
   },
+  "35c1cbd10b0d487ebd5b53ae60aa06cc5b8f193e50017508e9d5d585eb94373a": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: ProDevUnitId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "display_name!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "description!",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "value!",
+          "ordinal": 3,
+          "type_info": "Jsonb"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect unit_id              as \"id!: ProDevUnitId\",\n       display_name         as \"display_name!\",\n       description          as \"description!\",\n       value                as \"value!\"\nfrom pro_dev_data_unit \"pddr\"\nwhere pro_dev_data_id = $1\n  and pddr.unit_id = $2\n        "
+  },
   "37362a36cc3729a69d0f7db3d7b6dc381a35293d3ac94d2da2fd655322e73bbe": {
     "describe": {
       "columns": [],
@@ -3314,39 +3353,6 @@
       }
     },
     "query": "\ndelete from resource_data where id = $1\n    "
-  },
-  "3f184055ba7d5c715b7ce17b496ac1d223dbc31c5ef0e2c009c0b6ca294ebfd7": {
-    "describe": {
-      "columns": [
-        {
-          "name": "display_name!",
-          "ordinal": 0,
-          "type_info": "Text"
-        },
-        {
-          "name": "description!",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "value!",
-          "ordinal": 2,
-          "type_info": "Jsonb"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect display_name         as \"display_name!\",\n       description          as \"description!\",\n       value                as \"value!\"\nfrom pro_dev_data_unit \"pddr\"\nwhere pro_dev_data_id = $1\n  and pddr.unit_id = $2\n        "
   },
   "3f7ad7f5eb03139f9584aa6928a1b805b4f8908a1df023a12a7cf8cba3d56d26": {
     "describe": {

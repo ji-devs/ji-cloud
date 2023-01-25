@@ -74,7 +74,7 @@ pub async fn get(
     pro_dev_id: ProDevId,
     draft_or_live: DraftOrLive,
     unit_id: ProDevUnitId,
-) -> anyhow::Result<(String, String, ProDevUnitValue), error::NotFound> {
+) -> anyhow::Result<(ProDevUnitId, String, String, ProDevUnitValue), error::NotFound> {
     let mut txn = pool.begin().await?;
 
     let (draft_id, live_id) = super::get_draft_and_live_ids(&mut txn, pro_dev_id)
@@ -104,7 +104,8 @@ select exists(select 1 from pro_dev_data_unit "pddu" where pro_dev_data_id = $1
 
     let res = sqlx::query!(
         r#"
-select display_name         as "display_name!",
+select unit_id              as "id!: ProDevUnitId",
+       display_name         as "display_name!",
        description          as "description!",
        value                as "value!"
 from pro_dev_data_unit "pddr"
@@ -121,7 +122,7 @@ where pro_dev_data_id = $1
 
     txn.rollback().await?;
 
-    Ok((res.display_name, res.description, content))
+    Ok((res.id, res.display_name, res.description, content))
 }
 
 pub async fn update(
