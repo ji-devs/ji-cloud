@@ -146,8 +146,8 @@ pub async fn browse(
 with cte as (
     select (array_agg("user".id))[1]
     from "user"
-    inner join user_profile on "user".id = user_profile.user_id
-    inner join user_email using(user_id)
+        left join user_profile on "user".id = user_profile.user_id
+        left join user_email using(user_id)
     where ("user".id = $1 or $1 is null)
     group by family_name
     order by family_name desc
@@ -1011,18 +1011,18 @@ where index > $2 and user_id = $1
 pub async fn filtered_count(db: &PgPool, user_id: Option<UserId>) -> sqlx::Result<u64> {
     let users = sqlx::query!(
         //language=SQL
-r#"
+        r#"
         with cte as (
-            select (array_agg("user".id))[1]
-            from "user"
-            inner join user_profile on "user".id = user_profile.user_id
-            inner join user_email using(user_id)
+            select (array_agg(user_profile.user_id))[1]
+            from user_profile
+            left join "user" on "user".id = user_profile.user_id
+            left join user_email using(user_id)
             where ("user".id = $1 or $1 is null)
             group by family_name
             order by family_name desc
         )
         select count(*) as "count!" from unnest(array(select cte.array_agg from cte)) with ordinality t(id, ord)
-"#,
+        "#,
         user_id.map(|it| it.0),
 
     )
