@@ -33,6 +33,9 @@ impl Router {
                     AssetEditRoute::Course(course_id, _) => {
                         Some(AssetEditState::new(course_id.into(), route).render())
                     }
+                    AssetEditRoute::ProDev(pro_dev_id, _) => {
+                        Some(AssetEditState::new(pro_dev_id.into(), route).render())
+                    }
                 },
                 AssetRoute::Studio => Some(render_studio()),
                 AssetRoute::Play(_) => unimplemented!(), // Handled in player
