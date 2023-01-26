@@ -1950,72 +1950,6 @@
     },
     "query": "\nselect published_at  as \"published_at?\"\nfrom resource\nwhere id = $1\n    "
   },
-  "2b5a14b772fddfe8c66f0ff824ed425fe198cdfa96a00a94996fd385c1030452": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "username!",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "creator_name!",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "bio?",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "languages_spoken?: Vec<String>",
-          "ordinal": 4,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "organization?",
-          "ordinal": 5,
-          "type_info": "Text"
-        },
-        {
-          "name": "persona?: Vec<String>",
-          "ordinal": 6,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "location?: String",
-          "ordinal": 7,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "circles!",
-          "ordinal": 8,
-          "type_info": "UuidArray"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "\n     select user_id                                  as \"id!\",\n            username                                 as \"username!\",\n            given_name || ' '::text || family_name   as \"creator_name!\",\n            (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n            (select languages_spoken from user_profile where user_profile.user_id = \"user\".id and languages_spoken_public is true)  as \"languages_spoken?: Vec<String>\",\n            (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n            (select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\",\n            (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?: String\",\n            (select array(select circle.id\n                from circle_member bm\n                inner join circle on bm.id = circle.id\n                where bm.user_id = \"user\".id\n            )) as \"circles!\"\n        from user_profile \"up\"\n        inner join \"user\" on \"user\".id = up.user_id\nwhere (last_synced_at is null or\n       (up.updated_at is not null and last_synced_at < up.updated_at))\nlimit 100 for no key update skip locked;\n     "
-  },
   "2c9269da9de0d178512713b7fc2789ad3472cc1dcea22eecd5fb941415d37bc4": {
     "describe": {
       "columns": [
@@ -5611,6 +5545,18 @@
       }
     },
     "query": "\nupdate jig_admin_data\nset blocked = coalesce($2, blocked)\nwhere jig_id = $1 and $2 is distinct from blocked\n            "
+  },
+  "682dbdf7b9a0f373daad74e4f4face9e425a493e9965c6ba7c9a11e74252c866": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      }
+    },
+    "query": "update public_user set last_synced_at = now() where user_id = any($1)"
   },
   "684289dd550908cfb5adac9278ac9beb606e7d0ac91d8aa8a95d81100f357c3c": {
     "describe": {
@@ -11537,6 +11483,72 @@
       }
     },
     "query": "\nupdate pro_dev_data\nset display_name = $2,\n    updated_at = now()\nwhere id = $1 and $2 is distinct from display_name"
+  },
+  "d46dc7d8947b482f29492c3e6ab173e6914f88dfa4e1bfdda00da63d4cdfb7a2": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "username!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "creator_name!",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "bio?",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "languages_spoken?: Vec<String>",
+          "ordinal": 4,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "organization?",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "persona?: Vec<String>",
+          "ordinal": 6,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "location?: String",
+          "ordinal": 7,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "circles!",
+          "ordinal": 8,
+          "type_info": "UuidArray"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\n     select up.user_id                                  as \"id!\",\n            username                                 as \"username!\",\n            given_name || ' '::text || family_name   as \"creator_name!\",\n            (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n            (select languages_spoken from user_profile where user_profile.user_id = \"user\".id and languages_spoken_public is true)  as \"languages_spoken?: Vec<String>\",\n            (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n            (select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\",\n            (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?: String\",\n            (select array(select circle.id\n                from circle_member bm\n                inner join circle on bm.id = circle.id\n                where bm.user_id = \"user\".id\n            )) as \"circles!\"\n        from user_profile \"up\"\n        inner join \"user\" on \"user\".id = up.user_id\n        inner join public_user on public_user.user_id = up.user_id\nwhere (public_user.last_synced_at is null or\n       (up.updated_at is not null and public_user.last_synced_at < up.updated_at))\nlimit 100 for no key update skip locked;\n     "
   },
   "d4d6e14dd8b8d8af673fa0a1928526f5a35136a3af46272746667802200158e4": {
     "describe": {
