@@ -9,6 +9,7 @@ use shared::domain::{
     jig::JigId,
     meta::{AffiliationId, AgeRangeId},
     module::{ModuleId, ModuleKind},
+    pro_dev::{unit::ProDevUnitId, ProDevId},
     resource::ResourceId,
     session::OAuthUserProfile,
     user::{UserId, UserScope},
@@ -240,6 +241,7 @@ pub enum AssetEditRoute {
     Jig(JigId, JigEditRoute),
     Resource(ResourceId, ResourceEditRoute),
     Course(CourseId, CourseEditRoute),
+    ProDev(ProDevId, ProDevEditRoute),
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -258,6 +260,13 @@ pub enum ResourceEditRoute {
 #[derive(Debug, Clone, PartialEq)]
 pub enum CourseEditRoute {
     Landing,
+    Cover(ModuleId),
+    Publish,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ProDevEditRoute {
+    Unit(Option<ProDevUnitId>),
     Cover(ModuleId),
     Publish,
 }
@@ -512,6 +521,30 @@ impl Route {
                 Self::Asset(AssetRoute::Edit(AssetEditRoute::Course(
                     CourseId(Uuid::from_str(course_id).unwrap_ji()),
                     CourseEditRoute::Cover(ModuleId(Uuid::from_str(cover_id).unwrap_ji())),
+                )))
+            }
+            ["asset", "edit", "pro-dev", pro_dev_id, "unit"] => {
+                Self::Asset(AssetRoute::Edit(AssetEditRoute::ProDev(
+                    ProDevId(Uuid::from_str(pro_dev_id).unwrap_ji()),
+                    ProDevEditRoute::Unit(None),
+                )))
+            }
+            ["asset", "edit", "pro-dev", pro_dev_id, "unit", unit_id] => {
+                Self::Asset(AssetRoute::Edit(AssetEditRoute::ProDev(
+                    ProDevId(Uuid::from_str(pro_dev_id).unwrap_ji()),
+                    ProDevEditRoute::Unit(Some(ProDevUnitId(Uuid::from_str(unit_id).unwrap_ji()))),
+                )))
+            }
+            ["asset", "edit", "pro-dev", pro_dev_id, "cover", cover_id] => {
+                Self::Asset(AssetRoute::Edit(AssetEditRoute::ProDev(
+                    ProDevId(Uuid::from_str(pro_dev_id).unwrap_ji()),
+                    ProDevEditRoute::Cover(ModuleId(Uuid::from_str(cover_id).unwrap_ji())),
+                )))
+            }
+            ["asset", "edit", "pro-dev", pro_dev_id, "publish"] => {
+                Self::Asset(AssetRoute::Edit(AssetEditRoute::ProDev(
+                    ProDevId(Uuid::from_str(pro_dev_id).unwrap_ji()),
+                    ProDevEditRoute::Publish,
                 )))
             }
             ["asset", "play", "jig", "debug"] => {
@@ -769,6 +802,22 @@ impl From<&Route> for String {
                         }
                         CourseEditRoute::Publish => {
                             format!("/asset/edit/course/{}/publish", course_id.0)
+                        }
+                    },
+                    AssetEditRoute::ProDev(pro_dev_id, route) => match route {
+                        ProDevEditRoute::Unit(unit_id) => match unit_id {
+                            Some(unit_id) => {
+                                format!("/asset/edit/pro-dev/{}/unit/{}", pro_dev_id.0, unit_id.0)
+                            }
+                            None => {
+                                format!("/asset/edit/pro-dev/{}/unit", pro_dev_id.0)
+                            }
+                        },
+                        ProDevEditRoute::Cover(cover_id) => {
+                            format!("/asset/edit/pro-dev/{}/cover/{}", pro_dev_id.0, cover_id.0)
+                        }
+                        ProDevEditRoute::Publish => {
+                            format!("/asset/edit/pro-dev/{}/publish", pro_dev_id.0)
                         }
                     },
                 },

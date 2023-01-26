@@ -2,8 +2,8 @@ use std::rc::Rc;
 
 use super::{
     super::edit::publish::Publish, course::course_selection::state::CourseSelection,
-    jig::module_selection::ModuleSelection, module_iframe::ModuleIframe, sidebar::Sidebar,
-    state::AssetEditState,
+    jig::module_selection::ModuleSelection, module_iframe::ModuleIframe,
+    pro_dev::unit_editor::UnitEditor, sidebar::Sidebar, state::AssetEditState,
 };
 use components::{
     overlay::handle::OverlayHandle,
@@ -12,7 +12,7 @@ use components::{
 use dominator::{clone, html, Dom};
 use dominator_helpers::events::Message;
 use futures_signals::signal::SignalExt;
-use utils::{asset::AssetPlayerOptions, prelude::*};
+use utils::{asset::AssetPlayerOptions, component::Component, prelude::*};
 
 const STR_YT_VIDEO_ID: &str = "x4FYtTpQAt0";
 
@@ -85,6 +85,19 @@ impl AssetEditState {
                                 },
                             }
                         },
+                        AssetEditRoute::ProDev(_pro_dev_id, pro_dev_edit_route) => {
+                            match pro_dev_edit_route {
+                                ProDevEditRoute::Unit(unit_id) => {
+                                    Some(UnitEditor::new(unit_id, &state).render())
+                                },
+                                ProDevEditRoute::Cover(cover_id) => {
+                                    Some(ModuleIframe::new(state.asset_id, cover_id).render())
+                                }
+                                ProDevEditRoute::Publish => {
+                                    Some(Publish::new(Rc::clone(&state)).render())
+                                },
+                            }
+                        }
                     }
                 })))
                 .child_signal(state.show_onboarding.signal_cloned().map(clone!(state => move |show| {
