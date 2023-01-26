@@ -1157,7 +1157,7 @@ where course_data.id = any (select live_id from course where course.id = any ($1
         let requests: Vec<_> = sqlx::query!(
             //language=SQL
             r#"
-     select user_id                                  as "id!",
+     select up.user_id                                  as "id!",
             username                                 as "username!",
             given_name || ' '::text || family_name   as "creator_name!",
             (select bio from user_profile where user_profile.user_id = "user".id and bio_public is true)      as "bio?",
@@ -1172,8 +1172,9 @@ where course_data.id = any (select live_id from course where course.id = any ($1
             )) as "circles!"
         from user_profile "up"
         inner join "user" on "user".id = up.user_id
-where (last_synced_at is null or
-       (up.updated_at is not null and last_synced_at < up.updated_at))
+        inner join public_user on public_user.user_id = up.user_id
+where (public_user.last_synced_at is null or
+       (up.updated_at is not null and public_user.last_synced_at < up.updated_at))
 limit 100 for no key update skip locked;
      "#
         )
@@ -1216,7 +1217,7 @@ limit 100 for no key update skip locked;
         log::debug!("Updated a batch of {} public user profile(s)", ids.len());
 
         sqlx::query!(
-            "update user_profile set last_synced_at = now() where user_id = any($1)",
+            "update public_user set last_synced_at = now() where user_id = any($1)",
             &ids
         )
         .execute(&mut txn)
