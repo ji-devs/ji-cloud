@@ -4,8 +4,7 @@ use dominator::clone;
 use shared::{
     api::endpoints,
     domain::user::{
-        UserBrowsePath, UserBrowseQuery, UserResponse, UserSearchPath,
-        UserSearchQuery,
+        UserBrowsePath, UserBrowseQuery, UserResponse, UserSearchPath, UserSearchQuery,
     },
 };
 use utils::{

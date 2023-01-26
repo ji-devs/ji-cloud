@@ -5,7 +5,7 @@ use utils::routes::AdminUsersRoute;
 
 use crate::users::table::state::UsersTable;
 
-use super::{Users};
+use super::Users;
 
 impl Users {
     pub fn render(self: &Rc<Self>) -> Dom {
