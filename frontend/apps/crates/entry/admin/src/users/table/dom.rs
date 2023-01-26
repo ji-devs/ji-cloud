@@ -80,17 +80,45 @@ impl UsersTable {
                 html!("admin-table-line-user", {
                     .children(&mut [
                         html!("span", {
-                            .text(&user.username)
+                            .text_signal(user.username.signal_cloned())
                             .event(clone!(state => move |_: events::Click| {
                                 let route = AdminUsersRoute::User(user_id);
                                 state.users_state.navigate_to(route);
                             }))
                         }),
                         html!("span", {
-                            .text(&user.first_name)
+                            .text_signal(user.first_name.signal_cloned())
                         }),
                         html!("span", {
-                            .text(&user.last_name)
+                            .text_signal(user.last_name.signal_cloned())
+                        }),
+                        html!("span", {
+                            .child(
+                                html!("a", {
+                                    .prop("href", format!("mailto:{}", user.email.get_cloned()))
+                                    .prop("target", "_blank")
+                                    .prop("rel", "noopener norefferer")
+                                    .text_signal(user.email.signal_cloned())
+                                })
+                            )
+                        }),
+                        html!("span", {
+                            .text_signal(user.country.signal_cloned())
+                        }),
+                        html!("span", {
+                            .text_signal(user.state.signal_cloned())
+                        }),
+                        html!("span", {
+                            .text_signal(user.city.signal_cloned())
+                        }),
+                        html!("span", {
+                            .text_signal(user.organization.signal_cloned())
+                        }),
+                        html!("span", {
+                            .text_signal(user.signup_date.signal_cloned())
+                        }),
+                        html!("span", {
+                            .text_signal(user.language.signal_cloned())
                         }),
                     ])
                 })

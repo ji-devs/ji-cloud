@@ -1,12 +1,11 @@
 use std::rc::Rc;
 
 use dominator::{clone, html, Dom};
-use futures_signals::signal::{from_future, SignalExt};
 use utils::routes::AdminUsersRoute;
 
 use crate::users::table::state::UsersTable;
 
-use super::{user::state::AdminUser, Users};
+use super::Users;
 
 impl Users {
     pub fn render(self: &Rc<Self>) -> Dom {
@@ -25,19 +24,7 @@ impl Users {
                             Rc::clone(&state)
                         ).render()
                     },
-                    AdminUsersRoute::User(user_id) => {
-                        html!("empty-fragment", {
-                            .child_signal(from_future(state.clone().get_user(*user_id)).map(clone!(state => move|user| {
-                                user.map(|user| {
-                                    AdminUser::new(
-                                        Rc::clone(&state),
-                                        user.id,
-                                        user
-                                    ).render()
-                                })
-                            })))
-                        })
-                    },
+                    AdminUsersRoute::User(_) => todo!()
                 })
             })))
         })

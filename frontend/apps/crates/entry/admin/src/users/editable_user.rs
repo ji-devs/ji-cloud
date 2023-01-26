@@ -1,22 +1,37 @@
 use dominator_helpers::futures::AsyncLoader;
-use shared::domain::user::{public_user::PublicUser, UserId};
+use futures_signals::signal::Mutable;
+use shared::domain::user::{UserId, UserResponse};
 
 #[derive(Clone)]
 pub struct EditableUser {
     pub id: UserId,
-    pub username: String,
-    pub first_name: String,
-    pub last_name: String,
+    pub username: Mutable<String>,
+    pub first_name: Mutable<String>,
+    pub last_name: Mutable<String>,
+    pub email: Mutable<String>,
+    pub signup_date: Mutable<String>,
+    pub city: Mutable<String>,
+    pub state: Mutable<String>,
+    pub country: Mutable<String>,
+    pub language: Mutable<String>,
+    pub organization: Mutable<String>,
     pub loader: AsyncLoader,
 }
 
-impl From<PublicUser> for EditableUser {
-    fn from(user: PublicUser) -> Self {
+impl From<UserResponse> for EditableUser {
+    fn from(user: UserResponse) -> Self {
         Self {
             id: user.id,
-            username: user.username,
-            first_name: user.given_name,
-            last_name: user.family_name,
+            username: Mutable::new(user.username),
+            first_name: Mutable::new(user.given_name),
+            last_name: Mutable::new(user.family_name),
+            organization: Mutable::new(user.organization.unwrap_or_default()),
+            signup_date: Mutable::new(user.created_at.to_string()),
+            language: Mutable::new(user.language),
+            city: Mutable::new(user.city.unwrap_or_default()),
+            state: Mutable::new(user.state.unwrap_or_default()),
+            country: Mutable::new(user.country.unwrap_or_default()),
+            email: Mutable::new(user.email),
             loader: AsyncLoader::new(),
         }
     }

@@ -47,7 +47,14 @@ export class _ extends LitElement {
     headers: string[] = [
         "Username",
         "First Name",
-        "Last Name",
+        "Family Name",
+        "Email",
+        "Country",
+        "State",
+        "City",
+        "School/Organization",
+        "Signup Date",
+        "Language"
     ];
 
     render() {
@@ -66,8 +73,8 @@ export class _ extends LitElement {
             <div class="table">
                 <admin-table-line-user>
                     ${this.headers.map(
-                        (header) => html`<div class="header-cell">${header}</div>`
-                    )}
+            (header) => html`<div class="header-cell">${header}</div>`
+        )}
                 </admin-table-line-user>
                 <slot></slot>
             </div>
