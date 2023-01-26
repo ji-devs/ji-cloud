@@ -237,6 +237,76 @@
     },
     "query": "\nupdate jig_play_count\nset play_count = play_count + 1\nwhere jig_id = $1;\n            "
   },
+  "05bbabcca8dd32c111fe7308edf49359bf549213810253605bb4bf7eccedbca2": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: UserId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "username",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "given_name",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "family_name",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "email!",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "language_emails",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "created_at!",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "organization",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "location",
+          "ordinal": 8,
+          "type_info": "Jsonb"
+        }
+      ],
+      "nullable": [
+        null,
+        false,
+        false,
+        false,
+        null,
+        false,
+        false,
+        true,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\nwith cte as (\n    select (array_agg(\"user\".id))[1]\n    from \"user\"\n        left join user_profile on \"user\".id = user_profile.user_id\n        left join user_email using(user_id)\n    where (\"user\".id = $1 or $1 is null)\n    group by family_name\n    order by family_name desc\n),\ncte1 as (\n    select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n   , ord) order by ord\n)\nselect  cte1.id                 as \"id!: UserId\",\n        username,\n        given_name,\n        family_name,\n        user_email.email::text as \"email!\",\n        language_emails,\n        user_email.created_at  as \"created_at!\",\n        organization,\n        location\nfrom cte1\n        inner join user_profile on cte1.id = user_profile.user_id\n        inner join user_email using(user_id)\nwhere ord > (1 * $2 * $3)\norder by ord asc\nlimit $3\n"
+  },
   "05d18fc3ce0c0d8d1aff470f3a96f24d8c064c255a0c74da1220fad096268310": {
     "describe": {
       "columns": [
@@ -747,76 +817,6 @@
     },
     "query": "\nselect jig.id                                       as \"id!: JigId\",\n       creator_id                               as \"creator_id: UserId\",\n       author_id                                as \"author_id: UserId\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id) as \"author_name\",\n       live_id                                  as \"live_id!\",\n       draft_id                                 as \"draft_id!\",\n       published_at,\n       liked_count                              as \"liked_count!\",\n       live_up_to_date                          as \"live_up_to_date!\",\n       (\n           select play_count\n           from jig_play_count\n           where jig_play_count.jig_id = jig.id\n       )                                        as \"play_count!\",\n       rating                                   as \"rating?: JigRating\",\n       blocked                                  as \"blocked!\",\n       curated                                  as \"curated!\"\nfrom jig\n         inner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\n    inner join jig_admin_data \"admin\" on admin.jig_id = jig.id\n    order by ord asc\n    "
   },
-  "10bf0e316dde65365043a28b545dee88ac3a1c6dce8ddfc93608498fe0236fd1": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: UserId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "username",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "given_name",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "family_name",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "email!",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "language_emails",
-          "ordinal": 5,
-          "type_info": "Text"
-        },
-        {
-          "name": "created_at!",
-          "ordinal": 6,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "organization",
-          "ordinal": 7,
-          "type_info": "Text"
-        },
-        {
-          "name": "location",
-          "ordinal": 8,
-          "type_info": "Jsonb"
-        }
-      ],
-      "nullable": [
-        null,
-        false,
-        false,
-        false,
-        null,
-        false,
-        false,
-        true,
-        true
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int4",
-          "Int4"
-        ]
-      }
-    },
-    "query": "\nwith cte as (\n    select (array_agg(\"user\".id))[1]\n    from \"user\"\n    inner join user_profile on \"user\".id = user_profile.user_id\n    inner join user_email using(user_id)\n    where (\"user\".id = $1 or $1 is null)\n    group by family_name\n    order by family_name desc\n),\ncte1 as (\n    select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n   , ord) order by ord\n)\nselect  cte1.id                 as \"id!: UserId\",\n        username,\n        given_name,\n        family_name,\n        user_email.email::text as \"email!\",\n        language_emails,\n        user_email.created_at  as \"created_at!\",\n        organization,\n        location\nfrom cte1\n        inner join user_profile on cte1.id = user_profile.user_id\n        inner join user_email using(user_id)\nwhere ord > (1 * $2 * $3)\norder by ord asc\nlimit $3\n"
-  },
   "11623dd925dc935401e7c2ef73941a1a46d253df579b98af410e69d1e578850d": {
     "describe": {
       "columns": [],
@@ -905,6 +905,26 @@
       }
     },
     "query": "select exists (select 1 from \"user\" where id = $1) as \"exists!\""
+  },
+  "12fef31b2094fc7e8df6e3e7f483b70c196398c43ae4cc4b4946b58b2cb3ffe0": {
+    "describe": {
+      "columns": [
+        {
+          "name": "count!",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        with cte as (\n            select (array_agg(user_profile.user_id))[1]\n            from user_profile\n            left join \"user\" on \"user\".id = user_profile.user_id\n            left join user_email using(user_id)\n            where (\"user\".id = $1 or $1 is null)\n            group by family_name\n            order by family_name desc\n        )\n        select count(*) as \"count!\" from unnest(array(select cte.array_agg from cte)) with ordinality t(id, ord)\n        "
   },
   "131b0ba5b42db6c02145b25d2f21f6e7f37af65f4dca9eadd6287f0405c5482a": {
     "describe": {
@@ -12863,26 +12883,6 @@
       }
     },
     "query": "\nupdate resource_data\nset description = $2,\n    translated_description = '{}',\n    updated_at = now()\nwhere id = $1 and $2 is distinct from description"
-  },
-  "f59291979e1a68a6b378cc8b024a3b59de3bb1fc546e397f9a8555bea0db0e47": {
-    "describe": {
-      "columns": [
-        {
-          "name": "count!",
-          "ordinal": 0,
-          "type_info": "Int8"
-        }
-      ],
-      "nullable": [
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\n        with cte as (\n            select (array_agg(\"user\".id))[1]\n            from \"user\"\n            inner join user_profile on \"user\".id = user_profile.user_id\n            inner join user_email using(user_id)\n            where (\"user\".id = $1 or $1 is null)\n            group by family_name\n            order by family_name desc\n        )\n        select count(*) as \"count!\" from unnest(array(select cte.array_agg from cte)) with ordinality t(id, ord)\n"
   },
   "f61ec8402e7de26b770073be29eee23dd893751db1fe71f55def28f880b32e3a": {
     "describe": {
