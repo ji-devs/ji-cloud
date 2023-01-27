@@ -15,7 +15,7 @@ export class _ extends LitElement {
                     padding: 6px;
                     box-sizing: border-box;
                     background-color: var(--white);
-                    align-items: center;
+                    align-items: flex-start;
                 }
 
                 .header {
@@ -48,7 +48,7 @@ export class _ extends LitElement {
                 }
 
                 ::slotted(fa-button) {
-                    padding: 0 6px;
+                    padding: 4px 0 0 6px;
                 }
             `,
         ];
