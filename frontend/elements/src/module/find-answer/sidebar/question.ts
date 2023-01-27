@@ -28,7 +28,6 @@ export class _ extends LitElement {
                     display: flex;
                     flex-direction: row;
                     align-items: center;
-                    margin-right: 8px;
                 }
 
                 .header ::slotted(img-ui) {
@@ -36,8 +35,12 @@ export class _ extends LitElement {
                     display: block;
                 }
 
-                .header > div {
+                .header > div.title {
                     flex: 1;
+                }
+
+                .header > div.actions {
+                    align-self: flex-start;
                 }
 
                 .body {
@@ -61,15 +64,13 @@ export class _ extends LitElement {
         return html`
             <slot name="toggle"></slot>
             <div class="header">
-                <div>
-                    <span>
-                        <slot name="title"></slot>
-                    </span>
-                    <span>
-                        <slot name="edit-btn"></slot>
-                    </span>
+                <div class="title">
+                    <slot name="title"></slot>
                 </div>
-                <slot name="menu"></slot>
+                <div class="actions">
+                    <slot name="edit-btn"></slot>
+                    <slot name="menu"></slot>
+                </div>
             </div>
             <div class="body">
                 <slot></slot>
