@@ -462,6 +462,7 @@ pub fn render_question(
             } else {
                 Some(html!("span", {
                     .style("cursor", "pointer")
+                    .style("word-break", "break-all")
                     .prop("slot", "title")
                     .text_signal(question_default_title_signal(question.clone(), index.signal_cloned()))
                     .event(clone!(state, index => move|_: events::Click| {
