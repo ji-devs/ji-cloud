@@ -17,7 +17,7 @@ impl DomRenderable for Main {
 
         html!("empty-fragment", {
             .child(html!("img-ui", {
-                .prop("path", "jig/play/design-grid.svg")
+                .prop("path", "jig/play/design-grid-jig.svg")
                 .style("height", "100%")
                 .style("width", "100%")
                 .style("display", "block")
