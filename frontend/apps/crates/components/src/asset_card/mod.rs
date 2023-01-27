@@ -77,7 +77,7 @@ pub fn render_asset_card(asset: &Asset, config: AssetCardConfig) -> Dom {
                 Asset::Course(course) => {
                     dom.child(html!("span", {
                         .prop("slot", "middle-indicator")
-                        .text(&format!("Units {}", course.course_data.items.len()))
+                        .text(&format!("{} Units", course.course_data.items.len()))
                     }))
                 },
                 Asset::Resource(resource) => {
