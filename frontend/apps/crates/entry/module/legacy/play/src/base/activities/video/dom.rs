@@ -45,7 +45,7 @@ impl Video {
             .style("transform-origin", {
                 "center center"
             })
-            .prop("controls", false)
+            .prop("controls", true)
             .attr("src", &state.base.activity_media_url(&url))
             .apply_if(state.raw.range.is_some(), |dom| {
                 let (start, _) = state.raw.range.unwrap_ji();
