@@ -42,23 +42,13 @@ impl JigPlayer {
         let state = self;
         actions::load_data(state.clone());
 
-        // Timer is not Copy and cannot be deduped, so any change to timer, even if it is the same value
-        // will trigger an updated which will cause the assist popup to show again when it is not
-        // supposed to.
-        let has_timer = state
-            .timer
-            .signal_cloned()
-            .map(|timer| timer.is_some())
-            .dedupe();
-
         let should_show_assist = map_ref! {
             let module_assist = state.module_assist.signal_cloned(),
-            let has_timer = has_timer,
             let started = state.started.signal_cloned().dedupe()
             => {
                 if *started {
                     if let Some(module_assist) = module_assist {
-                        if *has_timer || module_assist.text.is_some() {
+                        if module_assist.module_assist_type.is_instructions() || module_assist.text.is_some() {
                             let is_instructions = module_assist.module_assist_type.is_instructions();
                             // if there is text or a timer, and
                             if is_instructions || module_assist.text.is_some() {
