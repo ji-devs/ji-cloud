@@ -6,8 +6,9 @@ use shared::{
         asset::{Asset, DraftOrLive, UserOrMe},
         module::{ModuleBody, ModuleCreatePath, ModuleCreateRequest, ModuleKind},
         resource::{
-            ResourceBrowsePath, ResourceBrowseQuery, ResourceCreatePath, ResourceCreateRequest,
-            ResourceDeletePath, ResourceId, ResourceSearchPath, ResourceSearchQuery,
+            ResourceBrowsePath, ResourceBrowseQuery, ResourceClonePath, ResourceCreatePath,
+            ResourceCreateRequest, ResourceDeletePath, ResourceGetDraftPath, ResourceId,
+            ResourceSearchPath, ResourceSearchQuery,
         },
     },
 };
@@ -98,33 +99,19 @@ async fn add_cover(resource_id: &ResourceId) {
     }
 }
 
-pub async fn copy_resource(_resource_id: ResourceId) -> Result<Asset, ()> {
-    todo!();
-    // let path = endpoints::resource::Clone::PATH.replace("{id}", &resource_id.0.to_string());
-
-    // match api_with_auth::<CreateResponse<ResourceId>, EmptyError, ()>(
-    //     &path,
-    //     endpoints::resource::Clone::METHOD,
-    //     None,
-    // )
-    // .await
-    // {
-    //     Ok(resp) => {
-    //         let path = endpoints::resource::GetDraft::PATH.replace("{id}", &resp.id.0.to_string());
-    //         api_with_auth::<ResourceResponse, EmptyError, ()>(
-    //             &path,
-    //             endpoints::resource::GetDraft::METHOD,
-    //             None,
-    //         )
-    //         .await
-    //         .map(|resp| {
-    //             let asset: Asset = resp.into();
-    //             asset
-    //         })
-    //         .map_err(|_| ())
-    //     }
-    //     Err(_) => Err(()),
-    // }
+pub async fn copy_resource(resource_id: ResourceId) -> Result<Asset, ()> {
+    match endpoints::resource::Clone::api_with_auth(ResourceClonePath(resource_id), None).await {
+        Ok(resp) => {
+            endpoints::resource::GetDraft::api_with_auth(ResourceGetDraftPath(resp.id), None)
+                .await
+                .map(|resp| {
+                    let asset: Asset = resp.into();
+                    asset
+                })
+                .map_err(|_| ())
+        }
+        Err(_) => Err(()),
+    }
 }
 
 pub async fn delete_resource(resource_id: ResourceId) -> anyhow::Result<()> {
