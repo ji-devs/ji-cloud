@@ -14,14 +14,13 @@ type DotPos = "tl" | "t" | "tr" | "l" | "r" | "bl" | "b" | "br";
 
 const dotIds: Array<DotPos> = ["tl", "t", "tr", "l", "r", "bl", "b", "br"];
 
-const MENU_BUTTON_RADIUS = 32 / 2;
-const DOT_RADIUS = 10;
+const BUTTON_RADIUS = 32 / 2;
+const DOT_RADIUS = 7;
 
 //If changing this, also update the CSS for .rectLine
 const RECT_STROKE_SIZE = 3;
 
 const ROT_LINE_DISTANCE = 30;
-const ROT_BUTTON_SIZE = 64;
 
 //If changing this, also update the CSS for #rotLine
 const ROT_STROKE_SIZE = 2;
@@ -86,7 +85,7 @@ export class TransformBox extends LitElement {
                 }
 
                 .dot.tl {
-                    cursor: se-resize;
+                    cursor: nw-resize;
                 }
                 .dot.tr {
                     cursor: ne-resize;
@@ -97,12 +96,15 @@ export class TransformBox extends LitElement {
                 .dot.br {
                     cursor: se-resize;
                 }
-
-                .dot.t,
-                .dot.b {
+                .dot.t {
                     cursor: n-resize;
                 }
-                .dot.l,
+                .dot.b {
+                    cursor: s-resize;
+                }
+                .dot.l {
+                    cursor: w-resize
+                }
                 .dot.r {
                     cursor: e-resize;
                 }
@@ -250,15 +252,17 @@ export class TransformBox extends LitElement {
             buttonHack,
         } = this;
 
+        // We need to calculate the position _outside_ the transform box
+        const dotOffset = 4;
         const dotPositions: Record<DotPos, [number, number]> = {
-            tl: [0, 0],
-            t: [width / 2, 0],
-            tr: [width, 0],
-            l: [0, height / 2],
-            bl: [0, height],
-            b: [width / 2, height],
-            br: [width, height],
-            r: [width, height / 2],
+            tl: [-(DOT_RADIUS * 2 + dotOffset), -(DOT_RADIUS * 2 + dotOffset)],
+            t: [width / 2 - DOT_RADIUS, -(DOT_RADIUS * 2 + dotOffset)],
+            tr: [width + DOT_RADIUS / 2 + dotOffset / 2, -(DOT_RADIUS * 2 + dotOffset)],
+            l: [-(DOT_RADIUS * 2 + dotOffset), height / 2 - DOT_RADIUS],
+            bl: [-(DOT_RADIUS * 2 + dotOffset), height + DOT_RADIUS / 2 + dotOffset / 2],
+            b: [width / 2 - DOT_RADIUS, height + DOT_RADIUS / 2 + dotOffset / 2],
+            br: [width + DOT_RADIUS / 2 + dotOffset / 2, height + DOT_RADIUS / 2 + dotOffset / 2],
+            r: [width + DOT_RADIUS / 2 + dotOffset / 2, height / 2 - DOT_RADIUS],
         };
 
         const renderRect = () => {
@@ -324,7 +328,7 @@ export class TransformBox extends LitElement {
                 const [x, y] = dotPositions[pos];
 
                 return svg`
-                    <svg id="dot-${pos}" width="${diameter}px" height="${diameter}px" style="left: calc(${x}px - ${DOT_RADIUS}px); top: calc(${y}px - ${DOT_RADIUS}px);">
+                    <svg id="dot-${pos}" width="${diameter}px" height="${diameter}px" style="left: ${x}px; top: ${y}px;">
                         <circle class="dot ${pos}" cx="${DOT_RADIUS}px" cy="${DOT_RADIUS}px" r="${DOT_RADIUS}px" @pointerdown=${(
                     evt: PointerEvent
                 ) => this.onResizeStart(pos, evt)} />
@@ -348,19 +352,18 @@ export class TransformBox extends LitElement {
                 <svg width="${ROT_STROKE_SIZE}rem" height="${ROT_LINE_DISTANCE}rem" style="left: calc(${middle_x}px - (${ROT_STROKE_SIZE}rem)/2); top: calc(${
                     RECT_STROKE_SIZE - DOT_RADIUS
                 }px - ${ROT_LINE_DISTANCE}rem);">
-                    <line id="rotLine" x1="${ROT_STROKE_SIZE / 2}rem" x2="${
+                    <line id="rotLine" x1="${ROT_STROKE_SIZE / 2}rem" stroke="red" stroke-width="3" x2="${
                     ROT_STROKE_SIZE / 2
                 }rem" y1="0" y2="${ROT_LINE_DISTANCE}rem" />
                     </svg>
                     `;
             };
             const renderRotButton = () => {
-                let style = `width: ${ROT_BUTTON_SIZE}rem;`;
-                style += ` height: ${ROT_BUTTON_SIZE}rem;`;
-                style += `left: calc(${middle_x}px - (${ROT_BUTTON_SIZE}rem)/2);`;
-                style += ` top: calc(${RECT_STROKE_SIZE}px - ${
-                    ROT_LINE_DISTANCE + ROT_BUTTON_SIZE
-                }rem);`;
+                const [x, y] = dotPositions['t'];
+                let style = `width: ${BUTTON_RADIUS * 2}px;`;
+                style += ` height: ${BUTTON_RADIUS * 2}px;`;
+                style += `left: calc(${x}px - ${BUTTON_RADIUS}px + ${DOT_RADIUS}px);`;
+                style += ` top: calc(${RECT_STROKE_SIZE}px - ${BUTTON_RADIUS * 3}px - ${DOT_RADIUS}px);`;
 
                 return html`<img-ui
                     .draggable=${false}
@@ -377,9 +380,9 @@ export class TransformBox extends LitElement {
         const renderMenuButton = () => {
             const [x, y] = dotPositions[menuButtonDot];
 
-            let style = `left: calc(${x}px - ${MENU_BUTTON_RADIUS}px);`;
+            let style = `left: calc(${x}px - ${BUTTON_RADIUS}px + ${DOT_RADIUS}px);`;
             // Move the menu button up by 1.5x it's diameter
-            style += ` top: calc(${RECT_STROKE_SIZE}px - ${MENU_BUTTON_RADIUS * 3}px);`;
+            style += ` top: calc(${RECT_STROKE_SIZE}px - ${BUTTON_RADIUS * 3}px - ${DOT_RADIUS}px);`;
 
             return !isTransforming && hasMenu && !buttonHack
                 ? html`<div id="menu-btn" style="${style}">
