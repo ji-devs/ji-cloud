@@ -246,6 +246,8 @@ pub fn render_advanced_modal(state: Rc<Step3>) -> Dom {
                             .child_signal(current_question_signal().map(clone!(state => move |(tab, index, question)| {
                                 let selection = Mutable::new(AdvancedFeedbackSelection::All);
                                 let state = Rc::clone(&state);
+                                // Set tab_kind for jiggling text
+                                state.sidebar.tab_kind.set_neq(Some(tab));
                                 match tab {
                                     MenuTabKind::Correct => {
                                         selection.set(AdvancedFeedbackSelection::All);
@@ -543,14 +545,15 @@ pub fn render_question(
                         state.sidebar.base.phase.set(Phase::Layout);
                         // Reset the tabs when a question is minimized
                         state.sidebar.tab_kind.set(None);
+                        state.question_tab_kind.set(None);
                     }))
                     .style("display", "contents")
                     .child_signal(
-                        state.sidebar.tab_kind.signal_cloned().map(clone!(state => move |kind| {
+                        state.question_tab_kind.signal_cloned().map(clone!(state => move |kind| {
                             match kind {
                                 Some(_) => {
                                     Some(html!("menu-tabs", {
-                                        .future(state.sidebar.tab_kind.signal_cloned().for_each(clone!(state => move |kind| {
+                                        .future(state.question_tab_kind.signal_cloned().for_each(clone!(state => move |kind| {
                                             state.sidebar.base.phase.set(
                                                 match kind {
                                                     Some(MenuTabKind::Answer) => Phase::new_trace_unchecked(state.sidebar.base.clone(), TraceKind::Correct),
@@ -562,22 +565,23 @@ pub fn render_question(
                                         })))
                                         .style("margin-top", "12px")
                                         .children(&mut [
-                                            render_tab(MenuTabKind::Question, state.sidebar.tab_kind.clone()),
-                                            render_tab(MenuTabKind::Answer, state.sidebar.tab_kind.clone()),
+                                            render_tab(MenuTabKind::Question, state.question_tab_kind.clone()),
+                                            render_tab(MenuTabKind::Answer, state.question_tab_kind.clone()),
                                             html!("module-sidebar-body", {
                                                 .prop("slot", "body")
                                                 .style("overflow", "inherit")
                                                 .child_signal(
                                                     //based on the selected tab kind, create and render the tab state
-                                                    state.sidebar.tab_kind.signal_cloned()
+                                                    state.question_tab_kind.signal_cloned()
                                                         .map(clone!(state => move |tab| {
+                                                            state.sidebar.tab_kind.set_neq(tab);
                                                             tab.map(|tab| {
                                                                 render_tab_body(state.clone(), tab.into())
                                                             })
                                                         }))
                                                 )
                                                 .child_signal(
-                                                    state.sidebar.tab_kind.signal_cloned()
+                                                    state.question_tab_kind.signal_cloned()
                                                         .map(clone!(state => move |tab| {
                                                             match tab {
                                                                 Some(MenuTabKind::Answer) => {
@@ -603,7 +607,7 @@ pub fn render_question(
                                 None => {
                                     // If the current tab isn't set, then set
                                     // it.
-                                    state.sidebar.tab_kind.set_neq(Some(MenuTabKind::Question));
+                                    state.question_tab_kind.set_neq(Some(MenuTabKind::Question));
                                     None
                                 }
                             }

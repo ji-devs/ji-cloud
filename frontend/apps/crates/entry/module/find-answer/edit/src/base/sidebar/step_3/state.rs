@@ -7,6 +7,7 @@ use super::super::state::Sidebar;
 
 pub struct Step3 {
     pub sidebar: Rc<Sidebar>,
+    pub question_tab_kind: Mutable<Option<MenuTabKind>>,
     pub advanced_visible: Mutable<bool>,
 }
 
@@ -14,6 +15,7 @@ impl Step3 {
     pub fn new(sidebar: Rc<Sidebar>) -> Rc<Self> {
         Rc::new(Self {
             sidebar,
+            question_tab_kind: Mutable::new(None),
             advanced_visible: Mutable::new(false),
         })
     }
