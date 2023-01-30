@@ -33,7 +33,7 @@ where
         None => html!("empty-fragment"),
     };
 
-    add_slot_to_dom(dom, "main-bg")
+    add_slot_to_dom(dom, "main")
 }
 pub fn render_main<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
     state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>,

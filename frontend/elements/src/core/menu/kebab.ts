@@ -22,6 +22,7 @@ export class _ extends LitElement {
                     box-shadow: 0 3px 16px 0 rgba(0, 0, 0, 0.2);
                     background-color: var(--white);
                     padding: 14px;
+                    z-index: 1;
                 }
                 .menu-container.visible {
                     display: block;

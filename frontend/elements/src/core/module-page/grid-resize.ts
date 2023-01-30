@@ -59,13 +59,6 @@ export class _ extends BgBlue {
                 :host([scrollable]) .canvas {
                     overflow: auto;
                 }
-                .canvas > * {
-                    grid-column: 1;
-                    grid-row: 1;
-                }
-                .main-bg {
-                    overflow: hidden;
-                }
 
                 #overlay {
                     position: fixed;
@@ -152,12 +145,7 @@ export class _ extends BgBlue {
                     </header>
 
                     <div id="canvas" class="canvas">
-                        <div class="main-bg">
-                            <slot name="main-bg"></slot>
-                        </div>
-                        <div id="main" class="main">
-                            <slot name="main"></slot>
-                        </div>
+                        <slot name="main"></slot>
                     </div>
 
                     <footer>

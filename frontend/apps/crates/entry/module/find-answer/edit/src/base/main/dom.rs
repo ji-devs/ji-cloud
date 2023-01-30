@@ -16,6 +16,11 @@ use utils::unwrap::UnwrapJiExt;
 impl DomRenderable for Main {
     fn render(state: Rc<Main>) -> Dom {
         html!("empty-fragment", {
+            .style("grid-column", "1")
+            .style("grid-row", "1")
+            .style("width", "100%")
+            .style("height", "100%")
+            .style("overflow", "hidden")
             .future(state.base.question_field.signal_cloned().for_each(clone!(state => move |question| {
                 if let QuestionField::Text(index) = question {
                     let text = state.base.stickers.get_as_text(index).unwrap_ji();
@@ -43,7 +48,6 @@ impl DomRenderable for Main {
                 .prop("path", "jig/play/design-grid-jig.svg")
                 .style("height", "100%")
                 .style("width", "100%")
-                .style("display", "block")
             }))
             // Normally we would render raw stickers for `Trace`, but because we need to have access to the renderer_ref on a sticker to
             // show the question's text, we use regular stickers. The traces component will overlay the stickers so that they cannot be edited.

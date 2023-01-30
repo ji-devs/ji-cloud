@@ -1,4 +1,5 @@
-use dominator::{html, Dom};
+use dominator::{class, html, Dom};
+use once_cell::sync::Lazy;
 use std::{rc::Rc, vec};
 use utils::{colors::*, prelude::*};
 
@@ -38,8 +39,7 @@ pub fn render_backgrounds(bg: Rc<Backgrounds>, slot: Option<&str>) -> Dom {
 
     html!("empty-fragment", {
         .apply_if(slot.is_some(), |dom| dom.prop("slot", slot.unwrap_ji()))
-        .style("width", "100%")
-        .style("height", "100%")
+        .style("display", "contents")
         .children_signal_vec(children)
     })
 }
@@ -68,8 +68,7 @@ pub fn render_single_background(
 
     html!("empty-fragment", {
         .apply_if(slot.is_some(), |dom| dom.prop("slot", slot.unwrap_ji()))
-        .style("width", "100%")
-        .style("height", "100%")
+        .style("display", "contents")
         .children_signal_vec(children)
 
     })
@@ -90,8 +89,7 @@ pub fn render_backgrounds_raw(bg: &RawBackgrounds, theme_id: ThemeId, slot: Opti
 
     html!("empty-fragment", {
         .apply_if(slot.is_some(), |dom| dom.prop("slot", slot.unwrap_ji()))
-        .style("width", "100%")
-        .style("height", "100%")
+        .style("display", "contents")
         .children(children)
 
     })
@@ -112,22 +110,33 @@ pub fn render_single_background_raw(
 
     html!("empty-fragment", {
         .apply_if(slot.is_some(), |dom| dom.prop("slot", slot.unwrap_ji()))
-        .style("width", "100%")
-        .style("height", "100%")
+        .style("display", "contents")
         .children(children)
 
     })
 }
 
+pub(super) static BG_STYLES: Lazy<String> = Lazy::new(|| {
+    class! {
+        .style("object-fit", "contain")
+        .style("grid-column", "1")
+        .style("grid-row", "1")
+        .style("width", "100%")
+        .style("height", "100%")
+        .style("overflow", "hidden")
+    }
+});
+
 fn render_bg(bg: &Background) -> Option<Dom> {
     match bg {
         Background::Color(color) => color.map(|color| {
             html!("div", {
+                .class(&*BG_STYLES)
                 .style("background-color", rgba8_to_hex(&color))
             })
         }),
         Background::Image(image) => Some(html!("img-ji", {
-            .style("object-fit", "contain")
+            .class(&*BG_STYLES)
             .prop("id", image.id.0.to_string())
             .prop("lib", image.lib.to_str())
             .prop("size", "full")
@@ -137,8 +146,7 @@ fn render_bg(bg: &Background) -> Option<Dom> {
 
 fn render_theme_bg(theme_id: ThemeId) -> Dom {
     html!("img-ui", {
-        .style("width", "100%")
-        .style("height", "100%")
+        .class(&*BG_STYLES)
         .prop("path", {
             &format!("theme/{}/bg.jpg", theme_id.as_str_id())
         })

@@ -17,11 +17,15 @@ use std::rc::Rc;
 impl DomRenderable for Main {
     fn render(state: Rc<Main>) -> Dom {
         html!("empty-fragment", {
+            .style("grid-column", "1")
+            .style("grid-row", "1")
+            .style("width", "100%")
+            .style("height", "100%")
+            .style("overflow", "hidden")
             .child(html!("img-ui", {
                 .prop("path", "jig/play/design-grid-jig.svg")
                 .style("height", "100%")
                 .style("width", "100%")
-                .style("display", "block")
             }))
             // rendering stickers manually so that video options can be passed in
             .children_signal_vec(state.base.stickers.list
