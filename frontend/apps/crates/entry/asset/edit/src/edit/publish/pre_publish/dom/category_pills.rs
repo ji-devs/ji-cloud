@@ -29,6 +29,7 @@ fn render_pill(state: Rc<PrePublish>, category_id: CategoryId) -> Dom {
             .prop("slot", "delete")
             .event(clone!(state => move |_: events::Click| {
                 state.asset.categories().lock_mut().remove(&category_id);
+                state.save_draft();
             }))
         }))
     })

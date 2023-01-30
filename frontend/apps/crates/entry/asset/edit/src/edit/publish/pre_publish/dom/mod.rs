@@ -39,7 +39,7 @@ pub mod category_pills;
 pub mod language;
 
 const STR_PUBLISH: &str = "Publish ";
-const STR_SAVE_DRAFT: &str = "Save draft and exit";
+const STR_PUBLISH_LATER: &str = "Publish later";
 const STR_PUBLIC_LABEL_1: &str = "My ";
 const STR_PUBLIC_LABEL_2: &str = " is ";
 const STR_PUBLIC_PUBLIC: &str = "public";
@@ -130,6 +130,7 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                                 state.asset.privacy_level().set(PrivacyLevel::Unlisted);
                                 state.show_public_popup.set(true);
                             }
+                            state.save_draft();
                         }))
                     }))
                     .child_signal(state.show_public_popup.signal_ref(clone!(state => move |show_public_popup| {
@@ -182,6 +183,7 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                         .event(clone!(state => move |_evt: events::Input| {
                             let value = elem.value();
                             state.asset.display_name().set(value);
+                            state.save_draft();
                         }))
                     })
                 }))
@@ -215,6 +217,7 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                         .event(clone!(state => move |_: events::Input| {
                             let value = elem.value();
                             state.asset.description().set(value);
+                            state.save_draft();
                         }))
                     })
                 }))
@@ -229,32 +232,29 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                 .prop("slot", "publish-later")
                 .prop("color", "blue")
                 .prop("kind", "text")
-                .text(STR_SAVE_DRAFT)
+                .text(STR_PUBLISH_LATER)
                 .event(clone!(state => move |_: events::Click| {
-                    state.loader.load(clone!(state => async move {
-                        state.save().await;
-                        let url = match &state.asset {
-                            EditableAsset::Jig(jig) => {
-                                state.publish_state.asset_edit_state.set_route_jig(JigEditRoute::Landing);
-                                Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
-                                    jig.id,
-                                    JigEditRoute::Landing
-                                ))).to_string()
-                            },
-                            EditableAsset::Resource(_) => {
-                                state.publish_state.asset_edit_state.set_route_resource(ResourceEditRoute::Landing);
-                                Route::Asset(AssetRoute::ResourceGallery).to_string()
-                            },
-                            EditableAsset::Course(course) => {
-                                state.publish_state.asset_edit_state.set_route_jig(JigEditRoute::Landing);
-                                Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
-                                    course.id,
-                                    CourseEditRoute::Landing
-                                ))).to_string()
-                            },
-                        };
-                        dominator::routing::go_to_url(&url);
-                    }))
+                    let url = match &state.asset {
+                        EditableAsset::Jig(jig) => {
+                            state.publish_state.asset_edit_state.set_route_jig(JigEditRoute::Landing);
+                            Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
+                                jig.id,
+                                JigEditRoute::Landing
+                            ))).to_string()
+                        },
+                        EditableAsset::Resource(_) => {
+                            state.publish_state.asset_edit_state.set_route_resource(ResourceEditRoute::Landing);
+                            Route::Asset(AssetRoute::ResourceGallery).to_string()
+                        },
+                        EditableAsset::Course(course) => {
+                            state.publish_state.asset_edit_state.set_route_jig(JigEditRoute::Landing);
+                            Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
+                                course.id,
+                                CourseEditRoute::Landing
+                            ))).to_string()
+                        },
+                    };
+                    dominator::routing::go_to_url(&url);
                 }))
             }),
 

@@ -42,6 +42,7 @@ fn render_language(Language(lang_code, land_label): &Language, state: Rc<PrePubl
         .event(clone!(state, lang_code => move |evt: events::CustomSelectedChange| {
             if evt.selected() {
                 state.asset.language().set(lang_code.to_string());
+                state.save_draft();
             }
         }))
     })

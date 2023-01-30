@@ -43,6 +43,7 @@ impl PrePublish {
                         .age_ranges()
                         .lock_mut()
                         .clear();
+                    state.save_draft();
                 }))
             }))
             .children_signal_vec(state.ages.signal_cloned().map(clone!(state => move |ages| {

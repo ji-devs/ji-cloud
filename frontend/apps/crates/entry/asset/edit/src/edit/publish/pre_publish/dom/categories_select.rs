@@ -1,5 +1,6 @@
 use components::categories_input;
-use dominator::{html, Dom};
+use dominator::{clone, html, Dom};
+use futures_signals::signal::SignalExt;
 use futures_signals::{map_ref, signal::Signal};
 use std::rc::Rc;
 use utils::unwrap::UnwrapJiExt;
@@ -14,6 +15,10 @@ impl PrePublish {
         let state = Rc::clone(&self);
 
         html!("input-wrapper", {
+            .future(state.asset.categories().signal_cloned().for_each(clone!(state => move |_| {
+                state.save_draft();
+                async {}
+            })))
             .prop("slot", "catagories-select")
             .prop("label", STR_CATEGORIES_LABEL)
             .child(categories_input::CategoriesInput::new(

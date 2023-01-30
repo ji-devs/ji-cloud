@@ -100,7 +100,7 @@ impl PrePublish {
         }
     }
 
-    pub async fn save(self: &Rc<Self>) -> Asset {
+    async fn save_async(self: &Rc<Self>) -> Asset {
         let asset = match &self.asset {
             EditableAsset::Jig(jig) => {
                 let jig = jig_actions::save_jig(jig).await.unwrap_ji();
@@ -123,12 +123,12 @@ impl PrePublish {
         asset
     }
 
-    // pub fn save_draft(self: &Rc<Self>) {
-    //     let state = self;
-    //     state.loader.load(clone!(state => async move {
-    //         state.save_async().await;
-    //     }));
-    // }
+    pub fn save_draft(self: &Rc<Self>) {
+        let state = self;
+        state.loader.load(clone!(state => async move {
+            state.save_async().await;
+        }));
+    }
 
     pub fn publish(self: &Rc<Self>) {
         let state = Rc::clone(&self);
@@ -139,7 +139,7 @@ impl PrePublish {
         };
 
         state.loader.load(clone!(state => async move {
-            let asset = state.save().await;
+            let asset = state.save_async().await;
             match &state.asset {
                 EditableAsset::Jig(jig) => {
                     jig_actions::publish_jig(jig.id).await.unwrap_ji();
