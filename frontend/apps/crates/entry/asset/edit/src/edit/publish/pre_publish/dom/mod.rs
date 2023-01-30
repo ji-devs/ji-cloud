@@ -247,7 +247,7 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                             Route::Asset(AssetRoute::ResourceGallery).to_string()
                         },
                         EditableAsset::Course(course) => {
-                            state.publish_state.asset_edit_state.set_route_jig(JigEditRoute::Landing);
+                            state.publish_state.asset_edit_state.set_route_course(CourseEditRoute::Landing);
                             Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
                                 course.id,
                                 CourseEditRoute::Landing
