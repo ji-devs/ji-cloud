@@ -7,7 +7,9 @@ use strum::IntoEnumIterator;
 use utils::{
     events,
     init::analytics,
-    routes::{AdminRoute, AssetRoute, CommunityMembersRoute, CommunityRoute, Route, UserRoute},
+    routes::{
+        AdminRoute, AssetRoute, CommunityMembersRoute, CommunityRoute, HomeRoute, Route, UserRoute,
+    },
     unwrap::UnwrapJiExt,
 };
 use wasm_bindgen::JsValue;
@@ -76,6 +78,13 @@ pub fn render(
                 analytics::event("Donate Click", None);
             })
         }))
+        .child(html!("button-rect", {
+            .prop("slot", "help")
+            .prop("href", Route::Home(HomeRoute::Help).to_string())
+            .child(html!("fa-button", {
+                .prop("icon", "fa-regular fa-circle-question")
+            }))
+        }))
         .apply_if(render_beta, |dom| {
             dom.child(html!("beta-button", {
                 .prop("slot", "beta")
@@ -121,7 +130,6 @@ pub fn render(
             } else {
                 dom
             }
-
         })
         .children_signal_vec(state.logged_in.signal_cloned().map(clone!(state => move|logged_in| {
             match logged_in {

@@ -5,6 +5,7 @@ use dominator::{html, Dom};
 use futures_signals::signal::Signal;
 use utils::routes::{HomeRoute, Route};
 
+use crate::help_center;
 pub struct Router {}
 
 impl Router {
@@ -29,6 +30,7 @@ impl Router {
                         let search_query = search_query.map(|x| *x);
                         Some(Home::new_search(search_query).render(true))
                     }
+                    HomeRoute::Help => Some(help_center::render_help_center()),
                 },
                 _ => None,
             }

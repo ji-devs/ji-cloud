@@ -93,6 +93,7 @@ buttons = []
 tabs = []
 overlay = []
 profile_image =[]
+help_center = []
 
 default = ["all"]
 all = [
@@ -137,5 +138,6 @@ all = [
     "buttons",
     "tabs",
     "overlay",
-    "profile_image"
+    "profile_image",
+    "help_center"
 ]

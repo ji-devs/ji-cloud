@@ -8,7 +8,7 @@ export class _ extends LitElement {
                 :host {
                     position: relative;
                     display: grid;
-                    grid-template-columns: repeat(5, auto);
+                    grid-template-columns: repeat(6, auto);
                     justify-content: space-between;
                     align-items: center;
                     padding: 0 20px;
@@ -43,6 +43,10 @@ export class _ extends LitElement {
                     display: grid;
                     place-content: center;
                 }
+                .help {
+                    padding-left: 10px;
+                    place-items: center;
+                }
                 .user {
                     display: flex;
                     column-gap: 16px;
@@ -65,7 +69,7 @@ export class _ extends LitElement {
                     :host {
                         justify-content: center;
                     }
-                    nav, .donate, .student-code, .user {
+                    nav, .donate, .student-code, .help, .user {
                         display: none;
                     }
                     .beta {
@@ -91,6 +95,9 @@ export class _ extends LitElement {
             </div>
             <div class="student-code">
                 <slot name="student-code"></slot>
+            </div>
+            <div class="help">
+                <slot name="help"></slot>
             </div>
             <div class="user">
                 <slot name="user"></slot>

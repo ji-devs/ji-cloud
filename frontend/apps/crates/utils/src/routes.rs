@@ -42,6 +42,7 @@ pub enum Route {
 pub enum HomeRoute {
     Home,
     Search(Option<Box<SearchQueryParams>>),
+    Help,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
@@ -318,6 +319,7 @@ impl Route {
                 let search: SearchQueryParams = serde_qs::from_str(&params_string).unwrap_ji();
                 Self::Home(HomeRoute::Search(Some(Box::new(search))))
             }
+            ["home", "help"] => Self::Home(HomeRoute::Help),
             ["kids"] => Self::Kids(KidsRoute::StudentCode(None)),
             ["kids", code] => Self::Kids(KidsRoute::StudentCode(Some(code.to_string()))),
             ["dev", "showcase", id] => {
@@ -611,6 +613,7 @@ impl From<&Route> for String {
                         format!("/home/search?{}", query)
                     }
                 },
+                HomeRoute::Help => "/home/help".to_string(),
             },
             Route::Kids(route) => match route {
                 KidsRoute::StudentCode(code) => match code {
