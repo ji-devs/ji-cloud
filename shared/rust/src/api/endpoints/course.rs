@@ -2,10 +2,11 @@ use crate::{
     api::Method,
     domain::{
         course::{
-            CourseBrowsePath, CourseBrowseQuery, CourseBrowseResponse, CourseCreatePath,
-            CourseCreateRequest, CourseDeletePath, CourseGetDraftPath, CourseGetLivePath, CourseId,
-            CoursePublishPath, CourseResponse, CourseSearchPath, CourseSearchQuery,
-            CourseSearchResponse, CourseUpdateDraftDataPath, CourseUpdateDraftDataRequest,
+            CourseBrowsePath, CourseBrowseQuery, CourseBrowseResponse, CourseClonePath,
+            CourseCreatePath, CourseCreateRequest, CourseDeletePath, CourseGetDraftPath,
+            CourseGetLivePath, CourseId, CoursePublishPath, CourseResponse, CourseSearchPath,
+            CourseSearchQuery, CourseSearchResponse, CourseUpdateDraftDataPath,
+            CourseUpdateDraftDataRequest,
         },
         CreateResponse,
     },
@@ -145,4 +146,23 @@ impl ApiEndpoint for Delete {
     type Path = CourseDeletePath;
     type Err = EmptyError;
     const METHOD: Method = Method::Delete;
+}
+
+/// Clone a Course. This clones both the draft and live.
+///
+/// # Authorization
+/// * One of `Admin`, `AdminJig`, or `ManageSelfJig`
+///
+/// # Errors
+/// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
+/// * [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
+/// * ['NotFound'](http::StatusCode::NOT_FOUND) if the resource does not exist.
+/// * ['BadRequest'](http::StatusCode::BAD_REQUEST) if the request is malformed or the Course is a draft.
+pub struct Clone;
+impl ApiEndpoint for Clone {
+    type Path = CourseClonePath;
+    type Req = ();
+    type Res = CreateResponse<CourseId>;
+    type Err = EmptyError;
+    const METHOD: Method = Method::Post;
 }

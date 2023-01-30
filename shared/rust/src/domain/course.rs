@@ -383,4 +383,6 @@ pub struct CourseSearchResponse {
 
 make_path_parts!(CourseDeletePath => "/v1/course/{}" => CourseId);
 
+make_path_parts!(CourseClonePath => "/v1/course/{}/clone" => CourseId);
+
 into_uuid![CourseId];
