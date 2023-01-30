@@ -292,6 +292,21 @@ async fn search(
     }))
 }
 
+/// Clone a Course
+async fn clone(
+    db: Data<PgPool>,
+    claims: TokenUser,
+    parent: web::Path<CourseId>,
+) -> Result<HttpResponse, error::CloneDraft> {
+    let user_id = claims.user_id();
+
+    db::resource::authz(&*db, user_id, None).await?;
+
+    let id = db::course::clone_course(db.as_ref(), parent.into_inner(), user_id).await?;
+
+    Ok(HttpResponse::Created().json(CreateResponse { id }))
+}
+
 #[instrument]
 async fn page_limit(page_limit: Option<u32>) -> anyhow::Result<u32> {
     if let Some(limit) = page_limit {
@@ -368,6 +383,10 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <course::GetDraft as ApiEndpoint>::Path::PATH,
         course::GetDraft::METHOD.route().to(get_draft),
+    )
+    .route(
+        <course::Clone as ApiEndpoint>::Path::PATH,
+        course::Clone::METHOD.route().to(clone),
     )
     .route(
         <course::Publish as ApiEndpoint>::Path::PATH,

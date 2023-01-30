@@ -1970,6 +1970,29 @@
     },
     "query": "\nselect published_at  as \"published_at?\"\nfrom resource\nwhere id = $1\n    "
   },
+  "2ac26476124281a23551dda733959d7eb6841f3f7cbbafb47ae913e97a4cd187": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: CourseId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\ninsert into course (creator_id, author_id, parents, live_id, draft_id)\nselect creator_id, $2, array_append(parents, $1), $3, $4\nfrom course\nwhere id = $1\nreturning id as \"id!: CourseId\"\n"
+  },
   "2c9269da9de0d178512713b7fc2789ad3472cc1dcea22eecd5fb941415d37bc4": {
     "describe": {
       "columns": [

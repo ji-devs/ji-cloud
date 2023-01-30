@@ -1034,3 +1034,39 @@ where id = $1
 
     Ok(())
 }
+
+pub async fn clone_course(
+    db: &PgPool,
+    parent: CourseId,
+    user_id: UserId,
+) -> Result<CourseId, error::CloneDraft> {
+    let mut txn = db.begin().await?;
+
+    let (draft_id, live_id) = get_draft_and_live_ids(&mut *txn, parent)
+        .await
+        .ok_or(error::CloneDraft::ResourceNotFound)?;
+
+    let new_draft_id = clone_data(&mut txn, &draft_id, DraftOrLive::Draft).await?;
+    let new_live_id = clone_data(&mut txn, &live_id, DraftOrLive::Live).await?;
+
+    let new_course = sqlx::query!(
+        //language=SQL
+        r#"
+insert into course (creator_id, author_id, parents, live_id, draft_id)
+select creator_id, $2, array_append(parents, $1), $3, $4
+from course
+where id = $1
+returning id as "id!: CourseId"
+"#,
+        parent.0,
+        user_id.0,
+        new_live_id,
+        new_draft_id,
+    )
+    .fetch_one(&mut txn)
+    .await?;
+
+    txn.commit().await?;
+
+    Ok(new_course.id)
+}
