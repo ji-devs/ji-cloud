@@ -100,27 +100,18 @@ impl PrePublish {
         }
     }
 
-    async fn save_async(self: &Rc<Self>) -> Asset {
-        let asset = match &self.asset {
+    async fn save_async(self: &Rc<Self>) {
+        match &self.asset {
             EditableAsset::Jig(jig) => {
-                let jig = jig_actions::save_jig(jig).await.unwrap_ji();
-                Asset::Jig(jig)
+                jig_actions::save_jig(jig).await.unwrap_ji();
             }
             EditableAsset::Resource(resource) => {
-                let resource = resource_actions::save_resource(resource).await.unwrap_ji();
-                Asset::Resource(resource)
+                resource_actions::save_resource(resource).await.unwrap_ji();
             }
             EditableAsset::Course(course) => {
-                let course = course_actions::save_course(course).await.unwrap_ji();
-                Asset::Course(course)
+                course_actions::save_course(course).await.unwrap_ji();
             }
         };
-
-        self.publish_state
-            .asset_edit_state
-            .asset
-            .fill_from_asset(asset.clone());
-        asset
     }
 
     pub fn save_draft(self: &Rc<Self>) {
@@ -139,18 +130,20 @@ impl PrePublish {
         };
 
         state.loader.load(clone!(state => async move {
-            let asset = state.save_async().await;
-            match &state.asset {
+            state.save_async().await;
+            let asset: Asset = match &state.asset {
                 EditableAsset::Jig(jig) => {
-                    jig_actions::publish_jig(jig.id).await.unwrap_ji();
+                    jig_actions::publish_jig(jig.id).await.unwrap_ji().into()
                 },
                 EditableAsset::Resource(resource) => {
-                    resource_actions::publish_resource(resource.id).await.unwrap_ji();
+                    resource_actions::publish_resource(resource.id).await.unwrap_ji().into()
                 }
                 EditableAsset::Course(course) => {
-                    course_actions::publish_course(course.id).await.unwrap_ji();
+                    course_actions::publish_course(course.id).await.unwrap_ji().into()
                 }
             };
+
+            state.publish_state.asset_edit_state.asset.fill_from_asset(asset.clone());
             state.publish_state.published_asset.set(Some(asset));
             state.submission_tried.set(false);
         }));

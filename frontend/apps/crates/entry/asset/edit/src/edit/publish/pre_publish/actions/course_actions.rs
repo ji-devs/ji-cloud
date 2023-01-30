@@ -8,17 +8,17 @@ use utils::prelude::ApiEndpointExt;
 
 use utils::editable_asset::EditableCourse;
 
-pub async fn save_course(course: &EditableCourse) -> anyhow::Result<CourseResponse> {
+pub async fn save_course(course: &EditableCourse) -> anyhow::Result<()> {
     let req = course.to_course_update_request();
 
     course::UpdateDraftData::api_with_auth_empty(CourseUpdateDraftDataPath(course.id), Some(req))
-        .await?;
-
-    let course = course::GetDraft::api_with_auth(CourseGetDraftPath(course.id), None).await?;
-
-    Ok(course)
+        .await
 }
 
-pub async fn publish_course(course_id: CourseId) -> anyhow::Result<()> {
-    course::Publish::api_with_auth_empty(CoursePublishPath(course_id), None).await
+pub async fn publish_course(course_id: CourseId) -> anyhow::Result<CourseResponse> {
+    course::Publish::api_with_auth_empty(CoursePublishPath(course_id), None).await?;
+
+    let course = course::GetDraft::api_with_auth(CourseGetDraftPath(course_id), None).await?;
+
+    Ok(course)
 }
