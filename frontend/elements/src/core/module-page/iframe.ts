@@ -44,6 +44,7 @@ export class _ extends BgBlue {
                     transform: translate(-50%, -50%);
                     overflow: hidden;
                     aspect-ratio: 16 / 9;
+                    display: grid;
                 }
                 :host([legacy]) #content {
                     aspect-ratio: 4 / 3;

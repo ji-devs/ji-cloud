@@ -12,6 +12,7 @@ impl DomRenderable for Base {
     fn render(state: Rc<Base>) -> Dom {
         html!("empty-fragment", {
             .prop("slot", "main")
+            .style("display", "contents")
             .future(state.module_phase.signal_cloned().for_each(clone!(state => move |phase| {
                 if let ModulePlayPhase::Playing = phase {
                     *state.audio_handle.borrow_mut() = state.audio.as_ref().map(|audio| {

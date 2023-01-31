@@ -14,6 +14,7 @@ impl DomRenderable for Base {
     fn render(state: Rc<Base>) -> Dom {
         html!("empty-fragment", {
             .prop("slot", "main")
+            .style("display", "contents")
             .child(render_single_background_raw(&state.background, state.theme_id, None))
             .child_signal(state.phase.signal_cloned().map(|phase| {
                 match phase {

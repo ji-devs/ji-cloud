@@ -10,6 +10,7 @@ impl DomRenderable for Base {
         html!("div", {
             .class(&*styles::FULL_STAGE)
             .prop("slot", "main")
+            .style("display", "contents")
             .style("user-select", "none")
             .child(html!("img", {
                 .class(&*styles::FULL_STAGE)

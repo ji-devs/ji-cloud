@@ -148,6 +148,7 @@ where
 
     html!("empty-fragment", {
         .prop("slot", "main")
+        .style("display", "contents")
         .child(Base::render(base.clone()))
         .future(feedback.signal_cloned().for_each(move |feedback| async move {
             let msg = IframeAction::new(ModuleToJigPlayerMessage::ModuleAssist(feedback.map(|feedback| (feedback, ModuleAssistType::Feedback))));

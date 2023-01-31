@@ -12,6 +12,7 @@ impl DomRenderable for Base {
     fn render(state: Rc<Base>) -> Dom {
         html!("empty-fragment", {
             .prop("slot", "main")
+            .style("display", "contents")
             .children(&mut [
                 render_backgrounds_raw(&state.backgrounds, state.theme_id, None),
                 render_stickers_raw(&state.stickers, state.theme_id),

@@ -24,6 +24,7 @@ impl DomRenderable for Base {
     fn render(state: Rc<Base>) -> Dom {
         html!("empty-fragment", {
             .prop("slot", "main")
+            .style("display", "contents")
             .child(render_backgrounds_raw(&state.backgrounds, state.theme_id, None))
             .child(
                 // This is similar to render_stickers_raw_vec, but we need to have a reference to the text stickers so that we can update their content based on the sticker index when each question changes, if a sticker is marked as a question field.
