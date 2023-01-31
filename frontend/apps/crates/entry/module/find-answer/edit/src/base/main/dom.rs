@@ -36,7 +36,7 @@ impl DomRenderable for Main {
                         if let Some(selected) = selected {
                             if let Some(Sticker::Text(text)) = state.base.stickers.list.lock_ref().get(selected) {
                                 let text = text.get_text_value();
-                                state.base.add_question(text, Some(selected));
+                                state.base.add_question(text, None);
                                 state.base.current_question.set(Some(0));
                             }
                         }

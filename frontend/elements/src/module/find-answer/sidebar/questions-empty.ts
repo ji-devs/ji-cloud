@@ -11,8 +11,8 @@ export class _ extends LitElement {
                     display: flex;
                     flex-direction: column;
                     justify-content: center;
-                    align-items: center;
-                    height: 100%;
+                    padding: 8px;
+                    grid-gap: 8px;
                 }
 
                 .clear {
@@ -21,6 +21,13 @@ export class _ extends LitElement {
                     width: 100%;
                     display: flex;
                     justify-content: center;
+                }
+
+                .tip {
+                    border-radius: 16px;
+                    background-color: var(--light-blue-2);
+                    text-align: center;
+                    padding: 8px;
                 }
 
                 .block {
@@ -72,17 +79,13 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <div>
+                <div class="tip">
+                    Add and edit questions here
+                </div>
                 <div class="block">
                     <slot></slot>
                     <p>Add a question</p>
                 </div>
-                <div class="break">or</div>
-                <div class="block">
-                    <img-ui path="module/find-answer/edit/select-question.svg"></img-ui>
-                    <p>Select the question if it's already on your page</p>
-                </div>
-            </div>
         `;
     }
 }

@@ -138,17 +138,19 @@ pub fn render(state: Rc<Step3>) -> Dom {
                             .prop("color", "blue")
                             .prop("icon", "circle-+-blue")
                             .event(clone!(state => move|_: events::Click| {
-                                let raw_sticker = RawSticker::Text(Text::from_value(format!(
-                                    r#"{{"version":"0.1.0","content":[{{"children":[{{"text":"{}","element":"H2"}}]}}]}}"#,
-                                    "Your question box"
-                                )));
-                                let text_sticker = Sticker::new(state.sidebar.base.stickers.clone(), &raw_sticker);
-                                if let Sticker::Text(text) = &text_sticker {
-                                    text.can_delete.set(false);
+                                if let QuestionField::Dynamic(_) = state.sidebar.base.question_field.get_cloned() {
+                                    let raw_sticker = RawSticker::Text(Text::from_value(format!(
+                                        r#"{{"version":"0.1.0","content":[{{"children":[{{"text":"{}","element":"P2"}}]}}]}}"#,
+                                        "Your question box"
+                                    )));
+                                    let text_sticker = Sticker::new(state.sidebar.base.stickers.clone(), &raw_sticker);
+                                    if let Sticker::Text(text) = &text_sticker {
+                                        text.can_delete.set(false);
+                                    }
+                                    state.sidebar.base.stickers.add_sticker(text_sticker);
+                                    let index = state.sidebar.base.stickers.list.lock_ref().len() - 1;
+                                    state.sidebar.base.question_field.set(QuestionField::Text(index));
                                 }
-                                state.sidebar.base.stickers.add_sticker(text_sticker);
-                                let index = state.sidebar.base.stickers.list.lock_ref().len() - 1;
-                                state.sidebar.base.question_field.set(QuestionField::Text(index));
                                 state.sidebar.base.add_default_question();
                                 state.sidebar.base.current_question.set(Some(0))
                             }))
@@ -751,7 +753,7 @@ fn render_tab_body(state: Rc<Step3>, tab: Tab) -> Dom {
                                     .attr("dir", "auto")
                                     .prop_signal("value", question.question_text.signal_cloned().map(|text| text.unwrap_or_default()))
                                     .prop("placeholder", crate::strings::step_3::STR_PLACEHOLDER)
-                                    .prop("rows", 1)
+                                    .prop("rows", 3)
                                     .event(clone!(state => move |evt: events::Input| {
                                         let target = evt.dyn_target::<HtmlTextAreaElement>().unwrap_ji();
                                         set_question_sticker_text(state.clone(), target.value());
@@ -769,6 +771,12 @@ fn render_tab_body(state: Rc<Step3>, tab: Tab) -> Dom {
 
 
                                         state.sidebar.base.save_question(index, question.clone());
+                                    })
+                                    .after_inserted(|elem| {
+                                        wasm_bindgen_futures::spawn_local(clone!(elem => async move {
+                                            gloo_timers::future::TimeoutFuture::new(0).await;
+                                            let _ = elem.focus();
+                                        }));
                                     })
                                 }))
                             }))

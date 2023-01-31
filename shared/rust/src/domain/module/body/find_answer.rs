@@ -12,7 +12,10 @@ use std::convert::TryFrom;
 mod play_settings;
 pub use play_settings::*;
 
-use super::{Audio, Transform};
+use super::{
+    Audio, Transform,
+    _groups::design::{Sticker, Text},
+};
 
 /// The body for [`FindAnswer`](crate::domain::module::ModuleKind::FindAnswer) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
@@ -37,13 +40,22 @@ impl BodyExt<Mode, Step> for ModuleData {
     }
 
     fn new_with_mode_and_theme(mode: Mode, theme: ThemeId) -> Self {
-        ModuleData {
+        let mut base = BaseContent::default();
+        base.theme = theme;
+
+        let mut sticker_content = Text::from_value(format!(
+            r#"{{"version":"0.1.0","content":[{{"children":[{{"text":"{}","element":"P2"}}]}}]}}"#,
+            "Questions appear here / שאלות מופיעות כאן"
+        ));
+        sticker_content.transform.translation.0[1] = -0.35; // Move Y coord up 35%
+        base.stickers.push(Sticker::Text(sticker_content));
+        let question_field_index = base.stickers.len() - 1;
+
+        Self {
             content: Some(Content {
                 mode,
-                base: BaseContent {
-                    theme,
-                    ..Default::default()
-                },
+                base,
+                question_field: QuestionField::Text(question_field_index),
                 ..Default::default()
             }),
         }
