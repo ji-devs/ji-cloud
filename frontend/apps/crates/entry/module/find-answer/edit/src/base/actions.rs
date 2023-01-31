@@ -136,8 +136,6 @@ impl Base {
                     .unwrap_ji();
                 }
             }
-
-            self.question_field.set(QuestionField::Dynamic(None));
         }
 
         self.history.push_modify(move |raw| {
