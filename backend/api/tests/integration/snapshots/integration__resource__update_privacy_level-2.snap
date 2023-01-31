@@ -1,0 +1,41 @@
+---
+source: tests/integration/resource.rs
+expression: body
+---
+{
+  "id": "[id]",
+  "publishedAt": "[published_at]",
+  "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+  "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+  "authorName": "Bobby Tables",
+  "likes": 0,
+  "views": 0,
+  "liveUpToDate": true,
+  "resourceData": {
+    "draftOrLive": "live",
+    "displayName": "resource1",
+    "cover": {
+      "id": "[id]",
+      "kind": "Cover",
+      "is_complete": false
+    },
+    "ageRanges": [],
+    "affiliations": [],
+    "language": "en",
+    "categories": [],
+    "description": "test description",
+    "createdAt": "2021-03-04T00:46:26.134651Z",
+    "lastEdited": "[last_edited]",
+    "privacyLevel": "private",
+    "locked": false,
+    "otherKeywords": "",
+    "translatedKeywords": "",
+    "translatedDescription": {},
+    "additionalResources": "[ids]"
+  },
+  "adminData": {
+    "rating": null,
+    "blocked": false,
+    "curated": false
+  }
+}

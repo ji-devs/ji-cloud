@@ -681,3 +681,138 @@ async fn live_up_to_date_flag(port: u16) -> anyhow::Result<()> {
 
     Ok(())
 }
+
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::MetaKinds",
+        "Fixture::UserDefaultPerms",
+        "Fixture::Resource",
+        "Fixture::CategoryOrdering"
+    )
+)]
+async fn update_privacy_level(port: u16) -> anyhow::Result<()> {
+    let name = "update_privacy_level";
+
+    let client = reqwest::Client::new();
+
+    let resource_id = "d8067526-1518-11ed-87fa-ebaf880b6d9c".to_string();
+
+    let resp = client
+        .patch(&format!(
+            "http://0.0.0.0:{}/v1/resource/{resource_id}",
+            port
+        ))
+        .json(&json!({
+            "privacyLevel": "private",
+        }))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::NO_CONTENT);
+
+    let resp = client
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/resource/{resource_id}/draft",
+            port
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(
+        format!("{}-1",name),
+        body, {
+            ".**.id" => "[id]",
+            ".**.lastEdited" => "[last_edited]",
+            ".**.publishedAt" => "[published_at]",
+            ".**.additionalResources" => "[ids]"
+        }
+    );
+
+    let _resp = client
+        .put(&format!(
+            "http://0.0.0.0:{}/v1/resource/{resource_id}/draft/publish",
+            port
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    let resp = client
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/resource/{resource_id}/live",
+            port
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(
+        format!("{}-2",name),
+        body, {
+            ".**.id" => "[id]",
+            ".**.lastEdited" => "[last_edited]",
+            ".**.publishedAt" => "[published_at]",
+            ".**.additionalResources" => "[ids]"
+        }
+    );
+
+    let resp = client
+        .patch(&format!(
+            "http://0.0.0.0:{}/v1/resource/{resource_id}",
+            port
+        ))
+        .json(&json!({
+            "privacyLevel": "unlisted",
+        }))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::NO_CONTENT);
+
+    let _resp = client
+        .put(&format!(
+            "http://0.0.0.0:{}/v1/resource/{resource_id}/draft/publish",
+            port
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    let resp = client
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/resource/{resource_id}/live",
+            port
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(
+        format!("{}-3",name),
+        body, {
+            ".**.id" => "[id]",
+            ".**.lastEdited" => "[last_edited]",
+            ".**.publishedAt" => "[published_at]",
+            ".**.additionalResources" => "[ids]"
+        }
+    );
+
+    Ok(())
+}
