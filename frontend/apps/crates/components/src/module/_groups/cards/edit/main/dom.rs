@@ -25,14 +25,18 @@ where
         state: Rc<Main<RawData, E, GetSettingsStateFn, RenderSettingsStateFn, SettingsState>>,
     ) -> Dom {
         html!("empty-fragment", {
+            .style("display", "contents")
             .child_signal(state.base.is_empty_signal().map(clone!(state => move |is_empty| {
                 Some(
                     if is_empty {
                         html!("main-empty", {
+                            .style("grid-column", "1")
+                            .style("grid-row", "1")
                             .prop("message", STR_EMPTY)
                         })
                     } else {
                         html!("empty-fragment", {
+                            .style("display", "contents")
                             .child_signal(state.base.step.signal_cloned().map(clone!(state => move |step| {
                                 // Reset card selection when changing step.
                                 state.base.selected_pair.set(None);
@@ -78,6 +82,9 @@ pub fn render_main_cards<RawData: RawDataExt, E: ExtraExt>(
     step: Step,
 ) -> Dom {
     html!("main-cards", {
+        .style("grid-column", "1")
+        .style("grid-row", "1")
+        .style("align-self", "start")
         .children_signal_vec({
             base.pairs
                 .signal_vec_cloned()
