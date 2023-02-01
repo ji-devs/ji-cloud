@@ -60,7 +60,7 @@ impl PrePublish {
         // navigate to cover if exists otherwise navigate to landing
         let cover_module_id = self.asset.cover().lock_ref().as_ref().map(|m| m.id);
 
-        match &self.asset {
+        match &*self.asset {
             EditableAsset::Jig(_) => {
                 let route = match cover_module_id {
                     Some(cover_module_id) => JigEditRoute::Module(cover_module_id),
@@ -93,7 +93,7 @@ impl PrePublish {
 
     // used to disable button
     pub fn is_ready_to_publish(self: &Rc<Self>) -> bool {
-        match &self.asset {
+        match &*self.asset {
             EditableAsset::Jig(jig) => jig.modules.lock_ref().iter().all(|m| m.is_complete),
             EditableAsset::Resource(resource) => resource.cover.lock_ref().is_some(),
             EditableAsset::Course(course) => course.cover.lock_ref().is_some(),
@@ -101,7 +101,7 @@ impl PrePublish {
     }
 
     async fn save_async(self: &Rc<Self>) {
-        match &self.asset {
+        match &*self.asset {
             EditableAsset::Jig(jig) => {
                 jig_actions::save_jig(jig).await.unwrap_ji();
             }
@@ -131,7 +131,7 @@ impl PrePublish {
 
         state.loader.load(clone!(state => async move {
             state.save_async().await;
-            let asset: Asset = match &state.asset {
+            let asset: Asset = match &*state.asset {
                 EditableAsset::Jig(jig) => {
                     jig_actions::publish_jig(jig.id).await.unwrap_ji().into()
                 },

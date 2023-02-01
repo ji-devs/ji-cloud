@@ -234,7 +234,7 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                 .prop("kind", "text")
                 .text(STR_PUBLISH_LATER)
                 .event(clone!(state => move |_: events::Click| {
-                    let url = match &state.asset {
+                    let url = match &*state.asset {
                         EditableAsset::Jig(jig) => {
                             state.publish_state.asset_edit_state.set_route_jig(JigEditRoute::Landing);
                             Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(

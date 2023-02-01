@@ -13,7 +13,7 @@ use utils::{
 
 pub struct AssetEditState {
     pub asset_id: AssetId,
-    pub asset: EditableAsset,
+    pub asset: Rc<EditableAsset>,
     // using this instead of jig.modules/course.items
     pub sidebar_spots: MutableVec<Rc<SidebarSpot>>,
     pub route: Mutable<AssetEditRoute>,
@@ -31,7 +31,7 @@ impl AssetEditState {
 
         Rc::new(Self {
             asset_id,
-            asset: asset_id.into(),
+            asset: Rc::new(asset_id.into()),
             sidebar_spots: Default::default(),
             route: Mutable::new(route),
             play_jig: Mutable::new(None),

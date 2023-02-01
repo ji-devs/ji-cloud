@@ -35,12 +35,10 @@ pub struct Sidebar {
 
 impl Sidebar {
     pub fn new(asset_edit_state: Rc<AssetEditState>) -> Rc<Self> {
-        let settings_state = match &asset_edit_state.asset {
+        let settings_state = match &*asset_edit_state.asset {
             EditableAsset::Jig(jig) => SidebarSetting::Jig(JigSettings::new(jig)),
             EditableAsset::Course(course) => SidebarSetting::Course(CourseSettings::new(course)),
-            EditableAsset::Resource(_) => {
-                unimplemented!()
-            }
+            EditableAsset::Resource(_) => unimplemented!(),
         };
 
         Rc::new(Self {
@@ -109,7 +107,7 @@ impl SidebarSpot {
             AssetId::JigId(_) => SidebarSpotItem::Jig(None),
             AssetId::CourseId(_) => SidebarSpotItem::Course(None),
             AssetId::ResourceId(_) => unimplemented!(),
-            AssetId::ProDevId(_) => unimplemented!(),
+            AssetId::ProDevId(_) => todo!(),
         };
         Rc::new(Self {
             item,

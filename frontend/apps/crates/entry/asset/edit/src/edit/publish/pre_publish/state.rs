@@ -19,7 +19,7 @@ const STR_COURSE: &str = "Course";
 
 pub struct PrePublish {
     pub loader: AsyncLoader,
-    pub asset: EditableAsset,
+    pub asset: Rc<EditableAsset>,
     pub categories: Mutable<Vec<Category>>,
     // categories has label lookup since it's both more complex to lookup and used more then others (pills)
     pub category_label_lookup: Mutable<HashMap<CategoryId, String>>,
@@ -44,7 +44,7 @@ impl PrePublish {
     ) -> Self {
         Self {
             // Separate asset for publish as it doesn't auto save
-            asset: publish_state.asset_edit_state.asset.deep_clone(),
+            asset: Rc::clone(&publish_state.asset_edit_state.asset),
             loader: AsyncLoader::new(),
             categories: Mutable::new(categories),
             category_label_lookup: Mutable::new(category_label_lookup),
@@ -61,7 +61,7 @@ impl PrePublish {
 
     /// a displayable string for the asset type
     pub fn asset_type_name(&self) -> &'static str {
-        match &self.asset {
+        match &*self.asset {
             EditableAsset::Jig(_) => STR_JIG,
             EditableAsset::Resource(_) => STR_RESOURCE,
             EditableAsset::Course(_) => STR_COURSE,
