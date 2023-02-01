@@ -121,7 +121,7 @@ impl Gallery {
                 AssetId::ProDevId(_) => todo!(),
 
             };
-            state.assets.lock_mut().push_cloned(asset.unwrap_ji());
+            state.assets.lock_mut().insert_cloned(0, asset.unwrap_ji());
         }));
     }
 
