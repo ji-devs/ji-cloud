@@ -20,15 +20,15 @@ export class _ extends LitElement {
                     font-weight: bold;
                     display: inline-grid;
                     place-content: center;
-                    width: 10px;
+                    width: 30px;
+                    height: 30px;
+                    border-radius: 50%;
+                    border: solid 1px var(--dark-blue-1);
                 }
-                @media (min-width: 1024px) {
-                    .index {
-                        width: 30px;
-                        height: 30px;
-                        border-radius: 50%;
-                        border: solid 1px var(--dark-blue-1);
-                    }
+                :host([done]) .index {
+                    background-color: var(--dark-green-1);
+                    color: #fff;
+                    border: none;
                 }
                 ::slotted([slot=thumbnail]) {
                     width: 150px;
@@ -78,9 +78,14 @@ export class _ extends LitElement {
     @property()
     description: string = "";
 
+    @property({ type: Boolean, reflect: true })
+    done: boolean = false;
+
     render() {
         return html`
-            <div class="index">${this.index}</div>
+            <div class="index">${
+                this.done ? html`<fa-icon icon="fa-solid fa-check"></fa-icon>` : this.index
+            }</div>
             <slot name="thumbnail"></slot>
             <div class="column-3">
                 <div class="name">${this.name}</div>

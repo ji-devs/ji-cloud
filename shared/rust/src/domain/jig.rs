@@ -27,7 +27,7 @@ use super::{
 use crate::{api::endpoints::PathPart, domain::module::body::ThemeId};
 
 /// Wrapper type around [`Uuid`], represents the ID of a JIG.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart, Hash)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct JigId(pub Uuid);

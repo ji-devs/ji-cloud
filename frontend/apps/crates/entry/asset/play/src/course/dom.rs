@@ -120,6 +120,7 @@ impl CoursePlayer {
             .prop("name", &jig.jig_data.display_name)
             .prop("description", &jig.jig_data.description)
             .prop("index", i + 1)
+            .prop_signal("done", state.jigs_done.signal_ref(move |jigs_done| jigs_done.contains(&jig_id)))
             .child(
                 ModuleThumbnail::new(
                     jig_id.into(),
@@ -134,6 +135,7 @@ impl CoursePlayer {
             }))
             .event(clone!(state, jig_id => move |_: events::Click| {
                 state.play_jig(jig_id);
+                state.jigs_done.lock_mut().insert(jig_id);
             }))
         })
     }
