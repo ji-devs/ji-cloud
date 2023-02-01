@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/images/ui";
 
-const STR_PREVIEW_JIG_LABEL = "Preview JIG";
+const STR_PREVIEW_JIG_LABEL = "Preview ";
 
 @customElement("jig-edit-sidebar-preview-button")
 export class _ extends LitElement {
@@ -23,10 +23,13 @@ export class _ extends LitElement {
         ];
     }
 
+    @property()
+    assetDisplayName: string = "";
+
     render() {
         return html`
             <img-ui path="entry/jig/preview.svg"></img-ui>
-            ${STR_PREVIEW_JIG_LABEL}
+            ${STR_PREVIEW_JIG_LABEL}${this.assetDisplayName}
         `;
     }
 }

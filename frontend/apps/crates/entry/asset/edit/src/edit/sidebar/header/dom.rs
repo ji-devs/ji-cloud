@@ -12,8 +12,10 @@ use utils::{
     prelude::*,
 };
 
-const STR_MY_JIGS: &str = "My JIGs";
-const STR_SEARCH_PLACEHOLDER: &str = "My JIG’s name";
+const STR_MY_JIGS_1: &str = "My ";
+const STR_MY_JIGS_2: &str = "s";
+const STR_SEARCH_PLACEHOLDER_1: &str = "My ";
+const STR_SEARCH_PLACEHOLDER_2: &str = "’s name";
 
 pub struct HeaderDom {}
 
@@ -25,7 +27,10 @@ impl HeaderDom {
             .prop_signal("collapsed", sidebar_state.collapsed.signal())
             .prop_signal("isModulePage", asset_edit_state.route.signal_cloned().map(|route| {
                 // TODO: change?
-                matches!(route, AssetEditRoute::Jig(_, JigEditRoute::Landing))
+                matches!(
+                    route,
+                    AssetEditRoute::Jig(_, JigEditRoute::Landing) | AssetEditRoute::Course(_, CourseEditRoute::Landing)
+                )
             }))
             .apply(|dom| {
                 match &sidebar_state.settings {
@@ -50,17 +55,31 @@ impl HeaderDom {
                     .prop("kind", "text")
                     .prop("color", "blue")
                     .prop("weight", "medium")
-                    .text(STR_MY_JIGS)
-                    .event(|_:events::Click| {
-                        let url:String = Route::Asset(AssetRoute::JigGallery).into();
+                    .text(&format!("{}{}{}",
+                        STR_MY_JIGS_1,
+                        asset_edit_state.asset.asset_type().as_str(),
+                        STR_MY_JIGS_2
+                    ))
+                    .event(clone!(asset_edit_state => move |_:events::Click| {
+                        let route = match asset_edit_state.asset_id {
+                            AssetId::JigId(_) => AssetRoute::JigGallery,
+                            AssetId::CourseId(_) => AssetRoute::CourseGallery,
+                            AssetId::ResourceId(_) => unimplemented!(),
+                            AssetId::ProDevId(_) => todo!(),
+                        };
+                        let url:String = Route::Asset(route).into();
                         dominator::routing::go_to_url(&url);
-                    })
+                    }))
                 }),
                 html!("input-wrapper", {
                     .prop("slot", "input")
                     .child(html!("input" => HtmlInputElement, {
                         .with_node!(input => {
-                            .prop("placeholder", STR_SEARCH_PLACEHOLDER)
+                            .prop("placeholder", format!("{}{}{}",
+                                STR_SEARCH_PLACEHOLDER_1,
+                                asset_edit_state.asset.asset_type().as_str(),
+                                STR_SEARCH_PLACEHOLDER_2
+                            ))
                             .prop_signal("value", asset_edit_state.asset.display_name().signal_cloned())
                             .event(clone!(sidebar_state => move |_: events::Input| {
                                 let value = input.value();
@@ -75,6 +94,7 @@ impl HeaderDom {
                 }),
                 html!("jig-edit-sidebar-preview-button", {
                     .prop("slot", "preview")
+                    .prop("assetDisplayName", asset_edit_state.asset.asset_type().as_str())
                     .event(clone!(sidebar_state, asset_edit_state => move |_: events::Click| {
                         match &sidebar_state.settings {
                             SidebarSetting::Jig(jig) => {

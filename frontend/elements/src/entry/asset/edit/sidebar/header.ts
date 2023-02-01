@@ -130,12 +130,10 @@ export class _ extends LitElement {
                 </a>
                 <nav class="open-only">
                     <slot name="gallery"></slot>
-                    ${this.isModulePage
-                        ? nothing
-                        : html`
-                              <div class="divider"></div>
-                              <slot name="modules"></slot>
-                          `}
+                    ${this.isModulePage ? nothing : html`
+                        <div class="divider"></div>
+                        <slot name="modules"></slot>
+                    `}
                 </nav>
             </div>
             <div class="input open-only"><slot name="input"></slot></div>
