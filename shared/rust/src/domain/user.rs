@@ -83,7 +83,7 @@ impl TryFrom<i16> for UserScope {
     }
 }
 
-make_path_parts!(UserLookupPath => "/v1/user");
+make_path_parts!(UserLookupPath => "/v1/user/lookup");
 
 /// Query to lookup a user by unique data
 /// no filters will return that the user does not exist.
