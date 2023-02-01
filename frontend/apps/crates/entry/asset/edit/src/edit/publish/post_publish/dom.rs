@@ -42,8 +42,10 @@ impl PostPublish {
 
     fn render_jig_actions(self: &Rc<Self>) -> Vec<Dom> {
         let state = self;
+        let asset_display_name = AssetType::Jig.as_str();
         let share_anchor = html!("post-publish-action", {
             .prop("kind", "share")
+            .prop("assetDisplayName", asset_display_name)
             .prop_signal("active", state.share_state.active_popup.signal_cloned().map(|active| active.is_some()))
         });
 
@@ -51,13 +53,15 @@ impl PostPublish {
             Rc::clone(&state.share_state).render(share_anchor, Some("actions")),
             html!("post-publish-action", {
                 .prop("slot", "actions")
-                .prop("kind", "new-jig")
+                .prop("kind", "new")
+                .prop("assetDisplayName", asset_display_name)
                 .event(clone!(state => move |_: events::Click| {
                     state.create_jig();
                 }))
             }),
             html!("post-publish-action", {
-                .prop("kind", "play-jig")
+                .prop("kind", "play")
+                .prop("assetDisplayName", asset_display_name)
                 .prop("slot", "actions")
                 .event(clone!(state => move |_: events::Click| {
                     let settings = AssetPlayerOptions::Jig(JigPlayerOptions::default());
@@ -69,16 +73,19 @@ impl PostPublish {
 
     fn render_resource_actions(self: &Rc<Self>) -> Vec<Dom> {
         let state = self;
+        let asset_display_name = AssetType::Resource.as_str();
         vec![
             html!("post-publish-action", {
                 .prop("slot", "actions")
-                .prop("kind", "new-resource")
+                .prop("kind", "new")
+                .prop("assetDisplayName", asset_display_name)
                 .event(clone!(state => move |_: events::Click| {
                     state.create_resource();
                 }))
             }),
             html!("post-publish-action", {
-                .prop("kind", "view-resources")
+                .prop("kind", "view-others")
+                .prop("assetDisplayName", asset_display_name)
                 .prop("slot", "actions")
                 .event(|_: events::Click| {
                     Route::Asset(AssetRoute::ResourceGallery).redirect();
@@ -89,8 +96,10 @@ impl PostPublish {
 
     fn render_course_actions(self: &Rc<Self>) -> Vec<Dom> {
         let state = self;
+        let asset_display_name = AssetType::Course.as_str();
         let share_anchor = html!("post-publish-action", {
             .prop("kind", "share")
+            .prop("assetDisplayName", asset_display_name)
             .prop_signal("active", state.share_state.active_popup.signal_cloned().map(|active| active.is_some()))
         });
 
@@ -98,13 +107,15 @@ impl PostPublish {
             Rc::clone(&state.share_state).render(share_anchor, Some("actions")),
             html!("post-publish-action", {
                 .prop("slot", "actions")
-                .prop("kind", "new-course")
+                .prop("kind", "new")
+                .prop("assetDisplayName", asset_display_name)
                 .event(clone!(state => move |_: events::Click| {
                     state.create_course();
                 }))
             }),
             html!("post-publish-action", {
-                .prop("kind", "play-course")
+                .prop("kind", "play")
+                .prop("assetDisplayName", asset_display_name)
                 .prop("slot", "actions")
                 .event(clone!(state => move |_: events::Click| {
                     let settings = AssetPlayerOptions::Course(CoursePlayerOptions::default());

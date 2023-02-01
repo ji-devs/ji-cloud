@@ -2,29 +2,7 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/images/ui";
 // import {ModuleKind, STR_MODULE_DISPLAY_NAME} from "@elements/module/_common/types";
 
-export type Kind = "share" | "new-jig" | "play-jig" | "new-resource" | "view-resources" | "new-course" | "play-course";
-
-const STR_LABEL_LOOKUP: { [key in Kind]: string } = {
-    "share": "Share JIG",
-    "new-jig": "Create a new JIG",
-    "play-jig": "Play JIG",
-    "new-resource": "Add another",
-    "view-resources": "View my resources",
-    "new-course": "Create a new Course",
-    "play-course": "Play Course",
-};
-
-const ext: {
-    [key in Kind]: string;
-} = {
-    "share": "svg",
-    "new-jig": "png",
-    "play-jig": "svg",
-    "new-resource": "svg",
-    "view-resources": "svg",
-    "new-course": "svg",
-    "play-course": "svg",
-};
+export type Kind = "share" | "new" | "play" | "view-others";
 
 @customElement("post-publish-action")
 export class _ extends LitElement {
@@ -64,16 +42,30 @@ export class _ extends LitElement {
     @property()
     kind: Kind = "share";
 
+    @property()
+    assetDisplayName: string = "";
+
+    private labelLookup() : string {
+        switch (this.kind) {
+            case "share":
+                return `Share ${this.assetDisplayName}`;
+            case "new":
+                return `Create a new ${this.assetDisplayName}`;
+            case "play":
+                return `Play ${this.assetDisplayName}`;
+            case "view-others":
+                return `View my ${this.assetDisplayName}s`;
+        }
+    }
+
     render() {
         return html`
             <div class="circle">
                 <img-ui
-                    path="jig/edit/post-publish/action-${this.kind}.${ext[
-                        this.kind
-                    ]}"
+                    path="jig/edit/post-publish/action-${this.kind}.svg"
                 ></img-ui>
             </div>
-            <span class="label">${STR_LABEL_LOOKUP[this.kind]}</span>
+            <span class="label">${this.labelLookup()}</span>
         `;
     }
 }
