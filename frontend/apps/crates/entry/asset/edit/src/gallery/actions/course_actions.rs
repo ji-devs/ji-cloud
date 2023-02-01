@@ -4,8 +4,9 @@ use shared::{
     domain::{
         asset::{Asset, DraftOrLive, UserOrMe},
         course::{
-            CourseBrowsePath, CourseBrowseQuery, CourseCreatePath, CourseCreateRequest,
-            CourseDeletePath, CourseId, CourseSearchPath, CourseSearchQuery,
+            CourseBrowsePath, CourseBrowseQuery, CourseClonePath, CourseCreatePath,
+            CourseCreateRequest, CourseDeletePath, CourseGetDraftPath, CourseId, CourseSearchPath,
+            CourseSearchQuery,
         },
         module::{ModuleBody, ModuleCreatePath, ModuleCreateRequest, ModuleKind},
     },
@@ -92,33 +93,17 @@ async fn add_cover(course_id: &CourseId) {
     }
 }
 
-pub async fn copy_course(_course_id: CourseId) -> Result<Asset, ()> {
-    todo!()
-    // let path = endpoints::course::Clone::PATH.replace("{id}", &course_id.0.to_string());
-
-    // match api_with_auth::<CreateResponse<CourseId>, EmptyError, ()>(
-    //     &path,
-    //     endpoints::course::Clone::METHOD,
-    //     None,
-    // )
-    // .await
-    // {
-    //     Ok(resp) => {
-    //         let path = endpoints::course::GetDraft::PATH.replace("{id}", &resp.id.0.to_string());
-    //         api_with_auth::<CourseResponse, EmptyError, ()>(
-    //             &path,
-    //             endpoints::course::GetDraft::METHOD,
-    //             None,
-    //         )
-    //         .await
-    //         .map(|resp| {
-    //             let asset: Asset = resp.into();
-    //             asset
-    //         })
-    //         .map_err(|_| ())
-    //     }
-    //     Err(_) => Err(()),
-    // }
+pub async fn copy_course(course_id: CourseId) -> Result<Asset, ()> {
+    match endpoints::course::Clone::api_with_auth(CourseClonePath(course_id), None).await {
+        Ok(resp) => endpoints::course::GetDraft::api_with_auth(CourseGetDraftPath(resp.id), None)
+            .await
+            .map(|resp| {
+                let asset: Asset = resp.into();
+                asset
+            })
+            .map_err(|_| ()),
+        Err(_) => Err(()),
+    }
 }
 
 pub async fn delete_course(course_id: CourseId) -> anyhow::Result<()> {
