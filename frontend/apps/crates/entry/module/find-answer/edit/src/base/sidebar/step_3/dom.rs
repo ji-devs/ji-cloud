@@ -30,6 +30,8 @@ use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement};
 
+const MAX_QUESTION_TITLE_LENGTH: usize = 32;
+
 fn empty_signal(state: Rc<Step3>) -> impl Signal<Item = bool> {
     state
         .sidebar
@@ -444,6 +446,10 @@ pub fn render_question(
                                 None => "".to_string(),
                             }
                         }))
+                        .event(move |evt: events::Input| {
+                            let target = evt.dyn_target::<HtmlInputElement>().unwrap_ji();
+                            target.set_value(&limit_text(MAX_QUESTION_TITLE_LENGTH, target.value()));
+                        })
                         .event(clone!(state, index, question => move |evt: events::Change| {
                             let target = evt.dyn_target::<HtmlInputElement>().unwrap_ji();
                             let value = target.value();
@@ -688,7 +694,7 @@ fn get_question_audio_input(
     AudioInput::new(opts, callbacks)
 }
 
-fn set_question_sticker_text(state: Rc<Step3>, value: String) {
+fn set_question_sticker_text(state: Rc<Step3>, mut value: String) {
     if let QuestionField::Text(field_index) = state.sidebar.base.question_field.get_cloned() {
         let text = state
             .sidebar
@@ -711,9 +717,14 @@ fn set_question_sticker_text(state: Rc<Step3>, value: String) {
                 .set(text.get_text_value());
         }
 
-        // Weird bug: If the value is an empty string, the sticker's value will be updated,
-        // but future updates will not work correctly. Adding in some whitespace resolves this.
-        let value = if value.is_empty() { " ".into() } else { value };
+        if value.is_empty() {
+            match state.sidebar.base.question_sticker_text.get_cloned() {
+                Some(text) => value = text,
+                // Weird bug: If the value is an empty string, the sticker's value will be updated,
+                // but future updates will not work correctly. Adding in some whitespace resolves this.
+                None => value = " ".into(),
+            }
+        }
 
         Reflect::set(
             &text.renderer_ref.get_cloned().unwrap_ji(),
@@ -768,7 +779,6 @@ fn render_tab_body(state: Rc<Step3>, tab: Tab) -> Dom {
                                         if question.title.get_cloned().is_none() {
                                             question.title.set(Some(value.into()))
                                         }
-
 
                                         state.sidebar.base.save_question(index, question.clone());
                                     })
