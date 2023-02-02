@@ -13,7 +13,6 @@ import { classMap } from "lit-html/directives/class-map";
 import { nothing } from "lit-html";
 
 const STR_CREATE_JIG = "Create a New ";
-const STR_TEMPLATE_PARAGRAPH = "Create a new JIG (Jewish Interactive Game). Choose the activities designed to fit your teaching goals and you'll have a complete interactive lesson in just a snap!";
 const STR_RECENT_1 = "My Recent";
 const STR_RECENT_2 = "s";
 const STR_SEE_ALL_TEMPLATES = "See all templates";
@@ -60,7 +59,7 @@ export class _ extends LitElement {
                     color: var(--orange);
                     margin: 0;
                 }
-                .template-paragraph {
+                ::slotted([slot=template-paragraph]) {
                     font-size: 18px;
                     font-weight: 300;
                     grid-column: 1;
@@ -206,9 +205,7 @@ export class _ extends LitElement {
                         <h1 class="create-jig-header">
                             ${STR_CREATE_JIG + this.assetDisplayName}
                         </h1>
-                        <p class="template-paragraph">
-                            ${STR_TEMPLATE_PARAGRAPH}
-                        </p>
+                        <slot name="template-paragraph"></slot>
                     </div>
                     <div
                         class="new-jig-section ${classMap({

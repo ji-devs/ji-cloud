@@ -16,6 +16,7 @@ use utils::prelude::*;
 const STR_DELETE: &str = "Delete";
 const STR_DUPLICATE: &str = "Duplicate";
 const STR_SEARCH: &str = "Search";
+const STR_TEMPLATE_PARAGRAPH: &str = "Create a new JIG (Jewish Interactive Game). Choose the activities designed to fit your teaching goals and you'll have a complete interactive lesson in just a snap!";
 const STR_SHOW_ALL: &str = "Show all";
 const STR_SHOW_PUBLISHED: &str = "Show published";
 const STR_SHOW_DRAFT: &str = "Show drafts";
@@ -99,14 +100,12 @@ impl Gallery {
                             analytics::event("Jig Gallery Create", None);
                         }))
                     }))
-                    // .apply_if(state.focus.is_modules(), move |dom| {
-                    //     dom.children(TEMPLATE_KINDS.iter().map(|kind| {
-                    //         html!("jig-gallery-template", {
-                    //             .prop("slot", "jig-templates")
-                    //             .prop("kind", *kind)
-                    //         })
-                    //     }))
-                    // })
+                    .apply_if(state.asset_type.is_jig(), move |dom| {
+                        dom.child(html!("p", {
+                            .prop("slot", "template-paragraph")
+                            .text(STR_TEMPLATE_PARAGRAPH)
+                        }))
+                    })
                     .child(html!("input-search", {
                         .style("grid-column", "3") // TODO: remove once draft filter is enabled
                         .prop("slot", "search-input")
