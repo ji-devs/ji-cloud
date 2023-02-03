@@ -57,7 +57,7 @@ export class _ extends LitElement {
                     transition: transform 0.4s;
                     transform-style: preserve-3d;
                     width: 280px;
-                    height: 288px;
+                    height: 280px;
                     perspective: 1000px;
                     position: relative;
                 }
@@ -67,6 +67,8 @@ export class _ extends LitElement {
                 }
                 ::slotted([slot=front]) {
                     z-index: 2;
+                    /* safari seems to require backface-visibility here */
+                    backface-visibility: hidden;
                 }
                 .back {
                     width: 100%;
@@ -78,7 +80,6 @@ export class _ extends LitElement {
                     position: absolute;
                     grid-column: 1;
                     grid-row: 1;
-                    height: 100%;
                     display: grid;
                     grid-template-rows: 1fr auto;
                     transform: rotateY(180deg);
