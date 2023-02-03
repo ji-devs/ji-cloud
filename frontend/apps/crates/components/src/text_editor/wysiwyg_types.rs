@@ -71,7 +71,7 @@ pub struct ControlsState {
     pub color: Option<Color>,
     pub highlight_color: Option<Color>,
     pub box_color: Option<Color>,
-    pub direction: Direction,
+    // pub direction: Direction,
     pub italic: bool,
     pub underline: bool,
 }
@@ -94,7 +94,7 @@ impl ControlsState {
             color: None,
             highlight_color: None,
             box_color: None,
-            direction: Direction::default(),
+            // direction: Direction::default(),
             italic: false,
             underline: false,
         }

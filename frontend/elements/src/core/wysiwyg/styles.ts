@@ -61,9 +61,9 @@ export function getLeafStyles(text: EditorText): CSSProperties {
     return styles;
 }
 
-export function getLeafProps(text: EditorText) {
+export function getLeafProps(_text: EditorText) {
     let props: any = {};
-    if (text.direction === Direction.RightToLeft) props.dir = "rtl";
+    // if (text.direction === Direction.RightToLeft) props.dir = "rtl";
     return props;
 }
 

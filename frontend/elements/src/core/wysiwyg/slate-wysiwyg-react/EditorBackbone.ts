@@ -26,7 +26,7 @@ export type EditorElement = {
     align?: Align;
 };
 export type EditorText = {
-    direction?: Direction
+    // direction?: Direction
     text?: string;
     underline?: boolean;
     italic?: boolean;
@@ -120,6 +120,7 @@ export class EditorBackbone {
         value: ControllerState[K] | undefined
     ) {
         const keyType = getKeyLevel(key);
+        console.log(`Key ${key}, Value ${value}`);
         if (keyType === "element") {
             Transforms.setNodes(
                 this._editor,

@@ -34,6 +34,6 @@ export class _ extends LitElement {
             fontSize: this.fontSize,
         });
 
-        return html`<span style=${style}>${value}</span>`;
+        return html`<span dir="auto" style=${style}>${value}</span>`;
     }
 }

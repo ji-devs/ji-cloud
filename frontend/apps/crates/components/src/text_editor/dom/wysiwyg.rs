@@ -32,7 +32,7 @@ impl TextEditor {
                 controls.color = value.color;
                 controls.highlight_color = value.highlight_color;
                 controls.box_color = value.box_color;
-                controls.direction = value.direction;
+                // controls.direction = value.direction;
                 controls.italic = value.italic;
                 controls.underline = value.underline;
             }))

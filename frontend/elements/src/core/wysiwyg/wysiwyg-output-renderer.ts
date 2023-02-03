@@ -115,8 +115,8 @@ export class _ extends LitElement {
     // prettier-ignore
     private renderLeaf(leaf: EditorText) {
         const styles = getLeafStyles(leaf) as StyleInfo;
-        let dir = leaf.direction === Direction.RightToLeft ? "rtl" : "ltr";
-        return html`<span style=${styleMap(styles)} type="${ifDefined(leaf.element)}" .dir=${dir}>${leaf.text === "" ? html`<br />` : leaf.text}</span>`;
+        // let dir = leaf.direction === Direction.RightToLeft ? "rtl" : "ltr";
+        return html`<span style=${styleMap(styles)} type="${ifDefined(leaf.element)}" dir="auto">${leaf.text === "" ? html`<br />` : leaf.text}</span>`;
     }
 
     // prettier-ignore
