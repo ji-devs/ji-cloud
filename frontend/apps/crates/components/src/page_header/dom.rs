@@ -8,7 +8,7 @@ use utils::{
     events,
     init::analytics,
     routes::{
-        AdminRoute, AssetRoute, CommunityMembersRoute, CommunityRoute, HomeRoute, Route, UserRoute,
+        AdminRoute, AssetRoute, CommunityMembersRoute, CommunityRoute, Route, UserRoute,
     },
     unwrap::UnwrapJiExt,
 };
@@ -78,12 +78,12 @@ pub fn render(
                 analytics::event("Donate Click", None);
             })
         }))
-        .child(html!("button-rect", {
+        .child(html!("fa-button", {
             .prop("slot", "help")
-            .prop("href", Route::Home(HomeRoute::Help).to_string())
-            .child(html!("fa-button", {
-                .prop("icon", "fa-regular fa-circle-question")
-            }))
+            .prop("icon", "fa-regular fa-circle-question fa-5x")
+            .event(move |_evt: events::Click| {
+                analytics::event("Help Center Click", None);
+            })
         }))
         .apply_if(render_beta, |dom| {
             dom.child(html!("beta-button", {

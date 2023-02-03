@@ -2,6 +2,7 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 import { nothing, Part } from "lit-html";
 import { classMap } from "lit-html/directives/class-map";
 import "@elements/core/images/ui";
+import { ifDefined } from "lit-html/directives/if-defined";
 
 export type IconSize = "x-small" | "small" | "medium";
 
@@ -197,7 +198,7 @@ export class _ extends LitElement {
 
         const regularImage = html`<img-ui
             class=${regularClasses}
-            path=${iconPath}
+            path=${ifDefined(iconPath)}
         ></img-ui>`;
         const hoverImage = iconHoverPath
             ? html`<img-ui

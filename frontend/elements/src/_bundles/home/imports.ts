@@ -3,6 +3,7 @@ import "@elements/_bundles/_sub-bundles/all";
 import "@elements/core/asset/asset-card";
 import "@elements/core/buttons/empty";
 import "@elements/core/buttons/rectangle-icon";
+import "@elements/core/buttons/hover-circle";
 import "@elements/core/buttons/fa-button";
 import "@elements/core/images/ui";
 import "@elements/core/images/ji";

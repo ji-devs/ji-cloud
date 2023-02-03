@@ -44,8 +44,19 @@ export class _ extends LitElement {
                     place-content: center;
                 }
                 .help {
-                    padding-left: 10px;
-                    place-items: center;
+                    display: flex;
+                    padding-left: 50px;
+                }
+                ::slotted([slot="help"]){
+                    display: grid;
+                    height: 27px;
+                    width: 27px;
+                    border-radius: 50%;
+                    place-content: center;
+                    color: none;
+                }
+                ::slotted([slot="help"]:hover){
+                    background-color: #c4d9f7;
                 }
                 .user {
                     display: flex;
@@ -62,6 +73,10 @@ export class _ extends LitElement {
                     transform: translateY(100%);
                     border-radius: 0 0 12px 12px;
                     margin-left: 1em;
+                }
+
+                a {
+                    color: inherit;
                 }
 
                 /* mobile */
@@ -82,6 +97,16 @@ export class _ extends LitElement {
         ];
     }
 
+    @property()
+    href: string = "";
+
+    @property()
+    target: string = "";
+
+    @property()
+    icon: string = "";
+
+
     render() {
         return html`
             <a href="/">
@@ -97,7 +122,9 @@ export class _ extends LitElement {
                 <slot name="student-code"></slot>
             </div>
             <div class="help">
-                <slot name="help"></slot>
+                <a href= "/home/help" color="black">
+                    <slot name="help"></slot>
+                </a>
             </div>
             <div class="user">
                 <slot name="user"></slot>
