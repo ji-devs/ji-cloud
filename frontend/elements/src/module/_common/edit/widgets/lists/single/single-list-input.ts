@@ -68,6 +68,7 @@ export class _ extends LitElement {
 
         return html`
             <input
+                dir="auto"
                 type="text"
                 @input="${this.onInput}"
                 @change="${this.onChange}"

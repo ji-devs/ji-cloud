@@ -173,6 +173,7 @@ export class _ extends LitElement {
 
         return html`
             <textarea
+                dir="auto"
                 style=${style}
                 @input=${this.onInput}
                 @blur=${this.onBlur}

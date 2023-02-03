@@ -20,7 +20,7 @@ import {
 } from "./styles";
 import { ThemeId } from "@elements/_themes/themes";
 import { getThemeVars } from "./wysiwyg-theme";
-import { Direction, WysiwygValue } from "./wysiwyg-types";
+import { WysiwygValue } from "./wysiwyg-types";
 import { ifDefined } from "lit-html/directives/if-defined";
 
 function getDefaultValue(): WysiwygValue {
@@ -115,8 +115,7 @@ export class _ extends LitElement {
     // prettier-ignore
     private renderLeaf(leaf: EditorText) {
         const styles = getLeafStyles(leaf) as StyleInfo;
-        let dir = leaf.direction === Direction.RightToLeft ? "rtl" : "ltr";
-        return html`<span style=${styleMap(styles)} type="${ifDefined(leaf.element)}" .dir=${dir}>${leaf.text === "" ? html`<br />` : leaf.text}</span>`;
+        return html`<span style=${styleMap(styles)} type="${ifDefined(leaf.element)}" dir="auto">${leaf.text === "" ? html`<br />` : leaf.text}</span>`;
     }
 
     // prettier-ignore

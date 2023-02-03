@@ -5,7 +5,7 @@ import {
     EditorElement,
     EditorText,
 } from "./slate-wysiwyg-react/EditorBackbone";
-import { Align, Direction, WysiwygValue } from "./wysiwyg-types";
+import { Align, WysiwygValue } from "./wysiwyg-types";
 
 export const baseStyles = css`
     :host {
@@ -61,9 +61,8 @@ export function getLeafStyles(text: EditorText): CSSProperties {
     return styles;
 }
 
-export function getLeafProps(text: EditorText) {
+export function getLeafProps(_text: EditorText) {
     let props: any = {};
-    if (text.direction === Direction.RightToLeft) props.dir = "rtl";
     return props;
 }
 

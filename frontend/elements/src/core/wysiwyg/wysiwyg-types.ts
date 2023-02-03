@@ -37,7 +37,6 @@ export interface ControllerState {
     element: ElementType;
     weight: Weight;
     align: Align;
-    direction: Direction;
     fontSize: FontSize;
     color?: Color;
     highlightColor?: Color;
@@ -51,7 +50,6 @@ export const defaultState: ControllerState = {
     element: ElementType.H1,
     weight: 400,
     align: Align.Left,
-    direction: Direction.LeftToRight,
     fontSize: 16,
 
     // keep here even undefined for Object.keys

@@ -112,12 +112,10 @@ export class _ extends LitElement {
                     <div class="button-collection color">
                         <slot name="colors"></slot>
                     </div>
-                    <div class="button-collection alignment">
+                    <div class="button-collection">
                         <slot name="align-left"></slot>
                         <slot name="align-center"></slot>
                         <slot name="align-right"></slot>
-                        <slot name="left-to-right"></slot>
-                        <slot name="right-to-left"></slot>
                     </div>
                 </div>
             </div>
