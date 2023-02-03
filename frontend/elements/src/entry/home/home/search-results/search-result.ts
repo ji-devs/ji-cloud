@@ -136,6 +136,8 @@ export class _ extends LitElement {
                 .thumbnails carousel-single {
                     aspect-ratio: 16/9;
                     height: 110px;
+                    /* safari need this to be grid, no idea why */
+                    display: grid;
                 }
                 .thumbnails carousel-single ::slotted([slot=thumbnails]) {
                     border-radius: 8px;
