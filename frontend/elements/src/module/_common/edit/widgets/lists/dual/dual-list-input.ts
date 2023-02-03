@@ -64,6 +64,7 @@ export class _ extends LitElement {
 
         return html`
             <textarea
+                dir="auto"
                 @input="${this.onInput}"
                 @change="${this.onChange}"
                 .value="${live(value)}"

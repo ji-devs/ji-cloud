@@ -1,6 +1,6 @@
 use crate::hebrew_buttons::HebrewButtons;
 use crate::text_editor::font_css_converter::font_to_css;
-use crate::text_editor::wysiwyg_types::{ControlsChange, Direction};
+use crate::text_editor::wysiwyg_types::ControlsChange;
 use dominator::{clone, html, Dom};
 use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
 use shared::domain::module::body::_groups::design::{Text as RawText, DEFAULT_TEXT_VALUE};
@@ -99,26 +99,6 @@ impl TextEditor {
                     }))
                     .event(clone!(state => move |_: events::Click| {
                         state.toggle_underline();
-                    }))
-                }),
-                html!("text-editor-controls-button", {
-                    .prop("kind", "left-to-right")
-                    .prop("slot", "left-to-right")
-                    .prop_signal("active", state.controls.signal_cloned().map(|controls| {
-                        controls.direction == Direction::LeftToRight
-                    }))
-                    .event(clone!(state => move |_: events::Click| {
-                        state.set_control_value(ControlsChange::Direction(Direction::LeftToRight))
-                    }))
-                }),
-                html!("text-editor-controls-button", {
-                    .prop("kind", "right-to-left")
-                    .prop("slot", "right-to-left")
-                    .event(clone!(state => move |_: events::Click| {
-                        state.set_control_value(ControlsChange::Direction(Direction::RightToLeft))
-                    }))
-                    .prop_signal("active", state.controls.signal_cloned().map(|controls| {
-                        controls.direction == Direction::RightToLeft
                     }))
                 }),
                 color_controls::render(state.clone()),

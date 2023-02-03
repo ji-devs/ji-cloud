@@ -18,7 +18,6 @@ import {
     FontSize,
     Weight,
     getKeyLevel,
-    Direction,
 } from "../wysiwyg-types";
 
 export type EditorElement = {
@@ -26,7 +25,6 @@ export type EditorElement = {
     align?: Align;
 };
 export type EditorText = {
-    direction?: Direction
     text?: string;
     underline?: boolean;
     italic?: boolean;
