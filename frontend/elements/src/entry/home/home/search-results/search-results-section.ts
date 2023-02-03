@@ -60,8 +60,8 @@ export class _ extends LitElement {
                     display: grid;
                     grid-template-columns: repeat(auto-fill, 280px);
                     justify-content: space-between;
-                    row-gap: 80px;
-                    column-gap: 40px;
+                    row-gap: 60px;
+                    column-gap: 30px;
                 }
                 .load-more {
                     display: grid;
