@@ -255,28 +255,56 @@ pub fn render_advanced_modal(state: Rc<Step3>) -> Dom {
                                 match tab {
                                     MenuTabKind::Correct => {
                                         selection.set(AdvancedFeedbackSelection::All);
-                                        state.sidebar.base.phase.set(Phase::Layout);
+                                        state.sidebar.base.phase.set(Phase::new_trace_unchecked(
+                                            state.sidebar.base.clone(),
+                                            TraceKind::Correct,
+                                        ));
                                         let audio_input = get_question_audio_input(state.clone(), question.correct_audio.clone(), index, question.clone());
                                         Some(html!("empty-fragment", {
                                             .child(render_advanced_select(selection.clone(), true))
                                             .child_signal(selection.signal_cloned().map(clone!(state, audio_input => move |selection| {
                                                 match selection {
-                                                    AdvancedFeedbackSelection::All => Some(render_correct(state.clone(), audio_input.clone(), "Feedback for ALL correct answers.", "\"Well done! You found red.\"")),
-                                                    AdvancedFeedbackSelection::Selected => Some(render_selected(state.clone(), TraceKind::Correct, "Feedback for specific correct answers.", "\"This is a red balloon.\"")),
+                                                    AdvancedFeedbackSelection::All => Some(render_all(
+                                                        audio_input.clone(),
+                                                        "Feedback for ALL correct answers.",
+                                                        "\"Well done! You found red.\"",
+                                                    )),
+                                                    AdvancedFeedbackSelection::Selected => Some(render_selected(
+                                                        state.clone(),
+                                                        TraceKind::Correct,
+                                                        "Feedback for specific correct answers.",
+                                                        "\"This is a red balloon.\"",
+                                                        "Select a trace to add feedback".into(),
+                                                        "module/_common/edit/sidebar/illustration-select-item.svg".into(),
+                                                    )),
                                                 }
                                             })))
                                         }))
                                     },
                                     MenuTabKind::Incorrect => {
                                         selection.set(AdvancedFeedbackSelection::All);
-                                        state.sidebar.base.phase.set(Phase::Layout);
+                                        state.sidebar.base.phase.set(Phase::new_trace_unchecked(
+                                            state.sidebar.base.clone(),
+                                            TraceKind::Wrong,
+                                        ));
                                         let audio_input = get_question_audio_input(state.clone(), question.incorrect_audio.clone(), index, question.clone());
                                         Some(html!("empty-fragment", {
                                             .child(render_advanced_select(selection.clone(), false))
                                             .child_signal(selection.signal_cloned().map(clone!(state, audio_input => move |selection| {
                                                 match selection {
-                                                    AdvancedFeedbackSelection::All => Some(render_correct(state.clone(), audio_input.clone(), "Feedback for ALL incorrect answers.", "\"Try again! Where's red?\"")),
-                                                    AdvancedFeedbackSelection::Selected => Some(render_selected(state.clone(), TraceKind::Wrong, "Feedback for specific incorrect answers.", "\"Oops! This is blue.\"")),
+                                                    AdvancedFeedbackSelection::All => Some(render_all(
+                                                        audio_input.clone(),
+                                                        "Feedback for ALL incorrect answers.",
+                                                        "\"Try again! Where's red?\"",
+                                                    )),
+                                                    AdvancedFeedbackSelection::Selected => Some(render_selected(
+                                                        state.clone(),
+                                                        TraceKind::Wrong,
+                                                        "Feedback for specific incorrect answers.",
+                                                        "\"Oops! This is blue.\"",
+                                                        "Trace an incorrect area to add specific feedback".into(),
+                                                        "module/_common/edit/sidebar/illustration-trace-area.svg".into(),
+                                                    )),
                                                 }
                                             })))
                                         }))
@@ -340,23 +368,25 @@ fn render_advanced_hint(hint: &str, example: &str) -> Dom {
     })
 }
 
-fn render_correct(state: Rc<Step3>, audio_input: Rc<AudioInput>, hint: &str, example: &str) -> Dom {
-    state.sidebar.base.phase.set(Phase::Layout);
+fn render_all(audio_input: Rc<AudioInput>, hint: &str, example: &str) -> Dom {
     html!("empty-fragment", {
         .child(render_advanced_hint(hint, example))
         .child(AudioInput::render(audio_input.clone(), None))
     })
 }
 
-fn render_selected(state: Rc<Step3>, trace_kind: TraceKind, hint: &str, example: &str) -> Dom {
-    state.sidebar.base.phase.set(Phase::new_trace_unchecked(
-        state.sidebar.base.clone(),
-        trace_kind,
-    ));
+fn render_selected(
+    state: Rc<Step3>,
+    trace_kind: TraceKind,
+    hint: &str,
+    example: &str,
+    empty_label: String,
+    empty_image: String,
+) -> Dom {
     if let Phase::Trace(traces) = state.sidebar.base.phase.get_cloned() {
         html!("empty-fragment", {
             .child(render_advanced_hint(hint, example))
-            .child_signal(traces.selected_index.signal_cloned().map(clone!(traces => move |index| {
+            .child_signal(traces.selected_index.signal_cloned().map(clone!(traces, empty_label, empty_image => move |index| {
                 let input = match index {
                     Some(index) => match traces.get(index) {
                         Some(trace) if trace.kind == trace_kind => {
@@ -378,12 +408,12 @@ fn render_selected(state: Rc<Step3>, trace_kind: TraceKind, hint: &str, example:
                     None => None,
                 };
 
-                input.or_else(|| {
+                input.or_else(clone!(empty_label, empty_image => move || {
                     Some(html!("sidebar-empty", {
-                        .prop("label", "Trace an incorrect area to add specific feedback")
-                        .prop("imagePath", "module/_common/edit/sidebar/illustration-trace-area.svg")
+                        .prop("label", empty_label.clone())
+                        .prop("imagePath", empty_image.clone())
                     }))
-                })
+                }))
             })))
         })
     } else {
