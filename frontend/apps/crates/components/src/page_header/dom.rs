@@ -7,9 +7,7 @@ use strum::IntoEnumIterator;
 use utils::{
     events,
     init::analytics,
-    routes::{
-        AdminRoute, AssetRoute, CommunityMembersRoute, CommunityRoute, Route, UserRoute,
-    },
+    routes::{AdminRoute, AssetRoute, CommunityMembersRoute, CommunityRoute, Route, UserRoute},
     unwrap::UnwrapJiExt,
 };
 use wasm_bindgen::JsValue;

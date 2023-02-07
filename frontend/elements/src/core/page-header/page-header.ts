@@ -45,7 +45,6 @@ export class _ extends LitElement {
                 }
                 .help {
                     display: flex;
-                    padding-left: 50px;
                 }
                 ::slotted([slot="help"]){
                     display: grid;
