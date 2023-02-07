@@ -55,6 +55,8 @@ pub mod page_header;
 pub mod pdf;
 #[cfg(feature = "player_popup")]
 pub mod player_popup;
+#[cfg(feature = "profile_image")]
+pub mod profile_image;
 #[cfg(feature = "share_jig")]
 pub mod share_asset;
 #[cfg(feature = "stickers")]
@@ -71,6 +73,3 @@ pub mod tooltip;
 pub mod traces;
 #[cfg(feature = "transform")]
 pub mod transform;
-
-#[cfg(feature = "profile_image")]
-pub mod profile_image;

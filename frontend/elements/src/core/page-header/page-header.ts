@@ -8,7 +8,7 @@ export class _ extends LitElement {
                 :host {
                     position: relative;
                     display: grid;
-                    grid-template-columns: repeat(5, auto);
+                    grid-template-columns: repeat(6, auto);
                     justify-content: space-between;
                     align-items: center;
                     padding: 0 20px;
@@ -43,6 +43,20 @@ export class _ extends LitElement {
                     display: grid;
                     place-content: center;
                 }
+                .help {
+                    display: flex;
+                }
+                ::slotted([slot="help"]){
+                    display: grid;
+                    height: 27px;
+                    width: 27px;
+                    border-radius: 50%;
+                    place-content: center;
+                    color: none;
+                }
+                ::slotted([slot="help"]:hover){
+                    background-color: #c4d9f7;
+                }
                 .user {
                     display: flex;
                     column-gap: 16px;
@@ -60,12 +74,16 @@ export class _ extends LitElement {
                     margin-left: 1em;
                 }
 
+                a {
+                    color: inherit;
+                }
+
                 /* mobile */
                 @media (max-width: 1023px) {
                     :host {
                         justify-content: center;
                     }
-                    nav, .donate, .student-code, .user {
+                    nav, .donate, .student-code, .help, .user {
                         display: none;
                     }
                     .beta {
@@ -77,6 +95,16 @@ export class _ extends LitElement {
             `,
         ];
     }
+
+    @property()
+    href: string = "";
+
+    @property()
+    target: string = "";
+
+    @property()
+    icon: string = "";
+
 
     render() {
         return html`
@@ -91,6 +119,11 @@ export class _ extends LitElement {
             </div>
             <div class="student-code">
                 <slot name="student-code"></slot>
+            </div>
+            <div class="help">
+                <a href= "/home/help" color="black">
+                    <slot name="help"></slot>
+                </a>
             </div>
             <div class="user">
                 <slot name="user"></slot>

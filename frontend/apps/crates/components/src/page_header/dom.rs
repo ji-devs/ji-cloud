@@ -76,6 +76,13 @@ pub fn render(
                 analytics::event("Donate Click", None);
             })
         }))
+        .child(html!("fa-button", {
+            .prop("slot", "help")
+            .prop("icon", "fa-regular fa-circle-question fa-5x")
+            .event(move |_evt: events::Click| {
+                analytics::event("Help Center Click", None);
+            })
+        }))
         .apply_if(render_beta, |dom| {
             dom.child(html!("beta-button", {
                 .prop("slot", "beta")
@@ -121,7 +128,6 @@ pub fn render(
             } else {
                 dom
             }
-
         })
         .children_signal_vec(state.logged_in.signal_cloned().map(clone!(state => move|logged_in| {
             match logged_in {
