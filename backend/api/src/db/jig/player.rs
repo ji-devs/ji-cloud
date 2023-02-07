@@ -79,7 +79,7 @@ fn session_create_error_or_continue(db_err: Box<dyn DatabaseError>) -> Result<()
     }
 }
 
-fn generate_random_code(generator: &mut ThreadRng) -> i16 {
+fn generate_random_code(generator: &mut ThreadRng) -> i32 {
     debug_assert!(JIG_PLAYER_SESSION_CODE_MAX > 0);
 
     generator.gen_range(0..JIG_PLAYER_SESSION_CODE_MAX)
@@ -89,7 +89,7 @@ pub async fn list_sessions(db: &PgPool, jig_id: JigId) -> sqlx::Result<Vec<JigPl
     let sessions = sqlx::query!(
         //language=SQL
         r#"
-select index     as "index!: i16",
+select index     as "index!: i32",
        direction as "direction: TextDirection",
        display_score,
        track_assessments,

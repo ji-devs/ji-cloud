@@ -75,7 +75,7 @@ impl TextDirection {
 #[derive(Serialize, Deserialize, Debug, Copy, Clone, PathPart)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
-pub struct JigPlayerSessionIndex(pub i16);
+pub struct JigPlayerSessionIndex(pub i32);
 
 make_path_parts!(JigPlayerSessionCreatePath => "/v1/jig/player");
 
