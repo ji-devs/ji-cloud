@@ -9,7 +9,7 @@ use super::state::UsersTable;
 impl UsersTable {
     pub fn search_users(self: &Rc<Self>, query: String) {
         let state = self;
-        let mut fetch_mode = state.users_state.fetch_mode.borrow_mut();
+        let mut fetch_mode = state.users_state.fetch_mode.lock_mut();
         if query.is_empty() {
             *fetch_mode = FetchMode::Browse;
         } else {
