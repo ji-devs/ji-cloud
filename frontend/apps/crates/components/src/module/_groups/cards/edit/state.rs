@@ -245,8 +245,11 @@ impl<RawData: RawDataExt, E: ExtraExt> BaseExt<Step> for CardsBase<RawData, E> {
         self.module_id
     }
 
-    fn allowed_step_change(&self, _from: Step, _to: Step) -> bool {
-        self.is_valid()
+    fn allowed_step_change(&self, from: Step, _to: Step) -> bool {
+        match from {
+            Step::One => self.is_valid(),
+            _ => true,
+        }
     }
 
     fn can_continue_next(&self) -> ReadOnlyMutable<bool> {

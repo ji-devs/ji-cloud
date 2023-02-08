@@ -127,11 +127,11 @@ export class _ extends LitElement {
 
                 slot[name="audio"]::slotted(*) {
                     position: absolute;
-                    top: -20px;
-                    left: 100px;
+                    top: -16px;
+                    left: 80px;
                     display: inline-block;
-                    width: 32px;
-                    height: 32px;
+                    width: 29px;
+                    height: 29px;
                 }
             `,
         ];
