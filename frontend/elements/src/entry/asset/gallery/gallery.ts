@@ -1,24 +1,11 @@
-import {
-    LitElement,
-    html,
-    css,
-    customElement,
-    property,
-    unsafeCSS,
-    state,
-} from "lit-element";
+import { LitElement, html, css, customElement, property, unsafeCSS, state } from "lit-element";
 import "@elements/core/images/ui";
 import { mediaUi } from "@utils/path";
-import { classMap } from "lit-html/directives/class-map";
-import { nothing } from "lit-html";
 
-const STR_CREATE_JIG = "Create a New ";
-const STR_RECENT_1 = "My Recent";
-const STR_RECENT_2 = "s";
-const STR_SEE_ALL_TEMPLATES = "See all templates";
-const STR_SEE_LESS_TEMPLATES = "See less templates";
+const STR_MY_1 = "My ";
+const STR_MY_2 = "s";
 
-@customElement("jig-gallery")
+@customElement("asset-gallery")
 export class _ extends LitElement {
     static get styles() {
         return [
@@ -26,121 +13,59 @@ export class _ extends LitElement {
                 :host {
                     display: grid;
                     min-height: 100vh;
-                    grid-template-rows: 0px auto 0px 1fr;
+                    grid-template-rows: auto 1fr;
                 }
                 .width-holder {
-                    max-width: 1720px;
+                    max-width: 1600px;
                     margin: 0 auto;
                 }
-                .novel-row-1 {
-                    z-index: 1;
-                    pointer-events: none;
-                }
-                .novel-row-1 .width-holder {
-                    padding-left: 698px;
-                }
-                .novel-img-1 {
-                    height: 125px;
-                    width: 125px;
-                }
                 .top-section {
-                    background-color: var(--light-blue-3);
+                    background-color: var(--light-blue-6);
+                    display: grid;
+                }
+                .top-section ::slotted([slot=back]),
+                .top-section .width-holder {
+                    grid-row: 1;
+                    grid-column: 1;
+                }
+                .top-section ::slotted([slot=back]) {
+                    /* color: #ffffff; */
+                    margin: 40px;
+                    place-self: start;
+                    z-index: 1;
+                    font-size: 14px;
+                    font-weight: 500;
+                    color: var(--light-blue-3);
+                    text-decoration: none;
+                    display: flex;
+                    column-gap: 8px;
                 }
                 .top-section .width-holder {
-                    grid-column: 1 / -1;
-                    padding: 100px;
                     display: grid;
-                    grid-template-columns: auto 1fr;
+                    grid-template-columns: auto auto;
                     justify-content: space-between;
-                }
-                .create-jig-header {
-                    font-size: 56px;
-                    font-weight: 900;
-                    color: var(--orange);
-                    margin: 0;
-                }
-                ::slotted([slot=template-paragraph]) {
-                    font-size: 18px;
-                    font-weight: 300;
-                    grid-column: 1;
-                    margin: 0;
-                    max-width: 540px;
-                }
-                .new-jig-section {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fit, 232px);
-                    gap: 32px;
-                    justify-content: end;
-                }
-                .new-jig-section-width-holder {
-                    grid-column: 2;
-                    display: grid;
-                    grid-template-rows: auto auto;
-                    row-gap: 56px;
-                }
-                .new-jig-items-wrapper {
-                    max-height: 185px;
-                    overflow-y: hidden;
-                    padding: 10px;
+                    align-items: center;
+                    padding: 60px 40px 20px 40px;
                     width: 100%;
-                    display: grid;
-                    grid-template-columns: inherit;
-                    gap: inherit;
-                    grid-column: 1 / -1;
+                    box-sizing: border-box;
                 }
-                .all-templates-visible .new-jig-items-wrapper {
-                    max-height: initial;
-                }
-                .new-jig-items {
-                    grid-column: 1 / -1;
-                    justify-content: flex-end;
-                    display: grid;
-                    grid-template-columns: inherit;
-                    gap: inherit;
-                    grid-column: 1 / -1;
-                }
-                .see-all-templates-button {
-                    grid-column: 1 / -1;
-                    text-align: center;
-                    padding-left: 10px; /* bad */
-                }
-                .see-all-templates-button span {
+                h1 {
+                    font-size: 28px;
+                    font-weight: 900;
+                    color: var(--main-yellow);
+                    margin: 0;
                     display: flex;
-                    justify-content: center;
-                    gap: 8px;
-                }
-                .see-all-templates-button img-ui {
-                    height: 22px;
-                    transition: transform 0.3s;
-                }
-                .all-templates-visible .see-all-templates-button img-ui {
-                    transform: rotate(180deg);
-                }
-                .novel-row-2 {
-                    z-index: 1;
-                    margin-top: -140px;
-                    pointer-events: none;
-                }
-                .novel-row-2 .width-holder {
-                    padding-left: 473px;
-                }
-                .novel-img-2 {
-                    height: 225px;
-                    width: 225px;
-                }
-                .novel-img-3 {
-                    height: 145px;
-                    width: 145px;
+                    align-items: center;
                 }
                 .bottom-section {
                     grid-column: 1 / -1;
                     background-image: url(${unsafeCSS(
                         mediaUi("entry/jig/gallery/background.png")
                     )});
-                    background-size: cover;
+                    background-size: 100%;
                 }
                 .bottom-section .width-holder {
-                    padding: 100px;
+                    padding: 40px;
                     display: grid;
                     row-gap: 48px;
                 }
@@ -149,12 +74,6 @@ export class _ extends LitElement {
                     grid-template-columns: auto auto 224px;
                     column-gap: 32px;
                     align-items: center;
-                }
-                .recent-header {
-                    color: var(--dark-blue-4);
-                    font-size: 40px;
-                    font-weight: 800;
-                    margin: 0;
                 }
                 ::slotted([slot="filters"]) {
                     justify-self: end;
@@ -186,83 +105,24 @@ export class _ extends LitElement {
     @property()
     assetDisplayName: string = "";
 
-    @state()
-    private allTemplatesVisible = false;
+    @property()
+    kind: string = "";
 
     render() {
         return html`
-            <div class="novel-row-1">
-                <div class="width-holder">
-                    <img-ui
-                        class="novel-img-1"
-                        path="entry/jig/gallery/novel-img-1.png"
-                    ></img-ui>
-                </div>
-            </div>
             <section class="top-section">
+                <slot name="back"></slot>
                 <div class="width-holder">
-                    <div class="text-side">
-                        <h1 class="create-jig-header">
-                            ${STR_CREATE_JIG + this.assetDisplayName}
-                        </h1>
-                        <slot name="template-paragraph"></slot>
-                    </div>
-                    <div
-                        class="new-jig-section ${classMap({
-                            "all-templates-visible": this.allTemplatesVisible,
-                        })}"
-                    >
-                        <div class="new-jig-items-wrapper">
-                            <div class="new-jig-items">
-                                <slot name="create-jig"></slot>
-                                <slot name="jig-templates"></slot>
-                            </div>
-                        </div>
-                        <!-- ${
-                            this.assetDisplayName === "jig" ? html`
-                                <div class="see-all-templates-button">
-                                    <button-rect
-                                        kind="text"
-                                        color="blue"
-                                        weight="bold"
-                                        @click="${() =>
-                                            (this.allTemplatesVisible =
-                                                !this.allTemplatesVisible)}"
-                                    >
-                                        <span>
-                                            ${this.allTemplatesVisible
-                                                ? STR_SEE_LESS_TEMPLATES
-                                                : STR_SEE_ALL_TEMPLATES}
-                                            <img-ui
-                                                path="core/_common/chevron-down-blue.svg"
-                                            ></img-ui>
-                                        </span>
-                                    </button-rect>
-                                </div>
-                            ` : nothing
-                        } -->
-                    </div>
+                    <h1 class="create-asset-header">
+                        <img-ui path="entry/jig/gallery/${this.kind}-icon.webp"></img-ui>
+                        ${STR_MY_1}${`${this.assetDisplayName}${STR_MY_2}`}
+                    </h1>
+                    <slot name="create-asset"></slot>
                 </div>
             </section>
-            <div class="novel-row-2">
-                <div class="width-holder">
-                    <img-ui
-                        class="novel-img-2"
-                        path="entry/jig/gallery/novel-img-2.png"
-                    ></img-ui>
-                    <img-ui
-                        class="novel-img-3"
-                        path="entry/jig/gallery/novel-img-3.png"
-                    ></img-ui>
-                </div>
-            </div>
             <section class="bottom-section">
                 <div class="width-holder">
                     <div class="recent-top-line">
-                        <h2 class="recent-header">
-                            ${STR_RECENT_1}
-                            ${`${this.assetDisplayName}${STR_RECENT_2}`}
-                        </h2>
                         <slot class="filters" name="filters"></slot>
                         <slot class="search-input" name="search-input"></slot>
                     </div>

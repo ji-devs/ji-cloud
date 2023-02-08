@@ -16,13 +16,12 @@ use utils::prelude::*;
 const STR_DELETE: &str = "Delete";
 const STR_DUPLICATE: &str = "Duplicate";
 const STR_SEARCH: &str = "Search";
-const STR_TEMPLATE_PARAGRAPH: &str = "Create a new JIG (Jewish Interactive Game). Choose the activities designed to fit your teaching goals and you'll have a complete interactive lesson in just a snap!";
 const STR_SHOW_ALL: &str = "Show all";
 const STR_SHOW_PUBLISHED: &str = "Show published";
 const STR_SHOW_DRAFT: &str = "Show drafts";
 
 const STR_DELETE_TITLE: &str = "Warning";
-const STR_DELETE_CONTENT: &str = "Are you sure you want to delete this JIG?";
+const STR_DELETE_CONTENT: &str = "Are you sure you want to delete this?";
 const STR_DELETE_CONTENT_WARNING_1: &str = "Deleting in Jigzi is ";
 const STR_DELETE_CONTENT_WARNING_2: &str = "permanent";
 const STR_DELETE_CONTENT_WARNING_3: &str = " and cannot be undone.";
@@ -32,8 +31,8 @@ const STR_DELETE_CANCEL: &str = "Don't delete";
 const STR_LOAD_MORE: &str = "See more";
 
 impl Gallery {
-    fn visible_assets_option_string(visible_jigs: &VisibleAssets) -> &'static str {
-        match visible_jigs {
+    fn visible_assets_option_string(visible_assets: &VisibleAssets) -> &'static str {
+        match visible_assets {
             VisibleAssets::All => STR_SHOW_ALL,
             VisibleAssets::Published => STR_SHOW_PUBLISHED,
             VisibleAssets::Draft => STR_SHOW_DRAFT,
@@ -41,7 +40,7 @@ impl Gallery {
     }
 
     pub fn render(self: Rc<Self>) -> Dom {
-        analytics::event("Jig Gallery Load", None);
+        analytics::event("Asset Gallery Load", None);
 
         let state = self;
         state.load_data();
@@ -62,7 +61,7 @@ impl Gallery {
         html!("empty-fragment", {
             .child(page_header::dom::render(Rc::new(page_header::state::State::new()), None, Some(PageLinks::Create), true))
             .child_signal(state.confirm_delete.signal().map(clone!(state => move |confirm_delete| {
-                confirm_delete.map(|jig_id| {
+                confirm_delete.map(|asset_id| {
                     html!("modal-confirm", {
                         .prop("dangerous", true)
                         .prop("title", STR_DELETE_TITLE)
@@ -85,27 +84,30 @@ impl Gallery {
                         .event(clone!(state => move |_evt: events::CustomCancel| state.confirm_delete.set_neq(None)))
                         .event(clone!(state => move |_evt: events::CustomConfirm| {
                             state.confirm_delete.set_neq(None);
-                            state.delete_asset(jig_id);
+                            state.delete_asset(asset_id);
                         }))
                     })
                 })
             })))
             .child(
-                html!("jig-gallery", {
+                html!("asset-gallery", {
+                    .prop("kind", state.asset_type.as_str())
                     .prop("assetDisplayName", state.asset_type_name())
-                    .child(html!("jig-gallery-create", {
-                        .prop("slot", "create-jig")
+                    // .child(link!(??, {
+                    //     .prop("slot", "back")
+                    //     .child(html!("fa-icon", {
+                    //         .prop("icon", "fa-regular fa-chevron-left")
+                    //     }))
+                    //     .text("Back to creator menu")
+                    // }))
+                    .child(html!("asset-gallery-create", {
+                        .prop("slot", "create-asset")
+                        .prop("assetName", state.asset_type_name())
                         .event(clone!(state => move |_: events::Click| {
                             state.create_asset();
-                            analytics::event("Jig Gallery Create", None);
+                            analytics::event("Asset Gallery Create", None);
                         }))
                     }))
-                    .apply_if(state.asset_type.is_jig(), move |dom| {
-                        dom.child(html!("p", {
-                            .prop("slot", "template-paragraph")
-                            .text(STR_TEMPLATE_PARAGRAPH)
-                        }))
-                    })
                     .child(html!("input-search", {
                         .style("grid-column", "3") // TODO: remove once draft filter is enabled
                         .prop("slot", "search-input")
@@ -122,13 +124,13 @@ impl Gallery {
                     .child(html!("input-select", {
                         .visible(false)
                         .prop("slot", "filters")
-                        .prop_signal("value", state.visible_assets.signal_cloned().map(|visible_jigs| Self::visible_assets_option_string(&visible_jigs)))
+                        .prop_signal("value", state.visible_assets.signal_cloned().map(|visible_assets| Self::visible_assets_option_string(&visible_assets)))
                         .children(VisibleAssets::iter().map(|option| {
                             html!("input-select-option", {
                                 .prop("value", &option.to_string())
                                 .text(Self::visible_assets_option_string(&option))
-                                .prop_signal("selected", state.visible_assets.signal_cloned().map(clone!(option => move |visible_jigs| {
-                                    visible_jigs == option
+                                .prop_signal("selected", state.visible_assets.signal_cloned().map(clone!(option => move |visible_assets| {
+                                    visible_assets == option
                                 })))
                                 .event(clone!(state, option => move |evt: events::CustomSelectedChange| {
                                     if evt.selected() {

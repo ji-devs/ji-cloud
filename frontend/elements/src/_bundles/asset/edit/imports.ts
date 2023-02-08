@@ -59,8 +59,6 @@ import "@elements/entry/asset/edit/sidebar/settings/jig-audio/jig-audio-playing-
 import "@elements/entry/asset/_common/bg";
 import "@elements/entry/asset/gallery/gallery";
 import "@elements/entry/asset/gallery/create";
-import "@elements/entry/asset/gallery/recent";
-import "@elements/entry/asset/gallery/template";
 import "@elements/entry/asset/edit/publish/publish";
 import "@elements/entry/asset/edit/publish/resource";
 import "@elements/entry/asset/edit/publish/resource-add";
