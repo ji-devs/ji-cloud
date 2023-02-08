@@ -24,7 +24,7 @@ impl Users {
 
     pub async fn load_users(self: &Rc<Self>) {
         // clone right away to free the lock
-        let fetch_mode = self.fetch_mode.borrow().clone();
+        let fetch_mode = self.fetch_mode.get_cloned();
         let res = match fetch_mode {
             FetchMode::Browse => self.load_users_browse().await,
             FetchMode::Search(query) => self.load_users_search(query.clone()).await,
@@ -36,9 +36,10 @@ impl Users {
                 .map(|user| Rc::new(user.into()))
                 .collect(),
         );
-        // self.set_total_page(res.total_page);
 
         self.total_pages.set_neq(Some(res.total_pages));
+
+        self.total_user_count.set_neq(Some(res.total_user_count))
     }
 
     async fn load_users_browse(&self) -> UserListResponse {
@@ -52,6 +53,7 @@ impl Users {
             Ok(res) => UserListResponse {
                 users: res.users,
                 total_pages: res.pages,
+                total_user_count: res.total_user_count,
             },
         }
     }
@@ -68,6 +70,7 @@ impl Users {
             Ok(res) => UserListResponse {
                 users: res.users,
                 total_pages: res.pages,
+                total_user_count: res.total_user_count,
             },
         }
     }
@@ -112,4 +115,5 @@ impl Users {
 struct UserListResponse {
     users: Vec<UserResponse>,
     total_pages: u32,
+    total_user_count: u64,
 }

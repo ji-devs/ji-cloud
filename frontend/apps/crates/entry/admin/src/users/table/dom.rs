@@ -17,6 +17,17 @@ impl UsersTable {
                     state.search_users(e.query());
                 }))
             }))
+            .child_signal(
+                state.search_count().map(|count| {
+                    match count {
+                        None => None,
+                        Some(count) => Some(html!("p", {
+                            .prop("slot", "search")
+                            .text(&format!("{} users found", count))
+                        }))
+                    }
+                })
+            )
             .child(html!("table-pagination-user", {
                 .prop("slot", "controls")
                 .child(html!("fa-button", {
