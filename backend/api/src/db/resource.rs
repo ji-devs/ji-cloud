@@ -137,6 +137,7 @@ pub async fn get_one(
     pool: &PgPool,
     id: ResourceId,
     draft_or_live: DraftOrLive,
+    user_id: Option<UserId>,
 ) -> anyhow::Result<Option<ResourceResponse>> {
     let res = sqlx::query!( //language=SQL
         r#"
@@ -147,6 +148,7 @@ with cte as (
            likes,
            views,
            live_up_to_date,
+           exists(select 1 from resource_like where resource_id = resource.id and user_id = $3)  as "is_liked",
            case
                when $2 = 0 then resource.draft_id
                when $2 = 1 then resource.live_id
@@ -181,6 +183,7 @@ select cte.resource_id                                          as "resource_id:
         translated_keywords,
         rating                                               as "rating?: ResourceRating",
         blocked                                              as "blocked",
+        cte.is_liked                                         as "is_liked",
         curated,
         (
                 select row(resource_data_module.id, kind, is_complete)
@@ -206,6 +209,7 @@ from resource_data
 "#,
         id.0,
         draft_or_live as i16,
+        user_id.map(|x| x.0)
     )
         .fetch_optional(pool).await?;
 
@@ -218,6 +222,7 @@ from resource_data
         likes: row.likes,
         views: row.views,
         live_up_to_date: row.live_up_to_date,
+        is_liked: row.is_liked,
         resource_data: ResourceData {
             created_at: row.created_at,
             draft_or_live,
@@ -269,6 +274,7 @@ pub async fn get_by_ids(
     db: &PgPool,
     ids: &[Uuid],
     draft_or_live: DraftOrLive,
+    user_id: Option<UserId>,
 ) -> sqlx::Result<Vec<ResourceResponse>> {
     let mut txn = db.begin().await?;
 
@@ -288,6 +294,7 @@ select resource.id                                       as "id!: ResourceId",
        views                                    as "views!",
        live_up_to_date                          as "live_up_to_date!",
        rating                                   as "rating?: ResourceRating",
+       exists(select 1 from resource_like where resource_id = resource.id and user_id = $2) as "is_liked",
        blocked                                  as "blocked!",
        curated                                  as "curated!"
 from resource
@@ -297,6 +304,7 @@ inner join resource_admin_data "admin" on admin.resource_id = resource.id
 order by ord asc
     "#,
         ids,
+        user_id.map(|x| x.0)
     )
     .fetch_all(&mut txn)
     .instrument(tracing::info_span!("query resources"))
@@ -363,6 +371,7 @@ order by ord asc
             likes: resource_row.likes,
             views: resource_row.views,
             live_up_to_date: resource_row.live_up_to_date,
+            is_liked: resource_row.is_liked,
             resource_data: ResourceData {
                 created_at: resource_data_row.created_at,
                 draft_or_live,
@@ -437,6 +446,7 @@ pub async fn browse(
     page_limit: u32,
     resource_types: Vec<Uuid>,
     order_by: Option<OrderBy>,
+    user_id: Option<UserId>,
 ) -> sqlx::Result<Vec<ResourceResponse>> {
     let mut txn = db.begin().await?;
 
@@ -479,6 +489,7 @@ select resource.id                                              as "resource_id:
     likes,
     views,
     live_up_to_date,
+    exists(select 1 from resource_like where resource_id = resource.id and user_id = $9)                         as "is_liked",
    display_name                                                                  as "display_name!",
    language                                                                      as "language!",
    description                                                                   as "description!",
@@ -532,6 +543,7 @@ limit $8
     order_by.map(|it| it as i32),
     page,
     page_limit as i32,
+    user_id.map(|x| x.0)
 )
     .fetch_all(&mut txn)
     .instrument(tracing::info_span!("query resource_data"))
@@ -548,6 +560,7 @@ limit $8
             likes: resource_data_row.likes,
             views: resource_data_row.views,
             live_up_to_date: resource_data_row.live_up_to_date,
+            is_liked: resource_data_row.is_liked,
             resource_data: ResourceData {
                 created_at: resource_data_row.created_at,
                 draft_or_live: resource_data_row.draft_or_live,

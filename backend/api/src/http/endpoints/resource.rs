@@ -23,7 +23,7 @@ use uuid::Uuid;
 use crate::{
     db::{self, resource::CreateResourceError},
     error::{self, ServiceKind},
-    extractor::{ScopeAdmin, TokenUser, TokenUserWithScope},
+    extractor::{get_user_id, ScopeAdmin, TokenUser, TokenUserWithScope},
     service::ServiceData,
 };
 
@@ -45,8 +45,6 @@ async fn create(
     ),
     error::CreateWithMetadata,
 > {
-    println!("here");
-
     let db = db.as_ref();
 
     let creator_id = auth.user_id();
@@ -85,22 +83,30 @@ async fn create(
 #[instrument(skip_all)]
 async fn get_live(
     db: Data<PgPool>,
+    auth: Option<TokenUser>,
     path: web::Path<ResourceId>,
 ) -> Result<Json<<resource::GetLive as ApiEndpoint>::Res>, error::NotFound> {
-    let resource_response = db::resource::get_one(&db, path.into_inner(), DraftOrLive::Live)
-        .await?
-        .ok_or(error::NotFound::ResourceNotFound)?;
+    let user_id = get_user_id(auth);
+
+    let resource_response =
+        db::resource::get_one(&db, path.into_inner(), DraftOrLive::Live, user_id)
+            .await?
+            .ok_or(error::NotFound::ResourceNotFound)?;
 
     Ok(Json(resource_response))
 }
 
 async fn get_draft(
     db: Data<PgPool>,
+    auth: Option<TokenUser>,
     path: web::Path<ResourceId>,
 ) -> Result<Json<<resource::GetDraft as ApiEndpoint>::Res>, error::NotFound> {
-    let resource_response = db::resource::get_one(&db, path.into_inner(), DraftOrLive::Draft)
-        .await?
-        .ok_or(error::NotFound::ResourceNotFound)?;
+    let user_id = get_user_id(auth);
+
+    let resource_response =
+        db::resource::get_one(&db, path.into_inner(), DraftOrLive::Draft, user_id)
+            .await?
+            .ok_or(error::NotFound::ResourceNotFound)?;
 
     Ok(Json(resource_response))
 }
@@ -166,7 +172,7 @@ async fn browse(
 ) -> Result<Json<<resource::Browse as ApiEndpoint>::Res>, error::Auth> {
     let query = query.map_or_else(Default::default, Query::into_inner);
 
-    let (author_id, privacy_level, blocked) = auth_claims(
+    let (author_id, user_id, privacy_level, blocked) = auth_claims(
         db.as_ref(),
         claims,
         query.author_id,
@@ -191,6 +197,7 @@ async fn browse(
         page_limit,
         resource_types.to_owned(),
         query.order_by,
+        user_id,
     );
 
     let total_count_future = db::resource::filtered_count(
@@ -299,7 +306,7 @@ async fn search(
         .await
         .map_err(|e| error::Service::InternalServerError(e))?;
 
-    let (author_id, privacy_level, blocked) = auth_claims(
+    let (author_id, user_id, privacy_level, blocked) = auth_claims(
         &*db,
         claims,
         query.author_id,
@@ -328,7 +335,8 @@ async fn search(
         .await?
         .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
 
-    let resources: Vec<_> = db::resource::get_by_ids(db.as_ref(), &ids, DraftOrLive::Live).await?;
+    let resources: Vec<_> =
+        db::resource::get_by_ids(db.as_ref(), &ids, DraftOrLive::Live, user_id).await?;
 
     Ok(Json(ResourceSearchResponse {
         resources,
@@ -431,7 +439,15 @@ async fn auth_claims(
     author_id: Option<UserOrMe>,
     privacy_level: Vec<PrivacyLevel>,
     blocked: Option<bool>,
-) -> Result<(Option<UserId>, Vec<PrivacyLevel>, Option<bool>), error::Auth> {
+) -> Result<
+    (
+        Option<UserId>,
+        Option<UserId>,
+        Vec<PrivacyLevel>,
+        Option<bool>,
+    ),
+    error::Auth,
+> {
     if claims.is_none() && author_id == Some(UserOrMe::Me) {
         return Err(error::Auth::Forbidden);
     };
@@ -459,12 +475,12 @@ async fn auth_claims(
                     }
                 }
             };
-            return Ok((author_id, privacy, blocked));
+            return Ok((author_id, Some(user_id), privacy, blocked));
         } else {
             if is_admin {
-                return Ok((None, privacy_level, None));
+                return Ok((None, Some(user_id), privacy_level, None));
             } else {
-                return Ok((None, vec![PrivacyLevel::Public], Some(false)));
+                return Ok((None, Some(user_id), vec![PrivacyLevel::Public], Some(false)));
             }
         };
     } else {
@@ -474,9 +490,9 @@ async fn auth_claims(
         });
 
         if let Some(id) = author_id {
-            return Ok((id, vec![PrivacyLevel::Public], Some(false)));
+            return Ok((id, None, vec![PrivacyLevel::Public], Some(false)));
         } else {
-            return Ok((None, vec![PrivacyLevel::Public], Some(false)));
+            return Ok((None, None, vec![PrivacyLevel::Public], Some(false)));
         }
     };
 }

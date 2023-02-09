@@ -23,7 +23,7 @@ use uuid::Uuid;
 use crate::{
     db::{self, jig::CreateJigError},
     error::{self, ServiceKind},
-    extractor::{ScopeAdmin, TokenUser, TokenUserWithScope},
+    extractor::{get_user_id, ScopeAdmin, TokenUser, TokenUserWithScope},
     service::ServiceData,
 };
 
@@ -85,9 +85,12 @@ async fn create(
 #[instrument(skip_all)]
 async fn get_live(
     db: Data<PgPool>,
+    auth: Option<TokenUser>,
     path: web::Path<JigId>,
 ) -> Result<Json<<jig::GetLive as ApiEndpoint>::Res>, error::NotFound> {
-    let jig_response = db::jig::get_one(&db, path.into_inner(), DraftOrLive::Live)
+    let user_id = get_user_id(auth);
+
+    let jig_response = db::jig::get_one(&db, path.into_inner(), DraftOrLive::Live, user_id)
         .await?
         .ok_or(error::NotFound::ResourceNotFound)?;
 
@@ -96,9 +99,12 @@ async fn get_live(
 
 async fn get_draft(
     db: Data<PgPool>,
+    auth: Option<TokenUser>,
     path: web::Path<JigId>,
 ) -> Result<Json<<jig::GetDraft as ApiEndpoint>::Res>, error::NotFound> {
-    let jig_response = db::jig::get_one(&db, path.into_inner(), DraftOrLive::Draft)
+    let user_id = get_user_id(auth);
+
+    let jig_response = db::jig::get_one(&db, path.into_inner(), DraftOrLive::Draft, user_id)
         .await?
         .ok_or(error::NotFound::ResourceNotFound)?;
 
@@ -170,7 +176,7 @@ async fn browse(
 ) -> Result<Json<<jig::Browse as ApiEndpoint>::Res>, error::Auth> {
     let query = query.map_or_else(Default::default, Query::into_inner);
 
-    let (author_id, privacy_level, blocked) = auth_claims(
+    let (author_id, user_id, privacy_level, blocked) = auth_claims(
         db.as_ref(),
         claims,
         query.author_id,
@@ -195,6 +201,7 @@ async fn browse(
         page_limit,
         resource_types.to_owned(),
         query.order_by,
+        user_id,
     );
 
     let total_count_future = db::jig::filtered_count(
@@ -325,7 +332,7 @@ async fn search(
         .await
         .map_err(|e| error::Service::InternalServerError(e))?;
 
-    let (author_id, privacy_level, blocked) = auth_claims(
+    let (author_id, user_id, privacy_level, blocked) = auth_claims(
         &*db,
         claims,
         query.author_id,
@@ -354,7 +361,7 @@ async fn search(
         .await?
         .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
 
-    let jigs: Vec<_> = db::jig::get_by_ids(db.as_ref(), &ids, DraftOrLive::Live).await?;
+    let jigs: Vec<_> = db::jig::get_by_ids(db.as_ref(), &ids, DraftOrLive::Live, user_id).await?;
 
     Ok(Json(JigSearchResponse {
         jigs,
@@ -471,7 +478,15 @@ async fn auth_claims(
     author_id: Option<UserOrMe>,
     privacy_level: Vec<PrivacyLevel>,
     blocked: Option<bool>,
-) -> Result<(Option<UserId>, Vec<PrivacyLevel>, Option<bool>), error::Auth> {
+) -> Result<
+    (
+        Option<UserId>,
+        Option<UserId>,
+        Vec<PrivacyLevel>,
+        Option<bool>,
+    ),
+    error::Auth,
+> {
     if claims.is_none() && author_id == Some(UserOrMe::Me) {
         return Err(error::Auth::Forbidden);
     };
@@ -499,12 +514,12 @@ async fn auth_claims(
                     }
                 }
             };
-            return Ok((author_id, privacy, blocked));
+            return Ok((author_id, Some(user_id), privacy, blocked));
         } else {
             if is_admin {
-                return Ok((None, privacy_level, None));
+                return Ok((None, Some(user_id), privacy_level, None));
             } else {
-                return Ok((None, vec![PrivacyLevel::Public], Some(false)));
+                return Ok((None, Some(user_id), vec![PrivacyLevel::Public], Some(false)));
             }
         };
     } else {
@@ -514,9 +529,9 @@ async fn auth_claims(
         });
 
         if let Some(id) = author_id {
-            return Ok((id, vec![PrivacyLevel::Public], Some(false)));
+            return Ok((id, None, vec![PrivacyLevel::Public], Some(false)));
         } else {
-            return Ok((None, vec![PrivacyLevel::Public], Some(false)));
+            return Ok((None, None, vec![PrivacyLevel::Public], Some(false)));
         }
     };
 }

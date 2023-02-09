@@ -162,6 +162,7 @@ pub async fn get_one(
     pool: &PgPool,
     id: JigId,
     draft_or_live: DraftOrLive,
+    user_id: Option<UserId>,
 ) -> anyhow::Result<Option<JigResponse>> {
     let res = sqlx::query!( //language=SQL
         r#"
@@ -172,6 +173,7 @@ with cte as (
            liked_count,
            play_count,
            live_up_to_date,
+           exists(select 1 from jig_like where jig_id = jig.id and user_id = $3) as "is_liked",
            case
                when $2 = 0 then jig.draft_id
                when $2 = 1 then jig.live_id
@@ -208,6 +210,7 @@ select cte.jig_id                                          as "jig_id: JigId",
         liked_count,
         play_count,
         live_up_to_date,
+        cte.is_liked,
         locked,
         other_keywords,
         translated_keywords,
@@ -241,6 +244,7 @@ from jig_data
 "#,
         id.0,
         draft_or_live as i16,
+        user_id.map(|x| x.0)
     )
         .fetch_optional(pool).await?;
 
@@ -253,6 +257,7 @@ from jig_data
         likes: row.liked_count,
         plays: row.play_count,
         live_up_to_date: row.live_up_to_date,
+        is_liked: row.is_liked,
         jig_data: JigData {
             created_at: row.created_at,
             draft_or_live,
@@ -328,6 +333,7 @@ pub async fn get_by_ids(
     db: &PgPool,
     ids: &[Uuid],
     draft_or_live: DraftOrLive,
+    user_id: Option<UserId>,
 ) -> sqlx::Result<Vec<JigResponse>> {
     let mut txn = db.begin().await?;
 
@@ -345,6 +351,7 @@ select jig.id                                       as "id!: JigId",
        published_at,
        liked_count                              as "liked_count!",
        live_up_to_date                          as "live_up_to_date!",
+       exists(select 1 from jig_like where jig_id = jig.id and user_id = $2) as "is_liked",
        (
            select play_count
            from jig_play_count
@@ -360,6 +367,7 @@ from jig
     order by ord asc
     "#,
         ids,
+        user_id.map(|x| x.0)
     )
     .fetch_all(&mut txn)
     .instrument(tracing::info_span!("query jigs"))
@@ -435,6 +443,7 @@ order by ord asc
             likes: jig_row.liked_count,
             plays: jig_row.play_count,
             live_up_to_date: jig_row.live_up_to_date,
+            is_liked: jig_row.is_liked,
             jig_data: JigData {
                 created_at: jig_data_row.created_at,
                 draft_or_live,
@@ -531,6 +540,7 @@ pub async fn browse(
     page_limit: u32,
     resource_types: Vec<Uuid>,
     order_by: Option<OrderBy>,
+    user_id: Option<UserId>,
 ) -> sqlx::Result<Vec<JigResponse>> {
     let mut txn = db.begin().await?;
 
@@ -572,6 +582,7 @@ select jig.id                                              as "jig_id: JigId",
     published_at,
     liked_count,
     live_up_to_date,
+    exists(select 1 from jig_like where jig_id = jig.id and user_id = $9) as "is_liked",
     (
          select play_count
          from jig_play_count
@@ -639,6 +650,7 @@ limit $8
     order_by.map(|it| it as i32),
     page,
     page_limit as i32,
+    user_id.map(|x| x.0)
 )
     .fetch_all(&mut txn)
     .instrument(tracing::info_span!("query jig_data"))
@@ -655,6 +667,7 @@ limit $8
             likes: jig_data_row.liked_count,
             plays: jig_data_row.play_count,
             live_up_to_date: jig_data_row.live_up_to_date,
+            is_liked: jig_data_row.is_liked,
             jig_data: JigData {
                 created_at: jig_data_row.created_at,
                 draft_or_live: jig_data_row.draft_or_live,

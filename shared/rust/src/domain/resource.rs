@@ -58,6 +58,9 @@ pub struct ResourceResponse {
     /// Live is current to Draft
     pub live_up_to_date: bool,
 
+    /// Liked by current user.
+    pub is_liked: Option<bool>,
+
     /// The data of the requested Resource.
     pub resource_data: ResourceData,
 

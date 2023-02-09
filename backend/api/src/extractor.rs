@@ -138,6 +138,14 @@ impl TokenUser {
     }
 }
 
+pub fn get_user_id(token: Option<TokenUser>) -> Option<UserId> {
+    if let Some(token) = token {
+        Some(token.user_id())
+    } else {
+        None
+    }
+}
+
 impl FromRequest for TokenUser {
     type Error = actix_web::Error;
     type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
