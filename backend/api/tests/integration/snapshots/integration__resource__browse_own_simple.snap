@@ -13,6 +13,7 @@ expression: body
       "likes": 0,
       "views": 0,
       "liveUpToDate": false,
+      "isLiked": false,
       "resourceData": {
         "draftOrLive": "draft",
         "displayName": "resource2",
@@ -50,6 +51,7 @@ expression: body
       "likes": 0,
       "views": 0,
       "liveUpToDate": false,
+      "isLiked": false,
       "resourceData": {
         "draftOrLive": "live",
         "displayName": "resource2",
@@ -79,39 +81,6 @@ expression: body
       }
     },
     {
-      "id": "af827e00-1519-11ed-87fa-7b1aa26c85a8",
-      "publishedAt": "2022-06-22T17:57:33.149359Z",
-      "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
-      "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
-      "authorName": "Bobby Tables",
-      "likes": 0,
-      "views": 0,
-      "liveUpToDate": false,
-      "resourceData": {
-        "draftOrLive": "live",
-        "displayName": "resource3",
-        "cover": null,
-        "ageRanges": [],
-        "affiliations": [],
-        "language": "en",
-        "categories": [],
-        "description": "test description",
-        "createdAt": "2021-03-04T00:46:26.134651Z",
-        "lastEdited": "[last_edited]",
-        "privacyLevel": "public",
-        "locked": false,
-        "otherKeywords": "",
-        "translatedKeywords": "",
-        "translatedDescription": {},
-        "additionalResources": []
-      },
-      "adminData": {
-        "rating": null,
-        "blocked": false,
-        "curated": false
-      }
-    },
-    {
       "id": "d8067526-1518-11ed-87fa-ebaf880b6d9c",
       "publishedAt": "2022-06-24T17:57:33.149359Z",
       "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
@@ -120,6 +89,7 @@ expression: body
       "likes": 0,
       "views": 0,
       "liveUpToDate": false,
+      "isLiked": false,
       "resourceData": {
         "draftOrLive": "live",
         "displayName": "resource1",
@@ -163,5 +133,5 @@ expression: body
     }
   ],
   "pages": 1,
-  "totalResourceCount": 4
+  "totalResourceCount": 3
 }

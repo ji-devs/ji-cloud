@@ -143,7 +143,7 @@ pub struct CourseResponse {
     pub live_up_to_date: bool,
 
     /// Liked by current user.
-    pub is_liked: Option<bool>,
+    pub is_liked: bool,
 
     /// The data of the requested Course.
     pub course_data: CourseData,
@@ -384,8 +384,23 @@ pub struct CourseSearchResponse {
     pub total_course_count: u64,
 }
 
+/// Response for whether a user has liked a Course.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct CourseLikedResponse {
+    /// Whether the authenticated user has liked the current Course
+    pub is_liked: bool,
+}
+
 make_path_parts!(CourseDeletePath => "/v1/course/{}" => CourseId);
 
 make_path_parts!(CourseClonePath => "/v1/course/{}/clone" => CourseId);
+
+make_path_parts!(CourseLikePath => "/v1/course/{}/like" => CourseId);
+
+make_path_parts!(CourseUnlikePath => "/v1/course/{}/unlike" => CourseId);
+
+make_path_parts!(CourseLikedPath => "/v1/course/{}/like" => CourseId);
+
+make_path_parts!(CourseViewPath => "/v1/course/{}/view" => CourseId);
 
 into_uuid![CourseId];

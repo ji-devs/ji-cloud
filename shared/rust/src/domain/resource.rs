@@ -59,7 +59,7 @@ pub struct ResourceResponse {
     pub live_up_to_date: bool,
 
     /// Liked by current user.
-    pub is_liked: Option<bool>,
+    pub is_liked: bool,
 
     /// The data of the requested Resource.
     pub resource_data: ResourceData,
@@ -522,7 +522,7 @@ impl TryFrom<u8> for ResourceRating {
 
 make_path_parts!(ResourceLikePath => "/v1/resource/{}/like" => ResourceId);
 
-make_path_parts!(ResourceUnlikePath => "/v1/resource/{}/like" => ResourceId);
+make_path_parts!(ResourceUnlikePath => "/v1/resource/{}/unlike" => ResourceId);
 
 make_path_parts!(ResourceLikedPath => "/v1/resource/{}/like" => ResourceId);
 

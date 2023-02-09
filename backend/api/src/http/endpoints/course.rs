@@ -8,7 +8,10 @@ use shared::{
     api::{endpoints::course, ApiEndpoint, PathParts},
     domain::{
         asset::{DraftOrLive, PrivacyLevel, UserOrMe},
-        course::{CourseBrowseResponse, CourseCreateRequest, CourseId, CourseSearchResponse},
+        course::{
+            CourseBrowseResponse, CourseCreateRequest, CourseId, CourseLikedResponse,
+            CourseSearchResponse,
+        },
         user::UserId,
         CreateResponse,
     },
@@ -379,6 +382,55 @@ async fn auth_claims(
     };
 }
 
+/// Add a like to a course
+async fn like(
+    db: Data<PgPool>,
+    claims: TokenUser,
+    path: web::Path<CourseId>,
+) -> Result<HttpResponse, error::Server> {
+    let user_id = claims.user_id();
+
+    db::course::course_like(&*db, user_id, path.into_inner()).await?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
+/// Whether a user has liked a Course
+async fn liked(
+    db: Data<PgPool>,
+    claims: TokenUser,
+    path: web::Path<CourseId>,
+) -> Result<Json<<course::Liked as ApiEndpoint>::Res>, error::Server> {
+    let user_id = claims.user_id();
+
+    let is_liked = db::course::course_is_liked(&*db, user_id, path.into_inner()).await?;
+
+    Ok(Json(CourseLikedResponse { is_liked }))
+}
+
+/// Unlike to a course
+async fn unlike(
+    db: Data<PgPool>,
+    claims: TokenUser,
+    path: web::Path<CourseId>,
+) -> Result<HttpResponse, error::Server> {
+    let user_id = claims.user_id();
+
+    db::course::course_unlike(&*db, user_id, path.into_inner()).await?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
+/// Add a play to a course
+async fn view(
+    db: Data<PgPool>,
+    path: web::Path<CourseId>,
+) -> Result<HttpResponse, error::NotFound> {
+    db::course::course_play(&*db, path.into_inner()).await?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
         <course::Create as ApiEndpoint>::Path::PATH,
@@ -387,6 +439,10 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <course::GetLive as ApiEndpoint>::Path::PATH,
         course::GetLive::METHOD.route().to(get_live),
+    )
+    .route(
+        <course::Like as ApiEndpoint>::Path::PATH,
+        course::Like::METHOD.route().to(like),
     )
     .route(
         <course::GetDraft as ApiEndpoint>::Path::PATH,
@@ -415,5 +471,17 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <course::Delete as ApiEndpoint>::Path::PATH,
         course::Delete::METHOD.route().to(delete),
+    )
+    .route(
+        <course::View as ApiEndpoint>::Path::PATH,
+        course::View::METHOD.route().to(view),
+    )
+    .route(
+        <course::Liked as ApiEndpoint>::Path::PATH,
+        course::Liked::METHOD.route().to(liked),
+    )
+    .route(
+        <course::Unlike as ApiEndpoint>::Path::PATH,
+        course::Unlike::METHOD.route().to(unlike),
     );
 }

@@ -469,7 +469,7 @@ pub struct JigResponse {
     pub jig_data: JigData,
 
     /// Liked by current user.
-    pub is_liked: Option<bool>,
+    pub is_liked: bool,
 
     /// Admin data for Jig
     pub admin_data: JigAdminData,

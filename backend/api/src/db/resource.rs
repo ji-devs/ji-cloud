@@ -148,7 +148,6 @@ with cte as (
            likes,
            views,
            live_up_to_date,
-           exists(select 1 from resource_like where resource_id = resource.id and user_id = $3)  as "is_liked",
            case
                when $2 = 0 then resource.draft_id
                when $2 = 1 then resource.live_id
@@ -183,7 +182,7 @@ select cte.resource_id                                          as "resource_id:
         translated_keywords,
         rating                                               as "rating?: ResourceRating",
         blocked                                              as "blocked",
-        cte.is_liked                                         as "is_liked",
+        exists(select 1 from resource_like where resource_id = $1 and user_id = $3)  as "is_liked!",
         curated,
         (
                 select row(resource_data_module.id, kind, is_complete)
@@ -294,7 +293,7 @@ select resource.id                                       as "id!: ResourceId",
        views                                    as "views!",
        live_up_to_date                          as "live_up_to_date!",
        rating                                   as "rating?: ResourceRating",
-       exists(select 1 from resource_like where resource_id = resource.id and user_id = $2) as "is_liked",
+       exists(select 1 from resource_like where resource_id = resource.id and user_id = $2) as "is_liked!",
        blocked                                  as "blocked!",
        curated                                  as "curated!"
 from resource
@@ -489,7 +488,7 @@ select resource.id                                              as "resource_id:
     likes,
     views,
     live_up_to_date,
-    exists(select 1 from resource_like where resource_id = resource.id and user_id = $9)                         as "is_liked",
+    exists(select 1 from resource_like where resource_id = resource.id and user_id = $9)                         as "is_liked!",
    display_name                                                                  as "display_name!",
    language                                                                      as "language!",
    description                                                                   as "description!",

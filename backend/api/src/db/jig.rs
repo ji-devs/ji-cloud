@@ -173,7 +173,6 @@ with cte as (
            liked_count,
            play_count,
            live_up_to_date,
-           exists(select 1 from jig_like where jig_id = jig.id and user_id = $3) as "is_liked",
            case
                when $2 = 0 then jig.draft_id
                when $2 = 1 then jig.live_id
@@ -210,7 +209,7 @@ select cte.jig_id                                          as "jig_id: JigId",
         liked_count,
         play_count,
         live_up_to_date,
-        cte.is_liked,
+        exists(select 1 from jig_like where jig_id = $1 and user_id = $3)    as "is_liked!", 
         locked,
         other_keywords,
         translated_keywords,
@@ -351,7 +350,7 @@ select jig.id                                       as "id!: JigId",
        published_at,
        liked_count                              as "liked_count!",
        live_up_to_date                          as "live_up_to_date!",
-       exists(select 1 from jig_like where jig_id = jig.id and user_id = $2) as "is_liked",
+       exists(select 1 from jig_like where jig_id = jig.id and user_id = $2) as "is_liked!",
        (
            select play_count
            from jig_play_count
@@ -582,7 +581,7 @@ select jig.id                                              as "jig_id: JigId",
     published_at,
     liked_count,
     live_up_to_date,
-    exists(select 1 from jig_like where jig_id = jig.id and user_id = $9) as "is_liked",
+    exists(select 1 from jig_like where jig_id = jig.id and user_id = $9) as "is_liked!",
     (
          select play_count
          from jig_play_count

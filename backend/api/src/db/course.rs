@@ -141,7 +141,6 @@ with cte as (
            likes,
            plays,
            live_up_to_date,
-           exists(select 1 from course_like where course_id = course.id and user_id = $3) as "is_liked",
            case
                when $2 = 0 then course.draft_id
                when $2 = 1 then course.live_id
@@ -168,7 +167,7 @@ select cte.course_id                                          as "course_id: Cou
        live_up_to_date,
        other_keywords,
        translated_keywords,
-       is_liked,
+       exists(select 1 from course_like where course_id = $1 and user_id = $3) as "is_liked!",
        (
             select row(course_data_module.id, kind, is_complete)
             from course_data_module
@@ -277,7 +276,7 @@ select course.id                                       as "id!: CourseId",
        likes                                    as "likes!",
        plays                                    as "plays!",
        live_up_to_date                          as "live_up_to_date!",
-       exists(select 1 from course_like where course_id = course.id and user_id = $2) as "is_liked"
+       exists(select 1 from course_like where course_id = course.id and user_id = $2) as "is_liked!"
 from course
 inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
@@ -457,7 +456,7 @@ select course.id                                                                
     likes,
     plays,
     live_up_to_date,
-    exists(select 1 from course_like where course_id = course.id and user_id = $7)    as "is_liked",
+    exists(select 1 from course_like where course_id = course.id and user_id = $7)    as "is_liked!",
     display_name                                                                  as "display_name!",
     updated_at,
     language                                                                      as "language!",
@@ -1082,4 +1081,123 @@ returning id as "id!: CourseId"
     txn.commit().await?;
 
     Ok(new_course.id)
+}
+
+pub async fn course_unlike(db: &PgPool, user_id: UserId, id: CourseId) -> anyhow::Result<()> {
+    sqlx::query!(
+        r#"
+delete from course_like
+where course_id = $1 and user_id = $2
+    "#,
+        id.0,
+        user_id.0
+    )
+    .execute(db)
+    .await
+    .map_err(|_| anyhow::anyhow!("Must like course prior to unlike"))?;
+
+    Ok(())
+}
+
+pub async fn course_is_liked(db: &PgPool, user_id: UserId, id: CourseId) -> sqlx::Result<bool> {
+    let exists = sqlx::query!(
+        r#"
+select exists (
+    select 1
+    from course_like
+    where
+        course_id = $1
+        and user_id = $2
+) as "exists!"
+    "#,
+        id.0,
+        user_id.0
+    )
+    .fetch_one(db)
+    .await?
+    .exists;
+
+    Ok(exists)
+}
+
+pub async fn course_like(db: &PgPool, user_id: UserId, id: CourseId) -> anyhow::Result<()> {
+    let mut txn = db.begin().await?;
+
+    let course = sqlx::query!(
+        r#"
+select author_id    as "author_id: UserId",
+       published_at  as "published_at?"
+from course
+where id = $1
+    "#,
+        id.0
+    )
+    .fetch_one(&mut txn)
+    .await?;
+
+    //check if Course is published and likeable
+    if course.published_at == None {
+        return Err(anyhow::anyhow!("Course has not been published"));
+    };
+
+    // check if current user is the author
+    if course.author_id == Some(user_id) {
+        return Err(anyhow::anyhow!("Cannot like your own course"));
+    };
+
+    // checks if user has already liked the course
+    sqlx::query!(
+        // language=SQL
+        r#"
+insert into course_like(course_id, user_id)
+values ($1, $2)
+            "#,
+        id.0,
+        user_id.0
+    )
+    .execute(&mut txn)
+    .await
+    .map_err(|_| anyhow::anyhow!("Cannot like a course more than once"))?;
+
+    txn.commit().await?;
+
+    Ok(())
+}
+
+pub async fn course_play(db: &PgPool, id: CourseId) -> anyhow::Result<()> {
+    let mut txn = db.begin().await?;
+
+    let course = sqlx::query!(
+        // language=SQL
+        r#"
+select published_at  as "published_at?"
+from course
+where id = $1
+    "#,
+        id.0
+    )
+    .fetch_one(&mut txn)
+    .await?;
+
+    //check if course has been published and playable
+    if course.published_at == None {
+        return Err(anyhow::anyhow!("Course has not been published"));
+    };
+
+    //update Course play count
+    sqlx::query!(
+        // language=SQL
+        r#"
+update course
+set plays = plays + 1
+where id = $1;
+            "#,
+        id.0,
+    )
+    .execute(db)
+    .await?;
+
+    txn.commit().await?;
+
+    Ok(())
 }

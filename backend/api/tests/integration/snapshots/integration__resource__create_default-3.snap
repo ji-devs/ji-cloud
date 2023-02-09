@@ -11,6 +11,7 @@ expression: body
   "likes": 0,
   "views": 0,
   "liveUpToDate": false,
+  "isLiked": false,
   "resourceData": {
     "draftOrLive": "live",
     "displayName": "",

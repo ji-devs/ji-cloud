@@ -4,9 +4,10 @@ use crate::{
         course::{
             CourseBrowsePath, CourseBrowseQuery, CourseBrowseResponse, CourseClonePath,
             CourseCreatePath, CourseCreateRequest, CourseDeletePath, CourseGetDraftPath,
-            CourseGetLivePath, CourseId, CoursePublishPath, CourseResponse, CourseSearchPath,
-            CourseSearchQuery, CourseSearchResponse, CourseUpdateDraftDataPath,
-            CourseUpdateDraftDataRequest,
+            CourseGetLivePath, CourseId, CourseLikePath, CourseLikedPath, CourseLikedResponse,
+            CoursePublishPath, CourseResponse, CourseSearchPath, CourseSearchQuery,
+            CourseSearchResponse, CourseUnlikePath, CourseUpdateDraftDataPath,
+            CourseUpdateDraftDataRequest, CourseViewPath,
         },
         CreateResponse,
     },
@@ -165,4 +166,56 @@ impl ApiEndpoint for Clone {
     type Res = CreateResponse<CourseId>;
     type Err = EmptyError;
     const METHOD: Method = Method::Post;
+}
+
+/// Like a Course
+///
+/// # Authorization
+/// * Admin, BasicAuth
+pub struct Like;
+impl ApiEndpoint for Like {
+    type Path = CourseLikePath;
+    type Req = ();
+    type Res = ();
+    type Err = EmptyError;
+    const METHOD: Method = Method::Put;
+}
+
+/// Unlike a Course
+///
+/// # Authorization
+/// * Admin, BasicAuth
+pub struct Unlike;
+impl ApiEndpoint for Unlike {
+    type Path = CourseUnlikePath;
+    type Req = ();
+    type Res = ();
+    type Err = EmptyError;
+    const METHOD: Method = Method::Delete;
+}
+
+/// Is a Course liked by a user
+///
+/// # Authorization
+/// * Admin, BasicAuth
+pub struct Liked;
+impl ApiEndpoint for Liked {
+    type Path = CourseLikedPath;
+    type Req = ();
+    type Res = CourseLikedResponse;
+    type Err = EmptyError;
+    const METHOD: Method = Method::Get;
+}
+
+/// View a Course
+///
+/// # Authorization
+/// * None
+pub struct View;
+impl ApiEndpoint for View {
+    type Path = CourseViewPath;
+    type Req = ();
+    type Res = ();
+    type Err = EmptyError;
+    const METHOD: Method = Method::Put;
 }

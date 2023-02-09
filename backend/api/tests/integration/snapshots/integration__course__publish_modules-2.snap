@@ -11,6 +11,7 @@ expression: body
   "likes": 0,
   "plays": 0,
   "liveUpToDate": false,
+  "isLiked": false,
   "courseData": {
     "draftOrLive": "live",
     "displayName": "course name1",

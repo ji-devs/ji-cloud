@@ -13,6 +13,7 @@ expression: body
       "likes": 0,
       "views": 0,
       "liveUpToDate": false,
+      "isLiked": false,
       "resourceData": {
         "draftOrLive": "draft",
         "displayName": "resource2",
@@ -50,6 +51,7 @@ expression: body
       "likes": 0,
       "views": 0,
       "liveUpToDate": false,
+      "isLiked": false,
       "resourceData": {
         "draftOrLive": "live",
         "displayName": "resource2",
@@ -81,12 +83,13 @@ expression: body
     {
       "id": "af827e00-1519-11ed-87fa-7b1aa26c85a8",
       "publishedAt": "2022-06-22T17:57:33.149359Z",
-      "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
-      "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
-      "authorName": "Bobby Tables",
-      "likes": 0,
+      "creatorId": "7b96a41c-e406-11eb-8176-efd86dd7f444",
+      "authorId": "7b96a41c-e406-11eb-8176-efd86dd7f444",
+      "authorName": "Post Gres",
+      "likes": 1,
       "views": 0,
       "liveUpToDate": false,
+      "isLiked": true,
       "resourceData": {
         "draftOrLive": "draft",
         "displayName": "resource3",
@@ -124,6 +127,7 @@ expression: body
       "likes": 0,
       "views": 0,
       "liveUpToDate": false,
+      "isLiked": false,
       "resourceData": {
         "draftOrLive": "draft",
         "displayName": "resource1",
