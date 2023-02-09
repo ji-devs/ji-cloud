@@ -29,7 +29,6 @@ export class _ extends LitElement {
                     grid-column: 1;
                 }
                 .top-section ::slotted([slot=back]) {
-                    /* color: #ffffff; */
                     margin: 40px;
                     place-self: start;
                     z-index: 1;
@@ -56,6 +55,10 @@ export class _ extends LitElement {
                     margin: 0;
                     display: flex;
                     align-items: center;
+                }
+                h1 img-ui {
+                    max-height: 70px;
+                    max-width: 70px;
                 }
                 .bottom-section {
                     grid-column: 1 / -1;

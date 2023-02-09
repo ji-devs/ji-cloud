@@ -5,7 +5,7 @@ use components::{
     page_footer,
     page_header::{PageHeader, PageLinks},
 };
-use dominator::{clone, html, Dom};
+use dominator::{clone, html, link, Dom};
 use futures_signals::map_ref;
 use futures_signals::signal::SignalExt;
 use futures_signals::signal_vec::SignalVecExt;
@@ -100,13 +100,13 @@ impl Gallery {
                 html!("asset-gallery", {
                     .prop("kind", state.asset_type.as_str())
                     .prop("assetDisplayName", state.asset_type_name())
-                    // .child(link!(??, {
-                    //     .prop("slot", "back")
-                    //     .child(html!("fa-icon", {
-                    //         .prop("icon", "fa-regular fa-chevron-left")
-                    //     }))
-                    //     .text("Back to creator menu")
-                    // }))
+                    .child(link!(Route::Asset(AssetRoute::Studio).to_string(), {
+                        .prop("slot", "back")
+                        .child(html!("fa-icon", {
+                            .prop("icon", "fa-regular fa-chevron-left")
+                        }))
+                        .text("Back to creator menu")
+                    }))
                     .child(html!("asset-gallery-create", {
                         .prop("slot", "create-asset")
                         .prop("assetName", state.asset_type_name())

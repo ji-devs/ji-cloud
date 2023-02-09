@@ -214,6 +214,7 @@ pub enum AdminUsersRoute {
 
 #[derive(Debug, Clone)]
 pub enum AssetRoute {
+    Studio,
     JigGallery,
     CourseGallery,
     ResourceGallery,
@@ -429,6 +430,7 @@ impl Route {
             ["admin", "export"] => Self::Admin(AdminRoute::Export),
             ["admin"] => Self::Admin(AdminRoute::Landing),
             // ["jig", "edit", path] => Self::Asset(AssetRoute::RedirectToJig(path.to_string())),
+            ["asset", "edit", "studio"] => Self::Asset(AssetRoute::Studio),
             ["asset", "edit", "jig-gallery"] => Self::Asset(AssetRoute::JigGallery),
             ["asset", "edit", "course-gallery"] => Self::Asset(AssetRoute::CourseGallery),
             ["asset", "edit", "resource-gallery"] => Self::Asset(AssetRoute::ResourceGallery),
@@ -703,6 +705,7 @@ impl From<&Route> for String {
                 AdminRoute::Export => "/admin/export".to_string(),
             },
             Route::Asset(route) => match route {
+                AssetRoute::Studio => "/asset/edit/studio".to_string(),
                 AssetRoute::JigGallery => "/asset/edit/jig-gallery".to_string(),
                 AssetRoute::CourseGallery => "/asset/edit/course-gallery".to_string(),
                 AssetRoute::ResourceGallery => "/asset/edit/resource-gallery".to_string(),

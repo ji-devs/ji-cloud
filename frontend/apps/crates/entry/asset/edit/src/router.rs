@@ -2,7 +2,7 @@ use components::overlay::container::OverlayContainer;
 use shared::domain::asset::AssetType;
 use utils::routes::{AssetEditRoute, AssetRoute, Route};
 
-use crate::{edit::AssetEditState, gallery::state::Gallery};
+use crate::{edit::AssetEditState, gallery::state::Gallery, studio::render_studio};
 use dominator::{html, Dom};
 use futures_signals::signal::{Signal, SignalExt};
 
@@ -34,7 +34,8 @@ impl Router {
                         Some(AssetEditState::new(course_id.into(), route).render())
                     }
                 },
-                _ => None,
+                AssetRoute::Studio => Some(render_studio()),
+                AssetRoute::Play(_) => unimplemented!(), // Handled in player
             },
             _ => None,
         })
