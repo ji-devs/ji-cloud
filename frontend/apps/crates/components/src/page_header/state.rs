@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use awsm_web::loaders::helpers::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::user::UserProfile;
@@ -8,23 +10,20 @@ use utils::{
     unwrap::UnwrapJiExt,
 };
 
+use super::PageHeaderConfig;
+
 const TARGET_SELF: &str = "_self";
 const TARGET_BLANK: &str = "_blank";
 
-pub struct State {
+pub struct PageHeader {
     pub logged_in: Mutable<LoggedInState>,
     pub loader: AsyncLoader,
     pub beta_tooltip: Mutable<bool>,
+    pub config: PageHeaderConfig,
 }
 
-impl Default for State {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl State {
-    pub fn new() -> Self {
+impl PageHeader {
+    pub fn new(config: PageHeaderConfig) -> Rc<Self> {
         let show_beta_tooltip = {
             if let Ok(local_storage) = storage::get_local_storage() {
                 // If we have access to local_storage, and the item is not set, show the tooltip...
@@ -45,11 +44,12 @@ impl State {
             }
         };
 
-        Self {
+        Rc::new(Self {
             logged_in: Mutable::new(LoggedInState::Loading),
             loader: AsyncLoader::new(),
             beta_tooltip: Mutable::new(show_beta_tooltip),
-        }
+            config,
+        })
     }
 }
 

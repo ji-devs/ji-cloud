@@ -1,7 +1,10 @@
 use super::state::*;
 use components::asset_card::{render_asset_card, AssetCardBottomIndicator, AssetCardConfig};
-use components::page_header::state::PageLinks;
-use components::{page_footer, page_header};
+use components::page_header::PageHeaderConfig;
+use components::{
+    page_footer,
+    page_header::{PageHeader, PageLinks},
+};
 use dominator::{clone, html, Dom};
 use futures_signals::map_ref;
 use futures_signals::signal::SignalExt;
@@ -59,7 +62,11 @@ impl Gallery {
         };
 
         html!("empty-fragment", {
-            .child(page_header::dom::render(Rc::new(page_header::state::State::new()), None, Some(PageLinks::Create), true))
+            .child(PageHeader::new(PageHeaderConfig {
+                active_page: Some(PageLinks::Create),
+                render_beta: true,
+                ..Default::default()
+            }).render())
             .child_signal(state.confirm_delete.signal().map(clone!(state => move |confirm_delete| {
                 confirm_delete.map(|asset_id| {
                     html!("modal-confirm", {

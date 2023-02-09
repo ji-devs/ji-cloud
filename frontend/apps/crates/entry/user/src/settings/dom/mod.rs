@@ -1,5 +1,5 @@
 use components::{
-    page_header,
+    page_header::{PageHeader, PageHeaderConfig},
     profile_image::{ProfileImage, ProfileImageConfig},
 };
 use dominator::{clone, html, with_node, Dom};
@@ -54,7 +54,12 @@ impl SettingsPage {
                         state.save_profile();
                     })),
             }).render())
-            .child(page_header::dom::render(Rc::new(page_header::state::State::new()), Some("page-header"), None, true))
+            // .child(page_header::dom::render(Rc::new(page_header::state::PageHeader::new()), Some("page-header"), None, true))
+            .child(PageHeader::new(PageHeaderConfig {
+                slot: Some("page-header"),
+                render_beta: true,
+                ..Default::default()
+            }).render())
             .prop_signal("email", state.user.email.signal_cloned())
             .prop_signal("name", state.full_name_signal())
             .children(&mut [

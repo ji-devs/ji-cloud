@@ -1,10 +1,8 @@
 use dominator::{html, Dom};
 
-use std::rc::Rc;
-
 use components::{
     page_footer,
-    page_header::{self},
+    page_header::{PageHeader, PageHeaderConfig},
 };
 
 mod dom;
@@ -13,7 +11,10 @@ use dom::Iframe;
 pub fn render_help_center() -> Dom {
     html!("div", {
         .child(
-            page_header::dom::render(Rc::new(page_header::state::State::new()), None, None, true)
+            PageHeader::new(PageHeaderConfig {
+                render_beta: true,
+                ..Default::default()
+            }).render()
         )
         .child(
             Iframe::new().render_help()

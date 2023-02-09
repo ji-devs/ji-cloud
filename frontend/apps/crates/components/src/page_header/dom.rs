@@ -18,7 +18,7 @@ use crate::{
     page_header::state::{LoggedInState, PageLinks},
 };
 
-use super::{actions, state::State};
+use super::{actions, PageHeader};
 
 const DONATE_LINK: &str = "https://www.jewishinteractive.org/donate/";
 
@@ -33,113 +33,112 @@ const STR_MY_PROFILE: &str = "My profile";
 const STR_MY_JIGS: &str = "My JIGs";
 const STR_MY_RESOURCES: &str = "My resources";
 
-pub fn render(
-    state: Rc<State>,
-    slot: Option<&str>,
-    active_page: Option<PageLinks>,
-    render_beta: bool,
-) -> Dom {
-    actions::fetch_profile(Rc::clone(&state));
+impl PageHeader {
+    pub fn render(self: Rc<PageHeader>) -> Dom {
+        let state = self;
+        actions::fetch_profile(Rc::clone(&state));
 
-    html!("page-header", {
-        .apply_if(slot.is_some(), |dom| {
-            dom.prop("slot", slot.unwrap_ji())
-        })
-        .children(PageLinks::iter().map(|page_link| {
-            html!("page-header-link", {
-                .prop("slot", "links")
-                .prop("kind", page_link.kind_str())
-                .prop("active", {
-                    matches!(
-                        &active_page,
-                        Some(active_page) if active_page == &page_link
-                    )
-                })
-                .prop("href", &page_link.route())
-                .prop("target", page_link.target())
-                .event(move |_evt: events::Click| {
-                    let mut properties = HashMap::new();
-                    properties.insert("Header Kind", page_link.kind_str().to_owned());
-                    analytics::event("Header Click", Some(properties));
-                })
+        html!("page-header", {
+            .apply_if(state.config.slot.is_some(), |dom| {
+                dom.prop("slot", state.config.slot.unwrap_ji())
             })
-        }))
-        .child(html!("button-rect", {
-            .prop("slot", "donate")
-            .prop("color", "green")
-            .prop("size", "small")
-            .prop("bold", true)
-            .prop("href", DONATE_LINK)
-            .prop("target", "_blank")
-            .text(STR_DONATE)
-            .event(move |_evt: events::Click| {
-                analytics::event("Donate Click", None);
-            })
-        }))
-        .child(html!("fa-button", {
-            .prop("slot", "help")
-            .prop("icon", "fa-regular fa-circle-question fa-5x")
-            .event(move |_evt: events::Click| {
-                analytics::event("Help Center Click", None);
-            })
-        }))
-        .apply_if(render_beta, |dom| {
-            dom.child(html!("beta-button", {
-                .prop("slot", "beta")
-                .event(clone!(state => move |_evt: events::Click| {
-                    state.beta_tooltip.set_neq(true);
-                }))
-                .with_node!(elem => {
-                    .child_signal(state.beta_tooltip.signal_cloned().map(clone!(state, elem => move |show_tooltip| {
-                        match show_tooltip {
-                            false => None,
-                            true => Some(
-                                html!("empty-fragment" => HtmlElement, {
-                                    .apply(OverlayHandle::lifecycle(
-                                        clone!(state, elem => move || {
-                                            html!("overlay-tooltip-info", {
-                                                .prop("target", &elem)
-                                                .prop("color", "light-orange")
-                                                .attr("targetAnchor", "mm")
-                                                .attr("contentAnchor", "bl")
-                                                .prop("closeable", true)
-                                                .prop("strategy", "track")
-                                                .event(clone!(state => move |_evt: events::Close| {
-                                                    state.beta_tooltip.set_neq(false);
-                                                }))
-                                                .child(html!("beta-tooltip-content", {
-                                                    .prop("slot", "body")
-                                                }))
-                                            })
-                                        })
-                                    ))
-                                })
-                            ),
-                        }
-                    })))
+            .children(PageLinks::iter().map(|page_link| {
+                html!("page-header-link", {
+                    .prop("slot", "links")
+                    .prop("kind", page_link.kind_str())
+                    .prop("active", {
+                        matches!(
+                            &state.config.active_page,
+                            Some(active_page) if active_page == &page_link
+                        )
+                    })
+                    .prop("href", &page_link.route())
+                    .prop("target", page_link.target())
+                    .event(move |_evt: events::Click| {
+                        let mut properties = HashMap::new();
+                        properties.insert("Header Kind", page_link.kind_str().to_owned());
+                        analytics::event("Header Click", Some(properties));
+                    })
                 })
             }))
-        })
-        .apply(|dom| {
-            if let Some(PageLinks::Home) = active_page {
-                dom.child(html!("page-header-student-code", {
-                    .prop("slot", "student-code")
+            .child(html!("button-rect", {
+                .prop("slot", "donate")
+                .prop("color", "green")
+                .prop("size", "small")
+                .prop("bold", true)
+                .prop("href", DONATE_LINK)
+                .prop("target", "_blank")
+                .text(STR_DONATE)
+                .event(move |_evt: events::Click| {
+                    analytics::event("Donate Click", None);
+                })
+            }))
+            .child(html!("fa-button", {
+                .prop("slot", "help")
+                .prop("icon", "fa-regular fa-circle-question fa-5x")
+                .event(move |_evt: events::Click| {
+                    analytics::event("Help Center Click", None);
+                })
+            }))
+            .apply_if(state.config.render_beta, |dom| {
+                dom.child(html!("beta-button", {
+                    .prop("slot", "beta")
+                    .event(clone!(state => move |_evt: events::Click| {
+                        state.beta_tooltip.set_neq(true);
+                    }))
+                    .with_node!(elem => {
+                        .child_signal(state.beta_tooltip.signal_cloned().map(clone!(state, elem => move |show_tooltip| {
+                            match show_tooltip {
+                                false => None,
+                                true => Some(
+                                    html!("empty-fragment" => HtmlElement, {
+                                        .apply(OverlayHandle::lifecycle(
+                                            clone!(state, elem => move || {
+                                                html!("overlay-tooltip-info", {
+                                                    .prop("target", &elem)
+                                                    .prop("color", "light-orange")
+                                                    .attr("targetAnchor", "mm")
+                                                    .attr("contentAnchor", "bl")
+                                                    .prop("closeable", true)
+                                                    .prop("strategy", "track")
+                                                    .event(clone!(state => move |_evt: events::Close| {
+                                                        state.beta_tooltip.set_neq(false);
+                                                    }))
+                                                    .child(html!("beta-tooltip-content", {
+                                                        .prop("slot", "body")
+                                                    }))
+                                                })
+                                            })
+                                        ))
+                                    })
+                                ),
+                            }
+                        })))
+                    })
                 }))
-            } else {
-                dom
-            }
+            })
+            .apply(|dom| {
+                if let Some(PageLinks::Home) = state.config.active_page {
+                    dom.child(html!("page-header-student-code", {
+                        .prop("slot", "student-code")
+                    }))
+                } else {
+                    dom
+                }
+
+            })
+            .children_signal_vec(state.logged_in.signal_cloned().map(clone!(state => move|logged_in| {
+                match logged_in {
+                    LoggedInState::LoggedIn(user) => render_logged_in(Rc::clone(&state), &user),
+                    LoggedInState::LoggedOut => render_logged_out(),
+                    LoggedInState::Loading => vec![],
+                }
+            })).to_signal_vec())
         })
-        .children_signal_vec(state.logged_in.signal_cloned().map(clone!(state => move|logged_in| {
-            match logged_in {
-                LoggedInState::LoggedIn(user) => render_logged_in(Rc::clone(&state), &user),
-                LoggedInState::LoggedOut => render_logged_out(),
-                LoggedInState::Loading => vec![],
-            }
-        })).to_signal_vec())
-    })
+    }
 }
 
-fn has_privileges(state: Rc<State>, scope: UserScope) -> impl Signal<Item = bool> {
+fn has_privileges(state: Rc<PageHeader>, scope: UserScope) -> impl Signal<Item = bool> {
     state
         .logged_in
         .signal_ref(move |logged_in_state| {
@@ -147,7 +146,7 @@ fn has_privileges(state: Rc<State>, scope: UserScope) -> impl Signal<Item = bool
         })
 }
 
-fn render_logged_in(state: Rc<State>, user: &UserProfile) -> Vec<Dom> {
+fn render_logged_in(state: Rc<PageHeader>, user: &UserProfile) -> Vec<Dom> {
     vec![html!("page-header-profile", {
         .prop("slot", "user")
         .prop("name", &user.given_name)

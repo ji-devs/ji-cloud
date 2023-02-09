@@ -7,7 +7,7 @@ use utils::events;
 use components::{
     overlay::handle::OverlayHandle,
     page_footer,
-    page_header::{self, state::PageLinks},
+    page_header::{PageHeader, PageHeaderConfig, PageLinks},
     player_popup::{PlayerPopup, PreviewPopupCallbacks},
 };
 
@@ -23,7 +23,12 @@ impl Home {
         let state = self;
         html!("home-full", {
             .child_signal(state.mode.signal_ref(|mode| {
-                Some(page_header::dom::render(Rc::new(page_header::state::State::new()), None, Some(PageLinks::from(mode)), true))
+                // Some(page_header::dom::render(Rc::new(page_header::state::PageHeader::new()), None, Some(PageLinks::from(mode)), true))
+                Some(PageHeader::new(PageHeaderConfig {
+                    active_page: Some(PageLinks::from(mode)),
+                    render_beta: true,
+                    ..Default::default()
+                }).render())
             }))
             .children(&mut [
                 search_section::render(state.clone(), auto_search),

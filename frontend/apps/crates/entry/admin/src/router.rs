@@ -1,3 +1,4 @@
+use components::page_header::PageHeader;
 use shared::{
     api::endpoints::user::Profile,
     domain::user::{GetProfilePath, UserProfile},
@@ -74,12 +75,14 @@ impl Router {
                     let route = dominator::routing::url().signal_ref(|url| Route::from_url(url)),
                     let profile = state.profile.signal_cloned()
                         => move {
-                            let header = components::page_header::dom::render(
-                                Rc::new(components::page_header::state::State::new()),
-                                None,
-                                None,
-                                false,
-                            );
+                            // let header = components::page_header::dom::render(
+                            //     Rc::new(components::page_header::state::State::new()),
+                            //     None,
+                            //     None,
+                            //     false,
+                            // );
+
+                            let header = PageHeader::new(Default::default()).render();
 
                             let mut children = vec![header];
 

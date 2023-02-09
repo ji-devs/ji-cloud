@@ -6,7 +6,7 @@ use shared::domain::asset::AssetId;
 
 use components::{
     asset_search_bar::{AssetSearchBar, SearchSelected},
-    page_header::state::PageLinks,
+    page_header::PageLinks,
 };
 use utils::routes::SearchQueryParams;
 

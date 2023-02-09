@@ -2,7 +2,7 @@ use std::{collections::HashMap, rc::Rc};
 
 use components::{
     overlay::container::OverlayContainer,
-    page_header::{self, state::PageLinks},
+    page_header::{PageHeader, PageHeaderConfig, PageLinks},
 };
 use dominator::{clone, html, with_node, Dom, EventOptions};
 use futures_signals::signal::{Signal, SignalExt};
@@ -32,12 +32,12 @@ impl Community {
 
         html!("community-main", {
             .children(&mut [
-                page_header::dom::render(
-                    Rc::new(page_header::state::State::new()),
-                    Some("jigzi-header"),
-                    Some(PageLinks::Community),
-                    true
-                ),
+                PageHeader::new(PageHeaderConfig {
+                    slot: Some("jigzi-header"),
+                    active_page: Some(PageLinks::Community),
+                    render_beta: true,
+                    ..Default::default()
+                }).render(),
                 self.render_nav(),
                 html!("form", {
                     .prop("slot", "search-bar")
