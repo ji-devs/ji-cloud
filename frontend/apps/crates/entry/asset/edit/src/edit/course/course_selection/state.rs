@@ -14,6 +14,9 @@ pub struct CourseSelection {
     pub asset_edit_state: Rc<AssetEditState>,
     pub loader: AsyncLoader,
     pub search_results: MutableVec<Rc<JigResponse>>,
+    pub next_page: Mutable<u32>,
+    pub active_query: Mutable<String>,
+    pub total_jig_count: Mutable<u32>,
     pub drag: Mutable<Option<Rc<Drag<Asset>>>>,
 }
 
@@ -25,6 +28,9 @@ impl CourseSelection {
             asset_edit_state: Rc::clone(asset_edit_state),
             loader: AsyncLoader::new(),
             search_results: Default::default(),
+            next_page: Default::default(),
+            active_query: Default::default(),
+            total_jig_count: Default::default(),
             drag: Default::default(),
         })
     }

@@ -2,11 +2,17 @@ use std::rc::Rc;
 
 use components::asset_card::{render_asset_card, AssetCardBottomIndicator, AssetCardConfig};
 use dominator::{clone, html, Dom, EventOptions};
-use futures_signals::signal_vec::SignalVecExt;
+use futures_signals::{
+    map_ref,
+    signal::{Signal, SignalExt},
+    signal_vec::SignalVecExt,
+};
 use shared::domain::{asset::Asset, jig::JigResponse};
 use utils::{events, unwrap::UnwrapJiExt};
 
 use super::state::CourseSelection;
+
+const STR_LOAD_MORE: &str = "See more";
 
 impl CourseSelection {
     pub fn render(self: Rc<Self>) -> Dom {
@@ -17,18 +23,37 @@ impl CourseSelection {
         html!("asset-edit-course-selection", {
             .prop("slot", "main")
             .child(state.search_bar.render(Rc::new(clone!(state => move || {
+                state.next_page.set(0);
+                state.search_results.lock_mut().clear();
                 state.search();
             }))))
             .child(html!("home-search-results", {
                 .prop("slot", "results")
-                .prop_signal("jigCount", state.search_results.signal_vec_cloned().len())
-                .prop_signal("query", state.search_bar.search_selected.query.signal_cloned())
+                .prop_signal("jigCount", state.total_jig_count.signal())
+                .prop_signal("query", state.active_query.signal_cloned())
                 .child(html!("home-search-results-section", {
                     .prop("slot", "sections")
                     .prop("kind", "jig")
-                    .prop_signal("resultsCount", state.search_results.signal_vec_cloned().len())
+                    .prop_signal("resultsCount", state.total_jig_count.signal())
                     .children_signal_vec(state.search_results.signal_vec_cloned().map(clone!(state => move |jig| {
                         state.render_asset(&jig)
+                    })))
+                    .child_signal(state.all_loaded_signal().map(clone!(state => move |all_loaded| {
+                        match all_loaded {
+                            true => None,
+                            false => {
+                                Some(html!("button-rect", {
+                                    .prop("slot", "load-more")
+                                    .prop("color", "blue")
+                                    .prop("type", "filled")
+                                    .prop_signal("disabled", state.loader.is_loading())
+                                    .text(STR_LOAD_MORE)
+                                    .event(clone!(state => move |_: events::Click| {
+                                        state.search();
+                                    }))
+                                }))
+                            },
+                        }
                     })))
                 }))
             }))
@@ -99,5 +124,14 @@ impl CourseSelection {
                 },
             ))
         })
+    }
+
+    fn all_loaded_signal(self: &Rc<Self>) -> impl Signal<Item = bool> {
+        map_ref! {
+            let list_len = self.search_results.signal_vec_cloned().len(),
+            let total = self.total_jig_count.signal() => move {
+                *list_len >= *total as usize
+            }
+        }
     }
 }

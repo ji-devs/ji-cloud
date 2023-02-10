@@ -1,7 +1,6 @@
 use std::rc::Rc;
 
 use dominator::clone;
-use itertools::Itertools;
 use shared::{
     api::endpoints,
     domain::{
@@ -18,17 +17,23 @@ impl CourseSelection {
     pub fn search(self: &Rc<Self>) {
         let state = Rc::clone(self);
         state.loader.load(clone!(state => async move {
-            let req = state.search_bar.search_selected.to_jig_search_request();
+            let mut req = state.search_bar.search_selected.to_jig_search_request();
+
+            state.active_query.set(req.q.clone());
+
+            req.page = Some(state.next_page.get());
 
             match endpoints::jig::Search::api_no_auth(JigSearchPath(), Some(req)).await {
                 Err(_) => todo!(),
                 Ok(res) => {
-                    let jigs = res
-                        .jigs
-                        .into_iter()
-                        .map(|jig| Rc::new(jig))
-                        .collect_vec();
-                    state.search_results.lock_mut().replace_cloned(jigs);
+                    let mut jigs = state.search_results.lock_mut();
+                    res.jigs.into_iter().for_each(|jig| {
+                        jigs.push_cloned(Rc::new(jig.into()));
+                    });
+
+                    state.total_jig_count.set(res.total_jig_count as u32);
+
+                    state.next_page.replace_with(|next_page| *next_page + 1);
                 }
             };
 
