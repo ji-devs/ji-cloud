@@ -12,6 +12,7 @@ use components::{
     traces::edit::{TracesEdit, TracesEditCallbacks},
 };
 use dominator::clone;
+use futures_signals::signal::{always, Signal};
 use futures_signals::signal_vec::VecDiff;
 use futures_signals::{
     signal::{Mutable, ReadOnlyMutable},
@@ -58,6 +59,7 @@ pub struct Base {
     pub current_question: Mutable<Option<usize>>,
     pub text_editor: Rc<TextEditor>,
     pub play_settings: Rc<PlaySettings>,
+    pub is_valid: Mutable<IsValid>,
     pub continue_next_fn: ContinueNextFn,
 }
 
@@ -102,7 +104,7 @@ pub struct Question {
     pub correct_audio: Mutable<Option<Audio>>,
 
     /// Traces
-    pub traces: Rc<MutableVec<Trace>>,
+    pub traces: MutableVec<Trace>,
 
     pub is_editing_title: Mutable<bool>,
 
@@ -128,7 +130,7 @@ impl Default for Question {
             question_audio: Mutable::new(None),
             incorrect_audio: Mutable::new(None),
             correct_audio: Mutable::new(None),
-            traces: Rc::new(MutableVec::new()),
+            traces: MutableVec::new(),
             is_editing_title: Mutable::new(false),
             confirm_delete: Mutable::new(false),
         }
@@ -143,7 +145,7 @@ impl From<&RawQuestion> for Question {
             question_audio: Mutable::new(raw_question.question_audio.clone()),
             incorrect_audio: Mutable::new(raw_question.incorrect_audio.clone()),
             correct_audio: Mutable::new(raw_question.correct_audio.clone()),
-            traces: Rc::new(MutableVec::new_with_values(raw_question.traces.clone())),
+            traces: MutableVec::new_with_values(raw_question.traces.clone()),
             is_editing_title: Mutable::new(false),
             confirm_delete: Mutable::new(false),
         }
@@ -301,6 +303,7 @@ impl Base {
             phase: Mutable::new(Phase::Layout),
             backgrounds,
             stickers,
+            is_valid: Mutable::new(IsValid::Valid),
             questions: Question::from_raw_vec(content.questions),
             question_field: Mutable::new(content.question_field),
             question_sticker_text: Mutable::new(None),
@@ -315,13 +318,46 @@ impl Base {
     }
 }
 
+pub fn is_valid(questions: &MutableVec<Rc<Question>>) -> IsValid {
+    let questions = questions.lock_ref();
+    if questions.is_empty() {
+        IsValid::Empty
+    } else {
+        match questions
+            .iter()
+            .enumerate()
+            .find(|(_idx, q)| q.traces.lock_ref().is_empty())
+        {
+            Some((idx, _)) => IsValid::Index(idx),
+            None => IsValid::Valid,
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub enum IsValid {
+    Empty,
+    Index(usize),
+    Valid,
+}
+
 impl BaseExt<Step> for Base {
-    fn allowed_step_change(&self, _from: Step, _to: Step) -> bool {
-        true
+    type CanContinueSignal = impl Signal<Item = bool>;
+    fn allowed_step_change(&self, from: Step, to: Step) -> bool {
+        match from {
+            Step::One | Step::Two | Step::Three => match to {
+                Step::Four | Step::Five => match is_valid(&self.questions) {
+                    IsValid::Valid => true,
+                    _ => false,
+                },
+                _ => true,
+            },
+            _ => true,
+        }
     }
 
-    fn can_continue_next(&self) -> ReadOnlyMutable<bool> {
-        Mutable::new(true).read_only()
+    fn can_continue_next(&self) -> Self::CanContinueSignal {
+        always(true)
     }
 
     fn continue_next(&self) -> bool {

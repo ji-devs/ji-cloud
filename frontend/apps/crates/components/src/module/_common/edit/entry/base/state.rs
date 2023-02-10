@@ -1,5 +1,5 @@
 use dominator::Dom;
-use futures_signals::signal::{Mutable, ReadOnlyMutable, Signal};
+use futures_signals::signal::{Mutable, Signal};
 use shared::domain::asset::{Asset, AssetId};
 use std::collections::HashSet;
 use std::{marker::PhantomData, rc::Rc};
@@ -198,11 +198,12 @@ pub trait DomRenderable {
 pub type ContinueNextFn = Mutable<Option<Rc<dyn Fn() -> bool>>>;
 
 pub trait BaseExt<Step: StepExt> {
+    type CanContinueSignal: Signal<Item = bool>;
     /// Whether the step in the modules sidebar can be changed
     fn allowed_step_change(&self, from: Step, to: Step) -> bool;
 
     /// A signal used to determine whether the module navigation can proceed to the next tab/step
-    fn can_continue_next(&self) -> ReadOnlyMutable<bool>;
+    fn can_continue_next(&self) -> Self::CanContinueSignal;
 
     /// Custom module-level navigation
     ///

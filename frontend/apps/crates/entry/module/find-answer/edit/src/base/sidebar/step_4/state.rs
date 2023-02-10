@@ -34,6 +34,7 @@ impl Step4 {
 pub fn next_kind(kind: &MenuTabKind) -> Option<MenuTabKind> {
     match kind {
         MenuTabKind::PlaySettings => Some(MenuTabKind::Instructions),
+        MenuTabKind::Instructions => Some(MenuTabKind::Feedback),
         _ => None,
     }
 }

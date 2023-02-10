@@ -10,7 +10,7 @@ use components::{
 };
 use components::{module::_common::edit::prelude::*, stickers::video::state::Video};
 use dominator::clone;
-use futures_signals::signal::{Mutable, ReadOnlyMutable};
+use futures_signals::signal::{Mutable, ReadOnlyMutable, Signal};
 use futures_signals::signal_vec::{SignalVecExt, VecDiff};
 use shared::domain::{
     asset::AssetId,
@@ -223,6 +223,7 @@ impl Base {
 }
 
 impl BaseExt<Step> for Base {
+    type CanContinueSignal = impl Signal<Item = bool>;
     fn allowed_step_change(&self, _from: Step, to: Step) -> bool {
         match to {
             // Only allow changing to steps 3 and 4 if the video URL has actually been set.
@@ -231,8 +232,8 @@ impl BaseExt<Step> for Base {
         }
     }
 
-    fn can_continue_next(&self) -> ReadOnlyMutable<bool> {
-        self.can_continue_next.read_only()
+    fn can_continue_next(&self) -> Self::CanContinueSignal {
+        self.can_continue_next.signal()
     }
 
     fn continue_next(&self) -> bool {

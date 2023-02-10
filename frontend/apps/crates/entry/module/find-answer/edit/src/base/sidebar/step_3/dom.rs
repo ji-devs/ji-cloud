@@ -1,6 +1,6 @@
 use crate::base::{
     actions::Direction,
-    state::{Phase, Question},
+    state::{is_valid, IsValid, Phase, Question},
 };
 
 use super::state::*;
@@ -28,7 +28,9 @@ use shared::domain::module::body::{
 use utils::prelude::*;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
-use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement};
+use web_sys::{
+    HtmlElement, HtmlInputElement, HtmlTextAreaElement, ScrollBehavior, ScrollIntoViewOptions,
+};
 
 const MAX_QUESTION_TITLE_LENGTH: usize = 32;
 
@@ -99,8 +101,29 @@ fn current_question_signal(state: Rc<Step3>) -> impl Signal<Item = Option<(usize
         }))
 }
 
+fn check_is_valid(state: &Rc<Step3>) -> bool {
+    let is_valid = is_valid(&state.sidebar.base.questions);
+
+    let valid = match is_valid {
+        IsValid::Valid => true,
+        _ => false,
+    };
+
+    state.sidebar.base.is_valid.set(is_valid);
+
+    valid
+}
+
 pub fn render(state: Rc<Step3>) -> Dom {
-    state.sidebar.base.continue_next_fn.set(None);
+    state
+        .sidebar
+        .base
+        .continue_next_fn
+        .set(Some(Rc::new(clone!(state => move || {
+            // If the questions are valid, we can let the parent navigation handle the continue event.
+            // Otherwise, if the questions are invalid, we say we handled the event, but do nothing.
+            !check_is_valid(&state)
+        }))));
 
     html!("module-sidebar-body", {
         .after_removed(clone!(state => move |_| {
@@ -134,6 +157,31 @@ pub fn render(state: Rc<Step3>) -> Dom {
                     .style_signal("display", state.advanced_visible.signal().map(|visible| {
                         if visible { Some("none") } else { None }
                     }))
+                    .with_node!(elem => {
+                        .child_signal(state.sidebar.base.is_valid.signal_cloned().map(clone!(state, elem => move |is_valid| {
+                            match is_valid {
+                                IsValid::Empty => {
+                                    Some(html!("empty-fragment", {
+                                        .apply(OverlayHandle::lifecycle(clone!(state, elem => move || {
+                                            html!("overlay-tooltip-error", {
+                                                .text("Oops! Please add questions before moving on to the next step.")
+                                                .prop("target", elem.clone())
+                                                .prop("targetAnchor", "tr")
+                                                .prop("contentAnchor", "oppositeH")
+                                                .prop("closeable", true)
+                                                .prop("strategy", "track")
+                                                .style("width", "700px")
+                                                .event(clone!(state => move |_:events::Close| {
+                                                    state.sidebar.base.is_valid.set(IsValid::Valid);
+                                                }))
+                                            })
+                                        })))
+                                    }))
+                                },
+                                _ => None,
+                            }
+                        })))
+                    })
                     .child(html!("div", {
                         .child(html!("button-icon", {
                             .prop("size", "medium")
@@ -180,9 +228,11 @@ pub fn render(state: Rc<Step3>) -> Dom {
                     .prop("label", "Add a question")
                     .prop("labelcolor", "blue")
                     .event(clone!(state => move|_: events::Click| {
-                        state.sidebar.base.add_default_question();
-                        let index = state.sidebar.base.questions.lock_ref().len() - 1;
-                        state.sidebar.base.current_question.set(Some(index));
+                        if check_is_valid(&state) {
+                            state.sidebar.base.add_default_question();
+                            let index = state.sidebar.base.questions.lock_ref().len() - 1;
+                            state.sidebar.base.current_question.set(Some(index));
+                        }
                     }))
                 }))
             } else {
@@ -450,6 +500,32 @@ pub fn render_question(
     question: Rc<Question>,
 ) -> Dom {
     html!("question-item", {
+        .with_node!(elem => {
+            .child_signal(state.sidebar.base.is_valid.signal_cloned().map(clone!(state, index, elem => move |is_valid| {
+                match is_valid {
+                    IsValid::Index(invalid_index) if Some(invalid_index) == index.get() => {
+                        elem.scroll_into_view_with_scroll_into_view_options(ScrollIntoViewOptions::new().behavior(ScrollBehavior::Smooth));
+                        Some(html!("empty-fragment", {
+                            .apply(OverlayHandle::lifecycle(clone!(state, elem => move || {
+                                html!("overlay-tooltip-error", {
+                                    .text("Oops! Please define your answers before moving to the next step.")
+                                    .prop("target", elem.clone())
+                                    .prop("targetAnchor", "tr")
+                                    .prop("contentAnchor", "oppositeH")
+                                    .prop("closeable", true)
+                                    .prop("strategy", "track")
+                                    .style("width", "700px")
+                                    .event(clone!(state => move |_:events::Close| {
+                                        state.sidebar.base.is_valid.set(IsValid::Valid);
+                                    }))
+                                })
+                            })))
+                        }))
+                    },
+                    _ => None,
+                }
+            })))
+        })
         .child(html!("fa-button", {
             .prop("slot", "toggle")
             .prop_signal("icon", current_question_idx_signal(state.clone(), index.signal()).map(|is_current| {

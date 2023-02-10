@@ -237,6 +237,7 @@ impl<RawData: RawDataExt, E: ExtraExt> CardsBase<RawData, E> {
 //here was the latest attempt: https://play.rust-lang.org/?version=nightly&mode=debug&edition=2018&gist=75e158fa8d226b8fdc505ec8551ca259
 
 impl<RawData: RawDataExt, E: ExtraExt> BaseExt<Step> for CardsBase<RawData, E> {
+    type CanContinueSignal = impl Signal<Item = bool>;
     fn get_asset_id(&self) -> AssetId {
         self.jig_id.into()
     }
@@ -252,8 +253,8 @@ impl<RawData: RawDataExt, E: ExtraExt> BaseExt<Step> for CardsBase<RawData, E> {
         }
     }
 
-    fn can_continue_next(&self) -> ReadOnlyMutable<bool> {
-        self.can_continue_next.read_only()
+    fn can_continue_next(&self) -> Self::CanContinueSignal {
+        self.can_continue_next.signal()
     }
 
     fn continue_next(&self) -> bool {
