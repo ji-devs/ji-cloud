@@ -16,16 +16,6 @@ where
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
 {
-    pub fn try_next_step(&self) {
-        if let Some(to) = self.step.get().next() {
-            if self.base.can_continue_next().get() {
-                // If the module didn't handle the navigation, move on to the next step.
-                if !self.base.continue_next() {
-                    self.try_change_step(to);
-                }
-            }
-        }
-    }
     pub fn try_change_step(&self, to: Step) {
         let from = self.step.get();
 

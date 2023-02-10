@@ -11,7 +11,7 @@ use components::{
     text_editor::{TextEditor, TextEditorCallbacks},
 };
 use dominator::clone;
-use futures_signals::signal::{Mutable, ReadOnlyMutable};
+use futures_signals::signal::{always, Mutable, ReadOnlyMutable, Signal};
 use shared::domain::module::body::BodyExt;
 use shared::domain::{
     asset::AssetId,
@@ -144,12 +144,13 @@ impl Base {
 }
 
 impl BaseExt<Step> for Base {
+    type CanContinueSignal = impl Signal<Item = bool>;
     fn allowed_step_change(&self, _from: Step, _to: Step) -> bool {
         true
     }
 
-    fn can_continue_next(&self) -> ReadOnlyMutable<bool> {
-        Mutable::new(true).read_only()
+    fn can_continue_next(&self) -> Self::CanContinueSignal {
+        always(true)
     }
 
     fn continue_next(&self) -> bool {

@@ -204,14 +204,35 @@ where
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
 {
+    let change_to = Mutable::new(None);
+
+    let should_change_to = map_ref! {
+        let change_to = change_to.signal_cloned(),
+        let can_continue_next = state.base.can_continue_next()
+            => {
+                match (change_to, can_continue_next) {
+                    (Some(to), true) => Some(*to),
+                    _ => None
+                }
+            }
+    };
+
     html!("module-footer", {
+        .future(should_change_to.for_each(clone!(state => move |to| {
+            if let Some(to) = to {
+                if !state.base.continue_next() {
+                    state.try_change_step(to);
+                }
+            }
+            async {}
+        })))
         .prop("slot", "footer")
         .child(Footer::render(state.footer.clone()))
         .child(html!("module-footer-continue-button", {
             .prop("slot", "btn")
-            .prop_signal("enabled", state.base.can_continue_next().signal_cloned())
-            .event(clone!(state => move |_evt:events::Next| {
-                state.try_next_step();
+            .prop_signal("enabled", state.base.can_continue_next())
+            .event(clone!(state => move |_evt: events::Next| {
+                change_to.set(state.step.get().next());
             }))
         }))
     })
