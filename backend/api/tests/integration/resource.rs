@@ -414,7 +414,7 @@ async fn browse_own_simple(port: u16) -> anyhow::Result<()> {
 
 #[test_service(
     setup = "setup_service",
-    fixtures("Fixture::MetaKinds", "Fixture::UserDefaultPerms", "Fixture::Resource")
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Resource")
 )]
 async fn count(port: u16) -> anyhow::Result<()> {
     let name = "count";
@@ -443,7 +443,7 @@ async fn count(port: u16) -> anyhow::Result<()> {
     setup = "setup_service",
     fixtures(
         "Fixture::MetaKinds",
-        "Fixture::UserDefaultPerms",
+        "Fixture::User",
         "Fixture::Resource",
         "Fixture::CategoryOrdering"
     )
@@ -613,7 +613,7 @@ async fn update_and_publish(port: u16) -> anyhow::Result<()> {
     setup = "setup_service",
     fixtures(
         "Fixture::MetaKinds",
-        "Fixture::UserDefaultPerms",
+        "Fixture::User",
         "Fixture::Resource",
         "Fixture::CategoryOrdering"
     )
@@ -686,7 +686,7 @@ async fn live_up_to_date_flag(port: u16) -> anyhow::Result<()> {
     setup = "setup_service",
     fixtures(
         "Fixture::MetaKinds",
-        "Fixture::UserDefaultPerms",
+        "Fixture::User",
         "Fixture::Resource",
         "Fixture::CategoryOrdering"
     )

@@ -1,6 +1,6 @@
 use components::page_header::{PageHeader, PageHeaderConfig, PageLinks};
 use dominator::{events, html, on_click_go_to_url, Dom};
-use utils::routes::{AssetRoute, Route, HomeRoute};
+use utils::routes::{AssetRoute, HomeRoute, Route};
 
 use super::actions;
 

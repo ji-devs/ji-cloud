@@ -13,6 +13,7 @@ expression: body
       "likes": 0,
       "plays": 0,
       "liveUpToDate": true,
+      "isLiked": false,
       "courseData": {
         "draftOrLive": "draft",
         "displayName": "course name1",
@@ -47,6 +48,7 @@ expression: body
       "likes": 0,
       "plays": 0,
       "liveUpToDate": false,
+      "isLiked": false,
       "courseData": {
         "draftOrLive": "draft",
         "displayName": "course name2",

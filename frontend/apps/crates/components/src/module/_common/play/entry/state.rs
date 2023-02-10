@@ -117,6 +117,7 @@ where
                         author_name: None,
                         published_at: None,
                         live_up_to_date: false,
+                        is_liked: false,
                         jig_data: JigData {
                             created_at: chrono::offset::Utc::now(),
                             last_edited: None,

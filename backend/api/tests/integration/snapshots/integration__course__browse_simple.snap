@@ -13,6 +13,7 @@ expression: body
       "likes": 0,
       "plays": 0,
       "liveUpToDate": false,
+      "isLiked": false,
       "courseData": {
         "draftOrLive": "draft",
         "displayName": "course name1",
@@ -44,9 +45,10 @@ expression: body
       "creatorId": "7b96a41c-e406-11eb-8176-efd86dd7f444",
       "authorId": "7b96a41c-e406-11eb-8176-efd86dd7f444",
       "authorName": "Post Gres",
-      "likes": 0,
+      "likes": 1,
       "plays": 0,
       "liveUpToDate": false,
+      "isLiked": true,
       "courseData": {
         "draftOrLive": "draft",
         "displayName": "course name3",
@@ -75,9 +77,10 @@ expression: body
       "creatorId": "7b96a41c-e406-11eb-8176-efd86dd7f444",
       "authorId": "7b96a41c-e406-11eb-8176-efd86dd7f444",
       "authorName": "Post Gres",
-      "likes": 0,
+      "likes": 1,
       "plays": 0,
       "liveUpToDate": false,
+      "isLiked": true,
       "courseData": {
         "draftOrLive": "live",
         "displayName": "course name3",

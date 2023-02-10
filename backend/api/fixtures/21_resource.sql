@@ -21,8 +21,8 @@ values ('d8067526-1518-11ed-87fa-ebaf880b6d9c', '1f241e1b-b537-493f-a230-075cb16
        ('2f8d91d0-1519-11ed-87fa-eb1826fcf343', '1f241e1b-b537-493f-a230-075cb16315be',
         '1f241e1b-b537-493f-a230-075cb16315be', '2f8d92d4-1519-11ed-87fa-63728884fdd0',
         '2f8d937e-1519-11ed-87fa-033ee1e7150d', '2022-06-23 17:57:33.149359+00'),
-       ('af827e00-1519-11ed-87fa-7b1aa26c85a8', '1f241e1b-b537-493f-a230-075cb16315be',
-        '1f241e1b-b537-493f-a230-075cb16315be', 'af827edc-1519-11ed-87fa-a7fcfabe535d',
+       ('af827e00-1519-11ed-87fa-7b1aa26c85a8', '7b96a41c-e406-11eb-8176-efd86dd7f444',
+        '7b96a41c-e406-11eb-8176-efd86dd7f444', 'af827edc-1519-11ed-87fa-a7fcfabe535d',
         'af827f86-1519-11ed-87fa-0f83dd32ae96', '2022-06-22 17:57:33.149359+00');
 
 insert into resource_data_module (id, resource_data_id, index, kind, is_complete, contents, created_at)
@@ -45,3 +45,6 @@ values ('d806771a-1518-11ed-87fa-4785946384aa', '286b828c-1dd9-11ec-8426-571b03b
        ('d8067634-1518-11ed-87fa-cb90cc4fa07d', '286b834a-1dd9-11ec-8426-6f641a50e23f',
         'link test', 'a91aca34-519e-11ec-ab46-175eaaf1ff23', '{ "link": "url://url.url.url/urls/s" }'),
        ('d8067634-1518-11ed-87fa-cb90cc4fa07d', '286b8390-1dd9-11ec-8426-fbeb80c504d9', 'link test', 'a91aca34-519e-11ec-ab46-175eaaf1ff23', '{ "link": "url://url.url.url/url/s" }');
+
+insert into resource_like (resource_id, user_id, created_at)
+values ('af827e00-1519-11ed-87fa-7b1aa26c85a8', '1f241e1b-b537-493f-a230-075cb16315be', '2021-03-04 00:47:26.134651+00');

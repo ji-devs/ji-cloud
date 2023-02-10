@@ -27,7 +27,7 @@ use sqlx::PgPool;
 use crate::{
     db,
     error::{self, ServiceKind},
-    extractor::TokenUser,
+    extractor::{get_user_id, TokenUser},
     http::endpoints::course::{DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT},
     service::ServiceData,
 };
@@ -124,7 +124,7 @@ pub async fn browse(
 /// Get a Public Users Jigs
 pub async fn browse_user_jigs(
     db: Data<PgPool>,
-    _auth: Option<TokenUser>,
+    auth: Option<TokenUser>,
     path: Path<UserId>,
     query: Option<Query<<user::BrowseUserJigs as ApiEndpoint>::Req>>,
 ) -> Result<Json<<user::BrowseUserJigs as ApiEndpoint>::Res>, error::NotFound> {
@@ -132,6 +132,8 @@ pub async fn browse_user_jigs(
         query.map_or_else(Default::default, Query::into_inner),
         path.into_inner(),
     );
+
+    let claim_id = get_user_id(auth);
 
     let page_limit = page_limit(query.page_limit)
         .await
@@ -150,6 +152,7 @@ pub async fn browse_user_jigs(
         page_limit,
         resource_types.to_owned(),
         None,
+        claim_id,
     );
 
     let total_count_future = db::jig::filtered_count(
@@ -175,7 +178,6 @@ pub async fn browse_user_jigs(
 /// Get a Public Users resources
 pub async fn browse_user_resources(
     db: Data<PgPool>,
-    _auth: Option<TokenUser>,
     path: Path<UserId>,
     query: Option<Query<<user::BrowseResources as ApiEndpoint>::Req>>,
 ) -> Result<Json<<user::BrowseResources as ApiEndpoint>::Res>, error::NotFound> {
@@ -212,7 +214,7 @@ pub async fn browse_user_resources(
 /// Get a Public Users Courses
 pub async fn browse_user_courses(
     db: Data<PgPool>,
-    _auth: Option<TokenUser>,
+    auth: Option<TokenUser>,
     path: Path<UserId>,
     query: Option<Query<<user::BrowseCourses as ApiEndpoint>::Req>>,
 ) -> Result<Json<<user::BrowseCourses as ApiEndpoint>::Res>, error::NotFound> {
@@ -220,6 +222,8 @@ pub async fn browse_user_courses(
         query.map_or_else(Default::default, Query::into_inner),
         path.into_inner(),
     );
+
+    let claim_id = get_user_id(auth);
 
     let privacy_level = vec![];
     let resource_types = vec![];
@@ -236,6 +240,7 @@ pub async fn browse_user_courses(
         query.page.unwrap_or(0) as i32,
         page_limit,
         resource_types.to_owned(),
+        claim_id,
     );
 
     let total_count_future = db::course::filtered_count(
@@ -327,7 +332,6 @@ pub async fn browse_user_followers(
 /// Get a Public User's Followers
 pub async fn browse_user_followings(
     db: Data<PgPool>,
-    _auth: Option<TokenUser>,
     path: Path<UserId>,
     query: Option<Query<<user::BrowseFollowing as ApiEndpoint>::Req>>,
 ) -> Result<Json<<user::BrowseFollowing as ApiEndpoint>::Res>, error::NotFound> {

@@ -191,7 +191,7 @@ pub async fn browse_user_resources(
             "#,
         user_id.0,
         page as i32,
-        page_limit as i32
+        page_limit as i32,
     )
     .fetch_all(db)
     .await?;

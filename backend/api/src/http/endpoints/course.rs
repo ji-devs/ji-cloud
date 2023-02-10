@@ -8,7 +8,10 @@ use shared::{
     api::{endpoints::course, ApiEndpoint, PathParts},
     domain::{
         asset::{DraftOrLive, PrivacyLevel, UserOrMe},
-        course::{CourseBrowseResponse, CourseCreateRequest, CourseId, CourseSearchResponse},
+        course::{
+            CourseBrowseResponse, CourseCreateRequest, CourseId, CourseLikedResponse,
+            CourseSearchResponse,
+        },
         user::UserId,
         CreateResponse,
     },
@@ -20,7 +23,7 @@ use uuid::Uuid;
 use crate::{
     db::{self, course::CreateCourseError},
     error::{self, ServiceKind},
-    extractor::TokenUser,
+    extractor::{get_user_id, TokenUser},
     service::ServiceData,
 };
 
@@ -73,9 +76,12 @@ async fn create(
 #[instrument(skip_all)]
 async fn get_live(
     db: Data<PgPool>,
+    auth: Option<TokenUser>,
     path: web::Path<CourseId>,
 ) -> Result<Json<<course::GetLive as ApiEndpoint>::Res>, error::NotFound> {
-    let course_response = db::course::get_one(&db, path.into_inner(), DraftOrLive::Live)
+    let user_id = get_user_id(auth);
+
+    let course_response = db::course::get_one(&db, path.into_inner(), DraftOrLive::Live, user_id)
         .await?
         .ok_or(error::NotFound::ResourceNotFound)?;
 
@@ -84,9 +90,12 @@ async fn get_live(
 
 async fn get_draft(
     db: Data<PgPool>,
+    auth: Option<TokenUser>,
     path: web::Path<CourseId>,
 ) -> Result<Json<<course::GetDraft as ApiEndpoint>::Res>, error::NotFound> {
-    let course_response = db::course::get_one(&db, path.into_inner(), DraftOrLive::Draft)
+    let user_id = get_user_id(auth);
+
+    let course_response = db::course::get_one(&db, path.into_inner(), DraftOrLive::Draft, user_id)
         .await?
         .ok_or(error::NotFound::ResourceNotFound)?;
 
@@ -155,7 +164,7 @@ async fn browse(
 ) -> Result<Json<<course::Browse as ApiEndpoint>::Res>, error::Auth> {
     let query = query.map_or_else(Default::default, Query::into_inner);
 
-    let (author_id, privacy_level) =
+    let (author_id, user_id, privacy_level) =
         auth_claims(db.as_ref(), claims, query.author_id, query.privacy_level).await?;
 
     let page_limit = page_limit(query.page_limit)
@@ -172,6 +181,7 @@ async fn browse(
         query.page.unwrap_or(0) as i32,
         page_limit,
         resource_types.to_owned(),
+        user_id,
     );
 
     let total_count_future = db::course::filtered_count(
@@ -260,7 +270,7 @@ async fn search(
         .await
         .map_err(|e| error::Service::InternalServerError(e))?;
 
-    let (author_id, privacy_level) =
+    let (author_id, user_id, privacy_level) =
         auth_claims(&*db, claims, query.author_id, query.privacy_level).await?;
 
     let (ids, pages, total_hits) = algolia
@@ -283,7 +293,8 @@ async fn search(
         .await?
         .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
 
-    let courses: Vec<_> = db::course::get_by_ids(db.as_ref(), &ids, DraftOrLive::Live).await?;
+    let courses: Vec<_> =
+        db::course::get_by_ids(db.as_ref(), &ids, DraftOrLive::Live, user_id).await?;
 
     Ok(Json(CourseSearchResponse {
         courses,
@@ -325,7 +336,7 @@ async fn auth_claims(
     claims: Option<TokenUser>,
     author_id: Option<UserOrMe>,
     privacy_level: Vec<PrivacyLevel>,
-) -> Result<(Option<UserId>, Vec<PrivacyLevel>), error::Auth> {
+) -> Result<(Option<UserId>, Option<UserId>, Vec<PrivacyLevel>), error::Auth> {
     if claims.is_none() && author_id == Some(UserOrMe::Me) {
         return Err(error::Auth::Forbidden);
     };
@@ -349,12 +360,12 @@ async fn auth_claims(
                     }
                 }
             };
-            return Ok((author_id, privacy));
+            return Ok((author_id, Some(user_id), privacy));
         } else {
             if is_admin {
-                return Ok((None, privacy_level));
+                return Ok((None, Some(user_id), privacy_level));
             } else {
-                return Ok((None, vec![PrivacyLevel::Public]));
+                return Ok((None, Some(user_id), vec![PrivacyLevel::Public]));
             }
         };
     } else {
@@ -364,11 +375,60 @@ async fn auth_claims(
         });
 
         if let Some(id) = author_id {
-            return Ok((id, vec![PrivacyLevel::Public]));
+            return Ok((id, None, vec![PrivacyLevel::Public]));
         } else {
-            return Ok((None, vec![PrivacyLevel::Public]));
+            return Ok((None, None, vec![PrivacyLevel::Public]));
         }
     };
+}
+
+/// Add a like to a course
+async fn like(
+    db: Data<PgPool>,
+    claims: TokenUser,
+    path: web::Path<CourseId>,
+) -> Result<HttpResponse, error::Server> {
+    let user_id = claims.user_id();
+
+    db::course::course_like(&*db, user_id, path.into_inner()).await?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
+/// Whether a user has liked a Course
+async fn liked(
+    db: Data<PgPool>,
+    claims: TokenUser,
+    path: web::Path<CourseId>,
+) -> Result<Json<<course::Liked as ApiEndpoint>::Res>, error::Server> {
+    let user_id = claims.user_id();
+
+    let is_liked = db::course::course_is_liked(&*db, user_id, path.into_inner()).await?;
+
+    Ok(Json(CourseLikedResponse { is_liked }))
+}
+
+/// Unlike to a course
+async fn unlike(
+    db: Data<PgPool>,
+    claims: TokenUser,
+    path: web::Path<CourseId>,
+) -> Result<HttpResponse, error::Server> {
+    let user_id = claims.user_id();
+
+    db::course::course_unlike(&*db, user_id, path.into_inner()).await?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
+/// Add a play to a course
+async fn view(
+    db: Data<PgPool>,
+    path: web::Path<CourseId>,
+) -> Result<HttpResponse, error::NotFound> {
+    db::course::course_play(&*db, path.into_inner()).await?;
+
+    Ok(HttpResponse::NoContent().finish())
 }
 
 pub fn configure(cfg: &mut ServiceConfig) {
@@ -379,6 +439,10 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <course::GetLive as ApiEndpoint>::Path::PATH,
         course::GetLive::METHOD.route().to(get_live),
+    )
+    .route(
+        <course::Like as ApiEndpoint>::Path::PATH,
+        course::Like::METHOD.route().to(like),
     )
     .route(
         <course::GetDraft as ApiEndpoint>::Path::PATH,
@@ -407,5 +471,17 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <course::Delete as ApiEndpoint>::Path::PATH,
         course::Delete::METHOD.route().to(delete),
+    )
+    .route(
+        <course::View as ApiEndpoint>::Path::PATH,
+        course::View::METHOD.route().to(view),
+    )
+    .route(
+        <course::Liked as ApiEndpoint>::Path::PATH,
+        course::Liked::METHOD.route().to(liked),
+    )
+    .route(
+        <course::Unlike as ApiEndpoint>::Path::PATH,
+        course::Unlike::METHOD.route().to(unlike),
     );
 }

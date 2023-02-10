@@ -50,6 +50,7 @@ expression: body
     "translatedKeywords": "",
     "translatedDescription": {}
   },
+  "isLiked": false,
   "adminData": {
     "rating": null,
     "blocked": false,

@@ -468,6 +468,9 @@ pub struct JigResponse {
     /// The data of the requested JIG.
     pub jig_data: JigData,
 
+    /// Liked by current user.
+    pub is_liked: bool,
+
     /// Admin data for Jig
     pub admin_data: JigAdminData,
 }
@@ -759,7 +762,7 @@ pub struct JigCountResponse {
 
 make_path_parts!(JigLikePath => "/v1/jig/{}/like" => JigId);
 
-make_path_parts!(JigUnlikePath => "/v1/jig/{}/like" => JigId);
+make_path_parts!(JigUnlikePath => "/v1/jig/{}/unlike" => JigId);
 
 make_path_parts!(JigLikedPath => "/v1/jig/{}/like" => JigId);
 
