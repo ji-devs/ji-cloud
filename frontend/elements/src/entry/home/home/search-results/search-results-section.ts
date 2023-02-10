@@ -63,6 +63,9 @@ export class _ extends LitElement {
                     row-gap: 60px;
                     column-gap: 30px;
                 }
+                :host([dense]) .results {
+                    grid-template-columns: repeat(auto-fill, 216px);
+                }
                 .load-more {
                     display: grid;
                     place-content: center;
@@ -98,6 +101,9 @@ export class _ extends LitElement {
 
     @property({ type: Number })
     resultsCount: number = 0;
+
+    @property({ type: Boolean, reflect: true })
+    dense: boolean = false;
 
     render() {
         return html`

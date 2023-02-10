@@ -34,6 +34,7 @@ impl CourseSelection {
                 .child(html!("home-search-results-section", {
                     .prop("slot", "sections")
                     .prop("kind", "jig")
+                    .prop("dense", true)
                     .prop_signal("resultsCount", state.total_jig_count.signal())
                     .children_signal_vec(state.search_results.signal_vec_cloned().map(clone!(state => move |jig| {
                         state.render_asset(&jig)
