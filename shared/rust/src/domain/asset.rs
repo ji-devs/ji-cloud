@@ -453,6 +453,16 @@ impl Asset {
         }
     }
 
+    /// is likes by current user
+    pub fn is_liked(&self) -> bool {
+        match self {
+            Self::Jig(jig) => jig.is_liked,
+            Self::Course(course) => course.is_liked,
+            Self::Resource(resource) => resource.is_liked,
+            Self::ProDev(_pro_dev) => todo!(),
+        }
+    }
+
     /// get plays
     pub fn plays(&self) -> i64 {
         match self {

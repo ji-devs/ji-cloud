@@ -5,7 +5,7 @@ use components::{
 };
 use dominator::{clone, html, Dom};
 use futures_signals::{
-    signal::{from_future, Signal, SignalExt},
+    signal::{from_future, Mutable, Signal, SignalExt},
     signal_vec::SignalVecExt,
 };
 use shared::{
@@ -70,6 +70,7 @@ impl SearchResultsSection {
         let state = self;
         let share_asset = ShareAsset::new((*asset).clone());
         let user_id = state.user.get_cloned().map(|user| user.id);
+        let user_liked = Mutable::new(asset.is_liked());
 
         html!("home-search-result", {
             .prop("slot", "results")
@@ -89,7 +90,6 @@ impl SearchResultsSection {
             .child(render_asset_card(
                 &asset,
                 AssetCardConfig {
-                    likeable: true,
                     bottom_indicator: AssetCardBottomIndicator::Author,
                     slot: Some("front"),
                     ..Default::default()
@@ -166,39 +166,63 @@ impl SearchResultsSection {
                 }),
                 Some("actions"),
             ))
-            .apply_if(asset.author_id() == &user_id, clone!(asset => move |dom| {
-                dom.child(html!("a", {
-                    .prop("slot", "actions")
-                    .child(html!("fa-icon", {
-                        .prop("icon", "fa-light fa-pencil")
-                    }))
-                    .prop("href", {
-                        match asset.id() {
-                            AssetId::JigId(jig_id) => {
-                                Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
-                                    jig_id,
-                                    JigEditRoute::Landing
-                                )))
-                            },
-                            AssetId::CourseId(course_id) => {
-                                Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
-                                    course_id,
-                                    CourseEditRoute::Landing
-                                )))
-                            },
-                            AssetId::ResourceId(resource_id) => {
-                                Route::Asset(AssetRoute::Edit(AssetEditRoute::Resource(
-                                    resource_id,
-                                    ResourceEditRoute::Landing
-                                )))
-                            },
-                            AssetId::ProDevId(_) => todo!()
-                        }.to_string()
-                    })
-                    .event(clone!(asset => move |_: events::Click| {
-                        track_action("edit", asset.clone());
-                    }))
-                }))
+            .apply(clone!(asset => move |dom| {
+                match asset.author_id() == &user_id {
+                    true => {
+                        dom.child(html!("a", {
+                            .prop("slot", "actions")
+                            .child(html!("fa-icon", {
+                                .prop("icon", "fa-light fa-pencil")
+                            }))
+                            .prop("href", {
+                                match asset.id() {
+                                    AssetId::JigId(jig_id) => {
+                                        Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
+                                            jig_id,
+                                            JigEditRoute::Landing
+                                        )))
+                                    },
+                                    AssetId::CourseId(course_id) => {
+                                        Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
+                                            course_id,
+                                            CourseEditRoute::Landing
+                                        )))
+                                    },
+                                    AssetId::ResourceId(resource_id) => {
+                                        Route::Asset(AssetRoute::Edit(AssetEditRoute::Resource(
+                                            resource_id,
+                                            ResourceEditRoute::Landing
+                                        )))
+                                    },
+                                    AssetId::ProDevId(_) => todo!()
+                                }.to_string()
+                            })
+                            .event(clone!(asset => move |_: events::Click| {
+                                track_action("edit", asset.clone());
+                            }))
+                        }))
+                    },
+                    false => {
+                        dom.child(html!("fa-button", {
+                            .prop("slot", "actions")
+                            .attr_signal("icon", user_liked.signal().map(|liked| {
+                                match liked {
+                                    true => "fa-solid fa-heart",
+                                    false => "fa-regular fa-heart",
+                                }
+                            }))
+                            .style_signal("color", user_liked.signal().map(|liked| {
+                                match liked {
+                                    true => "var(--dark-red-2)",
+                                    false => "var(--main-blue)",
+                                }
+                            }))
+                            .event(clone!(state, user_liked => move |_: events::Click| {
+                                state.on_like_click(asset.id(), &user_liked);
+                            }))
+                        }))
+                    },
+                }
             }))
             .apply(|dom| {
                 match state.asset_type {

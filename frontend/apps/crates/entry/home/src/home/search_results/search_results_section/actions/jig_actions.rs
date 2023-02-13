@@ -11,7 +11,7 @@ impl SearchResultsSection {
 
         req.page = Some(self.next_page.get());
 
-        match endpoints::jig::Search::api_no_auth(JigSearchPath(), Some(req)).await {
+        match endpoints::jig::Search::api_with_auth(JigSearchPath(), Some(req)).await {
             Err(_) => todo!(),
             Ok(res) => {
                 let mut jigs = self.list.lock_mut();

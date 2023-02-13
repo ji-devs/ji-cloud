@@ -11,7 +11,7 @@ impl SearchResultsSection {
 
         req.page = Some(self.next_page.get());
 
-        match endpoints::resource::Search::api_no_auth(ResourceSearchPath(), Some(req)).await {
+        match endpoints::resource::Search::api_with_auth(ResourceSearchPath(), Some(req)).await {
             Err(_) => todo!(),
             Ok(res) => {
                 let mut resources = self.list.lock_mut();

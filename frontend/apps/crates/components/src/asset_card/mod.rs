@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
-use dominator::{clone, events, html, Dom};
-use futures_signals::signal::{from_future, Mutable, SignalExt};
+use dominator::{html, Dom};
+use futures_signals::signal::{from_future, SignalExt};
 use shared::domain::asset::{Asset, DraftOrLive, PrivacyLevel};
 use utils::ages::AgeRangeVecExt;
 use utils::metadata::{get_age_ranges, get_resource_types};
@@ -10,7 +10,6 @@ use crate::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
 
 #[derive(Clone, Default)]
 pub struct AssetCardConfig<'a> {
-    pub likeable: bool,
     pub bottom_indicator: AssetCardBottomIndicator,
     pub slot: Option<&'a str>,
     pub dense: bool,
@@ -26,7 +25,7 @@ pub enum AssetCardBottomIndicator {
 }
 
 pub fn render_asset_card(asset: &Asset, config: AssetCardConfig) -> Dom {
-    let liked = Mutable::new(false);
+    // let liked = Mutable::new(false);
     html!("asset-card", {
         .prop("kind", asset.asset_type().as_str())
         .prop("dense", config.dense)
@@ -55,22 +54,22 @@ pub fn render_asset_card(asset: &Asset, config: AssetCardConfig) -> Dom {
         ).render(Some("image")))
         // TODO: enable like
         // .apply_if(config.likeable, |dom| {
-        .apply_if(false, |dom| {
-                dom.child(html!("fa-button", {
-                .prop("slot", "like")
-                .attr_signal("icon", liked.signal().map(|liked| {
-                    match liked {
-                        true => "fa-solid fa-heart",
-                        false => "fa-regular fa-heart",
-                    }
-                }))
-                .event(clone!(liked => move |_: events::Click| {
-                    let mut liked = liked.lock_mut();
-                    *liked = !*liked;
-                    todo!()
-                }))
-            }))
-        })
+        // .apply_if(false, |dom| {
+        //         dom.child(html!("fa-button", {
+        //         .prop("slot", "like")
+        //         .attr_signal("icon", liked.signal().map(|liked| {
+        //             match liked {
+        //                 true => "fa-solid fa-heart",
+        //                 false => "fa-regular fa-heart",
+        //             }
+        //         }))
+        //         .event(clone!(liked => move |_: events::Click| {
+        //             let mut liked = liked.lock_mut();
+        //             *liked = !*liked;
+        //             todo!()
+        //         }))
+        //     }))
+        // })
         .apply(|dom| {
             match asset {
                 Asset::Jig(_) => dom,

@@ -11,7 +11,7 @@ impl SearchResultsSection {
 
         req.page = Some(self.next_page.get());
 
-        match endpoints::course::Search::api_no_auth(CourseSearchPath(), Some(req)).await {
+        match endpoints::course::Search::api_with_auth(CourseSearchPath(), Some(req)).await {
             Err(_) => todo!(),
             Ok(res) => {
                 let mut courses = self.list.lock_mut();

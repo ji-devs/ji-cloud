@@ -1,7 +1,21 @@
 use std::rc::Rc;
 
-use shared::domain::asset::{AssetId, AssetType};
-use utils::{prelude::is_user_set, storage, unwrap::UnwrapJiExt};
+use futures_signals::signal::Mutable;
+use shared::{
+    api::endpoints,
+    domain::{
+        asset::{AssetId, AssetType},
+        course::{CourseLikePath, CourseUnlikePath},
+        jig::{JigLikePath, JigUnlikePath},
+        resource::{ResourceLikePath, ResourceUnlikePath},
+    },
+};
+use utils::{
+    prelude::{is_user_set, ApiEndpointExt},
+    storage,
+    unwrap::UnwrapJiExt,
+};
+use wasm_bindgen_futures::spawn_local;
 
 use super::SearchResultsSection;
 
@@ -35,6 +49,73 @@ impl SearchResultsSection {
         } else {
             self.home_state.play_login_popup_shown.set(true);
         }
+    }
+
+    pub fn on_like_click(self: &Rc<Self>, asset_id: AssetId, liked_mutable: &Mutable<bool>) {
+        let is_liked = !liked_mutable.get();
+        liked_mutable.set(is_liked);
+        spawn_local(async move {
+            match asset_id {
+                AssetId::JigId(jig_id) => {
+                    match is_liked {
+                        true => {
+                            endpoints::jig::Like::api_with_auth_empty(JigLikePath(jig_id), None)
+                                .await
+                                .unwrap_ji();
+                        }
+                        false => {
+                            endpoints::jig::Unlike::api_with_auth_empty(
+                                JigUnlikePath(jig_id),
+                                None,
+                            )
+                            .await
+                            .unwrap_ji();
+                        }
+                    };
+                }
+                AssetId::CourseId(course_id) => {
+                    match is_liked {
+                        true => {
+                            endpoints::course::Like::api_with_auth_empty(
+                                CourseLikePath(course_id),
+                                None,
+                            )
+                            .await
+                            .unwrap_ji();
+                        }
+                        false => {
+                            endpoints::course::Unlike::api_with_auth_empty(
+                                CourseUnlikePath(course_id),
+                                None,
+                            )
+                            .await
+                            .unwrap_ji();
+                        }
+                    };
+                }
+                AssetId::ResourceId(resource_id) => {
+                    match is_liked {
+                        true => {
+                            endpoints::resource::Like::api_with_auth_empty(
+                                ResourceLikePath(resource_id),
+                                None,
+                            )
+                            .await
+                            .unwrap_ji();
+                        }
+                        false => {
+                            endpoints::resource::Unlike::api_with_auth_empty(
+                                ResourceUnlikePath(resource_id),
+                                None,
+                            )
+                            .await
+                            .unwrap_ji();
+                        }
+                    };
+                }
+                AssetId::ProDevId(_) => todo!(),
+            }
+        });
     }
 }
 
