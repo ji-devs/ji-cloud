@@ -171,6 +171,7 @@ impl SearchResultsSection {
                     true => {
                         dom.child(html!("a", {
                             .prop("slot", "actions")
+                            .prop("title", "Edit")
                             .child(html!("fa-icon", {
                                 .prop("icon", "fa-light fa-pencil")
                             }))
@@ -205,6 +206,7 @@ impl SearchResultsSection {
                     false => {
                         dom.child(html!("fa-button", {
                             .prop("slot", "actions")
+                            .prop("title", "Like")
                             .attr_signal("icon", user_liked.signal().map(|liked| {
                                 match liked {
                                     true => "fa-solid fa-heart",
