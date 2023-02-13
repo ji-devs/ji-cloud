@@ -26,12 +26,16 @@ export class _ extends LitElement {
                 display: flex;
                 gap: 0 32px;
             }
+            .input-container,
+            .right-side {
+                max-height: calc(100vh - 220px);
+                overflow: auto;
+                box-sizing: border-box;
+            }
             .input-container {
                 padding: 31px 24px;
                 border-radius: 12px;
                 border: solid 2px #e6f0ff;
-                max-height: calc(100vh - 300px);
-                overflow: auto;
             }
             ::slotted([slot="inputs"]) {
                 display: grid;
@@ -42,6 +46,8 @@ export class _ extends LitElement {
                 display: grid;
                 row-gap: 20px;
                 align-self: start;
+                box-shadow: #00000054 0 0 2px 0;
+                padding: 10px;
             }
             .player {
                 display: grid;
@@ -59,6 +65,10 @@ export class _ extends LitElement {
             } */
             ::slotted(fa-button[slot=player]) {
                 font-size: 50px;
+            }
+            .thumbnails {
+                display: grid;
+                gap: 4px;
             }
         `
     ];
@@ -83,6 +93,9 @@ export class _ extends LitElement {
                 </div>
                 <slot name="rating"></slot>
                 <slot name="block"></slot>
+                <div class="thumbnails">
+                    <slot name="thumbnails"></slot>
+                </div>
             </div>
             <slot name="loader"></slot>
         `;

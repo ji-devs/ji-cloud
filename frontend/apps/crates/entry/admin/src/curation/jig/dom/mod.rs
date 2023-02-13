@@ -3,11 +3,13 @@ use components::{
     module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback},
     player_popup::{PlayerPopup, PreviewPopupCallbacks},
 };
-use dominator::{clone, html, with_node, Dom};
+use dominator::{class, clone, html, pseudo, with_node, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::{asset::DraftOrLive, jig::JigRating};
 use std::rc::Rc;
-use utils::{events, routes::AdminCurationRoute, unwrap::UnwrapJiExt};
+use utils::{
+    events, routes::AdminCurationRoute, screenshot::call_screenshot_service, unwrap::UnwrapJiExt,
+};
 use web_sys::{HtmlInputElement, HtmlTextAreaElement};
 
 mod affiliation;
@@ -19,6 +21,49 @@ impl CurationJig {
         let state = self;
         html!("admin-jig-details", {
             .prop("slot", "jig-details")
+            .children(state.jig.modules.iter().map(clone!(state => move |modules| {
+                html!("div", {
+                    .style("display", "grid")
+                    .style("display", "grid")
+                    .style("grid-template-columns", "150px auto")
+                    .style("gap", "4px")
+                    .style("align-items", "center")
+                    .prop("slot", "thumbnails")
+                    .child(ModuleThumbnail::new(
+                        state.jig_id.into(),
+                        Some(modules.clone()),
+                        ThumbnailFallback::Asset,
+                        DraftOrLive::Live,
+                    ).render_live(None))
+                    .child(html!("fa-button", {
+                        .prop("icon", "fa-solid fa-rotate-right")
+                        .prop("title", "Regenerate thumbnail")
+                        .class(class! {
+                            .style("height", "30px")
+                            .style("width", "30px")
+                            .style("display", "grid")
+                            .style("place-content", "center")
+                            .style("border-radius", "50%")
+                            .pseudo!(":hover", {
+                                .style("background-color", "#00a4581f")
+                            })
+                            .pseudo!(":active", {
+                                .style("background-color", "#00a4583b")
+                            })
+                        })
+                        .event(clone!(state, modules => move |_: events::Click| {
+                            wasm_bindgen_futures::spawn_local(clone!(state, modules => async move {
+                                call_screenshot_service(
+                                    state.jig_id.into(),
+                                    modules.id,
+                                    modules.kind,
+                                    DraftOrLive::Live
+                                ).await;
+                            }));
+                        }))
+                    }))
+                })
+            })))
             .child(html!("window-loader-block", {
                 .prop("slot", "loader")
                 .prop_signal("visible", state.jig.loader.is_loading())
