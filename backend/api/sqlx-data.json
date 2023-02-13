@@ -3234,45 +3234,6 @@
     },
     "query": "\nselect id,\n       display_name                                                                  as \"display_name!\",\n       created_at                                                                    as \"created_at!\",\n       updated_at,\n       language                                                                      as \"language!\",\n       description                                                                   as \"description!\",\n       translated_description                                                        as \"translated_description!: Json<HashMap<String,String>>\",\n       (\n                select row (resource_data_module.id, kind, is_complete)\n                from resource_data_module\n                where resource_data_id = resource_data.id\n       )                                                  as \"cover?: (ModuleId, ModuleKind, bool)\",\n       array(select row (category_id)\n             from resource_data_category\n             where resource_data_id = resource_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n       array(select row (affiliation_id)\n             from resource_data_affiliation\n             where resource_data_id = resource_data.id)     as \"affiliations!: Vec<(AffiliationId,)>\",\n       array(select row (age_range_id)\n             from resource_data_age_range\n             where resource_data_id = resource_data.id)     as \"age_ranges!: Vec<(AgeRangeId,)>\",\n       array(\n                select row (rdr.id, rdr.display_name, resource_type_id, resource_content)\n                from resource_data_resource \"rdr\"\n                where rdr.resource_data_id = resource_data.id\n            )                                               as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n       privacy_level                              as \"privacy_level!: PrivacyLevel\",\n       locked                                     as \"locked!\",\n       other_keywords                             as \"other_keywords!\",\n       translated_keywords                        as \"translated_keywords!\"\nfrom resource_data\ninner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\norder by ord asc\n"
   },
-  "35c1cbd10b0d487ebd5b53ae60aa06cc5b8f193e50017508e9d5d585eb94373a": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: ProDevUnitId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "display_name!",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "description!",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "value!",
-          "ordinal": 3,
-          "type_info": "Jsonb"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect unit_id              as \"id!: ProDevUnitId\",\n       display_name         as \"display_name!\",\n       description          as \"description!\",\n       value                as \"value!\"\nfrom pro_dev_data_unit \"pddr\"\nwhere pro_dev_data_id = $1\n  and pddr.unit_id = $2\n        "
-  },
   "37362a36cc3729a69d0f7db3d7b6dc381a35293d3ac94d2da2fd655322e73bbe": {
     "describe": {
       "columns": [],
@@ -5926,6 +5887,27 @@
     },
     "query": "\nupdate jig_admin_data\nset blocked = coalesce($2, blocked)\nwhere jig_id = $1 and $2 is distinct from blocked\n            "
   },
+  "678b849a0c6b137d0f576a0a42362ba7d69e908838674359b1ffe4c901fa24fb": {
+    "describe": {
+      "columns": [
+        {
+          "name": "unit_id!: ProDevUnitId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\ninsert into pro_dev_data_unit (pro_dev_data_id, index)\nvalues ((select draft_id from pro_dev where id = $1), (select count(*) from pro_dev_data_unit where pro_dev_data_id = $2))\nreturning unit_id as \"unit_id!: ProDevUnitId\"\n        "
+  },
   "682dbdf7b9a0f373daad74e4f4face9e425a493e9965c6ba7c9a11e74252c866": {
     "describe": {
       "columns": [],
@@ -7733,6 +7715,27 @@
       }
     },
     "query": "\nupdate jig_data_additional_resource\nset display_name = coalesce($2, display_name)\nwhere id = $1 and $2 is distinct from display_name\n            "
+  },
+  "8d72d3b60ec5555c4ea727badfede6bce3a700eb108c94fa4c11d1a498bcd559": {
+    "describe": {
+      "columns": [
+        {
+          "name": "value",
+          "ordinal": 0,
+          "type_info": "Jsonb"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect value                 as \"value\"\nfrom pro_dev_data_unit \"pddr\"\nwhere pro_dev_data_id = $1\n  and pddr.unit_id = $2\n  and pddr.value <> '{}'\n        "
   },
   "8d817d6384c10aa3eddcbe4b990c830b69970f782ad4ecdd5af9380994dfef0c": {
     "describe": {
@@ -12452,30 +12455,6 @@
     },
     "query": "delete from \"user\" where id = $1"
   },
-  "e4ae4bf489188636704e3124e0896f10beab26e9bf4e2c731e665b1a82084b09": {
-    "describe": {
-      "columns": [
-        {
-          "name": "unit_id!: ProDevUnitId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Text",
-          "Jsonb",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\ninsert into pro_dev_data_unit (pro_dev_data_id, display_name, description, value, index)\nvalues ((select draft_id from pro_dev where id = $1), $2, $3, $4, (select count(*) from pro_dev_data_unit where pro_dev_data_id = $5))\nreturning unit_id as \"unit_id!: ProDevUnitId\"\n        "
-  },
   "e507c5682a9424e1b2e0971c135667c3f9fc13894921c9a2690eb05c63f2ade1": {
     "describe": {
       "columns": [
@@ -13145,6 +13124,39 @@
       }
     },
     "query": "\nwith del_data as (\n    delete from resource_data\n        where id is not distinct from $1 or id is not distinct from $2)\ndelete\nfrom resource\nwhere id is not distinct from $3\n\n"
+  },
+  "f792dae0ec2deb14d92bb4039a6497bb1c0f763e93b6384e1c720c836ea9d6fe": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: ProDevUnitId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "display_name!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "description!",
+          "ordinal": 2,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect unit_id              as \"id!: ProDevUnitId\",\n       display_name         as \"display_name!\",\n       description          as \"description!\"\nfrom pro_dev_data_unit \"pddr\"\nwhere pro_dev_data_id = $1\n  and pddr.unit_id = $2\n        "
   },
   "f797852db725474f648066fe97f7d091abbd933f3f447aa057bbe9d9063d91ec": {
     "describe": {
