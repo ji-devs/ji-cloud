@@ -4,8 +4,8 @@ use crate::{
     domain::{
         pro_dev::unit::{
             CreateProDevUnitPath, DeleteProDevUnitPath, GetProDevUnitDraftPath,
-            GetProDevUnitLivePath, ProDevUnit, ProDevUnitCreateRequest, ProDevUnitId,
-            ProDevUnitUpdateRequest, UpdateProDevUnitPath,
+            GetProDevUnitLivePath, ProDevUnit, ProDevUnitId, ProDevUnitUpdateRequest,
+            UpdateProDevUnitPath,
         },
         CreateResponse,
     },
@@ -64,7 +64,7 @@ impl ApiEndpoint for GetLive {
 pub struct Create;
 impl ApiEndpoint for Create {
     type Path = CreateProDevUnitPath;
-    type Req = ProDevUnitCreateRequest;
+    type Req = ();
     type Res = CreateResponse<ProDevUnitId>;
     type Err = EmptyError;
     const METHOD: Method = Method::Post;
