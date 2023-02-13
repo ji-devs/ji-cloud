@@ -1,8 +1,10 @@
 use shared::{
     api::endpoints,
     domain::{
+        asset::AssetId,
         course::{CourseCreatePath, CourseCreateRequest},
         jig::{JigCreatePath, JigCreateRequest},
+        module::{ModuleBody, ModuleCreatePath, ModuleCreateRequest, ModuleKind},
         resource::{ResourceCreatePath, ResourceCreateRequest},
     },
 };
@@ -36,6 +38,7 @@ pub fn create_resource() {
         let resp = endpoints::resource::Create::api_with_auth(ResourceCreatePath(), Some(req))
             .await
             .unwrap_ji();
+        add_course_or_resource_cover(resp.id.into()).await;
         let url: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Resource(
             resp.id,
             ResourceEditRoute::Landing,
@@ -52,6 +55,7 @@ pub fn create_course() {
         let resp = endpoints::course::Create::api_with_auth(CourseCreatePath(), Some(req))
             .await
             .unwrap_ji();
+        add_course_or_resource_cover(resp.id.into()).await;
         let url: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
             resp.id,
             CourseEditRoute::Landing,
@@ -59,6 +63,17 @@ pub fn create_course() {
         .into();
         dominator::routing::go_to_url(&url);
     });
+}
+
+async fn add_course_or_resource_cover(asset_id: AssetId) {
+    let req = ModuleCreateRequest {
+        body: ModuleBody::new(ModuleKind::ResourceCover),
+        parent_id: asset_id,
+    };
+
+    endpoints::module::Create::api_with_auth(ModuleCreatePath(), Some(req))
+        .await
+        .unwrap_ji();
 }
 
 // pub fn create_pro_dev() {
