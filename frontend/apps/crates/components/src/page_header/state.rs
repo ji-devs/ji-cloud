@@ -85,7 +85,7 @@ impl PageLinks {
         match self {
             Self::Home => Route::Home(HomeRoute::Home).to_string(),
             Self::Content => Route::Home(HomeRoute::Search(None)).to_string(),
-            Self::Create => Route::Asset(AssetRoute::JigGallery).to_string(),
+            Self::Create => Route::Asset(AssetRoute::Studio).to_string(),
             Self::Community => Route::Community(CommunityRoute::Landing).to_string(),
             Self::Classroom => "javascript:alert(\"Coming soon\")".to_string(),
             Self::About => "https://www.jewishinteractive.org/ji-about-us".to_string(),
