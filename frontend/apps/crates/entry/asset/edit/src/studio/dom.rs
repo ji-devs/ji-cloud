@@ -40,7 +40,7 @@ pub fn render_studio() -> Dom {
                 .event(|_: events::Click| {
                     actions::create_course();
                 })
-                .text("Create a course")
+                .text("Create a Course")
             }),
             html!("button-rect", {
                 .prop("slot", "course-gallery")
@@ -60,7 +60,7 @@ pub fn render_studio() -> Dom {
                 .event(|_: events::Click| {
                     actions::create_resource();
                 })
-                .text("Create a resource")
+                .text("Create a Resource")
             }),
             html!("button-rect", {
                 .prop("slot", "resource-gallery")
@@ -70,7 +70,7 @@ pub fn render_studio() -> Dom {
                 .apply(move |dom| on_click_go_to_url!(dom, {
                     Route::Asset(AssetRoute::ResourceGallery).to_string()
                 }))
-                .text("My resources")
+                .text("My Resources")
             }),
             html!("button-rect", {
                 .prop("slot", "pro-dev-create")
@@ -80,7 +80,7 @@ pub fn render_studio() -> Dom {
                 .event(|_: events::Click| {
                     // actions::create_pro_dev();
                 })
-                .text("Create a Pro-Dev course")
+                .text("Create a Pro-Dev Course")
             }),
             html!("button-rect", {
                 .prop("slot", "pro-dev-gallery")
