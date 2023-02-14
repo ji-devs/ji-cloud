@@ -17,7 +17,7 @@ export class _ extends LitElement {
                 }
                 main {
                     display: grid;
-                    row-gap: 40px;
+                    row-gap: 45px;
                     grid-column: 1;
                     grid-row: 1;
                     width: 100vw;
@@ -48,6 +48,7 @@ export class _ extends LitElement {
                 }
                 ::slotted(kids-student-code-input) {
                     justify-self: center;
+                    width: fit-content;
                 }
                 .jigzi-wrapper {
                     justify-self: center;
@@ -69,7 +70,10 @@ export class _ extends LitElement {
                     <img-ui path="core/page-header/logo.svg"></img-ui>
                 </header>
                 <h1>${STR_TYPE_THE_CODE}</h1>
-                <h2><div>You can still use your 4-digit code!</div><div>Just type your code and press Enter.</div></h2>
+                <h2>
+                    <div>You can still use your 4-digit code!</div>
+                    <div>Just type your code and press Enter.</div>
+                </h2>
                 <slot name="input"></slot>
             </main>
             <div class="jigzi-wrapper">
