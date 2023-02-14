@@ -292,7 +292,7 @@
       "parameters": {
         "Left": [
           "Uuid",
-          "Int2",
+          "Int4",
           "Int2",
           "Bool",
           "Bool",
@@ -6816,6 +6816,56 @@
     },
     "query": "\nupdate resource_data\nset last_synced_at = now()\nwhere resource_data.id = any (select live_id from resource where resource.id = any ($1))\n"
   },
+  "7cd0b406b9ccb8537a66683cea7c676f43ef172d3365b5e0dbeaba27d5aa978c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "index!: i32",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "direction: TextDirection",
+          "ordinal": 1,
+          "type_info": "Int2"
+        },
+        {
+          "name": "display_score",
+          "ordinal": 2,
+          "type_info": "Bool"
+        },
+        {
+          "name": "track_assessments",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "drag_assist",
+          "ordinal": 4,
+          "type_info": "Bool"
+        },
+        {
+          "name": "expires_at: DateTime<Utc>",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect index     as \"index!: i32\",\n       direction as \"direction: TextDirection\",\n       display_score,\n       track_assessments,\n       drag_assist,\n       expires_at as \"expires_at: DateTime<Utc>\"\nfrom jig_player_session\nwhere jig_id = $1\n"
+  },
   "7d3b39b739ff8d2bbf16dca9749521ebc130be37e4525f91deaaf16187ab2016": {
     "describe": {
       "columns": [
@@ -6934,7 +6984,7 @@
       ],
       "parameters": {
         "Left": [
-          "Int2"
+          "Int4"
         ]
       }
     },
@@ -7323,7 +7373,7 @@
       ],
       "parameters": {
         "Left": [
-          "Int2",
+          "Int4",
           "Text",
           "Text"
         ]
@@ -9061,56 +9111,6 @@
       }
     },
     "query": "\nselect draft_id from course where course.id = $1\n"
-  },
-  "a4970e4a6b9f203bbc4c123f495e95a26a661265f6a10d19287e1342310aaac6": {
-    "describe": {
-      "columns": [
-        {
-          "name": "index!: i16",
-          "ordinal": 0,
-          "type_info": "Int2"
-        },
-        {
-          "name": "direction: TextDirection",
-          "ordinal": 1,
-          "type_info": "Int2"
-        },
-        {
-          "name": "display_score",
-          "ordinal": 2,
-          "type_info": "Bool"
-        },
-        {
-          "name": "track_assessments",
-          "ordinal": 3,
-          "type_info": "Bool"
-        },
-        {
-          "name": "drag_assist",
-          "ordinal": 4,
-          "type_info": "Bool"
-        },
-        {
-          "name": "expires_at: DateTime<Utc>",
-          "ordinal": 5,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect index     as \"index!: i16\",\n       direction as \"direction: TextDirection\",\n       display_score,\n       track_assessments,\n       drag_assist,\n       expires_at as \"expires_at: DateTime<Utc>\"\nfrom jig_player_session\nwhere jig_id = $1\n"
   },
   "a4b699dfe38e3ea733cfaa637901fe2c191656b67dc0c969a3fbc578b917fdf2": {
     "describe": {
