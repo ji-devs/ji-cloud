@@ -11,10 +11,7 @@ use dom::Iframe;
 pub fn render_help_center() -> Dom {
     html!("div", {
         .child(
-            PageHeader::new(PageHeaderConfig {
-                render_beta: true,
-                ..Default::default()
-            }).render()
+            PageHeader::new(PageHeaderConfig::default()).render()
         )
         .child(
             Iframe::new().render_help()

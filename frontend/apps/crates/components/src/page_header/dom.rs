@@ -1,6 +1,6 @@
 use std::{collections::HashMap, rc::Rc};
 
-use dominator::{clone, html, with_node, Dom, EventOptions};
+use dominator::{clone, html, Dom, EventOptions};
 use futures_signals::signal::{Signal, SignalExt};
 use shared::domain::user::{UserProfile, UserScope};
 use strum::IntoEnumIterator;
@@ -11,12 +11,8 @@ use utils::{
     unwrap::UnwrapJiExt,
 };
 use wasm_bindgen::JsValue;
-use web_sys::HtmlElement;
 
-use crate::{
-    overlay::handle::OverlayHandle,
-    page_header::state::{LoggedInState, PageLinks},
-};
+use crate::page_header::state::{LoggedInState, PageLinks};
 
 use super::{actions, PageHeader};
 
@@ -80,43 +76,6 @@ impl PageHeader {
                     analytics::event("Help Center Click", None);
                 })
             }))
-            .apply_if(state.config.render_beta, |dom| {
-                dom.child(html!("beta-button", {
-                    .prop("slot", "beta")
-                    .event(clone!(state => move |_evt: events::Click| {
-                        state.beta_tooltip.set_neq(true);
-                    }))
-                    .with_node!(elem => {
-                        .child_signal(state.beta_tooltip.signal_cloned().map(clone!(state, elem => move |show_tooltip| {
-                            match show_tooltip {
-                                false => None,
-                                true => Some(
-                                    html!("empty-fragment" => HtmlElement, {
-                                        .apply(OverlayHandle::lifecycle(
-                                            clone!(state, elem => move || {
-                                                html!("overlay-tooltip-info", {
-                                                    .prop("target", &elem)
-                                                    .prop("color", "light-orange")
-                                                    .attr("targetAnchor", "mm")
-                                                    .attr("contentAnchor", "bl")
-                                                    .prop("closeable", true)
-                                                    .prop("strategy", "track")
-                                                    .event(clone!(state => move |_evt: events::Close| {
-                                                        state.beta_tooltip.set_neq(false);
-                                                    }))
-                                                    .child(html!("beta-tooltip-content", {
-                                                        .prop("slot", "body")
-                                                    }))
-                                                })
-                                            })
-                                        ))
-                                    })
-                                ),
-                            }
-                        })))
-                    })
-                }))
-            })
             .apply(|dom| {
                 if let Some(PageLinks::Home) = state.config.active_page {
                     dom.child(html!("page-header-student-code", {

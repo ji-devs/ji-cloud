@@ -57,7 +57,6 @@ impl SettingsPage {
             // .child(page_header::dom::render(Rc::new(page_header::state::PageHeader::new()), Some("page-header"), None, true))
             .child(PageHeader::new(PageHeaderConfig {
                 slot: Some("page-header"),
-                render_beta: true,
                 ..Default::default()
             }).render())
             .prop_signal("email", state.user.email.signal_cloned())

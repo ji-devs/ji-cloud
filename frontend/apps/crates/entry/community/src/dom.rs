@@ -35,7 +35,6 @@ impl Community {
                 PageHeader::new(PageHeaderConfig {
                     slot: Some("jigzi-header"),
                     active_page: Some(PageLinks::Community),
-                    render_beta: true,
                     ..Default::default()
                 }).render(),
                 self.render_nav(),

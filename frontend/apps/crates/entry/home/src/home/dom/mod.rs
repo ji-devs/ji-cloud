@@ -26,7 +26,6 @@ impl Home {
                 // Some(page_header::dom::render(Rc::new(page_header::state::PageHeader::new()), None, Some(PageLinks::from(mode)), true))
                 Some(PageHeader::new(PageHeaderConfig {
                     active_page: Some(PageLinks::from(mode)),
-                    render_beta: true,
                     ..Default::default()
                 }).render())
             }))

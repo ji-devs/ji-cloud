@@ -64,7 +64,6 @@ impl Gallery {
         html!("empty-fragment", {
             .child(PageHeader::new(PageHeaderConfig {
                 active_page: Some(PageLinks::Create),
-                render_beta: true,
                 ..Default::default()
             }).render())
             .child_signal(state.confirm_delete.signal().map(clone!(state => move |confirm_delete| {
