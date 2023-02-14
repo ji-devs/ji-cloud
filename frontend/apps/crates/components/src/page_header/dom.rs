@@ -26,8 +26,7 @@ const STR_DONATE: &str = "Donate";
 
 const STR_MY_SETTINGS: &str = "My settings";
 const STR_MY_PROFILE: &str = "My profile";
-const STR_MY_JIGS: &str = "My JIGs";
-const STR_MY_RESOURCES: &str = "My resources";
+const STR_MY_CREATIONS: &str = "My Creations";
 
 impl PageHeader {
     pub fn render(self: Rc<PageHeader>) -> Dom {
@@ -143,26 +142,11 @@ fn render_logged_in(state: Rc<PageHeader>, user: &UserProfile) -> Vec<Dom> {
         ])
         .child(html!("a", {
             .prop("slot", "user-links")
-            .prop("href", Route::Asset(AssetRoute::JigGallery).to_string())
+            .prop("href", Route::Asset(AssetRoute::Studio).to_string())
             .child(html!("img-ui", {
                 .prop("path", "core/page-header/jig-icon.svg")
             }))
-            .text(STR_MY_JIGS)
-        }))
-        .child_signal(has_privileges(Rc::clone(&state), UserScope::Admin).map(|admin_privileges| {
-            match admin_privileges {
-                false => None,
-                true => {
-                    Some(html!("a", {
-                        .prop("slot", "user-links")
-                        .prop("href", Route::Asset(AssetRoute::ResourceGallery).to_string())
-                        .child(html!("fa-icon", {
-                            .prop("icon", "fa-light fa-lightbulb-on")
-                        }))
-                        .text(STR_MY_RESOURCES)
-                    }))
-                }
-            }
+            .text(STR_MY_CREATIONS)
         }))
         .child(html!("a", {
             .prop("slot", "user-links")

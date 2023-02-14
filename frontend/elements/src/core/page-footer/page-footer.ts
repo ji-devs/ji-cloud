@@ -256,7 +256,7 @@ export class _ extends LitElement {
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="/asset/edit/jig-gallery">
+                                    <a href="/asset/edit/studio">
                                         ${STR_PRODUCT_CREATE_ACTIVITIES}
                                     </a>
                                 </li>
