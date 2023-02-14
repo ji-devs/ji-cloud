@@ -3,8 +3,12 @@ use std::rc::Rc;
 use components::asset_search_bar::AssetSearchBar;
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::{signal::Mutable, signal_vec::MutableVec};
-use shared::domain::{asset::Asset, course::CourseId, jig::JigResponse};
-use utils::drag::Drag;
+use shared::domain::{
+    asset::{Asset, AssetId},
+    course::CourseId,
+    jig::JigResponse,
+};
+use utils::{asset::AssetPlayerOptions, drag::Drag};
 
 use crate::edit::AssetEditState;
 
@@ -18,6 +22,7 @@ pub struct CourseSelection {
     pub active_query: Mutable<String>,
     pub total_jig_count: Mutable<u32>,
     pub drag: Mutable<Option<Rc<Drag<Asset>>>>,
+    pub(super) play_asset: Mutable<Option<(AssetId, AssetPlayerOptions)>>,
 }
 
 impl CourseSelection {
@@ -32,6 +37,7 @@ impl CourseSelection {
             active_query: Default::default(),
             total_jig_count: Default::default(),
             drag: Default::default(),
+            play_asset: Default::default(),
         })
     }
 }

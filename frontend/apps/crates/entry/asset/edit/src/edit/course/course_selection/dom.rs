@@ -1,14 +1,24 @@
 use std::rc::Rc;
 
-use components::asset_card::{render_asset_card, AssetCardBottomIndicator, AssetCardConfig};
+use components::{
+    asset_card::{render_asset_card, AssetCardBottomIndicator, AssetCardConfig},
+    player_popup::{PlayerPopup, PreviewPopupCallbacks},
+};
 use dominator::{clone, html, Dom, EventOptions};
 use futures_signals::{
     map_ref,
     signal::{Signal, SignalExt},
     signal_vec::SignalVecExt,
 };
-use shared::domain::{asset::Asset, jig::JigResponse};
-use utils::{events, unwrap::UnwrapJiExt};
+use shared::domain::{
+    asset::{Asset, AssetId},
+    jig::JigResponse,
+};
+use utils::{
+    asset::{AssetPlayerOptions, JigPlayerOptions},
+    events,
+    unwrap::UnwrapJiExt,
+};
 
 use super::state::CourseSelection;
 
@@ -85,12 +95,26 @@ impl CourseSelection {
                     })
                 })
             })))
+            .child_signal(state.play_asset.signal_cloned().map(clone!(state => move|play_asset| {
+                play_asset.map(|(asset_id, settings)| {
+                    let close = clone!(state => move || {
+                        state.play_asset.set(None);
+                    });
+                    PlayerPopup::new(
+                        asset_id,
+                        None,
+                        settings,
+                        PreviewPopupCallbacks::new(close)
+                    ).render(Some("player"))
+                })
+            })))
         })
     }
 
     fn render_asset(self: &Rc<Self>, jig: &Rc<JigResponse>) -> Dom {
         let state = self;
         let asset: Asset = (**jig).clone().into();
+        let asset_id = asset.id();
         html!("div", {
             .prop("slot", "results")
             .style("cursor", "grab")
@@ -114,14 +138,25 @@ impl CourseSelection {
                 AssetCardConfig {
                     bottom_indicator: AssetCardBottomIndicator::Author,
                     dense: true,
-                    // menu: Some(Rc::new(move || {
-                    //     html!("menu-kebab", {
-                    //         .prop("slot", "menu")
-                    //         .children(&mut [
-                    //         ])
-                    //     })
-                    // })),
-                    menu: None,
+                    menu: Some(Rc::new(clone!(state => move || {
+                        html!("menu-kebab", {
+                            .prop("slot", "menu")
+                            .children(&mut [
+                                html!("menu-line", {
+                                    .prop("icon", "jig-play")
+                                    .event(clone!(state => move |_: events::Click| {
+                                        let settings = match asset_id {
+                                            AssetId::JigId(_) => AssetPlayerOptions::Jig(JigPlayerOptions::default()),
+                                            AssetId::ResourceId(_) => todo!(),
+                                            AssetId::CourseId(_) => unimplemented!(),
+                                            AssetId::ProDevId(_) => unimplemented!(),
+                                        };
+                                        state.play_asset.set(Some((asset_id, settings)));
+                                    }))
+                                })
+                            ])
+                        })
+                    }))),
                     ..Default::default()
                 },
             ))

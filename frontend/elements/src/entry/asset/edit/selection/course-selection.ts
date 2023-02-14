@@ -51,6 +51,7 @@ export class _ extends LitElement {
             <slot name="search-bar"></slot>
             <slot name="results"></slot>
             <slot name="dragging"></slot>
+            <slot name="player"></slot>
         `;
     }
 }
