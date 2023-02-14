@@ -33,27 +33,10 @@ pub struct ProDevUnit {
 
     /// Content of Pro Dev Unit
     #[serde(flatten)]
-    pub value: ProDevUnitValue,
+    pub value: Option<ProDevUnitValue>,
 }
 
 make_path_parts!(CreateProDevUnitPath => "/v1/pro-dev/{}/unit" => ProDevId);
-
-/// Request to create a new `ProDevUnit`.
-///
-/// [`pro_dev::unit::Create`](crate::api::endpoints::pro_dev::unit::Create)
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-pub struct ProDevUnitCreateRequest {
-    /// Display name for Pro Dev Unit
-    pub display_name: String,
-
-    /// Type of Pro Dev Unit
-    pub description: String,
-
-    /// Value of Pro Dev Unit
-    #[serde(flatten)]
-    pub value: ProDevUnitValue,
-}
 
 make_path_parts!(UpdateProDevUnitPath => "/v1/pro-dev/{}/unit/{}" => ProDevId, ProDevUnitId);
 

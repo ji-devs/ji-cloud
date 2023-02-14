@@ -25,15 +25,7 @@ pub struct ResourceObject {
     content: serde_json::Value,
 }
 
-pub async fn create(
-    pool: &PgPool,
-    pro_dev_id: ProDevId,
-    display_name: String,
-    description: String,
-    unit_content: ProDevUnitValue,
-) -> anyhow::Result<ProDevUnitId> {
-    let unit: serde_json::Value = check_value(pool, unit_content).await?;
-
+pub async fn create(pool: &PgPool, pro_dev_id: ProDevId) -> anyhow::Result<ProDevUnitId> {
     let mut txn = pool.begin().await?;
 
     let draft_id = sqlx::query!(
@@ -49,14 +41,11 @@ select draft_id from jig where jig.id = $1
 
     let res = sqlx::query!(
         r#"
-insert into pro_dev_data_unit (pro_dev_data_id, display_name, description, value, index)
-values ((select draft_id from pro_dev where id = $1), $2, $3, $4, (select count(*) from pro_dev_data_unit where pro_dev_data_id = $5))
+insert into pro_dev_data_unit (pro_dev_data_id, index)
+values ((select draft_id from pro_dev where id = $1), (select count(*) from pro_dev_data_unit where pro_dev_data_id = $2))
 returning unit_id as "unit_id!: ProDevUnitId"
         "#,
         pro_dev_id.0,
-        display_name,
-        description,
-        unit,
         draft_id
     )
     .fetch_one(pool)
@@ -74,7 +63,7 @@ pub async fn get(
     pro_dev_id: ProDevId,
     draft_or_live: DraftOrLive,
     unit_id: ProDevUnitId,
-) -> anyhow::Result<(ProDevUnitId, String, String, ProDevUnitValue), error::NotFound> {
+) -> anyhow::Result<(ProDevUnitId, String, String, Option<ProDevUnitValue>), error::NotFound> {
     let mut txn = pool.begin().await?;
 
     let (draft_id, live_id) = super::get_draft_and_live_ids(&mut txn, pro_dev_id)
@@ -106,8 +95,7 @@ select exists(select 1 from pro_dev_data_unit "pddu" where pro_dev_data_id = $1
         r#"
 select unit_id              as "id!: ProDevUnitId",
        display_name         as "display_name!",
-       description          as "description!",
-       value                as "value!"
+       description          as "description!"
 from pro_dev_data_unit "pddr"
 where pro_dev_data_id = $1
   and pddr.unit_id = $2
@@ -118,7 +106,26 @@ where pro_dev_data_id = $1
     .fetch_one(&mut txn)
     .await?;
 
-    let content = serde_json::from_value::<ProDevUnitValue>(res.value)?;
+    let value = sqlx::query!(
+        r#"
+select value                 as "value"
+from pro_dev_data_unit "pddr"
+where pro_dev_data_id = $1
+  and pddr.unit_id = $2
+  and pddr.value <> '{}'
+        "#,
+        pro_dev_data_id,
+        unit_id.0,
+    )
+    .fetch_optional(&mut txn)
+    .await?
+    .map(|it| it.value);
+
+    let content = if let Some(value) = value {
+        Some(serde_json::from_value::<ProDevUnitValue>(value)?)
+    } else {
+        None
+    };
 
     txn.rollback().await?;
 

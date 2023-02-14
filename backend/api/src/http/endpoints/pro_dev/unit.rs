@@ -26,7 +26,6 @@ async fn create(
     db: Data<PgPool>,
     auth: TokenUser,
     path: Path<ProDevId>,
-    req: Json<<pro_dev::unit::Create as ApiEndpoint>::Req>,
 ) -> Result<
     (
         Json<<pro_dev::unit::Create as ApiEndpoint>::Res>,
@@ -34,20 +33,12 @@ async fn create(
     ),
     error::Auth,
 > {
-    let req = req.into_inner();
     let user_id = auth.user_id();
     let pro_dev_id = path.to_owned();
 
     db::pro_dev::authz(&*db, user_id, Some(pro_dev_id)).await?;
 
-    let id = db::pro_dev::unit::create(
-        &*db,
-        pro_dev_id,
-        req.display_name,
-        req.description,
-        req.value,
-    )
-    .await?;
+    let id = db::pro_dev::unit::create(&*db, pro_dev_id).await?;
 
     Ok((Json(CreateResponse { id }), http::StatusCode::CREATED))
 }
@@ -87,14 +78,14 @@ async fn get_draft(
 ) -> Result<Json<<pro_dev::unit::GetDraft as ApiEndpoint>::Res>, error::NotFound> {
     let (pro_dev_id, pro_dev_unit_id) = path.into_inner();
 
-    let (id, display_name, description, unit_value) =
+    let (id, display_name, description, value) =
         db::pro_dev::unit::get(&db, pro_dev_id, DraftOrLive::Draft, pro_dev_unit_id).await?;
 
     Ok(Json(ProDevUnit {
         id,
         display_name,
         description,
-        value: unit_value,
+        value,
     }))
 }
 
