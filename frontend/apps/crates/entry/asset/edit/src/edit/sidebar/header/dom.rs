@@ -57,7 +57,7 @@ impl HeaderDom {
                     .prop("weight", "medium")
                     .text(&format!("{}{}{}",
                         STR_MY_JIGS_1,
-                        asset_edit_state.asset.asset_type().as_str(),
+                        asset_edit_state.asset.asset_type().display_name(),
                         STR_MY_JIGS_2
                     ))
                     .event(clone!(asset_edit_state => move |_:events::Click| {
@@ -77,7 +77,7 @@ impl HeaderDom {
                         .with_node!(input => {
                             .prop("placeholder", format!("{}{}{}",
                                 STR_SEARCH_PLACEHOLDER_1,
-                                asset_edit_state.asset.asset_type().as_str(),
+                                asset_edit_state.asset.asset_type().display_name(),
                                 STR_SEARCH_PLACEHOLDER_2
                             ))
                             .prop_signal("value", asset_edit_state.asset.display_name().signal_cloned())
@@ -94,7 +94,7 @@ impl HeaderDom {
                 }),
                 html!("jig-edit-sidebar-preview-button", {
                     .prop("slot", "preview")
-                    .prop("assetDisplayName", asset_edit_state.asset.asset_type().as_str())
+                    .prop("assetDisplayName", asset_edit_state.asset.asset_type().display_name())
                     .event(clone!(sidebar_state, asset_edit_state => move |_: events::Click| {
                         match &sidebar_state.settings {
                             SidebarSetting::Jig(jig) => {

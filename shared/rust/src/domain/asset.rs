@@ -77,6 +77,26 @@ impl AssetType {
         }
     }
 
+    /// asset type display name
+    pub fn display_name(&self) -> &'static str {
+        match self {
+            Self::Jig => "JIG",
+            Self::Resource => "resource",
+            Self::Course => "course",
+            Self::ProDev => todo!(),
+        }
+    }
+
+    /// asset type display name capitalized
+    pub fn display_name_capitalized(&self) -> &'static str {
+        match self {
+            Self::Jig => "JIG",
+            Self::Resource => "Resource",
+            Self::Course => "Course",
+            Self::ProDev => todo!(),
+        }
+    }
+
     /// Create asset id from self and uuid
     pub fn to_asset_id(&self, uuid: Uuid) -> AssetId {
         match self {
