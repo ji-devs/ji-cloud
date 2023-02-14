@@ -97,10 +97,7 @@ pub fn render_studio() -> Dom {
                 .prop("kind", "outline")
                 .prop("size", "small")
                 .prop("color", "white")
-                .apply(move |dom| on_click_go_to_url!(dom, {
-                    Route::Home(HomeRoute::Help).to_string()
-                }))
-                .prop("href", "???")
+                .prop("href", Route::Home(HomeRoute::Help).to_string())
                 .text("Help")
             }),
         ])
