@@ -114,13 +114,14 @@ impl CourseSelection {
                 AssetCardConfig {
                     bottom_indicator: AssetCardBottomIndicator::Author,
                     dense: true,
-                    menu: Some(Rc::new(move || {
-                        html!("menu-kebab", {
-                            .prop("slot", "menu")
-                            .children(&mut [
-                            ])
-                        })
-                    })),
+                    // menu: Some(Rc::new(move || {
+                    //     html!("menu-kebab", {
+                    //         .prop("slot", "menu")
+                    //         .children(&mut [
+                    //         ])
+                    //     })
+                    // })),
+                    menu: None,
                     ..Default::default()
                 },
             ))
