@@ -60,7 +60,7 @@ pub fn render_studio() -> Dom {
                 .event(|_: events::Click| {
                     actions::create_resource();
                 })
-                .text("Create a Resource")
+                .text("Add a Resource")
             }),
             html!("button-rect", {
                 .prop("slot", "resource-gallery")
