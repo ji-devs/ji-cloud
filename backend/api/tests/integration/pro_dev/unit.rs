@@ -4,7 +4,10 @@ use crate::{
 };
 use http::StatusCode;
 use macros::test_service;
-use shared::domain::pro_dev::unit::ProDevUnitUpdateRequest;
+use shared::domain::{
+    image::ImageId,
+    pro_dev::unit::{ProDevUnitCreateRequest, ProDevUnitUpdateRequest, ProDevUnitValue},
+};
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 #[test_service(
@@ -27,6 +30,13 @@ async fn create(port: u16) -> anyhow::Result<()> {
             port
         ))
         .login()
+        .json(&ProDevUnitCreateRequest {
+            display_name: "image unit".to_string(),
+            description: "create new unit".to_string(),
+            value: ProDevUnitValue::ImageId(ImageId(
+                uuid::Uuid::parse_str("89125d88-ffaa-11eb-86a5-9fd50ab8d8df").unwrap(),
+            )),
+        })
         .send()
         .await?
         .error_for_status()?;
