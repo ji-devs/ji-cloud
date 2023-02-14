@@ -63,7 +63,7 @@ pub async fn get(
     pro_dev_id: ProDevId,
     draft_or_live: DraftOrLive,
     unit_id: ProDevUnitId,
-) -> anyhow::Result<(ProDevUnitId, String, String, Option<ProDevUnitValue>), error::NotFound> {
+) -> anyhow::Result<(ProDevUnitId, String, String, ProDevUnitValue), error::NotFound> {
     let mut txn = pool.begin().await?;
 
     let (draft_id, live_id) = super::get_draft_and_live_ids(&mut txn, pro_dev_id)
@@ -95,7 +95,8 @@ select exists(select 1 from pro_dev_data_unit "pddu" where pro_dev_data_id = $1
         r#"
 select unit_id              as "id!: ProDevUnitId",
        display_name         as "display_name!",
-       description          as "description!"
+       description          as "description!",
+       value                as "value!"
 from pro_dev_data_unit "pddr"
 where pro_dev_data_id = $1
   and pddr.unit_id = $2
@@ -106,26 +107,7 @@ where pro_dev_data_id = $1
     .fetch_one(&mut txn)
     .await?;
 
-    let value = sqlx::query!(
-        r#"
-select value                 as "value"
-from pro_dev_data_unit "pddr"
-where pro_dev_data_id = $1
-  and pddr.unit_id = $2
-  and pddr.value <> '{}'
-        "#,
-        pro_dev_data_id,
-        unit_id.0,
-    )
-    .fetch_optional(&mut txn)
-    .await?
-    .map(|it| it.value);
-
-    let content = if let Some(value) = value {
-        Some(serde_json::from_value::<ProDevUnitValue>(value)?)
-    } else {
-        None
-    };
+    let content = serde_json::from_value::<ProDevUnitValue>(res.value)?;
 
     txn.rollback().await?;
 
