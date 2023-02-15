@@ -42,7 +42,7 @@ impl PostPublish {
 
     fn render_jig_actions(self: &Rc<Self>) -> Vec<Dom> {
         let state = self;
-        let asset_display_name = AssetType::Jig.as_str();
+        let asset_display_name = AssetType::Jig.display_name();
         let share_anchor = html!("post-publish-action", {
             .prop("kind", "share")
             .prop("assetDisplayName", asset_display_name)
@@ -73,7 +73,7 @@ impl PostPublish {
 
     fn render_resource_actions(self: &Rc<Self>) -> Vec<Dom> {
         let state = self;
-        let asset_display_name = AssetType::Resource.as_str();
+        let asset_display_name = AssetType::Resource.display_name();
         vec![
             html!("post-publish-action", {
                 .prop("slot", "actions")
@@ -96,7 +96,7 @@ impl PostPublish {
 
     fn render_course_actions(self: &Rc<Self>) -> Vec<Dom> {
         let state = self;
-        let asset_display_name = AssetType::Course.as_str();
+        let asset_display_name = AssetType::Course.display_name();
         let share_anchor = html!("post-publish-action", {
             .prop("kind", "share")
             .prop("assetDisplayName", asset_display_name)
