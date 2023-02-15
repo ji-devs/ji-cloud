@@ -185,7 +185,7 @@ export class _ extends LitElement {
                 .back .description {
                     font-size: 13px;
                     font-weight: 300;
-                    overflow-wrap: break-word;
+                    word-break: break-word;
                     white-space: pre-wrap;
                 }
                 .back h4,
