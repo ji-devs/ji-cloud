@@ -29,7 +29,7 @@ pub fn submit_code(state: Rc<State>, number: String) {
 }
 
 async fn code_to_jig_id(number: String) -> Result<PlayerSessionInstanceResponse, ()> {
-    let number = number.parse::<i16>().map_err(|_| ())?;
+    let number = number.parse::<i32>().map_err(|_| ())?;
     let index = JigPlayerSessionIndex(number);
     let req = PlayerSessionInstanceCreateRequest { index };
 

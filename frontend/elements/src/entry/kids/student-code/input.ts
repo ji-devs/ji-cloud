@@ -21,7 +21,7 @@ export class _ extends LitElement {
                 }
                 .inputs {
                     display: grid;
-                    grid-template-columns: repeat(4, 80px);
+                    grid-template-columns: repeat(6, 80px);
                     column-gap: 40px;
                     justify-content: center;
                 }
@@ -105,6 +105,16 @@ export class _ extends LitElement {
     @queryAll(".inputs input")
     private inputs!: NodeListOf<HTMLInputElement>;
 
+    // TODO Remove once 4 digit codes have all expired.
+    constructor() {
+        super();
+        this.addEventListener("keyup", event => {
+            if (event.key === "Enter") {
+                this.dispatchChangeEvent();
+            }
+        });
+    }
+
     private isValidNumber(v: string): boolean {
         return /^\d$/.test(v);
     }
@@ -154,7 +164,7 @@ export class _ extends LitElement {
         e.preventDefault();
 
         // if first input and is 4 digits
-        if (value.length === 4 && this.inputs[0] === target) {
+        if (value.length === 6 && this.inputs[0] === target) {
             for (let i = 0; i < this.inputs.length; i++) {
                 this.inputs[i].value = value[i];
             }
@@ -175,6 +185,16 @@ export class _ extends LitElement {
     render() {
         return html`
             <div class="inputs">
+                <input
+                    @input=${this.onInput}
+                    @paste=${this.onPaste}
+                    type="number"
+                />
+                <input
+                    @input=${this.onInput}
+                    @paste=${this.onPaste}
+                    type="number"
+                />
                 <input
                     @input=${this.onInput}
                     @paste=${this.onPaste}

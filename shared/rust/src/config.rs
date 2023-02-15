@@ -5,11 +5,11 @@
 use std::env::VarError;
 
 /// currently set to 14 days
-pub const JIG_PLAYER_SESSION_VALID_DURATION_SECS: u32 = 60 * 60 * 24 * 14;
+pub const JIG_PLAYER_SESSION_VALID_DURATION_SECS: u32 = 60 * 60 * 24 * 365;
 
 /// Defines the range of possible values for JIG player session sharing codes
 /// means 0-9999 are possible. If this is changed then the DB's check constraint must also be updated.
-pub const JIG_PLAYER_SESSION_CODE_MAX: i16 = 9999;
+pub const JIG_PLAYER_SESSION_CODE_MAX: i32 = 999999;
 
 /// Minimum amount of words which should be added to a list for a game.
 pub const MIN_LIST_WORDS: usize = 2;
