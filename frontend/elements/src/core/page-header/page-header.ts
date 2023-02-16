@@ -8,7 +8,7 @@ export class _ extends LitElement {
                 :host {
                     position: relative;
                     display: grid;
-                    grid-template-columns: repeat(6, auto);
+                    grid-template-columns: repeat(5, auto);
                     justify-content: space-between;
                     align-items: center;
                     padding: 0 20px;
@@ -43,25 +43,33 @@ export class _ extends LitElement {
                     display: grid;
                     place-content: center;
                 }
-                .help {
-                    display: flex;
-                }
-                ::slotted([slot="help"]){
+                .end {
                     display: grid;
-                    height: 27px;
-                    width: 27px;
-                    border-radius: 50%;
+                    grid-template-columns: repeat(2, auto);
+                    height: 100%;
+                    column-gap: 16px;
+                    justify-content: space-between;
+                }
+                .end .help {
+                    display: grid;
                     place-content: center;
+                }
+                .end .help ::slotted([slot="help"]){
+                    display: grid;
+                    place-content: center;
+                    padding: .5em;
                     color: none;
                 }
-                ::slotted([slot="help"]:hover){
-                    background-color: #c4d9f7;
+                .end .help ::slotted([slot="help"]:hover) {
+                    place-content: center;
+                    border-radius: 50%;
+                    background-color: #c4d9f7; 
                 }
-                .user {
+                .end .user {
                     display: flex;
                     column-gap: 16px;
                     height: 100%;
-                    align-items: center;
+                    justify-content: end;
                 }
                 .beta {
                     position: absolute;
@@ -73,11 +81,9 @@ export class _ extends LitElement {
                     border-radius: 0 0 12px 12px;
                     margin-left: 1em;
                 }
-
                 a {
                     color: inherit;
                 }
-
                 /* mobile */
                 @media (max-width: 1023px) {
                     :host {
@@ -120,13 +126,15 @@ export class _ extends LitElement {
             <div class="student-code">
                 <slot name="student-code"></slot>
             </div>
-            <div class="help">
-                <a href= "/home/help" color="black">
-                    <slot name="help"></slot>
-                </a>
-            </div>
-            <div class="user">
-                <slot name="user"></slot>
+            <div class="end">
+                <div class="help">
+                    <a href= "/home/help" color="black">
+                        <slot name="help"></slot>
+                    </a>
+                </div>
+                <div class="user">
+                    <slot name="user"></slot>
+                </div>
             </div>
             <span class="beta">
                 <slot name="beta"></slot>
