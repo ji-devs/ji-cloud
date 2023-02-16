@@ -18,7 +18,7 @@ export class _ extends LitElement {
                     align-items: start;
                     padding-top: 160px;
                     box-sizing: border-box;
-                    height: 100vh;
+                    height: 100svh;
                     background-image: url("${unsafeCSS(backgroundImage)}");
                     background-repeat: no-repeat;
                     background-size: cover;

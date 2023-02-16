@@ -34,7 +34,7 @@ export class _ extends LitElement {
                 @media (min-width: 1024px) {
                     :host {
                         grid-template-columns: 300px 1fr;
-                        height: 100vh;
+                        height: 100svh;
                     }
                 }
                 ::slotted([slot="page-header"]) {

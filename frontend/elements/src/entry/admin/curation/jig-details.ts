@@ -28,7 +28,7 @@ export class _ extends LitElement {
             }
             .input-container,
             .right-side {
-                max-height: calc(100vh - 220px);
+                max-height: calc(100svh - 220px);
                 overflow: auto;
                 box-sizing: border-box;
             }

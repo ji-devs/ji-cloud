@@ -11,7 +11,7 @@ export class _ extends BgBlue {
             css`
                 :host {
                     width: 100vw;
-                    height: 100vh;
+                    height: 100svh;
                     display: block;
                 }
 

@@ -9,7 +9,7 @@ export class _ extends LitElement {
             css`
                 :host {
                     display: grid;
-                    min-height: 100vh;
+                    min-height: 100svh;
                     grid-template-rows: auto 1fr;
                     background-image: url(${unsafeCSS(
                         mediaUi("entry/jig/gallery/background.png")

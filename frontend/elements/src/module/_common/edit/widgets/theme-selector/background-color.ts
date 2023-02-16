@@ -11,7 +11,7 @@ export class _ extends LitElement {
                     box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
                     border-radius: 14px;
                     display: grid;
-                    max-height: 100vh;
+                    max-height: 100svh;
                     overflow: auto;
                 }
                 ::slotted(*) {

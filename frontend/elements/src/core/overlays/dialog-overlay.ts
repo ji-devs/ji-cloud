@@ -18,7 +18,7 @@ export class DialogOverlay extends LitElement {
                     z-index: 1;
                     top: 0%;
                     left: 0%;
-                    height: 100vh;
+                    height: 100svh;
                     width: 100vw;
                     place-content: center;
                 }

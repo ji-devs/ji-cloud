@@ -25,7 +25,7 @@ export class _ extends BaseButton {
                     justify-content: center;
                     align-items: center;
                     width: 100vw;
-                    height: 100vh;
+                    height: 100svh;
                     opacity: 0.8;
                     background-color: var(--light-blue-3);
                     z-index: var(--overlay-z-index);

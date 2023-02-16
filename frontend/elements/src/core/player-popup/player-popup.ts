@@ -27,7 +27,7 @@ export class _ extends LitElement {
                     top: 0;
                     left: 0;
                     z-index: 9999;
-                    height: 100vh;
+                    height: 100svh;
                     width: 100vw;
                     background-color: #ececec;
                 }
@@ -41,12 +41,12 @@ export class _ extends LitElement {
                     margin: 0 auto;
                 }
                 :host([size=aspect-ratio]) .iframe-wrapper {
-                    max-height: 100vh;
+                    max-height: 100svh;
                     max-width: 100vw;
                     aspect-ratio: 16 / 9;
                 }
                 :host([size=full-screen]) .iframe-wrapper {
-                    height: 100vh;
+                    height: 100svh;
                     width: 100vw;
                 }
                 .iframe-wrapper ::slotted(iframe) {

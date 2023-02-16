@@ -12,7 +12,7 @@ export class _ extends LitElement {
             css`
                 :host {
                     display: grid;
-                    height: 100vh;
+                    height: 100svh;
                 }
                 .inside-wrapper {
                     width: 296px;

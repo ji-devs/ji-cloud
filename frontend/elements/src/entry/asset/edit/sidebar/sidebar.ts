@@ -20,7 +20,7 @@ export class _ extends LitElement {
                 .page-overlay {
                     position: fixed;
                     width: 100vw;
-                    height: 100vh;
+                    height: 100svh;
                     display: grid;
                     background-color: #ffffff80;
                     transition-property: background-color;
@@ -37,7 +37,7 @@ export class _ extends LitElement {
                     position: absolute;
                     display: flex;
                     flex-flow: column;
-                    height: 100vh;
+                    height: 100svh;
                     width: 324px;
                     box-shadow: 0 3px 20px 0 rgba(0, 0, 0, 0.08);
                     background-color: var(--white);
