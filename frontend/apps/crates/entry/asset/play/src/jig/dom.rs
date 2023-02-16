@@ -149,16 +149,11 @@ impl JigPlayer {
                     dom.child(sidebar::dom::render(sidebar_state))
                 }
             })
-            .apply(clone!(state => move|dom| {
-                if state.player_options.display_score {
-                    dom.child(html!("jig-play-points-indicator", {
-                        .visible(state.player_options.display_score)
-                        .prop("slot", "indicators")
-                        .prop_signal("value", state.points.signal())
-                    }))
-                } else {
-                    dom
-                }
+            .apply_if(state.player_options.display_score, clone!(state => move|dom| {
+                dom.child(html!("jig-play-points-indicator", {
+                    .prop("slot", "indicators")
+                    .prop_signal("value", state.points.signal())
+                }))
             }))
             .child_signal(state.jig.signal_ref(clone!(state => move |jig| {
                 match &jig {

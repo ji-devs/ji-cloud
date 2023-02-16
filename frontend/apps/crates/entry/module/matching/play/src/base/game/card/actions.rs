@@ -1,7 +1,10 @@
 use super::{super::state::*, state::*};
 use components::audio::mixer::{play_random_negative, play_random_positive, AUDIO_MIXER};
 use std::rc::Rc;
-use utils::math::BoundsF64;
+use utils::{
+    math::BoundsF64,
+    prelude::{IframeAction, IframeMessageExt, ModuleToJigPlayerMessage},
+};
 use web_sys::HtmlElement;
 
 impl CardDrag {
@@ -13,10 +16,16 @@ impl CardDrag {
 
             if let Some(choice) = choice {
                 if choice.pair_id == self.pair_id {
+                    let points = calculate_point_count(*choice.tried_count.borrow());
+                    let _ = IframeAction::new(ModuleToJigPlayerMessage::AddPoints(points))
+                        .try_post_message_to_player();
                     play_random_positive();
                     found_match = true;
                     choice.phase.set(TopPhase::Landed);
                 } else {
+                    choice
+                        .tried_count
+                        .replace_with(|tried_count| *tried_count + 1);
                     // Only play the negative effect if they've dropped the card over a target. If
                     // they drop the card over nothing, it could be for something like releasing
                     // the card to select a new card.
@@ -87,4 +96,10 @@ pub fn start_drag(state: Rc<CardBottom>, elem: HtmlElement, x: i32, y: i32) {
             AUDIO_MIXER.with(|mixer| mixer.play_oneshot(audio.into()));
         }
     }
+}
+
+fn calculate_point_count(tried_count: u32) -> u32 {
+    // start with 2 point, reduce one point for every try. min points: 0.
+    let base = 2_u32;
+    base.saturating_sub(tried_count)
 }

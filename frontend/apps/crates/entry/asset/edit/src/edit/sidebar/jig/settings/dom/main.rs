@@ -12,7 +12,7 @@ use crate::edit::sidebar::jig::settings::{
 
 use super::super::state::JigSettings;
 
-// const STR_DISPLAY_SCORE: &str = "Display score";
+const STR_DISPLAY_SCORE: &str = "Display score";
 const STR_ASSESSMENT_MODE: &str = "Assessment mode";
 const STR_DRAG_ASSIST: &str = "Drag & Drop assist";
 
@@ -58,16 +58,16 @@ impl JigSettings {
                                 update_jig_settings(Rc::clone(&state));
                             }))
                         }),
-                        // html!("label", {
-                        //     .child(html!("input-switch", {
-                        //         .prop_signal("enabled", state.display_score.signal())
-                        //         .event(clone!(state => move|evt :events::CustomToggle| {
-                        //             state.display_score.set(evt.value());
-                        //             update_jig_settings(Rc::clone(&state));
-                        //         }))
-                        //     }))
-                        //     .text(STR_DISPLAY_SCORE)
-                        // }),
+                        html!("label", {
+                            .child(html!("input-switch", {
+                                .prop_signal("enabled", state.jig.display_score.signal())
+                                .event(clone!(state => move|evt :events::CustomToggle| {
+                                    state.jig.display_score.set(evt.value());
+                                    update_jig_settings(Rc::clone(&state));
+                                }))
+                            }))
+                            .text(STR_DISPLAY_SCORE)
+                        }),
                         html!("label", {
                             .child(html!("input-switch", {
                                 .prop_signal("enabled", state.jig.track_assessments.signal())

@@ -25,6 +25,7 @@ pub struct CardChoice<P: Clone> {
     pub theme_id: ThemeId,
     pub mode: Mode,
     pub elem: RefCell<Option<HtmlElement>>,
+    pub tried_count: RefCell<u32>,
 }
 
 type IsDragOver = bool;
@@ -75,6 +76,7 @@ impl CardChoice<TopPhase> {
             theme_id,
             mode,
             elem: RefCell::new(None),
+            tried_count: RefCell::new(0),
         }
     }
 
@@ -120,6 +122,7 @@ impl CardChoice<BottomPhase> {
             theme_id,
             mode,
             elem: RefCell::new(None),
+            tried_count: RefCell::new(0),
         }
     }
 }
