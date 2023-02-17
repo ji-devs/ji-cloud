@@ -68,9 +68,13 @@ impl PageHeader {
                     analytics::event("Donate Click", None);
                 })
             }))
-            .child(html!("fa-button", {
+            .child(html!("div", {
                 .prop("slot", "help")
-                .prop("icon", "fa-regular fa-circle-question fa-5x")
+                .child(html!("img-ui", {
+                    .prop("path", "core/page-header/icon-help.svg")
+                    .style("width", "20px")
+                    .style("height", "20px")
+                }))
                 .event(move |_evt: events::Click| {
                     analytics::event("Help Center Click", None);
                 })
