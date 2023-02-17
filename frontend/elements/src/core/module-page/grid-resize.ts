@@ -14,7 +14,7 @@ export class _ extends BgBlue {
             css`
                 :host {
                     width: 100vw;
-                    height: 100svh;
+                    height: 100dvh;
                     display: block;
                     padding: 0;
                     margin: 0;
@@ -41,7 +41,7 @@ export class _ extends BgBlue {
                     display: grid;
                     grid-template-rows: auto minmax(0, 1fr) auto;
                     gap: 6px;
-                    height: 100svh;
+                    height: 100dvh;
                 }
                 .canvas {
                     max-height: 100%;

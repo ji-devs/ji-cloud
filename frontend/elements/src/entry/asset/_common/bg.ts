@@ -12,7 +12,7 @@ export class _ extends LitElement {
                     display: block;
                     background-color: var(--light-blue-3);
                     width: 100vw;
-                    height: 100svh;
+                    height: 100dvh;
                 }
 
                 .right,

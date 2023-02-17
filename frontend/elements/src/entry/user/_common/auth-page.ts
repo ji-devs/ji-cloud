@@ -13,7 +13,7 @@ export class _ extends LitElement {
             css`
                 :host {
                     display: grid;
-                    height: 100svh;
+                    height: 100dvh;
                 }
                 @media (min-width: 1024px) {
                     :host {
@@ -33,7 +33,7 @@ export class _ extends LitElement {
                 img-ui {
                     width: 100%;
                     height: 100%;
-                    max-height: 100svh;
+                    max-height: 100dvh;
                     object-fit: cover;
                     display: block;
                 }

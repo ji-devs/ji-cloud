@@ -12,7 +12,7 @@ export class _ extends LitElement {
                     top: 0;
                     left: 0;
                     width: 100vw;
-                    height: 100svh;
+                    height: 100dvh;
                     background-color: #6ca1fc3d;
                     background-image: url(${unsafeCSS(
                         mediaUi("core/loaders/loader.svg")

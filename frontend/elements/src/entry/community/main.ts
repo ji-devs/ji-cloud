@@ -10,7 +10,7 @@ export class _ extends LitElement {
         return [
             css`
                 :host {
-                    min-height: 100svh;
+                    min-height: 100dvh;
                     display: grid;
                     grid-template-rows: auto auto 1fr;
                 }

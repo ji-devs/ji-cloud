@@ -11,7 +11,7 @@ export class _ extends LitElement {
                     display: grid;
                     justify-content: center;
                     background-color: var(--green-3);
-                    height: 100svh;
+                    height: 100dvh;
                     width: 100vw;
                     box-sizing: border-box;
                 }

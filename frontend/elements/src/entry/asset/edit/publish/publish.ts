@@ -13,7 +13,7 @@ export class _ extends LitElement {
                 :host {
                     display: block;
                     padding: 50px;
-                    height: 100svh;
+                    height: 100dvh;
                     overflow: auto;
                     box-sizing: border-box;
                     overflow: auto;

@@ -10,7 +10,7 @@ export class _ extends LitElement {
                     top: 0;
                     left: 0;
                     width: 100vw;
-                    height: 100svh;
+                    height: 100dvh;
                     display: flex;
                     justify-content: center;
                     align-items: center;

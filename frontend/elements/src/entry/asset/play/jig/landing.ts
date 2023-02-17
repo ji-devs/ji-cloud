@@ -14,7 +14,7 @@ export class _ extends LitElement {
                 */
                 :host {
                     display: block;
-                    height: 100svh;
+                    height: 100dvh;
                     width: 100vw;
                 }
                 :host([isLegacy]) {
@@ -45,7 +45,7 @@ export class _ extends LitElement {
                 }
                 ::slotted([slot="message"]) {
                     position: fixed;
-                    height: 100svh;
+                    height: 100dvh;
                     width: 100vw;
                     display: grid;
                     place-content: center;

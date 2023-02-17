@@ -9,7 +9,7 @@ export class _ extends LitElement {
                     padding: 24px;
                     display: grid;
                     overflow: auto;
-                    max-height: 100svh;
+                    max-height: 100dvh;
                     box-sizing: border-box;
                 }
                 h1 {

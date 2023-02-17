@@ -6,7 +6,7 @@ export class DialogOverlay extends LitElement {
         return [
             css`
                 :host {
-                    height: 100svh;
+                    height: 100dvh;
                     width: 100vw;
                     background: rgb(216 231 250 / .9);
                     display: grid;

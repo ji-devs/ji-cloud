@@ -11,7 +11,7 @@ export class _ extends LitElement {
             css`
                 :host {
                     position: fixed;
-                    height: 100svh;
+                    height: 100dvh;
                     width: 100vw;
                     background-color: #00000040;
                     display: grid;

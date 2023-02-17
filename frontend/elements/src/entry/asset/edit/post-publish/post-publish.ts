@@ -14,7 +14,7 @@ export class _ extends LitElement {
                     display: grid;
                     place-content: center;
                     padding: 0 80px;
-                    height: 100svh;
+                    height: 100dvh;
                     grid-template-columns: 1fr;
                     overflow: auto;
                 }

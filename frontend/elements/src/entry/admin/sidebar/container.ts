@@ -12,7 +12,7 @@ export class _ extends LitElement {
                     height: 100%;
                     background-color: #83aef7;
                     position: relative;
-                    min-height: 100svh;
+                    min-height: 100dvh;
                 }
 
                 section.closed {
@@ -22,7 +22,7 @@ export class _ extends LitElement {
                     height: 100%;
                     background-color: #83aef7;
                     position: relative;
-                    min-height: 100svh;
+                    min-height: 100dvh;
                 }
 
                 .open,

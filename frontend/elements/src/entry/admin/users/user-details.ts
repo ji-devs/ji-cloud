@@ -30,7 +30,7 @@ export class _ extends LitElement {
                 padding: 31px 24px;
                 border-radius: 12px;
                 border: solid 2px #e6f0ff;
-                max-height: calc(100svh - 300px);
+                max-height: calc(100dvh - 300px);
                 overflow: auto;
             }
             ::slotted([slot="inputs"]) {

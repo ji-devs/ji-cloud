@@ -55,13 +55,13 @@ export class _ extends LitElement {
 
                 :host {
                     /* Effectively 50px - 178px offset, with the in-between dependent on height */
-                    padding-top: min(178px, max(50px, 100svh - 700px));
+                    padding-top: min(178px, max(50px, 100dvh - 700px));
                     display: block;
                     background-color: #d8e7fa;
                     background-size: cover;
                     display: grid;
                     box-sizing: border-box;
-                    height: 100svh;
+                    height: 100dvh;
                     align-content: start;
                     row-gap: 62px;
                 }

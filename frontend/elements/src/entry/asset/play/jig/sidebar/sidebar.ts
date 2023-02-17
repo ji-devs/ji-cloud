@@ -58,7 +58,7 @@ export class _ extends LitElement {
                     display: grid;
                     grid-template-rows: auto 1fr;
                     width: 324px;
-                    height: 100svh;
+                    height: 100dvh;
                     box-shadow: 0 3px 20px 0 rgba(0, 0, 0, 0.08);
                     background-color: #fff;
                     z-index: 1;

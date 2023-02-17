@@ -23,7 +23,7 @@ export class _ extends LitElement {
                     justify-content: center;
                     align-items: center;
                     width: 100vw;
-                    height: 100svh;
+                    height: 100dvh;
                     opacity: 0.8;
                     background-color: var(--light-blue-3);
                     z-index: 10;

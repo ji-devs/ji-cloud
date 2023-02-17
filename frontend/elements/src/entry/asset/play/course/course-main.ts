@@ -10,7 +10,7 @@ export class _ extends LitElement {
                     align-content: start;
                     column-gap: 48px;
                     background-color: var(--light-blue-1);
-                    min-height: 100svh;
+                    min-height: 100dvh;
                     box-sizing: border-box;
                 }
                 @media (min-width: 1024px) {

@@ -9,7 +9,7 @@ export class _ extends BgBlue {
             css`
                 :host {
                     width: 100vw;
-                    height: 100svh;
+                    height: 100dvh;
                     display: block;
                     padding: 0;
                     margin: 0;
