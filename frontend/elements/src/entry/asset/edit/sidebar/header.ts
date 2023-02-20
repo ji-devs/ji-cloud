@@ -114,6 +114,10 @@ export class _ extends LitElement {
     @property({ type: Boolean, reflect: true })
     isModulePage: boolean = false;
 
+    // TODO: remove once course has settings
+    @property({ type: Boolean })
+    hasSettings: boolean = true;
+
     render() {
         return html`
             <div class="close-wrapper collapsing-phase">
@@ -138,8 +142,12 @@ export class _ extends LitElement {
             </div>
             <div class="input open-only"><slot name="input"></slot></div>
             <div class="settings-preview">
-                <slot name="settings"></slot>
-                <div class="divider open-only"></div>
+                ${
+                    this.hasSettings ? html`
+                        <slot name="settings"></slot>
+                        <div class="divider open-only"></div>
+                    ` : nothing
+                }
                 <div class="open-only">
                     <slot name="preview"></slot>
                 </div>

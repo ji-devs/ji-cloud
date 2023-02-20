@@ -24,6 +24,8 @@ impl HeaderDom {
         let asset_edit_state = Rc::clone(&sidebar_state.asset_edit_state);
         html!("jig-edit-sidebar-header", {
             .prop("slot", "header")
+            // TODO: remove once course has setting
+            .prop("hasSettings", !asset_edit_state.asset_id.is_course_id())
             .prop_signal("collapsed", sidebar_state.collapsed.signal())
             .prop_signal("isModulePage", asset_edit_state.route.signal_cloned().map(|route| {
                 // TODO: change?
