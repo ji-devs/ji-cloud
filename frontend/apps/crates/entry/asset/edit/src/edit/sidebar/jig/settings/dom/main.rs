@@ -68,26 +68,26 @@ impl JigSettings {
                             }))
                             .text(STR_DISPLAY_SCORE)
                         }),
-                        html!("label", {
-                            .child(html!("input-switch", {
-                                .prop_signal("enabled", state.jig.track_assessments.signal())
-                                .event(clone!(state => move|evt :events::CustomToggle| {
-                                    state.jig.track_assessments.set(evt.value());
-                                    update_jig_settings(Rc::clone(&state));
-                                }))
-                            }))
-                            .text(STR_ASSESSMENT_MODE)
-                        }),
-                        html!("label", {
-                            .child(html!("input-switch", {
-                                .prop_signal("enabled", state.jig.drag_assist.signal())
-                                .event(clone!(state => move|evt :events::CustomToggle| {
-                                    state.jig.drag_assist.set(evt.value());
-                                    update_jig_settings(Rc::clone(&state));
-                                }))
-                            }))
-                            .text(STR_DRAG_ASSIST)
-                        }),
+                        // html!("label", {
+                        //     .child(html!("input-switch", {
+                        //         .prop_signal("enabled", state.jig.track_assessments.signal())
+                        //         .event(clone!(state => move|evt :events::CustomToggle| {
+                        //             state.jig.track_assessments.set(evt.value());
+                        //             update_jig_settings(Rc::clone(&state));
+                        //         }))
+                        //     }))
+                        //     .text(STR_ASSESSMENT_MODE)
+                        // }),
+                        // html!("label", {
+                        //     .child(html!("input-switch", {
+                        //         .prop_signal("enabled", state.jig.drag_assist.signal())
+                        //         .event(clone!(state => move|evt :events::CustomToggle| {
+                        //             state.jig.drag_assist.set(evt.value());
+                        //             update_jig_settings(Rc::clone(&state));
+                        //         }))
+                        //     }))
+                        //     .text(STR_DRAG_ASSIST)
+                        // }),
                     ])
                 }),
             ])
