@@ -17,14 +17,15 @@ export class _ extends LitElement {
                     font-weight: 900;
                     color: var(--dark-blue-4);
                     margin: 0;
+                    text-align: center;
                 }
                 h3 {
                     font-size: 18px;
                     font-weight: 500;
                     color: var(--dark-blue-4);
-                    margin: 0;
                     max-width: 465px;
-                    margin-bottom: 24px;
+                    text-align: center;
+                    margin: 0 auto 24px auto;
                 }
                 ::slotted([slot=search-bar]) {
                     margin: 0 auto 16px auto;
