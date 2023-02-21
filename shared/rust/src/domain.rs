@@ -55,6 +55,7 @@ pub mod admin;
 pub mod animation;
 pub mod asset;
 pub mod audio;
+pub mod billing;
 pub mod category;
 pub mod circle;
 pub mod course;
