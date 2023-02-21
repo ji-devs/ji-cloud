@@ -388,6 +388,19 @@ async fn update_admin_data(
     Ok(HttpResponse::NoContent().finish())
 }
 
+/// Admin Transfer JIGs from user id to another
+async fn admin_transfer_jigs(
+    db: Data<PgPool>,
+    _auth: TokenUserWithScope<ScopeAdmin>,
+    req: Json<<jig::JigAdminTransfer as ApiEndpoint>::Req>,
+) -> Result<HttpResponse, error::NotFound> {
+    db::jig::transfer_jigs(&*db, req.from, req.to, &req.jig_ids[..])
+        .await
+        .map_err(|e| error::NotFound::InternalServerError(e))?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
 async fn count(db: Data<PgPool>) -> Result<Json<<jig::Count as ApiEndpoint>::Res>, error::Server> {
     let total_count: u64 = db::jig::count(&*db, PrivacyLevel::Public).await?;
 
@@ -578,6 +591,12 @@ pub fn configure(cfg: &mut ServiceConfig) {
         jig::JigAdminDataUpdate::METHOD
             .route()
             .to(update_admin_data),
+    )
+    .route(
+        <jig::JigAdminTransfer as ApiEndpoint>::Path::PATH,
+        jig::JigAdminTransfer::METHOD
+            .route()
+            .to(admin_transfer_jigs),
     )
     .route(
         <jig::player::Create as ApiEndpoint>::Path::PATH,
