@@ -2,12 +2,13 @@ use crate::{
     api::Method,
     domain::{
         jig::{
-            JigAdminDataUpdatePath, JigBrowsePath, JigBrowseQuery, JigBrowseResponse, JigClonePath,
-            JigCountPath, JigCountResponse, JigCoverPath, JigCreatePath, JigCreateRequest,
-            JigDeleteAllPath, JigDeletePath, JigGetDraftPath, JigGetLivePath, JigId, JigLikePath,
-            JigLikedPath, JigLikedResponse, JigPlayPath, JigPublishPath, JigResponse,
-            JigSearchPath, JigSearchQuery, JigSearchResponse, JigUnlikePath,
-            JigUpdateAdminDataRequest, JigUpdateDraftDataPath, JigUpdateDraftDataRequest,
+            JigAdminDataUpdatePath, JigAdminTransferRequest, JigBrowsePath, JigBrowseQuery,
+            JigBrowseResponse, JigClonePath, JigCountPath, JigCountResponse, JigCoverPath,
+            JigCreatePath, JigCreateRequest, JigDeleteAllPath, JigDeletePath, JigGetDraftPath,
+            JigGetLivePath, JigId, JigLikePath, JigLikedPath, JigLikedResponse, JigPlayPath,
+            JigPublishPath, JigResponse, JigSearchPath, JigSearchQuery, JigSearchResponse,
+            JigTransferAdminPath, JigUnlikePath, JigUpdateAdminDataRequest, JigUpdateDraftDataPath,
+            JigUpdateDraftDataRequest,
         },
         CreateResponse,
     },
@@ -281,6 +282,26 @@ impl ApiEndpoint for JigAdminDataUpdate {
     type Path = JigAdminDataUpdatePath;
     type Err = EmptyError;
     const METHOD: Method = Method::Patch;
+}
+
+/// Update an admin data for a JIG.
+///
+/// # Authorization
+///
+/// * Standard + [`UserScope::ManageJig`](crate::domain::user::UserScope)
+///
+/// # Errors
+///
+/// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
+/// * [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
+/// * [`BadRequest`](http::StatusCode::BAD_REQUEST) if the request is missing/invalid.
+pub struct JigAdminTransfer;
+impl ApiEndpoint for JigAdminTransfer {
+    type Req = JigAdminTransferRequest;
+    type Res = ();
+    type Path = JigTransferAdminPath;
+    type Err = EmptyError;
+    const METHOD: Method = Method::Post;
 }
 
 /// Remove resource from jigs algolia

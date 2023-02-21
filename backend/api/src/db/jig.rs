@@ -14,7 +14,7 @@ use shared::domain::{
     user::{UserId, UserScope},
 };
 use sqlx::{types::Json, PgConnection, PgPool};
-use std::collections::HashMap;
+use std::{collections::HashMap, ops::Deref};
 use tracing::{instrument, Instrument};
 use uuid::Uuid;
 
@@ -1382,6 +1382,88 @@ where jig_id = $1 and $2 is distinct from curated
         .execute(&mut txn)
         .await?;
     }
+
+    txn.commit().await?;
+
+    Ok(())
+}
+
+pub async fn transfer_jigs(
+    pool: &PgPool,
+    from: UserId,
+    to: UserId,
+    jig_ids: &[JigId],
+) -> anyhow::Result<()> {
+    let mut txn = pool.begin().await?;
+
+    let from_exists = sqlx::query!(
+        r#"
+select exists (select 1 from "user" where id = $1) as "check_from!"        
+        "#,
+        from.0
+    )
+    .fetch_one(&mut txn)
+    .await?
+    .check_from;
+
+    if !from_exists {
+        return Err(anyhow::anyhow!("Former creator ID does not exist"));
+    };
+
+    let to_exists = sqlx::query!(
+        r#"
+select exists (select 1 from "user" where id = $1) as "check_to!"        
+        "#,
+        to.0
+    )
+    .fetch_one(&mut txn)
+    .await?
+    .check_to;
+
+    if !to_exists {
+        return Err(anyhow::anyhow!("Target creator ID does not exist"));
+    };
+
+    let mut ids = Vec::new();
+
+    for id in jig_ids {
+        let id = id.deref().0;
+
+        ids.push(id)
+    }
+
+    let ids = sqlx::query!(
+        r#"
+update jig 
+set author_id = $1,
+    creator_id = $1
+where (creator_id = $2 or author_id = $2)
+and id = any($3)
+returning live_id
+        "#,
+        to.0,
+        from.0,
+        &ids[..]
+    )
+    .fetch_all(&mut txn)
+    .await?;
+
+    let live_ids: Vec<_> = ids.into_iter().map(|record| record.live_id).collect();
+
+    if live_ids.is_empty() {
+        return Err(anyhow::anyhow!("JIG ids not owned by old creator ID"));
+    }
+
+    sqlx::query!(
+        r#"
+    update jig_data
+    set last_synced_at = null
+    where id = any($1)
+            "#,
+        &live_ids[..]
+    )
+    .execute(&mut txn)
+    .await?;
 
     txn.commit().await?;
 
