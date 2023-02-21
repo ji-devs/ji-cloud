@@ -13,8 +13,8 @@ use crate::edit::sidebar::jig::settings::{
 use super::super::state::JigSettings;
 
 const STR_DISPLAY_SCORE: &str = "Display score";
-const STR_ASSESSMENT_MODE: &str = "Assessment mode";
-const STR_DRAG_ASSIST: &str = "Drag & Drop assist";
+// const STR_ASSESSMENT_MODE: &str = "Assessment mode";
+// const STR_DRAG_ASSIST: &str = "Drag & Drop assist";
 
 impl JigSettings {
     pub fn render_main(self: &Rc<Self>) -> Dom {
