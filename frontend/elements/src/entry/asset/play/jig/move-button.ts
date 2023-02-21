@@ -9,6 +9,9 @@ export class _ extends LitElement {
         return [
             actionStyles,
             css`
+                :host {
+                    display: grid;
+                }
                 :host([kind="back"]) img-ui {
                     transform: rotate(180deg);
                 }

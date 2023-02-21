@@ -5,12 +5,11 @@ export class IndicatorBase extends LitElement {
         return [
             css`
                 :host {
-                    width: 94px;
-                    height: 98px;
                     justify-items: center;
                     display: inline-grid;
                     justify-content: center;
                     align-content: space-evenly;
+                    padding-left: 10px;
                     border-top-left-radius: 50%;
                     border-bottom-left-radius: 50%;
                     box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.16);
@@ -18,31 +17,30 @@ export class IndicatorBase extends LitElement {
                     background-color: var(--light-blue-2);
                     box-sizing: border-box;
                     text-align: center;
+                    font-size: 18px;
+                    line-height: 1em;
+                    font-weight: 500;
+                    color: var(--dark-blue-8);
+                    width: 80px;
+                    height: 72px;
+                }
+                @media (max-width: 1000px) {
+                    :host {
+                        width: 40px;
+                        height: 36px;
+                        font-size: 13px;
+                    }
                 }
                 img-ui {
-                    height: 30px;
-                    width: 30px;
+                    height: 28px;
+                    width: 28px;
                     display: grid;
                     place-content: center;
                 }
-                .value {
-                    font-size: 22px;
-                    font-weight: 500;
-                    color: var(--dark-blue-8);
-                }
-
-                /* mobile */
                 @media (max-width: 1000px) {
-                    :host {
-                        width: 50px;
-                        height: 58px;
-                    }
                     img-ui {
-                        height: 16px;
-                        width: 16px;
-                    }
-                    .value {
-                        font-size: 10px;
+                        height: 14px;
+                        width: 14px;
                     }
                 }
             `,

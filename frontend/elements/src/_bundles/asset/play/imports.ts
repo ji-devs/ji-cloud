@@ -17,6 +17,7 @@ import "@elements/entry/asset/play/jig/landing";
 import "@elements/entry/asset/play/jig/move-button";
 import "@elements/entry/asset/play/jig/play-button";
 import "@elements/entry/asset/play/jig/play-pause";
+import "@elements/entry/asset/play/jig/full-screen";
 import "@elements/entry/asset/play/jig/points-indicator";
 import "@elements/entry/asset/play/jig/progress-bar";
 import "@elements/entry/asset/play/jig/done-action";

@@ -6,6 +6,7 @@ use dominator::{clone, html, with_node, Dom};
 use dominator_helpers::{events::Message, signals::DefaultSignal};
 use futures_signals::map_ref;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
+use gloo::utils::{body, document};
 use js_sys::Reflect;
 use shared::domain::module::body::ModuleAssistType;
 use shared::domain::{jig::JigResponse, module::ModuleKind};
@@ -149,7 +150,7 @@ impl JigPlayer {
                     dom.child(sidebar::dom::render(sidebar_state))
                 }
             })
-            .apply_if(state.player_options.display_score, clone!(state => move|dom| {
+            .apply_if(true, clone!(state => move|dom| {
                 dom.child(html!("jig-play-points-indicator", {
                     .prop("slot", "indicators")
                     .prop_signal("value", state.points.signal())
@@ -234,8 +235,8 @@ impl JigPlayer {
                     html!("empty-fragment", {
                         .prop("slot", "module-assist")
                         .child(html!("button-icon", {
-                            .style("width", "40px")
-                            .style("height", "40px")
+                            .style("width", "30px")
+                            .style("height", "30px")
                             .prop("iconPath", "jig/play/icn-instructions.svg")
                             .prop("iconHoverPath", "jig/play/icn-instructions-hover.svg")
                             .event(clone!(state => move |_evt: events::Click| {
@@ -361,6 +362,22 @@ impl JigPlayer {
                     }))
                     .event(clone!(state => move |_:events::Click| {
                         actions::toggle_paused(&state);
+                    }))
+                }),
+                html!("jig-play-full-screen", {
+                    .prop("slot", "full-screen")
+                    .prop_signal("isFullScreen", state.is_full_screen.signal())
+                    .event(clone!(state => move|_: events::Click| {
+                        let full_screen = !state.is_full_screen.get();
+                        state.is_full_screen.set(full_screen);
+                        match full_screen {
+                            true => {
+                                let _ = body().request_fullscreen();
+                            },
+                            false => {
+                                let _ = document().exit_fullscreen();
+                            },
+                        };
                     }))
                 }),
                 html!("jig-play-move-button", {

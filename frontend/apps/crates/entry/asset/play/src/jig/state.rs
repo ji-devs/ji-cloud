@@ -45,6 +45,7 @@ pub struct JigPlayer {
     pub resource_types: Mutable<Vec<ResourceType>>,
     pub module_assist: Mutable<Option<PlayModuleAssist>>,
     pub module_assist_visible: Mutable<bool>,
+    pub is_full_screen: Mutable<bool>,
 }
 
 impl JigPlayer {
@@ -84,6 +85,7 @@ impl JigPlayer {
             resource_types: Default::default(),
             module_assist: Mutable::new(None),
             module_assist_visible: Mutable::new(false),
+            is_full_screen: Mutable::new(false),
         })
     }
 }

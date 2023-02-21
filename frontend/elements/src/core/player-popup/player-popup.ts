@@ -56,13 +56,13 @@ export class _ extends LitElement {
                     border: 4px red solid;
                 }
                 ::slotted([slot="close"]) {
-                    margin: 16px;
+                    margin: 5px 2px;
                     border-radius: 50%;
                     color: #ffffff;
-                    height: 40px;
-                    width: 40px;
+                    height: 30px;
+                    width: 30px;
                     cursor: pointer;
-                    font-size: 32px;
+                    font-size: 23px;
                     line-height: 1em;
                     font-family: "OpenSans-light";
                     z-index: 1;
@@ -70,8 +70,10 @@ export class _ extends LitElement {
                     top: 0;
                     right: 0;
                     padding: 0;
+                    display: inline-grid;
+                    place-content: center;
+                    background-color: var(--dark-blue-8);
                 }
-
                 :host .preview {
                     position: absolute;
                     left: 50%;

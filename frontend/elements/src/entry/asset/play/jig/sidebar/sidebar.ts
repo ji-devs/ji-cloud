@@ -29,11 +29,7 @@ export class _ extends LitElement {
                     padding: 0;
                     grid-column: 2;
                     align-self: start;
-                    margin-top: 60px;
-                    height: 90px;
-                    width: 90px;
                     cursor: pointer;
-                    margin-left: -26px;
                     transition: transform 0.2s, opacity 0.2s;
                     transform-origin: left top;
                     border-radius: 50%;
@@ -42,8 +38,21 @@ export class _ extends LitElement {
                     )});
                     background-position: center;
                     background-color: transparent;
-                    background-size: 118px;
                     box-shadow: 0 3px 6px 0 rgb(0 0 0 / 16%);
+                    width: 40px;
+                    height: 40px;
+                    background-size: 56px;
+                    margin-top: 10px;
+                    margin-left: -4px;
+                }
+                @media (min-width: 1024px) {
+                    ::slotted([slot="opener"]) {
+                        height: 80px;
+                        width: 80px;
+                        background-size: 104px;
+                        margin-top: 60px;
+                        margin-left: -20px;
+                    }
                 }
                 :host([open]) ::slotted([slot="opener"]) {
                     opacity: 0;

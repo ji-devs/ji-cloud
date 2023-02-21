@@ -1,9 +1,11 @@
-import { LitElement, html, css, customElement, property } from "lit-element";
+import { LitElement, html, css, customElement, property, state } from "lit-element";
+import { actionStyles } from "./action-styles";
 
 @customElement("jig-play-landing")
 export class _ extends LitElement {
     static get styles() {
         return [
+            actionStyles,
             css`
                 /*
                     z-index layers:
@@ -52,16 +54,21 @@ export class _ extends LitElement {
                     background-color: #ffffff;
                 }
                 .controls {
-                    display: grid;
-                    grid-template-columns: 0px 1fr auto;
-                    grid-template-rows: auto 1fr 100px;
                     box-sizing: border-box;
-                }
-                .controls {
+                    overflow: hidden;
                     z-index: 3;
                     pointer-events: none;
+                    display: grid;
+                    grid-template-columns: 0px 1fr auto;
+                    grid-template-rows: auto 1fr 38px;
                 }
-                .controls ::slotted(*) {
+                @media (min-width: 1024px) {
+                    .controls {
+                        grid-template-rows: auto 1fr 100px;
+                    }
+                }
+                .controls ::slotted(*),
+                .controls fa-button {
                     pointer-events: all;
                 }
                 .sidebar {
@@ -84,8 +91,8 @@ export class _ extends LitElement {
                     margin-right: 96px;
                 }
                 ::slotted([slot="module-assist"]) {
-                    width: 40px;
-                    height: 40px;
+                    width: 30px;
+                    height: 30px;
                     background: none;
                     border: none;
                     cursor: pointer;
@@ -99,30 +106,70 @@ export class _ extends LitElement {
                     grid-gap: 16px;
                     justify-items: end;
                     align-content: start;
-                    padding-top: 74px;
+                }
+                @media (min-width: 1024px) {
+                    .indicators {
+                        padding-top: 74px;
+                    }
                 }
                 .bottom-bar {
                     grid-row: 3;
                     grid-column: 1 / -1;
                     display: grid;
-                    grid-template-columns: 62px calc(100vw - 800px) 62px;
                     align-items: center;
                     justify-content: center;
                     grid-gap: 16px;
+                    grid-template-columns: 62px minmax(100px, 500px) 62px;
+                    padding: 0 50px;
+                }
+                @media (min-width: 1024px) {
+                    .bottom-bar {
+                        padding: 0 220px;
+                    }
                 }
                 :host([rtl]) .bottom-bar {
                     transform: scale(-1, 1);
+                }
+                .bottom-bar .back {
+                    justify-self: end;
                 }
                 .bottom-right {
                     grid-row: 3;
                     grid-column: 3;
                     display: flex;
-                    column-gap: 40px;
                     align-items: center;
-                    padding-right: 32px;
                 }
-                .bottom-right ::slotted([slot="background"]) {
-                    margin-right: 102px;
+                @media (max-width: 1023px) {
+                    .bottom-right {
+                        margin-right: 16px;
+                        column-gap: 8px;
+                        rotate: 180deg;
+                        /* 15px = center of button */
+                        transform-origin: calc(100% - 15px) center;
+                        align-self: center;
+                        transition: rotate .2s, opacity .2s;
+                    }
+                    :host([menuOpen]) .bottom-right {
+                        rotate: 90deg;
+                    }
+                    .bottom-right ::slotted(*) {
+                        rotate: -90deg;
+                        opacity: 0;
+                        pointer-events: none;
+                    }
+                    :host([menuOpen]) .bottom-right ::slotted(*) {
+                        opacity: 1;
+                        pointer-events: all;
+                    }
+                }
+                @media (min-width: 1024px) {
+                    .bottom-right {
+                        margin-right: 32px;
+                        column-gap: 16px;
+                    }
+                    .menu-button {
+                        display: none;
+                    }
                 }
                 ::slotted(dialog-overlay) {
                     background-color: #00000080;
@@ -132,23 +179,6 @@ export class _ extends LitElement {
                 }
                 ::slotted(dialog-overlay) {
                     z-index: 4;
-                }
-
-                /* mobile */
-                @media (max-width: 1000px) {
-                    :host([isLegacy]) ::slotted([slot="iframe"]){
-                        height: calc(100% - 50px);
-                    }
-                    .controls {
-                        grid-template-rows: auto 1fr 50px;
-                    }
-                    .bottom-bar {
-                        grid-template-columns: 30px 1fr 30px;
-                        padding: 0 120px;
-                    }
-                    .bottom-right ::slotted([slot="background"]) {
-                        margin-right: -30px;
-                    }
                 }
             `,
         ];
@@ -165,6 +195,9 @@ export class _ extends LitElement {
 
     @property({ type: Boolean, reflect: true })
     inIframe: boolean = false;
+
+    @property({ type: Boolean, reflect: true })
+    menuOpen: boolean = false;
 
     render() {
         return html`
@@ -185,17 +218,28 @@ export class _ extends LitElement {
                         </div>
                     </div>
                     <div class="bottom-bar">
-                        <span class="back"><slot name="back"></slot></span>
-                        <span class="progress"
-                            ><slot name="progress"></slot
-                        ></span>
-                        <span class="forward"
-                            ><slot name="forward"></slot
-                        ></span>
+                        <span class="back">
+                            <slot name="back"></slot>
+                        </span>
+                        <span class="progress">
+                            <slot name="progress"></slot>
+                        </span>
+                        <span class="forward">
+                            <slot name="forward"></slot>
+                        </span>
                     </div>
                     <div class="bottom-right">
+                        <!-- <slot @click=${() => this.menuOpen = false} name="full-screen"></slot>
+                        <slot @click=${() => this.menuOpen = false} name="background"></slot>
+                        <slot @click=${() => this.menuOpen = false} name="play-pause-button"></slot> -->
+                        <slot name="full-screen"></slot>
                         <slot name="background"></slot>
                         <slot name="play-pause-button"></slot>
+                        <fa-button
+                            class="menu-button action middle"
+                            icon="fa-solid fa-ellipsis-vertical"
+                            @click=${() => this.menuOpen = !this.menuOpen}
+                        ></fa-button>
                     </div>
                 </div>
                 <slot name="dialog"></slot>
