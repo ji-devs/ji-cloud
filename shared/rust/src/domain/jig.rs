@@ -196,7 +196,7 @@ pub struct JigAdminUpdateData {
     pub curated: Option<bool>,
 }
 
-/// Transfer Jig from one user to another. 
+/// Transfer Jig from one user to another.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct JigAdminTransferRequest {
@@ -207,11 +207,10 @@ pub struct JigAdminTransferRequest {
     pub to: UserId,
 
     /// JIG Ids to transfer
-    pub jig_ids: Vec<JigId>
+    pub jig_ids: Vec<JigId>,
 }
 
 make_path_parts!(JigTransferAdminPath => "/v1/jig/admin/transfer");
-
 
 /// Admin rating for Jig
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, Eq, PartialEq)]

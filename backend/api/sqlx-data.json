@@ -1030,6 +1030,26 @@
     },
     "query": "\n            update resource_curation_data\n            set curation_status = $2\n            where resource_id = $1 and $2 is distinct from curation_status\n             "
   },
+  "0ccde66cf3e209823531d54fad5732d5ff9d569b89a240e48e99c84e75e4a3a9": {
+    "describe": {
+      "columns": [
+        {
+          "name": "check_from!",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect exists (select 1 from \"user\" where id = $1) as \"check_from!\"        \n        "
+  },
   "0d33ddd6d34bf4755b8ff298de37d678fc3d79222c8d193dc06d1e8fe25b2354": {
     "describe": {
       "columns": [],
@@ -4733,6 +4753,28 @@
     },
     "query": "\nupdate jig_data\nset audio_feedback_positive = $2,\n    audio_feedback_negative = $3,\n    updated_at = now()\nwhere id = $1 and ($2 <> audio_feedback_positive or $3 <> audio_feedback_negative)\n            "
   },
+  "57014eec3c8db564db4e4702dcab29131db2551ea18c92f7e619980552215f49": {
+    "describe": {
+      "columns": [
+        {
+          "name": "live_id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "UuidArray"
+        ]
+      }
+    },
+    "query": "\nupdate jig \nset author_id = $1,\n    creator_id = $1\nwhere (creator_id = $2 or author_id = $2)\nand id = any($3)\nreturning live_id\n        "
+  },
   "5747a28fe18891687ae10c61c0aae94845dd38d73ab10b66cfb2998592f57b67": {
     "describe": {
       "columns": [
@@ -5654,6 +5696,18 @@
       }
     },
     "query": "\n            select subject_id as \"id: SubjectId\", display_name, created_at, updated_at from subject\n            order by index\n        "
+  },
+  "640b89322af8a3bbd2f1a6c68299ec477e9a58e1aa95ffb5e23e314daf05702a": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      }
+    },
+    "query": "\n    update jig_data\n    set last_synced_at = null\n    where id = any($1)\n            "
   },
   "64ba22498633c2981b471b9d584e7b16173003a0a17836c3da2025076ebdfe8c": {
     "describe": {
@@ -10061,6 +10115,26 @@
       }
     },
     "query": "\n     select up.user_id                               as \"id!\",\n            username                                 as \"username!\",\n            given_name                               as \"given_name!\",\n            family_name                              as \"family_name!\",\n            email                                    as \"email!: String\",\n            language_emails                          as \"language_emails!\",\n            organization                             as \"organization?\",\n            location                                 as \"location?\",\n            user_email.created_at                    as \"created_at\"                   \nfrom user_profile \"up\"\n        inner join \"user\" on \"user\".id = up.user_id\n        inner join user_email on user_email.user_id = up.user_id\nwhere (last_synced_at is null or\n       (up.updated_at is not null and last_synced_at < up.updated_at))\nlimit 100 for no key update skip locked;\n     "
+  },
+  "aea605e2985ef424fc7f8eff22f77531ce60e83d531b46a9c4b40cebc2bf4fa8": {
+    "describe": {
+      "columns": [
+        {
+          "name": "check_to!",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect exists (select 1 from \"user\" where id = $1) as \"check_to!\"        \n        "
   },
   "aec729ae876f9816b6a64f6527c6e8497140391a8bebb7a00fc5418cb07682a8": {
     "describe": {
