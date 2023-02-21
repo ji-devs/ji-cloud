@@ -19,11 +19,14 @@ export class _ extends LitElement {
                 }
                 main {
                     max-width: 1600px;
+                    width: 100vw;
                     padding: 48px 40px;
                     display: grid;
                     grid-template-rows: auto 1fr auto;
                     row-gap: 48px;
                     justify-content: center;
+                    box-sizing: border-box;
+                    margin: 0 auto;
                 }
                 h1 {
                     font-size: 28px;
