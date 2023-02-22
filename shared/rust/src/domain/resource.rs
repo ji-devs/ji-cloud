@@ -3,7 +3,6 @@ use chrono::{DateTime, Utc};
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, convert::TryFrom};
-use uuid::Uuid;
 
 pub mod curation;
 
@@ -21,11 +20,10 @@ use super::{
     user::UserId,
 };
 
-/// Wrapper type around [`Uuid`], represents the ID of a Resource.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-pub struct ResourceId(pub Uuid);
+wrap_uuid! {
+    /// Wrapper type around [`Uuid`], represents the ID of a Resource.
+    pub struct ResourceId
+}
 
 make_path_parts!(ResourceCreatePath => "/v1/resource");
 
@@ -529,5 +527,3 @@ make_path_parts!(ResourceLikedPath => "/v1/resource/{}/like" => ResourceId);
 make_path_parts!(ResourceViewPath => "/v1/resource/{}/view" => ResourceId);
 
 make_path_parts!(ResourceAdminDataUpdatePath => "/v1/resource/{}/admin" => ResourceId);
-
-into_uuid![ResourceId];

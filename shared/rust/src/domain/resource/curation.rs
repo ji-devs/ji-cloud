@@ -2,17 +2,15 @@
 use chrono::{DateTime, Utc};
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 use crate::api::endpoints::PathPart;
 
 use super::{report::ResourceReport, ResourceId, UserId};
 
-/// Wrapper type around [`Uuid`](Uuid), represents the ID of a curation comment.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-pub struct CommentId(pub Uuid);
+wrap_uuid! {
+    /// Wrapper type around [`Uuid`](Uuid), represents the ID of a curation comment.
+    pub struct CommentId
+}
 
 make_path_parts!(ResourceCurationPath => "/v1/resource/{}/curation" => ResourceId);
 
@@ -79,7 +77,7 @@ impl Default for ResourceCurationFieldsDone {
     }
 }
 
-/// Status of Curation  
+/// Status of Curation
 #[derive(Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[serde(rename_all = "camelCase")]
@@ -206,5 +204,3 @@ pub struct ResourceCurationCommentResponse {
     /// Name of commenter
     pub author_name: String,
 }
-
-into_uuid![CommentId];

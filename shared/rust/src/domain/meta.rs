@@ -3,65 +3,48 @@
 use chrono::{DateTime, Utc};
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
-/// Wrapper type around [`Uuid`], represents [`ImageStyle::id`].
-#[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-pub struct ImageStyleId(pub Uuid);
+use crate::api::endpoints::PathPart;
 
-/// Wrapper type around [`Uuid`], represents [`AnimationStyle::id`].
-#[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-pub struct AnimationStyleId(pub Uuid);
+wrap_uuid! {
+    /// Wrapper type around [`Uuid`], represents [`ImageStyle::id`].
+    pub struct ImageStyleId
+}
 
-/// Wrapper type around [`Uuid`], represents [`AudioStyle::id`]. Note: not yet implemented
-#[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-pub struct AudioStyleId(pub Uuid);
+wrap_uuid! {
+    /// Wrapper type around [`Uuid`], represents [`AnimationStyle::id`].
+    pub struct AnimationStyleId
+}
 
-/// Wrapper type around [`Uuid`], represents [`AgeRange::id`].
-#[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-pub struct AgeRangeId(pub Uuid);
+wrap_uuid! {
+    /// Wrapper type around [`Uuid`], represents [`AudioStyle::id`]. Note: not yet implemented
+    pub struct AudioStyleId
+}
 
-/// Wrapper type around [`Uuid`], represents [`Affiliation::id`].
-#[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-pub struct AffiliationId(pub Uuid);
+wrap_uuid! {
+    /// Wrapper type around [`Uuid`], represents [`AgeRange::id`].
+    pub struct AgeRangeId
+}
 
-/// Wrapper type around [`Uuid`], represents [`AdditionalResource::id`].
-#[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-pub struct ResourceTypeId(pub Uuid);
+wrap_uuid! {
+    /// Wrapper type around [`Uuid`], represents [`Affiliation::id`].
+    pub struct AffiliationId
+}
 
-/// Wrapper type around [`Uuid`], represents [`Subject::id`].
-#[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-pub struct SubjectId(pub Uuid);
+wrap_uuid! {
+    /// Wrapper type around [`Uuid`], represents [`AdditionalResource::id`].
+    pub struct ResourceTypeId
+}
 
-/// Wrapper type around [`Uuid`], represents [`Report::id`].
-#[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-pub struct ReportId(pub Uuid);
+wrap_uuid! {
+    /// Wrapper type around [`Uuid`], represents [`Subject::id`].
+    pub struct SubjectId
+}
 
-into_uuid!(
-    ImageStyleId,
-    AnimationStyleId,
-    AffiliationId,
-    ResourceTypeId,
-    AgeRangeId,
-    SubjectId,
-    ReportId
-);
+wrap_uuid! {
+    /// Wrapper type around [`Uuid`], represents [`Report::id`].
+    pub struct ReportId
+}
 
 /// Wrapper type around [`i16`](std::i16), represents the index of an image tag.
 ///

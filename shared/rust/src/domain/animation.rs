@@ -8,7 +8,6 @@ use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "backend")]
 use sqlx::postgres::PgRow;
-use uuid::Uuid;
 
 /// Animation Kinds
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
@@ -32,11 +31,10 @@ impl AnimationKind {
     }
 }
 
-/// Wrapper type around [`Uuid`], represents the ID of an animation.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-pub struct AnimationId(pub Uuid);
+wrap_uuid! {
+    /// Wrapper type around [`Uuid`], represents the ID of an animation.
+    pub struct AnimationId
+}
 
 make_path_parts!(AnimationGetPath => "/v1/animation/{}" => AnimationId);
 
@@ -175,5 +173,3 @@ pub struct AnimationUploadResponse {
 }
 
 make_path_parts!(AnimationDeletePath => "/v1/animation/{}" => AnimationId);
-
-into_uuid![AnimationId];

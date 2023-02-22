@@ -1,17 +1,5 @@
 //! Types that travel over the wire.
 
-macro_rules! into_uuid {
-    ( $( $t:ty ),+ $(,)? ) => {
-        $(
-            impl From<$t> for uuid::Uuid {
-                fn from(t: $t) -> Self {
-                    t.0
-                }
-            }
-        )+
-    };
-}
-
 macro_rules! into_i16_index {
     ( $( $t:ty ),+ $(,)? ) => {
         $(
@@ -29,6 +17,37 @@ macro_rules! into_i16_index {
             }
         )+
     };
+}
+
+/// Helper macro to generate a Newtype that wraps a [uuid::Uuid], derives relevant macros
+/// and sets it up to be stored in the database.
+///
+/// Example:
+///
+/// ```
+/// wrap_uuid! {
+///   /// Represents a My ID
+///   #[serde(rename_all = "camelCase")]
+///   pub struct MyId
+/// }
+/// ```
+macro_rules! wrap_uuid {
+    (
+        $(#[$outer:meta])*
+        $vis:vis struct $t:ident
+    ) => {
+        #[derive(Copy, Clone, Debug, Eq, PartialEq, Serialize, Deserialize, PathPart, Hash)]
+        $(#[$outer])*
+        #[cfg_attr(feature = "backend", derive(sqlx::Type))]
+        #[cfg_attr(feature = "backend", sqlx(transparent))]
+        $vis struct $t(pub uuid::Uuid);
+
+        impl From<$t> for uuid::Uuid {
+            fn from(t: $t) -> Self {
+                t.0
+            }
+        }
+    }
 }
 
 pub mod additional_resource;

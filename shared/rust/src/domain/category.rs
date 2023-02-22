@@ -7,15 +7,12 @@ use uuid::Uuid;
 
 use crate::{api::endpoints::PathPart, domain::user::UserScope};
 
-/// Wrapper type around [`Uuid`], represents the ID of a category.
-///
-/// [`Uuid`]: ../../uuid/struct.Uuid.html
-#[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-pub struct CategoryId(pub Uuid);
-
-into_uuid!(CategoryId);
+wrap_uuid! {
+    /// Wrapper type around [`Uuid`], represents the ID of a category.
+    ///
+    /// [`Uuid`]: ../../uuid/struct.Uuid.html
+    pub struct CategoryId
+}
 
 #[derive(Serialize, Deserialize, Debug)]
 /// The response returned when a request for categories is successful.

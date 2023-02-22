@@ -6,21 +6,19 @@ use chrono::{DateTime, Utc};
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
-use uuid::Uuid;
 
 /// Module bodies
 pub mod body;
 
 pub use body::Body as ModuleBody;
 
-/// Wrapper type around [`Uuid`](Uuid), represents the **unique ID** of a module.
-///
-/// This uniquely identifies a module. There is no other module that shares this ID.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-#[serde(rename_all = "camelCase")]
-pub struct ModuleId(pub Uuid);
+wrap_uuid! {
+    /// Wrapper type around [`Uuid`](Uuid), represents the **unique ID** of a module.
+    ///
+    /// This uniquely identifies a module. There is no other module that shares this ID.
+    #[serde(rename_all = "camelCase")]
+    pub struct ModuleId
+}
 
 /// Represents the various kinds of data a module can represent.
 #[repr(i16)]
@@ -267,5 +265,3 @@ pub struct ModuleDeleteRequest {
     #[serde(flatten)]
     pub parent_id: AssetId,
 }
-
-into_uuid![ModuleId];

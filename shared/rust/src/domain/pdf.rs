@@ -2,7 +2,6 @@
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 use crate::api::endpoints::PathPart;
 
@@ -62,11 +61,10 @@ pub mod user {
     make_path_parts!(UserPdfDeletePath => "/v1/user/me/pdf/{}" => PdfId);
 }
 
-/// Wrapper type around [`Uuid`](Uuid), represents the ID of an Pdf file.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-pub struct PdfId(pub Uuid);
+wrap_uuid! {
+    /// Wrapper type around [`Uuid`](Uuid), represents the ID of an Pdf file.
+    pub struct PdfId
+}
 
 /// Response for getting a single Pdf file.
 #[derive(Serialize, Deserialize, Debug)]
@@ -96,5 +94,3 @@ pub struct PdfMetadata {
     /// When the Pdf was last updated.
     pub updated_at: Option<DateTime<Utc>>,
 }
-
-into_uuid![PdfId];
