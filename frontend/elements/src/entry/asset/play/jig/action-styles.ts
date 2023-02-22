@@ -3,13 +3,13 @@ import { css } from "lit-element";
 export const actionStyles = css`
     .action {
         cursor: pointer;
-        display: inline-flex;
+        display: inline-grid;
         place-content: center;
         box-sizing: border-box;
         border: solid #fff 2px;
         border-radius: 50%;
         background-color: var(--dark-blue-8);
-        box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+        box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.16);
         color: #fff;
         line-height: 1em;
         height: 30px;

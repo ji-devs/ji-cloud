@@ -6,25 +6,35 @@ export class PopupBase extends LitElement {
         return [
             css`
                 :host {
-                    display: block;
-                    width: 800px;
-                    border-radius: 50px;
+                    border-radius: 14px;
                     overflow: hidden;
                     box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+                    display: grid;
+                    max-width: 70vw;
+                    max-height: 92vh;
+                    width: 300px;
+                    grid-template-rows: 2fr 1fr;
+                }
+                @media (min-width: 1024px) {
+                    :host {
+                        width: 800px;
+                        grid-template-rows: 1fr 164px;
+                    }
                 }
                 .top-section {
-                    height: 560px;
-                    max-height: 70vh;
-                    background-color: #192150d9;
+                    background-color: #192150f5;
                     display: grid;
                     align-items: center;
                     align-content: center;
                     justify-content: center;
-                    row-gap: 36px;
                     text-align: center;
                 }
+                @media (min-width: 1024px) {
+                    .top-section {
+                        row-gap: 36px;
+                    }
+                }
                 .actions {
-                    height: 164px;
                     background-color: #ffffff;
                     display: flex;
                     justify-content: center;

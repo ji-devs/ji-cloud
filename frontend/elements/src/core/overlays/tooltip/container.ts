@@ -117,7 +117,9 @@ export class _ extends LitElement {
                 /* main */
                 .main {
                     border-radius: 25px;
-                    padding: 12px 24px;
+                    padding: 8px 16px;
+                    max-width: 96vw;
+                    box-sizing: border-box;
                 }
 
                 /* triangle */

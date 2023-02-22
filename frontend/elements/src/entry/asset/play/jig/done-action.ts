@@ -25,7 +25,8 @@ export class _ extends LitElement {
                     background-color: transparent;
                     border: 0;
                     display: grid;
-                    row-gap: 12px;
+                    justify-items: center;
+                    row-gap: 6px;
                 }
                 fa-icon {
                     color: #fff;

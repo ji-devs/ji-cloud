@@ -11,20 +11,35 @@ export class _ extends PopupBase {
             ...super.styles,
             css`
                 img-ui {
-                    height: 350px;
+                    height: 60px;
+                }
+                @media (min-width: 1024px) {
+                    img-ui {
+                        height: 350px;
+                    }
                 }
                 h3 {
                     margin: 0;
-                    font-size: 22px;
+                    font-size: 16px;
                     font-weight: bold;
                     color: var(--light-orange-6);
                 }
+                @media (min-width: 1024px) {
+                    h3 {
+                        font-size: 22px;
+                    }
+                }
                 h2 {
                     margin: 0;
-                    font-size: 64px;
+                    font-size: 30px;
                     font-weight: 600;
                     font-style: italic;
                     color: #ffffff;
+                }
+                @media (min-width: 1024px) {
+                    h2 {
+                        font-size: 64px;
+                    }
                 }
             `,
         ];
