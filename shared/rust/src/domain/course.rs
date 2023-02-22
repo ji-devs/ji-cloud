@@ -4,7 +4,6 @@ use chrono::{DateTime, Utc};
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use uuid::Uuid;
 
 use super::{
     super::api::endpoints::PathPart,
@@ -17,11 +16,10 @@ use super::{
     user::UserId,
 };
 
-/// Wrapper type around [`Uuid`], represents the ID of a Course.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-pub struct CourseId(pub Uuid);
+wrap_uuid! {
+    /// Wrapper type around [`Uuid`], represents the ID of a Course.
+    pub struct CourseId
+}
 
 make_path_parts!(CourseCreatePath => "/v1/course");
 
@@ -402,5 +400,3 @@ make_path_parts!(CourseUnlikePath => "/v1/course/{}/unlike" => CourseId);
 make_path_parts!(CourseLikedPath => "/v1/course/{}/like" => CourseId);
 
 make_path_parts!(CourseViewPath => "/v1/course/{}/view" => CourseId);
-
-into_uuid![CourseId];

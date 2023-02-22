@@ -9,15 +9,13 @@ use crate::{
 };
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 use super::ProDevId;
 
-/// Wrapper type around [`Uuid`](Uuid), represents the ID of a Pro Dev Unit.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-pub struct ProDevUnitId(pub Uuid);
+wrap_uuid! {
+    /// Wrapper type around [`Uuid`](Uuid), represents the ID of a Pro Dev Unit.
+    pub struct ProDevUnitId
+}
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -117,5 +115,3 @@ pub struct Video {
     /// end timestamp
     pub end_at: Option<u32>,
 }
-
-into_uuid![ProDevUnitId];

@@ -3,7 +3,6 @@ use chrono::{DateTime, Utc};
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use uuid::Uuid;
 
 use self::unit::ProDevUnitId;
 
@@ -19,11 +18,10 @@ use super::{
 
 pub mod unit;
 
-/// Wrapper type around [`Uuid`], represents the ID of a ProDev.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-pub struct ProDevId(pub Uuid);
+wrap_uuid! {
+    /// Wrapper type around [`Uuid`], represents the ID of a ProDev.
+    pub struct ProDevId
+}
 
 make_path_parts!(ProDevCreatePath => "/v1/pro-dev");
 
@@ -341,5 +339,3 @@ pub struct ProDevSearchResponse {
 }
 
 make_path_parts!(ProDevDeletePath => "/v1/pro-dev/{}" => ProDevId);
-
-into_uuid![ProDevId];

@@ -17,7 +17,6 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "backend")]
 use sqlx::{postgres::PgRow, types::Json};
 use std::collections::HashMap;
-use uuid::Uuid;
 
 make_path_parts!(ImageGetPath => "/v1/image/{}" => ImageId);
 
@@ -60,13 +59,12 @@ impl ImageSize {
     }
 }
 
-/// Wrapper type around [`Uuid`], represents the ID of a image.
-///
-/// [`Uuid`]: ../../uuid/struct.Uuid.html
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart, Hash)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-pub struct ImageId(pub Uuid);
+wrap_uuid! {
+    /// Wrapper type around [`Uuid`], represents the ID of a image.
+    ///
+    /// [`Uuid`]: ../../uuid/struct.Uuid.html
+    pub struct ImageId
+}
 
 make_path_parts!(ImageCreatePath => "/v1/image");
 
@@ -234,7 +232,7 @@ pub struct ImageSearchQuery {
     /// correct that we get the desired ranking. This can also be interpreted as bit vector with comparison.
     ///
     /// *NOTE*: this means that with `i64` range supported by Algolia, we can only assign priority for
-    /// the first 62 tags. The remaining are all given a score of 1.  
+    /// the first 62 tags. The remaining are all given a score of 1.
     ///
     /// ## Example
     /// For an example request `[clothing, food, red, sports]`, we assign the scores:
@@ -480,5 +478,3 @@ struct DbImage {
 make_path_parts!(ImageDeletePath => "/v1/image/{}" => ImageId);
 
 make_path_parts!(ImagePutPath => "/v1/image/{}/use" => ImageId);
-
-into_uuid![ImageId];

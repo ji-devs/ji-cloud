@@ -8,11 +8,10 @@ use crate::api::endpoints::PathPart;
 
 use super::{report::JigReport, JigId};
 
-/// Wrapper type around [`Uuid`](Uuid), represents the ID of a curation comment.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-pub struct CommentId(pub Uuid);
+wrap_uuid! {
+    /// Wrapper type around [`Uuid`](Uuid), represents the ID of a curation comment.
+    pub struct CommentId
+}
 
 make_path_parts!(JigCurationPath => "/v1/jig/{}/curation" => JigId);
 
@@ -79,7 +78,7 @@ impl Default for JigCurationFieldsDone {
     }
 }
 
-/// Status of Curation  
+/// Status of Curation
 #[derive(Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[serde(rename_all = "camelCase")]
@@ -210,5 +209,3 @@ pub struct JigCurationCommentResponse {
     /// Name of commenter
     pub author_name: String,
 }
-
-into_uuid![CommentId];

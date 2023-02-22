@@ -9,11 +9,10 @@ use crate::api::endpoints::PathPart;
 
 use super::JigId;
 
-/// Wrapper type around [`Uuid`](Uuid), represents the ID of a curation comment.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-pub struct ReportId(pub Uuid);
+wrap_uuid! {
+    /// Wrapper type around [`Uuid`](Uuid), represents the ID of a curation comment.
+    pub struct ReportId
+}
 
 make_path_parts!(GetJigReportPath => "/v1/jig/{}/report/{}" => JigId, ReportId);
 
@@ -120,5 +119,3 @@ impl JigReportType {
         serde_json::from_str(s).unwrap()
     }
 }
-
-into_uuid![ReportId];

@@ -6,13 +6,11 @@ use crate::{
 };
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
-/// Wrapper type around [`Uuid`](Uuid), represents the ID of an additional resource.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-pub struct AdditionalResourceId(pub Uuid);
+wrap_uuid! {
+    /// Wrapper type around [`Uuid`](Uuid), represents the ID of an additional resource.
+    pub struct AdditionalResourceId
+}
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -118,5 +116,3 @@ pub enum ResourceContent {
     /// Additional resource kind: pdf
     PdfId(PdfId),
 }
-
-into_uuid![AdditionalResourceId];

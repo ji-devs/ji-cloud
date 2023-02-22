@@ -14,7 +14,6 @@ use std::{
     collections::{HashMap, HashSet},
     convert::TryFrom,
 };
-use uuid::Uuid;
 
 use super::{
     additional_resource::AdditionalResource,
@@ -26,11 +25,10 @@ use super::{
 };
 use crate::{api::endpoints::PathPart, domain::module::body::ThemeId};
 
-/// Wrapper type around [`Uuid`], represents the ID of a JIG.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart, Hash)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-pub struct JigId(pub Uuid);
+wrap_uuid! {
+    /// Wrapper type around [`Uuid`], represents the ID of a JIG.
+    pub struct JigId
+}
 
 make_path_parts!(JigCreatePath => "/v1/jig");
 
@@ -792,5 +790,3 @@ pub struct JigLikedResponse {
 make_path_parts!(JigPlayPath => "/v1/jig/{}/play" => JigId);
 
 make_path_parts!(JigAdminDataUpdatePath => "/v1/jig/{}/admin" => JigId);
-
-into_uuid![JigId];

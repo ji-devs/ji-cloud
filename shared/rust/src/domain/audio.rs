@@ -6,7 +6,6 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "backend")]
 use sqlx::postgres::PgRow;
-use uuid::Uuid;
 
 /// Types for user audio library.
 pub mod user {
@@ -64,11 +63,10 @@ pub mod user {
     make_path_parts!(UserAudioDeletePath => "/v1/user/me/audio/{}" => AudioId);
 }
 
-/// Wrapper type around [`Uuid`](Uuid), represents the ID of an audio file.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-pub struct AudioId(pub Uuid);
+wrap_uuid! {
+    /// Wrapper type around [`Uuid`](Uuid), represents the ID of an audio file.
+    pub struct AudioId
+}
 
 /// Represents different kinds of audio.
 #[derive(Serialize, Deserialize, Copy, Clone, Debug)]
@@ -166,5 +164,3 @@ struct DbAudio {
     pub created_at: DateTime<Utc>,
     pub updated_at: Option<DateTime<Utc>>,
 }
-
-into_uuid![AudioId];

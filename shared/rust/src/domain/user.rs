@@ -4,7 +4,6 @@ use chrono::{DateTime, NaiveDate, Utc};
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize, Serializer};
 use std::convert::TryFrom;
-use uuid::Uuid;
 
 use crate::{
     api::endpoints::PathPart,
@@ -17,11 +16,10 @@ use crate::{
 
 pub mod public_user;
 
-/// Wrapper type around [`Uuid`], represents the ID of a User.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-pub struct UserId(pub Uuid);
+wrap_uuid! {
+    /// Wrapper type around [`Uuid`], represents the ID of a User.
+    pub struct UserId
+}
 
 impl std::fmt::Display for UserId {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
@@ -781,5 +779,3 @@ pub struct UserSearchResponse {
 }
 
 make_path_parts!(UserSearchPath => "/v1/user");
-
-into_uuid![UserId];

@@ -3,18 +3,16 @@
 use chrono::{DateTime, Utc};
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 use crate::api::endpoints::PathPart;
 
 use super::{asset::UserOrMe, image::ImageId, user::UserId};
 
-/// Wrapper type around [`Uuid`], represents the ID of a Circle.
-#[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, PathPart)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-#[serde(rename_all = "camelCase")]
-pub struct CircleId(pub Uuid);
+wrap_uuid! {
+    /// Wrapper type around [`Uuid`], represents the ID of a Circle.
+    #[serde(rename_all = "camelCase")]
+    pub struct CircleId
+}
 
 /// The response returned when a request for `GET`ing a Circle is successful.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -194,5 +192,3 @@ pub struct BrowseMembersResponse {
     /// user id of member
     pub count: u32,
 }
-
-into_uuid![CircleId];
