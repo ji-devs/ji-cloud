@@ -56,7 +56,6 @@ export class _ extends LitElement {
                     border: 4px red solid;
                 }
                 ::slotted([slot="close"]) {
-                    margin: 5px 2px;
                     border-radius: 50%;
                     color: #ffffff;
                     height: 30px;
@@ -73,6 +72,12 @@ export class _ extends LitElement {
                     display: inline-grid;
                     place-content: center;
                     background-color: var(--dark-blue-8);
+                    margin: 5px 2px;
+                }
+                @media (min-width: 1024px) {
+                    ::slotted([slot="close"]) {
+                        margin: 16px;
+                    }
                 }
                 :host .preview {
                     position: absolute;
