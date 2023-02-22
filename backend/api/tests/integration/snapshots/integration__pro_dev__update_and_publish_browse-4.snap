@@ -32,9 +32,24 @@ expression: body
         "categories": [],
         "additionalResources": [],
         "units": [
-          "e0984370-906c-11ed-b4f6-3f864931e86f",
-          "e098451e-906c-11ed-b4f6-d3927726efad",
-          "09225240-906d-11ed-b4f6-ffc72cfa1509"
+          {
+            "id": "[id]",
+            "displayName": "prod_dev1 unit 1",
+            "description": "Image",
+            "imageId": "3095d05e-f2c7-11ea-89c3-3b621dd74a1f"
+          },
+          {
+            "id": "[id]",
+            "displayName": "prod_dev1 unit 2",
+            "description": "Audio",
+            "audioId": "0d2c9c30-3850-11ed-ac6a-9b037f9e2276"
+          },
+          {
+            "id": "[id]",
+            "displayName": "prod_dev1 unit 3",
+            "description": "URL",
+            "link": "https://jigzi.org/"
+          }
         ]
       }
     },
@@ -66,7 +81,12 @@ expression: body
         "categories": [],
         "additionalResources": [],
         "units": [
-          "092253c6-906d-11ed-b4f6-87e87e8212af"
+          {
+            "id": "[id]",
+            "displayName": "prod_dev2 unit 2",
+            "description": "Image",
+            "imageId": "92d8bb6e-0aa4-11ec-9f5e-83e2c58fc397"
+          }
         ]
       }
     }

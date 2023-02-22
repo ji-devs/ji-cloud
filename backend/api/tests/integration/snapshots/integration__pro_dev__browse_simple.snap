@@ -58,7 +58,12 @@ expression: body
         "categories": [],
         "additionalResources": [],
         "units": [
-          "09225312-906d-11ed-b4f6-afb0e90115b3"
+          {
+            "id": "09225312-906d-11ed-b4f6-afb0e90115b3",
+            "displayName": "prod_dev2 unit 1",
+            "description": "PDF",
+            "pdfId": "128e0870-6813-11ec-a1fd-73f800abf897"
+          }
         ]
       }
     }

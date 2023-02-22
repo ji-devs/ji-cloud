@@ -4,7 +4,7 @@ use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use self::unit::ProDevUnitId;
+use self::unit::{ProDevUnit, ProDevUnitId};
 
 use super::{
     super::api::endpoints::PathPart,
@@ -98,7 +98,7 @@ pub struct ProDevData {
     pub additional_resources: Vec<AdditionalResource>,
 
     /// List of ProDev Units within the ProDev
-    pub units: Vec<ProDevUnitId>,
+    pub units: Vec<ProDevUnit>,
 }
 
 /// The response returned when a request for `GET`ing a ProDev is successful.
@@ -185,7 +185,7 @@ pub struct ProDevUpdateDraftDataRequest {
     #[serde(default)]
     pub categories: Option<Vec<CategoryId>>,
 
-    /// The ProDev's JIGs.
+    /// The ProDev's units.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub units: Option<Vec<ProDevUnitId>>,
