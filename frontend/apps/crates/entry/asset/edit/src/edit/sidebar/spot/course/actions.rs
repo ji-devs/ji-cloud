@@ -1,5 +1,5 @@
 use super::super::super::spot::state::SpotState;
-use crate::edit::sidebar::{CourseSpot, SidebarSpot, SidebarSpotItem};
+use crate::edit::sidebar::{CourseSpot, ProDevSpot, SidebarSpot, SidebarSpotItem};
 use itertools::Itertools;
 use shared::{
     api::endpoints,
@@ -29,9 +29,11 @@ pub async fn save_course(state: &Rc<SpotState>) {
                         CourseSpot::Item(jig) => Some(jig.id),
                     },
                 },
+                SidebarSpotItem::ProDev(_) => unreachable!(),
             }
         })
         .collect_vec();
+
     let req = CourseUpdateDraftDataRequest {
         items: Some(items),
         ..Default::default()

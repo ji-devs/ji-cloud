@@ -76,6 +76,12 @@ impl SpotState {
                         Some(_) => "thumbnail",
                     }
                 },
+                SidebarSpotItem::ProDev(pro_dev_spot) => {
+                    match pro_dev_spot {
+                        None => "empty",
+                        Some(_) => "thumbnail",
+                    }
+                },
             }
         }))
     }

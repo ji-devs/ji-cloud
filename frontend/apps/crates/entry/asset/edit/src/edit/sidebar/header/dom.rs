@@ -42,6 +42,9 @@ impl HeaderDom {
                     SidebarSetting::Course(settings) => {
                         dom.child(settings.render())
                     },
+                    SidebarSetting::ProDev(settings) => {
+                        dom.child(settings.render())
+                    },
                 }
             })
             .children(&mut [
@@ -112,6 +115,15 @@ impl HeaderDom {
                                 let settings = AssetPlayerOptions::Course(settings);
                                 asset_edit_state.play_jig.set(Some(settings));
                             }
+                            SidebarSetting::ProDev(_pro_dev) => todo!()
+                            // {
+                            //     let settings = CoursePlayerOptions {
+                            //         draft_or_live: DraftOrLive::Draft,
+                            //         is_student: false
+                            //     };
+                            //     let settings = AssetPlayerOptions::Course(settings);
+                            //     asset_edit_state.play_jig.set(Some(settings));
+                            // }
                         }
                     }))
                 }),

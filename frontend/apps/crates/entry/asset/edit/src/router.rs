@@ -38,7 +38,8 @@ impl Router {
                     }
                 },
                 AssetRoute::Studio => Some(render_studio()),
-                AssetRoute::Play(_) => unimplemented!(), // Handled in player
+                AssetRoute::Play(_) => unimplemented!(),
+                AssetRoute::ProDevGallery => todo!(), // Handled in player
             },
             _ => None,
         })

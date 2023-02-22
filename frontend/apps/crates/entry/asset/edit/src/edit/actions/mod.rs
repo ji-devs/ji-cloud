@@ -13,6 +13,7 @@ use wasm_bindgen_futures::spawn_local;
 
 mod course_actions;
 mod jig_actions;
+mod pro_dev_actions;
 mod resource_actions;
 
 impl AssetEditState {

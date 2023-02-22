@@ -1,10 +1,12 @@
 use super::{
     course::settings::CourseSettings, dragging::state::State as DragState,
-    jig::settings::JigSettings,
+    jig::settings::JigSettings, pro_dev::settings::ProDevSettings,
 };
 use dominator_helpers::{futures::AsyncLoader, signals::OptionSignal};
 use futures_signals::signal::{Mutable, Signal, SignalExt};
-use shared::domain::{asset::AssetId, jig::JigResponse, module::LiteModule};
+use shared::domain::{
+    asset::AssetId, jig::JigResponse, module::LiteModule, pro_dev::unit::ProDevUnit,
+};
 use std::rc::Rc;
 use utils::{editable_asset::EditableAsset, math::PointI32};
 
@@ -39,6 +41,7 @@ impl Sidebar {
             EditableAsset::Jig(jig) => SidebarSetting::Jig(JigSettings::new(jig)),
             EditableAsset::Course(course) => SidebarSetting::Course(CourseSettings::new(course)),
             EditableAsset::Resource(_) => unimplemented!(),
+            EditableAsset::ProDev(pro_dev) => SidebarSetting::ProDev(ProDevSettings::new(pro_dev)),
         };
 
         Rc::new(Self {
@@ -107,7 +110,7 @@ impl SidebarSpot {
             AssetId::JigId(_) => SidebarSpotItem::Jig(None),
             AssetId::CourseId(_) => SidebarSpotItem::Course(None),
             AssetId::ResourceId(_) => unimplemented!(),
-            AssetId::ProDevId(_) => todo!(),
+            AssetId::ProDevId(_) => SidebarSpotItem::ProDev(None),
         };
         Rc::new(Self {
             item,
@@ -138,12 +141,27 @@ impl SidebarSpot {
             item: SidebarSpotItem::Course(Some(Rc::new(CourseSpot::Item(jig)))),
         })
     }
+
+    pub fn new_pro_dev_cover(cover: LiteModule) -> Rc<Self> {
+        Rc::new(Self {
+            is_incomplete: Mutable::new(false),
+            item: SidebarSpotItem::ProDev(Some(Rc::new(ProDevSpot::Cover(cover)))),
+        })
+    }
+
+    pub fn new_pro_dev_unit(unit: ProDevUnit) -> Rc<Self> {
+        Rc::new(Self {
+            is_incomplete: Mutable::new(false),
+            item: SidebarSpotItem::ProDev(Some(Rc::new(ProDevSpot::Item(unit)))),
+        })
+    }
 }
 
 #[derive(Clone, Debug)]
 pub enum SidebarSpotItem {
     Jig(Option<Rc<LiteModule>>),
     Course(Option<Rc<CourseSpot>>),
+    ProDev(Option<Rc<ProDevSpot>>),
 }
 
 impl SidebarSpotItem {
@@ -151,12 +169,14 @@ impl SidebarSpotItem {
         match self {
             Self::Jig(module) => module.is_some(),
             Self::Course(course_spot) => course_spot.is_some(),
+            Self::ProDev(pro_dev_spot) => pro_dev_spot.is_some(),
         }
     }
     pub fn is_none(&self) -> bool {
         match self {
             Self::Jig(module) => module.is_none(),
             Self::Course(course_spot) => course_spot.is_none(),
+            Self::ProDev(pro_dev_spot) => pro_dev_spot.is_none(),
         }
     }
     pub fn unwrap_jig(&self) -> &Option<Rc<LiteModule>> {
@@ -171,12 +191,24 @@ impl SidebarSpotItem {
             _ => panic!(),
         }
     }
+    pub fn unwrap_pro_dev(&self) -> &Option<Rc<ProDevSpot>> {
+        match self {
+            Self::ProDev(pro_dev_spot) => pro_dev_spot,
+            _ => panic!(),
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
 pub enum CourseSpot {
     Cover(LiteModule),
     Item(JigResponse),
+}
+
+#[derive(Clone, Debug)]
+pub enum ProDevSpot {
+    Cover(LiteModule),
+    Item(ProDevUnit),
 }
 
 // #[derive(Clone, Debug)]
@@ -204,4 +236,5 @@ pub enum CourseSpot {
 pub(super) enum SidebarSetting {
     Jig(Rc<JigSettings>),
     Course(Rc<CourseSettings>),
+    ProDev(Rc<ProDevSettings>),
 }

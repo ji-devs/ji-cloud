@@ -87,6 +87,7 @@ impl AssetEditState {
                         },
                         AssetEditRoute::ProDev(_pro_dev_id, pro_dev_edit_route) => {
                             match pro_dev_edit_route {
+                                ProDevEditRoute::Landing => todo!(),
                                 ProDevEditRoute::Unit(unit_id) => {
                                     Some(UnitEditor::new(unit_id, &state).render())
                                 },
