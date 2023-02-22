@@ -1866,147 +1866,6 @@
     },
     "query": "select index as \"index: i16\" from image_tag where index = $1 for update"
   },
-  "195ea8ae04e08b6d2160963479defab93696d8a86177bc6789a0daf621d450c6": {
-    "describe": {
-      "columns": [
-        {
-          "name": "pro_dev_id: ProDevId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "display_name",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "creator_id?: UserId",
-          "ordinal": 2,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "author_id?: UserId",
-          "ordinal": 3,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "author_name",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "published_at",
-          "ordinal": 5,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at",
-          "ordinal": 6,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "privacy_level!: PrivacyLevel",
-          "ordinal": 7,
-          "type_info": "Int2"
-        },
-        {
-          "name": "language",
-          "ordinal": 8,
-          "type_info": "Text"
-        },
-        {
-          "name": "description",
-          "ordinal": 9,
-          "type_info": "Text"
-        },
-        {
-          "name": "translated_description!: Json<HashMap<String, String>>",
-          "ordinal": 10,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "likes",
-          "ordinal": 11,
-          "type_info": "Int8"
-        },
-        {
-          "name": "plays",
-          "ordinal": 12,
-          "type_info": "Int8"
-        },
-        {
-          "name": "live_up_to_date",
-          "ordinal": 13,
-          "type_info": "Bool"
-        },
-        {
-          "name": "other_keywords",
-          "ordinal": 14,
-          "type_info": "Text"
-        },
-        {
-          "name": "translated_keywords",
-          "ordinal": 15,
-          "type_info": "Text"
-        },
-        {
-          "name": "duration",
-          "ordinal": 16,
-          "type_info": "Int8"
-        },
-        {
-          "name": "cover?: (ModuleId, ModuleKind, bool)",
-          "ordinal": 17,
-          "type_info": "Record"
-        },
-        {
-          "name": "categories!: Vec<(CategoryId,)>",
-          "ordinal": 18,
-          "type_info": "RecordArray"
-        },
-        {
-          "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
-          "ordinal": 19,
-          "type_info": "RecordArray"
-        },
-        {
-          "name": "units!: Vec<(ProDevUnitId,)>",
-          "ordinal": 20,
-          "type_info": "RecordArray"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        true,
-        true,
-        null,
-        true,
-        true,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        null,
-        null,
-        null,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int4"
-        ]
-      }
-    },
-    "query": "\nwith cte as (\n    select id      as \"pro_dev_id\",\n           creator_id,\n           author_id,\n           likes,\n           plays,\n           live_up_to_date,\n           case\n               when $2 = 0 then pro_dev.draft_id\n               when $2 = 1 then pro_dev.live_id\n               end as \"draft_or_live_id\",\n           published_at\n    from pro_dev\n    where id = $1\n)\nselect cte.pro_dev_id                                          as \"pro_dev_id: ProDevId\",\n       display_name,\n       creator_id                                             as \"creator_id?: UserId\",\n       author_id                                              as \"author_id?: UserId\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id)            as \"author_name\",\n       published_at,\n       updated_at,\n       privacy_level                                       as \"privacy_level!: PrivacyLevel\",\n       language,\n       description,\n       translated_description                              as \"translated_description!: Json<HashMap<String, String>>\",\n       likes,\n       plays,\n       live_up_to_date,\n       other_keywords,\n       translated_keywords,\n       duration,\n       (\n            select row(pro_dev_data_module.id, kind, is_complete)\n            from pro_dev_data_module\n            where pro_dev_data_id = cte.draft_or_live_id and \"index\" = 0\n            order by \"index\"\n        )                                                   as \"cover?: (ModuleId, ModuleKind, bool)\",\n       array(select row (category_id)\n             from pro_dev_data_category\n             where pro_dev_data_id = cte.draft_or_live_id)     as \"categories!: Vec<(CategoryId,)>\",\n       array(\n             select row (pddr.id, pddr.display_name, resource_type_id, resource_content)\n             from pro_dev_data_resource \"pddr\"\n             where pddr.pro_dev_data_id = cte.draft_or_live_id\n       )                                                    as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n       array(\n            select row(pddu.unit_id)\n            from pro_dev_data_unit \"pddu\"\n            where pddu.pro_dev_data_id = pro_dev_data.id\n            order by \"index\"\n    )                                                     as \"units!: Vec<(ProDevUnitId,)>\"\nfrom pro_dev_data\n         inner join cte on cte.draft_or_live_id = pro_dev_data.id\n"
-  },
   "1967c95aeff5916cbe0737394d29ceecb925877408c76f7e6518075e6d62a90e": {
     "describe": {
       "columns": [],
@@ -2123,6 +1982,157 @@
       }
     },
     "query": "\nupdate course_data_resource\nset resource_type_id = coalesce($2, resource_type_id)\nwhere id = $1 and $2 is distinct from resource_type_id\n            "
+  },
+  "1ba1e61c357151297bb04d6175eff062349eba652e7ecf8a299e4fd5426fef53": {
+    "describe": {
+      "columns": [
+        {
+          "name": "pro_dev_id: ProDevId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "privacy_level: PrivacyLevel",
+          "ordinal": 1,
+          "type_info": "Int2"
+        },
+        {
+          "name": "creator_id?: UserId",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_id?: UserId",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_name",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "published_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "likes",
+          "ordinal": 6,
+          "type_info": "Int8"
+        },
+        {
+          "name": "plays",
+          "ordinal": 7,
+          "type_info": "Int8"
+        },
+        {
+          "name": "duration",
+          "ordinal": 8,
+          "type_info": "Int8"
+        },
+        {
+          "name": "live_up_to_date",
+          "ordinal": 9,
+          "type_info": "Bool"
+        },
+        {
+          "name": "display_name!",
+          "ordinal": 10,
+          "type_info": "Text"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 11,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "language!",
+          "ordinal": 12,
+          "type_info": "Text"
+        },
+        {
+          "name": "description!",
+          "ordinal": 13,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_description!: Json<HashMap<String,String>>",
+          "ordinal": 14,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "draft_or_live!: DraftOrLive",
+          "ordinal": 15,
+          "type_info": "Int2"
+        },
+        {
+          "name": "other_keywords!",
+          "ordinal": 16,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_keywords!",
+          "ordinal": 17,
+          "type_info": "Text"
+        },
+        {
+          "name": "cover?: (ModuleId, ModuleKind, bool)",
+          "ordinal": 18,
+          "type_info": "Record"
+        },
+        {
+          "name": "categories!: Vec<(CategoryId,)>",
+          "ordinal": 19,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
+          "ordinal": 20,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "units!: Vec<(ProDevUnitId, String, String, Value)>",
+          "ordinal": 21,
+          "type_info": "RecordArray"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        true,
+        null,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int2Array",
+          "UuidArray",
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\nwith cte as (\n    select (array_agg(pdd.id))[1]\n    from pro_dev_data \"pdd\"\n          left join pro_dev on (draft_id = pdd.id or (live_id = pdd.id and pdd.last_synced_at is not null and published_at is not null))\n          left join pro_dev_data_resource \"resource\" on pdd.id = resource.pro_dev_data_id\n    where (author_id = $1 or $1 is null)\n        and (pdd.draft_or_live = $2 or $2 is null)\n        and (pdd.privacy_level = any($3) or $3 = array[]::smallint[])\n        and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n    group by coalesce(updated_at, created_at)\n    order by coalesce(updated_at, created_at) desc\n),\ncte1 as (\n    select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n   , ord) order by ord\n)\nselect pro_dev.id                                                                as \"pro_dev_id: ProDevId\",\n    privacy_level                                                               as \"privacy_level: PrivacyLevel\",\n    creator_id                                                                  as \"creator_id?: UserId\",\n    author_id                                                                   as \"author_id?: UserId\",\n    (select given_name || ' '::text || family_name\n     from user_profile\n     where user_profile.user_id = author_id)                                     as \"author_name\",\n    published_at,\n    likes,\n    plays,\n    duration,\n    live_up_to_date,\n    display_name                                                                  as \"display_name!\",\n    updated_at,\n    language                                                                      as \"language!\",\n    description                                                                   as \"description!\",\n    translated_description                                                        as \"translated_description!: Json<HashMap<String,String>>\",\n    draft_or_live                                                                 as \"draft_or_live!: DraftOrLive\",\n    other_keywords                                                                as \"other_keywords!\",\n    translated_keywords                                                           as \"translated_keywords!\",\n    (\n        select row(pro_dev_data_module.id, kind, is_complete)\n        from pro_dev_data_module\n        where pro_dev_data_id = pro_dev_data.id and \"index\" = 0\n        order by \"index\"\n    )                                                   as \"cover?: (ModuleId, ModuleKind, bool)\",\n    array(select row (category_id)\n            from pro_dev_data_category\n            where pro_dev_data_id = pro_dev_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n    array(select row (id, display_name, resource_type_id, resource_content)\n                from pro_dev_data_resource\n                where pro_dev_data_id = pro_dev_data.id\n          )                                          as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n    array(\n            select row(pddu.unit_id, pddu.display_name, pddu.description, pddu.value)\n            from pro_dev_data_unit \"pddu\"\n            where pddu.pro_dev_data_id = pro_dev_data.id\n            order by \"index\"\n    )                                                     as \"units!: Vec<(ProDevUnitId, String, String, Value)>\"\nfrom cte1\ninner join pro_dev_data on cte1.id = pro_dev_data.id\ninner join pro_dev on (\n    pro_dev_data.id = pro_dev.draft_id\n    or (\n        pro_dev_data.id = pro_dev.live_id\n        and last_synced_at is not null\n        and pro_dev.published_at is not null\n    )\n)\nwhere ord > (1 * $5 * $6)\norder by ord asc\nlimit $6\n"
   },
   "1c34eda829dd92980a83bf0ff3b38800febb950fd3b6e5f3e3694938b7bc19e3": {
     "describe": {
@@ -2925,157 +2935,6 @@
       }
     },
     "query": "\n            select id as \"id: AffiliationId\", display_name, created_at, updated_at from affiliation\n            order by index\n        "
-  },
-  "32d87258fd872c3ab1c4ed8d4ab4d39fa0addb851308a52b45ee24bee59b9bb9": {
-    "describe": {
-      "columns": [
-        {
-          "name": "pro_dev_id: ProDevId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "privacy_level: PrivacyLevel",
-          "ordinal": 1,
-          "type_info": "Int2"
-        },
-        {
-          "name": "creator_id?: UserId",
-          "ordinal": 2,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "author_id?: UserId",
-          "ordinal": 3,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "author_name",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "published_at",
-          "ordinal": 5,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "likes",
-          "ordinal": 6,
-          "type_info": "Int8"
-        },
-        {
-          "name": "plays",
-          "ordinal": 7,
-          "type_info": "Int8"
-        },
-        {
-          "name": "duration",
-          "ordinal": 8,
-          "type_info": "Int8"
-        },
-        {
-          "name": "live_up_to_date",
-          "ordinal": 9,
-          "type_info": "Bool"
-        },
-        {
-          "name": "display_name!",
-          "ordinal": 10,
-          "type_info": "Text"
-        },
-        {
-          "name": "updated_at",
-          "ordinal": 11,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "language!",
-          "ordinal": 12,
-          "type_info": "Text"
-        },
-        {
-          "name": "description!",
-          "ordinal": 13,
-          "type_info": "Text"
-        },
-        {
-          "name": "translated_description!: Json<HashMap<String,String>>",
-          "ordinal": 14,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "draft_or_live!: DraftOrLive",
-          "ordinal": 15,
-          "type_info": "Int2"
-        },
-        {
-          "name": "other_keywords!",
-          "ordinal": 16,
-          "type_info": "Text"
-        },
-        {
-          "name": "translated_keywords!",
-          "ordinal": 17,
-          "type_info": "Text"
-        },
-        {
-          "name": "cover?: (ModuleId, ModuleKind, bool)",
-          "ordinal": 18,
-          "type_info": "Record"
-        },
-        {
-          "name": "categories!: Vec<(CategoryId,)>",
-          "ordinal": 19,
-          "type_info": "RecordArray"
-        },
-        {
-          "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
-          "ordinal": 20,
-          "type_info": "RecordArray"
-        },
-        {
-          "name": "units!: Vec<(ProDevUnitId,)>",
-          "ordinal": 21,
-          "type_info": "RecordArray"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        true,
-        true,
-        null,
-        true,
-        false,
-        false,
-        true,
-        false,
-        false,
-        true,
-        false,
-        false,
-        false,
-        true,
-        false,
-        false,
-        null,
-        null,
-        null,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Int2Array",
-          "UuidArray",
-          "Int4",
-          "Int4"
-        ]
-      }
-    },
-    "query": "\nwith cte as (\n    select (array_agg(pdd.id))[1]\n    from pro_dev_data \"pdd\"\n          left join pro_dev on (draft_id = pdd.id or (live_id = pdd.id and pdd.last_synced_at is not null and published_at is not null))\n          left join pro_dev_data_resource \"resource\" on pdd.id = resource.pro_dev_data_id\n    where (author_id = $1 or $1 is null)\n        and (pdd.draft_or_live = $2 or $2 is null)\n        and (pdd.privacy_level = any($3) or $3 = array[]::smallint[])\n        and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n    group by coalesce(updated_at, created_at)\n    order by coalesce(updated_at, created_at) desc\n),\ncte1 as (\n    select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n   , ord) order by ord\n)\nselect pro_dev.id                                                                as \"pro_dev_id: ProDevId\",\n    privacy_level                                                               as \"privacy_level: PrivacyLevel\",\n    creator_id                                                                  as \"creator_id?: UserId\",\n    author_id                                                                   as \"author_id?: UserId\",\n    (select given_name || ' '::text || family_name\n     from user_profile\n     where user_profile.user_id = author_id)                                     as \"author_name\",\n    published_at,\n    likes,\n    plays,\n    duration,\n    live_up_to_date,\n    display_name                                                                  as \"display_name!\",\n    updated_at,\n    language                                                                      as \"language!\",\n    description                                                                   as \"description!\",\n    translated_description                                                        as \"translated_description!: Json<HashMap<String,String>>\",\n    draft_or_live                                                                 as \"draft_or_live!: DraftOrLive\",\n    other_keywords                                                                as \"other_keywords!\",\n    translated_keywords                                                           as \"translated_keywords!\",\n    (\n        select row(pro_dev_data_module.id, kind, is_complete)\n        from pro_dev_data_module\n        where pro_dev_data_id = pro_dev_data.id and \"index\" = 0\n        order by \"index\"\n    )                                                   as \"cover?: (ModuleId, ModuleKind, bool)\",\n    array(select row (category_id)\n            from pro_dev_data_category\n            where pro_dev_data_id = pro_dev_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n    array(select row (id, display_name, resource_type_id, resource_content)\n                from pro_dev_data_resource\n                where pro_dev_data_id = pro_dev_data.id\n          )                                          as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n    array(\n            select row(unit_id)\n            from pro_dev_data_unit \"pddu\"\n            where pddu.pro_dev_data_id = pro_dev_data.id\n            order by \"index\"\n    )                                                     as \"units!: Vec<(ProDevUnitId,)>\"\nfrom cte1\ninner join pro_dev_data on cte1.id = pro_dev_data.id\ninner join pro_dev on (\n    pro_dev_data.id = pro_dev.draft_id\n    or (\n        pro_dev_data.id = pro_dev.live_id\n        and last_synced_at is not null\n        and pro_dev.published_at is not null\n    )\n)\nwhere ord > (1 * $5 * $6)\norder by ord asc\nlimit $6\n"
   },
   "33b3def525f80ae097847489feda1bcb7cc23f2b24ae237dbb93e17802d5fb74": {
     "describe": {
@@ -4471,6 +4330,104 @@
     },
     "query": "delete from animation_metadata where id = $1 returning kind as \"kind: AnimationKind\""
   },
+  "51083940ec66c94905f7076e28673b9ce85d6e66c472853166c9c2955a790be8": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "display_name!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "privacy_level!: PrivacyLevel",
+          "ordinal": 3,
+          "type_info": "Int2"
+        },
+        {
+          "name": "language!",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "description!",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_description!: Json<HashMap<String, String>>",
+          "ordinal": 6,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "duration",
+          "ordinal": 7,
+          "type_info": "Int8"
+        },
+        {
+          "name": "other_keywords!",
+          "ordinal": 8,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_keywords!",
+          "ordinal": 9,
+          "type_info": "Text"
+        },
+        {
+          "name": "cover?: (ModuleId, ModuleKind, bool)",
+          "ordinal": 10,
+          "type_info": "Record"
+        },
+        {
+          "name": "categories!: Vec<(CategoryId,)>",
+          "ordinal": 11,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
+          "ordinal": 12,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "units!: Vec<(ProDevUnitId, String, String, Value)>",
+          "ordinal": 13,
+          "type_info": "RecordArray"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      }
+    },
+    "query": "\nselect  id,\n        display_name                                       as \"display_name!\",\n        updated_at,\n        privacy_level                                      as \"privacy_level!: PrivacyLevel\",\n        language                                           as \"language!\",\n        description                                         as \"description!\",\n        translated_description                              as \"translated_description!: Json<HashMap<String, String>>\",\n        duration                                           as \"duration\",\n        other_keywords                             as \"other_keywords!\",\n        translated_keywords                        as \"translated_keywords!\",\n        (\n            select row(pro_dev_data_module.id, kind, is_complete)\n            from pro_dev_data_module\n            where pro_dev_data_id = pro_dev_data.id and \"index\" = 0\n            order by \"index\"\n        )                                                   as \"cover?: (ModuleId, ModuleKind, bool)\",\n        array(select row (category_id)\n            from pro_dev_data_category\n            where pro_dev_data_id = pro_dev_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n        array(\n            select row (pddr.id, pddr.display_name, resource_type_id, resource_content)\n            from pro_dev_data_resource \"pddr\"\n            where pddr.pro_dev_data_id = pro_dev_data.id\n        )                                                    as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n        array(\n            select row(pddu.unit_id, pddu.display_name, pddu.description, pddu.value)\n            from pro_dev_data_unit \"pddu\"\n            where pddu.pro_dev_data_id = pro_dev_data.id\n            order by \"index\"\n        )                                                     as \"units!: Vec<(ProDevUnitId, String, String, Value)>\"\nfrom pro_dev_data\ninner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\norder by ord asc\n"
+  },
   "51a05fce94966f20937f90815425a04d7b843d864e39cf5d5b855d437b84bffa": {
     "describe": {
       "columns": [
@@ -5065,6 +5022,147 @@
       }
     },
     "query": "delete from image_metadata where id = $1"
+  },
+  "58fc083e8a2832afe3d91296a74f35772bf724a62435151a79a532fd20a9433f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "pro_dev_id: ProDevId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "creator_id?: UserId",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_id?: UserId",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_name",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "published_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "privacy_level!: PrivacyLevel",
+          "ordinal": 7,
+          "type_info": "Int2"
+        },
+        {
+          "name": "language",
+          "ordinal": 8,
+          "type_info": "Text"
+        },
+        {
+          "name": "description",
+          "ordinal": 9,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_description!: Json<HashMap<String, String>>",
+          "ordinal": 10,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "likes",
+          "ordinal": 11,
+          "type_info": "Int8"
+        },
+        {
+          "name": "plays",
+          "ordinal": 12,
+          "type_info": "Int8"
+        },
+        {
+          "name": "live_up_to_date",
+          "ordinal": 13,
+          "type_info": "Bool"
+        },
+        {
+          "name": "other_keywords",
+          "ordinal": 14,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_keywords",
+          "ordinal": 15,
+          "type_info": "Text"
+        },
+        {
+          "name": "duration",
+          "ordinal": 16,
+          "type_info": "Int8"
+        },
+        {
+          "name": "cover?: (ModuleId, ModuleKind, bool)",
+          "ordinal": 17,
+          "type_info": "Record"
+        },
+        {
+          "name": "categories!: Vec<(CategoryId,)>",
+          "ordinal": 18,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
+          "ordinal": 19,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "units!: Vec<(ProDevUnitId, String, String, Value)>",
+          "ordinal": 20,
+          "type_info": "RecordArray"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        true,
+        null,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        null,
+        null,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\nwith cte as (\n    select id      as \"pro_dev_id\",\n           creator_id,\n           author_id,\n           likes,\n           plays,\n           live_up_to_date,\n           case\n               when $2 = 0 then pro_dev.draft_id\n               when $2 = 1 then pro_dev.live_id\n               end as \"draft_or_live_id\",\n           published_at\n    from pro_dev\n    where id = $1\n)\nselect cte.pro_dev_id                                          as \"pro_dev_id: ProDevId\",\n       display_name,\n       creator_id                                             as \"creator_id?: UserId\",\n       author_id                                              as \"author_id?: UserId\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id)            as \"author_name\",\n       published_at,\n       updated_at,\n       privacy_level                                       as \"privacy_level!: PrivacyLevel\",\n       language,\n       description,\n       translated_description                              as \"translated_description!: Json<HashMap<String, String>>\",\n       likes,\n       plays,\n       live_up_to_date,\n       other_keywords,\n       translated_keywords,\n       duration,\n       (\n            select row(pro_dev_data_module.id, kind, is_complete)\n            from pro_dev_data_module\n            where pro_dev_data_id = cte.draft_or_live_id and \"index\" = 0\n            order by \"index\"\n        )                                                   as \"cover?: (ModuleId, ModuleKind, bool)\",\n       array(select row (category_id)\n             from pro_dev_data_category\n             where pro_dev_data_id = cte.draft_or_live_id)     as \"categories!: Vec<(CategoryId,)>\",\n       array(\n             select row (pddr.id, pddr.display_name, resource_type_id, resource_content)\n             from pro_dev_data_resource \"pddr\"\n             where pddr.pro_dev_data_id = cte.draft_or_live_id\n       )                                                    as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n       array(\n            select row(pddu.unit_id, pddu.display_name, pddu.description, pddu.value)\n            from pro_dev_data_unit \"pddu\"\n            where pddu.pro_dev_data_id = pro_dev_data.id\n            order by \"index\"\n    )                                                     as \"units!: Vec<(ProDevUnitId, String, String, Value)>\"\nfrom pro_dev_data\n         inner join cte on cte.draft_or_live_id = pro_dev_data.id\n"
   },
   "59c49f0ffacb928c16d48a8a91fc04e16057b123de225183c88bfd1348042e1b": {
     "describe": {
@@ -9695,104 +9793,6 @@
       }
     },
     "query": "\ninsert into jig_data\n(display_name, created_at, updated_at, language, last_synced_at, description, theme, audio_background,\n audio_feedback_negative, audio_feedback_positive, direction, display_score, drag_assist, track_assessments, privacy_level, other_keywords, translated_keywords, translated_description)\nselect display_name,\n       created_at,\n       updated_at,\n       language,\n       last_synced_at,\n       description,\n       theme,\n       audio_background,\n       audio_feedback_negative,\n       audio_feedback_positive,\n       direction,\n       display_score,\n       drag_assist,\n       track_assessments,\n       privacy_level,\n       other_keywords,\n       translated_keywords,\n       translated_description::jsonb\nfrom jig_data\nwhere id = $1\nreturning id\n        "
-  },
-  "ab6c682176e670014163298904adcab51e57b39a75233ae656e676b35d88d91c": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "display_name!",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "updated_at",
-          "ordinal": 2,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "privacy_level!: PrivacyLevel",
-          "ordinal": 3,
-          "type_info": "Int2"
-        },
-        {
-          "name": "language!",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "description!",
-          "ordinal": 5,
-          "type_info": "Text"
-        },
-        {
-          "name": "translated_description!: Json<HashMap<String, String>>",
-          "ordinal": 6,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "duration",
-          "ordinal": 7,
-          "type_info": "Int8"
-        },
-        {
-          "name": "other_keywords!",
-          "ordinal": 8,
-          "type_info": "Text"
-        },
-        {
-          "name": "translated_keywords!",
-          "ordinal": 9,
-          "type_info": "Text"
-        },
-        {
-          "name": "cover?: (ModuleId, ModuleKind, bool)",
-          "ordinal": 10,
-          "type_info": "Record"
-        },
-        {
-          "name": "categories!: Vec<(CategoryId,)>",
-          "ordinal": 11,
-          "type_info": "RecordArray"
-        },
-        {
-          "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
-          "ordinal": 12,
-          "type_info": "RecordArray"
-        },
-        {
-          "name": "units!: Vec<(ProDevUnitId,)>",
-          "ordinal": 13,
-          "type_info": "RecordArray"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        true,
-        false,
-        false,
-        false,
-        false,
-        true,
-        false,
-        false,
-        null,
-        null,
-        null,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "UuidArray"
-        ]
-      }
-    },
-    "query": "\nselect  id,\n        display_name                                       as \"display_name!\",\n        updated_at,\n        privacy_level                                      as \"privacy_level!: PrivacyLevel\",\n        language                                           as \"language!\",\n        description                                         as \"description!\",\n        translated_description                              as \"translated_description!: Json<HashMap<String, String>>\",\n        duration                                           as \"duration\",\n        other_keywords                             as \"other_keywords!\",\n        translated_keywords                        as \"translated_keywords!\",\n        (\n            select row(pro_dev_data_module.id, kind, is_complete)\n            from pro_dev_data_module\n            where pro_dev_data_id = pro_dev_data.id and \"index\" = 0\n            order by \"index\"\n        )                                                   as \"cover?: (ModuleId, ModuleKind, bool)\",\n        array(select row (category_id)\n            from pro_dev_data_category\n            where pro_dev_data_id = pro_dev_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n        array(\n            select row (pddr.id, pddr.display_name, resource_type_id, resource_content)\n            from pro_dev_data_resource \"pddr\"\n            where pddr.pro_dev_data_id = pro_dev_data.id\n        )                                                    as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n        array(\n            select row(unit_id)\n            from pro_dev_data_unit \"pddu\"\n            where pddu.pro_dev_data_id = pro_dev_data.id\n            order by \"index\"\n        )                                                     as \"units!: Vec<(ProDevUnitId,)>\"\nfrom pro_dev_data\ninner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\norder by ord asc\n"
   },
   "abe8fdba2626df204b680c636918cef5fa26f18f628d7bced58edacdb26e0b63": {
     "describe": {

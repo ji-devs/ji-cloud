@@ -7,7 +7,10 @@ use shared::domain::{
     category::CategoryId,
     meta::ResourceTypeId as TypeId,
     module::{LiteModule, ModuleId, ModuleKind},
-    pro_dev::{unit::ProDevUnitId, ProDevData, ProDevId, ProDevResponse},
+    pro_dev::{
+        unit::{ProDevUnit, ProDevUnitId, ProDevUnitValue},
+        ProDevData, ProDevId, ProDevResponse,
+    },
     user::{UserId, UserScope},
 };
 use sqlx::{types::Json, PgConnection, PgPool};
@@ -170,11 +173,11 @@ select cte.pro_dev_id                                          as "pro_dev_id: P
              where pddr.pro_dev_data_id = cte.draft_or_live_id
        )                                                    as "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
        array(
-            select row(pddu.unit_id)
+            select row(pddu.unit_id, pddu.display_name, pddu.description, pddu.value)
             from pro_dev_data_unit "pddu"
             where pddu.pro_dev_data_id = pro_dev_data.id
             order by "index"
-    )                                                     as "units!: Vec<(ProDevUnitId,)>"
+    )                                                     as "units!: Vec<(ProDevUnitId, String, String, Value)>"
 from pro_dev_data
          inner join cte on cte.draft_or_live_id = pro_dev_data.id
 "#,
@@ -224,7 +227,16 @@ from pro_dev_data
             other_keywords: row.other_keywords,
             translated_keywords: row.translated_keywords,
             translated_description: row.translated_description.0,
-            units: row.units.into_iter().map(|(it,)| it).collect(),
+            units: row
+                .units
+                .into_iter()
+                .map(|(id, display_name, description, value)| ProDevUnit {
+                    id,
+                    display_name,
+                    description,
+                    value: serde_json::from_value::<ProDevUnitValue>(value).unwrap(),
+                })
+                .collect(),
         },
     });
 
@@ -296,11 +308,11 @@ select  id,
             where pddr.pro_dev_data_id = pro_dev_data.id
         )                                                    as "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
         array(
-            select row(unit_id)
+            select row(pddu.unit_id, pddu.display_name, pddu.description, pddu.value)
             from pro_dev_data_unit "pddu"
             where pddu.pro_dev_data_id = pro_dev_data.id
             order by "index"
-        )                                                     as "units!: Vec<(ProDevUnitId,)>"
+        )                                                     as "units!: Vec<(ProDevUnitId, String, String, Value)>"
 from pro_dev_data
 inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
@@ -361,7 +373,16 @@ order by ord asc
                 other_keywords: pro_dev_data_row.other_keywords,
                 translated_keywords: pro_dev_data_row.translated_keywords,
                 translated_description: pro_dev_data_row.translated_description.0,
-                units: pro_dev_data_row.units.into_iter().map(|(it,)| it).collect(),
+                units: pro_dev_data_row
+                    .units
+                    .into_iter()
+                    .map(|(id, display_name, description, value)| ProDevUnit {
+                        id,
+                        display_name,
+                        description,
+                        value: serde_json::from_value::<ProDevUnitValue>(value).unwrap(),
+                    })
+                    .collect(),
             },
         })
         .collect();
@@ -438,11 +459,11 @@ select pro_dev.id                                                               
                 where pro_dev_data_id = pro_dev_data.id
           )                                          as "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
     array(
-            select row(unit_id)
+            select row(pddu.unit_id, pddu.display_name, pddu.description, pddu.value)
             from pro_dev_data_unit "pddu"
             where pddu.pro_dev_data_id = pro_dev_data.id
             order by "index"
-    )                                                     as "units!: Vec<(ProDevUnitId,)>"
+    )                                                     as "units!: Vec<(ProDevUnitId, String, String, Value)>"
 from cte1
 inner join pro_dev_data on cte1.id = pro_dev_data.id
 inner join pro_dev on (
@@ -517,7 +538,16 @@ limit $6
                 other_keywords: pro_dev_data_row.other_keywords,
                 translated_keywords: pro_dev_data_row.translated_keywords,
                 translated_description: pro_dev_data_row.translated_description.0,
-                units: pro_dev_data_row.units.into_iter().map(|(it,)| it).collect(),
+                units: pro_dev_data_row
+                    .units
+                    .into_iter()
+                    .map(|(id, display_name, description, value)| ProDevUnit {
+                        id,
+                        display_name,
+                        description,
+                        value: serde_json::from_value::<ProDevUnitValue>(value).unwrap(),
+                    })
+                    .collect(),
             },
         })
         .collect();
