@@ -49,6 +49,8 @@ make_custom_event!(CustomDrop, "custom-drop");
 
 make_custom_event_serde!("module-resize", ModuleResizeEvent, ResizeInfo);
 
+temp_make_event!(FullScreenChange, "fullscreenchange" => web_sys::Event);
+
 macro_rules! make_pointer_event {
     ($name:ident, $type:literal => $event:path) => {
         temp_make_event!($name, $type => $event);

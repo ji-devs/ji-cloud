@@ -368,16 +368,18 @@ impl JigPlayer {
                     .prop("slot", "full-screen")
                     .prop_signal("isFullScreen", state.is_full_screen.signal())
                     .event(clone!(state => move|_: events::Click| {
-                        let full_screen = !state.is_full_screen.get();
-                        state.is_full_screen.set(full_screen);
-                        match full_screen {
+                        match state.is_full_screen.get() {
                             true => {
-                                let _ = body().request_fullscreen();
-                            },
-                            false => {
                                 let _ = document().exit_fullscreen();
                             },
+                            false => {
+                                let _ = body().request_fullscreen();
+                            },
                         };
+                    }))
+                    .global_event(clone!(state => move|_: events::FullScreenChange| {
+                        let is_full_screen = document().fullscreen_element().is_some();
+                        state.is_full_screen.set(is_full_screen);
                     }))
                 }),
                 html!("jig-play-move-button", {
