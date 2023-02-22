@@ -8,7 +8,10 @@ use shared::domain::asset::{DraftOrLive, PrivacyLevel};
 use utils::{
     events,
     init::analytics,
-    routes::{AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, ResourceEditRoute, Route},
+    routes::{
+        AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, ProDevEditRoute,
+        ResourceEditRoute, Route,
+    },
 };
 use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement};
 
@@ -251,6 +254,13 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                             Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
                                 course.id,
                                 CourseEditRoute::Landing
+                            ))).to_string()
+                        },
+                        EditableAsset::ProDev(pro_dev) => {
+                            state.publish_state.asset_edit_state.set_route_pro_dev(ProDevEditRoute::Landing);
+                            Route::Asset(AssetRoute::Edit(AssetEditRoute::ProDev(
+                                pro_dev.id,
+                                ProDevEditRoute::Landing
                             ))).to_string()
                         },
                     };

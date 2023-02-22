@@ -6,7 +6,7 @@ use shared::domain::asset::AssetId;
 use utils::{
     asset::AssetPlayerOptions,
     editable_asset::EditableAsset,
-    routes::{AssetEditRoute, CourseEditRoute, JigEditRoute, ResourceEditRoute},
+    routes::{AssetEditRoute, CourseEditRoute, JigEditRoute, ProDevEditRoute, ResourceEditRoute},
     storage,
     unwrap::UnwrapJiExt,
 };
@@ -57,6 +57,13 @@ impl AssetEditState {
         assert!(&self.asset_id.is_course_id());
         self.route.set(AssetEditRoute::Course(
             *self.asset_id.unwrap_course(),
+            route,
+        ));
+    }
+    pub fn set_route_pro_dev(&self, route: ProDevEditRoute) {
+        assert!(&self.asset_id.is_pro_dev_id());
+        self.route.set(AssetEditRoute::ProDev(
+            *self.asset_id.unwrap_pro_dev(),
             route,
         ));
     }

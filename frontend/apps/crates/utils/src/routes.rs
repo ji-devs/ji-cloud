@@ -230,6 +230,7 @@ pub enum AssetRoute {
     JigGallery,
     CourseGallery,
     ResourceGallery,
+    ProDevGallery,
     /// Here for compatibility reasons, can probably go away in a few months
     // RedirectToJig(String),
     Edit(AssetEditRoute),
@@ -266,6 +267,7 @@ pub enum CourseEditRoute {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ProDevEditRoute {
+    Landing,
     Unit(Option<ProDevUnitId>),
     Cover(ModuleId),
     Publish,
@@ -770,6 +772,7 @@ impl From<&Route> for String {
                 AssetRoute::JigGallery => "/asset/edit/jig-gallery".to_string(),
                 AssetRoute::CourseGallery => "/asset/edit/course-gallery".to_string(),
                 AssetRoute::ResourceGallery => "/asset/edit/resource-gallery".to_string(),
+                AssetRoute::ProDevGallery => "/asset/edit/pro-dev-gallery".to_string(),
                 AssetRoute::Edit(route) => match route {
                     AssetEditRoute::Jig(jig_id, route) => match route {
                         JigEditRoute::Landing => {
@@ -805,6 +808,9 @@ impl From<&Route> for String {
                         }
                     },
                     AssetEditRoute::ProDev(pro_dev_id, route) => match route {
+                        ProDevEditRoute::Landing => {
+                            format!("/asset/edit/pro-dev/{}", pro_dev_id.0)
+                        }
                         ProDevEditRoute::Unit(unit_id) => match unit_id {
                             Some(unit_id) => {
                                 format!("/asset/edit/pro-dev/{}/unit/{}", pro_dev_id.0, unit_id.0)

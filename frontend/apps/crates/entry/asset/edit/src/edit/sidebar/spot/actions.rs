@@ -1,7 +1,11 @@
 use super::course::actions as course_spot_actions;
 use super::jig::actions as jig_spot_actions;
+use super::pro_dev::actions as pro_dev_spot_actions;
 use super::state::SpotState;
-use super::{course::actions as course_actions, jig::actions as jig_actions};
+use super::{
+    course::actions as course_actions, jig::actions as jig_actions,
+    pro_dev::actions as pro_dev_actions,
+};
 use crate::edit::sidebar::{
     dragging::state::State as DragState,
     state::{SidebarSpot, SidebarSpotItem},
@@ -72,7 +76,14 @@ pub fn move_index(state: Rc<SpotState>, move_target: MoveTarget) {
                 },
                 SidebarSpotItem::Course(_) => {
                     course_actions::save_course(&state).await;
-                }
+                },
+                SidebarSpotItem::ProDev(unit) => {
+                    pro_dev_actions::update_unit_index(
+                        &Rc::clone(&state),
+                        unit.as_ref(),
+                        target as u16
+                    ).await;
+                },
             }
         }
     }));
@@ -88,6 +99,10 @@ pub fn delete(state: Rc<SpotState>) {
             },
             SidebarSpotItem::Course(_) => {
                 course_actions::save_course(&state).await;
+            },
+            SidebarSpotItem::ProDev(unit) =>
+            {
+                pro_dev_actions::delete(&state, &unit).await;
             },
         }
     }));

@@ -9,7 +9,10 @@ use super::super::jig::menu::JigMenu;
 use super::super::spot::actions as spot_actions;
 use super::jig::actions as jig_spot_actions;
 use super::{actions, state::*};
+use crate::edit::pro_dev;
+use crate::edit::sidebar::pro_dev::menu::ProDevMenu;
 use crate::edit::sidebar::state::{CourseSpot, ModuleHighlight, SidebarSpotItem};
+use crate::edit::sidebar::ProDevSpot;
 use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
 use futures_signals::signal::{not, SignalExt};
 use std::rc::Rc;
@@ -105,6 +108,15 @@ impl SpotState {
                                 }
                                 state.sidebar.asset_edit_state.set_route_course(CourseEditRoute::Landing);
                             },
+                            SidebarSpotItem::ProDev(item) => {
+                                if let Some(item) = item {
+                                    if let ProDevSpot::Cover(cover) = &**item {
+                                        state.sidebar.asset_edit_state.set_route_pro_dev(ProDevEditRoute::Cover(cover.id));
+                                        return;
+                                    }
+                                }
+                                state.sidebar.asset_edit_state.set_route_pro_dev(ProDevEditRoute::Landing);
+                            },
                         }
                     })
                 )
@@ -157,6 +169,29 @@ impl SpotState {
                                                     DraftOrLive::Draft,
                                                 ).render_live(Some("thumbnail"))
                                             },
+                                        }
+                                    })
+                                }
+                                SidebarSpotItem::ProDev(pro_dev_spot) => {
+                                    pro_dev_spot.as_ref().map(|pro_dev_spot| {
+                                        match &**pro_dev_spot {
+                                            ProDevSpot::Cover(cover) => {
+                                                ModuleThumbnail::new(
+                                                    state.sidebar.asset_edit_state.asset.id(),
+                                                    Some((*cover).clone()),
+                                                    ThumbnailFallback::Module,
+                                                    DraftOrLive::Draft,
+                                                ).render_live(Some("thumbnail"))
+                                            },
+                                            ProDevSpot::Item(pro_dev) => todo!()
+                                            // {
+                                            //     ModuleThumbnail::new(
+                                            //         state.sidebar.asset_edit_state.asset.id(),
+                                            //         Some((*pro_dev).clone()),
+                                            //         ThumbnailFallback::Module,
+                                            //         DraftOrLive::Draft,
+                                            //     ).render_live(Some("thumbnail"))
+                                            // },
                                         }
                                     })
                                 }
@@ -244,6 +279,7 @@ impl SpotState {
                     match state.spot.item {
                         SidebarSpotItem::Jig(_) => dom.child(JigMenu::new(&state).render()),
                         SidebarSpotItem::Course(_) => dom.child(CourseMenu::new(&state).render()),
+                        SidebarSpotItem::ProDev(_) => dom.child(ProDevMenu::new(&state).render()),
                     }
                 }))
                 .apply(Self::render_add_button(&state))
