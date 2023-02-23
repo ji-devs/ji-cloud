@@ -18,6 +18,12 @@ export class _ extends LitElement {
                     display: block;
                     height: 100dvh;
                     width: 100vw;
+                    --bottom-bar-height: 38px;
+                }
+                @media (min-width: 1024px) {
+                    :host {
+                        --bottom-bar-height: 100px;
+                    }
                 }
                 :host([isLegacy]) {
                     /* only needed for legacy since legacy doesn't cover the whole height of the page */
@@ -43,7 +49,7 @@ export class _ extends LitElement {
                     z-index: 1;
                 }
                 :host([isLegacy]) ::slotted([slot="iframe"]){
-                    height: calc(100% - 100px);
+                    height: calc(100% - var(--bottom-bar-height));
                 }
                 ::slotted([slot="message"]) {
                     position: fixed;
@@ -60,12 +66,7 @@ export class _ extends LitElement {
                     pointer-events: none;
                     display: grid;
                     grid-template-columns: 0px 1fr auto;
-                    grid-template-rows: auto 1fr 38px;
-                }
-                @media (min-width: 1024px) {
-                    .controls {
-                        grid-template-rows: auto 1fr 100px;
-                    }
+                    grid-template-rows: auto 1fr var(--bottom-bar-height);
                 }
                 .controls ::slotted(*),
                 .controls fa-button {
