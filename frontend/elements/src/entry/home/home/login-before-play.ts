@@ -34,65 +34,94 @@ export class _ extends LitElement {
                     left: 50%;
                     transform: translate(-50%, -50%);
                     z-index: 10;
-
                     width: 880px;
-                    display: grid;
-                    grid-template-columns: 50% 50%;
+                    max-width: 90vw;
                     background: #fff;
                     border-radius: 16px;
                     box-shadow: 0 3px 16px 0 rgba(0, 0, 0, 0.16);
                     overflow: hidden;
+                    display: grid;
                 }
-                .left-side {
-                    grid-column: 1;
-                    grid-row: 1;
+                @media (min-width: 1024px) {
+                    .body {
+                        grid-template-columns: 50% 50%;
+                    }
+                }
+                .white-section {
                     padding: 32px;
                     display: grid;
                     grid-template-rows: auto auto 1fr;
+                    grid-column: 1;
                 }
-                .left-side h1 {
+                @media (min-width: 1024px) {
+                    .white-section {
+                        grid-row: 1;
+                    }
+                }
+                .white-section h1 {
                     color: var(--dark-blue-4);
                     font-size: 24px;
                     font-weight: bold;
-                    /* margin: 0; */
+                    text-align: center;
                 }
-                .left-side .divider {
-                    height: 1px;
-                    background-color: #d5e4ff;
+                @media (min-width: 1024px) {
+                    .white-section h1 {
+                        text-align: left;
+                    }
                 }
-                .left-side .actions {
+                @media (min-width: 1024px) {
+                    .white-section .divider {
+                        height: 1px;
+                        background-color: #d5e4ff;
+                    }
+                }
+                .white-section .actions {
                     display: grid;
                     justify-content: center;
                     align-content: center;
                 }
-                .right-side {
-                    grid-column: 2;
-                    grid-row: 1;
+                .blue-section {
                     background-color: var(--light-blue-6);
                     color: #fff;
                     padding: 24px;
                 }
-                .right-side img-ui {
-                    height: 300px;
-                    display: grid;
-                    place-content: center;
+                @media (min-width: 1024px) {
+                    .blue-section {
+                        grid-column: 2;
+                        grid-row: 1;
+                    }
                 }
-                .right-side ul {
+                .blue-section img-ui {
+                    display: none;
+                }
+                @media (min-width: 1024px) {
+                    .blue-section img-ui {
+                        height: 300px;
+                        display: grid;
+                        place-content: center;
+                    }
+                }
+                .blue-section ul {
                     list-style: none;
                     padding: 0;
                 }
-                .right-side ul li {
+                .blue-section ul li {
                     display: grid;
                     grid-template-columns: 24px 1fr;
                     padding: 0;
                     font-size: 14px;
                 }
                 ::slotted([slot=close]) {
-                    grid-column: 2;
-                    grid-row: 1;
                     justify-self: end;
                     align-self: start;
                     padding: 10px;
+                    grid-row: 1;
+                    grid-column: 1;
+                }
+                @media (min-width: 1024px) {
+                    ::slotted([slot=close]) {
+                        grid-column: 2;
+                    }
                 }
             `,
         ];
@@ -102,7 +131,7 @@ export class _ extends LitElement {
         return html`
             <div class="overlay"></div>
             <div class="body">
-                <div class="left-side">
+                <div class="white-section">
                     <h1>${STR_CREATE_ACCOUNT}</h1>
                     <div class="divider"></div>
                     <div class="actions">
@@ -113,7 +142,7 @@ export class _ extends LitElement {
                         </p>
                     </div>
                 </div>
-                <div class="right-side">
+                <div class="blue-section">
                     <img-ui path="entry/home/search-results/jigglings.webp"></img-ui>
                     <h4>${STR_WHAT_ARE_YOU_WAITING}</h4>
                     <ul>
