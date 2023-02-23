@@ -79,6 +79,9 @@ export class _ extends LitElement {
                 h4 .results-count {
                     font-weight: bold;
                 }
+                ::slotted([slot=search-bar]) {
+                    overflow: hidden;
+                }
                 .help {
                     grid-column: 2;
                     grid-row: 1;
