@@ -19,7 +19,7 @@ use shared::{
         circle::CircleId,
         course::CourseId,
         image::{ImageId, ImageSize},
-        jig::JigId,
+        jig::{JigId, JigRating},
         meta::{AffiliationId, AgeRangeId, ImageStyleId, ImageTagIndex, ResourceTypeId},
         pro_dev::ProDevId,
         resource::ResourceId,
@@ -1973,6 +1973,7 @@ impl Client {
         privacy_level: &[PrivacyLevel],
         page_limit: u32,
         blocked: Option<bool>,
+        is_rated: Option<JigRating>,
     ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
         let mut and_filters = algolia::filter::AndFilter { filters: vec![] };
 
@@ -2035,6 +2036,16 @@ impl Client {
                 filter: FacetFilter {
                     facet_name: "blocked".to_owned(),
                     value: blocked.to_string(),
+                },
+                invert: false,
+            }))
+        }
+
+        if let Some(is_rated) = is_rated {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "rating".to_owned(),
+                    value: (is_rated as i16).to_string(),
                 },
                 invert: false,
             }))
@@ -2092,6 +2103,7 @@ impl Client {
         privacy_level: &[PrivacyLevel],
         page_limit: u32,
         blocked: Option<bool>,
+        is_rated: Option<JigRating>,
     ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
         let mut and_filters = algolia::filter::AndFilter { filters: vec![] };
 
@@ -2154,6 +2166,16 @@ impl Client {
                 filter: FacetFilter {
                     facet_name: "blocked".to_owned(),
                     value: blocked.to_string(),
+                },
+                invert: false,
+            }))
+        }
+
+        if let Some(is_rated) = is_rated {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "rating".to_owned(),
+                    value: (is_rated as i16).to_string(),
                 },
                 invert: false,
             }))

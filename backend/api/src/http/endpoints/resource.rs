@@ -331,6 +331,7 @@ async fn search(
             &privacy_level,
             page_limit,
             blocked,
+            query.is_rated,
         )
         .await?
         .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
