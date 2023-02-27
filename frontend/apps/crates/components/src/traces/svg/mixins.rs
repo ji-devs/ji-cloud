@@ -42,7 +42,7 @@ where
         dom: DomBuilder<web_sys::SvgElement>,
         resize_info: &ResizeInfo,
     ) -> DomBuilder<web_sys::SvgElement> {
-        match self {
+        let builder = match self {
             Self::Static(transform, size) => {
                 let style = Self::get_style_string(transform, size, resize_info);
                 dom.attr("style", &style)
@@ -53,7 +53,9 @@ where
                     Self::get_style_string(&transform, size, &resize_info)
                 })),
             ),
-        }
+        };
+
+        builder.attr("vector-effect", "non-scaling-stroke")
     }
 }
 
