@@ -25,7 +25,15 @@ pub struct ResourceObject {
     content: serde_json::Value,
 }
 
-pub async fn create(pool: &PgPool, pro_dev_id: ProDevId) -> anyhow::Result<ProDevUnitId> {
+pub async fn create(
+    pool: &PgPool,
+    pro_dev_id: ProDevId,
+    display_name: String,
+    description: String,
+    unit_content: ProDevUnitValue,
+) -> anyhow::Result<ProDevUnitId> {
+    let unit: serde_json::Value = check_value(pool, unit_content).await?;
+
     let mut txn = pool.begin().await?;
 
     let draft_id = sqlx::query!(
@@ -41,11 +49,14 @@ select draft_id from jig where jig.id = $1
 
     let res = sqlx::query!(
         r#"
-insert into pro_dev_data_unit (pro_dev_data_id, index)
-values ((select draft_id from pro_dev where id = $1), (select count(*) from pro_dev_data_unit where pro_dev_data_id = $2))
+insert into pro_dev_data_unit (pro_dev_data_id, display_name, description, value, index)
+values ((select draft_id from pro_dev where id = $1), $2, $3, $4, (select count(*) from pro_dev_data_unit where pro_dev_data_id = $5))
 returning unit_id as "unit_id!: ProDevUnitId"
         "#,
         pro_dev_id.0,
+        display_name,
+        description,
+        unit,
         draft_id
     )
     .fetch_one(pool)

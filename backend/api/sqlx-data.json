@@ -6078,27 +6078,6 @@
     },
     "query": "\nupdate jig_admin_data\nset blocked = coalesce($2, blocked)\nwhere jig_id = $1 and $2 is distinct from blocked\n            "
   },
-  "678b849a0c6b137d0f576a0a42362ba7d69e908838674359b1ffe4c901fa24fb": {
-    "describe": {
-      "columns": [
-        {
-          "name": "unit_id!: ProDevUnitId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\ninsert into pro_dev_data_unit (pro_dev_data_id, index)\nvalues ((select draft_id from pro_dev where id = $1), (select count(*) from pro_dev_data_unit where pro_dev_data_id = $2))\nreturning unit_id as \"unit_id!: ProDevUnitId\"\n        "
-  },
   "682dbdf7b9a0f373daad74e4f4face9e425a493e9965c6ba7c9a11e74252c866": {
     "describe": {
       "columns": [],
@@ -12546,6 +12525,30 @@
       }
     },
     "query": "delete from \"user\" where id = $1"
+  },
+  "e4ae4bf489188636704e3124e0896f10beab26e9bf4e2c731e665b1a82084b09": {
+    "describe": {
+      "columns": [
+        {
+          "name": "unit_id!: ProDevUnitId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text",
+          "Jsonb",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\ninsert into pro_dev_data_unit (pro_dev_data_id, display_name, description, value, index)\nvalues ((select draft_id from pro_dev where id = $1), $2, $3, $4, (select count(*) from pro_dev_data_unit where pro_dev_data_id = $5))\nreturning unit_id as \"unit_id!: ProDevUnitId\"\n        "
   },
   "e507c5682a9424e1b2e0971c135667c3f9fc13894921c9a2690eb05c63f2ade1": {
     "describe": {

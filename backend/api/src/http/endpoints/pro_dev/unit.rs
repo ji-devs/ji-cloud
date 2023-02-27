@@ -26,6 +26,7 @@ async fn create(
     db: Data<PgPool>,
     auth: TokenUser,
     path: Path<ProDevId>,
+    req: Json<<pro_dev::unit::Create as ApiEndpoint>::Req>,
 ) -> Result<
     (
         Json<<pro_dev::unit::Create as ApiEndpoint>::Res>,
@@ -33,12 +34,20 @@ async fn create(
     ),
     error::Auth,
 > {
+    let req = req.into_inner();
     let user_id = auth.user_id();
     let pro_dev_id = path.to_owned();
 
     db::pro_dev::authz(&*db, user_id, Some(pro_dev_id)).await?;
 
-    let id = db::pro_dev::unit::create(&*db, pro_dev_id).await?;
+    let id = db::pro_dev::unit::create(
+        &*db,
+        pro_dev_id,
+        req.display_name,
+        req.description,
+        req.value,
+    )
+    .await?;
 
     Ok((Json(CreateResponse { id }), http::StatusCode::CREATED))
 }
