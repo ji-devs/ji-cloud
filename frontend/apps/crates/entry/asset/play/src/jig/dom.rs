@@ -156,7 +156,7 @@ impl JigPlayer {
                     .prop_signal("value", state.points.signal())
                 }))
             }))
-            .apply_if(document().fullscreen_enabled(), clone!(state => move|dom| {
+            .apply_if(fullscreen_enabled(), clone!(state => move|dom| {
                 dom.child(html!("jig-play-full-screen", {
                     .prop("slot", "full-screen")
                     .prop_signal("isFullScreen", state.is_full_screen.signal())
@@ -630,4 +630,21 @@ fn render_time_indicator(state: Rc<JigPlayer>) -> impl Signal<Item = Option<Dom>
             }
         }
     }))
+}
+
+fn fullscreen_enabled() -> bool {
+    // once webkit drops the prefix, we can just use `document().fullscreen_enabled()`
+
+    let webkit_fullscreen_enabled = js_sys::Reflect::get(
+        &document(),
+        &JsValue::from_str("webkitFullscreenEnabled")
+    );
+    match webkit_fullscreen_enabled {
+        Ok(webkit_fullscreen_enabled) => {
+            webkit_fullscreen_enabled.as_bool().unwrap_or_default()
+        },
+        Err(_) => {
+            document().fullscreen_enabled()
+        },
+    }
 }
