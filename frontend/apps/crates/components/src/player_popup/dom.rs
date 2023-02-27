@@ -21,7 +21,7 @@ impl PlayerPopup {
                 AssetId::JigId(_) => "aspect-ratio",
                 AssetId::CourseId(_) => "full-screen",
                 AssetId::ResourceId(_) => unreachable!(),
-                AssetId::ProDevId(_) => todo!(),
+                AssetId::ProDevId(_) => "full-screen",
             })
             .prop("preview", state.player_options.is_draft())
             .apply_if(slot.is_some(), |dom| {
@@ -50,12 +50,15 @@ impl PlayerPopup {
                             .prop("slot", "iframe")
                             .prop("allow", "autoplay; fullscreen")
                             .prop("src", {
-                                let url = match (state.asset_id, state.module_id, &state.player_options) {
-                                    (AssetId::JigId(jig_id), module_id, AssetPlayerOptions::Jig(player_options)) => {
+                                let url = match (state.asset_id, state.module_id, &state.player_options, state.unit_id) {
+                                    (AssetId::JigId(jig_id), module_id, AssetPlayerOptions::Jig(player_options), _unit_id) => {
                                         Route::Asset(AssetRoute::Play(AssetPlayRoute::Jig(jig_id, module_id, player_options.clone())))
                                     },
-                                    (AssetId::CourseId(course_id), _module_id, AssetPlayerOptions::Course(player_options)) => {
+                                    (AssetId::CourseId(course_id), _module_id, AssetPlayerOptions::Course(player_options), _unit_id) => {
                                         Route::Asset(AssetRoute::Play(AssetPlayRoute::Course(course_id, player_options.clone())))
+                                    },
+                                    (AssetId::ProDevId(pro_dev_id), _module_id, AssetPlayerOptions::ProDev(player_options), unit_id, ) => {
+                                        Route::Asset(AssetRoute::Play(AssetPlayRoute::ProDev(pro_dev_id, unit_id, player_options.clone())))
                                     },
                                     _ => {
                                         panic!("Invalid asset id/module id/player_options combinations")

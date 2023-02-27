@@ -1,0 +1,122 @@
+/* :host {
+    display: block;
+    padding: 50px;
+    height: 100dvh;
+    overflow: auto;
+    box-sizing: border-box;
+    overflow: auto;
+}
+.main-wrapper {
+    display: grid;
+    place-content: center;
+    max-width: 100%;
+    max-height: 100%;
+}
+.main-wrapper main {
+    display: grid;
+    place-content: center;
+    background-color: var(--white);
+    padding: 38px;
+    border-radius: 32px;
+    box-shadow: 0 3px 8px 0 rgba(0, 0, 0, 0.08);
+}
+main .width-holder {
+    display: grid;
+    grid-template-rows: auto 4fr auto;
+    row-gap: 15px;
+    max-width: 1300px;
+}
+.column-1 .url input-wrapper{
+    display: grid;
+    grid-row: 1;
+    width: 400px;
+    height: 100px;
+    background-color: var(--light-blue-1);
+}
+.column-2 .name input-wrapper{
+    display: grid;
+    grid-row: 1;
+    height: 65px;
+    width: 400px;
+    grid-template-columns: 1fr min-content;
+    grid-template-rows: min-content 1fr;
+    column-gap: 2px;
+}
+.column-2 .description input-wrapper{
+    display: grid;
+    grid-row: 2;
+    height: 250px;
+    width: 400px;
+    border: 2px solid var(--light-blue-3);
+    border-radius: 15px;
+    grid-template-columns: 1fr min-content;
+    grid-template-rows: min-content 1fr;
+    column-gap: 2px;
+}
+.main {
+    display: grid;
+    grid-row: 2;
+    column-gap: 35px;
+}
+.img-wrapper {
+    display: grid;
+}
+.img-wrapper h4 {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--main-blue);
+    grid-area: 1 / 1;
+    margin: 0;
+    transform: translateY(-2em);
+    padding-left: 16px;
+}
+::slotted([slot="edit-cover"]) {
+    grid-column: 1;
+    grid-row: 1;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: var(--main-blue);
+    color: white;
+    box-shadow: 0 0 4px #00000060;
+    justify-self: end;
+    display: inline-grid;
+    place-content: center;
+    transform: translate(50%, -50%);
+    cursor: pointer;
+}
+::slotted([slot="img"]) {
+    grid-column: 1;
+    grid-row: 1;
+    display: grid;
+    width: 100%;
+    border-radius: 16px;
+    overflow: hidden;
+}
+::slotted([slot="public"]) {
+    display: grid;
+    grid-template-columns: auto auto;
+    place-content: space-between;
+    margin-top: 24px;
+    padding: 0 16px;
+}
+.column-1 {
+    display: grid;
+    grid-row: 2;
+    grid-template-rows: repeat(2, auto);
+    row-gap: 20px;
+} 
+.column-2 {
+    display: grid;
+    grid-row: 2;
+    grid-template-rows: repeat(2, auto);
+    row-gap: 40px;
+} 
+::slotted([slot="description"]) {
+    height: 170px;
+}
+.save {
+    display: grid;
+    grid-row: 3;
+    place-content: center;
+} */

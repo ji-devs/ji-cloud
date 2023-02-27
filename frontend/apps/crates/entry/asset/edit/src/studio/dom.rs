@@ -78,7 +78,7 @@ pub fn render_studio() -> Dom {
                 .prop("kind", "filled")
                 .prop("size", "small")
                 .event(|_: events::Click| {
-                    // actions::create_pro_dev();
+                    actions::create_pro_dev();
                 })
                 .text("Create a Pro-Dev Course")
             }),
@@ -87,9 +87,9 @@ pub fn render_studio() -> Dom {
                 .prop("color", "blue")
                 .prop("kind", "text")
                 .prop("size", "small")
-                // .apply(move |dom| on_click_go_to_url!(dom, {
-                //     Route::Asset(AssetRoute::ProDevGallery).to_string()
-                // }))
+                .apply(move |dom| on_click_go_to_url!(dom, {
+                    Route::Asset(AssetRoute::ProDevGallery).to_string()
+                }))
                 .text("My Pro-Dev Courses")
             }),
             html!("button-rect", {

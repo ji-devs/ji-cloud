@@ -3,7 +3,7 @@ use std::rc::Rc;
 use awsm_web::loaders::helpers::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::asset::Asset;
-use utils::asset::{CoursePlayerOptions, JigPlayerOptions, ResourceContentExt};
+use utils::asset::{CoursePlayerOptions, JigPlayerOptions, ResourceContentExt, ProDevPlayerOptions};
 use utils::routes::{AssetRoute, Route};
 
 use utils::prelude::*;
@@ -80,7 +80,18 @@ impl ShareAsset {
                 .to_string();
                 format!("{}{}", origin, path)
             }
-            Asset::ProDev(_) => todo!(),
+            Asset::ProDev(pro_dev) => {
+                let path = Route::Asset(AssetRoute::Play(AssetPlayRoute::ProDev(
+                    pro_dev.id,
+                    None,
+                    ProDevPlayerOptions {
+                        is_student,
+                        ..Default::default()
+                    },
+                )))
+                .to_string();
+                format!("{}{}", origin, path)
+            },
         };
         url
     }
@@ -88,9 +99,9 @@ impl ShareAsset {
     pub(super) fn asset_type_name(&self) -> &'static str {
         match self.asset {
             Asset::Jig(_) => "JIG",
-            Asset::Course(_) => "Course",
-            Asset::Resource(_) => "Resource",
-            Asset::ProDev(_) => todo!(),
+            Asset::Course(_) => "course",
+            Asset::Resource(_) => "resource",
+            Asset::ProDev(_) => "pro dev",
         }
     }
 }

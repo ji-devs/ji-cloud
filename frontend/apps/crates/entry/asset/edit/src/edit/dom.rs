@@ -87,7 +87,9 @@ impl AssetEditState {
                         },
                         AssetEditRoute::ProDev(_pro_dev_id, pro_dev_edit_route) => {
                             match pro_dev_edit_route {
-                                ProDevEditRoute::Landing => todo!(),
+                                ProDevEditRoute::Landing => {
+                                    Some(UnitEditor::new(None, &state).render())
+                                },
                                 ProDevEditRoute::Unit(unit_id) => {
                                     Some(UnitEditor::new(unit_id, &state).render())
                                 },
@@ -135,6 +137,7 @@ impl AssetEditState {
                             PlayerPopup::new(
                                 state.asset_id,
                                 None,
+                                None,
                                 settings.into(),
                                 PreviewPopupCallbacks::new(close)
                             ).render(None)
@@ -145,6 +148,19 @@ impl AssetEditState {
                             });
                             PlayerPopup::new(
                                 state.asset_id,
+                                None,
+                                None,
+                                settings.into(),
+                                PreviewPopupCallbacks::new(close)
+                            ).render(None)
+                        },
+                        AssetPlayerOptions::ProDev(settings) => {
+                            let close = clone!(state => move || {
+                                state.play_jig.set(None);
+                            });
+                            PlayerPopup::new(
+                                state.asset_id,
+                                None,
                                 None,
                                 settings.into(),
                                 PreviewPopupCallbacks::new(close)

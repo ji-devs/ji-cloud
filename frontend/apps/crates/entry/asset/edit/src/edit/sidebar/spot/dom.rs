@@ -8,8 +8,8 @@ use super::super::course::menu::CourseMenu;
 use super::super::jig::menu::JigMenu;
 use super::super::spot::actions as spot_actions;
 use super::jig::actions as jig_spot_actions;
+use super::pro_dev::actions as pro_dev_spot_actions;
 use super::{actions, state::*};
-use crate::edit::pro_dev;
 use crate::edit::sidebar::pro_dev::menu::ProDevMenu;
 use crate::edit::sidebar::state::{CourseSpot, ModuleHighlight, SidebarSpotItem};
 use crate::edit::sidebar::ProDevSpot;
@@ -108,9 +108,9 @@ impl SpotState {
                                 }
                                 state.sidebar.asset_edit_state.set_route_course(CourseEditRoute::Landing);
                             },
-                            SidebarSpotItem::ProDev(item) => {
-                                if let Some(item) = item {
-                                    if let ProDevSpot::Cover(cover) = &**item {
+                            SidebarSpotItem::ProDev(unit) => {
+                                if let Some(unit) = unit {
+                                    if let ProDevSpot::Cover(cover) = &**unit {
                                         state.sidebar.asset_edit_state.set_route_pro_dev(ProDevEditRoute::Cover(cover.id));
                                         return;
                                     }
@@ -183,15 +183,13 @@ impl SpotState {
                                                     DraftOrLive::Draft,
                                                 ).render_live(Some("thumbnail"))
                                             },
-                                            ProDevSpot::Item(pro_dev) => todo!()
-                                            // {
-                                            //     ModuleThumbnail::new(
-                                            //         state.sidebar.asset_edit_state.asset.id(),
-                                            //         Some((*pro_dev).clone()),
-                                            //         ThumbnailFallback::Module,
-                                            //         DraftOrLive::Draft,
-                                            //     ).render_live(Some("thumbnail"))
-                                            // },
+                                            ProDevSpot::Unit(_unit) =>
+                                            {
+                                                html!("div", {
+                                                    .prop("slot", "unit")
+                                                    .text(format!("Unit {}", state.index + 1).as_str())
+                                                })
+                                            },
                                         }
                                     })
                                 }
@@ -200,6 +198,32 @@ impl SpotState {
                         .child_signal(state.sidebar.highlight_modules.signal_cloned().map(clone!(state, elem => move |highlight| {
                             match highlight {
                                 Some(ModuleHighlight::Module(idx)) => {
+                                    if idx == state.index {
+                                        // Make sure that the module window is visible to the
+                                        // teacher.
+                                        elem.scroll_into_view_with_scroll_into_view_options(ScrollIntoViewOptions::new().behavior(ScrollBehavior::Smooth));
+                                        Some(html!("empty-fragment", {
+                                            .apply(OverlayHandle::lifecycle(clone!(state, elem => move || {
+                                                html!("overlay-tooltip-error", {
+                                                    .text("This part of your JIG needs attention. Add content or delete.")
+                                                    .prop("target", elem.clone())
+                                                    .prop("targetAnchor", "tr")
+                                                    .prop("contentAnchor", "oppositeH")
+                                                    .prop("marginX", 75i32)
+                                                    .prop("closeable", true)
+                                                    .prop("strategy", "track")
+                                                    .style("width", "350px")
+                                                    .event(clone!(state => move |_:events::Close| {
+                                                        state.sidebar.highlight_modules.set_neq(None);
+                                                    }))
+                                                })
+                                            })))
+                                        }))
+                                    } else {
+                                        None
+                                    }
+                                },
+                                Some(ModuleHighlight::Unit(idx)) => {
                                     if idx == state.index {
                                         // Make sure that the module window is visible to the
                                         // teacher.

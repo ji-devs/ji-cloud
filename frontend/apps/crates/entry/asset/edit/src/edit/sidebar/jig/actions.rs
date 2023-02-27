@@ -104,7 +104,7 @@ pub fn on_iframe_message(state: Rc<Sidebar>, message: ModuleToJigEditorMessage) 
                     }),
                     SidebarSpotItem::ProDev(item) => item.as_ref().map(|item| match &**item {
                         ProDevSpot::Cover(item) => item.id,
-                        ProDevSpot::Item(_) => unreachable!("Only Units should be here"),
+                        ProDevSpot::Unit(_) => unreachable!("Only Units should be here"),
                     }),
                 };
                 match current_module_id {

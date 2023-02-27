@@ -1,4 +1,4 @@
-use crate::asset::{CoursePlayerOptions, JigPlayerOptions};
+use crate::asset::{CoursePlayerOptions, JigPlayerOptions, ProDevPlayerOptions};
 use serde::{Deserialize, Serialize};
 use shared::domain::{
     asset::{AssetId, AssetType, DraftOrLive},
@@ -277,6 +277,7 @@ pub enum ProDevEditRoute {
 pub enum AssetPlayRoute {
     Jig(JigId, Option<ModuleId>, JigPlayerOptions),
     Course(CourseId, CoursePlayerOptions),
+    ProDev(ProDevId, Option<ProDevUnitId>, ProDevPlayerOptions),
 }
 
 #[derive(Debug, Clone)]
@@ -523,6 +524,12 @@ impl Route {
                 Self::Asset(AssetRoute::Edit(AssetEditRoute::Course(
                     CourseId(Uuid::from_str(course_id).unwrap_ji()),
                     CourseEditRoute::Cover(ModuleId(Uuid::from_str(cover_id).unwrap_ji())),
+                )))
+            }
+            ["asset", "edit", "pro-dev", pro_dev_id] => {
+                Self::Asset(AssetRoute::Edit(AssetEditRoute::ProDev(
+                    ProDevId(Uuid::from_str(pro_dev_id).unwrap_ji()),
+                    ProDevEditRoute::Landing,
                 )))
             }
             ["asset", "edit", "pro-dev", pro_dev_id, "unit"] => {
@@ -840,6 +847,7 @@ impl From<&Route> for String {
                         let query = serde_qs::to_string(&player_settings).unwrap_ji();
                         format!("/asset/play/course/{}?{}", course_id.0, query)
                     }
+                    AssetPlayRoute::ProDev(_pro_dev_id, _unit_id, _player_settings) => todo!()
                 },
             },
             Route::Module(route) => match route {

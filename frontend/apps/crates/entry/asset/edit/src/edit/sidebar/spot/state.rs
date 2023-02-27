@@ -4,7 +4,7 @@ use futures_signals::signal::{Mutable, Signal, SignalExt};
 use std::cell::RefCell;
 use std::rc::Rc;
 use utils::drag::Drag;
-use utils::routes::{AssetEditRoute, JigEditRoute};
+use utils::routes::{AssetEditRoute, JigEditRoute, ProDevEditRoute};
 use web_sys::HtmlElement;
 
 pub struct SpotState {
@@ -79,7 +79,7 @@ impl SpotState {
                 SidebarSpotItem::ProDev(pro_dev_spot) => {
                     match pro_dev_spot {
                         None => "empty",
-                        Some(_) => "thumbnail",
+                        Some(_) => "unit",
                     }
                 },
             }
@@ -117,6 +117,14 @@ impl SpotState {
                             AssetEditRoute::Jig(_, JigEditRoute::Module(module_id)) if module_id == &module.id
                         )
                     }
+                    // SidebarSpotItem::ProDev(Some(unit)) => {
+                    //     let unit =  
+
+                    //     matches!(
+                    //         route,
+                    //         AssetEditRoute::ProDev(_, ProDevEditRoute::Unit(unit_id)) if unit_id == &**unit.id
+                    //     )
+                    // }
                     _ => false
                 }
             }))

@@ -170,7 +170,14 @@ where
                                 .await
                                 .map(|course| Asset::Course(course))
                         },
-                        AssetId::ProDevId(_) => todo!()
+                        AssetId::ProDevId(pro_dev_id) => {
+                            endpoints::pro_dev::GetDraft::api_no_auth(
+                                ProDevGetDraftPath(pro_dev_id.clone()),
+                                None
+                            )
+                                .await
+                                .map(|pro_dev| Asset::ProDev(pro_dev))
+                        }
                     };
 
                     match resp {

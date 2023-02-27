@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use dominator::{html, Dom};
 use futures_signals::signal::{from_future, SignalExt};
+use shared::api::endpoints::pro_dev;
 use shared::domain::asset::{Asset, DraftOrLive, PrivacyLevel};
 use utils::ages::AgeRangeVecExt;
 use utils::metadata::{get_age_ranges, get_resource_types};
@@ -102,7 +103,12 @@ pub fn render_asset_card(asset: &Asset, config: AssetCardConfig) -> Dom {
                         None => dom
                     }
                 },
-                Asset::ProDev(_) => todo!(),
+                Asset::ProDev(pro_dev) => {
+                    dom.child(html!("span", {
+                        .prop("slot", "middle-indicator")
+                        .text(&format!("{} Units", pro_dev.pro_dev_data.units.len()))
+                    }))
+                },
 
             }
         })

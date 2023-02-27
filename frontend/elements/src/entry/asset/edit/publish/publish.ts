@@ -183,6 +183,7 @@ export class _ extends LitElement {
                                     <slot name="catagories-select"></slot>
                                     <slot name="category-labels"></slot>
                                 </div>
+                                <slot name="duration"></slot>
                             </div>
                             ${
                                 !this.resourceOnTop ? html`

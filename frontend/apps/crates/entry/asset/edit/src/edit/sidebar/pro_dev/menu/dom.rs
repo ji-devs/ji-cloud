@@ -17,7 +17,7 @@ impl ProDevMenu {
         html!("menu-kebab", {
             .prop("slot", "menu")
             .child(html!("pro_dev-edit-sidebar-module-menu", {
-                .children(state.menu_items())
+                .children(state.menu_units())
             }))
             .event_with_options(&EventOptions::bubbles(), |e: events::Click| {
                 e.stop_propagation();
@@ -28,26 +28,26 @@ impl ProDevMenu {
         })
     }
 
-    fn menu_items(self: &Rc<Self>) -> Vec<Dom> {
+    fn menu_units(self: &Rc<Self>) -> Vec<Dom> {
         let state = self;
         let module = state.spot_state.spot.item.unwrap_pro_dev();
-        state.menu_items_pro_dev(module)
+        state.menu_units_pro_dev(module)
     }
 
-    fn menu_items_pro_dev(self: &Rc<Self>, module: &Option<Rc<ProDevSpot>>) -> Vec<Dom> {
+    fn menu_units_pro_dev(self: &Rc<Self>, module: &Option<Rc<ProDevSpot>>) -> Vec<Dom> {
         let state = self;
         match module {
             Some(module) => match &**module {
                 ProDevSpot::Cover(cover) => {
                     vec![state.cover_edit(cover.id)]
                 }
-                ProDevSpot::Item(_pro_dev_unit) => {
+                ProDevSpot::Unit(_pro_dev_unit) => {
                     vec![
-                        state.item_info(),
-                        state.item_play(),
-                        state.item_move_up(),
-                        state.item_move_down(),
-                        state.item_delete(),
+                        state.unit_info(),
+                        state.unit_play(),
+                        state.unit_move_up(),
+                        state.unit_move_down(),
+                        state.unit_delete(),
                     ]
                 }
             },
@@ -91,7 +91,7 @@ impl ProDevMenu {
         })
     }
 
-    fn item_info(self: &Rc<Self>) -> Dom {
+    fn unit_info(self: &Rc<Self>) -> Dom {
         let state = self;
         html!("menu-line", {
             .prop("slot", "lines")
@@ -102,7 +102,7 @@ impl ProDevMenu {
         })
     }
 
-    fn item_play(self: &Rc<Self>) -> Dom {
+    fn unit_play(self: &Rc<Self>) -> Dom {
         let state = self;
         html!("menu-line", {
             .prop("slot", "lines")
@@ -113,7 +113,7 @@ impl ProDevMenu {
         })
     }
 
-    fn item_move_up(self: &Rc<Self>) -> Dom {
+    fn unit_move_up(self: &Rc<Self>) -> Dom {
         let state = self;
         html!("menu-line", {
             .prop("slot", "lines")
@@ -125,7 +125,7 @@ impl ProDevMenu {
         })
     }
 
-    fn item_move_down(self: &Rc<Self>) -> Dom {
+    fn unit_move_down(self: &Rc<Self>) -> Dom {
         let state = self;
         html!("menu-line", {
             .prop("slot", "lines")
@@ -137,7 +137,7 @@ impl ProDevMenu {
         })
     }
 
-    fn item_delete(self: &Rc<Self>) -> Dom {
+    fn unit_delete(self: &Rc<Self>) -> Dom {
         let state = self;
         html!("menu-line", {
             .prop("slot", "lines")

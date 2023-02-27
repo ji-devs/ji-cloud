@@ -13,6 +13,8 @@ use crate::edit::sidebar::{
 use dominator::clone;
 use shared::domain::asset::Asset;
 use shared::domain::module::ModuleKind;
+use shared::domain::pro_dev::unit::ProDevUnit;
+use shared::domain::pro_dev::ProDevResponse;
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::str::FromStr;
@@ -109,6 +111,7 @@ pub fn delete(state: Rc<SpotState>) {
 }
 
 pub fn assign_to_empty_spot(state: &Rc<SpotState>, data: String) {
+    log::info!("data: {}", data);
     state.sidebar.loader.load(clone!(state => async move {
         if state.spot.item.is_none() {
             let spot = if let Ok(kind) = ModuleKind::from_str(&data) {
@@ -129,11 +132,26 @@ pub fn assign_to_empty_spot(state: &Rc<SpotState>, data: String) {
                         asset
                     ).await
                 )
-            } else {
+            }
+            // else if let Ok(unit) = ModuleKind::from_str(&data) {
+            //     let mut properties = HashMap::new();
+            //     properties.insert("Activity Kind", format!("Added asset {}", asset.display_name()));
+            //     analytics::event("Course Edit Add Activity", Some(properties));
+
+            //     Some(
+            //         course_spot_actions::assign_unit_to_empty_spot(
+            //             &state,
+            //             asset
+            //         ).await
+            //     )
+            // }
+            else {
                 None
             };
 
             if let Some(module) = spot {
+
+                log::info!("module value: {:?}", module);
                 // Instead of replacing the module at the index, we remove the old module and
                 // add the new one. This is slightly less efficient because it fires signals
                 // for the entire list of modules, however, it is necessary so that the modules
@@ -155,7 +173,7 @@ pub fn assign_to_empty_spot(state: &Rc<SpotState>, data: String) {
                 };
 
                 // if this is the empty module at the end
-                if !placeholder_exists {
+                if !placeholder_exists && !state.sidebar.asset_edit_state.asset_id.is_pro_dev_id() {
                     modules.push_cloned(SidebarSpot::new_empty(&state.sidebar.asset_edit_state.asset_id));
                 }
 
@@ -166,6 +184,7 @@ pub fn assign_to_empty_spot(state: &Rc<SpotState>, data: String) {
                     drop(modules);
                     course_spot_actions::save_course(&state).await;
                 }
+
             };
         }
     }));

@@ -5,7 +5,10 @@ use dominator::clone;
 use shared::domain::asset::{Asset, AssetId};
 use utils::{
     prelude::ModuleToAssetEditorMessage,
-    routes::{AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, ResourceEditRoute, Route},
+    routes::{
+        AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, ProDevEditRoute,
+        ResourceEditRoute, Route,
+    },
     storage,
     unwrap::UnwrapJiExt,
 };
@@ -31,7 +34,9 @@ impl AssetEditState {
                 Asset::Resource(_) => {
                     // do nothing, resource doesn't have the sidebar
                 },
-                Asset::ProDev(_) => todo!(),
+                Asset::ProDev(pro_dev) => {
+                    state.get_pro_dev_spots(pro_dev).await;
+                },
             };
             state.asset.fill_from_asset(asset);
         }));
@@ -44,7 +49,9 @@ impl AssetEditState {
                 resource_actions::load_resource(resource_id).await?.into()
             }
             AssetId::CourseId(course_id) => course_actions::load_course(course_id).await?.into(),
-            AssetId::ProDevId(_) => todo!(),
+            AssetId::ProDevId(pro_dev_id) => {
+                pro_dev_actions::load_pro_dev(&pro_dev_id).await?.into()
+            }
         };
         Ok(asset)
     }
@@ -87,7 +94,13 @@ impl AssetEditState {
                     ResourceEditRoute::Landing,
                 ))));
             }
-            AssetId::ProDevId(_) => todo!(),
+            AssetId::ProDevId(pro_dev_id) => {
+                self.set_route_pro_dev(ProDevEditRoute::Publish);
+                Route::push_state(Route::Asset(AssetRoute::Edit(AssetEditRoute::ProDev(
+                    pro_dev_id,
+                    ProDevEditRoute::Publish,
+                ))));
+            }
         }
     }
 }

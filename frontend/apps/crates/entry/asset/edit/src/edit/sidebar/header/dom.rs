@@ -8,7 +8,7 @@ use crate::edit::sidebar::{jig::actions::get_player_settings, state::SidebarSett
 
 use super::super::{actions as sidebar_actions, state::Sidebar as SidebarState};
 use utils::{
-    asset::{AssetPlayerOptions, CoursePlayerOptions},
+    asset::{AssetPlayerOptions, CoursePlayerOptions, ProDevPlayerOptions},
     prelude::*,
 };
 
@@ -25,7 +25,7 @@ impl HeaderDom {
         html!("jig-edit-sidebar-header", {
             .prop("slot", "header")
             // TODO: remove once course has setting
-            .prop("hasSettings", !asset_edit_state.asset_id.is_course_id())
+            .prop("hasSettings", (!asset_edit_state.asset_id.is_course_id() && !asset_edit_state.asset_id.is_pro_dev_id()))
             .prop_signal("collapsed", sidebar_state.collapsed.signal())
             .prop_signal("isModulePage", asset_edit_state.route.signal_cloned().map(|route| {
                 // TODO: change?
@@ -115,15 +115,15 @@ impl HeaderDom {
                                 let settings = AssetPlayerOptions::Course(settings);
                                 asset_edit_state.play_jig.set(Some(settings));
                             }
-                            SidebarSetting::ProDev(_pro_dev) => todo!()
-                            // {
-                            //     let settings = CoursePlayerOptions {
-                            //         draft_or_live: DraftOrLive::Draft,
-                            //         is_student: false
-                            //     };
-                            //     let settings = AssetPlayerOptions::Course(settings);
-                            //     asset_edit_state.play_jig.set(Some(settings));
-                            // }
+                            SidebarSetting::ProDev(_pro_dev) =>
+                            {
+                                let settings = ProDevPlayerOptions {
+                                    draft_or_live: DraftOrLive::Draft,
+                                    is_student: false
+                                };
+                                let settings = AssetPlayerOptions::ProDev(settings);
+                                asset_edit_state.play_jig.set(Some(settings));
+                            }
                         }
                     }))
                 }),

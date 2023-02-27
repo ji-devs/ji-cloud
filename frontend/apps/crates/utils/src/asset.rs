@@ -8,7 +8,7 @@ use shared::{
         jig::{
             AudioBackground, AudioFeedbackNegative, AudioFeedbackPositive, JigPlayerSettings,
             TextDirection,
-        },
+        }, pro_dev::unit::ProDevUnitValue,
     },
     media::{MediaLibrary, PngImageFile},
 };
@@ -222,10 +222,20 @@ pub struct CoursePlayerOptions {
     pub is_student: bool,
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+pub struct ProDevPlayerOptions {
+    #[serde(default)]
+    pub draft_or_live: DraftOrLive,
+
+    #[serde(default)]
+    pub is_student: bool,
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum AssetPlayerOptions {
     Jig(JigPlayerOptions),
     Course(CoursePlayerOptions),
+    ProDev(ProDevPlayerOptions),
 }
 
 impl AssetPlayerOptions {
@@ -233,6 +243,7 @@ impl AssetPlayerOptions {
         match self {
             Self::Jig(options) => options.draft_or_live.is_draft(),
             Self::Course(options) => options.draft_or_live.is_draft(),
+            Self::ProDev(options) => options.draft_or_live.is_draft(),
         }
     }
 
@@ -258,7 +269,17 @@ impl From<CoursePlayerOptions> for AssetPlayerOptions {
     }
 }
 
+impl From<ProDevPlayerOptions> for AssetPlayerOptions {
+    fn from(player_option: ProDevPlayerOptions) -> Self {
+        AssetPlayerOptions::ProDev(player_option)
+    }
+}
+
 pub trait ResourceContentExt {
+    fn get_link(&self) -> String;
+}
+
+pub trait ProDevUnitValueExt {
     fn get_link(&self) -> String;
 }
 
@@ -271,6 +292,20 @@ impl ResourceContentExt for ResourceContent {
             ResourceContent::AudioId(audio_id) => audio_lib_url(MediaLibrary::User, *audio_id),
             ResourceContent::PdfId(pdf_id) => pdf_lib_url(MediaLibrary::User, *pdf_id),
             ResourceContent::Link(url) => url.to_string(),
+        }
+    }
+}
+
+impl ProDevUnitValueExt for ProDevUnitValue {
+    fn get_link(&self) -> String {
+        match self {
+            ProDevUnitValue::ImageId(image_id) => {
+                image_lib_url(MediaLibrary::User, PngImageFile::Original, *image_id)
+            }
+            ProDevUnitValue::AudioId(audio_id) => audio_lib_url(MediaLibrary::User, *audio_id),
+            ProDevUnitValue::PdfId(pdf_id) => pdf_lib_url(MediaLibrary::User, *pdf_id),
+            ProDevUnitValue::Link(url) => url.to_string(),
+            ProDevUnitValue::Video(_) => todo!()
         }
     }
 }

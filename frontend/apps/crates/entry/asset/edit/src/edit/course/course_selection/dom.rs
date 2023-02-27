@@ -112,6 +112,7 @@ impl CourseSelection {
                     PlayerPopup::new(
                         asset_id,
                         None,
+                        None,
                         settings,
                         PreviewPopupCallbacks::new(close)
                     ).render(Some("player"))
