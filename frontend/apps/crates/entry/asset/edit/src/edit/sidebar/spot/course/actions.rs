@@ -1,5 +1,5 @@
 use super::super::super::spot::state::SpotState;
-use crate::edit::sidebar::{CourseSpot, ProDevSpot, SidebarSpot, SidebarSpotItem};
+use crate::edit::sidebar::{CourseSpot, SidebarSpot, SidebarSpotItem};
 use itertools::Itertools;
 use shared::{
     api::endpoints,

@@ -31,7 +31,7 @@ impl HeaderDom {
                 // TODO: change?
                 matches!(
                     route,
-                    AssetEditRoute::Jig(_, JigEditRoute::Landing) | AssetEditRoute::Course(_, CourseEditRoute::Landing)
+                    AssetEditRoute::Jig(_, JigEditRoute::Landing) | AssetEditRoute::Course(_, CourseEditRoute::Landing) | AssetEditRoute::ProDev(_, ProDevEditRoute::Landing)
                 )
             }))
             .apply(|dom| {

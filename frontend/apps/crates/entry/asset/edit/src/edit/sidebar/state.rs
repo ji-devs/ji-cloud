@@ -15,6 +15,7 @@ use super::super::state::AssetEditState;
 /// Determines which window in the sidebar should be highlighted and show an error tooltip
 #[derive(Clone, PartialEq)]
 pub enum ModuleHighlight {
+    Unit(usize),
     /// Module window with the index of the module in the `modules` list
     Module(usize),
     /// Publish window
@@ -152,7 +153,7 @@ impl SidebarSpot {
     pub fn new_pro_dev_unit(unit: ProDevUnit) -> Rc<Self> {
         Rc::new(Self {
             is_incomplete: Mutable::new(false),
-            item: SidebarSpotItem::ProDev(Some(Rc::new(ProDevSpot::Item(unit)))),
+            item: SidebarSpotItem::ProDev(Some(Rc::new(ProDevSpot::Unit(unit)))),
         })
     }
 }
@@ -208,7 +209,7 @@ pub enum CourseSpot {
 #[derive(Clone, Debug)]
 pub enum ProDevSpot {
     Cover(LiteModule),
-    Item(ProDevUnit),
+    Unit(ProDevUnit),
 }
 
 // #[derive(Clone, Debug)]

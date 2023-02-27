@@ -2,10 +2,12 @@ use crate::audio::mixer::AUDIO_MIXER;
 use dominator::{clone, Dom, DomHandle};
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
+use shared::api::endpoints::pro_dev;
 use shared::domain::asset::{Asset, AssetId, AssetType, DraftOrLive, PrivacyLevel};
 use shared::domain::course::CourseGetDraftPath;
 use shared::domain::jig::player::ModuleConfig;
 use shared::domain::module::body::{ModuleAssist, ModuleAssistType};
+use shared::domain::pro_dev::ProDevGetDraftPath;
 use shared::domain::resource::ResourceGetDraftPath;
 use shared::{
     api::endpoints::{self, module::*},
@@ -170,7 +172,14 @@ where
                                 .await
                                 .map(|course| Asset::Course(course))
                         },
-                        AssetId::ProDevId(_) => todo!()
+                        AssetId::ProDevId(pro_dev_id) => {
+                            endpoints::pro_dev::GetDraft::api_no_auth(
+                                ProDevGetDraftPath(pro_dev_id.clone()),
+                                None
+                            )
+                                .await
+                                .map(|pro_dev| Asset::ProDev(pro_dev))
+                        }
                     };
 
                     match resp {
