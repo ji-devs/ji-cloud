@@ -94,7 +94,7 @@ pub fn render(state: Rc<State>) -> Dom {
                         SettingsButtonBuilder::new(
                             SettingsButtonKind::custom_kind(
                                 SettingsButtonKind::TimeLimit,
-                                "Time limit (seconds) per question",
+                                "Time limit per question",
                             ),
                             clone!(state => move || {
                                 state.base.play_settings.has_time_limit
