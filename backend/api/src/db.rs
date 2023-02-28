@@ -1,5 +1,6 @@
 pub(crate) mod animation;
 pub(crate) mod audio;
+pub(crate) mod billing;
 pub(crate) mod category;
 pub(crate) mod circle;
 pub(crate) mod course;

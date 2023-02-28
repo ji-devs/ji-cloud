@@ -81,6 +81,9 @@ pub mod module;
 /// ProDev endpoints
 pub mod pro_dev;
 
+/// Billing endpoints
+pub mod billing;
+
 /// Item that can be part of PathParts
 pub trait PathPart {
     /// string value to replace placeholder with

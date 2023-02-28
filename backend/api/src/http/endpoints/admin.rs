@@ -1,13 +1,16 @@
 use actix_files::NamedFile;
 use actix_web::{
-    web::{Data, Path, Query, ServiceConfig},
+    web::{Data, Json, Path, Query, ServiceConfig},
     HttpRequest, HttpResponse,
 };
 use chrono::{Duration, Utc};
 use core::settings::RuntimeSettings;
 use serde::ser::Serialize;
 use shared::{
-    api::{endpoints::admin, ApiEndpoint, PathParts},
+    api::{
+        endpoints::admin::{self, CreateUpdateSubscriptionPlan},
+        ApiEndpoint, PathParts,
+    },
     domain::{
         admin::{ExportDataRequest, ExportType},
         session::NewSessionResponse,
@@ -21,6 +24,16 @@ use crate::{
     extractor::{ScopeAdmin, TokenUserNoCsrfWithScope, TokenUserWithScope},
     token::{create_auth_token, SessionMask},
 };
+
+async fn create_or_update_subscription_plan(
+    _auth: TokenUserWithScope<ScopeAdmin>,
+    db: Data<PgPool>,
+    req: Json<<CreateUpdateSubscriptionPlan as ApiEndpoint>::Req>,
+) -> actix_web::Result<HttpResponse, error::Server> {
+    db::billing::upsert_subscription_plan(&db, req.into_inner()).await?;
+
+    Ok(HttpResponse::Created().finish())
+}
 
 /// Impersonate another user
 async fn impersonate(
@@ -134,5 +147,11 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <admin::ExportData as ApiEndpoint>::Path::PATH,
         admin::ExportData::METHOD.route().to(export_data),
+    )
+    .route(
+        <admin::CreateUpdateSubscriptionPlan as ApiEndpoint>::Path::PATH,
+        admin::CreateUpdateSubscriptionPlan::METHOD
+            .route()
+            .to(create_or_update_subscription_plan),
     );
 }
