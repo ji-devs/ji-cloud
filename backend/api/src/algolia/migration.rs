@@ -68,7 +68,6 @@ pub(crate) async fn jig_index(
                 .single(Attribute("language".to_owned()))
                 .single(Attribute("other_keywords".to_owned()))
                 .single(Attribute("translated_name".to_owned()))
-                .single(Attribute("rating".to_owned()))
                 .finish(),
         ),
         attributes_for_faceting: Some(vec![
@@ -82,6 +81,7 @@ pub(crate) async fn jig_index(
             FacetAttribute::filter_only(Attribute("categories".to_owned())),
             FacetAttribute::filter_only(Attribute("resource_types".to_owned())),
             FacetAttribute::filter_only(Attribute("language".to_owned())),
+            FacetAttribute::filter_only(Attribute("rating".to_owned())),
         ]),
     };
 
@@ -257,7 +257,6 @@ pub(crate) async fn resource_index(
                 .single(Attribute("language".to_owned()))
                 .single(Attribute("other_keywords".to_owned()))
                 .single(Attribute("translated_name".to_owned()))
-                .single(Attribute("rating".to_owned()))
                 .finish(),
         ),
         attributes_for_faceting: Some(vec![
@@ -271,6 +270,7 @@ pub(crate) async fn resource_index(
             FacetAttribute::filter_only(Attribute("categories".to_owned())),
             FacetAttribute::filter_only(Attribute("resource_types".to_owned())),
             FacetAttribute::filter_only(Attribute("language".to_owned())),
+            FacetAttribute::filter_only(Attribute("rating".to_owned())),
         ]),
     };
 
