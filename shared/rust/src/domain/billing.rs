@@ -1,24 +1,29 @@
 //! Types for billing
 
 use chrono::{DateTime, Utc};
+use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 
 use crate::{api::endpoints::PathPart, domain::user::UserId};
 
 /// Stripe customer ID
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type), sqlx(transparent))]
 pub struct CustomerId(String);
 
 /// Stripe payment method ID
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type), sqlx(transparent))]
 pub struct StripePaymentMethodId(String);
 
 /// Last 4 digits of a card number
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type), sqlx(transparent))]
 pub struct Last4(String);
 
 /// Payment network associated with a [Card]
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
 pub enum PaymentNetwork {
     /// Visa
     Visa,
@@ -32,15 +37,18 @@ pub enum PaymentNetwork {
 
 /// Status of the payment method
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[repr(i16)]
 pub enum PaymentMethodStatus {
     /// Payment method is active
-    Active,
+    Active = 0,
     /// Payment method has expired
-    Expired,
+    Expired = 1,
 }
 
 /// A display-only representation of a card
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
 pub struct Card {
     /// The last 4 digits of the card
     pub last_4: Last4,
@@ -79,32 +87,39 @@ pub struct PaymentMethod {
 
 /// The tier a subscription is on. This would apply to any [SubscriptionType]
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[repr(i16)]
 pub enum SubscriptionTier {
     /// Basic
-    Basic,
+    Basic = 0,
     /// Pro
-    Pro,
+    Pro = 1,
 }
 
 /// Stripe subscription ID
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type), sqlx(transparent))]
 pub struct StripeSubscriptionId(String);
 
 /// Stripe product ID
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type), sqlx(transparent))]
 pub struct StripeProductId(String);
 
 /// Stripe price ID
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type), sqlx(transparent))]
 pub struct StripePriceId(String);
 
 /// The subscriptions billing interval
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[repr(i16)]
 pub enum BillingInterval {
     /// Subscription is billed monthly
-    Monthly,
+    Monthly = 0,
     /// Subscription is billed yearly
-    Annually,
+    Annually = 1,
 }
 
 /// Status of a subscription
@@ -153,22 +168,35 @@ pub struct Subscription {
 
 /// The limit of how many accounts can be associated with the subscription. [None] means unlimited.
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct AccountLimit(Option<usize>);
+#[cfg_attr(feature = "backend", derive(sqlx::Type), sqlx(transparent))]
+pub struct AccountLimit(i64);
+
+impl From<i64> for AccountLimit {
+    fn from(value: i64) -> Self {
+        Self(value)
+    }
+}
 
 /// The type of subscription
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[repr(i16)]
 pub enum SubscriptionType {
     /// An individual subscription
-    Individual,
+    Individual = 0,
     /// A school subscription
-    School,
+    School = 1,
 }
 
 /// Stripe invoice number
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type), sqlx(transparent))]
 pub struct InvoiceNumber(String);
 
 /// Represents a value amount in cents
-pub struct AmountInCents(usize);
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type), sqlx(transparent))]
+pub struct AmountInCents(i64);
 
 wrap_uuid! {
     /// Local charge ID
@@ -200,6 +228,8 @@ wrap_uuid! {
 /// A subscription plan
 ///
 /// In Stripe this would correspond to a Price within a Product.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
 pub struct SubscriptionPlan {
     /// Local ID of the subscription plan
     pub plan_id: PlanId,
@@ -216,10 +246,16 @@ pub struct SubscriptionPlan {
     /// The account limit for this subscription
     ///
     /// For [SubscriptionType::Individual] subscriptions, this will _always_ be `Some(1)`.
-    pub account_limit: AccountLimit,
+    pub account_limit: Option<AccountLimit>,
     /// Current price of subscription in cents
     pub amount_in_cents: AmountInCents,
+    /// When the plan was originally created.
+    pub created_at: DateTime<Utc>,
+    /// When the plan was last updated.
+    pub updated_at: Option<DateTime<Utc>>,
 }
+
+make_path_parts!(SubscriptionPlanPath => "/v1/admin/plans");
 
 // TODO Add stripe billing fields to UserProfile
 // /// The user's customer ID

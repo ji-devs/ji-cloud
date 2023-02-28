@@ -3,6 +3,7 @@ use crate::{
     api::Method,
     domain::{
         admin::{ExportDataPath, ExportDataRequest},
+        billing::{SubscriptionPlan, SubscriptionPlanPath},
         session::{ImpersonatePath, NewSessionResponse},
     },
     error::{ApiError, EmptyError},
@@ -26,4 +27,14 @@ impl ApiEndpoint for ExportData {
     type Res = ();
     type Err = ApiError<()>;
     const METHOD: Method = Method::Get;
+}
+
+/// Create or update a subscription plan
+pub struct CreateUpdateSubscriptionPlan;
+impl ApiEndpoint for CreateUpdateSubscriptionPlan {
+    type Req = SubscriptionPlan;
+    type Res = ();
+    type Path = SubscriptionPlanPath;
+    type Err = EmptyError;
+    const METHOD: Method = Method::Post;
 }
