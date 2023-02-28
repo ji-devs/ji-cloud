@@ -732,6 +732,11 @@ pub struct JigSearchQuery {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub page_limit: Option<u32>,
+
+    /// The hits per page to be returned
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_rated: Option<JigRating>,
 }
 
 /// Response for successful search.
