@@ -36,7 +36,7 @@ impl ShareAsset {
     pub fn embed_code(&self) -> String {
         let link = self.asset_link(true);
         format!(
-            r#"<iframe src="{}" width="960" height="540" allow="autoplay; fullscreen"></iframe>"#,
+            r#"<iframe src="{}" width="960" height="540" allow="autoplay; fullscreen" frameborder="0"></iframe>"#,
             link
         )
     }
