@@ -6,12 +6,12 @@ use shared::domain::{
     asset::OrderBy,
     meta::{Affiliation, AgeRange},
 };
-use utils::routes::AdminCurationRoute;
+use utils::routes::AdminJigCurationRoute;
 
 use super::EditableJig;
 
-pub struct Curation {
-    pub route: Mutable<AdminCurationRoute>,
+pub struct JigCuration {
+    pub route: Mutable<AdminJigCurationRoute>,
     pub jigs: MutableVec<Rc<EditableJig>>,
     pub fetch_mode: RefCell<FetchMode>,
     pub loader: AsyncLoader,
@@ -22,8 +22,8 @@ pub struct Curation {
     pub order_by: Mutable<OrderBy>,
 }
 
-impl Curation {
-    pub fn new(route: AdminCurationRoute) -> Rc<Self> {
+impl JigCuration {
+    pub fn new(route: AdminJigCurationRoute) -> Rc<Self> {
         Rc::new(Self {
             route: Mutable::new(route),
             jigs: MutableVec::new(),

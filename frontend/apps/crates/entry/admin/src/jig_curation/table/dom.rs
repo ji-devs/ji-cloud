@@ -1,4 +1,4 @@
-use crate::curation::EditableJig;
+use crate::jig_curation::EditableJig;
 
 use super::state::*;
 use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
@@ -14,10 +14,10 @@ use shared::domain::{
     meta::{AffiliationId, AgeRangeId},
 };
 use std::rc::Rc;
-use utils::{events, languages::Language, routes::AdminCurationRoute, unwrap::UnwrapJiExt};
+use utils::{events, languages::Language, routes::AdminJigCurationRoute, unwrap::UnwrapJiExt};
 use web_sys::HtmlSelectElement;
 
-impl CurationTable {
+impl JigTable {
     pub fn render(self: Rc<Self>) -> Dom {
         let order_by_options = vec![OrderBy::PublishedAt, OrderBy::CreatedAt];
 
@@ -132,7 +132,7 @@ impl CurationTable {
                         html!("a", {
                             .text_signal(jig.display_name.signal_cloned())
                             .event(clone!(state => move |_: events::Click| {
-                                let route = AdminCurationRoute::Jig(jig_id);
+                                let route = AdminJigCurationRoute::Jig(jig_id);
                                 state.curation_state.navigate_to(route);
                             }))
                         }),

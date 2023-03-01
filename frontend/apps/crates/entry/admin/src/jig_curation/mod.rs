@@ -3,7 +3,7 @@ mod dom;
 mod editable_jig;
 mod state;
 
-mod jig;
+mod details;
 mod table;
 
 pub use dom::*;

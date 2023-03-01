@@ -7,12 +7,12 @@ use shared::domain::meta::AgeRange;
 use std::rc::Rc;
 use utils::events;
 
-use crate::curation::jig::state::CurationJig;
+use crate::jig_curation::details::state::JigDetails;
 
 const STR_AGE_LABEL: &str = "Age";
 const STR_AGE_PLACEHOLDER: &str = "Select one or more";
 
-impl CurationJig {
+impl JigDetails {
     pub fn render_ages(self: &Rc<Self>) -> Dom {
         let state = Rc::clone(self);
         html!("input-select", {
@@ -40,7 +40,7 @@ impl CurationJig {
     }
 }
 
-fn render_age(age: &AgeRange, state: Rc<CurationJig>) -> Dom {
+fn render_age(age: &AgeRange, state: Rc<JigDetails>) -> Dom {
     let age_id = age.id;
     html!("input-select-option", {
         .text(&age.display_name)
@@ -58,7 +58,7 @@ fn render_age(age: &AgeRange, state: Rc<CurationJig>) -> Dom {
     })
 }
 
-fn age_value_signal(state: Rc<CurationJig>) -> impl Signal<Item = String> {
+fn age_value_signal(state: Rc<JigDetails>) -> impl Signal<Item = String> {
     map_ref! {
         let selected_ages = state.jig.age_ranges.signal_cloned(),
         let available_ages = state.curation_state.ages.signal_cloned() => {

@@ -15,12 +15,12 @@ use shared::{
 };
 use utils::{
     prelude::ApiEndpointExt,
-    routes::{AdminCurationRoute, AdminRoute, Route},
+    routes::{AdminJigCurationRoute, AdminRoute, Route},
 };
 
-use super::{Curation, EditableJig, FetchMode};
+use super::{EditableJig, FetchMode, JigCuration};
 
-impl Curation {
+impl JigCuration {
     pub fn load_data(self: &Rc<Self>) {
         let state = Rc::clone(self);
         state.loader.load(clone!(state => async move {
@@ -109,9 +109,9 @@ impl Curation {
         }));
     }
 
-    pub fn navigate_to(self: &Rc<Self>, route: AdminCurationRoute) {
+    pub fn navigate_to(self: &Rc<Self>, route: AdminJigCurationRoute) {
         self.route.set(route.clone());
-        Route::Admin(AdminRoute::Curation(route)).push_state();
+        Route::Admin(AdminRoute::JigCuration(route)).push_state();
     }
 
     pub async fn get_jig(self: Rc<Self>, jig_id: JigId) -> Rc<EditableJig> {

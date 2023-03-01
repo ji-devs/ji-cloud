@@ -31,7 +31,7 @@ impl Sidebar {
                     SidebarItem::new(AdminRoute::ImageSearch(None), profile, &curr_route),
                     SidebarItem::new(AdminRoute::ImageTags, profile, &curr_route),
                     SidebarItem::new(
-                        AdminRoute::Curation(AdminCurationRoute::Table),
+                        AdminRoute::JigCuration(AdminJigCurationRoute::Table),
                         profile,
                         &curr_route,
                     ),
@@ -70,7 +70,7 @@ impl SidebarItem {
             AdminRoute::ImageMeta(_, _) => "image-search",
             AdminRoute::ImageSearch(_) => "image-search",
             AdminRoute::Users(_) => "users",
-            AdminRoute::Curation(_) => "curation",
+            AdminRoute::JigCuration(_) => "jig-curation",
             AdminRoute::Images => "images",
             AdminRoute::Export => "export",
             AdminRoute::Landing => "",

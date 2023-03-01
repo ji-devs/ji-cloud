@@ -18,13 +18,13 @@ use futures_signals::{
 
 use crate::{
     categories::dom::CategoriesPage,
-    curation::Curation,
     export::Export,
     image_table::ImageTable,
     images::{
         add::dom::ImageAddPage, meta::dom::ImageMetaPage, search::dom::ImageSearchPage,
         tags::ImageTags,
     },
+    jig_curation::JigCuration,
     locale::{dom::LocalePage, state::LoaderState as LocaleLoaderState},
     sidebar::Sidebar,
     users::Users,
@@ -111,7 +111,7 @@ impl Router {
                                                 AdminRoute::ImageSearch(query) => Some(state.with_child(route, ImageSearchPage::render(query))),
                                                 AdminRoute::ImageTags => Some(state.with_child(route, ImageTags::render(ImageTags::new()))),
                                                 AdminRoute::Users(users_route) => Some(state.with_child(route, Users::new(users_route).render())),
-                                                AdminRoute::Curation(curation_route) => Some(state.with_child(route, Curation::new(curation_route).render())),
+                                                AdminRoute::JigCuration(curation_route) => Some(state.with_child(route, JigCuration::new(curation_route).render())),
                                                 AdminRoute::Images => Some(state.with_child(route, ImageTable::new().render())),
                                                 AdminRoute::Export => Some(state.with_child(route, Export::new().render())),
                                                 _ => Some(state.with_child(route, html!("empty-fragment"))),

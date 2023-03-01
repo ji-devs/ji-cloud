@@ -2,11 +2,11 @@ use std::rc::Rc;
 
 use dominator::clone;
 
-use crate::curation::FetchMode;
+use crate::jig_curation::FetchMode;
 
-use super::state::CurationTable;
+use super::state::JigTable;
 
-impl CurationTable {
+impl JigTable {
     pub fn search_jigs(self: &Rc<Self>, query: String) {
         let state = self;
         let mut fetch_mode = state.curation_state.fetch_mode.borrow_mut();

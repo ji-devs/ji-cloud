@@ -1,4 +1,4 @@
-use super::state::CurationJig;
+use super::state::JigDetails;
 use components::{
     module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback},
     player_popup::{PlayerPopup, PreviewPopupCallbacks},
@@ -8,7 +8,7 @@ use futures_signals::signal::SignalExt;
 use shared::domain::{asset::DraftOrLive, jig::JigRating};
 use std::rc::Rc;
 use utils::{
-    events, routes::AdminCurationRoute, screenshot::call_screenshot_service, unwrap::UnwrapJiExt,
+    events, routes::AdminJigCurationRoute, screenshot::call_screenshot_service, unwrap::UnwrapJiExt,
 };
 use web_sys::{HtmlInputElement, HtmlTextAreaElement};
 
@@ -16,7 +16,7 @@ mod affiliation;
 mod age;
 mod language;
 
-impl CurationJig {
+impl JigDetails {
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self;
         html!("admin-jig-details", {
@@ -75,7 +75,7 @@ impl CurationJig {
                     .prop("kind", "text")
                     .text("Back")
                     .event(clone!(state => move |_: events::Click| {
-                        let route = AdminCurationRoute::Table;
+                        let route = AdminJigCurationRoute::Table;
                         state.curation_state.navigate_to(route);
                     }))
                 }),
@@ -102,7 +102,7 @@ impl CurationJig {
                             .prop("color", "blue")
                             .text("Cancel")
                             .event(clone!(state => move |_: events::Click| {
-                                state.curation_state.navigate_to(AdminCurationRoute::Table);
+                                state.curation_state.navigate_to(AdminJigCurationRoute::Table);
                             }))
                         }),
                         html!("button-rect", {

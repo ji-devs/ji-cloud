@@ -2,13 +2,13 @@ use std::rc::Rc;
 
 use dominator::{clone, html, Dom};
 use futures_signals::signal::{from_future, SignalExt};
-use utils::routes::AdminCurationRoute;
+use utils::routes::AdminJigCurationRoute;
 
-use crate::curation::{jig::state::CurationJig, table::state::CurationTable};
+use crate::jig_curation::{details::state::JigDetails, table::state::JigTable};
 
-use super::Curation;
+use super::JigCuration;
 
-impl Curation {
+impl JigCuration {
     pub fn render(self: &Rc<Self>) -> Dom {
         let state = self;
 
@@ -21,16 +21,16 @@ impl Curation {
             }))
             .child_signal(self.route.signal_ref(clone!(state => move|route| {
                 Some(match route {
-                    AdminCurationRoute::Table => {
-                        CurationTable::new(
+                    AdminJigCurationRoute::Table => {
+                        JigTable::new(
                             Rc::clone(&state)
                         ).render()
                     },
-                    AdminCurationRoute::Jig(jig_id) => {
+                    AdminJigCurationRoute::Jig(jig_id) => {
                         html!("empty-fragment", {
                             .child_signal(from_future(state.clone().get_jig(*jig_id)).map(clone!(state => move|jig| {
                                 jig.map(|jig| {
-                                    CurationJig::new(
+                                    JigDetails::new(
                                         Rc::clone(&state),
                                         jig.id,
                                         jig

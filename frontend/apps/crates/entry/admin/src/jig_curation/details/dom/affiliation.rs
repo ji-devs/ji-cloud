@@ -7,12 +7,12 @@ use shared::domain::meta::Affiliation;
 use std::rc::Rc;
 use utils::events;
 
-use crate::curation::jig::state::CurationJig;
+use crate::jig_curation::details::state::JigDetails;
 
 const STR_AFFILIATION_LABEL: &str = "Affiliation";
 const STR_AFFILIATION_PLACEHOLDER: &str = "Select one or more";
 
-impl CurationJig {
+impl JigDetails {
     pub fn render_affiliations(self: &Rc<Self>) -> Dom {
         let state = Rc::clone(self);
         html!("input-select", {
@@ -40,7 +40,7 @@ impl CurationJig {
     }
 }
 
-fn render_affiliation(affiliation: &Affiliation, state: Rc<CurationJig>) -> Dom {
+fn render_affiliation(affiliation: &Affiliation, state: Rc<JigDetails>) -> Dom {
     let affiliation_id = affiliation.id;
     html!("input-select-option", {
         .text(&affiliation.display_name)
@@ -58,7 +58,7 @@ fn render_affiliation(affiliation: &Affiliation, state: Rc<CurationJig>) -> Dom 
     })
 }
 
-fn affiliation_value_signal(state: Rc<CurationJig>) -> impl Signal<Item = String> {
+fn affiliation_value_signal(state: Rc<JigDetails>) -> impl Signal<Item = String> {
     map_ref! {
         let selected_affiliations = state.jig.affiliations.signal_cloned(),
         let available_affiliations = state.curation_state.affiliations.signal_cloned() => {

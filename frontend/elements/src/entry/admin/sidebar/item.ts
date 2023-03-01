@@ -6,7 +6,7 @@ export type ID =
     | "images"
     | "image-add"
     | "image-search"
-    | "curation"
+    | "jig-curation"
     | "users"
     | "category"
     | "image-tags"
@@ -17,7 +17,7 @@ const STR_LABEL_LOOKUP: { [key in ID]: string } = {
     "images": "Images",
     "image-tags": "Image tags",
     "image-search": "Edit images",
-    "curation": "Curation",
+    "jig-curation": "Jig curation",
     "users": "Users",
     "category": "Edit categories",
     "locale": "Localization",

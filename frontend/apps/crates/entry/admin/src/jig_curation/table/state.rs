@@ -1,15 +1,15 @@
 use dominator_helpers::futures::AsyncLoader;
 use std::rc::Rc;
 
-use crate::curation::Curation;
+use crate::jig_curation::JigCuration;
 
-pub struct CurationTable {
+pub struct JigTable {
     pub loader: AsyncLoader,
-    pub curation_state: Rc<Curation>,
+    pub curation_state: Rc<JigCuration>,
 }
 
-impl CurationTable {
-    pub fn new(curation_state: Rc<Curation>) -> Rc<Self> {
+impl JigTable {
+    pub fn new(curation_state: Rc<JigCuration>) -> Rc<Self> {
         Rc::new(Self {
             loader: AsyncLoader::new(),
             curation_state,

@@ -6,12 +6,12 @@ use utils::{
     languages::{Language, JIG_LANGUAGES},
 };
 
-use crate::curation::jig::state::CurationJig;
+use crate::jig_curation::details::state::JigDetails;
 
 const STR_LANGUAGE_LABEL: &str = "Language of instructions";
 const STR_LANGUAGE_PLACEHOLDER: &str = "Select language";
 
-impl CurationJig {
+impl JigDetails {
     pub fn render_languages(self: &Rc<Self>) -> Dom {
         let state = Rc::clone(self);
         html!("input-select", {
@@ -36,7 +36,7 @@ impl CurationJig {
     }
 }
 
-fn render_language(Language(lang_code, land_label): &Language, state: Rc<CurationJig>) -> Dom {
+fn render_language(Language(lang_code, land_label): &Language, state: Rc<JigDetails>) -> Dom {
     html!("input-select-option", {
         .text(land_label)
         .prop_signal("selected", state.jig.language.signal_cloned().map(clone!(lang_code => move |selected_lang| {
@@ -50,7 +50,7 @@ fn render_language(Language(lang_code, land_label): &Language, state: Rc<Curatio
     })
 }
 
-fn language_value_signal(state: Rc<CurationJig>) -> impl Signal<Item = &'static str> {
+fn language_value_signal(state: Rc<JigDetails>) -> impl Signal<Item = &'static str> {
     state
         .jig
         .language
