@@ -22,9 +22,14 @@ export class _ extends LitElement {
                 :host {
                     display: grid;
                     row-gap: 48px;
-                    padding: 5px 60px;
                     max-width: 1800px;
                     margin: 0 auto;
+                    padding: 5px 40px;
+                }
+                @media (min-width: 1024px) {
+                    :host {
+                        padding: 5px 60px;
+                    }
                 }
                 :host([kind=resource]) {
                     background-color: var(--green-2);
@@ -56,15 +61,18 @@ export class _ extends LitElement {
                 .results {
                     /* display: flex;
                     flex-wrap: wrap; */
-
                     display: grid;
                     grid-template-columns: repeat(auto-fill, 280px);
-                    justify-content: space-between;
+                    /* justify-content: space-between; */
+                    justify-content: space-evenly;
                     row-gap: 60px;
                     column-gap: 30px;
                 }
                 :host([dense]) .results {
                     grid-template-columns: repeat(auto-fill, 216px);
+                }
+                .results ::slotted(*) {
+                    margin: 0 auto;
                 }
                 .load-more {
                     display: grid;
