@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement } from "lit-element";
 
-@customElement("table-order-by-jig")
+@customElement("table-order-by")
 export class _ extends LitElement {
     static styles = [
         css`

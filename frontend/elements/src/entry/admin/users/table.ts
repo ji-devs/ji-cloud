@@ -71,11 +71,11 @@ export class _ extends LitElement {
                 </div>
             </div>
             <div class="table">
-                <admin-table-line-user>
+                <admin-table-line>
                     ${this.headers.map(
             (header) => html`<div class="header-cell">${header}</div>`
         )}
-                </admin-table-line-user>
+                </admin-table-line>
                 <slot></slot>
             </div>
         `;

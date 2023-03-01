@@ -88,7 +88,7 @@ impl UsersTable {
             }))
             .children_signal_vec(state.users_state.users.signal_vec_cloned().map(clone!(state => move |user: Rc<EditableUser>| {
                 let user_id = user.id;
-                html!("admin-table-line-user", {
+                html!("admin-table-line", {
                     .children(&mut [
                         html!("span", {
                             .text_signal(user.username.signal_cloned())

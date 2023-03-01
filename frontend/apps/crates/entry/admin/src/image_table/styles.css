@@ -1,4 +1,4 @@
-admin-table-line-image > * {
+admin-table-line > * {
     display: flex;
     flex-wrap: wrap;
     column-gap: 16px;

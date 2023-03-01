@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement } from "lit-element";
 
-@customElement("admin-table-line-jig")
+@customElement("admin-table-line")
 export class _ extends LitElement {
     static styles = [
         css`

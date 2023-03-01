@@ -30,7 +30,7 @@ impl JigTable {
                     state.search_jigs(e.query());
                 }))
             }))
-            .child(html!("table-order-by-jig", {
+            .child(html!("table-order-by", {
                 .prop("slot", "controls")
                 .child(html!("input-select", {
                     .prop_signal("value", state.curation_state.order_by.signal().map(|order_by| {
@@ -111,7 +111,7 @@ impl JigTable {
             }))
             .children_signal_vec(state.curation_state.jigs.signal_vec_cloned().map(clone!(state => move |jig: Rc<EditableJig>| {
                 let jig_id = jig.id;
-                html!("admin-table-line-jig", {
+                html!("admin-table-line", {
                     .child(html!("div", {
                         .style("display", "grid")
                         .style("grid-template-columns", "repeat(3, 100px)")

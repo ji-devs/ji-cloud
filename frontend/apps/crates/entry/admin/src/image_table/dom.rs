@@ -138,7 +138,7 @@ impl Component<ImageTable> for Rc<ImageTable> {
                 })))
             }))
             .children_signal_vec(state.images.signal_vec_cloned().map(clone!(state => move |image: Rc<EditableImage>| {
-                html!("admin-table-line-image", {
+                html!("admin-table-line", {
                     .children(&mut [
                         html!("span", {
                             .child(html!("input-checkbox", {
