@@ -25,6 +25,8 @@ import "@elements/entry/admin/locale/locale-select-columns";
 import "@elements/entry/admin/locale/locale-select-columns-item";
 import "@elements/entry/admin/jig-curation/jig-table";
 import "@elements/entry/admin/jig-curation/jig-details";
+import "@elements/entry/admin/resource-curation/resource-table";
+import "@elements/entry/admin/resource-curation/resource-details";
 import "@elements/entry/admin/tables/order-by";
 import "@elements/entry/admin/tables/pagination";
 import "@elements/entry/admin/tables/table-line";

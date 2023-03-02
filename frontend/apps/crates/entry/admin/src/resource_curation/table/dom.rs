@@ -1,34 +1,36 @@
-use crate::jig_curation::EditableJig;
-
 use super::state::*;
 use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
 use convert_case::{Case, Casing};
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::{
     map_ref,
-    signal::{Signal, SignalExt},
+    signal::{from_future, Signal, SignalExt},
     signal_vec::SignalVecExt,
 };
 use shared::domain::{
     asset::{DraftOrLive, OrderBy, PrivacyLevel},
-    jig::JigRating,
     meta::{AffiliationId, AgeRangeId},
+    resource::ResourceRating,
 };
 use std::rc::Rc;
-use utils::{events, languages::Language, routes::AdminJigCurationRoute, unwrap::UnwrapJiExt};
+use utils::editable_asset::EditableResource;
+use utils::{
+    asset::ResourceContentExt, events, languages::Language, metadata::get_resource_types,
+    routes::AdminResourceCurationRoute, unwrap::UnwrapJiExt,
+};
 use web_sys::HtmlSelectElement;
 
-impl JigTable {
+impl ResourceTable {
     pub fn render(self: Rc<Self>) -> Dom {
         let order_by_options = vec![OrderBy::PublishedAt, OrderBy::CreatedAt];
 
         let state = self;
-        html!("admin-table-jig", {
+        html!("admin-table-resource", {
             .child(html!("input-search", {
                 .prop("slot", "search")
                 .prop("placeholder", "Search...")
                 .event(clone!(state => move |e: events::CustomSearch| {
-                    state.search_jigs(e.query());
+                    state.search_resources(e.query());
                 }))
             }))
             .child(html!("table-order-by", {
@@ -52,7 +54,7 @@ impl JigTable {
                     }))
                 }))
             }))
-            .child(html!("table-pagination-jig", {
+            .child(html!("table-pagination-resource", {
                 .prop("slot", "controls")
                 .child(html!("fa-button", {
                     .prop("slot", "back")
@@ -110,86 +112,110 @@ impl JigTable {
                     })
                 })))
             }))
-            .children_signal_vec(state.curation_state.jigs.signal_vec_cloned().map(clone!(state => move |jig: Rc<EditableJig>| {
-                let jig_id = jig.id;
+            .children_signal_vec(state.curation_state.resources.signal_vec_cloned().map(clone!(state => move |resource: Rc<EditableResource>| {
+                let resource_id = resource.id;
                 html!("admin-table-line", {
                     .child(html!("div", {
                         .style("display", "grid")
-                        .style("grid-template-columns", "repeat(3, 100px)")
                         .style("align-items", "start")
-                        .style("padding", "0")
-                        .children((0..3).filter_map(|i| {
-                            jig.modules.get(i).map(|module| {
+                        .child_signal(resource.cover.signal_cloned().map(clone!(resource => move|cover| {
+                            cover.map(|cover| {
                                 ModuleThumbnail::new(
-                                    jig.id.into(),
-                                    Some(module.clone()),
+                                    resource.id.into(),
+                                    Some(cover.clone()),
                                     ThumbnailFallback::Asset,
                                     DraftOrLive::Live,
                                 ).render(None)
                             })
-                        }))
+                        })))
                     }))
                     .children(&mut [
                         html!("a", {
-                            .text_signal(jig.display_name.signal_cloned())
+                            .text_signal(resource.display_name.signal_cloned())
                             .event(clone!(state => move |_: events::Click| {
-                                let route = AdminJigCurationRoute::Jig(jig_id);
+                                let route = AdminResourceCurationRoute::Resource(resource_id);
                                 state.curation_state.navigate_to(route);
                             }))
                         }),
-
+                        // html!("span", {
+                        //     .text_signal(resource.description.signal_cloned())
+                        // }),
+                        html!("a", {
+                            .text_signal(map_ref! {
+                                let resource_types = from_future(get_resource_types()),
+                                let resource = resource.resource_signal() => move {
+                                    match (resource_types, resource) {
+                                        (Some(resource_types), Some(resource)) => {
+                                            resource_types
+                                                .iter()
+                                                .find(move|t| t.id == resource.resource_type_id)
+                                                .map(|t| t.display_name.clone())
+                                                .unwrap_or_default()
+                                        },
+                                        _ => String::new()
+                                    }
+                                }
+                            })
+                            .prop_signal("href", resource.resource_signal().map(|resource| {
+                                resource.map(|resource| {
+                                    resource.resource_content.get_link()
+                                })
+                            }))
+                            .prop("target", "_BLANK")
+                        }),
                         html!("span", {
                             .child(html!("fa-button", {
                                 .prop("slot", "block")
-                                .style_signal("color", jig.blocked.signal().map(|blocked| {
+                                .style_signal("color", resource.blocked.signal().map(|blocked| {
                                     match blocked {
                                         true => "red",
                                         false => "green",
                                     }
                                 }))
-                                .prop_signal("icon", jig.blocked.signal().map(|blocked| {
+                                .prop_signal("icon", resource.blocked.signal().map(|blocked| {
                                     match blocked {
                                         true => "fa-solid fa-eye-slash",
                                         false => "fa-solid fa-eye",
                                     }
                                 }))
-                                .prop_signal("title", jig.blocked.signal().map(|blocked| {
+                                .prop_signal("title", resource.blocked.signal().map(|blocked| {
                                     match blocked {
                                         true => "Blocked",
                                         false => "Visible",
                                     }
                                 }))
-                                .event(clone!(jig => move |_: events::Click| {
-                                    let mut blocked = jig.blocked.lock_mut();
+                                .event(clone!(state, resource => move |_: events::Click| {
+                                    let mut blocked = resource.blocked.lock_mut();
                                     *blocked = !*blocked;
-
-                                    jig.save_and_publish();
+                                    state.curation_state.save_and_publish(&resource);
                                 }))
                             }))
                         }),
                         html!("span", {
-                            .text(&jig.author_name)
+                            .text(match &resource.author_name {
+                                Some(author_name) => author_name,
+                                None => "",
+                            })
                         }),
                         html!("star-rating", {
-                            .prop_signal("rating", jig.rating.signal().map(|rating| {
+                            .prop_signal("rating", resource.rating.signal().map(|rating| {
                                 match rating {
                                     Some(rating) => rating as u8,
                                     None => 0,
                                 }
                             }))
-                            .event(clone!(jig => move |e: events::CustomRatingChange| {
+                            .event(clone!(resource => move |e: events::CustomRatingChange| {
                                 let rating = e.rating();
                                 let rating = rating.map(|rating| {
-                                    JigRating::try_from(rating).unwrap_ji()
+                                    ResourceRating::try_from(rating).unwrap_ji()
                                 });
-                                jig.rating.set(rating);
-                                jig.save_and_publish();
+                                resource.rating.set(rating);
                             }))
                         }),
                         html!("label", {
                             .child(html!("select" => HtmlSelectElement, {
                                 .with_node!(select => {
-                                    .prop_signal("value", jig.privacy_level.signal().map(|privacy_level| {
+                                    .prop_signal("value", resource.privacy_level.signal().map(|privacy_level| {
                                         privacy_level.as_str().to_case(Case::Title)
                                     }))
                                     .children(&mut [
@@ -199,31 +225,32 @@ impl JigTable {
                                         html!("option", {
                                             .text(&PrivacyLevel::Unlisted.as_str().to_case(Case::Title))
                                         }),
-                                        // html!("option", {
-                                        //     .text(&PrivacyLevel::Private.as_str().to_case(Case::Title))
-                                        // }),
+                                        html!("option", {
+                                            .text(&PrivacyLevel::Private.as_str().to_case(Case::Title))
+                                        }),
                                     ])
-                                    .event(clone!(jig, select => move |_: events::Change| {
+                                    .event(clone!(state, resource, select => move |_: events::Change| {
                                         let value = select.value().to_case(Case::Lower);
                                         let value = value.parse().unwrap_ji();
-                                        jig.privacy_level.set(value);
-
-                                        jig.save_and_publish();
+                                        resource.privacy_level.set(value);
+                                        state.curation_state.save_and_publish(&resource);
                                     }))
                                 })
                             }))
                         }),
                         html!("span", {
-                            .text(&jig.created_at.format("%b %e, %Y").to_string())
+                            .text(&resource.created_at.format("%b %e, %Y").to_string())
                         }),
                         html!("span", {
-                            .text(&match jig.published_at {
-                                Some(published_at) => published_at.format("%b %e, %Y").to_string(),
-                                None => "".to_string()
-                            })
+                            .text_signal(resource.published_at.signal().map(|published_at| {
+                                match published_at {
+                                    Some(published_at) => published_at.format("%b %e, %Y").to_string(),
+                                    None => "".to_string()
+                                }
+                            }))
                         }),
                         html!("span", {
-                            .text_signal(jig.language.signal_cloned().map(|language| {
+                            .text_signal(resource.language.signal_cloned().map(|language| {
                                 Language::code_to_display_name(&language)
                             }))
                         }),
@@ -231,7 +258,7 @@ impl JigTable {
                             .style("display", "flex")
                             .style("flex-wrap", "wrap")
                             .style("column-gap", "16px")
-                            .children_signal_vec(jig.age_ranges.signal_cloned().map(clone!(state => move |ages_hash| {
+                            .children_signal_vec(resource.age_ranges.signal_cloned().map(clone!(state => move |ages_hash| {
                                 ages_hash.into_iter().map(|age_id| {
                                     html!("span", {
                                         .text_signal(state.age_label(age_id))
@@ -243,7 +270,7 @@ impl JigTable {
                             .style("display", "flex")
                             .style("flex-wrap", "wrap")
                             .style("column-gap", "16px")
-                            .children_signal_vec(jig.affiliations.signal_cloned().map(clone!(state => move |affiliation_hash| {
+                            .children_signal_vec(resource.affiliations.signal_cloned().map(clone!(state => move |affiliation_hash| {
                                 affiliation_hash.into_iter().map(|affiliation_id| {
                                     html!("span", {
                                         .text_signal(state.affiliation_label(affiliation_id))
@@ -251,6 +278,9 @@ impl JigTable {
                                 }).collect()
                             })).to_signal_vec())
                         }),
+                        // html!("span", {
+                        //     .text_signal(resource.other_keywords.signal_cloned())
+                        // }),
                     ])
                 })
             })))

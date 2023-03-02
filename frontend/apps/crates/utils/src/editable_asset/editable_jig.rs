@@ -5,11 +5,13 @@ use std::rc::Rc;
 use chrono::{DateTime, Utc};
 use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::MutableVec;
+use shared::api::endpoints;
 use shared::domain::additional_resource::AdditionalResource;
 use shared::domain::asset::PrivacyLevel;
 use shared::domain::jig::{
-    AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive, JigPlayerSettings,
-    TextDirection,
+    AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive,
+    JigAdminDataUpdatePath, JigPlayerSettings, JigPublishPath, JigRating,
+    JigUpdateAdminDataRequest, JigUpdateDraftDataPath, TextDirection,
 };
 use shared::domain::meta::AffiliationId;
 use shared::domain::module::body::ThemeId;
@@ -19,6 +21,8 @@ use shared::domain::{
     meta::AgeRangeId,
     module::LiteModule,
 };
+
+use crate::prelude::ApiEndpointExt;
 
 #[derive(Clone)]
 pub struct EditableJig {
@@ -43,6 +47,11 @@ pub struct EditableJig {
     pub display_score: Mutable<bool>,
     pub track_assessments: Mutable<bool>,
     pub drag_assist: Mutable<bool>,
+    pub other_keywords: Mutable<String>,
+    pub rating: Mutable<Option<JigRating>>,
+    pub blocked: Mutable<bool>,
+    pub author_name: Option<String>,
+    pub created_at: DateTime<Utc>,
 }
 
 impl From<JigResponse> for EditableJig {
@@ -70,6 +79,11 @@ impl From<JigResponse> for EditableJig {
             display_score: Mutable::new(jig.jig_data.default_player_settings.display_score),
             track_assessments: Mutable::new(jig.jig_data.default_player_settings.track_assessments),
             drag_assist: Mutable::new(jig.jig_data.default_player_settings.drag_assist),
+            other_keywords: Mutable::new(jig.jig_data.other_keywords),
+            rating: Mutable::new(jig.admin_data.rating),
+            blocked: Mutable::new(jig.admin_data.blocked),
+            author_name: jig.author_name,
+            created_at: jig.jig_data.created_at,
         }
     }
 }
@@ -97,6 +111,11 @@ impl From<JigId> for EditableJig {
             display_score: Default::default(),
             track_assessments: Default::default(),
             drag_assist: Default::default(),
+            other_keywords: Default::default(),
+            rating: Default::default(),
+            blocked: Default::default(),
+            author_name: Default::default(),
+            created_at: Default::default(),
         }
     }
 }
@@ -133,6 +152,9 @@ impl EditableJig {
             .set(jig.jig_data.default_player_settings.track_assessments);
         self.drag_assist
             .set(jig.jig_data.default_player_settings.drag_assist);
+        self.other_keywords.set(jig.jig_data.other_keywords);
+        self.rating.set(jig.admin_data.rating);
+        self.blocked.set(jig.admin_data.blocked);
     }
 
     pub fn deep_clone(&self) -> Self {
@@ -159,6 +181,11 @@ impl EditableJig {
             display_score: Mutable::new(self.display_score.get()),
             track_assessments: Mutable::new(self.track_assessments.get()),
             drag_assist: Mutable::new(self.drag_assist.get()),
+            other_keywords: Mutable::new(self.other_keywords.get_cloned()),
+            rating: Mutable::new(self.rating.get()),
+            blocked: Mutable::new(self.blocked.get()),
+            author_name: self.author_name.clone(),
+            created_at: self.created_at,
         }
     }
 
@@ -184,7 +211,38 @@ impl EditableJig {
                 track_assessments: self.track_assessments.get(),
                 drag_assist: self.drag_assist.get(),
             }),
+            other_keywords: Some(self.other_keywords.get_cloned()),
             ..Default::default()
         }
+    }
+
+    pub fn to_update_admin_data_request(&self) -> JigUpdateAdminDataRequest {
+        JigUpdateAdminDataRequest {
+            rating: self.rating.get_cloned(),
+            blocked: Some(self.blocked.get()),
+            ..Default::default()
+        }
+    }
+
+    pub async fn save_draft(&self) -> anyhow::Result<()> {
+        let req = self.to_jig_update_request();
+        endpoints::jig::UpdateDraftData::api_with_auth_empty(
+            JigUpdateDraftDataPath(self.id),
+            Some(req),
+        )
+        .await
+    }
+
+    pub async fn save_admin_data(&self) -> anyhow::Result<()> {
+        let req = self.to_update_admin_data_request();
+        endpoints::jig::JigAdminDataUpdate::api_with_auth_empty(
+            JigAdminDataUpdatePath(self.id),
+            Some(req),
+        )
+        .await
+    }
+
+    pub async fn publish(&self) -> anyhow::Result<()> {
+        endpoints::jig::Publish::api_with_auth_empty(JigPublishPath(self.id), None).await
     }
 }

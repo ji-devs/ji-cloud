@@ -19,7 +19,6 @@ use shared::domain::{
 #[derive(Clone)]
 pub struct EditableCourse {
     pub id: CourseId,
-    // cover and modules only for read
     pub cover: Mutable<Option<LiteModule>>,
     pub items: MutableVec<JigId>,
     pub published_at: Mutable<Option<DateTime<Utc>>>,

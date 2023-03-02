@@ -10,6 +10,7 @@ mod image_table;
 mod images;
 mod jig_curation;
 mod locale;
+mod resource_curation;
 mod router;
 mod sidebar;
 mod strings;

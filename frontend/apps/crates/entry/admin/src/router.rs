@@ -26,6 +26,7 @@ use crate::{
     },
     jig_curation::JigCuration,
     locale::{dom::LocalePage, state::LoaderState as LocaleLoaderState},
+    resource_curation::ResourceCuration,
     sidebar::Sidebar,
     users::Users,
 };
@@ -100,6 +101,7 @@ impl Router {
                                             })))
                                         } else {
                                             match route.clone() {
+                                                AdminRoute::Landing => Some(state.with_child(route, html!("empty-fragment"))),
                                                 AdminRoute::Categories=> Some(state.with_child(route, CategoriesPage::render())),
                                                 AdminRoute::Locale => {
                                                     let app_state = Rc::new(LocaleLoaderState::new());
@@ -112,9 +114,9 @@ impl Router {
                                                 AdminRoute::ImageTags => Some(state.with_child(route, ImageTags::render(ImageTags::new()))),
                                                 AdminRoute::Users(users_route) => Some(state.with_child(route, Users::new(users_route).render())),
                                                 AdminRoute::JigCuration(curation_route) => Some(state.with_child(route, JigCuration::new(curation_route).render())),
+                                                AdminRoute::ResourceCuration(curation_route) => Some(state.with_child(route, ResourceCuration::new(curation_route).render())),
                                                 AdminRoute::Images => Some(state.with_child(route, ImageTable::new().render())),
                                                 AdminRoute::Export => Some(state.with_child(route, Export::new().render())),
-                                                _ => Some(state.with_child(route, html!("empty-fragment"))),
                                             }
                                         }
                                     }

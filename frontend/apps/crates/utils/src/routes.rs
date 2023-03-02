@@ -128,6 +128,7 @@ pub enum AdminRoute {
     Categories,
     Locale,
     JigCuration(AdminJigCurationRoute),
+    ResourceCuration(AdminResourceCurationRoute),
     Images,
     Users(AdminUsersRoute),
     ImageSearch(Option<ImageSearchQuery>),
@@ -190,6 +191,7 @@ impl AdminRoute {
             Self::Categories => scopes.contains(&UserScope::ManageCategory),
             Self::Locale => false,
             Self::JigCuration(_) => scopes.contains(&UserScope::AdminJig),
+            Self::ResourceCuration(_) => scopes.contains(&UserScope::AdminJig),
             Self::Images => scopes.contains(&UserScope::AdminJig),
             Self::Users(_) => scopes.contains(&UserScope::Admin),
             Self::ImageSearch(_) | Self::ImageAdd | Self::ImageTags | Self::ImageMeta(_, _) => {
@@ -210,6 +212,12 @@ pub enum AdminJigCurationRoute {
 pub enum AdminUsersRoute {
     Table,
     User(UserId),
+}
+
+#[derive(Debug, Clone)]
+pub enum AdminResourceCurationRoute {
+    Table,
+    Resource(ResourceId),
 }
 
 #[derive(Debug, Clone)]
@@ -406,6 +414,15 @@ impl Route {
             ["admin", "jig-curation", jig_id] => {
                 let jig_id = JigId(Uuid::from_str(jig_id).unwrap_ji());
                 Self::Admin(AdminRoute::JigCuration(AdminJigCurationRoute::Jig(jig_id)))
+            }
+            ["admin", "resource-curation"] => Self::Admin(AdminRoute::ResourceCuration(
+                AdminResourceCurationRoute::Table,
+            )),
+            ["admin", "resource-curation", resource_id] => {
+                let resource_id = ResourceId(Uuid::from_str(resource_id).unwrap_ji());
+                Self::Admin(AdminRoute::ResourceCuration(
+                    AdminResourceCurationRoute::Resource(resource_id),
+                ))
             }
             ["admin", "images"] => Self::Admin(AdminRoute::Images),
             ["admin", "users"] => Self::Admin(AdminRoute::Users(AdminUsersRoute::Table)),
@@ -681,6 +698,12 @@ impl From<&Route> for String {
                     AdminJigCurationRoute::Table => "/admin/jig-curation".to_string(),
                     AdminJigCurationRoute::Jig(jig_id) => {
                         format!("/admin/jig-curation/{}", jig_id.0)
+                    }
+                },
+                AdminRoute::ResourceCuration(curation_route) => match curation_route {
+                    AdminResourceCurationRoute::Table => "/admin/resource-curation".to_string(),
+                    AdminResourceCurationRoute::Resource(resource_id) => {
+                        format!("/admin/resource-curation/{}", resource_id.0)
                     }
                 },
                 AdminRoute::Images => "/admin/images".to_string(),
