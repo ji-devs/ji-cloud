@@ -114,6 +114,7 @@ pub fn can_load_liked_status(jig: &JigResponse) -> bool {
 pub struct PlayModuleAssist {
     pub text: Option<String>,
     pub audio: Option<Audio>,
+    pub always_show: bool,
     pub module_assist_type: ModuleAssistType,
 }
 
@@ -125,6 +126,7 @@ impl PlayModuleAssist {
         Self {
             text: module_assist.text,
             audio: module_assist.audio,
+            always_show: module_assist.always_show,
             module_assist_type,
         }
     }

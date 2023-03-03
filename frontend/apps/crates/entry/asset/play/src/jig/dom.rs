@@ -43,13 +43,24 @@ impl JigPlayer {
         let state = self;
         actions::load_data(state.clone());
 
+        // Timer is not Copy and cannot be deduped, so any change to timer, even if it is the same value
+        // will trigger an updated which will cause the instructions popup to show again when it is not
+        // supposed to.
+        let has_timer = state
+            .timer
+            .signal_cloned()
+            .map(|timer| timer.is_some())
+            .dedupe();
+
         let should_show_assist = map_ref! {
             let module_assist = state.module_assist.signal_cloned(),
+            let has_timer = has_timer,
             let started = state.started.signal_cloned().dedupe()
             => {
                 if *started {
                     if let Some(module_assist) = module_assist {
-                        if module_assist.module_assist_type.is_instructions() || module_assist.text.is_some() {
+                        if *has_timer || module_assist.always_show || module_assist.text.is_some() {
+                        // if module_assist.module_assist_type.is_instructions() || module_assist.text.is_some() {
                             let is_instructions = module_assist.module_assist_type.is_instructions();
                             // if there is text or a timer, and
                             if is_instructions || module_assist.text.is_some() {
@@ -263,8 +274,8 @@ impl JigPlayer {
                                 let module_assist = state.module_assist.get_cloned();
                                 let timer = state.timer.get_cloned();
                                 if let Some(module_assist) = module_assist {
-                                    if (timer.is_some() && module_assist.module_assist_type.is_instructions()) || module_assist.text.is_some() {
-                                        // If there is a timer and the type is `Instructions`, or if there is text, show the popup
+                                    if ((timer.is_some() || module_assist.always_show) && module_assist.module_assist_type.is_instructions()) || module_assist.text.is_some() {
+                                        // If there is a timer or assist is set to always_show, and the type is `Instructions`, or if there is text, show the popup
                                         actions::show_assist(state.clone(), true);
                                     } else if module_assist.audio.is_some() {
                                         actions::play_assist_audio(state.clone());

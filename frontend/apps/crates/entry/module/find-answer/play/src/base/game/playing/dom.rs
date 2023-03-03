@@ -71,10 +71,7 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                     if is_in_iframe() {
                         // If we're in an iframe, send a message to the player to play the audio from
                         // the module assist component. This allows students to replay the question audio.
-                        let module_assist = ModuleAssist {
-                            text: None,
-                            audio: Some(audio.clone()),
-                        };
+                        let module_assist = ModuleAssist::new(None, Some(audio.clone()));
                         let msg = IframeAction::new(ModuleToJigPlayerMessage::ModuleAssist(Some((module_assist, ModuleAssistType::InActivity))));
                         let _ = msg.try_post_message_to_player();
                     } else {
