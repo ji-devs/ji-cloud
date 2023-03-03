@@ -433,7 +433,8 @@ pub struct ModuleAssist {
     /// This will override the default module assist behavior.
     ///
     /// Note: This value will never be persisted in the backend.
-    #[serde(skip)]
+    #[serde(default)]
+    #[cfg_attr(feature = "backend", serde(skip))]
     pub always_show: bool,
 }
 
