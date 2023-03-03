@@ -14,7 +14,6 @@ import { classMap } from "lit-html/directives/class-map";
 
 const STR_STUDENTS_HEADER = "Share with Students";
 const STR_STUDENTS_URL_LABEL = "Ask the students to go to:";
-const STR_STUDENTS_URL_LINK = "Go to site";
 const STR_STUDENTS_CODE_LABEL = "Student code:";
 const STR_STUDENTS_CODE_VALID_UNTIL = "Valid until";
 
@@ -70,11 +69,6 @@ export class _ extends LitElement {
                     justify-content: flex-end;
                     align-items: center;
                     column-gap: 8px;
-                }
-                .field-url .under .divider {
-                    height: 1em;
-                    width: 2px;
-                    background-color: var(--main-blue);
                 }
                 .field-code input {
                     font-size: 48px;
@@ -140,14 +134,6 @@ export class _ extends LitElement {
                             <input readonly value="${this.url}" />
                         </label>
                         <div class="under">
-                            <button-rect
-                                href="${this.url}"
-                                kind="text"
-                                color="blue"
-                                ?disabled=${this.code === ""}
-                                >${STR_STUDENTS_URL_LINK}</button-rect
-                            >
-                            <span class="divider"></span>
                             <slot name="copy-url"></slot>
                         </div>
                     </div>
