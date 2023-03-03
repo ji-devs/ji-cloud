@@ -81,12 +81,8 @@ export class _ extends LitElement {
                     grid-row: 1;
                     grid-column: 1 / -1;
                     display: flex;
-                    flex-direction: column;
-                    align-items: flex-end;
-                }
-                .top-bar .module-assist {
-                    margin: 16px;
-                    margin-right: 22px;
+                    justify-content: space-between;
+                    padding: 16px 28px;
                 }
                 :host([inIframe]) .top-bar .module-assist {
                     margin-right: 96px;
@@ -214,6 +210,7 @@ export class _ extends LitElement {
                         <slot name="indicators"></slot>
                     </div>
                     <div class="top-bar">
+                        <img-ui path="jig/play/logo.svg"></img-ui>
                         <div class="module-assist">
                             <slot name="module-assist"></slot>
                         </div>
