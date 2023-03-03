@@ -86,7 +86,7 @@ impl Base {
             sticker_refs,
             question_field: content.question_field,
             module_phase: init_args.play_phase,
-            instructions: content.base.instructions,
+            instructions: content.base.instructions.always_show(),
             feedback: content.base.feedback,
             feedback_signal: Mutable::new(None),
         });

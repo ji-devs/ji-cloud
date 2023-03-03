@@ -426,12 +426,33 @@ pub struct Audio {
 pub struct ModuleAssist {
     /// Text displayed in banner
     pub text: Option<String>,
-
     /// Audio played on module start
     pub audio: Option<Audio>,
+    /// Whether to always show module assistance
+    ///
+    /// This will override the default module assist behavior.
+    ///
+    /// Note: This value will never be persisted in the backend.
+    #[serde(skip)]
+    pub always_show: bool,
 }
 
 impl ModuleAssist {
+    /// Create a new ModuleAssist instance which doesn't override module assist behavior
+    pub fn new(text: Option<String>, audio: Option<Audio>) -> Self {
+        Self {
+            text,
+            audio,
+            ..Default::default()
+        }
+    }
+
+    /// Override default module assist behavior
+    pub fn always_show(mut self) -> Self {
+        self.always_show = true;
+        self
+    }
+
     /// Whether the instructions actually have either text or audio content set
     pub fn has_content(&self) -> bool {
         self.text.is_some() || self.audio.is_some()

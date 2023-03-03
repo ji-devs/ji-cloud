@@ -222,7 +222,7 @@ pub fn play_assist_audio(state: Rc<JigPlayer>) {
 
                     // For the `Instructions` variant, we display a default text in the popup when a _timer_ is set. In that case
                     // we don't want to fire the done event when audio completes.
-                    if !(state.timer.get_cloned().is_some() && module_assist.module_assist_type.is_instructions()) && module_assist.text.is_none() {
+                    if !((state.timer.get_cloned().is_some() || module_assist.always_show) && module_assist.module_assist_type.is_instructions()) && module_assist.text.is_none() {
                         // If there is no text, then we can notify the activity that the assist audio has completed.
                         module_assist_done(state.clone(), module_assist.clone());
                     }

@@ -183,13 +183,13 @@ impl DebugSettings {
                         theme: ThemeId::Chalkboard,
                         instructions: ModuleAssist::default(),
                         //feedback: Instructions::default(),
-                        feedback: ModuleAssist {
-                            text: Some("good job!".to_string()),
-                            audio: Some(Audio {
+                        feedback: ModuleAssist::new(
+                            Some("good job!".to_string()),
+                            Some(Audio {
                                 id: AudioId(Uuid::parse_str(AUDIO_UUID).unwrap_ji()),
                                 lib: MediaLibrary::User,
                             }),
-                        },
+                        ),
                         backgrounds: Backgrounds {
                             layer_1: None, //Some(Background::Color(hex_to_rgba8("#ff0000"))),
                             layer_2: None,
