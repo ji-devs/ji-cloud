@@ -3,6 +3,7 @@
 use chrono::{DateTime, Utc};
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
+use strum_macros::EnumString;
 
 use crate::{api::endpoints::PathPart, domain::user::UserId};
 
@@ -22,8 +23,10 @@ pub struct StripePaymentMethodId(String);
 pub struct Last4(String);
 
 /// Payment network associated with a [Card]
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, EnumString)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[serde(rename_all = "kebab-case")]
+#[strum(serialize_all = "lowercase")]
 pub enum PaymentNetwork {
     /// Visa
     Visa,
@@ -31,8 +34,18 @@ pub enum PaymentNetwork {
     Mastercard,
     /// Discover Global Network
     Discover,
+    /// JCB Co
+    JCB,
     /// American Express
+    #[strum(serialize = "amex")]
     AmericanExpress,
+    /// UnionPay
+    UnionPay,
+    /// Diners
+    #[strum(serialize = "diners")]
+    DinersClub,
+    /// Unknown
+    Unknown,
 }
 
 /// Status of the payment method
@@ -60,11 +73,16 @@ pub struct Card {
 
 // TODO what details do I need for the other types?
 /// Type of payment method
+///
+/// Note: Only the [PaymentMethodType::Card] variant has any display details.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum PaymentMethodType {
-    // ApplePay(..),
-    // GooglePay(..),
-    // Link(..),
+    /// Apple Pay
+    ApplePay,
+    /// Google Pay
+    GooglePay,
+    /// [Link](https://stripe.com/docs/payments/link) one-click checkout
+    Link,
     /// Card
     Card(Card),
 }
