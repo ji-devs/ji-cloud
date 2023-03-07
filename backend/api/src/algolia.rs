@@ -19,7 +19,7 @@ use shared::{
         circle::CircleId,
         course::CourseId,
         image::{ImageId, ImageSize},
-        jig::{JigId, JigRating},
+        jig::JigId,
         meta::{AffiliationId, AgeRangeId, ImageStyleId, ImageTagIndex, ResourceTypeId},
         pro_dev::ProDevId,
         resource::ResourceId,
@@ -38,6 +38,8 @@ mod migration;
 const PREMIUM_TAG: &'static str = "premium";
 const PUBLISHED_TAG: &'static str = "published"; // not currently used
 const HAS_AUTHOR_TAG: &'static str = "hasAuthor";
+const HAS_RATING_TAG: &'static str = "isRated";
+const HAS_NO_RATING_TAG: &'static str = "isNotRated";
 
 #[derive(Serialize)]
 struct BatchJig<'a> {
@@ -623,6 +625,12 @@ limit 100 for no key update skip locked;
                 tags.push(HAS_AUTHOR_TAG);
             }
 
+            if row.rating.is_some() {
+                tags.push(HAS_RATING_TAG);
+            } else {
+                tags.push(HAS_NO_RATING_TAG);
+            }
+
             let mut translation_description: Vec<String> = Vec::new();
 
             for value in row.translated_description.0.values() {
@@ -774,6 +782,12 @@ limit 100 for no key update skip locked;
 
             if row.author_id.is_some() {
                 tags.push(HAS_AUTHOR_TAG);
+            }
+
+            if row.rating.is_some() {
+                tags.push(HAS_RATING_TAG);
+            } else {
+                tags.push(HAS_NO_RATING_TAG);
             }
 
             let mut translation_description: Vec<String> = Vec::new();
@@ -1973,7 +1987,7 @@ impl Client {
         privacy_level: &[PrivacyLevel],
         page_limit: u32,
         blocked: Option<bool>,
-        is_rated: Option<JigRating>,
+        is_rated: Option<bool>,
     ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
         let mut and_filters = algolia::filter::AndFilter { filters: vec![] };
 
@@ -2042,13 +2056,20 @@ impl Client {
         }
 
         if let Some(is_rated) = is_rated {
-            and_filters.filters.push(Box::new(CommonFilter {
-                filter: FacetFilter {
-                    facet_name: "rating".to_owned(),
-                    value: (is_rated as i16).to_string(),
-                },
-                invert: false,
-            }))
+            match is_rated {
+                true => {
+                    and_filters.filters.push(Box::new(CommonFilter {
+                        filter: TagFilter(HAS_RATING_TAG.to_owned()),
+                        invert: false,
+                    }));
+                }
+                false => {
+                    and_filters.filters.push(Box::new(CommonFilter {
+                        filter: TagFilter(HAS_NO_RATING_TAG.to_owned()),
+                        invert: false,
+                    }));
+                }
+            }
         }
 
         filters_for_privacy(&mut and_filters.filters, privacy_level);
@@ -2103,7 +2124,7 @@ impl Client {
         privacy_level: &[PrivacyLevel],
         page_limit: u32,
         blocked: Option<bool>,
-        is_rated: Option<JigRating>,
+        is_rated: Option<bool>,
     ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
         let mut and_filters = algolia::filter::AndFilter { filters: vec![] };
 
@@ -2172,13 +2193,20 @@ impl Client {
         }
 
         if let Some(is_rated) = is_rated {
-            and_filters.filters.push(Box::new(CommonFilter {
-                filter: FacetFilter {
-                    facet_name: "rating".to_owned(),
-                    value: (is_rated as i16).to_string(),
-                },
-                invert: false,
-            }))
+            match is_rated {
+                true => {
+                    and_filters.filters.push(Box::new(CommonFilter {
+                        filter: TagFilter(HAS_RATING_TAG.to_owned()),
+                        invert: false,
+                    }));
+                }
+                false => {
+                    and_filters.filters.push(Box::new(CommonFilter {
+                        filter: TagFilter(HAS_NO_RATING_TAG.to_owned()),
+                        invert: false,
+                    }));
+                }
+            }
         }
 
         filters_for_privacy(&mut and_filters.filters, privacy_level);
