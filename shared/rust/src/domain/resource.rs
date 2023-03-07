@@ -15,7 +15,6 @@ use super::{
     additional_resource::AdditionalResource,
     asset::{DraftOrLive, OrderBy, PrivacyLevel, UserOrMe},
     category::CategoryId,
-    jig::JigRating,
     meta::{AffiliationId, AgeRangeId, ResourceTypeId},
     module::LiteModule,
     user::UserId,
@@ -392,10 +391,10 @@ pub struct ResourceSearchQuery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub page_limit: Option<u32>,
 
-    /// The hits per page to be returned
+    /// Optionally filter resources based off of existence of rating
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub is_rated: Option<JigRating>,
+    pub is_rated: Option<bool>,
 }
 
 /// Response for successful search.
