@@ -150,6 +150,8 @@ pub fn assign_to_empty_spot(state: &Rc<SpotState>, data: String) {
             };
 
             if let Some(module) = spot {
+
+                log::info!("module value: {:?}", module);
                 // Instead of replacing the module at the index, we remove the old module and
                 // add the new one. This is slightly less efficient because it fires signals
                 // for the entire list of modules, however, it is necessary so that the modules
@@ -171,7 +173,7 @@ pub fn assign_to_empty_spot(state: &Rc<SpotState>, data: String) {
                 };
 
                 // if this is the empty module at the end
-                if !placeholder_exists {
+                if !placeholder_exists && !state.sidebar.asset_edit_state.asset_id.is_pro_dev_id() {
                     modules.push_cloned(SidebarSpot::new_empty(&state.sidebar.asset_edit_state.asset_id));
                 }
 
@@ -182,6 +184,7 @@ pub fn assign_to_empty_spot(state: &Rc<SpotState>, data: String) {
                     drop(modules);
                     course_spot_actions::save_course(&state).await;
                 }
+
             };
         }
     }));

@@ -56,33 +56,6 @@ export class _ extends LitElement {
                     width: 900px;
                     max-width: 1300px;
                 }
-                /* .column-1 .url {
-                    display: grid;
-                    grid-row: 1;
-                    width: 400px;
-                    height: 70px;
-                    background-color: var(--light-blue-1);
-                }
-                .column-2 .name {
-                    display: grid;
-                    grid-row: 1;
-                    height: 65px;
-                    width: 400px;
-                    grid-template-columns: 1fr min-content;
-                    grid-template-rows: min-content 1fr;
-                    column-gap: 2px;
-                }
-                .column-2 .description {
-                    display: grid;
-                    grid-row: 2;
-                    height: 250px;
-                    width: 400px;
-                    border: 2px solid var(--light-blue-3);
-                    border-radius: 15px;
-                    grid-template-columns: 1fr min-content;
-                    grid-template-rows: min-content 1fr;
-                    column-gap: 2px;
-                } */
                 .main {
                     display: grid;
                     grid-row: 2;

@@ -84,9 +84,6 @@ impl Component<UnitEditor> for Rc<UnitEditor> {
                 html!("input-wrapper", {
                     .prop("slot", "description")
                     .prop("label", STR_DESCRIPTION_LABEL)
-                    // .child({
-                    //     HebrewButtons::reveal().render(Some("hebrew-inputs"))
-                    // })
                     .child(html!("textarea" => HtmlTextAreaElement, {
                         .with_node!(elem => {
                             .attr("dir", "auto")
@@ -111,9 +108,9 @@ impl Component<UnitEditor> for Rc<UnitEditor> {
                         analytics::event("Add Unit to Course", None);
                         state.create_unit();
                     }))
+                    .prop_signal("loading", state.loader.is_loading())
                 }),
             ])
-
         }))
     }
 }

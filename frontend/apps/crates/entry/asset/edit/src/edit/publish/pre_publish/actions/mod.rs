@@ -178,15 +178,17 @@ fn get_categories_labels(
 }
 
 fn set_default_values(asset: &EditableAsset, meta: &MetadataResponse) {
-    let available_affiliations = meta
-        .affiliations
-        .iter()
-        .map(|affiliation| affiliation.id)
-        .collect();
-    asset.affiliations().replace(available_affiliations);
+    if !asset._is_pro_dev() {
+        let available_affiliations = meta
+            .affiliations
+            .iter()
+            .map(|affiliation| affiliation.id)
+            .collect();
+        asset.affiliations().replace(available_affiliations);
 
-    let available_ages = meta.age_ranges.iter().map(|age| age.id).collect();
-    asset.age_ranges().replace(available_ages);
+        let available_ages = meta.age_ranges.iter().map(|age| age.id).collect();
+        asset.age_ranges().replace(available_ages);
+    }
 
     asset.privacy_level().replace(PrivacyLevel::default());
 }

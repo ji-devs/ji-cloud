@@ -5,12 +5,12 @@ use shared::{
         course::{CourseCreatePath, CourseCreateRequest},
         jig::{JigCreatePath, JigCreateRequest},
         module::{ModuleBody, ModuleCreatePath, ModuleCreateRequest, ModuleKind},
-        resource::{ResourceCreatePath, ResourceCreateRequest},
+        resource::{ResourceCreatePath, ResourceCreateRequest}, pro_dev::{ProDevCreateRequest, ProDevCreatePath},
     },
 };
 use utils::{
     prelude::ApiEndpointExt,
-    routes::{AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, ResourceEditRoute, Route},
+    routes::{AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, ResourceEditRoute, Route, ProDevEditRoute},
     unwrap::UnwrapJiExt,
 };
 use wasm_bindgen_futures::spawn_local;
@@ -76,18 +76,18 @@ async fn add_course_or_resource_cover(asset_id: AssetId) {
         .unwrap_ji();
 }
 
-// pub fn create_pro_dev() {
-//     spawn_local(async move {
-//         let req = ProDevCreateRequest::default();
+pub fn create_pro_dev() {
+    spawn_local(async move {
+        let req = ProDevCreateRequest::default();
 
-//         let resp = endpoints::pro_dev::Create::api_with_auth(ProDevCreatePath(), Some(req))
-//             .await
-//             .unwrap_ji();
-//         let url: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::ProDev(
-//             resp.id,
-//             ProDevEditRoute::Landing,
-//         )))
-//         .into();
-//         dominator::routing::go_to_url(&url);
-//     });
-// }
+        let resp = endpoints::pro_dev::Create::api_with_auth(ProDevCreatePath(), Some(req))
+            .await
+            .unwrap_ji();
+        let url: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::ProDev(
+            resp.id,
+            ProDevEditRoute::Landing,
+        )))
+        .into();
+        dominator::routing::go_to_url(&url);
+    });
+}

@@ -95,7 +95,7 @@ impl AssetEditState {
                 ))));
             }
             AssetId::ProDevId(pro_dev_id) => {
-                self.set_route_jig(JigEditRoute::Publish);
+                self.set_route_pro_dev(ProDevEditRoute::Publish);
                 Route::push_state(Route::Asset(AssetRoute::Edit(AssetEditRoute::ProDev(
                     pro_dev_id,
                     ProDevEditRoute::Publish,

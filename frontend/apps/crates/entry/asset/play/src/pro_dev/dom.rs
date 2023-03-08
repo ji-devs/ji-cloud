@@ -5,41 +5,41 @@ use components::{
 };
 use dominator::{clone, html, Dom};
 use futures_signals::signal::{Signal, SignalExt};
-use shared::domain::{course::CourseResponse, jig::JigResponse, meta::ResourceTypeId};
+use shared::domain::{pro_dev::ProDevResponse, meta::ResourceTypeId};
 use std::rc::Rc;
 use utils::{
-    asset::{AssetPlayerOptions, JigPlayerOptions, ResourceContentExt},
+    asset::{AssetPlayerOptions, ProDevPlayerOptions, ProDevUnitValueExt},
     events,
     languages::Language,
 };
 
-use super::state::CoursePlayer;
+use super::state::ProDevPlayer;
 
-const STR_SHARE_COURSE: &str = "Share course";
+const STR_SHARE_COURSE: &str = "Share pro_dev";
 
-impl CoursePlayer {
+impl ProDevPlayer {
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self;
         state.load_data();
         html!("div", {
-            .child_signal(state.course.signal_ref(clone!(state => move|course| {
-                course.as_ref().map(|course| {
-                    state.render_course(course)
+            .child_signal(state.pro_dev.signal_ref(clone!(state => move|pro_dev| {
+                pro_dev.as_ref().map(|pro_dev| {
+                    state.render_pro_dev(pro_dev)
                 })
             })))
-            .child_signal(state.active_jig.signal_cloned().map(clone!(state => move|active_jig| {
-                active_jig.map(|jig_id| {
+            .child_signal(state.active_unit.signal_cloned().map(clone!(state => move|active_unit| {
+                active_unit.map(|unit_id| {
                     let close = clone!(state => move || {
-                        state.done_playing_jig();
+                        state.done_playing_unit();
                     });
-                    let options = AssetPlayerOptions::Jig(JigPlayerOptions {
+                    let options = AssetPlayerOptions::ProDev(ProDevPlayerOptions {
                         is_student: state.player_options.is_student,
                         ..Default::default()
                     });
                     PlayerPopup::new(
                         jig_id.into(),
                         None,
-                        None,
+                        unit_id.into(),
                         options,
                         PreviewPopupCallbacks::new(close)
                     ).render(None)
@@ -48,20 +48,20 @@ impl CoursePlayer {
         })
     }
 
-    fn render_course(self: &Rc<Self>, course: &CourseResponse) -> Dom {
+    fn render_pro_dev(self: &Rc<Self>, pro_dev: &ProDevResponse) -> Dom {
         let state = self;
-        let language = Language::code_to_display_name(&course.course_data.language);
-        html!("jig-play-course-main", {
-            .prop("name", &course.course_data.display_name)
-            .prop("description", &course.course_data.description)
+        let language = Language::code_to_display_name(&pro_dev.pro_dev_data.language);
+        html!("jig-play-pro_dev-main", {
+            .prop("name", &pro_dev.pro_dev_data.display_name)
+            .prop("description", &pro_dev.pro_dev_data.description)
             .prop("language", language)
-            .prop("author", &course.author_name.to_owned().unwrap_or_default())
-            .prop("itemsCount", course.course_data.items.len())
-            .prop("hasAdditionalResources", !course.course_data.additional_resources.is_empty())
+            .prop("author", &pro_dev.author_name.to_owned().unwrap_or_default())
+            .prop("itemsCount", pro_dev.pro_dev_data.units.len())
+            .prop("hasAdditionalResources", !pro_dev.pro_dev_data.additional_resources.is_empty())
             .child(
                 ModuleThumbnail::new_hight_res(
-                    course.id.into(),
-                    course.course_data.cover.clone(),
+                    pro_dev.id.into(),
+                    pro_dev.pro_dev_data.cover.clone(),
                     ThumbnailFallback::Asset,
                     state.player_options.draft_or_live,
                 ).render(Some("thumbnail"))
@@ -71,7 +71,7 @@ impl CoursePlayer {
                     state.render_item(jig, i)
                 })).collect()
             })).to_signal_vec())
-            .children(course.course_data.additional_resources.iter().map(|resource| {
+            .children(pro_dev.pro_dev_data.additional_resources.iter().map(|resource| {
                 html!("a", {
                     .prop("slot", "additional-resources")
                     .prop("target", "_BLANK")
@@ -94,7 +94,7 @@ impl CoursePlayer {
 
                 }))
             }))
-            .child(ShareAsset::new(course.clone().into()).render(
+            .child(ShareAsset::new(pro_dev.clone().into()).render(
                 html!("button-empty", {
                     .child(html!("fa-icon", {
                         .prop("icon", "fa-light fa-share-nodes")
@@ -116,7 +116,7 @@ impl CoursePlayer {
     fn render_item(self: &Rc<Self>, jig: &JigResponse, i: usize) -> Dom {
         let state = self;
         let jig_id = jig.id;
-        html!("jig-play-course-item", {
+        html!("jig-play-pro_dev-item", {
             .prop("slot", "items")
             .prop("name", &jig.jig_data.display_name)
             .prop("description", &jig.jig_data.description)

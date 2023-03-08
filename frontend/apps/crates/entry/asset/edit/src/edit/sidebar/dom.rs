@@ -40,7 +40,7 @@ impl Sidebar {
                     state.asset_edit_state.route.signal_cloned().for_each(clone!(state => move |route| {
                         let should_collapse = !matches!(
                             route,
-                            AssetEditRoute::Jig(_, JigEditRoute::Landing) | AssetEditRoute::Course(_, CourseEditRoute::Landing)
+                            AssetEditRoute::Jig(_, JigEditRoute::Landing) | AssetEditRoute::Course(_, CourseEditRoute::Landing) | AssetEditRoute::ProDev(_, ProDevEditRoute::Landing) | AssetEditRoute::ProDev(_, ProDevEditRoute::Unit(_))
                         );
                         state.collapsed.set(should_collapse);
                         ready(())
@@ -51,7 +51,7 @@ impl Sidebar {
                     // TODO: change?
                     matches!(
                         route,
-                        AssetEditRoute::Jig(_, JigEditRoute::Landing) | AssetEditRoute::Course(_, CourseEditRoute::Landing)
+                        AssetEditRoute::Jig(_, JigEditRoute::Landing) | AssetEditRoute::Course(_, CourseEditRoute::Landing) | AssetEditRoute::ProDev(_, ProDevEditRoute::Landing) | AssetEditRoute::ProDev(_, ProDevEditRoute::Unit(_))
                     )
                 }))
                 .prop_signal("loading", state.loader.is_loading())
@@ -73,7 +73,7 @@ impl Sidebar {
                     .prop_signal("selected", state.asset_edit_state.route.signal_cloned().map(|route| {
                         matches!(
                             route,
-                            AssetEditRoute::Jig(_, JigEditRoute::Publish) | AssetEditRoute::Course(_, CourseEditRoute::Publish)
+                            AssetEditRoute::Jig(_, JigEditRoute::Publish) | AssetEditRoute::Course(_, CourseEditRoute::Publish) | AssetEditRoute::ProDev(_, ProDevEditRoute::Publish)
                         )
                     }))
                     .event(clone!(state => move |_ :events::Click| {
@@ -155,6 +155,7 @@ impl Sidebar {
             .child(DraggingDom::render(Rc::clone(&state)))
         })
     }
+
 }
 
 /*

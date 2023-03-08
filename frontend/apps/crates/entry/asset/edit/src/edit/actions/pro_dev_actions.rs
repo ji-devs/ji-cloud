@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use shared::{
     api::endpoints::{self},
-    domain::pro_dev::{ProDevGetDraftPath, ProDevId, ProDevResponse},
+    domain::{pro_dev::{ProDevGetDraftPath, ProDevId, ProDevResponse}},
 };
 use utils::prelude::ApiEndpointExt;
 
@@ -30,3 +30,4 @@ impl AssetEditState {
         spots.push_cloned(SidebarSpot::new_empty(&pro_dev.id.into()))
     }
 }
+

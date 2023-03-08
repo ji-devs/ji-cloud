@@ -109,23 +109,12 @@ impl SpotState {
                                 state.sidebar.asset_edit_state.set_route_course(CourseEditRoute::Landing);
                             },
                             SidebarSpotItem::ProDev(unit) => {
-                                match unit {
-                                    Some(unit) => {
-                                        match &**unit {
-                                            ProDevSpot::Cover(cover) => {
-                                                state.sidebar.asset_edit_state.set_route_pro_dev(ProDevEditRoute::Cover(cover.id));
-                                            },
-                                            ProDevSpot::Unit(_) => {
-                                                todo!()
-                                                // pro_dev_spot_actions::edit(state.clone())
-                                            }
-                                        }
-                                    },
-                                    None => {
-                                        state.sidebar.asset_edit_state.set_route_pro_dev(ProDevEditRoute::Landing);
-                                    },
+                                if let Some(unit) = unit {
+                                    if let ProDevSpot::Cover(cover) = &**unit {
+                                        state.sidebar.asset_edit_state.set_route_pro_dev(ProDevEditRoute::Cover(cover.id));
+                                        return;
+                                    }
                                 }
-
                                 state.sidebar.asset_edit_state.set_route_pro_dev(ProDevEditRoute::Landing);
                             },
                         }
@@ -194,7 +183,7 @@ impl SpotState {
                                                     DraftOrLive::Draft,
                                                 ).render_live(Some("thumbnail"))
                                             },
-                                            ProDevSpot::Unit(unit) =>
+                                            ProDevSpot::Unit(_unit) =>
                                             {
                                                 html!("div", {
                                                     .prop("slot", "unit")

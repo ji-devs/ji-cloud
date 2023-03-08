@@ -226,10 +226,10 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                 }))
             }),
 
-            PrePublish::render_ages(state.clone()),
             PrePublish::render_languages(state.clone()),
             PrePublish::render_categories_select(state.clone()),
             PrePublish::render_category_pills(state.clone()),
+
 
             html!("button-rect", {
                 .prop("slot", "publish-later")
@@ -308,6 +308,10 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                 })
             }),
         ])
+        .apply_if(!state.asset._is_pro_dev(), clone!(state => move |dom|{
+            dom
+                .child(PrePublish::render_ages(state.clone()))
+        }))
         .apply_if(!state.asset.is_resource(), clone!(state => move |dom|{
             dom
                 .children_signal_vec(state.asset.additional_resources().signal_vec_cloned().map(clone!(state => move |additional_resource| {
