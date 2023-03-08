@@ -882,10 +882,6 @@ fn render_tab_body(state: Rc<Step3>, tab: Tab) -> Dom {
 
                                         question.question_text.set(Some(value.into()));
 
-                                        if question.title.get_cloned().is_none() {
-                                            question.title.set(Some(value.into()))
-                                        }
-
                                         state.sidebar.base.save_question(index, question.clone());
                                     })
                                     .after_inserted(|elem| {

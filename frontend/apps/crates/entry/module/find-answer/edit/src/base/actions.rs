@@ -57,7 +57,6 @@ impl Base {
     }
     pub fn add_question(&self, question_text: Option<String>, question_field_index: Option<usize>) {
         self.questions.lock_mut().push_cloned(Rc::new(Question {
-            title: Mutable::new(question_text.clone()),
             question_text: Mutable::new(question_text.clone()),
             ..Default::default()
         }));
@@ -70,7 +69,6 @@ impl Base {
             if let Some(content) = &mut raw.content {
                 let question_text = question_text.unwrap_or_default();
                 let raw_question = RawQuestion {
-                    title: question_text.clone(),
                     question_text,
                     ..Default::default()
                 };
