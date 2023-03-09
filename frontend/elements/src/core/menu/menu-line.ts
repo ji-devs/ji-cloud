@@ -20,6 +20,8 @@ type IconKind =
     | "image"
     | "jig-info"
     | "jig-play"
+    | "view"
+    | "share"
 ;
 
 const STR_LABEL_LOOKUP: any = {
@@ -51,6 +53,7 @@ const STR_LABEL_LOOKUP: any = {
     ["remove-white"]: "Remove white",
     ["make-background"]: "Make background",
     ["play"]: "Play",
+    ["view"]: "View",
     ["record-sound"]: "Record sound",
     ["upload-sound"]: "Upload sound",
     //module publish
@@ -58,6 +61,7 @@ const STR_LABEL_LOOKUP: any = {
     //Theme selector
     ["set-jig-theme"]: "Set JIG theme",
     ["text"]: "Edit text",
+    ["share"]: "Share",
 };
 
 // possible fa icons

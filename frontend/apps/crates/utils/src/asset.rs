@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use shared::{
     domain::{
         additional_resource::ResourceContent,
-        asset::DraftOrLive,
+        asset::{AssetId, DraftOrLive},
         jig::{
             AudioBackground, AudioFeedbackNegative, AudioFeedbackPositive, JigPlayerSettings,
             TextDirection,
@@ -233,6 +233,15 @@ impl AssetPlayerOptions {
         match self {
             Self::Jig(options) => options.draft_or_live.is_draft(),
             Self::Course(options) => options.draft_or_live.is_draft(),
+        }
+    }
+
+    pub fn default_from_id(asset_id: &AssetId) -> Self {
+        match asset_id {
+            AssetId::JigId(_) => Self::Jig(Default::default()),
+            AssetId::CourseId(_) => Self::Course(Default::default()),
+            AssetId::ProDevId(_) => todo!(),
+            AssetId::ResourceId(_) => unimplemented!(),
         }
     }
 }

@@ -1,6 +1,7 @@
 use super::state::*;
 use components::asset_card::{render_asset_card, AssetCardBottomIndicator, AssetCardConfig};
 use components::page_header::PageHeaderConfig;
+use components::player_popup::{PlayerPopup, PreviewPopupCallbacks};
 use components::{
     page_footer,
     page_header::{PageHeader, PageLinks},
@@ -9,15 +10,21 @@ use dominator::{clone, html, link, Dom};
 use futures_signals::map_ref;
 use futures_signals::signal::SignalExt;
 use futures_signals::signal_vec::SignalVecExt;
-use shared::domain::asset::Asset;
+use gloo::utils::window;
+use shared::domain::asset::{Asset, AssetId};
 use std::collections::HashMap;
 use std::rc::Rc;
 use strum::IntoEnumIterator;
+use utils::asset::{AssetPlayerOptions, ResourceContentExt};
 use utils::init::analytics;
 use utils::prelude::*;
 
-const STR_DELETE: &str = "Delete";
+const STR_EDIT: &str = "Edit";
+const STR_PLAY: &str = "Play";
+const STR_VIEW: &str = "View";
+// const STR_SHARE: &str = "Share";
 const STR_DUPLICATE: &str = "Duplicate";
+const STR_DELETE: &str = "Delete";
 const STR_SEARCH: &str = "Search";
 const STR_SHOW_ALL: &str = "Show all";
 const STR_SHOW_PUBLISHED: &str = "Show published";
@@ -154,6 +161,13 @@ impl Gallery {
                     // }))
                     .children_signal_vec(state.assets.signal_vec_cloned().map(clone!(state => move |asset| {
                         let asset_id = asset.id();
+                        let resource_link = match &asset {
+                            Asset::Resource(resource) => match resource.resource_data.additional_resources.first() {
+                                Some(resource) => Some(resource.resource_content.get_link()),
+                                None => None,
+                            },
+                            _ => None,
+                        };
                         html!("a", {
                             .prop("slot", "recent-items")
                             .event(clone!(asset => move |_: events::Click| {
@@ -161,39 +175,58 @@ impl Gallery {
                                 properties.insert("Asset ID", asset.id().uuid().to_string());
                                 analytics::event("Asset Gallery Edit", Some(properties));
                             }))
-                            .prop("href", {
-                                match &asset {
-                                    Asset::Jig(jig) => {
-                                        String::from(Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
-                                            jig.id,
-                                            JigEditRoute::Landing
-                                        ))))
-                                    },
-                                    Asset::Resource(resource) => {
-                                        String::from(Route::Asset(AssetRoute::Edit(AssetEditRoute::Resource(
-                                            resource.id,
-                                            ResourceEditRoute::Landing
-                                        ))))
-                                    },
-                                    Asset::Course(course) => {
-                                        String::from(Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
-                                            course.id,
-                                            CourseEditRoute::Landing
-                                        ))))
-                                    },
-                                    Asset::ProDev(_) => todo!(),
-
-                                }
-                            })
+                            .prop("href", get_asset_link(asset_id))
                             .child(render_asset_card(
                                 &asset,
                                 AssetCardConfig {
                                     bottom_indicator: AssetCardBottomIndicator::Status,
                                     dense: true,
-                                    menu: Some(Rc::new(clone!(state => move || {
+                                    menu: Some(Rc::new(clone!(state, resource_link => move || {
                                         html!("menu-kebab", {
                                             .prop("slot", "menu")
+                                            .child(html!("menu-line", {
+                                                .prop("icon", "edit")
+                                                .text(STR_EDIT)
+                                                .event(clone!(asset_id => move |_: events::Click| {
+                                                    let route = get_asset_link(asset_id);
+                                                    dominator::routing::go_to_url(&route);
+                                                }))
+                                            }))
+                                            .apply(clone!(state, resource_link => move |dom| {
+                                                match (asset_id, resource_link) {
+                                                    (AssetId::ResourceId(_), Some(link)) => {
+                                                        dom.child(html!("menu-line", {
+                                                            .prop("icon", "view")
+                                                            .text(STR_VIEW)
+                                                            .event(clone!(link => move |_: events::Click| {
+                                                                log::info!("{link:?}");
+                                                                let _ = window().open_with_url_and_target(&link, "_BLANK");
+                                                            }))
+                                                        }))
+                                                    },
+                                                    (AssetId::ResourceId(_), None) => {
+                                                        // empty resource
+                                                        dom
+                                                    },
+                                                    _ => {
+                                                        dom.child(html!("menu-line", {
+                                                            .prop("icon", "play")
+                                                            .text(STR_PLAY)
+                                                            .event(clone!(state, asset_id => move |_: events::Click| {
+                                                                state.play_asset.set(Some(asset_id));
+                                                            }))
+                                                        }))
+                                                    }
+                                                }
+                                            }))
                                             .children(&mut [
+                                                // ShareAsset::new(asset.clone()).render(
+                                                //     html!("menu-line", {
+                                                //         .prop("icon", "share")
+                                                //         .text(STR_SHARE)
+                                                //     }),
+                                                //     None
+                                                // ),
                                                 html!("menu-line", {
                                                     .prop("icon", "duplicate")
                                                     .text(STR_DUPLICATE)
@@ -237,6 +270,40 @@ impl Gallery {
                 })
             )
             .child(page_footer::dom::render(None))
+            .child_signal(state.play_asset.signal().map(clone!(state => move |play_asset| {
+                play_asset.map(|asset_id| {
+                    PlayerPopup::new(
+                        asset_id,
+                        None,
+                        AssetPlayerOptions::default_from_id(&asset_id),
+                        PreviewPopupCallbacks {
+                            close: Box::new(clone!(state => move|| {
+                                state.play_asset.set(None);
+                            }))
+                        },
+                    ).render(None)
+                })
+            })))
         })
+    }
+}
+
+fn get_asset_link(asset_id: AssetId) -> String {
+    match asset_id {
+        AssetId::JigId(jig_id) => Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
+            jig_id,
+            JigEditRoute::Landing,
+        )))
+        .into(),
+        AssetId::ResourceId(resource_id) => Route::Asset(AssetRoute::Edit(
+            AssetEditRoute::Resource(resource_id, ResourceEditRoute::Landing),
+        ))
+        .into(),
+        AssetId::CourseId(course_id) => Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
+            course_id,
+            CourseEditRoute::Landing,
+        )))
+        .into(),
+        AssetId::ProDevId(_) => todo!(),
     }
 }

@@ -40,6 +40,7 @@ pub struct Gallery {
     pub visible_assets: Rc<Mutable<VisibleAssets>>,
     pub age_ranges: Mutable<Vec<AgeRange>>,
     pub confirm_delete: Mutable<Option<AssetId>>,
+    pub play_asset: Mutable<Option<AssetId>>,
 }
 
 impl Gallery {
@@ -53,6 +54,7 @@ impl Gallery {
             visible_assets: Rc::new(Mutable::new(VisibleAssets::All)),
             age_ranges: Mutable::new(vec![]),
             confirm_delete: Mutable::new(None),
+            play_asset: Mutable::new(None),
         })
     }
 
