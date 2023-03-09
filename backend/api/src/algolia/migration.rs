@@ -197,7 +197,7 @@ pub(crate) async fn user_index(
 
     client.set_settings(public_user_index, &settings).await?;
 
-    sqlx::query!(r#"update algolia_index_settings set updated_at = now(), index_hash = $1 where index_name = $2"#, PUBLIC_USER_HASH, PUBLIC_USER_INDEX).execute(txn).await?;
+    sqlx::query!(r#"update algolia_index_settings set updated_at = now(), index_hash = $1 where index_name = $2"#, USER_HASH, USER_INDEX).execute(txn).await?;
 
     Ok(())
 }
