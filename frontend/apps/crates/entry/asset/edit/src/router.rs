@@ -23,6 +23,7 @@ impl Router {
                 AssetRoute::JigGallery => Some(Gallery::new(AssetType::Jig).render()),
                 AssetRoute::ResourceGallery => Some(Gallery::new(AssetType::Resource).render()),
                 AssetRoute::CourseGallery => Some(Gallery::new(AssetType::Course).render()),
+                AssetRoute::ProDevGallery => Some(Gallery::new(AssetType::ProDev).render()),
                 AssetRoute::Edit(route) => match route {
                     AssetEditRoute::Jig(jig_id, _) => {
                         Some(AssetEditState::new(jig_id.into(), route).render())
@@ -39,7 +40,6 @@ impl Router {
                 },
                 AssetRoute::Studio => Some(render_studio()),
                 AssetRoute::Play(_) => unimplemented!(),
-                AssetRoute::ProDevGallery => todo!(), // Handled in player
             },
             _ => None,
         })

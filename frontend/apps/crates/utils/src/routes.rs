@@ -468,6 +468,7 @@ impl Route {
             ["asset", "edit", "jig-gallery"] => Self::Asset(AssetRoute::JigGallery),
             ["asset", "edit", "course-gallery"] => Self::Asset(AssetRoute::CourseGallery),
             ["asset", "edit", "resource-gallery"] => Self::Asset(AssetRoute::ResourceGallery),
+            ["asset", "edit", "pro-dev-gallery"] => Self::Asset(AssetRoute::ProDevGallery),
             ["asset", "edit", "jig", jig_id, "publish"] => {
                 Self::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
                     JigId(Uuid::from_str(jig_id).unwrap_ji()),
