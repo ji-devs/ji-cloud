@@ -4,7 +4,7 @@ use super::state::HomePageMode;
 use dominator::clone;
 use futures::join;
 
-use shared::{api::endpoints::jig, domain::jig::JigCountPath};
+use shared::{api::endpoints, domain::jig::JigSearchPath};
 use std::{collections::HashMap, rc::Rc};
 use utils::{init::analytics, metadata::get_age_ranges, prelude::*};
 
@@ -41,10 +41,12 @@ pub fn fetch_data(state: Rc<Home>, include_search: bool) {
 }
 
 async fn fetch_total_jigs_count(state: Rc<Home>) {
-    match jig::Count::api_no_auth(JigCountPath(), None).await {
+    // using search instead of count api because of differences in count result
+    // match jig::Count::api_no_auth(JigCountPath(), None).await {
+    match endpoints::jig::Search::api_no_auth(JigSearchPath(), None).await {
         Err(_) => {}
         Ok(res) => {
-            state.total_assets_count.set(res.total_count);
+            state.total_assets_count.set(res.total_jig_count);
         }
     };
 }
