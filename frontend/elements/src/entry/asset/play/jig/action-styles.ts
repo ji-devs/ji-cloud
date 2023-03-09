@@ -15,6 +15,8 @@ export const actionStyles = css`
         height: 30px;
         width: 30px;
         font-size: 15px;
+        /* explicit padding as it's different in Safari, removing this breaks safari when width < 1024 */
+        padding: 6px;
     }
     @media (min-width: 1024px) {
         .action.large {
