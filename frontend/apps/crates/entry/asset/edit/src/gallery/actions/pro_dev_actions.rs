@@ -83,7 +83,6 @@ async fn add_cover(pro_dev_id: &ProDevId) {
         parent_id: (*pro_dev_id).into(),
     };
 
-    // let path = endpoints::module::Create::PATH.replace("{id}", &jig_id.0.to_string());
 
     match endpoints::module::Create::api_with_auth(ModuleCreatePath(), Some(req)).await {
         Ok(_) => {}

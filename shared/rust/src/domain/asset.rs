@@ -83,7 +83,7 @@ impl AssetType {
             Self::Jig => "JIG",
             Self::Resource => "resource",
             Self::Course => "course",
-            Self::ProDev => "ProDev",
+            Self::ProDev => "Pro Dev",
         }
     }
 
@@ -93,7 +93,7 @@ impl AssetType {
             Self::Jig => "JIG",
             Self::Resource => "Resource",
             Self::Course => "Course",
-            Self::ProDev => "ProDev",
+            Self::ProDev => "Pro Dev",
         }
     }
 
@@ -439,7 +439,7 @@ impl Asset {
             Self::Jig(jig) => &jig.jig_data.age_ranges,
             Self::Course(course) => &course.course_data.age_ranges,
             Self::Resource(resource) => &resource.resource_data.age_ranges,
-            Self::ProDev(_) => panic!(),
+            Self::ProDev(_) => unimplemented!(),
         }
     }
 

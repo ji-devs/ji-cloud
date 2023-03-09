@@ -20,7 +20,7 @@ impl PostPublish {
                     AssetType::Jig => "JIG",
                     AssetType::Course => "Course",
                     AssetType::Resource => "Resource",
-                    AssetType::ProDev => todo!()
+                    AssetType::ProDev => "Pro Dev"
                 })
             }))
             .apply(clone!(state => move |dom| {

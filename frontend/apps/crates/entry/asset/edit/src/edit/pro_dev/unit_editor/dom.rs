@@ -104,11 +104,11 @@ impl Component<UnitEditor> for Rc<UnitEditor> {
                     .prop("size", "small")
                     .prop("bold", true)
                     .text(STR_ADD_TO_COURSE)
+                    .prop_signal("loading", state.loader.is_loading())
                     .event(clone!(state => move |_: events::Click| {
                         analytics::event("Add Unit to Course", None);
                         state.create_unit();
                     }))
-                    .prop_signal("loading", state.loader.is_loading())
                 }),
             ])
         }))

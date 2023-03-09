@@ -70,7 +70,7 @@ impl HeaderDom {
                             AssetId::JigId(_) => AssetRoute::JigGallery,
                             AssetId::CourseId(_) => AssetRoute::CourseGallery,
                             AssetId::ResourceId(_) => unimplemented!(),
-                            AssetId::ProDevId(_) => todo!(),
+                            AssetId::ProDevId(_) => AssetRoute::ProDevGallery,
                         };
                         let url:String = Route::Asset(route).into();
                         dominator::routing::go_to_url(&url);
