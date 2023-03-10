@@ -97,7 +97,7 @@ async fn search_async(state: Rc<Home>) {
     analytics::event("Search", Some(properties));
 }
 
-pub fn search(state: Rc<Home>) {
+pub fn search(state: &Rc<Home>) {
     state.loader.load(clone!(state => async move {
         search_async(state).await;
     }));

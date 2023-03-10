@@ -18,6 +18,7 @@ pub struct SearchSelected {
     pub age_ranges: Mutable<HashSet<AgeRangeId>>,
     pub language: Mutable<Option<String>>,
     pub query: Mutable<String>,
+    pub is_rated: Mutable<bool>,
 }
 
 impl Default for SearchSelected {
@@ -28,6 +29,7 @@ impl Default for SearchSelected {
             age_ranges: Mutable::new(HashSet::new()),
             language: Mutable::new(None),
             query: Mutable::new(String::new()),
+            is_rated: Mutable::new(true),
         }
     }
 }
@@ -48,18 +50,29 @@ impl SearchSelected {
     }
 
     pub fn from_query_params(search: SearchQueryParams) -> Self {
-        Self {
+        log::info!("{:?}", search.is_rated);
+        let s = Self {
             affiliations: Mutable::new(HashSet::from_iter(search.affiliations)),
             categories: Mutable::new(HashSet::from_iter(search.categories)),
             age_ranges: Mutable::new(HashSet::from_iter(search.age_ranges)),
             language: Mutable::new(None),
+            // default is true, so None => true
+            is_rated: Mutable::new(search.is_rated.unwrap_or(true)),
             query: Mutable::new(search.q),
-        }
+        };
+        log::info!("{:?}", s.is_rated);
+
+        s
     }
 
     pub fn to_query_params(&self) -> SearchQueryParams {
         SearchQueryParams {
             q: self.query.get_cloned(),
+            // since default is true, only add when false
+            is_rated: match self.is_rated.get() {
+                true => None,
+                false => Some(false),
+            },
             age_ranges: self.age_ranges.get_cloned().into_iter().collect(),
             affiliations: self.affiliations.get_cloned().into_iter().collect(),
             categories: self.categories.get_cloned().into_iter().collect(),
@@ -75,6 +88,7 @@ impl SearchSelected {
             categories: self.categories.get_cloned().into_iter().collect(),
             page: Some(0),
             language: self.language.get_cloned(),
+            is_rated: self.is_rated.get().then(|| true),
             ..Default::default()
         }
     }
@@ -87,6 +101,7 @@ impl SearchSelected {
             categories: self.categories.get_cloned().into_iter().collect(),
             page: Some(0),
             language: self.language.get_cloned(),
+            // is_rated: self.is_rated.get().then(|| true),
             ..Default::default()
         }
     }
@@ -99,6 +114,7 @@ impl SearchSelected {
             categories: self.categories.get_cloned().into_iter().collect(),
             page: Some(0),
             language: self.language.get_cloned(),
+            // is_rated: self.is_rated.get().then(|| true),
             ..Default::default()
         }
     }
