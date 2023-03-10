@@ -4,8 +4,10 @@
 
 FROM clux/muslrust:stable AS api-builder
 
-# Add our source code.
+# Use crates.io sparse protocol
+ENV CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
 
+# Add our source code.
 RUN mkdir -p /workspace/backend/api
 COPY ./shared /workspace/shared
 COPY ./backend/core /workspace/backend/core
