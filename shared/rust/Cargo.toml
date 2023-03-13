@@ -3,7 +3,7 @@ name = "shared"
 version = "0.1.0"
 authors = [
     "dakom <david.komer@gmail.com>",
-    "Chloe Ross <orangesnowfox@gmail.com>", # chloe@launchbadge.com 
+    "Chloe Ross <orangesnowfox@gmail.com>", # chloe@launchbadge.com
 ]
 edition = "2018"
 description = "shared types for ji cloud project"
@@ -30,6 +30,7 @@ thiserror = "1.0.30"
 strum = "0.22.0"
 strum_macros = "0.22.0"
 macros = { path = "../macros" }
+unicode-segmentation = "1.8.0"
 
 # wasm
 wasm-bindgen = { version = "0.2.78", optional = true }

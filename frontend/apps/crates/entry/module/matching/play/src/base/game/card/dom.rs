@@ -9,7 +9,7 @@ use std::rc::Rc;
 use utils::prelude::*;
 use web_sys::HtmlElement;
 
-pub fn render_top(state: Rc<CardTop>) -> Dom {
+pub fn render_top(state: Rc<CardTop>, top_text_length: usize, bottom_text_length: usize) -> Dom {
     let theme_id = state.theme_id;
     let mode = state.mode;
     let side = state.side;
@@ -19,6 +19,7 @@ pub fn render_top(state: Rc<CardTop>) -> Dom {
         .child({
             let card = &state.card;
             let mut options = CardOptions::new(card, theme_id, mode, side, Size::Matching);
+            options.card_text_len = Some(top_text_length);
             options.flipped = true;
             render_card(options)
         })
@@ -45,6 +46,7 @@ pub fn render_top(state: Rc<CardTop>) -> Dom {
                 TopPhase::Landed => {
                     let card = &state.other;
                     let mut options = CardOptions::new(card, theme_id, mode, side.negate(), Size::Matching);
+                    options.card_text_len = Some(bottom_text_length);
                     options.flipped = true;
                     Some(render_card(options))
                 }
@@ -53,7 +55,7 @@ pub fn render_top(state: Rc<CardTop>) -> Dom {
     })
 }
 
-pub fn render_bottom(state: Rc<CardBottom>) -> Dom {
+pub fn render_bottom(state: Rc<CardBottom>, longest_text_length: usize) -> Dom {
     html!("div", {
         .prop("slot", "bottom")
         .style("touch-action", "none")
@@ -74,6 +76,7 @@ pub fn render_bottom(state: Rc<CardBottom>) -> Dom {
             Some(match phase {
                 BottomPhase::Show => {
                     let mut options = CardOptions::new(card, theme_id, mode, side, Size::Matching);
+                    options.card_text_len = Some(longest_text_length);
                     options.flipped = true;
                     render_card(options)
                 },
@@ -86,7 +89,7 @@ pub fn render_bottom(state: Rc<CardBottom>) -> Dom {
     })
 }
 
-pub fn render_drag(state: Rc<CardDrag>) -> Dom {
+pub fn render_drag(state: Rc<CardDrag>, longest_text_length: usize) -> Dom {
     let theme_id = state.theme_id;
     let mode = state.mode;
     let side = state.side;
@@ -94,6 +97,7 @@ pub fn render_drag(state: Rc<CardDrag>) -> Dom {
     let _other = &state.other;
 
     let mut options = CardOptions::new(card, theme_id, mode, side, Size::Matching);
+    options.card_text_len = Some(longest_text_length);
     options.flipped = true;
     options.style_kind = StyleKind::Dragging;
 

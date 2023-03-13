@@ -24,6 +24,8 @@ pub struct CardOptions<'a> {
     //should be set to match card and back_card will automatically
     //use the opposite
     pub side: Side,
+    /// For calculating the text size on all cards
+    pub card_text_len: Option<usize>,
     pub slot: Option<&'a str>,
 }
 
@@ -50,6 +52,7 @@ impl<'a> CardOptions<'a> {
             simple_transform: None,
             slot: None,
             style_kind: StyleKind::Theme,
+            card_text_len: None,
         }
     }
 }
@@ -86,6 +89,7 @@ where
         side,
         slot,
         style_kind,
+        card_text_len,
     } = options;
 
     html!("play-card", {
@@ -124,11 +128,11 @@ where
                 .prop("scale", t.scale)
                 .prop("hasTransform", true)
         })
-        .child(render_media(card, &size, None))
+        .child(render_media(card, &size, card_text_len, None))
         .apply_if(back_card.is_some(), |dom| {
             dom
                 .prop("doubleSided", true)
-                .child(render_media(back_card.unwrap_ji(), &size, Some("backSideContent")))
+                .child(render_media(back_card.unwrap_ji(), &size, card_text_len, Some("backSideContent")))
         })
         .apply_if(mixin.is_some(), |dom| {
             (mixin.unwrap_ji()) (dom)
