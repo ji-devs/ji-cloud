@@ -1,4 +1,5 @@
 use dominator::{html, Dom};
+use unicode_segmentation::UnicodeSegmentation;
 use utils::prelude::*;
 use wasm_bindgen::JsValue;
 
@@ -64,7 +65,12 @@ pub struct SimpleTransform {
     pub scale: f64,
 }
 
-pub(super) fn render_media(card: &Card, size: &Size, slot: Option<&str>) -> Dom {
+pub(super) fn render_media(
+    card: &Card,
+    size: &Size,
+    card_text_len: Option<usize>,
+    slot: Option<&str>,
+) -> Dom {
     match &card.card_content {
         CardContent::Text(s) => {
             html!("card-text", {
@@ -73,7 +79,7 @@ pub(super) fn render_media(card: &Card, size: &Size, slot: Option<&str>) -> Dom 
                 })
                 .prop("value", s)
                 .prop("fontSize", {
-                    lookup::get_card_font_size(s, Some(size))
+                    lookup::get_card_font_size(card_text_len.unwrap_or(s.graphemes(true).count()), Some(size))
                 })
             })
         }

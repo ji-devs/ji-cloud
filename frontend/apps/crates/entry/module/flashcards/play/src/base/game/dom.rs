@@ -48,22 +48,23 @@ pub fn render(state: Rc<Game>) -> Dom {
 
                     let Current { card, other, side } = current;
 
-                    if state.base.settings.display_mode == DisplayMode::Single {
+                    match state.base.settings.display_mode {
+                        DisplayMode::Single => {
+                            let mut options = CardOptions::new(&card, theme_id, mode, side, Size::Flashcards);
+                            options.back_card = Some(&other);
 
-                        let mut options = CardOptions::new(&card, theme_id, mode, side, Size::Flashcards);
-                        options.back_card = Some(&other);
+                            children.push(render_card_mixin(options, flip_controller(state.clone(), true)));
+                        },
+                        DisplayMode::Double => {
+                            let mut options = CardOptions::new(&card, theme_id, mode, side, Size::Flashcards);
+                            options.flipped = true;
 
-                        children.push(render_card_mixin(options, flip_controller(state.clone(), true)));
+                            children.push(render_card(options));
 
-                    } else {
-                        let mut options = CardOptions::new(&card, theme_id, mode, side, Size::Flashcards);
-                        options.flipped = true;
+                            let options = CardOptions::new(&other, theme_id, mode, side.negate(), Size::Flashcards);
 
-                        children.push(render_card(options));
-
-                        let options = CardOptions::new(&other, theme_id, mode, side.negate(), Size::Flashcards);
-
-                        children.push(render_card_mixin(options, flip_controller(state.clone(), false)));
+                            children.push(render_card_mixin(options, flip_controller(state.clone(), false)));
+                        }
                     }
 
                     children

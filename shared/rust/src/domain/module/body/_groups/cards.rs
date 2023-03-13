@@ -9,6 +9,7 @@ use crate::{
 use serde::{de, Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fmt;
+use unicode_segmentation::UnicodeSegmentation;
 
 /// The base content for card modules
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
@@ -74,6 +75,26 @@ pub struct Card {
 
     /// Content associated with the card
     pub card_content: CardContent,
+}
+
+/// Util fn to fetch the length of a cards text if its content is text
+pub fn get_card_text_length(card: &Card) -> usize {
+    match &card.card_content {
+        CardContent::Text(text) => text.graphemes(true).count(),
+        _ => 0,
+    }
+}
+
+/// Util fn to fetch the longest card text in a list of card pair
+pub fn get_longest_card_text_length<'c>(cards: impl Iterator<Item = &'c Card>) -> usize {
+    cards.fold(0, |acc, card| {
+        let longest_current = match &card.card_content {
+            CardContent::Text(a) => a.graphemes(true).count(),
+            _ => 0,
+        };
+
+        acc.max(longest_current)
+    })
 }
 
 // Required because we need to be able to handle the data for the original Card enum, and also data

@@ -1,4 +1,5 @@
 use dominator::{clone, html, Dom};
+use shared::domain::module::body::_groups::cards::get_longest_card_text_length;
 
 use super::state::*;
 use components::module::_groups::cards::play::card::dom::{
@@ -31,10 +32,10 @@ impl Game {
 
                             children.push(render_card(options));
 
+                            let longest_card_text = get_longest_card_text_length(others.iter().map(|card_id| &card_id.card));
                             for other in others.iter() {
-
                                 let mut options = CardOptions::new(&other.card, theme_id, mode, side.negate(), Size::QuizOption);
-
+                                options.card_text_len = Some(longest_card_text);
                                 options.flipped = true;
                                 options.slot = Some("options");
 

@@ -1,5 +1,6 @@
 use dominator::{clone, html, with_node, Dom, EventOptions};
 use std::rc::Rc;
+use unicode_segmentation::UnicodeSegmentation;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlElement;
 
@@ -16,7 +17,7 @@ use crate::{
     },
     overlay::handle::OverlayHandle,
 };
-use futures_signals::signal::SignalExt;
+use futures_signals::{map_ref, signal::SignalExt, signal_vec::SignalVecExt};
 use shared::domain::module::body::{
     ModeExt,
     _groups::cards::{Mode, Step},
@@ -34,6 +35,29 @@ const STR_DELETE_CONFIRM: &str = "Yes, delete";
 const STR_DELETE_CANCEL: &str = "Don't delete";
 
 pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>) -> Dom {
+    let longest_card_text_signal = map_ref! {
+        let pairs = state.base.pairs.signal_vec_cloned().to_signal_cloned()
+            => {
+                pairs.iter().fold(0, |acc, pair| {
+                    let (a, b) = (&pair.0, &pair.1);
+                    let longest_current = match (&a.card_content, &b.card_content) {
+                        (CardContent::Text(a), CardContent::Text(b)) => {
+                            a.get_cloned().graphemes(true).count().max(b.get_cloned().graphemes(true).count())
+                        }
+                        (CardContent::Text(a), _) => {
+                            a.get_cloned().graphemes(true).count()
+                        }
+                        (_, CardContent::Text(b)) => {
+                            b.get_cloned().graphemes(true).count()
+                        }
+                        _ => 0,
+                    };
+
+                    acc.max(longest_current)
+                })
+            }
+    };
+
     html!("main-card", {
         .child_signal(state.confirm_action.signal_cloned().map(clone!(state => move |confirm_action| {
             confirm_action.map(|confirm_action| html!("empty-fragment", {
@@ -227,8 +251,8 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
                 CardContent::Text(data) => {
                     html!("input-textarea-content", {
                         .prop_signal("value", data.signal_cloned())
-                        .prop_signal("fontSize", data.signal_cloned().map(|value| {
-                            lookup::get_card_font_size(&value, None)
+                        .prop_signal("fontSize", longest_card_text_signal.map(|length| {
+                            lookup::get_card_font_size(length, None)
                         }))
                         .prop_signal("editing", state.editing_active.signal_cloned())
                         .prop("clickMode", "none")

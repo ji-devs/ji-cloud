@@ -35,24 +35,26 @@ pub fn render(state: Rc<MainSettings>) -> Dom {
                 let theme_id = state.base.theme_id.get_cloned();
                 let mode = state.base.mode;
 
-                if display_mode == DisplayMode::Single {
+                match display_mode {
+                    DisplayMode::Single => {
+                        let mut options = CardOptions::new(card, theme_id, mode, side, Size::Flashcards);
+                        options.back_card = Some(other);
+                        options.flip_on_hover = true;
+                        options.flipped = true;
 
-                    let mut options = CardOptions::new(card, theme_id, mode, side, Size::Flashcards);
-                    options.back_card = Some(other);
-                    options.flip_on_hover = true;
-                    options.flipped = true;
+                        children.push(render_card(options));
+                    }
+                    DisplayMode::Double => {
+                        let mut options = CardOptions::new(card, theme_id, mode, side, Size::Flashcards);
+                        options.flipped = true;
 
-                    children.push(render_card(options));
-                } else {
-                    let mut options = CardOptions::new(card, theme_id, mode, side, Size::Flashcards);
-                    options.flipped = true;
+                        children.push(render_card(options));
 
-                    children.push(render_card(options));
+                        let mut options = CardOptions::new(other, theme_id, mode, side, Size::Flashcards);
+                        options.flip_on_hover = true;
 
-                    let mut options = CardOptions::new(other, theme_id, mode, side, Size::Flashcards);
-                    options.flip_on_hover = true;
-
-                    children.push(render_card(options));
+                        children.push(render_card(options));
+                    }
                 }
 
                 children

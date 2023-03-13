@@ -1,4 +1,5 @@
 use dominator::{clone, html, Dom};
+use shared::domain::module::body::_groups::cards::get_longest_card_text_length;
 use std::rc::Rc;
 
 use super::state::*;
@@ -37,18 +38,29 @@ fn render_top_card(state: Rc<MainSettings>) -> impl Signal<Item = Dom> {
 }
 
 fn render_choices(state: Rc<MainSettings>) -> impl SignalVec<Item = Dom> {
-    state.choices_signal()
-        .map_signal(clone!(state => move |choice| {
-            let mode = state.base.mode;
-            //theme_id won't have actually changed here, but w/e
-            state.base.theme_id.signal_cloned()
-                .map(move |theme_id| {
-                    let (card, side, _is_correct) = &choice;
-                    let mut options = CardOptions::new(card, theme_id, mode, *side, Size::QuizOption);
-                    options.flipped = true;
-                    options.slot = Some("options");
+    let sig = map_ref! {
+        let choices = state.choices_signal().to_signal_cloned()
+            => {
+                let longest_card_text = get_longest_card_text_length(choices.iter().map(|choice| &choice.0));
 
-                    render_card(options)
-                })
-        }))
+                choices.into_iter().map(|(card, side, is_correct)| {
+                    (card.clone(), side.clone(), is_correct.clone(), longest_card_text)
+                }).collect::<Vec<_>>()
+            }
+    }.to_signal_vec();
+
+    sig.map_signal(clone!(state => move |choice| {
+        let mode = state.base.mode;
+        //theme_id won't have actually changed here, but w/e
+        state.base.theme_id.signal_cloned()
+            .map(move |theme_id| {
+                let (card, side, _is_correct, len) = &choice;
+                let mut options = CardOptions::new(card, theme_id, mode, *side, Size::QuizOption);
+                options.card_text_len = Some(*len);
+                options.flipped = true;
+                options.slot = Some("options");
+
+                render_card(options)
+            })
+    }))
 }

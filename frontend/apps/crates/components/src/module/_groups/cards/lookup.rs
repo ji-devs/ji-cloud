@@ -1,5 +1,4 @@
 use super::play::card::dom::Size;
-use unicode_segmentation::UnicodeSegmentation;
 
 const FONT_SIZE_RANGE: (f32, f32) = (200f32, 60f32);
 const TEXT_LENGTH_RANGE: (usize, usize) = (1, 10);
@@ -27,7 +26,7 @@ impl Side {
     }
 }
 
-pub fn get_card_font_size(value: &str, size: Option<&Size>) -> String {
+pub fn get_card_font_size(longest_len: usize, size: Option<&Size>) -> String {
     let size = match size {
         None => 40f32, // Return the original font size
         Some(size) => {
@@ -37,8 +36,6 @@ pub fn get_card_font_size(value: &str, size: Option<&Size>) -> String {
                 Size::Matching | Size::QuizOption => 0.45f32,
                 Size::Memory => 0.3f32,
             };
-
-            let value_len = value.graphemes(true).count();
 
             // Different card games have different sized cards, this scales the final font size per
             // card size.
@@ -50,7 +47,7 @@ pub fn get_card_font_size(value: &str, size: Option<&Size>) -> String {
                 / (TEXT_LENGTH_RANGE.1 as f32 - TEXT_LENGTH_RANGE.0 as f32);
             let capped = std::cmp::min(
                 TEXT_LENGTH_RANGE.1,
-                std::cmp::max(TEXT_LENGTH_RANGE.0, value_len),
+                std::cmp::max(TEXT_LENGTH_RANGE.0, longest_len),
             ) - TEXT_LENGTH_RANGE.0;
 
             capped as f32 * scale + font_size_range.0 as f32
