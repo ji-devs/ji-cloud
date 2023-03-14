@@ -11,6 +11,7 @@ use futures_signals::map_ref;
 use futures_signals::signal::SignalExt;
 use futures_signals::signal_vec::SignalVecExt;
 use gloo::utils::window;
+use shared::api::endpoints::pro_dev;
 use shared::domain::asset::{Asset, AssetId};
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -275,6 +276,7 @@ impl Gallery {
                     PlayerPopup::new(
                         asset_id,
                         None,
+                        None,
                         AssetPlayerOptions::default_from_id(&asset_id),
                         PreviewPopupCallbacks {
                             close: Box::new(clone!(state => move|| {
@@ -304,6 +306,10 @@ fn get_asset_link(asset_id: AssetId) -> String {
             CourseEditRoute::Landing,
         )))
         .into(),
-        AssetId::ProDevId(_) => todo!(),
+        AssetId::ProDevId(pro_dev_id) => Route::Asset(AssetRoute::Edit(AssetEditRoute::ProDev(
+            pro_dev_id,
+            ProDevEditRoute::Landing,
+        )))
+        .into(),
     }
 }

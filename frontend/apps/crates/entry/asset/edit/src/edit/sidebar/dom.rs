@@ -155,7 +155,6 @@ impl Sidebar {
             .child(DraggingDom::render(Rc::clone(&state)))
         })
     }
-
 }
 
 /*

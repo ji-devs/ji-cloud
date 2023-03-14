@@ -3,7 +3,9 @@ use std::rc::Rc;
 use awsm_web::loaders::helpers::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::asset::Asset;
-use utils::asset::{CoursePlayerOptions, JigPlayerOptions, ResourceContentExt, ProDevPlayerOptions};
+use utils::asset::{
+    CoursePlayerOptions, JigPlayerOptions, ProDevPlayerOptions, ResourceContentExt,
+};
 use utils::routes::{AssetRoute, Route};
 
 use utils::prelude::*;
@@ -91,7 +93,7 @@ impl ShareAsset {
                 )))
                 .to_string();
                 format!("{}{}", origin, path)
-            },
+            }
         };
         url
     }

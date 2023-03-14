@@ -1,4 +1,5 @@
 use crate::edit::sidebar::state::{Sidebar as SidebarState, SidebarSpot, SidebarSpotItem};
+use crate::edit::sidebar::ProDevSpot;
 use dominator::clone;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use std::cell::RefCell;
@@ -118,7 +119,16 @@ impl SpotState {
                         )
                     }
                     // SidebarSpotItem::ProDev(Some(unit)) => {
-                    //     let unit =  
+                    //     // let unit_id = if let Some(ProDevSpot::Unit(unit)) = **unit {
+                    //     //     Some(unit.id)
+                    //     // } else {
+                    //     //     None
+                    //     // };
+
+                    //     let unit_id = match **unit {
+                    //         ProDevSpot::Unit(unit) => Some(unit.id)
+                    //         ProDevSpot::Cover(_) => None
+                    //     }
 
                     //     matches!(
                     //         route,

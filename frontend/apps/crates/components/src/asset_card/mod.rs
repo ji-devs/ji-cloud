@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use dominator::{html, Dom, clone};
+use dominator::{clone, html, Dom};
 use futures_signals::signal::{from_future, SignalExt};
 use shared::api::endpoints::pro_dev;
 use shared::domain::asset::{Asset, DraftOrLive, PrivacyLevel};
@@ -125,7 +125,7 @@ pub fn render_asset_card(asset: &Asset, config: AssetCardConfig) -> Dom {
                         .prop("to", to)
                     })
                 })
-            }))        
+            }))
         })
         .apply(|mut dom| {
             match config.bottom_indicator {

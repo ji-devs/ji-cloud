@@ -18,7 +18,7 @@ pub fn navigate_to_publish(state: Rc<Sidebar>) {
         AssetId::ResourceId(_) => unimplemented!(),
         AssetId::ProDevId(_) => {
             pro_dev_actions::navigate_to_publish(Rc::clone(&state));
-        },
+        }
     }
 }
 

@@ -306,7 +306,16 @@ impl SpotState {
                         SidebarSpotItem::ProDev(_) => dom.child(ProDevMenu::new(&state).render()),
                     }
                 }))
-                .apply(Self::render_add_button(&state))
+                .apply_if(state.spot.item.is_pro_dev(), |dom| {
+                    dom.child(html!("button-icon", {
+                        .prop("icon", "gears")
+                        .prop("slot", "add")
+                        .event(clone!(state => move |_evt:events::Click| {
+                            actions::add_empty_unit_after(state.clone())
+                        }))
+                    }))
+                })
+                .apply_if(!state.spot.item.is_pro_dev(), Self::render_add_button(&state))
             }))
         })
     }

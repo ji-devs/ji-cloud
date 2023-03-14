@@ -9,7 +9,8 @@ use shared::{
             user::{UserImageCreatePath, UserImageCreateRequest},
             ImageId, ImageSize,
         },
-        pdf::{user::UserPdfCreatePath, PdfId}, pro_dev::unit::ProDevUnitValue,
+        pdf::{user::UserPdfCreatePath, PdfId},
+        pro_dev::unit::ProDevUnitValue,
     },
     media::MediaLibrary,
 };
@@ -23,28 +24,19 @@ const MIME_START_AUDIO: &str = "audio/";
 const MIME_PDF: &str = "application/pdf";
 
 impl AddFile {
-    pub fn save(self: &Rc<Self>) {
+    pub fn save(self: &Rc<Self>, file: File) {
         let state = Rc::clone(self);
 
-        let file = self.file.get_cloned().unwrap_ji();
-
-        self.unit_editor_state.loader.load(async move {
+        self.add_unit_value_state.loader.load(async move {
             let value = upload_file(&file).await.unwrap_ji();
             state
+                .add_unit_value_state
                 .unit_editor_state
-                .value.set(Some(value));
+                .value
+                .set(Some(value))
         })
     }
-
-    // fn allowed_file_type(mime_type: &str) -> bool {
-    //     mime_type.starts_with(MIME_START_IMAGE)
-    //     ||
-    //     mime_type.starts_with(MIME_START_AUDIO)
-    //     ||
-    //     mime_type.starts_with(MIME_PDF)
-    // }
 }
-
 pub async fn upload_file(file: &File) -> Result<ProDevUnitValue, anyhow::Error> {
     let mime_type = Blob::type_(file);
 

@@ -5,6 +5,7 @@ const STR_HEADER_SECOND = "Build your course by inserting links, files, and vide
 
 const STR_ADD_LINK = "Add Link";
 const STR_UPLOAD_FILE = "Upload file";
+const STR_YOUTUBE = "Youtube link";
 
 
 @customElement("unit-edit")
@@ -79,15 +80,11 @@ export class _ extends LitElement {
                     place-content: center;
                 }
 
-                .value-types {
-                    display: grid;
-                    grid-row: 1;
-                    grid-template-columns: 50px 150px 50px 100px;
-                    position: start;
-                }
-
-                input[type=radio], input[type=checkbox] {
-                    margin-right: 2em;
+                .controls {
+                    cursor: pointer;
+                    display: flex;
+                    column-gap: 6px;
+                    align-items: center;
                 }
 
                 label {
@@ -97,48 +94,34 @@ export class _ extends LitElement {
         ];
     }
 
-
-    @property({ type: Boolean, reflect: false })
-    selected: boolean = true;
-
-    private toggleOpen = () => {
-        this.selected = !this.selected;
-        if (!this.selected) {
-            this.dispatchEvent(new Event("closed"));
-        }
-    };
-
     render() {
         return html`
-           <div class="header">
-                <h1>${STR_HEADER_FIRST}</h1>
-                <h3>${STR_HEADER_SECOND}</h3>
-            </div>
-           <div class="main-wrapper">
-                <main>
-                    <div class="width-holder">
-                        <div class="value-types">
-                            <input type="radio" name="type" id="rad1" value="link" checked>
-                            <label for="rad1">${STR_ADD_LINK}</label>
-                            <input type="radio" name="type" id="rad2" value="file">
-                            <label for="rad2">${STR_UPLOAD_FILE}</label>
+        <div class="header">
+            <h1>${STR_HEADER_FIRST}</h1>
+            <h3>${STR_HEADER_SECOND}</h3>
+        </div>
+        <div class="main-wrapper">
+            <main>
+                <div class="width-holder">
+                    <div class="controls">
+                        <slot name="link-select"></slot>
+                        <slot name="file-select"></slot>
+                    </div>
+                    <div class="main">
+                        <div class="column-1">
+                            <slot name="body-input"></slot>
                         </div>
-                        <div class="main">
-                            <div class="column-1">
-                                <slot name="url"></slot>
-                                <slot name="file"></slot>
-                            </div>
-                            <div class="column-2">
-                                <slot name="name"></slot>
-                                <slot name="description"></slot>
-                            </div>
-                        </div>
-                        <div class="save">
-                            <slot name="add"></slot>
+                        <div class="column-2">
+                            <slot name="name"></slot>
+                            <slot name="description"></slot>
                         </div>
                     </div>
-                </main>
-            </div>
+                    <div class="save">
+                        <slot name="add"></slot>
+                    </div>
+                </div>
+            </main>
+        </div>
         `;
     }
 }
@@ -147,3 +130,4 @@ export class _ extends LitElement {
 
 // <!-- <input type='radio' name='a' checked/>
 // <input type='radio' name='a'/> -->
+

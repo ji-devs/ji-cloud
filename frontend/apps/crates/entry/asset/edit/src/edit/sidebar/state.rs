@@ -198,6 +198,13 @@ impl SidebarSpotItem {
             _ => panic!(),
         }
     }
+
+    pub fn is_pro_dev(&self) -> bool {
+        match self {
+            Self::ProDev(_) => true,
+            _ => false,
+        }
+    }
 }
 
 #[derive(Clone, Debug)]

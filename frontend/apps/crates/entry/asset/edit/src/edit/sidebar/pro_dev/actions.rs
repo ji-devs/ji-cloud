@@ -1,10 +1,10 @@
 use super::super::state::Sidebar;
 use shared::{
     api::endpoints,
-    domain::{pro_dev::{
+    domain::pro_dev::{
         unit::{ProDevUnitId, ProDevUnitUpdateRequest, UpdateProDevUnitPath},
         ProDevId, ProDevUpdateDraftDataPath, ProDevUpdateDraftDataRequest,
-    }},
+    },
 };
 use std::rc::Rc;
 use utils::prelude::*;
@@ -46,7 +46,6 @@ pub async fn update_display_name(pro_dev_id: ProDevId, value: String) {
 
     let _ = update_pro_dev(&pro_dev_id, req).await;
 }
-
 
 // pub fn _player_settings_change_signal(state: Rc<State>) -> impl Signal<Item = ProDevPlayerSettings> {
 //     let sig = map_ref! {

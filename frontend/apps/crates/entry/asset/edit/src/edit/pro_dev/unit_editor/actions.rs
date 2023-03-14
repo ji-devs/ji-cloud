@@ -3,15 +3,16 @@ use std::rc::Rc;
 use dominator::clone;
 use shared::{
     api::endpoints::{self, pro_dev::unit},
-    domain::pro_dev::{
-        unit::{
-            CreateProDevUnitPath, GetProDevUnitDraftPath, ProDevUnit, ProDevUnitCreateRequest,
-            ProDevUnitId as UnitId,
-        },
-        ProDevCreatePath,
+    domain::pro_dev::unit::{
+        CreateProDevUnitPath, GetProDevUnitDraftPath, ProDevUnit, ProDevUnitCreateRequest,
+        ProDevUnitId as UnitId,
     },
 };
-use utils::{editable_asset::EditableAsset, prelude::ApiEndpointExt};
+use utils::{
+    editable_asset::EditableAsset,
+    prelude::ApiEndpointExt,
+    routes::{AssetEditRoute, AssetRoute, ProDevEditRoute, Route},
+};
 
 use super::UnitEditor;
 
@@ -57,7 +58,7 @@ impl UnitEditor {
         let value = if let Some(value) = self.value.lock_ref().clone() {
             value
         } else {
-            todo!()
+            todo!();
         };
 
         let body = ProDevUnitCreateRequest {
@@ -77,6 +78,13 @@ impl UnitEditor {
         let state = self;
         state.loader.load(clone!(state => async move {
             state.create_async().await;
+            let url: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::ProDev(
+                state.asset_edit_state.asset_id.unwrap_pro_dev().clone(),
+                ProDevEditRoute::Unit(state.unit_id),
+            )))
+            .into();
+
+            dominator::routing::go_to_url(&url);
         }));
     }
 }

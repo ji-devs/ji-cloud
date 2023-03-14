@@ -8,7 +8,8 @@ use shared::{
         jig::{
             AudioBackground, AudioFeedbackNegative, AudioFeedbackPositive, JigPlayerSettings,
             TextDirection,
-        }, pro_dev::unit::ProDevUnitValue,
+        },
+        pro_dev::unit::ProDevUnitValue,
     },
     media::{MediaLibrary, PngImageFile},
 };
@@ -305,7 +306,7 @@ impl ProDevUnitValueExt for ProDevUnitValue {
             ProDevUnitValue::AudioId(audio_id) => audio_lib_url(MediaLibrary::User, *audio_id),
             ProDevUnitValue::PdfId(pdf_id) => pdf_lib_url(MediaLibrary::User, *pdf_id),
             ProDevUnitValue::Link(url) => url.to_string(),
-            ProDevUnitValue::Video(_) => todo!()
+            ProDevUnitValue::Video(_) => todo!(),
         }
     }
 }

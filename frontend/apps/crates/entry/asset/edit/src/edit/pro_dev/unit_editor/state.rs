@@ -14,7 +14,7 @@ pub struct UnitEditor {
     pub display_name: Mutable<String>,
     pub description: Mutable<String>,
     pub value: Mutable<Option<ProDevUnitValue>>,
-    pub value_type: Mutable<UnitType>,
+    pub value_type: Mutable<Option<UnitValueType>>,
     pub loader: AsyncLoader,
 }
 
@@ -26,15 +26,18 @@ impl UnitEditor {
             display_name: Mutable::new("".to_string()),
             description: Mutable::new("".to_string()),
             value: Mutable::new(None),
-            value_type: Mutable::new(UnitType::Link),
+            value_type: Mutable::new(Some(UnitValueType::Link)),
             loader: AsyncLoader::new(),
         })
     }
 }
 
-pub enum UnitType {
+#[derive(Clone, Copy, Debug)]
+pub enum UnitValueType {
     /// Link for Unit
     Link,
     /// Upload file for Unit
     File,
+    /// Link for Youtube video
+    Youtube,
 }

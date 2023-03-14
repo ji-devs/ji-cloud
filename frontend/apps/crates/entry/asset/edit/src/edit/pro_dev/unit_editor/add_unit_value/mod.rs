@@ -1,5 +1,6 @@
 mod actions;
-mod add_unit_value;
+mod add_file;
+mod add_link;
 mod dom;
 mod state;
 
