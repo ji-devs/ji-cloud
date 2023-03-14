@@ -1,6 +1,9 @@
 use super::super::super::spot::state::SpotState;
 use crate::edit::sidebar::{state::SidebarSpotItem, ProDevSpot};
-use shared::{api::endpoints, domain::{pro_dev::{unit::*, ProDevId}, module::{ModuleCreateRequest, ModuleKind, ModuleBody, ModuleCreatePath}}};
+use shared::{
+    api::endpoints,
+    domain::pro_dev::{unit::*, ProDevId},
+};
 use std::rc::Rc;
 use utils::prelude::*;
 
@@ -9,9 +12,11 @@ pub fn edit(state: Rc<SpotState>) {
 
     if let SidebarSpotItem::ProDev(Some(unit)) = &state.spot.item {
         let unit_id = match &**unit {
-            ProDevSpot::Cover(_) => unimplemented!(),
-            ProDevSpot::Unit(unit) => unit.id,
+            ProDevSpot::Cover(_) => None,
+            ProDevSpot::Unit(unit) => Some(unit.id),
         };
+
+        log::info!("{unit_id:?}");
 
         state
             .sidebar
@@ -19,12 +24,12 @@ pub fn edit(state: Rc<SpotState>) {
             .route
             .set(AssetEditRoute::ProDev(
                 pro_dev_id,
-                ProDevEditRoute::Unit(Some(unit_id)),
+                ProDevEditRoute::Unit(unit_id),
             ));
 
         Route::push_state(Route::Asset(AssetRoute::Edit(AssetEditRoute::ProDev(
             pro_dev_id,
-            ProDevEditRoute::Unit(Some(unit_id)),
+            ProDevEditRoute::Unit(unit_id),
         ))));
     };
 }

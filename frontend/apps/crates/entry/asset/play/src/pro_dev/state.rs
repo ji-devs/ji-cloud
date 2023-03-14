@@ -3,8 +3,11 @@ use std::{collections::HashSet, rc::Rc};
 use awsm_web::loaders::helpers::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::{
-    pro_dev::{ProDevId, ProDevResponse, unit::{ProDevUnitId, ProDevUnit}},
     meta::ResourceType,
+    pro_dev::{
+        unit::{ProDevUnit, ProDevUnitId},
+        ProDevId, ProDevResponse,
+    },
 };
 use utils::asset::ProDevPlayerOptions;
 

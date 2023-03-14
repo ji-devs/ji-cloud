@@ -5,10 +5,16 @@ use components::{
 };
 use dominator::{clone, html, Dom};
 use futures_signals::signal::{Signal, SignalExt};
-use shared::domain::{pro_dev::ProDevResponse, meta::ResourceTypeId};
+use shared::domain::{
+    meta::ResourceTypeId,
+    pro_dev::{
+        unit::{ProDevUnit, ProDevUnitId},
+        ProDevResponse,
+    },
+};
 use std::rc::Rc;
 use utils::{
-    asset::{AssetPlayerOptions, ProDevPlayerOptions, ProDevUnitValueExt},
+    asset::{AssetPlayerOptions, ProDevPlayerOptions, ProDevUnitValueExt, ResourceContentExt},
     events,
     languages::Language,
 };
@@ -37,7 +43,7 @@ impl ProDevPlayer {
                         ..Default::default()
                     });
                     PlayerPopup::new(
-                        jig_id.into(),
+                        state.pro_dev_id.into(),
                         None,
                         unit_id.into(),
                         options,
@@ -66,9 +72,9 @@ impl ProDevPlayer {
                     state.player_options.draft_or_live,
                 ).render(Some("thumbnail"))
             )
-            .children_signal_vec(state.jigs.signal_ref(clone!(state => move |jigs| {
-                jigs.iter().enumerate().map(clone!(state => move |(i, jig)| {
-                    state.render_item(jig, i)
+            .children_signal_vec(state.units.signal_ref(clone!(state => move |units| {
+                units.iter().enumerate().map(clone!(state => move |(i, unit)| {
+                    state.render_unit(unit, i)
                 })).collect()
             })).to_signal_vec())
             .children(pro_dev.pro_dev_data.additional_resources.iter().map(|resource| {
@@ -88,9 +94,9 @@ impl ProDevPlayer {
                 .prop("slot", "play")
                 .prop("icon", "fa-solid fa-circle-play")
                 .event(clone!(state => move |_: events::Click| {
-                    let jigs = state.jigs.lock_mut();
-                    let jig_id = jigs.first().map(|jig| jig.id);
-                    state.active_jig.set(jig_id);
+                    let units = state.units.lock_mut();
+                    let unit_id = units.first().map(|unit| unit.id);
+                    state.active_unit.set(unit_id);
 
                 }))
             }))
@@ -103,30 +109,30 @@ impl ProDevPlayer {
                 }),
                 Some("share")
             ))
-            .child_signal(state.active_jig.signal_cloned().map(|active_jig| {
-                active_jig.map(|active_jig| {
+            .child_signal(state.active_unit.signal_cloned().map(|active_unit| {
+                active_unit.map(|active_unit| {
                     html!("div", {
-                        .text(&active_jig.0.to_string())
+                        .text(&active_unit.0.to_string())
                     })
                 })
             }))
         })
     }
 
-    fn render_item(self: &Rc<Self>, jig: &JigResponse, i: usize) -> Dom {
+    fn render_unit(self: &Rc<Self>, unit: &ProDevUnit, i: usize) -> Dom {
         let state = self;
-        let jig_id = jig.id;
-        html!("jig-play-pro_dev-item", {
+        let unit_id = unit.id;
+        html!("jig-play-pro-dev-item", {
             .prop("slot", "items")
-            .prop("name", &jig.jig_data.display_name)
-            .prop("description", &jig.jig_data.description)
+            .prop("name", &unit.display_name)
+            .prop("description", &unit.description)
             .prop("index", i + 1)
-            .prop_signal("done", state.jigs_done.signal_ref(move |jigs_done| jigs_done.contains(&jig_id)))
+            .prop_signal("done", state.units_done.signal_ref(move |units_done| units_done.contains(&unit_id)))
             .child(
                 ModuleThumbnail::new(
-                    jig_id.into(),
-                    jig.jig_data.modules.get(0).cloned(),
-                    ThumbnailFallback::Asset,
+                    state.pro_dev_id.into(),
+                    None,
+                    ThumbnailFallback::Unit,
                     state.player_options.draft_or_live,
                 ).render(Some("thumbnail"))
             )
@@ -134,9 +140,9 @@ impl ProDevPlayer {
                 .prop("slot", "play-button")
                 .prop("icon", "fa-solid fa-play")
             }))
-            .event(clone!(state, jig_id => move |_: events::Click| {
-                state.play_jig(jig_id);
-                state.jigs_done.lock_mut().insert(jig_id);
+            .event(clone!(state, unit_id => move |_: events::Click| {
+                state.play_unit(unit_id);
+                state.units_done.lock_mut().insert(unit_id);
             }))
         })
     }

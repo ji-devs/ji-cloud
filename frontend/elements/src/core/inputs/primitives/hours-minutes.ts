@@ -1,15 +1,15 @@
 import { LitElement, html, css, customElement, property, internalProperty, PropertyValues } from "lit-element";
 
-const MINUTE = 60;
+const HOUR = 24;
 
-@customElement("input-minutes-seconds")
+@customElement("input-hours-minutes")
 export class _ extends LitElement {
     static get styles() {
         return [
             css`
                 :host {
                     display: inline-grid;
-                    grid-template-columns: minmax(0, 1fr) min-content minmax(0, 1fr);
+                    grid-template-columns: minmax(0, 20px) min-content minmax(0, 30px) min-content;
                 }
                 input {
                     padding: 0;
@@ -20,10 +20,10 @@ export class _ extends LitElement {
                 input:focus {
                     outline: 0;
                 }
-                input#minutes {
+                input#hours {
                     text-align: right;
                 }
-                input#seconds {
+                input#minutes {
                     text-align: left;
                 }
                 input::-webkit-outer-spin-button,
@@ -38,10 +38,10 @@ export class _ extends LitElement {
     value?: number;
 
     @internalProperty()
-    minutes?: number;
+    hours?: number;
 
     @internalProperty()
-    seconds?: number;
+    minutes?: number;
   
     // firstUpdated() {
     //     this.tabIndex = 0;
@@ -56,35 +56,35 @@ export class _ extends LitElement {
         }
     }
 
-    private onMinutesChange(e: Event) {
+    private onHoursChange(e: Event) {
         const valueAsNumber = (e.target as HTMLInputElement).valueAsNumber;
         console.log((e.target as HTMLInputElement).valueAsNumber);
         
         if(window.isNaN(valueAsNumber))
-            this.minutes = undefined;
+            this.hours = undefined;
         else
-            this.minutes = valueAsNumber;
+            this.hours = valueAsNumber;
         
-        console.log(this.minutes);
+        console.log(this.hours);
 
         this.userUpdate();
     }
 
-    private onSecondsChange(e: Event) {
+    private onMinutesChange(e: Event) {
         const valueAsNumber = (e.target as HTMLInputElement).valueAsNumber;
         if(window.isNaN(valueAsNumber))
-            this.seconds = undefined;
+            this.minutes = undefined;
         else
-            this.seconds = valueAsNumber;
+            this.minutes = valueAsNumber;
         this.userUpdate();
     }
 
     private userUpdate() {
-        console.log(this.minutes, this.seconds);
+        console.log(this.hours, this.minutes);
         let value;
-        if((this.minutes || this.minutes === 0) && (this.seconds || this.seconds === 0)) {
-            // this.value = (this.minutes * MINUTE) + this.seconds;
-            value = (this.minutes * MINUTE) + this.seconds;
+        if((this.hours || this.hours === 0) && (this.minutes || this.minutes === 0)) {
+            // this.value = (this.hours * HOUR) + this.seconds;
+            value = (this.hours * HOUR) + this.minutes;
             console.log(true);
             
         } else {
@@ -104,34 +104,34 @@ export class _ extends LitElement {
 
     private programingUpdate() {
         if(!this.value && this.value !== 0) {
-            this.seconds = undefined;
+            this.hours = undefined;
             this.minutes = undefined;
         } else {
-            this.seconds = this.value % MINUTE;
-            this.minutes = Math.floor(this.value / MINUTE);
+            this.minutes = this.value % HOUR;
+            this.hours = Math.floor(this.value / HOUR);
         }
     }
 
     render() {
         return html`
             <input
-                id="minutes"
+                id="hours"
                 type="number"
-                @input=${this.onMinutesChange}
-                value=${this.minutes ?? ""}
+                @input=${this.onHoursChange}
+                value=${this.hours ?? ""}
                 min="0"
-                placeholder="MM"
+                placeholder="HH"
             >
             :
             <input
-                id="seconds"
+                id="minutes"
                 type="number"
-                @input=${this.onSecondsChange}
-                value=${paddingNumber(this.seconds)}
+                @input=${this.onMinutesChange}
+                value=${paddingNumber(this.minutes)}
                 max="59"
                 min="0"
-                placeholder="SS"
-            >
+                placeholder="MM"
+            > H
         `;
     }
 

@@ -48,8 +48,9 @@ export class _ extends LitElement {
                     background-color: var(--white);
                 }
                 :host([state="unit"]) .wrapper {
-                    border: solid var(--light-blue-5) 3px;
+                    border: 0 1px;
                     background-color: var(--light-blue-5);
+                    overflow: hidden;
                 }
                 :host([incomplete]) .wrapper {
                     border: solid var(--light-red-4) 3px;
@@ -63,14 +64,16 @@ export class _ extends LitElement {
                 }
 
                 slot[name="unit"] {
-                    color: white
+                    color: white;
                 }
+
                 :host([state="thumbnail"]) slot[name="thumbnail"] {
                     display: revert;
                 }
                 ::slotted([slot="thumbnail"]) {
                     border-radius: 16px;
                 }
+
                 :host([incomplete]) ::slotted([slot="thumbnail"]) {
                     border: none;
                 }

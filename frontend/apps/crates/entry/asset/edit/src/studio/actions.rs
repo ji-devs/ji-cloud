@@ -5,12 +5,16 @@ use shared::{
         course::{CourseCreatePath, CourseCreateRequest},
         jig::{JigCreatePath, JigCreateRequest},
         module::{ModuleBody, ModuleCreatePath, ModuleCreateRequest, ModuleKind},
-        resource::{ResourceCreatePath, ResourceCreateRequest}, pro_dev::{ProDevCreateRequest, ProDevCreatePath},
+        pro_dev::{ProDevCreatePath, ProDevCreateRequest},
+        resource::{ResourceCreatePath, ResourceCreateRequest},
     },
 };
 use utils::{
     prelude::ApiEndpointExt,
-    routes::{AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, ResourceEditRoute, Route, ProDevEditRoute},
+    routes::{
+        AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, ProDevEditRoute,
+        ResourceEditRoute, Route,
+    },
     unwrap::UnwrapJiExt,
 };
 use wasm_bindgen_futures::spawn_local;

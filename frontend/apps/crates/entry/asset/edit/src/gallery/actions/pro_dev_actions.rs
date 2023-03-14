@@ -3,12 +3,11 @@ use shared::{
     api::endpoints::{self},
     domain::{
         asset::{Asset, DraftOrLive, UserOrMe},
-        pro_dev::{
-            ProDevBrowsePath, ProDevBrowseQuery, ProDevCreatePath,
-            ProDevCreateRequest, ProDevDeletePath, ProDevGetDraftPath, ProDevId, ProDevSearchPath,
-            ProDevSearchQuery,
-        },
         module::{ModuleBody, ModuleCreatePath, ModuleCreateRequest, ModuleKind},
+        pro_dev::{
+            ProDevBrowsePath, ProDevBrowseQuery, ProDevCreatePath, ProDevCreateRequest,
+            ProDevDeletePath, ProDevGetDraftPath, ProDevId, ProDevSearchPath, ProDevSearchQuery,
+        },
     },
 };
 use std::rc::Rc;
@@ -82,7 +81,6 @@ async fn add_cover(pro_dev_id: &ProDevId) {
         body: ModuleBody::new(ModuleKind::ResourceCover),
         parent_id: (*pro_dev_id).into(),
     };
-
 
     match endpoints::module::Create::api_with_auth(ModuleCreatePath(), Some(req)).await {
         Ok(_) => {}

@@ -6,12 +6,16 @@ use shared::{
         course::{CourseCreatePath, CourseCreateRequest, CourseId},
         jig::{JigCreatePath, JigCreateRequest},
         module::{ModuleBody, ModuleCreatePath, ModuleCreateRequest, ModuleKind},
-        resource::{ResourceCreatePath, ResourceCreateRequest, ResourceId}, pro_dev::{ProDevCreateRequest, ProDevCreatePath, ProDevId},
+        pro_dev::{ProDevCreatePath, ProDevCreateRequest, ProDevId},
+        resource::{ResourceCreatePath, ResourceCreateRequest, ResourceId},
     },
 };
 use utils::{
     prelude::ApiEndpointExt,
-    routes::{AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, ResourceEditRoute, Route, ProDevEditRoute},
+    routes::{
+        AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, ProDevEditRoute,
+        ResourceEditRoute, Route,
+    },
     unwrap::UnwrapJiExt,
 };
 

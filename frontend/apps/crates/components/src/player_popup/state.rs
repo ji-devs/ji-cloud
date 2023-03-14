@@ -2,7 +2,9 @@ use std::rc::Rc;
 
 use futures_signals::signal::Mutable;
 use shared::domain::{asset::AssetId, module::ModuleId, pro_dev::unit::ProDevUnitId};
-use utils::asset::{AssetPlayerOptions, CoursePlayerOptions, JigPlayerOptions, ProDevPlayerOptions};
+use utils::asset::{
+    AssetPlayerOptions, CoursePlayerOptions, JigPlayerOptions, ProDevPlayerOptions,
+};
 
 use super::PreviewPopupCallbacks;
 

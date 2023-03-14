@@ -13,8 +13,8 @@ use utils::prelude::*;
 
 mod course_actions;
 mod jig_actions;
-mod resource_actions;
 mod pro_dev_actions;
+mod resource_actions;
 
 impl Gallery {
     pub fn load_data(self: &Rc<Self>) {

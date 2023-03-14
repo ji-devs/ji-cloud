@@ -7,6 +7,7 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 mod course;
 mod debug;
 mod jig;
+mod pro_dev;
 mod router;
 
 use wasm_bindgen::prelude::*;

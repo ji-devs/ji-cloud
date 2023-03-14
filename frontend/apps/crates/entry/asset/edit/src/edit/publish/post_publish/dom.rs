@@ -126,7 +126,7 @@ impl PostPublish {
             }),
         ]
     }
-    
+
     fn render_pro_dev_actions(self: &Rc<Self>) -> Vec<Dom> {
         let state = self;
         let asset_display_name = AssetType::ProDev.display_name();

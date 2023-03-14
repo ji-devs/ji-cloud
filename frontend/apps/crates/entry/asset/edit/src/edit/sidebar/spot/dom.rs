@@ -1,7 +1,9 @@
 use components::overlay::handle::OverlayHandle;
+use components::stickers::video::ext::YoutubeUrlExt;
 use dominator::{clone, html, with_node, Dom, DomBuilder, EventOptions};
 use futures_signals::map_ref;
 use shared::domain::asset::DraftOrLive;
+use shared::domain::module::body::_groups::design::VideoHost;
 use web_sys::{HtmlElement, Node, ScrollBehavior, ScrollIntoViewOptions};
 
 use super::super::course::menu::CourseMenu;
@@ -14,7 +16,7 @@ use crate::edit::sidebar::pro_dev::menu::ProDevMenu;
 use crate::edit::sidebar::state::{CourseSpot, ModuleHighlight, SidebarSpotItem};
 use crate::edit::sidebar::ProDevSpot;
 use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
-use futures_signals::signal::{not, SignalExt};
+use futures_signals::signal::{not, Mutable, SignalExt};
 use std::rc::Rc;
 use utils::prelude::*;
 
@@ -108,14 +110,16 @@ impl SpotState {
                                 }
                                 state.sidebar.asset_edit_state.set_route_course(CourseEditRoute::Landing);
                             },
-                            SidebarSpotItem::ProDev(unit) => {
-                                if let Some(unit) = unit {
-                                    if let ProDevSpot::Cover(cover) = &**unit {
-                                        state.sidebar.asset_edit_state.set_route_pro_dev(ProDevEditRoute::Cover(cover.id));
-                                        return;
+                            SidebarSpotItem::ProDev(item) => {
+                                match item {
+                                    Some(item)=> {
+                                        match &**item {
+                                            ProDevSpot::Cover(cover) => state.sidebar.asset_edit_state.set_route_pro_dev(ProDevEditRoute::Cover(cover.id)),
+                                            ProDevSpot::Unit(_) => pro_dev_spot_actions::edit(state.clone()),
+                                        }
                                     }
+                                    None => state.sidebar.asset_edit_state.set_route_pro_dev(ProDevEditRoute::Landing)
                                 }
-                                state.sidebar.asset_edit_state.set_route_pro_dev(ProDevEditRoute::Landing);
                             },
                         }
                     })
@@ -183,12 +187,45 @@ impl SpotState {
                                                     DraftOrLive::Draft,
                                                 ).render_live(Some("thumbnail"))
                                             },
-                                            ProDevSpot::Unit(_unit) =>
+                                            ProDevSpot::Unit(unit) =>
                                             {
-                                                html!("div", {
-                                                    .prop("slot", "unit")
-                                                    .text(format!("Unit {}", state.index + 1).as_str())
-                                                })
+                                                match &unit.value {
+                                                    shared::domain::pro_dev::unit::ProDevUnitValue::Video(video) => {
+                                                        let mut_host = Mutable::new(video.host.clone());
+
+                                                        html!("div", {
+                                                            .prop("slot", "unit")
+                                                            .child_signal(mut_host.signal_cloned().map(clone!(video => move|host| {
+                                                                match host {
+                                                                    VideoHost::Youtube(youtube) => Some(
+                                                                        html!("video-youtube-thumbnail", {
+                                                                            .prop("videoId", youtube.url.get_id())
+                                                                            .style("width", "100%")
+                                                                            .style("height", "100%")
+                                                                            .style("position", "relative") // create a new stacking context
+                                                                            .child(html!("div", {
+                                                                                .style("left", "0")
+                                                                                .style("top", "0")
+                                                                                .style("z-index", "1")
+                                                                                .style("width", "100%")
+                                                                                .style("height", "100%")
+                                                                                .child(html!("img-ui", {
+                                                                                  .prop("path", "entry/pro-dev/link-icon.svg")
+                                                                                }))
+                                                                              }))                                                                     })
+                                                                    ),
+                                                                }
+                                                            })))
+                                                        })
+                                                    },
+                                                    _ => {
+                                                        html!("div", {
+                                                            .prop("slot", "unit")
+                                                            .text(format!("Unit {}", state.index).as_str())
+                                                        })
+                                                    }
+                                                }
+
                                             },
                                         }
                                     })
@@ -225,31 +262,18 @@ impl SpotState {
                                 },
                                 Some(ModuleHighlight::Unit(idx)) => {
                                     if idx == state.index {
-                                        // Make sure that the module window is visible to the
-                                        // teacher.
                                         elem.scroll_into_view_with_scroll_into_view_options(ScrollIntoViewOptions::new().behavior(ScrollBehavior::Smooth));
                                         Some(html!("empty-fragment", {
-                                            .apply(OverlayHandle::lifecycle(clone!(state, elem => move || {
-                                                html!("overlay-tooltip-error", {
-                                                    .text("This part of your JIG needs attention. Add content or delete.")
-                                                    .prop("target", elem.clone())
-                                                    .prop("targetAnchor", "tr")
-                                                    .prop("contentAnchor", "oppositeH")
-                                                    .prop("marginX", 75i32)
-                                                    .prop("closeable", true)
-                                                    .prop("strategy", "track")
-                                                    .style("width", "350px")
-                                                    .event(clone!(state => move |_:events::Close| {
-                                                        state.sidebar.highlight_modules.set_neq(None);
-                                                    }))
-                                                })
-                                            })))
+                                            // Populate existing unit with it's data.
                                         }))
                                     } else {
                                         None
                                     }
                                 },
-                                _ => None,
+                                _ =>
+                                {
+                                    None
+                                },
                             }
                         })))
                         .apply(OverlayHandle::lifecycle(clone!(state => move || {
@@ -306,7 +330,16 @@ impl SpotState {
                         SidebarSpotItem::ProDev(_) => dom.child(ProDevMenu::new(&state).render()),
                     }
                 }))
-                .apply(Self::render_add_button(&state))
+                .apply_if(state.spot.item.is_pro_dev(), |dom| {
+                    dom.child(html!("button-icon", {
+                        .prop("icon", "gears")
+                        .prop("slot", "add")
+                        .event(clone!(state => move |_evt:events::Click| {
+                            actions::add_empty_unit_after(state.clone())
+                        }))
+                    }))
+                })
+                .apply_if(!state.spot.item.is_pro_dev(), Self::render_add_button(&state))
             }))
         })
     }

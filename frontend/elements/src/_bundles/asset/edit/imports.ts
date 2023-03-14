@@ -10,6 +10,8 @@ import "@elements/core/inputs/composed/autocomplete-option";
 import "@elements/core/inputs/wrapper";
 import "@elements/core/inputs/composed/switch";
 import "@elements/core/inputs/primitives/file";
+import "@elements/core/inputs/primitives/minutes-seconds";
+import "@elements/core/inputs/primitives/hours-minutes";
 import "@elements/core/buttons/icon";
 import "@elements/core/buttons/rectangle";
 import "@elements/core/buttons/fa-button";
@@ -74,6 +76,7 @@ import "@elements/entry/asset/edit/post-publish/post-publish-action";
 import "@elements/_bundles/_sub-bundles/hebrew-buttons";
 import "@elements/core/modals/confirm";
 import "@elements/core/modals/video";
+import "@elements/module/video/youtube-thumbnail";
 
 import "@elements/entry/home/home/search-results/search-results";
 import "@elements/entry/home/home/search-results/search-results-section";

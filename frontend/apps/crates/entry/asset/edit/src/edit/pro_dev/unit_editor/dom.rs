@@ -1,13 +1,16 @@
-use std::{process::Child, rc::Rc, str::FromStr};
+use std::{rc::Rc, str::FromStr};
 
-use components::hebrew_buttons::HebrewButtons;
+use components::{file_input::FileInput, hebrew_buttons::HebrewButtons};
 use dominator::{clone, events, html, with_node, Dom, DomBuilder};
+use futures_signals::{map_ref, signal::SignalExt};
 use shared::domain::pro_dev::unit::ProDevUnitValue;
 use url::{ParseError, Url};
 use utils::{component::Component, init::analytics};
 use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement, ShadowRoot};
 
-use super::state::UnitEditor;
+use crate::edit::pro_dev::unit_editor::UnitValue;
+
+use super::{add_unit_value::AddUnitValue, state::UnitEditor};
 
 const STR_NAME_LABEL: &str = "Unit’s name";
 const STR_NAME_PLACEHOLDER: &str = "Add unit name";
@@ -15,6 +18,9 @@ const STR_DESCRIPTION_LABEL: &str = "Description";
 const STR_DESCRIPTION_PLACEHOLDER: &str = "Add Description";
 const STR_URL_PLACEHOLDER: &str = "Insert URL here";
 const STR_ADD_TO_COURSE: &str = "Add to course";
+const STR_ADD_LINK: &str = " Add Link";
+const STR_UPLOAD_FILE: &str = " Upload file";
+const STR_ADD_YOUTUBE: &str = " Video";
 
 impl Component<UnitEditor> for Rc<UnitEditor> {
     fn styles() -> &'static str {
@@ -27,48 +33,79 @@ impl Component<UnitEditor> for Rc<UnitEditor> {
 
     fn dom(&self, dom: DomBuilder<ShadowRoot>) -> DomBuilder<ShadowRoot> {
         let state = self;
+        state.load_unit();
+
+        let is_valid = map_ref! {
+            let display_name = state.display_name.signal_cloned(),
+            let description = state.description.signal_cloned(),
+            let value = state.value.signal_cloned()
+
+            => {
+                !display_name.trim().is_empty() && !description.trim().is_empty() && UnitValue::is_some(value)
+            }
+        };
 
         dom.child(html!("unit-edit", {
             .children(&mut [
-                html!("input-wrapper", {
-                    .prop("slot", "url")
-                    .child(html!("input" => HtmlInputElement, {
-                        .with_node!(elem => {
-                            .attr("dir", "auto")
-                            .prop("placeholder", format!("{}", STR_URL_PLACEHOLDER))
-                            .event(clone!(state => move |_evt: events::Input| {
-                                let val = elem.value().trim().to_string();
-                                let url = Url::from_str(&val);
-                                match url {
-                                    Ok(url) => {
-                                        let _ = elem.remove_attribute("error");
-                                        state.value.set(Some(ProDevUnitValue::Link(url)));
-                                    },
-                                    Err(err) => {
-                                        match err {
-                                            ParseError::RelativeUrlWithoutBase => {
-                                                let url_with_https = prepend_https_to_url(&val);
-                                                let _ = elem.remove_attribute("error");
-                                                elem.set_value(url_with_https.as_str());
-                                                state.value.set(Some(ProDevUnitValue::Link(url_with_https)));
-                                            },
-                                            _ => {
-                                                let _ = elem.set_attribute("error", "");
-                                                state.value.set(None);
-                                            },
-                                        }
-                                    },
-                                }
-                            }))
-                        })
+                html!("label", {
+                    .prop("slot", "link-select")
+                    .child(html!("input", {
+                        .prop("slot", "input")
+                        .prop("label", STR_URL_PLACEHOLDER)
+                        .prop("type", "radio")
+                        .prop("name", "type")
+                        .prop("value", "input-link")
+                        .prop_signal("checked", state.value.signal_ref(|value| {
+                            matches!(value, UnitValue::Link(_))
+                        }))
+                        .event(clone!(state => move |_: events::Click| {
+                            state.value.set(UnitValue::Link(None))
+                        }))
                     }))
+                    .text(STR_ADD_LINK)
                 }),
+                html!("label", {
+                    .prop("slot", "file-select")
+                    .child(html!("input", {
+                        .prop("type", "radio")
+                        .prop("name", "type")
+                        .prop("value", "input-file")
+                        .prop_signal("checked", state.value.signal_ref(|value| {
+                            matches!(value, UnitValue::File(_))
+                        }))
+                        .event(clone!(state => move |_: events::Click| {
+                            state.value.set(UnitValue::File(None));
+                        }))
+                    }))
+                    .text(STR_UPLOAD_FILE)
+                }),
+                html!("label", {
+                    .prop("slot", "youtube-select")
+                    .child(html!("input", {
+                        .prop("type", "radio")
+                        .prop("name", "type")
+                        .prop("value", "input-youtube")
+                        .prop("label", "Add a Youtube link")
+                        .prop_signal("checked", state.value.signal_ref(|value| {
+                            matches!(value, UnitValue::Video(_))
+                        }))
+                        .event(clone!(state => move |_: events::Click| {
+                            state.value.set(UnitValue::Video(None));
+                        }))
+                    }))
+                    .text(STR_ADD_YOUTUBE)
+                }),
+            ])
+            .child({
+                AddUnitValue::new(state.clone()).render(Some("body-input"))
+            })
+            .children(&mut [
                 html!("input-wrapper", {
                     .prop("slot", "name")
                     .prop("label", format!("{}", STR_NAME_LABEL))
-                    // .child({
-                    //     HebrewButtons::reveal().render(Some("hebrew-inputs"))
-                    // })
+                    .child({
+                        HebrewButtons::reveal().render(Some("hebrew-inputs"))
+                    })
                     .child(html!("input" => HtmlInputElement, {
                         .with_node!(elem => {
                             .attr("dir", "auto")
@@ -84,6 +121,9 @@ impl Component<UnitEditor> for Rc<UnitEditor> {
                 html!("input-wrapper", {
                     .prop("slot", "description")
                     .prop("label", STR_DESCRIPTION_LABEL)
+                    .child({
+                        HebrewButtons::reveal().render(Some("hebrew-inputs"))
+                    })
                     .child(html!("textarea" => HtmlTextAreaElement, {
                         .with_node!(elem => {
                             .attr("dir", "auto")
@@ -100,24 +140,24 @@ impl Component<UnitEditor> for Rc<UnitEditor> {
                     }))
                 }),
                 html!("button-rect", {
+                    .prop_signal("disabled", is_valid.map(|value| !value))
                     .prop("slot", "add")
                     .prop("size", "small")
                     .prop("bold", true)
                     .text(STR_ADD_TO_COURSE)
-                    .prop_signal("loading", state.loader.is_loading())
                     .event(clone!(state => move |_: events::Click| {
                         analytics::event("Add Unit to Course", None);
-                        state.create_unit();
+                        match state.unit_id {
+                            Some(_) => {
+                                state.clone().update_unit()
+                            }
+                            None => {
+                                state.clone().create_unit()
+                            }
+                        }
                     }))
                 }),
             ])
         }))
     }
-}
-
-fn prepend_https_to_url(url: &str) -> Url {
-    let mut fixed_url_string = String::new();
-    fixed_url_string.push_str("https://");
-    fixed_url_string.push_str(url);
-    Url::from_str(&fixed_url_string).unwrap()
 }

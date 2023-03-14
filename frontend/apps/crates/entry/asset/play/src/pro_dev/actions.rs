@@ -7,8 +7,11 @@ use shared::{
     api::endpoints,
     domain::{
         asset::DraftOrLive,
-        pro_dev::{ProDevGetDraftPath, ProDevGetLivePath, unit::{ProDevUnit, ProDevUnitId, GetProDevUnitLivePath}},
         meta::GetMetadataPath,
+        pro_dev::{
+            unit::{GetProDevUnitLivePath, ProDevUnit, ProDevUnitId},
+            ProDevGetDraftPath, ProDevGetLivePath,
+        },
     },
 };
 use utils::{
@@ -38,14 +41,23 @@ impl ProDevPlayer {
                     .await
             }
             DraftOrLive::Draft => {
-                endpoints::pro_dev::GetDraft::api_no_auth(ProDevGetDraftPath(state.pro_dev_id), None)
-                    .await
+                endpoints::pro_dev::GetDraft::api_no_auth(
+                    ProDevGetDraftPath(state.pro_dev_id),
+                    None,
+                )
+                .await
             }
         };
 
         match pro_dev {
             Ok(pro_dev) => {
-                let unit_ids = pro_dev.pro_dev_data.units.clone().into_iter().map(|x| x.id).collect();
+                let unit_ids = pro_dev
+                    .pro_dev_data
+                    .units
+                    .clone()
+                    .into_iter()
+                    .map(|x| x.id)
+                    .collect();
                 state.pro_dev.set(Some(pro_dev));
                 state.load_units(unit_ids).await;
             }
@@ -73,9 +85,12 @@ impl ProDevPlayer {
     }
 
     async fn load_unit(self: &Rc<Self>, unit_id: &ProDevUnitId) -> Result<ProDevUnit, ()> {
-        endpoints::pro_dev::unit::GetLive::api_no_auth(GetProDevUnitLivePath(self.pro_dev_id, unit_id.clone()), None)
-            .await
-            .map_err(|_| ())
+        endpoints::pro_dev::unit::GetLive::api_no_auth(
+            GetProDevUnitLivePath(self.pro_dev_id, unit_id.clone()),
+            None,
+        )
+        .await
+        .map_err(|_| ())
     }
 
     pub fn play_unit(self: &Rc<Self>, unit_id: ProDevUnitId) {
