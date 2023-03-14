@@ -50,5 +50,6 @@ pub fn configure(config: &mut ServiceConfig) {
         .route("/no-auth", web::get().to(direct_template_no_auth))
         .route("/info", web::get().to(info_template))
         .route("/epoch", web::get().to(epoch_page))
-        .route("/plans", web::get().to(redirect));
+        .route("/plans", web::get().to(redirect))
+        .route("/static/{path:.*}", web::get().to(spa::static_assets));
 }
