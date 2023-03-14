@@ -324,7 +324,7 @@ impl Manager {
     pub async fn spawn_cron_jobs(&self) -> anyhow::Result<()> {
         log::info!("reached updates for spawning jobs");
 
-        for count in 0..7 {
+        for count in 0..8 {
             let res = match count {
                 0 => self
                     .update_images()
@@ -354,7 +354,7 @@ impl Manager {
                 7 => self
                     .update_pro_devs()
                     .await
-                    .context("update public users task errored"),
+                    .context("update pro devs task errored"),
                 _ => continue,
             };
 
