@@ -78,7 +78,10 @@ pub fn render_bottom(state: Rc<CardBottom>, longest_text_length: usize) -> Dom {
                     let mut options = CardOptions::new(card, theme_id, mode, side, Size::Matching);
                     options.card_text_len = Some(longest_text_length);
                     options.flipped = true;
-                    render_card(options)
+                    render_card_mixin(options, |dom| {
+                        // block events on the element so that it's parent gets them (needed for touch on Android)
+                        dom.style("pointer-events", "none")
+                    })
                 },
                 BottomPhase::Remove => {
                     let options = EmptyCardOptions::new(EmptyKind::Translucent, theme_id, Size::Matching);
