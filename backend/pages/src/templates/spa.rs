@@ -35,7 +35,6 @@ pub enum SpaPage {
     Module(String, ModuleAssetPageKind),
     Dev(String),
     LegacyJig,
-    StaticAssets(String),
 }
 
 impl SpaPage {
@@ -52,7 +51,6 @@ impl SpaPage {
             }
             Self::Dev(path) => Cow::Owned(format!("dev/{}", path)),
             Self::LegacyJig => Cow::Borrowed("legacy/play"),
-            Self::StaticAssets(path) => Cow::Owned(format!("static/{}", path)),
         }
     }
 }
@@ -61,6 +59,7 @@ impl SpaPage {
 #[template(path = "spa.html")]
 struct SpaPageInfo {
     app_js: String,
+    app_css: String,
     app_custom_elements_js: String,
     firebase: bool,
     google_maps_url: Option<String>,
@@ -79,6 +78,7 @@ fn spa_template(settings: &RuntimeSettings, spa: SpaPage) -> actix_web::Result<H
         app_js: settings
             .remote_target()
             .spa_url(&*spa.as_str(), "js/index.js"),
+        app_css: settings.remote_target().css_url(true),
         app_custom_elements_js: settings
             .remote_target()
             .spa_url(&*spa.as_str(), "elements/custom-elements.js"),
@@ -155,11 +155,4 @@ pub async fn dev_template(
     path: Path<String>,
 ) -> actix_web::Result<HttpResponse> {
     spa_template(&settings, SpaPage::Dev(path.into_inner()))
-}
-
-pub async fn static_assets(
-    settings: Data<RuntimeSettings>,
-    path: Path<String>,
-) -> actix_web::Result<HttpResponse> {
-    spa_template(&settings, SpaPage::StaticAssets(path.into_inner()))
 }
