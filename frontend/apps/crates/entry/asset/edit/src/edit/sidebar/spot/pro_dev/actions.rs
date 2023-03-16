@@ -15,8 +15,8 @@ pub fn edit(state: Rc<SpotState>) {
 
     if let SidebarSpotItem::ProDev(Some(unit)) = &state.spot.item {
         let unit_id = match &**unit {
-            ProDevSpot::Cover(_) => unimplemented!(),
-            ProDevSpot::Unit(unit) => unit.id,
+            ProDevSpot::Cover(_) => None,
+            ProDevSpot::Unit(unit) => Some(unit.id),
         };
 
         state
@@ -25,12 +25,12 @@ pub fn edit(state: Rc<SpotState>) {
             .route
             .set(AssetEditRoute::ProDev(
                 pro_dev_id,
-                ProDevEditRoute::Unit(Some(unit_id)),
+                ProDevEditRoute::Unit(unit_id),
             ));
 
         Route::push_state(Route::Asset(AssetRoute::Edit(AssetEditRoute::ProDev(
             pro_dev_id,
-            ProDevEditRoute::Unit(Some(unit_id)),
+            ProDevEditRoute::Unit(unit_id),
         ))));
     };
 }

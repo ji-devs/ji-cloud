@@ -80,7 +80,7 @@ impl SpotState {
                 SidebarSpotItem::ProDev(pro_dev_spot) => {
                     match pro_dev_spot {
                         None => "empty",
-                        Some(_) => "unit",
+                        Some(_) => "thumbnail",
                     }
                 },
             }
@@ -118,12 +118,22 @@ impl SpotState {
                             AssetEditRoute::Jig(_, JigEditRoute::Module(module_id)) if module_id == &module.id
                         )
                     }
+                    SidebarSpotItem::ProDev(Some(unit)) => {
+                        let id = match &**unit {
+                            ProDevSpot::Cover(_) => None,
+                            ProDevSpot::Unit(unit) => Some(unit.id),
+                        };
+                        matches!(
+                            route,
+                            AssetEditRoute::ProDev(_, ProDevEditRoute::Unit(unit_id)) if unit_id == &id
+                        )
+                    }
                     // SidebarSpotItem::ProDev(Some(unit)) => {
-                    //     // let unit_id = if let Some(ProDevSpot::Unit(unit)) = **unit {
-                    //     //     Some(unit.id)
-                    //     // } else {
-                    //     //     None
-                    //     // };
+                        // let unit_id = if let Some(ProDevSpot::Unit(unit)) = **unit {
+                        //     Some(unit.id)
+                        // } else {
+                        //     None
+                        // };
 
                     //     let unit_id = match **unit {
                     //         ProDevSpot::Unit(unit) => Some(unit.id)

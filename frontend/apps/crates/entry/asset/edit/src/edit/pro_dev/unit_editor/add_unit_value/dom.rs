@@ -1,13 +1,9 @@
 use std::rc::Rc;
 
-use components::overlay::handle::OverlayHandle;
-use dominator::traits::AsStr;
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
 
-use shared::api::endpoints::pro_dev::unit;
-use utils::events;
-use web_sys::{HtmlElement, HtmlInputElement};
+use web_sys::HtmlElement;
 
 use crate::edit::pro_dev::unit_editor::add_unit_value::add_link::state::AddLink;
 use crate::edit::pro_dev::unit_editor::UnitValueType;
@@ -24,11 +20,9 @@ impl AddUnitValue {
             .apply_if(slot.is_some(), move |dom| {
                 dom.prop("slot", slot)
             })
-            .with_node!(elem => {
-                .child_signal(state.unit_editor_state.value_type.signal().map(clone!(state, elem => move|unit_type| {
-                    unit_type.map(|unit_type| state.render_value_slot(unit_type))
-                })))
-            })
+            .child_signal(state.unit_editor_state.value_type.signal().map(clone!(state => move|unit_type| {
+                unit_type.map(|unit_type| state.render_value_slot(unit_type))
+            })))
 
         })
     }
@@ -37,8 +31,6 @@ impl AddUnitValue {
         let state = Rc::clone(self);
         html!("div" => HtmlElement, {
                     .child({
-                        log::info!("selector {:?}", value_selector);
-
                         match value_selector {
                             UnitValueType::Link => {
                                 AddLink::new(Rc::clone(&state)).render()

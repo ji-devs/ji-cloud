@@ -36,7 +36,7 @@ use super::{
 /// AssetType
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Display)]
 #[serde(rename_all = "lowercase")]
-#[strum(serialize_all = "snake_case")]
+#[strum(serialize_all = "kebab-case")]
 pub enum AssetType {
     /// JIG
     Jig,
@@ -67,13 +67,18 @@ impl AssetType {
         matches!(self, Self::Course)
     }
 
+    /// check if pro_dev
+    pub fn is_pro_dev(&self) -> bool {
+        matches!(self, Self::ProDev)
+    }
+
     /// Represents the asset type as a `str`
     pub fn as_str(&self) -> &'static str {
         match self {
             Self::Jig => "jig",
             Self::Resource => "resource",
             Self::Course => "course",
-            Self::ProDev => "pro dev",
+            Self::ProDev => "prodev",
         }
     }
 
@@ -127,7 +132,7 @@ impl TryFrom<&str> for AssetType {
             "jig" => Ok(Self::Jig),
             "course" => Ok(Self::Course),
             "resource" => Ok(Self::Resource),
-            "pro_dev" => Ok(Self::ProDev),
+            "pro-dev" => Ok(Self::ProDev),
             _ => Err(()),
         }
     }
