@@ -1,6 +1,7 @@
 {
   "name": "build-utils",
   "description": "Ji Cloud Build Utils",
+  "type": "module",
   "scripts": {
     "local-media-server": "node ./src/local-media-server.js",
     "local-dev-files": "node ./src/local-dev-files.js",

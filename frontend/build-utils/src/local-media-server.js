@@ -1,4 +1,12 @@
-require("dotenv").config({ path: "../../.env" });
+import path from "path";
+import express from "express";
+import cors from "cors";
+import serveIndex from "serve-index";
+import dotenv from "dotenv";
+
+dotenv.config({
+    path: path.resolve("../../.env"),
+});
 
 if (
     !process.env.LOCAL_CDN_MEDIA_DIR ||
@@ -24,11 +32,6 @@ if (
     process.exit(1);
 }
 
-const path = require("path");
-
-const express = require("express");
-const cors = require("cors");
-const serveIndex = require("serve-index");
 
 startCdnLegacy();
 startCdnMedia();

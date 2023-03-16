@@ -1,4 +1,10 @@
-require("dotenv").config({ path: "../.env" });
+import spawn from "cross-spawn";
+import path from "path";
+import dotenv from "dotenv";
+
+dotenv.config({
+    path: path.resolve("../.env"),
+});
 
 if (
     !process.env.LOCAL_CDN_MEDIA_DIR ||
@@ -15,11 +21,6 @@ if (
     console.log("Media server sync: set [REMOTE_CDN_MEDIA_BUCKET] in .env");
     process.exit(1);
 }
-
-const spawn = require("cross-spawn");
-const fs = require("fs");
-const os = require("os");
-const path = require("path");
 
 const cmd = process.argv[2];
 

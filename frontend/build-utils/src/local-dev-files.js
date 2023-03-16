@@ -1,48 +1,13 @@
-const { execSync } = require("child_process");
-const path = require("path");
-const fs = require("fs-extra");
+import path from "path";
+import fs from "fs-extra";
+import ALLOWED_APP_NAMES from "../../available-app.mjs";
+import dotenv from "dotenv";
 
-require("dotenv").config({
+dotenv.config({
     path: path.resolve("../../.env"),
 });
 
 const { APP_NAME } = process.env;
-
-const ALLOWED_APP_NAMES = [
-    "user",
-    "admin",
-    "home",
-    "kids",
-    "community",
-    "asset/edit",
-    "asset/play",
-    "module/memory/edit",
-    "module/memory/play",
-    "module/flashcards/edit",
-    "module/flashcards/play",
-    "module/card-quiz/edit",
-    "module/card-quiz/play",
-    "module/matching/edit",
-    "module/matching/play",
-    "module/poster/edit",
-    "module/poster/play",
-    "module/cover/edit",
-    "module/cover/play",
-    "module/resource-cover/edit",
-    "module/resource-cover/play",
-    "module/video/edit",
-    "module/video/play",
-    "module/tapping-board/edit",
-    "module/tapping-board/play",
-    "module/drag-drop/edit",
-    "module/drag-drop/play",
-    "module/find-answer/edit",
-    "module/find-answer/play",
-    "dev/scratch/001",
-    "dev/showcase/001",
-    "module/legacy/play",
-    "module/legacy/edit",
-];
 
 if (!APP_NAME) {
     console.error("requires APP_NAME in env");
