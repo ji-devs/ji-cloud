@@ -90,6 +90,7 @@ impl JigTable {
                 .child_signal(state.curation_state.total_pages.signal().map(clone!(state => move |total_pages| {
                     total_pages.map(|total_pages| {
                         html!("input-select", {
+                            .style("width", "150px")
                             .prop_signal("value", state.curation_state.active_page.signal().map(|active_page| {
                                 format!("{}", active_page + 1)
                             }))

@@ -28,7 +28,7 @@ impl UsersTable {
                     }
                 })
             )
-            .child(html!("table-pagination-user", {
+            .child(html!("table-pagination-jig", {
                 .prop("slot", "controls")
                 .child(html!("fa-button", {
                     .prop("slot", "back")
@@ -66,6 +66,7 @@ impl UsersTable {
                 .child_signal(state.users_state.total_pages.signal().map(clone!(state => move |total_pages| {
                     total_pages.map(|total_pages| {
                         html!("input-select", {
+                            .style("width", "150px")
                             .prop_signal("value", state.users_state.active_page.signal().map(|active_page| {
                                 format!("{}", active_page + 1)
                             }))
