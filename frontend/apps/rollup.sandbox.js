@@ -13,24 +13,40 @@ if (!APP_NAME) {
     process.exit(1);
 }
 
-export default {
-    input: {
-        index: `./crates/entry/${APP_NAME}/Cargo.toml`,
+export default [
+    {
+        input: {
+            index: `./empty.js`,
+        },
+        output: {
+            dir: `./dist/static/`,
+        },
+        plugins: [
+            static_files({
+                include: ['./static'],
+            }),
+        ],
     },
-    output: {
-        dir: `./dist/${APP_NAME}/js/`,
-        format: "iife",
-        sourcemap: true,
-    },
-    plugins: [
-        rust({
-            serverPath: `${URL_FRONTEND_SANDBOX}/${APP_NAME}/js/`,
-            // wasmBindgenArgs: ["--reference-types"],
-            cargoArgs: ["--features", "sandbox"],
-            debug: false,
-        }),
-        nodeResolve(),
-        commonjs(),
-        injectProcessEnv(getEnv()),
-    ],
-};
+
+    {
+        input: {
+            index: `./crates/entry/${APP_NAME}/Cargo.toml`,
+        },
+        output: {
+            dir: `./dist/${APP_NAME}/js/`,
+            format: "iife",
+            sourcemap: true,
+        },
+        plugins: [
+            rust({
+                serverPath: `${URL_FRONTEND_SANDBOX}/${APP_NAME}/js/`,
+                // wasmBindgenArgs: ["--reference-types"],
+                cargoArgs: ["--features", "sandbox"],
+                debug: false,
+            }),
+            nodeResolve(),
+            commonjs(),
+            injectProcessEnv(getEnv()),
+        ],
+    }
+];
