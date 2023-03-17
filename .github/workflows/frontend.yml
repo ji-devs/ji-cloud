@@ -126,6 +126,7 @@ jobs:
       - name: deploy to google cloud
         # run: gsutil -m rsync -d -r frontend/apps/dist/${{ matrix.app }}/js gs://${{ env.STORAGE_BUCKET }}/${{ matrix.app }}/js
         run: gsutil -m cp -Z -r frontend/apps/dist/${{ matrix.app }}/js gs://${{ env.STORAGE_BUCKET }}/${{ matrix.app }}
+        # run: gsutil -m cp -Z -r frontend/apps/dist gs://${{ env.STORAGE_BUCKET }}
 
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master
@@ -211,6 +212,45 @@ jobs:
 
       - name: deploy to google cloud
         run: gsutil -m rsync -d -r frontend/apps/dist/module/${{ matrix.app }}/${{ matrix.mode }}/js gs://${{ env.STORAGE_BUCKET }}/module/${{ matrix.app }}/${{ matrix.mode }}/js
+
+      - name: Notify slack of all status
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.value}} ${{job.status}}\"}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        if: always()
+
+  copy-static:
+    needs: [prepare]
+    name: "[${{ needs.prepare.outputs.branch }}] Copy static files"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Extract label
+        shell: bash
+        run: echo "value=\"[${{needs.prepare.outputs.branch}} - copy-static]\"" >> $GITHUB_OUTPUT
+        id: extract_label
+
+      - name: Notify slack
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.value}} starting...\"}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: '${{ env.GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY }}'
+
+      - name: install google cloud sdk
+        uses: google-github-actions/setup-gcloud@v1
+
+      - name: deploy to google cloud
+        run: gsutil -m rsync -d -r frontend/apps/dist/static gs://${{ env.STORAGE_BUCKET }}/static
 
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master

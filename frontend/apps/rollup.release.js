@@ -3,7 +3,6 @@ import nodeResolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import injectProcessEnv from "rollup-plugin-inject-process-env";
 import { getEnv } from "./rollup.common.js";
-import static_files from "rollup-plugin-static-files";
 
 const { URL_FRONTEND_RELEASE } = require("../config/constants");
 
@@ -14,40 +13,24 @@ if (!APP_NAME) {
     process.exit(1);
 }
 
-export default [
-    {
-        input: {
-            index: `./empty.js`,
-        },
-        output: {
-            dir: `./dist/static/`,
-        },
-        plugins: [
-            static_files({
-                include: ['./static'],
-            }),
-        ],
+export default {
+    input: {
+        index: `./crates/entry/${APP_NAME}/Cargo.toml`,
     },
-
-    {
-        input: {
-            index: `./crates/entry/${APP_NAME}/Cargo.toml`,
-        },
-        output: {
-            dir: `./dist/${APP_NAME}/js/`,
-            format: "iife",
-            sourcemap: true,
-        },
-        plugins: [
-            rust({
-                serverPath: `${URL_FRONTEND_RELEASE}/${APP_NAME}/js/`,
-                // wasmBindgenArgs: ["--reference-types"],
-                cargoArgs: ["--features", "release"],
-                debug: false,
-            }),
-            nodeResolve(),
-            commonjs(),
-            injectProcessEnv(getEnv()),
-        ],
-    }
-];
+    output: {
+        dir: `./dist/${APP_NAME}/js/`,
+        format: "iife",
+        sourcemap: true,
+    },
+    plugins: [
+        rust({
+            serverPath: `${URL_FRONTEND_RELEASE}/${APP_NAME}/js/`,
+            // wasmBindgenArgs: ["--reference-types"],
+            cargoArgs: ["--features", "release"],
+            debug: false,
+        }),
+        nodeResolve(),
+        commonjs(),
+        injectProcessEnv(getEnv()),
+    ],
+};
