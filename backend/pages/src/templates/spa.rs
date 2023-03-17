@@ -60,6 +60,7 @@ impl SpaPage {
 struct SpaPageInfo {
     app_js: String,
     app_css: String,
+    app_favicon: String,
     app_custom_elements_js: String,
     firebase: bool,
     google_maps_url: Option<String>,
@@ -78,7 +79,12 @@ fn spa_template(settings: &RuntimeSettings, spa: SpaPage) -> actix_web::Result<H
         app_js: settings
             .remote_target()
             .spa_url(&*spa.as_str(), "js/index.js"),
-        app_css: settings.remote_target().css_url(true),
+        app_css: settings
+            .remote_target()
+            .spa_url(&*spa.as_str(), "static/head.css"),
+        app_favicon: settings
+            .remote_target()
+            .spa_url(&*spa.as_str(), "static/favicon.ico"),
         app_custom_elements_js: settings
             .remote_target()
             .spa_url(&*spa.as_str(), "elements/custom-elements.js"),
