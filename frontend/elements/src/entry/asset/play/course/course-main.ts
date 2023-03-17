@@ -149,7 +149,7 @@ export class _ extends LitElement {
         return html`
             <div class="course-info-side">
                 <slot name="thumbnail"></slot>
-                <h2 class="name">${this.name}</h2>
+                <h2 class="name" dir="auto">${this.name}</h2>
                 <div class="count-lang-author">
                     <img-ui path="entry/home/search-results/jig-section.png"></img-ui>
                     <span class="items-count">
@@ -163,7 +163,7 @@ export class _ extends LitElement {
                         Created by: ${this.author}
                     </span>
                 </div>
-                <p class="description">${this.description}</p>
+                <p class="description" dir="auto">${this.description}</p>
                 <div class="additional-resources">
                     <h3>Teacher resources</h3>
                     <slot name="additional-resources"></slot>
