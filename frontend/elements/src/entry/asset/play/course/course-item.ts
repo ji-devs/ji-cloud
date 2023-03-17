@@ -88,8 +88,8 @@ export class _ extends LitElement {
             }</div>
             <slot name="thumbnail"></slot>
             <div class="column-3">
-                <div class="name">${this.name}</div>
-                <div class="description">${this.description}</div>
+                <div class="name" dir="auto">${this.name}</div>
+                <div class="description" dir="auto">${this.description}</div>
             </div>
             <slot name="play-button"></slot>
         `;
