@@ -81,10 +81,10 @@ fn spa_template(settings: &RuntimeSettings, spa: SpaPage) -> actix_web::Result<H
             .spa_url(&*spa.as_str(), "js/index.js"),
         app_css: settings
             .remote_target()
-            .static_url("static/head.css"),
+            .static_url("head.css"),
         app_favicon: settings
             .remote_target()
-            .static_url("static/favicon.ico"),
+            .static_url("favicon.ico"),
         app_custom_elements_js: settings
             .remote_target()
             .spa_url(&*spa.as_str(), "elements/custom-elements.js"),
