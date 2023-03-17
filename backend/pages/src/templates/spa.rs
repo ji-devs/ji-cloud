@@ -81,21 +81,13 @@ fn spa_template(settings: &RuntimeSettings, spa: SpaPage) -> actix_web::Result<H
         app_js: settings
             .remote_target()
             .spa_url(&*spa.as_str(), "js/index.js"),
-        app_css: settings
-            .remote_target()
-            .static_url("head.css"),
-        app_favicon: settings
-            .remote_target()
-            .static_url("favicon.ico"),
+        app_css: settings.remote_target().static_url("head.css"),
+        app_favicon: settings.remote_target().static_url("favicon.ico"),
         app_custom_elements_js: settings
             .remote_target()
             .spa_url(&*spa.as_str(), "elements/custom-elements.js"),
-        app_manifest: settings
-            .remote_target()
-            .static_url("manifest.json"),
-        app_service_worker: settings
-            .remote_target()
-            .static_url("service-worker.js"),
+        app_manifest: settings.remote_target().static_url("manifest.json"),
+        app_service_worker: settings.remote_target().static_url("service-worker.js"),
         firebase: matches!(spa, SpaPage::User),
         google_maps_url,
         local_dev: settings.is_local(),
