@@ -62,6 +62,8 @@ struct SpaPageInfo {
     app_css: String,
     app_favicon: String,
     app_custom_elements_js: String,
+    app_manifest: String,
+    app_service_worker: String,
     firebase: bool,
     google_maps_url: Option<String>,
     local_dev: bool,
@@ -88,6 +90,12 @@ fn spa_template(settings: &RuntimeSettings, spa: SpaPage) -> actix_web::Result<H
         app_custom_elements_js: settings
             .remote_target()
             .spa_url(&*spa.as_str(), "elements/custom-elements.js"),
+        app_manifest: settings
+            .remote_target()
+            .static_url("manifest.json"),
+        app_service_worker: settings
+            .remote_target()
+            .static_url("service-worker.js"),
         firebase: matches!(spa, SpaPage::User),
         google_maps_url,
         local_dev: settings.is_local(),
