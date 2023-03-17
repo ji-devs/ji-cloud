@@ -21,7 +21,7 @@ on:
       - 'frontend/apps/crates/entry/module/**'
       - 'frontend/ts-utils/**'
       - 'frontend/elements/**'
-      - 'frontend/static/**'
+      - 'frontend/apps/static/**'
 
 jobs:
   prepare:

@@ -81,7 +81,7 @@
     <script src="{{ app_js|safe }}"></script>
 
     <script>
-        navigator.serviceWorker.register("{{ app_service_worker|safe }}");
+        navigator.serviceWorker.register("{{ app_service_worker|safe }}", { scope: "/" });
     </script>
 </body>
 
