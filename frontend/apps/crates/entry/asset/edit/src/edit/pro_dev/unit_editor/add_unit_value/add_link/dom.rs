@@ -40,6 +40,7 @@ impl AddLink {
                                 Ok(url) => {
                                     let _ = elem.remove_attribute("error");
                                     state.url.set(Some(url));
+                                    state.save()
                                 },
                                 Err(err) => {
                                     match err {
@@ -48,6 +49,7 @@ impl AddLink {
                                             let _ = elem.remove_attribute("error");
                                             elem.set_value(url_with_https.as_str());
                                             state.url.set(Some(url_with_https));
+                                            state.save()
                                         },
                                         _ => {
                                             let _ = elem.set_attribute("error", "");
