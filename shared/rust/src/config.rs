@@ -185,6 +185,10 @@ impl RemoteTarget {
         format!("{}{}", self.pages_url_iframe(), route_path)
     }
 
+    pub fn static_url(&self, path: &str) -> String {
+        format!("{}/static/{}", self.frontend_url(), path)
+    }
+
     pub const fn host(&self) -> Option<&'static str> {
         None
     }
