@@ -27,6 +27,7 @@ impl UnitEditor {
             description: Mutable::new("".to_string()),
             value: Mutable::new(None),
             value_type: Mutable::new(Some(UnitValueType::Link)),
+
             loader: AsyncLoader::new(),
         })
     }
@@ -39,5 +40,5 @@ pub enum UnitValueType {
     /// Upload file for Unit
     File,
     /// Link for Youtube video
-    Youtube,
+    Video,
 }

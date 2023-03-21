@@ -1,10 +1,7 @@
 use std::{rc::Rc, str::FromStr};
 
 use dominator::{clone, html, with_node, Dom};
-use futures_signals::{
-    map_ref,
-    signal::{not, Signal},
-};
+
 use url::{ParseError, Url};
 use utils::events;
 use web_sys::HtmlTextAreaElement;

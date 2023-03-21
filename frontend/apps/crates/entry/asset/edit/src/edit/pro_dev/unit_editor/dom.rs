@@ -3,7 +3,6 @@ use std::{rc::Rc, str::FromStr};
 use components::{file_input::FileInput, hebrew_buttons::HebrewButtons};
 use dominator::{clone, events, html, with_node, Dom, DomBuilder};
 use futures_signals::{map_ref, signal::SignalExt};
-use shared::domain::pro_dev::unit::ProDevUnitValue;
 use url::{ParseError, Url};
 use utils::{component::Component, init::analytics};
 use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement, ShadowRoot};
@@ -18,6 +17,7 @@ const STR_URL_PLACEHOLDER: &str = "Insert URL here";
 const STR_ADD_TO_COURSE: &str = "Add to course";
 const STR_ADD_LINK: &str = " Add Link";
 const STR_UPLOAD_FILE: &str = " Upload file";
+const STR_ADD_YOUTUBE: &str = " Video";
 
 impl Component<UnitEditor> for Rc<UnitEditor> {
     fn styles() -> &'static str {
@@ -46,6 +46,8 @@ impl Component<UnitEditor> for Rc<UnitEditor> {
                 html!("label", {
                     .prop("slot", "link-select")
                     .child(html!("input", {
+                        .prop("slot", "input")
+                        .prop("label", STR_URL_PLACEHOLDER)
                         .prop("type", "radio")
                         .prop("name", "type")
                         .prop("value", "input-link")
@@ -73,6 +75,22 @@ impl Component<UnitEditor> for Rc<UnitEditor> {
                     }))
                     .text(STR_UPLOAD_FILE)
                 }),
+                html!("label", {
+                    .prop("slot", "youtube-select")
+                    .child(html!("input", {
+                        .prop("type", "radio")
+                        .prop("name", "type")
+                        .prop("value", "input-youtube")
+                        .prop("label", "Add a Youtube link")
+                        .prop_signal("checked", state.value_type.signal_ref(|value_type| {
+                            matches!(value_type, Some(UnitValueType::Video))
+                        }))
+                        .event(clone!(state => move |_: events::Click| {
+                            state.value_type.set(Some(UnitValueType::Video));
+                        }))
+                    }))
+                    .text(STR_ADD_YOUTUBE)
+                }),
             ])
             .child({
                 AddUnitValue::new(state.clone()).render(Some("body-input"))
@@ -81,9 +99,9 @@ impl Component<UnitEditor> for Rc<UnitEditor> {
                 html!("input-wrapper", {
                     .prop("slot", "name")
                     .prop("label", format!("{}", STR_NAME_LABEL))
-                    // .child({
-                    //     HebrewButtons::reveal().render(Some("hebrew-inputs"))
-                    // })
+                    .child({
+                        HebrewButtons::reveal().render(Some("hebrew-inputs"))
+                    })
                     .child(html!("input" => HtmlInputElement, {
                         .with_node!(elem => {
                             .attr("dir", "auto")
@@ -99,6 +117,9 @@ impl Component<UnitEditor> for Rc<UnitEditor> {
                 html!("input-wrapper", {
                     .prop("slot", "description")
                     .prop("label", STR_DESCRIPTION_LABEL)
+                    .child({
+                        HebrewButtons::reveal().render(Some("hebrew-inputs"))
+                    })
                     .child(html!("textarea" => HtmlTextAreaElement, {
                         .with_node!(elem => {
                             .attr("dir", "auto")
@@ -128,11 +149,4 @@ impl Component<UnitEditor> for Rc<UnitEditor> {
             ])
         }))
     }
-}
-
-fn prepend_https_to_url(url: &str) -> Url {
-    let mut fixed_url_string = String::new();
-    fixed_url_string.push_str("https://");
-    fixed_url_string.push_str(url);
-    Url::from_str(&fixed_url_string).unwrap()
 }

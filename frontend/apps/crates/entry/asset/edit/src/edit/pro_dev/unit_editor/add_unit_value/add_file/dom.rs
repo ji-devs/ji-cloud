@@ -7,7 +7,7 @@ use futures_signals::{
     signal::{not, Signal},
 };
 
-use utils::{component::Component};
+use utils::component::Component;
 
 use super::state::AddFile;
 

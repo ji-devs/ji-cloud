@@ -6,6 +6,7 @@ use futures_signals::signal::SignalExt;
 use web_sys::HtmlElement;
 
 use crate::edit::pro_dev::unit_editor::add_unit_value::add_link::state::AddLink;
+use crate::edit::pro_dev::unit_editor::add_unit_value::add_video::state::AddVideo;
 use crate::edit::pro_dev::unit_editor::UnitValueType;
 
 use super::super::add_unit_value::add_file::state::AddFile;
@@ -38,7 +39,9 @@ impl AddUnitValue {
                             UnitValueType::File => {
                                 AddFile::new(Rc::clone(&state)).render()
                             },
-                            UnitValueType::Youtube => todo!()
+                            UnitValueType::Video => {
+                                AddVideo::render(&AddVideo::new(Rc::clone(&state)))
+                            }
                         }
                     })
         })

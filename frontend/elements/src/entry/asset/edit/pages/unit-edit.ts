@@ -106,10 +106,12 @@ export class _ extends LitElement {
                     <div class="controls">
                         <slot name="link-select"></slot>
                         <slot name="file-select"></slot>
+                        <slot name="youtube-select"></slot>
                     </div>
                     <div class="main">
                         <div class="column-1">
                             <slot name="body-input"></slot>
+                            <slot name="body-preview"></slot>
                         </div>
                         <div class="column-2">
                             <slot name="name"></slot>
