@@ -108,14 +108,16 @@ impl SpotState {
                                 }
                                 state.sidebar.asset_edit_state.set_route_course(CourseEditRoute::Landing);
                             },
-                            SidebarSpotItem::ProDev(unit) => {
-                                if let Some(unit) = unit {
-                                    if let ProDevSpot::Cover(cover) = &**unit {
-                                        state.sidebar.asset_edit_state.set_route_pro_dev(ProDevEditRoute::Cover(cover.id));
-                                        return;
+                            SidebarSpotItem::ProDev(item) => {
+                                match item {
+                                    Some(item)=> {
+                                        match &**item {
+                                            ProDevSpot::Cover(cover) => state.sidebar.asset_edit_state.set_route_pro_dev(ProDevEditRoute::Cover(cover.id)),
+                                            ProDevSpot::Unit(_) => pro_dev_spot_actions::edit(state.clone()),
+                                        }
                                     }
+                                    None => state.sidebar.asset_edit_state.set_route_pro_dev(ProDevEditRoute::Landing)
                                 }
-                                state.sidebar.asset_edit_state.set_route_pro_dev(ProDevEditRoute::Landing);
                             },
                         }
                     })
@@ -183,11 +185,11 @@ impl SpotState {
                                                     DraftOrLive::Draft,
                                                 ).render_live(Some("thumbnail"))
                                             },
-                                            ProDevSpot::Unit(_unit) =>
+                                            ProDevSpot::Unit(unit) =>
                                             {
                                                 html!("div", {
                                                     .prop("slot", "unit")
-                                                    .text(format!("Unit {}", state.index + 1).as_str())
+                                                    .text(format!("Unit {}", state.index).as_str())
                                                 })
                                             },
                                         }
@@ -225,25 +227,9 @@ impl SpotState {
                                 },
                                 Some(ModuleHighlight::Unit(idx)) => {
                                     if idx == state.index {
-                                        // Make sure that the module window is visible to the
-                                        // teacher.
                                         elem.scroll_into_view_with_scroll_into_view_options(ScrollIntoViewOptions::new().behavior(ScrollBehavior::Smooth));
                                         Some(html!("empty-fragment", {
-                                            .apply(OverlayHandle::lifecycle(clone!(state, elem => move || {
-                                                html!("overlay-tooltip-error", {
-                                                    .text("This part of your JIG needs attention. Add content or delete.")
-                                                    .prop("target", elem.clone())
-                                                    .prop("targetAnchor", "tr")
-                                                    .prop("contentAnchor", "oppositeH")
-                                                    .prop("marginX", 75i32)
-                                                    .prop("closeable", true)
-                                                    .prop("strategy", "track")
-                                                    .style("width", "350px")
-                                                    .event(clone!(state => move |_:events::Close| {
-                                                        state.sidebar.highlight_modules.set_neq(None);
-                                                    }))
-                                                })
-                                            })))
+                                            // Populate existing unit with it's data.
                                         }))
                                     } else {
                                         None

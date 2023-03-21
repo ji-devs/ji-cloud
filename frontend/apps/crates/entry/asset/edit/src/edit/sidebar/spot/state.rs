@@ -2,6 +2,7 @@ use crate::edit::sidebar::state::{Sidebar as SidebarState, SidebarSpot, SidebarS
 use crate::edit::sidebar::ProDevSpot;
 use dominator::clone;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
+use shared::api::endpoints::pro_dev::unit;
 use std::cell::RefCell;
 use std::rc::Rc;
 use utils::drag::Drag;
@@ -79,8 +80,12 @@ impl SpotState {
                 },
                 SidebarSpotItem::ProDev(pro_dev_spot) => {
                     match pro_dev_spot {
-                        None => "empty",
-                        Some(_) => "thumbnail",
+                        None => "unit",
+                        Some(item) =>                            
+                            match &**item {
+                                ProDevSpot::Cover(_) => "thumbnail",
+                                ProDevSpot::Unit(_) => "unit",
+                            },
                     }
                 },
             }

@@ -11,7 +11,7 @@ use futures_signals::{
 };
 
 use shared::domain::module::body::_groups::design::{VideoHost, YoutubeUrl, YoutubeVideo};
-use utils::{component::Component, events};
+use utils::events;
 use web_sys::{HtmlElement, HtmlInputElement};
 
 use crate::edit::pro_dev::unit_editor::add_unit_value::add_video::actions;
@@ -36,7 +36,7 @@ impl AddVideo {
                                 None => String::new(),
                                 Some(video) => {
                                     // TODO: don't .lock_ref(), use ref_map
-                                    match &*video.host.lock_ref() {
+                                    match &video.host {
                                         VideoHost::Youtube(youtube) => youtube.url.0.clone(),
                                     }
                                 },
@@ -56,7 +56,6 @@ impl AddVideo {
 
                                         state.save(host);
 
-                                        log::info!("TODO: put in error")
                                     },
                                 };
                             }))

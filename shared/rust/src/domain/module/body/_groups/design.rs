@@ -174,6 +174,18 @@ pub struct YoutubeVideo {
 /// YouTube host video url
 pub struct YoutubeUrl(pub String);
 
+impl VideoHost {
+    /// Convert youtube host url to a string
+    pub fn get_url_string(&self) -> String {
+        match &self {
+            VideoHost::Youtube(youtube_video) => {
+                let YoutubeUrl(url) = &youtube_video.url;
+                url.to_string()
+            },
+        }
+    }
+}
+
 /// Youtube url parse error
 pub type YoutubeUrlError = String;
 

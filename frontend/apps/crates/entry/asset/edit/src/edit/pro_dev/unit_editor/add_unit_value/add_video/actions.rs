@@ -30,7 +30,7 @@ impl AddVideo {
                 .add_unit_value_state
                 .unit_editor_state
                 .value
-                .set(Some(ProDevUnitValue::Video(video)));
+                .set(ProDevUnitValue::Video(video).into());
         })
     }
 

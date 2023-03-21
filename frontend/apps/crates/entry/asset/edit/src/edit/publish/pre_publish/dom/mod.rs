@@ -6,7 +6,7 @@ use futures_signals::{
 };
 use shared::domain::asset::{DraftOrLive, PrivacyLevel};
 use utils::{
-    events,
+    editable_asset, events,
     init::analytics,
     routes::{
         AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, ProDevEditRoute,
@@ -227,9 +227,7 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
             }),
 
             PrePublish::render_languages(state.clone()),
-            PrePublish::render_categories_select(state.clone()),
             PrePublish::render_category_pills(state.clone()),
-
 
             html!("button-rect", {
                 .prop("slot", "publish-later")
@@ -310,7 +308,44 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
         ])
         .apply_if(!state.asset._is_pro_dev(), clone!(state => move |dom|{
             dom
-                .child(PrePublish::render_ages(state.clone()))
+                .children(&mut [
+                    PrePublish::render_categories_select(state.clone()),
+                    PrePublish::render_ages(state.clone())
+                ])
+
+        }))
+        .apply(clone!(state => move |dom| {
+            match &*state.asset{
+                EditableAsset::ProDev(pro_dev) => {
+                    dom
+                        .child(html!("input-wrapper", {
+                            .prop("slot", "duration")
+                            .prop("label", "Course duration")
+                            .child(html!("input-hours-minutes" => HtmlElement, {
+                                .prop("type", "number")
+                                .prop_signal("value", pro_dev.duration.signal_ref(|duration| {
+                                    match duration {
+                                        Some(duration) => duration.to_string(),
+                                        None => {
+                                            String::new()
+                                        },
+                                    }
+                                }))
+                                // event not executing
+                                .event(clone!(pro_dev => move |evt: events::CustomInputNumber| {
+                                    let value = evt.value().map(|num| num as u32);
+                                    log::info!("Here2");
+
+                                    log::info!("{value:?}");
+
+                                    pro_dev.duration.set(value);
+                                }))
+                            }))
+                        }))
+                },
+                _ => dom
+            }
+
         }))
         .apply_if(!state.asset.is_resource(), clone!(state => move |dom|{
             dom

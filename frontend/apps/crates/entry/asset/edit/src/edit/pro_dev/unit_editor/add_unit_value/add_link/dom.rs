@@ -3,7 +3,7 @@ use std::{rc::Rc, str::FromStr};
 use dominator::{clone, html, with_node, Dom};
 
 use url::{ParseError, Url};
-use utils::events;
+use utils::{events, text};
 use web_sys::HtmlTextAreaElement;
 
 use super::state::AddLink;
@@ -13,6 +13,7 @@ const STR_ADD_LINK: &str = "Insert URL here";
 impl AddLink {
     pub fn render(self: &Rc<Self>) -> Dom {
         let state = Rc::clone(self);
+        
         html!("div", {
             .children(&mut [
                 html!("textarea" => HtmlTextAreaElement, {
@@ -29,6 +30,7 @@ impl AddLink {
                         .style("border", "0")
                         .style("height", "100px")
                         .style("resize", "none")
+                        .text_signal(state.url_str.signal_cloned())
                         .event(clone!(state, elem => move |_: events::Change| {
                             let val = elem.value().trim().to_string();
                             let url = Url::from_str(&val);
@@ -37,6 +39,9 @@ impl AddLink {
                                 Ok(url) => {
                                     let _ = elem.remove_attribute("error");
                                     state.url.set(Some(url));
+                                    state.url_str.set(val);
+                                    state.add_unit_value_state.unit_editor_state.url_str.set(state.url_str.get_cloned());
+
                                     state.save()
                                 },
                                 Err(err) => {
@@ -46,10 +51,13 @@ impl AddLink {
                                             let _ = elem.remove_attribute("error");
                                             elem.set_value(url_with_https.as_str());
                                             state.url.set(Some(url_with_https));
+                                            state.url_str.set(val);
+                                            state.add_unit_value_state.unit_editor_state.url_str.set(state.url_str.get_cloned());
                                             state.save()
                                         },
                                         _ => {
                                             let _ = elem.set_attribute("error", "");
+                                            state.url_str.set("".to_string());
                                             state.url.set(None);
                                         },
                                     }

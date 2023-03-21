@@ -33,7 +33,7 @@ impl AddFile {
                 .add_unit_value_state
                 .unit_editor_state
                 .value
-                .set(Some(value))
+                .set(value.into())
         })
     }
 }

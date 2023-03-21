@@ -2,10 +2,7 @@ use super::super::super::spot::state::SpotState;
 use crate::edit::sidebar::{state::SidebarSpotItem, ProDevSpot};
 use shared::{
     api::endpoints,
-    domain::{
-        module::{ModuleBody, ModuleCreatePath, ModuleCreateRequest, ModuleKind},
-        pro_dev::{unit::*, ProDevId},
-    },
+    domain::pro_dev::{unit::*, ProDevId},
 };
 use std::rc::Rc;
 use utils::prelude::*;
@@ -18,6 +15,8 @@ pub fn edit(state: Rc<SpotState>) {
             ProDevSpot::Cover(_) => None,
             ProDevSpot::Unit(unit) => Some(unit.id),
         };
+
+        log::info!("{unit_id:?}");
 
         state
             .sidebar

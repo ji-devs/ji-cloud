@@ -848,7 +848,17 @@ impl From<&Route> for String {
                         let query = serde_qs::to_string(&player_settings).unwrap_ji();
                         format!("/asset/play/course/{}?{}", course_id.0, query)
                     }
-                    AssetPlayRoute::ProDev(_pro_dev_id, _unit_id, _player_settings) => todo!(),
+                    AssetPlayRoute::ProDev(pro_dev_id, unit_id, player_settings) => {
+                        let query = serde_qs::to_string(&player_settings).unwrap_ji();
+                        if let Some(unit_id) = unit_id {
+                            format!(
+                                "/asset/play/pro-dev/{}/{}?{}",
+                                pro_dev_id.0, unit_id.0, query
+                            )
+                        } else {
+                            format!("/asset/play/pro-dev/{}?{}", pro_dev_id.0, query)
+                        }
+                    }
                 },
             },
             Route::Module(route) => match route {

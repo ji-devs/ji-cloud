@@ -3,11 +3,14 @@ use std::{rc::Rc, str::FromStr};
 use components::{file_input::FileInput, hebrew_buttons::HebrewButtons};
 use dominator::{clone, events, html, with_node, Dom, DomBuilder};
 use futures_signals::{map_ref, signal::SignalExt};
+use shared::domain::pro_dev::unit::ProDevUnitValue;
 use url::{ParseError, Url};
 use utils::{component::Component, init::analytics};
 use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement, ShadowRoot};
 
-use super::{add_unit_value::AddUnitValue, state::UnitEditor, UnitValueType};
+use crate::edit::pro_dev::unit_editor::UnitValue;
+
+use super::{add_unit_value::AddUnitValue, state::UnitEditor};
 
 const STR_NAME_LABEL: &str = "Unit’s name";
 const STR_NAME_PLACEHOLDER: &str = "Add unit name";
@@ -30,6 +33,7 @@ impl Component<UnitEditor> for Rc<UnitEditor> {
 
     fn dom(&self, dom: DomBuilder<ShadowRoot>) -> DomBuilder<ShadowRoot> {
         let state = self;
+        state.load_unit();
 
         let is_valid = map_ref! {
             let display_name = state.display_name.signal_cloned(),
@@ -37,7 +41,7 @@ impl Component<UnitEditor> for Rc<UnitEditor> {
             let value = state.value.signal_cloned()
 
             => {
-                !display_name.trim().is_empty() && !description.trim().is_empty() && value.is_some()
+                !display_name.trim().is_empty() && !description.trim().is_empty() && UnitValue::is_some(value)
             }
         };
 
@@ -51,11 +55,11 @@ impl Component<UnitEditor> for Rc<UnitEditor> {
                         .prop("type", "radio")
                         .prop("name", "type")
                         .prop("value", "input-link")
-                        .prop_signal("checked", state.value_type.signal_ref(|value_type| {
-                            matches!(value_type, Some(UnitValueType::Link))
+                        .prop_signal("checked", state.value.signal_ref(|value| {
+                            matches!(value, UnitValue::Link(_))
                         }))
                         .event(clone!(state => move |_: events::Click| {
-                            state.value_type.set(Some(UnitValueType::Link))
+                            state.value.set(UnitValue::Link(None))
                         }))
                     }))
                     .text(STR_ADD_LINK)
@@ -66,11 +70,11 @@ impl Component<UnitEditor> for Rc<UnitEditor> {
                         .prop("type", "radio")
                         .prop("name", "type")
                         .prop("value", "input-file")
-                        .prop_signal("checked", state.value_type.signal_ref(|value_type| {
-                            matches!(value_type, Some(UnitValueType::File))
+                        .prop_signal("checked", state.value.signal_ref(|value| {
+                            matches!(value, UnitValue::File(_))
                         }))
                         .event(clone!(state => move |_: events::Click| {
-                            state.value_type.set(Some(UnitValueType::File));
+                            state.value.set(UnitValue::File(None));
                         }))
                     }))
                     .text(STR_UPLOAD_FILE)
@@ -82,11 +86,11 @@ impl Component<UnitEditor> for Rc<UnitEditor> {
                         .prop("name", "type")
                         .prop("value", "input-youtube")
                         .prop("label", "Add a Youtube link")
-                        .prop_signal("checked", state.value_type.signal_ref(|value_type| {
-                            matches!(value_type, Some(UnitValueType::Video))
+                        .prop_signal("checked", state.value.signal_ref(|value| {
+                            matches!(value, UnitValue::Video(_))
                         }))
                         .event(clone!(state => move |_: events::Click| {
-                            state.value_type.set(Some(UnitValueType::Video));
+                            state.value.set(UnitValue::Video(None));
                         }))
                     }))
                     .text(STR_ADD_YOUTUBE)

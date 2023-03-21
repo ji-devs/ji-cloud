@@ -1,7 +1,6 @@
 use std::rc::Rc;
 
 use dominator_helpers::futures::AsyncLoader;
-use futures_signals::signal::Mutable;
 
 use super::super::state::UnitEditor as UnitEditorState;
 
