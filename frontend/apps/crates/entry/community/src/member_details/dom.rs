@@ -422,7 +422,7 @@ impl MemberDetails {
     fn render_member(self: &Rc<Self>, member: &PublicUser) -> Dom {
         html!("community-member-details-connection", {
             .prop("slot", "connection-members")
-            .prop("name", &member.given_name)
+            .prop("name", &format!("{} {}", member.given_name, member.family_name))
             .apply(move |dom| dominator::on_click_go_to_url!(dom, {
                 Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(member.id))).to_string()
             }))
