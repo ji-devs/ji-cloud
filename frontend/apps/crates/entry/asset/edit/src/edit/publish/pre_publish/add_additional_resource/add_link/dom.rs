@@ -16,6 +16,7 @@ use super::state::AddLink;
 const STR_SAVE: &str = "Save";
 const STR_CANCEL: &str = "Cancel";
 const STR_BACK: &str = "Back";
+const STR_ENTER_LINK_HERE: &str = "Insert URL here";
 
 impl AddLink {
     pub fn render(self: &Rc<Self>) -> Dom {
@@ -45,6 +46,7 @@ impl AddLink {
                     .with_node!(elem => {
                         .prop("slot", "textarea")
                         .prop("spellcheck", "false")
+                        .prop("placeholder", STR_ENTER_LINK_HERE)
                         .event(clone!(state, elem => move |_: events::Change| {
                             let val = elem.value().trim().to_string();
                             let url = Url::from_str(&val);

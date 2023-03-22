@@ -2,7 +2,6 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/images/ui";
 
 const STR_ENTER_URL = "Enter URL";
-const STR_ENTER_LINK_HERE = "Enter your link here";
 
 @customElement("jig-edit-publish-resource-add-link")
 export class _ extends LitElement {
@@ -80,7 +79,6 @@ export class _ extends LitElement {
                 </h3>
                 <div slot="body" class="body">
                     <label>
-                        ${STR_ENTER_LINK_HERE}
                         <slot name="textarea"></slot>
                         <slot name="type"></slot>
                     </label>
