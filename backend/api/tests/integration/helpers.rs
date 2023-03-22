@@ -122,6 +122,8 @@ pub async fn initialize_server_and_get_db(
         None,
         PASETO_KEY.clone(),
         None,
+        None,
+        None,
     );
 
     let app = ji_cloud_api::http::build(

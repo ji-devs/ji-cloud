@@ -860,6 +860,21 @@
     },
     "query": "\nselect color\nfrom user_color\nwhere user_id = $1\norder by index\n"
   },
+  "086c0d306ed148f6106b754a744034cf0c5f640628f0b0012532d94dddb1ebff": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Bool",
+          "Int2",
+          "Timestamptz"
+        ]
+      }
+    },
+    "query": "\nupdate subscription\nset\n    auto_renew = coalesce($2, auto_renew),\n    status = coalesce($3, status),\n    current_period_end = coalesce($4, current_period_end),\n    updated_at = now()\nwhere stripe_subscription_id = $1\n"
+  },
   "089181a3a2d32d0eacc5e0c0e0aeff11b4590f88f3422f1a825996a812d13486": {
     "describe": {
       "columns": [
@@ -1983,6 +1998,19 @@
     },
     "query": "\nupdate course_data_resource\nset resource_type_id = coalesce($2, resource_type_id)\nwhere id = $1 and $2 is distinct from resource_type_id\n            "
   },
+  "1b222c61e912115c147191bdaa9ea86eaadca90474647057a5a581aa2fd842ed": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Jsonb"
+        ]
+      }
+    },
+    "query": "\nupdate user_profile\nset payment_method = $2,\nupdated_at = now()\nwhere user_id = $1"
+  },
   "1ba1e61c357151297bb04d6175eff062349eba652e7ecf8a299e4fd5426fef53": {
     "describe": {
       "columns": [
@@ -2668,6 +2696,80 @@
       }
     },
     "query": "\nselect pro_dev.id                               as \"id!: ProDevId\",\n       creator_id                               as \"creator_id?: UserId\",\n       author_id                                as \"author_id?: UserId\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id) as \"author_name\",\n       live_id                                  as \"live_id!\",\n       draft_id                                 as \"draft_id!\",\n       published_at,\n       likes                                    as \"likes!\",\n       plays                                    as \"plays!\",\n       live_up_to_date                          as \"live_up_to_date!\"\nfrom pro_dev\ninner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\norder by ord asc\n    "
+  },
+  "2d2725ea8b61dc314d5e83383f138c0415389af30dd0ad7406afe8cbab953e8e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "plan_id: PlanId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "product_id: StripeProductId",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "price_id: StripePriceId",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "subscription_tier: SubscriptionTier",
+          "ordinal": 3,
+          "type_info": "Int2"
+        },
+        {
+          "name": "subscription_type: SubscriptionType",
+          "ordinal": 4,
+          "type_info": "Int2"
+        },
+        {
+          "name": "billing_interval: BillingInterval",
+          "ordinal": 5,
+          "type_info": "Int2"
+        },
+        {
+          "name": "account_limit: AccountLimit",
+          "ordinal": 6,
+          "type_info": "Int8"
+        },
+        {
+          "name": "amount_in_cents: AmountInCents",
+          "ordinal": 7,
+          "type_info": "Int8"
+        },
+        {
+          "name": "created_at: DateTime<Utc>",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at: DateTime<Utc>",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect\n    plan_id as \"plan_id: PlanId\",\n    product_id as \"product_id: StripeProductId\",\n    price_id as \"price_id: StripePriceId\",\n    subscription_tier as \"subscription_tier: SubscriptionTier\",\n    subscription_type as \"subscription_type: SubscriptionType\",\n    billing_interval as \"billing_interval: BillingInterval\",\n    account_limit as \"account_limit: AccountLimit\",\n    amount_in_cents as \"amount_in_cents: AmountInCents\",\n    created_at as \"created_at: DateTime<Utc>\",\n    updated_at as \"updated_at: DateTime<Utc>\"\nfrom subscription_plan\nwhere plan_id = $1\n"
   },
   "2d7bafd7b464bb3dd87cf57bc759efe7e5cb73de4ee63feed43f08e2edc1270f": {
     "describe": {
@@ -3763,194 +3865,6 @@
       }
     },
     "query": "\nselect id                                   as \"id!: CommentId\",\n       jig_id                               as \"jig_id!: JigId\",                      \n       comment,\n       created_at,\n       author_id                            as \"author_id!: Uuid\",\n       (\n            select given_name || ' '::text || family_name\n            from user_profile\n            where user_profile.user_id = author_id\n        )                                       as \"author_name!\"\nfrom jig_curation_comment\nwhere id = $1 and jig_id = $2\n"
-  },
-  "498344d2963abb5ca2f09927e99d2fb67074b89a8e55e285e7b5a7df5d680484": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id: UserId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "username",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "email!",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "given_name",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "family_name",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "profile_image?: ImageId",
-          "ordinal": 5,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "is_oauth!: bool",
-          "ordinal": 6,
-          "type_info": "Int4"
-        },
-        {
-          "name": "languages_spoken!: Vec<String>",
-          "ordinal": 7,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "language_app",
-          "ordinal": 8,
-          "type_info": "Text"
-        },
-        {
-          "name": "language_emails",
-          "ordinal": 9,
-          "type_info": "Text"
-        },
-        {
-          "name": "bio",
-          "ordinal": 10,
-          "type_info": "Text"
-        },
-        {
-          "name": "location_public",
-          "ordinal": 11,
-          "type_info": "Bool"
-        },
-        {
-          "name": "languages_spoken_public",
-          "ordinal": 12,
-          "type_info": "Bool"
-        },
-        {
-          "name": "persona_public",
-          "ordinal": 13,
-          "type_info": "Bool"
-        },
-        {
-          "name": "bio_public",
-          "ordinal": 14,
-          "type_info": "Bool"
-        },
-        {
-          "name": "organization_public",
-          "ordinal": 15,
-          "type_info": "Bool"
-        },
-        {
-          "name": "opt_into_edu_resources",
-          "ordinal": 16,
-          "type_info": "Bool"
-        },
-        {
-          "name": "over_18",
-          "ordinal": 17,
-          "type_info": "Bool"
-        },
-        {
-          "name": "timezone",
-          "ordinal": 18,
-          "type_info": "Text"
-        },
-        {
-          "name": "created_at",
-          "ordinal": 19,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at",
-          "ordinal": 20,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "organization",
-          "ordinal": 21,
-          "type_info": "Text"
-        },
-        {
-          "name": "persona!: Vec<String>",
-          "ordinal": 22,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "location",
-          "ordinal": 23,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "scopes!: Vec<i16>",
-          "ordinal": 24,
-          "type_info": "Int2Array"
-        },
-        {
-          "name": "subjects!: Vec<Uuid>",
-          "ordinal": 25,
-          "type_info": "UuidArray"
-        },
-        {
-          "name": "affiliations!: Vec<Uuid>",
-          "ordinal": 26,
-          "type_info": "UuidArray"
-        },
-        {
-          "name": "age_ranges!: Vec<Uuid>",
-          "ordinal": 27,
-          "type_info": "UuidArray"
-        },
-        {
-          "name": "circles!: Vec<Uuid>",
-          "ordinal": 28,
-          "type_info": "UuidArray"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        null,
-        false,
-        false,
-        true,
-        null,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        true,
-        true,
-        true,
-        null,
-        null,
-        null,
-        null,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect user_id as \"id: UserId\",\n    username,\n    user_email.email::text as \"email!\",\n    given_name,\n    family_name,\n    profile_image_id       as \"profile_image?: ImageId\",\n    (select case when exists(select * from user_auth_google where user_id = $1) = true then 1 else 0 end)     as \"is_oauth!: bool\",\n    languages_spoken         as \"languages_spoken!: Vec<String>\",\n    language_app,\n    language_emails,\n    bio,\n    location_public,\n    languages_spoken_public,\n    persona_public,\n    bio_public,\n    organization_public,\n    opt_into_edu_resources,\n    over_18,\n    timezone,\n    user_profile.created_at,\n    user_profile.updated_at,\n    organization,\n    persona                as \"persona!: Vec<String>\",\n    location,\n    array(select scope from user_scope where user_scope.user_id = \"user\".id) as \"scopes!: Vec<i16>\",\n    array(select subject_id from user_subject where user_subject.user_id = \"user\".id) as \"subjects!: Vec<Uuid>\",\n    array(select affiliation_id from user_affiliation where user_affiliation.user_id = \"user\".id) as \"affiliations!: Vec<Uuid>\",\n    array(select age_range_id from user_age_range where user_age_range.user_id = \"user\".id) as \"age_ranges!: Vec<Uuid>\",\n    array(select circle.id\n        from circle_member bm\n        inner join circle on bm.id = circle.id\n        where bm.user_id = \"user\".id or circle.creator_id = \"user\".id\n    ) as \"circles!: Vec<Uuid>\"\nfrom \"user\"\n    inner join user_profile on \"user\".id = user_profile.user_id\n    inner join user_email using(user_id)\nwhere id = $1"
   },
   "49b32d516e56680d33cb7719087afaa160328580f2c5a9f548b4f6da3dbdd66f": {
     "describe": {
@@ -6114,6 +6028,80 @@
     },
     "query": "\ninsert into user_email (user_id, email)\nselect session.user_id, user_auth_basic.email\nfrom session\ninner join user_auth_basic on user_auth_basic.user_id = session.user_id\nwhere\n    session.token = $1 and\n    session.expires_at > now() and\n    (session.scope_mask & $2) = $2\nreturning user_id as \"id!: UserId\"\n"
   },
+  "66943310a6a5790d2f7683ae44a958292ed2397bf73c8f886b7318377e5b7d3b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "subscription_id!: SubscriptionId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "stripe_subscription_id!: StripeSubscriptionId",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "subscription_plan_id!: PlanId",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "tier!: SubscriptionTier",
+          "ordinal": 3,
+          "type_info": "Int2"
+        },
+        {
+          "name": "auto_renew",
+          "ordinal": 4,
+          "type_info": "Bool"
+        },
+        {
+          "name": "status!: SubscriptionStatus",
+          "ordinal": 5,
+          "type_info": "Int2"
+        },
+        {
+          "name": "current_period_end!: DateTime<Utc>",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "user_id!: UserId",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at!: DateTime<Utc>",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at?: DateTime<Utc>",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect\n    subscription_id as \"subscription_id!: SubscriptionId\",\n    stripe_subscription_id as \"stripe_subscription_id!: StripeSubscriptionId\",\n    subscription_plan_id as \"subscription_plan_id!: PlanId\",\n    subscription_tier as \"tier!: SubscriptionTier\",\n    auto_renew,\n    status as \"status!: SubscriptionStatus\",\n    current_period_end as \"current_period_end!: DateTime<Utc>\",\n    user_id as \"user_id!: UserId\",\n    created_at as \"created_at!: DateTime<Utc>\",\n    updated_at as \"updated_at?: DateTime<Utc>\"\nfrom subscription\nwhere subscription_id = $1\n"
+  },
   "66c7f2798010ff1fc00b0ec452672d72b7bef299ec172672b47578822c963f0f": {
     "describe": {
       "columns": [
@@ -6773,6 +6761,212 @@
     },
     "query": "\nselect exists (\n    select 1 from user_scope where user_id = $1 and scope = any($2)\n) or (\n    exists (select 1 from user_scope where user_id = $1 and scope = $3) and\n    not exists (select 1 from resource where resource.id = $4 and resource.author_id <> $1)\n) as \"authed!\"\n"
   },
+  "7501acb3b759fdab8d99465606a716bc4da28bd1790779e1d917f447267b0413": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: UserId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "username",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "email!",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "given_name",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "family_name",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "profile_image?: ImageId",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "is_oauth!: bool",
+          "ordinal": 6,
+          "type_info": "Int4"
+        },
+        {
+          "name": "languages_spoken!: Vec<String>",
+          "ordinal": 7,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "language_app",
+          "ordinal": 8,
+          "type_info": "Text"
+        },
+        {
+          "name": "language_emails",
+          "ordinal": 9,
+          "type_info": "Text"
+        },
+        {
+          "name": "bio",
+          "ordinal": 10,
+          "type_info": "Text"
+        },
+        {
+          "name": "location_public",
+          "ordinal": 11,
+          "type_info": "Bool"
+        },
+        {
+          "name": "languages_spoken_public",
+          "ordinal": 12,
+          "type_info": "Bool"
+        },
+        {
+          "name": "persona_public",
+          "ordinal": 13,
+          "type_info": "Bool"
+        },
+        {
+          "name": "bio_public",
+          "ordinal": 14,
+          "type_info": "Bool"
+        },
+        {
+          "name": "organization_public",
+          "ordinal": 15,
+          "type_info": "Bool"
+        },
+        {
+          "name": "opt_into_edu_resources",
+          "ordinal": 16,
+          "type_info": "Bool"
+        },
+        {
+          "name": "over_18",
+          "ordinal": 17,
+          "type_info": "Bool"
+        },
+        {
+          "name": "timezone",
+          "ordinal": 18,
+          "type_info": "Text"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 19,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 20,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "organization",
+          "ordinal": 21,
+          "type_info": "Text"
+        },
+        {
+          "name": "persona!: Vec<String>",
+          "ordinal": 22,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "location",
+          "ordinal": 23,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "stripe_customer_id?: CustomerId",
+          "ordinal": 24,
+          "type_info": "Text"
+        },
+        {
+          "name": "payment_method",
+          "ordinal": 25,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "subscription_id?: SubscriptionId",
+          "ordinal": 26,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "scopes!: Vec<i16>",
+          "ordinal": 27,
+          "type_info": "Int2Array"
+        },
+        {
+          "name": "subjects!: Vec<Uuid>",
+          "ordinal": 28,
+          "type_info": "UuidArray"
+        },
+        {
+          "name": "affiliations!: Vec<Uuid>",
+          "ordinal": 29,
+          "type_info": "UuidArray"
+        },
+        {
+          "name": "age_ranges!: Vec<Uuid>",
+          "ordinal": 30,
+          "type_info": "UuidArray"
+        },
+        {
+          "name": "circles!: Vec<Uuid>",
+          "ordinal": 31,
+          "type_info": "UuidArray"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        null,
+        false,
+        false,
+        true,
+        null,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect user_id as \"id: UserId\",\n    username,\n    user_email.email::text as \"email!\",\n    given_name,\n    family_name,\n    profile_image_id       as \"profile_image?: ImageId\",\n    (select case when exists(select * from user_auth_google where user_id = $1) = true then 1 else 0 end)     as \"is_oauth!: bool\",\n    languages_spoken         as \"languages_spoken!: Vec<String>\",\n    language_app,\n    language_emails,\n    bio,\n    location_public,\n    languages_spoken_public,\n    persona_public,\n    bio_public,\n    organization_public,\n    opt_into_edu_resources,\n    over_18,\n    timezone,\n    user_profile.created_at,\n    user_profile.updated_at,\n    organization,\n    persona                as \"persona!: Vec<String>\",\n    location,\n    stripe_customer_id as \"stripe_customer_id?: CustomerId\",\n    payment_method,\n    subscription_id as \"subscription_id?: SubscriptionId\",\n    array(select scope from user_scope where user_scope.user_id = \"user\".id) as \"scopes!: Vec<i16>\",\n    array(select subject_id from user_subject where user_subject.user_id = \"user\".id) as \"subjects!: Vec<Uuid>\",\n    array(select affiliation_id from user_affiliation where user_affiliation.user_id = \"user\".id) as \"affiliations!: Vec<Uuid>\",\n    array(select age_range_id from user_age_range where user_age_range.user_id = \"user\".id) as \"age_ranges!: Vec<Uuid>\",\n    array(select circle.id\n        from circle_member bm\n        inner join circle on bm.id = circle.id\n        where bm.user_id = \"user\".id or circle.creator_id = \"user\".id\n    ) as \"circles!: Vec<Uuid>\"\nfrom \"user\"\n    inner join user_profile on \"user\".id = user_profile.user_id\n    inner join user_email using(user_id)\nwhere id = $1"
+  },
   "758bee136eaae799c8beef0e069597d0f67cfc590d5ecc6a4353d24b3474e39b": {
     "describe": {
       "columns": [
@@ -6875,32 +7069,6 @@
       }
     },
     "query": "\ninsert into image_tag (index, display_name)\nvalues ($1, $2)\nreturning index as \"index: ImageTagIndex\", display_name\n            "
-  },
-  "775696458ceca6fa85d001b4565b42d9430a3cea777d157aeee47c4fb4769109": {
-    "describe": {
-      "columns": [
-        {
-          "name": "user_id: UserId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "is_oauth!",
-          "ordinal": 1,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        false,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      }
-    },
-    "query": "\n        select user_id \"user_id: UserId\",\n        (\n           select\n             case \n                when exists(select 1 from user_auth_basic where lower(user_auth_basic.email) = lower($1::text)) = true then false\n                else true\n            end\n        )     as \"is_oauth!\"      \n         from user_email \n         where lower(email) = lower($1::text)"
   },
   "79bce8bafae973dfdb2932091ebeeed4f007ecf2849cc8c859d45a1fea68a251": {
     "describe": {
@@ -7547,6 +7715,32 @@
       }
     },
     "query": "update jig set live_id = $1, published_at = now() where id = $2"
+  },
+  "887b6bc1e07a74e30c87bc4953a48c2d1b7908571c62b189e001be1dc85c6339": {
+    "describe": {
+      "columns": [
+        {
+          "name": "user_id: UserId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "is_oauth!",
+          "ordinal": 1,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n        select user_id \"user_id: UserId\",\n        (\n           select\n             case\n                when exists(select 1 from user_auth_basic where lower(user_auth_basic.email) = lower($1::text)) = true then false\n                else true\n            end\n        )     as \"is_oauth!\"\n         from user_email\n         where lower(email) = lower($1::text)"
   },
   "88f0b8dffce417087a9ca7732ca5d41b13d686ab6388d7fa26a7b62e68ae613e": {
     "describe": {
@@ -12580,6 +12774,19 @@
     },
     "query": "\nselect id                               as \"id!: ImageId\",\n       name\nfrom image_metadata\n     inner join image_upload on id = image_id\nwhere name <> '' and translated_name = '{}'\nand processed_at is not null\nand name_translate_status is null\norder by coalesce(updated_at, created_at) desc\nlimit 10 for no key update skip locked;\n "
   },
+  "e3b2378bc8b9ca9f1d8ee2dda9571d5e0cac0ca3e711474e4ae27d2913e3cff5": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nupdate user_profile\nset subscription_id = $2,\nupdated_at = now()\nwhere user_id = $1"
+  },
   "e3ee149ba3066bd72758e68b8e0437b9a3e3e1dfa3e8b1d940ae002d4b285805": {
     "describe": {
       "columns": [],
@@ -12817,6 +13024,32 @@
     },
     "query": "\nselect published_at  as \"published_at?\"\nfrom jig\nwhere id = $1\n    "
   },
+  "e78d16703393b91be0040df947b2b1265554f2baac530787525e9760ffec1065": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: SubscriptionId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Uuid",
+          "Int2",
+          "Bool",
+          "Int2",
+          "Timestamptz",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\ninsert into subscription\n    (\n        stripe_subscription_id,\n        subscription_plan_id,\n        subscription_tier,\n        auto_renew,\n        status,\n        current_period_end,\n        user_id\n    )\nvalues\n    ($1, $2, $3, $4, $5, $6, $7)\nreturning subscription_id as \"id!: SubscriptionId\"\n"
+  },
   "e8cac1c4331f80bc9b4d3eb878d98fb1650ea401e669cfa5154971251776f17d": {
     "describe": {
       "columns": [],
@@ -12855,6 +13088,26 @@
       }
     },
     "query": "insert into web_media_library_url (media_id, media_url) values ($1, $2)"
+  },
+  "ebb686ae5f68def959a79bda2f4f38d9b8ba19d10db495af2edcfbd8fcf39fb6": {
+    "describe": {
+      "columns": [
+        {
+          "name": "user_id: UserId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "select user_id as \"user_id: UserId\" from user_profile where stripe_customer_id = $1"
   },
   "ebf961d5777f0009b3717b25f4328a1d4e8230adc40135440a107f570062e9f6": {
     "describe": {
@@ -13384,6 +13637,19 @@
       }
     },
     "query": "select exists(select 1 from user_email where email = lower($1)) as \"exists!\""
+  },
+  "f9261badbb4c4ae2346d503a28ffe382c5f586bd484d79ac567e969b4a651b02": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nupdate user_profile\nset stripe_customer_id = $2,\nupdated_at = now()\nwhere user_id = $1"
   },
   "f92c14a182afb0bbc54cf4ce449d6d5c124ef1f3b7c364178247a28a1371fe4c": {
     "describe": {

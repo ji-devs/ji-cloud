@@ -11,6 +11,7 @@ use actix_web::{
     HttpResponse, ResponseError,
 };
 use shared::error::{ApiError, EmptyError, MetadataNotFound};
+use stripe::StripeError;
 
 use crate::db::meta::MetaWrapperError;
 
@@ -174,6 +175,7 @@ pub enum ServiceKind {
     FirebaseCloudMessaging,
     UploadCleaner,
     GoogleTranslate,
+    Stripe,
 }
 
 impl ServiceKind {
@@ -189,6 +191,7 @@ impl ServiceKind {
             Self::FirebaseCloudMessaging => "Firebase Cloud Messaging",
             Self::UploadCleaner => "Media Upload Cleaner",
             Self::GoogleTranslate => "Google Translate",
+            Self::Stripe => "Stripe",
         }
     }
 }
@@ -794,5 +797,48 @@ impl From<Auth> for JigCode {
             Auth::Forbidden => Self::Forbidden,
             Auth::ResourceNotFound(_) => Self::ResourceNotFound,
         }
+    }
+}
+
+pub enum Billing {
+    InternalServerError(anyhow::Error),
+    Service(Service),
+    Stripe(StripeError),
+    NotFound,
+    BadRequest,
+    SubscriptionExists,
+}
+
+impl<T: Into<anyhow::Error>> From<T> for Billing {
+    fn from(e: T) -> Self {
+        Self::InternalServerError(e.into())
+    }
+}
+
+impl Into<actix_web::Error> for Billing {
+    fn into(self) -> actix_web::Error {
+        match self {
+            Self::InternalServerError(e) => ise(e),
+            Self::BadRequest => {
+                BasicError::with_message(http::StatusCode::BAD_REQUEST, "Bad request".into()).into()
+            }
+            Self::Service(e) => e.into(),
+            Self::Stripe(e) => ise(e.into()),
+            Self::NotFound => {
+                BasicError::with_message(http::StatusCode::NOT_FOUND, "Resource not found".into())
+                    .into()
+            }
+            Self::SubscriptionExists => BasicError::with_message(
+                http::StatusCode::BAD_REQUEST,
+                "User has existing subscription".into(),
+            )
+            .into(),
+        }
+    }
+}
+
+impl From<Service> for Billing {
+    fn from(err: Service) -> Self {
+        Self::Service(err)
     }
 }

@@ -838,7 +838,7 @@ async fn get_profile(
     // todo: figure out how to do `<Profile as ApiEndpoint>::Err`
     let user_id = claims.user_id();
 
-    db::user::get_profile(db.as_ref(), user_id)
+    db::user::get_profile(db.as_ref(), &user_id)
         .await?
         .map(Json)
         .ok_or(error::UserNotFound::UserNotFound)
@@ -881,12 +881,12 @@ async fn reset_password(
         select user_id "user_id: UserId",
         (
            select
-             case 
+             case
                 when exists(select 1 from user_auth_basic where lower(user_auth_basic.email) = lower($1::text)) = true then false
                 else true
             end
-        )     as "is_oauth!"      
-         from user_email 
+        )     as "is_oauth!"
+         from user_email
          where lower(email) = lower($1::text)"#,
         &req.email
     )

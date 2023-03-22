@@ -12,19 +12,39 @@ use crate::{api::endpoints::PathPart, domain::user::UserId};
 #[cfg_attr(feature = "backend", derive(sqlx::Type), sqlx(transparent))]
 pub struct CustomerId(String);
 
+#[cfg(feature = "backend")]
+impl From<stripe::CustomerId> for CustomerId {
+    fn from(value: stripe::CustomerId) -> Self {
+        Self(value.as_str().to_owned())
+    }
+}
+
+#[cfg(feature = "backend")]
+impl From<CustomerId> for stripe::CustomerId {
+    fn from(value: CustomerId) -> Self {
+        use std::str::FromStr;
+        stripe::CustomerId::from_str(&value.0).unwrap()
+    }
+}
+
+impl CustomerId {
+    /// Obtain a reference to the inner string
+    #[cfg(feature = "backend")]
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
 /// Stripe payment method ID
 #[derive(Debug, Serialize, Deserialize, Clone)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type), sqlx(transparent))]
 pub struct StripePaymentMethodId(String);
 
 /// Last 4 digits of a card number
 #[derive(Debug, Serialize, Deserialize, Clone)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type), sqlx(transparent))]
 pub struct Last4(String);
 
 /// Payment network associated with a [Card]
 #[derive(Debug, Serialize, Deserialize, Clone, EnumString)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[serde(rename_all = "kebab-case")]
 #[strum(serialize_all = "lowercase")]
 pub enum PaymentNetwork {
@@ -48,30 +68,38 @@ pub enum PaymentNetwork {
     Unknown,
 }
 
-/// Status of the payment method
-#[derive(Debug, Serialize, Deserialize, Clone)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[repr(i16)]
-pub enum PaymentMethodStatus {
-    /// Payment method is active
-    Active = 0,
-    /// Payment method has expired
-    Expired = 1,
+impl Default for PaymentNetwork {
+    fn default() -> Self {
+        Self::Unknown
+    }
 }
 
 /// A display-only representation of a card
 #[derive(Debug, Serialize, Deserialize, Clone)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
 pub struct Card {
     /// The last 4 digits of the card
-    pub last_4: Last4,
+    pub last4: Last4,
     /// The cards payment network
     pub payment_network: PaymentNetwork,
-    /// The cards current status
-    pub status: PaymentMethodStatus,
+    /// The expiry month for this card
+    pub exp_month: u8,
+    /// The expiry year for this card
+    pub exp_year: u16,
 }
 
-// TODO what details do I need for the other types?
+#[cfg(feature = "backend")]
+impl From<stripe::CardDetails> for Card {
+    fn from(value: stripe::CardDetails) -> Self {
+        use std::str::FromStr;
+        Self {
+            last4: Last4(value.last4),
+            payment_network: PaymentNetwork::from_str(&value.brand).unwrap_or_default(),
+            exp_month: value.exp_month as u8,
+            exp_year: value.exp_year as u16,
+        }
+    }
+}
+
 /// Type of payment method
 ///
 /// Note: Only the [PaymentMethodType::Card] variant has any display details.
@@ -85,6 +113,8 @@ pub enum PaymentMethodType {
     Link,
     /// Card
     Card(Card),
+    /// Other/unknown
+    Other,
 }
 
 wrap_uuid! {
@@ -95,12 +125,38 @@ wrap_uuid! {
 /// Payment method
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PaymentMethod {
-    /// Local payment method ID
-    pub payment_method_id: PaymentMethodId,
     /// The Stripe payment method ID
     pub stripe_payment_method_id: StripePaymentMethodId, // Stripe payment method ID
     /// The type of payment method
     pub payment_method_type: PaymentMethodType,
+}
+
+#[cfg(feature = "backend")]
+impl From<stripe::PaymentMethod> for PaymentMethod {
+    fn from(value: stripe::PaymentMethod) -> Self {
+        let payment_method_type = if value.link.is_some() {
+            PaymentMethodType::Link
+        } else if let Some(card) = value.card {
+            if let Some(wallet) = card.wallet {
+                if wallet.apple_pay.is_some() {
+                    PaymentMethodType::ApplePay
+                } else if wallet.google_pay.is_some() {
+                    PaymentMethodType::GooglePay
+                } else {
+                    PaymentMethodType::Other
+                }
+            } else {
+                PaymentMethodType::Card(Card::from(card))
+            }
+        } else {
+            PaymentMethodType::Other
+        };
+
+        Self {
+            stripe_payment_method_id: StripePaymentMethodId(value.id.as_str().to_string()),
+            payment_method_type,
+        }
+    }
 }
 
 /// The tier a subscription is on. This would apply to any [SubscriptionType]
@@ -119,6 +175,13 @@ pub enum SubscriptionTier {
 #[cfg_attr(feature = "backend", derive(sqlx::Type), sqlx(transparent))]
 pub struct StripeSubscriptionId(String);
 
+#[cfg(feature = "backend")]
+impl From<stripe::SubscriptionId> for StripeSubscriptionId {
+    fn from(value: stripe::SubscriptionId) -> Self {
+        Self(value.as_str().to_owned())
+    }
+}
+
 /// Stripe product ID
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type), sqlx(transparent))]
@@ -128,6 +191,12 @@ pub struct StripeProductId(String);
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type), sqlx(transparent))]
 pub struct StripePriceId(String);
+
+impl From<StripePriceId> for String {
+    fn from(value: StripePriceId) -> Self {
+        value.0
+    }
+}
 
 /// The subscriptions billing interval
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -142,13 +211,52 @@ pub enum BillingInterval {
 
 /// Status of a subscription
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[repr(i16)]
 pub enum SubscriptionStatus {
+    /// The subscription has been created, awaiting finalization from Stripe or paused.
+    Inactive = 0,
     /// The subscription is active, i.e. not cancelled or expired.
-    Active,
+    Active = 1,
     /// The subscription is cancelled but still active, i.e. not expired.
-    Cancelled,
+    Canceled = 2,
     /// The subscription is expired.
-    Expired,
+    Expired = 3,
+}
+
+impl SubscriptionStatus {
+    /// Whether the subscription is still valid so that a teacher is able to make use of subscription
+    /// features.
+    pub fn is_valid(&self) -> bool {
+        match self {
+            Self::Active | Self::Canceled => true,
+            _ => false,
+        }
+    }
+}
+
+#[cfg(feature = "backend")]
+impl Default for SubscriptionStatus {
+    fn default() -> Self {
+        Self::Inactive
+    }
+}
+
+#[cfg(feature = "backend")]
+impl From<stripe::SubscriptionStatus> for SubscriptionStatus {
+    fn from(value: stripe::SubscriptionStatus) -> Self {
+        match value {
+            stripe::SubscriptionStatus::Incomplete | stripe::SubscriptionStatus::Paused => {
+                Self::Inactive
+            }
+            stripe::SubscriptionStatus::Active
+            | stripe::SubscriptionStatus::PastDue
+            | stripe::SubscriptionStatus::Trialing
+            | stripe::SubscriptionStatus::Unpaid => Self::Active,
+            stripe::SubscriptionStatus::Canceled => Self::Canceled,
+            stripe::SubscriptionStatus::IncompleteExpired => Self::Expired,
+        }
+    }
 }
 
 wrap_uuid! {
@@ -158,6 +266,7 @@ wrap_uuid! {
 
 /// An existing subscription for a customer
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
 pub struct Subscription {
     /// The local subscription ID
     pub subscription_id: SubscriptionId,
@@ -173,15 +282,79 @@ pub struct Subscription {
     pub status: SubscriptionStatus,
     /// When the subscriptions current period ends/expires
     pub current_period_end: DateTime<Utc>,
-    /// The teacher who is the administrator of this subscription
-    ///
-    /// For [SubscriptionType::Individual] subscriptions, this would always be the user that created
+    /// User ID to associate this subscription with.
+    /// For [SubscriptionType::School] subscriptions, this is also the teacher who can administer
     /// the subscription.
-    ///
-    /// For [SubscriptionType::School] subscriptions, this would be the user that initially created
-    /// the subscription. It should be possible to transfer ownership of the subscription.
-    pub admin: UserId,
-    // TODO do we need other fields?
+    pub user_id: UserId,
+    /// When the subscription was originally created.
+    pub created_at: DateTime<Utc>,
+    /// When the subscription was last updated.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub updated_at: Option<DateTime<Utc>>,
+}
+
+/// Data used to create a new subscription record
+#[derive(Debug, Serialize, Deserialize, Clone, sqlx::Type)]
+#[cfg(feature = "backend")]
+pub struct CreateSubscriptionRecord {
+    /// The Stripe subscription ID
+    pub stripe_subscription_id: StripeSubscriptionId,
+    /// The subscription plan ID
+    pub subscription_plan_id: PlanId,
+    /// The subscription tier
+    pub tier: SubscriptionTier,
+    /// Whether the subscription auto-renews
+    pub auto_renew: bool,
+    /// The subscription status
+    pub status: SubscriptionStatus,
+    /// When the subscriptions current period ends/expires
+    pub current_period_end: DateTime<Utc>,
+    /// User ID to associate this subscription with.
+    /// For [SubscriptionType::School] subscriptions, this is also the teacher who can administer
+    /// the subscription.
+    pub user_id: UserId,
+}
+
+/// Data used to update a new subscription record
+#[derive(Debug, Serialize, Deserialize, Clone, sqlx::Type)]
+#[cfg(feature = "backend")]
+pub struct UpdateSubscriptionRecord {
+    /// The Stripe subscription ID
+    pub stripe_subscription_id: StripeSubscriptionId,
+    /// Whether the subscription auto-renews
+    pub auto_renew: Option<bool>,
+    /// The subscription status
+    pub status: Option<SubscriptionStatus>,
+    /// When the subscriptions current period ends/expires
+    pub current_period_end: Option<DateTime<Utc>>,
+}
+
+#[cfg(feature = "backend")]
+impl TryFrom<stripe::Subscription> for UpdateSubscriptionRecord {
+    type Error = anyhow::Error;
+
+    fn try_from(value: stripe::Subscription) -> Result<Self, Self::Error> {
+        use chrono::TimeZone;
+
+        Ok(Self {
+            stripe_subscription_id: value.id.into(),
+            auto_renew: None, // TODO need to impl this
+            // This is weird.
+            status: Some(if value.ended_at.is_some() {
+                SubscriptionStatus::Expired
+            } else if value.canceled_at.is_some() {
+                SubscriptionStatus::Canceled
+            } else {
+                SubscriptionStatus::from(value.status)
+            }),
+            current_period_end: Some(
+                Utc.timestamp_opt(value.current_period_end, 0)
+                    .latest()
+                    .ok_or(anyhow::anyhow!("Invalid timestamp"))?,
+            ),
+        })
+    }
 }
 
 /// The limit of how many accounts can be associated with the subscription. [None] means unlimited.
@@ -204,6 +377,16 @@ pub enum SubscriptionType {
     Individual = 0,
     /// A school subscription
     School = 1,
+}
+
+impl SubscriptionType {
+    /// Whether this subscription type has a dedicated admin user
+    pub fn has_admin(&self) -> bool {
+        match self {
+            Self::School => true,
+            _ => false,
+        }
+    }
 }
 
 /// Stripe invoice number
@@ -273,20 +456,60 @@ pub struct SubscriptionPlan {
     pub updated_at: Option<DateTime<Utc>>,
 }
 
+/// Request to create or update a subscription plan
+///
+/// In Stripe this would correspond to a Price within a Product.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
+pub struct CreateUpdateSubscriptionPlanRequest {
+    /// Stripe product ID
+    pub product_id: StripeProductId,
+    /// Stripe price ID
+    pub price_id: StripePriceId,
+    /// Subscription tier
+    pub subscription_tier: SubscriptionTier,
+    /// Subscription plan type
+    pub subscription_type: SubscriptionType,
+    /// Billing interval
+    pub billing_interval: BillingInterval,
+    /// The account limit for this subscription
+    ///
+    /// For [SubscriptionType::Individual] subscriptions, this will _always_ be `Some(1)`.
+    pub account_limit: Option<AccountLimit>,
+    /// Current price of subscription in cents
+    pub amount_in_cents: AmountInCents,
+}
+
 make_path_parts!(SubscriptionPlanPath => "/v1/admin/plans");
 
+/// Request to create a subscription.
+///
+/// If no payment method information is passed with, then the system will attempt to use the
+/// users existing payment method. Otherwise, a payment method will be saved.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct CreateSubscriptionRequest {
+    /// The Stripe payment method ID
+    #[serde(default)]
+    pub stripe_payment_method_id: Option<StripePaymentMethodId>,
+    /// The type of payment method
+    #[serde(default)]
+    pub payment_method_type: Option<PaymentMethodType>,
+    /// Plan ID to create the subscriptinon for
+    pub plan_id: PlanId,
+}
+
+make_path_parts!(CreateSubscriptionPath => "/v1/subscribe");
+
+/// Create subscription response.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct CreateSubscriptionResponse {
+    /// The *Stripe* subscription ID
+    pub subscription_id: StripeSubscriptionId,
+    /// The client secret from Stripe for reference when adding a payment method
+    ///
+    /// `None` indicates that the subscription was created without requiring a new payment method to
+    /// be added.
+    pub client_secret: String,
+}
+
 // TODO Add stripe billing fields to UserProfile
-// /// The user's customer ID
-// #[serde(default)]
-// #[serde(skip_serializing_if = "Option::is_none")]
-// pub stripe_customer_id: Option<CustomerId>,
-
-// /// The user's current payment method
-// #[serde(default)]
-// #[serde(skip_serializing_if = "Option::is_none")]
-// pub payment_method: Option<PaymentMethod>,
-
-// /// The users current subscription
-// #[serde(default)]
-// #[serde(skip_serializing_if = "Option::is_none")]
-// pub subscription: Option<Subscription>,

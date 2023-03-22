@@ -58,12 +58,13 @@ url = { version = "2.3.1", features = ["serde"] }
 uuid = "1.1.2"
 quote = "1.0.18"
 hashfn = "0.2.0"
+csv = "1.1.6"
+async-stripe = { version = "0.18.4", features = ["runtime-tokio-hyper-rustls"] }
 
 # project deps
 core = { path = "../core", features = ["db"] }
 shared = { path = "../../shared/rust", features = ["backend"] }
 macros = { path = "../../shared/macros" }
-csv = "1.1.6"
 
 [dependencies.sendgrid]
 default-features = false
