@@ -2,6 +2,7 @@ use chrono::{DateTime, Utc};
 use chrono_tz::Tz;
 use shared::domain::{
     admin::DateFilterType,
+    billing::{CustomerId, PaymentMethod, SubscriptionId},
     circle::CircleId,
     image::ImageId,
     meta::{
@@ -40,8 +41,7 @@ pub async fn lookup(
 }
 
 #[instrument(skip(db))]
-pub async fn get_profile(db: &sqlx::PgPool, id: UserId) -> anyhow::Result<Option<UserProfile>> {
-    log::warn!("in get_profile: {:?}", id);
+pub async fn get_profile(db: &sqlx::PgPool, id: &UserId) -> anyhow::Result<Option<UserProfile>> {
     let row = sqlx::query!(
         //language=SQL
         r#"
@@ -69,6 +69,9 @@ select user_id as "id: UserId",
     organization,
     persona                as "persona!: Vec<String>",
     location,
+    stripe_customer_id as "stripe_customer_id?: CustomerId",
+    payment_method,
+    subscription_id as "subscription_id?: SubscriptionId",
     array(select scope from user_scope where user_scope.user_id = "user".id) as "scopes!: Vec<i16>",
     array(select subject_id from user_subject where user_subject.user_id = "user".id) as "subjects!: Vec<Uuid>",
     array(select affiliation_id from user_affiliation where user_affiliation.user_id = "user".id) as "affiliations!: Vec<Uuid>",
@@ -128,7 +131,103 @@ where id = $1"#,
         age_ranges: row.age_ranges.into_iter().map(AgeRangeId).collect(),
         affiliations: row.affiliations.into_iter().map(AffiliationId).collect(),
         circles: row.circles.into_iter().map(CircleId).collect(),
+        stripe_customer_id: row.stripe_customer_id,
+        payment_method: match row.payment_method {
+            Some(value) => {
+                match serde_json::from_value(value) {
+                    Err(_error) => {
+                        // TODO probably log user id here.
+                        log::warn!("Failed to deserialize persisted payment method");
+                        None
+                    }
+                    Ok(value) => Some(value),
+                }
+            }
+            None => None,
+        },
+        subscription_id: row.subscription_id,
     }))
+}
+
+#[instrument(skip(db))]
+pub async fn save_customer_id(
+    db: &sqlx::Pool<sqlx::Postgres>,
+    user_id: &UserId,
+    customer_id: &CustomerId,
+) -> anyhow::Result<()> {
+    sqlx::query!(
+        //language=SQL
+        r#"
+update user_profile
+set stripe_customer_id = $2,
+updated_at = now()
+where user_id = $1"#,
+        user_id.0,
+        customer_id.as_str(),
+    )
+    .execute(db)
+    .instrument(tracing::info_span!("set customer id"))
+    .await?;
+
+    Ok(())
+}
+
+#[instrument(skip(db))]
+pub async fn save_payment_method(
+    db: &sqlx::Pool<sqlx::Postgres>,
+    user_id: &UserId,
+    payment_method: Option<PaymentMethod>,
+) -> anyhow::Result<()> {
+    sqlx::query!(
+        //language=SQL
+        r#"
+update user_profile
+set payment_method = $2,
+updated_at = now()
+where user_id = $1"#,
+        user_id.0,
+        serde_json::to_value(payment_method)?,
+    )
+    .execute(db)
+    .await?;
+
+    Ok(())
+}
+
+#[instrument(skip(db))]
+pub async fn save_subscription_id(
+    db: &sqlx::Pool<sqlx::Postgres>,
+    user_id: &UserId,
+    subscription_id: SubscriptionId,
+) -> anyhow::Result<()> {
+    sqlx::query!(
+        //language=SQL
+        r#"
+update user_profile
+set subscription_id = $2,
+updated_at = now()
+where user_id = $1"#,
+        user_id.0,
+        subscription_id as SubscriptionId,
+    )
+    .execute(db)
+    .await?;
+
+    Ok(())
+}
+
+#[instrument(skip(db))]
+pub async fn get_user_id_by_customer_id(
+    db: &sqlx::Pool<sqlx::Postgres>,
+    customer_id: &CustomerId,
+) -> anyhow::Result<Option<UserId>> {
+    Ok(sqlx::query_scalar!(
+        //language=SQL
+        r#"select user_id as "user_id: UserId" from user_profile where stripe_customer_id = $1"#,
+        customer_id.as_str(),
+    )
+    .fetch_optional(db)
+    .await?)
 }
 
 #[instrument(skip(db))]

@@ -192,3 +192,9 @@ pub const GOOGLE_OAUTH_SECRET: &str = "GOOGLE_OAUTH_SECRET";
 /// Is optional. If missing, all Google Api related services will be disabled,
 /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
 pub const GOOGLE_API_KEY: &str = "GOOGLE_API_KEY";
+
+/// Secret for Stripe API
+pub const STRIPE_SECRET_KEY: &str = "STRIPE_SECRET_KEY";
+
+/// Stripe Webhook secret
+pub const STRIPE_WEBHOOK_SECRET: &str = "STRIPE_WEBHOOK_SECRET";

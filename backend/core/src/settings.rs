@@ -106,6 +106,12 @@ pub struct RuntimeSettings {
     /// * can only be set on `local`
     /// * optional, if missing it will use the server's compiled default (an indeterminate but reasonable amount of time)
     pub login_token_valid_duration: Option<chrono::Duration>,
+
+    /// Secret for Stripe API
+    pub stripe_secret_key: Option<String>,
+
+    /// Secret for Stripe Webhooks
+    pub stripe_webhook_secret: Option<String>,
 }
 
 impl RuntimeSettings {
@@ -120,6 +126,8 @@ impl RuntimeSettings {
         google_oauth: Option<GoogleOAuth>,
         token_secret: Box<[u8; 32]>,
         login_token_valid_duration: Option<chrono::Duration>,
+        stripe_secret_key: Option<String>,
+        stripe_webhook_secret: Option<String>,
     ) -> Self {
         assert_eq!(token_secret.len(), 32);
 
@@ -134,6 +142,8 @@ impl RuntimeSettings {
             google_api_key,
             token_secret,
             login_token_valid_duration,
+            stripe_secret_key,
+            stripe_webhook_secret,
         }
     }
 
@@ -144,6 +154,8 @@ impl RuntimeSettings {
         google_oauth: Option<GoogleOAuth>,
         token_secret: Box<[u8; 32]>,
         login_token_valid_duration: Option<chrono::Duration>,
+        stripe_secret_key: Option<String>,
+        stripe_webhook_secret: Option<String>,
     ) -> anyhow::Result<Self> {
         let (api_port, pages_port, media_watch_port) = match remote_target {
             RemoteTarget::Local => (
@@ -168,6 +180,8 @@ impl RuntimeSettings {
             google_api_key,
             token_secret,
             login_token_valid_duration,
+            stripe_secret_key,
+            stripe_webhook_secret,
         })
     }
 
@@ -850,7 +864,19 @@ impl SettingsManager {
             google_oauth,
             token_secret,
             login_token_valid_duration,
+            self.stripe_secret_key().await?,
+            self.stripe_webhook_secret().await?,
         )
+    }
+
+    /// Load the Stripe secret key
+    async fn stripe_secret_key(&self) -> anyhow::Result<Option<String>> {
+        self.get_varying_secret(keys::STRIPE_SECRET_KEY).await
+    }
+
+    /// Load the Stripe webhook secret
+    async fn stripe_webhook_secret(&self) -> anyhow::Result<Option<String>> {
+        self.get_varying_secret(keys::STRIPE_WEBHOOK_SECRET).await
     }
 }
 

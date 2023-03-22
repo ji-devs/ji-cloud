@@ -2,6 +2,7 @@ pub mod additional_resource;
 pub mod admin;
 pub mod animation;
 pub mod audio;
+pub mod billing;
 pub mod category;
 pub mod circle;
 pub mod course;

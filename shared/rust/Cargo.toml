@@ -5,7 +5,7 @@ authors = [
     "dakom <david.komer@gmail.com>",
     "Chloe Ross <orangesnowfox@gmail.com>", # chloe@launchbadge.com
 ]
-edition = "2018"
+edition = "2021"
 description = "shared types for ji cloud project"
 license = "MIT OR Apache-2.0"
 publish = false
@@ -29,6 +29,7 @@ uuid = { version = "1.1.2", features = ["serde"] }
 thiserror = "1.0.30"
 strum = "0.22.0"
 strum_macros = "0.22.0"
+async-stripe = { version = "0.18.4", features = ["runtime-tokio-hyper-rustls"], optional = true }
 macros = { path = "../macros" }
 unicode-segmentation = "1.8.0"
 
@@ -55,5 +56,5 @@ features = [
 optional = true
 
 [features]
-backend = ["sqlx", "actix-web"]
+backend = ["sqlx", "actix-web", "async-stripe"]
 wasm = ["wasm-bindgen", "js-sys"]

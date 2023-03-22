@@ -14,6 +14,8 @@ use crate::{
     },
 };
 
+use super::billing::{CustomerId, PaymentMethod, SubscriptionId};
+
 pub mod public_user;
 
 wrap_uuid! {
@@ -232,6 +234,21 @@ pub struct UserProfile {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub location: Option<serde_json::Value>,
+
+    /// The user's customer ID
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stripe_customer_id: Option<CustomerId>,
+
+    /// The user's current payment method
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub payment_method: Option<PaymentMethod>,
+
+    /// The users current subscription
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subscription_id: Option<SubscriptionId>,
 }
 
 /// User Response (used for Admin).
