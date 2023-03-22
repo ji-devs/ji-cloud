@@ -3,7 +3,9 @@ use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::resource::ResourceRating;
 use std::rc::Rc;
-use utils::{events, routes::AdminResourceCurationRoute, unwrap::UnwrapJiExt};
+use utils::{
+    asset::ResourceContentExt, events, routes::AdminResourceCurationRoute, unwrap::UnwrapJiExt,
+};
 use web_sys::{HtmlInputElement, HtmlTextAreaElement};
 
 mod affiliation;
@@ -29,6 +31,26 @@ impl ResourceDetails {
                         let route = AdminResourceCurationRoute::Table;
                         state.curation_state.navigate_to(route);
                     }))
+                }),
+                html!("button-rect", {
+                    .prop("slot", "open")
+                    .prop("color", "blue")
+                    .prop("kind", "outline")
+                    .prop("size", "small")
+                    .text("Open")
+                    .child(html!("fa-icon", {
+                        .prop("icon", "fa-regular fa-up-right-from-square")
+                    }))
+                    .prop_signal("href", state.resource.resource_signal().map(|resource| {
+                        resource.map(|resource| {
+                            resource.resource_content.get_link()
+                        })
+                    }))
+                    .prop("target", "_BLANK")
+                    // .event(clone!(state => move |_: events::Click| {
+                    //     let route = AdminResourceCurationRoute::Table;
+                    //     state.curation_state.navigate_to(route);
+                    // }))
                 }),
                 html!("star-rating", {
                     .prop("slot", "rating")

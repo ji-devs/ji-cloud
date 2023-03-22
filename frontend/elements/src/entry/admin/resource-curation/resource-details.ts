@@ -67,6 +67,7 @@ export class _ extends LitElement {
                 <slot name="inputs"></slot>
             </div>
             <div class="right-side">
+                <slot name="open"></slot>
                 <slot name="rating"></slot>
                 <slot name="block"></slot>
             </div>
