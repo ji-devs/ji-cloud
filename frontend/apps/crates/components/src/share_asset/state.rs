@@ -88,8 +88,8 @@ impl ShareAsset {
     pub(super) fn asset_type_name(&self) -> &'static str {
         match self.asset {
             Asset::Jig(_) => "JIG",
-            Asset::Course(_) => "course",
-            Asset::Resource(_) => "resource",
+            Asset::Course(_) => "Course",
+            Asset::Resource(_) => "Resource",
             Asset::ProDev(_) => todo!(),
         }
     }
