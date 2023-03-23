@@ -1,8 +1,8 @@
 import { JigData } from "./types";
 import { jigs } from "./story-data";
 
-import "@elements/entry/admin/curation/table";
-import "@elements/entry/admin/curation/table-line";
+// import "@elements/entry/admin/curation/table";
+// import "@elements/entry/admin/curation/table-line";
 
 export default {
   title: "Entry/Admin/Jig Table UI",

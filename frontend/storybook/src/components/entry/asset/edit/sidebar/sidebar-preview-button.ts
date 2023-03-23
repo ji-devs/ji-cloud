@@ -1,5 +1,5 @@
 import { argsToAttrs } from "@utils/attributes";
-import "@elements/entry/jig/edit/sidebar/preview-button";
+import "@elements/entry/asset/edit/sidebar/preview-button";
 
 const STR_MY_JIGS = "My JIGs";
 export default {

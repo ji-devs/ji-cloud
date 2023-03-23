@@ -1,6 +1,6 @@
 import {jigs} from './story-data';
 
-import "@elements/entry/admin/curation/table-line";
+// import "@elements/entry/admin/curation/table-line";
 
 const jig = jigs[0];
 

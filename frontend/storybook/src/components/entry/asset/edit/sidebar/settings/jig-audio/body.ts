@@ -1,5 +1,5 @@
 import { argsToAttrs } from "@utils/attributes";
-import "@elements/entry/jig/edit/sidebar/settings/jig-audio/jig-audio-body";
+import "@elements/entry/asset/edit/sidebar/settings/jig-audio/jig-audio-body";
 import { Kind } from "@elements/entry/jig/edit/sidebar/settings/jig-audio/jig-audio-body";
 import { arrayCount, mapToString } from "@utils/array";
 

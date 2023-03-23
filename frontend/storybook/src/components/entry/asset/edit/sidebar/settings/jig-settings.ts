@@ -1,6 +1,6 @@
 import { argsToAttrs } from "@utils/attributes";
-import "@elements/entry/jig/edit/sidebar/settings/jig-settings";
-import "@elements/entry/jig/edit/sidebar/settings/jig-settings-button";
+import "@elements/entry/asset/edit/sidebar/settings/jig-settings";
+import "@elements/entry/asset/edit/sidebar/settings/jig-settings-button";
 import { JigPreviewSettings } from "./jig-preview-settings";
 
 export default {

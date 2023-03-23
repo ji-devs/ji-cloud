@@ -1,6 +1,6 @@
 import { argsToAttrs } from "@utils/attributes";
-import "@elements/entry/jig/edit/sidebar/settings/jig-audio/jig-audio-line";
-import "@elements/entry/jig/edit/sidebar/settings/jig-audio/jig-audio-play-pause";
+import "@elements/entry/asset/edit/sidebar/settings/jig-audio/jig-audio-line";
+import "@elements/entry/asset/edit/sidebar/settings/jig-audio/jig-audio-play-pause";
 
 export default {
     title: "Entry / Jig / Edit / Sidebar/ Settings/ Jig Audio",

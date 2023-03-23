@@ -1,4 +1,4 @@
-import "@elements/entry/jig/gallery/create";
+// import "@elements/entry/jig/gallery/create";
 import { argsToAttrs } from "@utils/attributes";
 
 export default {

@@ -1,5 +1,6 @@
-import "@elements/entry/jig/gallery/template";
-import { Kind } from "@elements/entry/jig/gallery/template";
+// import "@elements/entry/jig/gallery/template";
+// import { Kind } from "@elements/entry/jig/gallery/template";
+type Kind = any;
 import { argsToAttrs } from "@utils/attributes";
 
 export default {

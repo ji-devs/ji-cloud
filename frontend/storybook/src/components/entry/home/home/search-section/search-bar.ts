@@ -1,5 +1,5 @@
-import "@elements/entry/home/home/search-section/search-bar";
-import "@elements/entry/home/home/search-section/search-section-select";
+// import "@elements/entry/home/home/search-section/search-bar";
+// import "@elements/entry/home/home/search-section/search-section-select";
 import { AdvancedSearch } from "./search-result-advanced";
 
 export default {

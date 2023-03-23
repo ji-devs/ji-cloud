@@ -1,5 +1,5 @@
 import { argsToAttrs } from "@utils/attributes";
-import "@elements/entry/jig/edit/selection/jig-selection";
+import "@elements/entry/asset/edit/selection/jig-selection";
 import { mapToString, arrayIndex } from "@utils/array";
 import { Card } from "./card";
 import { ModuleKind, moduleKinds } from "@elements/module/_common/types";

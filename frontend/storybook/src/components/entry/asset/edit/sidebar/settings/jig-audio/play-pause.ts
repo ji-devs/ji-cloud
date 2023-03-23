@@ -1,5 +1,5 @@
 import { argsToAttrs } from "@utils/attributes";
-import "@elements/entry/jig/edit/sidebar/settings/jig-audio/jig-audio-play-pause";
+import "@elements/entry/asset/edit/sidebar/settings/jig-audio/jig-audio-play-pause";
 import { Mode } from "@elements/entry/jig/edit/sidebar/settings/jig-audio/jig-audio-play-pause";
 
 export default {

@@ -1,5 +1,5 @@
 import { argsToAttrs } from "@utils/attributes";
-import "@elements/entry/jig/edit/sidebar/settings/jig-audio/jig-audio-playing-indicator";
+import "@elements/entry/asset/edit/sidebar/settings/jig-audio/jig-audio-playing-indicator";
 
 export default {
     title: "Entry / Jig / Edit / Sidebar/ Settings/ Jig Audio",

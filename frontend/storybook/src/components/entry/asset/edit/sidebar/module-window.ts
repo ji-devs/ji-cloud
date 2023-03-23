@@ -1,7 +1,8 @@
 import { argsToAttrs } from "@utils/attributes";
-import "@elements/entry/jig/edit/sidebar/publish";
-import "@elements/entry/jig/edit/sidebar/module/window";
-import { ModuleState } from "@elements/entry/jig/edit/sidebar/module/window";
+// import "@elements/entry/asset/edit/sidebar/publish";
+import "@elements/entry/asset/edit/sidebar/module/window";
+// import { ModuleState } from "@elements/entry/jig/edit/sidebar/module/window";
+type ModuleState = any;
 import { ModuleKind, moduleKinds } from "@elements/module/_common/types";
 
 export default {

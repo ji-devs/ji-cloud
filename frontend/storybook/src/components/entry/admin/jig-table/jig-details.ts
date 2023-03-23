@@ -1,4 +1,4 @@
-import "@elements/entry/admin/curation/jig-details";
+// import "@elements/entry/admin/curation/jig-details";
 
 export default {
   title: "Entry/Admin/Jig Details",

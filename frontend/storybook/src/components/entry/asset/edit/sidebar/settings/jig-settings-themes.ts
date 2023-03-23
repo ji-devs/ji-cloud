@@ -1,5 +1,5 @@
 import { argsToAttrs } from "@utils/attributes";
-import "@elements/entry/jig/edit/sidebar/settings/jig-settings-themes";
+import "@elements/entry/asset/edit/sidebar/settings/jig-settings-themes";
 
 export default {
     title: "Entry / Jig / Edit / Sidebar / Settings",

@@ -1,7 +1,7 @@
 import { argsToAttrs } from "@utils/attributes";
-import "@elements/entry/jig/edit/sidebar/sidebar";
-import "@elements/entry/jig/edit/sidebar/header";
-import "@elements/entry/jig/edit/pages/landing";
+// import "@elements/entry/asset/edit/sidebar/sidebar";
+import "@elements/entry/asset/edit/sidebar/header";
+import "@elements/entry/asset/edit/pages/landing";
 import { mapToString, arrayIndex } from "@utils/array";
 import { Sidebar } from "../sidebar/sidebar";
 import { ModuleSelection } from "../selection/selection";

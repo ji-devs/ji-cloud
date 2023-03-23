@@ -1,5 +1,5 @@
 import { argsToAttrs } from "@utils/attributes";
-import "@elements/entry/user/email/pages/email-change";
+// import "@elements/entry/user/email/pages/email-change";
 import "@elements/core/buttons/rectangle";
 
 export default {

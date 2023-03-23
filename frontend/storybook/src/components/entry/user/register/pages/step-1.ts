@@ -1,6 +1,6 @@
 import { argsToAttrs } from "@utils/attributes";
 import "@elements/entry/user/register/pages/step1";
-import "@elements/entry/user/register/footer/login";
+// import "@elements/entry/user/register/footer/login";
 import "@elements/core/buttons/rectangle";
 
 const STR_FIRSTNAME_LABEL = "First name *";

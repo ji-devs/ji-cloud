@@ -1,6 +1,6 @@
 import { moduleKinds, ModuleKind } from "@elements/module/_common/types";
-import "@elements/entry/jig/edit/post-publish/post-publish";
-import "@elements/entry/jig/edit/post-publish/post-publish-action";
+import "@elements/entry/asset/edit/post-publish/post-publish";
+import "@elements/entry/asset/edit/post-publish/post-publish-action";
 import { argsToAttrs } from "@utils/attributes";
 
 export default {

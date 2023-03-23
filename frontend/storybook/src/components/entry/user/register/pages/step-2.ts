@@ -1,7 +1,7 @@
 import { argsToAttrs } from "@utils/attributes";
 
 import "@elements/entry/user/register/pages/step2";
-import "@elements/entry/user/register/footer/login";
+// import "@elements/entry/user/register/footer/login";
 import "@elements/core/buttons/rectangle";
 import "@elements/core/inputs/wrapper";
 

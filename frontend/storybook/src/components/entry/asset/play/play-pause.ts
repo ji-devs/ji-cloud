@@ -1,6 +1,7 @@
 import { argsToAttrs } from "@utils/attributes";
-import "@elements/entry/jig/play/jig/play-pause";
-import { Mode } from "@elements/entry/jig/play/jig/play-pause";
+// import "@elements/entry/asset/play/jig/play-pause";
+// import { Mode } from "@elements/entry/jig/play/jig/play-pause";
+type Mode = any;
 
 export default {
     title: "Entry / Jig / Play",

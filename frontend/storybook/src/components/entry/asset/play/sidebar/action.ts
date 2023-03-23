@@ -1,6 +1,7 @@
 import { argsToAttrs } from "@utils/attributes";
-import "@elements/entry/jig/play/jig/sidebar/action";
-import { Kind } from "@elements/entry/jig/play/jig/sidebar/action";
+// import "@elements/entry/asset/play/jig/sidebar/action";
+// import { Kind } from "@elements/entry/jig/play/jig/sidebar/action";
+type Kind = any;
 
 export default {
     title: "Entry / Jig / Play / Sidebar",

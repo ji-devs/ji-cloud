@@ -1,5 +1,5 @@
 import { argsToAttrs } from "@utils/attributes";
-import "@elements/entry/jig/edit/sidebar/settings/jig-settings-button";
+import "@elements/entry/asset/edit/sidebar/settings/jig-settings-button";
 import { Kind } from "@elements/entry/jig/edit/sidebar/settings/jig-settings-button";
 
 export default {

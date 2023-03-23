@@ -1,5 +1,5 @@
 import { argsToAttrs } from "@utils/attributes";
-import "@elements/entry/jig/play/jig/done-popup";
+// import "@elements/entry/asset/play/jig/done-popup";
 
 export default {
     title: "Entry / Jig / Play",

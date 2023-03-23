@@ -1,6 +1,6 @@
 import { argsToAttrs } from "@utils/attributes";
-import "@elements/entry/jig/edit/sidebar/publish";
-import "@elements/entry/jig/edit/sidebar/module/menu";
+// import "@elements/entry/asset/edit/sidebar/publish";
+import "@elements/entry/asset/edit/sidebar/module/menu";
 import "@elements/core/menu/kebab";
 import "@elements/core/menu/menu-line";
 

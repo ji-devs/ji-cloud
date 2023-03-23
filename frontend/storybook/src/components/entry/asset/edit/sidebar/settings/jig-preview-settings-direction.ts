@@ -1,5 +1,5 @@
 import { argsToAttrs } from "@utils/attributes";
-import "@elements/entry/jig/edit/sidebar/settings/jig-preview-settings-direction";
+import "@elements/entry/asset/edit/sidebar/settings/jig-preview-settings-direction";
 import { Direction } from "@elements/entry/jig/edit/sidebar/settings/jig-preview-settings-direction";
 
 export default {

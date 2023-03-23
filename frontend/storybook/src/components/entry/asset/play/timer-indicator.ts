@@ -1,5 +1,5 @@
 import { argsToAttrs } from "@utils/attributes";
-import "@elements/entry/jig/play/jig/timer-indicator";
+// import "@elements/entry/asset/play/jig/timer-indicator";
 
 export default {
     title: "Entry / Jig / Play",

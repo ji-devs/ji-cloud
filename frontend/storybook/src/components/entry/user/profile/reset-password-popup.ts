@@ -1,5 +1,5 @@
 import { argsToAttrs } from "@utils/attributes";
-import "@elements/entry/user/profile/reset-password-popup";
+// import "@elements/entry/user/profile/reset-password-popup";
 import "@elements/core/buttons/rectangle";
 import "@elements/core/buttons/empty";
 

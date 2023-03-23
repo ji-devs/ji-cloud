@@ -1,6 +1,6 @@
 import { argsToAttrs } from "@utils/attributes";
-import "@elements/entry/jig/edit/sidebar/sidebar";
-import "@elements/entry/jig/edit/sidebar/header";
+// import "@elements/entry/asset/edit/sidebar/sidebar";
+import "@elements/entry/asset/edit/sidebar/header";
 
 const STR_MY_JIGS = "My JIGs";
 export default {
