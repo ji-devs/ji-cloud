@@ -401,11 +401,7 @@ impl AudioFeedbackNegative {
 
     /// Get default sounds
     pub fn default_options() -> Vec<Self> {
-        vec![
-            Self::Boing,
-            Self::Buzz,
-            Self::JumpWrong,
-        ]
+        vec![Self::Boing, Self::Buzz, Self::JumpWrong]
     }
 }
 
@@ -461,10 +457,7 @@ impl AudioFeedbackPositive {
 
     /// Get default sounds
     pub fn default_options() -> Vec<Self> {
-        vec![
-            Self::VoiceYippee,
-            Self::Xylophone,
-        ]
+        vec![Self::VoiceYippee, Self::Xylophone]
     }
 }
 
