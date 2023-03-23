@@ -431,7 +431,7 @@ impl AudioSettings {
                     .into_iter()
                     .collect()
             } else {
-                AudioFeedbackPositive::variants()
+                AudioFeedbackPositive::default_options()
             }
         };
 
@@ -443,7 +443,7 @@ impl AudioSettings {
                     .into_iter()
                     .collect()
             } else {
-                AudioFeedbackNegative::variants()
+                AudioFeedbackNegative::default_options()
             }
         };
     }
