@@ -8,6 +8,8 @@ create table subscription
     status int2 not null default 0,
     current_period_end timestamptz not null,
     user_id uuid references "user" (id),
+    latest_invoice_id text,
+    amount_due int8,
     created_at timestamptz not null default now(),
     updated_at timestamptz
 );

@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 use shared::domain::billing::{
     AccountLimit, AmountInCents, BillingInterval, CreateSubscriptionRecord,
-    CreateUpdateSubscriptionPlanRequest, PlanId, StripePriceId, StripeProductId,
+    CreateUpdateSubscriptionPlanRequest, PlanId, StripeInvoiceId, StripePriceId, StripeProductId,
     StripeSubscriptionId, Subscription, SubscriptionId, SubscriptionPlan, SubscriptionStatus,
     SubscriptionTier, SubscriptionType, UpdateSubscriptionRecord,
 };
@@ -122,10 +122,12 @@ insert into subscription
         auto_renew,
         status,
         current_period_end,
-        user_id
+        user_id,
+        latest_invoice_id,
+        amount_due
     )
 values
-    ($1, $2, $3, $4, $5, $6, $7)
+    ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 returning subscription_id as "id!: SubscriptionId"
 "#,
         subscription.stripe_subscription_id as StripeSubscriptionId,
@@ -135,6 +137,10 @@ returning subscription_id as "id!: SubscriptionId"
         subscription.status as SubscriptionStatus,
         subscription.current_period_end,
         subscription.user_id as UserId,
+        subscription
+            .latest_invoice_id
+            .map(|invoice_id| invoice_id.inner()),
+        subscription.amount_due_in_cents.map(|due| due.inner()),
     )
     .fetch_one(&*pool)
     .await
@@ -154,13 +160,17 @@ set
     auto_renew = coalesce($2, auto_renew),
     status = coalesce($3, status),
     current_period_end = coalesce($4, current_period_end),
-    updated_at = now()
+    updated_at = now(),
+    latest_invoice_id = $5
 where stripe_subscription_id = $1
 "#,
         subscription.stripe_subscription_id as StripeSubscriptionId,
         subscription.auto_renew,
         subscription.status.map(|status| status as i16),
         subscription.current_period_end,
+        subscription
+            .latest_invoice_id
+            .map(|invoice_id| invoice_id.inner()),
     )
     .execute(&*pool)
     .await?;
@@ -168,7 +178,30 @@ where stripe_subscription_id = $1
     Ok(())
 }
 
-#[instrument()]
+#[instrument(skip(pool))]
+pub async fn set_subscription_amount_due(
+    pool: &PgPool,
+    subscription_id: StripeSubscriptionId,
+    amount_due: AmountInCents,
+) -> sqlx::Result<()> {
+    sqlx::query!(
+        //language=SQL
+        r#"
+update subscription
+set
+    amount_due = $2
+where stripe_subscription_id = $1
+"#,
+        subscription_id as StripeSubscriptionId,
+        amount_due as AmountInCents,
+    )
+    .execute(&*pool)
+    .await?;
+
+    Ok(())
+}
+
+#[instrument(skip(pool))]
 pub async fn get_subscription(
     pool: &PgPool,
     subscription_id: SubscriptionId,
@@ -186,12 +219,28 @@ select
     status as "status!: SubscriptionStatus",
     current_period_end as "current_period_end!: DateTime<Utc>",
     user_id as "user_id!: UserId",
+    latest_invoice_id as "latest_invoice_id?: StripeInvoiceId",
+    amount_due as "amount_due_in_cents?: AmountInCents",
     created_at as "created_at!: DateTime<Utc>",
     updated_at as "updated_at?: DateTime<Utc>"
 from subscription
 where subscription_id = $1
 "#,
         subscription_id as SubscriptionId,
+    )
+    .fetch_optional(&*pool)
+    .await
+}
+
+#[instrument(skip(pool))]
+pub async fn get_stripe_subscription_id_with_invoice_id(
+    pool: &PgPool,
+    invoice_id: &StripeInvoiceId,
+) -> sqlx::Result<Option<StripeSubscriptionId>> {
+    sqlx::query_scalar!(
+        // language=SQL
+        r#"select stripe_subscription_id as "id: StripeSubscriptionId" from subscription where latest_invoice_id = $1"#,
+        invoice_id as &StripeInvoiceId,
     )
     .fetch_optional(&*pool)
     .await
