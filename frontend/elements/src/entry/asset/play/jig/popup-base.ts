@@ -39,7 +39,12 @@ export class PopupBase extends LitElement {
                     display: flex;
                     justify-content: center;
                     align-items: center;
-                    column-gap: 50px;
+                    column-gap: 30px;
+                }
+                @media (min-width: 1024px) {
+                    .actions {
+                        row-gap: 50px;
+                    }
                 }
             `,
         ];
