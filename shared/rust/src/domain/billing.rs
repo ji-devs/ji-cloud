@@ -182,6 +182,25 @@ impl From<stripe::SubscriptionId> for StripeSubscriptionId {
     }
 }
 
+/// Stripe invoice ID
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type), sqlx(transparent))]
+pub struct StripeInvoiceId(String);
+
+impl StripeInvoiceId {
+    /// Returns a copy of the inner value
+    pub fn inner(&self) -> String {
+        self.0.clone()
+    }
+}
+
+#[cfg(feature = "backend")]
+impl From<&stripe::InvoiceId> for StripeInvoiceId {
+    fn from(value: &stripe::InvoiceId) -> Self {
+        Self(value.as_str().to_owned())
+    }
+}
+
 /// Stripe product ID
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type), sqlx(transparent))]
@@ -286,6 +305,10 @@ pub struct Subscription {
     /// For [SubscriptionType::School] subscriptions, this is also the teacher who can administer
     /// the subscription.
     pub user_id: UserId,
+    /// ID of the latest unpaid invoice generated for this subscription
+    pub latest_invoice_id: Option<StripeInvoiceId>,
+    /// Amount due if any
+    pub amount_due_in_cents: Option<AmountInCents>,
     /// When the subscription was originally created.
     pub created_at: DateTime<Utc>,
     /// When the subscription was last updated.
@@ -310,10 +333,15 @@ pub struct CreateSubscriptionRecord {
     pub status: SubscriptionStatus,
     /// When the subscriptions current period ends/expires
     pub current_period_end: DateTime<Utc>,
-    /// User ID to associate this subscription with.
+    /// User ID to associate this subscription with
+    ///
     /// For [SubscriptionType::School] subscriptions, this is also the teacher who can administer
     /// the subscription.
     pub user_id: UserId,
+    /// ID of the latest unpaid invoice generated for this subscription
+    pub latest_invoice_id: Option<StripeInvoiceId>,
+    /// Amount due if any
+    pub amount_due_in_cents: Option<AmountInCents>,
 }
 
 /// Data used to update a new subscription record
@@ -328,6 +356,22 @@ pub struct UpdateSubscriptionRecord {
     pub status: Option<SubscriptionStatus>,
     /// When the subscriptions current period ends/expires
     pub current_period_end: Option<DateTime<Utc>>,
+    /// ID of the latest unpaid invoice generated for this subscription
+    pub latest_invoice_id: Option<StripeInvoiceId>,
+}
+
+#[cfg(feature = "backend")]
+impl UpdateSubscriptionRecord {
+    /// Create a new instance with just the stripe subscription ID set
+    pub fn new(stripe_subscription_id: StripeSubscriptionId) -> Self {
+        Self {
+            stripe_subscription_id,
+            auto_renew: None,
+            status: None,
+            current_period_end: None,
+            latest_invoice_id: None,
+        }
+    }
 }
 
 #[cfg(feature = "backend")]
@@ -336,6 +380,11 @@ impl TryFrom<stripe::Subscription> for UpdateSubscriptionRecord {
 
     fn try_from(value: stripe::Subscription) -> Result<Self, Self::Error> {
         use chrono::TimeZone;
+
+        let latest_invoice_id = value
+            .latest_invoice
+            .as_ref()
+            .map(|invoice| StripeInvoiceId::from(&invoice.id()));
 
         Ok(Self {
             stripe_subscription_id: value.id.into(),
@@ -353,6 +402,7 @@ impl TryFrom<stripe::Subscription> for UpdateSubscriptionRecord {
                     .latest()
                     .ok_or(anyhow::anyhow!("Invalid timestamp"))?,
             ),
+            latest_invoice_id,
         })
     }
 }
@@ -398,6 +448,18 @@ pub struct InvoiceNumber(String);
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type), sqlx(transparent))]
 pub struct AmountInCents(i64);
+
+impl AmountInCents {
+    /// Create a new instance
+    pub fn new(amount: i64) -> Self {
+        Self(amount)
+    }
+
+    /// Returns a copy of the inner value
+    pub fn inner(&self) -> i64 {
+        self.0
+    }
+}
 
 wrap_uuid! {
     /// Local charge ID

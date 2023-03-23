@@ -5,7 +5,8 @@ use actix_web::{
 use chrono::{TimeZone, Utc};
 use core::settings::RuntimeSettings;
 use shared::domain::billing::{
-    CreateSubscriptionRecord, StripeSubscriptionId, SubscriptionStatus, UpdateSubscriptionRecord,
+    AmountInCents, CreateSubscriptionRecord, StripeInvoiceId, StripeSubscriptionId,
+    SubscriptionStatus, UpdateSubscriptionRecord,
 };
 use shared::{
     api::{endpoints::billing::CreateSubscription, ApiEndpoint, Method, PathParts},
@@ -31,7 +32,7 @@ use crate::{db, error, extractor::TokenUser};
 /// - If a user has had a subscription in the past, then the user will not receive any trial days.
 ///   - If a user has _not_ had a previous subscription, they will receive trial days.
 ///   - If a user does not receive trial days then a Payment Intent will be the response so that the client can confirm it.
-/// - Trial subscriptions will be paused if payment could not be collected
+/// - Trial subscriptions will be canceled if payment could not be collected. I.e. if they don't have a payment method.
 #[instrument(skip_all)]
 async fn create_subscription(
     auth: TokenUser,
@@ -123,7 +124,7 @@ async fn create_subscription(
             params.trial_period_days = Some(7);
             params.trial_settings = Some(stripe::CreateSubscriptionTrialSettings {
                 end_behavior: stripe::CreateSubscriptionTrialSettingsEndBehavior {
-                    missing_payment_method: stripe::CreateSubscriptionTrialSettingsEndBehaviorMissingPaymentMethod::Pause,
+                    missing_payment_method: stripe::CreateSubscriptionTrialSettingsEndBehaviorMissingPaymentMethod::Cancel,
                 },
             });
         }
@@ -135,26 +136,42 @@ async fn create_subscription(
 
     let stripe_subscription_id: StripeSubscriptionId = stripe_subscription.id.into();
 
+    let latest_invoice_id = stripe_subscription
+        .latest_invoice
+        .as_ref()
+        .map(|invoice| StripeInvoiceId::from(&invoice.id()));
+
+    let amount_due_in_cents = match stripe_subscription.latest_invoice.as_ref() {
+        Some(invoice) => match invoice.as_object().unwrap().amount_remaining {
+            Some(amount_due) => Some(AmountInCents::new(amount_due)),
+            None => None,
+        },
+        None => None,
+    };
+
     // Fetch the latest invoice so that we can retrieve the client secret. This is useful if the
     // user doesn't get a trial, and needs to add a payment method so that the subscription can be
     // completed.
-    let latest_invoice = stripe_subscription.latest_invoice.unwrap();
-
-    let create_response = latest_invoice
-        .as_object()
-        .unwrap()
-        .payment_intent
-        .as_ref()
-        .map(|payment_intent| CreateSubscriptionResponse {
-            subscription_id: stripe_subscription_id.clone(),
-            client_secret: payment_intent
+    let create_response = match stripe_subscription.latest_invoice {
+        Some(invoice) => {
+            invoice
                 .as_object()
                 .unwrap()
-                .client_secret
+                .payment_intent
                 .as_ref()
-                .unwrap()
-                .to_owned(),
-        });
+                .map(|payment_intent| CreateSubscriptionResponse {
+                    subscription_id: stripe_subscription_id.clone(),
+                    client_secret: payment_intent
+                        .as_object()
+                        .unwrap()
+                        .client_secret
+                        .as_ref()
+                        .unwrap()
+                        .to_owned(),
+                })
+        }
+        None => None,
+    };
 
     // Create subscription in database
     let subscription = CreateSubscriptionRecord {
@@ -168,6 +185,8 @@ async fn create_subscription(
             .latest()
             .ok_or(anyhow::anyhow!("Invalid timestamp"))?,
         user_id: user_profile.id,
+        latest_invoice_id,
+        amount_due_in_cents,
     };
 
     let subscription_id = db::billing::create_subscription(db.as_ref(), subscription).await?;
@@ -202,15 +221,6 @@ async fn webhook(
 
     match Webhook::construct_event(payload_str, stripe_signature, secret) {
         Ok(event) => match event.event_type {
-            EventType::CustomerSubscriptionCreated => {
-                save_subscription(db, event.data.object).await?;
-            }
-            EventType::CustomerSubscriptionUpdated => {
-                save_subscription(db, event.data.object).await?;
-            }
-            EventType::CustomerSubscriptionDeleted => {
-                save_subscription(db, event.data.object).await?;
-            }
             EventType::PaymentMethodAttached => {
                 save_payment_method(db, event.data.object, EventType::PaymentMethodAttached)
                     .await?;
@@ -223,10 +233,44 @@ async fn webhook(
                     .await?;
             }
             _ => {
-                log::trace!(
-                    "Unknown event encountered in webhook: {:?}",
-                    event.event_type
-                );
+                match event.data.object {
+                    EventObject::Subscription(subscription) => {
+                        let _span = tracing::info_span!("subscription event");
+
+                        // Save a subscription from a subscription event
+                        // Note: this will handle invoice changes on subscriptions as well since a
+                        // subscription is updated when an invoice is paid/unpaid/etc.
+                        let update_subscription = UpdateSubscriptionRecord::try_from(subscription)?;
+
+                        db::billing::save_subscription(db.as_ref(), update_subscription).await?;
+                    }
+                    EventObject::Invoice(invoice) => {
+                        let _span = tracing::info_span!("invoice event");
+
+                        let invoice_id = StripeInvoiceId::from(&invoice.id);
+
+                        if let Some(subscription_id) =
+                            db::billing::get_stripe_subscription_id_with_invoice_id(
+                                db.as_ref(),
+                                &invoice_id,
+                            )
+                            .await?
+                        {
+                            db::billing::set_subscription_amount_due(
+                                db.as_ref(),
+                                subscription_id,
+                                AmountInCents::new(invoice.amount_remaining.unwrap_or_default()),
+                            )
+                            .await?;
+                        }
+                    }
+                    _ => {
+                        log::trace!(
+                            "Unknown event encountered in webhook: {:?}",
+                            event.event_type
+                        );
+                    }
+                }
             }
         },
         Err(error) => {
@@ -235,24 +279,6 @@ async fn webhook(
     }
 
     Ok(HttpResponse::Ok().finish())
-}
-
-/// Save a subscription from a subscription event
-#[instrument(skip(db, event_object))]
-async fn save_subscription(db: Data<PgPool>, event_object: EventObject) -> anyhow::Result<()> {
-    let subscription = match event_object {
-        EventObject::Subscription(subscription) => {
-            UpdateSubscriptionRecord::try_from(subscription)?
-        }
-        _ => {
-            log::warn!("EventObject was not a `Subscription`");
-            return Ok(());
-        }
-    };
-
-    db::billing::save_subscription(db.as_ref(), subscription).await?;
-
-    Ok(())
 }
 
 /// Save a payment method for a customer. This will overwrite the existing payment method
