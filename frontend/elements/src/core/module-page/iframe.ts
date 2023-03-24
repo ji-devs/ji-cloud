@@ -38,7 +38,8 @@ export class _ extends BgBlue {
                     background-color: white;
                     position: relative;
                     max-height: 100%;
-                    max-width: 100%;
+                    /* enabling the next line breaks sizing on IOS landscape, no idea why */
+                    /* max-width: 100%; */
                     top: 50%;
                     left: 50%;
                     transform: translate(-50%, -50%);
@@ -105,6 +106,12 @@ export class _ extends BgBlue {
                 this.fontsLoaded = true;
             });
         }
+
+
+        this.shadowRoot!.addEventListener("click", e => {
+            console.log(e.target);
+            
+        })
     }
 
     disconnectedCallback() {
