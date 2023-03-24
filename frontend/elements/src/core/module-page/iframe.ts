@@ -106,6 +106,12 @@ export class _ extends BgBlue {
                 this.fontsLoaded = true;
             });
         }
+
+
+        this.shadowRoot!.addEventListener("click", e => {
+            console.log(e.target);
+            
+        })
     }
 
     disconnectedCallback() {
