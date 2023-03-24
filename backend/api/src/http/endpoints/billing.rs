@@ -2,8 +2,10 @@ use actix_web::{
     web::{self, Data, Json, ServiceConfig},
     HttpRequest, HttpResponse,
 };
+use anyhow::anyhow;
 use chrono::{TimeZone, Utc};
 use core::settings::RuntimeSettings;
+use shared::api::endpoints::billing::CreateSetupIntent;
 use shared::domain::billing::{
     AmountInCents, CreateSubscriptionRecord, StripeInvoiceId, StripeSubscriptionId,
     SubscriptionStatus, UpdateSubscriptionRecord,
@@ -72,34 +74,9 @@ async fn create_subscription(
         }
     }
 
-    let secret = settings
-        .stripe_secret_key
-        .as_ref()
-        .ok_or(error::Service::DisabledService(error::ServiceKind::Stripe))?;
+    let client = create_stripe_client(&settings)?;
 
-    let client = Client::new(secret);
-
-    // Get the users customer ID. If they don't have one yet, then we create one here.
-    let customer_id = match user_profile.stripe_customer_id {
-        Some(customer_id) => customer_id,
-        None => {
-            let customer_id = Customer::create(
-                &client,
-                CreateCustomer {
-                    email: Some(user_profile.email.as_str()),
-                    ..Default::default()
-                },
-            )
-            .await
-            .map_err(|error| error::Billing::Stripe(error))?
-            .id
-            .into();
-
-            db::user::save_customer_id(db.as_ref(), &user_profile.id, &customer_id).await?;
-
-            customer_id
-        }
-    };
+    let customer_id = get_or_create_customer(db.as_ref(), &client, &user_profile).await?;
 
     // Fetch the subscription plan details
     let plan: SubscriptionPlan = db::billing::get_subscription_plan_by_id(&db, req.plan_id)
@@ -195,6 +172,85 @@ async fn create_subscription(
     db::user::save_subscription_id(db.as_ref(), &user_id, subscription_id).await?;
 
     Ok((Json(create_response), http::StatusCode::CREATED))
+}
+
+#[instrument(skip_all)]
+async fn create_setup_intent(
+    auth: TokenUser,
+    db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
+) -> Result<
+    (
+        Json<<CreateSetupIntent as ApiEndpoint>::Res>,
+        http::StatusCode,
+    ),
+    error::Billing,
+> {
+    let user_id = auth.user_id();
+
+    // Fetch the profile for the user that wants to subscribe
+    let user_profile: UserProfile = db::user::get_profile(db.as_ref(), &user_id)
+        .await?
+        .ok_or(error::Billing::NotFound)?;
+
+    let client = create_stripe_client(&settings)?;
+
+    let customer_id = get_or_create_customer(db.as_ref(), &client, &user_profile).await?;
+
+    let create_setup_intent = stripe::CreateSetupIntent {
+        customer: Some(customer_id.into()),
+        // TODO need to set `automatic_payment_methods` but it isn't available in async-stripe?
+        ..Default::default()
+    };
+    let setup_intent = stripe::SetupIntent::create(&client, create_setup_intent).await?;
+
+    Ok((
+        Json(
+            setup_intent
+                .client_secret
+                .ok_or(anyhow!("Missing client secret"))?,
+        ),
+        http::StatusCode::CREATED,
+    ))
+}
+
+#[instrument(skip_all)]
+fn create_stripe_client(settings: &RuntimeSettings) -> Result<Client, error::Billing> {
+    let secret = settings
+        .stripe_secret_key
+        .as_ref()
+        .ok_or(error::Service::DisabledService(error::ServiceKind::Stripe))?;
+
+    Ok(Client::new(secret))
+}
+
+/// Get the users customer ID. If they don't have one yet, then we create one here.
+#[instrument(skip_all)]
+async fn get_or_create_customer(
+    db: &PgPool,
+    client: &Client,
+    user_profile: &UserProfile,
+) -> Result<CustomerId, error::Billing> {
+    Ok(match &user_profile.stripe_customer_id {
+        Some(customer_id) => customer_id.clone(),
+        None => {
+            let customer_id = Customer::create(
+                client,
+                CreateCustomer {
+                    email: Some(user_profile.email.as_str()),
+                    ..Default::default()
+                },
+            )
+            .await
+            .map_err(|error| error::Billing::Stripe(error))?
+            .id
+            .into();
+
+            db::user::save_customer_id(db, &user_profile.id, &customer_id).await?;
+
+            customer_id
+        }
+    })
 }
 
 #[instrument(skip_all)]
@@ -333,6 +389,10 @@ pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
         <CreateSubscription as ApiEndpoint>::Path::PATH,
         CreateSubscription::METHOD.route().to(create_subscription),
+    )
+    .route(
+        <CreateSetupIntent as ApiEndpoint>::Path::PATH,
+        CreateSetupIntent::METHOD.route().to(create_setup_intent),
     )
     .route("/v1/stripe-webhook", Method::Post.route().to(webhook));
 }
