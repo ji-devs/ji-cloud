@@ -574,4 +574,4 @@ pub struct CreateSubscriptionResponse {
     pub client_secret: String,
 }
 
-// TODO Add stripe billing fields to UserProfile
+make_path_parts!(CreateSetupIntentPath => "/v1/billing/payment-method");
