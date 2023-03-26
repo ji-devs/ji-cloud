@@ -50,27 +50,35 @@ impl Puzzle {
                 }
             }))
             .event(clone!(state => move |evt:events::PointerDown| {
-                let init_phase = state.init_phase.get_cloned();
-                if let InitPhase::Playing(game) = init_phase {
-                    game.start_drag(evt.x(), evt.y());
+                if evt.is_primary() {
+                    let init_phase = state.init_phase.get_cloned();
+                    if let InitPhase::Playing(game) = init_phase {
+                        game.start_drag(evt.x(), evt.y());
+                    }
                 }
             }))
             .global_event(clone!(state => move |evt:events::PointerMove| {
-                let init_phase = state.init_phase.get_cloned();
-                if let InitPhase::Playing(game) = init_phase {
-                    game.try_move_drag(evt.x(), evt.y());
+                if evt.is_primary() {
+                    let init_phase = state.init_phase.get_cloned();
+                    if let InitPhase::Playing(game) = init_phase {
+                        game.try_move_drag(evt.x(), evt.y());
+                    }
                 }
             }))
             .global_event(clone!(state => move |evt:events::PointerUp| {
-                let init_phase = state.init_phase.get_cloned();
-                if let InitPhase::Playing(game) = init_phase {
-                    game.try_end_drag(evt.x(), evt.y());
+                if evt.is_primary() {
+                    let init_phase = state.init_phase.get_cloned();
+                    if let InitPhase::Playing(game) = init_phase {
+                        game.try_end_drag(evt.x(), evt.y());
+                    }
                 }
             }))
             .global_event(clone!(state => move |evt:events::PointerCancel| {
-                let init_phase = state.init_phase.get_cloned();
-                if let InitPhase::Playing(game) = init_phase {
-                    game.try_end_drag(evt.x(), evt.y());
+                if evt.is_primary() {
+                    let init_phase = state.init_phase.get_cloned();
+                    if let InitPhase::Playing(game) = init_phase {
+                        game.try_end_drag(evt.x(), evt.y());
+                    }
                 }
             }))
         })

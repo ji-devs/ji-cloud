@@ -112,10 +112,14 @@ pub fn render_transform(
                 }))
 
                 .global_event(clone!(state => move |evt:events::PointerUp| {
-                    state.stop_tracking_action(evt.x() as i32, evt.y() as i32);
+                    if evt.is_primary() {
+                        state.stop_tracking_action(evt.x() as i32, evt.y() as i32);
+                    }
                 }))
                 .global_event(clone!(state => move |evt:events::PointerMove| {
-                    state.mouse_move(evt.x() as i32, evt.y() as i32);
+                    if evt.is_primary() {
+                        state.mouse_move(evt.x() as i32, evt.y() as i32);
+                    }
                 }))
                 .with_node!(elem => {
                     .event(clone!(state, elem => move |_: events::FocusOut| {

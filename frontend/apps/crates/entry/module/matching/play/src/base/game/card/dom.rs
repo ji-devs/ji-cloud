@@ -60,11 +60,13 @@ pub fn render_bottom(state: Rc<CardBottom>, longest_text_length: usize) -> Dom {
         .prop("slot", "bottom")
         .style("touch-action", "none")
         .event(clone!(state => move |evt:events::PointerDown| {
-            let elem: HtmlElement = evt.dyn_target().unwrap_ji();
-            if let BottomPhase::Show = state.phase.get_cloned() {
-                // Only fire off start_drag if the card the teacher is attempting to drag is _not_
-                // an empty-card.
-                super::actions::start_drag(state.clone(), elem, evt.x(), evt.y());
+            if evt.is_primary() {
+                let elem: HtmlElement = evt.dyn_target().unwrap_ji();
+                if let BottomPhase::Show = state.phase.get_cloned() {
+                    // Only fire off start_drag if the card the teacher is attempting to drag is _not_
+                    // an empty-card.
+                    super::actions::start_drag(state.clone(), elem, evt.x(), evt.y());
+                }
             }
         }))
         .child_signal(state.phase.signal_cloned().map(clone!(state => move |phase| {
@@ -107,13 +109,17 @@ pub fn render_drag(state: Rc<CardDrag>, longest_text_length: usize) -> Dom {
     render_card_mixin(options, |dom| {
         dom.prop("hasTransform", true)
             .style_signal("transform", state.drag.transform_signal())
-            .global_event(clone!(state => move |_evt:events::PointerUp| {
-                state.on_release();
-                //on_mouse_up(evt.x() as i32, evt.y() as i32);
+            .global_event(clone!(state => move |evt:events::PointerUp| {
+                if evt.is_primary() {
+                    state.on_release();
+                    //on_mouse_up(evt.x() as i32, evt.y() as i32);
+                }
             }))
             .global_event(clone!(state => move |evt:events::PointerMove| {
-                if let Some(_point) = state.drag.update(evt.x(), evt.y()) {
-                    state.evaluate_drag_over();
+                if evt.is_primary() {
+                    if let Some(_point) = state.drag.update(evt.x(), evt.y()) {
+                        state.evaluate_drag_over();
+                    }
                 }
             }))
             .after_inserted(clone!(state => move |elem| {

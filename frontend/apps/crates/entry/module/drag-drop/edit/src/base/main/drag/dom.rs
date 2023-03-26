@@ -43,16 +43,24 @@ impl MainDrag {
                                     dom
                                         .apply(mixin_sticker_button)
                                         .event(clone!(item => move |evt: events::PointerDown| {
-                                            item.start_drag(evt.x() as i32, evt.y() as i32);
+                                            if evt.is_primary() {
+                                                item.start_drag(evt.x() as i32, evt.y() as i32);
+                                            }
                                         }))
                                         .global_event(clone!(item => move |evt:events::PointerMove| {
-                                            item.try_move_drag(evt.x() as i32, evt.y() as i32);
+                                            if evt.is_primary() {
+                                                item.try_move_drag(evt.x() as i32, evt.y() as i32);
+                                            }
                                         }))
-                                        .global_event(clone!(state, item, size_signal => move |_evt: events::PointerUp| {
-                                            item.try_end_drag(state.clone(), idx, size_signal.get());
+                                        .global_event(clone!(state, item, size_signal => move |evt: events::PointerUp| {
+                                            if evt.is_primary() {
+                                                item.try_end_drag(state.clone(), idx, size_signal.get());
+                                            }
                                         }))
-                                        .global_event(clone!(state, item, size_signal => move |_evt: events::PointerCancel| {
-                                            item.try_end_drag(state.clone(), idx, size_signal.get());
+                                        .global_event(clone!(state, item, size_signal => move |evt: events::PointerCancel| {
+                                            if evt.is_primary() {
+                                                item.try_end_drag(state.clone(), idx, size_signal.get());
+                                            }
                                         }))
                                 }));
 
@@ -84,16 +92,24 @@ impl MainDrag {
                                 dom
                                     .apply(mixin_sticker_button)
                                     .event(clone!(item => move |evt: events::PointerDown| {
-                                        item.start_drag(evt.x() as i32, evt.y() as i32);
+                                        if evt.is_primary() {
+                                            item.start_drag(evt.x() as i32, evt.y() as i32);
+                                        }
                                     }))
                                     .global_event(clone!(item => move |evt:events::PointerMove| {
-                                        item.try_move_drag(evt.x() as i32, evt.y() as i32);
+                                        if evt.is_primary() {
+                                            item.try_move_drag(evt.x() as i32, evt.y() as i32);
+                                        }
                                     }))
-                                    .global_event(clone!(state, idx, item, size_signal => move |_evt: events::PointerUp| {
-                                        item.try_end_drag(state.clone(), idx.get().unwrap_ji(), size_signal.get());
+                                    .global_event(clone!(state, idx, item, size_signal => move |evt: events::PointerUp| {
+                                        if evt.is_primary() {
+                                            item.try_end_drag(state.clone(), idx.get().unwrap_ji(), size_signal.get());
+                                        }
                                     }))
-                                    .global_event(clone!(state, idx, item, size_signal => move |_evt: events::PointerCancel| {
-                                        item.try_end_drag(state.clone(), idx.get().unwrap_ji(), size_signal.get());
+                                    .global_event(clone!(state, idx, item, size_signal => move |evt: events::PointerCancel| {
+                                        if evt.is_primary() {
+                                            item.try_end_drag(state.clone(), idx.get().unwrap_ji(), size_signal.get());
+                                        }
                                     }))
                             }));
 

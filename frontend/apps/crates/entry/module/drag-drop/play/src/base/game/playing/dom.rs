@@ -64,19 +64,27 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                                                 }))
                                         })
                                         .event(clone!(item => move |evt:events::PointerDown| {
-                                            item.start_drag(evt.x() as i32, evt.y() as i32);
+                                            if evt.is_primary() {
+                                                item.start_drag(evt.x() as i32, evt.y() as i32);
+                                            }
                                         }))
                                         .global_event(clone!(item => move |evt:events::PointerMove| {
-                                            item.try_move_drag(evt.x() as i32, evt.y() as i32);
+                                            if evt.is_primary() {
+                                                item.try_move_drag(evt.x() as i32, evt.y() as i32);
+                                            }
                                         }))
                                         .global_event(clone!(state, item => move |evt:events::PointerUp| {
-                                            if item.try_end_drag(evt.x() as i32, evt.y() as i32) {
-                                                PlayState::evaluate(state.clone(), index, item.clone());
+                                            if evt.is_primary() {
+                                                if item.try_end_drag(evt.x() as i32, evt.y() as i32) {
+                                                    PlayState::evaluate(state.clone(), index, item.clone());
+                                                }
                                             }
                                         }))
                                         .global_event(clone!(state, item => move |evt:events::PointerCancel| {
-                                            if item.try_end_drag(evt.x() as i32, evt.y() as i32) {
-                                                PlayState::evaluate(state.clone(), index, item.clone());
+                                            if evt.is_primary() {
+                                                if item.try_end_drag(evt.x() as i32, evt.y() as i32) {
+                                                    PlayState::evaluate(state.clone(), index, item.clone());
+                                                }
                                             }
                                         }))
                                     })

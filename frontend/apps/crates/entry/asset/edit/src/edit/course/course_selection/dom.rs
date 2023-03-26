@@ -76,13 +76,19 @@ impl CourseSelection {
                         .prop("slot", "dragging")
                         .style_signal("transform", drag.transform_signal())
                         .global_event(clone!(state, drag => move |evt: events::PointerMove| {
-                            state.on_pointer_move(&drag, evt.x(), evt.y());
+                            if evt.is_primary() {
+                                state.on_pointer_move(&drag, evt.x(), evt.y());
+                            }
                         }))
                         .global_event(clone!(state, drag => move |evt: events::PointerUp| {
-                            state.on_pointer_up(&drag, evt.x(), evt.y());
+                            if evt.is_primary() {
+                                state.on_pointer_up(&drag, evt.x(), evt.y());
+                            }
                         }))
-                        .global_event(clone!(state => move |_:events::PointerCancel| {
-                            state.stop_drag();
+                        .global_event(clone!(state => move |evt:events::PointerCancel| {
+                            if evt.is_primary() {
+                                state.stop_drag();
+                            }
                         }))
                         .child(render_asset_card(
                             &asset,
@@ -129,8 +135,10 @@ impl CourseSelection {
             .event_with_options(
                 &EventOptions::bubbles(),
                 clone!(state, jig => move |evt: events::PointerDown| {
-                    let elem = evt.dyn_target().unwrap_ji();
-                    state.on_pointer_down(&elem, evt.x(), evt.y(), &jig);
+                    if evt.is_primary() {
+                        let elem = evt.dyn_target().unwrap_ji();
+                        state.on_pointer_down(&elem, evt.x(), evt.y(), &jig);
+                    }
                 })
             )
             .child(render_asset_card(

@@ -67,13 +67,19 @@ impl ModuleSelection {
                         .prop("path", &format!("entry/jig/modules/large/{}-hover.svg", drag.data.as_str()))
                         .style_signal("transform", drag.transform_signal())
                         .global_event(clone!(state, drag => move |evt: events::PointerMove| {
-                            state.on_pointer_move(&drag, evt.x(), evt.y());
+                            if evt.is_primary() {
+                                state.on_pointer_move(&drag, evt.x(), evt.y());
+                            }
                         }))
                         .global_event(clone!(state, drag => move |evt: events::PointerUp| {
-                            state.on_pointer_up(&drag, evt.x(), evt.y());
+                            if evt.is_primary() {
+                                state.on_pointer_up(&drag, evt.x(), evt.y());
+                            }
                         }))
-                        .global_event(clone!(state => move |_:events::PointerCancel| {
-                            state.stop_drag();
+                        .global_event(clone!(state => move |evt:events::PointerCancel| {
+                            if evt.is_primary() {
+                                state.stop_drag();
+                            }
                         }))
                     })
                 }))
