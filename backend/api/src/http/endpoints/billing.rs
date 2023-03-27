@@ -59,18 +59,14 @@ async fn create_subscription(
     // cancelled or expired previously.
     let mut prev_subscription_exists = false;
 
-    if let Some(subscription_id) = user_profile.subscription_id {
+    if let Some(subscription) = &user_profile.subscription {
         // They have at least had a subscription before
         prev_subscription_exists = true;
 
-        let subscription = db::billing::get_subscription(db.as_ref(), subscription_id).await?;
-
-        if let Some(subscription) = subscription {
-            // Check whether they have an _active_ subscription
-            if !matches!(subscription.status, SubscriptionStatus::Expired) {
-                // If a subscription exists, we don't want to create a new subscription
-                return Err(error::Billing::SubscriptionExists)?;
-            }
+        // Check whether they have an _active_ subscription
+        if !matches!(subscription.status, SubscriptionStatus::Expired) {
+            // If a subscription exists, we don't want to create a new subscription
+            return Err(error::Billing::SubscriptionExists)?;
         }
     }
 
