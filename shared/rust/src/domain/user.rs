@@ -14,7 +14,7 @@ use crate::{
     },
 };
 
-use super::billing::{CustomerId, PaymentMethod, SubscriptionId};
+use super::billing::{CustomerId, PaymentMethod, Subscription};
 
 pub mod public_user;
 
@@ -248,7 +248,7 @@ pub struct UserProfile {
     /// The users current subscription
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub subscription_id: Option<SubscriptionId>,
+    pub subscription: Option<Subscription>,
 }
 
 /// User Response (used for Admin).
