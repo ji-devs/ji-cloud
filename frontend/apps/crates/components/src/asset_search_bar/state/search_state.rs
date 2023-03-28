@@ -18,7 +18,7 @@ pub struct SearchSelected {
     pub age_ranges: Mutable<HashSet<AgeRangeId>>,
     pub language: Mutable<Option<String>>,
     pub query: Mutable<String>,
-    pub is_rated: Mutable<bool>,
+    pub rated_only: Mutable<bool>,
 }
 
 impl Default for SearchSelected {
@@ -29,7 +29,7 @@ impl Default for SearchSelected {
             age_ranges: Mutable::new(HashSet::new()),
             language: Mutable::new(None),
             query: Mutable::new(String::new()),
-            is_rated: Mutable::new(true),
+            rated_only: Mutable::new(true),
         }
     }
 }
@@ -57,10 +57,10 @@ impl SearchSelected {
             age_ranges: Mutable::new(HashSet::from_iter(search.age_ranges)),
             language: Mutable::new(None),
             // default is true, so None => true
-            is_rated: Mutable::new(search.is_rated.unwrap_or(true)),
+            rated_only: Mutable::new(search.is_rated.unwrap_or(true)),
             query: Mutable::new(search.q),
         };
-        log::info!("{:?}", s.is_rated);
+        log::info!("{:?}", s.rated_only);
 
         s
     }
@@ -69,7 +69,7 @@ impl SearchSelected {
         SearchQueryParams {
             q: self.query.get_cloned(),
             // since default is true, only add when false
-            is_rated: match self.is_rated.get() {
+            is_rated: match self.rated_only.get() {
                 true => None,
                 false => Some(false),
             },
@@ -88,7 +88,7 @@ impl SearchSelected {
             categories: self.categories.get_cloned().into_iter().collect(),
             page: Some(0),
             language: self.language.get_cloned(),
-            is_rated: self.is_rated.get().then(|| true),
+            is_rated: self.rated_only.get().then(|| true),
             ..Default::default()
         }
     }

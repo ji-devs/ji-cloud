@@ -1,16 +1,15 @@
 use std::rc::Rc;
 
-use crate::home::Home;
 use dominator::{clone, html};
-use futures_signals::signal::{Mutable, SignalExt};
+use futures_signals::signal::SignalExt;
 use utils::{component::Component, events};
 
-use super::super::actions::search;
+use crate::asset_search_bar::AssetSearchBar;
 
 pub struct RatedToggleConfig {
     pub slot: Option<&'static str>,
-    pub is_rated: Mutable<bool>,
-    pub home_state: Rc<Home>,
+    pub search_bar_state: Rc<AssetSearchBar>,
+    pub on_search: Rc<dyn Fn()>,
 }
 
 pub struct RatedToggle {
@@ -86,23 +85,24 @@ impl Component<RatedToggle> for Rc<RatedToggle> {
             .class("indicator-wrapper")
             .child(html!("div", {
                 .class("indicator")
-                .class_signal("all", self.config.is_rated.signal().map(|x| !x))
+                .class_signal("all", self.config.search_bar_state.search_selected.rated_only.signal().map(|x| !x))
             }))
         }))
         .child(html!("button", {
             .class("rated")
             .text("Top rated")
             .event(clone!(state => move |_: events::Click| {
-                state.config.is_rated.set(true);
-                search(&state.config.home_state);
+                state.config.search_bar_state.search_selected.rated_only.set(true);
+                (state.config.on_search)();
+
             }))
         }))
         .child(html!("button", {
             .class("all")
             .text("All")
             .event(clone!(state => move |_: events::Click| {
-                state.config.is_rated.set(false);
-                search(&state.config.home_state);
+                state.config.search_bar_state.search_selected.rated_only.set(false);
+                (state.config.on_search)();
             }))
         }))
     }

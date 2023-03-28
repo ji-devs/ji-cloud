@@ -15,7 +15,7 @@ export class _ extends LitElement {
                     background-color: #ffffff;
                     width: 100%;
                     display: grid;
-                    grid-template-columns: 1fr 200px 200px auto;
+                    grid-template-columns: 1fr minmax(170px, 200px) minmax(170px, 200px) auto;
                     align-items: center;
                     padding-left: 18px;
                     height: 40px;

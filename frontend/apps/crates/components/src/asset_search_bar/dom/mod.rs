@@ -5,10 +5,14 @@ use futures_signals::{
     map_ref,
     signal::{from_future, Signal, SignalExt},
 };
-use utils::{events, languages::JIG_LANGUAGES, metadata::get_age_ranges, unwrap::UnwrapJiExt};
+use utils::{
+    component::Component, events, languages::JIG_LANGUAGES, metadata::get_age_ranges,
+    unwrap::UnwrapJiExt,
+};
 use web_sys::HtmlInputElement;
 
 use super::AssetSearchBar;
+use rated_toggle::{RatedToggle, RatedToggleConfig};
 
 const STR_ALL_LANGUAGES: &str = "All languages";
 const STR_ALL_AGES: &str = "All ages";
@@ -18,9 +22,10 @@ const STR_WHAT_ARE_YOU_LOOKING_FOR: &str = "What are you looking for?";
 #[allow(dead_code)] // TODO: remove once advanced search is enabled again
 mod advanced_search;
 mod categories_select;
+mod rated_toggle;
 
 impl AssetSearchBar {
-    pub fn render(self: &Rc<Self>, on_search: Rc<dyn Fn()>) -> Dom {
+    pub fn render_bar(self: &Rc<Self>, on_search: Rc<dyn Fn()>) -> Dom {
         let state = self;
 
         html!("form", {
@@ -130,6 +135,19 @@ impl AssetSearchBar {
                 // ))
             }))
         })
+    }
+
+    pub fn render_rated_toggle(
+        self: &Rc<Self>,
+        on_search: Rc<dyn Fn()>,
+        slot: Option<&'static str>,
+    ) -> Dom {
+        let config = RatedToggleConfig {
+            slot,
+            search_bar_state: Rc::clone(&self),
+            on_search,
+        };
+        RatedToggle::new(config).render()
     }
 
     fn age_value_signal(self: &Rc<Self>) -> impl Signal<Item = String> {

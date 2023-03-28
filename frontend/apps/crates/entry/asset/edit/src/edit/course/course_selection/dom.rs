@@ -30,13 +30,16 @@ impl CourseSelection {
 
         state.search();
 
+        let search_callback: Rc<dyn Fn()> = Rc::new(clone!(state => move || {
+            state.next_page.set(0);
+            state.search_results.lock_mut().clear();
+            state.search();
+        }));
+
         html!("asset-edit-course-selection", {
             .prop("slot", "main")
-            .child(state.search_bar.render(Rc::new(clone!(state => move || {
-                state.next_page.set(0);
-                state.search_results.lock_mut().clear();
-                state.search();
-            }))))
+            .child(state.search_bar.render_bar(Rc::clone(&search_callback)))
+            .child(state.search_bar.render_rated_toggle(Rc::clone(&search_callback), Some("rated")))
             .child(html!("home-search-results", {
                 .prop("slot", "results")
                 .prop_signal("jigCount", state.total_jig_count.signal())

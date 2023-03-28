@@ -29,7 +29,12 @@ export class _ extends LitElement {
                 }
                 ::slotted([slot=search-bar]) {
                     margin: 0 auto 16px auto;
-                    max-width: 710px;
+                    max-width: 660px;
+                }
+                ::slotted([slot=rated]) {
+                    margin: auto;
+                    max-width: 80%;
+                    width: 550px;
                 }
                 ::slotted([slot=dragging]) {
                     position: fixed;
@@ -50,6 +55,7 @@ export class _ extends LitElement {
             <h1>New Course</h1>
             <h3>Search for JIGs or resources and drag them to your course journey</h3>
             <slot name="search-bar"></slot>
+            <slot name="rated"></slot>
             <slot name="results"></slot>
             <slot name="dragging"></slot>
             <slot name="player"></slot>

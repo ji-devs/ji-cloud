@@ -16,7 +16,7 @@ pub fn render(state: Rc<Home>, auto_search: bool) -> Dom {
         // .child(html!("home-search-section-help", {
         //     .prop("slot", "help")
         // }))
-        .child(state.search_bar.render(Rc::new(clone!(state => move || {
+        .child(state.search_bar.render_bar(Rc::new(clone!(state => move || {
             search(&state)
         }))))
     })

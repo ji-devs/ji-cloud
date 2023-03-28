@@ -19,7 +19,6 @@ use shared::{
 use std::{collections::HashMap, rc::Rc};
 use utils::{
     asset::{published_at_string, ResourceContentExt},
-    component::Component,
     events,
     init::analytics,
     metadata::{get_category_label_lookup, get_resource_types},
@@ -27,7 +26,7 @@ use utils::{
     routes::{AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, ResourceEditRoute, Route},
 };
 
-use crate::home::search_results::rated_toggle::{RatedToggle, RatedToggleConfig};
+use crate::home::actions::search;
 
 use super::state::SearchResultsSection;
 
@@ -45,12 +44,9 @@ impl SearchResultsSection {
             .prop("kind", state.asset_type.as_str())
             .prop_signal("resultsCount", state.total.signal())
             .apply_if(self.asset_type.is_jig(), |dom| {
-                let config = RatedToggleConfig {
-                    slot: Some("rated"),
-                    home_state: Rc::clone(&state.home_state),
-                    is_rated: state.home_state.search_bar.search_selected.is_rated.clone(),
-                };
-                dom.child(RatedToggle::new(config).render())
+                dom.child(state.home_state.search_bar.render_rated_toggle(Rc::new(clone!(state => move || {
+                    search(&state.home_state)
+                })), Some("rated")))
             })
             .children_signal_vec(state.list.signal_vec_cloned().map(clone!(state => move |jig| {
                 state.render_result(jig)
