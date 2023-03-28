@@ -526,76 +526,6 @@
     },
     "query": "\nwith cte as (\n    select array_agg(rd.id)\n    from resource_data \"rd\"\n          inner join resource on (draft_id = rd.id or (live_id = rd.id and rd.last_synced_at is not null and published_at is not null))\n          left join resource_admin_data \"admin\" on admin.resource_id = resource.id\n          left join resource_data_resource \"rdr\" on rd.id = rdr.resource_data_id\n    where (author_id = $1 or $1 is null)\n        and (blocked = $2 or $2 is null)\n        and (rd.privacy_level = any($3) or $3 = array[]::smallint[])\n        and (rdr.resource_type_id = any($4) or $4 = array[]::uuid[])\n        and (draft_or_live = $5 or $5 is null)\n    group by updated_at, created_at, resource.published_at, admin.resource_id\n    order by case when $6 = 0 then created_at\n        when $6 = 1 then published_at\n        else coalesce(updated_at, created_at)\n  end desc, resource_id\n),\ncte1 as (\n    select * from unnest(array((select cte.array_agg[1] from cte))) with ordinality t(id\n   , ord) order by ord\n)\nselect resource.id                                              as \"resource_id: ResourceId\",\n    privacy_level                                       as \"privacy_level: PrivacyLevel\",\n    creator_id                                          as \"creator_id?: UserId\",\n    author_id                                           as \"author_id?: UserId\",\n    (select given_name || ' '::text || family_name\n        from user_profile\n     where user_profile.user_id = author_id)            as \"author_name\",\n    created_at,\n    updated_at,\n    published_at,\n    likes,\n    views,\n    live_up_to_date,\n    exists(select 1 from resource_like where resource_id = resource.id and user_id = $9)                         as \"is_liked!\",\n   display_name                                                                  as \"display_name!\",\n   language                                                                      as \"language!\",\n   description                                                                   as \"description!\",\n   translated_description                                                        as \"translated_description!: Json<HashMap<String,String>>\",\n   draft_or_live                                                                 as \"draft_or_live!: DraftOrLive\",\n   (\n       select row(resource_data_module.id, kind, is_complete)\n       from resource_data_module\n       where resource_data_id = resource_data.id\n    )                                               as \"cover?: (ModuleId, ModuleKind, bool)\",\n   array(select row (category_id)\n         from resource_data_category\n         where resource_data_id = resource_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n   array(select row (affiliation_id)\n         from resource_data_affiliation\n         where resource_data_id = resource_data.id)     as \"affiliations!: Vec<(AffiliationId,)>\",\n   array(select row (age_range_id)\n         from resource_data_age_range\n         where resource_data_id = resource_data.id)     as \"age_ranges!: Vec<(AgeRangeId,)>\",\n   array(\n            select row (rdr.id, rdr.display_name, resource_type_id, resource_content)\n            from resource_data_resource \"rdr\"\n            where rdr.resource_data_id= resource_data.id\n        )                                               as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n   locked                                     as \"locked!\",\n   other_keywords                             as \"other_keywords!\",\n   translated_keywords                        as \"translated_keywords!\",\n   rating                                     as \"rating!: Option<ResourceRating>\",\n   blocked                                    as \"blocked!\",\n   curated                                    as \"curated!\"\nfrom cte1\ninner join resource_data on cte1.id = resource_data.id\ninner join resource on (\n    resource_data.id = resource.draft_id\n    or (\n        resource_data.id = resource.live_id\n        and last_synced_at is not null\n        and resource.published_at is not null\n    )\n)\nleft join resource_admin_data \"admin\" on admin.resource_id = resource.id\nwhere ord > (1 * $7 * $8)\norder by ord asc\nlimit $8\n"
   },
-  "05bbabcca8dd32c111fe7308edf49359bf549213810253605bb4bf7eccedbca2": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: UserId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "username",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "given_name",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "family_name",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "email!",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "language_emails",
-          "ordinal": 5,
-          "type_info": "Text"
-        },
-        {
-          "name": "created_at!",
-          "ordinal": 6,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "organization",
-          "ordinal": 7,
-          "type_info": "Text"
-        },
-        {
-          "name": "location",
-          "ordinal": 8,
-          "type_info": "Jsonb"
-        }
-      ],
-      "nullable": [
-        null,
-        false,
-        false,
-        false,
-        null,
-        false,
-        false,
-        true,
-        true
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int4",
-          "Int4"
-        ]
-      }
-    },
-    "query": "\nwith cte as (\n    select (array_agg(\"user\".id))[1]\n    from \"user\"\n        left join user_profile on \"user\".id = user_profile.user_id\n        left join user_email using(user_id)\n    where (\"user\".id = $1 or $1 is null)\n    group by family_name\n    order by family_name desc\n),\ncte1 as (\n    select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n   , ord) order by ord\n)\nselect  cte1.id                 as \"id!: UserId\",\n        username,\n        given_name,\n        family_name,\n        user_email.email::text as \"email!\",\n        language_emails,\n        user_email.created_at  as \"created_at!\",\n        organization,\n        location\nfrom cte1\n        inner join user_profile on cte1.id = user_profile.user_id\n        inner join user_email using(user_id)\nwhere ord > (1 * $2 * $3)\norder by ord asc\nlimit $3\n"
-  },
   "05d18fc3ce0c0d8d1aff470f3a96f24d8c064c255a0c74da1220fad096268310": {
     "describe": {
       "columns": [
@@ -10626,6 +10556,76 @@
       }
     },
     "query": "\nupdate user_profile\nset organization = $2,\n    updated_at = now()\nwhere user_id = $1 and organization is distinct from $2"
+  },
+  "b138082a4898d12c2b92a1b7b7e2c881ed435ffce16578f148acfa9cfea799e0": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: UserId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "username",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "given_name",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "family_name",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "email!",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "language_emails",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "created_at!",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "organization",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "location",
+          "ordinal": 8,
+          "type_info": "Jsonb"
+        }
+      ],
+      "nullable": [
+        null,
+        false,
+        false,
+        false,
+        null,
+        false,
+        false,
+        true,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\nwith cte as (\n    select (array_agg(\"user\".id))[1]\n    from \"user\"\n        left join user_profile on \"user\".id = user_profile.user_id\n        left join user_email using(user_id)\n    where (\"user\".id = $1 or $1 is null)\n    group by \"user\".created_at\n    order by \"user\".created_at desc\n),\ncte1 as (\n    select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n   , ord) order by ord\n)\nselect  cte1.id                 as \"id!: UserId\",\n        username,\n        given_name,\n        family_name,\n        user_email.email::text as \"email!\",\n        language_emails,\n        user_email.created_at  as \"created_at!\",\n        organization,\n        location\nfrom cte1\n        inner join user_profile on cte1.id = user_profile.user_id\n        inner join user_email using(user_id)\nwhere ord > (1 * $2 * $3)\norder by ord asc\nlimit $3\n"
   },
   "b153140eaccffcd332c14aa694bdfcfed7e9d4f043e4c25e39da6766f9595ac8": {
     "describe": {
