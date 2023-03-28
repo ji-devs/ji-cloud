@@ -147,7 +147,14 @@ impl Component<UnitEditor> for Rc<UnitEditor> {
                     .text(STR_ADD_TO_COURSE)
                     .event(clone!(state => move |_: events::Click| {
                         analytics::event("Add Unit to Course", None);
-                        state.create_unit();
+                        match state.unit_id {
+                            Some(_) => {
+                                state.clone().update_unit()
+                            }
+                            None => {
+                                state.clone().create_unit()
+                            }
+                        }
                     }))
                 }),
             ])

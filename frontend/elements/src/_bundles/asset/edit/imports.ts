@@ -76,6 +76,7 @@ import "@elements/entry/asset/edit/post-publish/post-publish-action";
 import "@elements/_bundles/_sub-bundles/hebrew-buttons";
 import "@elements/core/modals/confirm";
 import "@elements/core/modals/video";
+import "@elements/module/video/youtube-thumbnail";
 
 import "@elements/entry/home/home/search-results/search-results";
 import "@elements/entry/home/home/search-results/search-results-section";

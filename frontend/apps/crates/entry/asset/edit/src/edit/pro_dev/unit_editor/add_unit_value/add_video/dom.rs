@@ -55,7 +55,6 @@ impl AddVideo {
                                         });
 
                                         state.save(host);
-
                                     },
                                 };
                             }))

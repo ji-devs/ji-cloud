@@ -13,18 +13,16 @@ pub struct AddVideo {
 
 impl AddVideo {
     pub fn new(add_unit_value_state: Rc<AddUnitValueState>, video: &Option<Video>) -> Rc<Self> {
-
         let url_str = if let Some(url) = video {
             url.host.get_url_string()
         } else {
             "".to_string()
         };
-        
+
         Rc::new(Self {
             video: Mutable::new(video.clone()),
             url_str: Mutable::new(url_str),
             add_unit_value_state,
         })
     }
-    
 }

@@ -13,7 +13,7 @@ const STR_ADD_LINK: &str = "Insert URL here";
 impl AddLink {
     pub fn render(self: &Rc<Self>) -> Dom {
         let state = Rc::clone(self);
-        
+
         html!("div", {
             .children(&mut [
                 html!("textarea" => HtmlTextAreaElement, {

@@ -13,14 +13,11 @@ pub struct AddLink {
 
 impl AddLink {
     pub fn new(add_unit_value_state: Rc<AddUnitValueState>, url: &Option<Url>) -> Rc<Self> {
-
         let url_str = if let Some(url) = url {
             url.to_string()
         } else {
             "".to_string()
         };
-
-        log::info!("url_str: {}", url_str);
 
         Rc::new(Self {
             url: Mutable::new(url.clone()),
@@ -29,4 +26,3 @@ impl AddLink {
         })
     }
 }
-

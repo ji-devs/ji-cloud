@@ -55,24 +55,22 @@ pub fn set_highlight_units(state: &Rc<Sidebar>, highlight: bool) {
     if highlight {
         state.collapsed.set_neq(false);
 
-        let modules = state.asset_edit_state.sidebar_spots.lock_ref();
+        let units = state.asset_edit_state.sidebar_spots.lock_ref();
 
-        if modules
-            .iter()
-            .filter(|module| module.item.is_some())
-            .count()
-            == 0
-        {
+        if units.iter().filter(|unit| unit.item.is_some()).count() == 0 {
             state
                 .highlight_modules
                 .set_neq(Some(ModuleHighlight::Publish))
         } else {
-            let idx = modules.iter().position(|module| module.is_incomplete.get());
+            let idx = units.iter().position(|unit| unit.is_incomplete.get());
             match idx {
                 Some(idx) => state
                     .highlight_modules
                     .set_neq(Some(ModuleHighlight::Unit(idx))),
-                None => state.highlight_modules.set_neq(None),
+                None => {
+                    log::info!("New highlight unit");
+                    state.highlight_modules.set_neq(None)
+                }
             }
         }
     } else {

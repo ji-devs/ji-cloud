@@ -63,7 +63,7 @@ pub fn add_empty_unit_after(state: Rc<SpotState>) {
         state
             .sidebar
             .asset_edit_state
-            .set_route_pro_dev(ProDevEditRoute::Landing);
+            .set_route_pro_dev(ProDevEditRoute::Unit(None));
     }
 }
 

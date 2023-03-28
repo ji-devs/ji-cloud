@@ -12,7 +12,6 @@ impl AddLink {
         let url = self.url.get_cloned().unwrap_ji();
 
         let value = ProDevUnitValue::Link(url);
-        
 
         self.add_unit_value_state.loader.load(async move {
             state

@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use dominator::{clone, html, with_node, Dom};
+use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 
 use shared::domain::pro_dev::unit::ProDevUnitValue;

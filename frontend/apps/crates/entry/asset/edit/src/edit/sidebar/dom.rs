@@ -80,7 +80,12 @@ impl Sidebar {
                         if state.can_publish() {
                             actions::navigate_to_publish(state.clone());
                         } else {
-                            actions::set_highlight_modules(&state, true);
+                            match state.asset_edit_state.asset_id {
+                                shared::domain::asset::AssetId::JigId(_) => actions::set_highlight_modules(&state, true),
+                                shared::domain::asset::AssetId::CourseId(_) => actions::set_highlight_modules(&state, true),
+                                shared::domain::asset::AssetId::ResourceId(_) => actions::set_highlight_modules(&state, true),
+                                shared::domain::asset::AssetId::ProDevId(_) => actions::set_highlight_units(&state, true),
+                            }
                         }
                     }))
                     .child(html!("menu-kebab", {

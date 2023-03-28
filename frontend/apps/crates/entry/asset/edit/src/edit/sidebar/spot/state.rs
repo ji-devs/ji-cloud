@@ -81,7 +81,7 @@ impl SpotState {
                 SidebarSpotItem::ProDev(pro_dev_spot) => {
                     match pro_dev_spot {
                         None => "unit",
-                        Some(item) =>                            
+                        Some(item) =>
                             match &**item {
                                 ProDevSpot::Cover(_) => "thumbnail",
                                 ProDevSpot::Unit(_) => "unit",
@@ -133,24 +133,9 @@ impl SpotState {
                             AssetEditRoute::ProDev(_, ProDevEditRoute::Unit(unit_id)) if unit_id == &id
                         )
                     }
-                    // SidebarSpotItem::ProDev(Some(unit)) => {
-                        // let unit_id = if let Some(ProDevSpot::Unit(unit)) = **unit {
-                        //     Some(unit.id)
-                        // } else {
-                        //     None
-                        // };
-
-                    //     let unit_id = match **unit {
-                    //         ProDevSpot::Unit(unit) => Some(unit.id)
-                    //         ProDevSpot::Cover(_) => None
-                    //     }
-
-                    //     matches!(
-                    //         route,
-                    //         AssetEditRoute::ProDev(_, ProDevEditRoute::Unit(unit_id)) if unit_id == &**unit.id
-                    //     )
-                    // }
-                    _ => false
+                    _ => {
+                        false
+                    }
                 }
             }))
     }

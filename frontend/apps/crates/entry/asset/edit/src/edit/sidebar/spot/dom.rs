@@ -1,7 +1,9 @@
 use components::overlay::handle::OverlayHandle;
+use components::stickers::video::ext::YoutubeUrlExt;
 use dominator::{clone, html, with_node, Dom, DomBuilder, EventOptions};
 use futures_signals::map_ref;
 use shared::domain::asset::DraftOrLive;
+use shared::domain::module::body::_groups::design::VideoHost;
 use web_sys::{HtmlElement, Node, ScrollBehavior, ScrollIntoViewOptions};
 
 use super::super::course::menu::CourseMenu;
@@ -14,7 +16,7 @@ use crate::edit::sidebar::pro_dev::menu::ProDevMenu;
 use crate::edit::sidebar::state::{CourseSpot, ModuleHighlight, SidebarSpotItem};
 use crate::edit::sidebar::ProDevSpot;
 use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
-use futures_signals::signal::{not, SignalExt};
+use futures_signals::signal::{not, SignalExt, Mutable};
 use std::rc::Rc;
 use utils::prelude::*;
 
@@ -187,10 +189,35 @@ impl SpotState {
                                             },
                                             ProDevSpot::Unit(unit) =>
                                             {
-                                                html!("div", {
-                                                    .prop("slot", "unit")
-                                                    .text(format!("Unit {}", state.index).as_str())
-                                                })
+                                                match &unit.value {
+                                                    shared::domain::pro_dev::unit::ProDevUnitValue::Video(video) => {
+                                                        let mut_host = Mutable::new(video.host.clone());
+
+                                                        html!("div", {
+                                                            .prop("slot", "unit")
+                                                            .child_signal(mut_host.signal_cloned().map(clone!(video => move|host| {
+                                                                log::info!("Inside mut host");
+                                                                match host {
+                                                                    VideoHost::Youtube(youtube) => Some(
+                                                                        html!("video-youtube-thumbnail", {
+                                                                            .prop("videoId", youtube.url.get_id())
+                                                                            .style("width", "100%")
+                                                                            .style("height", "100%")
+                                                                            .style("object-fit", "contain")
+                                                                        })
+                                                                    ),
+                                                                }
+                                                            })))
+                                                        })
+                                                    },
+                                                    _ => {
+                                                        html!("div", {
+                                                            .prop("slot", "unit")
+                                                            .text(format!("Unit {}", state.index).as_str())
+                                                        })
+                                                    }
+                                                }
+
                                             },
                                         }
                                     })
@@ -235,7 +262,11 @@ impl SpotState {
                                         None
                                     }
                                 },
-                                _ => None,
+                                _ =>
+                                {
+                                    log::info!("inside None");
+                                    None
+                                },
                             }
                         })))
                         .apply(OverlayHandle::lifecycle(clone!(state => move || {
