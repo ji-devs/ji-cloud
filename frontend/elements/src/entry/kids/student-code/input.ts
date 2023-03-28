@@ -105,15 +105,6 @@ export class _ extends LitElement {
     @queryAll(".inputs input")
     private inputs!: NodeListOf<HTMLInputElement>;
 
-    // TODO Remove once 4 digit codes have all expired.
-    constructor() {
-        super();
-        this.addEventListener("keyup", event => {
-            if (event.key === "Enter") {
-                this.dispatchChangeEvent();
-            }
-        });
-    }
 
     private isValidNumber(v: string): boolean {
         return /^\d$/.test(v);
