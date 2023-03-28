@@ -293,8 +293,8 @@ with cte as (
         left join user_profile on "user".id = user_profile.user_id
         left join user_email using(user_id)
     where ("user".id = $1 or $1 is null)
-    group by family_name
-    order by family_name desc
+    group by "user".created_at
+    order by "user".created_at desc
 ),
 cte1 as (
     select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id
