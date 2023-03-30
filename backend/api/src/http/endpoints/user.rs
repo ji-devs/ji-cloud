@@ -211,10 +211,12 @@ async fn create_user(
 
     let mut txn = db.begin().await?;
 
+    let email = req.email.to_lowercase();
+
     // FIXME simplify these queries
     let exists_basic = sqlx::query!(
-        r#"select exists(select 1 from user_auth_basic where email = lower($1)) as "exists!""#,
-        &req.email
+        r#"select exists(select 1 from user_auth_basic where email = $1::text) as "exists!""#,
+        email
     )
     .fetch_one(&mut txn)
     .instrument(tracing::info_span!("check basic exists"))
@@ -222,8 +224,8 @@ async fn create_user(
     .exists;
 
     let exists_google = sqlx::query!(
-        r#"select exists(select 1 from user_email where email = lower($1)) as "exists!""#,
-        &req.email
+        r#"select exists(select 1 from user_email where email = $1::text) as "exists!""#,
+        email
     )
     .fetch_one(&mut txn)
     .instrument(tracing::info_span!("check google exists"))
@@ -251,7 +253,7 @@ async fn create_user(
     sqlx::query!(
         "insert into user_auth_basic (user_id, email, password) values ($1, $2::text, $3)",
         user.id,
-        &req.email,
+        email,
         pass_hash.to_string(),
     )
     .execute(&mut txn)
@@ -287,6 +289,8 @@ async fn verify_email(
         VerifyEmailRequest::Resend { email } => {
             let mut txn = db.begin().await?;
 
+            let lowercase_email = &email.to_lowercase();
+
             // todo: make this more future proof and exhaustive.
 
             let user = sqlx::query!(
@@ -294,8 +298,8 @@ async fn verify_email(
 select user_id          "id!: UserId"
 from user_auth_basic
 where
-    lower(email) = lower($1::text) and
-    not exists(select 1 from user_email where lower(email) = lower($1))
+    email = $1::text and
+    not exists(select 1 from user_email where email = $1)
 "#,
                 email
             )
@@ -344,7 +348,7 @@ where
             let user = sqlx::query!(
                 r#"
 insert into user_email (user_id, email)
-select session.user_id, user_auth_basic.email
+select session.user_id, lower(user_auth_basic.email)
 from session
 inner join user_auth_basic on user_auth_basic.user_id = session.user_id
 where
@@ -589,11 +593,13 @@ async fn email_reset(
 
     let mut txn = db.begin().await?;
 
+    let lowercase_email = req.email.to_lowercase();
+
     // 0. validate the email
     // FIXME simplify these queries - maybe make this a separate function to be used with update email
     let exists_basic = sqlx::query!(
-        r#"select exists(select 1 from user_auth_basic where lower(email) = lower($1)) as "exists!""#,
-        &req.email
+        r#"select exists(select 1 from user_auth_basic where email = $1::text) as "exists!""#,
+        lowercase_email
     )
     .fetch_one(&mut txn)
     .instrument(tracing::info_span!("validate email"))
@@ -601,8 +607,8 @@ async fn email_reset(
     .exists;
 
     let exists_google = sqlx::query!(
-        r#"select exists(select 1 from user_email where lower(email) = lower($1)) as "exists!""#,
-        &req.email
+        r#"select exists(select 1 from user_email where email = $1::text) as "exists!""#,
+        lowercase_email
     )
     .fetch_one(&mut txn)
     .instrument(tracing::info_span!("check google exists"))
@@ -625,7 +631,7 @@ async fn email_reset(
     let paseto_token: String = create_update_email_token(
         &settings.token_secret,
         Duration::hours(1),
-        &req.email,
+        &lowercase_email,
         Utc::now(),
         &user_id.0,
     )?;
@@ -634,7 +640,7 @@ async fn email_reset(
     send_reset_email(
         &mut txn,
         user_id,
-        req.email,
+        lowercase_email,
         &mail,
         &settings.remote_target().pages_url(),
     )
@@ -689,11 +695,13 @@ async fn verify_email_reset(
 
             let token: EmailToken = validate_email_token(paseto_token, &settings.token_secret)?;
 
+            let email = &token.email.to_lowercase();
+
             // 1. generate a paseto token for this instance
             let paseto_token: String = create_update_email_token(
                 &settings.token_secret,
                 Duration::hours(1),
-                &token.email,
+                &email,
                 Utc::now(),
                 &token.user_id.into(),
             )?;
@@ -704,7 +712,7 @@ async fn verify_email_reset(
             send_reset_email(
                 &mut txn,
                 token.user_id,
-                token.email,
+                email.to_string(),
                 &mail,
                 &settings.remote_target().pages_url(),
             )
@@ -744,7 +752,7 @@ async fn verify_email_reset(
             .await?;
 
             let email = match email {
-                Some(email) => email.email,
+                Some(email) => email.email.to_lowercase(),
                 None => return Err(anyhow::anyhow!("Handle no confirmed email").into()),
             };
 
@@ -756,7 +764,7 @@ async fn verify_email_reset(
                 r#"
         update user_auth_basic
         set email = $3::text
-        where user_id = $1 and lower(email) = lower($2::text)
+        where user_id = $1 and email = $2::text
         "#,
                 token.user_id.0,
                 &email,
@@ -771,7 +779,7 @@ async fn verify_email_reset(
                 r#"
         update user_email
         set email = $3::text
-        where user_id = $1 and lower(email) = lower($2::text)
+        where user_id = $1 and email = $2::text
         "#,
                 token.user_id.0,
                 &email,
@@ -809,7 +817,7 @@ pub fn validate_email_token(
     );
 
     Ok(EmailToken {
-        email: new_email,
+        email: new_email.to_lowercase(),
         user_id,
     })
 }
@@ -875,6 +883,8 @@ async fn reset_password(
 
     let mut txn = db.begin().await?;
 
+    let email = req.email.to_lowercase();
+
     // includes check for oauth email
     let user = sqlx::query!(
         r#"
@@ -882,13 +892,13 @@ async fn reset_password(
         (
            select
              case
-                when exists(select 1 from user_auth_basic where lower(user_auth_basic.email) = lower($1::text)) = true then false
+                when exists(select 1 from user_auth_basic where user_auth_basic.email = lower($1::text)) = true then false
                 else true
             end
         )     as "is_oauth!"
          from user_email
-         where lower(email) = lower($1::text)"#,
-        &req.email
+         where email = lower($1::text)"#,
+        &email
     )
     .fetch_optional(&mut txn)
     .instrument(tracing::info_span!("get user_id"))
@@ -902,7 +912,7 @@ async fn reset_password(
     send_password_email(
         &mut txn,
         user_id,
-        req.email,
+        email,
         mail.as_ref(),
         &config.remote_target().pages_url(),
         is_oauth,
@@ -947,7 +957,7 @@ async fn put_password(
     .await?;
 
     let email = match email {
-        Some(email) => email.email,
+        Some(email) => email.email.to_lowercase(),
         None => return Err(anyhow::anyhow!("Handle no confirmed email").into()),
     };
 
@@ -959,7 +969,7 @@ async fn put_password(
         .await?;
 
     let user_to_delete = sqlx::query!(
-        r#"select user_id "id!: UserId" from user_auth_basic where user_id <> $1 and lower(email) = lower($2) for update"#,
+        r#"select user_id "id!: UserId" from user_auth_basic where user_id <> $1 and email = $2 for update"#,
         user_id.0,
         email as _
     )

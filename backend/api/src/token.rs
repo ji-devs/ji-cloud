@@ -221,7 +221,7 @@ pub fn create_update_email_token(
         .set_not_before(&now)
         .set_issued_at(Some(now))
         .set_encryption_key(token_secret)
-        .set_subject(&user_email.to_string())
+        .set_subject(&user_email.to_lowercase())
         .set_claim("id", json!(session_instance_id.to_string()))
         // .set_subject(&session_instance_id.to_string())
         .build()
