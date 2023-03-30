@@ -179,7 +179,7 @@ async fn handle_google_oauth(
             .await?;
 
             sqlx::query!(
-                "insert into user_email (user_id, email) values ($1, $2::text)",
+                "insert into user_email (user_id, email) values ($1, lower($2::text))",
                 id,
                 &claims.email
             )
