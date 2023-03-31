@@ -39,7 +39,7 @@ pub async fn create(
     let draft_id = sqlx::query!(
         //language=SQL
         r#"
-select draft_id from jig where jig.id = $1
+select draft_id from pro_dev where id = $1
 "#,
         pro_dev_id.0,
     )
