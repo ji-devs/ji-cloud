@@ -476,7 +476,7 @@ select
     exists(select 1 from user_email where user_id = user_auth_basic.user_id) as "has_verified_email!"
 from user_auth_basic where email = $1::text
 "#,
-                &*email
+                &*email.to_lowercase()
             )
             .fetch_optional(&db)
             .await
