@@ -38,6 +38,7 @@ impl Component<EditAbout> for Rc<EditAbout> {
                             .prop("slot", "organization")
                             .child(html!("textarea" => HtmlTextAreaElement, {
                                 .prop("placeholder", STR_ABOUT_PLACEHOLDER)
+                                .prop("dir", "auto")
                                 .with_node!(elem => {
                                     .prop_signal("value", state.description.signal_cloned())
                                     .event(clone!(state => move |_: events::Input| {
