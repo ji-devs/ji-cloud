@@ -1,9 +1,6 @@
 use super::super::super::spot::state::SpotState;
 use crate::edit::sidebar::{state::SidebarSpotItem, ProDevSpot};
-use shared::{
-    api::endpoints,
-    domain::pro_dev::{unit::*, ProDevId},
-};
+use shared::{api::endpoints, domain::pro_dev::unit::*};
 use std::rc::Rc;
 use utils::prelude::*;
 

@@ -6,7 +6,7 @@ use shared::{
         module::{ModuleBody, ModuleCreatePath, ModuleCreateRequest, ModuleKind},
         pro_dev::{
             ProDevBrowsePath, ProDevBrowseQuery, ProDevCreatePath, ProDevCreateRequest,
-            ProDevDeletePath, ProDevGetDraftPath, ProDevId, ProDevSearchPath, ProDevSearchQuery,
+            ProDevDeletePath, ProDevId, ProDevSearchPath, ProDevSearchQuery,
         },
     },
 };

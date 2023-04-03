@@ -26,7 +26,7 @@ pub async fn update_pro_dev(
     .await
 }
 
-pub async fn update_unit(
+pub async fn _update_unit(
     pro_dev_id: &ProDevId,
     unit_id: &ProDevUnitId,
     req: ProDevUnitUpdateRequest,

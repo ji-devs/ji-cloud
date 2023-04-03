@@ -3,12 +3,12 @@ use std::{rc::Rc, str::FromStr};
 use dominator::{clone, html, with_node, Dom};
 
 use url::{ParseError, Url};
-use utils::{events, text};
+use utils::events;
 use web_sys::HtmlTextAreaElement;
 
 use super::state::AddLink;
 
-const STR_ADD_LINK: &str = "Insert URL here";
+const _STR_ADD_LINK: &str = "Insert URL here";
 
 impl AddLink {
     pub fn render(self: &Rc<Self>) -> Dom {

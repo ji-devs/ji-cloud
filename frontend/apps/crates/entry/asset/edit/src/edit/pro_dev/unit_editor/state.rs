@@ -2,7 +2,6 @@ use std::rc::Rc;
 
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
-use serde::{Deserialize, Serialize};
 use shared::domain::{
     audio::AudioId,
     image::ImageId,
@@ -11,7 +10,7 @@ use shared::domain::{
 };
 use utils::editable_asset::{EditableAsset, EditableProDev};
 
-use crate::edit::{pro_dev, AssetEditState};
+use crate::edit::AssetEditState;
 
 #[derive(Clone)]
 pub struct UnitEditor {

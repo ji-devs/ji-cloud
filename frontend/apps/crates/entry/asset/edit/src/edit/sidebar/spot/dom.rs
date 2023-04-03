@@ -195,7 +195,7 @@ impl SpotState {
 
                                                         html!("div", {
                                                             .prop("slot", "unit")
-                                                            .child_signal(mut_host.signal_cloned().map(clone!(video => move|host| {
+                                                            .child_signal(mut_host.signal_cloned().map(move|host| {
                                                                 match host {
                                                                     VideoHost::Youtube(youtube) => Some(
                                                                         html!("video-youtube-thumbnail", {
@@ -215,7 +215,7 @@ impl SpotState {
                                                                               }))                                                                     })
                                                                     ),
                                                                 }
-                                                            })))
+                                                            }))
                                                         })
                                                     },
                                                     _ => {

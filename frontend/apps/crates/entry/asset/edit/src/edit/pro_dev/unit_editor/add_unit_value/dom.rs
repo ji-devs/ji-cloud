@@ -2,8 +2,6 @@ use std::rc::Rc;
 
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
-
-use shared::domain::pro_dev::unit::ProDevUnitValue;
 use web_sys::HtmlElement;
 
 use crate::edit::pro_dev::unit_editor::add_unit_value::add_link::state::AddLink;

@@ -11,7 +11,6 @@ use futures_signals::map_ref;
 use futures_signals::signal::SignalExt;
 use futures_signals::signal_vec::SignalVecExt;
 use gloo::utils::window;
-use shared::api::endpoints::pro_dev;
 use shared::domain::asset::{Asset, AssetId};
 use std::collections::HashMap;
 use std::rc::Rc;

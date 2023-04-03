@@ -7,14 +7,11 @@ use dominator::{clone, html, Dom};
 use futures_signals::signal::{Signal, SignalExt};
 use shared::domain::{
     meta::ResourceTypeId,
-    pro_dev::{
-        unit::{ProDevUnit, ProDevUnitId},
-        ProDevResponse,
-    },
+    pro_dev::{unit::ProDevUnit, ProDevResponse},
 };
 use std::rc::Rc;
 use utils::{
-    asset::{AssetPlayerOptions, ProDevPlayerOptions, ProDevUnitValueExt, ResourceContentExt},
+    asset::{AssetPlayerOptions, ProDevPlayerOptions, ResourceContentExt},
     events,
     languages::Language,
 };

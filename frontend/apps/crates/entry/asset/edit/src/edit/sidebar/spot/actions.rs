@@ -1,6 +1,5 @@
 use super::course::actions as course_spot_actions;
 use super::jig::actions as jig_spot_actions;
-use super::pro_dev::actions as pro_dev_spot_actions;
 use super::state::SpotState;
 use super::{
     course::actions as course_actions, jig::actions as jig_actions,
@@ -13,8 +12,6 @@ use crate::edit::sidebar::{
 use dominator::clone;
 use shared::domain::asset::Asset;
 use shared::domain::module::ModuleKind;
-use shared::domain::pro_dev::unit::ProDevUnit;
-use shared::domain::pro_dev::ProDevResponse;
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::str::FromStr;

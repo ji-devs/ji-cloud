@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use futures_signals::signal::Mutable;
-use shared::domain::{meta::ResourceType, pro_dev::unit::ProDevUnitValue};
+use shared::domain::pro_dev::unit::ProDevUnitValue;
 
 use web_sys::File;
 

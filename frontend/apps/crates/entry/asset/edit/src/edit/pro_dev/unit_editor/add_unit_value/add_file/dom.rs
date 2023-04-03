@@ -2,10 +2,6 @@ use std::rc::Rc;
 
 use components::file_input::{FileInput, FileInputConfig};
 use dominator::{clone, html, Dom};
-use futures_signals::{
-    map_ref,
-    signal::{not, Signal},
-};
 
 use utils::component::Component;
 

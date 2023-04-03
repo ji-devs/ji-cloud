@@ -1,10 +1,8 @@
-use std::{rc::Rc, str::FromStr};
+use std::rc::Rc;
 
-use components::{file_input::FileInput, hebrew_buttons::HebrewButtons};
-use dominator::{clone, events, html, with_node, Dom, DomBuilder};
+use components::hebrew_buttons::HebrewButtons;
+use dominator::{clone, events, html, with_node, DomBuilder};
 use futures_signals::{map_ref, signal::SignalExt};
-use shared::domain::pro_dev::unit::ProDevUnitValue;
-use url::{ParseError, Url};
 use utils::{component::Component, init::analytics};
 use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement, ShadowRoot};
 

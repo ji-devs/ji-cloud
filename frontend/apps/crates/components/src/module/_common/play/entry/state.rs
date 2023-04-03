@@ -2,7 +2,6 @@ use crate::audio::mixer::AUDIO_MIXER;
 use dominator::{clone, Dom, DomHandle};
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
-use shared::api::endpoints::pro_dev;
 use shared::domain::asset::{Asset, AssetId, AssetType, DraftOrLive, PrivacyLevel};
 use shared::domain::course::CourseGetDraftPath;
 use shared::domain::jig::player::ModuleConfig;

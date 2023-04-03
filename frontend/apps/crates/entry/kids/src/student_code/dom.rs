@@ -54,6 +54,7 @@ pub fn render(state: Rc<State>, code: Option<String>) -> Dom {
                 PlayerPopup::new(
                     jig_id.into(),
                     None,
+                    None,
                     player_options.into(),
                     PreviewPopupCallbacks::new(close)
                 ).render(None)

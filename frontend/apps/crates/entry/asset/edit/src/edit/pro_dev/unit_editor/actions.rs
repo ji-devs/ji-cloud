@@ -2,14 +2,13 @@ use std::rc::Rc;
 
 use dominator::clone;
 use shared::{
-    api::endpoints::{self, pro_dev::unit},
+    api::endpoints::pro_dev::unit,
     domain::pro_dev::unit::{
-        CreateProDevUnitPath, GetProDevUnitDraftPath, ProDevUnit, ProDevUnitCreateRequest,
-        ProDevUnitId as UnitId, ProDevUnitUpdateRequest, ProDevUnitValue, UpdateProDevUnitPath,
+        CreateProDevUnitPath, ProDevUnitCreateRequest, ProDevUnitUpdateRequest, ProDevUnitValue,
+        UpdateProDevUnitPath,
     },
 };
 use utils::{
-    editable_asset::EditableAsset,
     prelude::ApiEndpointExt,
     routes::{AssetEditRoute, AssetRoute, ProDevEditRoute, Route},
     unwrap::UnwrapJiExt,

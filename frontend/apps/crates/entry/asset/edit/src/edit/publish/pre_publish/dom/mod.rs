@@ -6,7 +6,7 @@ use futures_signals::{
 };
 use shared::domain::asset::{DraftOrLive, PrivacyLevel};
 use utils::{
-    editable_asset, events,
+    events,
     init::analytics,
     routes::{
         AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, ProDevEditRoute,

@@ -1,17 +1,12 @@
 use std::rc::Rc;
 
 use js_sys::Reflect;
-use shared::{
-    api::endpoints,
-    domain::{
-        audio::{user::UserAudioCreatePath, AudioId},
-        module::body::_groups::design::VideoHost,
-        pro_dev::unit::{ProDevUnitValue, Video},
-    },
+use shared::domain::{
+    module::body::_groups::design::VideoHost,
+    pro_dev::unit::{ProDevUnitValue, Video},
 };
-use utils::{prelude::ApiEndpointExt, unwrap::UnwrapJiExt};
 use wasm_bindgen::JsValue;
-use web_sys::{Blob, File, HtmlElement};
+use web_sys::HtmlElement;
 
 use super::state::AddVideo;
 

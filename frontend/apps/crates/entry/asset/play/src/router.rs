@@ -24,7 +24,7 @@ impl Router {
                 utils::routes::AssetPlayRoute::Course(course_id, player_options) => {
                     CoursePlayer::new(course_id, player_options).render()
                 }
-                utils::routes::AssetPlayRoute::ProDev(pro_dev_id, unit_id, player_options) => {
+                utils::routes::AssetPlayRoute::ProDev(pro_dev_id, _unit_id, player_options) => {
                     ProDevPlayer::new(pro_dev_id, player_options).render()
                 }
             }),
