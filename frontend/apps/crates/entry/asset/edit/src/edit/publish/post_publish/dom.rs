@@ -2,7 +2,7 @@ use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::asset::AssetType;
 use utils::{
-    asset::{AssetPlayerOptions, CoursePlayerOptions, JigPlayerOptions},
+    asset::{AssetPlayerOptions, CoursePlayerOptions, JigPlayerOptions, ProDevPlayerOptions},
     events,
     routes::{AssetRoute, Route},
 };
@@ -20,7 +20,7 @@ impl PostPublish {
                     AssetType::Jig => "JIG",
                     AssetType::Course => "Course",
                     AssetType::Resource => "Resource",
-                    AssetType::ProDev => todo!()
+                    AssetType::ProDev => "Pro Dev"
                 })
             }))
             .apply(clone!(state => move |dom| {
@@ -34,7 +34,9 @@ impl PostPublish {
                     AssetType::Course => {
                         dom.children(state.render_course_actions())
                     },
-                    AssetType::ProDev => todo!()
+                    AssetType::ProDev => {
+                        dom.children(state.render_pro_dev_actions())
+                    }
                 }
             }))
         })
@@ -119,6 +121,37 @@ impl PostPublish {
                 .prop("slot", "actions")
                 .event(clone!(state => move |_: events::Click| {
                     let settings = AssetPlayerOptions::Course(CoursePlayerOptions::default());
+                    state.asset_edit_state.play_jig.set(Some(settings));
+                }))
+            }),
+        ]
+    }
+
+    fn render_pro_dev_actions(self: &Rc<Self>) -> Vec<Dom> {
+        let state = self;
+        let asset_display_name = AssetType::ProDev.display_name();
+        let share_anchor = html!("post-publish-action", {
+            .prop("kind", "share")
+            .prop("assetDisplayName", asset_display_name)
+            .prop_signal("active", state.share_state.active_popup.signal_cloned().map(|active| active.is_some()))
+        });
+
+        vec![
+            Rc::clone(&state.share_state).render(share_anchor, Some("actions")),
+            html!("post-publish-action", {
+                .prop("slot", "actions")
+                .prop("kind", "new")
+                .prop("assetDisplayName", asset_display_name)
+                .event(clone!(state => move |_: events::Click| {
+                    state.create_pro_dev();
+                }))
+            }),
+            html!("post-publish-action", {
+                .prop("kind", "play")
+                .prop("assetDisplayName", asset_display_name)
+                .prop("slot", "actions")
+                .event(clone!(state => move |_: events::Click| {
+                    let settings = AssetPlayerOptions::ProDev(ProDevPlayerOptions::default());
                     state.asset_edit_state.play_jig.set(Some(settings));
                 }))
             }),

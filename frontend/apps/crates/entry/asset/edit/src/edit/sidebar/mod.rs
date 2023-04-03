@@ -6,6 +6,7 @@ mod debug;
 mod dragging;
 mod header;
 mod jig;
+mod pro_dev;
 mod spot;
 mod state;
 

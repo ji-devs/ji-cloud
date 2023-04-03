@@ -2,7 +2,7 @@ import { LitElement, html, css, customElement, property, internalProperty, Prope
 
 const MINUTE = 60;
 
-@customElement('input-minutes-seconds')
+@customElement("input-minutes-seconds")
 export class _ extends LitElement {
     static get styles() {
         return [

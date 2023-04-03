@@ -1,10 +1,11 @@
 use crate::edit::sidebar::state::{Sidebar as SidebarState, SidebarSpot, SidebarSpotItem};
+use crate::edit::sidebar::ProDevSpot;
 use dominator::clone;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use std::cell::RefCell;
 use std::rc::Rc;
 use utils::drag::Drag;
-use utils::routes::{AssetEditRoute, JigEditRoute};
+use utils::routes::{AssetEditRoute, JigEditRoute, ProDevEditRoute};
 use web_sys::HtmlElement;
 
 pub struct SpotState {
@@ -76,6 +77,16 @@ impl SpotState {
                         Some(_) => "thumbnail",
                     }
                 },
+                SidebarSpotItem::ProDev(pro_dev_spot) => {
+                    match pro_dev_spot {
+                        None => "unit",
+                        Some(item) =>
+                            match &**item {
+                                ProDevSpot::Cover(_) => "thumbnail",
+                                ProDevSpot::Unit(_) => "unit",
+                            },
+                    }
+                },
             }
         }))
     }
@@ -111,7 +122,19 @@ impl SpotState {
                             AssetEditRoute::Jig(_, JigEditRoute::Module(module_id)) if module_id == &module.id
                         )
                     }
-                    _ => false
+                    SidebarSpotItem::ProDev(Some(unit)) => {
+                        let id = match &**unit {
+                            ProDevSpot::Cover(_) => None,
+                            ProDevSpot::Unit(unit) => Some(unit.id),
+                        };
+                        matches!(
+                            route,
+                            AssetEditRoute::ProDev(_, ProDevEditRoute::Unit(unit_id)) if unit_id == &id
+                        )
+                    }
+                    _ => {
+                        false
+                    }
                 }
             }))
     }

@@ -8,7 +8,10 @@ use shared::domain::asset::{DraftOrLive, PrivacyLevel};
 use utils::{
     events,
     init::analytics,
-    routes::{AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, ResourceEditRoute, Route},
+    routes::{
+        AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, ProDevEditRoute,
+        ResourceEditRoute, Route,
+    },
 };
 use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement};
 
@@ -223,9 +226,7 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                 }))
             }),
 
-            PrePublish::render_ages(state.clone()),
             PrePublish::render_languages(state.clone()),
-            PrePublish::render_categories_select(state.clone()),
             PrePublish::render_category_pills(state.clone()),
 
             html!("button-rect", {
@@ -251,6 +252,13 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                             Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
                                 course.id,
                                 CourseEditRoute::Landing
+                            ))).to_string()
+                        },
+                        EditableAsset::ProDev(pro_dev) => {
+                            state.publish_state.asset_edit_state.set_route_pro_dev(ProDevEditRoute::Landing);
+                            Route::Asset(AssetRoute::Edit(AssetEditRoute::ProDev(
+                                pro_dev.id,
+                                ProDevEditRoute::Landing
                             ))).to_string()
                         },
                     };
@@ -298,6 +306,47 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                 })
             }),
         ])
+        .apply_if(!state.asset._is_pro_dev(), clone!(state => move |dom|{
+            dom
+                .children(&mut [
+                    PrePublish::render_categories_select(state.clone()),
+                    PrePublish::render_ages(state.clone())
+                ])
+
+        }))
+        .apply(clone!(state => move |dom| {
+            match &*state.asset{
+                EditableAsset::ProDev(pro_dev) => {
+                    dom
+                        .child(html!("input-wrapper", {
+                            .prop("slot", "duration")
+                            .prop("label", "Course duration")
+                            .child(html!("input-hours-minutes" => HtmlElement, {
+                                .prop("type", "number")
+                                .prop_signal("value", pro_dev.duration.signal_ref(|duration| {
+                                    match duration {
+                                        Some(duration) => duration.to_string(),
+                                        None => {
+                                            String::new()
+                                        },
+                                    }
+                                }))
+                                // event not executing
+                                .event(clone!(pro_dev => move |evt: events::CustomInputNumber| {
+                                    let value = evt.value().map(|num| num as u32);
+                                    log::info!("Here2");
+
+                                    log::info!("{value:?}");
+
+                                    pro_dev.duration.set(value);
+                                }))
+                            }))
+                        }))
+                },
+                _ => dom
+            }
+
+        }))
         .apply_if(!state.asset.is_resource(), clone!(state => move |dom|{
             dom
                 .children_signal_vec(state.asset.additional_resources().signal_vec_cloned().map(clone!(state => move |additional_resource| {

@@ -49,4 +49,5 @@ impl ModuleThumbnail {
 pub enum ThumbnailFallback {
     Asset,
     Module,
+    Unit,
 }

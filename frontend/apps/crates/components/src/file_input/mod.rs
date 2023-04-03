@@ -28,6 +28,8 @@ pub struct FileInput {
 
 impl FileInput {
     pub fn new(config: FileInputConfig) -> Rc<Self> {
+        log::info!("In link");
+
         Rc::new(Self {
             value: Mutable::new(config.value),
             on_change: config.on_change,

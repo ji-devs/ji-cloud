@@ -12,7 +12,7 @@ use shared::{
 };
 use utils::{
     prelude::{ApiEndpointExt, UnwrapJiExt},
-    routes::{CourseEditRoute, JigEditRoute, ResourceEditRoute},
+    routes::{CourseEditRoute, JigEditRoute, ProDevEditRoute, ResourceEditRoute},
 };
 
 use super::state::PrePublish;
@@ -21,6 +21,7 @@ use utils::editable_asset::EditableAsset;
 
 mod course_actions;
 mod jig_actions;
+mod pro_dev_actions;
 mod resource_actions;
 
 impl PrePublish {
@@ -79,6 +80,11 @@ impl PrePublish {
                     .asset_edit_state
                     .set_route_course(CourseEditRoute::Cover(cover_module_id.unwrap_ji()));
             }
+            EditableAsset::ProDev(_) => {
+                self.publish_state
+                    .asset_edit_state
+                    .set_route_pro_dev(ProDevEditRoute::Cover(cover_module_id.unwrap_ji()));
+            }
         };
     }
 
@@ -97,6 +103,7 @@ impl PrePublish {
             EditableAsset::Jig(jig) => jig.modules.lock_ref().iter().all(|m| m.is_complete),
             EditableAsset::Resource(resource) => resource.cover.lock_ref().is_some(),
             EditableAsset::Course(course) => course.cover.lock_ref().is_some(),
+            EditableAsset::ProDev(pro_dev) => pro_dev.cover.lock_ref().is_some(),
         }
     }
 
@@ -110,6 +117,9 @@ impl PrePublish {
             }
             EditableAsset::Course(course) => {
                 course_actions::save_course(course).await.unwrap_ji();
+            }
+            EditableAsset::ProDev(pro_dev) => {
+                pro_dev_actions::save_pro_dev(pro_dev).await.unwrap_ji();
             }
         };
     }
@@ -141,6 +151,9 @@ impl PrePublish {
                 EditableAsset::Course(course) => {
                     course_actions::publish_course(course.id).await.unwrap_ji().into()
                 }
+                EditableAsset::ProDev(pro_dev) => {
+                    pro_dev_actions::publish_pro_dev(pro_dev.id).await.unwrap_ji().into()
+                }
             };
 
             state.publish_state.asset_edit_state.asset.fill_from_asset(asset.clone());
@@ -165,15 +178,17 @@ fn get_categories_labels(
 }
 
 fn set_default_values(asset: &EditableAsset, meta: &MetadataResponse) {
-    let available_affiliations = meta
-        .affiliations
-        .iter()
-        .map(|affiliation| affiliation.id)
-        .collect();
-    asset.affiliations().replace(available_affiliations);
+    if !asset._is_pro_dev() {
+        let available_affiliations = meta
+            .affiliations
+            .iter()
+            .map(|affiliation| affiliation.id)
+            .collect();
+        asset.affiliations().replace(available_affiliations);
 
-    let available_ages = meta.age_ranges.iter().map(|age| age.id).collect();
-    asset.age_ranges().replace(available_ages);
+        let available_ages = meta.age_ranges.iter().map(|age| age.id).collect();
+        asset.age_ranges().replace(available_ages);
+    }
 
     asset.privacy_level().replace(PrivacyLevel::default());
 }

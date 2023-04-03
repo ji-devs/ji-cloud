@@ -139,5 +139,4 @@ all = [
     "tabs",
     "overlay",
     "profile_image",
-    "help_center"
 ]

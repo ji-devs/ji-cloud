@@ -165,6 +165,7 @@ where
                     PlayerPopup::new(
                         asset_id,
                         Some(module_id),
+                        None,
                         AssetPlayerOptions::Jig(JigPlayerOptions {
                             draft_or_live: DraftOrLive::Draft,
                             ..Default::default()

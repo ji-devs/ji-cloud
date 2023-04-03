@@ -3,6 +3,7 @@ use dominator_helpers::signals::EitherSignal;
 use futures_signals::signal::{always, Mutable, Signal, SignalExt};
 use shared::domain::asset::{Asset, AssetId, AssetType, DraftOrLive, PrivacyLevel};
 use shared::domain::course::CourseGetDraftPath;
+use shared::domain::pro_dev::ProDevGetDraftPath;
 use shared::domain::resource::ResourceGetDraftPath;
 
 use std::cell::RefCell;
@@ -182,7 +183,14 @@ where
                                         .await
                                         .map(|course| Asset::Course(course))
                                 },
-                                AssetId::ProDevId(_) => todo!()
+                                AssetId::ProDevId(pro_dev_id) => {
+                                    endpoints::pro_dev::GetDraft::api_no_auth(
+                                        ProDevGetDraftPath(pro_dev_id.clone()),
+                                        None
+                                    )
+                                        .await
+                                        .map(|pro_dev| Asset::ProDev(pro_dev))
+                                }
                             };
 
                             match resp {

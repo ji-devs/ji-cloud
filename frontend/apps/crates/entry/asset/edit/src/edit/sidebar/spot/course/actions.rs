@@ -29,9 +29,11 @@ pub async fn save_course(state: &Rc<SpotState>) {
                         CourseSpot::Item(jig) => Some(jig.id),
                     },
                 },
+                SidebarSpotItem::ProDev(_) => unreachable!(),
             }
         })
         .collect_vec();
+
     let req = CourseUpdateDraftDataRequest {
         items: Some(items),
         ..Default::default()

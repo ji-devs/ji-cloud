@@ -6,6 +6,7 @@ use shared::domain::{
     course::CourseSearchQuery,
     jig::JigSearchQuery,
     meta::{AffiliationId, AgeRangeId},
+    pro_dev::ProDevSearchQuery,
     resource::ResourceSearchQuery,
     user::UserProfile,
 };
@@ -115,6 +116,16 @@ impl SearchSelected {
             page: Some(0),
             language: self.language.get_cloned(),
             // is_rated: self.is_rated.get().then(|| true),
+            ..Default::default()
+        }
+    }
+
+    pub fn to_pro_dev_search_request(&self) -> ProDevSearchQuery {
+        ProDevSearchQuery {
+            q: self.query.get_cloned(),
+            categories: self.categories.get_cloned().into_iter().collect(),
+            page: Some(0),
+            language: self.language.get_cloned(),
             ..Default::default()
         }
     }

@@ -39,6 +39,7 @@ impl CoursePlayer {
                     PlayerPopup::new(
                         jig_id.into(),
                         None,
+                        None,
                         options,
                         PreviewPopupCallbacks::new(close)
                     ).render(None)

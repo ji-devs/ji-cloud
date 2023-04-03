@@ -10,7 +10,7 @@ import { nothing } from "lit-html";
 import { ModuleKind } from "@elements/module/_common/types";
 import "@elements/core/images/ui";
 
-export type ModuleState = "empty" | "active" | "thumbnail";
+export type ModuleState = "empty" | "active" | "thumbnail" | "unit";
 const STR_EMPTY = "Drag\nactivity\nhere";
 const STR_EMPTY_COVER = "Drag\ncover\nhere";
 
@@ -47,6 +47,11 @@ export class _ extends LitElement {
                     border: solid var(--light-blue-5) 3px;
                     background-color: var(--white);
                 }
+                :host([state="unit"]) .wrapper {
+                    border: 0 1px;
+                    background-color: var(--light-blue-5);
+                    overflow: hidden;
+                }
                 :host([incomplete]) .wrapper {
                     border: solid var(--light-red-4) 3px;
                 }
@@ -57,12 +62,18 @@ export class _ extends LitElement {
                 slot[name="thumbnail"] {
                     display: none;
                 }
+
+                slot[name="unit"] {
+                    color: white;
+                }
+
                 :host([state="thumbnail"]) slot[name="thumbnail"] {
                     display: revert;
                 }
                 ::slotted([slot="thumbnail"]) {
                     border-radius: 16px;
                 }
+
                 :host([incomplete]) ::slotted([slot="thumbnail"]) {
                     border: none;
                 }
@@ -125,6 +136,9 @@ export class _ extends LitElement {
                       `
                     : this.state === "thumbnail" ? html`
                         <slot name="thumbnail"></slot>
+                    `
+                    : this.state === "unit" ? html`
+                        <slot name="unit"></slot>
                     `
                     : nothing
                 }

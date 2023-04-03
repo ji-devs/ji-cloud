@@ -13,6 +13,7 @@ use utils::prelude::*;
 
 mod course_actions;
 mod jig_actions;
+mod pro_dev_actions;
 mod resource_actions;
 
 impl Gallery {
@@ -38,7 +39,7 @@ impl Gallery {
             AssetType::Jig => jig_actions::load_jigs(state, is_published).await,
             AssetType::Resource => resource_actions::load_resources(state, is_published).await,
             AssetType::Course => course_actions::load_courses(state, is_published).await,
-            AssetType::ProDev => todo!(),
+            AssetType::ProDev => pro_dev_actions::load_pro_devs(state, is_published).await,
         };
 
         match res {
@@ -84,7 +85,7 @@ impl Gallery {
                 AssetType::Jig => jig_actions::search_jigs(q, is_published).await,
                 AssetType::Resource => resource_actions::search_resources(q, is_published).await,
                 AssetType::Course => course_actions::search_courses(q, is_published).await,
-                AssetType::ProDev => todo!(),
+                AssetType::ProDev => pro_dev_actions::search_pro_devs(q, is_published).await,
             };
 
             let assets = assets.unwrap_ji();
@@ -106,7 +107,7 @@ impl Gallery {
                 AssetType::Jig => jig_actions::create_jig().await,
                 AssetType::Resource => resource_actions::create_resource().await,
                 AssetType::Course => course_actions::create_course().await,
-                AssetType::ProDev => todo!(),
+                AssetType::ProDev => pro_dev_actions::create_pro_dev().await,
             };
         }));
     }
@@ -138,7 +139,9 @@ impl Gallery {
                 AssetId::CourseId(course_id) => {
                     course_actions::delete_course(course_id).await
                 },
-                AssetId::ProDevId(_) => todo!(),
+                AssetId::ProDevId(pro_dev_id) => {
+                    pro_dev_actions::delete_pro_dev(pro_dev_id).await
+                },
             };
 
             match result {

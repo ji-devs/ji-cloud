@@ -36,7 +36,7 @@ use super::{
 /// AssetType
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Display)]
 #[serde(rename_all = "lowercase")]
-#[strum(serialize_all = "snake_case")]
+#[strum(serialize_all = "kebab-case")]
 pub enum AssetType {
     /// JIG
     Jig,
@@ -67,13 +67,18 @@ impl AssetType {
         matches!(self, Self::Course)
     }
 
+    /// check if pro_dev
+    pub fn is_pro_dev(&self) -> bool {
+        matches!(self, Self::ProDev)
+    }
+
     /// Represents the asset type as a `str`
     pub fn as_str(&self) -> &'static str {
         match self {
             Self::Jig => "jig",
             Self::Resource => "resource",
             Self::Course => "course",
-            Self::ProDev => todo!(),
+            Self::ProDev => "prodev",
         }
     }
 
@@ -83,7 +88,7 @@ impl AssetType {
             Self::Jig => "JIG",
             Self::Resource => "resource",
             Self::Course => "course",
-            Self::ProDev => todo!(),
+            Self::ProDev => "Pro Dev",
         }
     }
 
@@ -93,7 +98,7 @@ impl AssetType {
             Self::Jig => "JIG",
             Self::Resource => "Resource",
             Self::Course => "Course",
-            Self::ProDev => todo!(),
+            Self::ProDev => "Pro Dev",
         }
     }
 
@@ -103,7 +108,7 @@ impl AssetType {
             AssetType::Jig => JigId(uuid).into(),
             AssetType::Course => CourseId(uuid).into(),
             AssetType::Resource => ResourceId(uuid).into(),
-            AssetType::ProDev => todo!(),
+            AssetType::ProDev => ProDevId(uuid).into(),
         }
     }
 }
@@ -114,7 +119,7 @@ impl From<&AssetId> for AssetType {
             AssetId::JigId(_) => AssetType::Jig,
             AssetId::CourseId(_) => AssetType::Course,
             AssetId::ResourceId(_) => AssetType::Resource,
-            AssetId::ProDevId(_) => todo!(),
+            AssetId::ProDevId(_) => AssetType::ProDev,
         }
     }
 }
@@ -127,7 +132,7 @@ impl TryFrom<&str> for AssetType {
             "jig" => Ok(Self::Jig),
             "course" => Ok(Self::Course),
             "resource" => Ok(Self::Resource),
-            "pro_dev" => todo!(),
+            "pro-dev" => Ok(Self::ProDev),
             _ => Err(()),
         }
     }
@@ -439,7 +444,7 @@ impl Asset {
             Self::Jig(jig) => &jig.jig_data.age_ranges,
             Self::Course(course) => &course.course_data.age_ranges,
             Self::Resource(resource) => &resource.resource_data.age_ranges,
-            Self::ProDev(_) => panic!(),
+            Self::ProDev(_) => unimplemented!(),
         }
     }
 
