@@ -1,17 +1,17 @@
-use crate::stickers::video::state::Video;
+use crate::stickers::embed::state::Embed;
 
 use super::{
+    embed::ext::*,
     sprite::{ext::*, state::*},
     state::*,
     text::state::*,
-    video::ext::*,
 };
 use dominator::clone;
 use futures_signals::signal_vec::VecDiff;
 use shared::domain::module::body::{
     Image,
     _groups::design::{
-        Sprite as RawSprite, Sticker as RawSticker, Text as RawText, Video as RawVideo, VideoHost,
+        Embed as RawEmbed, EmbedHost, Sprite as RawSprite, Sticker as RawSticker, Text as RawText,
     },
 };
 use std::rc::Rc;
@@ -28,7 +28,7 @@ impl<T: AsSticker> Stickers<T> {
                 match &mut raw {
                     RawSticker::Sprite(sprite) => sprite.transform.nudge_for_duplicate(),
                     RawSticker::Text(text) => text.transform.nudge_for_duplicate(),
-                    RawSticker::Video(video) => video.transform.nudge_for_duplicate(),
+                    RawSticker::Embed(embed) => embed.transform.nudge_for_duplicate(),
                 };
 
                 item.duplicate_with_sticker(Sticker::new(_self.clone(), &raw))
@@ -134,9 +134,9 @@ impl<T: AsSticker> Stickers<T> {
         )))));
     }
 
-    pub fn add_video(_self: Rc<Self>, value: VideoHost) {
-        _self.add_sticker(T::new_from_sticker(Sticker::Video(Rc::new(Video::new(
-            &RawVideo::new(value),
+    pub fn add_embed(_self: Rc<Self>, embed: EmbedHost) {
+        _self.add_sticker(T::new_from_sticker(Sticker::Embed(Rc::new(Embed::new(
+            &RawEmbed::new(embed),
             Some(clone!(_self => move |_| {
                 _self.call_change();
             })),

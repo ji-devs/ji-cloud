@@ -4,7 +4,7 @@
 use crate::{
     api::endpoints::PathPart,
     domain::{
-        audio::AudioId, image::ImageId, module::body::_groups::design::VideoHost, pdf::PdfId,
+        audio::AudioId, image::ImageId, module::body::_groups::design::EmbedHost, pdf::PdfId,
     },
 };
 use macros::make_path_parts;
@@ -109,7 +109,7 @@ pub enum ProDevUnitValue {
 #[serde(rename_all = "camelCase")]
 pub struct Video {
     /// Youtube
-    pub host: VideoHost,
+    pub host: EmbedHost,
     /// start timestamp
     pub start_at: Option<u32>,
     /// end timestamp

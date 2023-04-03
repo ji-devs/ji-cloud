@@ -1,13 +1,13 @@
 use super::{
     super::state::{AsSticker, Stickers},
-    config::{YOUTUBE_VIDEO_HEIGHT, YOUTUBE_VIDEO_WIDTH},
-    menu::dom::render_sticker_video_menu,
-    state::Video,
+    config::{YOUTUBE_EMBED_HEIGHT, YOUTUBE_EMBED_WIDTH},
+    menu::dom::render_sticker_embed_menu,
+    state::Embed,
 };
 use crate::{
     stickers::{
         dom::{BaseRawRenderOptions, BaseRenderOptions},
-        video::ext::YoutubeUrlExt,
+        embed::ext::YoutubeUrlExt,
     },
     transform::{
         dom::render_transform,
@@ -20,7 +20,7 @@ use futures_signals::signal::{Mutable, ReadOnlyMutable, SignalExt};
 use gloo_timers::future::TimeoutFuture;
 use js_sys::Reflect;
 use shared::domain::module::body::{
-    _groups::design::{Video as RawVideo, VideoHost, YoutubeVideo},
+    _groups::design::{Embed as RawEmbed, EmbedHost, YoutubeEmbed},
     video::DoneAction,
 };
 use std::rc::Rc;
@@ -29,7 +29,7 @@ use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlElement;
 
-pub struct VideoRenderOptions {
+pub struct EmbedRenderOptions {
     pub base: BaseRenderOptions,
     pub captions: ReadOnlyMutable<bool>,
     pub muted: ReadOnlyMutable<bool>,
@@ -37,7 +37,7 @@ pub struct VideoRenderOptions {
     pub on_ended: Option<Box<dyn Fn()>>,
 }
 
-impl Default for VideoRenderOptions {
+impl Default for EmbedRenderOptions {
     fn default() -> Self {
         let read_only_bool = Mutable::new(false).read_only();
         Self {
@@ -51,7 +51,7 @@ impl Default for VideoRenderOptions {
 }
 
 #[derive(Default)]
-pub struct VideoRawRenderOptions {
+pub struct EmbedRawRenderOptions {
     pub base: BaseRawRenderOptions,
     pub captions: Mutable<bool>,
     pub muted: Mutable<bool>,
@@ -60,15 +60,15 @@ pub struct VideoRawRenderOptions {
     pub on_ended: Option<Rc<dyn Fn()>>,
 }
 
-fn render_youtube_video(
-    youtube: &YoutubeVideo,
-    video: Rc<Video>,
-    opts: Rc<VideoRenderOptions>,
+fn render_youtube_embed(
+    youtube: &YoutubeEmbed,
+    embed: Rc<Embed>,
+    opts: Rc<EmbedRenderOptions>,
 ) -> Dom {
     html!("video-youtube-player" => HtmlElement, {
         .with_node!(elem => {
-            .future(clone!(elem, video => async move {
-                video.is_playing.signal().for_each(|is_playing| {
+            .future(clone!(elem, embed => async move {
+                embed.is_playing.signal().for_each(|is_playing| {
                     if is_playing {
                         let play_method = Reflect::get(
                             &elem,
@@ -83,7 +83,7 @@ fn render_youtube_video(
                 }).await;
             }))
         })
-        .style_signal("display", video.is_playing.signal().map(|is_playing| {
+        .style_signal("display", embed.is_playing.signal().map(|is_playing| {
             match is_playing {
                 true => "block",
                 false => "none",
@@ -97,17 +97,17 @@ fn render_youtube_video(
         .prop_signal("loop", opts.done_action.signal().map(|done_action| {
             matches!(done_action, Some(DoneAction::Loop))
         }))
-        .prop_signal("start", video.start_at.signal())
-        .prop_signal("end", video.end_at.signal())
-        .apply(|dom| apply_transform(dom, &video.transform))
-        .event(clone!(video, opts => move |_: events::YoutubeEnded| {
-            video.is_playing.set_neq(false);
+        .prop_signal("start", embed.start_at.signal())
+        .prop_signal("end", embed.end_at.signal())
+        .apply(|dom| apply_transform(dom, &embed.transform))
+        .event(clone!(embed, opts => move |_: events::YoutubeEnded| {
+            embed.is_playing.set_neq(false);
             if let Some(on_ended) = opts.on_ended.as_ref() {
                 (on_ended) ();
             }
         }))
-        .event(clone!(video => move |evt: events::YoutubePaused| {
-            spawn_local(clone!(video => async move {
+        .event(clone!(embed => move |evt: events::YoutubePaused| {
+            spawn_local(clone!(embed => async move {
                 // wait for half a second and then check if still paused, if still paused than show the overlay again
 
                 TimeoutFuture::new(300).await;
@@ -123,13 +123,13 @@ fn render_youtube_video(
 
                 log::info!("{:?}", player_state);
                 if player_state == "paused" {
-                    video.is_playing.set_neq(false);
+                    embed.is_playing.set_neq(false);
                 }
             }));
 
         }))
-        .event(clone!(video => move |_: events::YoutubePlaying| {
-            video.is_playing.set_neq(true);
+        .event(clone!(embed => move |_: events::YoutubePlaying| {
+            embed.is_playing.set_neq(true);
 
         }))
     })
@@ -153,61 +153,61 @@ fn apply_transform<A: AsRef<HtmlElement>>(
         )
 }
 
-pub fn render_sticker_video<T: AsSticker>(
+pub fn render_sticker_embed<T: AsSticker>(
     stickers: Rc<Stickers<T>>,
     index: ReadOnlyMutable<Option<usize>>,
-    video: Rc<Video>,
-    opts: Option<VideoRenderOptions>,
+    embed: Rc<Embed>,
+    opts: Option<EmbedRenderOptions>,
 ) -> Dom {
     let opts = Rc::new(opts.unwrap_or_default());
 
     html!("document-fragment", {
-        .child_signal(video.playing_started.signal().map(clone!(video => move |playing_started| {
+        .child_signal(embed.playing_started.signal().map(clone!(embed => move |playing_started| {
             match playing_started {
                 false => None,
                 true => {
                     Some(html!("document-fragment", {
-                        .child_signal(video.host.signal_cloned().map(clone!(video, opts => move|host| {
+                        .child_signal(embed.host.signal_cloned().map(clone!(embed, opts => move|host| {
                             match host {
-                                VideoHost::Youtube(youtube) => Some(render_youtube_video(&youtube, Rc::clone(&video), Rc::clone(&opts))),
+                                EmbedHost::Youtube(youtube) => Some(render_youtube_embed(&youtube, Rc::clone(&embed), Rc::clone(&opts))),
                             }
                         })))
                     }))
                 },
             }
         })))
-        .child_signal(video.is_playing.signal().map(clone!(video => move |is_playing| {
+        .child_signal(embed.is_playing.signal().map(clone!(embed => move |is_playing| {
             match is_playing {
                 true => None,
                 false => {
                     Some(html!("document-fragment", {
-                        .child_signal(video.host.signal_cloned().map(clone!(video => move|host| {
+                        .child_signal(embed.host.signal_cloned().map(clone!(embed => move|host| {
                             match host {
-                                VideoHost::Youtube(youtube) => Some(
+                                EmbedHost::Youtube(youtube) => Some(
                                     html!("video-youtube-thumbnail", {
                                         .prop("videoId", youtube.url.get_id())
-                                        .apply(|dom| apply_transform(dom, &video.transform))
+                                        .apply(|dom| apply_transform(dom, &embed.transform))
                                     })
                                 ),
                             }
                         })))
                         .children(&mut [
                             render_transform(
-                                video.transform.clone(),
+                                embed.transform.clone(),
                                 ResizeLevel::KeepAspectRatio,
-                                Some(clone!(stickers, index, video => move || render_sticker_video_menu(stickers.clone(), index.clone(), Rc::clone(&video))))
+                                Some(clone!(stickers, index, embed => move || render_sticker_embed_menu(stickers.clone(), index.clone(), Rc::clone(&embed))))
                             ),
                             html!("div", {
-                                .apply(|dom| apply_transform(dom, &video.transform))
+                                .apply(|dom| apply_transform(dom, &embed.transform))
                                 .style("display", "inline-grid")
                                 .style("place-content", "center")
                                 .style("pointer-events", "none")
                                 .style("position", "relative")
                                 .style("z-index", "1")
                                 .child(html!("video-youtube-play-button", {
-                                    .event(clone!(video => move|_: events::Click| {
-                                        video.playing_started.set_neq(true);
-                                        video.is_playing.set(true);
+                                    .event(clone!(embed => move|_: events::Click| {
+                                        embed.playing_started.set_neq(true);
+                                        embed.is_playing.set(true);
                                     }))
                                 }))
                             })
@@ -220,7 +220,7 @@ pub fn render_sticker_video<T: AsSticker>(
     })
 }
 
-pub fn render_sticker_video_raw(video: &RawVideo, opts: Option<VideoRawRenderOptions>) -> Dom {
+pub fn render_sticker_embed_raw(embed: &RawEmbed, opts: Option<EmbedRawRenderOptions>) -> Dom {
     const COORDS_IN_CENTER: bool = true;
 
     let opts = opts.unwrap_or_default();
@@ -231,9 +231,9 @@ pub fn render_sticker_video_raw(video: &RawVideo, opts: Option<VideoRawRenderOpt
         .unwrap_or_else(|| DomBuilder::new_html("empty-fragment"));
 
     let size = opts.base.size.unwrap_or_else(|| Mutable::new(None));
-    size.set(Some((YOUTUBE_VIDEO_WIDTH, YOUTUBE_VIDEO_HEIGHT)));
+    size.set(Some((YOUTUBE_EMBED_WIDTH, YOUTUBE_EMBED_HEIGHT)));
 
-    let transform = video.transform.clone();
+    let transform = embed.transform.clone();
 
     let transform_override = opts.base.transform_override;
 
@@ -279,19 +279,19 @@ pub fn render_sticker_video_raw(video: &RawVideo, opts: Option<VideoRawRenderOpt
         .style_signal("width", width_signal.map(|x| format!("{}px", x)))
         .style_signal("height", height_signal.map(|x| format!("{}px", x)))
         .child({
-            match &video.host {
-                VideoHost::Youtube(youtube_video) => {
+            match &embed.host {
+                EmbedHost::Youtube(youtube_embed) => {
                     html!("video-youtube-player" => HtmlElement, {
-                        .prop("videoId", youtube_video.url.get_id())
+                        .prop("videoId", youtube_embed.url.get_id())
                         .prop_signal("autoplay", opts.autoplay.signal())
                         .prop_signal("loop", opts._loop.signal())
                         .prop_signal("captions", opts.captions.signal())
                         .prop_signal("muted", opts.muted.signal())
                         .apply(|mut dom| {
-                            if let Some(start_at) = video.start_at {
+                            if let Some(start_at) = embed.start_at {
                                 dom = dom.prop("start", start_at);
                             }
-                            if let Some(end_at) = video.end_at {
+                            if let Some(end_at) = embed.end_at {
                                 dom = dom.prop("end", end_at);
                             }
                             dom

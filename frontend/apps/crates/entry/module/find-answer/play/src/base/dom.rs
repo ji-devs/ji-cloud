@@ -4,9 +4,9 @@ use components::{
     module::_common::play::prelude::DomRenderable,
     stickers::{
         dom::{render_sticker_raw, StickerRawRenderOptions},
+        embed::dom::EmbedRawRenderOptions,
         sprite::dom::SpriteRawRenderOptions,
         text::dom::TextRawRenderOptions,
-        video::dom::VideoRawRenderOptions,
     },
 };
 use dominator::{apply_methods, clone, html, Dom};
@@ -71,8 +71,8 @@ impl DomRenderable for Base {
                                         }));
                                         StickerRawRenderOptions::Text(opts)
                                     }
-                                    RawSticker::Video(_) => {
-                                        StickerRawRenderOptions::Video(VideoRawRenderOptions::default())
+                                    RawSticker::Embed(_) => {
+                                        StickerRawRenderOptions::Embed(EmbedRawRenderOptions::default())
                                     }
                                 };
 

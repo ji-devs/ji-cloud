@@ -1,4 +1,4 @@
-use super::{state::*, video};
+use super::{state::*, embed};
 use components::{
     image::search::dom::render as render_image_search,
     tabs::{MenuTab, MenuTabKind},
@@ -9,17 +9,17 @@ use std::rc::Rc;
 
 pub fn render(state: Rc<Step2>) -> Dom {
     let is_empty = map_ref! {
-        let video = state.sidebar.base.video.signal_cloned()
+        let embed = state.sidebar.base.embed.signal_cloned()
             => {
-            video.is_none()
+            embed.is_none()
         }
     };
 
     let tab = map_ref! {
         let tab = state.tab.signal_cloned(),
-        let video = state.sidebar.base.video.signal_cloned()
+        let embed = state.sidebar.base.embed.signal_cloned()
             => {
-            (video.is_none(), tab.kind())
+            (embed.is_none(), tab.kind())
         }
     };
 
@@ -59,7 +59,7 @@ pub fn render(state: Rc<Step2>) -> Dom {
                         .child_signal(state.tab.signal_cloned().map(clone!(state => move |tab| {
                             match tab {
                                 Tab::Video => {
-                                    Some(video::render(Rc::clone(&state)))
+                                    Some(embed::render(Rc::clone(&state)))
                                 },
                                 Tab::Text => {
                                     Some(state.sidebar.base.text_editor.render_controls())

@@ -6,10 +6,10 @@ use components::{
     backgrounds::dom::render_backgrounds,
     module::_common::edit::prelude::*,
     stickers::{
+        embed::dom::{render_sticker_embed, EmbedRenderOptions},
         sprite::dom::render_sticker_sprite,
         state::Sticker,
         text::dom::render_sticker_text,
-        video::dom::{render_sticker_video, VideoRenderOptions},
     },
 };
 use std::rc::Rc;
@@ -35,7 +35,7 @@ impl DomRenderable for Main {
                     match sticker.as_ref() {
                         Sticker::Sprite(sprite) => render_sticker_sprite(state.base.stickers.clone(), index, sprite.clone(), None),
                         Sticker::Text(text) => render_sticker_text(state.base.stickers.clone(), index, text.clone(), None),
-                        Sticker::Video(video) => render_sticker_video(state.base.stickers.clone(), index, video.clone(), Some(get_video_render_opts(Rc::clone(&state)))),
+                        Sticker::Embed(embed) => render_sticker_embed(state.base.stickers.clone(), index, embed.clone(), Some(get_embed_render_opts(Rc::clone(&state)))),
                     }
                 }))
             )
@@ -48,8 +48,8 @@ impl MainDomRenderable for Main {
     }
 }
 
-fn get_video_render_opts(state: Rc<Main>) -> VideoRenderOptions {
-    VideoRenderOptions {
+fn get_embed_render_opts(state: Rc<Main>) -> EmbedRenderOptions {
+    EmbedRenderOptions {
         captions: state.base.play_settings.captions.read_only(),
         muted: state.base.play_settings.muted.read_only(),
         done_action: state.base.play_settings.done_action.read_only(),

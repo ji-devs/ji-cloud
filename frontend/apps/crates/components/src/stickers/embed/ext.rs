@@ -1,18 +1,18 @@
 use regex::Regex;
 use shared::domain::module::body::{
     Transform,
-    _groups::design::{Video, VideoHost, YoutubeUrl},
+    _groups::design::{Embed, EmbedHost, YoutubeUrl},
 };
 use url::Url;
 use utils::prelude::*;
 
-pub trait VideoExt {
-    fn new(value: VideoHost) -> Self;
+pub trait EmbedExt {
+    fn new(value: EmbedHost) -> Self;
 }
 
-impl VideoExt for Video {
-    /// Create a new Video
-    fn new(host: VideoHost) -> Self {
+impl EmbedExt for Embed {
+    /// Create a new Embed
+    fn new(host: EmbedHost) -> Self {
         Self {
             host,
             transform: Transform::identity(),
@@ -122,7 +122,7 @@ impl YoutubeUrlExt for YoutubeUrl {
 mod tests {
     use shared::domain::module::body::_groups::design::YoutubeUrl;
 
-    use crate::stickers::video::ext::YoutubeUrlExt;
+    use crate::stickers::embed::ext::YoutubeUrlExt;
 
     #[test]
     fn can_get_id_from_url() {

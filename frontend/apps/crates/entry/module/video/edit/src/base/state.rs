@@ -8,7 +8,7 @@ use components::{
     },
     text_editor::{TextEditor, TextEditorCallbacks},
 };
-use components::{module::_common::edit::prelude::*, stickers::video::state::Video};
+use components::{module::_common::edit::prelude::*, stickers::embed::state::Embed};
 use dominator::clone;
 use futures_signals::signal::{Mutable, ReadOnlyMutable, Signal};
 use futures_signals::signal_vec::{SignalVecExt, VecDiff};
@@ -37,14 +37,14 @@ pub struct Base {
     pub module_id: ModuleId,
     pub can_continue_next: Mutable<bool>,
     pub continue_next_fn: ContinueNextFn,
-    // Video-specific
+    // Embed-specific
     pub backgrounds: Rc<Backgrounds>,
     pub stickers: Rc<Stickers<Sticker>>,
     pub text_editor: Rc<TextEditor>,
     pub play_settings: PlaySettings,
 
-    // reference to the video in the stickers list
-    pub video: Mutable<Option<Rc<Video>>>,
+    // reference to the embed in the stickers list
+    pub embed: Mutable<Option<Rc<Embed>>>,
     pub clip: Mutable<bool>,
 }
 
@@ -163,34 +163,34 @@ impl Base {
             backgrounds,
             stickers,
             play_settings: PlaySettings::new(content.play_settings),
-            video: Mutable::new(None),
+            embed: Mutable::new(None),
             clip: Mutable::new(false),
         });
 
         *_self_ref.borrow_mut() = Some(_self.clone());
 
-        // this listens for changes in the stickers list and updates _self.video whenever there is a video
+        // this listens for changes in the stickers list and updates _self.embed whenever there is a embed
         spawn_local(_self.stickers.list.signal_vec_cloned().for_each(
             clone!(_self => move |diff| {
                 match diff {
                     VecDiff::Replace {..} |
                     VecDiff::RemoveAt {..} |
                     VecDiff::Pop {..} => {
-                        // check if video in vec
+                        // check if embed in vec
                         let stickers = _self.stickers.list.lock_ref();
-                        let video_sticker = stickers.iter().find(|sticker| {
-                            matches!(sticker, Sticker::Video(_))
+                        let embed_sticker = stickers.iter().find(|sticker| {
+                            matches!(sticker, Sticker::Embed(_))
                         });
 
-                        match video_sticker {
+                        match embed_sticker {
                             None => {
-                                _self.video.set(None);
+                                _self.embed.set(None);
                             },
-                            Some(Sticker::Video(video)) => {
-                                if video.start_at.get().is_some() || video.end_at.get().is_some() {
+                            Some(Sticker::Embed(embed)) => {
+                                if embed.start_at.get().is_some() || embed.end_at.get().is_some() {
                                     _self.clip.set(true);
                                 }
-                                _self.video.set(Some(Rc::clone(video)));
+                                _self.embed.set(Some(Rc::clone(embed)));
                             },
                             _ => unreachable!(),
                         }
@@ -199,14 +199,14 @@ impl Base {
                     VecDiff::InsertAt { value, .. } |
                     VecDiff::UpdateAt { value, .. } |
                     VecDiff::Push { value } => {
-                        // if value is a video, set
-                        if let Sticker::Video(video) = value {
-                            _self.video.set(Some(video));
+                        // if value is a embed, set
+                        if let Sticker::Embed(embed) = value {
+                            _self.embed.set(Some(embed));
                         };
                     },
                     VecDiff::Clear { .. } => {
-                        // remove video
-                        _self.video.set(None);
+                        // remove embed
+                        _self.embed.set(None);
                     },
 
                     VecDiff::Move { .. } => {
@@ -226,8 +226,8 @@ impl BaseExt<Step> for Base {
     type CanContinueSignal = impl Signal<Item = bool>;
     fn allowed_step_change(&self, _from: Step, to: Step) -> bool {
         match to {
-            // Only allow changing to steps 3 and 4 if the video URL has actually been set.
-            Step::Three | Step::Four => self.video.get_cloned().is_some(),
+            // Only allow changing to steps 3 and 4 if the embed URL has actually been set.
+            Step::Three | Step::Four => self.embed.get_cloned().is_some(),
             _ => true,
         }
     }

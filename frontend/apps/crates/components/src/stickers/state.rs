@@ -7,7 +7,7 @@ use utils::prelude::TransformExt;
 
 use std::rc::Rc;
 
-use super::{callbacks::Callbacks, sprite::state::Sprite, text::state::Text, video::state::Video};
+use super::{callbacks::Callbacks, embed::state::Embed, sprite::state::Sprite, text::state::Text};
 use crate::{text_editor::TextEditor, transform::state::TransformState};
 use dominator::clone;
 use shared::domain::module::body::_groups::design::Sticker as RawSticker;
@@ -30,8 +30,8 @@ pub enum Sticker {
     Sprite(Rc<Sprite>),
     /// Text
     Text(Rc<Text>),
-    /// Text
-    Video(Rc<Video>),
+    /// Embed
+    Embed(Rc<Embed>),
 }
 
 impl AsRef<Sticker> for Sticker {
@@ -70,8 +70,8 @@ impl Sticker {
                     stickers.deselect();
                 })),
             ))),
-            RawSticker::Video(video) => Self::Video(Rc::new(Video::new(
-                video,
+            RawSticker::Embed(embed) => Self::Embed(Rc::new(Embed::new(
+                embed,
                 Some(clone!(stickers => move |_| {
                     stickers.call_change();
                 })),
@@ -84,7 +84,7 @@ impl Sticker {
         match self {
             Self::Sprite(sprite) => RawSticker::Sprite(sprite.to_raw()),
             Self::Text(text) => RawSticker::Text(text.to_raw()),
-            Self::Video(video) => RawSticker::Video(video.to_raw()),
+            Self::Embed(embed) => RawSticker::Embed(embed.to_raw()),
         }
     }
 
@@ -92,14 +92,14 @@ impl Sticker {
         match self {
             Self::Sprite(sprite) => sprite.transform.get_inner_clone().get_translation_2d(),
             Self::Text(text) => text.transform.get_inner_clone().get_translation_2d(),
-            Self::Video(video) => video.transform.get_inner_clone().get_translation_2d(),
+            Self::Embed(embed) => embed.transform.get_inner_clone().get_translation_2d(),
         }
     }
     pub fn transform(&self) -> &TransformState {
         match self {
             Self::Sprite(sprite) => &sprite.transform,
             Self::Text(text) => &text.transform,
-            Self::Video(video) => &video.transform,
+            Self::Embed(embed) => &embed.transform,
         }
     }
 }

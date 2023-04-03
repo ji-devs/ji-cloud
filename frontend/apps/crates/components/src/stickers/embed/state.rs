@@ -1,17 +1,17 @@
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use shared::domain::module::body::{
     Transform,
-    _groups::design::{Video as RawVideo, VideoHost},
+    _groups::design::{Embed as RawEmbed, EmbedHost},
 };
 use std::rc::Rc;
 
 use crate::transform::state::{TransformCallbacks, TransformState};
 
-use super::config::{YOUTUBE_VIDEO_HEIGHT, YOUTUBE_VIDEO_WIDTH};
+use super::config::{YOUTUBE_EMBED_HEIGHT, YOUTUBE_EMBED_WIDTH};
 
 #[derive(Clone)]
-pub struct Video {
-    pub host: Mutable<VideoHost>,
+pub struct Embed {
+    pub host: Mutable<EmbedHost>,
     pub start_at: Mutable<Option<u32>>,
     pub end_at: Mutable<Option<u32>>,
     pub transform: Rc<TransformState>,
@@ -19,28 +19,28 @@ pub struct Video {
     pub is_playing: Mutable<bool>,
 }
 
-impl Video {
+impl Embed {
     pub fn new(
-        video: &RawVideo,
+        embed: &RawEmbed,
         on_transform_finished: Option<impl Fn(Transform) + 'static>,
         on_blur: Option<impl Fn() + 'static>,
     ) -> Self {
-        let video = video.clone();
+        let embed = embed.clone();
         let is_playing = Mutable::new(false);
         let playing_started = Mutable::new(false);
 
         let transform_callbacks =
             TransformCallbacks::new(on_transform_finished, None::<fn()>, on_blur);
         Self {
-            host: Mutable::new(video.host.clone()),
+            host: Mutable::new(embed.host.clone()),
             transform: Rc::new(TransformState::new(
-                video.transform,
-                Some((YOUTUBE_VIDEO_WIDTH, YOUTUBE_VIDEO_HEIGHT)),
+                embed.transform,
+                Some((YOUTUBE_EMBED_WIDTH, YOUTUBE_EMBED_HEIGHT)),
                 true,
                 transform_callbacks,
             )),
-            start_at: Mutable::new(video.start_at),
-            end_at: Mutable::new(video.end_at),
+            start_at: Mutable::new(embed.start_at),
+            end_at: Mutable::new(embed.end_at),
             playing_started,
             is_playing,
         }
@@ -53,8 +53,8 @@ impl Video {
         height_signal(self.transform.size.signal_cloned())
     }
 
-    pub fn to_raw(&self) -> RawVideo {
-        RawVideo {
+    pub fn to_raw(&self) -> RawEmbed {
+        RawEmbed {
             host: self.host.get_cloned(),
             transform: self.transform.get_inner_clone(),
             start_at: self.start_at.get(),

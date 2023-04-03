@@ -6,13 +6,13 @@ use futures_signals::{
     map_ref,
     signal::{Mutable, Signal, SignalExt},
 };
-use shared::domain::module::body::legacy::activity::Video as RawVideo;
+use shared::domain::module::body::legacy::activity::Video as RawEmbed;
 use utils::{math::mat4::Matrix4, resize::resize_info_signal};
 use web_sys::{HtmlElement, HtmlVideoElement};
 
 pub struct Video {
     pub base: Rc<Base>,
-    pub raw: RawVideo,
+    pub raw: RawEmbed,
     pub start_gates: Mutable<StartGates>,
     pub video_size: Mutable<Option<(f64, f64)>>,
     pub yt_api: RefCell<Option<YoutubeApi>>,
@@ -26,7 +26,7 @@ pub struct StartGates {
 }
 
 impl Video {
-    pub fn new(base: Rc<Base>, raw: RawVideo) -> Rc<Self> {
+    pub fn new(base: Rc<Base>, raw: RawEmbed) -> Rc<Self> {
         let _self = Rc::new(Self {
             base,
             raw,

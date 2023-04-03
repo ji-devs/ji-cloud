@@ -1,16 +1,16 @@
 use super::{
     super::super::state::{AsSticker, Stickers},
-    super::state::Video,
+    super::state::Embed,
 };
 use dominator::{clone, html, Dom};
 use futures_signals::signal::ReadOnlyMutable;
 use std::rc::Rc;
 use utils::prelude::*;
 
-pub fn render_sticker_video_menu<T: AsSticker>(
+pub fn render_sticker_embed_menu<T: AsSticker>(
     stickers: Rc<Stickers<T>>,
     index: ReadOnlyMutable<Option<usize>>,
-    video: Rc<Video>,
+    embed: Rc<Embed>,
 ) -> Dom {
     html!("div", {
         .style("display", "flex")
@@ -19,8 +19,8 @@ pub fn render_sticker_video_menu<T: AsSticker>(
         .children(&mut [
             html!("menu-line", {
                 .prop("icon", "move-to-front")
-                .event(clone!(stickers, index, video => move |_ :events::Click| {
-                    video.transform.close_menu();
+                .event(clone!(stickers, index, embed => move |_ :events::Click| {
+                    embed.transform.close_menu();
                     if let Some(index) = index.get() {
                         stickers.move_to_front(index);
                     }
@@ -28,8 +28,8 @@ pub fn render_sticker_video_menu<T: AsSticker>(
             }),
             html!("menu-line", {
                 .prop("icon", "move-forward")
-                .event(clone!(stickers, index, video => move |_ :events::Click| {
-                    video.transform.close_menu();
+                .event(clone!(stickers, index, embed => move |_ :events::Click| {
+                    embed.transform.close_menu();
                     if let Some(index) = index.get() {
                         stickers.move_forward(index);
                     }
@@ -37,8 +37,8 @@ pub fn render_sticker_video_menu<T: AsSticker>(
             }),
             html!("menu-line", {
                 .prop("icon", "move-backward")
-                .event(clone!(stickers, index, video => move |_ :events::Click| {
-                    video.transform.close_menu();
+                .event(clone!(stickers, index, embed => move |_ :events::Click| {
+                    embed.transform.close_menu();
                     if let Some(index) = index.get() {
                         stickers.move_backward(index);
                     }
@@ -46,8 +46,8 @@ pub fn render_sticker_video_menu<T: AsSticker>(
             }),
             html!("menu-line", {
                 .prop("icon", "move-to-back")
-                .event(clone!(stickers, index, video => move |_ :events::Click| {
-                    video.transform.close_menu();
+                .event(clone!(stickers, index, embed => move |_ :events::Click| {
+                    embed.transform.close_menu();
                     if let Some(index) = index.get() {
                         stickers.move_to_back(index);
                     }
@@ -55,8 +55,8 @@ pub fn render_sticker_video_menu<T: AsSticker>(
             }),
             html!("menu-line", {
                 .prop("icon", "delete")
-                .event(clone!(stickers, video => move |_ :events::Click| {
-                    video.transform.close_menu();
+                .event(clone!(stickers, embed => move |_ :events::Click| {
+                    embed.transform.close_menu();
                     if let Some(index) = index.get() {
                         stickers.delete_index(index);
                     }

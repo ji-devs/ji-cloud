@@ -1,8 +1,8 @@
 #![allow(dead_code)]
 
 use components::stickers::{
+    embed::ext::{EmbedExt, YoutubeUrlExt},
     sprite::ext::*,
-    video::ext::{VideoExt, YoutubeUrlExt},
 };
 use once_cell::sync::OnceCell;
 use shared::{
@@ -13,8 +13,8 @@ use shared::{
             body::{
                 Image, ModuleAssist,
                 _groups::design::{
-                    Backgrounds, BaseContent, Sprite, Sticker, Text, Video, VideoHost, YoutubeUrl,
-                    YoutubeVideo,
+                    Backgrounds, BaseContent, Embed, EmbedHost, Sprite, Sticker, Text,
+                    YoutubeEmbed, YoutubeUrl,
                 },
                 video::{Content, DoneAction, Mode, ModuleData as RawData, PlaySettings},
             },
@@ -47,7 +47,7 @@ pub struct InitData {
 pub enum InitSticker {
     Text,
     Sprite,
-    Video,
+    Embed,
 }
 
 impl DebugSettings {
@@ -82,13 +82,13 @@ impl DebugSettings {
                                         id: ImageId(Uuid::parse_str(IMAGE_UUID).unwrap_ji()),
                                         lib: MediaLibrary::Global,
                                     })),
-                                    InitSticker::Video => {
+                                    InitSticker::Embed => {
                                         let youtube_url =
                                             YoutubeUrl::try_parse("LUQksiZ2TVw".to_string())
                                                 .unwrap_ji();
                                         let host =
-                                            VideoHost::Youtube(YoutubeVideo { url: youtube_url });
-                                        Sticker::Video(Video::new(host))
+                                            EmbedHost::Youtube(YoutubeEmbed { url: youtube_url });
+                                        Sticker::Embed(Embed::new(host))
                                     }
                                 })
                                 .collect(),
@@ -114,7 +114,7 @@ pub fn init(asset_id: AssetId, _module_id: ModuleId) {
             .set(DebugSettings::debug(Some(InitData {
                 stickers: vec![
                     InitSticker::Text,
-                    InitSticker::Video, //InitSticker::Sprite
+                    InitSticker::Embed, //InitSticker::Sprite
                 ],
             })))
             .unwrap_ji();

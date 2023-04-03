@@ -35,7 +35,7 @@ pub use shared::domain::{
     }
 };
 pub use utils::{math::mat4::Matrix4, prelude::*};
-pub use components::stickers::video::ext::YoutubeUrlExt;
+pub use components::stickers::embed::ext::YoutubeUrlExt;
 pub use scan_fmt::scan_fmt;
 
 use super::context::Context;

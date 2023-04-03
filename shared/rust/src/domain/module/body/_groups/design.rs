@@ -57,9 +57,9 @@ pub enum Sticker {
     /// Text
     #[serde(alias = "text")]
     Text(Text),
-    /// Video
-    #[serde(alias = "video")]
-    Video(Video),
+    /// Embed
+    #[serde(alias = "embed")]
+    Embed(Embed),
 }
 
 impl Sticker {
@@ -68,7 +68,7 @@ impl Sticker {
         match self {
             Self::Sprite(sprite) => &sprite.transform,
             Self::Text(text) => &text.transform,
-            Self::Video(video) => &video.transform,
+            Self::Embed(embed) => &embed.transform,
         }
     }
 }
@@ -139,39 +139,39 @@ pub enum SpriteEffect {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
-/// Video
+/// Embed
 /// Text are serialized text things
-pub struct Video {
-    /// The video host
-    pub host: VideoHost,
+pub struct Embed {
+    /// The embed host
+    pub host: EmbedHost,
 
     /// Transforms
     pub transform: Transform,
 
-    /// url of the YouTube video
+    /// url of the YouTube embed
     pub start_at: Option<u32>,
 
-    /// url of the YouTube video
+    /// url of the YouTube embed
     pub end_at: Option<u32>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
-/// Host of video
-pub enum VideoHost {
+/// Host of embed
+pub enum EmbedHost {
     /// YouTube
     #[serde(alias = "youtube")]
-    Youtube(YoutubeVideo),
+    Youtube(YoutubeEmbed),
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
-/// YouTube host video url
-pub struct YoutubeVideo {
-    /// url of the YouTube video
+/// YouTube host embed
+pub struct YoutubeEmbed {
+    /// url of the YouTube embed
     pub url: YoutubeUrl,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
-/// YouTube host video url
+/// YouTube host embed url
 pub struct YoutubeUrl(pub String);
 
 impl VideoHost {

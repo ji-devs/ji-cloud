@@ -1,4 +1,7 @@
 use super::{
+    embed::dom::{
+        render_sticker_embed, render_sticker_embed_raw, EmbedRawRenderOptions, EmbedRenderOptions,
+    },
     sprite::dom::{
         render_sticker_sprite, render_sticker_sprite_raw, SpriteRawRenderOptions,
         SpriteRenderOptions,
@@ -6,9 +9,6 @@ use super::{
     state::*,
     text::dom::{
         render_sticker_text, render_sticker_text_raw, TextRawRenderOptions, TextRenderOptions,
-    },
-    video::dom::{
-        render_sticker_video, render_sticker_video_raw, VideoRawRenderOptions, VideoRenderOptions,
     },
 };
 use dominator::{clone, html, Dom, DomBuilder};
@@ -43,7 +43,7 @@ pub fn mixin_sticker_button(dom: DomBuilder<HtmlElement>) -> DomBuilder<HtmlElem
 pub enum StickerRenderOptions {
     Sprite(SpriteRenderOptions),
     Text(TextRenderOptions),
-    Video(VideoRenderOptions),
+    Embed(EmbedRenderOptions),
 }
 
 impl StickerRenderOptions {
@@ -55,7 +55,7 @@ impl StickerRenderOptions {
             Sticker::Text(_) => Self::Text(TextRenderOptions {
                 base: base.unwrap_or_default(),
             }),
-            Sticker::Video(_) => Self::Video(VideoRenderOptions {
+            Sticker::Embed(_) => Self::Embed(EmbedRenderOptions {
                 base: base.unwrap_or_default(),
                 ..Default::default()
             }),
@@ -74,10 +74,10 @@ impl StickerRenderOptions {
             _ => panic!("not a text!"),
         }
     }
-    pub fn into_video_unchecked(self) -> VideoRenderOptions {
+    pub fn into_embed_unchecked(self) -> EmbedRenderOptions {
         match self {
-            Self::Video(inner) => inner,
-            _ => panic!("not a video!"),
+            Self::Embed(inner) => inner,
+            _ => panic!("not an embed!"),
         }
     }
 
@@ -85,7 +85,7 @@ impl StickerRenderOptions {
         match self {
             Self::Sprite(inner) => &inner.base,
             Self::Text(inner) => &inner.base,
-            Self::Video(inner) => &inner.base,
+            Self::Embed(inner) => &inner.base,
         }
     }
 }
@@ -97,7 +97,7 @@ pub struct BaseRenderOptions {}
 pub enum StickerRawRenderOptions {
     Sprite(SpriteRawRenderOptions),
     Text(TextRawRenderOptions),
-    Video(VideoRawRenderOptions),
+    Embed(EmbedRawRenderOptions),
 }
 
 impl StickerRawRenderOptions {
@@ -110,7 +110,7 @@ impl StickerRawRenderOptions {
                 base: base.unwrap_or_default(),
                 measurer_mixin: None,
             }),
-            RawSticker::Video(_) => Self::Video(VideoRawRenderOptions {
+            RawSticker::Embed(_) => Self::Embed(EmbedRawRenderOptions {
                 base: base.unwrap_or_default(),
                 ..Default::default()
             }),
@@ -129,10 +129,10 @@ impl StickerRawRenderOptions {
             _ => panic!("not a text!"),
         }
     }
-    pub fn into_video_unchecked(self) -> VideoRawRenderOptions {
+    pub fn into_embed_unchecked(self) -> EmbedRawRenderOptions {
         match self {
-            Self::Video(inner) => inner,
-            _ => panic!("not a video!"),
+            Self::Embed(inner) => inner,
+            _ => panic!("not an embed!"),
         }
     }
 
@@ -140,7 +140,7 @@ impl StickerRawRenderOptions {
         match self {
             Self::Sprite(inner) => &inner.base,
             Self::Text(inner) => &inner.base,
-            Self::Video(inner) => &inner.base,
+            Self::Embed(inner) => &inner.base,
         }
     }
 }
@@ -264,11 +264,11 @@ pub fn render_sticker<T: AsSticker>(
                     text.clone(),
                     opts.map(|opts| opts.into_text_unchecked()),
                 ),
-                Sticker::Video(video) => render_sticker_video(
+                Sticker::Embed(embed) => render_sticker_embed(
                     stickers,
                     index,
-                    video.clone(),
-                    opts.map(|opts| opts.into_video_unchecked()),
+                    embed.clone(),
+                    opts.map(|opts| opts.into_embed_unchecked()),
                 ),
             }
         )
@@ -318,10 +318,10 @@ where
                     opts.base.set_mixin(mixin.clone());
                     StickerRawRenderOptions::Text(opts)
                 }
-                RawSticker::Video(_) => {
-                    let mut opts = VideoRawRenderOptions::default();
+                RawSticker::Embed(_) => {
+                    let mut opts = EmbedRawRenderOptions::default();
                     opts.base.set_mixin(mixin.clone());
-                    StickerRawRenderOptions::Video(opts)
+                    StickerRawRenderOptions::Embed(opts)
                 }
             };
 
@@ -342,8 +342,8 @@ pub fn render_sticker_raw(
         RawSticker::Text(text) => {
             render_sticker_text_raw(text, theme_id, opts.map(|opts| opts.into_text_unchecked()))
         }
-        RawSticker::Video(video) => {
-            render_sticker_video_raw(video, opts.map(|opts| opts.into_video_unchecked()))
+        RawSticker::Embed(embed) => {
+            render_sticker_embed_raw(embed, opts.map(|opts| opts.into_embed_unchecked()))
         }
     }
 }
