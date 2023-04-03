@@ -58,6 +58,9 @@ export function getLeafStyles(text: EditorText): CSSProperties {
     if (text.font) styles.fontFamily = text.font;
     if (text.weight) styles.fontWeight = text.weight;
 
+    styles.display = "inline-block";
+    styles.width = "100%";
+
     return styles;
 }
 
