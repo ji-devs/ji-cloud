@@ -23,6 +23,7 @@ impl CreateCircle {
                     .prop("slot", "name")
                     .child(html!("input" => HtmlInputElement, {
                         .prop("placeholder", "Type a name")
+                        .prop("dir", "auto")
                         .with_node!(input => {
                             .event(clone!(state => move |_: events::Input| {
                                 let value = input.value();
@@ -36,6 +37,7 @@ impl CreateCircle {
                     .prop("slot", "description")
                     .child(html!("textarea" => HtmlTextAreaElement, {
                         .prop("placeholder", "Describe why members would want to join this circle")
+                        .prop("dir", "auto")
                         .with_node!(input => {
                             .event(clone!(state => move |_: events::Input| {
                                 let value = input.value();

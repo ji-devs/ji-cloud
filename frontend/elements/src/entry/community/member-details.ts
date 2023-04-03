@@ -203,7 +203,7 @@ export class _ extends LitElement {
                 </header>
                 ${
                     this.bio ? html`
-                        <p>
+                        <p dir="auto">
                             ${this.bio}
                         </p>
                     ` : nothing

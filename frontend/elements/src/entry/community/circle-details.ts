@@ -172,7 +172,7 @@ export class _ extends LitElement {
                     <h3>${STR_ABOUT}</h3>
                     <slot name="edit-about"></slot>
                 </header>
-                <p>${this.description}</p>
+                <p dir="auto">${this.description}</p>
             </div>
             <div class="members-section">
                 <div class="member-heading">

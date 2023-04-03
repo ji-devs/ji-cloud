@@ -110,6 +110,7 @@ impl CircleDetails {
                                     html!("fa-button", {
                                         .prop("slot", "edit-about")
                                         .prop("icon", "fa-light fa-pen")
+                                        .prop("dir", "auto")
                                         .text("about")
                                         .event(clone!(state => move |_: events::Click| {
                                             state.active_popup.set(Some(ActivePopup::About))

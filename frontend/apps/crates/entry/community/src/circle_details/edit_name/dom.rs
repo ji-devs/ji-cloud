@@ -39,6 +39,7 @@ impl Component<EditName> for Rc<EditName> {
                             .child(html!("input" => HtmlInputElement, {
                                 .with_node!(elem => {
                                     .prop("placeholder", STR_NAME_PLACEHOLDER)
+                                    .prop("dir", "auto")
                                     .prop_signal("value", state.display_name.signal_cloned())
                                     .event(clone!(state => move |_: events::Input| {
                                         state.display_name.set(elem.value());
