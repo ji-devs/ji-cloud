@@ -4,6 +4,7 @@ use super::state::*;
 use components::collision::stickers_traces::pixels::{
     get_hit_index, StickerBoundsKind, StickerHitSource,
 };
+use components::traces::utils::TraceExt;
 use futures_signals::signal::Mutable;
 use shared::domain::module::body::{_groups::design::Trace, drag_drop::TargetTransform};
 use std::{borrow::Cow, rc::Rc};
@@ -94,51 +95,78 @@ impl DragItem {
                             .is_some();
 
                         match (self.is_placed_item, sticker_exists) {
-                            (false, false) => {
-                                // A item is dragged from the initial list and placed inside
-                                // a trace area
+                            (is_placed_item, false) => {
+                                let trace_has_items =
+                                    state.placed_items.lock_ref().iter().any(|item| {
+                                        item.trace_idx
+                                            .get()
+                                            .map(|idx| idx == hit_idx)
+                                            .unwrap_or_default()
+                                    });
 
-                                // We need to create a new Item so that it's signals are not cloned
-                                // and the transforms in one don't affect the transforms in the
-                                // other.
-                                let create_item = || Item {
-                                    sticker: self.item.sticker.clone(),
-                                    kind: Mutable::new(ItemKind::Interactive(Interactive {
-                                        audio: interactive_item.audio.clone(),
-                                        target_transform: Mutable::new(Some(transform.clone())),
-                                    })),
+                                let transform = if !trace_has_items {
+                                    if let Some(trace) = state.base.traces.get(hit_idx) {
+                                        let (center_x, center_y) =
+                                            trace.calc_bounds(false).unwrap_ji().middle();
+                                        let mut trace_transform = trace.transform.clone();
+                                        trace_transform
+                                            .add_translation_2d(center_x - 0.5, center_y - 0.5);
+                                        let (x, y) = trace_transform.get_translation_2d();
+
+                                        let mut transform = transform.clone();
+                                        transform.set_translation_2d(x, y);
+                                        transform
+                                    } else {
+                                        transform
+                                    }
+                                } else {
+                                    transform
                                 };
 
-                                // Create a new DragItem with the current transform. This will get added to
-                                // the list of targets.
-                                let drag_item = DragItem {
-                                    item: create_item(),
-                                    index: self.index,
-                                    drag: Mutable::new(None),
-                                    base: self.base.clone(),
-                                    is_placed_item: true,
-                                    trace_idx: Mutable::new(Some(hit_idx)),
-                                };
+                                // The item will be placed in a trace
+                                if is_placed_item {
+                                    // An item is dragged from one trace area to another. Update the
+                                    // trace index.
+                                    //
+                                    // This will also fire whenever a sticker is moved around inside
+                                    // it's current trace area, but will not change anything thanks to
+                                    // set_neq.
+                                    self.trace_idx.set_neq(Some(hit_idx));
+                                } else {
+                                    // A item is dragged from the initial list and placed inside
+                                    // a trace area
 
-                                state.placed_items.lock_mut().push_cloned(drag_item);
-                                state
-                                    .base
-                                    .sticker_targets
-                                    .lock_mut()
-                                    .push_cloned(StickerTarget {
-                                        sticker_idx: self.index,
-                                        trace_idx: hit_idx,
+                                    // We need to create a new Item so that it's signals are not cloned
+                                    // and the transforms in one don't affect the transforms in the
+                                    // other.
+                                    let create_item = || Item {
+                                        sticker: self.item.sticker.clone(),
+                                        kind: Mutable::new(ItemKind::Interactive(Interactive {
+                                            audio: interactive_item.audio.clone(),
+                                            target_transform: Mutable::new(Some(transform.clone())),
+                                        })),
+                                    };
+
+                                    // Create a new DragItem with the current transform. This will get added to
+                                    // the list of targets.
+                                    let drag_item = DragItem {
                                         item: create_item(),
-                                    })
-                            }
-                            (true, false) => {
-                                // An item is dragged from one trace area to another. Update the
-                                // trace index.
-                                //
-                                // This will also fire whenever a sticker is moved around inside
-                                // it's current trace area, but will not change anything thanks to
-                                // set_neq.
-                                self.trace_idx.set_neq(Some(hit_idx));
+                                        index: self.index,
+                                        drag: Mutable::new(None),
+                                        base: self.base.clone(),
+                                        is_placed_item: true,
+                                        trace_idx: Mutable::new(Some(hit_idx)),
+                                    };
+
+                                    state.placed_items.lock_mut().push_cloned(drag_item);
+                                    state.base.sticker_targets.lock_mut().push_cloned(
+                                        StickerTarget {
+                                            sticker_idx: self.index,
+                                            trace_idx: hit_idx,
+                                            item: create_item(),
+                                        },
+                                    )
+                                }
                             }
                             (true, true) => {
                                 // Moving an item from a trace into another trace where that item

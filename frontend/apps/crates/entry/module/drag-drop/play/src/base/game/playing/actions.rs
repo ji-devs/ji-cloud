@@ -69,7 +69,7 @@ impl PlayState {
 
     pub fn evaluate(state: Rc<Self>, item_index: usize, item: Rc<InteractiveItem>) {
         spawn_local(async move {
-            let mut is_correct = false;
+            let mut item_target = None;
 
             if let Some(hit_source) = item.get_hit_source(Some(SourceTransformOverride::Current)) {
                 let traces: Vec<&Trace> = state
@@ -81,45 +81,73 @@ impl PlayState {
                     .collect();
 
                 if let Some(index) = get_hit_index(hit_source, &traces) {
-                    is_correct = state.game.base.item_targets.iter().any(|item_target| {
-                        item_index == item_target.sticker_idx && item_target.trace_idx == index
-                    });
+                    item_target = state
+                        .game
+                        .base
+                        .item_targets
+                        .iter()
+                        .find(|item_target| {
+                            item_index == item_target.sticker_idx && item_target.trace_idx == index
+                        })
+                        .map(|target| (target, index));
 
                     if DEBUGGING_EVALUATION_RESULT
-                        && (!DEBUGGING_EVALUATION_RESULT_ONLY_MATCH || is_correct)
+                        && (!DEBUGGING_EVALUATION_RESULT_ONLY_MATCH || item_target.is_some())
                     {
                         debug_render_hit_trace(index, &traces);
                     }
                 }
             }
 
-            if !is_correct {
-                // Move the item back to it's origin
-                item.move_back_to_origin();
-                item.play_audio_effect(AudioEffect::Wrong);
-            } else {
-                item.completed.set_neq(true);
-                if !Self::evaluate_all_completed(state.clone()) {
-                    item.play_audio_effect(AudioEffect::Correct);
-                } else {
-                    // Play JIG positive feedback sound
-                    AUDIO_MIXER.with(|mixer| {
-                        let positive_audio: AudioPath<'_> = mixer.get_random_positive().into();
-                        mixer.play_oneshot_on_ended(positive_audio, move || {
-                            // Once the positive feedback effect has played, we can show/play the
-                            // feedback for the activity. If we played this at the same time, it
-                            // we could have two audio clips playing simultaneously which would be
-                            // noisy and distracting from the intent of the feedbacks.
-                            let feedback = &state.game.base.feedback;
-                            if feedback.has_content() {
-                                state.game.base.feedback_signal.set(Some(feedback.clone()));
-                            } else {
-                                state.game.base.set_play_phase(ModulePlayPhase::Ending(Some(
-                                    ModuleEnding::Next,
-                                )));
-                            }
+            match item_target {
+                None => {
+                    // Move the item back to it's origin
+                    item.move_back_to_origin();
+                    item.play_audio_effect(AudioEffect::Wrong);
+                }
+                Some((target_transform, index)) => {
+                    // If the number of items that can be placed in a trace is just 1, then we snap
+                    // the item to the position that the teacher placed it in. Otherwise, we let the
+                    // player place the item wherever they like in the trace.
+                    let target_item_count = state
+                        .game
+                        .base
+                        .item_targets
+                        .iter()
+                        .filter(|target| target.trace_idx == index)
+                        .count();
+                    if target_item_count == 1 {
+                        item.curr_transform.replace_with(|t| {
+                            let mut t = t.clone();
+                            let (x, y) = target_transform.transform.get_translation_2d();
+                            t.set_translation_2d(x, y);
+                            t
                         });
-                    });
+                    }
+
+                    item.completed.set_neq(true);
+                    if !Self::evaluate_all_completed(state.clone()) {
+                        item.play_audio_effect(AudioEffect::Correct);
+                    } else {
+                        // Play JIG positive feedback sound
+                        AUDIO_MIXER.with(|mixer| {
+                            let positive_audio: AudioPath<'_> = mixer.get_random_positive().into();
+                            mixer.play_oneshot_on_ended(positive_audio, move || {
+                                // Once the positive feedback effect has played, we can show/play the
+                                // feedback for the activity. If we played this at the same time, it
+                                // we could have two audio clips playing simultaneously which would be
+                                // noisy and distracting from the intent of the feedbacks.
+                                let feedback = &state.game.base.feedback;
+                                if feedback.has_content() {
+                                    state.game.base.feedback_signal.set(Some(feedback.clone()));
+                                } else {
+                                    state.game.base.set_play_phase(ModulePlayPhase::Ending(Some(
+                                        ModuleEnding::Next,
+                                    )));
+                                }
+                            });
+                        });
+                    }
                 }
             }
         });
