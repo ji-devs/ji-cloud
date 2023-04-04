@@ -92,6 +92,7 @@ export class _ extends LitElement {
                     color: #555;
                     text-align: center;
                     margin: 0;
+                    line-height: 1.4em;
 
                     /* max 2 lines */
                     display: -webkit-box;
