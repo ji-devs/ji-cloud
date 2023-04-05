@@ -1,167 +1,167 @@
-use components::{
-    module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback},
-    player_popup::{PlayerPopup, PreviewPopupCallbacks},
-    share_asset::ShareAsset,
-};
+use super::actions;
+use components::stickers::video::ext::YoutubeUrlExt;
 use dominator::{clone, html, Dom};
-use futures_signals::signal::{Signal, SignalExt};
-use shared::domain::{
-    meta::ResourceTypeId,
-    pro_dev::{unit::ProDevUnit, ProDevResponse},
-};
+use futures_signals::map_ref;
+use futures_signals::signal::{Mutable, Signal, SignalExt};
+use serde::{Serialize, Deserialize};
+use shared::domain::image::ImageId;
+use shared::domain::module::body::_groups::design::VideoHost;
+use shared::domain::pdf::PdfId;
+use shared::domain::pro_dev::unit::{ProDevUnit, Video};
+use shared::media::MediaLibrary;
+use utils::path::pdf_lib_url;
 use std::rc::Rc;
-use utils::{
-    asset::{AssetPlayerOptions, ProDevPlayerOptions, ResourceContentExt},
-    events,
-    languages::Language,
-};
+use utils::events;
+use web_sys::{HtmlElement, HtmlIFrameElement};
 
 use super::state::ProDevPlayer;
 
-const STR_SHARE_COURSE: &str = "Share pro_dev";
+// const INT_IFRAME_PADDING: usize = 30;
+// const INT_INITIAL_HEIGHT: usize = 3000;
 
 impl ProDevPlayer {
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self;
-        state.load_data();
+        actions::load_data(state.clone());
+
+        log::info!("After load");
+
         html!("div", {
-            .child_signal(state.pro_dev.signal_ref(clone!(state => move|pro_dev| {
-                pro_dev.as_ref().map(|pro_dev| {
-                    state.render_pro_dev(pro_dev)
+            // start stupid
+            .text_signal(state.active_unit.signal().map(|active_unit| {
+                format!("Active unit: {active_unit:?}")
+            }))
+            .child(html!("br"))
+            // end stupid
+            .child_signal(state.active_unit_signal().map(clone!(state => move|unit| {
+                unit.map(|unit| {
+                    state.render_active_unit(unit)
                 })
             })))
-            .child_signal(state.active_unit.signal_cloned().map(clone!(state => move|active_unit| {
-                active_unit.map(|unit_id| {
-                    let close = clone!(state => move || {
-                        state.done_playing_unit();
-                    });
-                    let options = AssetPlayerOptions::ProDev(ProDevPlayerOptions {
-                        is_student: state.player_options.is_student,
-                        ..Default::default()
-                    });
-                    PlayerPopup::new(
-                        state.pro_dev_id.into(),
-                        None,
-                        unit_id.into(),
-                        options,
-                        PreviewPopupCallbacks::new(close)
-                    ).render(None)
-                })
-            })))
-        })
-    }
+            .child_signal(state.pro_dev.signal_cloned().map(clone!(state => move |pro_dev| {
+                pro_dev.map(|pro_dev| {
+                    log::info!("Inside html");
 
-    fn render_pro_dev(self: &Rc<Self>, pro_dev: &ProDevResponse) -> Dom {
-        let state = self;
-        let language = Language::code_to_display_name(&pro_dev.pro_dev_data.language);
-        html!("jig-play-pro_dev-main", {
-            .prop("name", &pro_dev.pro_dev_data.display_name)
-            .prop("description", &pro_dev.pro_dev_data.description)
-            .prop("language", language)
-            .prop("author", &pro_dev.author_name.to_owned().unwrap_or_default())
-            .prop("itemsCount", pro_dev.pro_dev_data.units.len())
-            .prop("hasAdditionalResources", !pro_dev.pro_dev_data.additional_resources.is_empty())
-            .child(
-                ModuleThumbnail::new_hight_res(
-                    pro_dev.id.into(),
-                    pro_dev.pro_dev_data.cover.clone(),
-                    ThumbnailFallback::Asset,
-                    state.player_options.draft_or_live,
-                ).render(Some("thumbnail"))
-            )
-            .children_signal_vec(state.units.signal_ref(clone!(state => move |units| {
-                units.iter().enumerate().map(clone!(state => move |(i, unit)| {
-                    state.render_unit(unit, i)
-                })).collect()
-            })).to_signal_vec())
-            .children(pro_dev.pro_dev_data.additional_resources.iter().map(|resource| {
-                html!("a", {
-                    .prop("slot", "additional-resources")
-                    .prop("target", "_BLANK")
-                    .prop("title", &resource.display_name)
-                    .prop("href", resource.resource_content.get_link())
-                    .child(html!("fa-icon", {
-                        .prop("icon", "fa-light fa-file")
-                    }))
-                    .text(" ")
-                    .text_signal(state.resource_type_name_signal(resource.resource_type_id))
-                })
-            }))
-            .child(html!("fa-button", {
-                .prop("slot", "play")
-                .prop("icon", "fa-solid fa-circle-play")
-                .event(clone!(state => move |_: events::Click| {
-                    let units = state.units.lock_mut();
-                    let unit_id = units.first().map(|unit| unit.id);
-                    state.active_unit.set(unit_id);
-
-                }))
-            }))
-            .child(ShareAsset::new(pro_dev.clone().into()).render(
-                html!("button-empty", {
-                    .child(html!("fa-icon", {
-                        .prop("icon", "fa-light fa-share-nodes")
-                    }))
-                    .text(STR_SHARE_COURSE)
-                }),
-                Some("share")
-            ))
-            .child_signal(state.active_unit.signal_cloned().map(|active_unit| {
-                active_unit.map(|active_unit| {
                     html!("div", {
-                        .text(&active_unit.0.to_string())
-                    })
+                        .text(format!("display name: {}", pro_dev.pro_dev_data.display_name).as_str())
+                        .children(pro_dev.pro_dev_data.units.iter().enumerate().map(clone!(state => move |(index, unit)| {
+                            html!("button", {
+                                .text(&unit.display_name)
+                                .event(clone!(state, index => move |_: events::Click| {
+                                    state.active_unit.set(Some(index))
+                                }))
+                            })
+                        })))
+                    })               
                 })
-            }))
+            })))
         })
     }
 
-    fn render_unit(self: &Rc<Self>, unit: &ProDevUnit, i: usize) -> Dom {
-        let state = self;
-        let unit_id = unit.id;
-        html!("jig-play-pro-dev-item", {
-            .prop("slot", "items")
-            .prop("name", &unit.display_name)
-            .prop("description", &unit.description)
-            .prop("index", i + 1)
-            .prop_signal("done", state.units_done.signal_ref(move |units_done| units_done.contains(&unit_id)))
-            .child(
-                ModuleThumbnail::new(
-                    state.pro_dev_id.into(),
-                    None,
-                    ThumbnailFallback::Unit,
-                    state.player_options.draft_or_live,
-                ).render(Some("thumbnail"))
-            )
-            .child(html!("fa-button", {
-                .prop("slot", "play-button")
-                .prop("icon", "fa-solid fa-play")
-            }))
-            .event(clone!(state, unit_id => move |_: events::Click| {
-                state.play_unit(unit_id);
-                state.units_done.lock_mut().insert(unit_id);
-            }))
-        })
+    fn render_active_unit(self: &Rc<Self>, unit: ProDevUnit) -> Dom {
+        match unit.value {
+            shared::domain::pro_dev::unit::ProDevUnitValue::ImageId(image_id) => self.render_active_image(image_id),
+            shared::domain::pro_dev::unit::ProDevUnitValue::AudioId(_) => todo!("<audio> tag"),
+            shared::domain::pro_dev::unit::ProDevUnitValue::Link(url) => self.render_active_link(url),
+            shared::domain::pro_dev::unit::ProDevUnitValue::PdfId(pdf_id) => self.render_active_pdf(pdf_id),
+            shared::domain::pro_dev::unit::ProDevUnitValue::Video(video) => self.render_active_video(video),
+        }
     }
 
-    fn resource_type_name_signal(
-        self: &Rc<Self>,
-        resource_type_id: ResourceTypeId,
-    ) -> impl Signal<Item = String> {
-        let state = Rc::clone(self);
-
-        state
-            .resource_types
-            .signal_cloned()
-            .map(move |resource_types| {
-                let resource_type = resource_types
-                    .iter()
-                    .find(|resource_type| resource_type_id == resource_type.id);
-
-                match resource_type {
-                    None => String::new(),
-                    Some(resource_type) => resource_type.display_name.to_owned(),
+    fn active_unit_signal(self: &Rc<Self>) -> impl Signal<Item = Option<ProDevUnit>> {
+        map_ref! {
+            let active_unit = self.active_unit.signal(),
+            let pro_dev = self.pro_dev.signal_cloned() => move {
+                match (active_unit, pro_dev) {
+                    (Some(active_unit), Some(pro_dev)) => {
+                        Some(pro_dev.pro_dev_data.units[*active_unit].clone())
+                    },
+                    _ => None
                 }
-            })
+            }
+        }
+    } 
+
+    fn render_active_video(self: &Rc<Self>, video: Video) -> Dom {
+        let mut_host = Mutable::new(video.host.clone());
+
+        html!("div", {
+            .child_signal(mut_host.signal_cloned().map(move|host| {
+                match host {
+                    VideoHost::Youtube(youtube_video) => Some(
+                        html!("video-youtube-player" => HtmlElement, {
+                            .prop("videoId", youtube_video.url.get_id())
+                            .apply(|mut dom| {
+                                if let Some(start_at) = video.start_at {
+                                    dom = dom.prop("start", start_at);
+                                }
+                                if let Some(end_at) = video.end_at {
+                                    dom = dom.prop("end", end_at);
+                                }
+                                dom
+                            })
+                            .style("display", "block")
+                            .style("width", "100%")
+                            .style("height", "100%")
+                            // .event(clone!(on_ended => move |_: events::YoutubeEnded| {
+                            //     if let Some(on_ended) = on_ended.as_ref() {
+                            //         (on_ended) ();
+                            //     }
+                            // }))
+                        })
+                    ),
+                }
+            }))
+        })
     }
+
+    fn render_active_image(self: &Rc<Self>, image: ImageId) -> Dom {
+        let mut_image = Mutable::new(image.clone());
+
+        html!("div", {
+            .child_signal(mut_image.signal_cloned().map(move|image| {
+                    Some(
+                        html!("img-ji", {
+                            // would like to get rid if the styles here
+                            .style("object-fit", "contain")
+                            .prop("size", "full")
+                            .prop("id", image.0.to_string())
+                            .prop("lib", "user")
+                        })
+                    )
+            }))
+        })
+    }
+
+    pub fn render_active_link(self: &Rc<Self>, link: url::Url) -> Dom {
+        // let state = self;
+        html!("iframe" => HtmlIFrameElement, {
+            .style("width", "100%")
+            .style("border", "none")
+            // .global_event(clone!(state => move |event: Message| {
+            //     if let Ok(data) = event.try_serde_data::<IframeMessageData>() {
+            //         if data.kind == "scrollHeight" {
+            //             state.height.set(data.height + INT_IFRAME_PADDING);
+            //         }
+            //     }
+            // }))
+            .prop("src", link.to_string())
+        })
+    }
+    
+    pub fn render_active_pdf(self: &Rc<Self>, pdf_id: PdfId) -> Dom {
+        // let state = self;
+        let resp = pdf_lib_url(MediaLibrary::User, pdf_id);
+        html!("iframe" => HtmlIFrameElement, {
+            .style("width", "100%")
+            .style("border", "none")
+            .prop("src", resp)
+        })
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct IframeMessageData {
+    kind: String,
+    height: usize,
 }

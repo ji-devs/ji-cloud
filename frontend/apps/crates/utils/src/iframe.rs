@@ -205,11 +205,11 @@ pub enum JigToModulePlayerMessage {
 pub enum ModuleToJigPlayerMessage {
     AddPoints(u32),
     Start(ModuleConfig),
-    ResetTimer(Seconds),
-    PauseTimer,
-    UnpauseTimer,
     Previous,
     Next,
+    ResetTimer(Seconds),
+    PauseTimer, 
+    UnpauseTimer,
     JumpToIndex(usize),
     JumpToId(ModuleId),
     /// Useful for acting on key press events such as arrow keys for navigating between activities

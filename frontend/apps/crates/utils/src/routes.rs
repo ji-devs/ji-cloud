@@ -601,6 +601,27 @@ impl Route {
                 )))
             }
 
+            ["asset", "play", "pro-dev", pro_dev_id] => {
+                let search: ProDevPlayerOptions = serde_qs::from_str(&params_string).unwrap_ji();
+
+                Self::Asset(AssetRoute::Play(AssetPlayRoute::ProDev(
+                    ProDevId(Uuid::from_str(pro_dev_id).unwrap_ji()),
+                    None,
+                    search,
+                )))
+            }
+
+            ["asset", "play", "pro-dev", pro_dev_id, "unit", unit_id] => {
+                let search: ProDevPlayerOptions = serde_qs::from_str(&params_string).unwrap_ji();
+
+                Self::Asset(AssetRoute::Play(AssetPlayRoute::ProDev(
+                    ProDevId(Uuid::from_str(pro_dev_id).unwrap_ji()),
+                    Some(ProDevUnitId(Uuid::from_str(unit_id).unwrap_ji())),
+                    search,
+                )))
+            }
+
+
             ["jig", play_or_edit] | ["jig", play_or_edit, _] | ["jig", play_or_edit, _, _] => {
                 let url: String = url.pathname();
                 let mut url: Vec<&str> = url.split('/').collect();

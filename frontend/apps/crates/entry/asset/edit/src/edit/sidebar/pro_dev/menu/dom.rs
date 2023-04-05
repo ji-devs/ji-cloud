@@ -43,7 +43,7 @@ impl ProDevMenu {
                 }
                 ProDevSpot::Unit(_pro_dev_unit) => {
                     vec![
-                        state.unit_info(),
+                        state.unit_edit(),
                         state.unit_play(),
                         state.unit_move_up(),
                         state.unit_move_down(),
@@ -91,7 +91,7 @@ impl ProDevMenu {
         })
     }
 
-    fn unit_info(self: &Rc<Self>) -> Dom {
+    fn unit_edit(self: &Rc<Self>) -> Dom {
         let state = self;
         html!("menu-line", {
             .prop("slot", "lines")

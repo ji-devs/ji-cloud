@@ -90,12 +90,6 @@ impl JigPlayer {
     }
 }
 
-#[derive(Clone, Default, Serialize, Deserialize)]
-pub struct PlayerOptions {
-    settings: JigPlayerSettings,
-    is_student: bool,
-}
-
 /// Returns whether the liked status should be loaded for a JIG
 ///
 /// Returns true only if there is a logged-in user who is **not** the author of the JIG, and the
