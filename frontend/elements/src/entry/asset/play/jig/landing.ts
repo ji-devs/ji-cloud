@@ -84,6 +84,14 @@ export class _ extends LitElement {
                     justify-content: space-between;
                     padding: 16px 28px;
                 }
+                .top-bar .logo {
+                    height: 14px;
+                }
+                @media (min-width: 1024px) {
+                    .top-bar .logo {
+                        height: 28px;
+                    }
+                }
                 :host([inIframe]) .top-bar .module-assist {
                     margin-right: 96px;
                 }
@@ -210,7 +218,7 @@ export class _ extends LitElement {
                         <slot name="indicators"></slot>
                     </div>
                     <div class="top-bar">
-                        <img-ui path="jig/play/logo.svg"></img-ui>
+                        <img-ui class="logo" path="jig/play/logo.svg"></img-ui>
                         <div class="module-assist">
                             <slot name="module-assist"></slot>
                         </div>
