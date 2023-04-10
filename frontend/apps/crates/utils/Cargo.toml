@@ -33,7 +33,7 @@ dominator = { workspace = true }
 futures-signals = { workspace = true }
 dominator_helpers = { workspace = true }
 htmlescape = { workspace = true }
-gloo-timers = { workspace = true }
+gloo = { workspace = true }
 console_error_panic_hook = { workspace = true }
 wasm-logger = { workspace = true, optional = true }
 web-sys = { workspace = true }

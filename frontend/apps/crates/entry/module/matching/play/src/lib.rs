@@ -26,5 +26,5 @@ pub async fn main_js() {
 
     router::render(router);
 
-    //std::mem::forget(Box::new(router));
+    utils::block_context_menu::block_context_menu_globally();
 }

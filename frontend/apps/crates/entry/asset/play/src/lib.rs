@@ -27,10 +27,6 @@ pub async fn main_js() {
 
     let router = router::Router::new();
     dominator::append_dom(&dominator::get_id("root"), router.render());
-    /*
 
-    let page = page::Page::new();
-
-    dominator::append_dom(&dominator::get_id("root"), page.render());
-    */
+    utils::block_context_menu::block_context_menu_globally();
 }

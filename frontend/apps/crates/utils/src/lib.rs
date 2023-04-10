@@ -3,6 +3,7 @@
 pub mod ages;
 pub mod api_helpers;
 pub mod asset;
+pub mod block_context_menu;
 pub mod callback_future;
 pub mod clipboard;
 pub mod colors;

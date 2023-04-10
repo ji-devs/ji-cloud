@@ -30,7 +30,7 @@ impl ImageEffect {
         let img = match awsm_web::loaders::image::load(url.to_string()).await {
             Ok(img) => img,
             Err(_) => {
-                gloo_timers::future::TimeoutFuture::new(900_000_000).await;
+                gloo::timers::future::TimeoutFuture::new(900_000_000).await;
                 panic!("could not load image!");
             }
         };

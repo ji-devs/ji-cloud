@@ -2593,7 +2593,7 @@ dependencies = [
  "futures",
  "futures-channel",
  "futures-signals",
- "gloo-timers",
+ "gloo",
  "htmlescape",
  "itertools",
  "js-sys",
