@@ -82,7 +82,7 @@ export class _ extends LitElement {
                     line-height: 30px;
                 }
                 .white-section {
-                    padding: 24px 12px 6px 12px;
+                    padding: 6px;
                     display: grid;
                     align-content: space-between;
                 }
@@ -92,7 +92,7 @@ export class _ extends LitElement {
                     color: #555;
                     text-align: center;
                     margin: 0;
-                    line-height: 1.4em;
+                    line-height: 1.2em;
 
                     /* max 2 lines */
                     display: -webkit-box;
