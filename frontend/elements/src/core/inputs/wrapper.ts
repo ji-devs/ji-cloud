@@ -44,6 +44,7 @@ export class _ extends LitElement {
                     display: grid;
                     grid-template-columns: 1fr min-content;
                     grid-template-rows: min-content 1fr;
+                    grid-template-areas: "label" "field";
                     column-gap: 2px;
                     font-size: 14px;
                     line-height: 1.2;
@@ -68,6 +69,7 @@ export class _ extends LitElement {
                     grid-row: 1;
                     color: var(--main-blue);
                     font-weight: 500;
+                    grid-area: label;
                 }
                 .label:focus-within,
                 :host([focus-within]) .label {
@@ -91,6 +93,7 @@ export class _ extends LitElement {
                     width: 100%;
                     scrollbar-width: thin;
                     scrollbar-color: #e7f0fe transparent;
+                    grid-area: field;
                 }
                 ::slotted(:not([slot]):focus) {
                     outline: 0;
