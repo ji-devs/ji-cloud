@@ -13,12 +13,18 @@ impl AddLink {
 
         let value = ProDevUnitValue::Link(url);
 
+        state
+            .add_unit_value_state
+            .unit_editor_state
+            .changed
+            .set(true);
+
         self.add_unit_value_state.loader.load(async move {
             state
                 .add_unit_value_state
                 .unit_editor_state
                 .value
                 .set(value.into());
-        })
+        });
     }
 }

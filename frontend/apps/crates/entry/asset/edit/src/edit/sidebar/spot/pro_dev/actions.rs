@@ -1,5 +1,5 @@
 use super::super::super::spot::state::SpotState;
-use crate::edit::sidebar::{state::SidebarSpotItem, ProDevSpot};
+use crate::edit::sidebar::{state::SidebarSpotItem, ProDevSpot, SidebarSpot};
 use shared::{api::endpoints, domain::pro_dev::unit::*};
 use std::rc::Rc;
 use utils::prelude::*;
@@ -62,6 +62,8 @@ pub async fn update_unit_index(state: &Rc<SpotState>, item: Option<&Rc<ProDevSpo
         display_name: None,
         value: None,
     };
+
+    log::info!("spot index {}", index);
 
     if let Some(item) = item.clone() {
         match &**item {

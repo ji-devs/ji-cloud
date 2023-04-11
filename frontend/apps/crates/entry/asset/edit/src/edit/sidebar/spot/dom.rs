@@ -80,6 +80,7 @@ impl SpotState {
                     if is_filler { "none" } else {"block"}
                 })
                 .prop("module", state.kind_str())
+                .prop("unit_name", state.unit_name())
                 .prop("index", state.index as u32)
                 .prop_signal("collapsed", state.sidebar.collapsed.signal())
                 .prop_signal("selected", state.is_selected_signal())
@@ -219,6 +220,7 @@ impl SpotState {
                                                         })
                                                     },
                                                     _ => {
+                                                        log::info!("Slot unit");
                                                         html!("div", {
                                                             .prop("slot", "unit")
                                                             .text(format!("Unit {}", state.index).as_str())
@@ -330,16 +332,7 @@ impl SpotState {
                         SidebarSpotItem::ProDev(_) => dom.child(ProDevMenu::new(&state).render()),
                     }
                 }))
-                .apply_if(state.spot.item.is_pro_dev(), |dom| {
-                    dom.child(html!("button-icon", {
-                        .prop("icon", "gears")
-                        .prop("slot", "add")
-                        .event(clone!(state => move |_evt:events::Click| {
-                            actions::add_empty_unit_after(state.clone())
-                        }))
-                    }))
-                })
-                .apply_if(!state.spot.item.is_pro_dev(), Self::render_add_button(&state))
+                .apply(Self::render_add_button(&state))
             }))
         })
     }

@@ -52,6 +52,16 @@ impl SpotState {
         }
     }
 
+    pub fn unit_name(&self) -> String {
+        match &self.spot.item {
+            SidebarSpotItem::ProDev(Some(spot)) => match &**spot {
+                ProDevSpot::Cover(_) => "Cover".to_string(),
+                ProDevSpot::Unit(unit) => unit.display_name.clone(),
+            },
+            _ => "".to_string(),
+        }
+    }
+
     pub fn is_last_module(&self) -> bool {
         // self.index < self.total_len - 2 && (&*self.module).is_some()
         self.index < self.total_len - 2 && matches!(&self.spot.item, SidebarSpotItem::Jig(Some(_)))

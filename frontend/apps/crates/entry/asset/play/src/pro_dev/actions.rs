@@ -81,6 +81,12 @@ impl ProDevPlayer {
             .await
             .unwrap_ji();
 
+        log::info!(
+            "load units 
+                    {:?}",
+            units
+        );
+
         self.units.set(units);
     }
 

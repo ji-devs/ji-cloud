@@ -15,7 +15,6 @@ const STR_NAME_PLACEHOLDER: &str = "Add unit name";
 const STR_DESCRIPTION_LABEL: &str = "Description";
 const STR_DESCRIPTION_PLACEHOLDER: &str = "Add Description";
 const STR_URL_PLACEHOLDER: &str = "Insert URL here";
-const STR_ADD_TO_COURSE: &str = "Add to course";
 const STR_ADD_LINK: &str = " Add Link";
 const STR_UPLOAD_FILE: &str = " Upload file";
 const STR_ADD_YOUTUBE: &str = " Video";
@@ -31,15 +30,17 @@ impl Component<UnitEditor> for Rc<UnitEditor> {
 
     fn dom(&self, dom: DomBuilder<ShadowRoot>) -> DomBuilder<ShadowRoot> {
         let state = self;
+
         state.load_unit();
 
         let is_valid = map_ref! {
             let display_name = state.display_name.signal_cloned(),
             let description = state.description.signal_cloned(),
-            let value = state.value.signal_cloned()
+            let value = state.value.signal_cloned(),
+            let changed = state.changed.signal_cloned()
 
             => {
-                !display_name.trim().is_empty() && !description.trim().is_empty() && UnitValue::is_some(value)
+                !display_name.trim().is_empty() && !description.trim().is_empty() && UnitValue::is_some(value) && changed.to_owned()
             }
         };
 
@@ -109,9 +110,9 @@ impl Component<UnitEditor> for Rc<UnitEditor> {
                             .attr("dir", "auto")
                             .prop("placeholder", format!("{}", STR_NAME_PLACEHOLDER))
                             .prop_signal("value", state.display_name.signal_cloned())
-                            .event(clone!(state => move |_evt: events::Input| {
+                            .event(clone!(state => move |_evt: events::Change| {
                                 let value = elem.value();
-                                state.display_name.set(value);
+                                state.on_display_name_change(&value);
                             }))
                         })
                     }))
@@ -130,9 +131,9 @@ impl Component<UnitEditor> for Rc<UnitEditor> {
                                 STR_DESCRIPTION_PLACEHOLDER
                             ))
                             .text_signal(state.description.signal_cloned())
-                            .event(clone!(state => move |_: events::Input| {
+                            .event(clone!(state => move |_: events::Change| {
                                 let value = elem.value();
-                                state.description.set(value);
+                                state.on_description_change(&value);
                             }))
                         })
                     }))
@@ -142,15 +143,15 @@ impl Component<UnitEditor> for Rc<UnitEditor> {
                     .prop("slot", "add")
                     .prop("size", "small")
                     .prop("bold", true)
-                    .text(STR_ADD_TO_COURSE)
+                    .text(&state.create_or_update_text())
                     .event(clone!(state => move |_: events::Click| {
                         analytics::event("Add Unit to Course", None);
                         match state.unit_id {
                             Some(_) => {
-                                state.clone().update_unit()
+                                state.update_unit()
                             }
                             None => {
-                                state.clone().create_unit()
+                                state.create_unit()
                             }
                         }
                     }))
