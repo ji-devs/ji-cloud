@@ -41,6 +41,7 @@ impl AddLink {
                                     state.url.set(Some(url));
                                     state.url_str.set(val);
                                     state.add_unit_value_state.unit_editor_state.url_str.set(state.url_str.get_cloned());
+                                    state.add_unit_value_state.unit_editor_state.changed.set(true);
 
                                     state.save()
                                 },
@@ -59,6 +60,7 @@ impl AddLink {
                                             let _ = elem.set_attribute("error", "");
                                             state.url_str.set("".to_string());
                                             state.url.set(None);
+                                            state.add_unit_value_state.unit_editor_state.changed.set(false);
                                         },
                                     }
                                 },

@@ -97,23 +97,37 @@ export class _ extends LitElement {
                     z-index: 1;
                 }
 
-                .title {
+                .title-container .title {
+                    grid-row: 1;
                     font-size: 14px;
                     font-weight: bold;
                     line-height: 1.5;
                     color: var(--main-blue);
+                    grid-template-rows: 30px 75px
                 }
-                .subtitle {
+
+                .title-container {
+                    display: grid;
+                    text-align: left;
+                    transition-timing-function: linear;
+                    text-overflow: ellipsis;
+                    grid-template-rows: auto 75px; 
+                }
+
+                .title-container .subtitle {
+                    grid-row: 2;
                     font-size: 14px;
                     font-weight: 500;
-                    line-height: 1.5;
+                    text-align: justify;
+                    max-width: 10ch; 
+                    line-height: 1.3;
                     color: #4a4a4a;
                     transition-property: font-size, opacity;
                     transition-duration: var(--collapsing-phase-duration),
                         var(--fading-phase-duration);
                     transition-delay: 0s, var(--collapsing-phase-duration);
-                    transition-timing-function: linear;
                 }
+
                 :host([collapsed]) .subtitle {
                     font-size: 0px;
                     opacity: 0;
@@ -219,6 +233,9 @@ export class _ extends LitElement {
     @property()
     module: ModuleKind | "" = "";
 
+    @property()
+    unit_name: string = "";
+
     @property({ type: Boolean })
     dragging: boolean = false;
 
@@ -270,7 +287,7 @@ export class _ extends LitElement {
     }
 
     render() {
-        const { index, dragging, module } = this;
+        const { index, dragging, module, unit_name } = this;
 
         const sectionClasses = classMap({ dragging });
         const addContainerClasses = classMap({
@@ -280,17 +297,27 @@ export class _ extends LitElement {
 
         const title = (index + 1).toString().padStart(2, "0");
 
-        const subtitle = module === "" ? "" : STR_MODULE_DISPLAY_NAME[module];
+        // const subtitle = module === "" ? "" : STR_MODULE_DISPLAY_NAME[module];
+
+        let subtitle = "";
+        if (unit_name) {
+            subtitle = unit_name;
+        } else if (module !== "") {
+            subtitle = STR_MODULE_DISPLAY_NAME[module];
+        }
 
         return html`
             <section class="${sectionClasses}">
                 <div class="grid-container">
                     <div class="left">
-                        <div class="title">${title}</div>
-                        ${subtitle === ""
-                            ? nothing
-                            : html`<div class="subtitle">${subtitle}</div>`}
-                        ${this.renderModuleImg()}
+                        <div class="title-container">
+                            <div class="title">${title}</div>
+                                ${subtitle === ""
+                                    ? nothing
+                                    : html`<div class="subtitle">${subtitle}</div>`  
+                                }
+                                ${this.renderModuleImg()}
+                        </div>
                     </div>
                     <div class="middle open-only">
                         <div class="decorations">

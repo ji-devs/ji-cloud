@@ -4,6 +4,7 @@ use dominator::{clone, html, with_node, Dom, DomBuilder, EventOptions};
 use futures_signals::map_ref;
 use shared::domain::asset::DraftOrLive;
 use shared::domain::module::body::_groups::design::VideoHost;
+use shared::domain::pro_dev::unit::ProDevUnitValue;
 use web_sys::{HtmlElement, Node, ScrollBehavior, ScrollIntoViewOptions};
 
 use super::super::course::menu::CourseMenu;
@@ -80,6 +81,7 @@ impl SpotState {
                     if is_filler { "none" } else {"block"}
                 })
                 .prop("module", state.kind_str())
+                .prop("unit_name", state.unit_name())
                 .prop("index", state.index as u32)
                 .prop_signal("collapsed", state.sidebar.collapsed.signal())
                 .prop_signal("selected", state.is_selected_signal())
@@ -190,7 +192,7 @@ impl SpotState {
                                             ProDevSpot::Unit(unit) =>
                                             {
                                                 match &unit.value {
-                                                    shared::domain::pro_dev::unit::ProDevUnitValue::Video(video) => {
+                                                   ProDevUnitValue::Video(video) => {
                                                         let mut_host = Mutable::new(video.host.clone());
 
                                                         html!("div", {
@@ -202,19 +204,64 @@ impl SpotState {
                                                                             .prop("videoId", youtube.url.get_id())
                                                                             .style("width", "100%")
                                                                             .style("height", "100%")
-                                                                            .style("position", "relative") // create a new stacking context
-                                                                            .child(html!("div", {
-                                                                                .style("left", "0")
-                                                                                .style("top", "0")
-                                                                                .style("z-index", "1")
-                                                                                .style("width", "100%")
-                                                                                .style("height", "100%")
-                                                                                .child(html!("img-ui", {
-                                                                                  .prop("path", "entry/pro-dev/link-icon.svg")
-                                                                                }))
-                                                                              }))                                                                     })
+                                                                            .style("position", "relative")
+                                                                            })
                                                                     ),
                                                                 }
+                                                            }))
+                                                            .child(html!("img-ui", {
+                                                                .class("icon")
+                                                                .prop("path", "entry/pro-dev/link-icon.svg")
+                                                                .style("position", "absolute")
+                                                                .style("height", "20px")
+                                                                .style("width", "20px")
+                                                                .style("top", "5px")
+                                                                .style("left", "5px")
+                                                            }))
+                                                        })
+                                                    },
+                                                    ProDevUnitValue::Link(_) => {
+                                                        html!("div", {
+                                                            .prop("slot", "unit")
+                                                            .text(format!("Unit {}", state.index).as_str())
+                                                            .child(html!("img-ui", {
+                                                                .class("icon")
+                                                                .prop("path", "entry/pro-dev/link-icon.svg")
+                                                                .style("position", "absolute")
+                                                                .style("height", "20px")
+                                                                .style("width", "20px")
+                                                                .style("top", "5px")
+                                                                .style("left", "5px")
+                                                            }))
+                                                        })
+                                                    },
+                                                    ProDevUnitValue::PdfId(_) => {
+                                                        html!("div", {
+                                                            .prop("slot", "unit")
+                                                            .text(format!("Unit {}", state.index).as_str())
+                                                            .child(html!("img-ui", {
+                                                                .class("icon")
+                                                                .prop("path", "entry/pro-dev/pdf-icon.svg")
+                                                                .style("position", "absolute")
+                                                                .style("height", "20px")
+                                                                .style("width", "20px")
+                                                                .style("top", "5px")
+                                                                .style("left", "5px")
+                                                            }))
+                                                        })
+                                                    },
+                                                    ProDevUnitValue::ImageId(_) => {
+                                                        html!("div", {
+                                                            .prop("slot", "unit")
+                                                            .text(format!("Unit {}", state.index).as_str())
+                                                            .child(html!("img-ui", {
+                                                                .class("icon")
+                                                                .prop("path", "entry/pro-dev/image-icon.svg")
+                                                                .style("position", "absolute")
+                                                                .style("height", "20px")
+                                                                .style("width", "20px")
+                                                                .style("top", "5px")
+                                                                .style("left", "5px")
                                                             }))
                                                         })
                                                     },
@@ -330,16 +377,7 @@ impl SpotState {
                         SidebarSpotItem::ProDev(_) => dom.child(ProDevMenu::new(&state).render()),
                     }
                 }))
-                .apply_if(state.spot.item.is_pro_dev(), |dom| {
-                    dom.child(html!("button-icon", {
-                        .prop("icon", "gears")
-                        .prop("slot", "add")
-                        .event(clone!(state => move |_evt:events::Click| {
-                            actions::add_empty_unit_after(state.clone())
-                        }))
-                    }))
-                })
-                .apply_if(!state.spot.item.is_pro_dev(), Self::render_add_button(&state))
+                .apply(Self::render_add_button(&state))
             }))
         })
     }

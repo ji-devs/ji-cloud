@@ -37,45 +37,49 @@ pub fn add_empty_module_after(state: Rc<SpotState>) {
             SidebarSpot::new_empty(&state.sidebar.asset_edit_state.asset_id),
         );
 
-    if state.sidebar.asset_edit_state.asset_id.is_jig_id() {
-        state
-            .sidebar
-            .asset_edit_state
-            .set_route_jig(JigEditRoute::Landing);
-    }
-}
-
-pub fn add_empty_unit_after(state: Rc<SpotState>) {
-    state
-        .sidebar
-        .asset_edit_state
-        .sidebar_spots
-        .lock_mut()
-        .insert_cloned(
-            state.index + 1,
-            SidebarSpot::new_empty(&state.sidebar.asset_edit_state.asset_id),
-        );
-
-    if state.sidebar.asset_edit_state.asset_id.is_pro_dev_id() {
-        state
-            .sidebar
-            .asset_edit_state
-            .set_route_pro_dev(ProDevEditRoute::Unit(None));
+    match state.sidebar.asset_edit_state.asset_id {
+        shared::domain::asset::AssetId::JigId(_) => {
+            state
+                .sidebar
+                .asset_edit_state
+                .set_route_jig(JigEditRoute::Landing);
+        }
+        shared::domain::asset::AssetId::CourseId(_) => unreachable!(),
+        shared::domain::asset::AssetId::ResourceId(_) => unreachable!(),
+        shared::domain::asset::AssetId::ProDevId(_) => {
+            state
+                .sidebar
+                .asset_edit_state
+                .set_route_pro_dev(ProDevEditRoute::Unit(None));
+        }
     }
 
-    let url: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::ProDev(
-        state
-            .sidebar
-            .asset_edit_state
-            .asset_id
-            .unwrap_pro_dev()
-            .clone(),
-        ProDevEditRoute::Unit(None),
-    )))
-    .into();
-
-    dominator::routing::go_to_url(&url);
+    // if state.sidebar.asset_edit_state.asset_id.is_jig_id() {
+    //     state
+    //         .sidebar
+    //         .asset_edit_state
+    //         .set_route_jig(JigEditRoute::Landing);
+    // }
 }
+
+// pub fn add_empty_unit_after(state: Rc<SpotState>) {
+//     state
+//         .sidebar
+//         .asset_edit_state
+//         .sidebar_spots
+//         .lock_mut()
+//         .insert_cloned(
+//             state.index + 1,
+//             SidebarSpot::new_empty(&state.sidebar.asset_edit_state.asset_id),
+//         );
+
+//     if state.sidebar.asset_edit_state.asset_id.is_pro_dev_id() {
+//         state
+//             .sidebar
+//             .asset_edit_state
+//             .set_route_pro_dev(ProDevEditRoute::Unit(None));
+//     }
+// }
 
 pub enum MoveTarget {
     Up,

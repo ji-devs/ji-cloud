@@ -7,7 +7,7 @@ import {
     query,
 } from "lit-element";
 import { nothing } from "lit-html";
-import { ModuleKind } from "@elements/module/_common/types";
+import { ModuleKind} from "@elements/module/_common/types";
 import "@elements/core/images/ui";
 
 export type ModuleState = "empty" | "active" | "thumbnail" | "unit";
@@ -51,10 +51,13 @@ export class _ extends LitElement {
                     border: 0 1px;
                     background-color: var(--light-blue-5);
                     overflow: hidden;
+                    border-radius: 9px;
                 }
+
                 :host([incomplete]) .wrapper {
                     border: solid var(--light-red-4) 3px;
                 }
+                
                 :host([state="active"]) img-ui {
                     height: 82px;
                 }
@@ -63,7 +66,7 @@ export class _ extends LitElement {
                     display: none;
                 }
 
-                slot[name="unit"] {
+                :host([state="unit"]) {
                     color: white;
                 }
 
