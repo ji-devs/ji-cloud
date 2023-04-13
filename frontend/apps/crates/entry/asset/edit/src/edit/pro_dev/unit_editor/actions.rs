@@ -10,7 +10,7 @@ use shared::{
 };
 use utils::{
     prelude::ApiEndpointExt,
-    routes::{AssetEditRoute, AssetRoute, ProDevEditRoute, Route},
+    routes::{AssetEditRoute, ProDevEditRoute},
     unwrap::UnwrapJiExt,
 };
 
