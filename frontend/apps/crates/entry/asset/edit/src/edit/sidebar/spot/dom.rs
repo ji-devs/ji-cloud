@@ -250,10 +250,16 @@ impl SpotState {
                                                             }))
                                                         })
                                                     },
-                                                    ProDevUnitValue::ImageId(_) => {
+                                                    ProDevUnitValue::ImageId(image) => {
                                                         html!("div", {
                                                             .prop("slot", "unit")
                                                             .text(format!("Unit {}", state.index).as_str())
+                                                            .child(html!("img-ji", {
+                                                                .style("object-fit", "contain")
+                                                                .prop("size", "full")
+                                                                .prop("id", image.0.to_string())
+                                                                .prop("lib", "user")
+                                                            }))
                                                             .child(html!("img-ui", {
                                                                 .class("icon")
                                                                 .prop("path", "entry/pro-dev/image-icon.svg")
