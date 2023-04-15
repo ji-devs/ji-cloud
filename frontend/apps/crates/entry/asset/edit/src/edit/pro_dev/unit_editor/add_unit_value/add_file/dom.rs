@@ -3,6 +3,7 @@ use std::rc::Rc;
 use components::file_input::{FileInput, FileInputConfig};
 use dominator::{clone, html, Dom};
 
+use futures_signals::signal::SignalExt;
 use utils::component::Component;
 
 use super::state::AddFile;
@@ -20,7 +21,8 @@ impl AddFile {
                 FileInput::new(FileInputConfig {
                     on_change: Box::new(clone!(state => move|file| {
                         if let Some(file) = file {
-                            AddFile::save(&state, file);
+                            state.file.set(Some(file));
+                            state.save();
                         }
                     })),
                     error_msg_type: STR_ERROR_MSG_TYPE.to_string(),
@@ -30,6 +32,24 @@ impl AddFile {
                     ..Default::default()
                 }).render(),
             ])
+            .child_signal(state.loader.is_loading().map(move|is_loading| {
+                match is_loading {
+                    true => Some(
+                        html!("div", {
+                            .children(&mut [
+                                html!("progress-bar", {
+                                    .prop("progress", "infinite")
+                                })
+                            ])
+                        })
+                    ),
+                    false => Some(
+                        html!("div", {
+
+                        })
+                    )
+                }
+            }))
         })
     }
 }

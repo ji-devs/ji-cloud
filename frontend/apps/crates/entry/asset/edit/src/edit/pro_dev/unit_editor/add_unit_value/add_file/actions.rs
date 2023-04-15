@@ -24,17 +24,21 @@ const MIME_START_AUDIO: &str = "audio/";
 const MIME_PDF: &str = "application/pdf";
 
 impl AddFile {
-    pub fn save(self: &Rc<Self>, file: File) {
+    pub fn save(self: &Rc<Self>) {
         let state = Rc::clone(self);
 
-        self.add_unit_value_state.loader.load(async move {
+        let file = self.file.get_cloned().unwrap_ji();
+        let filename = file.name();
+        state.filename.set(filename);
+
+        self.loader.load(async move {
             let value = upload_file(&file).await.unwrap_ji();
             state
                 .add_unit_value_state
                 .unit_editor_state
                 .value
                 .set(value.into())
-        })
+        });
     }
 }
 pub async fn upload_file(file: &File) -> Result<ProDevUnitValue, anyhow::Error> {

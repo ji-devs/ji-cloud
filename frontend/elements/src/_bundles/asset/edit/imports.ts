@@ -39,6 +39,7 @@ import "@elements/core/asset-search-bar/select";
 import "@elements/entry/asset/edit/sidebar/sidebar";
 import "@elements/entry/asset/edit/pages/landing";
 import "@elements/entry/asset/edit/pages/unit-edit";
+import "@elements/entry/asset/edit/pages/unit-value";
 import "@elements/entry/asset/edit/selection/card";
 import "@elements/entry/asset/edit/selection/jig-selection";
 import "@elements/entry/asset/edit/selection/course-selection";

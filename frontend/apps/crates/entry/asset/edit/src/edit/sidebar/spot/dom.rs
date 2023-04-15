@@ -271,6 +271,7 @@ impl SpotState {
                                                             }))
                                                         })
                                                     },
+                                                    //TODO: Add Audio icon to thumbnail
                                                     _ => {
                                                         html!("div", {
                                                             .prop("slot", "unit")
