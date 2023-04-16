@@ -4,8 +4,8 @@ use std::{
 };
 
 use crate::unwrap::UnwrapJiExt;
+use futures::channel::oneshot;
 use futures::Future;
-use futures_channel::oneshot;
 
 pub struct CallbackFuture<T>
 where

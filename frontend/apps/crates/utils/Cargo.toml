@@ -42,7 +42,6 @@ anyhow = { workspace = true }
 rgb = { workspace = true }
 lazy_static = { workspace = true }
 unicode-segmentation = { workspace = true }
-futures-channel = { workspace = true }
 
 [features]
 debug_log = []

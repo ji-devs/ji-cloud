@@ -1,6 +1,7 @@
 use std::rc::Rc;
 
 use futures_signals::signal::Mutable;
+use gloo::utils::document;
 use shared::{
     api::endpoints,
     domain::{
@@ -26,8 +27,19 @@ mod resource_actions;
 const PLAYED_WITHOUT_LOGIN_COUNT_KEY: &'static str = "PLAYED_WITHOUT_LOGIN_COUNT";
 const PLAYED_WITHOUT_LOGIN_ALLOWED: u32 = 5;
 
+fn get_page_pos() -> i32 {
+    document().document_element().unwrap_ji().scroll_top()
+}
+fn set_page_pos(pos: i32) {
+    document()
+        .document_element()
+        .unwrap_ji()
+        .set_scroll_top(pos)
+}
+
 impl SearchResultsSection {
     pub async fn load_items(self: &Rc<Self>) {
+        let pos = get_page_pos();
         match self.asset_type {
             AssetType::Jig => {
                 self.load_jigs().await;
@@ -40,6 +52,8 @@ impl SearchResultsSection {
             }
             AssetType::ProDev => todo!(),
         }
+        utils::request_animation_frame::before_next_frame().await;
+        set_page_pos(pos);
     }
 
     pub fn on_play_asset_click(self: &Rc<Self>, asset_id: AssetId) {

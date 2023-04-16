@@ -29,6 +29,7 @@ pub mod mixin;
 pub mod panic_hook;
 pub mod path;
 pub mod prelude;
+pub mod request_animation_frame;
 pub mod resize;
 pub mod routes;
 pub mod screenshot;
