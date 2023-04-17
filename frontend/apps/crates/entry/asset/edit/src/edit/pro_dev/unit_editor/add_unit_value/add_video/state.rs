@@ -1,5 +1,6 @@
 use std::rc::Rc;
 
+use awsm_web::loaders::helpers::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::pro_dev::unit::Video;
 
@@ -9,6 +10,7 @@ pub struct AddVideo {
     pub video: Mutable<Option<Video>>,
     pub url_str: Mutable<String>,
     pub add_unit_value_state: Rc<AddUnitValueState>,
+    pub loader: AsyncLoader,
 }
 
 impl AddVideo {
@@ -23,6 +25,7 @@ impl AddVideo {
             video: Mutable::new(video.clone()),
             url_str: Mutable::new(url_str),
             add_unit_value_state,
+            loader: AsyncLoader::new(),
         })
     }
 }

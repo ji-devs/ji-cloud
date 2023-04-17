@@ -32,7 +32,7 @@ impl AddFile {
                     ..Default::default()
                 }).render(),
             ])
-            .child_signal(state.loader.is_loading().map(move|is_loading| {
+            .child_signal(state.add_unit_value_state.loader.is_loading().map(move|is_loading| {
                 match is_loading {
                     true => Some(
                         html!("div", {

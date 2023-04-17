@@ -8,10 +8,7 @@ export class _ extends LitElement {
             css`
                 :host {
                     display: grid;
-                    grid-auto-columns: minmax(0px, 1fr);
-                    justify-content: space-between;
-                    column-gap: 8px;
-                    row-gap: 12px;
+                    grid-template-columns: 1fr auto;
                     background-color: var(--light-blue-1);
                     padding: 1.5em;
                     border-radius: 8px;
@@ -50,8 +47,9 @@ export class _ extends LitElement {
                 <fa-icon icon="fa-light fa-check"></fa-icon>
                 ${this.resourceHref === "" 
                     ? html`${ this.label }` 
-                    : html`<a href="${this.resourceHref}" target="_blank">${ this.label }</a>` }
+                    : html`<a target="_blank">${ this.label }</a>` }
             </div>
+            <slot name="delete"></slot>
         `;
     }
 }

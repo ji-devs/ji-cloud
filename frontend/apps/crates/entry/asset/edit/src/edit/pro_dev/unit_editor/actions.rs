@@ -106,7 +106,6 @@ impl UnitEditor {
             } else {
                 // deactivate unit submit button request has completed
                 state.changed.set(false);
-
             }
 
             state.asset_edit_state.route.set(AssetEditRoute::ProDev(
@@ -114,6 +113,12 @@ impl UnitEditor {
                 ProDevEditRoute::Unit(state.unit_id),
             ));
         }));
+
+        // if state.new_value.lock_ref().is_some() {
+        //     state.loader.load(clone!(state => async move {
+        //         state.update_value().await;
+        //     }));
+        // }
 
         log::info!("Success");
     }
@@ -132,6 +137,35 @@ impl UnitEditor {
         log::info!("description {:?}", self.description);
     }
 
+    // pub async fn update_value(self: &Rc<Self>, ) {
+    //     let state = self.clone();
+
+    //     state.loader.load(clone!(state => async move {
+    //             let _ = state.map(clone!(state => async move {
+    //                 match self.value.signal_cloned() {
+    //                     super::UnitValue::File(file) => {
+    //                         match file {
+    //                             Some(val) => match val {
+    //                                 super::UnitValueFile::ImageId(id) => {
+    //                                     delete_image(id).await;
+    //                                 }
+    //                                 super::UnitValueFile::AudioId(id) => {
+    //                                     delete_audio(id).await;
+    //                                 }
+    //                                 super::UnitValueFile::PdfId(id) => {
+    //                                     delete_pdf(id).await;
+    //                                 }
+    //                             },
+    //                             None => todo!(),
+    //                         }
+    //                     },
+    //                     super::UnitValue::Link(_) => todo!(),
+    //                     super::UnitValue::Video(_) => todo!(),
+    //                 }
+    //             }));
+    //     }));
+    // }
+
     pub fn create_or_update_text(&self) -> String {
         match self.unit_id {
             Some(_) => STR_UPDATE.to_string(),
@@ -139,3 +173,65 @@ impl UnitEditor {
         }
     }
 }
+
+// pub async fn delete_image(image_id: Option<ImageId>) -> Result<(), String> {
+//     let id = match image_id {
+//         Some(id) => id,
+//         None => todo!(),
+//     };
+//     let res = endpoints::image::user::Delete::api_no_auth_empty(UserImageDeletePath(id), None)
+//         .await;
+
+//     match res {
+//         Ok(_) => {
+//             log::info!("update_async(): update successful");
+//             Ok(())
+//         }
+//         Err(e) => {
+//             log::error!("update_async(): update failed: {}", e);
+//             Err(format!("update failed: {}", e))
+//         }
+//     }
+// }
+
+// pub async fn delete_audio(audio_id: Option<AudioId>) -> Result<(), String> {
+//     let id = match audio_id {
+//         Some(id) => id,
+//         None => todo!(),
+//     };
+
+//     let res = endpoints::audio::user::Delete::api_no_auth_empty(UserAudioDeletePath(id), None)
+//         .await;
+
+//     match res {
+//         Ok(_) => {
+//             log::info!("update_async(): update successful");
+//             Ok(())
+//         }
+//         Err(e) => {
+//             log::error!("update_async(): update failed: {}", e);
+//             Err(format!("update failed: {}", e))
+//         }
+//     }
+// }
+
+// pub async fn delete_pdf(pdf_id: Option<PdfId>) -> Result<(), String> {
+//     let id = match pdf_id {
+//         Some(id) => id,
+//         None => todo!(),
+//     };
+
+//     let res = endpoints::pdf::user::Delete::api_no_auth_empty(UserPdfDeletePath(id), None)
+//         .await;
+
+//     match res {
+//         Ok(_) => {
+//             log::info!("update_async(): update successful");
+//             Ok(())
+//         }
+//         Err(e) => {
+//             log::error!("update_async(): update failed: {}", e);
+//             Err(format!("update failed: {}", e))
+//         }
+//     }
+// }
