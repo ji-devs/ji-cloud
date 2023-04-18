@@ -13,14 +13,16 @@
     <link rel="manifest" href="{{ app_manifest|safe }}" />
     <title>Jigzi</title>
 
-    <!-- Google Analytics -->
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-054H3BL2PM"></script>
     <script>
-        window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
-        ga('create', 'UA-27977599-9', 'auto');
-        ga('send', 'pageview');
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-054H3BL2PM');
     </script>
-    <script async src='https://www.google-analytics.com/analytics.js'></script>
-    <!-- End Google Analytics -->
+    <!-- End Google tag (gtag.js) -->
 
     <!-- Google Tag Manager -->
     <script>(function (w, d, s, l, i) {
