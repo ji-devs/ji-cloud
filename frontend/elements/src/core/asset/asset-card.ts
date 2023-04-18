@@ -83,8 +83,13 @@ export class _ extends LitElement {
                 }
                 .white-section {
                     padding: 6px;
+                    line-height: 1em;
                     display: grid;
                     align-content: space-between;
+                }
+                :host([hasMiddleIndicator]) .white-section {
+                    /* add top padding when middle-indicator is present */
+                    padding-top: 16px;
                 }
                 .name {
                     font-size: 16px;
@@ -92,7 +97,6 @@ export class _ extends LitElement {
                     color: #555;
                     text-align: center;
                     margin: 0;
-                    line-height: 1.2em;
 
                     /* max 2 lines */
                     display: -webkit-box;
@@ -173,6 +177,9 @@ export class _ extends LitElement {
     @property({ type: Boolean, reflect: true })
     showBottomIndicator: boolean = true;
 
+    @property({ type: Boolean, reflect: true })
+    private hasMiddleIndicator: boolean = false;
+
     renderCount(label: string, count: number) {
         // See related comment in renderCountDivider.
         if (BigInt(count) === BigInt(0)) {
@@ -217,7 +224,10 @@ export class _ extends LitElement {
             <slot name="image"></slot>
             <div class="middle">
                 <slot name="like"></slot>
-                <slot name="middle-indicator"></slot>
+                <slot
+                    @slotchange=${(e: any) => this.hasMiddleIndicator = e.target.assignedNodes().length > 0}
+                    name="middle-indicator"
+                ></slot>
             </div>
             <div class="white-section">
                 <h3 class="name">${this.name}</h3>
