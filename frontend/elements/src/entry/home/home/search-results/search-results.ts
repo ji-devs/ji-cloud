@@ -10,8 +10,8 @@ const STR_LOADING = "So many great JIGs and resources to sift through...";
 
 const KINDS: {[key: string]: string[]} = {
     jig: ["JIG", "JIGs"],
-    resource: ["Resource", "Resources"],
     course: ["Course", "Courses"],
+    resource: ["Resource", "Resources"],
 };
 const STR_AND = "and";
 
@@ -58,10 +58,10 @@ export class _ extends LitElement {
     jigCount: number = 0;
 
     @property({ type: Number })
-    resourceCount: number = 0;
+    courseCount: number = 0;
 
     @property({ type: Number })
-    courseCount: number = 0;
+    resourceCount: number = 0;
 
     private scrollToResults(event: MouseEvent) {
         event.preventDefault();
@@ -90,8 +90,8 @@ export class _ extends LitElement {
         }
 
         addResultCount("jig", this.jigCount);
-        addResultCount("resource", this.resourceCount);
         addResultCount("course", this.courseCount);
+        addResultCount("resource", this.resourceCount);
 
         // If we're rendering more than one set of results then add STR_AND
         // before the last result.
@@ -142,7 +142,7 @@ export class _ extends LitElement {
         return html`
             ${this.loading
                 ? this.renderLoading()
-                : this.jigCount + this.resourceCount > 0
+                : this.jigCount + this.courseCount + this.resourceCount > 0
                     ? this.renderResultsFound()
                     : this.renderNoResultsFound()
             }
