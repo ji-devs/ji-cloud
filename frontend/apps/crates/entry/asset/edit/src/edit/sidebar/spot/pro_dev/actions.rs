@@ -13,8 +13,6 @@ pub fn edit(state: Rc<SpotState>) {
             ProDevSpot::Unit(unit) => Some(unit.id),
         };
 
-        log::info!("{unit_id:?}");
-
         state
             .sidebar
             .asset_edit_state
@@ -62,8 +60,6 @@ pub async fn update_unit_index(state: &Rc<SpotState>, item: Option<&Rc<ProDevSpo
         display_name: None,
         value: None,
     };
-
-    log::info!("spot index {}", index);
 
     if let Some(item) = item.clone() {
         match &**item {

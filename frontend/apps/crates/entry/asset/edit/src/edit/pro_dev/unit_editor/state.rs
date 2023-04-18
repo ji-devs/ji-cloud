@@ -36,43 +36,35 @@ impl UnitEditor {
         let unit = units.iter().find(|x| Some(x.id) == unit_id);
 
         match unit {
-            Some(unit) => {
-                log::info!("Some");
-
-                Rc::new(Self {
-                    unit_id,
-                    asset_edit_state: Rc::clone(&asset_edit_state),
-                    editable_pro_dev: Rc::clone(editable_pro_dev),
-                    display_name: Mutable::new(unit.display_name.clone()),
-                    description: Mutable::new(unit.description.clone()),
-                    value: Mutable::new(unit.value.clone().into()),
-                    url_str: Mutable::new("".to_string()),
-                    changed: Mutable::new(false),
-                    loader: AsyncLoader::new(),
-                })
-            }
-            None => {
-                log::info!("None");
-
-                Rc::new(Self {
-                    unit_id,
-                    asset_edit_state: Rc::clone(&asset_edit_state),
-                    editable_pro_dev: Rc::clone(editable_pro_dev),
-                    display_name: Mutable::new("".to_string()),
-                    description: Mutable::new("".to_string()),
-                    value: Mutable::new(Default::default()),
-                    url_str: Mutable::new("".to_string()),
-                    changed: Mutable::new(false),
-                    loader: AsyncLoader::new(),
-                })
-            }
+            Some(unit) => Rc::new(Self {
+                unit_id,
+                asset_edit_state: Rc::clone(&asset_edit_state),
+                editable_pro_dev: Rc::clone(editable_pro_dev),
+                display_name: Mutable::new(unit.display_name.clone()),
+                description: Mutable::new(unit.description.clone()),
+                value: Mutable::new(unit.value.clone().into()),
+                url_str: Mutable::new("".to_string()),
+                changed: Mutable::new(false),
+                loader: AsyncLoader::new(),
+            }),
+            None => Rc::new(Self {
+                unit_id,
+                asset_edit_state: Rc::clone(&asset_edit_state),
+                editable_pro_dev: Rc::clone(editable_pro_dev),
+                display_name: Mutable::new("".to_string()),
+                description: Mutable::new("".to_string()),
+                value: Mutable::new(Default::default()),
+                url_str: Mutable::new("".to_string()),
+                changed: Mutable::new(false),
+                loader: AsyncLoader::new(),
+            }),
         }
     }
 }
 
 /// Value of Pro Dev Unit
 #[derive(Debug, Clone)]
-pub(super) enum UnitValue {
+pub enum UnitValue {
     File(Option<UnitValueFile>),
     Link(Option<url::Url>),
     Video(Option<Video>),
@@ -104,7 +96,7 @@ impl Default for UnitValue {
 }
 
 #[derive(Debug, Clone)]
-pub(super) enum UnitValueFile {
+pub enum UnitValueFile {
     ImageId(Option<ImageId>),
     AudioId(Option<AudioId>),
     PdfId(Option<PdfId>),
