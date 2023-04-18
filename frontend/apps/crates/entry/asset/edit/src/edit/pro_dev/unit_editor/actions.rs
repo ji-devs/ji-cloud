@@ -1,5 +1,6 @@
 use std::rc::Rc;
 
+use crate::edit::sidebar::SidebarSpot;
 use dominator::clone;
 use shared::{
     api::endpoints::pro_dev::unit,
@@ -20,7 +21,7 @@ const STR_ADD_TO_COURSE: &str = "Add to course";
 const STR_UPDATE: &str = " Update unit ";
 
 impl UnitEditor {
-    pub fn load_unit(&self) {
+    pub fn load_unit(self: &Rc<Self>) {
         if let Some(unit_id) = self.unit_id {
             let units = self.editable_pro_dev.units.lock_ref();
             let unit = units.iter().find(|x| x.id == unit_id);
@@ -106,19 +107,37 @@ impl UnitEditor {
             } else {
                 // deactivate unit submit button request has completed
                 state.changed.set(false);
+                let mut units = state.editable_pro_dev.units.lock_mut();
+                let mut spots = state.asset_edit_state.sidebar_spots.lock_mut();
+
+
+                let unit_index = units.iter().position(|x| x.id == state.unit_id.unwrap_ji());
+
+
+                if let Some(unit_index) = unit_index {
+                    let mut unit = units.remove(unit_index);
+
+                    unit.display_name = state.display_name.get_cloned();
+                    unit.description = state.description.get_cloned();
+                    unit.value = ProDevUnitValue::try_from(state.value.get_cloned()).unwrap_ji();
+
+                    // replace sidebar spot with new data
+                    units.insert_cloned(unit_index, unit.clone());
+                    let spot_index = unit_index + 1;
+
+                    // replace sidebar spot with new data
+                    spots.remove(spot_index);
+
+                    spots.insert_cloned(spot_index, SidebarSpot::new_pro_dev_unit(unit));
+                }
+
+
+                state.asset_edit_state.route.set(AssetEditRoute::ProDev(
+                    state.asset_edit_state.asset_id.unwrap_pro_dev().clone(),
+                    ProDevEditRoute::Unit(state.unit_id),
+                ));
             }
-
-            state.asset_edit_state.route.set(AssetEditRoute::ProDev(
-                state.asset_edit_state.asset_id.unwrap_pro_dev().clone(),
-                ProDevEditRoute::Unit(state.unit_id),
-            ));
         }));
-
-        // if state.new_value.lock_ref().is_some() {
-        //     state.loader.load(clone!(state => async move {
-        //         state.update_value().await;
-        //     }));
-        // }
 
         log::info!("Success");
     }
@@ -137,6 +156,9 @@ impl UnitEditor {
         log::info!("description {:?}", self.description);
     }
 
+    //
+    //TODO: Delete previous file after new file is assigned to a unit
+    //
     // pub async fn update_value(self: &Rc<Self>, ) {
     //     let state = self.clone();
 

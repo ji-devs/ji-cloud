@@ -53,7 +53,7 @@ pub async fn delete(state: &Rc<SpotState>, item: &Option<Rc<ProDevSpot>>) {
     }
 }
 
-pub async fn update_unit_index(state: &Rc<SpotState>, item: Option<&Rc<ProDevSpot>>, index: u16) {
+pub async fn update_unit_index(state: Rc<SpotState>, item: Option<&Rc<ProDevSpot>>, index: u16) {
     let req = ProDevUnitUpdateRequest {
         index: Some(index),
         description: None,
@@ -62,6 +62,7 @@ pub async fn update_unit_index(state: &Rc<SpotState>, item: Option<&Rc<ProDevSpo
     };
 
     if let Some(item) = item.clone() {
+        log::info!("index: {index}");
         match &**item {
             ProDevSpot::Cover(_) => unimplemented!(),
             ProDevSpot::Unit(item) => {

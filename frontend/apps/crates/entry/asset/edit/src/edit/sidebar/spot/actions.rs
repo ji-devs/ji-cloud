@@ -50,7 +50,7 @@ pub fn add_empty_module_after(state: Rc<SpotState>) {
             state
                 .sidebar
                 .asset_edit_state
-                .set_route_pro_dev(ProDevEditRoute::Unit(None));
+                .set_route_pro_dev(ProDevEditRoute::Landing);
         }
     }
 }
@@ -88,7 +88,7 @@ pub fn move_index(state: Rc<SpotState>, move_target: MoveTarget) {
                 },
                 SidebarSpotItem::ProDev(unit) => {
                     pro_dev_actions::update_unit_index(
-                        &Rc::clone(&state),
+                        Rc::clone(&state),
                         unit.as_ref(),
                         target as u16
                     ).await;
