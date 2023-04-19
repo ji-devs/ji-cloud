@@ -45,9 +45,9 @@ module.exports = {
 	URL_MEDIA: "https://media.jicloud.org",
 	URL_LEGACY: "https://legacy.jicloud.org",
 	URL_FRONTEND_RELEASE: "https://frontend.jicloud.org",
-	URL_FRONTEND_SANDBOX: "https://frontend.sandbox.jicloud.org",
+	URL_FRONTEND_SANDBOX: "https://frontend.sandbox.jigzi.org",
 	URL_STORYBOOK_RELEASE: "https://storybook.jicloud.org",
 	URL_STORYBOOK_SANDBOX: "https://storybook.sandbox.jicloud.org",
 	URL_UPLOADS_RELEASE: "https://uploads.jicloud.org",
-	URL_UPLOADS_SANDBOX: "https://uploads.sandbox.jicloud.org"
+	URL_UPLOADS_SANDBOX: "https://uploads.sandbox.jigzi.org"
 };
