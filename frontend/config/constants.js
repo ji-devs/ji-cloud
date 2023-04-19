@@ -39,9 +39,7 @@ module.exports = {
 	BUCKET_MEDIA: "ji-cloud-media-origin-eu-001",
 	BUCKET_LEGACY: "ji-cloud-legacy-eu-001",
 
-//is actually on sandbox (since it's for devs)
-	URL_DOCS: "https://docs.jicloud.org",
-//is actually on release (since it's for public)
+	URL_DOCS: "https://ji-cloud-sandbox-docs.firebaseapp.com",
 	URL_MEDIA: "https://media.jigzi.org",
 	URL_LEGACY: "https://legacy.jigzi.org",
 	URL_FRONTEND_RELEASE: "https://frontend.jigzi.org",
