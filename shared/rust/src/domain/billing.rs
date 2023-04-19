@@ -3,7 +3,11 @@
 use chrono::{DateTime, Utc};
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use strum_macros::EnumString;
+
+#[cfg(feature = "backend")]
+use anyhow::anyhow;
 
 use crate::{api::endpoints::PathPart, domain::user::UserId};
 
@@ -408,7 +412,7 @@ impl TryFrom<stripe::Subscription> for UpdateSubscriptionRecord {
 }
 
 /// The limit of how many accounts can be associated with the subscription. [None] means unlimited.
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type), sqlx(transparent))]
 pub struct AccountLimit(i64);
 
@@ -444,7 +448,7 @@ impl SubscriptionType {
 #[cfg_attr(feature = "backend", derive(sqlx::Type), sqlx(transparent))]
 pub struct InvoiceNumber(String);
 
-/// Represents a value amount in cents
+/// Represents an amount in cents
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type), sqlx(transparent))]
 pub struct AmountInCents(i64);
@@ -453,6 +457,23 @@ impl AmountInCents {
     /// Create a new instance
     pub fn new(amount: i64) -> Self {
         Self(amount)
+    }
+
+    /// Returns a copy of the inner value
+    pub fn inner(&self) -> i64 {
+        self.0
+    }
+}
+
+/// Represents a trial period length
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type), sqlx(transparent))]
+pub struct TrialPeriod(i64);
+
+impl TrialPeriod {
+    /// Create a new instance
+    pub fn new(length: i64) -> Self {
+        Self(length)
     }
 
     /// Returns a copy of the inner value
@@ -542,7 +563,141 @@ pub struct CreateUpdateSubscriptionPlanRequest {
     pub amount_in_cents: AmountInCents,
 }
 
-make_path_parts!(SubscriptionPlanPath => "/v1/admin/plans");
+make_path_parts!(SubscriptionPlanPath => "/v1/plans");
+
+/// Mapped into plan details
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct SubscriptionPlanDetailsResponse {
+    /// Local subscription plan ID
+    pub plan_id: PlanId,
+    /// Billing interval
+    pub billing_interval: BillingInterval,
+    /// Amount in cents to subscribe to this plan
+    pub amount_in_cents: AmountInCents,
+    /// Trial period
+    pub trial_period: TrialPeriod,
+}
+
+impl From<SubscriptionPlan> for SubscriptionPlanDetailsResponse {
+    fn from(plan: SubscriptionPlan) -> Self {
+        Self {
+            plan_id: plan.plan_id,
+            billing_interval: plan.billing_interval,
+            amount_in_cents: plan.amount_in_cents,
+            trial_period: TrialPeriod(7), // TODO
+        }
+    }
+}
+
+/// Mapped individual plans
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct IndividualPlanResponse {
+    /// Basic plan
+    basic: SubscriptionPlanDetailsResponse,
+    /// Pro plan
+    pro: SubscriptionPlanDetailsResponse,
+}
+
+/// Mapped school plans
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct SchoolPlanResponse {
+    /// School plans with an account limit
+    pub limited: HashMap<AccountLimit, SubscriptionPlanDetailsResponse>,
+    /// School plan without a limit
+    pub unlimited: SubscriptionPlanDetailsResponse,
+}
+
+/// Subscription plans mapped into a response
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct SubscriptionPlansResponse {
+    /// Individual plans
+    pub individual: IndividualPlanResponse,
+    /// School plans
+    pub school: SchoolPlanResponse,
+}
+
+#[cfg(feature = "backend")]
+impl TryFrom<Vec<SubscriptionPlan>> for SubscriptionPlansResponse {
+    type Error = anyhow::Error;
+
+    fn try_from(plans: Vec<SubscriptionPlan>) -> Result<Self, Self::Error> {
+        let mut builder = SubscriptionPlansResponseBuilder::default();
+        for plan in plans {
+            builder.set_from_plan(plan);
+        }
+
+        builder.build()
+    }
+}
+
+/// Allows to easily build a subscription plans response from database records
+#[derive(Default, Debug, Serialize, Deserialize, Clone)]
+#[cfg(feature = "backend")]
+struct SubscriptionPlansResponseBuilder {
+    /// Individual basic
+    individual_basic: Option<SubscriptionPlanDetailsResponse>,
+    /// Individual pro
+    individual_pro: Option<SubscriptionPlanDetailsResponse>,
+    /// School plans with account limits
+    school_limited: HashMap<AccountLimit, SubscriptionPlanDetailsResponse>,
+    /// School plan without an account limit
+    school_unlimited: Option<SubscriptionPlanDetailsResponse>,
+}
+
+#[cfg(feature = "backend")]
+impl SubscriptionPlansResponseBuilder {
+    /// Set the appropriate plan from a subscription plan record
+    fn set_from_plan(&mut self, plan: SubscriptionPlan) {
+        match plan.subscription_type {
+            SubscriptionType::Individual => match plan.subscription_tier {
+                SubscriptionTier::Basic => {
+                    self.individual_basic = Some(SubscriptionPlanDetailsResponse::from(plan));
+                }
+                SubscriptionTier::Pro => {
+                    self.individual_pro = Some(SubscriptionPlanDetailsResponse::from(plan));
+                }
+            },
+            SubscriptionType::School => match plan.account_limit {
+                None => {
+                    self.school_unlimited = Some(SubscriptionPlanDetailsResponse::from(plan));
+                }
+                Some(account_limit) => {
+                    self.school_limited
+                        .insert(account_limit, SubscriptionPlanDetailsResponse::from(plan));
+                }
+            },
+        }
+    }
+
+    /// Build the subscription plans response.
+    ///
+    /// Will return an error if:
+    /// - Either or both of the individual plans are missing;
+    /// - The unlimited school plan is missing;
+    /// - Or, there are no limited school plans.
+    fn build(self) -> anyhow::Result<SubscriptionPlansResponse> {
+        if self.school_limited.len() == 0 {
+            return Err(anyhow!("Missing limited school plans"));
+        }
+
+        Ok(SubscriptionPlansResponse {
+            individual: IndividualPlanResponse {
+                basic: self
+                    .individual_basic
+                    .ok_or(anyhow!("Missing Individual Basic plan"))?,
+                pro: self
+                    .individual_pro
+                    .ok_or(anyhow!("Missing Individual Pro plan"))?,
+            },
+            school: SchoolPlanResponse {
+                limited: self.school_limited,
+                unlimited: self
+                    .school_unlimited
+                    .ok_or(anyhow!("Missing School Unlimited plan"))?,
+            },
+        })
+    }
+}
 
 /// Request to create a subscription.
 ///

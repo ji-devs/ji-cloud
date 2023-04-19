@@ -5,7 +5,7 @@ use actix_web::{
 use anyhow::anyhow;
 use chrono::{TimeZone, Utc};
 use core::settings::RuntimeSettings;
-use shared::api::endpoints::billing::CreateSetupIntent;
+use shared::api::endpoints::billing::{CreateSetupIntent, GetSubscriptionPlans};
 use shared::domain::billing::{
     AmountInCents, CreateSubscriptionRecord, StripeInvoiceId, StripeSubscriptionId,
     SubscriptionStatus, UpdateSubscriptionRecord,
@@ -104,7 +104,7 @@ async fn create_subscription(
 
         stripe::Subscription::create(&client, params)
             .await
-            .map_err(|error| error::Billing::Stripe(error))?
+            .map_err(error::Billing::Stripe)?
     };
 
     let stripe_subscription_id: StripeSubscriptionId = stripe_subscription.id.into();
@@ -115,10 +115,11 @@ async fn create_subscription(
         .map(|invoice| StripeInvoiceId::from(&invoice.id()));
 
     let amount_due_in_cents = match stripe_subscription.latest_invoice.as_ref() {
-        Some(invoice) => match invoice.as_object().unwrap().amount_remaining {
-            Some(amount_due) => Some(AmountInCents::new(amount_due)),
-            None => None,
-        },
+        Some(invoice) => invoice
+            .as_object()
+            .unwrap()
+            .amount_remaining
+            .map(AmountInCents::new),
         None => None,
     };
 
@@ -140,7 +141,7 @@ async fn create_subscription(
                         .client_secret
                         .as_ref()
                         .unwrap()
-                        .to_owned(),
+                        .clone(),
                 })
         }
         None => None,
@@ -238,7 +239,7 @@ async fn get_or_create_customer(
                 },
             )
             .await
-            .map_err(|error| error::Billing::Stripe(error))?
+            .map_err(error::Billing::Stripe)?
             .id
             .into();
 
@@ -342,8 +343,8 @@ async fn save_payment_method(
     event_object: EventObject,
     event_type: EventType,
 ) -> anyhow::Result<()> {
-    let (customer_id, payment_method) = match event_object {
-        EventObject::PaymentMethod(payment_method) => {
+    let (customer_id, payment_method) =
+        if let EventObject::PaymentMethod(payment_method) = event_object {
             if let Some(customer) = &payment_method.customer {
                 let customer_id = CustomerId::from(customer.id());
 
@@ -357,12 +358,10 @@ async fn save_payment_method(
                 log::warn!("No customer associated with payment method event");
                 return Ok(());
             }
-        }
-        _ => {
+        } else {
             log::warn!("EventObject was not `PaymentMethod`");
             return Ok(());
-        }
-    };
+        };
 
     match db::user::get_user_id_by_customer_id(db.as_ref(), &customer_id).await? {
         Some(user_id) => {
@@ -381,6 +380,14 @@ async fn save_payment_method(
     Ok(())
 }
 
+pub async fn get_subscription_plans(
+    db: Data<PgPool>,
+) -> Result<Json<<GetSubscriptionPlans as ApiEndpoint>::Res>, error::Billing> {
+    let plans = db::billing::get_subscription_plans(db.as_ref()).await?;
+
+    Ok(Json(plans.try_into()?))
+}
+
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
         <CreateSubscription as ApiEndpoint>::Path::PATH,
@@ -390,5 +397,11 @@ pub fn configure(cfg: &mut ServiceConfig) {
         <CreateSetupIntent as ApiEndpoint>::Path::PATH,
         CreateSetupIntent::METHOD.route().to(create_setup_intent),
     )
-    .route("/v1/stripe-webhook", Method::Post.route().to(webhook));
+    .route("/v1/stripe-webhook", Method::Post.route().to(webhook))
+    .route(
+        <GetSubscriptionPlans as ApiEndpoint>::Path::PATH,
+        GetSubscriptionPlans::METHOD
+            .route()
+            .to(get_subscription_plans),
+    );
 }

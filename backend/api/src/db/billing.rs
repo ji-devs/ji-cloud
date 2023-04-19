@@ -44,7 +44,7 @@ set
         plan.account_limit as Option<AccountLimit>,
         plan.amount_in_cents as AmountInCents,
     )
-    .execute(&*pool)
+    .execute(pool)
     .instrument(tracing::info_span!("upsert subscription_plan"))
     .await?;
 
@@ -71,7 +71,7 @@ select
 from subscription_plan
 "#
     )
-    .fetch_all(&*pool)
+    .fetch_all(pool)
     .instrument(tracing::info_span!("get subscription plans"))
     .await
 }
@@ -101,7 +101,7 @@ where plan_id = $1
 "#,
         uuid::Uuid::from(plan_id),
     )
-    .fetch_optional(&*pool)
+    .fetch_optional(pool)
     .instrument(tracing::info_span!("get subscription plans"))
     .await
 }
@@ -142,7 +142,7 @@ returning subscription_id as "id!: SubscriptionId"
             .map(|invoice_id| invoice_id.inner()),
         subscription.amount_due_in_cents.map(|due| due.inner()),
     )
-    .fetch_one(&*pool)
+    .fetch_one(pool)
     .await
     .map(|res| res.id)
 }
@@ -172,7 +172,7 @@ where stripe_subscription_id = $1
             .latest_invoice_id
             .map(|invoice_id| invoice_id.inner()),
     )
-    .execute(&*pool)
+    .execute(pool)
     .await?;
 
     Ok(())
@@ -195,7 +195,7 @@ where stripe_subscription_id = $1
         subscription_id as StripeSubscriptionId,
         amount_due as AmountInCents,
     )
-    .execute(&*pool)
+    .execute(pool)
     .await?;
 
     Ok(())
@@ -228,7 +228,7 @@ where subscription_id = $1
 "#,
         subscription_id as SubscriptionId,
     )
-    .fetch_optional(&*pool)
+    .fetch_optional(pool)
     .await
 }
 
@@ -242,6 +242,6 @@ pub async fn get_stripe_subscription_id_with_invoice_id(
         r#"select stripe_subscription_id as "id: StripeSubscriptionId" from subscription where latest_invoice_id = $1"#,
         invoice_id as &StripeInvoiceId,
     )
-    .fetch_optional(&*pool)
+    .fetch_optional(pool)
     .await
 }
