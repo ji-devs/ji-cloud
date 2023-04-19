@@ -6,7 +6,7 @@ Dynamic backends are typically through cloud run and so cannot be efficiently ca
 
 Make sure to set interconnect location that's closest to storage (e.g. Amsterdam Fastly for Belgium Google)
 
-Only each origin should have host request condition, in order for that origin to be used for the domain. e.g. `req.http.host == "docs.jicloud.org"`
+Only each origin should have host request condition, in order for that origin to be used for the domain. e.g. `req.http.host == "docs.jigzi.org"`
 
 A small `VCL Snippet` for the `recv` block is required to make it fetch index.html for plain directory requests:
 

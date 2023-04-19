@@ -1,7 +1,7 @@
-const URL_MEDIA = "https://media.jicloud.org";
-const URL_FRONTEND_RELEASE = "https://frontend.jicloud.org";
+const URL_MEDIA = "https://media.jigzi.org";
+const URL_FRONTEND_RELEASE = "https://frontend.jigzi.org";
 const URL_FRONTEND_SANDBOX = "https://frontend.sandbox.jigzi.org";
-const URL_UPLOADS_RELEASE = "https://uploads.jicloud.org";
+const URL_UPLOADS_RELEASE = "https://uploads.jigzi.org";
 const URL_UPLOADS_SANDBOX = "https://uploads.sandbox.jigzi.org";
 
 const fetch = require("node-fetch");

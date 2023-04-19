@@ -175,7 +175,7 @@ script = ["gcloud functions deploy purgeFrontendRelease --project ji-cloud --tri
 script_runner = "@shell"
 script = ["gcloud functions deploy purgeUploadsRelease --project ji-cloud --trigger-resource ji-cloud-uploads-origin-eu-001 --region europe-west1 --source backend/fastly-purge --runtime nodejs10 --trigger-event google.storage.object.finalize"]
 
-# the media is on release project since it's used by release project (media.jicloud.org)
+# the media is on release project since it's used by release project (media.jigzi.org)
 [tasks.deploy-release-fastly-purge-media]
 script_runner = "@shell"
 script = ["gcloud functions deploy purgeMedia --project ji-cloud --trigger-resource ji-cloud-media-origin-eu-001 --region europe-west1 --source backend/fastly-purge --runtime nodejs10 --trigger-event google.storage.object.finalize"]

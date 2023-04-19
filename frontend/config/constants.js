@@ -42,12 +42,12 @@ module.exports = {
 //is actually on sandbox (since it's for devs)
 	URL_DOCS: "https://docs.jicloud.org",
 //is actually on release (since it's for public)
-	URL_MEDIA: "https://media.jicloud.org",
-	URL_LEGACY: "https://legacy.jicloud.org",
-	URL_FRONTEND_RELEASE: "https://frontend.jicloud.org",
+	URL_MEDIA: "https://media.jigzi.org",
+	URL_LEGACY: "https://legacy.jigzi.org",
+	URL_FRONTEND_RELEASE: "https://frontend.jigzi.org",
 	URL_FRONTEND_SANDBOX: "https://frontend.sandbox.jigzi.org",
 	URL_STORYBOOK_RELEASE: "https://storybook.jicloud.org",
 	URL_STORYBOOK_SANDBOX: "https://storybook.sandbox.jicloud.org",
-	URL_UPLOADS_RELEASE: "https://uploads.jicloud.org",
+	URL_UPLOADS_RELEASE: "https://uploads.jigzi.org",
 	URL_UPLOADS_SANDBOX: "https://uploads.sandbox.jigzi.org"
 };
