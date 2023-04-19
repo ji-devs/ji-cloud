@@ -14,7 +14,7 @@ const BROWSER_HEIGHT = 576;
 const THUMB_HEIGHT = 168;
 const THUMB_WIDTH = BROWSER_WIDTH * (THUMB_HEIGHT / BROWSER_HEIGHT);
 
-const FINAL_URL_SANDBOX = "https://uploads.sandbox.jicloud.org";
+const FINAL_URL_SANDBOX = "https://uploads.sandbox.jigzi.org";
 const FINAL_URL_RELEASE = "https://uploads.jicloud.org";
 
 require("dotenv").config();

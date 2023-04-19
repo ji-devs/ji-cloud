@@ -1,8 +1,8 @@
 const URL_MEDIA = "https://media.jicloud.org";
 const URL_FRONTEND_RELEASE = "https://frontend.jicloud.org";
-const URL_FRONTEND_SANDBOX = "https://frontend.sandbox.jicloud.org";
+const URL_FRONTEND_SANDBOX = "https://frontend.sandbox.jigzi.org";
 const URL_UPLOADS_RELEASE = "https://uploads.jicloud.org";
-const URL_UPLOADS_SANDBOX = "https://uploads.sandbox.jicloud.org";
+const URL_UPLOADS_SANDBOX = "https://uploads.sandbox.jigzi.org";
 
 const fetch = require("node-fetch");
 const { Storage } = require("@google-cloud/storage");
