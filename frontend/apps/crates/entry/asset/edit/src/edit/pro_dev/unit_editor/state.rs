@@ -1,7 +1,10 @@
 use std::rc::Rc;
 
+use dominator::clone;
 use dominator_helpers::futures::AsyncLoader;
+use futures::StreamExt;
 use futures_signals::signal::Mutable;
+use futures_signals::signal_vec::SignalVecExt;
 use shared::domain::{
     audio::AudioId,
     image::ImageId,
@@ -9,6 +12,8 @@ use shared::domain::{
     pro_dev::unit::{ProDevUnitId, ProDevUnitValue, Video},
 };
 use utils::editable_asset::{EditableAsset, EditableProDev};
+use wasm_bindgen_futures::spawn_local;
+// use futures::future::ready;
 
 use crate::edit::AssetEditState;
 
@@ -35,7 +40,7 @@ impl UnitEditor {
         let units = editable_pro_dev.units.lock_ref();
         let unit = units.iter().find(|x| Some(x.id) == unit_id);
 
-        match unit {
+        let self_ = match unit {
             Some(unit) => Rc::new(Self {
                 unit_id,
                 asset_edit_state: Rc::clone(&asset_edit_state),
@@ -58,7 +63,32 @@ impl UnitEditor {
                 changed: Mutable::new(false),
                 loader: AsyncLoader::new(),
             }),
+        };
+
+        // having an ID but not a unit means it's not yet loaded
+        if let Some(unit_id) = unit_id {
+            if unit.is_none() {
+                self_.fill_after_loaded(unit_id);
+            }
         }
+
+        self_
+    }
+
+    fn fill_after_loaded(self: &Rc<Self>, unit_id: ProDevUnitId) {
+        let state = self;
+        // wait for the first sidebar spot change, which we use as a proxy to know when the ProDev is loaded.
+        spawn_local(clone!(state => async move {
+            state.asset_edit_state.sidebar_spots.signal_vec_cloned().to_stream().next().await;
+            let units = state.editable_pro_dev.units.lock_ref();
+            let unit = units.iter().find(|x| x.id == unit_id);
+
+            if let Some(unit_clone) = unit {
+                state.display_name.set(unit_clone.display_name.clone());
+                state.description.set(unit_clone.description.clone());
+                state.value.set(unit_clone.value.clone().into());
+            }
+        }))
     }
 }
 
