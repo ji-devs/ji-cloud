@@ -263,7 +263,7 @@ async fn create_user(
     send_verification_email(
         &mut txn,
         UserId(user.id),
-        req.email,
+        email,
         &mail,
         &config.remote_target().pages_url(),
     )
@@ -301,7 +301,7 @@ where
     email = $1::text and
     not exists(select 1 from user_email where email = $1)
 "#,
-                email
+                lowercase_email
             )
             .fetch_optional(&mut txn)
             .instrument(tracing::info_span!("get user_id"))
@@ -318,7 +318,7 @@ where
             send_verification_email(
                 &mut txn,
                 user.id,
-                email,
+                lowercase_email.to_string(),
                 &mail,
                 &config.remote_target().pages_url(),
             )
