@@ -22,12 +22,8 @@
 [![Api - Backend - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/Api%20-%20Backend%20-%20Sandbox/badge.svg)](https://github.com/ji-devs/ji-cloud/actions/workflows/backend-api-sandbox.yml)
 
 * [![Media - Backend - Release](https://github.com/jewish-interactive/ji-cloud/workflows/Media%20-%20Backend%20-%20Release/badge.svg)](https://github.com/ji-devs/ji-cloud/actions/workflows/backend-media-release.yml)
-/
-[![Media - Backend - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/Media%20-%20Backend%20-%20Sandbox/badge.svg)](https://github.com/ji-devs/ji-cloud/actions/workflows/backend-media-sandbox.yml)
 
 * [![Pages - Backend - Release](https://github.com/jewish-interactive/ji-cloud/workflows/Pages%20-%20Backend%20-%20Release/badge.svg)](https://github.com/ji-devs/ji-cloud/actions/workflows/backend-pages-release.yml)
-/
-[![Pages - Backend - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/Pages%20-%20Backend%20-%20Sandbox/badge.svg)](https://github.com/ji-devs/ji-cloud/actions/workflows/backend-pages-sandbox.yml)
 
 * [![FastlyPurge- Backend - Release](https://github.com/jewish-interactive/ji-cloud/workflows/FastlyPurge%20-%20Backend%20-%20Release/badge.svg)](https://github.com/ji-devs/ji-cloud/actions/workflows/backend-fastly-purge-release.yml)
 /
