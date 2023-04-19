@@ -126,7 +126,7 @@ impl RemoteTarget {
         match self {
             Self::Local => env_var("LOCAL_UPLOADS_URL")
                 .unwrap_or("http://localhost:9000/test-bucket".to_string()),
-            Self::Sandbox => "https://uploads.sandbox.jicloud.org".to_string(),
+            Self::Sandbox => "https://uploads.sandbox.jigzi.org".to_string(),
             Self::Release => "https://uploads.jicloud.org".to_string(),
         }
     }
@@ -171,7 +171,7 @@ impl RemoteTarget {
             Self::Local => {
                 env_var("LOCAL_FRONTEND_URL").unwrap_or("http://localhost:4104".to_string())
             }
-            Self::Sandbox => "https://frontend.sandbox.jicloud.org".to_string(),
+            Self::Sandbox => "https://frontend.sandbox.jigzi.org".to_string(),
             Self::Release => "https://frontend.jicloud.org".to_string(),
         }
     }
