@@ -211,6 +211,86 @@
     },
     "query": "\ninsert into resource_data_age_range(resource_data_id, age_range_id)\nselect $2, age_range_id\nfrom resource_data_age_range\nwhere resource_data_id = $1\n        "
   },
+  "040ce75080d45c3145b01e706eeb2f0b855eed8dd0eaae542ea24d383b4f70fe": {
+    "describe": {
+      "columns": [
+        {
+          "name": "plan_id: PlanId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "product_id: StripeProductId",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "price_id: StripePriceId",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "subscription_tier: SubscriptionTier",
+          "ordinal": 3,
+          "type_info": "Int2"
+        },
+        {
+          "name": "subscription_type: SubscriptionType",
+          "ordinal": 4,
+          "type_info": "Int2"
+        },
+        {
+          "name": "billing_interval: BillingInterval",
+          "ordinal": 5,
+          "type_info": "Int2"
+        },
+        {
+          "name": "account_limit: AccountLimit",
+          "ordinal": 6,
+          "type_info": "Int8"
+        },
+        {
+          "name": "amount_in_cents: AmountInCents",
+          "ordinal": 7,
+          "type_info": "Int8"
+        },
+        {
+          "name": "trial_period?: TrialPeriod",
+          "ordinal": 8,
+          "type_info": "Int8"
+        },
+        {
+          "name": "created_at: DateTime<Utc>",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at: DateTime<Utc>",
+          "ordinal": 10,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect\n    plan_id as \"plan_id: PlanId\",\n    product_id as \"product_id: StripeProductId\",\n    price_id as \"price_id: StripePriceId\",\n    subscription_tier as \"subscription_tier: SubscriptionTier\",\n    subscription_type as \"subscription_type: SubscriptionType\",\n    billing_interval as \"billing_interval: BillingInterval\",\n    account_limit as \"account_limit: AccountLimit\",\n    amount_in_cents as \"amount_in_cents: AmountInCents\",\n    trial_period as \"trial_period?: TrialPeriod\",\n    created_at as \"created_at: DateTime<Utc>\",\n    updated_at as \"updated_at: DateTime<Utc>\"\nfrom subscription_plan\nwhere plan_id = $1\n"
+  },
   "041c763ec559907841f70e45f627d3864a9e9fef4929d6b96327064617a2f5ec": {
     "describe": {
       "columns": [
@@ -2543,80 +2623,6 @@
       }
     },
     "query": "\nselect pro_dev.id                               as \"id!: ProDevId\",\n       creator_id                               as \"creator_id?: UserId\",\n       author_id                                as \"author_id?: UserId\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id) as \"author_name\",\n       live_id                                  as \"live_id!\",\n       draft_id                                 as \"draft_id!\",\n       published_at,\n       likes                                    as \"likes!\",\n       plays                                    as \"plays!\",\n       live_up_to_date                          as \"live_up_to_date!\"\nfrom pro_dev\ninner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\norder by ord asc\n    "
-  },
-  "2d2725ea8b61dc314d5e83383f138c0415389af30dd0ad7406afe8cbab953e8e": {
-    "describe": {
-      "columns": [
-        {
-          "name": "plan_id: PlanId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "product_id: StripeProductId",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "price_id: StripePriceId",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "subscription_tier: SubscriptionTier",
-          "ordinal": 3,
-          "type_info": "Int2"
-        },
-        {
-          "name": "subscription_type: SubscriptionType",
-          "ordinal": 4,
-          "type_info": "Int2"
-        },
-        {
-          "name": "billing_interval: BillingInterval",
-          "ordinal": 5,
-          "type_info": "Int2"
-        },
-        {
-          "name": "account_limit: AccountLimit",
-          "ordinal": 6,
-          "type_info": "Int8"
-        },
-        {
-          "name": "amount_in_cents: AmountInCents",
-          "ordinal": 7,
-          "type_info": "Int8"
-        },
-        {
-          "name": "created_at: DateTime<Utc>",
-          "ordinal": 8,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at: DateTime<Utc>",
-          "ordinal": 9,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        false,
-        false,
-        true
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect\n    plan_id as \"plan_id: PlanId\",\n    product_id as \"product_id: StripeProductId\",\n    price_id as \"price_id: StripePriceId\",\n    subscription_tier as \"subscription_tier: SubscriptionTier\",\n    subscription_type as \"subscription_type: SubscriptionType\",\n    billing_interval as \"billing_interval: BillingInterval\",\n    account_limit as \"account_limit: AccountLimit\",\n    amount_in_cents as \"amount_in_cents: AmountInCents\",\n    created_at as \"created_at: DateTime<Utc>\",\n    updated_at as \"updated_at: DateTime<Utc>\"\nfrom subscription_plan\nwhere plan_id = $1\n"
   },
   "2d7bafd7b464bb3dd87cf57bc759efe7e5cb73de4ee63feed43f08e2edc1270f": {
     "describe": {
@@ -5106,78 +5112,6 @@
     },
     "query": "\nselect resource.id,\n       display_name                                                                                                 as \"name\",\n       language                                                                                                     as \"language!\",\n       description                                                                                                  as \"description!\",\n       translated_description                                                                                       as \"translated_description!: Json<HashMap<String, String>>\",\n       translated_name                                                                                              as \"translated_name!: Json<HashMap<String, String>>\",\n       array((select affiliation_id\n              from resource_data_affiliation\n              where resource_data_id = resource_data.id))                                                                     as \"affiliations!\",\n       array((select affiliation.display_name\n              from affiliation\n                       inner join resource_data_affiliation on affiliation.id = resource_data_affiliation.affiliation_id\n              where resource_data_affiliation.resource_data_id = resource_data.id))                                                as \"affiliation_names!\",\n        array((select resource_type_id\n                from resource_data_resource\n                where resource_data_id = resource_data.id))                                                                     as \"resource_types!\",\n        array((select resource_type.display_name\n              from resource_type\n                        inner join resource_data_resource on resource_type.id = resource_data_resource.resource_type_id\n             where resource_data_resource.resource_data_id = resource_data.id))                                         as \"resource_type_names!\",\n       array((select age_range_id\n              from resource_data_age_range\n              where resource_data_id = resource_data.id))                                                                     as \"age_ranges!\",\n       array((select age_range.display_name\n              from age_range\n                       inner join resource_data_age_range on age_range.id = resource_data_age_range.age_range_id\n              where resource_data_age_range.resource_data_id = resource_data.id))                                                  as \"age_range_names!\",\n       array((select category_id\n              from resource_data_category\n              where resource_data_id = resource_data.id))                                                                     as \"categories!\",\n       array((select name\n              from category\n                       inner join resource_data_category on category.id = resource_data_category.category_id\n              where resource_data_category.resource_data_id = resource_data.id))                                                   as \"category_names!\",\n       privacy_level                                                                                                as \"privacy_level!: PrivacyLevel\",\n       author_id                                                                                                    as \"author_id\",\n       locked                                                                                                       as \"locked!\",\n       other_keywords                                                                                               as \"other_keywords!\",\n       translated_keywords                                                                                          as \"translated_keywords!\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = resource.author_id)                                                            as \"author_name\",\n        rating                                                                                                      as \"rating\",\n        likes                                                                                                       as \"likes!\",\n        views                                                                                                       as \"views!\",\n        published_at                                                                                                as \"published_at\",\n        blocked                                                                                                     as \"blocked!\"\nfrom resource\n         inner join resource_data on live_id = resource_data.id\n         inner join resource_admin_data \"rad\" on rad.resource_id = resource.id\nwhere ((last_synced_at is null and published_at is not null)\n   or (updated_at is not null and last_synced_at < updated_at)\n    or (published_at < now() is true and last_synced_at < published_at))\nlimit 100 for no key update skip locked;\n     "
   },
-  "58cd3e4887f6508b2948cfb7c396d8657f1b8857cc8d051d7bb46403533aab5c": {
-    "describe": {
-      "columns": [
-        {
-          "name": "plan_id: PlanId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "product_id: StripeProductId",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "price_id: StripePriceId",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "subscription_tier: SubscriptionTier",
-          "ordinal": 3,
-          "type_info": "Int2"
-        },
-        {
-          "name": "subscription_type: SubscriptionType",
-          "ordinal": 4,
-          "type_info": "Int2"
-        },
-        {
-          "name": "billing_interval: BillingInterval",
-          "ordinal": 5,
-          "type_info": "Int2"
-        },
-        {
-          "name": "account_limit: AccountLimit",
-          "ordinal": 6,
-          "type_info": "Int8"
-        },
-        {
-          "name": "amount_in_cents: AmountInCents",
-          "ordinal": 7,
-          "type_info": "Int8"
-        },
-        {
-          "name": "created_at: DateTime<Utc>",
-          "ordinal": 8,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at: DateTime<Utc>",
-          "ordinal": 9,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        false,
-        false,
-        true
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "\nselect\n    plan_id as \"plan_id: PlanId\",\n    product_id as \"product_id: StripeProductId\",\n    price_id as \"price_id: StripePriceId\",\n    subscription_tier as \"subscription_tier: SubscriptionTier\",\n    subscription_type as \"subscription_type: SubscriptionType\",\n    billing_interval as \"billing_interval: BillingInterval\",\n    account_limit as \"account_limit: AccountLimit\",\n    amount_in_cents as \"amount_in_cents: AmountInCents\",\n    created_at as \"created_at: DateTime<Utc>\",\n    updated_at as \"updated_at: DateTime<Utc>\"\nfrom subscription_plan\n"
-  },
   "58ed84397822e7790a3c721f37579e8cbe5aa2e6836c533323229873e88e247d": {
     "describe": {
       "columns": [],
@@ -5680,6 +5614,25 @@
       }
     },
     "query": "\nselect exists(select 1 from user_image_library where user_id = $1 and id = $2) as \"exists!\"\n    "
+  },
+  "628420d3e65bdd621925596f9f00faa7f0ef620de80e871e6975a1c6cb643ad5": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Int2",
+          "Int2",
+          "Int2",
+          "Int8",
+          "Int8",
+          "Int8"
+        ]
+      }
+    },
+    "query": "\ninsert into subscription_plan\n    (product_id, price_id, subscription_tier, subscription_type, billing_interval, account_limit, amount_in_cents)\nvalues\n    ($1, $2, $3, $4, $5, $6, $7)\non conflict (product_id, price_id) do update\nset\n    product_id = $1,\n    price_id = $2,\n    subscription_tier = $3,\n    subscription_type = $4,\n    billing_interval = $5,\n    account_limit = $6,\n    amount_in_cents = $7,\n    trial_period = $8\n"
   },
   "62d55b6e6d3f58b4744cfefb6b9bc2f6376e29c0892ae8fa764f2dc5b42cd1aa": {
     "describe": {
@@ -9177,24 +9130,6 @@
     },
     "query": "select exists(select 1 from user_audio_upload where audio_id = $1 for no key update) as \"exists!\""
   },
-  "9d1880a16bd768eb6b90bdce2adcb55075314e7215e81c04b3293aa4556d37fd": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text",
-          "Int2",
-          "Int2",
-          "Int2",
-          "Int8",
-          "Int8"
-        ]
-      }
-    },
-    "query": "\ninsert into subscription_plan\n    (product_id, price_id, subscription_tier, subscription_type, billing_interval, account_limit, amount_in_cents)\nvalues\n    ($1, $2, $3, $4, $5, $6, $7)\non conflict (product_id, price_id) do update\nset\n    product_id = $1,\n    price_id = $2,\n    subscription_tier = $3,\n    subscription_type = $4,\n    billing_interval = $5,\n    account_limit = $6,\n    amount_in_cents = $7\n"
-  },
   "9d4752bf9a22f50e73e71079588c4d734ce6b91fe23b217f2f9aa22a16d2c363": {
     "describe": {
       "columns": [
@@ -11194,6 +11129,84 @@
       }
     },
     "query": "delete from circle where id = $1"
+  },
+  "bcd76b5f13042928018552bb7136cceb2943e00c42ad986d871d364c97276531": {
+    "describe": {
+      "columns": [
+        {
+          "name": "plan_id: PlanId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "product_id: StripeProductId",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "price_id: StripePriceId",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "subscription_tier: SubscriptionTier",
+          "ordinal": 3,
+          "type_info": "Int2"
+        },
+        {
+          "name": "subscription_type: SubscriptionType",
+          "ordinal": 4,
+          "type_info": "Int2"
+        },
+        {
+          "name": "billing_interval: BillingInterval",
+          "ordinal": 5,
+          "type_info": "Int2"
+        },
+        {
+          "name": "account_limit: AccountLimit",
+          "ordinal": 6,
+          "type_info": "Int8"
+        },
+        {
+          "name": "amount_in_cents: AmountInCents",
+          "ordinal": 7,
+          "type_info": "Int8"
+        },
+        {
+          "name": "trial_period?: TrialPeriod",
+          "ordinal": 8,
+          "type_info": "Int8"
+        },
+        {
+          "name": "created_at: DateTime<Utc>",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at: DateTime<Utc>",
+          "ordinal": 10,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\nselect\n    plan_id as \"plan_id: PlanId\",\n    product_id as \"product_id: StripeProductId\",\n    price_id as \"price_id: StripePriceId\",\n    subscription_tier as \"subscription_tier: SubscriptionTier\",\n    subscription_type as \"subscription_type: SubscriptionType\",\n    billing_interval as \"billing_interval: BillingInterval\",\n    account_limit as \"account_limit: AccountLimit\",\n    amount_in_cents as \"amount_in_cents: AmountInCents\",\n    trial_period as \"trial_period?: TrialPeriod\",\n    created_at as \"created_at: DateTime<Utc>\",\n    updated_at as \"updated_at: DateTime<Utc>\"\nfrom subscription_plan\n"
   },
   "bdfa6658d04ff049c61a416af645025bdd798b50d837f21ebd79ff76f71899e5": {
     "describe": {

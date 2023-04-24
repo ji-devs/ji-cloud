@@ -533,6 +533,8 @@ pub struct SubscriptionPlan {
     pub account_limit: Option<AccountLimit>,
     /// Current price of subscription in cents
     pub amount_in_cents: AmountInCents,
+    /// Trial period, if any
+    pub trial_period: Option<TrialPeriod>,
     /// When the plan was originally created.
     pub created_at: DateTime<Utc>,
     /// When the plan was last updated.
@@ -561,6 +563,8 @@ pub struct CreateUpdateSubscriptionPlanRequest {
     pub account_limit: Option<AccountLimit>,
     /// Current price of subscription in cents
     pub amount_in_cents: AmountInCents,
+    /// Trial period, if any
+    pub trial_period: Option<TrialPeriod>,
 }
 
 make_path_parts!(SubscriptionPlanPath => "/v1/plans");
@@ -573,7 +577,7 @@ pub struct SubscriptionPlanDetailsResponse {
     /// Amount in cents to subscribe to this plan
     pub amount_in_cents: AmountInCents,
     /// Trial period
-    pub trial_period: TrialPeriod,
+    pub trial_period: Option<TrialPeriod>,
 }
 
 impl From<SubscriptionPlan> for SubscriptionPlanDetailsResponse {
@@ -581,7 +585,7 @@ impl From<SubscriptionPlan> for SubscriptionPlanDetailsResponse {
         Self {
             plan_id: plan.plan_id,
             amount_in_cents: plan.amount_in_cents,
-            trial_period: TrialPeriod(7), // TODO
+            trial_period: plan.trial_period,
         }
     }
 }

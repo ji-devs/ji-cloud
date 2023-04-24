@@ -3,7 +3,7 @@ use shared::domain::billing::{
     AccountLimit, AmountInCents, BillingInterval, CreateSubscriptionRecord,
     CreateUpdateSubscriptionPlanRequest, PlanId, StripeInvoiceId, StripePriceId, StripeProductId,
     StripeSubscriptionId, Subscription, SubscriptionId, SubscriptionPlan, SubscriptionStatus,
-    SubscriptionTier, SubscriptionType, UpdateSubscriptionRecord,
+    SubscriptionTier, SubscriptionType, TrialPeriod, UpdateSubscriptionRecord,
 };
 use shared::domain::user::UserId;
 use sqlx::PgPool;
@@ -34,7 +34,8 @@ set
     subscription_type = $4,
     billing_interval = $5,
     account_limit = $6,
-    amount_in_cents = $7
+    amount_in_cents = $7,
+    trial_period = $8
 "#,
         plan.product_id as StripeProductId,
         plan.price_id as StripePriceId,
@@ -43,6 +44,7 @@ set
         plan.billing_interval as BillingInterval,
         plan.account_limit as Option<AccountLimit>,
         plan.amount_in_cents as AmountInCents,
+        plan.trial_period as Option<TrialPeriod>,
     )
     .execute(pool)
     .instrument(tracing::info_span!("upsert subscription_plan"))
@@ -66,6 +68,7 @@ select
     billing_interval as "billing_interval: BillingInterval",
     account_limit as "account_limit: AccountLimit",
     amount_in_cents as "amount_in_cents: AmountInCents",
+    trial_period as "trial_period?: TrialPeriod",
     created_at as "created_at: DateTime<Utc>",
     updated_at as "updated_at: DateTime<Utc>"
 from subscription_plan
@@ -94,6 +97,7 @@ select
     billing_interval as "billing_interval: BillingInterval",
     account_limit as "account_limit: AccountLimit",
     amount_in_cents as "amount_in_cents: AmountInCents",
+    trial_period as "trial_period?: TrialPeriod",
     created_at as "created_at: DateTime<Utc>",
     updated_at as "updated_at: DateTime<Utc>"
 from subscription_plan

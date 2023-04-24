@@ -94,12 +94,14 @@ async fn create_subscription(
 
         // If the user hasn't previously had a subscription, then we can set their trial period.
         if !prev_subscription_exists {
-            params.trial_period_days = Some(7);
-            params.trial_settings = Some(stripe::CreateSubscriptionTrialSettings {
-                end_behavior: stripe::CreateSubscriptionTrialSettingsEndBehavior {
-                    missing_payment_method: stripe::CreateSubscriptionTrialSettingsEndBehaviorMissingPaymentMethod::Cancel,
-                },
-            });
+            if let Some(trial_period) = plan.trial_period {
+                params.trial_period_days = Some(trial_period.inner() as u32);
+                params.trial_settings = Some(stripe::CreateSubscriptionTrialSettings {
+                    end_behavior: stripe::CreateSubscriptionTrialSettingsEndBehavior {
+                        missing_payment_method: stripe::CreateSubscriptionTrialSettingsEndBehaviorMissingPaymentMethod::Cancel,
+                    },
+                });
+            }
         }
 
         stripe::Subscription::create(&client, params)
