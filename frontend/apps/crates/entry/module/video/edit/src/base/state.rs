@@ -16,9 +16,7 @@ use shared::domain::{
     asset::AssetId,
     module::{
         body::{
-            video::{
-                DoneAction, Mode, ModuleData as RawData, PlaySettings as RawPlaySettings, Step,
-            },
+            video::{Mode, ModuleData as RawData, Step},
             BodyExt, ModuleAssist,
         },
         ModuleId,
@@ -41,29 +39,9 @@ pub struct Base {
     pub backgrounds: Rc<Backgrounds>,
     pub stickers: Rc<Stickers<Sticker>>,
     pub text_editor: Rc<TextEditor>,
-    pub play_settings: PlaySettings,
 
     // reference to the embed in the stickers list
     pub embed: Mutable<Option<Rc<Embed>>>,
-    pub clip: Mutable<bool>,
-}
-
-pub struct PlaySettings {
-    pub captions: Mutable<bool>,
-    pub muted: Mutable<bool>,
-    pub autoplay: Mutable<bool>,
-    pub done_action: Mutable<Option<DoneAction>>,
-}
-
-impl PlaySettings {
-    pub fn new(settings: RawPlaySettings) -> Self {
-        Self {
-            captions: Mutable::new(settings.captions),
-            muted: Mutable::new(settings.muted),
-            autoplay: Mutable::new(settings.autoplay),
-            done_action: Mutable::new(settings.done_action),
-        }
-    }
 }
 
 impl Base {
@@ -162,9 +140,7 @@ impl Base {
             text_editor,
             backgrounds,
             stickers,
-            play_settings: PlaySettings::new(content.play_settings),
             embed: Mutable::new(None),
-            clip: Mutable::new(false),
         });
 
         *_self_ref.borrow_mut() = Some(_self.clone());
@@ -187,9 +163,6 @@ impl Base {
                                 _self.embed.set(None);
                             },
                             Some(Sticker::Embed(embed)) => {
-                                if embed.start_at.get().is_some() || embed.end_at.get().is_some() {
-                                    _self.clip.set(true);
-                                }
                                 _self.embed.set(Some(Rc::clone(embed)));
                             },
                             _ => unreachable!(),
@@ -224,12 +197,8 @@ impl Base {
 
 impl BaseExt<Step> for Base {
     type CanContinueSignal = impl Signal<Item = bool>;
-    fn allowed_step_change(&self, _from: Step, to: Step) -> bool {
-        match to {
-            // Only allow changing to steps 3 and 4 if the embed URL has actually been set.
-            Step::Three | Step::Four => self.embed.get_cloned().is_some(),
-            _ => true,
-        }
+    fn allowed_step_change(&self, _from: Step, _to: Step) -> bool {
+        true
     }
 
     fn can_continue_next(&self) -> Self::CanContinueSignal {

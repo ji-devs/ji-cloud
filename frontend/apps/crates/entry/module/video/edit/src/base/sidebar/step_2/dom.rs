@@ -1,4 +1,4 @@
-use super::{state::*, embed};
+use super::{embed, state::*};
 use components::{
     image::search::dom::render as render_image_search,
     tabs::{MenuTab, MenuTabKind},

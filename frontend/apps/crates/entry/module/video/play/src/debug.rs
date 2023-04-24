@@ -16,7 +16,7 @@ use shared::{
                     Backgrounds, BaseContent, Embed, EmbedHost, Sprite, Sticker, Text,
                     YoutubeEmbed, YoutubeUrl,
                 },
-                video::{Content, DoneAction, Mode, ModuleData as RawData, PlaySettings},
+                video::{Content, Mode, ModuleData as RawData},
             },
             ModuleId,
         },
@@ -59,10 +59,6 @@ impl DebugSettings {
                 RawData {
                     content: Some(Content {
                         mode: Mode::Introduction,
-                        play_settings: PlaySettings {
-                            done_action: Some(DoneAction::Next),
-                            ..PlaySettings::default()
-                        },
                         base: BaseContent {
                             theme: ThemeId::Chalkboard,
                             instructions: ModuleAssist {
@@ -86,8 +82,13 @@ impl DebugSettings {
                                         let youtube_url =
                                             YoutubeUrl::try_parse("LUQksiZ2TVw".to_string())
                                                 .unwrap_ji();
-                                        let host =
-                                            EmbedHost::Youtube(YoutubeEmbed { url: youtube_url });
+
+                                        let youtube = YoutubeEmbed::new(youtube_url)
+                                            .captions(true)
+                                            .autoplay(true);
+
+                                        let host = EmbedHost::Youtube(youtube);
+
                                         Sticker::Embed(Embed::new(host))
                                     }
                                 })

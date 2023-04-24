@@ -1,19 +1,17 @@
 use futures_signals::signal::{Mutable, Signal, SignalExt};
-use shared::domain::module::body::{
-    Transform,
-    _groups::design::{Embed as RawEmbed, EmbedHost},
-};
+use shared::domain::module::body::{Transform, _groups::design::Embed as RawEmbed};
 use std::rc::Rc;
 
 use crate::transform::state::{TransformCallbacks, TransformState};
 
-use super::config::{YOUTUBE_EMBED_HEIGHT, YOUTUBE_EMBED_WIDTH};
+use super::{
+    config::{YOUTUBE_EMBED_HEIGHT, YOUTUBE_EMBED_WIDTH},
+    types::EmbedHost,
+};
 
 #[derive(Clone)]
 pub struct Embed {
     pub host: Mutable<EmbedHost>,
-    pub start_at: Mutable<Option<u32>>,
-    pub end_at: Mutable<Option<u32>>,
     pub transform: Rc<TransformState>,
     pub playing_started: Mutable<bool>,
     pub is_playing: Mutable<bool>,
@@ -32,15 +30,13 @@ impl Embed {
         let transform_callbacks =
             TransformCallbacks::new(on_transform_finished, None::<fn()>, on_blur);
         Self {
-            host: Mutable::new(embed.host.clone()),
+            host: Mutable::new(embed.host.clone().into()),
             transform: Rc::new(TransformState::new(
                 embed.transform,
                 Some((YOUTUBE_EMBED_WIDTH, YOUTUBE_EMBED_HEIGHT)),
                 true,
                 transform_callbacks,
             )),
-            start_at: Mutable::new(embed.start_at),
-            end_at: Mutable::new(embed.end_at),
             playing_started,
             is_playing,
         }
@@ -55,10 +51,8 @@ impl Embed {
 
     pub fn to_raw(&self) -> RawEmbed {
         RawEmbed {
-            host: self.host.get_cloned(),
+            host: (&*self.host.lock_ref()).into(),
             transform: self.transform.get_inner_clone(),
-            start_at: self.start_at.get(),
-            end_at: self.end_at.get(),
         }
     }
 }

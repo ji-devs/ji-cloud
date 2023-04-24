@@ -35,7 +35,7 @@ pub fn render_sticker_text_menu<T: AsSticker>(
                 .event(clone!(stickers, index, text => move |_evt:events::Click| {
                     text.transform.close_menu();
                     if let Some(index) = index.get() {
-                        Stickers::duplicate(stickers.clone(), index);
+                        stickers.duplicate(index);
                     }
                 }))
             }),

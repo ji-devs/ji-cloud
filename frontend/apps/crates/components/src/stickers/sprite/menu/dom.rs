@@ -23,7 +23,7 @@ pub fn render_sticker_sprite_menu<T: AsSticker>(
                 .event(clone!(stickers, index, sprite => move |_evt:events::Click| {
                     sprite.transform.close_menu();
                     if let Some(index) = index.get() {
-                        Stickers::duplicate(stickers.clone(), index);
+                        stickers.duplicate(index);
                     }
                 }))
             }),

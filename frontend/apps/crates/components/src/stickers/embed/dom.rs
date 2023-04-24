@@ -3,11 +3,12 @@ use super::{
     config::{YOUTUBE_EMBED_HEIGHT, YOUTUBE_EMBED_WIDTH},
     menu::dom::render_sticker_embed_menu,
     state::Embed,
+    types::YoutubeEmbed,
 };
 use crate::{
     stickers::{
         dom::{BaseRawRenderOptions, BaseRenderOptions},
-        embed::ext::YoutubeUrlExt,
+        embed::{ext::YoutubeUrlExt, types::EmbedHost},
     },
     transform::{
         dom::render_transform,
@@ -19,9 +20,8 @@ use dominator_helpers::signals::DefaultSignal;
 use futures_signals::signal::{Mutable, ReadOnlyMutable, SignalExt};
 use gloo_timers::future::TimeoutFuture;
 use js_sys::Reflect;
-use shared::domain::module::body::{
-    _groups::design::{Embed as RawEmbed, EmbedHost, YoutubeEmbed},
-    video::DoneAction,
+use shared::domain::module::body::_groups::design::{
+    DoneAction, Embed as RawEmbed, EmbedHost as RawEmbedHost,
 };
 use std::rc::Rc;
 use utils::{math::transform_signals, prelude::*};
@@ -29,39 +29,20 @@ use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlElement;
 
+#[derive(Default)]
 pub struct EmbedRenderOptions {
     pub base: BaseRenderOptions,
-    pub captions: ReadOnlyMutable<bool>,
-    pub muted: ReadOnlyMutable<bool>,
-    pub done_action: ReadOnlyMutable<Option<DoneAction>>,
     pub on_ended: Option<Box<dyn Fn()>>,
-}
-
-impl Default for EmbedRenderOptions {
-    fn default() -> Self {
-        let read_only_bool = Mutable::new(false).read_only();
-        Self {
-            base: BaseRenderOptions::default(),
-            captions: read_only_bool.clone(),
-            muted: read_only_bool,
-            done_action: Mutable::new(None).read_only(),
-            on_ended: None,
-        }
-    }
 }
 
 #[derive(Default)]
 pub struct EmbedRawRenderOptions {
     pub base: BaseRawRenderOptions,
-    pub captions: Mutable<bool>,
-    pub muted: Mutable<bool>,
-    pub autoplay: Mutable<bool>,
-    pub _loop: Mutable<bool>,
     pub on_ended: Option<Rc<dyn Fn()>>,
 }
 
 fn render_youtube_embed(
-    youtube: &YoutubeEmbed,
+    youtube: &Rc<YoutubeEmbed>,
     embed: Rc<Embed>,
     opts: Rc<EmbedRenderOptions>,
 ) -> Dom {
@@ -89,18 +70,20 @@ fn render_youtube_embed(
                 false => "none",
             }
         }))
-        .prop("videoId", youtube.url.get_id())
+        .prop_signal("videoId", youtube.url.signal_cloned().map(|url| {
+            url.get_id().to_owned()
+        }))
         // always autoplay since there's another layer for the play button
         .prop("autoplay", true)
-        .prop_signal("captions", opts.captions.signal())
-        .prop_signal("muted", opts.muted.signal())
-        .prop_signal("loop", opts.done_action.signal().map(|done_action| {
+        .prop_signal("captions", youtube.captions.signal())
+        .prop_signal("muted", youtube.muted.signal())
+        .prop_signal("loop", youtube.done_action.signal().map(|done_action| {
             matches!(done_action, Some(DoneAction::Loop))
         }))
-        .prop_signal("start", embed.start_at.signal())
-        .prop_signal("end", embed.end_at.signal())
+        .prop_signal("start", youtube.start_at.signal())
+        .prop_signal("end", youtube.end_at.signal())
         .apply(|dom| apply_transform(dom, &embed.transform))
-        .event(clone!(embed, opts => move |_: events::YoutubeEnded| {
+        .event(clone!(embed => move |_: events::YoutubeEnded| {
             embed.is_playing.set_neq(false);
             if let Some(on_ended) = opts.on_ended.as_ref() {
                 (on_ended) ();
@@ -185,7 +168,9 @@ pub fn render_sticker_embed<T: AsSticker>(
                             match host {
                                 EmbedHost::Youtube(youtube) => Some(
                                     html!("video-youtube-thumbnail", {
-                                        .prop("videoId", youtube.url.get_id())
+                                        .prop_signal("videoId", youtube.url.signal_cloned().map(|url| {
+                                            url.get_id().to_owned()
+                                        }))
                                         .apply(|dom| apply_transform(dom, &embed.transform))
                                     })
                                 ),
@@ -280,18 +265,18 @@ pub fn render_sticker_embed_raw(embed: &RawEmbed, opts: Option<EmbedRawRenderOpt
         .style_signal("height", height_signal.map(|x| format!("{}px", x)))
         .child({
             match &embed.host {
-                EmbedHost::Youtube(youtube_embed) => {
+                RawEmbedHost::Youtube(youtube) => {
                     html!("video-youtube-player" => HtmlElement, {
-                        .prop("videoId", youtube_embed.url.get_id())
-                        .prop_signal("autoplay", opts.autoplay.signal())
-                        .prop_signal("loop", opts._loop.signal())
-                        .prop_signal("captions", opts.captions.signal())
-                        .prop_signal("muted", opts.muted.signal())
+                        .prop("videoId", youtube.url.get_id())
+                        .prop("autoplay", youtube.autoplay)
+                        .prop("loop", matches!(youtube.done_action, Some(DoneAction::Loop)))
+                        .prop("captions", youtube.captions)
+                        .prop("muted", youtube.muted)
                         .apply(|mut dom| {
-                            if let Some(start_at) = embed.start_at {
+                            if let Some(start_at) = youtube.start_at {
                                 dom = dom.prop("start", start_at);
                             }
-                            if let Some(end_at) = embed.end_at {
+                            if let Some(end_at) = youtube.end_at {
                                 dom = dom.prop("end", end_at);
                             }
                             dom

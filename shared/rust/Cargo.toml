@@ -32,6 +32,7 @@ strum_macros = "0.22.0"
 async-stripe = { version = "0.18.4", features = ["runtime-tokio-hyper-rustls"], optional = true }
 macros = { path = "../macros" }
 unicode-segmentation = "1.8.0"
+derive_setters = "0.1.5"
 
 # wasm
 wasm-bindgen = { version = "0.2.78", optional = true }

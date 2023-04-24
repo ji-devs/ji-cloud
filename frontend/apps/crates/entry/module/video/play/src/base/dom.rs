@@ -9,8 +9,7 @@ use components::{
     },
 };
 use dominator::{clone, html, Dom};
-use shared::domain::module::body::_groups::design::Sticker as RawSticker;
-use shared::domain::module::body::video::DoneAction;
+use shared::domain::module::body::_groups::design::{DoneAction, EmbedHost, Sticker as RawSticker};
 use std::rc::Rc;
 
 use super::state::*;
@@ -31,8 +30,13 @@ impl DomRenderable for Base {
                             RawSticker::Sprite(sprite) => render_sticker_sprite_raw(sprite, None),
                             RawSticker::Text(text) => render_sticker_text_raw(text, state.theme_id, None),
                             RawSticker::Embed(embed) => {
-                                let opts = actions::create_embed_sticker_options(&state.play_settings, Some(clone!(state => move || {
-                                    if state.play_settings.done_action == Some(DoneAction::Next) {
+                                let set_next_when_done = match &embed.host {
+                                    EmbedHost::Youtube(youtube) if youtube.done_action == Some(DoneAction::Next) => true,
+                                    _ => false,
+                                };
+
+                                let opts = actions::create_embed_sticker_options(Some(clone!(state => move || {
+                                    if set_next_when_done {
                                         state.set_play_phase(ModulePlayPhase::Ending(Some(ModuleEnding::Next)));
                                     }
                                 })));

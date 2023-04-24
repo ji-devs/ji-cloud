@@ -1,10 +1,10 @@
 use std::rc::Rc;
 
-use components::stickers::video::ext::YoutubeUrlExt;
+use components::stickers::embed::ext::YoutubeUrlExt;
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
 
-use shared::domain::module::body::_groups::design::{VideoHost, YoutubeUrl, YoutubeVideo};
+use shared::domain::module::body::_groups::design::{EmbedHost, YoutubeEmbed, YoutubeUrl};
 use utils::events;
 use web_sys::{HtmlElement, HtmlInputElement};
 
@@ -31,7 +31,7 @@ impl AddVideo {
                                 Some(video) => {
                                     // TODO: don't .lock_ref(), use ref_map
                                     match &video.host {
-                                        VideoHost::Youtube(youtube) => youtube.url.0.clone(),
+                                        EmbedHost::Youtube(youtube) => youtube.url.0.clone(),
                                     }
                                 },
                             }
@@ -44,10 +44,7 @@ impl AddVideo {
                                     }
                                     Ok(youtube_url) => {
                                         actions::set_error(&wrapper, false);
-                                        let host = VideoHost::Youtube(YoutubeVideo {
-                                            url: youtube_url,
-                                        });
-
+                                        let host = EmbedHost::Youtube(YoutubeEmbed::new(youtube_url));
                                         state.save(host);
                                     },
                                 };

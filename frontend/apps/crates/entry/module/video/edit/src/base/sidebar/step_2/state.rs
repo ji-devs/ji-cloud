@@ -6,7 +6,7 @@ use components::{
         state::{ImageSearchKind, ImageSearchOptions, State as ImageSearchState},
     },
     module::_groups::design::edit::design_ext::DesignExt,
-    stickers::state::Stickers,
+    stickers::{embed::types::PartialEmbedHost, state::Stickers},
     tabs::MenuTabKind,
 };
 use dominator::clone;
@@ -17,6 +17,8 @@ use utils::unwrap::UnwrapJiExt;
 pub struct Step2 {
     pub tab: Mutable<Tab>,
     pub sidebar: Rc<Sidebar>,
+    //
+    pub host: Mutable<Option<PartialEmbedHost>>,
 }
 
 impl Step2 {
@@ -28,7 +30,14 @@ impl Step2 {
 
         let tab = Mutable::new(Tab::new(sidebar.base.clone(), kind));
 
-        Rc::new(Self { sidebar, tab })
+        let host: Mutable<Option<PartialEmbedHost>> =
+            Mutable::new(sidebar.base.get_embed_sticker().map(
+                |host: Rc<components::stickers::embed::state::Embed>| {
+                    host.host.lock_ref().partial()
+                },
+            ));
+
+        Rc::new(Self { sidebar, tab, host })
     }
 
     pub fn next_kind(&self) -> Option<MenuTabKind> {

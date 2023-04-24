@@ -6,7 +6,7 @@ use shared::domain::{
         body::{
             ModuleAssist,
             _groups::design::{Backgrounds, Sticker},
-            video::{Mode, ModuleData as RawData, PlaySettings, Step},
+            video::{Mode, ModuleData as RawData, Step},
         },
         ModuleId,
     },
@@ -21,7 +21,6 @@ pub struct Base {
     pub instructions: ModuleAssist,
     pub backgrounds: Backgrounds,
     pub stickers: Vec<Sticker>,
-    pub play_settings: PlaySettings,
     pub module_phase: Mutable<ModulePlayPhase>,
 }
 
@@ -45,7 +44,6 @@ impl Base {
             instructions: base_content.instructions,
             backgrounds: base_content.backgrounds,
             stickers: base_content.stickers,
-            play_settings: content.play_settings,
             module_phase: init_args.play_phase,
         })
     }

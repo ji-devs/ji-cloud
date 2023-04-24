@@ -1,4 +1,5 @@
 use crate::domain::module::body::{Audio, Background, Image, ModuleAssist, ThemeId, Transform};
+use derive_setters::Setters;
 use serde::{Deserialize, Serialize};
 
 /// Default text for `Text`
@@ -147,12 +148,16 @@ pub struct Embed {
 
     /// Transforms
     pub transform: Transform,
+}
 
-    /// url of the YouTube embed
-    pub start_at: Option<u32>,
+/// what to do when done
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+pub enum DoneAction {
+    /// loop
+    Loop,
 
-    /// url of the YouTube embed
-    pub end_at: Option<u32>,
+    /// move on to next activity
+    Next,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
@@ -161,24 +166,60 @@ pub enum EmbedHost {
     /// YouTube
     #[serde(alias = "youtube")]
     Youtube(YoutubeEmbed),
+
+    // /// Google sheets
+    // GoogleSheet(GoogleSheetsEmbed),
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Setters)]
 /// YouTube host embed
 pub struct YoutubeEmbed {
     /// url of the YouTube embed
     pub url: YoutubeUrl,
+
+    /// start at second
+    pub start_at: Option<u32>,
+
+    /// end at second
+    pub end_at: Option<u32>,
+
+    /// show captions
+    pub captions: bool,
+
+    /// play with sound
+    pub muted: bool,
+
+    /// autoplay
+    pub autoplay: bool,
+
+    /// what to do when done
+    pub done_action: Option<DoneAction>,
+}
+
+impl YoutubeEmbed {
+    /// creates a new YoutubeEmbed
+    pub fn new(url: YoutubeUrl) -> Self {
+        Self {
+            url,
+            start_at: None,
+            end_at: None,
+            captions: false,
+            muted: false,
+            autoplay: false,
+            done_action: None,
+        }
+    }
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 /// YouTube host embed url
 pub struct YoutubeUrl(pub String);
 
-impl VideoHost {
+impl EmbedHost {
     /// Convert youtube host url to a string
     pub fn get_url_string(&self) -> String {
         match &self {
-            VideoHost::Youtube(youtube_video) => {
+            EmbedHost::Youtube(youtube_video) => {
                 let YoutubeUrl(url) = &youtube_video.url;
                 url.to_string()
             }
@@ -188,6 +229,16 @@ impl VideoHost {
 
 /// Youtube url parse error
 pub type YoutubeUrlError = String;
+
+// #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+// /// Google sheets host embed url
+// pub struct GoogleSheetsEmbed {
+//     /// url of the YouTube video
+//     pub url: GoogleSheetId,
+// }
+// #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+// /// YouTube host google sheet url
+// pub struct GoogleSheetId(pub String);
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 /// Trace

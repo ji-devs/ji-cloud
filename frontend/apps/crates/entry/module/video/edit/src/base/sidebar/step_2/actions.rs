@@ -1,65 +1,67 @@
-use crate::base::state::*;
 use components::stickers::{
-    embed::state::Embed,
+    embed::{
+        state::Embed,
+        types::{EmbedHost, PartialEmbedHost},
+    },
     state::{Sticker, Stickers},
 };
 use js_sys::Reflect;
-use shared::domain::module::body::_groups::design::EmbedHost;
 use std::rc::Rc;
 use wasm_bindgen::JsValue;
 use web_sys::HtmlElement;
 
-impl Base {
-    pub fn on_link_change(&self, host: EmbedHost) {
-        let embed = self.get_embed_sticker();
+use super::state::Step2;
 
-        match embed {
+impl Step2 {
+    pub fn on_embed_value_change(&self) {
+        let partial_host = self.host.lock_ref();
+        let full_embed = self.sidebar.base.get_embed_sticker();
+
+        match &*partial_host {
+            Some(partial_host) => match full_embed {
+                None => {
+                    if let Ok(full_host) = partial_host.full() {
+                        self.add_embed_sticker(full_host);
+                    }
+                }
+                Some(full_embed) => {
+                    self.update_embed_sticker(full_embed, partial_host);
+                }
+            },
             None => {
-                self.add_embed_sticker(host);
-            }
-            Some(embed) => {
-                self.update_embed_sticker(embed, host);
+                self.delete_embed_sticker();
             }
         }
     }
 
-    fn add_embed_sticker(&self, host: EmbedHost) {
-        Stickers::add_embed(Rc::clone(&self.stickers), host);
-    }
-
-    fn update_embed_sticker(&self, sticker: Rc<Embed>, host: EmbedHost) {
-        sticker.host.set(host);
-        sticker.playing_started.set_neq(false);
-        sticker.is_playing.set_neq(false);
-        Stickers::call_change(&Rc::clone(&self.stickers));
-    }
-
-    #[must_use]
-    pub fn get_embed_sticker(&self) -> Option<Rc<Embed>> {
-        let stickers = self.stickers.list.lock_ref();
-
-        let embed = stickers
-            .iter()
-            .find(|sticker| matches!(sticker, Sticker::Embed(_)))
-            .map(|sticker| match sticker {
-                Sticker::Embed(embed) => embed,
-                _ => unreachable!("should not be possible"),
-            });
-
-        let embed = embed.map(|embed| Rc::clone(&embed));
-
-        embed
-    }
-
     pub fn delete_embed(&self) {
-        let mut stickers = self.stickers.list.lock_mut();
+        self.delete_embed_sticker();
+        self.host.set(None);
+    }
+
+    fn add_embed_sticker(&self, host: EmbedHost) {
+        let host = (&host).into();
+        Stickers::add_embed(self.sidebar.base.stickers.clone(), host);
+    }
+
+    fn update_embed_sticker(&self, embed: Rc<Embed>, partial_host: &PartialEmbedHost) {
+        let _ = embed.host.lock_ref().update_from_partial(partial_host);
+        embed.playing_started.set_neq(false);
+        embed.is_playing.set_neq(false);
+        self.sidebar.base.stickers.call_change();
+    }
+
+    fn delete_embed_sticker(&self) {
+        let stickers = self.sidebar.base.stickers.list.lock_ref();
         let embed_index = stickers
             .iter()
             .position(|sticker| matches!(sticker, Sticker::Embed(_)));
         match embed_index {
-            None => log::info!("No emebd to delete"),
+            None => log::info!("No embed to delete"),
             Some(embed_index) => {
-                stickers.remove(embed_index);
+                // drop stickers so that delete_index can get a mutable reference
+                drop(stickers);
+                self.sidebar.base.stickers.delete_index(embed_index);
             }
         };
     }

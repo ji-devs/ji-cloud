@@ -1,9 +1,9 @@
 use components::overlay::handle::OverlayHandle;
-use components::stickers::video::ext::YoutubeUrlExt;
+use components::stickers::embed::ext::YoutubeUrlExt;
 use dominator::{clone, html, with_node, Dom, DomBuilder, EventOptions};
 use futures_signals::map_ref;
 use shared::domain::asset::DraftOrLive;
-use shared::domain::module::body::_groups::design::VideoHost;
+use shared::domain::module::body::_groups::design::EmbedHost;
 use shared::domain::pro_dev::unit::ProDevUnitValue;
 use web_sys::{HtmlElement, Node, ScrollBehavior, ScrollIntoViewOptions};
 
@@ -199,7 +199,7 @@ impl SpotState {
                                                             .prop("slot", "unit")
                                                             .child_signal(mut_host.signal_cloned().map(move|host| {
                                                                 match host {
-                                                                    VideoHost::Youtube(youtube) => Some(
+                                                                    EmbedHost::Youtube(youtube) => Some(
                                                                         html!("video-youtube-thumbnail", {
                                                                             .prop("videoId", youtube.url.get_id())
                                                                             .style("width", "100%")

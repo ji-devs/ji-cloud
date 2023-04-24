@@ -107,9 +107,6 @@ pub struct Content {
 
     /// The base content for all design modules
     pub base: BaseContent,
-
-    /// Play settings
-    pub play_settings: PlaySettings,
 }
 
 /// Editor state
@@ -231,39 +228,3 @@ impl StepExt for Step {
     }
 }
 
-/// Video play settings
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct PlaySettings {
-    /// show captions
-    pub captions: bool,
-
-    /// play with sound
-    pub muted: bool,
-
-    /// autoplay
-    pub autoplay: bool,
-
-    /// what to do when done
-    pub done_action: Option<DoneAction>,
-}
-
-impl Default for PlaySettings {
-    fn default() -> Self {
-        Self {
-            autoplay: true,
-            muted: Default::default(),
-            captions: Default::default(),
-            done_action: Default::default(),
-        }
-    }
-}
-
-/// what to do when done playing video
-#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
-pub enum DoneAction {
-    /// loop the video
-    Loop,
-
-    /// move on to next activity
-    Next,
-}

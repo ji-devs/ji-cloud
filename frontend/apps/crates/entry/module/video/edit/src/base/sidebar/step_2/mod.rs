@@ -1,4 +1,4 @@
 pub mod actions;
 pub mod dom;
-pub mod state;
 pub(super) mod embed;
+pub mod state;

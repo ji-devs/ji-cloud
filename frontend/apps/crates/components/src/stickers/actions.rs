@@ -22,7 +22,8 @@ enum Direction {
     Tail,
 }
 impl<T: AsSticker> Stickers<T> {
-    pub fn duplicate(_self: Rc<Self>, index: usize) {
+    pub fn duplicate(self: &Rc<Self>, index: usize) {
+        let _self: &Rc<Stickers<T>> = self;
         if let Some(mut raw) = _self.get_raw(index) {
             let sticker = _self.map(index, |item| {
                 match &mut raw {
@@ -109,7 +110,8 @@ impl<T: AsSticker> Stickers<T> {
         */
     }
 
-    pub fn add_sprite(_self: Rc<Self>, image: Image) {
+    pub fn add_sprite(self: Rc<Self>, image: Image) {
+        let _self = self;
         _self.add_sticker(T::new_from_sticker(Sticker::Sprite(Rc::new(Sprite::new(
             &RawSprite::new(image),
             Some(clone!(_self => move |_| {
@@ -121,7 +123,8 @@ impl<T: AsSticker> Stickers<T> {
         )))));
     }
 
-    pub fn add_text(_self: Rc<Self>, value: String) {
+    pub fn add_text(self: Rc<Self>, value: String) {
+        let _self = self;
         _self.add_sticker(T::new_from_sticker(Sticker::Text(Rc::new(Text::new(
             _self.text_editor.clone(),
             &RawText::from_value(value),
@@ -134,7 +137,8 @@ impl<T: AsSticker> Stickers<T> {
         )))));
     }
 
-    pub fn add_embed(_self: Rc<Self>, embed: EmbedHost) {
+    pub fn add_embed(self: Rc<Self>, embed: EmbedHost) {
+        let _self = self;
         _self.add_sticker(T::new_from_sticker(Sticker::Embed(Rc::new(Embed::new(
             &RawEmbed::new(embed),
             Some(clone!(_self => move |_| {
