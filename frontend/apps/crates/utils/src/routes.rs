@@ -621,7 +621,6 @@ impl Route {
                 )))
             }
 
-
             ["jig", play_or_edit] | ["jig", play_or_edit, _] | ["jig", play_or_edit, _, _] => {
                 let url: String = url.pathname();
                 let mut url: Vec<&str> = url.split('/').collect();

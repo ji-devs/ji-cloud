@@ -1,19 +1,12 @@
 use std::{cell::RefCell, rc::Rc};
 
 use awsm_web::loaders::helpers::AsyncLoader;
-use components::audio::mixer::AudioHandle;
 use futures_signals::signal::Mutable;
-use serde::{Deserialize, Serialize};
 use shared::domain::{
-    pro_dev::{ProDevId, ProDevResponse,unit::{
-        ProDevUnitId,
-    }},
     meta::ResourceType,
-
+    pro_dev::{unit::ProDevUnitId, ProDevId, ProDevResponse},
 };
 use utils::asset::ProDevPlayerOptions;
-use web_sys::HtmlIFrameElement;
-
 
 pub struct ProDevPlayer {
     pub pro_dev_id: ProDevId,
@@ -24,6 +17,7 @@ pub struct ProDevPlayer {
     pub active_unit: Mutable<Option<usize>>,
     // /// Count of units which have been played
     // pub played_units: RefCell<usize>,
+    pub current_page: Mutable<Option<usize>>,
     pub play_tracked: RefCell<bool>,
     pub start_unit_id: Option<ProDevUnitId>,
     pub player_options: ProDevPlayerOptions,
@@ -54,25 +48,10 @@ impl ProDevPlayer {
             // played_units: RefCell::new(0),
             play_tracked: RefCell::new(false),
             start_unit_id: unit_id,
+            current_page: Mutable::new(None),
             player_options,
             resource_types: Default::default(),
             is_full_screen: Mutable::new(false),
         })
-    }
-}
-
-
-
-/// Returns whether the liked status should be loaded for a JIG
-///
-/// Returns true only if there is a logged-in user who is **not** the author of the JIG, and the
-/// JIG is published.
-pub fn can_load_liked_status(pro_dev: &ProDevResponse) -> bool {
-    match utils::init::user::get_user_id() {
-        Some(user_id) if pro_dev.pro_dev_data.draft_or_live.is_live() => match pro_dev.author_id {
-            Some(author_id) => author_id != user_id,
-            None => true,
-        },
-        _ => false, // No logged-in user
     }
 }

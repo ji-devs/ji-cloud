@@ -9,7 +9,6 @@ use gloo_timers::future::TimeoutFuture;
 
 impl Ending {
     pub fn render(state: Rc<Self>) -> Dom {
-
         // if msg.try_post_message_to_player().is_err() {
         //     log::info!("Couldn't post message to player!");
         // }

@@ -1,17 +1,19 @@
 use super::actions;
+use crate::pro_dev::actions::{page_forward_signal, paginate};
 use components::stickers::video::ext::YoutubeUrlExt;
 use dominator::{clone, html, Dom};
 use futures_signals::map_ref;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
+use shared::domain::audio::AudioId;
 use shared::domain::image::ImageId;
 use shared::domain::module::body::_groups::design::VideoHost;
 use shared::domain::pdf::PdfId;
 use shared::domain::pro_dev::unit::{ProDevUnit, Video};
 use shared::media::MediaLibrary;
-use utils::path::pdf_lib_url;
 use std::rc::Rc;
 use utils::events;
+use utils::path::{audio_lib_url, pdf_lib_url};
 use web_sys::{HtmlElement, HtmlIFrameElement};
 
 use super::state::ProDevPlayer;
@@ -24,35 +26,58 @@ impl ProDevPlayer {
         let state = self;
         actions::load_data(state.clone());
 
-        log::info!("After load");
-
         html!("div", {
-            // start stupid
-            .text_signal(state.active_unit.signal().map(|active_unit| {
-                format!("Active unit: {active_unit:?}")
-            }))
-            .child(html!("br"))
-            // end stupid
             .child_signal(state.active_unit_signal().map(clone!(state => move|unit| {
                 unit.map(|unit| {
                     state.render_active_unit(unit)
                 })
             })))
+            .child_signal(state.active_unit_signal().map(move|unit| {
+                unit.map(|unit| {
+                    html!("div", {
+                        .children(&mut [
+                            html!("div", {
+                                .text(&unit.display_name)
+                            }),
+                            html!("div", {
+                                .text(&unit.description)
+                            })
+                        ])
+                    })
+                })
+            }))
             .child_signal(state.pro_dev.signal_cloned().map(clone!(state => move |pro_dev| {
                 pro_dev.map(|pro_dev| {
-                    log::info!("Inside html");
-
                     html!("div", {
-                        .text(format!("display name: {}", pro_dev.pro_dev_data.display_name).as_str())
-                        .children(pro_dev.pro_dev_data.units.iter().enumerate().map(clone!(state => move |(index, unit)| {
-                            html!("button", {
-                                .text(&unit.display_name)
-                                .event(clone!(state, index => move |_: events::Click| {
-                                    state.active_unit.set(Some(index))
+                        .style("display", "flex")
+                        .child(html!("button", {  // Left arrow button
+                            .text("<")
+                            .style("order", "0")
+                            .event(clone!(state => move |_: events::Click| {
+                                let current_page = state.current_page.get().unwrap_or(0);
+                                if current_page > 0 {
+                                    state.current_page.set(Some(current_page - 1));
+                                }
                                 }))
-                            })
-                        })))
-                    })               
+                        }))
+                        .child_signal(state.current_page.signal_cloned().map(clone!(
+                            state, pro_dev => move |_page| {
+                                Some(paginate(&state, &pro_dev))
+                            }
+                        )))
+                        .child(html!("button", {  // Right arrow button
+                            .text(">")
+                            .style("order", "2")
+                            .prop_signal("disable", page_forward_signal(Rc::clone(&state), &pro_dev))
+                            .event(clone!(state => move |_: events::Click| {
+                                    let current_page = state.current_page.get().unwrap_or(0);
+                                    let num_pages = (pro_dev.pro_dev_data.units.len() + 9) / 10;
+                                    if current_page < num_pages - 1 {
+                                        state.current_page.set(Some(current_page + 1));
+                                    }
+                                }))
+                            }))
+                        })
                 })
             })))
         })
@@ -60,11 +85,21 @@ impl ProDevPlayer {
 
     fn render_active_unit(self: &Rc<Self>, unit: ProDevUnit) -> Dom {
         match unit.value {
-            shared::domain::pro_dev::unit::ProDevUnitValue::ImageId(image_id) => self.render_active_image(image_id),
-            shared::domain::pro_dev::unit::ProDevUnitValue::AudioId(_) => todo!("<audio> tag"),
-            shared::domain::pro_dev::unit::ProDevUnitValue::Link(url) => self.render_active_link(url),
-            shared::domain::pro_dev::unit::ProDevUnitValue::PdfId(pdf_id) => self.render_active_pdf(pdf_id),
-            shared::domain::pro_dev::unit::ProDevUnitValue::Video(video) => self.render_active_video(video),
+            shared::domain::pro_dev::unit::ProDevUnitValue::ImageId(image_id) => {
+                self.render_active_image(image_id)
+            }
+            shared::domain::pro_dev::unit::ProDevUnitValue::AudioId(audio_id) => {
+                self.render_active_audio(audio_id)
+            }
+            shared::domain::pro_dev::unit::ProDevUnitValue::Link(url) => {
+                self.render_active_link(url)
+            }
+            shared::domain::pro_dev::unit::ProDevUnitValue::PdfId(pdf_id) => {
+                self.render_active_pdf(pdf_id)
+            }
+            shared::domain::pro_dev::unit::ProDevUnitValue::Video(video) => {
+                self.render_active_video(video)
+            }
         }
     }
 
@@ -80,7 +115,7 @@ impl ProDevPlayer {
                 }
             }
         }
-    } 
+    }
 
     fn render_active_video(self: &Rc<Self>, video: Video) -> Dom {
         let mut_host = Mutable::new(video.host.clone());
@@ -103,11 +138,6 @@ impl ProDevPlayer {
                             .style("display", "block")
                             .style("width", "100%")
                             .style("height", "100%")
-                            // .event(clone!(on_ended => move |_: events::YoutubeEnded| {
-                            //     if let Some(on_ended) = on_ended.as_ref() {
-                            //         (on_ended) ();
-                            //     }
-                            // }))
                         })
                     ),
                 }
@@ -148,7 +178,7 @@ impl ProDevPlayer {
             .prop("src", link.to_string())
         })
     }
-    
+
     pub fn render_active_pdf(self: &Rc<Self>, pdf_id: PdfId) -> Dom {
         // let state = self;
         let resp = pdf_lib_url(MediaLibrary::User, pdf_id);
@@ -156,6 +186,17 @@ impl ProDevPlayer {
             .style("width", "100%")
             .style("border", "none")
             .prop("src", resp)
+        })
+    }
+
+    pub fn render_active_audio(self: &Rc<Self>, audio_id: AudioId) -> Dom {
+        // let state = self;
+        let resp = audio_lib_url(MediaLibrary::User, audio_id);
+        html!("audio", {
+            .style("width", "100%")
+            .style("border", "none")
+            .prop("src", resp)
+            .prop("controls", true)
         })
     }
 }

@@ -208,7 +208,7 @@ pub enum ModuleToJigPlayerMessage {
     Previous,
     Next,
     ResetTimer(Seconds),
-    PauseTimer, 
+    PauseTimer,
     UnpauseTimer,
     JumpToIndex(usize),
     JumpToId(ModuleId),

@@ -3,9 +3,8 @@ use std::{cell::RefCell, rc::Rc};
 use awsm_web::loaders::helpers::AsyncLoader;
 use components::audio::mixer::AudioHandle;
 use futures_signals::signal::Mutable;
-use serde::{Deserialize, Serialize};
 use shared::domain::{
-    jig::{player::PlayerNavigationHandler, JigId, JigPlayerSettings, JigResponse},
+    jig::{player::PlayerNavigationHandler, JigId, JigResponse},
     meta::ResourceType,
     module::{
         body::{Audio, ModuleAssist, ModuleAssistType},
