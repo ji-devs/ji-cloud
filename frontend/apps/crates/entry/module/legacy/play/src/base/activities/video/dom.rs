@@ -1,6 +1,6 @@
 use super::state::Video;
 use crate::base::styles;
-use components::stickers::embed::ext::*;
+use components::stickers::embed::types::ParseUrlExt;
 use dominator::{clone, html, with_node, Dom};
 use shared::domain::module::body::{_groups::design::YoutubeUrl, legacy::activity::VideoSource};
 use std::rc::Rc;

@@ -5,7 +5,7 @@ use dominator::{clone, html, Dom};
 use futures_signals::signal::{Signal, SignalExt};
 use utils::events;
 
-use super::{super::state::Step2, youtube::render_youtube};
+use super::{super::state::Step2, google_sheet::render_google_sheet, youtube::render_youtube};
 
 fn option(
     label: &str,
@@ -14,6 +14,7 @@ fn option(
 ) -> Dom {
     html!("label", {
         .text(label)
+        .style("display", "block")
         .child(html!("input", {
             .prop("type", "radio")
             .prop("name", "radio")
@@ -41,16 +42,19 @@ pub fn render(state: Rc<Step2>) -> Dom {
                     matches!(host, Some(PartialEmbedHost::Youtube(_)))
                 })
             ),
-            // option(
-            //     "google sheet",
-            //     Box::new(clone!(state => move|| {
-            //         log::info!("google sheet");
-            //         state.host.set(Some(EmbedHost::GoogleSheet(Default::default())));
-            //     })),
-            //     state.host.signal_ref(|host| {
-            //         matches!(host, Some(EmbedHost::GoogleSheet(_)))
-            //     })
-            // ),
+            option(
+                "google sheet",
+                Box::new(clone!(state => move|| {
+                    match state.host.get_cloned() {
+                        Some(PartialEmbedHost::GoogleSheet(_)) => state.host.set(None),
+                        _ => state.host.set(Some(PartialEmbedHost::GoogleSheet(Default::default()))),
+                    };
+                    state.on_embed_value_change();
+                })),
+                state.host.signal_ref(|host| {
+                    matches!(host, Some(PartialEmbedHost::GoogleSheet(_)))
+                })
+            ),
         ])
         .child_signal(state.host.signal_cloned().map(clone!(state => move |embed| {
             embed.map(clone!(state => move |embed| {
@@ -64,6 +68,6 @@ pub fn render(state: Rc<Step2>) -> Dom {
 fn render_host(state: &Rc<Step2>, host: PartialEmbedHost) -> Dom {
     match &host {
         PartialEmbedHost::Youtube(youtube) => render_youtube(state, youtube),
-        // EmbedHost::GoogleSheet(google_sheet) => render_google_sheet(state, google_sheet),
+        PartialEmbedHost::GoogleSheet(google_sheet) => render_google_sheet(state, google_sheet),
     }
 }

@@ -1,7 +1,7 @@
 use crate::stickers::embed::state::Embed;
 
 use super::{
-    embed::ext::*,
+    embed::types::EmbedExt,
     sprite::{ext::*, state::*},
     state::*,
     text::state::*,

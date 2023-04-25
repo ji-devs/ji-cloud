@@ -1,5 +1,5 @@
 use components::overlay::handle::OverlayHandle;
-use components::stickers::embed::ext::YoutubeUrlExt;
+use components::stickers::embed::types::ParseUrlExt;
 use dominator::{clone, html, with_node, Dom, DomBuilder, EventOptions};
 use futures_signals::map_ref;
 use shared::domain::asset::DraftOrLive;
@@ -205,8 +205,9 @@ impl SpotState {
                                                                             .style("width", "100%")
                                                                             .style("height", "100%")
                                                                             .style("position", "relative")
-                                                                            })
+                                                                        })
                                                                     ),
+                                                                    EmbedHost::GoogleSheet(_) => todo!(),
                                                                 }
                                                             }))
                                                             .child(html!("img-ui", {

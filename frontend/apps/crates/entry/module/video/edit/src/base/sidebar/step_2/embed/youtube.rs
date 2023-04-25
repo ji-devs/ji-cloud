@@ -1,4 +1,4 @@
-use components::stickers::embed::{ext::YoutubeUrlExt, types::PartialYoutubeEmbed};
+use components::stickers::embed::types::{ParseUrlExt, PartialYoutubeEmbed};
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::module::body::_groups::design::YoutubeUrl;

@@ -167,8 +167,8 @@ pub enum EmbedHost {
     #[serde(alias = "youtube")]
     Youtube(YoutubeEmbed),
 
-    // /// Google sheets
-    // GoogleSheet(GoogleSheetsEmbed),
+    /// Google sheets
+    GoogleSheet(GoogleSheetsEmbed),
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Setters)]
@@ -222,7 +222,11 @@ impl EmbedHost {
             EmbedHost::Youtube(youtube_video) => {
                 let YoutubeUrl(url) = &youtube_video.url;
                 url.to_string()
-            }
+            },
+            EmbedHost::GoogleSheet(google_sheet) => {
+                let GoogleSheetId(url) = &google_sheet.url;
+                url.to_string()
+            },
         }
     }
 }
@@ -230,15 +234,16 @@ impl EmbedHost {
 /// Youtube url parse error
 pub type YoutubeUrlError = String;
 
-// #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
-// /// Google sheets host embed url
-// pub struct GoogleSheetsEmbed {
-//     /// url of the YouTube video
-//     pub url: GoogleSheetId,
-// }
-// #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
-// /// YouTube host google sheet url
-// pub struct GoogleSheetId(pub String);
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+/// Google sheets host embed url
+pub struct GoogleSheetsEmbed {
+    /// url of the YouTube video
+    pub url: GoogleSheetId,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+/// YouTube host google sheet url
+pub struct GoogleSheetId(pub String);
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 /// Trace

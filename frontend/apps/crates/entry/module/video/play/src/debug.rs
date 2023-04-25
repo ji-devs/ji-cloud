@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use components::stickers::{
-    embed::ext::{EmbedExt, YoutubeUrlExt},
+    embed::types::{EmbedExt, ParseUrlExt},
     sprite::ext::*,
 };
 use once_cell::sync::OnceCell;

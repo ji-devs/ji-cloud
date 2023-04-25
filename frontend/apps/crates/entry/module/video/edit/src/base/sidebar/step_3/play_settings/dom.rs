@@ -16,11 +16,17 @@ pub fn render(state: Rc<State>) -> Dom {
             EmbedHost::Youtube(youtube) => {
                 render_settings(Rc::new(render_settings_youtube(&state, youtube)))
             }
+            EmbedHost::GoogleSheet(_) => render_no_settings("Google Sheet"),
         },
         None => render_no_embed_selected(),
     }
 }
 
+fn render_no_settings(embed_name: &str) -> Dom {
+    html!("div", {
+        .text(&format!("No settings for {embed_name}"))
+    })
+}
 fn render_no_embed_selected() -> Dom {
     html!("div", {
         .text("Please select an embed in step 2 before editing settings")

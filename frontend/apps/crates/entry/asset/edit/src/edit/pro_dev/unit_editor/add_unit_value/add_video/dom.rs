@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use components::stickers::embed::ext::YoutubeUrlExt;
+use components::stickers::embed::types::ParseUrlExt;
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
 
@@ -32,6 +32,7 @@ impl AddVideo {
                                     // TODO: don't .lock_ref(), use ref_map
                                     match &video.host {
                                         EmbedHost::Youtube(youtube) => youtube.url.0.clone(),
+                                        EmbedHost::GoogleSheet(google_sheet) => google_sheet.url.0.clone(),
                                     }
                                 },
                             }

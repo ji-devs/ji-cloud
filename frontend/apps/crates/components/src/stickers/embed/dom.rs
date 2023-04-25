@@ -3,12 +3,12 @@ use super::{
     config::{YOUTUBE_EMBED_HEIGHT, YOUTUBE_EMBED_WIDTH},
     menu::dom::render_sticker_embed_menu,
     state::Embed,
-    types::YoutubeEmbed,
+    types::{GoogleSheetsEmbed, YoutubeEmbed},
 };
 use crate::{
     stickers::{
         dom::{BaseRawRenderOptions, BaseRenderOptions},
-        embed::{ext::YoutubeUrlExt, types::EmbedHost},
+        embed::types::{EmbedHost, ParseUrlExt},
     },
     transform::{
         dom::render_transform,
@@ -21,7 +21,7 @@ use futures_signals::signal::{Mutable, ReadOnlyMutable, SignalExt};
 use gloo_timers::future::TimeoutFuture;
 use js_sys::Reflect;
 use shared::domain::module::body::_groups::design::{
-    DoneAction, Embed as RawEmbed, EmbedHost as RawEmbedHost,
+    DoneAction, Embed as RawEmbed, EmbedHost as RawEmbedHost, GoogleSheetId,
 };
 use std::rc::Rc;
 use utils::{math::transform_signals, prelude::*};
@@ -118,6 +118,19 @@ fn render_youtube_embed(
     })
 }
 
+fn render_google_sheet_embed(
+    google_sheet: &Rc<GoogleSheetsEmbed>,
+    embed: Rc<Embed>,
+    _opts: Rc<EmbedRenderOptions>,
+) -> Dom {
+    html!("iframe", {
+        .prop_signal("src", google_sheet.url.signal_cloned().map(|url| {
+            url.get_id().to_owned()
+        }))
+        .apply(|dom| apply_transform(dom, &embed.transform))
+    })
+}
+
 fn apply_transform<A: AsRef<HtmlElement>>(
     dom: DomBuilder<A>,
     transform: &TransformState,
@@ -153,6 +166,7 @@ pub fn render_sticker_embed<T: AsSticker>(
                         .child_signal(embed.host.signal_cloned().map(clone!(embed, opts => move|host| {
                             match host {
                                 EmbedHost::Youtube(youtube) => Some(render_youtube_embed(&youtube, Rc::clone(&embed), Rc::clone(&opts))),
+                                EmbedHost::GoogleSheet(google_sheet) => Some(render_google_sheet_embed(&google_sheet, Rc::clone(&embed), Rc::clone(&opts))),
                             }
                         })))
                     }))
@@ -170,6 +184,14 @@ pub fn render_sticker_embed<T: AsSticker>(
                                     html!("video-youtube-thumbnail", {
                                         .prop_signal("videoId", youtube.url.signal_cloned().map(|url| {
                                             url.get_id().to_owned()
+                                        }))
+                                        .apply(|dom| apply_transform(dom, &embed.transform))
+                                    })
+                                ),
+                                EmbedHost::GoogleSheet(google_sheet) => Some(
+                                    html!("iframe", {
+                                        .prop_signal("src", google_sheet.url.signal_ref(|url| {
+                                            get_google_sheet_url(&url)
                                         }))
                                         .apply(|dom| apply_transform(dom, &embed.transform))
                                     })
@@ -291,8 +313,23 @@ pub fn render_sticker_embed_raw(embed: &RawEmbed, opts: Option<EmbedRawRenderOpt
                         }))
                     })
                 }
+                RawEmbedHost::GoogleSheet(google_sheet) => {
+                    html!("iframe", {
+                        .prop("src", get_google_sheet_url(&google_sheet.url))
+                        .style("display", "block")
+                        .style("width", "100%")
+                        .style("height", "100%")
+                    })
+                }
             }
         })
         .apply_if(mixin.is_some(), move |dom| dom.apply(mixin.unwrap_ji()))
         .into_dom()
+}
+
+fn get_google_sheet_url(google_sheet: &GoogleSheetId) -> String {
+    format!(
+        "https://docs.google.com/spreadsheets/d/e/{}/pubhtml?widget=true&amp;headers=false",
+        google_sheet.get_id()
+    )
 }
