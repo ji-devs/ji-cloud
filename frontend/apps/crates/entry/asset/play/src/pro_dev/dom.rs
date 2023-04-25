@@ -26,7 +26,7 @@ impl ProDevPlayer {
         let state = self;
         actions::load_data(state.clone());
 
-        html!("div", {
+        html!("pro-dev-player", {
             .child_signal(state.active_unit_signal().map(clone!(state => move|unit| {
                 unit.map(|unit| {
                     state.render_active_unit(unit)
@@ -35,6 +35,7 @@ impl ProDevPlayer {
             .child_signal(state.active_unit_signal().map(move|unit| {
                 unit.map(|unit| {
                     html!("div", {
+                        .prop("slot", "title")
                         .children(&mut [
                             html!("div", {
                                 .text(&unit.display_name)
@@ -49,6 +50,7 @@ impl ProDevPlayer {
             .child_signal(state.pro_dev.signal_cloned().map(clone!(state => move |pro_dev| {
                 pro_dev.map(|pro_dev| {
                     html!("div", {
+                        .prop("slot", "navigation")
                         .style("display", "flex")
                         .child(html!("button", {  // Left arrow button
                             .text("<")
@@ -121,6 +123,7 @@ impl ProDevPlayer {
         let mut_host = Mutable::new(video.host.clone());
 
         html!("div", {
+            .prop("slot", "player-window")
             .child_signal(mut_host.signal_cloned().map(move|host| {
                 match host {
                     VideoHost::Youtube(youtube_video) => Some(
@@ -149,6 +152,7 @@ impl ProDevPlayer {
         let mut_image = Mutable::new(image.clone());
 
         html!("div", {
+            .prop("slot", "player-window")
             .child_signal(mut_image.signal_cloned().map(move|image| {
                     Some(
                         html!("img-ji", {
@@ -165,38 +169,42 @@ impl ProDevPlayer {
 
     pub fn render_active_link(self: &Rc<Self>, link: url::Url) -> Dom {
         // let state = self;
-        html!("iframe" => HtmlIFrameElement, {
-            .style("width", "100%")
-            .style("border", "none")
-            // .global_event(clone!(state => move |event: Message| {
-            //     if let Ok(data) = event.try_serde_data::<IframeMessageData>() {
-            //         if data.kind == "scrollHeight" {
-            //             state.height.set(data.height + INT_IFRAME_PADDING);
-            //         }
-            //     }
-            // }))
-            .prop("src", link.to_string())
+        html!("div", {
+            .prop("slot", "player-window")
+            .child(html!("iframe" => HtmlIFrameElement, {
+                .style("width", "100%")
+                .style("border", "none")
+                .prop("src", link.to_string())
+            }))
         })
     }
 
     pub fn render_active_pdf(self: &Rc<Self>, pdf_id: PdfId) -> Dom {
         // let state = self;
         let resp = pdf_lib_url(MediaLibrary::User, pdf_id);
-        html!("iframe" => HtmlIFrameElement, {
-            .style("width", "100%")
-            .style("border", "none")
-            .prop("src", resp)
+
+        html!("div", {
+            .prop("slot", "player-window")
+            .child(html!("iframe" => HtmlIFrameElement, {
+                .style("width", "100%")
+                .style("border", "none")
+                .prop("src", resp)
+            }))
         })
     }
 
     pub fn render_active_audio(self: &Rc<Self>, audio_id: AudioId) -> Dom {
         // let state = self;
         let resp = audio_lib_url(MediaLibrary::User, audio_id);
-        html!("audio", {
-            .style("width", "100%")
-            .style("border", "none")
-            .prop("src", resp)
-            .prop("controls", true)
+
+        html!("div", {
+            .prop("slot", "player-window")
+            .child(html!("audio", {
+                .style("width", "100%")
+                .style("border", "none")
+                .prop("src", resp)
+                .prop("controls", true)
+            }))
         })
     }
 }
