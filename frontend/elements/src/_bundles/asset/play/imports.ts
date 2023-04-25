@@ -27,6 +27,7 @@ import "@elements/entry/asset/play/jig/done-popup";
 import "@elements/entry/asset/_common/sidebar-modules/module";
 import "@elements/entry/asset/_common/age-range";
 import "@elements/entry/asset/play/jig/sidebar/action";
+import "@elements/entry/asset/play/pro-dev/pro-dev-player";
 import "@elements/entry/asset/play/jig/sidebar/jig-info";
 import "@elements/entry/asset/play/jig/sidebar/report";
 import "@elements/entry/asset/play/jig/sidebar/sidebar";
