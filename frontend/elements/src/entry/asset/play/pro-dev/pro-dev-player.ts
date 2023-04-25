@@ -13,18 +13,25 @@ export class _ extends LitElement {
                 }
               
                 ::slotted([slot=player-window]) {
-                    display: grid;
+                    display: flex;
                     position: relative;
+                    width: 40vw;
+                    height: 40vw;
+                    border: solid;
+                    align-items: center; 
+                    justify-content: center; 
                 }
 
                 ::slotted([slot=title]) {
                   display: grid;
                   position: relative;
+                  justify-content: center;
                 }
 
                 ::slotted([slot=navigation]) {
                   display: grid;
                   position: relative;
+                  justify-content: center;
                 }
             `,
         ];

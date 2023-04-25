@@ -38,9 +38,11 @@ impl ProDevPlayer {
                         .prop("slot", "title")
                         .children(&mut [
                             html!("div", {
+                                .style("text-align", "center")
                                 .text(&unit.display_name)
                             }),
                             html!("div", {
+                                .style("text-align", "center")
                                 .text(&unit.description)
                             })
                         ])
@@ -157,6 +159,7 @@ impl ProDevPlayer {
                     Some(
                         html!("img-ji", {
                             // would like to get rid if the styles here
+                            .style("position", "relative")
                             .style("object-fit", "contain")
                             .prop("size", "full")
                             .prop("id", image.0.to_string())
@@ -173,6 +176,7 @@ impl ProDevPlayer {
             .prop("slot", "player-window")
             .child(html!("iframe" => HtmlIFrameElement, {
                 .style("width", "100%")
+                .style("height", "100%")
                 .style("border", "none")
                 .prop("src", link.to_string())
             }))
@@ -187,7 +191,8 @@ impl ProDevPlayer {
             .prop("slot", "player-window")
             .child(html!("iframe" => HtmlIFrameElement, {
                 .style("width", "100%")
-                .style("border", "none")
+                .style("height", "100%")
+                .style("position", "relative")
                 .prop("src", resp)
             }))
         })
