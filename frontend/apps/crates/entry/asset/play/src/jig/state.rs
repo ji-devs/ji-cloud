@@ -3,9 +3,8 @@ use std::{cell::RefCell, rc::Rc};
 use awsm_web::loaders::helpers::AsyncLoader;
 use components::audio::mixer::AudioHandle;
 use futures_signals::signal::Mutable;
-use serde::{Deserialize, Serialize};
 use shared::domain::{
-    jig::{player::PlayerNavigationHandler, JigId, JigPlayerSettings, JigResponse},
+    jig::{player::PlayerNavigationHandler, JigId, JigResponse},
     meta::ResourceType,
     module::{
         body::{Audio, ModuleAssist, ModuleAssistType},
@@ -88,12 +87,6 @@ impl JigPlayer {
             is_full_screen: Mutable::new(false),
         })
     }
-}
-
-#[derive(Clone, Default, Serialize, Deserialize)]
-pub struct PlayerOptions {
-    settings: JigPlayerSettings,
-    is_student: bool,
 }
 
 /// Returns whether the liked status should be loaded for a JIG

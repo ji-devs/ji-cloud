@@ -1,107 +1,111 @@
 use std::rc::Rc;
 
-use dominator::clone;
-use futures::future::try_join_all;
-use futures::join;
+use dominator::{clone, html, Dom};
+use futures_signals::signal::{Signal, SignalExt};
+use shared::domain::pro_dev::ProDevResponse;
 use shared::{
-    api::endpoints,
+    api::endpoints::pro_dev,
     domain::{
         asset::DraftOrLive,
-        meta::GetMetadataPath,
-        pro_dev::{
-            unit::{GetProDevUnitLivePath, ProDevUnit, ProDevUnitId},
-            ProDevGetDraftPath, ProDevGetLivePath,
-        },
+        pro_dev::{ProDevGetDraftPath, ProDevGetLivePath},
     },
 };
-use utils::{
-    iframe::{AssetPlayerToPlayerPopup, IframeAction, IframeMessageExt},
-    prelude::ApiEndpointExt,
-    unwrap::UnwrapJiExt,
-};
+use utils::{events, prelude::ApiEndpointExt};
 
 use super::state::ProDevPlayer;
 
-impl ProDevPlayer {
-    pub fn load_data(self: &Rc<Self>) {
-        let state = self;
-        state.loader.load(clone!(state => async move {
-            join!(
-                state.load_pro_dev(),
-                state.load_resource_types(),
-            );
-        }));
-    }
+pub fn load_data(state: Rc<ProDevPlayer>) {
+    state.loader.load(clone!(state => async move {
+        load_pro_dev(Rc::clone(&state)).await;
+    }));
+}
 
-    async fn load_pro_dev(self: &Rc<Self>) {
-        let state = self;
+async fn load_pro_dev(state: Rc<ProDevPlayer>) {
+    state.loader.load(clone!(state => async move {
         let pro_dev = match state.player_options.draft_or_live {
             DraftOrLive::Live => {
-                endpoints::pro_dev::GetLive::api_no_auth(ProDevGetLivePath(state.pro_dev_id), None)
-                    .await
-            }
+                let pro_dev = {
+                    pro_dev::GetLive::api_no_auth(ProDevGetLivePath(state.pro_dev_id), None).await
+                };
+
+
+                pro_dev
+            },
             DraftOrLive::Draft => {
-                endpoints::pro_dev::GetDraft::api_no_auth(
-                    ProDevGetDraftPath(state.pro_dev_id),
-                    None,
-                )
-                .await
-            }
+                let pro_dev = {
+                    pro_dev::GetDraft::api_no_auth(ProDevGetDraftPath(state.pro_dev_id), None).await
+                };
+
+                pro_dev
+            },
         };
 
         match pro_dev {
             Ok(pro_dev) => {
-                let unit_ids = pro_dev
-                    .pro_dev_data
-                    .units
-                    .clone()
-                    .into_iter()
-                    .map(|x| x.id)
-                    .collect();
+                // state.active_unit.set(Some(resp.pro_dev.units[0].clone()));
+                if let Some(start_unit_id) = state.start_unit_id {
+                    if let Some((index, _)) = pro_dev.pro_dev_data.units.iter().enumerate().find(|unit| {
+                        unit.1.id == start_unit_id
+                    }) {
+                        state.active_unit.set_neq(Some(index));
+                    };
+                }
                 state.pro_dev.set(Some(pro_dev));
-                state.load_units(unit_ids).await;
-            }
+            },
             Err(_) => {
                 todo!();
-            }
+            },
         }
-    }
+    }));
+}
 
-    async fn load_resource_types(self: &Rc<Self>) {
-        match endpoints::meta::Get::api_with_auth(GetMetadataPath(), None).await {
-            Err(_) => todo!(),
-            Ok(meta) => {
-                self.resource_types.set(meta.resource_types);
-            }
+pub fn page_forward_signal(
+    state: Rc<ProDevPlayer>,
+    pro_dev: &ProDevResponse,
+) -> impl Signal<Item = bool> {
+    state.current_page.signal().map(clone!(pro_dev => move |current_page| {
+        let units_per_page = 10;
+        let num_pages = (pro_dev.pro_dev_data.units.len() + units_per_page - 1) / units_per_page;
+        let page = if let Some(page) = current_page {
+            page + 1
+        } else {
+            // If the current page is not set, default to the first page
+            0
         };
-    }
+        // Calculate whether the current page is the last page
+        let is_last_page = page >= (num_pages - 1);
+        is_last_page // Return the bool signal
+    }))
+}
 
-    async fn load_units(self: &Rc<Self>, unit_ids: Vec<ProDevUnitId>) {
-        let units = try_join_all(unit_ids.iter().map(|unit_id| self.load_unit(unit_id)))
-            .await
-            .unwrap_ji();
+pub fn paginate(state: &Rc<ProDevPlayer>, pro_dev: &ProDevResponse) -> Dom {
+    let units_per_page = 10;
 
-        self.units.set(units);
-    }
+    let current_page = state.current_page.get().unwrap_or(0);
 
-    async fn load_unit(self: &Rc<Self>, unit_id: &ProDevUnitId) -> Result<ProDevUnit, ()> {
-        endpoints::pro_dev::unit::GetLive::api_no_auth(
-            GetProDevUnitLivePath(self.pro_dev_id, unit_id.clone()),
-            None,
+    let start_index = current_page * units_per_page;
+
+    let end_index = ((current_page + 1) * units_per_page).min(pro_dev.pro_dev_data.units.len());
+
+    let units_to_display = &pro_dev.pro_dev_data.units[start_index..end_index];
+
+    // Create buttons for each unit on the current page
+    let unit_buttons =
+        units_to_display
+            .iter()
+            .enumerate()
+            .map(clone!(state => move |(index, _unit)| {
+                html!("button", {
+                    .text(&((current_page * units_per_page) + index + 1).to_string())
+                    .event(clone!(state, index => move |_: events::Click| {
+                        state.active_unit.set(Some(current_page * units_per_page + index));
+                    }))
+                })
+            }));
+
+    html!("div", {
+        .children(
+            unit_buttons
         )
-        .await
-        .map_err(|_| ())
-    }
-
-    pub fn play_unit(self: &Rc<Self>, unit_id: ProDevUnitId) {
-        self.active_unit.set(Some(unit_id));
-        let _ = IframeAction::new(AssetPlayerToPlayerPopup::CloseButtonShown(false))
-            .try_post_message_to_parent();
-    }
-
-    pub fn done_playing_unit(self: &Rc<Self>) {
-        self.active_unit.set(None);
-        let _ = IframeAction::new(AssetPlayerToPlayerPopup::CloseButtonShown(true))
-            .try_post_message_to_parent();
-    }
+    })
 }
