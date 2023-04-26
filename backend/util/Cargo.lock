@@ -1618,6 +1618,7 @@ dependencies = [
  "strum",
  "strum_macros",
  "thiserror",
+ "unicode-segmentation",
  "url",
  "uuid",
 ]

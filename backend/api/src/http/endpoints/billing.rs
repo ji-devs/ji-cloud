@@ -198,6 +198,7 @@ async fn create_setup_intent(
 
     let create_setup_intent = stripe::CreateSetupIntent {
         customer: Some(customer_id.into()),
+        payment_method_types: Some(vec!["card".into(), "link".into()]),
         // TODO need to set `automatic_payment_methods` but it isn't available in async-stripe?
         ..Default::default()
     };
