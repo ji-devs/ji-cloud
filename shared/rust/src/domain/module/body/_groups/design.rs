@@ -169,6 +169,21 @@ pub enum EmbedHost {
 
     /// Google sheets
     GoogleSheet(GoogleSheetsEmbed),
+
+    /// Edpuzzle
+    Edpuzzle(EdpuzzleEmbed),
+
+    /// Puzzel
+    Puzzel(PuzzelEmbed),
+
+    /// Quizlet
+    Quizlet(QuizletEmbed),
+
+    /// Thinglink
+    Thinglink(ThinglinkEmbed),
+
+    /// Sutori
+    Sutori(SutoriEmbed),
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Setters)]
@@ -227,6 +242,20 @@ impl EmbedHost {
                 let GoogleSheetId(url) = &google_sheet.url;
                 url.to_string()
             },
+            EmbedHost::Edpuzzle(_) => todo!(),
+            EmbedHost::Puzzel(_) => todo!(),
+            EmbedHost::Quizlet(quizlet) => {
+                let QuizletId(url) = &quizlet.url;
+                url.to_string()
+            },
+            EmbedHost::Thinglink(thinglink) => {
+                let ThinglinkId(url) = &thinglink.url;
+                url.to_string()
+            },
+            EmbedHost::Sutori(sutori) => {
+                let SutoriId(url) = &sutori.url;
+                url.to_string()
+            },
         }
     }
 }
@@ -244,6 +273,70 @@ pub struct GoogleSheetsEmbed {
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 /// YouTube host google sheet url
 pub struct GoogleSheetId(pub String);
+
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+/// Edpuzzle host embed url
+pub struct EdpuzzleEmbed {
+    /// url of the Edpuzzle video
+    pub url: EdpuzzleId,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+/// Edpuzzle host google sheet url
+pub struct EdpuzzleId(pub String);
+
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+/// Puzzel host embed url
+pub struct PuzzelEmbed {
+    /// url of the Puzzel video
+    pub url: PuzzelId,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+/// Puzzel host google sheet url
+pub struct PuzzelId(pub String);
+
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+/// Quizlet host embed url
+pub struct QuizletEmbed {
+    /// url of the Quizlet video
+    pub url: QuizletId,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+/// Quizlet host google sheet url
+pub struct QuizletId(pub String);
+
+
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+/// Thinglink host embed url
+pub struct ThinglinkEmbed {
+    /// url of the Thinglink video
+    pub url: ThinglinkId,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+/// Thinglink host google sheet url
+pub struct ThinglinkId(pub String);
+
+
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+/// Sutori host embed url
+pub struct SutoriEmbed {
+    /// url of the Sutori video
+    pub url: SutoriId,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+/// Sutori host google sheet url
+pub struct SutoriId(pub String);
+
+
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 /// Trace

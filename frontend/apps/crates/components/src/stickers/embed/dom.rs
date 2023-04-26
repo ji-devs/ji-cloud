@@ -3,7 +3,7 @@ use super::{
     config::{YOUTUBE_EMBED_HEIGHT, YOUTUBE_EMBED_WIDTH},
     menu::dom::render_sticker_embed_menu,
     state::Embed,
-    types::{GoogleSheetsEmbed, YoutubeEmbed},
+    types::{GoogleSheetsEmbed, QuizletEmbed, SutoriEmbed, ThinglinkEmbed, YoutubeEmbed},
 };
 use crate::{
     stickers::{
@@ -21,7 +21,8 @@ use futures_signals::signal::{Mutable, ReadOnlyMutable, SignalExt};
 use gloo_timers::future::TimeoutFuture;
 use js_sys::Reflect;
 use shared::domain::module::body::_groups::design::{
-    DoneAction, Embed as RawEmbed, EmbedHost as RawEmbedHost, GoogleSheetId,
+    DoneAction, Embed as RawEmbed, EmbedHost as RawEmbedHost, GoogleSheetId, QuizletId, SutoriId,
+    ThinglinkId,
 };
 use std::rc::Rc;
 use utils::{math::transform_signals, prelude::*};
@@ -126,6 +127,52 @@ fn render_google_sheet_embed(
     html!("iframe", {
         .prop_signal("src", google_sheet.url.signal_cloned().map(|url| {
             url.get_id().to_owned()
+            // TODO: only the id?
+        }))
+        .apply(|dom| apply_transform(dom, &embed.transform))
+    })
+}
+
+fn render_thinglink_embed(
+    thinglink: &Rc<ThinglinkEmbed>,
+    embed: Rc<Embed>,
+    _opts: Rc<EmbedRenderOptions>,
+) -> Dom {
+    html!("iframe", {
+        .prop_signal("src", thinglink.url.signal_cloned().map(|url| {
+            url.get_id().to_owned()
+            // TODO: only the id?
+            // frameborder="0" allowfullscreen
+        }))
+        .apply(|dom| apply_transform(dom, &embed.transform))
+    })
+}
+
+fn render_quizlet_embed(
+    quizlet: &Rc<QuizletEmbed>,
+    embed: Rc<Embed>,
+    _opts: Rc<EmbedRenderOptions>,
+) -> Dom {
+    html!("iframe", {
+        .prop_signal("src", quizlet.url.signal_cloned().map(|url| {
+            url.get_id().to_owned()
+            // TODO: only the id?
+            // frameborder="0" allowfullscreen
+        }))
+        .apply(|dom| apply_transform(dom, &embed.transform))
+    })
+}
+
+fn render_sutori_embed(
+    sutori: &Rc<SutoriEmbed>,
+    embed: Rc<Embed>,
+    _opts: Rc<EmbedRenderOptions>,
+) -> Dom {
+    html!("iframe", {
+        .prop_signal("src", sutori.url.signal_cloned().map(|url| {
+            url.get_id().to_owned()
+            // TODO: only the id?
+            // frameborder="0" allowfullscreen
         }))
         .apply(|dom| apply_transform(dom, &embed.transform))
     })
@@ -167,6 +214,11 @@ pub fn render_sticker_embed<T: AsSticker>(
                             match host {
                                 EmbedHost::Youtube(youtube) => Some(render_youtube_embed(&youtube, Rc::clone(&embed), Rc::clone(&opts))),
                                 EmbedHost::GoogleSheet(google_sheet) => Some(render_google_sheet_embed(&google_sheet, Rc::clone(&embed), Rc::clone(&opts))),
+                                EmbedHost::Edpuzzle(_) => todo!(),
+                                EmbedHost::Puzzel(_) => todo!(),
+                                EmbedHost::Quizlet(quizlet) => Some(render_quizlet_embed(&quizlet, Rc::clone(&embed), Rc::clone(&opts))),
+                                EmbedHost::Thinglink(thinglink) => Some(render_thinglink_embed(&thinglink, Rc::clone(&embed), Rc::clone(&opts))),
+                                EmbedHost::Sutori(sutori) => Some(render_sutori_embed(&sutori, Rc::clone(&embed), Rc::clone(&opts))),
                             }
                         })))
                     }))
@@ -193,6 +245,34 @@ pub fn render_sticker_embed<T: AsSticker>(
                                         .prop_signal("src", google_sheet.url.signal_ref(|url| {
                                             get_google_sheet_url(&url)
                                         }))
+                                        .apply(|dom| apply_transform(dom, &embed.transform))
+                                    })
+                                ),
+                                EmbedHost::Edpuzzle(_) => todo!(),
+                                EmbedHost::Puzzel(_) => todo!(),
+                                EmbedHost::Quizlet(quizlet) => Some(
+                                    html!("iframe", {
+                                        .prop_signal("src", quizlet.url.signal_ref(|url| {
+                                            get_quizlet_url(&url)
+                                        }))
+                                        .apply(|dom| apply_transform(dom, &embed.transform))
+                                    })
+                                ),
+                                EmbedHost::Thinglink(thinglink) => Some(
+                                    html!("iframe", {
+                                        .prop_signal("src", thinglink.url.signal_ref(|url| {
+                                            get_thinglink_url(&url)
+                                        }))
+                                        // frameborder="0" allowfullscreen
+                                        .apply(|dom| apply_transform(dom, &embed.transform))
+                                    })
+                                ),
+                                EmbedHost::Sutori(sutori) => Some(
+                                    html!("iframe", {
+                                        .prop_signal("src", sutori.url.signal_ref(|url| {
+                                            get_sutori_url(&url)
+                                        }))
+                                        // frameborder="0" allowfullscreen
                                         .apply(|dom| apply_transform(dom, &embed.transform))
                                     })
                                 ),
@@ -321,6 +401,33 @@ pub fn render_sticker_embed_raw(embed: &RawEmbed, opts: Option<EmbedRawRenderOpt
                         .style("height", "100%")
                     })
                 }
+                RawEmbedHost::Edpuzzle(_) => todo!(),
+                RawEmbedHost::Puzzel(_) => todo!(),
+                RawEmbedHost::Quizlet(quizlet) => {
+                    html!("iframe", {
+                        .prop("src", get_quizlet_url(&quizlet.url))
+                        .style("display", "block")
+                        .style("width", "100%")
+                        .style("height", "100%")
+                    })
+                }
+                RawEmbedHost::Thinglink(thinglink) => {
+                    html!("iframe", {
+                        .prop("src", get_thinglink_url(&thinglink.url))
+                        .style("display", "block")
+                        .style("width", "100%")
+                        .style("height", "100%")
+                        // frameborder="0" allowfullscreen
+                    })
+                }
+                RawEmbedHost::Sutori(sutori) => {
+                    html!("iframe", {
+                        .prop("src", get_sutori_url(&sutori.url))
+                        .style("display", "block")
+                        .style("width", "100%")
+                        .style("height", "100%")
+                    })
+                }
             }
         })
         .apply_if(mixin.is_some(), move |dom| dom.apply(mixin.unwrap_ji()))
@@ -332,4 +439,16 @@ fn get_google_sheet_url(google_sheet: &GoogleSheetId) -> String {
         "https://docs.google.com/spreadsheets/d/e/{}/pubhtml?widget=true&amp;headers=false",
         google_sheet.get_id()
     )
+}
+
+fn get_thinglink_url(thinglink: &ThinglinkId) -> String {
+    format!("https://www.thinglink.com/card/{}", thinglink.get_id())
+}
+
+fn get_quizlet_url(quizlet: &QuizletId) -> String {
+    format!("https://quizlet.com/{}/flashcards/embed", quizlet.get_id())
+}
+
+fn get_sutori_url(sutori: &SutoriId) -> String {
+    format!("https://www.sutori.com/en/story/{}/embed", sutori.get_id())
 }

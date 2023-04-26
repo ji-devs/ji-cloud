@@ -17,6 +17,11 @@ pub fn render(state: Rc<State>) -> Dom {
                 render_settings(Rc::new(render_settings_youtube(&state, youtube)))
             }
             EmbedHost::GoogleSheet(_) => render_no_settings("Google Sheet"),
+            EmbedHost::Edpuzzle(_) => render_no_settings("Edpuzzle"),
+            EmbedHost::Puzzel(_) => render_no_settings("Puzzel"),
+            EmbedHost::Quizlet(_) => render_no_settings("Quizlet"),
+            EmbedHost::Thinglink(_) => render_no_settings("Thinglink"),
+            EmbedHost::Sutori(_) => render_no_settings("Sutori"),
         },
         None => render_no_embed_selected(),
     }
