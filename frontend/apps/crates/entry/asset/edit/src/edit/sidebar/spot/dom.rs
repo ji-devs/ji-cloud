@@ -3,7 +3,6 @@ use components::stickers::embed::types::ParseUrlExt;
 use dominator::{clone, html, with_node, Dom, DomBuilder, EventOptions};
 use futures_signals::map_ref;
 use shared::domain::asset::DraftOrLive;
-use shared::domain::module::body::_groups::design::EmbedHost;
 use shared::domain::pro_dev::unit::ProDevUnitValue;
 use web_sys::{HtmlElement, Node, ScrollBehavior, ScrollIntoViewOptions};
 
@@ -17,7 +16,7 @@ use crate::edit::sidebar::pro_dev::menu::ProDevMenu;
 use crate::edit::sidebar::state::{CourseSpot, ModuleHighlight, SidebarSpotItem};
 use crate::edit::sidebar::ProDevSpot;
 use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
-use futures_signals::signal::{not, Mutable, SignalExt};
+use futures_signals::signal::{not, SignalExt};
 use std::rc::Rc;
 use utils::prelude::*;
 
@@ -192,33 +191,12 @@ impl SpotState {
                                             ProDevSpot::Unit(unit) =>
                                             {
                                                 match &unit.value {
-                                                   ProDevUnitValue::Video(video) => {
-                                                        let mut_host = Mutable::new(video.host.clone());
-
-                                                        html!("div", {
-                                                            .prop("slot", "unit")
-                                                            .child_signal(mut_host.signal_cloned().map(move|host| {
-                                                                match host {
-                                                                    EmbedHost::Youtube(youtube) => Some(
-                                                                        html!("video-youtube-thumbnail", {
-                                                                            .prop("videoId", youtube.url.get_id())
-                                                                            .style("width", "100%")
-                                                                            .style("height", "100%")
-                                                                            .style("position", "relative")
-                                                                        })
-                                                                    ),
-                                                                    EmbedHost::GoogleSheet(_) => todo!(),
-                                                                }
-                                                            }))
-                                                            .child(html!("img-ui", {
-                                                                .class("icon")
-                                                                .prop("path", "entry/pro-dev/link-icon.svg")
-                                                                .style("position", "absolute")
-                                                                .style("height", "20px")
-                                                                .style("width", "20px")
-                                                                .style("top", "5px")
-                                                                .style("left", "5px")
-                                                            }))
+                                                    ProDevUnitValue::Video(youtube) => {
+                                                        html!("video-youtube-thumbnail", {
+                                                            .prop("videoId", youtube.url.get_id())
+                                                            .style("width", "100%")
+                                                            .style("height", "100%")
+                                                            .style("position", "relative")
                                                         })
                                                     },
                                                     ProDevUnitValue::Link(_) => {

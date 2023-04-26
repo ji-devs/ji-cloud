@@ -8,8 +8,9 @@ use futures_signals::signal_vec::SignalVecExt;
 use shared::domain::{
     audio::AudioId,
     image::ImageId,
+    module::body::_groups::design::YoutubeEmbed,
     pdf::PdfId,
-    pro_dev::unit::{ProDevUnitId, ProDevUnitValue, Video},
+    pro_dev::unit::{ProDevUnitId, ProDevUnitValue},
 };
 use utils::editable_asset::{EditableAsset, EditableProDev};
 use wasm_bindgen_futures::spawn_local;
@@ -97,7 +98,7 @@ impl UnitEditor {
 pub enum UnitValue {
     File(Option<UnitValueFile>),
     Link(Option<url::Url>),
-    Video(Option<Video>),
+    Video(Option<YoutubeEmbed>),
 }
 
 impl UnitValue {

@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use js_sys::Reflect;
-use shared::domain::{module::body::_groups::design::EmbedHost, pro_dev::unit::Video};
+use shared::domain::module::body::_groups::design::YoutubeEmbed;
 use wasm_bindgen::JsValue;
 use web_sys::HtmlElement;
 
@@ -10,21 +10,15 @@ use crate::edit::pro_dev::unit_editor::UnitValue;
 use super::state::AddVideo;
 
 impl AddVideo {
-    pub fn save(self: &Rc<Self>, host: EmbedHost) {
+    pub fn save(self: &Rc<Self>, host: YoutubeEmbed) {
         let state = Rc::clone(self);
 
         self.loader.load(async move {
-            let video = Video {
-                host,
-                start_at: None,
-                end_at: None,
-            };
-
             state
                 .add_unit_value_state
                 .unit_editor_state
                 .value
-                .set(UnitValue::Video(Some(video.clone())));
+                .set(UnitValue::Video(Some(host.clone())));
 
             state
                 .add_unit_value_state

@@ -4,7 +4,7 @@ use components::stickers::embed::types::ParseUrlExt;
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
 
-use shared::domain::module::body::_groups::design::{EmbedHost, YoutubeEmbed, YoutubeUrl};
+use shared::domain::module::body::_groups::design::{YoutubeEmbed, YoutubeUrl};
 use utils::events;
 use web_sys::{HtmlElement, HtmlInputElement};
 
@@ -28,12 +28,8 @@ impl AddVideo {
                         .prop_signal("value", state.video.signal_cloned().map(|video| {
                             match video {
                                 None => String::new(),
-                                Some(video) => {
-                                    // TODO: don't .lock_ref(), use ref_map
-                                    match &video.host {
-                                        EmbedHost::Youtube(youtube) => youtube.url.0.clone(),
-                                        EmbedHost::GoogleSheet(google_sheet) => google_sheet.url.0.clone(),
-                                    }
+                                Some(youtube) => {
+                                    youtube.url.0.clone()
                                 },
                             }
                         }))
@@ -45,7 +41,7 @@ impl AddVideo {
                                     }
                                     Ok(youtube_url) => {
                                         actions::set_error(&wrapper, false);
-                                        let host = EmbedHost::Youtube(YoutubeEmbed::new(youtube_url));
+                                        let host = YoutubeEmbed::new(youtube_url);
                                         state.save(host);
                                     },
                                 };

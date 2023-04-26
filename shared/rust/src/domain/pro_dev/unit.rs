@@ -4,7 +4,7 @@
 use crate::{
     api::endpoints::PathPart,
     domain::{
-        audio::AudioId, image::ImageId, module::body::_groups::design::EmbedHost, pdf::PdfId,
+        audio::AudioId, image::ImageId, module::body::_groups::design::YoutubeEmbed, pdf::PdfId,
     },
 };
 use macros::make_path_parts;
@@ -101,17 +101,5 @@ pub enum ProDevUnitValue {
     /// Pro Dev Unit kind: pdf
     PdfId(PdfId),
     /// Pro Dev Unit kind: YouTube Video
-    Video(Video),
-}
-
-///Video of ProDevUnit
-#[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
-pub struct Video {
-    /// Youtube
-    pub host: EmbedHost,
-    /// start timestamp
-    pub start_at: Option<u32>,
-    /// end timestamp
-    pub end_at: Option<u32>,
+    Video(YoutubeEmbed),
 }
