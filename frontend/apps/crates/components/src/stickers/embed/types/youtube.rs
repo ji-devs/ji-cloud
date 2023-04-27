@@ -117,6 +117,7 @@ const REGULAR_URL_BASE: &str = "https://www.youtube.com/watch?v=";
 const SHARE_URL_BASE: &str = "https://youtu.be/";
 const EMBED_IFRAME_BASE: &str = "<iframe ";
 const EMBED_URL_BASE: &str = "https://www.youtube.com/embed/";
+const ID_LENGTH: usize = 11;
 
 fn get_id_from_url(url: &str) -> Result<&str, ()> {
     let id;
@@ -126,7 +127,7 @@ fn get_id_from_url(url: &str) -> Result<&str, ()> {
         return Ok(url);
     } else if url.starts_with(REGULAR_URL_BASE) {
         id = extract_id_regular(url);
-    } else if url.starts_with(SHARE_URL_BASE) {
+    } else if url.starts_with(SHARE_URL_BASE) && url.len() >= SHARE_URL_BASE.len() + ID_LENGTH {
         id = extract_id_share(url);
     } else if url.starts_with(EMBED_IFRAME_BASE) || url.starts_with(EMBED_URL_BASE) {
         id = extract_id_iframe(url);
@@ -181,7 +182,7 @@ fn extract_id_iframe(code: &str) -> &str {
 }
 
 fn is_id(id: &str) -> bool {
-    let regex = Regex::new(r"^[\w|_|\-]{11}$").unwrap_ji();
+    let regex = Regex::new(&format!("^[\\w|_|\\-]{{{ID_LENGTH}}}$")).unwrap_ji();
     regex.is_match(id)
 }
 

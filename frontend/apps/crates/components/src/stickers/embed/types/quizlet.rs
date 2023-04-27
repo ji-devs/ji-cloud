@@ -69,9 +69,10 @@ fn get_id_from_url(url: &str) -> Result<&str, ()> {
 
     if is_id(url) {
         return Ok(url);
-    } else if url.starts_with(SHARE_URL_BASE) {
+    } else if url.starts_with(SHARE_URL_BASE) && url.len() >= SHARE_URL_BASE.len() + ID_LENGTH {
         id = extract_id_share(url);
-    } else if url.starts_with(EMBED_IFRAME_BASE) {
+    } else if url.starts_with(EMBED_IFRAME_BASE) && url.len() >= EMBED_IFRAME_BASE.len() + ID_LENGTH
+    {
         id = extract_id_iframe(url);
     } else {
         return Err(());

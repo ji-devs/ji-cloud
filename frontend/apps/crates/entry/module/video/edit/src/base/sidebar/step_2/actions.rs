@@ -5,6 +5,7 @@ use components::stickers::{
     },
     state::{Sticker, Stickers},
 };
+use futures_signals::signal::Mutable;
 use js_sys::Reflect;
 use std::rc::Rc;
 use wasm_bindgen::JsValue;
@@ -45,7 +46,7 @@ impl Step2 {
     }
 
     fn update_embed_sticker(&self, embed: Rc<Embed>, partial_host: &PartialEmbedHost) {
-        let _ = embed.host.lock_ref().update_from_partial(partial_host);
+        let _ = update_full_from_partial(&embed.host, &partial_host);
         embed.playing_started.set_neq(false);
         embed.is_playing.set_neq(false);
         self.sidebar.base.stickers.call_change();
@@ -64,6 +65,25 @@ impl Step2 {
                 self.sidebar.base.stickers.delete_index(embed_index);
             }
         };
+    }
+}
+
+fn update_full_from_partial(
+    full: &Mutable<EmbedHost>,
+    partial: &PartialEmbedHost,
+) -> anyhow::Result<()> {
+    let mut full = full.lock_mut();
+    match (&*full, partial) {
+        (EmbedHost::Youtube(full), PartialEmbedHost::Youtube(partial)) => {
+            full.update_from_partial(&*partial)
+        }
+        (EmbedHost::GoogleSheet(full), PartialEmbedHost::GoogleSheet(partial)) => {
+            full.update_from_partial(&*partial)
+        }
+        (_, partial) => {
+            *full = partial.full()?;
+            Ok(())
+        }
     }
 }
 

@@ -105,7 +105,6 @@ fn render_youtube_embed(
                     .as_string()
                     .unwrap_ji();
 
-                log::info!("{:?}", player_state);
                 if player_state == "paused" {
                     embed.is_playing.set_neq(false);
                 }

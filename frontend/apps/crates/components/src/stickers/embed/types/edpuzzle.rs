@@ -68,23 +68,17 @@ const ID_LENGTH: usize = 19;
 
 fn get_id_from_url(url: &str) -> Result<&str, ()> {
     let id;
-    log::info!("{url}");
 
     if is_id(url) {
-        log::info!("here");
         return Ok(url);
-    // } else if url.starts_with(SHARE_URL_BASE) {
     } else if url.starts_with(SHARE_URL_BASE) && url.len() >= SHARE_URL_BASE.len() + ID_LENGTH {
-        log::info!("here");
         id = extract_id_share(url);
-    } else if url.starts_with(EMBED_IFRAME_BASE) {
-        log::info!("here");
+    } else if url.starts_with(EMBED_IFRAME_BASE) && url.len() >= EMBED_IFRAME_BASE.len() + ID_LENGTH
+    {
         id = extract_id_iframe(url);
     } else {
-        log::info!("here");
         return Err(());
     };
-    log::info!("{id}");
 
     if is_id(id) {
         Ok(id)
@@ -95,13 +89,11 @@ fn get_id_from_url(url: &str) -> Result<&str, ()> {
 
 fn extract_id_share(url: &str) -> &str {
     let base_length: usize = SHARE_URL_BASE.len();
-    log::info!("{url}");
     &url[base_length..(base_length + ID_LENGTH)]
 }
 
 fn extract_id_iframe(code: &str) -> &str {
     let id_index = code.find(SHARE_URL_BASE).unwrap_ji() + SHARE_URL_BASE.len();
-    log::info!("{code}");
     &code[id_index..(id_index + ID_LENGTH)]
 }
 

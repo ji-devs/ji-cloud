@@ -78,17 +78,6 @@ impl EmbedHost {
             EmbedHost::Sutori(sutori) => PartialEmbedHost::Sutori(Rc::new(sutori.partial())),
         }
     }
-    pub fn update_from_partial(&self, partial: &PartialEmbedHost) -> anyhow::Result<()> {
-        match (self, partial) {
-            (EmbedHost::Youtube(youtube), PartialEmbedHost::Youtube(partial)) => {
-                youtube.update_from_partial(&*partial)
-            }
-            (EmbedHost::GoogleSheet(google_sheet), PartialEmbedHost::GoogleSheet(partial)) => {
-                google_sheet.update_from_partial(&*partial)
-            }
-            _ => panic!(),
-        }
-    }
 }
 impl From<RawEmbedHost> for EmbedHost {
     fn from(value: RawEmbedHost) -> Self {
