@@ -10,19 +10,20 @@ use utils::asset::ProDevPlayerOptions;
 
 pub struct ProDevPlayer {
     pub pro_dev_id: ProDevId,
-    pub pro_dev: Mutable<Option<ProDevResponse>>,
+    pub pro_dev: Mutable<Option<ProDevResponse>>, // Rc
     /// Loaded after [`State`] is initialized necessitating an Option
     pub pro_dev_liked: Mutable<Option<bool>>,
     pub loader: AsyncLoader,
     pub active_unit: Mutable<Option<usize>>,
     // /// Count of units which have been played
-    // pub played_units: RefCell<usize>,
+    pub played_units: Mutable<Vec<usize>>,
     pub current_page: Mutable<Option<usize>>,
     pub play_tracked: RefCell<bool>,
     pub start_unit_id: Option<ProDevUnitId>,
     pub player_options: ProDevPlayerOptions,
     pub resource_types: Mutable<Vec<ResourceType>>,
     pub is_full_screen: Mutable<bool>,
+    pub popup_open: Mutable<bool>,
 }
 
 impl ProDevPlayer {
@@ -36,7 +37,7 @@ impl ProDevPlayer {
             // the first unit;
             Some(_) => Mutable::new(None),
             // Otherwise, if no unit_id is set, then set the active unit to the first unit.
-            None => Mutable::new(Some(0)),
+            None => Mutable::new(None),
         };
 
         Rc::new(Self {
@@ -45,13 +46,14 @@ impl ProDevPlayer {
             pro_dev_liked: Mutable::new(None),
             loader: AsyncLoader::new(),
             active_unit,
-            // played_units: RefCell::new(0),
+            played_units: Mutable::new(vec![]),
             play_tracked: RefCell::new(false),
             start_unit_id: unit_id,
             current_page: Mutable::new(None),
             player_options,
             resource_types: Default::default(),
             is_full_screen: Mutable::new(false),
+            popup_open: Mutable::new(false),
         })
     }
 }

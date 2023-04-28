@@ -1,7 +1,8 @@
-use std::rc::Rc;
-
 use dominator::{clone, html, Dom};
+use futures::join;
 use futures_signals::signal::{Signal, SignalExt};
+use shared::api::endpoints;
+use shared::domain::meta::GetMetadataPath;
 use shared::domain::pro_dev::ProDevResponse;
 use shared::{
     api::endpoints::pro_dev,
@@ -10,13 +11,17 @@ use shared::{
         pro_dev::{ProDevGetDraftPath, ProDevGetLivePath},
     },
 };
+use std::rc::Rc;
 use utils::{events, prelude::ApiEndpointExt};
 
 use super::state::ProDevPlayer;
 
 pub fn load_data(state: Rc<ProDevPlayer>) {
     state.loader.load(clone!(state => async move {
-        load_pro_dev(Rc::clone(&state)).await;
+        join!(
+            load_pro_dev(Rc::clone(&state)),
+            load_resource_types(Rc::clone(&state)),
+        );
     }));
 }
 
@@ -59,23 +64,42 @@ async fn load_pro_dev(state: Rc<ProDevPlayer>) {
     }));
 }
 
+pub fn page_back_signal(state: Rc<ProDevPlayer>) -> impl Signal<Item = bool> {
+    state.current_page.signal().map(move |current_page| {
+        let current_page = current_page.unwrap_or(0);
+        if current_page > 0 {
+            false
+        } else {
+            true
+        }
+    })
+}
+
 pub fn page_forward_signal(
     state: Rc<ProDevPlayer>,
     pro_dev: &ProDevResponse,
 ) -> impl Signal<Item = bool> {
-    state.current_page.signal().map(clone!(pro_dev => move |current_page| {
-        let units_per_page = 10;
-        let num_pages = (pro_dev.pro_dev_data.units.len() + units_per_page - 1) / units_per_page;
-        let page = if let Some(page) = current_page {
-            page + 1
-        } else {
-            // If the current page is not set, default to the first page
-            0
-        };
-        // Calculate whether the current page is the last page
-        let is_last_page = page >= (num_pages - 1);
-        is_last_page // Return the bool signal
-    }))
+    state
+        .current_page
+        .signal()
+        .map(clone!(pro_dev => move |current_page| {
+            let current_page = current_page.unwrap_or(0);
+            let num_pages = (pro_dev.pro_dev_data.units.len() + 9) / 10;
+            if current_page < (num_pages - 1)  {
+                false
+            } else {
+                true
+            }
+        }))
+}
+
+async fn load_resource_types(state: Rc<ProDevPlayer>) {
+    match endpoints::meta::Get::api_with_auth(GetMetadataPath(), None).await {
+        Err(_) => todo!(),
+        Ok(meta) => {
+            state.resource_types.set(meta.resource_types);
+        }
+    };
 }
 
 pub fn paginate(state: &Rc<ProDevPlayer>, pro_dev: &ProDevResponse) -> Dom {
