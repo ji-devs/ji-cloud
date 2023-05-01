@@ -1,29 +1,20 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{collections::HashSet, rc::Rc};
 
 use awsm_web::loaders::helpers::AsyncLoader;
 use futures_signals::signal::Mutable;
-use shared::domain::{
-    meta::ResourceType,
-    pro_dev::{unit::ProDevUnitId, ProDevId, ProDevResponse},
-};
+use shared::domain::pro_dev::{unit::ProDevUnitId, ProDevId, ProDevResponse};
 use utils::asset::ProDevPlayerOptions;
 
 pub struct ProDevPlayer {
     pub pro_dev_id: ProDevId,
-    pub pro_dev: Mutable<Option<ProDevResponse>>, // Rc
     /// Loaded after [`State`] is initialized necessitating an Option
-    pub pro_dev_liked: Mutable<Option<bool>>,
+    pub pro_dev: Mutable<Option<Rc<ProDevResponse>>>,
     pub loader: AsyncLoader,
     pub active_unit: Mutable<Option<usize>>,
-    // /// Count of units which have been played
-    pub played_units: Mutable<Vec<usize>>,
-    pub current_page: Mutable<Option<usize>>,
-    pub play_tracked: RefCell<bool>,
+    pub played_units: Mutable<HashSet<usize>>,
+    pub current_page: Mutable<Option<usize>>, // TODO: what is this??
     pub start_unit_id: Option<ProDevUnitId>,
     pub player_options: ProDevPlayerOptions,
-    pub resource_types: Mutable<Vec<ResourceType>>,
-    pub is_full_screen: Mutable<bool>,
-    pub popup_open: Mutable<bool>,
 }
 
 impl ProDevPlayer {
@@ -32,28 +23,15 @@ impl ProDevPlayer {
         unit_id: Option<ProDevUnitId>,
         player_options: ProDevPlayerOptions,
     ) -> Rc<Self> {
-        let active_unit = match unit_id {
-            // If the unit_id is specified, then we need to make sure that we don't unecessarily load
-            // the first unit;
-            Some(_) => Mutable::new(None),
-            // Otherwise, if no unit_id is set, then set the active unit to the first unit.
-            None => Mutable::new(None),
-        };
-
         Rc::new(Self {
             pro_dev_id,
-            pro_dev: Mutable::new(None),
-            pro_dev_liked: Mutable::new(None),
+            pro_dev: Default::default(),
             loader: AsyncLoader::new(),
-            active_unit,
-            played_units: Mutable::new(vec![]),
-            play_tracked: RefCell::new(false),
+            active_unit: Default::default(),
+            played_units: Default::default(),
             start_unit_id: unit_id,
             current_page: Mutable::new(None),
             player_options,
-            resource_types: Default::default(),
-            is_full_screen: Mutable::new(false),
-            popup_open: Mutable::new(false),
         })
     }
 }

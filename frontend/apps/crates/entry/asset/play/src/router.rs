@@ -2,7 +2,10 @@ use crate::{course::state::CoursePlayer, jig::state::JigPlayer, pro_dev::state::
 use components::overlay::container::OverlayContainer;
 use dominator::{html, Dom};
 use futures_signals::signal::{Signal, SignalExt};
-use utils::routes::{AssetRoute, Route};
+use utils::{
+    component::Component,
+    routes::{AssetRoute, Route},
+};
 
 pub struct Router {}
 
