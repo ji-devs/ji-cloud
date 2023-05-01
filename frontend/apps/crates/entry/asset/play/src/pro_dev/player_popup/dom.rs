@@ -72,7 +72,7 @@ impl Component<PlayerPopup> for Rc<PlayerPopup> {
                                     html!("button", {  // back arrow button
                                         .text("<")
                                         .style("order", "0")
-                                        .prop_signal("hidden", state.page_back_signal())
+                                        .prop_signal("hidden", state.navigate_previous_signal())
                                         .event(clone!(state => move |_: events::Click| {
                                             let index = state.player_state.active_unit.get().unwrap_or(0);
                                             let current_page = state.player_state.current_page.get().unwrap_or(0);
@@ -96,7 +96,7 @@ impl Component<PlayerPopup> for Rc<PlayerPopup> {
                                     html!("button", {  // forward arrow button
                                         .text(">")
                                         .style("order", "2")
-                                        .prop_signal("hidden", state.page_forward_signal(&pro_dev))
+                                        .prop_signal("hidden", state.navigate_forward_signal(&pro_dev))
                                         .event(clone!(state, pro_dev => move |_: events::Click| {
                                                 let index = state.player_state.active_unit.get().unwrap_or(0);
                                                 let current_page = state.player_state.current_page.get().unwrap_or(0);

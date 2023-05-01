@@ -91,7 +91,7 @@ impl HintLetters {
         match self.indices.pop() {
             None => None,
             Some(index) => {
-                let mut entry = &mut self.letters[index];
+                let entry = &mut self.letters[index];
                 entry.revealed = true;
                 Some(&entry.letter)
             }
