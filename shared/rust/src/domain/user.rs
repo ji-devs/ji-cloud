@@ -23,12 +23,6 @@ wrap_uuid! {
     pub struct UserId
 }
 
-impl std::fmt::Display for UserId {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
-        write!(fmt, "{}", self.0)
-    }
-}
-
 /// Represents a user's permissions.
 ///
 /// Note: 5 was "ManageModule", and has been deleted, but cannot be replaced(?)
