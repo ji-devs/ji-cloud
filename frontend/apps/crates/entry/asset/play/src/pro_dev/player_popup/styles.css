@@ -109,13 +109,15 @@ main {
 }
 .navigation-button-back,
 .navigation-button-forward {
-    color: var(--light-gray-4);
     width: 30px;
     font-size: 26px;
     height: 30px;
     display: grid;
     place-content: center;
 }
-.navigation-button-forward {
+.navigation-button-back {
     color: var(--light-gray-4);
+}
+.navigation-button-forward {
+    color: var(--main-blue);
 }

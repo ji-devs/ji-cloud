@@ -66,8 +66,8 @@ impl Component<PlayerPopup> for Rc<PlayerPopup> {
                         .class("fullscreen-button")
                         .prop_signal("icon", state.is_full_screen.signal().map(|is_full_screen| {
                             match is_full_screen {
-                                false => "fa-regular fa-arrows-maximize",
-                                true => "fa-regular fa-arrows-minimize",
+                                false => "fa-light fa-arrows-maximize",
+                                true => "fa-light fa-arrows-minimize",
                             }
                         }))
                         .event(clone!(state => move|_: events::Click| {
