@@ -7,7 +7,7 @@ use futures_signals::{
     map_ref,
     signal::{Signal, SignalExt},
 };
-use gloo::utils::{document, body};
+use gloo::utils::{body, document};
 use itertools::Itertools;
 use shared::{
     domain::{

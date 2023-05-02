@@ -134,7 +134,10 @@ impl PlayerMain {
         })
     }
 
-    fn resource_name_signal(self: &Rc<Self>, resource_type_id: ResourceTypeId) -> impl Signal<Item = String> {
+    fn resource_name_signal(
+        self: &Rc<Self>,
+        resource_type_id: ResourceTypeId,
+    ) -> impl Signal<Item = String> {
         from_future(get_resource_types()).map(
             move |resource_types: Option<Arc<Vec<ResourceType>>>| match resource_types {
                 Some(resource_types) => resource_types
