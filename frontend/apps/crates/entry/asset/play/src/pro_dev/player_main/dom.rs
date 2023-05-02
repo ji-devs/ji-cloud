@@ -122,14 +122,6 @@ impl PlayerMain {
             .prop("description", &unit.description)
             .prop("index", i + 1)
             .prop_signal("done", state.player_state.played_units.signal_ref(move |played_units| played_units.contains(&i)))
-            // .child(.player_state
-            //     ModuleThumbnail::new(
-            //         unit_id.into(),
-            //         unit.unit_data.modules.get(0).cloned(),
-            //         ThumbnailFallback::Asset,
-            //         state.player_options.draft_or_live,
-            //     ).render(Some("thumbnail"))
-            // )
             .child(html!("fa-button", {
                 .prop("slot", "play-button")
                 .prop("icon", "fa-solid fa-play")

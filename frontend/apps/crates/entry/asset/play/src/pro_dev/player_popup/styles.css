@@ -1,0 +1,45 @@
+dialog {
+    padding: 0;
+    border: 0;
+    margin: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+main {
+    height: 100dvh;
+    width: 100dvw;
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--light-blue-3);
+}
+.player-window {
+    order: 0;
+    display: flex;
+    position: relative;
+    width: 40vw;
+    height: 40vw;
+    border: solid;
+    align-items: center;
+    justify-content: center;
+}
+.title {
+    order: 1;
+    display: grid;
+    position: relative;
+    justify-content: center;
+}
+.navigation {
+    order: 2;
+    display: grid;
+    position: relative;
+    justify-content: center;
+}
+.close {
+    position: absolute;
+    display: flex;
+    right: 0px;
+    top: 0;
+    padding: 12px;
+}

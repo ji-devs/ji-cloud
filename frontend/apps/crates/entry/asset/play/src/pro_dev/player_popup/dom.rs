@@ -35,11 +35,9 @@ impl Component<PlayerPopup> for Rc<PlayerPopup> {
     fn dom(&self, dom: DomBuilder<ShadowRoot>) -> DomBuilder<ShadowRoot> {
         let state = self;
         dom.child(html!("dialog" => HtmlDialogElement, {
-            .after_inserted(|dialog: HtmlDialogElement| {
-                let _ = dialog.show_modal();
-            })
+            .prop("open", true)
             .prop("slot", "dialog")
-            .child(html!("pro-dev-player", {
+            .child(html!("main", {
                 .child_signal(state.active_unit_signal().map(clone!(state => move|unit| {
                     unit.map(|unit| {
                         state.render_active_unit(unit)
@@ -48,7 +46,7 @@ impl Component<PlayerPopup> for Rc<PlayerPopup> {
                 .child_signal(state.active_unit_signal().map(move|unit| {
                     unit.map(|unit| {
                         html!("div", {
-                            .prop("slot", "title")
+                            .class("title")
                             .children(&mut [
                                 html!("div", {
                                     .style("text-align", "center")
@@ -65,7 +63,7 @@ impl Component<PlayerPopup> for Rc<PlayerPopup> {
                 .child_signal(state.player_state.pro_dev.signal_cloned().map(clone!(state => move |pro_dev| {
                     pro_dev.map(clone!(state => move |pro_dev| {
                         html!("div", {
-                            .prop("slot", "navigation")
+                            .class("navigation")
                             .style("display", "flex")
                             .child_signal(state.player_state.active_unit.signal_cloned().map(clone!(state=> move |_active_unit| {
                                 Some(
@@ -115,7 +113,7 @@ impl Component<PlayerPopup> for Rc<PlayerPopup> {
                     }))
                 })))
                 .child(html!("fa-button", {
-                    .prop("slot", "close")
+                    .class("close")
                     .prop("icon", "fa-light fa-xmark")
                     .event(clone!(state => move |_: events::Click| {
                         state.player_state.active_unit.set(None);
@@ -207,7 +205,7 @@ impl PlayerPopup {
         let mut_host = Mutable::new(video.host.clone());
 
         html!("div", {
-            .prop("slot", "player-window")
+            .class("player-window")
             .child_signal(mut_host.signal_cloned().map(move|host| {
                 match host {
                     VideoHost::Youtube(youtube_video) => Some(
@@ -236,7 +234,7 @@ impl PlayerPopup {
         let mut_image = Mutable::new(image.clone());
 
         html!("div", {
-            .prop("slot", "player-window")
+            .class("player-window")
             .child_signal(mut_image.signal_cloned().map(move|image| {
                     Some(
                         html!("img-ji", {
@@ -255,7 +253,7 @@ impl PlayerPopup {
     fn render_active_link(self: &Rc<Self>, link: url::Url) -> Dom {
         // let state = self;
         html!("div", {
-            .prop("slot", "player-window")
+            .class("player-window")
             .child(html!("iframe" => HtmlIFrameElement, {
                 .style("width", "100%")
                 .style("height", "100%")
@@ -270,7 +268,7 @@ impl PlayerPopup {
         let resp = pdf_lib_url(MediaLibrary::User, pdf_id);
 
         html!("div", {
-            .prop("slot", "player-window")
+            .class("player-window")
             .child(html!("iframe" => HtmlIFrameElement, {
                 .style("width", "100%")
                 .style("height", "100%")
@@ -285,7 +283,7 @@ impl PlayerPopup {
         let resp = audio_lib_url(MediaLibrary::User, audio_id);
 
         html!("div", {
-            .prop("slot", "player-window")
+            .class("player-window")
             .child(html!("audio", {
                 .style("width", "100%")
                 .style("border", "none")
