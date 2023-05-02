@@ -4,7 +4,8 @@ use chrono::{DateTime, Utc};
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use strum_macros::EnumString;
+use std::fmt::Debug;
+use strum_macros::{Display, EnumString};
 
 #[cfg(feature = "backend")]
 use anyhow::anyhow;
@@ -222,7 +223,7 @@ impl From<StripePriceId> for String {
 }
 
 /// The subscriptions billing interval
-#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
+#[derive(Debug, Display, Serialize, Deserialize, Clone, Copy)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[repr(i16)]
 pub enum BillingInterval {
@@ -578,6 +579,12 @@ pub struct SubscriptionPlanDetailsResponse {
     pub amount_in_cents: AmountInCents,
     /// Trial period
     pub trial_period: Option<TrialPeriod>,
+    /// Billing interval
+    pub billing_interval: BillingInterval,
+    /// Subscription type
+    pub subscription_type: SubscriptionType,
+    /// Subscription tier
+    pub subscription_tier: SubscriptionTier,
 }
 
 impl From<SubscriptionPlan> for SubscriptionPlanDetailsResponse {
@@ -586,6 +593,9 @@ impl From<SubscriptionPlan> for SubscriptionPlanDetailsResponse {
             plan_id: plan.plan_id,
             amount_in_cents: plan.amount_in_cents,
             trial_period: plan.trial_period,
+            billing_interval: plan.billing_interval,
+            subscription_type: plan.subscription_type,
+            subscription_tier: plan.subscription_tier,
         }
     }
 }
@@ -594,34 +604,36 @@ impl From<SubscriptionPlan> for SubscriptionPlanDetailsResponse {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct IndividualPlanResponse {
     /// Basic plan monthly
-    basic_monthly: SubscriptionPlanDetailsResponse,
+    pub basic_monthly: PlanId,
     /// Basic plan annual
-    basic_annual: SubscriptionPlanDetailsResponse,
+    pub basic_annual: PlanId,
     /// Pro plan monthly
-    pro_monthly: SubscriptionPlanDetailsResponse,
+    pub pro_monthly: PlanId,
     /// Pro plan annual
-    pro_annual: SubscriptionPlanDetailsResponse,
+    pub pro_annual: PlanId,
 }
 
 /// Mapped school plans
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SchoolPlanResponse {
     /// Monthly school plans with an account limit
-    pub limited_monthly: HashMap<AccountLimit, SubscriptionPlanDetailsResponse>,
+    pub limited_monthly: HashMap<AccountLimit, PlanId>,
     /// Annual school plans with an account limit
-    pub limited_annual: HashMap<AccountLimit, SubscriptionPlanDetailsResponse>,
+    pub limited_annual: HashMap<AccountLimit, PlanId>,
     /// Monthly school plan without a limit
-    pub unlimited_monthly: SubscriptionPlanDetailsResponse,
+    pub unlimited_monthly: PlanId,
     /// Annual school plan without a limit
-    pub unlimited_annual: SubscriptionPlanDetailsResponse,
+    pub unlimited_annual: PlanId,
 }
 
 /// Subscription plans mapped into a response
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SubscriptionPlansResponse {
-    /// Individual plans
+    /// Plans
+    pub plans: HashMap<PlanId, SubscriptionPlanDetailsResponse>,
+    /// Individual plan lookups
     pub individual: IndividualPlanResponse,
-    /// School plans
+    /// School plan lookups
     pub school: SchoolPlanResponse,
 }
 
@@ -643,22 +655,24 @@ impl TryFrom<Vec<SubscriptionPlan>> for SubscriptionPlansResponse {
 #[derive(Default, Debug, Serialize, Deserialize, Clone)]
 #[cfg(feature = "backend")]
 struct SubscriptionPlansResponseBuilder {
+    /// Plans map
+    plans: HashMap<PlanId, SubscriptionPlanDetailsResponse>,
     /// Individual basic monthly
-    individual_basic_monthly: Option<SubscriptionPlanDetailsResponse>,
+    individual_basic_monthly: Option<PlanId>,
     /// Individual basic annual
-    individual_basic_annual: Option<SubscriptionPlanDetailsResponse>,
+    individual_basic_annual: Option<PlanId>,
     /// Individual pro monthly
-    individual_pro_monthly: Option<SubscriptionPlanDetailsResponse>,
+    individual_pro_monthly: Option<PlanId>,
     /// Individual pro annual
-    individual_pro_annual: Option<SubscriptionPlanDetailsResponse>,
+    individual_pro_annual: Option<PlanId>,
     /// Monthly school plans with account limits
-    school_limited_monthly: HashMap<AccountLimit, SubscriptionPlanDetailsResponse>,
+    school_limited_monthly: HashMap<AccountLimit, PlanId>,
     /// Annual school plans with account limits
-    school_limited_annual: HashMap<AccountLimit, SubscriptionPlanDetailsResponse>,
+    school_limited_annual: HashMap<AccountLimit, PlanId>,
     /// Monthly school plan without an account limit
-    school_unlimited_monthly: Option<SubscriptionPlanDetailsResponse>,
+    school_unlimited_monthly: Option<PlanId>,
     /// Annual school plan without an account limit
-    school_unlimited_annual: Option<SubscriptionPlanDetailsResponse>,
+    school_unlimited_annual: Option<PlanId>,
 }
 
 #[cfg(feature = "backend")]
@@ -671,34 +685,36 @@ impl SubscriptionPlansResponseBuilder {
         let account_limit = plan.account_limit;
 
         let response = SubscriptionPlanDetailsResponse::from(plan);
+        let plan_id = response.plan_id;
+        self.plans.insert(plan_id, response);
 
         match subscription_type {
             SubscriptionType::Individual => match (subscription_tier, billing_interval) {
                 (SubscriptionTier::Basic, BillingInterval::Monthly) => {
-                    self.individual_basic_monthly = Some(response);
+                    self.individual_basic_monthly = Some(plan_id);
                 }
                 (SubscriptionTier::Basic, BillingInterval::Annually) => {
-                    self.individual_basic_annual = Some(response);
+                    self.individual_basic_annual = Some(plan_id);
                 }
                 (SubscriptionTier::Pro, BillingInterval::Monthly) => {
-                    self.individual_pro_monthly = Some(response);
+                    self.individual_pro_monthly = Some(plan_id);
                 }
                 (SubscriptionTier::Pro, BillingInterval::Annually) => {
-                    self.individual_pro_annual = Some(response);
+                    self.individual_pro_annual = Some(plan_id);
                 }
             },
             SubscriptionType::School => match (account_limit, billing_interval) {
                 (None, BillingInterval::Monthly) => {
-                    self.school_unlimited_monthly = Some(response);
+                    self.school_unlimited_monthly = Some(plan_id);
                 }
                 (None, BillingInterval::Annually) => {
-                    self.school_unlimited_annual = Some(response);
+                    self.school_unlimited_annual = Some(plan_id);
                 }
                 (Some(account_limit), BillingInterval::Monthly) => {
-                    self.school_limited_monthly.insert(account_limit, response);
+                    self.school_limited_monthly.insert(account_limit, plan_id);
                 }
                 (Some(account_limit), BillingInterval::Annually) => {
-                    self.school_limited_annual.insert(account_limit, response);
+                    self.school_limited_annual.insert(account_limit, plan_id);
                 }
             },
         }
@@ -716,6 +732,7 @@ impl SubscriptionPlansResponseBuilder {
         }
 
         Ok(SubscriptionPlansResponse {
+            plans: self.plans,
             individual: IndividualPlanResponse {
                 basic_monthly: self
                     .individual_basic_monthly
