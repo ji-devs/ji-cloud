@@ -93,6 +93,7 @@ impl PlayerMain {
                 .prop("icon", "fa-solid fa-circle-play")
                 .event(clone!(state => move |_: events::Click| {
                     state.player_state.active_unit.set(Some(0));
+                    state.player_state.played_units.lock_mut().insert(0);
                 }))
             }))
             .child(ShareAsset::new(pro_dev.as_ref().clone().into()).render(
@@ -133,10 +134,7 @@ impl PlayerMain {
         })
     }
 
-    fn resource_name_signal(
-        self: &Rc<Self>,
-        resource_type_id: ResourceTypeId,
-    ) -> impl Signal<Item = String> {
+    fn resource_name_signal(self: &Rc<Self>, resource_type_id: ResourceTypeId) -> impl Signal<Item = String> {
         from_future(get_resource_types()).map(
             move |resource_types: Option<Arc<Vec<ResourceType>>>| match resource_types {
                 Some(resource_types) => resource_types
