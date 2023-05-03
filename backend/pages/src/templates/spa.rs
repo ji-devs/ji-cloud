@@ -3,8 +3,8 @@ use actix_web::{
     web::{Data, Path},
     HttpResponse,
 };
-use shared::config::RemoteTarget;
 use core::settings::RuntimeSettings;
+use shared::config::RemoteTarget;
 use std::borrow::Cow;
 
 use askama::Template;
