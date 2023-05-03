@@ -3,6 +3,7 @@ use actix_web::{
     web::{Data, Path},
     HttpResponse,
 };
+use shared::config::RemoteTarget;
 use core::settings::RuntimeSettings;
 use std::borrow::Cow;
 
@@ -68,6 +69,7 @@ struct SpaPageInfo {
     google_maps_url: Option<String>,
     local_dev: bool,
     include_hubspot: bool,
+    is_release: bool,
 }
 
 fn spa_template(settings: &RuntimeSettings, spa: SpaPage) -> actix_web::Result<HttpResponse> {
@@ -91,6 +93,7 @@ fn spa_template(settings: &RuntimeSettings, spa: SpaPage) -> actix_web::Result<H
         firebase: matches!(spa, SpaPage::User),
         google_maps_url,
         local_dev: settings.is_local(),
+        is_release: matches!(settings.remote_target(), RemoteTarget::Release),
         include_hubspot: match spa {
             SpaPage::Asset(ModuleAssetPageKind::Play) => false,
             SpaPage::Module(_, _) => false,
