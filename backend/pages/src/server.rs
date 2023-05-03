@@ -2,12 +2,18 @@ mod cors;
 mod routes;
 
 use crate::templates::direct;
+use actix_web::middleware::Condition;
 use actix_web::{
     body::MessageBody,
     dev::{Service, ServiceRequest, ServiceResponse},
     http,
     web::{self, Data},
-    HttpResponse,
+    Error, HttpResponse,
+};
+use actix_web_httpauth::{
+    extractors::{basic::BasicAuth, AuthenticationError},
+    headers::www_authenticate::basic::Basic,
+    middleware::HttpAuthentication,
 };
 use core::{
     config::JSON_BODY_LIMIT,
@@ -17,6 +23,9 @@ use core::{
 use futures::future::{self, Either};
 use regex::Regex;
 use sentry::types::protocol::v7::value::Value as JsonValue;
+use shared::config::RemoteTarget;
+
+const SANDBOX_USERNAME: &str = "jigzi";
 
 // todo: dedup this with api
 fn log_ise<B: MessageBody, T>(
@@ -57,9 +66,21 @@ where
     }
 }
 
+async fn sandbox_auth(
+    req: ServiceRequest,
+    credentials: BasicAuth,
+) -> Result<ServiceRequest, (Error, ServiceRequest)> {
+    if credentials.user_id().to_ascii_lowercase() == SANDBOX_USERNAME {
+        return Ok(req);
+    } else {
+        Err((AuthenticationError::new(Basic::default()).into(), req))
+    }
+}
+
 pub async fn run(settings: RuntimeSettings) -> anyhow::Result<()> {
     let local_insecure = settings.is_local();
     let pages_port = settings.pages_port;
+    let is_sandbox = matches!(settings.remote_target(), RemoteTarget::Sandbox);
     let server = actix_web::HttpServer::new(move || {
         actix_web::App::new()
             .app_data(Data::new(settings.clone()))
@@ -88,6 +109,10 @@ pub async fn run(settings: RuntimeSettings) -> anyhow::Result<()> {
 
                 Either::Left(srv.call(req))
             })
+            .wrap(Condition::new(
+                is_sandbox,
+                HttpAuthentication::basic(sandbox_auth),
+            ))
             .wrap(cors::get(local_insecure))
             .wrap(actix_web::middleware::Logger::default())
             .wrap_fn(log_ise)
