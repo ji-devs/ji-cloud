@@ -89,7 +89,7 @@ impl SpotState {
                 },
                 SidebarSpotItem::ProDev(pro_dev_spot) => {
                     match pro_dev_spot {
-                        None => "unit",
+                        None => "empty",
                         Some(item) =>
                             match &**item {
                                 ProDevSpot::Cover(_) => "thumbnail",

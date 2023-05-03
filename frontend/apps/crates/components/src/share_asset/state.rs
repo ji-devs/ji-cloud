@@ -103,7 +103,7 @@ impl ShareAsset {
             Asset::Jig(_) => "JIG",
             Asset::Course(_) => "course",
             Asset::Resource(_) => "resource",
-            Asset::ProDev(_) => "pro dev",
+            Asset::ProDev(_) => "pro-dev",
         }
     }
 }
