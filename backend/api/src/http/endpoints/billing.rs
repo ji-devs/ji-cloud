@@ -89,7 +89,7 @@ async fn create_subscription(
 
         // This will mark the subscription as incomplete until the payment intent has been
         // confirmed.
-        params.payment_behavior = Some(stripe::SubscriptionPaymentBehavior::DefaultIncomplete);
+        params.payment_behavior = Some(stripe::SubscriptionPaymentBehavior::AllowIncomplete);
         params.expand = &["latest_invoice.payment_intent"];
 
         // If the user hasn't previously had a subscription, then we can set their trial period.
