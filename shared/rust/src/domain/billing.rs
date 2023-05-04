@@ -28,7 +28,7 @@ impl From<stripe::CustomerId> for CustomerId {
 impl From<CustomerId> for stripe::CustomerId {
     fn from(value: CustomerId) -> Self {
         use std::str::FromStr;
-        stripe::CustomerId::from_str(&value.0).unwrap()
+        Self::from_str(&value.0).unwrap()
     }
 }
 
@@ -251,11 +251,9 @@ pub enum SubscriptionStatus {
 impl SubscriptionStatus {
     /// Whether the subscription is still valid so that a teacher is able to make use of subscription
     /// features.
-    pub fn is_valid(&self) -> bool {
-        match self {
-            Self::Active | Self::Canceled => true,
-            _ => false,
-        }
+    #[must_use]
+    pub const fn is_valid(&self) -> bool {
+        matches!(self, Self::Active | Self::Canceled)
     }
 }
 
@@ -767,12 +765,8 @@ impl SubscriptionPlansResponseBuilder {
 /// users existing payment method. Otherwise, a payment method will be saved.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct CreateSubscriptionRequest {
-    /// The Stripe payment method ID
-    #[serde(default)]
-    pub stripe_payment_method_id: Option<StripePaymentMethodId>,
-    /// The type of payment method
-    #[serde(default)]
-    pub payment_method_type: Option<PaymentMethodType>,
+    /// Optional setup intent ID if a payment method was created prior to subscribing.
+    pub setup_intent_id: Option<String>,
     /// Plan ID to create the subscriptinon for
     pub plan_id: PlanId,
 }

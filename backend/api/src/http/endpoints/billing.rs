@@ -19,9 +19,11 @@ use shared::{
 };
 use sqlx::PgPool;
 use std::borrow::Borrow;
+use std::str::FromStr;
 use stripe::{
     Client, CreateCustomer, CreateSubscription as CreateStripeSubscription,
-    CreateSubscriptionItems, Customer, EventObject, EventType, Webhook,
+    CreateSubscriptionItems, Customer, CustomerInvoiceSettings, EventObject, EventType,
+    SetupIntent, SetupIntentId, UpdateCustomer, Webhook,
 };
 use tracing::instrument;
 
@@ -73,6 +75,35 @@ async fn create_subscription(
     let client = create_stripe_client(&settings)?;
 
     let customer_id = get_or_create_customer(db.as_ref(), &client, &user_profile).await?;
+    let stripe_customer_id = stripe::CustomerId::from(customer_id.clone());
+
+    if let Some(setup_intent_id) = &req.setup_intent_id {
+        let setup_intent_id =
+            SetupIntentId::from_str(setup_intent_id).map_err(|_| error::Billing::BadRequest)?;
+        let setup_intent = SetupIntent::retrieve(&client, &setup_intent_id, &[])
+            .await
+            .map_err(|_| error::Billing::BadRequest)?;
+
+        let payment_method_id = setup_intent
+            .payment_method
+            .ok_or(error::Billing::BadRequest)?
+            .id()
+            .to_string();
+
+        let customer_invoice_settings = CustomerInvoiceSettings {
+            default_payment_method: Some(payment_method_id),
+            ..Default::default()
+        };
+
+        let update_customer = UpdateCustomer {
+            invoice_settings: Some(customer_invoice_settings),
+            ..Default::default()
+        };
+
+        Customer::update(&client, &stripe_customer_id, update_customer)
+            .await
+            .map_err(error::Billing::Stripe)?;
+    }
 
     // Fetch the subscription plan details
     let plan: SubscriptionPlan = db::billing::get_subscription_plan_by_id(&db, req.plan_id)
@@ -81,7 +112,7 @@ async fn create_subscription(
 
     // Create a Stripe subscription
     let stripe_subscription = {
-        let mut params = CreateStripeSubscription::new(stripe::CustomerId::from(customer_id));
+        let mut params = CreateStripeSubscription::new(stripe_customer_id);
         params.items = Some(vec![CreateSubscriptionItems {
             price: Some(plan.price_id.into()),
             ..Default::default()

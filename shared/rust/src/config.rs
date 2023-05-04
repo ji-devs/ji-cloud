@@ -152,7 +152,10 @@ impl RemoteTarget {
 
     pub fn pages_url(&self) -> String {
         match self {
-            Self::Local | Self::Sandbox => "https://sandbox.jigzi.org".to_string(),
+            Self::Local => {
+                env_var("LOCAL_FRONTEND_URL").unwrap_or("http://localhost:4104".to_string())
+            }
+            Self::Sandbox => "https://sandbox.jigzi.org".to_string(),
             Self::Release => "https://jigzi.org".to_string(),
         }
     }
