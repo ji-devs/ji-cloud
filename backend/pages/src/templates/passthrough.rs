@@ -10,7 +10,7 @@ use shared::config::RemoteTarget;
 #[cached(time = 60, result = true, sync_writes = true)]
 async fn get_from_frontend_server(
     route: String,
-) -> Result<(String, HashMap<String, Vec<u8>>), Box<dyn Error>> {
+) -> Result<(Vec<u8>, HashMap<String, Vec<u8>>), Box<dyn Error>> {
     let res = reqwest::get(route).await?;
 
     let headers = res
@@ -19,7 +19,7 @@ async fn get_from_frontend_server(
         .map(|(key, value)| (key.to_string(), value.as_bytes().to_vec()))
         .collect();
 
-    let body = res.text().await?;
+    let body = res.bytes().await?.to_vec();
 
     Ok((body, headers))
 }
@@ -27,36 +27,30 @@ async fn get_from_frontend_server(
 fn static_frontend_url(remote_target: RemoteTarget, path: &str) -> String {
     format!("{}/static/{}", remote_target.frontend_url(), path)
 }
-pub async fn service_worker(settings: Data<RuntimeSettings>) -> actix_web::Result<HttpResponse> {
-    let route = static_frontend_url(settings.remote_target(), "service-worker.js");
 
-    let (body, headers) = get_from_frontend_server(route).await.map_err(|e| {
-        println!("Error fetching service-worker.js: {:?}", e);
-        ErrorInternalServerError("")
-    })?;
+macro_rules! create_passthrough_route_handler {
+    ($fn_name:ident, $route:literal) => {
+        pub async fn $fn_name(settings: Data<RuntimeSettings>) -> actix_web::Result<HttpResponse> {
+            let route = static_frontend_url(settings.remote_target(), $route);
 
-    let mut res = actix_web::HttpResponse::Ok();
-    headers.into_iter().for_each(|header| {
-        res.insert_header(header);
-    });
-    let res = res.body(body);
+            let (body, headers) = get_from_frontend_server(route).await.map_err(|e| {
+                println!("Error fetching {}: {:?}", $route, e);
+                ErrorInternalServerError("")
+            })?;
 
-    Ok(res)
+            let mut res = actix_web::HttpResponse::Ok();
+            headers.into_iter().for_each(|header| {
+                res.insert_header(header);
+            });
+            let res = res.body(body);
+
+            Ok(res)
+        }
+    };
 }
 
-pub async fn manifest(settings: Data<RuntimeSettings>) -> actix_web::Result<HttpResponse> {
-    let route = static_frontend_url(settings.remote_target(), "manifest.json");
-
-    let (body, headers) = get_from_frontend_server(route).await.map_err(|e| {
-        println!("Error fetching manifest.json: {:?}", e);
-        ErrorInternalServerError("")
-    })?;
-
-    let mut res = actix_web::HttpResponse::Ok();
-    headers.into_iter().for_each(|header| {
-        res.insert_header(header);
-    });
-    let res = res.body(body);
-
-    Ok(res)
-}
+create_passthrough_route_handler!(manifest, "manifest.json");
+create_passthrough_route_handler!(service_worker, "service-worker.js");
+create_passthrough_route_handler!(icon, "icon.png");
+create_passthrough_route_handler!(icon_192, "icon-192x192.png");
+create_passthrough_route_handler!(icon_512, "icon-512x512.png");

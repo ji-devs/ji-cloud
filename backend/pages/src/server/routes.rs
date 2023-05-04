@@ -55,5 +55,8 @@ pub fn configure(config: &mut ServiceConfig) {
             "/service-worker.js",
             web::get().to(passthrough::service_worker),
         )
-        .route("/manifest.json", web::get().to(passthrough::manifest));
+        .route("/manifest.json", web::get().to(passthrough::manifest))
+        .route("/icon.png", web::get().to(passthrough::icon))
+        .route("/icon-192x192.png", web::get().to(passthrough::icon_192))
+        .route("/icon-512x512.png", web::get().to(passthrough::icon_512));
 }
