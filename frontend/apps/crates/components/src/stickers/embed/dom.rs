@@ -3,7 +3,9 @@ use super::{
     config::{YOUTUBE_EMBED_HEIGHT, YOUTUBE_EMBED_WIDTH},
     menu::dom::render_sticker_embed_menu,
     state::Embed,
-    types::{GoogleSheetsEmbed, QuizletEmbed, SutoriEmbed, ThinglinkEmbed, YoutubeEmbed},
+    types::{
+        GoogleSheetsEmbed, QuizletEmbed, SutoriEmbed, ThinglinkEmbed, VimeoEmbed, YoutubeEmbed,
+    },
 };
 use crate::{
     stickers::{
@@ -22,7 +24,7 @@ use gloo_timers::future::TimeoutFuture;
 use js_sys::Reflect;
 use shared::domain::module::body::_groups::design::{
     DoneAction, Embed as RawEmbed, EmbedHost as RawEmbedHost, GoogleSheetId, QuizletId, SutoriId,
-    ThinglinkId,
+    ThinglinkId, VimeoUrl,
 };
 use std::rc::Rc;
 use utils::{math::transform_signals, prelude::*};
@@ -115,6 +117,20 @@ fn render_youtube_embed(
             embed.is_playing.set_neq(true);
 
         }))
+    })
+}
+
+fn render_vimeo_embed(
+    vimeo: &Rc<VimeoEmbed>,
+    embed: Rc<Embed>,
+    _opts: Rc<EmbedRenderOptions>,
+) -> Dom {
+    html!("iframe", {
+        .prop_signal("src", vimeo.url.signal_cloned().map(|url| {
+            url.get_id().to_owned()
+            // TODO: only the id?
+        }))
+        .apply(|dom| apply_transform(dom, &embed.transform))
     })
 }
 
@@ -212,6 +228,7 @@ pub fn render_sticker_embed<T: AsSticker>(
                         .child_signal(embed.host.signal_cloned().map(clone!(embed, opts => move|host| {
                             match host {
                                 EmbedHost::Youtube(youtube) => Some(render_youtube_embed(&youtube, Rc::clone(&embed), Rc::clone(&opts))),
+                                EmbedHost::Vimeo(vimeo) => Some(render_vimeo_embed(&vimeo, Rc::clone(&embed), Rc::clone(&opts))),
                                 EmbedHost::GoogleSheet(google_sheet) => Some(render_google_sheet_embed(&google_sheet, Rc::clone(&embed), Rc::clone(&opts))),
                                 EmbedHost::Edpuzzle(_) => todo!(),
                                 EmbedHost::Puzzel(_) => todo!(),
@@ -235,6 +252,14 @@ pub fn render_sticker_embed<T: AsSticker>(
                                     html!("video-youtube-thumbnail", {
                                         .prop_signal("videoId", youtube.url.signal_cloned().map(|url| {
                                             url.get_id().to_owned()
+                                        }))
+                                        .apply(|dom| apply_transform(dom, &embed.transform))
+                                    })
+                                ),
+                                EmbedHost::Vimeo(vimeo) => Some(
+                                    html!("iframe", {
+                                        .prop_signal("src", vimeo.url.signal_ref(|url| {
+                                            get_vimeo_url(&url)
                                         }))
                                         .apply(|dom| apply_transform(dom, &embed.transform))
                                     })
@@ -392,6 +417,15 @@ pub fn render_sticker_embed_raw(embed: &RawEmbed, opts: Option<EmbedRawRenderOpt
                         }))
                     })
                 }
+                RawEmbedHost::Vimeo(vimeo) => {
+                    html!("iframe", {
+                        .prop("src", get_vimeo_url(&vimeo.url))
+                        .style("display", "block")
+                        .style("width", "100%")
+                        .style("height", "100%")
+                        // frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+                    })
+                }
                 RawEmbedHost::GoogleSheet(google_sheet) => {
                     html!("iframe", {
                         .prop("src", get_google_sheet_url(&google_sheet.url))
@@ -450,4 +484,8 @@ fn get_quizlet_url(quizlet: &QuizletId) -> String {
 
 fn get_sutori_url(sutori: &SutoriId) -> String {
     format!("https://www.sutori.com/en/story/{}/embed", sutori.get_id())
+}
+
+fn get_vimeo_url(vimeo: &VimeoUrl) -> String {
+    format!("https://player.vimeo.com/video/{}", vimeo.get_id())
 }

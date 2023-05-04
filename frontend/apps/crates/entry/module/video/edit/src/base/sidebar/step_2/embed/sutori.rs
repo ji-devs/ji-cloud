@@ -1,6 +1,5 @@
 use components::stickers::embed::types::{ParseUrlExt, PartialSutoriEmbed};
 use dominator::{clone, html, with_node, Dom};
-use futures_signals::signal::SignalExt;
 use shared::domain::module::body::_groups::design::SutoriId;
 use std::rc::Rc;
 use utils::events;
@@ -17,12 +16,13 @@ pub fn render_sutori(state: &Rc<Step2>, sutori: &Rc<PartialSutoriEmbed>) -> Dom 
                 .prop("slot", "input")
                 .prop("label", "Add a Sutori link")
                 .child(html!("input" => HtmlInputElement, {
-                    .prop_signal("value", sutori.url.signal_cloned().map(|url| {
-                        match url {
+                    .prop("value", {
+                        // not using a signal because the value can be invalid but should still show up
+                        match sutori.url.get_cloned() {
                             Some(url) => url.0.clone(),
                             None => String::new(),
                         }
-                    }))
+                    })
                     .with_node!(input => {
                         .event(clone!(state, sutori => move |_: events::Input| {
                             match SutoriId::try_parse(input.value()) {

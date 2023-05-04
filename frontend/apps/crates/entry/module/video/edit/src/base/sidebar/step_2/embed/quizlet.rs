@@ -1,6 +1,5 @@
 use components::stickers::embed::types::{ParseUrlExt, PartialQuizletEmbed};
 use dominator::{clone, html, with_node, Dom};
-use futures_signals::signal::SignalExt;
 use shared::domain::module::body::_groups::design::QuizletId;
 use std::rc::Rc;
 use utils::events;
@@ -17,12 +16,13 @@ pub fn render_quizlet(state: &Rc<Step2>, quizlet: &Rc<PartialQuizletEmbed>) -> D
                 .prop("slot", "input")
                 .prop("label", "Add a Quizlet link")
                 .child(html!("input" => HtmlInputElement, {
-                    .prop_signal("value", quizlet.url.signal_cloned().map(|url| {
-                        match url {
+                    .prop("value", {
+                        // not using a signal because the value can be invalid but should still show up
+                        match quizlet.url.get_cloned() {
                             Some(url) => url.0.clone(),
                             None => String::new(),
                         }
-                    }))
+                    })
                     .with_node!(input => {
                         .event(clone!(state, quizlet => move |_: events::Input| {
                             match QuizletId::try_parse(input.value()) {

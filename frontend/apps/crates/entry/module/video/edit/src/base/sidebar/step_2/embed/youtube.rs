@@ -19,12 +19,13 @@ pub fn render_youtube(state: &Rc<Step2>, youtube: &Rc<PartialYoutubeEmbed>) -> D
                 .prop("slot", "input")
                 .prop("label", "Add a YouTube link")
                 .child(html!("input" => HtmlInputElement, {
-                    .prop_signal("value", youtube.url.signal_cloned().map(|url| {
-                        match url {
+                    .prop("value", {
+                        // not using a signal because the value can be invalid but should still show up
+                        match youtube.url.get_cloned() {
                             Some(url) => url.0.clone(),
                             None => String::new(),
                         }
-                    }))
+                    })
                     .with_node!(input => {
                         .event(clone!(state, youtube => move |_: events::Input| {
                             match YoutubeUrl::try_parse(input.value()) {

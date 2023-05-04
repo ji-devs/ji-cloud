@@ -1,6 +1,5 @@
 use components::stickers::embed::types::{ParseUrlExt, PartialGoogleSheetsEmbed};
 use dominator::{clone, html, with_node, Dom};
-use futures_signals::signal::SignalExt;
 use shared::domain::module::body::_groups::design::GoogleSheetId;
 use std::rc::Rc;
 use utils::events;
@@ -17,12 +16,13 @@ pub fn render_google_sheet(state: &Rc<Step2>, google_sheet: &Rc<PartialGoogleShe
                 .prop("slot", "input")
                 .prop("label", "Add a Google Sheet link")
                 .child(html!("input" => HtmlInputElement, {
-                    .prop_signal("value", google_sheet.url.signal_cloned().map(|url| {
-                        match url {
+                    .prop("value", {
+                        // not using a signal because the value can be invalid but should still show up
+                        match google_sheet.url.get_cloned() {
                             Some(url) => url.0.clone(),
                             None => String::new(),
                         }
-                    }))
+                    })
                     .with_node!(input => {
                         .event(clone!(state, google_sheet => move |_: events::Input| {
                             match GoogleSheetId::try_parse(input.value()) {

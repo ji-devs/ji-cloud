@@ -11,6 +11,7 @@ pub use self::{
     quizlet::{PartialQuizletEmbed, QuizletEmbed},
     sutori::{PartialSutoriEmbed, SutoriEmbed},
     thinglink::{PartialThinglinkEmbed, ThinglinkEmbed},
+    vimeo::{PartialVimeoEmbed, VimeoEmbed},
     youtube::{PartialYoutubeEmbed, YoutubeEmbed},
 };
 
@@ -20,12 +21,14 @@ mod puzzel;
 mod quizlet;
 mod sutori;
 mod thinglink;
+mod vimeo;
 mod youtube;
 
 // partial host are host that don't have all required fields, e.g. youtube.url
 #[derive(Clone, Debug)]
 pub enum PartialEmbedHost {
     Youtube(Rc<PartialYoutubeEmbed>),
+    Vimeo(Rc<PartialVimeoEmbed>),
     GoogleSheet(Rc<PartialGoogleSheetsEmbed>),
     Edpuzzle(Rc<PartialEdpuzzleEmbed>),
     Puzzel(Rc<PartialPuzzelEmbed>),
@@ -37,6 +40,7 @@ impl PartialEmbedHost {
     pub fn full(&self) -> anyhow::Result<EmbedHost> {
         Ok(match self {
             PartialEmbedHost::Youtube(youtube) => EmbedHost::Youtube(Rc::new(youtube.full()?)),
+            PartialEmbedHost::Vimeo(vimeo) => EmbedHost::Vimeo(Rc::new(vimeo.full()?)),
             PartialEmbedHost::GoogleSheet(google_sheet) => {
                 EmbedHost::GoogleSheet(Rc::new(google_sheet.full()?))
             }
@@ -53,6 +57,7 @@ impl PartialEmbedHost {
 #[derive(Clone, Debug)]
 pub enum EmbedHost {
     Youtube(Rc<YoutubeEmbed>),
+    Vimeo(Rc<VimeoEmbed>),
     GoogleSheet(Rc<GoogleSheetsEmbed>),
     Edpuzzle(Rc<EdpuzzleEmbed>),
     Puzzel(Rc<PuzzelEmbed>),
@@ -64,6 +69,7 @@ impl EmbedHost {
     pub fn partial(&self) -> PartialEmbedHost {
         match self {
             EmbedHost::Youtube(youtube) => PartialEmbedHost::Youtube(Rc::new(youtube.partial())),
+            EmbedHost::Vimeo(vimeo) => PartialEmbedHost::Vimeo(Rc::new(vimeo.partial())),
             EmbedHost::GoogleSheet(google_sheet) => {
                 PartialEmbedHost::GoogleSheet(Rc::new(google_sheet.partial()))
             }
@@ -83,6 +89,7 @@ impl From<RawEmbedHost> for EmbedHost {
     fn from(value: RawEmbedHost) -> Self {
         match value {
             RawEmbedHost::Youtube(youtube) => Self::Youtube(Rc::new(youtube.into())),
+            RawEmbedHost::Vimeo(vimeo) => Self::Vimeo(Rc::new(vimeo.into())),
             RawEmbedHost::GoogleSheet(google_sheet) => {
                 Self::GoogleSheet(Rc::new(google_sheet.into()))
             }
@@ -98,6 +105,7 @@ impl From<&EmbedHost> for RawEmbedHost {
     fn from(value: &EmbedHost) -> Self {
         match value {
             EmbedHost::Youtube(youtube) => RawEmbedHost::Youtube((&**youtube).into()),
+            EmbedHost::Vimeo(vimeo) => RawEmbedHost::Vimeo((&**vimeo).into()),
             EmbedHost::GoogleSheet(google_sheet) => {
                 RawEmbedHost::GoogleSheet((&**google_sheet).into())
             }

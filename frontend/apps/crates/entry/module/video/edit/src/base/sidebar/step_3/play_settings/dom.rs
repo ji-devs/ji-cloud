@@ -16,6 +16,7 @@ pub fn render(state: Rc<State>) -> Dom {
             EmbedHost::Youtube(youtube) => {
                 render_settings(Rc::new(render_settings_youtube(&state, youtube)))
             }
+            EmbedHost::Vimeo(_) => render_no_settings("Vimeo"),
             EmbedHost::GoogleSheet(_) => render_no_settings("Google Sheet"),
             EmbedHost::Edpuzzle(_) => render_no_settings("Edpuzzle"),
             EmbedHost::Puzzel(_) => render_no_settings("Puzzel"),

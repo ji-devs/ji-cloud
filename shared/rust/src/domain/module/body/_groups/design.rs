@@ -167,6 +167,9 @@ pub enum EmbedHost {
     #[serde(alias = "youtube")]
     Youtube(YoutubeEmbed),
 
+    /// Vimeo
+    Vimeo(VimeoEmbed),
+
     /// Google sheets
     GoogleSheet(GoogleSheetsEmbed),
 
@@ -230,12 +233,61 @@ impl YoutubeEmbed {
 /// YouTube host embed url
 pub struct YoutubeUrl(pub String);
 
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Setters)]
+/// Vimeo host embed
+pub struct VimeoEmbed {
+    /// url of the Vimeo embed
+    pub url: VimeoUrl,
+
+    /// start at second
+    pub start_at: Option<u32>,
+
+    /// end at second
+    pub end_at: Option<u32>,
+
+    /// show captions
+    pub captions: bool,
+
+    /// play with sound
+    pub muted: bool,
+
+    /// autoplay
+    pub autoplay: bool,
+
+    /// what to do when done
+    pub done_action: Option<DoneAction>,
+}
+
+impl VimeoEmbed {
+    /// creates a new VimeoEmbed
+    pub fn new(url: VimeoUrl) -> Self {
+        Self {
+            url,
+            start_at: None,
+            end_at: None,
+            captions: false,
+            muted: false,
+            autoplay: false,
+            done_action: None,
+        }
+    }
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+/// Vimeo host embed url
+pub struct VimeoUrl(pub String);
+
 impl EmbedHost {
     /// Convert youtube host url to a string
     pub fn get_url_string(&self) -> String {
         match &self {
             EmbedHost::Youtube(youtube_video) => {
                 let YoutubeUrl(url) = &youtube_video.url;
+                url.to_string()
+            },
+            EmbedHost::Vimeo(vimeo_video) => {
+                let VimeoUrl(url) = &vimeo_video.url;
                 url.to_string()
             },
             EmbedHost::GoogleSheet(google_sheet) => {
@@ -271,7 +323,7 @@ pub struct GoogleSheetsEmbed {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
-/// YouTube host google sheet url
+/// GoogleSheet host google sheet url
 pub struct GoogleSheetId(pub String);
 
 

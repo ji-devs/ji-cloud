@@ -7,7 +7,8 @@ use utils::events;
 
 use super::{
     super::state::Step2, google_sheet::render_google_sheet, quizlet::render_quizlet,
-    sutori::render_sutori, thinglink::render_thinglink, youtube::render_youtube,
+    sutori::render_sutori, thinglink::render_thinglink, vimeo::render_vimeo,
+    youtube::render_youtube,
 };
 
 fn option(
@@ -92,6 +93,22 @@ pub fn render(state: Rc<Step2>) -> Dom {
                     }),
                     state.host.signal_ref(|host| {
                         matches!(host, Some(PartialEmbedHost::Youtube(_)))
+                    })
+                ),
+                option(
+                    "Vimeo",
+                    Box::new(clone!(state => move|| {
+                        match state.host.get_cloned() {
+                            Some(PartialEmbedHost::Vimeo(_)) => state.host.set(None),
+                            _ => state.host.set(Some(PartialEmbedHost::Vimeo(Default::default()))),
+                        };
+                        state.on_embed_value_change();
+                    })),
+                    state.host.signal_ref(|host| {
+                        matches!(host, Some(PartialEmbedHost::Vimeo(_)))
+                    }),
+                    state.host.signal_ref(|host| {
+                        matches!(host, Some(PartialEmbedHost::Vimeo(_)))
                     })
                 ),
                 option(
@@ -192,6 +209,7 @@ pub fn render(state: Rc<Step2>) -> Dom {
 fn render_host(state: &Rc<Step2>, host: PartialEmbedHost) -> Dom {
     match &host {
         PartialEmbedHost::Youtube(youtube) => render_youtube(state, youtube),
+        PartialEmbedHost::Vimeo(vimeo) => render_vimeo(state, vimeo),
         PartialEmbedHost::GoogleSheet(google_sheet) => render_google_sheet(state, google_sheet),
         PartialEmbedHost::Edpuzzle(_) => todo!(),
         PartialEmbedHost::Puzzel(_) => todo!(),
