@@ -20,6 +20,7 @@ use utils::{
 use web_sys::ShadowRoot;
 
 const STR_SHARE_COURSE: &str = "Share course";
+const UNITS_PER_PAGE: usize = 10;
 
 impl Component<PlayerMain> for Rc<PlayerMain> {
     fn styles() -> &'static str {
@@ -128,10 +129,19 @@ impl PlayerMain {
                 .prop("icon", "fa-solid fa-play")
             }))
             .event(clone!(state => move |_: events::Click| {
-                state.player_state.active_unit.set(Some(i));
-                state.player_state.played_units.lock_mut().insert(i);
+                state.set_active_unit_and_update_page(i);
             }))
         })
+    }
+
+    pub fn set_active_unit_and_update_page(self: &Rc<Self>, active_unit: usize) {
+        let current_page = active_unit / UNITS_PER_PAGE;
+        self.player_state.current_page.set(Some(current_page));
+        self.player_state.active_unit.set(Some(active_unit));
+        self.player_state
+            .played_units
+            .lock_mut()
+            .insert(active_unit);
     }
 
     fn resource_name_signal(

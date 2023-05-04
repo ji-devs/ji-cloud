@@ -29,6 +29,8 @@ use utils::{
 };
 use web_sys::{HtmlDialogElement, HtmlElement, HtmlIFrameElement, ShadowRoot};
 
+const UNITS_PER_PAGE: usize = 10;
+
 impl Component<PlayerPopup> for Rc<PlayerPopup> {
     fn styles() -> &'static str {
         include_str!("./styles.css")
@@ -100,7 +102,7 @@ impl Component<PlayerPopup> for Rc<PlayerPopup> {
                                         let index = state.player_state.active_unit.get().unwrap_or(0);
                                         let current_page = state.player_state.current_page.get().unwrap_or(0);
                                         if index > 0 {
-                                            state.played_unit(index);
+                                            state.player_state.played_units.lock_mut().insert(index - 1);
                                             state.player_state.active_unit.set(Some(index - 1));
                                             if (index + 1) % 10 == 1 && current_page > 0 {
                                                 state.player_state.current_page.set(Some(current_page - 1));
@@ -120,7 +122,7 @@ impl Component<PlayerPopup> for Rc<PlayerPopup> {
                                         let current_page = state.player_state.current_page.get().unwrap_or(0);
                                         let num_pages = (pro_dev.pro_dev_data.units.len() + 9) / 10;
                                         if index < (pro_dev.pro_dev_data.units.len() - 1) {
-                                            state.played_unit(index);
+                                            state.player_state.played_units.lock_mut().insert(index + 1);
                                             state.player_state.active_unit.set(Some(index + 1));
                                             if (index + 1) % 10 == 0  && (current_page < (num_pages - 1))  {
                                                 state.player_state.current_page.set(Some(current_page + 1));
@@ -137,6 +139,7 @@ impl Component<PlayerPopup> for Rc<PlayerPopup> {
                     .prop("icon", "fa-light fa-xmark")
                     .event(clone!(state => move |_: events::Click| {
                         state.player_state.active_unit.set(None);
+                        state.player_state.current_page.set(None);
                     }))
                 }))
             }))
@@ -148,13 +151,11 @@ impl PlayerPopup {
     pub fn render_unit_navigation(self: &Rc<Self>, pro_dev: &Rc<ProDevResponse>) -> Dom {
         let state = self;
 
-        let units_per_page = 10;
+        let current_page = state.player_state.current_page.get().unwrap();
 
-        let current_page = state.player_state.current_page.get().unwrap_or(0);
+        let start_index = current_page * UNITS_PER_PAGE;
 
-        let start_index = current_page * units_per_page;
-
-        let end_index = ((current_page + 1) * units_per_page).min(pro_dev.pro_dev_data.units.len());
+        let end_index = ((current_page + 1) * UNITS_PER_PAGE).min(pro_dev.pro_dev_data.units.len());
 
         let units_to_display = &pro_dev.pro_dev_data.units[start_index..end_index];
 
@@ -163,18 +164,22 @@ impl PlayerPopup {
             .iter()
             .enumerate()
             .map(clone!(state => move |(index, _unit)| {
+                let global_index = current_page * UNITS_PER_PAGE + index;
+
                 html!("button", {
                     .class("unit-navigation-button")
                     .class_signal("active", state.player_state.active_unit.signal().map(move |active_unit| {
-                        active_unit.map(|active_unit| active_unit == index).unwrap_or_default()
+                        active_unit.map(|active_unit|
+                        active_unit == global_index
+                        ).unwrap_or_default()
                     }))
                     .class_signal("done", state.player_state.played_units.signal_ref(move |played_units| {
-                        played_units.contains(&index)
+                        played_units.contains(&global_index)
                     }))
-                    .text(&((current_page * units_per_page) + index + 1).to_string())
+                    .text(&((current_page * UNITS_PER_PAGE) + index + 1).to_string())
                     .event(clone!(state => move |_: events::Click| {
-                        state.player_state.active_unit.set(Some(current_page * units_per_page + index));
-                        state.played_unit(index);
+                        state.player_state.played_units.lock_mut().insert(global_index);
+                        state.player_state.active_unit.set(Some(global_index));
                     }))
                 })
             }))
@@ -200,10 +205,6 @@ impl PlayerPopup {
                 }
             }
         }
-    }
-
-    fn played_unit(self: &Rc<Self>, index: usize) {
-        self.player_state.played_units.lock_mut().insert(index);
     }
 
     fn render_active_unit(self: &Rc<Self>, unit: ProDevUnit) -> Dom {
