@@ -5,7 +5,7 @@ use components::{
         callbacks::Callbacks as InstructionsEditorCallbacks,
         state::{InstructionsType, State as InstructionsEditorState},
     },
-    module::_groups::design::edit::embed::settings::state::State as PlaySettingsState,
+    module::_groups::design::edit::embed::settings::EmbedSettings,
     tabs::MenuTabKind,
 };
 use dominator::clone;
@@ -41,17 +41,16 @@ impl Step3 {
 
 #[derive(Clone)]
 pub enum Tab {
-    Settings(Rc<PlaySettingsState>),
+    Settings(Rc<EmbedSettings>),
     Instructions(Rc<InstructionsEditorState>),
 }
 
 impl Tab {
     pub fn new(base: Rc<Base>, kind: MenuTabKind) -> Self {
         match kind {
-            MenuTabKind::PlaySettings => Self::Settings(Rc::new(PlaySettingsState::new(
-                &base.stickers,
-                base.embed.read_only(),
-            ))),
+            MenuTabKind::PlaySettings => {
+                Self::Settings(EmbedSettings::new(&base.stickers, base.embed.read_only()))
+            }
             MenuTabKind::Instructions => {
                 let callbacks = InstructionsEditorCallbacks::new(
                     clone!(base => move |instructions, also_history| {

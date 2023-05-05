@@ -1,7 +1,6 @@
 use super::state::*;
 use components::{
     instructions::editor::dom::render as render_instructions,
-    module::_groups::design::edit::embed::settings as embed_settings,
     tabs::{MenuTab, MenuTabKind},
 };
 use dominator::{clone, html, Dom};
@@ -37,7 +36,7 @@ pub fn render(state: Rc<Step3>) -> Dom {
                 .child_signal(state.tab.signal_cloned().map(move |tab| {
                     match tab {
                         Tab::Settings(state) => {
-                            Some(embed_settings::dom::render(state))
+                            Some(state.render())
                         },
                         Tab::Instructions(state) => {
                             Some(render_instructions(state))

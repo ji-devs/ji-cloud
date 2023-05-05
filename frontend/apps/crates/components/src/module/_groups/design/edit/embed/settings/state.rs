@@ -6,19 +6,19 @@ use crate::stickers::{
 };
 use std::rc::Rc;
 
-pub struct State {
+pub struct EmbedSettings {
     pub stickers: Rc<Stickers<Sticker>>,
     pub embed: ReadOnlyMutable<Option<Rc<Embed>>>,
 }
 
-impl State {
+impl EmbedSettings {
     pub fn new(
         stickers: &Rc<Stickers<Sticker>>,
         embed: ReadOnlyMutable<Option<Rc<Embed>>>,
-    ) -> Self {
-        Self {
+    ) -> Rc<Self> {
+        Rc::new(Self {
             stickers: Rc::clone(&stickers),
             embed,
-        }
+        })
     }
 }

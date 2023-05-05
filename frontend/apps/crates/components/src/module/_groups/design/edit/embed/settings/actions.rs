@@ -3,9 +3,9 @@ use std::rc::Rc;
 use crate::stickers::embed::types::YoutubeEmbed;
 use shared::domain::module::body::_groups::design::DoneAction;
 
-use super::state::State;
+use super::state::EmbedSettings;
 
-impl State {
+impl EmbedSettings {
     pub fn toggle_captions(&self, youtube: &Rc<YoutubeEmbed>) {
         let captions = youtube.captions.get();
         youtube.captions.set(captions);
