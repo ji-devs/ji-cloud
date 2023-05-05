@@ -2,10 +2,7 @@ use super::{
     footer::state::Footer, header::state::Header, main::state::Main, overlay::state::Overlay,
     sidebar::state::Sidebar, state::*,
 };
-use components::{
-    module::_common::edit::prelude::*,
-    stickers::{embed::state::Embed, state::Sticker},
-};
+use components::module::_common::edit::prelude::*;
 use shared::domain::module::body::video::{Mode, ModuleData as RawData, Step};
 use std::rc::Rc;
 
@@ -31,24 +28,5 @@ pub async fn init_from_raw(
         header: Rc::new(Header::new(base.clone())),
         footer: Rc::new(Footer::new(base.clone())),
         overlay: Rc::new(Overlay::new(base)),
-    }
-}
-
-impl Base {
-    #[must_use]
-    pub(super) fn get_embed_sticker(&self) -> Option<Rc<Embed>> {
-        let stickers = self.stickers.list.lock_ref(); ///////////////////////////////////// TODO: why not just get self.embed?
-
-        let embed = stickers
-            .iter()
-            .find(|sticker| matches!(sticker, Sticker::Embed(_)))
-            .map(|sticker| match sticker {
-                Sticker::Embed(embed) => embed,
-                _ => unreachable!("should not be possible"),
-            });
-
-        let embed = embed.map(|embed| Rc::clone(&embed));
-
-        embed
     }
 }

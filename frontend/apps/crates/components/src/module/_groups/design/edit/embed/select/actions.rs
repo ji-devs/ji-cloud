@@ -1,4 +1,4 @@
-use components::stickers::{
+use crate::stickers::{
     embed::{
         state::Embed,
         types::{EmbedHost, PartialEmbedHost},
@@ -11,12 +11,12 @@ use std::rc::Rc;
 use wasm_bindgen::JsValue;
 use web_sys::HtmlElement;
 
-use super::state::Step2;
+use super::EmbedSelect;
 
-impl Step2 {
+impl EmbedSelect {
     pub fn on_embed_value_change(&self) {
         let partial_host = self.host.lock_ref();
-        let full_embed = self.sidebar.base.get_embed_sticker();
+        let full_embed: Option<Rc<Embed>> = self.embed.lock_ref().clone();
 
         match &*partial_host {
             Some(partial_host) => match full_embed {
@@ -42,18 +42,18 @@ impl Step2 {
 
     fn add_embed_sticker(&self, host: EmbedHost) {
         let host = (&host).into();
-        Stickers::add_embed(self.sidebar.base.stickers.clone(), host);
+        Stickers::add_embed(self.stickers.clone(), host);
     }
 
     fn update_embed_sticker(&self, embed: Rc<Embed>, partial_host: &PartialEmbedHost) {
         let _ = update_full_from_partial(&embed.host, &partial_host);
         embed.playing_started.set_neq(false);
         embed.is_playing.set_neq(false);
-        self.sidebar.base.stickers.call_change();
+        self.stickers.call_change();
     }
 
     fn delete_embed_sticker(&self) {
-        let stickers = self.sidebar.base.stickers.list.lock_ref();
+        let stickers = self.stickers.list.lock_ref();
         let embed_index = stickers
             .iter()
             .position(|sticker| matches!(sticker, Sticker::Embed(_)));
@@ -62,7 +62,7 @@ impl Step2 {
             Some(embed_index) => {
                 // drop stickers so that delete_index can get a mutable reference
                 drop(stickers);
-                self.sidebar.base.stickers.delete_index(embed_index);
+                self.stickers.delete_index(embed_index);
             }
         };
     }

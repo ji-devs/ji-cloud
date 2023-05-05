@@ -126,7 +126,8 @@ fn get_id_from_url(url: &str) -> anyhow::Result<&str> {
         return Ok(url);
     } else if url.starts_with(REGULAR_URL_BASE) {
         id = extract_id_regular(url);
-    } else if url.starts_with(EMBED_IFRAME_BASE) && url.len() >= EMBED_IFRAME_BASE.len() + ID_LENGTH {
+    } else if url.starts_with(EMBED_IFRAME_BASE) && url.len() >= EMBED_IFRAME_BASE.len() + ID_LENGTH
+    {
         id = extract_id_iframe(url).context("")?;
     } else if url.starts_with(EMBED_URL_BASE) && url.len() >= EMBED_URL_BASE.len() + ID_LENGTH {
         log::info!("herer");

@@ -4,14 +4,14 @@ use futures_signals::signal::SignalExt;
 use shared::domain::module::body::_groups::design::DoneAction;
 use std::rc::Rc;
 
-use components::{
+use crate::{
     module::_common::edit::settings::prelude::*,
     stickers::embed::types::{EmbedHost, YoutubeEmbed},
 };
 
 pub fn render(state: Rc<State>) -> Dom {
     // can use lock_ref instead of signal as embed type can't chance while on this page/step
-    match &*state.base.embed.lock_ref() {
+    match &*state.embed.lock_ref() {
         Some(embed) => match &*embed.host.lock_ref() {
             EmbedHost::Youtube(youtube) => {
                 render_settings(Rc::new(render_settings_youtube(&state, youtube)))

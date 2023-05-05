@@ -1,11 +1,11 @@
 use super::super::state::Sidebar;
-use super::play_settings::state::State as PlaySettingsState;
 use crate::base::state::Base;
 use components::{
     instructions::editor::{
         callbacks::Callbacks as InstructionsEditorCallbacks,
         state::{InstructionsType, State as InstructionsEditorState},
     },
+    module::_groups::design::edit::embed::settings::state::State as PlaySettingsState,
     tabs::MenuTabKind,
 };
 use dominator::clone;
@@ -48,7 +48,10 @@ pub enum Tab {
 impl Tab {
     pub fn new(base: Rc<Base>, kind: MenuTabKind) -> Self {
         match kind {
-            MenuTabKind::PlaySettings => Self::Settings(Rc::new(PlaySettingsState::new(base))),
+            MenuTabKind::PlaySettings => Self::Settings(Rc::new(PlaySettingsState::new(
+                &base.stickers,
+                base.embed.read_only(),
+            ))),
             MenuTabKind::Instructions => {
                 let callbacks = InstructionsEditorCallbacks::new(
                     clone!(base => move |instructions, also_history| {

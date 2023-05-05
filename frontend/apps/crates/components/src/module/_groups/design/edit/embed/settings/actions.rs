@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use components::stickers::embed::types::YoutubeEmbed;
+use crate::stickers::embed::types::YoutubeEmbed;
 use shared::domain::module::body::_groups::design::DoneAction;
 
 use super::state::State;
@@ -9,19 +9,19 @@ impl State {
     pub fn toggle_captions(&self, youtube: &Rc<YoutubeEmbed>) {
         let captions = youtube.captions.get();
         youtube.captions.set(captions);
-        self.base.stickers.call_change();
+        self.stickers.call_change();
     }
 
     pub fn toggle_muted(&self, youtube: &Rc<YoutubeEmbed>) {
         let muted = youtube.muted.get();
         youtube.muted.set(muted);
-        self.base.stickers.call_change();
+        self.stickers.call_change();
     }
 
     pub fn toggle_autoplay(&self, youtube: &Rc<YoutubeEmbed>) {
         let autoplay = youtube.autoplay.get();
         youtube.autoplay.set(autoplay);
-        self.base.stickers.call_change();
+        self.stickers.call_change();
     }
 
     pub fn set_unset_next_action(
@@ -36,6 +36,6 @@ impl State {
             done_action
         };
         youtube.done_action.set(done_action);
-        self.base.stickers.call_change();
+        self.stickers.call_change();
     }
 }
