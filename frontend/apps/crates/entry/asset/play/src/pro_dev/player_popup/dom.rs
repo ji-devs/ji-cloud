@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use super::PlayerPopup;
-use components::stickers::video::ext::YoutubeUrlExt;
+use components::stickers::embed::types::ParseUrlExt;
 use dominator::{clone, html, Dom, DomBuilder};
 use futures_signals::{
     map_ref,
@@ -13,12 +13,9 @@ use shared::{
     domain::{
         audio::AudioId,
         image::ImageId,
-        module::body::_groups::design::VideoHost,
+        module::body::_groups::design::YoutubeEmbed,
         pdf::PdfId,
-        pro_dev::{
-            unit::{ProDevUnit, Video},
-            ProDevResponse,
-        },
+        pro_dev::{unit::ProDevUnit, ProDevResponse},
     },
     media::MediaLibrary,
 };
@@ -230,23 +227,19 @@ impl PlayerPopup {
         })
     }
 
-    fn render_active_video(self: &Rc<Self>, video: Video) -> Dom {
-        match video.host {
-            VideoHost::Youtube(youtube_video) => {
-                html!("video-youtube-player" => HtmlElement, {
-                    .prop("videoId", youtube_video.url.get_id())
-                    .apply(|mut dom| {
-                        if let Some(start_at) = video.start_at {
-                            dom = dom.prop("start", start_at);
-                        }
-                        if let Some(end_at) = video.end_at {
-                            dom = dom.prop("end", end_at);
-                        }
-                        dom
-                    })
-                })
-            }
-        }
+    fn render_active_video(self: &Rc<Self>, video: YoutubeEmbed) -> Dom {
+        html!("video-youtube-player" => HtmlElement, {
+            .prop("videoId", video.url.get_id())
+            .apply(|mut dom| {
+                if let Some(start_at) = video.start_at {
+                    dom = dom.prop("start", start_at);
+                }
+                if let Some(end_at) = video.end_at {
+                    dom = dom.prop("end", end_at);
+                }
+                dom
+            })
+        })
     }
 
     fn render_active_image(self: &Rc<Self>, image: ImageId) -> Dom {
