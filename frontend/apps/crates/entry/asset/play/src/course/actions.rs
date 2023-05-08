@@ -16,6 +16,7 @@ use utils::{
     iframe::{AssetPlayerToPlayerPopup, IframeAction, IframeMessageExt},
     prelude::ApiEndpointExt,
     unwrap::UnwrapJiExt,
+    js_wrappers::is_iframe,
 };
 
 use super::state::CoursePlayer;
@@ -81,13 +82,17 @@ impl CoursePlayer {
 
     pub fn play_jig(self: &Rc<Self>, jig_id: JigId) {
         self.active_jig.set(Some(jig_id));
-        let _ = IframeAction::new(AssetPlayerToPlayerPopup::CloseButtonShown(false))
-            .try_post_message_to_parent();
+        if is_iframe() {
+            let _ = IframeAction::new(AssetPlayerToPlayerPopup::CloseButtonShown(false))
+                .try_post_message_to_parent();
+        }
     }
 
     pub fn done_playing_jig(self: &Rc<Self>) {
         self.active_jig.set(None);
-        let _ = IframeAction::new(AssetPlayerToPlayerPopup::CloseButtonShown(true))
-            .try_post_message_to_parent();
+        if is_iframe() {
+            let _ = IframeAction::new(AssetPlayerToPlayerPopup::CloseButtonShown(true))
+                .try_post_message_to_parent();
+        }
     }
 }
