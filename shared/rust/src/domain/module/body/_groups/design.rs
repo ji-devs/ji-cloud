@@ -233,7 +233,6 @@ impl YoutubeEmbed {
 /// YouTube host embed url
 pub struct YoutubeUrl(pub String);
 
-
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Setters)]
 /// Vimeo host embed
 pub struct VimeoEmbed {
@@ -285,29 +284,29 @@ impl EmbedHost {
             EmbedHost::Youtube(youtube_video) => {
                 let YoutubeUrl(url) = &youtube_video.url;
                 url.to_string()
-            },
+            }
             EmbedHost::Vimeo(vimeo_video) => {
                 let VimeoUrl(url) = &vimeo_video.url;
                 url.to_string()
-            },
+            }
             EmbedHost::GoogleSheet(google_sheet) => {
                 let GoogleSheetId(url) = &google_sheet.url;
                 url.to_string()
-            },
+            }
             EmbedHost::Edpuzzle(_) => todo!(),
             EmbedHost::Puzzel(_) => todo!(),
             EmbedHost::Quizlet(quizlet) => {
                 let QuizletId(url) = &quizlet.url;
                 url.to_string()
-            },
+            }
             EmbedHost::Thinglink(thinglink) => {
                 let ThinglinkId(url) = &thinglink.url;
                 url.to_string()
-            },
+            }
             EmbedHost::Sutori(sutori) => {
                 let SutoriId(url) = &sutori.url;
                 url.to_string()
-            },
+            }
         }
     }
 }
@@ -326,7 +325,6 @@ pub struct GoogleSheetsEmbed {
 /// GoogleSheet host google sheet url
 pub struct GoogleSheetId(pub String);
 
-
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 /// Edpuzzle host embed url
 pub struct EdpuzzleEmbed {
@@ -337,7 +335,6 @@ pub struct EdpuzzleEmbed {
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 /// Edpuzzle host google sheet url
 pub struct EdpuzzleId(pub String);
-
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 /// Puzzel host embed url
@@ -350,7 +347,6 @@ pub struct PuzzelEmbed {
 /// Puzzel host google sheet url
 pub struct PuzzelId(pub String);
 
-
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 /// Quizlet host embed url
 pub struct QuizletEmbed {
@@ -361,8 +357,6 @@ pub struct QuizletEmbed {
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 /// Quizlet host google sheet url
 pub struct QuizletId(pub String);
-
-
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 /// Thinglink host embed url
@@ -375,8 +369,6 @@ pub struct ThinglinkEmbed {
 /// Thinglink host google sheet url
 pub struct ThinglinkId(pub String);
 
-
-
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 /// Sutori host embed url
 pub struct SutoriEmbed {
@@ -387,8 +379,6 @@ pub struct SutoriEmbed {
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 /// Sutori host google sheet url
 pub struct SutoriId(pub String);
-
-
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 /// Trace
