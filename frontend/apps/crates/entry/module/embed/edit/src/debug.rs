@@ -10,7 +10,7 @@ use shared::{
         module::body::{
             Image, ModuleAssist,
             _groups::design::{Backgrounds, BaseContent, Sprite, Sticker, Text},
-            video::{Content, Mode, ModuleData as RawData, Step},
+            embed::{Content, Mode, ModuleData as RawData, Step},
         },
         module::ModuleId,
     },

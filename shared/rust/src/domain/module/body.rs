@@ -16,6 +16,9 @@ pub mod poster;
 /// Video Body.
 pub mod video;
 
+/// Embed Body.
+pub mod embed;
+
 /// Listen & Learn Body.
 pub mod tapping_board;
 
@@ -69,6 +72,9 @@ pub enum Body {
     /// Module is a Video, and has a video body.
     Video(video::ModuleData),
 
+    /// Module is a Embed, and has a embed body.
+    Embed(embed::ModuleData),
+
     /// Module is a Listen & Learn, and has a Listen & Learn's body.
     TappingBoard(tapping_board::ModuleData),
 
@@ -102,11 +108,12 @@ impl Body {
             super::ModuleKind::Matching => Self::Matching(Default::default()),
             super::ModuleKind::Poster => Self::Poster(Default::default()),
             super::ModuleKind::Video => Self::Video(Default::default()),
+            super::ModuleKind::Embed => Self::Embed(Default::default()),
             super::ModuleKind::TappingBoard => Self::TappingBoard(Default::default()),
             super::ModuleKind::DragDrop => Self::DragDrop(Default::default()),
             super::ModuleKind::FindAnswer => Self::FindAnswer(Default::default()),
             super::ModuleKind::Legacy => Self::Legacy(Default::default()),
-            _ => unimplemented!("TODO!"),
+            super::ModuleKind::Tracing => unimplemented!("TODO!"),
         }
     }
 
@@ -119,6 +126,7 @@ impl Body {
             Self::CardQuiz(data) => data.convert_to_body(kind),
             Self::Poster(data) => data.convert_to_body(kind),
             Self::Video(data) => data.convert_to_body(kind),
+            Self::Embed(data) => data.convert_to_body(kind),
             Self::TappingBoard(data) => data.convert_to_body(kind),
             Self::DragDrop(data) => data.convert_to_body(kind),
             Self::Cover(data) => data.convert_to_body(kind),
@@ -137,6 +145,7 @@ impl Body {
             Self::CardQuiz(data) => data.is_complete(),
             Self::Poster(data) => data.is_complete(),
             Self::Video(data) => data.is_complete(),
+            Self::Embed(data) => data.is_complete(),
             Self::TappingBoard(data) => data.is_complete(),
             Self::DragDrop(data) => data.is_complete(),
             Self::Cover(data) => data.is_complete(),
@@ -218,6 +227,7 @@ pub trait BodyExt<Mode: ModeExt, Step: StepExt>:
             ModuleKind::CardQuiz => Ok(Body::CardQuiz(self.convert_to_card_quiz()?)),
             ModuleKind::Poster => Ok(Body::Poster(self.convert_to_poster()?)),
             ModuleKind::Video => Ok(Body::Video(self.convert_to_video()?)),
+            ModuleKind::Embed => Ok(Body::Embed(self.convert_to_embed()?)),
             ModuleKind::TappingBoard => Ok(Body::TappingBoard(self.convert_to_tapping_board()?)),
             ModuleKind::DragDrop => Ok(Body::DragDrop(self.convert_to_drag_drop()?)),
             ModuleKind::Cover => Ok(Body::Cover(self.convert_to_cover()?)),
@@ -285,6 +295,10 @@ pub trait BodyConvert {
     fn convert_to_video(&self) -> Result<video::ModuleData, &'static str> {
         Err("cannot convert to video!")
     }
+    /// Embed
+    fn convert_to_embed(&self) -> Result<embed::ModuleData, &'static str> {
+        Err("cannot convert to embed!")
+    }
     /// Legacy
     fn convert_to_legacy(&self) -> Result<legacy::ModuleData, &'static str> {
         Err("cannot convert to legacy!")
@@ -345,6 +359,7 @@ impl Body {
             Self::Matching(_) => super::ModuleKind::Matching,
             Self::Poster(_) => super::ModuleKind::Poster,
             Self::Video(_) => super::ModuleKind::Video,
+            Self::Embed(_) => super::ModuleKind::Embed,
             Self::TappingBoard(_) => super::ModuleKind::TappingBoard,
             Self::DragDrop(_) => super::ModuleKind::DragDrop,
             Self::FindAnswer(_) => super::ModuleKind::FindAnswer,

@@ -22,6 +22,8 @@ export default [
     "module/resource-cover/play",
     "module/video/edit",
     "module/video/play",
+    "module/embed/edit",
+    "module/embed/play",
     "module/tapping-board/edit",
     "module/tapping-board/play",
     "module/drag-drop/edit",

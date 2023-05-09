@@ -8,6 +8,7 @@ export type ModuleKind =
     | "tapping-board"
     | "tracing"
     | "video"
+    | "embed"
     | "card-quiz"
     | "drag-drop"
     | "find-answer";
@@ -22,6 +23,7 @@ export const moduleKinds: Array<ModuleKind> = [
     "tapping-board",
     "tracing",
     "video",
+    "embed",
     "card-quiz",
     "drag-drop",
     "find-answer",
@@ -39,6 +41,7 @@ export const STR_MODULE_DISPLAY_NAME: { [key in ModuleKind]: string } = {
     "tapping-board": "Listen & Learn",
     tracing: "Tracing",
     video: "Video Player",
+    embed: "Embed It",
     "card-quiz": "Multiple Choice",
     "drag-drop": "Drag & Drop",
     "find-answer": "Answer This",
@@ -56,6 +59,7 @@ export const STR_MODULE_CHOOSE_HEADER: { [key in ModuleKind]: string } = {
     "drag-drop": "Create a Drag & Drop activity",
     tracing: "Create a Tracing activity",
     video: "Create a Video activity",
+    embed: "Create an Embed activity",
     "find-answer": "Create an Answer This activity",
 };
 

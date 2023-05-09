@@ -54,7 +54,7 @@ pub enum MenuTabKind {
     DualList,
     Theme,
     Tooltip,
-    Video,
+    Embed,
     Trace,
     Place,
     Correct,

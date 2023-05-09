@@ -1,18 +1,25 @@
 #![allow(dead_code)]
 
-use components::stickers::sprite::ext::*;
-use components::tabs::MenuTabKind;
+use components::stickers::{
+    embed::types::{EmbedExt, ParseUrlExt},
+    sprite::ext::*,
+};
 use once_cell::sync::OnceCell;
 use shared::{
     domain::{
         asset::AssetId,
         image::ImageId,
-        module::body::{
-            Image, ModuleAssist,
-            _groups::design::{Backgrounds, BaseContent, Sprite, Sticker, Text},
-            video::{Content, Mode, ModuleData as RawData, Step},
+        module::{
+            body::{
+                Image, ModuleAssist,
+                _groups::design::{
+                    Backgrounds, BaseContent, Embed, EmbedHost, Sprite, Sticker, Text,
+                    YoutubeEmbed, YoutubeUrl,
+                },
+                embed::{Content, Mode, ModuleData as RawData},
+            },
+            ModuleId,
         },
-        module::ModuleId,
     },
     media::MediaLibrary,
 };
@@ -23,16 +30,12 @@ pub static SETTINGS: OnceCell<DebugSettings> = OnceCell::new();
 
 const IMAGE_UUID: &str = "e84dd7fe-c92d-11eb-8c82-cfd1d3fd13ff";
 
-const DEBUG_TEXT: &str = "Text from rust";
+pub const DEBUG_TEXT: &str = "Hello World this is a long line of text";
 
 #[derive(Debug, Default)]
 pub struct DebugSettings {
     pub data: Option<RawData>,
-    pub step: Option<Step>,
-    pub skip_save: bool,
     pub skip_load_jig: bool,
-    pub bg_tab: Option<MenuTabKind>,
-    pub content_tab: Option<MenuTabKind>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -44,12 +47,7 @@ pub struct InitData {
 pub enum InitSticker {
     Text,
     Sprite,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum InitTrace {
-    //x, y, w, h
-    Ellipse(f64, f64, f64, f64),
+    Embed,
 }
 
 impl DebugSettings {
@@ -63,7 +61,10 @@ impl DebugSettings {
                         mode: Mode::Introduction,
                         base: BaseContent {
                             theme: ThemeId::Chalkboard,
-                            instructions: ModuleAssist::default(),
+                            instructions: ModuleAssist {
+                                text: Some("Heya World!".to_string()),
+                                ..ModuleAssist::default()
+                            },
                             feedback: ModuleAssist::default(),
                             stickers: init_data
                                 .stickers
@@ -77,6 +78,19 @@ impl DebugSettings {
                                         id: ImageId(Uuid::parse_str(IMAGE_UUID).unwrap_ji()),
                                         lib: MediaLibrary::Global,
                                     })),
+                                    InitSticker::Embed => {
+                                        let youtube_url =
+                                            YoutubeUrl::try_parse("LUQksiZ2TVw".to_string())
+                                                .unwrap_ji();
+
+                                        let youtube = YoutubeEmbed::new(youtube_url)
+                                            .captions(true)
+                                            .autoplay(true);
+
+                                        let host = EmbedHost::Youtube(youtube);
+
+                                        Sticker::Embed(Embed::new(host))
+                                    }
                                 })
                                 .collect(),
                             backgrounds: Backgrounds {
@@ -90,11 +104,7 @@ impl DebugSettings {
             } else {
                 RawData { content: None }
             }),
-            step: Some(Step::One),
-            skip_save: true,
             skip_load_jig: true,
-            bg_tab: Some(MenuTabKind::BackgroundImage),
-            content_tab: Some(MenuTabKind::Embed),
         }
     }
 }
@@ -104,7 +114,8 @@ pub fn init(asset_id: AssetId, _module_id: ModuleId) {
         SETTINGS
             .set(DebugSettings::debug(Some(InitData {
                 stickers: vec![
-                    // InitSticker::Text, InitSticker::Sprite
+                    InitSticker::Text,
+                    InitSticker::Embed, //InitSticker::Sprite
                 ],
             })))
             .unwrap_ji();

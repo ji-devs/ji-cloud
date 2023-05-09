@@ -18,6 +18,7 @@ static MODULE_KINDS: &[ModuleKind] = &[
     ModuleKind::DragDrop,
     //ModuleKind::Tracing,
     ModuleKind::Video,
+    ModuleKind::Embed,
     //ModuleKind::VisualQuiz,
     ModuleKind::FindAnswer,
 ];

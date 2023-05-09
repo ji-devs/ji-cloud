@@ -66,6 +66,9 @@ pub enum ModuleKind {
 
     /// Answer This (Previously "Find the Answer")
     FindAnswer = 13,
+
+    /// Embed
+    Embed = 14,
 }
 
 impl ModuleKind {
@@ -83,6 +86,7 @@ impl ModuleKind {
             Self::DragDrop => "drag-drop",
             Self::Tracing => "tracing",
             Self::Video => "video",
+            Self::Embed => "embed",
             Self::CardQuiz => "card-quiz",
             Self::Legacy => "legacy",
             Self::FindAnswer => "find-answer",
@@ -112,6 +116,7 @@ impl FromStr for ModuleKind {
             "drag-drop" => Self::DragDrop,
             "tracing" => Self::Tracing,
             "video" => Self::Video,
+            "embed" => Self::Embed,
             "card-quiz" => Self::CardQuiz,
             "legacy" => Self::Legacy,
             "find-answer" => Self::FindAnswer,
@@ -137,6 +142,7 @@ impl ModuleBody {
             Self::Poster(body) => serde_json::to_value(body)?,
             Self::TappingBoard(body) => serde_json::to_value(body)?,
             Self::Video(body) => serde_json::to_value(body)?,
+            Self::Embed(body) => serde_json::to_value(body)?,
             Self::FindAnswer(body) => serde_json::to_value(body)?,
             Self::Legacy(body) => serde_json::to_value(body)?,
         };
@@ -160,6 +166,7 @@ impl ModuleBody {
             ModuleKind::Poster => Ok(Self::Poster(serde_json::from_value(contents)?)),
             ModuleKind::TappingBoard => Ok(Self::TappingBoard(serde_json::from_value(contents)?)),
             ModuleKind::Video => Ok(Self::Video(serde_json::from_value(contents)?)),
+            ModuleKind::Embed => Ok(Self::Embed(serde_json::from_value(contents)?)),
             ModuleKind::FindAnswer => Ok(Self::FindAnswer(serde_json::from_value(contents)?)),
             ModuleKind::Legacy => Ok(Self::Legacy(serde_json::from_value(contents)?)),
 

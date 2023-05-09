@@ -319,6 +319,78 @@ dependencies = [
 ]
 
 [[package]]
+name = "app-embed-edit"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "awsm_web 0.32.3",
+ "cfg-if 1.0.0",
+ "components",
+ "console_error_panic_hook",
+ "discard",
+ "dominator",
+ "dominator_helpers",
+ "futures",
+ "futures-signals",
+ "gloo",
+ "gloo-timers",
+ "itertools",
+ "js-sys",
+ "log",
+ "once_cell",
+ "serde",
+ "serde-wasm-bindgen 0.4.5",
+ "serde_json",
+ "shared",
+ "unicode-segmentation",
+ "url",
+ "utils",
+ "uuid",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "wee_alloc",
+]
+
+[[package]]
+name = "app-embed-play"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "awsm_web 0.32.3",
+ "cfg-if 1.0.0",
+ "components",
+ "console_error_panic_hook",
+ "discard",
+ "dominator",
+ "dominator_helpers",
+ "futures",
+ "futures-signals",
+ "gloo",
+ "gloo-timers",
+ "itertools",
+ "js-sys",
+ "log",
+ "once_cell",
+ "serde",
+ "serde-wasm-bindgen 0.4.5",
+ "serde_json",
+ "shared",
+ "unicode-segmentation",
+ "url",
+ "utils",
+ "uuid",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "wee_alloc",
+]
+
+[[package]]
 name = "app-find-answer-edit"
 version = "0.1.0"
 dependencies = [

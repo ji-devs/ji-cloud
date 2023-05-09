@@ -28,6 +28,8 @@ members = [
     "crates/entry/module/resource-cover/play",
     "crates/entry/module/video/edit",
     "crates/entry/module/video/play",
+    "crates/entry/module/embed/edit",
+    "crates/entry/module/embed/play",
     "crates/entry/module/tapping-board/edit",
     "crates/entry/module/tapping-board/play",
     "crates/entry/module/drag-drop/edit",
