@@ -14,9 +14,9 @@ use shared::{
 };
 use utils::{
     iframe::{AssetPlayerToPlayerPopup, IframeAction, IframeMessageExt},
+    js_wrappers::is_iframe,
     prelude::ApiEndpointExt,
     unwrap::UnwrapJiExt,
-    js_wrappers::is_iframe,
 };
 
 use super::state::CoursePlayer;

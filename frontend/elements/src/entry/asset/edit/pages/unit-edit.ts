@@ -14,81 +14,111 @@ export class _ extends LitElement {
         return [
             css`
                 :host {
-                    display: block;
-                    padding: 50px;
-                    height: 100dvh;
-                    overflow: auto;
-                    box-sizing: border-box;
-                    overflow: auto;
+                  display: flex;
+                  padding: 25px;
+                  overflow: auto;
+                  box-sizing: border-box;
+                  flex-direction: column;
+                  row-gap: 10px;
                 }
+              
                 .main-wrapper {
-                    display: grid;
-                    place-content: center;
-                    max-width: 100%;
-                    max-height: 100%;
+                  display: flex;
+                  justify-content: flex-end;
+                  align-items: center;
+                  height: 95vh;
                 }
+              
                 main {
-                    display: grid;
-                    place-content: center;
-                    background-color: var(--white);
-                    padding: 38px;
-                    border-radius: 32px;
-                    box-shadow: 0 3px 8px 0 rgba(0, 0, 0, 0.08);
-                    position: fixed;
-                    left: 30%;
+                  display: flex;
+                  justify-content: center;
+                  place-content: center;
+                  background-color: var(--white);
+                  padding: 38px;
+                  border-radius: 32px;
+                  box-shadow: 0 3px 8px 0 rgba(0, 0, 0, 0.08);
+                  width: 100%;
+                  height: 70%;
+                  margin-bottom: 100px;
                 }
 
-                h1 {
-                    font-size: 32px;
-                    font-weight: 900;
-                    color: var(--dark-blue-4);
-                    margin: 0;
+                .header {
+                  display: flex;
+                  flex-direction: column;
+                  position: sticky;
+                  top: 0;
+                  z-index: 1;
                 }
+              
+                h1 {
+                  font-size: 32px;
+                  font-weight: 900;
+                  color: var(--dark-blue-4);
+                  margin: 0;
+                }
+              
                 h3 {
-                    font-weight: 500;
-                    color: #4a4a4a;
-                    margin: 0;
+                  font-weight: 500;
+                  color: #4a4a4a;
+                  margin: 0;
                 }
 
                 .width-holder {
-                    display: grid;
-                    grid-template-rows: auto 4fr auto;
-                    row-gap: 15px;
-                    width: 900px;
-                    max-width: 1300px;
+                  display: flex;
+                  flex-direction: column;
+                  justify-content: flex-start;
+                  height: 100%;
+                  width: 100%;
                 }
+              
                 .main {
-                    display: grid;
-                    grid-row: 2;
-                    column-gap: 35px;
+                  display: flex;
+                  height: 100%;
+                  column-gap: 40px;
                 }
-                .column-1 {
-                    display: grid;
-                    grid-row: 2;
-                    grid-template-rows: repeat(2, auto);
-                    row-gap: 20px;
-                } 
+
+                .column-1,
                 .column-2 {
-                    display: grid;
-                    grid-row: 2;
-                    grid-template-rows: 60px 300px;
-                    row-gap: 40px;
-                } 
+                  display: flex;
+                  flex-direction: column;
+                  flex-grow: 1;
+                  row-gap: 40px;
+                }
+              
+                ::slotted([slot="body-input"]) {
+                  height: 75%;
+                }
+              
+                ::slotted([slot="description"]) {
+                  height: 100%;
+                  max-height: 300px;                
+                }
+
+                ::slotted([slot="add"]) {
+                  height: 100%;
+                  max-height: 35px;
+                }
+              
                 .save {
-                    display: grid;
-                    grid-row: 3;
-                    place-content: center;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  padding-top: 15px;
                 }
 
                 .controls {
-                    cursor: pointer;
-                    display: flex;
-                    column-gap: 6px;
-                    align-items: center;
+                  cursor: pointer;
+                  display: flex;
+                  column-gap: 20px;
+                  align-items: center;
+                  padding-bottom: 15px;
+                  font-size: large;
+                  color: var(--light-blue-6);
+                  font-weight: 400;
                 }
 
                 label {
-                    color: var(--dark-blue-1);
+                  color: var(--dark-blue-1);
                 }
             `,
         ];
@@ -104,9 +134,9 @@ export class _ extends LitElement {
             <main>
                 <div class="width-holder">
                     <div class="controls">
+                        <slot name="youtube-select"></slot>
                         <slot name="link-select"></slot>
                         <slot name="file-select"></slot>
-                        <slot name="youtube-select"></slot>
                     </div>
                     <div class="main">
                         <div class="column-1">
