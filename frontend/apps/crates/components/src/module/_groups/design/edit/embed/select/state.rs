@@ -33,6 +33,18 @@ impl EmbedHostType {
             EmbedHostType::Sutori => "Sutori",
         }
     }
+    pub(super) fn as_str(&self) -> &'static str {
+        match self {
+            EmbedHostType::Youtube => "youtube",
+            EmbedHostType::Vimeo => "vimeo",
+            EmbedHostType::GoogleSheet => "google-sheets",
+            EmbedHostType::Edpuzzle => "edpuzzle",
+            EmbedHostType::Puzzel => "puzzel",
+            EmbedHostType::Quizlet => "quizlet",
+            EmbedHostType::Thinglink => "thinglink",
+            EmbedHostType::Sutori => "sutori",
+        }
+    }
 }
 
 pub struct EmbedSelectList {

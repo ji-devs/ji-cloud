@@ -52,7 +52,10 @@ impl EmbedSelect {
             .style("position", "relative")
             .children(&mut [
                 html!("img-ui", {
-                    .prop("path", "...")
+                    .prop("path", &format!(
+                        "module/_common/edit/widgets/sidebar/embed/{}.png",
+                        embed_type.as_str()
+                    ))
                     .style("background-color", "#ffffff")
                     .style("border-radius", "8px")
                     .style("overflow", "hidden")
