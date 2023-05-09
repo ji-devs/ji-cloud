@@ -10,12 +10,12 @@ use crate::edit::pro_dev::unit_editor::UnitValue;
 
 use super::{add_unit_value::AddUnitValue, state::UnitEditor};
 
-const STR_NAME_LABEL: &str = "Unit’s name";
+const STR_NAME_LABEL: &str = "Unit name";
 const STR_NAME_PLACEHOLDER: &str = "Add unit name";
-const STR_DESCRIPTION_LABEL: &str = "Description";
-const STR_DESCRIPTION_PLACEHOLDER: &str = "Add Description";
+const STR_DESCRIPTION_LABEL: &str = "Unit description";
+const STR_DESCRIPTION_PLACEHOLDER: &str = "Add description";
 const STR_URL_PLACEHOLDER: &str = "Insert URL here";
-const STR_ADD_LINK: &str = " Add Link";
+const STR_ADD_LINK: &str = " Add link";
 const STR_UPLOAD_FILE: &str = " Upload file";
 const STR_ADD_YOUTUBE: &str = " Video";
 
@@ -48,6 +48,7 @@ impl Component<UnitEditor> for Rc<UnitEditor> {
             .children(&mut [
                 html!("label", {
                     .prop("slot", "link-select")
+                    .style("font-size", "large")
                     .child(html!("input", {
                         .prop("slot", "input")
                         .prop("label", STR_URL_PLACEHOLDER)
@@ -141,9 +142,9 @@ impl Component<UnitEditor> for Rc<UnitEditor> {
                 html!("button-rect", {
                     .prop_signal("disabled", is_valid.map(|value| !value))
                     .prop("slot", "add")
-                    .prop("size", "small")
-                    .prop("bold", true)
+                    .prop("size", "medium")
                     .text(&state.create_or_update_text())
+                    .style("font-size", "medium")
                     .event(clone!(state => move |_: events::Click| {
                         analytics::event("Add Unit to Course", None);
                         match state.unit_id {
