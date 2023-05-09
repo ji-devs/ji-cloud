@@ -1,7 +1,7 @@
 use super::state::*;
 use components::{
     image::search::dom::render as render_image_search,
-    module::_groups::design::edit::embed::select::EmbedSelect,
+    module::_groups::design::edit::embed::select::{EmbedSelect, EmbedSelectList},
     tabs::{MenuTab, MenuTabKind},
 };
 use dominator::{clone, html, Dom};
@@ -61,7 +61,7 @@ pub fn render(state: Rc<Step2>) -> Dom {
                             match tab {
                                 Tab::Embed => {
                                     let base = &state.sidebar.base;
-                                    Some(EmbedSelect::new(&base.stickers, base.embed.clone()).render())
+                                    Some(EmbedSelect::new(EmbedSelectList::video_only(), &base.stickers, base.embed.clone()).render())
                                 },
                                 Tab::Text => {
                                     Some(state.sidebar.base.text_editor.render_controls())

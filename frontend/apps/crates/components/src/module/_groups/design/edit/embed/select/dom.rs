@@ -2,10 +2,11 @@ use std::rc::Rc;
 
 use crate::stickers::embed::types::PartialEmbedHost;
 use dominator::{clone, html, Dom};
-use futures_signals::signal::{Signal, SignalExt};
+use futures_signals::signal::SignalExt;
+use itertools::Itertools;
 use utils::events;
 
-use super::EmbedSelect;
+use super::{EmbedHostType, EmbedSelect};
 
 impl EmbedSelect {
     pub fn render(self: &Rc<Self>) -> Dom {
@@ -25,141 +26,25 @@ impl EmbedSelect {
                 .style("justify-content", "space-evenly")
                 .style("column-gap", "48px")
                 .style("row-gap", "24px")
-                .children(&mut [
-                    state.option(
-                        "Youtube",
-                        Box::new(clone!(state => move|| {
-                            match state.host.get_cloned() {
-                                Some(PartialEmbedHost::Youtube(_)) => state.host.set(None),
-                                _ => state.host.set(Some(PartialEmbedHost::Youtube(Default::default()))),
-                            };
-                            state.on_embed_value_change();
-                        })),
-                        state.host.signal_ref(|host| {
-                            matches!(host, Some(PartialEmbedHost::Youtube(_)))
-                        }),
-                        state.host.signal_ref(|host| {
-                            matches!(host, Some(PartialEmbedHost::Youtube(_)))
-                        })
-                    ),
-                    state.option(
-                        "Vimeo",
-                        Box::new(clone!(state => move|| {
-                            match state.host.get_cloned() {
-                                Some(PartialEmbedHost::Vimeo(_)) => state.host.set(None),
-                                _ => state.host.set(Some(PartialEmbedHost::Vimeo(Default::default()))),
-                            };
-                            state.on_embed_value_change();
-                        })),
-                        state.host.signal_ref(|host| {
-                            matches!(host, Some(PartialEmbedHost::Vimeo(_)))
-                        }),
-                        state.host.signal_ref(|host| {
-                            matches!(host, Some(PartialEmbedHost::Vimeo(_)))
-                        })
-                    ),
-                    state.option(
-                        "Google Sheets",
-                        Box::new(clone!(state => move|| {
-                            match state.host.get_cloned() {
-                                Some(PartialEmbedHost::GoogleSheet(_)) => state.host.set(None),
-                                _ => state.host.set(Some(PartialEmbedHost::GoogleSheet(Default::default()))),
-                            };
-                            state.on_embed_value_change();
-                        })),
-                        state.host.signal_ref(|host| {
-                            matches!(host, Some(PartialEmbedHost::GoogleSheet(_)))
-                        }),
-                        state.host.signal_ref(|host| {
-                            matches!(host, Some(PartialEmbedHost::GoogleSheet(_)))
-                        })
-                    ),
-                    // state.option(
-                    //     "Edpuzzle",
-                    //     Box::new(clone!(state => move|| {
-                    //         match state.host.get_cloned() {
-                    //             Some(PartialEmbedHost::Edpuzzle(_)) => state.host.set(None),
-                    //             _ => state.host.set(Some(PartialEmbedHost::Edpuzzle(Default::default()))),
-                    //         };
-                    //         state.on_embed_value_change();
-                    //     })),
-                    //     state.host.signal_ref(|host| {
-                    //         matches!(host, Some(PartialEmbedHost::Edpuzzle(_)))
-                    //     })
-                    // ),
-                    // state.option(
-                    //     "Puzzel",
-                    //     Box::new(clone!(state => move|| {
-                    //         match state.host.get_cloned() {
-                    //             Some(PartialEmbedHost::Puzzel(_)) => state.host.set(None),
-                    //             _ => state.host.set(Some(PartialEmbedHost::Puzzel(Default::default()))),
-                    //         };
-                    //         state.on_embed_value_change();
-                    //     })),
-                    //     state.host.signal_ref(|host| {
-                    //         matches!(host, Some(PartialEmbedHost::Puzzel(_)))
-                    //     })
-                    // ),
-                    state.option(
-                        "Quizlet",
-                        Box::new(clone!(state => move|| {
-                            match state.host.get_cloned() {
-                                Some(PartialEmbedHost::Quizlet(_)) => state.host.set(None),
-                                _ => state.host.set(Some(PartialEmbedHost::Quizlet(Default::default()))),
-                            };
-                            state.on_embed_value_change();
-                        })),
-                        state.host.signal_ref(|host| {
-                            matches!(host, Some(PartialEmbedHost::Quizlet(_)))
-                        }),
-                        state.host.signal_ref(|host| {
-                            matches!(host, Some(PartialEmbedHost::Quizlet(_)))
-                        })
-                    ),
-                    state.option(
-                        "Thinglink",
-                        Box::new(clone!(state => move|| {
-                            match state.host.get_cloned() {
-                                Some(PartialEmbedHost::Thinglink(_)) => state.host.set(None),
-                                _ => state.host.set(Some(PartialEmbedHost::Thinglink(Default::default()))),
-                            };
-                            state.on_embed_value_change();
-                        })),
-                        state.host.signal_ref(|host| {
-                            matches!(host, Some(PartialEmbedHost::Thinglink(_)))
-                        }),
-                        state.host.signal_ref(|host| {
-                            matches!(host, Some(PartialEmbedHost::Thinglink(_)))
-                        })
-                    ),
-                    // state.option(
-                    //     "Sutori",
-                    //     Box::new(clone!(state => move|| {
-                    //         match state.host.get_cloned() {
-                    //             Some(PartialEmbedHost::Sutori(_)) => state.host.set(None),
-                    //             _ => state.host.set(Some(PartialEmbedHost::Sutori(Default::default()))),
-                    //         };
-                    //         state.on_embed_value_change();
-                    //     })),
-                    //     state.host.signal_ref(|host| {
-                    //         matches!(host, Some(PartialEmbedHost::Sutori(_)))
-                    //     }),
-                    //     state.host.signal_ref(|host| {
-                    //         matches!(host, Some(PartialEmbedHost::Sutori(_)))
-                    //     })
-                    // ),
-                ])
+                .children(state.render_options())
             }))
         })
     }
 
-    fn option(
-        self: &Rc<Self>,
-        label: &str,
-        on_select: Box<dyn Fn()>,
-        selected_a: impl Signal<Item = bool> + 'static,
-        selected_b: impl Signal<Item = bool> + 'static,
-    ) -> Dom {
+    fn render_options(self: &Rc<Self>) -> Vec<Dom> {
+        let state = self;
+        state
+            .type_list
+            .modules
+            .iter()
+            .map(clone!(state => move|module| {
+                state.option(module)
+            }))
+            .collect_vec()
+    }
+
+    fn option(self: &Rc<Self>, embed_type: &EmbedHostType) -> Dom {
+        let state = self;
         html!("label", {
             .style("display", "grid")
             .style("gap", "5px")
@@ -173,12 +58,16 @@ impl EmbedSelect {
                     .style("overflow", "hidden")
                     .style("width", "56px")
                     .style("height", "56px")
-                    .style_signal("outline", selected_a.map(|selected| {
-                        match selected {
+                    .style_signal("outline", state.host.signal_ref(clone!(embed_type => move |host| {
+                        let is_selected = match host {
+                            Some(host) => embed_type == partial_to_type(host),
+                            None => false,
+                        };
+                        match is_selected {
                             true => "solid 3px var(--light-blue-5)",
                             false => "none",
                         }
-                    }))
+                    })))
                 }),
                 html!("p", {
                     .style("font-size", "13px")
@@ -190,16 +79,36 @@ impl EmbedSelect {
                     .style("top", "58px")
                     .style("left", "50%")
                     .style("translate", "-50%")
-                    .text(label)
+                    .text(embed_type.display_name())
                 }),
                 html!("input", {
                     .prop("type", "radio")
                     .prop("name", "radio")
-                    .prop_signal("checked", selected_b)
+                    .prop_signal("checked", state.host.signal_ref(clone!(embed_type => move |host| {
+                        match host {
+                            Some(host) => embed_type == partial_to_type(host),
+                            None => false,
+                        }
+                    })))
                     .style("display", "none")
-                    .event(move |_: events::Click| {
-                        (on_select)();
-                    })
+                    .event(clone!(state, embed_type => move |_: events::Click| {
+                        let mut host = state.host.lock_mut();
+                        let is_selected = match &*host {
+                            Some(host) => embed_type.clone() == partial_to_type(host),
+                            None => false,
+                        };
+                        match is_selected {
+                            true => {
+                                *host = None;
+                            },
+                            false => {
+                                let embed = type_to_partial(&embed_type);
+                                *host = Some(embed);
+                            },
+                        };
+                        drop(host);
+                        state.on_embed_value_change();
+                    }))
                 }),
             ])
         })
@@ -217,5 +126,30 @@ impl EmbedSelect {
             PartialEmbedHost::Thinglink(thinglink) => state.render_thinglink(thinglink),
             PartialEmbedHost::Sutori(sutori) => state.render_sutori(sutori),
         }
+    }
+}
+
+fn partial_to_type(partial: &PartialEmbedHost) -> EmbedHostType {
+    match partial {
+        PartialEmbedHost::Youtube(_) => EmbedHostType::Youtube,
+        PartialEmbedHost::Vimeo(_) => EmbedHostType::Vimeo,
+        PartialEmbedHost::GoogleSheet(_) => EmbedHostType::GoogleSheet,
+        PartialEmbedHost::Edpuzzle(_) => EmbedHostType::Edpuzzle,
+        PartialEmbedHost::Puzzel(_) => EmbedHostType::Puzzel,
+        PartialEmbedHost::Quizlet(_) => EmbedHostType::Quizlet,
+        PartialEmbedHost::Thinglink(_) => EmbedHostType::Thinglink,
+        PartialEmbedHost::Sutori(_) => EmbedHostType::Sutori,
+    }
+}
+fn type_to_partial(partial: &EmbedHostType) -> PartialEmbedHost {
+    match partial {
+        EmbedHostType::Youtube => PartialEmbedHost::Youtube(Default::default()),
+        EmbedHostType::Vimeo => PartialEmbedHost::Vimeo(Default::default()),
+        EmbedHostType::GoogleSheet => PartialEmbedHost::GoogleSheet(Default::default()),
+        EmbedHostType::Edpuzzle => PartialEmbedHost::Edpuzzle(Default::default()),
+        EmbedHostType::Puzzel => PartialEmbedHost::Puzzel(Default::default()),
+        EmbedHostType::Quizlet => PartialEmbedHost::Quizlet(Default::default()),
+        EmbedHostType::Thinglink => PartialEmbedHost::Thinglink(Default::default()),
+        EmbedHostType::Sutori => PartialEmbedHost::Sutori(Default::default()),
     }
 }

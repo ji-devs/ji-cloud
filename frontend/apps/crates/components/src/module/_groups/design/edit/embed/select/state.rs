@@ -1,20 +1,69 @@
 use std::rc::Rc;
 
 use futures_signals::signal::Mutable;
+use strum::IntoEnumIterator;
+use strum_macros::EnumIter;
 
 use crate::stickers::{
     embed::{state::Embed, types::PartialEmbedHost},
     state::{Sticker, Stickers},
 };
 
+#[derive(Clone, Copy, EnumIter, PartialEq, Eq)]
+pub(super) enum EmbedHostType {
+    Youtube,
+    Vimeo,
+    GoogleSheet,
+    Edpuzzle,
+    Puzzel,
+    Quizlet,
+    Thinglink,
+    Sutori,
+}
+impl EmbedHostType {
+    pub(super) fn display_name(&self) -> &'static str {
+        match self {
+            EmbedHostType::Youtube => "Youtube",
+            EmbedHostType::Vimeo => "Vimeo",
+            EmbedHostType::GoogleSheet => "Google Sheet",
+            EmbedHostType::Edpuzzle => "Edpuzzle",
+            EmbedHostType::Puzzel => "Puzzel",
+            EmbedHostType::Quizlet => "Quizlet",
+            EmbedHostType::Thinglink => "Thinglink",
+            EmbedHostType::Sutori => "Sutori",
+        }
+    }
+}
+
+pub struct EmbedSelectList {
+    pub(super) modules: Vec<EmbedHostType>,
+}
+impl EmbedSelectList {
+    pub fn all() -> Self {
+        Self {
+            modules: EmbedHostType::iter().collect(),
+        }
+    }
+    pub fn video_only() -> Self {
+        Self {
+            modules: vec![EmbedHostType::Youtube, EmbedHostType::Vimeo],
+        }
+    }
+}
+
 pub struct EmbedSelect {
-    pub stickers: Rc<Stickers<Sticker>>,
-    pub embed: Mutable<Option<Rc<Embed>>>,
-    pub host: Mutable<Option<PartialEmbedHost>>,
+    pub(super) stickers: Rc<Stickers<Sticker>>,
+    pub(super) embed: Mutable<Option<Rc<Embed>>>,
+    pub(super) host: Mutable<Option<PartialEmbedHost>>,
+    pub(super) type_list: EmbedSelectList,
 }
 
 impl EmbedSelect {
-    pub fn new(stickers: &Rc<Stickers<Sticker>>, embed: Mutable<Option<Rc<Embed>>>) -> Rc<Self> {
+    pub fn new(
+        type_list: EmbedSelectList,
+        stickers: &Rc<Stickers<Sticker>>,
+        embed: Mutable<Option<Rc<Embed>>>,
+    ) -> Rc<Self> {
         let host = embed
             .lock_ref()
             .as_ref()
@@ -24,6 +73,7 @@ impl EmbedSelect {
             stickers: Rc::clone(&stickers),
             embed,
             host: Mutable::new(host),
+            type_list,
         })
     }
 }
