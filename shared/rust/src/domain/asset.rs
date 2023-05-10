@@ -78,7 +78,7 @@ impl AssetType {
             Self::Jig => "jig",
             Self::Resource => "resource",
             Self::Course => "course",
-            Self::ProDev => "prodev",
+            Self::ProDev => "pro-dev",
         }
     }
 
