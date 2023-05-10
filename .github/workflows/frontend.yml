@@ -143,7 +143,7 @@ jobs:
 
     strategy:
       matrix:
-        app: [poster, video, tapping-board, drag-drop, memory, matching, flashcards, card-quiz, cover, resource-cover, legacy, find-answer]
+        app: [poster, video, embed, tapping-board, drag-drop, memory, matching, flashcards, card-quiz, cover, resource-cover, legacy, find-answer]
         mode: [edit, play]
     steps:
       - name: "Set environment"
@@ -327,7 +327,7 @@ jobs:
 
     strategy:
       matrix:
-        app: [poster, video, tapping-board, drag-drop, memory, matching, flashcards, card-quiz, cover, resource-cover, find-answer, legacy]
+        app: [poster, video, embed, tapping-board, drag-drop, memory, matching, flashcards, card-quiz, cover, resource-cover, find-answer, legacy]
         mode: [edit, play]
     steps:
       - name: "Set environment"
