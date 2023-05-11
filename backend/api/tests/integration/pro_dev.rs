@@ -8,6 +8,7 @@ use crate::{
     helpers::{setup_service, LoginExt},
 };
 
+pub mod module;
 pub mod unit;
 
 #[test_service(
