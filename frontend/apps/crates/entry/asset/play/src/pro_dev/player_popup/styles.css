@@ -43,7 +43,10 @@ main {
     width: 100%;
     height: 100%;
     border: none; /* iframe */
-    /* object-fit: contain; if enabled for images, should we do this also for other types? */
+    object-fit: contain; /* img */
+}
+.player-window audio {
+    height: 40px;
 }
 .middle-section {
     display: grid;
