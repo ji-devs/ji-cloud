@@ -36,6 +36,7 @@ use super::{
 /// AssetType
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Display)]
 #[serde(rename_all = "kebab-case")]
+#[strum(serialize_all = "kebab-case")]
 pub enum AssetType {
     /// JIG
     Jig,
