@@ -148,7 +148,7 @@ impl PlayerPopup {
     pub fn render_unit_navigation(self: &Rc<Self>, pro_dev: &Rc<ProDevResponse>) -> Dom {
         let state = self;
 
-        let current_page = state.player_state.current_page.get().unwrap();
+        let current_page = state.player_state.current_page.get().unwrap_or_default();
 
         let start_index = current_page * UNITS_PER_PAGE;
 
