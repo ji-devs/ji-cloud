@@ -1,5 +1,6 @@
 use crate::asset::{CoursePlayerOptions, JigPlayerOptions, ProDevPlayerOptions};
 use serde::{Deserialize, Serialize};
+use shared::domain::billing::PlanId;
 use shared::domain::{
     asset::{AssetId, AssetType, DraftOrLive},
     category::CategoryId,
@@ -44,6 +45,7 @@ pub enum HomeRoute {
     Home,
     Search(Option<Box<SearchQueryParams>>),
     Help,
+    Subscribe(Option<SubscribeRedirect>),
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
@@ -77,6 +79,30 @@ pub struct SearchQueryParams {
     #[serde(deserialize_with = "shared::domain::ser::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub categories: Vec<CategoryId>,
+}
+
+#[derive(Deserialize, Clone, Debug)]
+pub struct SubscribeRedirect {
+    pub plan_id: PlanId,
+    pub setup_intent_redirect_params: StripeSetupIntentRedirectParams,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct StripeSetupIntentRedirectParams {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub setup_intent: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub setup_intent_client_secret: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub redirect_status: Option<SetupIntentStatus>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "snake_case")]
+pub enum SetupIntentStatus {
+    Succeeded,
+    Processing,
+    RequiresPaymentMethod,
 }
 
 #[derive(Debug, Clone)]
@@ -339,6 +365,16 @@ impl Route {
 
         match paths {
             [""] => Self::Home(HomeRoute::Home),
+            ["subscribe"] => Self::Home(HomeRoute::Subscribe(None)),
+            ["subscribe", plan_id] => {
+                let setup_intent_redirect_params: StripeSetupIntentRedirectParams =
+                    serde_qs::from_str(&params_string).unwrap_ji();
+                let redirect = SubscribeRedirect {
+                    plan_id: PlanId(Uuid::parse_str(*plan_id).unwrap_ji()),
+                    setup_intent_redirect_params,
+                };
+                Self::Home(HomeRoute::Subscribe(Some(redirect)))
+            }
             ["home", "search"] => {
                 let search: SearchQueryParams = serde_qs::from_str(&params_string).unwrap_ji();
                 Self::Home(HomeRoute::Search(Some(Box::new(search))))
@@ -700,6 +736,8 @@ impl From<&Route> for String {
                         format!("/home/search?{}", query)
                     }
                 },
+                HomeRoute::Subscribe(None) => "/subscribe".to_string(),
+                HomeRoute::Subscribe(Some(redirect)) => format!("/subscribe/{}", redirect.plan_id),
                 HomeRoute::Help => "/home/help".to_string(),
             },
             Route::Kids(route) => match route {

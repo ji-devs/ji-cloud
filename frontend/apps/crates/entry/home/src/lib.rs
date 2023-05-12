@@ -8,6 +8,7 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 mod help_center;
 mod home;
 mod router;
+mod subscribe;
 
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;

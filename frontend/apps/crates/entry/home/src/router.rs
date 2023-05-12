@@ -5,7 +5,7 @@ use dominator::{html, Dom};
 use futures_signals::signal::Signal;
 use utils::routes::{HomeRoute, Route};
 
-use crate::help_center;
+use crate::{help_center, subscribe};
 pub struct Router {}
 
 impl Router {
@@ -30,6 +30,7 @@ impl Router {
                         let search_query = search_query.map(|x| *x);
                         Some(Home::new_search(search_query).render(true))
                     }
+                    HomeRoute::Subscribe(redirect) => Some(subscribe::render_subscribe(redirect)),
                     HomeRoute::Help => Some(help_center::render_help_center()),
                 },
                 _ => None,
