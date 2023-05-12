@@ -1,66 +1,81 @@
 use std::rc::Rc;
 
 use crate::stickers::embed::types::PartialEmbedHost;
-use dominator::{clone, html, Dom};
+use const_format::formatcp;
+use dominator::{clone, html, Dom, with_node, DomBuilder};
 use futures_signals::signal::SignalExt;
 use itertools::Itertools;
-use utils::events;
+use utils::{events, component::Component};
+use web_sys::{HtmlElement, ShadowRoot};
 
 use super::{EmbedHostType, EmbedSelect};
 
-impl EmbedSelect {
-    pub fn render(self: &Rc<Self>) -> Dom {
-        let state = self;
-        html!("div", {
-            .style("display", "grid")
-            .style("row-gap", "38px")
-            .child_signal(state.host.signal_cloned().map(clone!(state => move |embed| {
-                embed.map(clone!(state => move |embed| {
-                    state.render_host(embed)
-                }))
-            })))
-            .child(html!("div", {
-                .style("display", "grid")
-                .style("grid-template-columns", "repeat(auto-fill, 56px)")
-                .style("grid-auto-rows", "82px")
-                .style("justify-content", "space-evenly")
-                .style("column-gap", "48px")
-                .style("row-gap", "24px")
-                .children(state.render_options())
-            }))
-        })
+macro_rules! gap {
+    ($size:expr) => {
+        {
+            const SIZE_U32: u32 = $size; // needed to asset type
+            const SIZE_STR: &str = formatcp!("{}px", SIZE_U32);
+            html!("div", {
+                .style("height", SIZE_STR)
+                .style("width", SIZE_STR)
+            })
+        }
+    };
+}
+
+const STR_DELETE: &str = "Delete";
+const STR_BACK: &str = "Back to all categories";
+
+impl Component<EmbedSelect> for Rc<EmbedSelect> {
+    fn styles() -> &'static str {
+        include_str!("./styles.css")
     }
 
-    fn render_options(self: &Rc<Self>) -> Vec<Dom> {
+    fn dom(&self, dom: DomBuilder<ShadowRoot>) -> DomBuilder<ShadowRoot> {
         let state = self;
-        state
-            .type_list
-            .modules
-            .iter()
-            .map(clone!(state => move|module| {
-                state.option(module)
-            }))
-            .collect_vec()
+        dom.child(html!("div", {
+            .class("main")
+            .child_signal(state.host.signal_cloned().map(clone!(state => move |embed| {
+                Some(match embed {
+                    Some(embed) => {
+                        state.render_host(embed)
+                    },
+                    None => {
+                        state.render_options()
+                    },
+                })
+            })))
+        }))
+    }
+}
+
+impl EmbedSelect {
+    fn render_options(self: &Rc<Self>) -> Dom {
+        let state = self;
+        html!("div", {
+            .class("options-wrapper")
+            .children(state
+                .type_list
+                .modules
+                .iter()
+                .map(clone!(state => move|module| {
+                    state.option(module)
+                }))
+                .collect_vec()
+            )
+        })
     }
 
     fn option(self: &Rc<Self>, embed_type: &EmbedHostType) -> Dom {
         let state = self;
         html!("label", {
-            .style("display", "grid")
-            .style("gap", "5px")
-            .style("cursor", "pointer")
-            .style("position", "relative")
             .children(&mut [
                 html!("img-ui", {
                     .prop("path", &format!(
-                        "module/_common/edit/widgets/sidebar/embed/{}.png",
+                        "module/_common/edit/widgets/sidebar/embed/square/{}.png",
                         embed_type.as_str()
                     ))
-                    .style("background-color", "#ffffff")
-                    .style("border-radius", "8px")
-                    .style("overflow", "hidden")
-                    .style("width", "56px")
-                    .style("height", "56px")
+
                     .style_signal("outline", state.host.signal_ref(clone!(embed_type => move |host| {
                         let is_selected = match host {
                             Some(host) => embed_type == partial_to_type(host),
@@ -73,15 +88,7 @@ impl EmbedSelect {
                     })))
                 }),
                 html!("p", {
-                    .style("font-size", "13px")
-                    .style("color", "var(--dark-gray-6)")
-                    .style("margin", "0")
-                    .style("translate", "calc(50% + -56px) 0")
-                    .style("white-space", "nowrap")
-                    .style("position", "absolute")
-                    .style("top", "58px")
-                    .style("left", "50%")
-                    .style("translate", "-50%")
+
                     .text(embed_type.display_name())
                 }),
                 html!("input", {
@@ -93,7 +100,6 @@ impl EmbedSelect {
                             None => false,
                         }
                     })))
-                    .style("display", "none")
                     .event(clone!(state, embed_type => move |_: events::Click| {
                         let mut host = state.host.lock_mut();
                         let is_selected = match &*host {
@@ -119,15 +125,77 @@ impl EmbedSelect {
 
     fn render_host(self: &Rc<Self>, host: PartialEmbedHost) -> Dom {
         let state = self;
+        let embed_type = partial_to_type(&host);
+        html!("div", {
+            .class("host")
+            .child(html!("button-rect", {
+                .prop("slot", "back")
+                .prop("kind", "text")
+                .prop("color", "blue")
+                .child(html!("fa-icon", {
+                    .prop("icon", "fa-light fa-chevron-left")
+                }))
+                .text(STR_BACK)
+                .event(clone!(state => move |_: events::Click| {
+                    state.delete_embed();
+                }))
+            }))
+            .child(gap!(44))
+            .child(html!("img-ui", {
+                .prop("path", &format!(
+                    "module/_common/edit/widgets/sidebar/embed/rectangle/{}.png",
+                    embed_type.as_str()
+                ))
+            }))
+            .child(gap!(16))
+            .child(html!("input-wrapper" => HtmlElement, {
+                .with_node!(wrapper => {
+                    .prop("slot", "input")
+                    .prop("label", &format!("Add a {} link", embed_type.display_name()))
+                    .child(state.render_host_input(&host, wrapper))
+                })
+            }))
+            .child(gap!(24))
+            .child(html!("button-rect", {
+                .prop("slot", "delete")
+                .prop("kind", "text")
+                .prop("color", "blue")
+                .child(html!("fa-icon", {
+                    .prop("icon", "fa-light fa-trash-can")
+                }))
+                .text(STR_DELETE)
+                .event(clone!(state => move |_: events::Click| {
+                    state.delete_embed();
+                }))
+            }))
+            .apply(clone!(state => move |dom| {
+                match state.render_host_specific_options(&host) {
+                    Some(el) => dom.child(el),
+                    None => dom,
+                }
+            }))
+        })
+    }
+
+    fn render_host_input(self: &Rc<Self>, host: &PartialEmbedHost, wrapper: HtmlElement) -> Dom {
+        let state = self;
         match &host {
-            PartialEmbedHost::Youtube(youtube) => state.render_youtube(youtube),
-            PartialEmbedHost::Vimeo(vimeo) => state.render_vimeo(vimeo),
-            PartialEmbedHost::GoogleSheet(google_sheet) => state.render_google_sheet(google_sheet),
+            PartialEmbedHost::Youtube(youtube) => state.render_youtube_input(youtube, wrapper),
+            PartialEmbedHost::Vimeo(vimeo) => state.render_vimeo_input(vimeo, wrapper),
+            PartialEmbedHost::GoogleSheet(google_sheet) => state.render_google_sheet_input(google_sheet, wrapper),
             PartialEmbedHost::Edpuzzle(_) => todo!(),
             PartialEmbedHost::Puzzel(_) => todo!(),
-            PartialEmbedHost::Quizlet(quizlet) => state.render_quizlet(quizlet),
-            PartialEmbedHost::Thinglink(thinglink) => state.render_thinglink(thinglink),
-            PartialEmbedHost::Sutori(sutori) => state.render_sutori(sutori),
+            PartialEmbedHost::Quizlet(quizlet) => state.render_quizlet_input(quizlet, wrapper),
+            PartialEmbedHost::Thinglink(thinglink) => state.render_thinglink_input(thinglink, wrapper),
+            PartialEmbedHost::Sutori(sutori) => state.render_sutori_input(sutori, wrapper),
+        }
+    }
+
+    fn render_host_specific_options(self: &Rc<Self>, host: &PartialEmbedHost) -> Option<Dom> {
+        let state = self;
+        match &host {
+            PartialEmbedHost::Youtube(youtube) => Some(state.render_youtube_specific_options(youtube)),
+            _ => None,
         }
     }
 }
@@ -137,8 +205,8 @@ fn partial_to_type(partial: &PartialEmbedHost) -> EmbedHostType {
         PartialEmbedHost::Youtube(_) => EmbedHostType::Youtube,
         PartialEmbedHost::Vimeo(_) => EmbedHostType::Vimeo,
         PartialEmbedHost::GoogleSheet(_) => EmbedHostType::GoogleSheet,
-        PartialEmbedHost::Edpuzzle(_) => EmbedHostType::Edpuzzle,
-        PartialEmbedHost::Puzzel(_) => EmbedHostType::Puzzel,
+        PartialEmbedHost::Edpuzzle(_) => todo!(),
+        PartialEmbedHost::Puzzel(_) => todo!(),
         PartialEmbedHost::Quizlet(_) => EmbedHostType::Quizlet,
         PartialEmbedHost::Thinglink(_) => EmbedHostType::Thinglink,
         PartialEmbedHost::Sutori(_) => EmbedHostType::Sutori,
@@ -149,8 +217,8 @@ fn type_to_partial(partial: &EmbedHostType) -> PartialEmbedHost {
         EmbedHostType::Youtube => PartialEmbedHost::Youtube(Default::default()),
         EmbedHostType::Vimeo => PartialEmbedHost::Vimeo(Default::default()),
         EmbedHostType::GoogleSheet => PartialEmbedHost::GoogleSheet(Default::default()),
-        EmbedHostType::Edpuzzle => PartialEmbedHost::Edpuzzle(Default::default()),
-        EmbedHostType::Puzzel => PartialEmbedHost::Puzzel(Default::default()),
+        // EmbedHostType::Edpuzzle => PartialEmbedHost::Edpuzzle(Default::default()),
+        // EmbedHostType::Puzzel => PartialEmbedHost::Puzzel(Default::default()),
         EmbedHostType::Quizlet => PartialEmbedHost::Quizlet(Default::default()),
         EmbedHostType::Thinglink => PartialEmbedHost::Thinglink(Default::default()),
         EmbedHostType::Sutori => PartialEmbedHost::Sutori(Default::default()),

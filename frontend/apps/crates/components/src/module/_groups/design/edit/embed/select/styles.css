@@ -1,0 +1,52 @@
+.main {
+    display: grid;
+    row-gap: 38px;
+}
+.options-wrapper {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 56px);
+    grid-auto-rows: 82px;
+    justify-content: center;
+    column-gap: 48px;
+    row-gap: 24px;
+}
+label {
+    display: grid;
+    gap: 5px;
+    cursor: pointer;
+    position: relative;
+}
+label img-ui {
+    background-color: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    width: 56px;
+    height: 56px;
+}
+label p {
+    font-size: 13px;
+    color: var(--dark-gray-6);
+    margin: 0;
+    /* translate: calc(50% + -56px) 0; */
+    white-space: nowrap;
+    position: absolute;
+    top: 58px;
+    left: 50%;
+    translate: -50%;
+}
+label input {
+    display: none;
+}
+
+.host {
+    display: grid;
+    justify-items: start;
+}
+.host img-ui {
+    height: 48px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.host textarea {
+    height: 138px;
+}

@@ -6,6 +6,7 @@ use components::{
 };
 use dominator::{clone, html, Dom};
 use futures_signals::{map_ref, signal::SignalExt};
+use utils::component::Component;
 use std::rc::Rc;
 
 pub fn render(state: Rc<Step2>) -> Dom {

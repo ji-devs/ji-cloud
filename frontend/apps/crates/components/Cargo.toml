@@ -43,6 +43,7 @@ gloo-timers = { workspace = true }
 gloo-utils = { workspace = true }
 rgb = { workspace = true }
 regex = { workspace = true }
+const_format = { workspace = true }
 
 [features]
 quiet = ["utils/quiet"]
