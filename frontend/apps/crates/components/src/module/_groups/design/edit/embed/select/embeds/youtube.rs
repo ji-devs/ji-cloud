@@ -1,4 +1,4 @@
-use crate::{stickers::embed::types::{ParseUrlExt, PartialYoutubeEmbed}};
+use crate::stickers::embed::types::{ParseUrlExt, PartialYoutubeEmbed};
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::module::body::_groups::design::YoutubeUrl;
@@ -9,7 +9,11 @@ use web_sys::{HtmlElement, HtmlTextAreaElement};
 use super::super::{actions, EmbedSelect};
 
 impl EmbedSelect {
-    pub fn render_youtube_input(self: &Rc<Self>, youtube: &Rc<PartialYoutubeEmbed>, wrapper: HtmlElement) -> Dom {
+    pub fn render_youtube_input(
+        self: &Rc<Self>,
+        youtube: &Rc<PartialYoutubeEmbed>,
+        wrapper: HtmlElement,
+    ) -> Dom {
         let state = self;
         html!("textarea" => HtmlTextAreaElement, {
             .prop("value", {
@@ -37,7 +41,10 @@ impl EmbedSelect {
         })
     }
 
-    pub fn render_youtube_specific_options(self: &Rc<Self>, youtube: &Rc<PartialYoutubeEmbed>) -> Dom {
+    pub fn render_youtube_specific_options(
+        self: &Rc<Self>,
+        youtube: &Rc<PartialYoutubeEmbed>,
+    ) -> Dom {
         let state = self;
         html!("div", {
             .child_signal(youtube.url.signal_ref(clone!(state, youtube => move |youtube_url| {

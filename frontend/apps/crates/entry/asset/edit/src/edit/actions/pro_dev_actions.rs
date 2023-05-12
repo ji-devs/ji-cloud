@@ -1,11 +1,8 @@
 use shared::{
     api::endpoints::{self},
-    domain::pro_dev::{
-        unit::{GetProDevUnitDraftPath, ProDevUnit, ProDevUnitId},
-        ProDevGetDraftPath, ProDevId, ProDevResponse,
-    },
+    domain::pro_dev::{ProDevGetDraftPath, ProDevId, ProDevResponse},
 };
-use utils::{prelude::ApiEndpointExt, unwrap::UnwrapJiExt};
+use utils::prelude::ApiEndpointExt;
 
 use crate::edit::{sidebar::SidebarSpot, AssetEditState};
 
@@ -33,13 +30,4 @@ impl AssetEditState {
             spots.push_cloned(item);
         }
     }
-}
-
-async fn get_unit(pro_dev_id: &ProDevId, unit_id: &ProDevUnitId) -> ProDevUnit {
-    endpoints::pro_dev::unit::GetDraft::api_with_auth(
-        GetProDevUnitDraftPath(pro_dev_id.clone(), unit_id.clone()),
-        None,
-    )
-    .await
-    .unwrap_ji()
 }

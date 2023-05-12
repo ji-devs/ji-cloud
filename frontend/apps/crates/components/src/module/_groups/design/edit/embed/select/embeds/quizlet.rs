@@ -8,7 +8,11 @@ use web_sys::{HtmlElement, HtmlTextAreaElement};
 use super::super::{actions, EmbedSelect};
 
 impl EmbedSelect {
-    pub fn render_quizlet_input(self: &Rc<Self>, quizlet: &Rc<PartialQuizletEmbed>, wrapper: HtmlElement) -> Dom {
+    pub fn render_quizlet_input(
+        self: &Rc<Self>,
+        quizlet: &Rc<PartialQuizletEmbed>,
+        wrapper: HtmlElement,
+    ) -> Dom {
         let state = self;
         html!("textarea" => HtmlTextAreaElement, {
             .prop("value", {
