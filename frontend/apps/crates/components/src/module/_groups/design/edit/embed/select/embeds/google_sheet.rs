@@ -11,7 +11,7 @@ impl EmbedSelect {
     pub fn render_google_sheet_input(
         self: &Rc<Self>,
         google_sheet: &Rc<PartialGoogleSheetsEmbed>,
-        wrapper: HtmlElement
+        wrapper: HtmlElement,
     ) -> Dom {
         let state = self;
         html!("textarea" => HtmlTextAreaElement, {

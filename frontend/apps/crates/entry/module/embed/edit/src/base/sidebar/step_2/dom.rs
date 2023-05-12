@@ -6,8 +6,8 @@ use components::{
 };
 use dominator::{clone, html, Dom};
 use futures_signals::{map_ref, signal::SignalExt};
-use utils::component::Component;
 use std::rc::Rc;
+use utils::component::Component;
 
 pub fn render(state: Rc<Step2>) -> Dom {
     let is_empty = map_ref! {

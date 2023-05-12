@@ -8,7 +8,11 @@ use web_sys::{HtmlElement, HtmlTextAreaElement};
 use super::super::{actions, EmbedSelect};
 
 impl EmbedSelect {
-    pub fn render_sutori_input(self: &Rc<Self>, sutori: &Rc<PartialSutoriEmbed>, wrapper: HtmlElement) -> Dom {
+    pub fn render_sutori_input(
+        self: &Rc<Self>,
+        sutori: &Rc<PartialSutoriEmbed>,
+        wrapper: HtmlElement,
+    ) -> Dom {
         let state = self;
         html!("textarea" => HtmlTextAreaElement, {
             .prop("value", {

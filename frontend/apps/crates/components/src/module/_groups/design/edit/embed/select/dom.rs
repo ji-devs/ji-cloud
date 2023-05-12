@@ -2,10 +2,10 @@ use std::rc::Rc;
 
 use crate::stickers::embed::types::PartialEmbedHost;
 use const_format::formatcp;
-use dominator::{clone, html, Dom, with_node, DomBuilder};
+use dominator::{clone, html, with_node, Dom, DomBuilder};
 use futures_signals::signal::SignalExt;
 use itertools::Itertools;
-use utils::{events, component::Component};
+use utils::{component::Component, events};
 use web_sys::{HtmlElement, ShadowRoot};
 
 use super::{EmbedHostType, EmbedSelect};
@@ -182,11 +182,15 @@ impl EmbedSelect {
         match &host {
             PartialEmbedHost::Youtube(youtube) => state.render_youtube_input(youtube, wrapper),
             PartialEmbedHost::Vimeo(vimeo) => state.render_vimeo_input(vimeo, wrapper),
-            PartialEmbedHost::GoogleSheet(google_sheet) => state.render_google_sheet_input(google_sheet, wrapper),
+            PartialEmbedHost::GoogleSheet(google_sheet) => {
+                state.render_google_sheet_input(google_sheet, wrapper)
+            }
             PartialEmbedHost::Edpuzzle(_) => todo!(),
             PartialEmbedHost::Puzzel(_) => todo!(),
             PartialEmbedHost::Quizlet(quizlet) => state.render_quizlet_input(quizlet, wrapper),
-            PartialEmbedHost::Thinglink(thinglink) => state.render_thinglink_input(thinglink, wrapper),
+            PartialEmbedHost::Thinglink(thinglink) => {
+                state.render_thinglink_input(thinglink, wrapper)
+            }
             PartialEmbedHost::Sutori(sutori) => state.render_sutori_input(sutori, wrapper),
         }
     }
@@ -194,7 +198,9 @@ impl EmbedSelect {
     fn render_host_specific_options(self: &Rc<Self>, host: &PartialEmbedHost) -> Option<Dom> {
         let state = self;
         match &host {
-            PartialEmbedHost::Youtube(youtube) => Some(state.render_youtube_specific_options(youtube)),
+            PartialEmbedHost::Youtube(youtube) => {
+                Some(state.render_youtube_specific_options(youtube))
+            }
             _ => None,
         }
     }
