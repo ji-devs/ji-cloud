@@ -20,7 +20,9 @@ impl AssetEditState {
         )];
 
         for unit in &pro_dev.pro_dev_data.units {
-            let unit = get_unit(&pro_dev.id, &unit.id).await;
+            // let unit = get_unit(&pro_dev.id, &unit.id).await;
+
+            let unit = unit.clone();
 
             items.push(SidebarSpot::new_pro_dev_unit(unit));
         }
