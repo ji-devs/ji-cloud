@@ -411,7 +411,7 @@ impl TryFrom<stripe::Subscription> for UpdateSubscriptionRecord {
 }
 
 /// The limit of how many accounts can be associated with the subscription. [None] means unlimited.
-#[derive(Debug, Serialize, Deserialize, Clone, Copy, Eq, PartialEq, Hash)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, Eq, PartialEq, Hash, Ord, PartialOrd)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type), sqlx(transparent))]
 pub struct AccountLimit(i64);
 
