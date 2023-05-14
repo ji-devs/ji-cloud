@@ -14,11 +14,13 @@ use shared::{
     },
 };
 use utils::{
+    editable_asset::EditableJig,
     prelude::ApiEndpointExt,
     routes::{AdminJigCurationRoute, AdminRoute, Route},
+    unwrap::UnwrapJiExt,
 };
 
-use super::{EditableJig, FetchMode, JigCuration};
+use super::{FetchMode, JigCuration};
 
 impl JigCuration {
     pub fn load_data(self: &Rc<Self>) {
@@ -134,6 +136,18 @@ impl JigCuration {
                 todo!()
             }
         }
+    }
+
+    pub fn save_and_publish(self: &Rc<Self>, jig: &Rc<EditableJig>) {
+        self.loader.load(clone!(jig => async move {
+            let (a, b) = join!(
+                jig.save_draft(),
+                jig.save_admin_data(),
+            );
+            a.unwrap_ji();
+            b.unwrap_ji();
+            jig.publish().await.unwrap_ji();
+        }))
     }
 }
 

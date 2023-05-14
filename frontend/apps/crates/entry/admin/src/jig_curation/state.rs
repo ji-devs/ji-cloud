@@ -6,9 +6,7 @@ use shared::domain::{
     asset::OrderBy,
     meta::{Affiliation, AgeRange},
 };
-use utils::routes::AdminJigCurationRoute;
-
-use super::EditableJig;
+use utils::{editable_asset::EditableJig, routes::AdminJigCurationRoute};
 
 pub struct JigCuration {
     pub route: Mutable<AdminJigCurationRoute>,

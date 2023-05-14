@@ -4,7 +4,7 @@ use components::{
     player_popup::{PlayerPopup, PreviewPopupCallbacks},
 };
 use dominator::{class, clone, html, pseudo, with_node, Dom};
-use futures_signals::signal::SignalExt;
+use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
 use shared::domain::{asset::DraftOrLive, jig::JigRating};
 use std::rc::Rc;
 use utils::{
@@ -21,7 +21,7 @@ impl JigDetails {
         let state = self;
         html!("admin-jig-details", {
             .prop("slot", "jig-details")
-            .children(state.jig.modules.iter().map(clone!(state => move |modules| {
+            .children_signal_vec(state.jig.modules.signal_vec_cloned().map(clone!(state => move |modules| {
                 html!("div", {
                     .style("display", "grid")
                     .style("display", "grid")
@@ -66,7 +66,7 @@ impl JigDetails {
             })))
             .child(html!("window-loader-block", {
                 .prop("slot", "loader")
-                .prop_signal("visible", state.jig.loader.is_loading())
+                .prop_signal("visible", state.loader.is_loading())
             }))
             .children(&mut [
                 html!("button-rect", {
@@ -110,7 +110,7 @@ impl JigDetails {
                             .prop("color", "blue")
                             .text("Save and republish")
                             .event(clone!(state => move |_: events::Click| {
-                                state.jig.save_and_publish();
+                                state.curation_state.save_and_publish(&state.jig);
                             }))
                         }),
                     ])
@@ -137,7 +137,7 @@ impl JigDetails {
                             .children(&mut [
                                 html!("input", {
                                     .prop("readOnly", true)
-                                    .prop("value", &state.jig.author_name)
+                                    .prop("value", &state.jig.author_name.clone().unwrap_or_default())
                                 }),
                             ])
                         }),
@@ -178,7 +178,7 @@ impl JigDetails {
             .child(
                 ModuleThumbnail::new(
                     state.jig_id.into(),
-                    state.jig.modules.get(0).cloned(),
+                    state.jig.modules.lock_ref().get(0).cloned(),
                     ThumbnailFallback::Asset,
                     DraftOrLive::Live,
                 ).render(Some("player"))

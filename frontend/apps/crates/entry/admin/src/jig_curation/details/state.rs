@@ -2,8 +2,9 @@ use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::jig::JigId;
 use std::rc::Rc;
+use utils::editable_asset::EditableJig;
 
-use crate::jig_curation::{EditableJig, JigCuration};
+use crate::jig_curation::JigCuration;
 
 pub struct JigDetails {
     pub jig_id: JigId,

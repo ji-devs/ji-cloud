@@ -1,5 +1,3 @@
-use crate::jig_curation::EditableJig;
-
 use super::state::*;
 use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
 use convert_case::{Case, Casing};
@@ -15,7 +13,10 @@ use shared::domain::{
     meta::{AffiliationId, AgeRangeId},
 };
 use std::rc::Rc;
-use utils::{events, languages::Language, routes::AdminJigCurationRoute, unwrap::UnwrapJiExt};
+use utils::{
+    editable_asset::EditableJig, events, languages::Language, routes::AdminJigCurationRoute,
+    unwrap::UnwrapJiExt,
+};
 use web_sys::HtmlSelectElement;
 
 impl JigTable {
@@ -119,16 +120,19 @@ impl JigTable {
                         .style("grid-template-columns", "repeat(3, 100px)")
                         .style("align-items", "start")
                         .style("padding", "0")
-                        .children((0..3).filter_map(|i| {
-                            jig.modules.get(i).map(|module| {
-                                ModuleThumbnail::new(
-                                    jig.id.into(),
-                                    Some(module.clone()),
-                                    ThumbnailFallback::Asset,
-                                    DraftOrLive::Live,
-                                ).render(None)
-                            })
-                        }))
+                        .apply(|dom| {
+                            let modules = jig.modules.lock_ref();
+                            dom.children((0..3).filter_map(|i| {
+                                modules.get(i).map(|module| {
+                                    ModuleThumbnail::new(
+                                        jig.id.into(),
+                                        Some(module.clone()),
+                                        ThumbnailFallback::Asset,
+                                        DraftOrLive::Live,
+                                    ).render(None)
+                                })
+                            }))
+                        })
                     }))
                     .children(&mut [
                         html!("a", {
@@ -160,16 +164,16 @@ impl JigTable {
                                         false => "Visible",
                                     }
                                 }))
-                                .event(clone!(jig => move |_: events::Click| {
+                                .event(clone!(state, jig => move |_: events::Click| {
                                     let mut blocked = jig.blocked.lock_mut();
                                     *blocked = !*blocked;
 
-                                    jig.save_and_publish();
+                                    state.curation_state.save_and_publish(&jig);
                                 }))
                             }))
                         }),
                         html!("span", {
-                            .text(&jig.author_name)
+                            .text(&jig.author_name.clone().unwrap_or_default())
                         }),
                         html!("star-rating", {
                             .prop_signal("rating", jig.rating.signal().map(|rating| {
@@ -178,13 +182,13 @@ impl JigTable {
                                     None => 0,
                                 }
                             }))
-                            .event(clone!(jig => move |e: events::CustomRatingChange| {
+                            .event(clone!(state, jig => move |e: events::CustomRatingChange| {
                                 let rating = e.rating();
                                 let rating = rating.map(|rating| {
                                     JigRating::try_from(rating).unwrap_ji()
                                 });
                                 jig.rating.set(rating);
-                                jig.save_and_publish();
+                                state.curation_state.save_and_publish(&jig);
                             }))
                         }),
                         html!("label", {
@@ -204,12 +208,12 @@ impl JigTable {
                                         //     .text(&PrivacyLevel::Private.as_str().to_case(Case::Title))
                                         // }),
                                     ])
-                                    .event(clone!(jig, select => move |_: events::Change| {
+                                    .event(clone!(state, jig, select => move |_: events::Change| {
                                         let value = select.value().to_case(Case::Lower);
                                         let value = value.parse().unwrap_ji();
                                         jig.privacy_level.set(value);
 
-                                        jig.save_and_publish();
+                                        state.curation_state.save_and_publish(&jig);
                                     }))
                                 })
                             }))
@@ -218,10 +222,12 @@ impl JigTable {
                             .text(&jig.created_at.format("%b %e, %Y").to_string())
                         }),
                         html!("span", {
-                            .text(&match jig.published_at {
-                                Some(published_at) => published_at.format("%b %e, %Y").to_string(),
-                                None => "".to_string()
-                            })
+                            .text_signal(jig.published_at.signal().map(|published_at| {
+                                match published_at {
+                                    Some(published_at) => published_at.format("%b %e, %Y").to_string(),
+                                    None => "".to_string()
+                                }
+                            }))
                         }),
                         html!("span", {
                             .text_signal(jig.language.signal_cloned().map(|language| {
