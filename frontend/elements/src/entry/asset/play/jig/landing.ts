@@ -13,6 +13,7 @@ export class _ extends LitElement {
                     2) pause overlay
                     3) controls
                     4) dialog
+                    5) rotate-dialog
                 */
                 :host {
                     display: block;
@@ -185,6 +186,65 @@ export class _ extends LitElement {
                 ::slotted(dialog-overlay) {
                     z-index: 4;
                 }
+
+                .rotate-dialog-wrapper {
+                    background-color: #c2deff9e;
+                    position: fixed;
+                    z-index: 5;
+                    height: 100dvh;
+                    width: 100dvw;
+                    place-content: center;
+                    display: none;
+                }
+                @media (max-width: 1024px) and (orientation: portrait) {
+                    :host(:not([hideRotatePopup])) .rotate-dialog-wrapper {
+                        display: grid;
+                    }
+                }
+                .rotate-dialog {
+                    width: 620px;
+                    height: 511px;
+                    max-width: 90vw;
+                    max-height: 90vh;
+                    border: none;
+                    border-radius: 16px;
+                    display: grid;
+                    justify-items: center;
+                    align-content: center;
+                    background-color: #ffffff;
+                    position: relative;
+                    text-align: center;
+                    padding: 12px;
+                }
+                .rotate-dialog .close {
+                    position: absolute;
+                    right: 12px;
+                    top: 12px;
+                    width: 32px;
+                    height: 32px;
+                    display: grid;
+                    place-content: center;
+                }
+                .rotate-dialog:focus {
+                    outline: none;
+                }
+                .rotate-dialog img-ui {
+                    display: inline-block;
+                    width: 232px;
+                    margin-bottom: 52px;
+                }
+                .rotate-dialog h2 {
+                    margin: 0;
+                    font-size: 20px;
+                    font-weight: normal;
+                    color: var(--dark-gray-6);
+                }
+                .rotate-dialog h1 {
+                    margin: 0;
+                    font-size: 32px;
+                    font-weight: bold;
+                    color: var(--dark-blue-5);
+                }
             `,
         ];
     }
@@ -203,6 +263,9 @@ export class _ extends LitElement {
 
     @property({ type: Boolean, reflect: true })
     menuOpen: boolean = false;
+
+    @property({ type: Boolean, reflect: true })
+    hideRotatePopup: boolean = false;
 
     render() {
         return html`
@@ -249,6 +312,14 @@ export class _ extends LitElement {
                     </div>
                 </div>
                 <slot name="dialog"></slot>
+                <div class="rotate-dialog-wrapper">
+                    <div class="rotate-dialog">
+                        <fa-button class="close" icon="fa-light fa-xmark" @click=${() => this.hideRotatePopup = true}></fa-button>
+                        <img-ui path="jig/play/rotate-illustration.webp"></img-ui>
+                        <h2>Oh no! We can’t fit  everything on your screen.</h2>
+                        <h1>Please rotate your device</h1>
+                    </div>
+                </div>
             </main>
         `;
     }
