@@ -1,14 +1,9 @@
-use dominator::{clone, html, Dom};
-use futures_signals::signal_vec::SignalVecExt;
+use dominator::{html, Dom};
 
 use super::state::*;
 use components::{
-    backgrounds::dom::render_backgrounds,
-    module::_common::edit::prelude::*,
-    stickers::{
-        embed::dom::render_sticker_embed, sprite::dom::render_sticker_sprite, state::Sticker,
-        text::dom::render_sticker_text,
-    },
+    backgrounds::dom::render_backgrounds, module::_common::edit::prelude::*,
+    stickers::dom::render_stickers,
 };
 use std::rc::Rc;
 
@@ -25,18 +20,7 @@ impl DomRenderable for Main {
                 .style("height", "100%")
                 .style("width", "100%")
             }))
-            // rendering stickers manually so that embed options can be passed in
-            .children_signal_vec(state.base.stickers.list
-                .signal_vec_cloned()
-                .enumerate()
-                .map(clone!(state => move |(index, sticker)| {
-                    match sticker.as_ref() {
-                        Sticker::Sprite(sprite) => render_sticker_sprite(state.base.stickers.clone(), index, sprite.clone(), None),
-                        Sticker::Text(text) => render_sticker_text(state.base.stickers.clone(), index, text.clone(), None),
-                        Sticker::Embed(embed) => render_sticker_embed(state.base.stickers.clone(), index, embed.clone(), Some(Default::default())),
-                    }
-                }))
-            )
+            .child(render_stickers(state.base.stickers.clone()))
         })
     }
 }
