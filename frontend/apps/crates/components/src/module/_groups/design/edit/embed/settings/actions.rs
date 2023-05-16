@@ -7,20 +7,17 @@ use super::state::EmbedSettings;
 
 impl EmbedSettings {
     pub fn toggle_captions(&self, youtube: &Rc<YoutubeEmbed>) {
-        let captions = youtube.captions.get();
-        youtube.captions.set(captions);
+        youtube.captions.replace_with(|c| !*c);
         self.stickers.call_change();
     }
 
     pub fn toggle_muted(&self, youtube: &Rc<YoutubeEmbed>) {
-        let muted = youtube.muted.get();
-        youtube.muted.set(muted);
+        youtube.muted.replace_with(|m| !*m);
         self.stickers.call_change();
     }
 
     pub fn toggle_autoplay(&self, youtube: &Rc<YoutubeEmbed>) {
-        let autoplay = youtube.autoplay.get();
-        youtube.autoplay.set(autoplay);
+        youtube.autoplay.replace_with(|a: &mut bool| !*a);
         self.stickers.call_change();
     }
 
