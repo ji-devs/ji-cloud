@@ -25,7 +25,7 @@ impl AssetEditState {
         }
 
         // add empty at the end
-        items.push(SidebarSpot::new_empty(&course.id.into()));
+        items.push(SidebarSpot::new_empty(&course.id.into(), None));
 
         let mut spots = self.sidebar_spots.lock_mut();
         for item in items {

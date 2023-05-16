@@ -39,7 +39,7 @@ impl AssetEditState {
         };
 
         // add empty at the end
-        modules.push(SidebarSpot::new_empty(&jig.id.into()));
+        modules.push(SidebarSpot::new_empty(&jig.id.into(), None));
 
         let mut spots = self.sidebar_spots.lock_mut();
         for module in modules {

@@ -18,6 +18,7 @@ pub struct AssetEditState {
     pub sidebar_spots: MutableVec<Rc<SidebarSpot>>,
     pub route: Mutable<AssetEditRoute>,
     pub show_onboarding: Mutable<bool>,
+    pub target_index: Mutable<Option<usize>>,
     pub(super) play_jig: Mutable<Option<AssetPlayerOptions>>,
 }
 
@@ -35,6 +36,7 @@ impl AssetEditState {
             sidebar_spots: Default::default(),
             route: Mutable::new(route),
             play_jig: Mutable::new(None),
+            target_index: Mutable::new(None),
             show_onboarding: Mutable::new(show_onboarding),
         })
     }

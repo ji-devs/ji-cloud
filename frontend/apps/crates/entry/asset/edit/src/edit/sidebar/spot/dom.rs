@@ -271,6 +271,8 @@ impl SpotState {
                                     if idx == state.index {
                                         // Make sure that the module window is visible to the
                                         // teacher.
+
+                                        log::warn!("module");
                                         elem.scroll_into_view_with_scroll_into_view_options(ScrollIntoViewOptions::new().behavior(ScrollBehavior::Smooth));
                                         Some(html!("empty-fragment", {
                                             .apply(OverlayHandle::lifecycle(clone!(state, elem => move || {
@@ -294,6 +296,7 @@ impl SpotState {
                                     }
                                 },
                                 Some(ModuleHighlight::Unit(idx)) => {
+                                    log::warn!("unit");
                                     if idx == state.index {
                                         elem.scroll_into_view_with_scroll_into_view_options(ScrollIntoViewOptions::new().behavior(ScrollBehavior::Smooth));
                                         Some(html!("empty-fragment", {

@@ -37,7 +37,7 @@ impl UnitEditor {
         };
     }
 
-    pub async fn create_async(self: &Rc<Self>) {
+    pub async fn create_async(self: &Rc<Self>) -> Result<(), String> {
         let state = Rc::clone(&self);
 
         let body = ProDevUnitCreateRequest {
@@ -46,22 +46,95 @@ impl UnitEditor {
             value: ProDevUnitValue::try_from(self.value.lock_ref().clone()).unwrap_ji(),
         };
 
-        let _ = unit::Create::api_with_auth(
+        let res = unit::Create::api_with_auth(
             CreateProDevUnitPath(state.asset_edit_state.asset_id.unwrap_pro_dev().clone()),
             Some(body),
         )
         .await;
+
+        //
+        // Update index for ProDevUnit after created
+        //
+        match res {
+            Ok(resp) => {
+                let id = resp.id;
+
+                let target_index = state
+                    .asset_edit_state
+                    .target_index
+                    .lock_ref()
+                    .clone()
+                    .map(|x| x as u16);
+
+                let body = ProDevUnitUpdateRequest {
+                    display_name: None,
+                    description: None,
+                    value: None,
+                    index: target_index,
+                };
+
+                let _ = unit::Update::api_with_auth_empty(
+                    UpdateProDevUnitPath(
+                        state.asset_edit_state.asset_id.unwrap_pro_dev().clone(),
+                        id,
+                    ),
+                    Some(body),
+                )
+                .await;
+
+                state.asset_edit_state.route.set(AssetEditRoute::ProDev(
+                    state.asset_edit_state.asset_id.unwrap_pro_dev().clone(),
+                    ProDevEditRoute::Unit(Some(id)),
+                ));
+
+                Ok(())
+            }
+            Err(e) => {
+                log::error!("create_async(): create failed: {}", e);
+                Err(format!("create failed: {}", e))
+            }
+        }
     }
 
     pub fn create_unit(self: &Rc<Self>) {
         let state = self;
         state.loader.load(clone!(state => async move {
-            state.create_async().await;
-            state.asset_edit_state.route.set(AssetEditRoute::ProDev(
-                state.asset_edit_state.asset_id.unwrap_pro_dev().clone(),
-                ProDevEditRoute::Unit(None),
-            ));
+            if let Err(msg) = state.create_async().await {
+                log::error!("{}", msg);
+            } else {
+                // deactivate unit submit button request has completed
+                state.changed.set(false);
+                let mut units = state.editable_pro_dev.units.lock_mut();
+                let mut spots = state.asset_edit_state.sidebar_spots.lock_mut();
+
+                let unit_index = state.asset_edit_state.target_index.get();
+
+                if let Some(unit_index) = unit_index {
+                    let mut unit = units.remove(unit_index);
+
+                    unit.display_name = state.display_name.get_cloned();
+                    unit.description = state.description.get_cloned();
+                    unit.value = ProDevUnitValue::try_from(state.value.get_cloned()).unwrap_ji();
+
+                    // replace sidebar spot with new data
+                    units.insert_cloned(unit_index, unit.clone());
+
+                    let spot_index = unit_index + 1;
+
+                    // replace sidebar spot with new data
+                    spots.remove(spot_index);
+
+                    spots.insert_cloned(spot_index, SidebarSpot:: new_pro_dev_unit(unit));
+
+                    state.asset_edit_state.route.set(AssetEditRoute::ProDev(
+                        state.asset_edit_state.asset_id.unwrap_pro_dev().clone(),
+                        ProDevEditRoute::Unit(None),
+                    ));
+                }
+            }
         }));
+
+        log::info!("Success");
     }
 
     pub async fn update_async(&self) -> Result<(), String> {
@@ -128,7 +201,7 @@ impl UnitEditor {
                     // replace sidebar spot with new data
                     spots.remove(spot_index);
 
-                    spots.insert_cloned(spot_index, SidebarSpot::new_pro_dev_unit(unit));
+                    spots.insert_cloned(spot_index, SidebarSpot:: new_pro_dev_unit(unit));
                 }
 
 

@@ -34,7 +34,10 @@ pub fn add_empty_module_after(state: Rc<SpotState>) {
         .lock_mut()
         .insert_cloned(
             state.index + 1,
-            SidebarSpot::new_empty(&state.sidebar.asset_edit_state.asset_id),
+            SidebarSpot::new_empty(
+                &state.sidebar.asset_edit_state.asset_id,
+                Some(state.index + 1),
+            ),
         );
 
     match state.sidebar.asset_edit_state.asset_id {
@@ -50,7 +53,13 @@ pub fn add_empty_module_after(state: Rc<SpotState>) {
             state
                 .sidebar
                 .asset_edit_state
-                .set_route_pro_dev(ProDevEditRoute::Landing);
+                .target_index
+                .set(Some(state.index));
+
+            state
+                .sidebar
+                .asset_edit_state
+                .set_route_pro_dev(ProDevEditRoute::Unit(None));
         }
     }
 }
@@ -163,6 +172,8 @@ pub fn assign_to_empty_spot(state: &Rc<SpotState>, data: String) {
                 // add the new one. This is slightly less efficient because it fires signals
                 // for the entire list of modules, however, it is necessary so that the modules
                 // before and after this one can have their views updated.
+                log::info!("index: {:?}", state.index);
+
                 let mut modules = state.sidebar.asset_edit_state.sidebar_spots.lock_mut();
                 modules.remove(state.index);
                 modules.insert_cloned(state.index, module);
@@ -181,7 +192,7 @@ pub fn assign_to_empty_spot(state: &Rc<SpotState>, data: String) {
 
                 // if this is the empty module at the end
                 if !placeholder_exists && !state.sidebar.asset_edit_state.asset_id.is_pro_dev_id() {
-                    modules.push_cloned(SidebarSpot::new_empty(&state.sidebar.asset_edit_state.asset_id));
+                    modules.push_cloned(SidebarSpot::new_empty(&state.sidebar.asset_edit_state.asset_id, None));
                 }
 
                 // jigs are already saved in `assign_module_to_empty_spot`,
