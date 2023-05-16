@@ -113,12 +113,14 @@ impl ParseUrlExt for VimeoUrl {
 }
 
 const ANY_VIMEO_DOMAIN: &str = "youtube.com";
-const REGULAR_URL_BASE: &str = "https://www.vimeo.com/";
+const REGULAR_URL_BASE: &str = "https://vimeo.com/";
+const REGULAR_URL_WWW_BASE: &str = "https://www.vimeo.com/";
 const EMBED_IFRAME_BASE: &str = "<iframe ";
 const EMBED_URL_BASE: &str = "https://player.vimeo.com/video/";
 const ID_LENGTH: usize = 9;
 
 fn get_id_from_url(url: &str) -> anyhow::Result<&str> {
+    log::info!("{url}");
     let id;
     //when is_id passes all tests, this can be removed
     let mut check_extracted_id = true;
@@ -126,11 +128,12 @@ fn get_id_from_url(url: &str) -> anyhow::Result<&str> {
         return Ok(url);
     } else if url.starts_with(REGULAR_URL_BASE) {
         id = extract_id_regular(url);
+    } else if url.starts_with(REGULAR_URL_WWW_BASE) {
+        id = extract_id_www(url);
     } else if url.starts_with(EMBED_IFRAME_BASE) && url.len() >= EMBED_IFRAME_BASE.len() + ID_LENGTH
     {
         id = extract_id_iframe(url).context("")?;
     } else if url.starts_with(EMBED_URL_BASE) && url.len() >= EMBED_URL_BASE.len() + ID_LENGTH {
-        log::info!("herer");
         id = extract_id_iframe(url).context("")?;
     } else if url.contains(ANY_VIMEO_DOMAIN) {
         let url = match url.find("http") {
@@ -168,12 +171,17 @@ fn extract_any_v(url: &str) -> &str {
 
 fn extract_id_regular(url: &str) -> &str {
     let base_length = REGULAR_URL_BASE.len();
-    &url[base_length..(base_length + 11)]
+    &url[base_length..(base_length + ID_LENGTH)]
+}
+
+fn extract_id_www(url: &str) -> &str {
+    let base_length = REGULAR_URL_WWW_BASE.len();
+    &url[base_length..(base_length + ID_LENGTH)]
 }
 
 fn extract_id_iframe(code: &str) -> Option<&str> {
     let id_index = code.find(EMBED_URL_BASE).unwrap_ji() + EMBED_URL_BASE.len();
-    code.get(id_index..(id_index + 11))
+    code.get(id_index..(id_index + ID_LENGTH))
 }
 
 fn is_id(id: &str) -> bool {
