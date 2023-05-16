@@ -50,6 +50,8 @@ pub struct EditableJig {
     pub other_keywords: Mutable<String>,
     pub rating: Mutable<Option<JigRating>>,
     pub blocked: Mutable<bool>,
+    pub likes: Mutable<i64>,
+    pub plays: Mutable<i64>,
     pub author_name: Option<String>,
     pub created_at: DateTime<Utc>,
 }
@@ -82,6 +84,8 @@ impl From<JigResponse> for EditableJig {
             other_keywords: Mutable::new(jig.jig_data.other_keywords),
             rating: Mutable::new(jig.admin_data.rating),
             blocked: Mutable::new(jig.admin_data.blocked),
+            likes: Mutable::new(jig.likes),
+            plays: Mutable::new(jig.plays),
             author_name: jig.author_name,
             created_at: jig.jig_data.created_at,
         }
@@ -114,6 +118,8 @@ impl From<JigId> for EditableJig {
             other_keywords: Default::default(),
             rating: Default::default(),
             blocked: Default::default(),
+            likes: Default::default(),
+            plays: Default::default(),
             author_name: Default::default(),
             created_at: Default::default(),
         }
@@ -154,6 +160,8 @@ impl EditableJig {
             .set(jig.jig_data.default_player_settings.drag_assist);
         self.other_keywords.set(jig.jig_data.other_keywords);
         self.rating.set(jig.admin_data.rating);
+        self.likes.set(jig.likes);
+        self.plays.set(jig.plays);
         self.blocked.set(jig.admin_data.blocked);
     }
 
@@ -184,6 +192,8 @@ impl EditableJig {
             other_keywords: Mutable::new(self.other_keywords.get_cloned()),
             rating: Mutable::new(self.rating.get()),
             blocked: Mutable::new(self.blocked.get()),
+            likes: Mutable::new(self.likes.get()),
+            plays: Mutable::new(self.plays.get()),
             author_name: self.author_name.clone(),
             created_at: self.created_at,
         }

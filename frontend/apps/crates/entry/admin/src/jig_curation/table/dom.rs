@@ -175,6 +175,12 @@ impl JigTable {
                         html!("span", {
                             .text(&jig.author_name.clone().unwrap_or_default())
                         }),
+                        html!("span", {
+                            .text_signal(jig.plays.signal().map(|p| p.to_string()))
+                        }),
+                        html!("span", {
+                            .text_signal(jig.likes.signal().map(|l| l.to_string()))
+                        }),
                         html!("star-rating", {
                             .prop_signal("rating", jig.rating.signal().map(|rating| {
                                 match rating {

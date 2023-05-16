@@ -197,6 +197,12 @@ impl ResourceTable {
                                 None => "",
                             })
                         }),
+                        html!("span", {
+                            .text_signal(resource.views.signal().map(|v| v.to_string()))
+                        }),
+                        html!("span", {
+                            .text_signal(resource.likes.signal().map(|l| l.to_string()))
+                        }),
                         html!("star-rating", {
                             .prop_signal("rating", resource.rating.signal().map(|rating| {
                                 match rating {

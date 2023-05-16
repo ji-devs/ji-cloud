@@ -38,6 +38,8 @@ pub struct EditableResource {
     pub other_keywords: Mutable<String>,
     pub rating: Mutable<Option<ResourceRating>>,
     pub blocked: Mutable<bool>,
+    pub likes: Mutable<i64>,
+    pub views: Mutable<i64>,
     pub author_name: Option<String>,
     pub created_at: DateTime<Utc>,
 }
@@ -61,6 +63,8 @@ impl From<ResourceResponse> for EditableResource {
             other_keywords: Mutable::new(resource.resource_data.other_keywords),
             rating: Mutable::new(resource.admin_data.rating),
             blocked: Mutable::new(resource.admin_data.blocked),
+            likes: Mutable::new(resource.likes),
+            views: Mutable::new(resource.views),
             author_name: resource.author_name,
             created_at: resource.resource_data.created_at,
         }
@@ -84,6 +88,8 @@ impl From<ResourceId> for EditableResource {
             other_keywords: Default::default(),
             rating: Default::default(),
             blocked: Default::default(),
+            likes: Default::default(),
+            views: Default::default(),
             author_name: Default::default(),
             created_at: Default::default(),
         }
@@ -122,6 +128,8 @@ impl EditableResource {
         self.other_keywords
             .set(resource.resource_data.other_keywords);
         self.rating.set(resource.admin_data.rating);
+        self.likes.set(resource.likes);
+        self.views.set(resource.views);
         self.blocked.set(resource.admin_data.blocked);
     }
 
@@ -143,6 +151,8 @@ impl EditableResource {
             other_keywords: Mutable::new(self.other_keywords.get_cloned()),
             rating: Mutable::new(self.rating.get()),
             blocked: Mutable::new(self.blocked.get()),
+            likes: Mutable::new(self.likes.get()),
+            views: Mutable::new(self.views.get()),
             author_name: self.author_name.clone(),
             created_at: self.created_at,
         }

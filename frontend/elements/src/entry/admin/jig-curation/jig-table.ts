@@ -49,6 +49,8 @@ export class _ extends LitElement {
         "Jig Name",
         "Blocked",
         "Author",
+        "Plays",
+        "Likes",
         "Rating",
         "Privacy",
         // "Author's Badge",
