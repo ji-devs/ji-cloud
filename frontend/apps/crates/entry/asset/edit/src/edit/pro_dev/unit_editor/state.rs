@@ -122,7 +122,7 @@ impl UnitValue {
 
 impl Default for UnitValue {
     fn default() -> Self {
-        Self::Link(None)
+        Self::Video(None)
     }
 }
 
