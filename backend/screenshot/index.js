@@ -201,6 +201,9 @@ function doScreenshot(url) {
             req.continue();
           }
         });
+        if(url.startsWith("https://sandbox.")) {
+          await page.authenticate({'username':'jigzi', 'password': ''});
+        }
         await page.goto(url, { waitUntil: "networkidle0" });
         //removing this seems to be okay:
         //await page.waitFor(5000);
