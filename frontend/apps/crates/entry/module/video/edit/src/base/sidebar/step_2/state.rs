@@ -23,7 +23,7 @@ impl Step2 {
     pub fn new(sidebar: Rc<Sidebar>) -> Rc<Self> {
         let kind = match crate::debug::settings().content_tab {
             Some(kind) => kind,
-            None => MenuTabKind::Embed,
+            None => MenuTabKind::Video,
         };
 
         let tab = Mutable::new(Tab::new(sidebar.base.clone(), kind));
@@ -33,7 +33,7 @@ impl Step2 {
 
     pub fn next_kind(&self) -> Option<MenuTabKind> {
         match self.tab.get_cloned().kind() {
-            MenuTabKind::Embed => Some(MenuTabKind::Text),
+            MenuTabKind::Video => Some(MenuTabKind::Text),
             MenuTabKind::Text => Some(MenuTabKind::Image),
             _ => None,
         }
@@ -42,7 +42,7 @@ impl Step2 {
 
 #[derive(Clone)]
 pub enum Tab {
-    Embed,
+    Video,
     Text, // uses top-level state since it must be toggled from main too
     Image(Rc<ImageSearchState>),
 }
@@ -50,7 +50,7 @@ pub enum Tab {
 impl Tab {
     pub fn new(base: Rc<Base>, kind: MenuTabKind) -> Self {
         match kind {
-            MenuTabKind::Embed => Self::Embed,
+            MenuTabKind::Video => Self::Video,
             MenuTabKind::Text => Self::Text,
             MenuTabKind::Image => {
                 let opts = ImageSearchOptions {
@@ -75,7 +75,7 @@ impl Tab {
 
     pub fn kind(&self) -> MenuTabKind {
         match self {
-            Self::Embed => MenuTabKind::Embed,
+            Self::Video => MenuTabKind::Video,
             Self::Text => MenuTabKind::Text,
             Self::Image(_) => MenuTabKind::Image,
         }

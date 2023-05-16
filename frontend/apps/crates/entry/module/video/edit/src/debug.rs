@@ -94,7 +94,7 @@ impl DebugSettings {
             skip_save: true,
             skip_load_jig: true,
             bg_tab: Some(MenuTabKind::BackgroundImage),
-            content_tab: Some(MenuTabKind::Embed),
+            content_tab: Some(MenuTabKind::Video),
         }
     }
 }

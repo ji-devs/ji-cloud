@@ -44,7 +44,7 @@ pub fn render(state: Rc<Step2>) -> Dom {
             state.sidebar.tab_kind.set(Some(kind));
 
             state.sidebar.base.can_continue_next.set_neq(match kind {
-                MenuTabKind::Embed => !is_empty,
+                MenuTabKind::Video => !is_empty,
                 _ => true,
             });
 
@@ -53,14 +53,14 @@ pub fn render(state: Rc<Step2>) -> Dom {
         .child_signal(is_empty.map(clone!(state => move |is_empty| {
             Some(html!("menu-tabs", {
                 .children(&mut [
-                    render_tab(state.clone(), MenuTabKind::Embed, true),
+                    render_tab(state.clone(), MenuTabKind::Video, true),
                     render_tab(state.clone(), MenuTabKind::Text, !is_empty),
                     render_tab(state.clone(), MenuTabKind::Image, !is_empty),
                     html!("module-sidebar-body", {
                         .prop("slot", "body")
                         .child_signal(state.tab.signal_cloned().map(clone!(state => move |tab| {
                             match tab {
-                                Tab::Embed => {
+                                Tab::Video => {
                                     let base = &state.sidebar.base;
                                     Some(EmbedSelect::new(EmbedSelectList::video_only(), &base.stickers, base.embed.clone()).render())
                                 },
