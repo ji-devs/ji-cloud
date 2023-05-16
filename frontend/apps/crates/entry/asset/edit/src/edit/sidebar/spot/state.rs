@@ -89,7 +89,7 @@ impl SpotState {
                 },
                 SidebarSpotItem::ProDev(pro_dev_spot) => {
                     match pro_dev_spot {
-                        None => "empty",
+                        None => "unit",
                         Some(item) =>
                             match &**item {
                                 ProDevSpot::Cover(_) => "thumbnail",
@@ -132,16 +132,25 @@ impl SpotState {
                             AssetEditRoute::Jig(_, JigEditRoute::Module(module_id)) if module_id == &module.id
                         )
                     }
-                    SidebarSpotItem::ProDev(Some(unit)) => {
-                        let id = match &**unit {
-                            ProDevSpot::Cover(_) => None,
-                            ProDevSpot::Unit(unit) => Some(unit.id),
-                        };
-                        matches!(
-                            route,
-                            AssetEditRoute::ProDev(_, ProDevEditRoute::Unit(unit_id)) if unit_id == &id
-                        )
-                    }
+                    SidebarSpotItem::ProDev(unit) => {
+                            match unit {
+                                Some(unit) => {
+                                    let id = match &**unit {
+                                        ProDevSpot::Cover(_) => None,
+                                        ProDevSpot::Unit(unit) => Some(unit.id),
+                                    };
+
+                                    matches!(
+                                        route,
+                                        AssetEditRoute::ProDev(_, ProDevEditRoute::Unit(unit_id)) if unit_id == &id
+                                    )
+                                },
+                                None => {
+                                    // Handle the None case here.
+                                    false // for example, you might simply return false
+                                },
+                            }
+                        }
                     _ => {
                         false
                     }

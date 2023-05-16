@@ -102,11 +102,12 @@ impl Sidebar {
 #[derive(Clone, Debug)]
 pub struct SidebarSpot {
     pub item: SidebarSpotItem,
+    pub target_index: Mutable<Option<usize>>,
     pub is_incomplete: Mutable<bool>,
 }
 
 impl SidebarSpot {
-    pub fn new_empty(asset_id: &AssetId) -> Rc<Self> {
+    pub fn new_empty(asset_id: &AssetId, target_index: Option<usize>) -> Rc<Self> {
         let item = match asset_id {
             AssetId::JigId(_) => SidebarSpotItem::Jig(None),
             AssetId::CourseId(_) => SidebarSpotItem::Course(None),
@@ -115,6 +116,7 @@ impl SidebarSpot {
         };
         Rc::new(Self {
             item,
+            target_index: Mutable::new(target_index),
             is_incomplete: Mutable::new(false),
         })
     }
@@ -125,6 +127,7 @@ impl SidebarSpot {
                 Some(module) => !module.is_complete,
                 None => false,
             }),
+            target_index: Mutable::new(None),
             item: SidebarSpotItem::Jig(module.map(|module| Rc::new(module))),
         })
     }
@@ -132,6 +135,7 @@ impl SidebarSpot {
     pub fn new_course_cover(cover: LiteModule) -> Rc<Self> {
         Rc::new(Self {
             is_incomplete: Mutable::new(false),
+            target_index: Mutable::new(None),
             item: SidebarSpotItem::Course(Some(Rc::new(CourseSpot::Cover(cover)))),
         })
     }
@@ -139,6 +143,7 @@ impl SidebarSpot {
     pub fn new_course_item(jig: JigResponse) -> Rc<Self> {
         Rc::new(Self {
             is_incomplete: Mutable::new(false),
+            target_index: Mutable::new(None),
             item: SidebarSpotItem::Course(Some(Rc::new(CourseSpot::Item(jig)))),
         })
     }
@@ -146,6 +151,7 @@ impl SidebarSpot {
     pub fn new_pro_dev_cover(cover: LiteModule) -> Rc<Self> {
         Rc::new(Self {
             is_incomplete: Mutable::new(false),
+            target_index: Mutable::new(None),
             item: SidebarSpotItem::ProDev(Some(Rc::new(ProDevSpot::Cover(cover)))),
         })
     }
@@ -153,6 +159,7 @@ impl SidebarSpot {
     pub fn new_pro_dev_unit(unit: ProDevUnit) -> Rc<Self> {
         Rc::new(Self {
             is_incomplete: Mutable::new(false),
+            target_index: Mutable::new(None),
             item: SidebarSpotItem::ProDev(Some(Rc::new(ProDevSpot::Unit(unit)))),
         })
     }
