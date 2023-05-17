@@ -5,8 +5,8 @@ use dominator::clone;
 use shared::{
     api::endpoints::pro_dev::unit,
     domain::pro_dev::unit::{
-        CreateProDevUnitPath, ProDevUnitCreateRequest, ProDevUnitUpdateRequest, ProDevUnitValue,
-        UpdateProDevUnitPath,
+        CreateProDevUnitPath, ProDevUnit, ProDevUnitCreateRequest, ProDevUnitId,
+        ProDevUnitUpdateRequest, ProDevUnitValue, UpdateProDevUnitPath,
     },
 };
 use utils::{
@@ -37,7 +37,7 @@ impl UnitEditor {
         };
     }
 
-    pub async fn create_async(self: &Rc<Self>) -> Result<(), String> {
+    pub async fn create_async(self: &Rc<Self>) -> Result<ProDevUnitId, String> {
         let state = Rc::clone(&self);
 
         let body = ProDevUnitCreateRequest {
@@ -87,7 +87,7 @@ impl UnitEditor {
                     ProDevEditRoute::Unit(Some(id)),
                 ));
 
-                Ok(())
+                Ok(id)
             }
             Err(e) => {
                 log::error!("create_async(): create failed: {}", e);
@@ -99,42 +99,41 @@ impl UnitEditor {
     pub fn create_unit(self: &Rc<Self>) {
         let state = self;
         state.loader.load(clone!(state => async move {
-            if let Err(msg) = state.create_async().await {
-                log::error!("{}", msg);
-            } else {
-                // deactivate unit submit button request has completed
-                state.changed.set(false);
-                let mut units = state.editable_pro_dev.units.lock_mut();
-                let mut spots = state.asset_edit_state.sidebar_spots.lock_mut();
+            match state.create_async().await {
+                Ok(unit_id) => {
+                    state.changed.set(false);
+                    let mut units = state.editable_pro_dev.units.lock_mut();
+                    let mut spots = state.asset_edit_state.sidebar_spots.lock_mut();
 
-                let unit_index = state.asset_edit_state.target_index.get();
+                    let unit_index = state.asset_edit_state.target_index.get();
 
-                if let Some(unit_index) = unit_index {
-                    let mut unit = units.remove(unit_index);
+                    if let Some(unit_index) = unit_index {
+                        let unit = ProDevUnit {
+                            id: unit_id,
+                            display_name: state.display_name.lock_ref().clone(),
+                            description: state.description.lock_ref().clone(),
+                            value: ProDevUnitValue::try_from(state.value.lock_ref().clone()).unwrap_ji(),
+                        };
 
-                    unit.display_name = state.display_name.get_cloned();
-                    unit.description = state.description.get_cloned();
-                    unit.value = ProDevUnitValue::try_from(state.value.get_cloned()).unwrap_ji();
+                        units.insert_cloned(unit_index, unit.clone());
 
-                    // replace sidebar spot with new data
-                    units.insert_cloned(unit_index, unit.clone());
+                        let spot_index = unit_index + 1;
 
-                    let spot_index = unit_index + 1;
+                        spots.remove(spot_index);
 
-                    // replace sidebar spot with new data
-                    spots.remove(spot_index);
+                        spots.insert_cloned(spot_index, SidebarSpot::new_pro_dev_unit(unit.clone()));
 
-                    spots.insert_cloned(spot_index, SidebarSpot:: new_pro_dev_unit(unit));
-
-                    state.asset_edit_state.route.set(AssetEditRoute::ProDev(
-                        state.asset_edit_state.asset_id.unwrap_pro_dev().clone(),
-                        ProDevEditRoute::Unit(None),
-                    ));
+                        state.asset_edit_state.route.set(AssetEditRoute::ProDev(
+                            state.asset_edit_state.asset_id.unwrap_pro_dev().clone(),
+                            ProDevEditRoute::Unit(Some(unit_id)),
+                        ));
+                    }
+                },
+                Err(msg) => {
+                    log::error!("{}", msg);
                 }
             }
         }));
-
-        log::info!("Success");
     }
 
     pub async fn update_async(&self) -> Result<(), String> {

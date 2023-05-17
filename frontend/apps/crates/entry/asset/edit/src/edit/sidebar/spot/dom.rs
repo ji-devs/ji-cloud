@@ -120,7 +120,7 @@ impl SpotState {
                                             ProDevSpot::Unit(_) => pro_dev_spot_actions::edit(state.clone()),
                                         }
                                     }
-                                    None => state.sidebar.asset_edit_state.set_route_pro_dev(ProDevEditRoute::Landing)
+                                    None => state.sidebar.asset_edit_state.set_route_pro_dev(ProDevEditRoute::Unit(None))
                                 }
                             },
                         }
