@@ -62,6 +62,14 @@ impl SpotState {
         }
     }
 
+    pub fn asset_type(&self) -> &'static str {
+        match &self.spot.item {
+            SidebarSpotItem::Jig(_) => "jig",
+            SidebarSpotItem::Course(_) => "course",
+            SidebarSpotItem::ProDev(_) => "pro-dev",
+        }
+    }
+
     pub fn is_last_module(&self) -> bool {
         // self.index < self.total_len - 2 && (&*self.module).is_some()
         self.index < self.total_len - 2 && matches!(&self.spot.item, SidebarSpotItem::Jig(Some(_)))

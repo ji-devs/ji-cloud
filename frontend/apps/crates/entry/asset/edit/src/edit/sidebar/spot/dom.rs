@@ -79,6 +79,7 @@ impl SpotState {
                 .style("display", {
                     if is_filler { "none" } else {"block"}
                 })
+                .prop("assetType", state.asset_type())
                 .prop("module", state.kind_str())
                 .prop("unit_name", state.unit_name())
                 .prop("index", state.index as u32)

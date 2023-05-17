@@ -2,6 +2,8 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/images/ui";
 import "@elements/core/buttons/icon";
 import { collapseStyles } from "../../_common/sidebar-modules/collapse-styles";
+import { AssetType } from "@elements/module/_common/types";
+
 
 @customElement("jig-edit-sidebar")
 export class _ extends LitElement {
@@ -81,10 +83,7 @@ export class _ extends LitElement {
                 :host([collapsed]) section {
                     margin-top: 100px;
                 }
-                .cover-module {
-                    /* Allow room for jiggling head */
-                    margin-top: 180px;
-                }
+                .cover-module,
                 :host([collapsed]) .cover-module {
                     margin-top: 2px;
                     transition-property: margin-top;
@@ -103,7 +102,12 @@ export class _ extends LitElement {
     @property({ type: Boolean, reflect: true })
     isModulePage: boolean = false;
 
+    @property()
+    assetType: AssetType | "" = "";
+
     render() {
+        const coverModuleMarginTop = this.assetType === "pro-dev" ? "0px" : "180px";
+
         return html`
             <div class="page-overlay collapsing-phase"></div>
             <div class="sidebar-content">
@@ -114,7 +118,7 @@ export class _ extends LitElement {
                     <slot name="side-head"></slot>
                 </div>
                 <section class="collapsing-phase">
-                    <div class="cover-module collapsing-phase">
+                    <div class="cover-module collapsing-phase" style="margin-top: ${coverModuleMarginTop}">
                         <slot name="cover-module"></slot>
                     </div>
                     <div class="modules">
