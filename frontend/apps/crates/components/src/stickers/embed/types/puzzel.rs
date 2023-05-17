@@ -50,8 +50,8 @@ impl From<&PuzzelEmbed> for RawPuzzelEmbed {
 impl ParseUrlExt for PuzzelId {
     fn try_parse(text: String) -> anyhow::Result<Self> {
         match get_id_from_url(&text) {
-            Ok(_) => Ok(Self(text)),
-            Err(_) => Err(anyhow::anyhow!("")),
+            Some(_) => Ok(Self(text)),
+            None => Err(anyhow::anyhow!("")),
         }
     }
 
@@ -64,35 +64,35 @@ const SHARE_URL_BASE: &str = "https://www.puzzel.com/card/";
 const EMBED_IFRAME_BASE: &str = "<iframe ";
 const ID_LENGTH: usize = 19;
 
-fn get_id_from_url(url: &str) -> Result<&str, ()> {
+fn get_id_from_url(url: &str) -> Option<&str> {
     let id;
 
     if is_id(url) {
-        return Ok(url);
+        return Some(url);
     } else if url.starts_with(SHARE_URL_BASE) && url.len() >= SHARE_URL_BASE.len() + ID_LENGTH {
-        id = extract_id_share(url);
+        id = extract_id_share(url)?;
     } else if url.starts_with(EMBED_IFRAME_BASE) && url.len() >= EMBED_IFRAME_BASE.len() + ID_LENGTH
     {
-        id = extract_id_iframe(url);
+        id = extract_id_iframe(url)?;
     } else {
-        return Err(());
+        return None;
     };
 
     if is_id(id) {
-        Ok(id)
+        Some(id)
     } else {
-        Err(())
+        None
     }
 }
 
-fn extract_id_share(url: &str) -> &str {
+fn extract_id_share(url: &str) -> Option<&str> {
     let base_length: usize = SHARE_URL_BASE.len();
-    &url[base_length..(base_length + ID_LENGTH)]
+    url.get(base_length..(base_length + ID_LENGTH))
 }
 
-fn extract_id_iframe(code: &str) -> &str {
+fn extract_id_iframe(code: &str) -> Option<&str> {
     let id_index = code.find(SHARE_URL_BASE).unwrap_ji() + SHARE_URL_BASE.len();
-    &code[id_index..(id_index + ID_LENGTH)]
+    code.get(id_index..(id_index + ID_LENGTH))
 }
 
 fn is_id(id: &str) -> bool {

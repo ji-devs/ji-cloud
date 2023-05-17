@@ -102,8 +102,8 @@ impl From<&VimeoEmbed> for RawVimeoEmbed {
 impl ParseUrlExt for VimeoUrl {
     fn try_parse(text: String) -> anyhow::Result<Self> {
         match get_id_from_url(&text) {
-            Ok(_) => Ok(Self(text)),
-            Err(_) => Err(anyhow::anyhow!("")),
+            Some(_) => Ok(Self(text)),
+            None => Err(anyhow::anyhow!("")),
         }
     }
 
@@ -119,64 +119,63 @@ const EMBED_IFRAME_BASE: &str = "<iframe ";
 const EMBED_URL_BASE: &str = "https://player.vimeo.com/video/";
 const ID_LENGTH: usize = 9;
 
-fn get_id_from_url(url: &str) -> anyhow::Result<&str> {
-    log::info!("{url}");
+fn get_id_from_url(url: &str) -> Option<&str> {
     let id;
     //when is_id passes all tests, this can be removed
     let mut check_extracted_id = true;
     if is_id(url) {
-        return Ok(url);
+        return Some(url);
     } else if url.starts_with(REGULAR_URL_BASE) {
-        id = extract_id_regular(url);
+        id = extract_id_regular(url)?;
     } else if url.starts_with(REGULAR_URL_WWW_BASE) {
-        id = extract_id_www(url);
+        id = extract_id_www(url)?;
     } else if url.starts_with(EMBED_IFRAME_BASE) && url.len() >= EMBED_IFRAME_BASE.len() + ID_LENGTH
     {
-        id = extract_id_iframe(url).context("")?;
+        id = extract_id_iframe(url)?;
     } else if url.starts_with(EMBED_URL_BASE) && url.len() >= EMBED_URL_BASE.len() + ID_LENGTH {
-        id = extract_id_iframe(url).context("")?;
+        id = extract_id_iframe(url)?;
     } else if url.contains(ANY_VIMEO_DOMAIN) {
         let url = match url.find("http") {
-            Some(pos) => &url[pos..],
+            Some(pos) => url.get(pos..)?,
             None => url,
         };
 
         match Url::parse(url) {
             Ok(real_url) => match real_url.query_pairs().find(|pair| pair.0 == "v") {
                 Some(_) => {
-                    id = extract_any_v(url);
+                    id = extract_any_v(url)?;
                     check_extracted_id = false;
                 }
-                None => anyhow::bail!(""),
+                None => return None,
             },
-            _ => anyhow::bail!(""),
+            _ => return None,
         }
     } else {
-        anyhow::bail!("");
+        return None;
     };
 
     if !check_extracted_id || is_id(id) {
-        Ok(id)
+        Some(id)
     } else {
-        anyhow::bail!("")
+        None
     }
 }
 
-fn extract_any_v(url: &str) -> &str {
+fn extract_any_v(url: &str) -> Option<&str> {
     let start_bytes = url.find("v=").unwrap_or(0) + 2;
-    let rest = &url[start_bytes..];
+    let rest = url.get(start_bytes..)?;
     let end_bytes = start_bytes + rest.find('&').unwrap_or(rest.len());
-    &url[start_bytes..end_bytes]
+    url.get(start_bytes..end_bytes)
 }
 
-fn extract_id_regular(url: &str) -> &str {
+fn extract_id_regular(url: &str) -> Option<&str> {
     let base_length = REGULAR_URL_BASE.len();
-    &url[base_length..(base_length + ID_LENGTH)]
+    url.get(base_length..(base_length + ID_LENGTH))
 }
 
-fn extract_id_www(url: &str) -> &str {
+fn extract_id_www(url: &str) -> Option<&str> {
     let base_length = REGULAR_URL_WWW_BASE.len();
-    &url[base_length..(base_length + ID_LENGTH)]
+    url.get(base_length..(base_length + ID_LENGTH))
 }
 
 fn extract_id_iframe(code: &str) -> Option<&str> {

@@ -102,8 +102,8 @@ impl From<&YoutubeEmbed> for RawYoutubeEmbed {
 impl ParseUrlExt for YoutubeUrl {
     fn try_parse(text: String) -> anyhow::Result<Self> {
         match get_id_from_url(&text) {
-            Ok(_) => Ok(Self(text)),
-            Err(_) => Err(anyhow::anyhow!("")),
+            Some(_) => Ok(Self(text)),
+            None => Err(anyhow::anyhow!("")),
         }
     }
 
@@ -119,66 +119,66 @@ const EMBED_IFRAME_BASE: &str = "<iframe ";
 const EMBED_URL_BASE: &str = "https://www.youtube.com/embed/";
 const ID_LENGTH: usize = 11;
 
-fn get_id_from_url(url: &str) -> Result<&str, ()> {
+fn get_id_from_url(url: &str) -> Option<&str> {
     let id;
     //when is_id passes all tests, this can be removed
     let mut check_extracted_id = true;
     if is_id(url) {
-        return Ok(url);
+        return Some(url);
     } else if url.starts_with(REGULAR_URL_BASE) {
-        id = extract_id_regular(url);
+        id = extract_id_regular(url)?;
     } else if url.starts_with(SHARE_URL_BASE) && url.len() >= SHARE_URL_BASE.len() + ID_LENGTH {
-        id = extract_id_share(url);
+        id = extract_id_share(url)?;
     } else if url.starts_with(EMBED_IFRAME_BASE) || url.starts_with(EMBED_URL_BASE) {
-        id = extract_id_iframe(url);
+        id = extract_id_iframe(url)?;
     } else if url.contains(ANY_YOUTUBE_DOMAIN) {
         let url = match url.find("http") {
-            Some(pos) => &url[pos..],
+            Some(pos) => url.get(pos..)?,
             None => url,
         };
 
         match Url::parse(url) {
             Ok(real_url) => match real_url.query_pairs().find(|pair| pair.0 == "v") {
                 Some(_) => {
-                    id = extract_any_v(url);
+                    id = extract_any_v(url)?;
                     check_extracted_id = false;
                 }
-                None => return Err(()),
+                None => return None,
             },
-            _ => return Err(()),
+            Err(_) => return None,
         }
     } else {
-        return Err(());
+        return None;
     };
 
     if !check_extracted_id || is_id(id) {
-        Ok(id)
+        Some(id)
     } else {
-        Err(())
+        None
     }
 }
 
 // https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=814bb22fa870f8132b2995c6e99a5221
-fn extract_any_v(url: &str) -> &str {
+fn extract_any_v(url: &str) -> Option<&str> {
     let start_bytes = url.find("v=").unwrap_or(0) + 2;
-    let rest = &url[start_bytes..];
+    let rest = url.get(start_bytes..)?;
     let end_bytes = start_bytes + rest.find('&').unwrap_or(rest.len());
-    &url[start_bytes..end_bytes]
+    url.get(start_bytes..end_bytes)
 }
 
-fn extract_id_regular(url: &str) -> &str {
+fn extract_id_regular(url: &str) -> Option<&str> {
     let base_length = REGULAR_URL_BASE.len();
-    &url[base_length..(base_length + 11)]
+    url.get(base_length..(base_length + 11))
 }
 
-fn extract_id_share(url: &str) -> &str {
+fn extract_id_share(url: &str) -> Option<&str> {
     let base_length = SHARE_URL_BASE.len();
-    &url[base_length..(base_length + 11)]
+    url.get(base_length..(base_length + 11))
 }
 
-fn extract_id_iframe(code: &str) -> &str {
+fn extract_id_iframe(code: &str) -> Option<&str> {
     let id_index = code.find(EMBED_URL_BASE).unwrap_ji() + EMBED_URL_BASE.len();
-    &code[id_index..(id_index + 11)]
+    code.get(id_index..(id_index + 11))
 }
 
 fn is_id(id: &str) -> bool {
