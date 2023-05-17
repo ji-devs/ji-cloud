@@ -2,6 +2,8 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/images/ui";
 import "@elements/core/buttons/icon";
 import { collapseStyles } from "../../_common/sidebar-modules/collapse-styles";
+import { AssetType } from "@elements/module/_common/types";
+import {nothing} from "lit-html";
 
 const STR_END = "End";
 const STR_PUBLISH = "Publish";
@@ -138,6 +140,24 @@ export class _ extends LitElement {
     @property({ type: Boolean, reflect: true })
     collapsed: boolean = true;
 
+    @property()
+    assetType: AssetType | "" = "";
+
+    renderDecoration() {
+        return html`
+            <div class="decorations">
+                <img-ui
+                        class="feet-spring"
+                        path="entry/jig/jiggling/feet-spring.svg"
+                ></img-ui>
+                <img-ui
+                        class="feet-rollers"
+                        path="entry/jig/jiggling/yellow/feet-rollers.svg"
+                ></img-ui>
+            </div>
+        `;
+    }
+
     render() {
         return html`
             <section>
@@ -151,16 +171,7 @@ export class _ extends LitElement {
                         </div>
                     </div>
                     <div class="middle open-only">
-                        <div class="decorations">
-                            <img-ui
-                                class="feet-spring"
-                                path="entry/jig/jiggling/feet-spring.svg"
-                            ></img-ui>
-                            <img-ui
-                                class="feet-rollers"
-                                path="entry/jig/jiggling/yellow/feet-rollers.svg"
-                            ></img-ui>
-                        </div>
+                        ${this.assetType === "pro-dev" ? nothing : this.renderDecoration()}
                         <div class="window">
                             <img-ui
                                 class="window-icon"

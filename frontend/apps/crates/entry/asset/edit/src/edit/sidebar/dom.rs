@@ -13,6 +13,7 @@ use super::{
     state::*,
 };
 use futures_signals::{map_ref, signal::SignalExt, signal_vec::SignalVecExt};
+use shared::domain::asset::AssetType;
 use std::rc::Rc;
 
 use utils::{
@@ -36,6 +37,7 @@ impl Sidebar {
                 };
             }))
             .child(html!("jig-edit-sidebar", {
+                .prop("assetType",  AssetType::from(&state.asset_edit_state.asset_id).as_str())
                 .future(clone!(state => async move {
                     state.asset_edit_state.route.signal_cloned().for_each(clone!(state => move |route| {
                         let should_collapse = !matches!(
@@ -68,6 +70,7 @@ impl Sidebar {
                 .child(HeaderDom::render(state.clone()))
                 .child(html!("jig-edit-sidebar-publish", {
                     .prop("slot", "publish")
+                    .prop("assetType", AssetType::from(&state.asset_edit_state.asset_id).as_str())
                     .prop("publish", state.asset_edit_state.asset.published_at().lock_ref().is_some())
                     .prop_signal("collapsed", state.collapsed.signal())
                     .prop_signal("selected", state.asset_edit_state.route.signal_cloned().map(|route| {

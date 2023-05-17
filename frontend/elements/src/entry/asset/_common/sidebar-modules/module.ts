@@ -7,6 +7,7 @@ import "@elements/core/buttons/rectangle";
 import {
     ModuleKind,
     STR_MODULE_DISPLAY_NAME,
+    AssetType,
 } from "@elements/module/_common/types";
 import { collapseStyles } from "./collapse-styles";
 
@@ -242,6 +243,10 @@ export class _ extends LitElement {
     @property({ type: Boolean, reflect: true })
     collapsed: boolean = false;
 
+    @property()
+    assetType: AssetType | "" = "";
+
+
     renderDecoration() {
         const getImage = (path: string, classes: string) =>
             html`<img-ui class="${classes}" path="entry/jig/jiggling/${path}"></img-ui>`;
@@ -300,6 +305,7 @@ export class _ extends LitElement {
         // const subtitle = module === "" ? "" : STR_MODULE_DISPLAY_NAME[module];
 
         let subtitle = "";
+
         if (unit_name) {
             subtitle = unit_name;
         } else if (module !== "") {
@@ -321,7 +327,7 @@ export class _ extends LitElement {
                     </div>
                     <div class="middle open-only">
                         <div class="decorations">
-                            ${this.renderDecoration()}
+                            ${this.assetType === "pro-dev" ? nothing : this.renderDecoration()}
                         </div>
                         <div class="window">
                             <slot name="window"></slot>
