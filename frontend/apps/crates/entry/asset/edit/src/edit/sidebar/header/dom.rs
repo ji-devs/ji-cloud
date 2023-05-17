@@ -5,7 +5,8 @@ use std::rc::Rc;
 use web_sys::HtmlInputElement;
 
 use crate::edit::sidebar::{jig::actions::get_player_settings, state::SidebarSetting};
-
+use shared::domain::asset::AssetType
+;
 use super::super::{actions as sidebar_actions, state::Sidebar as SidebarState};
 use utils::{
     asset::{AssetPlayerOptions, CoursePlayerOptions, ProDevPlayerOptions},
@@ -99,7 +100,14 @@ impl HeaderDom {
                 }),
                 html!("jig-edit-sidebar-preview-button", {
                     .prop("slot", "preview")
-                    .prop("assetDisplayName", asset_edit_state.asset.asset_type().display_name())
+                    .prop("assetDisplayName", {
+                        let asset_type = asset_edit_state.asset.asset_type();
+                        if asset_type != AssetType::ProDev {
+                            asset_type.display_name()
+                        } else {
+                            ""
+                        }
+                    })
                     .event(clone!(sidebar_state, asset_edit_state => move |_: events::Click| {
                         match &sidebar_state.settings {
                             SidebarSetting::Jig(jig) => {
