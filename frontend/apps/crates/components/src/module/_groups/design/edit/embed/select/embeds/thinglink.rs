@@ -15,6 +15,7 @@ impl EmbedSelect {
     ) -> Dom {
         let state = self;
         html!("textarea" => HtmlTextAreaElement, {
+            .prop("placeholder", "Place the link here")
             .prop("value", {
                 // not using a signal because the value can be invalid but should still show up
                 match thinglink.url.get_cloned() {

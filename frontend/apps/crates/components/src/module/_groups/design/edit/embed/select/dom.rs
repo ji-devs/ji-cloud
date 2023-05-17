@@ -23,8 +23,9 @@ macro_rules! gap {
     };
 }
 
+const STR_SELECT_TITLE: &str = "Click to embed:";
 const STR_DELETE: &str = "Delete";
-const STR_BACK: &str = "Back to all categories";
+const STR_BACK: &str = "Back";
 
 impl Component<EmbedSelect> for Rc<EmbedSelect> {
     fn styles() -> &'static str {
@@ -51,18 +52,26 @@ impl Component<EmbedSelect> for Rc<EmbedSelect> {
 
 impl EmbedSelect {
     fn render_options(self: &Rc<Self>) -> Dom {
-        let state = self;
+        let state: &Rc<EmbedSelect> = self;
         html!("div", {
-            .class("options-wrapper")
-            .children(state
-                .type_list
-                .modules
-                .iter()
-                .map(clone!(state => move|module| {
-                    state.option(module)
-                }))
-                .collect_vec()
-            )
+            .class("select-wrapper")
+            .child(gap!(12))
+            .child(html!("h4", {
+                .text(STR_SELECT_TITLE)
+            }))
+            .child(gap!(44))
+            .child(html!("div", {
+                .class("options-wrapper")
+                .children(state
+                    .type_list
+                    .modules
+                    .iter()
+                    .map(clone!(state => move|module| {
+                        state.option(module)
+                    }))
+                    .collect_vec()
+                )
+            }))
         })
     }
 
@@ -75,7 +84,6 @@ impl EmbedSelect {
                         "module/_common/edit/widgets/sidebar/embed/square/{}.png",
                         embed_type.as_str()
                     ))
-
                     .style_signal("outline", state.host.signal_ref(clone!(embed_type => move |host| {
                         let is_selected = match host {
                             Some(host) => embed_type == partial_to_type(host),
@@ -88,7 +96,6 @@ impl EmbedSelect {
                     })))
                 }),
                 html!("p", {
-
                     .text(embed_type.display_name())
                 }),
                 html!("input", {

@@ -20,6 +20,7 @@ export type TabKind =
     | "text"
     | "theme"
     | "tooltip"
+    | "embed"
     | "video"
     | "trace"
     | "place"
@@ -70,7 +71,8 @@ const STR_LABEL_LOOKUP: {
     text: "Text",
     theme: "Theme",
     tooltip: "Tooltip", //Not in zeplin
-    video: "Video", //Not in Zeplin
+    video: "Video",
+    embed: "Embed",
     trace: "Trace",
     place: "Place",
     correct: "Correct",

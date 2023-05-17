@@ -23,7 +23,7 @@ pub(super) enum EmbedHostType {
 impl EmbedHostType {
     pub(super) fn display_name(&self) -> &'static str {
         match self {
-            EmbedHostType::Youtube => "Youtube",
+            EmbedHostType::Youtube => "YouTube",
             EmbedHostType::Vimeo => "Vimeo",
             EmbedHostType::GoogleSheet => "Google Sheet",
             // EmbedHostType::Edpuzzle => "Edpuzzle",

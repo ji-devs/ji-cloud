@@ -2,7 +2,21 @@
     display: grid;
     row-gap: 38px;
 }
+.select-wrapper {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 56px);
+    justify-content: center;
+    column-gap: 48px;
+}
+.select-wrapper h4 {
+    grid-column: 1 / -1;
+    font-size: 18px;
+    color: var(--dark-gray-6);
+    font-weight: normal;
+    margin: 0;
+}
 .options-wrapper {
+    grid-column: 1 / -1;
     display: grid;
     grid-template-columns: repeat(auto-fill, 56px);
     grid-auto-rows: 82px;
