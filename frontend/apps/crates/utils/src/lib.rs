@@ -22,6 +22,7 @@ pub mod init;
 pub mod js_wrappers;
 pub mod keyboard;
 pub mod languages;
+pub mod location;
 pub mod logging;
 pub mod math;
 pub mod metadata;

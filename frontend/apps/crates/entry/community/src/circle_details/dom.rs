@@ -19,6 +19,7 @@ use utils::{
     component::Component,
     events,
     languages::Language,
+    location::Country,
     prelude::get_user_id,
     routes::{CommunityMembersRoute, CommunityRoute, Route},
     unwrap::UnwrapJiExt,
@@ -207,8 +208,13 @@ impl CircleDetails {
         html!("community-list-member", {
             .prop("slot", "members")
             .prop("name", &format!("{} {}", member.given_name, member.family_name))
-            // .prop("city", "New York")
-            // .prop("state", "NY")
+            .apply(|mut dom| {
+                if let Some(country) = Country::from_google_location(&member.location) {
+                    dom = dom.prop("countryCode", country.code);
+                    dom = dom.prop("countryName", country.name);
+                }
+                dom
+            })
             .apply(|mut dom| {
                 if let Some(languages_spoken) = &member.languages_spoken {
                     if languages_spoken.len() > 0 {

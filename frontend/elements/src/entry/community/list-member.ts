@@ -1,5 +1,6 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import { listItemStyles } from "./list-item-styles";
+import { nothing } from "lit-html";
 
 @customElement("community-list-member")
 export class _ extends LitElement {
@@ -30,6 +31,11 @@ export class _ extends LitElement {
                 }
                 .location {
                     display: inline-grid;
+                    grid-template-columns: auto auto;
+                    gap: 12px;
+                }
+                .location img-ui {
+                    width: 37px;
                 }
             `,
         ];
@@ -39,10 +45,10 @@ export class _ extends LitElement {
     name: string = "";
 
     @property()
-    city: string = "";
+    countryCode: string = "";
 
     @property()
-    state: string = "";
+    countryName: string = "";
 
     @property()
     language: string = "";
@@ -51,9 +57,11 @@ export class _ extends LitElement {
         return html`
             <slot name="img"></slot>
             <p class="name">${this.name}</p>
-            <p class="desktop-only location">
-                <span>${this.city}</span>
-                <span>${this.state}</span>
+            <p class="desktop-only location" title=${this.countryName}>
+                ${this.countryCode ? html`
+                    <span>${this.countryCode}</span>
+                    <img-ui path="flags/${this.countryCode}.webp"></img-ui>
+                ` : nothing}
             </p>
             <p class="desktop-only language">${this.language}</p>
             <slot class="desktop-only status" name="status"></slot>
