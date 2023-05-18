@@ -10,6 +10,7 @@ use utils::{
     events,
     routes::{AssetEditRoute, AssetRoute, ProDevEditRoute, Route},
 };
+use crate::edit::sidebar::spot::pro_dev::actions::edit;
 
 impl ProDevMenu {
     pub fn render(self: Rc<Self>) -> Dom {
@@ -44,7 +45,6 @@ impl ProDevMenu {
                 ProDevSpot::Unit(_pro_dev_unit) => {
                     vec![
                         state.unit_edit(),
-                        state.unit_play(),
                         state.unit_move_up(),
                         state.unit_move_down(),
                         state.unit_delete(),
@@ -95,20 +95,9 @@ impl ProDevMenu {
         let state = self;
         html!("menu-line", {
             .prop("slot", "lines")
-            .prop("icon", "jig-info")
+            .prop("icon", "edit")
             .event(clone!(state => move |_:events::Click| {
-                todo!("{:?}", state.spot_state.kind_str());
-            }))
-        })
-    }
-
-    fn unit_play(self: &Rc<Self>) -> Dom {
-        let state = self;
-        html!("menu-line", {
-            .prop("slot", "lines")
-            .prop("icon", "jig-play")
-            .event(clone!(state => move |_:events::Click| {
-                todo!("{:?}", state.spot_state.kind_str());
+                edit(state.spot_state.clone())
             }))
         })
     }
