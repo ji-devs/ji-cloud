@@ -104,7 +104,7 @@ impl HeaderDom {
                         if asset_type != AssetType::ProDev {
                             asset_type.display_name()
                         } else {
-                            ""
+                            "course"
                         }
                     })
                     .event(clone!(sidebar_state, asset_edit_state => move |_: events::Click| {
