@@ -99,7 +99,7 @@ pub fn move_index(state: Rc<SpotState>, move_target: MoveTarget) {
                     pro_dev_actions::update_unit_index(
                         Rc::clone(&state),
                         unit.as_ref(),
-                        target as u16
+                        (target - 1) as u16
                     ).await;
                 },
             }

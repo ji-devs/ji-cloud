@@ -62,7 +62,6 @@ pub async fn update_unit_index(state: Rc<SpotState>, item: Option<&Rc<ProDevSpot
     };
 
     if let Some(item) = item.clone() {
-        log::info!("index: {index}");
         match &**item {
             ProDevSpot::Cover(_) => unimplemented!(),
             ProDevSpot::Unit(item) => {
