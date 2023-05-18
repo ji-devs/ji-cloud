@@ -1,16 +1,20 @@
 use super::state::*;
+use crate::edit::sidebar::spot::pro_dev;
+use crate::edit::sidebar::spot::pro_dev::actions::edit;
 use crate::edit::sidebar::{
+    pro_dev::actions as pro_dev_actions,
     spot::actions::{self, MoveTarget},
     state::ProDevSpot,
+    state::Sidebar as SidebarState,
 };
 use dominator::{clone, html, Dom, EventOptions};
 use shared::domain::module::ModuleId;
+use shared::domain::pro_dev::unit::ProDevUnit;
 use std::rc::Rc;
 use utils::{
     events,
     routes::{AssetEditRoute, AssetRoute, ProDevEditRoute, Route},
 };
-use crate::edit::sidebar::spot::pro_dev::actions::edit;
 
 impl ProDevMenu {
     pub fn render(self: Rc<Self>) -> Dom {
@@ -31,22 +35,26 @@ impl ProDevMenu {
 
     fn menu_units(self: &Rc<Self>) -> Vec<Dom> {
         let state = self;
-        let module = state.spot_state.spot.item.unwrap_pro_dev();
-        state.menu_units_pro_dev(module)
+        let unit = state.spot_state.spot.item.unwrap_pro_dev();
+        state.menu_units_pro_dev(unit)
     }
 
-    fn menu_units_pro_dev(self: &Rc<Self>, module: &Option<Rc<ProDevSpot>>) -> Vec<Dom> {
+    fn menu_units_pro_dev(self: &Rc<Self>, unit: &Option<Rc<ProDevSpot>>) -> Vec<Dom> {
         let state = self;
-        match module {
+        match unit {
             Some(module) => match &**module {
                 ProDevSpot::Cover(cover) => {
                     vec![state.cover_edit(cover.id)]
                 }
-                ProDevSpot::Unit(_pro_dev_unit) => {
+                ProDevSpot::Unit(pro_dev_unit) => {
                     vec![
                         state.unit_edit(),
                         state.unit_move_up(),
                         state.unit_move_down(),
+                        state.unit_duplicate(
+                            &state.spot_state.sidebar.clone(),
+                            pro_dev_unit.clone(),
+                        ),
                         state.unit_delete(),
                     ]
                 }
@@ -134,6 +142,18 @@ impl ProDevMenu {
             .event(clone!(state => move |_:events::Click| {
                 state.spot_state.confirm_delete.set_neq(true);
                 state.close_menu();
+            }))
+        })
+    }
+
+    fn unit_duplicate(self: &Rc<Self>, sidebar_state: &Rc<SidebarState>, unit: ProDevUnit) -> Dom {
+        let state = self;
+        html!("menu-line", {
+            .prop("slot", "lines")
+            .prop("icon", "duplicate")
+            .event(clone!(state, sidebar_state => move |_:events::Click| {
+                state.close_menu();
+                pro_dev_actions::duplicate_unit(sidebar_state.clone(), &unit);
             }))
         })
     }

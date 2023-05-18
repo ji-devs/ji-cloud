@@ -94,12 +94,16 @@ mod tests {
                     "html_attributions": []
                 }
             }
-        "#.into();
+        "#
+        .into();
 
         let country = Country::from_google_location(&Some(location_json));
 
         assert_eq!(
-            Some(Country { name: "United States".to_string(), code: "US".to_string() }),
+            Some(Country {
+                name: "United States".to_string(),
+                code: "US".to_string()
+            }),
             country
         )
     }
