@@ -77,7 +77,25 @@ fn update_full_from_partial(
         (EmbedHost::Youtube(full), PartialEmbedHost::Youtube(partial)) => {
             full.update_from_partial(&*partial)
         }
+        (EmbedHost::Vimeo(full), PartialEmbedHost::Vimeo(partial)) => {
+            full.update_from_partial(&*partial)
+        }
         (EmbedHost::GoogleSheet(full), PartialEmbedHost::GoogleSheet(partial)) => {
+            full.update_from_partial(&*partial)
+        }
+        (EmbedHost::Edpuzzle(full), PartialEmbedHost::Edpuzzle(partial)) => {
+            full.update_from_partial(&*partial)
+        }
+        (EmbedHost::Puzzel(full), PartialEmbedHost::Puzzel(partial)) => {
+            full.update_from_partial(&*partial)
+        }
+        (EmbedHost::Quizlet(full), PartialEmbedHost::Quizlet(partial)) => {
+            full.update_from_partial(&*partial)
+        }
+        (EmbedHost::Thinglink(full), PartialEmbedHost::Thinglink(partial)) => {
+            full.update_from_partial(&*partial)
+        }
+        (EmbedHost::Sutori(full), PartialEmbedHost::Sutori(partial)) => {
             full.update_from_partial(&*partial)
         }
         (_, partial) => {
