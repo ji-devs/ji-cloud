@@ -4,10 +4,9 @@ use shared::domain::asset::{AssetId, DraftOrLive};
 use std::rc::Rc;
 use web_sys::HtmlInputElement;
 
-use crate::edit::sidebar::{jig::actions::get_player_settings, state::SidebarSetting};
-use shared::domain::asset::AssetType
-;
 use super::super::{actions as sidebar_actions, state::Sidebar as SidebarState};
+use crate::edit::sidebar::{jig::actions::get_player_settings, state::SidebarSetting};
+use shared::domain::asset::AssetType;
 use utils::{
     asset::{AssetPlayerOptions, CoursePlayerOptions, ProDevPlayerOptions},
     prelude::*,
@@ -63,7 +62,7 @@ impl HeaderDom {
                     .prop("weight", "medium")
                     .text(&format!("{}{}{}",
                         STR_MY_JIGS_1,
-                        asset_edit_state.asset.asset_type().display_name(),
+                        asset_edit_state.asset.asset_type().sidebar_header(),
                         STR_MY_JIGS_2
                     ))
                     .event(clone!(asset_edit_state => move |_:events::Click| {

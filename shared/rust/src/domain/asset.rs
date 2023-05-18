@@ -88,7 +88,7 @@ impl AssetType {
             Self::Jig => "JIG",
             Self::Resource => "resource",
             Self::Course => "course",
-            Self::ProDev => "Pro Dev",
+            Self::ProDev => "ProDev",
         }
     }
 
@@ -98,7 +98,17 @@ impl AssetType {
             Self::Jig => "JIG",
             Self::Resource => "Resource",
             Self::Course => "Course",
-            Self::ProDev => "Pro Dev",
+            Self::ProDev => "ProDev",
+        }
+    }
+
+    /// return to gallery button on sidebar
+    pub fn sidebar_header(&self) -> &'static str {
+        match self {
+            Self::Jig => "JIG",
+            Self::Resource => "resource",
+            Self::Course => "course",
+            Self::ProDev => "ProDev course",
         }
     }
 
