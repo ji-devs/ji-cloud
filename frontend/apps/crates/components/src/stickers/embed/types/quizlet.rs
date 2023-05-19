@@ -91,7 +91,7 @@ fn extract_id_share(url: &str) -> Option<&str> {
 }
 
 fn extract_id_iframe(code: &str) -> Option<&str> {
-    let id_index = code.find(SHARE_URL_BASE).unwrap_ji() + SHARE_URL_BASE.len();
+    let id_index = code.find(SHARE_URL_BASE)? + SHARE_URL_BASE.len();
     code.get(id_index..(id_index + ID_LENGTH))
 }
 

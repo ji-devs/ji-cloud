@@ -168,17 +168,17 @@ fn extract_any_v(url: &str) -> Option<&str> {
 
 fn extract_id_regular(url: &str) -> Option<&str> {
     let base_length = REGULAR_URL_BASE.len();
-    url.get(base_length..(base_length + 11))
+    url.get(base_length..(base_length + ID_LENGTH))
 }
 
 fn extract_id_share(url: &str) -> Option<&str> {
     let base_length = SHARE_URL_BASE.len();
-    url.get(base_length..(base_length + 11))
+    url.get(base_length..(base_length + ID_LENGTH))
 }
 
 fn extract_id_iframe(code: &str) -> Option<&str> {
-    let id_index = code.find(EMBED_URL_BASE).unwrap_ji() + EMBED_URL_BASE.len();
-    code.get(id_index..(id_index + 11))
+    let id_index = code.find(EMBED_URL_BASE)? + EMBED_URL_BASE.len();
+    code.get(id_index..(id_index + ID_LENGTH))
 }
 
 fn is_id(id: &str) -> bool {

@@ -179,7 +179,7 @@ fn extract_id_www(url: &str) -> Option<&str> {
 }
 
 fn extract_id_iframe(code: &str) -> Option<&str> {
-    let id_index = code.find(EMBED_URL_BASE).unwrap_ji() + EMBED_URL_BASE.len();
+    let id_index = code.find(EMBED_URL_BASE)? + EMBED_URL_BASE.len();
     code.get(id_index..(id_index + ID_LENGTH))
 }
 
