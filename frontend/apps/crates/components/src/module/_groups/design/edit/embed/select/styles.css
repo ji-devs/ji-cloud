@@ -61,6 +61,9 @@ label input {
     border-radius: 4px;
     overflow: hidden;
 }
+.host input-wrapper {
+    width: 100%;
+}
 .host textarea {
     height: 138px;
 }
