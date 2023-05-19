@@ -139,6 +139,8 @@ make_path_parts!(ProDevGetDraftPath => "/v1/pro-dev/{}/draft" => ProDevId);
 
 make_path_parts!(ProDevUpdateDraftDataPath => "/v1/pro-dev/{}" => ProDevId);
 
+make_path_parts!(ProDevClonePath => "/v1/pro-dev/{}/clone" => ProDevId);
+
 /// Request for updating a ProDev's draft data.
 #[derive(Serialize, Deserialize, Debug, Default)]
 #[serde(rename_all = "camelCase")]

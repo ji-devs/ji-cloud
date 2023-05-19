@@ -3,10 +3,11 @@ use crate::{
     api::Method,
     domain::{
         pro_dev::{
-            ProDevBrowsePath, ProDevBrowseQuery, ProDevBrowseResponse, ProDevCreatePath,
-            ProDevCreateRequest, ProDevDeletePath, ProDevGetDraftPath, ProDevGetLivePath, ProDevId,
-            ProDevPublishPath, ProDevResponse, ProDevSearchPath, ProDevSearchQuery,
-            ProDevSearchResponse, ProDevUpdateDraftDataPath, ProDevUpdateDraftDataRequest,
+            ProDevBrowsePath, ProDevBrowseQuery, ProDevBrowseResponse, ProDevClonePath,
+            ProDevCreatePath, ProDevCreateRequest, ProDevDeletePath, ProDevGetDraftPath,
+            ProDevGetLivePath, ProDevId, ProDevPublishPath, ProDevResponse, ProDevSearchPath,
+            ProDevSearchQuery, ProDevSearchResponse, ProDevUpdateDraftDataPath,
+            ProDevUpdateDraftDataRequest,
         },
         CreateResponse,
     },
@@ -148,4 +149,23 @@ impl ApiEndpoint for Delete {
     type Path = ProDevDeletePath;
     type Err = EmptyError;
     const METHOD: Method = Method::Delete;
+}
+
+/// Clone a ProDev. This clones both the draft and live.
+///
+/// # Authorization
+/// * One of `Admin`, `AdminJig`, or `ManageSelfJig`
+///
+/// # Errors
+/// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
+/// * [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
+/// * ['NotFound'](http::StatusCode::NOT_FOUND) if the resource does not exist.
+/// * ['BadRequest'](http::StatusCode::BAD_REQUEST) if the request is malformed or the ProDev is a draft.
+pub struct Clone;
+impl ApiEndpoint for Clone {
+    type Path = ProDevClonePath;
+    type Req = ();
+    type Res = CreateResponse<ProDevId>;
+    type Err = EmptyError;
+    const METHOD: Method = Method::Post;
 }

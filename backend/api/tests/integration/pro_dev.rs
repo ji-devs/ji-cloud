@@ -1,6 +1,7 @@
 use http::StatusCode;
 use macros::test_service;
 use serde_json::json;
+use shared::domain::{pro_dev::ProDevId, CreateResponse};
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
@@ -279,6 +280,78 @@ async fn live_up_to_date_flag(port: u16) -> anyhow::Result<()> {
             ".**.lastEdited" => "[last_edited]",
             ".**.publishedAt" => "[published_at]",
             ".**.units" => "[units]",
+        }
+    );
+
+    Ok(())
+}
+
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::ProDev")
+)]
+async fn clone(port: u16) -> anyhow::Result<()> {
+    let name = "clone";
+    let client = reqwest::Client::new();
+
+    let pro_dev_id = "f77222a6-906b-11ed-b4f6-2f6dfab2ea0a".to_string();
+
+    let resp = client
+        .post(&format!(
+            "http://0.0.0.0:{}/v1/pro-dev/{pro_dev_id}/clone",
+            port
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::CREATED);
+
+    let CreateResponse { id: ProDevId(id) } = resp.json().await?;
+
+    let resp = client
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/pro-dev/{pro_dev_id}/draft",
+            port
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(
+        format!("{}-1",name),
+        body, {
+            ".**.id" => "[id]",
+            ".**.lastEdited" => "[last_edited]",
+            ".**.additionalResources" => "[ids]"
+        }
+    );
+
+    let resp = client
+        .get(&format!("http://0.0.0.0:{}/v1/pro-dev/{}/draft", port, id))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(
+        format!("{}-2",name),
+        body, {
+            ".**.id" => "[id]",
+            ".**.lastEdited" => "[last_edited]",
+            ".**.feedbackPositive" => "[audio]",
+            ".**.feedbackNegative" => "[audio]",
+            ".**.additionalResources" => "[ids]"
         }
     );
 

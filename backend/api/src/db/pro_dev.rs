@@ -786,13 +786,12 @@ select draft_id, live_id from pro_dev where id = $1
     .map(|it| (it.draft_id, it.live_id))
 }
 
-/// Clones a copy of the pro_dev data and modules, preserving the module's stable IDs
+/// Clones a copy of the pro_dev data and unitss
 pub async fn clone_data(
     txn: &mut PgConnection,
     from_data_id: &Uuid,
     draft_or_live: DraftOrLive,
 ) -> Result<Uuid, error::CloneDraft> {
-    println!("here in clone");
     let new_id = sqlx::query!(
         //language=SQL
         r#"
@@ -896,6 +895,42 @@ select exists(select 1 from user_scope where user_id = $1 and scope = any($2)) a
     }
 
     Ok(true)
+}
+
+pub async fn clone_pro_dev(
+    db: &PgPool,
+    parent: ProDevId,
+    user_id: UserId,
+) -> Result<ProDevId, error::CloneDraft> {
+    let mut txn = db.begin().await?;
+
+    let (draft_id, live_id) = get_draft_and_live_ids(&mut *txn, parent)
+        .await
+        .ok_or(error::CloneDraft::ResourceNotFound)?;
+
+    let new_draft_id = clone_data(&mut txn, &draft_id, DraftOrLive::Draft).await?;
+    let new_live_id = clone_data(&mut txn, &live_id, DraftOrLive::Live).await?;
+
+    let new_pro_dev = sqlx::query!(
+        //language=SQL
+        r#"
+insert into pro_dev(creator_id, author_id, parents, live_id, draft_id)
+select creator_id, $2, array_append(parents, $1), $3, $4
+from pro_dev
+where id = $1
+returning id as "id!: ProDevId"
+"#,
+        parent.0,
+        user_id.0,
+        new_live_id,
+        new_draft_id,
+    )
+    .fetch_one(&mut txn)
+    .await?;
+
+    txn.commit().await?;
+
+    Ok(new_pro_dev.id)
 }
 
 pub async fn authz(
