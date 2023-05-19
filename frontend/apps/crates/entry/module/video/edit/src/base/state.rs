@@ -193,12 +193,18 @@ impl Base {
 
         _self
     }
+    fn has_embed(&self) -> bool {
+        self.embed.lock_ref().is_some()
+    }
 }
 
 impl BaseExt<Step> for Base {
     type CanContinueSignal = impl Signal<Item = bool>;
-    fn allowed_step_change(&self, _from: Step, _to: Step) -> bool {
-        true
+    fn allowed_step_change(&self, _from: Step, to: Step) -> bool {
+        match to {
+            Step::Three => self.has_embed(),
+            _ => true,
+        }
     }
 
     fn can_continue_next(&self) -> Self::CanContinueSignal {
