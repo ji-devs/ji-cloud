@@ -170,8 +170,17 @@ pub enum EmbedHost {
     /// Vimeo
     Vimeo(VimeoEmbed),
 
+    /// Google doc
+    GoogleDoc(GoogleDocsEmbed),
+
+    /// Google form
+    GoogleForm(GoogleFormsEmbed),
+
     /// Google sheets
     GoogleSheet(GoogleSheetsEmbed),
+
+    /// Google slide
+    GoogleSlide(GoogleSlidesEmbed),
 
     /// Edpuzzle
     Edpuzzle(EdpuzzleEmbed),
@@ -289,8 +298,20 @@ impl EmbedHost {
                 let VimeoUrl(url) = &vimeo_video.url;
                 url.to_string()
             }
+            EmbedHost::GoogleDoc(google_doc) => {
+                let GoogleDocId(url) = &google_doc.url;
+                url.to_string()
+            }
+            EmbedHost::GoogleForm(google_form) => {
+                let GoogleFormId(url) = &google_form.url;
+                url.to_string()
+            }
             EmbedHost::GoogleSheet(google_sheet) => {
                 let GoogleSheetId(url) = &google_sheet.url;
+                url.to_string()
+            }
+            EmbedHost::GoogleSlide(google_slide) => {
+                let GoogleSlideId(url) = &google_slide.url;
                 url.to_string()
             }
             EmbedHost::Edpuzzle(_) => todo!(),
@@ -311,8 +332,28 @@ impl EmbedHost {
     }
 }
 
-/// Youtube url parse error
-pub type YoutubeUrlError = String;
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+/// Google docs host embed url
+pub struct GoogleDocsEmbed {
+    /// url of the YouTube video
+    pub url: GoogleDocId,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+/// GoogleDoc host google doc url
+pub struct GoogleDocId(pub String);
+
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+/// Google forms host embed url
+pub struct GoogleFormsEmbed {
+    /// url of the YouTube video
+    pub url: GoogleFormId,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+/// GoogleForm host google form url
+pub struct GoogleFormId(pub String);
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 /// Google sheets host embed url
@@ -324,6 +365,17 @@ pub struct GoogleSheetsEmbed {
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 /// GoogleSheet host google sheet url
 pub struct GoogleSheetId(pub String);
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+/// Google slides host embed url
+pub struct GoogleSlidesEmbed {
+    /// url of the YouTube video
+    pub url: GoogleSlideId,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+/// GoogleSlide host google slide url
+pub struct GoogleSlideId(pub String);
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 /// Edpuzzle host embed url

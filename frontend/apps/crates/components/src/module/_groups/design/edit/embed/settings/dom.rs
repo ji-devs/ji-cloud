@@ -19,7 +19,10 @@ impl EmbedSettings {
                     render_settings(Rc::new(state.render_settings_youtube(youtube)))
                 }
                 EmbedHost::Vimeo(_) => state.render_no_settings("Vimeo"),
+                EmbedHost::GoogleDoc(_) => state.render_no_settings("Google Doc"),
+                EmbedHost::GoogleForm(_) => state.render_no_settings("Google Form"),
                 EmbedHost::GoogleSheet(_) => state.render_no_settings("Google Sheet"),
+                EmbedHost::GoogleSlide(_) => state.render_no_settings("Google Slide"),
                 EmbedHost::Edpuzzle(_) => state.render_no_settings("Edpuzzle"),
                 EmbedHost::Puzzel(_) => state.render_no_settings("Puzzel"),
                 EmbedHost::Quizlet(_) => state.render_no_settings("Quizlet"),

@@ -189,8 +189,17 @@ impl EmbedSelect {
         match &host {
             PartialEmbedHost::Youtube(youtube) => state.render_youtube_input(youtube, wrapper),
             PartialEmbedHost::Vimeo(vimeo) => state.render_vimeo_input(vimeo, wrapper),
+            PartialEmbedHost::GoogleDoc(google_doc) => {
+                state.render_google_doc_input(google_doc, wrapper)
+            }
+            PartialEmbedHost::GoogleForm(google_form) => {
+                state.render_google_form_input(google_form, wrapper)
+            }
             PartialEmbedHost::GoogleSheet(google_sheet) => {
                 state.render_google_sheet_input(google_sheet, wrapper)
+            }
+            PartialEmbedHost::GoogleSlide(google_slide) => {
+                state.render_google_slide_input(google_slide, wrapper)
             }
             PartialEmbedHost::Edpuzzle(_) => todo!(),
             PartialEmbedHost::Puzzel(_) => todo!(),
@@ -217,7 +226,10 @@ fn partial_to_type(partial: &PartialEmbedHost) -> EmbedHostType {
     match partial {
         PartialEmbedHost::Youtube(_) => EmbedHostType::Youtube,
         PartialEmbedHost::Vimeo(_) => EmbedHostType::Vimeo,
+        PartialEmbedHost::GoogleDoc(_) => EmbedHostType::GoogleDoc,
+        PartialEmbedHost::GoogleForm(_) => EmbedHostType::GoogleForm,
         PartialEmbedHost::GoogleSheet(_) => EmbedHostType::GoogleSheet,
+        PartialEmbedHost::GoogleSlide(_) => EmbedHostType::GoogleSlide,
         PartialEmbedHost::Edpuzzle(_) => todo!(),
         PartialEmbedHost::Puzzel(_) => todo!(),
         PartialEmbedHost::Quizlet(_) => EmbedHostType::Quizlet,
@@ -229,7 +241,10 @@ fn type_to_partial(partial: &EmbedHostType) -> PartialEmbedHost {
     match partial {
         EmbedHostType::Youtube => PartialEmbedHost::Youtube(Default::default()),
         EmbedHostType::Vimeo => PartialEmbedHost::Vimeo(Default::default()),
+        EmbedHostType::GoogleDoc => PartialEmbedHost::GoogleDoc(Default::default()),
+        EmbedHostType::GoogleForm => PartialEmbedHost::GoogleForm(Default::default()),
         EmbedHostType::GoogleSheet => PartialEmbedHost::GoogleSheet(Default::default()),
+        EmbedHostType::GoogleSlide => PartialEmbedHost::GoogleSlide(Default::default()),
         // EmbedHostType::Edpuzzle => PartialEmbedHost::Edpuzzle(Default::default()),
         // EmbedHostType::Puzzel => PartialEmbedHost::Puzzel(Default::default()),
         EmbedHostType::Quizlet => PartialEmbedHost::Quizlet(Default::default()),

@@ -13,7 +13,10 @@ use crate::stickers::{
 pub(super) enum EmbedHostType {
     Youtube,
     Vimeo,
+    GoogleDoc,
+    GoogleForm,
     GoogleSheet,
+    GoogleSlide,
     // Edpuzzle,
     // Puzzel,
     Quizlet,
@@ -25,7 +28,10 @@ impl EmbedHostType {
         match self {
             EmbedHostType::Youtube => "YouTube",
             EmbedHostType::Vimeo => "Vimeo",
+            EmbedHostType::GoogleDoc => "Google Doc",
+            EmbedHostType::GoogleForm => "Google Form",
             EmbedHostType::GoogleSheet => "Google Sheet",
+            EmbedHostType::GoogleSlide => "Google Slide",
             // EmbedHostType::Edpuzzle => "Edpuzzle",
             // EmbedHostType::Puzzel => "Puzzel",
             EmbedHostType::Quizlet => "Quizlet",
@@ -37,7 +43,10 @@ impl EmbedHostType {
         match self {
             EmbedHostType::Youtube => "youtube",
             EmbedHostType::Vimeo => "vimeo",
+            EmbedHostType::GoogleDoc => "google-docs",
+            EmbedHostType::GoogleForm => "google-forms",
             EmbedHostType::GoogleSheet => "google-sheets",
+            EmbedHostType::GoogleSlide => "google-slides",
             // EmbedHostType::Edpuzzle => "edpuzzle",
             // EmbedHostType::Puzzel => "puzzel",
             EmbedHostType::Quizlet => "quizlet",

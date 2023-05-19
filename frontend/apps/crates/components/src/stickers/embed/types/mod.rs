@@ -6,7 +6,10 @@ use std::rc::Rc;
 
 pub use self::{
     edpuzzle::{EdpuzzleEmbed, PartialEdpuzzleEmbed},
+    google_doc::{GoogleDocsEmbed, PartialGoogleDocsEmbed},
+    google_form::{GoogleFormsEmbed, PartialGoogleFormsEmbed},
     google_sheet::{GoogleSheetsEmbed, PartialGoogleSheetsEmbed},
+    google_slide::{GoogleSlidesEmbed, PartialGoogleSlidesEmbed},
     puzzel::{PartialPuzzelEmbed, PuzzelEmbed},
     quizlet::{PartialQuizletEmbed, QuizletEmbed},
     sutori::{PartialSutoriEmbed, SutoriEmbed},
@@ -16,7 +19,10 @@ pub use self::{
 };
 
 mod edpuzzle;
+mod google_doc;
+mod google_form;
 mod google_sheet;
+mod google_slide;
 mod puzzel;
 mod quizlet;
 mod sutori;
@@ -29,7 +35,10 @@ mod youtube;
 pub enum PartialEmbedHost {
     Youtube(Rc<PartialYoutubeEmbed>),
     Vimeo(Rc<PartialVimeoEmbed>),
+    GoogleDoc(Rc<PartialGoogleDocsEmbed>),
+    GoogleForm(Rc<PartialGoogleFormsEmbed>),
     GoogleSheet(Rc<PartialGoogleSheetsEmbed>),
+    GoogleSlide(Rc<PartialGoogleSlidesEmbed>),
     Edpuzzle(Rc<PartialEdpuzzleEmbed>),
     Puzzel(Rc<PartialPuzzelEmbed>),
     Quizlet(Rc<PartialQuizletEmbed>),
@@ -41,8 +50,17 @@ impl PartialEmbedHost {
         Ok(match self {
             PartialEmbedHost::Youtube(youtube) => EmbedHost::Youtube(Rc::new(youtube.full()?)),
             PartialEmbedHost::Vimeo(vimeo) => EmbedHost::Vimeo(Rc::new(vimeo.full()?)),
+            PartialEmbedHost::GoogleDoc(google_doc) => {
+                EmbedHost::GoogleDoc(Rc::new(google_doc.full()?))
+            }
+            PartialEmbedHost::GoogleForm(google_form) => {
+                EmbedHost::GoogleForm(Rc::new(google_form.full()?))
+            }
             PartialEmbedHost::GoogleSheet(google_sheet) => {
                 EmbedHost::GoogleSheet(Rc::new(google_sheet.full()?))
+            }
+            PartialEmbedHost::GoogleSlide(google_slide) => {
+                EmbedHost::GoogleSlide(Rc::new(google_slide.full()?))
             }
             PartialEmbedHost::Edpuzzle(edpuzzle) => EmbedHost::Edpuzzle(Rc::new(edpuzzle.full()?)),
             PartialEmbedHost::Puzzel(puzzel) => EmbedHost::Puzzel(Rc::new(puzzel.full()?)),
@@ -58,7 +76,10 @@ impl PartialEmbedHost {
 pub enum EmbedHost {
     Youtube(Rc<YoutubeEmbed>),
     Vimeo(Rc<VimeoEmbed>),
+    GoogleDoc(Rc<GoogleDocsEmbed>),
+    GoogleForm(Rc<GoogleFormsEmbed>),
     GoogleSheet(Rc<GoogleSheetsEmbed>),
+    GoogleSlide(Rc<GoogleSlidesEmbed>),
     Edpuzzle(Rc<EdpuzzleEmbed>),
     Puzzel(Rc<PuzzelEmbed>),
     Quizlet(Rc<QuizletEmbed>),
@@ -70,8 +91,17 @@ impl EmbedHost {
         match self {
             EmbedHost::Youtube(youtube) => PartialEmbedHost::Youtube(Rc::new(youtube.partial())),
             EmbedHost::Vimeo(vimeo) => PartialEmbedHost::Vimeo(Rc::new(vimeo.partial())),
+            EmbedHost::GoogleDoc(google_doc) => {
+                PartialEmbedHost::GoogleDoc(Rc::new(google_doc.partial()))
+            }
+            EmbedHost::GoogleForm(google_form) => {
+                PartialEmbedHost::GoogleForm(Rc::new(google_form.partial()))
+            }
             EmbedHost::GoogleSheet(google_sheet) => {
                 PartialEmbedHost::GoogleSheet(Rc::new(google_sheet.partial()))
+            }
+            EmbedHost::GoogleSlide(google_slide) => {
+                PartialEmbedHost::GoogleSlide(Rc::new(google_slide.partial()))
             }
             EmbedHost::Edpuzzle(edpuzzle) => {
                 PartialEmbedHost::Edpuzzle(Rc::new(edpuzzle.partial()))
@@ -90,8 +120,17 @@ impl From<RawEmbedHost> for EmbedHost {
         match value {
             RawEmbedHost::Youtube(youtube) => Self::Youtube(Rc::new(youtube.into())),
             RawEmbedHost::Vimeo(vimeo) => Self::Vimeo(Rc::new(vimeo.into())),
+            RawEmbedHost::GoogleDoc(google_doc) => {
+                Self::GoogleDoc(Rc::new(google_doc.into()))
+            }
+            RawEmbedHost::GoogleForm(google_form) => {
+                Self::GoogleForm(Rc::new(google_form.into()))
+            }
             RawEmbedHost::GoogleSheet(google_sheet) => {
                 Self::GoogleSheet(Rc::new(google_sheet.into()))
+            }
+            RawEmbedHost::GoogleSlide(google_slide) => {
+                Self::GoogleSlide(Rc::new(google_slide.into()))
             }
             RawEmbedHost::Edpuzzle(edpuzzle) => Self::Edpuzzle(Rc::new(edpuzzle.into())),
             RawEmbedHost::Puzzel(puzzel) => Self::Puzzel(Rc::new(puzzel.into())),
@@ -106,8 +145,17 @@ impl From<&EmbedHost> for RawEmbedHost {
         match value {
             EmbedHost::Youtube(youtube) => RawEmbedHost::Youtube((&**youtube).into()),
             EmbedHost::Vimeo(vimeo) => RawEmbedHost::Vimeo((&**vimeo).into()),
+            EmbedHost::GoogleDoc(google_doc) => {
+                RawEmbedHost::GoogleDoc((&**google_doc).into())
+            }
+            EmbedHost::GoogleForm(google_form) => {
+                RawEmbedHost::GoogleForm((&**google_form).into())
+            }
             EmbedHost::GoogleSheet(google_sheet) => {
                 RawEmbedHost::GoogleSheet((&**google_sheet).into())
+            }
+            EmbedHost::GoogleSlide(google_slide) => {
+                RawEmbedHost::GoogleSlide((&**google_slide).into())
             }
             EmbedHost::Edpuzzle(edpuzzle) => RawEmbedHost::Edpuzzle((&**edpuzzle).into()),
             EmbedHost::Puzzel(puzzel) => RawEmbedHost::Puzzel((&**puzzel).into()),

@@ -4,7 +4,7 @@ use super::{
     menu::dom::render_sticker_embed_menu,
     state::Embed,
     types::{
-        GoogleSheetsEmbed, QuizletEmbed, SutoriEmbed, ThinglinkEmbed, VimeoEmbed, YoutubeEmbed,
+        GoogleDocsEmbed, GoogleFormsEmbed, GoogleSheetsEmbed, GoogleSlidesEmbed, QuizletEmbed, SutoriEmbed, ThinglinkEmbed, VimeoEmbed, YoutubeEmbed,
     },
 };
 use crate::{
@@ -24,7 +24,7 @@ use gloo_timers::future::TimeoutFuture;
 use js_sys::Reflect;
 use shared::domain::module::body::_groups::design::{
     DoneAction, Embed as RawEmbed, EmbedHost as RawEmbedHost, GoogleSheetId, QuizletId, SutoriId,
-    ThinglinkId, VimeoUrl,
+    ThinglinkId, VimeoUrl, GoogleDocId, GoogleFormId, GoogleSlideId,
 };
 use std::rc::Rc;
 use utils::{math::transform_signals, prelude::*};
@@ -134,6 +134,34 @@ fn render_vimeo_embed(
     })
 }
 
+fn render_google_doc_embed(
+    google_doc: &Rc<GoogleDocsEmbed>,
+    embed: Rc<Embed>,
+    _opts: Rc<EmbedRenderOptions>,
+) -> Dom {
+    html!("iframe", {
+        .prop_signal("src", google_doc.url.signal_cloned().map(|url| {
+            url.get_id().to_owned()
+            // TODO: only the id?
+        }))
+        .apply(|dom| apply_transform(dom, &embed.transform))
+    })
+}
+
+fn render_google_form_embed(
+    google_form: &Rc<GoogleFormsEmbed>,
+    embed: Rc<Embed>,
+    _opts: Rc<EmbedRenderOptions>,
+) -> Dom {
+    html!("iframe", {
+        .prop_signal("src", google_form.url.signal_cloned().map(|url| {
+            url.get_id().to_owned()
+            // TODO: only the id?
+        }))
+        .apply(|dom| apply_transform(dom, &embed.transform))
+    })
+}
+
 fn render_google_sheet_embed(
     google_sheet: &Rc<GoogleSheetsEmbed>,
     embed: Rc<Embed>,
@@ -141,6 +169,20 @@ fn render_google_sheet_embed(
 ) -> Dom {
     html!("iframe", {
         .prop_signal("src", google_sheet.url.signal_cloned().map(|url| {
+            url.get_id().to_owned()
+            // TODO: only the id?
+        }))
+        .apply(|dom| apply_transform(dom, &embed.transform))
+    })
+}
+
+fn render_google_slide_embed(
+    google_slide: &Rc<GoogleSlidesEmbed>,
+    embed: Rc<Embed>,
+    _opts: Rc<EmbedRenderOptions>,
+) -> Dom {
+    html!("iframe", {
+        .prop_signal("src", google_slide.url.signal_cloned().map(|url| {
             url.get_id().to_owned()
             // TODO: only the id?
         }))
@@ -229,7 +271,10 @@ pub fn render_sticker_embed<T: AsSticker>(
                             match host {
                                 EmbedHost::Youtube(youtube) => Some(render_youtube_embed(&youtube, Rc::clone(&embed), Rc::clone(&opts))),
                                 EmbedHost::Vimeo(vimeo) => Some(render_vimeo_embed(&vimeo, Rc::clone(&embed), Rc::clone(&opts))),
+                                EmbedHost::GoogleDoc(google_doc) => Some(render_google_doc_embed(&google_doc, Rc::clone(&embed), Rc::clone(&opts))),
+                                EmbedHost::GoogleForm(google_form) => Some(render_google_form_embed(&google_form, Rc::clone(&embed), Rc::clone(&opts))),
                                 EmbedHost::GoogleSheet(google_sheet) => Some(render_google_sheet_embed(&google_sheet, Rc::clone(&embed), Rc::clone(&opts))),
+                                EmbedHost::GoogleSlide(google_slide) => Some(render_google_slide_embed(&google_slide, Rc::clone(&embed), Rc::clone(&opts))),
                                 EmbedHost::Edpuzzle(_) => todo!(),
                                 EmbedHost::Puzzel(_) => todo!(),
                                 EmbedHost::Quizlet(quizlet) => Some(render_quizlet_embed(&quizlet, Rc::clone(&embed), Rc::clone(&opts))),
@@ -264,10 +309,34 @@ pub fn render_sticker_embed<T: AsSticker>(
                                         .apply(|dom| apply_transform(dom, &embed.transform))
                                     })
                                 ),
+                                EmbedHost::GoogleDoc(google_doc) => Some(
+                                    html!("iframe", {
+                                        .prop_signal("src", google_doc.url.signal_ref(|url| {
+                                            get_google_doc_url(&url)
+                                        }))
+                                        .apply(|dom| apply_transform(dom, &embed.transform))
+                                    })
+                                ),
+                                EmbedHost::GoogleForm(google_form) => Some(
+                                    html!("iframe", {
+                                        .prop_signal("src", google_form.url.signal_ref(|url| {
+                                            get_google_form_url(&url)
+                                        }))
+                                        .apply(|dom| apply_transform(dom, &embed.transform))
+                                    })
+                                ),
                                 EmbedHost::GoogleSheet(google_sheet) => Some(
                                     html!("iframe", {
                                         .prop_signal("src", google_sheet.url.signal_ref(|url| {
                                             get_google_sheet_url(&url)
+                                        }))
+                                        .apply(|dom| apply_transform(dom, &embed.transform))
+                                    })
+                                ),
+                                EmbedHost::GoogleSlide(google_slide) => Some(
+                                    html!("iframe", {
+                                        .prop_signal("src", google_slide.url.signal_ref(|url| {
+                                            get_google_slide_url(&url)
                                         }))
                                         .apply(|dom| apply_transform(dom, &embed.transform))
                                     })
@@ -426,9 +495,33 @@ pub fn render_sticker_embed_raw(embed: &RawEmbed, opts: Option<EmbedRawRenderOpt
                         // frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
                     })
                 }
+                RawEmbedHost::GoogleDoc(google_doc) => {
+                    html!("iframe", {
+                        .prop("src", get_google_doc_url(&google_doc.url))
+                        .style("display", "block")
+                        .style("width", "100%")
+                        .style("height", "100%")
+                    })
+                }
+                RawEmbedHost::GoogleForm(google_form) => {
+                    html!("iframe", {
+                        .prop("src", get_google_form_url(&google_form.url))
+                        .style("display", "block")
+                        .style("width", "100%")
+                        .style("height", "100%")
+                    })
+                }
                 RawEmbedHost::GoogleSheet(google_sheet) => {
                     html!("iframe", {
                         .prop("src", get_google_sheet_url(&google_sheet.url))
+                        .style("display", "block")
+                        .style("width", "100%")
+                        .style("height", "100%")
+                    })
+                }
+                RawEmbedHost::GoogleSlide(google_slide) => {
+                    html!("iframe", {
+                        .prop("src", get_google_slide_url(&google_slide.url))
                         .style("display", "block")
                         .style("width", "100%")
                         .style("height", "100%")
@@ -467,10 +560,31 @@ pub fn render_sticker_embed_raw(embed: &RawEmbed, opts: Option<EmbedRawRenderOpt
         .into_dom()
 }
 
+fn get_google_doc_url(google_doc: &GoogleDocId) -> String {
+    format!(
+        "https://docs.google.com/document/d/e/{}/pub?embedded=true",
+        google_doc.get_id()
+    )
+}
+
+fn get_google_form_url(google_form: &GoogleFormId) -> String {
+    format!(
+        "https://docs.google.com/forms/d/e/{}/viewform?embedded=true",
+        google_form.get_id()
+    )
+}
+
 fn get_google_sheet_url(google_sheet: &GoogleSheetId) -> String {
     format!(
         "https://docs.google.com/spreadsheets/d/e/{}/pubhtml?widget=true&amp;headers=false",
         google_sheet.get_id()
+    )
+}
+
+fn get_google_slide_url(google_slide: &GoogleSlideId) -> String {
+    format!(
+        "https://docs.google.com/presentation/d/e/{}/embed",
+        google_slide.get_id()
     )
 }
 
