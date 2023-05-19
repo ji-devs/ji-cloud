@@ -203,6 +203,11 @@ export class _ extends LitElement {
                     display: flex;
                     align-items: center;
                     column-gap: 6px;
+                    color: inherit;
+                    text-decoration: none;
+                }
+                .back .author-section .left-side:hover {
+                    color: var(--main-blue);
                 }
                 .back .result-actions {
                     height: 40px;
@@ -286,7 +291,10 @@ export class _ extends LitElement {
     byJiTeam: boolean = false;
 
     @property()
-    author: string = "";
+    authorName: string = "";
+
+    @property()
+    authorLink: string = "";
 
     @property()
     publishedAt: string = "";
@@ -382,19 +390,19 @@ export class _ extends LitElement {
                                 ` : nothing
                             }
                             <div class="author-section">
-                                <span class="left-side">
-                                    ${this.byJiTeam
-                                        ? html`
-                                              <img-ui
-                                                  path="entry/home/search-results/ji-logo-white.svg"
-                                              ></img-ui>
-                                              <span class="by-ji-team"
-                                                  >${STR_JI_TEAM}
-                                              </span>
-                                          `
-                                        : nothing}
-                                    ${this.author}
-                                </span>
+                                <a class="left-side" href="${this.authorLink}">
+                                    ${
+                                        this.byJiTeam ? html`
+                                            <img-ui
+                                                path="entry/home/search-results/ji-logo-white.svg"
+                                            ></img-ui>
+                                            <span class="by-ji-team"
+                                                >${STR_JI_TEAM}
+                                            </span>
+                                        ` : nothing
+                                    }
+                                    ${this.authorName}
+                                </a>
                                 <!-- <a>
                                     ${STR_SEE_ALL}
                                     <fa-icon

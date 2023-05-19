@@ -23,7 +23,10 @@ use utils::{
     init::analytics,
     metadata::{get_category_label_lookup, get_resource_types},
     prelude::{get_user_cloned, ApiEndpointExt},
-    routes::{AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, ResourceEditRoute, Route},
+    routes::{
+        AssetEditRoute, AssetRoute, CommunityMembersRoute, CommunityRoute, CourseEditRoute,
+        JigEditRoute, ResourceEditRoute, Route,
+    },
 };
 
 use crate::home::actions::search;
@@ -84,7 +87,6 @@ impl SearchResultsSection {
             .prop("name", asset.display_name())
             .prop("playedCount", asset.plays())
             .prop("likedCount", asset.likes())
-            .prop("author", asset.author_name().clone().unwrap_or_default())
             .prop("language", asset.language())
             .prop_signal("flipped", share_asset.active_popup.signal_cloned().map(|active_popup| active_popup.is_some()))
             .prop("kind", state.asset_type.as_str())
@@ -93,6 +95,14 @@ impl SearchResultsSection {
                     Some(publish_at) => published_at_string(publish_at, false),
                     None => String::new(),
                 }
+            })
+            .apply(|mut dom| {
+                if let (Some(name), Some(id)) = (asset.author_name(), asset.author_id()) {
+                    let url = Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(*id))).to_string();
+                    dom = dom.prop("authorName", name);
+                    dom = dom.prop("authorLink", url);
+                }
+                dom
             })
             .child(render_asset_card(
                 &asset,

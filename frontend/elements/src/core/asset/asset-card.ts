@@ -141,7 +141,13 @@ export class _ extends LitElement {
                     column-gap: 18px;
                     font-size: 13px;
                     font-weight: 500;
+                }
+                .bottom-indicator ::slotted([slot=bottom-indicator]) {
                     color: var(--dark-gray-5);
+                    text-decoration: none;
+                }
+                .bottom-indicator ::slotted([slot=bottom-indicator]:hover) {
+                    color: var(--main-blue);
                 }
                 :host([kind=jig]) .bottom-indicator {
                     background-color: #fff6d9;

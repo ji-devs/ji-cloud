@@ -5,6 +5,7 @@ use futures_signals::signal::{from_future, SignalExt};
 use shared::domain::asset::{Asset, DraftOrLive, PrivacyLevel};
 use utils::ages::AgeRangeVecExt;
 use utils::metadata::{get_age_ranges, get_resource_types};
+use utils::routes::{CommunityMembersRoute, CommunityRoute, Route};
 
 use crate::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
 
@@ -132,10 +133,15 @@ pub fn render_asset_card(asset: &Asset, config: AssetCardConfig) -> Dom {
                     dom
                 },
                 AssetCardBottomIndicator::Author => {
-                    dom.child(html!("span", {
-                        .prop("slot", "bottom-indicator")
-                        .text(&asset.author_name().clone().unwrap_or_default())
-                    }))
+                    if let (Some(name), Some(id)) = (asset.author_name(), asset.author_id()) {
+                        let url = Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(*id))).to_string();
+                        dom = dom.child(html!("a", {
+                            .prop("slot", "bottom-indicator")
+                            .prop("href", url)
+                            .text(name)
+                        }));
+                    }
+                    dom
                 },
                 AssetCardBottomIndicator::Status => {
                     if !asset.live_up_to_date() {
