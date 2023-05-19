@@ -1,6 +1,5 @@
 use super::super::state::Sidebar;
 use crate::edit::sidebar::SidebarSpot;
-use crate::edit::sidebar::SidebarSpotItem::ProDev;
 use dominator::clone;
 use shared::domain::pro_dev::unit::ProDevUnit;
 use shared::{

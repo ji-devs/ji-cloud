@@ -1,14 +1,8 @@
 use shared::domain::pro_dev::unit::{
-    CreateProDevUnitPath, GetProDevUnitDraftPath, ProDevUnit, ProDevUnitCreateRequest, ProDevUnitId,
+    CreateProDevUnitPath, ProDevUnit, ProDevUnitCreateRequest, ProDevUnitId,
 };
-use shared::{
-    api::endpoints::pro_dev,
-    domain::{
-        asset::AssetType,
-        pro_dev::{unit, ProDevCreateRequest, ProDevId},
-    },
-};
-use utils::{prelude::ApiEndpointExt, unwrap::UnwrapJiExt};
+use shared::{api::endpoints::pro_dev, domain::pro_dev::ProDevId};
+use utils::prelude::ApiEndpointExt;
 
 pub async fn clone_unit(
     orig_unit: &ProDevUnit,

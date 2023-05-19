@@ -1,5 +1,4 @@
 use super::state::*;
-use crate::edit::sidebar::spot::pro_dev;
 use crate::edit::sidebar::spot::pro_dev::actions::edit;
 use crate::edit::sidebar::{
     pro_dev::actions as pro_dev_actions,
