@@ -145,6 +145,9 @@ export class _ extends LitElement {
     @property({ type: Boolean, reflect: true })
     hasAdditionalResources: boolean = false;
 
+    @property()
+   itemType: string = "";
+
     render() {
         return html`
             <div class="course-info-side">
@@ -153,7 +156,7 @@ export class _ extends LitElement {
                 <div class="count-lang-author">
                     <img-ui path="entry/home/search-results/jig-section.png"></img-ui>
                     <span class="items-count">
-                        ${this.itemsCount} Jigs
+                        ${this.itemsCount} ${this.itemType}
                     </span>
                     <span class="language">
                         <fa-icon icon="fa-light fa-globe"></fa-icon>

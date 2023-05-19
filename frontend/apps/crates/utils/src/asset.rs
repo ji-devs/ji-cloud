@@ -252,7 +252,7 @@ impl AssetPlayerOptions {
         match asset_id {
             AssetId::JigId(_) => Self::Jig(Default::default()),
             AssetId::CourseId(_) => Self::Course(Default::default()),
-            AssetId::ProDevId(_) => todo!(),
+            AssetId::ProDevId(_) => Self::ProDev(Default::default()),
             AssetId::ResourceId(_) => unimplemented!(),
         }
     }

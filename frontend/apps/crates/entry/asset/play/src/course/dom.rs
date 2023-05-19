@@ -57,6 +57,7 @@ impl CoursePlayer {
             .prop("language", language)
             .prop("author", &course.author_name.to_owned().unwrap_or_default())
             .prop("itemsCount", course.course_data.items.len())
+            .prop("itemType", "Jigs")
             .prop("hasAdditionalResources", !course.course_data.additional_resources.is_empty())
             .child(
                 ModuleThumbnail::new_hight_res(

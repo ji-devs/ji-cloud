@@ -57,6 +57,7 @@ impl PlayerMain {
             .prop("language", language)
             .prop("author", &pro_dev.author_name.to_owned().unwrap_or_default())
             .prop("itemsCount", pro_dev.pro_dev_data.units.len())
+            .prop("itemType", "Units")
             .prop("hasAdditionalResources", !pro_dev.pro_dev_data.additional_resources.is_empty())
             .child(
                 ModuleThumbnail::new_hight_res(
