@@ -3,8 +3,10 @@ use std::rc::Rc;
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::{
+    asset::AssetId,
     circle::Circle,
-    jig::{JigId, JigResponse},
+    course::CourseResponse,
+    jig::JigResponse,
     resource::ResourceResponse,
     user::{public_user::PublicUser, UserId},
 };
@@ -18,7 +20,7 @@ pub struct MemberDetails {
     pub loader: AsyncLoader,
     pub creations: Mutable<Creations>,
     pub connections: Mutable<Connections>,
-    pub play_jig: Mutable<Option<JigId>>,
+    pub play_asset: Mutable<Option<AssetId>>,
     pub community_state: Rc<Community>,
     pub(super) active_popup: Mutable<Option<ActivePopup>>,
 }
@@ -32,7 +34,7 @@ impl MemberDetails {
             loader: AsyncLoader::new(),
             creations: Mutable::new(Creations::Jigs(None)),
             connections: Mutable::new(Connections::Followers(None)),
-            play_jig: Mutable::new(None),
+            play_asset: Mutable::new(None),
             community_state,
             active_popup: Mutable::new(None),
         })
@@ -43,7 +45,7 @@ impl MemberDetails {
 pub enum Creations {
     Jigs(Option<Vec<JigResponse>>),
     Resources(Option<Vec<ResourceResponse>>),
-    // Courses(Option<Vec<CourseResponse>>),
+    Courses(Option<Vec<CourseResponse>>),
 }
 
 #[derive(Clone, Debug)]

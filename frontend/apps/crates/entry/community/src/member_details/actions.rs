@@ -7,6 +7,7 @@ use shared::{
     domain::{
         asset::{DraftOrLive, UserOrMe},
         circle::{CircleBrowsePath, CircleBrowseQuery},
+        course::{CourseBrowsePath, CourseBrowseQuery},
         jig::{JigBrowsePath, JigBrowseQuery},
         resource::{ResourceBrowsePath, ResourceBrowseQuery},
         user::{
@@ -71,6 +72,7 @@ impl MemberDetails {
         state.loader.load(clone!(state => async move {
             match creations {
                 Creations::Jigs(_) => state.load_members_jigs().await,
+                Creations::Courses(_) => state.load_members_courses().await,
                 Creations::Resources(_) => state.load_members_resources().await,
             };
         }));
@@ -87,6 +89,21 @@ impl MemberDetails {
 
         match endpoints::jig::Browse::api_no_auth(JigBrowsePath(), Some(req)).await {
             Ok(res) => state.creations.set(Creations::Jigs(Some(res.jigs))),
+            Err(_) => todo!(),
+        }
+    }
+
+    async fn load_members_courses(self: &Rc<Self>) {
+        let state = self;
+
+        let req = CourseBrowseQuery {
+            author_id: Some(UserOrMe::User(state.member_id.0)),
+            draft_or_live: Some(DraftOrLive::Live),
+            ..Default::default()
+        };
+
+        match endpoints::course::Browse::api_no_auth(CourseBrowsePath(), Some(req)).await {
+            Ok(res) => state.creations.set(Creations::Courses(Some(res.courses))),
             Err(_) => todo!(),
         }
     }

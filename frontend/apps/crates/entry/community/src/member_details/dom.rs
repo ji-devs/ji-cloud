@@ -14,7 +14,7 @@ use futures_signals::signal::{Signal, SignalExt};
 use itertools::Itertools;
 use shared::{
     domain::{
-        asset::DraftOrLive, jig::JigResponse, resource::ResourceResponse,
+        asset::DraftOrLive, course::CourseResponse, jig::JigResponse, resource::ResourceResponse,
         user::public_user::PublicUser,
     },
     media::MediaLibrary,
@@ -185,10 +185,10 @@ impl MemberDetails {
                     )
                 }))
             })))
-            .child_signal(state.play_jig.signal_cloned().map(clone!(state => move|play_jig| {
-                play_jig.map(|jig_id| {
+            .child_signal(state.play_asset.signal_cloned().map(clone!(state => move|play_asset| {
+                play_asset.map(|jig_id| {
                     let close = clone!(state => move || {
-                        state.play_jig.set(None);
+                        state.play_asset.set(None);
                     });
                     PlayerPopup::new_default_player_options(
                         jig_id.into(),
@@ -258,6 +258,16 @@ impl MemberDetails {
             }),
             html!("community-member-details-tab", {
                 .prop("slot", "creation-tabs")
+                .text("Courses")
+                .prop_signal("active", state.creations.signal_ref(|creations| {
+                    matches!(creations, Creations::Courses(_))
+                }))
+                .event(clone!(state => move |_: events::Click| {
+                    state.set_active_creations(Creations::Courses(None));
+                }))
+            }),
+            html!("community-member-details-tab", {
+                .prop("slot", "creation-tabs")
                 .text("Resources")
                 .prop_signal("active", state.creations.signal_ref(|creations| {
                     matches!(creations, Creations::Resources(_))
@@ -286,6 +296,20 @@ impl MemberDetails {
                                 })).collect()
                             }
                         },
+                        Creations::Courses(Some(courses)) => {
+                            if courses.is_empty() {
+                                vec![
+                                    html!("div", {
+                                        .prop("slot", "creation-assets")
+                                        .text("User has no courses")
+                                    })
+                                ]
+                            } else {
+                                courses.iter().map(clone!(state => move |courses| {
+                                    state.render_course(courses)
+                                })).collect()
+                            }
+                        },
                         Creations::Resources(Some(resources)) => {
                             if resources.is_empty() {
                                 vec![
@@ -300,7 +324,7 @@ impl MemberDetails {
                                 })).collect()
                             }
                         },
-                        Creations::Jigs(None) | Creations::Resources(None) => vec![
+                        Creations::Jigs(None) | Creations::Courses(None) | Creations::Resources(None) => vec![
                             html!("progress", {
                                 .prop("slot", "creation-assets")
                             })
@@ -324,7 +348,25 @@ impl MemberDetails {
             .prop("slot", "creation-assets")
             .prop("name", &jig.jig_data.display_name)
             .event(clone!(state => move |_:events::Click| {
-                state.play_jig.set(Some(jig_id));
+                state.play_asset.set(Some(jig_id.into()));
+            }))
+        })
+    }
+
+    fn render_course(self: &Rc<Self>, course: &CourseResponse) -> Dom {
+        let state = self;
+        let course_id = course.id;
+        html!("community-asset", {
+            .child(ModuleThumbnail::new(
+                course.id.into(),
+                course.course_data.cover.clone(),
+                ThumbnailFallback::Asset,
+                DraftOrLive::Live,
+            ).render(Some("thumbnail")))
+            .prop("slot", "creation-assets")
+            .prop("name", &course.course_data.display_name)
+            .event(clone!(state => move |_:events::Click| {
+                state.play_asset.set(Some(course_id.into()));
             }))
         })
     }

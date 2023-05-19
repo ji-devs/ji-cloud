@@ -11,7 +11,7 @@ export class _ extends LitElement {
                     color: var(--dark-gray-5);
                     border-bottom: solid #fff 3px;
                     text-align: center;
-                    min-width: 100px;
+                    padding: 0 40px;
                     display: inline-block;
                     cursor: pointer;
                 }
