@@ -4,7 +4,8 @@ use super::{
     menu::dom::render_sticker_embed_menu,
     state::Embed,
     types::{
-        GoogleDocsEmbed, GoogleFormsEmbed, GoogleSheetsEmbed, GoogleSlidesEmbed, QuizletEmbed, SutoriEmbed, ThinglinkEmbed, VimeoEmbed, YoutubeEmbed,
+        GoogleDocsEmbed, GoogleFormsEmbed, GoogleSheetsEmbed, GoogleSlidesEmbed, QuizletEmbed,
+        SutoriEmbed, ThinglinkEmbed, VimeoEmbed, YoutubeEmbed,
     },
 };
 use crate::{
@@ -23,8 +24,8 @@ use futures_signals::signal::{Mutable, ReadOnlyMutable, SignalExt};
 use gloo_timers::future::TimeoutFuture;
 use js_sys::Reflect;
 use shared::domain::module::body::_groups::design::{
-    DoneAction, Embed as RawEmbed, EmbedHost as RawEmbedHost, GoogleSheetId, QuizletId, SutoriId,
-    ThinglinkId, VimeoUrl, GoogleDocId, GoogleFormId, GoogleSlideId,
+    DoneAction, Embed as RawEmbed, EmbedHost as RawEmbedHost, GoogleDocId, GoogleFormId,
+    GoogleSheetId, GoogleSlideId, QuizletId, SutoriId, ThinglinkId, VimeoUrl,
 };
 use std::rc::Rc;
 use utils::{math::transform_signals, prelude::*};

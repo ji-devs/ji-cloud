@@ -120,12 +120,8 @@ impl From<RawEmbedHost> for EmbedHost {
         match value {
             RawEmbedHost::Youtube(youtube) => Self::Youtube(Rc::new(youtube.into())),
             RawEmbedHost::Vimeo(vimeo) => Self::Vimeo(Rc::new(vimeo.into())),
-            RawEmbedHost::GoogleDoc(google_doc) => {
-                Self::GoogleDoc(Rc::new(google_doc.into()))
-            }
-            RawEmbedHost::GoogleForm(google_form) => {
-                Self::GoogleForm(Rc::new(google_form.into()))
-            }
+            RawEmbedHost::GoogleDoc(google_doc) => Self::GoogleDoc(Rc::new(google_doc.into())),
+            RawEmbedHost::GoogleForm(google_form) => Self::GoogleForm(Rc::new(google_form.into())),
             RawEmbedHost::GoogleSheet(google_sheet) => {
                 Self::GoogleSheet(Rc::new(google_sheet.into()))
             }
@@ -145,12 +141,8 @@ impl From<&EmbedHost> for RawEmbedHost {
         match value {
             EmbedHost::Youtube(youtube) => RawEmbedHost::Youtube((&**youtube).into()),
             EmbedHost::Vimeo(vimeo) => RawEmbedHost::Vimeo((&**vimeo).into()),
-            EmbedHost::GoogleDoc(google_doc) => {
-                RawEmbedHost::GoogleDoc((&**google_doc).into())
-            }
-            EmbedHost::GoogleForm(google_form) => {
-                RawEmbedHost::GoogleForm((&**google_form).into())
-            }
+            EmbedHost::GoogleDoc(google_doc) => RawEmbedHost::GoogleDoc((&**google_doc).into()),
+            EmbedHost::GoogleForm(google_form) => RawEmbedHost::GoogleForm((&**google_form).into()),
             EmbedHost::GoogleSheet(google_sheet) => {
                 RawEmbedHost::GoogleSheet((&**google_sheet).into())
             }
