@@ -11521,6 +11521,29 @@
     },
     "query": "\nselect jdm.id          as \"id!: ModuleId\",\n       contents    as \"body!\",\n       created_at  as \"created_at!\",\n       updated_at  as \"updated_at!\",\n       kind        as \"kind!: ModuleKind\",\n       is_complete as \"is_complete!\"\nfrom jig_data_module \"jdm\"\ninner join jig on jig.live_id = jdm.jig_data_id \nwhere jdm.id is not distinct from $1 \n"
   },
+  "c8ffa3196adce5e5cb52681e288abd8e58c1df141533779a7c34a1599f47625a": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: ProDevId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\ninsert into pro_dev(creator_id, author_id, parents, live_id, draft_id)\nselect creator_id, $2, array_append(parents, $1), $3, $4\nfrom pro_dev\nwhere id = $1\nreturning id as \"id!: ProDevId\"\n"
+  },
   "c965d419a0e46d766a5b22b3f96a9b56bcd985196ae9bf41d662c813ad189aa2": {
     "describe": {
       "columns": [

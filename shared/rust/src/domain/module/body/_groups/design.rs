@@ -343,7 +343,6 @@ pub struct GoogleDocsEmbed {
 /// GoogleDoc host google doc url
 pub struct GoogleDocId(pub String);
 
-
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 /// Google forms host embed url
 pub struct GoogleFormsEmbed {

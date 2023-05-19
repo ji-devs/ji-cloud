@@ -286,6 +286,21 @@ async fn search(
     }))
 }
 
+/// Clone a ProDev
+async fn clone(
+    db: Data<PgPool>,
+    claims: TokenUser,
+    parent: web::Path<ProDevId>,
+) -> Result<HttpResponse, error::CloneDraft> {
+    let user_id = claims.user_id();
+
+    db::resource::authz(&*db, user_id, None).await?;
+
+    let id = db::pro_dev::clone_pro_dev(db.as_ref(), parent.into_inner(), user_id).await?;
+
+    Ok(HttpResponse::Created().json(CreateResponse { id }))
+}
+
 #[instrument]
 async fn page_limit(page_limit: Option<u32>) -> anyhow::Result<u32> {
     if let Some(limit) = page_limit {
@@ -358,6 +373,10 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <pro_dev::GetLive as ApiEndpoint>::Path::PATH,
         pro_dev::GetLive::METHOD.route().to(get_live),
+    )
+    .route(
+        <pro_dev::Clone as ApiEndpoint>::Path::PATH,
+        pro_dev::Clone::METHOD.route().to(clone),
     )
     .route(
         <pro_dev::GetDraft as ApiEndpoint>::Path::PATH,
