@@ -25,7 +25,9 @@ use crate::config::PUZZLE_DISTANCE_THRESHHOLD;
 use components::traces::canvas::{apply_transform_mat4, clip_single_shape, draw_single_shape};
 use dominator::{animation::Percentage, clone};
 use futures_signals::signal::SignalExt;
+use gloo_timers::future::TimeoutFuture;
 use std::rc::Rc;
+use std::sync::atomic::Ordering;
 use utils::{
     drag::Drag,
     math::{mat4::Matrix4, vec2},
@@ -33,8 +35,6 @@ use utils::{
     resize::{get_resize_info, ResizeInfo},
 };
 use wasm_bindgen::prelude::*;
-use std::sync::atomic::Ordering;
-use gloo_timers::future::TimeoutFuture;
 use wasm_bindgen_futures::spawn_local;
 
 impl Puzzle {
@@ -47,10 +47,9 @@ impl Puzzle {
         if let Some(audio_filename) = state.raw.audio_filename.as_ref() {
             state.audio_playing.store(true, Ordering::SeqCst);
 
-            state
-                .base
-                .audio_manager
-                .play_clip_on_ended(state.base.activity_media_url(&audio_filename), clone!(state => move || {
+            state.base.audio_manager.play_clip_on_ended(
+                state.base.activity_media_url(&audio_filename),
+                clone!(state => move || {
                     state.audio_playing.store(false, Ordering::SeqCst);
                     match state.init_phase.get_cloned() {
                         InitPhase::Playing(game) => {
@@ -58,7 +57,8 @@ impl Puzzle {
                         },
                         _ => {}
                     }
-                }));
+                }),
+            );
         }
 
         state.base.allow_stage_click();
@@ -240,7 +240,10 @@ impl PuzzleGame {
             let base = self.base.clone();
 
             spawn_local(async move {
-                log::info!("all finished, waiting {} ms before jumping", crate::config::PUZZLE_FINISH_DELAY);
+                log::info!(
+                    "all finished, waiting {} ms before jumping",
+                    crate::config::PUZZLE_FINISH_DELAY
+                );
                 TimeoutFuture::new(crate::config::PUZZLE_FINISH_DELAY).await;
                 match jump_index {
                     Some(index) => {
@@ -263,12 +266,13 @@ impl PuzzleItem {
 
         if let Some(audio_filename) = self.raw.audio_filename.as_ref() {
             game.audio_playing.store(true, Ordering::Relaxed);
-            self.base
-                .audio_manager
-                .play_clip_on_ended(self.base.activity_media_url(audio_filename), move || {
+            self.base.audio_manager.play_clip_on_ended(
+                self.base.activity_media_url(audio_filename),
+                move || {
                     game.audio_playing.store(false, Ordering::Relaxed);
                     game.evaluate_all();
-                });
+                },
+            );
         }
     }
 
