@@ -27,6 +27,7 @@ pub struct Puzzle {
     pub base: Rc<Base>,
     pub raw: RawPuzzle,
     pub init_phase: Mutable<InitPhase>,
+    pub audio_playing: Rc<AtomicBool>,
 }
 
 pub struct PuzzlePreview {
@@ -46,7 +47,7 @@ pub struct PuzzleGame {
     pub locked_items: RefCell<Vec<Rc<PuzzleItem>>>,
     pub free_items: RefCell<Vec<Rc<PuzzleItem>>>,
     pub drag_index: Cell<Option<usize>>,
-    pub audio_playing: AtomicBool,
+    pub audio_playing: Rc<AtomicBool>,
 }
 
 pub struct PuzzleItem {
@@ -70,6 +71,7 @@ impl Puzzle {
             base,
             raw,
             init_phase: Mutable::new(InitPhase::Loading),
+            audio_playing: Rc::new(AtomicBool::new(false)),
         });
 
         _self.base.insert_start_listener(clone!(_self => move || {
@@ -149,7 +151,7 @@ impl PuzzleGame {
             locked_items: RefCell::new(Vec::new()),
             free_items,
             drag_index: Cell::new(None),
-            audio_playing: AtomicBool::new(false)
+            audio_playing: parent.audio_playing.clone(), 
         })
     }
 }
