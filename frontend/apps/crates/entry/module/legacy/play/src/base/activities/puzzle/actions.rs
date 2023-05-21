@@ -45,10 +45,20 @@ impl Puzzle {
             log::info!("showing preview...");
         }
         if let Some(audio_filename) = state.raw.audio_filename.as_ref() {
+            state.audio_playing.store(true, Ordering::SeqCst);
+
             state
                 .base
                 .audio_manager
-                .play_clip(state.base.activity_media_url(&audio_filename));
+                .play_clip_on_ended(state.base.activity_media_url(&audio_filename), clone!(state => move || {
+                    state.audio_playing.store(false, Ordering::SeqCst);
+                    match state.init_phase.get_cloned() {
+                        InitPhase::Playing(game) => {
+                            game.evaluate_all();
+                        },
+                        _ => {}
+                    }
+                }));
         }
 
         state.base.allow_stage_click();
