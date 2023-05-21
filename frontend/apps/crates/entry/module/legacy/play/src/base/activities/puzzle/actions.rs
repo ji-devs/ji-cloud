@@ -33,6 +33,7 @@ use utils::{
     resize::{get_resize_info, ResizeInfo},
 };
 use wasm_bindgen::prelude::*;
+use std::sync::atomic::Ordering;
 
 impl Puzzle {
     pub fn on_start(self: Rc<Self>) {
@@ -166,7 +167,7 @@ impl PuzzleGame {
         }
     }
 
-    pub fn start_drag(&self, x: i32, y: i32) {
+    pub fn start_drag(self: Rc<Self>, x: i32, y: i32) {
         let resize_info = get_resize_info();
         self.draw_click_detection(&resize_info);
 
@@ -184,7 +185,7 @@ impl PuzzleGame {
             //we use alpha just to check if there _is_ a hit
             if a != 0 {
                 let index = ((r << 16) | (g << 8) | b) as usize;
-                self.free_items.borrow()[index].start_drag(x, y);
+                self.free_items.borrow()[index].start_drag(x, y, self.clone());
                 self.drag_index.set(Some(index));
                 //log::info!("got hit! {}, mouse: {} {}, canvas: {} {}", index, x, y, canvas_x, canvas_y);
             } else {
@@ -217,6 +218,10 @@ impl PuzzleGame {
     }
 
     pub fn evaluate_all(&self) {
+        if self.audio_playing.load(Ordering::Relaxed) {
+            log::info!("audio playing, waiting for finish before evaluating");
+            return;
+        }
         if self.free_items.borrow().len() == 0 {
             log::info!("all finished!!");
             match self.raw.jump_index {
@@ -234,13 +239,17 @@ impl PuzzleGame {
 }
 
 impl PuzzleItem {
-    pub fn start_drag(&self, x: i32, y: i32) {
+    pub fn start_drag(&self, x: i32, y: i32, game: Rc<PuzzleGame>) {
         *self.drag.borrow_mut() = Some(Rc::new(Drag::new(x, y, 0.0, 0.0, true, ())));
 
         if let Some(audio_filename) = self.raw.audio_filename.as_ref() {
+            game.audio_playing.store(true, Ordering::Relaxed);
             self.base
                 .audio_manager
-                .play_clip(self.base.activity_media_url(audio_filename));
+                .play_clip_on_ended(self.base.activity_media_url(audio_filename), move || {
+                    game.audio_playing.store(false, Ordering::Relaxed);
+                    game.evaluate_all();
+                });
         }
     }
 
@@ -269,7 +278,7 @@ impl PuzzleItem {
         if dist <= PUZZLE_DISTANCE_THRESHHOLD {
             *self.curr_transform_matrix.borrow_mut() = Matrix4::identity();
 
-            self.base.audio_manager.play_positive_clip();
+            self.base.audio_manager.play_positive_sidefx();
             true
         } else {
             if fly_back_to_origin {
@@ -281,7 +290,7 @@ impl PuzzleItem {
                 // whatever...
                 //*self.curr_transform_matrix.borrow_mut() = self.orig_transform_matrix.clone();
             }
-            self.base.audio_manager.play_negative_clip();
+            self.base.audio_manager.play_negative_sidefx();
             false
         }
     }

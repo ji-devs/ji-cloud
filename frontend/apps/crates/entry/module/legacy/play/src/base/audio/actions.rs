@@ -3,6 +3,18 @@ use components::audio::mixer::{AudioPath, AUDIO_MIXER};
 use gloo_timers::callback::Timeout;
 
 impl AudioManager {
+    pub fn play_positive_sidefx(&self) {
+        self.play_sidefx(
+            AudioPath::from(AUDIO_MIXER.with(|mixer| mixer.get_random_positive())).url(),
+        );
+    }
+
+    pub fn play_negative_sidefx(&self) {
+        self.play_sidefx(
+            AudioPath::from(AUDIO_MIXER.with(|mixer| mixer.get_random_negative())).url(),
+        );
+    }
+
     pub fn play_positive_clip(&self) {
         self.play_clip(
             AudioPath::from(AUDIO_MIXER.with(|mixer| mixer.get_random_positive())).url(),
@@ -43,5 +55,10 @@ impl AudioManager {
     pub fn play_bg(&self, url: String) {
         *self.bg.borrow_mut() =
             Some(AUDIO_MIXER.with(|mixer| mixer.play(AudioPath::new_url(url), true)));
+    }
+
+    pub fn play_sidefx(&self, url: String) {
+        *self.sidefx.borrow_mut() =
+            Some(AUDIO_MIXER.with(|mixer| mixer.play(AudioPath::new_url(url), false)));
     }
 }

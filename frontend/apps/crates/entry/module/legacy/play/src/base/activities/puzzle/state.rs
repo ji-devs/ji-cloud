@@ -21,6 +21,7 @@ use utils::{
 use wasm_bindgen::JsCast;
 use web_sys::CanvasRenderingContext2d;
 use web_sys::HtmlCanvasElement;
+use std::sync::atomic::AtomicBool;
 
 pub struct Puzzle {
     pub base: Rc<Base>,
@@ -45,6 +46,7 @@ pub struct PuzzleGame {
     pub locked_items: RefCell<Vec<Rc<PuzzleItem>>>,
     pub free_items: RefCell<Vec<Rc<PuzzleItem>>>,
     pub drag_index: Cell<Option<usize>>,
+    pub audio_playing: AtomicBool,
 }
 
 pub struct PuzzleItem {
@@ -126,6 +128,7 @@ impl PuzzleGame {
 
         let click_ctx = get_2d_context(&click_canvas, None).unwrap_ji();
 
+
         let free_items = RefCell::new(
             parent
                 .raw
@@ -146,6 +149,7 @@ impl PuzzleGame {
             locked_items: RefCell::new(Vec::new()),
             free_items,
             drag_index: Cell::new(None),
+            audio_playing: AtomicBool::new(false)
         })
     }
 }
