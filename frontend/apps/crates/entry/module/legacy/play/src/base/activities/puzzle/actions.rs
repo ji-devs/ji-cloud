@@ -265,11 +265,11 @@ impl PuzzleItem {
         *self.drag.borrow_mut() = Some(Rc::new(Drag::new(x, y, 0.0, 0.0, true, ())));
 
         if let Some(audio_filename) = self.raw.audio_filename.as_ref() {
-            game.audio_playing.store(true, Ordering::Relaxed);
+            game.audio_playing.store(true, Ordering::SeqCst);
             self.base.audio_manager.play_clip_on_ended(
                 self.base.activity_media_url(audio_filename),
                 move || {
-                    game.audio_playing.store(false, Ordering::Relaxed);
+                    game.audio_playing.store(false, Ordering::SeqCst);
                     game.evaluate_all();
                 },
             );
