@@ -11,6 +11,7 @@ use shared::domain::module::body::legacy::activity::{
 };
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+use std::sync::atomic::AtomicBool;
 use utils::{
     drag::Drag,
     image_effects::ImageEffect,
@@ -21,7 +22,6 @@ use utils::{
 use wasm_bindgen::JsCast;
 use web_sys::CanvasRenderingContext2d;
 use web_sys::HtmlCanvasElement;
-use std::sync::atomic::AtomicBool;
 
 pub struct Puzzle {
     pub base: Rc<Base>,
@@ -130,7 +130,6 @@ impl PuzzleGame {
 
         let click_ctx = get_2d_context(&click_canvas, None).unwrap_ji();
 
-
         let free_items = RefCell::new(
             parent
                 .raw
@@ -151,7 +150,7 @@ impl PuzzleGame {
             locked_items: RefCell::new(Vec::new()),
             free_items,
             drag_index: Cell::new(None),
-            audio_playing: parent.audio_playing.clone(), 
+            audio_playing: parent.audio_playing.clone(),
         })
     }
 }
