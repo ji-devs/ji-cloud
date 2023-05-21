@@ -34,6 +34,8 @@ use utils::{
 };
 use wasm_bindgen::prelude::*;
 use std::sync::atomic::Ordering;
+use gloo_timers::future::TimeoutFuture;
+use wasm_bindgen_futures::spawn_local;
 
 impl Puzzle {
     pub fn on_start(self: Rc<Self>) {
@@ -218,22 +220,29 @@ impl PuzzleGame {
     }
 
     pub fn evaluate_all(&self) {
-        if self.audio_playing.load(Ordering::Relaxed) {
-            log::info!("audio playing, waiting for finish before evaluating");
-            return;
-        }
         if self.free_items.borrow().len() == 0 {
-            log::info!("all finished!!");
-            match self.raw.jump_index {
-                Some(index) => {
-                    log::info!("going to index {}!", index);
-                    self.base.navigate(NavigationTarget::Index(index));
-                }
-                None => {
-                    log::info!("going next!");
-                    self.base.navigate(NavigationTarget::Next);
-                }
-            };
+            if self.audio_playing.load(Ordering::Relaxed) {
+                log::info!("audio playing, waiting for finish before re-evaluating all");
+                return;
+            }
+
+            let jump_index = self.raw.jump_index;
+            let base = self.base.clone();
+
+            spawn_local(async move {
+                log::info!("all finished, waiting {} ms before jumping", crate::config::PUZZLE_FINISH_DELAY);
+                TimeoutFuture::new(crate::config::PUZZLE_FINISH_DELAY).await;
+                match jump_index {
+                    Some(index) => {
+                        log::info!("going to index {}!", index);
+                        base.navigate(NavigationTarget::Index(index));
+                    }
+                    None => {
+                        log::info!("going next!");
+                        base.navigate(NavigationTarget::Next);
+                    }
+                };
+            });
         }
     }
 }
