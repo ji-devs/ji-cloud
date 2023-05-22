@@ -5,22 +5,18 @@ use super::{
     edit_image::EditImage, ActivePopup, Connections, Creations, MemberDetails,
 };
 use components::{
+    asset_card::{render_asset_card, AssetCardBottomIndicator, AssetCardConfig},
     dialog::Dialog,
-    module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback},
     player_popup::{PlayerPopup, PreviewPopupCallbacks},
 };
 use dominator::{clone, html, link, Dom, DomBuilder};
 use futures_signals::signal::{Signal, SignalExt};
 use itertools::Itertools;
 use shared::{
-    domain::{
-        asset::DraftOrLive, course::CourseResponse, jig::JigResponse, resource::ResourceResponse,
-        user::public_user::PublicUser,
-    },
+    domain::{asset::Asset, user::public_user::PublicUser},
     media::MediaLibrary,
 };
 use utils::{
-    asset::ResourceContentExt,
     component::Component,
     events,
     languages::Language,
@@ -292,7 +288,7 @@ impl MemberDetails {
                                 ]
                             } else {
                                 jigs.iter().map(clone!(state => move |jig| {
-                                    state.render_jig(jig)
+                                    state.render_asset(jig.clone().into())
                                 })).collect()
                             }
                         },
@@ -306,7 +302,7 @@ impl MemberDetails {
                                 ]
                             } else {
                                 courses.iter().map(clone!(state => move |courses| {
-                                    state.render_course(courses)
+                                    state.render_asset(courses.clone().into())
                                 })).collect()
                             }
                         },
@@ -320,7 +316,7 @@ impl MemberDetails {
                                 ]
                             } else {
                                 resources.iter().map(clone!(state => move |resources| {
-                                    state.render_resource(resources)
+                                    state.render_asset(resources.clone().into())
                                 })).collect()
                             }
                         },
@@ -335,62 +331,30 @@ impl MemberDetails {
         )
     }
 
-    fn render_jig(self: &Rc<Self>, jig: &JigResponse) -> Dom {
+    fn render_asset(self: &Rc<Self>, asset: Asset) -> Dom {
         let state = self;
-        let jig_id = jig.id;
-        html!("community-asset", {
-            .child(ModuleThumbnail::new(
-                jig.id.into(),
-                jig.jig_data.modules.get(0).cloned(),
-                ThumbnailFallback::Asset,
-                DraftOrLive::Live,
-            ).render(Some("thumbnail")))
-            .prop("slot", "creation-assets")
-            .prop("name", &jig.jig_data.display_name)
-            .event(clone!(state => move |_:events::Click| {
-                state.play_asset.set(Some(jig_id.into()));
-            }))
-        })
-    }
-
-    fn render_course(self: &Rc<Self>, course: &CourseResponse) -> Dom {
-        let state = self;
-        let course_id = course.id;
-        html!("community-asset", {
-            .child(ModuleThumbnail::new(
-                course.id.into(),
-                course.course_data.cover.clone(),
-                ThumbnailFallback::Asset,
-                DraftOrLive::Live,
-            ).render(Some("thumbnail")))
-            .prop("slot", "creation-assets")
-            .prop("name", &course.course_data.display_name)
-            .event(clone!(state => move |_:events::Click| {
-                state.play_asset.set(Some(course_id.into()));
-            }))
-        })
-    }
-
-    fn render_resource(self: &Rc<Self>, resource: &ResourceResponse) -> Dom {
-        let link = match resource.resource_data.additional_resources.first() {
-            Some(resource) => resource.resource_content.get_link(),
-            None => {
-                // should not be here
-                String::new()
-            }
-        };
-
-        html!("community-asset", {
-            .child(ModuleThumbnail::new(
-                resource.id.into(),
-                resource.resource_data.cover.clone(),
-                ThumbnailFallback::Asset,
-                DraftOrLive::Live,
-            ).render(Some("thumbnail")))
-            .prop("slot", "creation-assets")
-            .prop("name", &resource.resource_data.display_name)
-            .prop("href", link)
-        })
+        let asset_id = asset.id();
+        render_asset_card(
+            &asset,
+            AssetCardConfig {
+                bottom_indicator: AssetCardBottomIndicator::Author,
+                slot: Some("creation-assets"),
+                dense: true,
+                menu: Some(Rc::new(clone!(state => move || {
+                    html!("menu-kebab", {
+                        .prop("slot", "menu")
+                        .children(&mut [
+                            html!("menu-line", {
+                                .prop("icon", "play")
+                                .event(clone!(state => move |_: events::Click| {
+                                    state.play_asset.set(Some(asset_id));
+                                }))
+                            })
+                        ])
+                    })
+                }))),
+            },
+        )
     }
 
     fn connections_mixin(self: &Rc<Self>, dom: DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
