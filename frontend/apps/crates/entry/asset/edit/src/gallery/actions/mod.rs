@@ -119,7 +119,7 @@ impl Gallery {
                 AssetId::JigId(jig_id) => jig_actions::copy_jig(jig_id).await,
                 AssetId::ResourceId(resource_id) => resource_actions::copy_resource(resource_id).await,
                 AssetId::CourseId(course_id) => course_actions::copy_course(course_id).await,
-                AssetId::ProDevId(_) => todo!(),
+                AssetId::ProDevId(pro_dev_id) => pro_dev_actions::copy_pro_dev(pro_dev_id).await,
 
             };
             state.assets.lock_mut().insert_cloned(0, asset.unwrap_ji());
