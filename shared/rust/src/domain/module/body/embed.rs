@@ -3,6 +3,8 @@ use crate::domain::module::{
     ModuleKind,
 };
 use serde::{Deserialize, Serialize};
+use strum_macros::EnumIter;
+use strum::IntoEnumIterator;
 use std::collections::HashSet;
 use std::convert::TryFrom;
 
@@ -119,50 +121,61 @@ pub struct EditorState {
     pub steps_completed: HashSet<Step>,
 }
 
-#[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq, Hash, EnumIter)]
 /// The mode
 pub enum Mode {
-    /// Introduction
-    Introduction,
-    /// Story
-    Story,
-    /// Song
-    Song,
-    /// Howto
-    Howto,
+    /// Class quiz
+    Quiz,
+    /// Worksheets
+    Worksheets,
+    /// Project-based learning
+    ProjectBasedLearning,
+    /// Class project
+    ClassProject,
+    /// Portfolio
+    Portfolio,
+    /// Forms
+    Forms,
 }
 
 impl Default for Mode {
     fn default() -> Self {
-        Self::Introduction
+        Self::Quiz
     }
 }
 
 impl ModeExt for Mode {
     fn get_list() -> Vec<Self> {
-        vec![Self::Introduction, Self::Story, Self::Song, Self::Howto]
+        Self::iter().collect()
     }
 
     fn as_str_id(&self) -> &'static str {
         match self {
-            Self::Introduction => "introduction",
-            Self::Story => "story",
-            Self::Song => "song",
-            Self::Howto => "howto",
+            Self::Quiz => "quiz",
+            Self::Worksheets => "worksheets",
+            Self::ProjectBasedLearning => "project-based-learning",
+            Self::ClassProject => "class-project",
+            Self::Portfolio => "portfolio",
+            Self::Forms => "forms",
         }
     }
 
     fn label(&self) -> &'static str {
-        const STR_INTRODUCTION_LABEL: &'static str = "Introduce Your Topic";
-        const STR_STORY_LABEL: &'static str = "Tell a Story";
-        const STR_SONG_LABEL: &'static str = "Play a Song";
-        const STR_HOWTO_LABEL: &'static str = "How to";
+        const STR_QUIZ: &str = "Class quiz";
+        const STR_WORKSHEETS: &str = "Worksheets";
+        const STR_PROJECT_BASED_LEARNING: &str = "Project-based learning";
+        const STR_CLASS_PROJECT: &str = "Class project";
+        const STR_DIGITAL_PORTFOLIO: &str = "Digital portfolio";
+        const STR_COLLABORATIVE_FORMS: &str = "Collaborative forms";
 
         match self {
-            Self::Introduction => STR_INTRODUCTION_LABEL,
-            Self::Story => STR_STORY_LABEL,
-            Self::Song => STR_SONG_LABEL,
-            Self::Howto => STR_HOWTO_LABEL,
+            Mode::Quiz => STR_QUIZ,
+            Mode::Worksheets => STR_WORKSHEETS,
+            Mode::ProjectBasedLearning => STR_PROJECT_BASED_LEARNING,
+            Mode::ClassProject => STR_CLASS_PROJECT,
+            Mode::Portfolio => STR_DIGITAL_PORTFOLIO,
+            Mode::Forms => STR_COLLABORATIVE_FORMS,
+            
         }
     }
 }

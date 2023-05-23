@@ -248,12 +248,6 @@ impl DesignExt<Mode> for Base {
     }
 
     fn get_image_tag_priorities(&self) -> Option<Vec<ImageTag>> {
-        let mode = self.history.get_current().mode();
-        mode.map(|mode| match mode {
-            Mode::Introduction => vec![ImageTag::Video],
-            Mode::Story => vec![ImageTag::Book],
-            Mode::Song => vec![ImageTag::Music],
-            Mode::Howto => vec![ImageTag::Boards],
-        })
+        None
     }
 }

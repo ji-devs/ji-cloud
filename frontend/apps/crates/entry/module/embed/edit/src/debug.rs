@@ -10,7 +10,7 @@ use shared::{
         module::body::{
             Image, ModuleAssist,
             _groups::design::{Backgrounds, BaseContent, Sprite, Sticker, Text},
-            embed::{Content, Mode, ModuleData as RawData, Step},
+            embed::{Content, ModuleData as RawData, Step},
         },
         module::ModuleId,
     },
@@ -60,7 +60,7 @@ impl DebugSettings {
             data: Some(if let Some(init_data) = init_data {
                 RawData {
                     content: Some(Content {
-                        mode: Mode::Introduction,
+                        mode: Default::default(),
                         base: BaseContent {
                             theme: ThemeId::Chalkboard,
                             instructions: ModuleAssist::default(),

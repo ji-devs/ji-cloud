@@ -58,7 +58,7 @@ impl DebugSettings {
             data: Some(if let Some(init_data) = init_data {
                 RawData {
                     content: Some(Content {
-                        mode: Mode::Introduction,
+                        mode: Mode::Quiz,
                         base: BaseContent {
                             theme: ThemeId::Chalkboard,
                             instructions: ModuleAssist {
