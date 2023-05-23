@@ -1,9 +1,10 @@
 use std::rc::Rc;
 
-use components::hebrew_buttons::HebrewButtons;
+use components::{hebrew_buttons::HebrewButtons, unit::unit_value::UnitValueView};
 use dominator::{clone, events, html, with_node, DomBuilder};
 use futures_signals::{map_ref, signal::SignalExt};
-use utils::{component::Component, init::analytics};
+use shared::domain::pro_dev::unit::ProDevUnitValue;
+use utils::{component::Component, init::analytics, unwrap::UnwrapJiExt};
 use web_sys::{HtmlElement, HtmlInputElement, HtmlTextAreaElement, ShadowRoot};
 
 use crate::edit::pro_dev::unit_editor::UnitValue;
@@ -99,6 +100,28 @@ impl Component<UnitEditor> for Rc<UnitEditor> {
             .child({
                 AddUnitValue::new(state.clone()).render(Some("body-input"))
             })
+            .child_signal(state.value.signal_cloned().map(move |value| {
+                match value {
+                    UnitValue::File(file) => {
+                        match file {
+                            Some(file) => return Some(UnitValueView::new(Some(ProDevUnitValue::try_from(UnitValue::File(Some(file))).unwrap_ji())).render()),
+                            None => return None,
+                        };
+                    },
+                    UnitValue::Link(link) => {
+                        match link {
+                            Some(link) => return Some(UnitValueView::new(Some(ProDevUnitValue::try_from(UnitValue::Link(Some(link))).unwrap_ji())).render()),
+                            None => return None,
+                        };
+                    },
+                    UnitValue::Video(video) => {
+                        match video {
+                            Some(video) => return Some(UnitValueView::new(Some(ProDevUnitValue::try_from(UnitValue::Video(Some(video))).unwrap_ji())).render()),
+                            None => return None,
+                        };
+                    },
+                }
+            }))
             .children(&mut [
                 html!("input-wrapper", {
                     .prop("slot", "name")
