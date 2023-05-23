@@ -4,10 +4,7 @@ use dominator::clone;
 use shared::domain::pro_dev::unit::ProDevUnit;
 use shared::{
     api::endpoints,
-    domain::pro_dev::{
-        unit::{ProDevUnitId, ProDevUnitUpdateRequest, UpdateProDevUnitPath},
-        ProDevId, ProDevUpdateDraftDataPath, ProDevUpdateDraftDataRequest,
-    },
+    domain::pro_dev::{ProDevId, ProDevUpdateDraftDataPath, ProDevUpdateDraftDataRequest},
 };
 use std::rc::Rc;
 use utils::prelude::*;
@@ -24,18 +21,6 @@ pub async fn update_pro_dev(
 ) -> anyhow::Result<()> {
     endpoints::pro_dev::UpdateDraftData::api_with_auth_empty(
         ProDevUpdateDraftDataPath(pro_dev_id.clone()),
-        Some(req),
-    )
-    .await
-}
-
-pub async fn _update_unit(
-    pro_dev_id: &ProDevId,
-    unit_id: &ProDevUnitId,
-    req: ProDevUnitUpdateRequest,
-) -> anyhow::Result<()> {
-    endpoints::pro_dev::unit::Update::api_with_auth_empty(
-        UpdateProDevUnitPath(pro_dev_id.clone(), unit_id.clone()),
         Some(req),
     )
     .await
@@ -59,7 +44,6 @@ pub fn duplicate_unit(state: Rc<Sidebar>, unit: &ProDevUnit) {
 }
 
 fn populate_added_unit(state: Rc<Sidebar>, unit: ProDevUnit) {
-    // Assumes that the final module in the list is always the placeholder module.
     let insert_at_idx = state.asset_edit_state.sidebar_spots.lock_ref().len();
 
     let unit_id = unit.id;
