@@ -6,6 +6,7 @@ use super::PlayerMain;
 use components::{
     module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback},
     share_asset::ShareAsset,
+    unit::thumbnail::UnitThumbnail,
 };
 use dominator::{clone, html, Dom, DomBuilder};
 use futures_signals::signal::{from_future, Signal, SignalExt};
@@ -129,6 +130,9 @@ impl PlayerMain {
                 .prop("slot", "play-button")
                 .prop("icon", "fa-solid fa-play")
             }))
+            .child(UnitThumbnail::new(
+                unit.value.clone(),
+            ).render_live(Some("thumbnail")))
             .event(clone!(state => move |_: events::Click| {
                 state.set_active_unit_and_update_page(i);
             }))

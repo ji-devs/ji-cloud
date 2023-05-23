@@ -15,6 +15,7 @@ export class _ extends LitElement {
                     max-height: 100%;
                     max-width: 100%;
                     object-fit: inherit;
+                    border-radius: var(--border-radius, 0);
                 }
             `,
         ];
@@ -38,6 +39,21 @@ export class _ extends LitElement {
     //use with cacheBust true to force reloading when id changes to the same thing
     @property({ hasChanged: () => true })
     id: string = "";
+
+    //use with cacheBust true to force reloading when id changes to the same thing
+    @property()
+    borderRadius: string = "0";
+
+    firstUpdated() {
+        this.style.setProperty('--border-radius', this.borderRadius);
+    }
+
+    updated(changedProperties: Map<string | number | symbol, unknown>) {
+        if (changedProperties.has('borderRadius')) {
+            this.style.setProperty('--border-radius', this.borderRadius);
+        }
+    }
+
 
     onLoad(evt: Event) {
         const img = evt.currentTarget as HTMLImageElement;
