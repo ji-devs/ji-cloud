@@ -1,11 +1,12 @@
 use chrono::{DateTime, Utc};
 use shared::domain::billing::{
-    AccountLimit, AmountInCents, BillingInterval, CreateSubscriptionRecord,
-    CreateUpdateSubscriptionPlanRequest, PlanId, StripeInvoiceId, StripePriceId, StripeProductId,
-    StripeSubscriptionId, Subscription, SubscriptionId, SubscriptionPlan, SubscriptionStatus,
-    SubscriptionTier, SubscriptionType, TrialPeriod, UpdateSubscriptionRecord,
+    AccountId, AccountLimit, AmountInCents, BillingInterval, CreateSubscriptionRecord,
+    CreateUpdateSubscriptionPlanRequest, PlanId, School, SchoolId, SchoolName, SchoolNameId,
+    StripeInvoiceId, StripePriceId, StripeProductId, StripeSubscriptionId, Subscription,
+    SubscriptionId, SubscriptionPlan, SubscriptionStatus, SubscriptionTier, SubscriptionType,
+    TrialPeriod, UpdateSubscriptionRecord,
 };
-use shared::domain::user::UserId;
+use shared::domain::image::ImageId;
 use sqlx::PgPool;
 use tracing::{instrument, Instrument};
 
@@ -126,7 +127,7 @@ insert into subscription
         auto_renew,
         status,
         current_period_end,
-        user_id,
+        account_id,
         latest_invoice_id,
         amount_due
     )
@@ -140,7 +141,7 @@ returning subscription_id as "id!: SubscriptionId"
         subscription.auto_renew,
         subscription.status as SubscriptionStatus,
         subscription.current_period_end,
-        subscription.user_id as UserId,
+        subscription.account_id as AccountId,
         subscription
             .latest_invoice_id
             .map(|invoice_id| invoice_id.inner()),
@@ -210,8 +211,7 @@ pub async fn get_subscription(
     pool: &PgPool,
     subscription_id: SubscriptionId,
 ) -> sqlx::Result<Option<Subscription>> {
-    sqlx::query_as!(
-        Subscription,
+    let row = sqlx::query!(
         // language=SQL
         r#"
 select
@@ -222,7 +222,7 @@ select
     auto_renew,
     status as "status!: SubscriptionStatus",
     current_period_end as "current_period_end!: DateTime<Utc>",
-    user_id as "user_id!: UserId",
+    account_id as "account_id!: AccountId",
     latest_invoice_id as "latest_invoice_id?: StripeInvoiceId",
     amount_due as "amount_due_in_cents?: AmountInCents",
     created_at as "created_at!: DateTime<Utc>",
@@ -233,7 +233,73 @@ where subscription_id = $1
         subscription_id as SubscriptionId,
     )
     .fetch_optional(pool)
-    .await
+    .await?;
+
+    let subscription = row.map(|row| Subscription {
+        subscription_id: row.subscription_id,
+        stripe_subscription_id: row.stripe_subscription_id,
+        subscription_plan_id: row.subscription_plan_id,
+        tier: row.tier,
+        auto_renew: row.auto_renew,
+        status: row.status,
+        current_period_end: row.current_period_end,
+        account_id: row.account_id,
+        latest_invoice_id: row.latest_invoice_id,
+        amount_due_in_cents: row.amount_due_in_cents,
+        created_at: row.created_at,
+        updated_at: row.updated_at,
+    });
+
+    Ok(subscription)
+}
+
+#[instrument(skip(pool))]
+pub async fn get_latest_subscription_by_account_id(
+    pool: &PgPool,
+    account_id: AccountId,
+) -> sqlx::Result<Option<Subscription>> {
+    let row = sqlx::query!(
+        // language=SQL
+        r#"
+select
+    subscription_id as "subscription_id!: SubscriptionId",
+    stripe_subscription_id as "stripe_subscription_id!: StripeSubscriptionId",
+    subscription_plan_id as "subscription_plan_id!: PlanId",
+    subscription_tier as "tier!: SubscriptionTier",
+    auto_renew,
+    status as "status!: SubscriptionStatus",
+    current_period_end as "current_period_end!: DateTime<Utc>",
+    account_id as "account_id!: AccountId",
+    latest_invoice_id as "latest_invoice_id?: StripeInvoiceId",
+    amount_due as "amount_due_in_cents?: AmountInCents",
+    created_at as "created_at!: DateTime<Utc>",
+    updated_at as "updated_at?: DateTime<Utc>"
+from subscription
+where account_id = $1
+order by created_at desc
+limit 1
+"#,
+        account_id as AccountId,
+    )
+    .fetch_optional(pool)
+    .await?;
+
+    let subscription = row.map(|row| Subscription {
+        subscription_id: row.subscription_id,
+        stripe_subscription_id: row.stripe_subscription_id,
+        subscription_plan_id: row.subscription_plan_id,
+        tier: row.tier,
+        auto_renew: row.auto_renew,
+        status: row.status,
+        current_period_end: row.current_period_end,
+        account_id: row.account_id,
+        latest_invoice_id: row.latest_invoice_id,
+        amount_due_in_cents: row.amount_due_in_cents,
+        created_at: row.created_at,
+        updated_at: row.updated_at,
+    });
+
+    Ok(subscription)
 }
 
 #[instrument(skip(pool))]
@@ -248,4 +314,70 @@ pub async fn get_stripe_subscription_id_with_invoice_id(
     )
     .fetch_optional(pool)
     .await
+}
+
+#[instrument(skip(pool))]
+pub async fn get_school_account_by_account_id(
+    pool: &PgPool,
+    account_id: &AccountId,
+) -> sqlx::Result<Option<School>> {
+    let record = sqlx::query!(
+        // language=SQL
+        r#"
+select
+    school_id as "id!: SchoolId",
+    school_name_id as "name!: SchoolNameId",
+    location as "location?: serde_json::Value",
+    email::text as "email!",
+    description,
+    profile_image_id as "profile_image?: ImageId",
+    website,
+    organization_type,
+    account_id as "account_id!: AccountId",
+    created_at,
+    updated_at
+from school
+where account_id = $1
+"#,
+        account_id as &AccountId
+    )
+    .fetch_optional(pool)
+    .await?;
+
+    match record {
+        Some(record) => {
+            let school_name = sqlx::query_as!(
+                SchoolName,
+                // language=SQL
+                r#"
+select
+    school_name_id as "id!: SchoolNameId",
+    name::text as "name!",
+    verified
+from school_name
+where school_name_id = $1
+"#,
+                record.name as SchoolNameId
+            )
+            .fetch_one(pool)
+            .await?;
+
+            let school = School {
+                id: record.id,
+                name: school_name,
+                location: record.location,
+                email: record.email,
+                description: record.description,
+                profile_image: record.profile_image,
+                website: record.website,
+                organization_type: record.organization_type,
+                account_id: record.account_id,
+                created_at: record.created_at,
+                updated_at: record.updated_at,
+            };
+
+            Ok(Some(school))
+        }
+        None => Ok(None),
+    }
 }

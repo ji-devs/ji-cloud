@@ -5,6 +5,7 @@ use macros::make_path_parts;
 use serde::{Deserialize, Serialize, Serializer};
 use std::convert::TryFrom;
 
+use crate::domain::billing::UserAccountSummary;
 use crate::{
     api::endpoints::PathPart,
     domain::{
@@ -13,8 +14,6 @@ use crate::{
         meta::{AffiliationId, AgeRangeId, SubjectId},
     },
 };
-
-use super::billing::{CustomerId, PaymentMethod, Subscription};
 
 pub mod public_user;
 
@@ -25,7 +24,7 @@ wrap_uuid! {
 
 /// Represents a user's permissions.
 ///
-/// Note: 5 was "ManageModule", and has been deleted, but cannot be replaced(?)
+/// Note: 5 was `ManageModule`, and has been deleted, but cannot be replaced(?)
 #[derive(Deserialize, Serialize, PartialEq, Eq, Debug, Clone, Copy)]
 #[non_exhaustive]
 #[repr(i16)]
@@ -229,20 +228,13 @@ pub struct UserProfile {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub location: Option<serde_json::Value>,
 
-    /// The user's customer ID
+    /// The user's account summary, if available.
+    ///
+    /// Note: This is not set when fetching a user profile. It must be explicitly set using a
+    /// function such as [`db::account::get_user_account_summary()`]
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub stripe_customer_id: Option<CustomerId>,
-
-    /// The user's current payment method
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub payment_method: Option<PaymentMethod>,
-
-    /// The users current subscription
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub subscription: Option<Subscription>,
+    pub account_summary: Option<UserAccountSummary>,
 }
 
 /// User Response (used for Admin).
