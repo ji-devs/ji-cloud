@@ -59,7 +59,7 @@ uuid = "1.1.2"
 quote = "1.0.18"
 hashfn = "0.2.0"
 csv = "1.1.6"
-async-stripe = { version = "0.18.4", features = ["runtime-tokio-hyper-rustls"] }
+async-stripe = { version = "0.22.2", features = ["runtime-tokio-hyper-rustls"] }
 
 # project deps
 core = { path = "../core", features = ["db"] }

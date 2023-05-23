@@ -1,13 +1,7 @@
-use anyhow::anyhow;
 use chrono::{DateTime, Utc};
 use chrono_tz::Tz;
-use shared::domain::billing::{
-    AmountInCents, PlanId, StripeInvoiceId, StripeSubscriptionId, Subscription, SubscriptionStatus,
-    SubscriptionTier,
-};
 use shared::domain::{
     admin::DateFilterType,
-    billing::{CustomerId, PaymentMethod, SubscriptionId},
     circle::CircleId,
     image::ImageId,
     meta::{
@@ -75,19 +69,6 @@ select
     organization,
     persona                as "persona!: Vec<String>",
     location,
-    stripe_customer_id as "stripe_customer_id?: CustomerId",
-    payment_method,
-    subscription_id as "subscription_id?: SubscriptionId",
-    stripe_subscription_id as "stripe_subscription_id?: StripeSubscriptionId",
-    subscription_plan_id as "subscription_plan_id?: PlanId",
-    subscription_tier as "tier?: SubscriptionTier",
-    auto_renew as "auto_renew?: bool",
-    status as "status?: SubscriptionStatus",
-    current_period_end as "current_period_end?: DateTime<Utc>",
-    latest_invoice_id as "latest_invoice_id?: StripeInvoiceId",
-    amount_due as "amount_due_in_cents?: AmountInCents",
-    subscription.created_at as "subscription_created_at?: DateTime<Utc>",
-    subscription.updated_at as "subscription_updated_at?: DateTime<Utc>",
     array(select scope from user_scope where user_scope.user_id = "user".id) as "scopes!: Vec<i16>",
     array(select subject_id from user_subject where user_subject.user_id = "user".id) as "subjects!: Vec<Uuid>",
     array(select affiliation_id from user_affiliation where user_affiliation.user_id = "user".id) as "affiliations!: Vec<Uuid>",
@@ -100,7 +81,6 @@ select
 from "user"
     inner join user_profile on "user".id = user_profile.user_id
     inner join user_email using(user_id)
-    left join subscription using(subscription_id)
 where id = $1"#,
         id.0
     )
@@ -115,32 +95,6 @@ where id = $1"#,
     };
 
     let user_id = row.id;
-    // Load the subscription data if a subscription ID is set.
-    let subscription = match row.subscription_id {
-        None => None,
-        Some(subscription_id) => Some(Subscription {
-            subscription_id,
-            stripe_subscription_id: row
-                .stripe_subscription_id
-                .ok_or_else(|| anyhow!("Missing Stripe subscription ID"))?,
-            subscription_plan_id: row
-                .subscription_plan_id
-                .ok_or(anyhow!("Missing subscription plan ID"))?,
-            tier: row.tier.ok_or(anyhow!("Missing subscription tier"))?,
-            auto_renew: row.auto_renew.ok_or(anyhow!("Missing auto_renew"))?,
-            status: row.status.ok_or(anyhow!("Missing subscription status"))?,
-            current_period_end: row
-                .current_period_end
-                .ok_or(anyhow!("Missing current period end"))?,
-            user_id,
-            latest_invoice_id: row.latest_invoice_id,
-            amount_due_in_cents: row.amount_due_in_cents,
-            created_at: row
-                .subscription_created_at
-                .ok_or(anyhow!("Missing created at timestamp"))?,
-            updated_at: row.subscription_updated_at,
-        }),
-    };
 
     Ok(Some(UserProfile {
         id: user_id,
@@ -176,103 +130,8 @@ where id = $1"#,
         age_ranges: row.age_ranges.into_iter().map(AgeRangeId).collect(),
         affiliations: row.affiliations.into_iter().map(AffiliationId).collect(),
         circles: row.circles.into_iter().map(CircleId).collect(),
-        stripe_customer_id: row.stripe_customer_id,
-        payment_method: match row.payment_method {
-            Some(value) => {
-                match serde_json::from_value(value) {
-                    Err(_error) => {
-                        // TODO probably log user id here.
-                        log::warn!("Failed to deserialize persisted payment method");
-                        None
-                    }
-                    Ok(value) => Some(value),
-                }
-            }
-            None => None,
-        },
-        subscription,
+        account_summary: None,
     }))
-}
-
-#[instrument(skip(db))]
-pub async fn save_customer_id(
-    db: &sqlx::Pool<sqlx::Postgres>,
-    user_id: &UserId,
-    customer_id: &CustomerId,
-) -> anyhow::Result<()> {
-    sqlx::query!(
-        //language=SQL
-        r#"
-update user_profile
-set stripe_customer_id = $2,
-updated_at = now()
-where user_id = $1"#,
-        user_id.0,
-        customer_id.as_str(),
-    )
-    .execute(db)
-    .instrument(tracing::info_span!("set customer id"))
-    .await?;
-
-    Ok(())
-}
-
-#[instrument(skip(db))]
-pub async fn save_payment_method(
-    db: &sqlx::Pool<sqlx::Postgres>,
-    user_id: &UserId,
-    payment_method: Option<PaymentMethod>,
-) -> anyhow::Result<()> {
-    sqlx::query!(
-        //language=SQL
-        r#"
-update user_profile
-set payment_method = $2,
-updated_at = now()
-where user_id = $1"#,
-        user_id.0,
-        serde_json::to_value(payment_method)?,
-    )
-    .execute(db)
-    .await?;
-
-    Ok(())
-}
-
-#[instrument(skip(db))]
-pub async fn save_subscription_id(
-    db: &sqlx::Pool<sqlx::Postgres>,
-    user_id: &UserId,
-    subscription_id: SubscriptionId,
-) -> anyhow::Result<()> {
-    sqlx::query!(
-        //language=SQL
-        r#"
-update user_profile
-set subscription_id = $2,
-updated_at = now()
-where user_id = $1"#,
-        user_id.0,
-        subscription_id as SubscriptionId,
-    )
-    .execute(db)
-    .await?;
-
-    Ok(())
-}
-
-#[instrument(skip(db))]
-pub async fn get_user_id_by_customer_id(
-    db: &sqlx::Pool<sqlx::Postgres>,
-    customer_id: &CustomerId,
-) -> anyhow::Result<Option<UserId>> {
-    Ok(sqlx::query_scalar!(
-        //language=SQL
-        r#"select user_id as "user_id: UserId" from user_profile where stripe_customer_id = $1"#,
-        customer_id.as_str(),
-    )
-    .fetch_optional(db)
-    .await?)
 }
 
 #[instrument(skip(db))]

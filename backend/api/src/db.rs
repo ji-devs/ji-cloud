@@ -1,3 +1,4 @@
+pub(crate) mod account;
 pub(crate) mod animation;
 pub(crate) mod audio;
 pub(crate) mod billing;

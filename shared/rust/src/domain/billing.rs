@@ -9,8 +9,10 @@ use strum_macros::{Display, EnumString};
 
 #[cfg(feature = "backend")]
 use anyhow::anyhow;
+use serde_json::Value;
 
-use crate::{api::endpoints::PathPart, domain::user::UserId};
+use crate::api::endpoints::PathPart;
+use crate::domain::image::ImageId;
 
 /// Stripe customer ID
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -164,7 +166,7 @@ impl From<stripe::PaymentMethod> for PaymentMethod {
     }
 }
 
-/// The tier a subscription is on. This would apply to any [SubscriptionType]
+/// The tier a subscription is on. This would apply to any [`SubscriptionType`]
 #[derive(Debug, Serialize, Deserialize, Clone, Copy)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[repr(i16)]
@@ -288,7 +290,6 @@ wrap_uuid! {
 
 /// An existing subscription for a customer
 #[derive(Debug, Serialize, Deserialize, Clone)]
-#[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
 pub struct Subscription {
     /// The local subscription ID
     pub subscription_id: SubscriptionId,
@@ -304,10 +305,8 @@ pub struct Subscription {
     pub status: SubscriptionStatus,
     /// When the subscriptions current period ends/expires
     pub current_period_end: DateTime<Utc>,
-    /// User ID to associate this subscription with.
-    /// For [SubscriptionType::School] subscriptions, this is also the teacher who can administer
-    /// the subscription.
-    pub user_id: UserId,
+    /// Account ID to associate this subscription with.
+    pub account_id: AccountId,
     /// ID of the latest unpaid invoice generated for this subscription
     pub latest_invoice_id: Option<StripeInvoiceId>,
     /// Amount due if any
@@ -336,11 +335,9 @@ pub struct CreateSubscriptionRecord {
     pub status: SubscriptionStatus,
     /// When the subscriptions current period ends/expires
     pub current_period_end: DateTime<Utc>,
+    /// Account ID to associate this subscription with
     /// User ID to associate this subscription with
-    ///
-    /// For [SubscriptionType::School] subscriptions, this is also the teacher who can administer
-    /// the subscription.
-    pub user_id: UserId,
+    pub account_id: AccountId,
     /// ID of the latest unpaid invoice generated for this subscription
     pub latest_invoice_id: Option<StripeInvoiceId>,
     /// Amount due if any
@@ -422,7 +419,7 @@ impl From<i64> for AccountLimit {
 }
 
 /// The type of subscription
-#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
+#[derive(Debug, Display, Serialize, Deserialize, Clone, Copy)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[repr(i16)]
 pub enum SubscriptionType {
@@ -432,12 +429,40 @@ pub enum SubscriptionType {
     School = 1,
 }
 
-impl SubscriptionType {
-    /// Whether this subscription type has a dedicated admin user
+/// The type of account
+#[derive(Debug, Display, Serialize, Deserialize, Clone, Copy)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[repr(i16)]
+pub enum AccountType {
+    /// An individual account
+    Individual = 0,
+    /// A school account
+    School = 1,
+}
+
+impl AccountType {
+    /// Whether this account type has a dedicated admin user
     pub fn has_admin(&self) -> bool {
         match self {
             Self::School => true,
             _ => false,
+        }
+    }
+
+    /// Test whether this variant matches the variant in SubscriptionType
+    pub fn matches_subscription_type(&self, subscription_type: &SubscriptionType) -> bool {
+        match self {
+            Self::Individual => matches!(subscription_type, SubscriptionType::Individual),
+            Self::School => matches!(subscription_type, SubscriptionType::School),
+        }
+    }
+}
+
+impl From<SubscriptionType> for AccountType {
+    fn from(value: SubscriptionType) -> Self {
+        match value {
+            SubscriptionType::Individual => Self::Individual,
+            SubscriptionType::School => Self::School,
         }
     }
 }
@@ -614,12 +639,8 @@ pub struct IndividualPlanResponse {
 /// Mapped school plans
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SchoolPlanResponse {
-    /// Monthly school plans with an account limit
-    pub limited_monthly: HashMap<AccountLimit, PlanId>,
     /// Annual school plans with an account limit
     pub limited_annual: HashMap<AccountLimit, PlanId>,
-    /// Monthly school plan without a limit
-    pub unlimited_monthly: PlanId,
     /// Annual school plan without a limit
     pub unlimited_annual: PlanId,
 }
@@ -663,12 +684,8 @@ struct SubscriptionPlansResponseBuilder {
     individual_pro_monthly: Option<PlanId>,
     /// Individual pro annual
     individual_pro_annual: Option<PlanId>,
-    /// Monthly school plans with account limits
-    school_limited_monthly: HashMap<AccountLimit, PlanId>,
     /// Annual school plans with account limits
     school_limited_annual: HashMap<AccountLimit, PlanId>,
-    /// Monthly school plan without an account limit
-    school_unlimited_monthly: Option<PlanId>,
     /// Annual school plan without an account limit
     school_unlimited_annual: Option<PlanId>,
 }
@@ -702,17 +719,15 @@ impl SubscriptionPlansResponseBuilder {
                 }
             },
             SubscriptionType::School => match (account_limit, billing_interval) {
-                (None, BillingInterval::Monthly) => {
-                    self.school_unlimited_monthly = Some(plan_id);
-                }
                 (None, BillingInterval::Annually) => {
                     self.school_unlimited_annual = Some(plan_id);
                 }
-                (Some(account_limit), BillingInterval::Monthly) => {
-                    self.school_limited_monthly.insert(account_limit, plan_id);
-                }
                 (Some(account_limit), BillingInterval::Annually) => {
                     self.school_limited_annual.insert(account_limit, plan_id);
+                }
+                _ => {
+                    // There are no monthly plans for schools. If the data exists, we can safely
+                    // ignore it.
                 }
             },
         }
@@ -725,7 +740,7 @@ impl SubscriptionPlansResponseBuilder {
     /// - The unlimited school plan is missing;
     /// - Or, there are no limited school plans.
     fn build(self) -> anyhow::Result<SubscriptionPlansResponse> {
-        if self.school_limited_monthly.is_empty() || self.school_limited_annual.is_empty() {
+        if self.school_limited_annual.is_empty() {
             return Err(anyhow!("Missing limited school plans"));
         }
 
@@ -746,11 +761,7 @@ impl SubscriptionPlansResponseBuilder {
                     .ok_or(anyhow!("Missing annual Individual Pro plan"))?,
             },
             school: SchoolPlanResponse {
-                limited_monthly: self.school_limited_monthly,
                 limited_annual: self.school_limited_annual,
-                unlimited_monthly: self
-                    .school_unlimited_monthly
-                    .ok_or(anyhow!("Missing monthly School Unlimited plan"))?,
                 unlimited_annual: self
                     .school_unlimited_annual
                     .ok_or(anyhow!("Missing annual School Unlimited plan"))?,
@@ -767,7 +778,7 @@ impl SubscriptionPlansResponseBuilder {
 pub struct CreateSubscriptionRequest {
     /// Optional setup intent ID if a payment method was created prior to subscribing.
     pub setup_intent_id: Option<String>,
-    /// Plan ID to create the subscriptinon for
+    /// Plan ID to create the subscription for
     pub plan_id: PlanId,
 }
 
@@ -785,4 +796,160 @@ pub struct CreateSubscriptionResponse {
     pub client_secret: String,
 }
 
+/// Request to create a subscription.
+///
+/// If no payment method information is passed with, then the system will attempt to use the
+/// users existing payment method. Otherwise, a payment method will be saved.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct CreateSetupIntentRequest {
+    /// Plan ID to create the subscription for
+    pub plan_id: PlanId,
+}
+
 make_path_parts!(CreateSetupIntentPath => "/v1/billing/payment-method");
+
+wrap_uuid! {
+    /// Account ID
+    pub struct AccountId
+}
+
+/// A billing account
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Account {
+    /// Account ID
+    pub account_id: AccountId,
+    /// The type of account
+    pub account_type: AccountType,
+    /// The customer ID on stripe
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stripe_customer_id: Option<CustomerId>,
+    /// Stripe payment method, if any
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub payment_method: Option<PaymentMethod>,
+    /// _Current_ subscription if any
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subscription: Option<Subscription>,
+    /// When the account was created.
+    pub created_at: DateTime<Utc>,
+    /// When the account was last updated.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub updated_at: Option<DateTime<Utc>>,
+}
+
+/// Summary of the user's account. This could be a school account that a user is a member of.
+///
+/// In the case that the user is a member of a school account, the subscription tier would be
+/// `None` for a free account, or `Pro`.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct UserAccountSummary {
+    /// Type of the account
+    pub account_type: AccountType,
+    /// The subscription tier the user is on
+    pub subscription_tier: Option<SubscriptionTier>,
+    /// Status of the accounts subscription, if any
+    pub subscription_status: Option<SubscriptionStatus>,
+    /// Whether this user is an admin. For non School accounts, this user will
+    /// always be an admin
+    pub is_admin: bool,
+    /// Whether the account is overdue
+    pub overdue: bool,
+    /// Whether the user is verified for the account
+    pub verified: bool,
+}
+
+wrap_uuid! {
+    /// Wrapper type around [`Uuid`], represents the ID of a School.
+    pub struct SchoolId
+}
+
+/// A school profile.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct School {
+    /// The school's id.
+    pub id: SchoolId,
+
+    /// Name of the school
+    pub name: SchoolName,
+
+    /// The school's location
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub location: Option<Value>,
+
+    /// The school's email address
+    pub email: String,
+
+    /// Description for school
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+
+    /// ID to the school's profile image in the user image library.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub profile_image: Option<ImageId>,
+
+    /// Website for the school
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub website: Option<String>,
+
+    /// Organization type
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub organization_type: Option<String>,
+
+    /// The school's account ID
+    pub account_id: AccountId,
+
+    /// When the school was created.
+    pub created_at: DateTime<Utc>,
+
+    /// When the school was last updated.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub updated_at: Option<DateTime<Utc>>,
+}
+
+wrap_uuid! {
+    /// Wrapper type around [`Uuid`], represents the ID of a School Name.
+    pub struct SchoolNameId
+}
+
+make_path_parts!(SchoolNamePath => "/v1/school-name");
+
+/// A known school name
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct SchoolName {
+    /// The id of a school name
+    pub id: SchoolNameId,
+    /// The school name
+    pub name: String,
+    /// Whether the school name has been verified
+    #[serde(default)]
+    pub verified: bool,
+}
+
+/// Whether the user is creating a new school name or chosen an existing name that we know about
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub enum SchoolNameRequest {
+    /// Attempt to create a new name
+    Value(String),
+    /// Use an existing name
+    Id(SchoolNameId),
+}
+
+make_path_parts!(SchoolAccountPath => "/v1/school");
+
+/// Request to create a new school account
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct CreateSchoolAccountRequest {
+    /// School name
+    pub name: SchoolNameRequest,
+    /// School location
+    pub location: Value,
+}

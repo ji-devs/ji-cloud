@@ -28,6 +28,7 @@ pub use user::{
 
 pub mod event_arc;
 pub use event_arc::EventArc;
+use shared::domain::billing::{AccountType, SchoolNameId, SubscriptionType};
 use shared::domain::meta::MetaKind;
 
 /// Represents an error returned by the api.
@@ -807,6 +808,8 @@ pub enum Billing {
     NotFound,
     BadRequest,
     SubscriptionExists,
+    SchoolNotFound,
+    IncorrectPlanType(AccountType, SubscriptionType),
 }
 
 impl<T: Into<anyhow::Error>> From<T> for Billing {
@@ -830,7 +833,16 @@ impl Into<actix_web::Error> for Billing {
             }
             Self::SubscriptionExists => BasicError::with_message(
                 http::StatusCode::BAD_REQUEST,
-                "User has existing subscription".into(),
+                "Account has existing subscription".into(),
+            )
+            .into(),
+            Self::SchoolNotFound => {
+                BasicError::with_message(http::StatusCode::NOT_FOUND, "School not found".into())
+                    .into()
+            }
+            Self::IncorrectPlanType(expected, found) => BasicError::with_message(
+                http::StatusCode::BAD_REQUEST,
+                format!("Expected {expected}, found {found}"),
             )
             .into(),
         }
@@ -840,5 +852,41 @@ impl Into<actix_web::Error> for Billing {
 impl From<Service> for Billing {
     fn from(err: Service) -> Self {
         Self::Service(err)
+    }
+}
+
+pub enum Account {
+    InternalServerError(anyhow::Error),
+    UserHasAccount,
+    SchoolNameExists(String),
+    SchoolExists(SchoolNameId),
+}
+
+impl<T: Into<anyhow::Error>> From<T> for Account {
+    fn from(e: T) -> Self {
+        Self::InternalServerError(e.into())
+    }
+}
+
+impl Into<actix_web::Error> for Account {
+    fn into(self) -> actix_web::Error {
+        match self {
+            Self::InternalServerError(e) => ise(e),
+            Self::UserHasAccount => BasicError::with_message(
+                http::StatusCode::BAD_REQUEST,
+                format!("User already has an existing account"),
+            )
+            .into(),
+            Self::SchoolNameExists(name) => BasicError::with_message(
+                http::StatusCode::BAD_REQUEST,
+                format!("A school name of {name} already exists"),
+            )
+            .into(),
+            Self::SchoolExists(id) => BasicError::with_message(
+                http::StatusCode::BAD_REQUEST,
+                format!("A school using a name with ID {id} already exists"),
+            )
+            .into(),
+        }
     }
 }

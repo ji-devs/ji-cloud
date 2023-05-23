@@ -7,8 +7,8 @@ use chrono::{TimeZone, Utc};
 use core::settings::RuntimeSettings;
 use shared::api::endpoints::billing::{CreateSetupIntent, GetSubscriptionPlans};
 use shared::domain::billing::{
-    AmountInCents, CreateSubscriptionRecord, StripeInvoiceId, StripeSubscriptionId,
-    SubscriptionStatus, UpdateSubscriptionRecord,
+    Account, AccountType, AmountInCents, CreateSubscriptionRecord, StripeInvoiceId,
+    StripeSubscriptionId, SubscriptionStatus, SubscriptionType, UpdateSubscriptionRecord,
 };
 use shared::{
     api::{endpoints::billing::CreateSubscription, ApiEndpoint, Method, PathParts},
@@ -52,30 +52,31 @@ async fn create_subscription(
 > {
     let user_id = auth.user_id();
 
-    // Fetch the profile for the user that wants to subscribe
+    // Fetch the subscription plan details
+    let plan: SubscriptionPlan = db::billing::get_subscription_plan_by_id(&db, req.plan_id)
+        .await?
+        .ok_or(error::Billing::NotFound)?;
+
+    // Fetch the profile for the user that's creating the subscription
     let user_profile: UserProfile = db::user::get_profile(db.as_ref(), &user_id)
         .await?
         .ok_or(error::Billing::NotFound)?;
 
-    // So that we don't add a trial on if the teacher already had a subscription which may have been
-    // cancelled or expired previously.
-    let mut prev_subscription_exists = false;
-
-    if let Some(subscription) = &user_profile.subscription {
-        // They have at least had a subscription before
-        prev_subscription_exists = true;
-
-        // Check whether they have an _active_ subscription
-        if !matches!(subscription.status, SubscriptionStatus::Expired) {
-            // If a subscription exists, we don't want to create a new subscription
-            return Err(error::Billing::SubscriptionExists)?;
-        }
-    }
-
     let client = create_stripe_client(&settings)?;
 
-    let customer_id = get_or_create_customer(db.as_ref(), &client, &user_profile).await?;
-    let stripe_customer_id = stripe::CustomerId::from(customer_id.clone());
+    let account = get_or_create_customer(db.as_ref(), &client, &user_profile, &plan).await?;
+
+    if account
+        .account_type
+        .matches_subscription_type(&plan.subscription_type)
+    {
+        return Err(error::Billing::IncorrectPlanType(
+            account.account_type,
+            plan.subscription_type,
+        ));
+    }
+
+    let stripe_customer_id = stripe::CustomerId::from(account.stripe_customer_id.unwrap().clone());
 
     if let Some(setup_intent_id) = &req.setup_intent_id {
         let setup_intent_id =
@@ -105,11 +106,6 @@ async fn create_subscription(
             .map_err(error::Billing::Stripe)?;
     }
 
-    // Fetch the subscription plan details
-    let plan: SubscriptionPlan = db::billing::get_subscription_plan_by_id(&db, req.plan_id)
-        .await?
-        .ok_or(error::Billing::NotFound)?;
-
     // Create a Stripe subscription
     let stripe_subscription = {
         let mut params = CreateStripeSubscription::new(stripe_customer_id);
@@ -124,7 +120,7 @@ async fn create_subscription(
         params.expand = &["latest_invoice.payment_intent"];
 
         // If the user hasn't previously had a subscription, then we can set their trial period.
-        if !prev_subscription_exists {
+        if account.subscription.is_none() {
             if let Some(trial_period) = plan.trial_period {
                 params.trial_period_days = Some(trial_period.inner() as u32);
                 params.trial_settings = Some(stripe::CreateSubscriptionTrialSettings {
@@ -191,15 +187,12 @@ async fn create_subscription(
             .timestamp_opt(stripe_subscription.current_period_end, 0)
             .latest()
             .ok_or(anyhow::anyhow!("Invalid timestamp"))?,
-        user_id: user_profile.id,
+        account_id: account.account_id,
         latest_invoice_id,
         amount_due_in_cents,
     };
 
-    let subscription_id = db::billing::create_subscription(db.as_ref(), subscription).await?;
-
-    // Save the subscription ID against the user
-    db::user::save_subscription_id(db.as_ref(), &user_id, subscription_id).await?;
+    db::billing::create_subscription(db.as_ref(), subscription).await?;
 
     Ok((Json(create_response), http::StatusCode::CREATED))
 }
@@ -209,6 +202,7 @@ async fn create_setup_intent(
     auth: TokenUser,
     db: Data<PgPool>,
     settings: Data<RuntimeSettings>,
+    req: Json<<CreateSetupIntent as ApiEndpoint>::Req>,
 ) -> Result<
     (
         Json<<CreateSetupIntent as ApiEndpoint>::Res>,
@@ -218,6 +212,11 @@ async fn create_setup_intent(
 > {
     let user_id = auth.user_id();
 
+    // Fetch the subscription plan details
+    let plan: SubscriptionPlan = db::billing::get_subscription_plan_by_id(&db, req.plan_id)
+        .await?
+        .ok_or(error::Billing::NotFound)?;
+
     // Fetch the profile for the user that wants to subscribe
     let user_profile: UserProfile = db::user::get_profile(db.as_ref(), &user_id)
         .await?
@@ -225,7 +224,8 @@ async fn create_setup_intent(
 
     let client = create_stripe_client(&settings)?;
 
-    let customer_id = get_or_create_customer(db.as_ref(), &client, &user_profile).await?;
+    let account = get_or_create_customer(db.as_ref(), &client, &user_profile, &plan).await?;
+    let customer_id = account.stripe_customer_id.unwrap(); // get_or_create_customer guarantees that this is `Some`
 
     let create_setup_intent = stripe::CreateSetupIntent {
         customer: Some(customer_id.into()),
@@ -233,7 +233,7 @@ async fn create_setup_intent(
         // TODO need to set `automatic_payment_methods` but it isn't available in async-stripe?
         ..Default::default()
     };
-    let setup_intent = stripe::SetupIntent::create(&client, create_setup_intent).await?;
+    let setup_intent = SetupIntent::create(&client, create_setup_intent).await?;
 
     Ok((
         Json(
@@ -255,33 +255,94 @@ fn create_stripe_client(settings: &RuntimeSettings) -> Result<Client, error::Bil
     Ok(Client::new(secret))
 }
 
-/// Get the users customer ID. If they don't have one yet, then we create one here.
+/// Get the user accounts customer ID. If they don't have one yet, then we create one here.
 #[instrument(skip_all)]
 async fn get_or_create_customer(
     db: &PgPool,
     client: &Client,
     user_profile: &UserProfile,
-) -> Result<CustomerId, error::Billing> {
-    Ok(match &user_profile.stripe_customer_id {
-        Some(customer_id) => customer_id.clone(),
-        None => {
-            let customer_id = Customer::create(
-                client,
-                CreateCustomer {
-                    email: Some(user_profile.email.as_str()),
-                    ..Default::default()
-                },
+    plan: &SubscriptionPlan,
+) -> Result<Account, error::Billing> {
+    let mut account =
+        if let Some(account) = db::account::get_account_by_user_id(db, &user_profile.id).await? {
+            if let Some(subscription) = &account.subscription {
+                // Check whether they have an _active_ subscription
+                if !matches!(subscription.status, SubscriptionStatus::Expired) {
+                    // If a subscription exists, we don't want to create a new subscription
+                    return Err(error::Billing::SubscriptionExists)?;
+                }
+            }
+
+            account
+        } else {
+            if !matches!(plan.subscription_type, SubscriptionType::Individual) {
+                return Err(error::Billing::IncorrectPlanType(
+                    AccountType::Individual,
+                    SubscriptionType::School,
+                ));
+            }
+
+            db::account::create_default_individual_account(
+                db,
+                &user_profile.id,
+                &plan.subscription_tier,
             )
-            .await
-            .map_err(error::Billing::Stripe)?
-            .id
-            .into();
+            .await?;
 
-            db::user::save_customer_id(db, &user_profile.id, &customer_id).await?;
+            db::account::get_account_by_user_id(db, &user_profile.id)
+                .await?
+                .ok_or(error::Billing::InternalServerError(anyhow!(
+                    "Missing account"
+                )))?
+        };
 
-            customer_id
-        }
-    })
+    if account.stripe_customer_id.is_none() {
+        let customer_id = match account.account_type {
+            AccountType::School => {
+                let school = db::billing::get_school_account_by_account_id(db, &account.account_id)
+                    .await?
+                    .ok_or(error::Billing::SchoolNotFound)?;
+
+                create_stripe_customer(
+                    client,
+                    CreateCustomer {
+                        email: Some(school.email.as_str()),
+                        name: Some(school.name.name.as_str()),
+                        ..Default::default()
+                    },
+                )
+                .await?
+            }
+            AccountType::Individual => {
+                create_stripe_customer(
+                    client,
+                    CreateCustomer {
+                        email: Some(user_profile.email.as_str()),
+                        ..Default::default()
+                    },
+                )
+                .await?
+            }
+        };
+
+        db::account::save_customer_id(db, &account.account_id, &customer_id).await?;
+
+        account.stripe_customer_id = Some(customer_id);
+    }
+
+    Ok(account)
+}
+
+#[instrument(skip(client))]
+async fn create_stripe_customer(
+    client: &Client,
+    create_customer: CreateCustomer<'_>,
+) -> Result<CustomerId, error::Billing> {
+    Ok(Customer::create(client, create_customer)
+        .await
+        .map_err(error::Billing::Stripe)?
+        .id
+        .into())
 }
 
 #[instrument(skip_all)]
@@ -307,7 +368,7 @@ async fn webhook(
         .unwrap_or_default();
 
     match Webhook::construct_event(payload_str, stripe_signature, secret) {
-        Ok(event) => match event.event_type {
+        Ok(event) => match event.type_ {
             EventType::PaymentMethodAttached => {
                 save_payment_method(db, event.data.object, EventType::PaymentMethodAttached)
                     .await?;
@@ -352,10 +413,7 @@ async fn webhook(
                         }
                     }
                     _ => {
-                        log::trace!(
-                            "Unknown event encountered in webhook: {:?}",
-                            event.event_type
-                        );
+                        log::trace!("Unknown event encountered in webhook: {:?}", event.type_);
                     }
                 }
             }
@@ -397,11 +455,11 @@ async fn save_payment_method(
             return Ok(());
         };
 
-    match db::user::get_user_id_by_customer_id(db.as_ref(), &customer_id).await? {
-        Some(user_id) => {
-            db::user::save_payment_method(
+    match db::account::get_account_id_by_customer_id(db.as_ref(), &customer_id).await? {
+        Some(account_id) => {
+            db::account::save_payment_method(
                 db.as_ref(),
-                &user_id,
+                &account_id,
                 payment_method.map(PaymentMethod::from),
             )
             .await?;

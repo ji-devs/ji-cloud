@@ -846,10 +846,15 @@ async fn get_profile(
     // todo: figure out how to do `<Profile as ApiEndpoint>::Err`
     let user_id = claims.user_id();
 
-    db::user::get_profile(db.as_ref(), &user_id)
-        .await?
-        .map(Json)
-        .ok_or(error::UserNotFound::UserNotFound)
+    match db::user::get_profile(db.as_ref(), &user_id).await? {
+        Some(mut profile) => {
+            let account_summary =
+                db::account::get_user_account_summary(db.as_ref(), &user_id).await?;
+            profile.account_summary = account_summary;
+            Ok(Json(profile))
+        }
+        None => Err(error::UserNotFound::UserNotFound),
+    }
 }
 
 /// Delete your account

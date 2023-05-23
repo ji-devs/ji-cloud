@@ -29,7 +29,7 @@ uuid = { version = "1.1.2", features = ["serde"] }
 thiserror = "1.0.30"
 strum = "0.22.0"
 strum_macros = "0.22.0"
-async-stripe = { version = "0.18.4", features = ["runtime-tokio-hyper-rustls"], optional = true }
+async-stripe = { version = "0.22.2", features = ["runtime-tokio-hyper-rustls"], optional = true }
 macros = { path = "../macros" }
 unicode-segmentation = "1.8.0"
 derive_setters = "0.1.5"

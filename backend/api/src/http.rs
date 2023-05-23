@@ -252,6 +252,7 @@ pub fn build(
             )
             .default_service(actix_web::web::to(default_route))
             .configure(endpoints::user::configure)
+            .configure(endpoints::account::configure)
             .configure(endpoints::billing::configure)
             .configure(endpoints::category::configure)
             .configure(endpoints::image::configure)
