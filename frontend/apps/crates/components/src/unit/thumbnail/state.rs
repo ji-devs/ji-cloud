@@ -9,9 +9,7 @@ pub struct UnitThumbnail {
 }
 
 impl UnitThumbnail {
-    pub fn new(
-        unit_value: ProDevUnitValue,
-    ) -> Rc<Self> {
+    pub fn new(unit_value: ProDevUnitValue) -> Rc<Self> {
         Rc::new(UnitThumbnail {
             unit_value: Mutable::new(Some(unit_value)),
         })

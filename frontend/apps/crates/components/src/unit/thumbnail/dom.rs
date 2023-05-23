@@ -1,12 +1,11 @@
-
 use crate::stickers::embed::types::ParseUrlExt;
 
 use super::state::*;
 use dominator::{html, Dom};
 use shared::domain::image::ImageId;
+use shared::domain::{module::body::_groups::design::YoutubeEmbed, pro_dev::unit::ProDevUnitValue};
 use std::rc::Rc;
 use utils::prelude::*;
-use shared::domain::{pro_dev::unit::ProDevUnitValue, module::body::_groups::design::YoutubeEmbed};
 
 impl UnitThumbnail {
     pub fn render_live(self: Rc<Self>, slot: Option<&str>) -> Dom {
@@ -79,4 +78,3 @@ fn render_image_thumbnail(image: &ImageId) -> Option<Dom> {
         .prop("lib", "user")
     }))
 }
-

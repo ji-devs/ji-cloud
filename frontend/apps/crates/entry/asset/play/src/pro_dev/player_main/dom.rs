@@ -4,9 +4,9 @@ use crate::pro_dev::player_popup::PlayerPopup;
 
 use super::PlayerMain;
 use components::{
+    module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback},
     share_asset::ShareAsset,
     unit::thumbnail::UnitThumbnail,
-    module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback}
 };
 use dominator::{clone, html, Dom, DomBuilder};
 use futures_signals::signal::{from_future, Signal, SignalExt};
@@ -19,7 +19,6 @@ use utils::{
     metadata::get_resource_types,
 };
 use web_sys::ShadowRoot;
-
 
 const STR_SHARE_COURSE: &str = "Share course";
 const UNITS_PER_PAGE: usize = 10;
