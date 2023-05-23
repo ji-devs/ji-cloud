@@ -20,13 +20,15 @@ export class _ extends LitElement {
                   box-sizing: border-box;
                   flex-direction: column;
                   row-gap: 10px;
+                  width: 100%
+                  height: 100%
                 }
               
                 .main-wrapper {
                   display: flex;
                   justify-content: flex-end;
                   align-items: center;
-                  height: 95vh;
+                  height: 90vh;
                 }
               
                 main {
@@ -69,6 +71,7 @@ export class _ extends LitElement {
                   justify-content: flex-start;
                   height: 100%;
                   width: 100%;
+                  position: relative;
                 }
               
                 .main {
@@ -83,27 +86,49 @@ export class _ extends LitElement {
                   flex-direction: column;
                   flex-grow: 1;
                   row-gap: 40px;
+                  flex: 1 0 0;
+                  height: 100%;
                 }
-              
-                ::slotted([slot="body-input"]) {
-                  height: 75%;
+
+                .column-1 {
+                  display: flex;
+                  flex-direction: column;
+                  flex-grow: 1;
+                  row-gap: 40px;
+                  flex: 1 0 0;
+                  height: 100%;
+                  width: 100%;
                 }
-              
+
+                .column-1 > * {
+                  margin-bottom: 20px;
+                }
+
+                .column-2 > * {
+                  margin-bottom: 40px;
+                }
+
                 ::slotted([slot="description"]) {
                   height: 100%;
-                  max-height: 300px;                
+                  max-height: 400px;                
                 }
 
                 ::slotted([slot="add"]) {
-                  height: 100%;
-                  max-height: 35px;
+                  max-height: 45px;
+                }
+
+                .width-holder ::slotted([slot="unit-play"]) {
+                  overflow: hidden;
                 }
               
-                .save {
+                .width-holder .save {
                   display: flex;
                   justify-content: center;
                   align-items: center;
-                  padding-top: 15px;
+                  width: 100%;
+                  z-index: 1;
+                  padding-top: 20px;
+                  padding-bottom: 5px;
                 }
 
                 .controls {
@@ -117,6 +142,7 @@ export class _ extends LitElement {
                   font-weight: 400;
                 }
 
+                
                 label {
                   color: var(--dark-blue-1);
                 }
@@ -141,7 +167,7 @@ export class _ extends LitElement {
                     <div class="main">
                         <div class="column-1">
                             <slot name="body-input"></slot>
-                            <slot name="body-preview"></slot>
+                            <slot name="unit-play"></slot>
                         </div>
                         <div class="column-2">
                             <slot name="name"></slot>
