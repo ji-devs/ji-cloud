@@ -5,10 +5,7 @@ use dominator::{clone, html, Dom, DomBuilder};
 use futures_signals::signal::SignalExt;
 use shared::{
     domain::{
-        audio::AudioId,
-        image::ImageId,
-        module::body::_groups::design::YoutubeEmbed,
-        pdf::PdfId,
+        audio::AudioId, image::ImageId, module::body::_groups::design::YoutubeEmbed, pdf::PdfId,
         pro_dev::unit::ProDevUnitValue,
     },
     media::MediaLibrary,

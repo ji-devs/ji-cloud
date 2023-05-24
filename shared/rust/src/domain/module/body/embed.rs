@@ -3,10 +3,10 @@ use crate::domain::module::{
     ModuleKind,
 };
 use serde::{Deserialize, Serialize};
-use strum_macros::EnumIter;
-use strum::IntoEnumIterator;
 use std::collections::HashSet;
 use std::convert::TryFrom;
+use strum::IntoEnumIterator;
+use strum_macros::EnumIter;
 
 use super::BodyConvert;
 
@@ -175,7 +175,6 @@ impl ModeExt for Mode {
             Mode::ClassProject => STR_CLASS_PROJECT,
             Mode::Portfolio => STR_DIGITAL_PORTFOLIO,
             Mode::Forms => STR_COLLABORATIVE_FORMS,
-            
         }
     }
 }
