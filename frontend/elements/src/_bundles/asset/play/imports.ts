@@ -33,6 +33,7 @@ import "@elements/entry/asset/play/jig/sidebar/sidebar";
 import "@elements/core/images/composed/module-screenshot";
 import "@elements/module/_groups/cards/_common/main-empty";
 import "@elements/module/video/youtube-player";
+import "@elements/module/video/youtube-thumbnail";
 import "@elements/entry/asset/play/course/course-main";
 import "@elements/entry/asset/play/course/course-item";
 import "@elements/core/buttons/fa-button";

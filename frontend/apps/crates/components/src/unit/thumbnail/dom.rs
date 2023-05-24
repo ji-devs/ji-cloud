@@ -36,11 +36,12 @@ impl UnitThumbnail {
 
 fn render_youtube_thumbnail(youtube: &YoutubeEmbed) -> Option<Dom> {
     Some(html!("video-youtube-thumbnail", {
-        .prop("videoId", youtube.url.get_id().to_owned())
-        .style("width", "100%")
-        .style("height", "100%")
+        .prop("videoId", youtube.url.get_id())
         .style("position", "relative")
-        .style("border-radius", "10px")
+        .prop("borderRadius", "10px")
+        .style("height", "100%")
+        .style("width", "100%")
+        .style("object-fit", "cover")
     }))
 }
 

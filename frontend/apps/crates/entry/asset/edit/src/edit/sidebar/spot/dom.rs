@@ -193,11 +193,13 @@ impl SpotState {
                                             {
                                                 match &unit.value {
                                                     ProDevUnitValue::Video(youtube) => {
-                                                        html!("video-youtube-thumbnail", {
-                                                            .prop("videoId", youtube.url.get_id())
-                                                            .style("width", "100%")
-                                                            .style("height", "100%")
-                                                            .style("position", "relative")
+                                                        html!("div", {
+                                                            .prop("slot", "unit")
+                                                            .child(html!("video-youtube-thumbnail", {
+                                                                .prop("videoId", youtube.url.get_id())
+                                                                .style("width", "100%")
+                                                                .style("height", "100%")
+                                                            }))
                                                         })
                                                     },
                                                     ProDevUnitValue::Link(_) => {
