@@ -19,16 +19,15 @@ export class _ extends LitElement {
                   overflow: auto;
                   box-sizing: border-box;
                   flex-direction: column;
-                  row-gap: 10px;
+                  row-gap: 65px;
                   width: 100%
                   height: 100%
                 }
               
                 .main-wrapper {
                   display: flex;
-                  justify-content: flex-end;
+                  justify-content: center;
                   align-items: center;
-                  height: 90vh;
                 }
               
                 main {
@@ -40,8 +39,7 @@ export class _ extends LitElement {
                   border-radius: 32px;
                   box-shadow: 0 3px 8px 0 rgba(0, 0, 0, 0.08);
                   width: 100%;
-                  height: 70%;
-                  margin-bottom: 100px;
+                  height: 100%;
                 }
 
                 .header {
@@ -78,6 +76,10 @@ export class _ extends LitElement {
                   display: flex;
                   height: 100%;
                   column-gap: 40px;
+                  flex-direction: row;
+                  align-items: stretch;
+                  height: 60vh;
+                  max-height: 50vh;
                 }
 
                 .column-1,
@@ -90,45 +92,47 @@ export class _ extends LitElement {
                   height: 100%;
                 }
 
-                .column-1 {
-                  display: flex;
-                  flex-direction: column;
-                  flex-grow: 1;
-                  row-gap: 40px;
-                  flex: 1 0 0;
-                  height: 100%;
-                  width: 100%;
-                }
-
-                .column-1 > * {
-                  margin-bottom: 20px;
+                .column-1 > *,
+                .column-2 > * {
+                    margin-bottom: 20px;
                 }
 
                 .column-2 > * {
                   margin-bottom: 40px;
                 }
 
+                ::slotted([slot="name"]) {
+                  /* height: 100%; */
+                  /* max-height: 13%; */
+                }
+
                 ::slotted([slot="description"]) {
                   height: 100%;
-                  max-height: 400px;                
                 }
 
-                ::slotted([slot="add"]) {
-                  max-height: 45px;
+                ::slotted([slot="description"]) {
+                  height: 100%;
                 }
 
-                .width-holder ::slotted([slot="unit-play"]) {
+                ::slotted([slot="unit-play"]) {
+                  display: grid;
+                  height: 100%;
+                  border-radius: 16px;
                   overflow: hidden;
+                  object-fit: contain;
+                }
+
+                main .save ::slotted([slot="add"]) {
+                  /* max-height: 45px; */
                 }
               
-                .width-holder .save {
+                main .save {
                   display: flex;
                   justify-content: center;
                   align-items: center;
                   width: 100%;
                   z-index: 1;
-                  padding-top: 20px;
-                  padding-bottom: 5px;
+                  padding-top: 40px;
                 }
 
                 .controls {
@@ -142,10 +146,17 @@ export class _ extends LitElement {
                   font-weight: 400;
                 }
 
-                
                 label {
                   color: var(--dark-blue-1);
                 }
+
+
+                .player-window img-ji {
+                    display: grid;
+                    border-radius: 16px;
+                    justify-content: center;
+                }
+
             `,
         ];
     }

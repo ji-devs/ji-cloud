@@ -77,9 +77,6 @@ impl UnitValueView {
                 }
                 dom
             })
-            .style("display", "block")
-            .style("width", "100%")
-            .style("height", "100%")
         })
     }
 
@@ -89,21 +86,19 @@ impl UnitValueView {
             // .prop("size", "full")
             .prop("id", image.0.to_string())
             .prop("lib", "user")
+            .prop("borderRadius", "16px")
+            .style("position", "relative")
         })
     }
 
     fn render_active_link(self: &Rc<Self>, link: url::Url) -> Dom {
         html!("iframe" => HtmlIFrameElement, {
             .prop("src", link.to_string())
-            .style("display", "block")
-            .style("width", "100%")
-            .style("height", "100%")
         })
     }
 
     fn render_active_pdf(self: &Rc<Self>, pdf_id: PdfId) -> Dom {
         let resp = pdf_lib_url(MediaLibrary::User, pdf_id);
-
         html!("iframe" => HtmlIFrameElement, {
             .prop("src", resp)
         })
