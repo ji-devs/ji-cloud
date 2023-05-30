@@ -1,4 +1,5 @@
 use super::super::state::Gallery;
+use shared::domain::pro_dev::{ProDevClonePath, ProDevGetDraftPath};
 use shared::{
     api::endpoints::{self},
     domain::{
@@ -73,6 +74,19 @@ pub async fn create_pro_dev() {
             dominator::routing::go_to_url(&url);
         }
         Err(_) => todo!(""),
+    }
+}
+
+pub async fn copy_pro_dev(pro_dev_id: ProDevId) -> Result<Asset, ()> {
+    match endpoints::pro_dev::Clone::api_with_auth(ProDevClonePath(pro_dev_id), None).await {
+        Ok(resp) => endpoints::pro_dev::GetDraft::api_with_auth(ProDevGetDraftPath(resp.id), None)
+            .await
+            .map(|resp| {
+                let asset: Asset = resp.into();
+                asset
+            })
+            .map_err(|_| ()),
+        Err(_) => Err(()),
     }
 }
 
