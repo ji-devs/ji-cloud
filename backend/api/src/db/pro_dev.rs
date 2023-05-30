@@ -909,7 +909,10 @@ pub async fn clone_pro_dev(
         .ok_or(error::CloneDraft::ResourceNotFound)?;
 
     let new_draft_id = clone_data(&mut txn, &draft_id, DraftOrLive::Draft).await?;
+    update_timestamps(&mut txn, new_draft_id).await?;
+
     let new_live_id = clone_data(&mut txn, &live_id, DraftOrLive::Live).await?;
+    update_timestamps(&mut txn, new_live_id).await?;
 
     let new_pro_dev = sqlx::query!(
         //language=SQL
@@ -931,6 +934,37 @@ returning id as "id!: ProDevId"
     txn.commit().await?;
 
     Ok(new_pro_dev.id)
+}
+
+pub async fn update_timestamps(
+    txn: &mut PgConnection,
+    data_id: Uuid,
+) -> Result<(), error::CloneDraft> {
+    sqlx::query!(
+        //language=SQL
+        r#"
+update pro_dev_data 
+set created_at = now()
+where id = $1
+"#,
+        data_id,
+    )
+    .execute(&mut *txn)
+    .await?;
+
+    sqlx::query!(
+        //language=SQL
+        r#"
+update pro_dev_data 
+set updated_at = null
+where id = $1
+"#,
+        data_id,
+    )
+    .execute(&mut *txn)
+    .await?;
+
+    Ok(())
 }
 
 pub async fn authz(

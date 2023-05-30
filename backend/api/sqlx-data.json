@@ -211,6 +211,18 @@
     },
     "query": "\ninsert into resource_data_age_range(resource_data_id, age_range_id)\nselect $2, age_range_id\nfrom resource_data_age_range\nwhere resource_data_id = $1\n        "
   },
+  "0390647e7da788b5166b3a1acb6724bd22277d89904f488dd1c82f3bb15e9896": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nupdate pro_dev_data \nset created_at = now()\nwhere id = $1\n"
+  },
   "040ce75080d45c3145b01e706eeb2f0b855eed8dd0eaae542ea24d383b4f70fe": {
     "describe": {
       "columns": [
@@ -2551,6 +2563,18 @@
       }
     },
     "query": "\nselect\n    account_id as \"account_id!: AccountId\",\n    account_type as \"account_type!: AccountType\",\n    stripe_customer_id as \"stripe_customer_id?: CustomerId\",\n    payment_method as \"payment_method?: serde_json::Value\",\n    created_at,\n    updated_at\nfrom account\njoin user_account using (account_id)\nwhere user_account.user_id = $1\n"
+  },
+  "28a3fa85c70b1ca84b6abc90efe6073183d682bdd2e7d52168a5223e271e2f49": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nupdate pro_dev_data \nset updated_at = null\nwhere id = $1\n"
   },
   "2ab2664126a2fe3c1f250ef588a47ca653de0e2544d378347dc665f81685a65f": {
     "describe": {
