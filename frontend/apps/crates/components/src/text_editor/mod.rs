@@ -6,5 +6,4 @@ mod state;
 mod wysiwyg_types;
 
 pub use callbacks::*;
-pub use dom::*;
 pub use state::*;
