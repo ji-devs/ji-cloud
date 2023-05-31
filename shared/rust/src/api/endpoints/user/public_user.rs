@@ -2,14 +2,14 @@ use super::super::ApiEndpoint;
 use crate::{
     api::Method,
     domain::{
-        playlist::PlaylistBrowseResponse,
         jig::JigBrowseResponse,
+        playlist::PlaylistBrowseResponse,
         user::public_user::{
-            BrowsePublicUserPlaylistsPath, BrowsePublicUserPlaylistsQuery,
             BrowsePublicUserFollowersPath, BrowsePublicUserFollowersQuery,
             BrowsePublicUserFollowersResponse, BrowsePublicUserFollowingPath,
             BrowsePublicUserFollowingResponse, BrowsePublicUserFollowingsQuery,
-            BrowsePublicUserJigsPath, BrowsePublicUserJigsQuery, BrowsePublicUserResourcesPath,
+            BrowsePublicUserJigsPath, BrowsePublicUserJigsQuery, BrowsePublicUserPlaylistsPath,
+            BrowsePublicUserPlaylistsQuery, BrowsePublicUserResourcesPath,
             BrowsePublicUserResourcesQuery, BrowsePublicUserResourcesResponse,
             BrowsePublicUserResponse, PublicUser, PublicUserBrowsePath, PublicUserFollowPath,
             PublicUserGetPath, PublicUserSearchPath, PublicUserUnfollowPath, SearchPublicUserQuery,
