@@ -9,7 +9,7 @@ use hashfn::hashfn;
 
 pub const JIG_INDEX: &str = "jig_index";
 pub const MEDIA_INDEX: &str = "media_index";
-pub const COURSE_INDEX: &str = "course_index";
+pub const PLAYLIST_INDEX: &str = "playlist_index";
 pub const CIRCLE_INDEX: &str = "circle_index";
 pub const PUBLIC_USER_INDEX: &str = "public_user_index";
 pub const USER_INDEX: &str = "user_index";
@@ -92,11 +92,11 @@ pub(crate) async fn jig_index(
     Ok(())
 }
 
-#[hashfn(COURSE_HASH)]
-pub(crate) async fn course_index(
+#[hashfn(PLAYLIST_HASH)]
+pub(crate) async fn playlist_index(
     txn: &mut PgConnection,
     client: &super::Inner,
-    course_index: &str,
+    playlist_index: &str,
 ) -> anyhow::Result<()> {
     let settings = SetSettings {
         searchable_attributes: Some(
@@ -127,9 +127,9 @@ pub(crate) async fn course_index(
         ]),
     };
 
-    client.set_settings(course_index, &settings).await?;
+    client.set_settings(playlist_index, &settings).await?;
 
-    sqlx::query!(r#"update algolia_index_settings set updated_at = now(), index_hash = $1 where index_name = $2"#, COURSE_HASH, COURSE_INDEX).execute(txn).await?;
+    sqlx::query!(r#"update algolia_index_settings set updated_at = now(), index_hash = $1 where index_name = $2"#, PLAYLIST_HASH, PLAYLIST_INDEX).execute(txn).await?;
 
     Ok(())
 }

@@ -18,7 +18,7 @@ pub enum Fixture {
     MetaAudio,
     Circle,
     PublicUser,
-    Course,
+    Playlist,
     Resource,
     ProDev,
 }
@@ -44,7 +44,7 @@ impl Fixture {
             Self::MetaAudio => include_str!("../../fixtures/17_meta_kinds_audio.sql"),
             Self::Circle => include_str!("../../fixtures/18_circle.sql"),
             Self::PublicUser => include_str!("../../fixtures/19_public_user.sql"),
-            Self::Course => include_str!("../../fixtures/20_course.sql"),
+            Self::Playlist => include_str!("../../fixtures/20_playlist.sql"),
             Self::Resource => include_str!("../../fixtures/21_resource.sql"),
             Self::ProDev => include_str!("../../fixtures/22_pro_dev.sql"),
         }

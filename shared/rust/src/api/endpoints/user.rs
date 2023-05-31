@@ -32,7 +32,7 @@ pub use fonts::{
 pub use profile::{Create as CreateProfile, Get as Profile, Patch as PatchProfile};
 
 pub use public_user::{
-    BrowseFollowers, BrowseFollowing, BrowsePublicUser, BrowseUserCourses as BrowseCourses,
+    BrowseFollowers, BrowseFollowing, BrowsePublicUser, BrowseUserPlaylists as BrowsePlaylists,
     BrowseUserJigs, BrowseUserResources as BrowseResources, Follow, Get as GetPublicUser,
     SearchPublicUser as Search, Unfollow,
 };

@@ -42,12 +42,12 @@ async fn create(
             )
             .await?
         }
-        AssetId::CourseId(course_id) => {
-            db::course::authz(&*db, user_id, Some(course_id)).await?;
+        AssetId::PlaylistId(playlist_id) => {
+            db::playlist::authz(&*db, user_id, Some(playlist_id)).await?;
 
-            db::course::additional_resource::create(
+            db::playlist::additional_resource::create(
                 &*db,
-                course_id,
+                playlist_id,
                 req.display_name,
                 req.resource_type_id,
                 req.resource_content,
@@ -110,12 +110,12 @@ async fn update(
                 )
                 .await?
             }
-            AssetId::CourseId(course_id) => {
-                db::course::authz(&*db, user_id, Some(course_id)).await?;
+            AssetId::PlaylistId(playlist_id) => {
+                db::playlist::authz(&*db, user_id, Some(playlist_id)).await?;
 
-                db::course::additional_resource::update(
+                db::playlist::additional_resource::update(
                     &*db,
-                    course_id,
+                    playlist_id,
                     DraftOrLive::Draft,
                     additional_resource_id,
                     req.display_name,
@@ -162,7 +162,7 @@ async fn update(
     Ok(HttpResponse::NoContent().finish())
 }
 
-/// Get an additional resource on a draft JIG or Course.
+/// Get an additional resource on a draft JIG or Playlist.
 async fn get_draft(
     db: Data<PgPool>,
     _auth: TokenUser,
@@ -184,10 +184,10 @@ async fn get_draft(
                 )
                 .await?
             }
-            AssetId::CourseId(course_id) => {
-                db::course::additional_resource::get(
+            AssetId::PlaylistId(playlist_id) => {
+                db::playlist::additional_resource::get(
                     &db,
-                    course_id,
+                    playlist_id,
                     DraftOrLive::Draft,
                     additional_resource_id,
                 )
@@ -226,7 +226,7 @@ async fn get_draft(
     }))
 }
 
-/// Get an additional resource on a live JIG or Course.
+/// Get an additional resource on a live JIG or Playlist.
 async fn get_live(
     db: Data<PgPool>,
     _auth: TokenUser,
@@ -248,10 +248,10 @@ async fn get_live(
                 )
                 .await?
             }
-            AssetId::CourseId(course_id) => {
-                db::course::additional_resource::get(
+            AssetId::PlaylistId(playlist_id) => {
+                db::playlist::additional_resource::get(
                     &db,
-                    course_id,
+                    playlist_id,
                     DraftOrLive::Live,
                     additional_resource_id,
                 )
@@ -308,10 +308,10 @@ async fn delete(
 
                 db::jig::additional_resource::delete(&*db, jig_id, additional_resource_id).await?;
             }
-            AssetId::CourseId(course_id) => {
-                db::course::authz(&*db, user_id, Some(course_id)).await?;
+            AssetId::PlaylistId(playlist_id) => {
+                db::playlist::authz(&*db, user_id, Some(playlist_id)).await?;
 
-                db::course::additional_resource::delete(&*db, course_id, additional_resource_id)
+                db::playlist::additional_resource::delete(&*db, playlist_id, additional_resource_id)
                     .await?;
             }
             AssetId::ResourceId(resource_id) => {

@@ -3,7 +3,7 @@ use dominator::{clone, Dom, DomHandle};
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
 use shared::domain::asset::{Asset, AssetId, AssetType, DraftOrLive, PrivacyLevel};
-use shared::domain::course::CourseGetDraftPath;
+use shared::domain::playlist::PlaylistGetDraftPath;
 use shared::domain::jig::player::ModuleConfig;
 use shared::domain::module::body::{ModuleAssist, ModuleAssistType};
 use shared::domain::resource::ResourceGetDraftPath;
@@ -162,13 +162,13 @@ where
                                 .await
                                 .map(|resource| Asset::Resource(resource))
                         },
-                        AssetId::CourseId(course_id) => {
-                            endpoints::course::GetDraft::api_no_auth(
-                                CourseGetDraftPath(course_id.clone()),
+                        AssetId::PlaylistId(playlist_id) => {
+                            endpoints::playlist::GetDraft::api_no_auth(
+                                PlaylistGetDraftPath(playlist_id.clone()),
                                 None
                             )
                                 .await
-                                .map(|course| Asset::Course(course))
+                                .map(|playlist| Asset::Playlist(playlist))
                         },
                         AssetId::ProDevId(pro_dev_id) => {
                             endpoints::pro_dev::GetDraft::api_no_auth(

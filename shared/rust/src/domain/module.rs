@@ -61,7 +61,7 @@ pub enum ModuleKind {
     /// Legacy
     Legacy = 11,
 
-    /// ResourceCover user for resources and course cover
+    /// ResourceCover user for resources and playlist cover
     ResourceCover = 12,
 
     /// Answer This (Previously "Find the Answer")
@@ -216,7 +216,7 @@ make_path_parts!(ModuleCreatePath => "/v1/module/draft");
 /// Request to create a new `Module`.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ModuleCreateRequest {
-    /// ID for Course or JIG
+    /// ID for Playlist or JIG
     #[serde(flatten)]
     pub parent_id: AssetId,
 
@@ -242,7 +242,7 @@ make_path_parts!(ModuleUploadPath => "/v1/module/draft/{}" => ModuleId);
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct ModuleUpdateRequest {
-    /// ID for Course or JIG
+    /// ID for Playlist or JIG
     #[serde(flatten)]
     pub parent_id: AssetId,
 
@@ -268,7 +268,7 @@ make_path_parts!(ModuleDeletePath => "/v1/module/draft/{}" => ModuleId);
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct ModuleDeleteRequest {
-    /// ID for Course or JIG
+    /// ID for Playlist or JIG
     #[serde(flatten)]
     pub parent_id: AssetId,
 }

@@ -14,7 +14,7 @@ pub struct SearchResults {
     pub query: String,
     pub jigs: Rc<SearchResultsSection>,
     pub resources: Rc<SearchResultsSection>,
-    pub courses: Rc<SearchResultsSection>,
+    pub playlists: Rc<SearchResultsSection>,
 }
 
 impl SearchResults {
@@ -26,7 +26,7 @@ impl SearchResults {
             query,
             jigs: SearchResultsSection::new(Rc::clone(&home_state), AssetType::Jig),
             resources: SearchResultsSection::new(Rc::clone(&home_state), AssetType::Resource),
-            courses: SearchResultsSection::new(Rc::clone(&home_state), AssetType::Course),
+            playlists: SearchResultsSection::new(Rc::clone(&home_state), AssetType::Playlist),
         })
     }
 

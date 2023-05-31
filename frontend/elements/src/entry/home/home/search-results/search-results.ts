@@ -10,7 +10,7 @@ const STR_LOADING = "So many great JIGs and resources to sift through...";
 
 const KINDS: {[key: string]: string[]} = {
     jig: ["JIG", "JIGs"],
-    course: ["Course", "Courses"],
+    playlist: ["Playlist", "Playlists"],
     resource: ["Resource", "Resources"],
 };
 const STR_AND = "and";
@@ -58,7 +58,7 @@ export class _ extends LitElement {
     jigCount: number = 0;
 
     @property({ type: Number })
-    courseCount: number = 0;
+    playlistCount: number = 0;
 
     @property({ type: Number })
     resourceCount: number = 0;
@@ -90,7 +90,7 @@ export class _ extends LitElement {
         }
 
         addResultCount("jig", this.jigCount);
-        addResultCount("course", this.courseCount);
+        addResultCount("playlist", this.playlistCount);
         addResultCount("resource", this.resourceCount);
 
         // If we're rendering more than one set of results then add STR_AND
@@ -142,7 +142,7 @@ export class _ extends LitElement {
         return html`
             ${this.loading
                 ? this.renderLoading()
-                : this.jigCount + this.courseCount + this.resourceCount > 0
+                : this.jigCount + this.playlistCount + this.resourceCount > 0
                     ? this.renderResultsFound()
                     : this.renderNoResultsFound()
             }

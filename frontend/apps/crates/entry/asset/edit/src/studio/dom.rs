@@ -33,24 +33,24 @@ pub fn render_studio() -> Dom {
                 .text("My JIGs")
             }),
             html!("button-rect", {
-                .prop("slot", "course-create")
+                .prop("slot", "playlist-create")
                 .prop("color", "red")
                 .prop("kind", "filled")
                 .prop("size", "small")
                 .event(|_: events::Click| {
-                    actions::create_course();
+                    actions::create_playlist();
                 })
-                .text("Create a Course")
+                .text("Create a Playlist")
             }),
             html!("button-rect", {
-                .prop("slot", "course-gallery")
+                .prop("slot", "playlist-gallery")
                 .prop("color", "blue")
                 .prop("kind", "text")
                 .prop("size", "small")
                 .apply(move |dom| on_click_go_to_url!(dom, {
-                    Route::Asset(AssetRoute::CourseGallery).to_string()
+                    Route::Asset(AssetRoute::PlaylistGallery).to_string()
                 }))
-                .text("My Courses")
+                .text("My Playlists")
             }),
             html!("button-rect", {
                 .prop("slot", "resource-create")

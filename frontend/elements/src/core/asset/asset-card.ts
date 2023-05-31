@@ -5,7 +5,7 @@ const STR_PLAYED = "Plays";
 const STR_VIEWED = "Views";
 const STR_LIKED = "Likes";
 
-type Kind = "jig" | "resource" | "course";
+type Kind = "jig" | "resource" | "playlist";
 
 @customElement("asset-card")
 export class _ extends LitElement {
@@ -155,7 +155,7 @@ export class _ extends LitElement {
                 :host([kind=resource]) .bottom-indicator {
                     background-color: #e3f5fd;
                 }
-                :host([kind=course]) .bottom-indicator {
+                :host([kind=playlist]) .bottom-indicator {
                     background-color: #e9fae5;
                 }
             `,

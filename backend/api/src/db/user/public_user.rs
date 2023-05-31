@@ -160,10 +160,10 @@ pub async fn browse_user_resources(
                 author_id,
                 updated_at,
                 created_at
-          from course_data_resource "cdr"
-          inner join course on course.live_id = cdr.course_data_id
-          inner join course_data on course.live_id = course_data.id
-          where author_id = $1 and course.published_at is not null
+          from playlist_data_resource "cdr"
+          inner join playlist on playlist.live_id = cdr.playlist_data_id
+          inner join playlist_data on playlist.live_id = playlist_data.id
+          where author_id = $1 and playlist.published_at is not null
           ),
           cte2 as (
             select *
@@ -602,10 +602,10 @@ pub async fn total_resource_count(db: &PgPool, user_id: UserId) -> sqlx::Result<
                 author_id,
                 updated_at,
                 created_at
-          from course_data_resource "cdr"
-          inner join course on course.live_id = cdr.course_data_id
-          inner join course_data on course.live_id = course_data.id
-          where author_id = $1 and course.published_at is not null
+          from playlist_data_resource "cdr"
+          inner join playlist on playlist.live_id = cdr.playlist_data_id
+          inner join playlist_data on playlist.live_id = playlist_data.id
+          where author_id = $1 and playlist.published_at is not null
         )
         select count(id) as "count!"
         from unnest(array(

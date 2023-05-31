@@ -73,7 +73,7 @@ async fn search_async(state: Rc<Home>) {
     join!(
         search_state.jigs.load_items(),
         search_state.resources.load_items(),
-        search_state.courses.load_items(),
+        search_state.playlists.load_items(),
     );
 
     search_state.loading.set(false);

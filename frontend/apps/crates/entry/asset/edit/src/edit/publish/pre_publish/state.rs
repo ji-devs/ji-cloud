@@ -15,7 +15,7 @@ use super::super::Publish;
 
 const STR_JIG: &str = "JIG";
 const STR_RESOURCE: &str = "Resource";
-const STR_COURSE: &str = "Course";
+const STR_PLAYLIST: &str = "Playlist";
 const STR_PRO_DEV: &str = "Pro Dev course";
 
 pub struct PrePublish {
@@ -65,7 +65,7 @@ impl PrePublish {
         match &*self.asset {
             EditableAsset::Jig(_) => STR_JIG,
             EditableAsset::Resource(_) => STR_RESOURCE,
-            EditableAsset::Course(_) => STR_COURSE,
+            EditableAsset::Playlist(_) => STR_PLAYLIST,
             EditableAsset::ProDev(_) => STR_PRO_DEV,
         }
     }

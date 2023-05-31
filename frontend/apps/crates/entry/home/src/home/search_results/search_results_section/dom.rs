@@ -24,8 +24,8 @@ use utils::{
     metadata::{get_category_label_lookup, get_resource_types},
     prelude::{get_user_cloned, ApiEndpointExt},
     routes::{
-        AssetEditRoute, AssetRoute, CommunityMembersRoute, CommunityRoute, CourseEditRoute,
-        JigEditRoute, ResourceEditRoute, Route,
+        AssetEditRoute, AssetRoute, CommunityMembersRoute, CommunityRoute, JigEditRoute,
+        PlaylistEditRoute, ResourceEditRoute, Route,
     },
 };
 
@@ -114,7 +114,7 @@ impl SearchResultsSection {
             ))
             .apply(|dom| {
                 match &*asset {
-                    Asset::Course(_) | Asset::Resource(_) => dom,
+                    Asset::Playlist(_) | Asset::Resource(_) => dom,
                     Asset::Jig(jig) => {
                         dom.children(jig.jig_data.modules.iter().map(|module| {
                             ModuleThumbnail::new(
@@ -200,10 +200,10 @@ impl SearchResultsSection {
                                             JigEditRoute::Landing
                                         )))
                                     },
-                                    AssetId::CourseId(course_id) => {
-                                        Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
-                                            course_id,
-                                            CourseEditRoute::Landing
+                                    AssetId::PlaylistId(playlist_id) => {
+                                        Route::Asset(AssetRoute::Edit(AssetEditRoute::Playlist(
+                                            playlist_id,
+                                            PlaylistEditRoute::Landing
                                         )))
                                     },
                                     AssetId::ResourceId(resource_id) => {
@@ -245,7 +245,7 @@ impl SearchResultsSection {
             }))
             .apply(|dom| {
                 match state.asset_type {
-                    AssetType::Jig | AssetType::Course => {
+                    AssetType::Jig | AssetType::Playlist => {
                         dom.child(html!("button-rect-icon", {
                             .prop("slot", "play-button")
                             .prop("color", "red")
@@ -321,16 +321,12 @@ impl SearchResultsSection {
 fn track_action(action: &str, asset: Rc<Asset>) {
     let asset_id = asset.id();
 
-    let asset_type = match asset_id {
-        AssetId::JigId(_) => "Jig",
-        AssetId::CourseId(_) => "Course",
-        AssetId::ResourceId(_) => "Resource",
-        AssetId::ProDevId(_) => todo!(),
-    };
-
     let mut properties = HashMap::new();
     properties.insert("Asset ID", format!("{}", asset_id.uuid()));
-    properties.insert("Asset Type", asset_type.to_owned());
+    properties.insert(
+        "Asset Type",
+        asset_id.asset_type().display_name().to_string(),
+    );
     properties.insert("Asset Name", asset.display_name().clone());
 
     analytics::event(action, Some(properties));

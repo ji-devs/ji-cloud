@@ -22,7 +22,7 @@ impl Router {
             Route::Asset(route) => match route {
                 AssetRoute::JigGallery => Some(Gallery::new(AssetType::Jig).render()),
                 AssetRoute::ResourceGallery => Some(Gallery::new(AssetType::Resource).render()),
-                AssetRoute::CourseGallery => Some(Gallery::new(AssetType::Course).render()),
+                AssetRoute::PlaylistGallery => Some(Gallery::new(AssetType::Playlist).render()),
                 AssetRoute::ProDevGallery => Some(Gallery::new(AssetType::ProDev).render()),
                 AssetRoute::Edit(route) => match route {
                     AssetEditRoute::Jig(jig_id, _) => {
@@ -31,8 +31,8 @@ impl Router {
                     AssetEditRoute::Resource(resource_id, _) => {
                         Some(AssetEditState::new(resource_id.into(), route).render())
                     }
-                    AssetEditRoute::Course(course_id, _) => {
-                        Some(AssetEditState::new(course_id.into(), route).render())
+                    AssetEditRoute::Playlist(playlist_id, _) => {
+                        Some(AssetEditState::new(playlist_id.into(), route).render())
                     }
                     AssetEditRoute::ProDev(pro_dev_id, _) => {
                         Some(AssetEditState::new(pro_dev_id.into(), route).render())

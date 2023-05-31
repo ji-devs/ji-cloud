@@ -11,8 +11,8 @@ use shared::{
 use std::rc::Rc;
 use utils::prelude::*;
 
-mod course_actions;
 mod jig_actions;
+mod playlist_actions;
 mod pro_dev_actions;
 mod resource_actions;
 
@@ -38,7 +38,7 @@ impl Gallery {
         let res = match state.asset_type {
             AssetType::Jig => jig_actions::load_jigs(state, is_published).await,
             AssetType::Resource => resource_actions::load_resources(state, is_published).await,
-            AssetType::Course => course_actions::load_courses(state, is_published).await,
+            AssetType::Playlist => playlist_actions::load_playlists(state, is_published).await,
             AssetType::ProDev => pro_dev_actions::load_pro_devs(state, is_published).await,
         };
 
@@ -84,7 +84,7 @@ impl Gallery {
             let assets = match state.asset_type {
                 AssetType::Jig => jig_actions::search_jigs(q, is_published).await,
                 AssetType::Resource => resource_actions::search_resources(q, is_published).await,
-                AssetType::Course => course_actions::search_courses(q, is_published).await,
+                AssetType::Playlist => playlist_actions::search_playlists(q, is_published).await,
                 AssetType::ProDev => pro_dev_actions::search_pro_devs(q, is_published).await,
             };
 
@@ -106,7 +106,7 @@ impl Gallery {
             match state.asset_type {
                 AssetType::Jig => jig_actions::create_jig().await,
                 AssetType::Resource => resource_actions::create_resource().await,
-                AssetType::Course => course_actions::create_course().await,
+                AssetType::Playlist => playlist_actions::create_playlist().await,
                 AssetType::ProDev => pro_dev_actions::create_pro_dev().await,
             };
         }));
@@ -118,9 +118,8 @@ impl Gallery {
             let asset = match asset_id {
                 AssetId::JigId(jig_id) => jig_actions::copy_jig(jig_id).await,
                 AssetId::ResourceId(resource_id) => resource_actions::copy_resource(resource_id).await,
-                AssetId::CourseId(course_id) => course_actions::copy_course(course_id).await,
+                AssetId::PlaylistId(playlist_id) => playlist_actions::copy_playlist(playlist_id).await,
                 AssetId::ProDevId(pro_dev_id) => pro_dev_actions::copy_pro_dev(pro_dev_id).await,
-
             };
             state.assets.lock_mut().insert_cloned(0, asset.unwrap_ji());
         }));
@@ -136,8 +135,8 @@ impl Gallery {
                 AssetId::ResourceId(resource_id) => {
                     resource_actions::delete_resource(resource_id).await
                 },
-                AssetId::CourseId(course_id) => {
-                    course_actions::delete_course(course_id).await
+                AssetId::PlaylistId(playlist_id) => {
+                    playlist_actions::delete_playlist(playlist_id).await
                 },
                 AssetId::ProDevId(pro_dev_id) => {
                     pro_dev_actions::delete_pro_dev(pro_dev_id).await

@@ -6,8 +6,8 @@ const STR_JI_TEAM = "Ji Team";
 const STR_LIKED = "Likes";
 const STR_PLAYED = "Plays";
 const STR_ADDITIONAL_RESOURCES = "Teacher resources";
-const STR_COURSES = "Courses";
-const STR_COURSES_SUBHEADING = "This JIG is a apart of the following courses:";
+const STR_PLAYLISTS = "Playlists";
+const STR_PLAYLISTS_SUBHEADING = "This JIG is a apart of the following playlists:";
 
 @customElement("jig-play-sidebar-jig-info")
 export class _ extends LitElement {
@@ -97,13 +97,13 @@ export class _ extends LitElement {
                     display: flex;
                     column-gap: 5px;
                 }
-                .courses-section h5 {
+                .playlists-section h5 {
                     margin: 0;
                     font-size: 12px;
                     font-weight: normal;
                     color: var(--dark-gray-6);
                 }
-                .courses-section .courses {
+                .playlists-section .playlists {
                     display: grid;
                 }
                 .report-section {
@@ -202,15 +202,15 @@ export class _ extends LitElement {
                             <slot name="additional-resources"></slot>
                         </div>
                     </section>
-                    <section class="courses-section">
+                    <section class="playlists-section">
                         <div>
-                            <h4>${STR_COURSES}</h4>
+                            <h4>${STR_PLAYLISTS}</h4>
                             <!-- TODO: enable when ready -->
-                            <!-- <h5>${STR_COURSES_SUBHEADING}</h5> -->
+                            <!-- <h5>${STR_PLAYLISTS_SUBHEADING}</h5> -->
                         </div>
-                        <div class="courses">
+                        <div class="playlists">
                             <!-- TODO: enable when ready -->
-                            <!-- <slot name="courses"></slot> -->
+                            <!-- <slot name="playlists"></slot> -->
                             Coming soon!
                         </div>
                     </section>

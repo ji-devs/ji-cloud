@@ -63,11 +63,11 @@ export const STR_MODULE_CHOOSE_HEADER: { [key in ModuleKind]: string } = {
     "find-answer": "Create an Answer This activity",
 };
 
-export type AssetType = "jig" | "course" | "pro-dev";
+export type AssetType = "jig" | "playlist" | "pro-dev";
 
 export const STR_ASSET_TYPE: { [key in AssetType]: string } = {
     jig: "jig",
-    course: "course",
+    playlist: "playlist",
     "pro-dev": "pro-dev"
 };
 

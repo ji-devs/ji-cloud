@@ -42,7 +42,7 @@ impl Sidebar {
                     state.asset_edit_state.route.signal_cloned().for_each(clone!(state => move |route| {
                         let should_collapse = !matches!(
                             route,
-                            AssetEditRoute::Jig(_, JigEditRoute::Landing) | AssetEditRoute::Course(_, CourseEditRoute::Landing) | AssetEditRoute::ProDev(_, ProDevEditRoute::Landing) | AssetEditRoute::ProDev(_, ProDevEditRoute::Unit(_))
+                            AssetEditRoute::Jig(_, JigEditRoute::Landing) | AssetEditRoute::Playlist(_, PlaylistEditRoute::Landing) | AssetEditRoute::ProDev(_, ProDevEditRoute::Landing) | AssetEditRoute::ProDev(_, ProDevEditRoute::Unit(_))
                         );
                         state.collapsed.set(should_collapse);
                         ready(())
@@ -53,7 +53,7 @@ impl Sidebar {
                     // TODO: change?
                     matches!(
                         route,
-                        AssetEditRoute::Jig(_, JigEditRoute::Landing) | AssetEditRoute::Course(_, CourseEditRoute::Landing) | AssetEditRoute::ProDev(_, ProDevEditRoute::Landing) | AssetEditRoute::ProDev(_, ProDevEditRoute::Unit(_))
+                        AssetEditRoute::Jig(_, JigEditRoute::Landing) | AssetEditRoute::Playlist(_, PlaylistEditRoute::Landing) | AssetEditRoute::ProDev(_, ProDevEditRoute::Landing) | AssetEditRoute::ProDev(_, ProDevEditRoute::Unit(_))
                     )
                 }))
                 .prop_signal("loading", state.loader.is_loading())
@@ -76,7 +76,7 @@ impl Sidebar {
                     .prop_signal("selected", state.asset_edit_state.route.signal_cloned().map(|route| {
                         matches!(
                             route,
-                            AssetEditRoute::Jig(_, JigEditRoute::Publish) | AssetEditRoute::Course(_, CourseEditRoute::Publish) | AssetEditRoute::ProDev(_, ProDevEditRoute::Publish)
+                            AssetEditRoute::Jig(_, JigEditRoute::Publish) | AssetEditRoute::Playlist(_, PlaylistEditRoute::Publish) | AssetEditRoute::ProDev(_, ProDevEditRoute::Publish)
                         )
                     }))
                     .event(clone!(state => move |_ :events::Click| {
@@ -85,7 +85,7 @@ impl Sidebar {
                         } else {
                             match state.asset_edit_state.asset_id {
                                 shared::domain::asset::AssetId::JigId(_) => actions::set_highlight_modules(&state, true),
-                                shared::domain::asset::AssetId::CourseId(_) => actions::set_highlight_modules(&state, true),
+                                shared::domain::asset::AssetId::PlaylistId(_) => actions::set_highlight_modules(&state, true),
                                 shared::domain::asset::AssetId::ResourceId(_) => actions::set_highlight_modules(&state, true),
                                 shared::domain::asset::AssetId::ProDevId(_) => actions::set_highlight_units(&state, true),
                             }

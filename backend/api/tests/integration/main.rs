@@ -7,7 +7,7 @@ mod audio;
 mod auth;
 mod category;
 mod circle;
-mod course;
+mod playlist;
 mod fixture;
 mod helpers;
 mod image;

@@ -2,9 +2,9 @@ use shared::{
     api::endpoints,
     domain::{
         asset::AssetId,
-        course::{CourseCreatePath, CourseCreateRequest},
         jig::{JigCreatePath, JigCreateRequest},
         module::{ModuleBody, ModuleCreatePath, ModuleCreateRequest, ModuleKind},
+        playlist::{PlaylistCreatePath, PlaylistCreateRequest},
         pro_dev::{ProDevCreatePath, ProDevCreateRequest},
         resource::{ResourceCreatePath, ResourceCreateRequest},
     },
@@ -12,7 +12,7 @@ use shared::{
 use utils::{
     prelude::ApiEndpointExt,
     routes::{
-        AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, ProDevEditRoute,
+        AssetEditRoute, AssetRoute, JigEditRoute, PlaylistEditRoute, ProDevEditRoute,
         ResourceEditRoute, Route,
     },
     unwrap::UnwrapJiExt,
@@ -42,7 +42,7 @@ pub fn create_resource() {
         let resp = endpoints::resource::Create::api_with_auth(ResourceCreatePath(), Some(req))
             .await
             .unwrap_ji();
-        add_course_or_resource_cover(resp.id.into()).await;
+        add_playlist_or_resource_cover(resp.id.into()).await;
         let url: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Resource(
             resp.id,
             ResourceEditRoute::Landing,
@@ -52,24 +52,24 @@ pub fn create_resource() {
     });
 }
 
-pub fn create_course() {
+pub fn create_playlist() {
     spawn_local(async move {
-        let req = CourseCreateRequest::default();
+        let req = PlaylistCreateRequest::default();
 
-        let resp = endpoints::course::Create::api_with_auth(CourseCreatePath(), Some(req))
+        let resp = endpoints::playlist::Create::api_with_auth(PlaylistCreatePath(), Some(req))
             .await
             .unwrap_ji();
-        add_course_or_resource_cover(resp.id.into()).await;
-        let url: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
+        add_playlist_or_resource_cover(resp.id.into()).await;
+        let url: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Playlist(
             resp.id,
-            CourseEditRoute::Landing,
+            PlaylistEditRoute::Landing,
         )))
         .into();
         dominator::routing::go_to_url(&url);
     });
 }
 
-async fn add_course_or_resource_cover(asset_id: AssetId) {
+async fn add_playlist_or_resource_cover(asset_id: AssetId) {
     let req = ModuleCreateRequest {
         body: ModuleBody::new(ModuleKind::ResourceCover),
         parent_id: asset_id,

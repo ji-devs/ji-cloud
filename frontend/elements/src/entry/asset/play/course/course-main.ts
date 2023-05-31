@@ -1,6 +1,6 @@
 import { css, customElement, html, LitElement, property } from "lit-element";
 
-@customElement("jig-play-course-main")
+@customElement("jig-play-playlist-main")
 export class _ extends LitElement {
     static get styles() {
         return [
@@ -19,7 +19,7 @@ export class _ extends LitElement {
                         grid-template-columns: 4fr 6fr;
                     }
                 }
-                .course-info-side {
+                .playlist-info-side {
                     display: grid;
                     align-content: start;
                     row-gap: 12px;
@@ -28,7 +28,7 @@ export class _ extends LitElement {
                     padding: 8px;
                 }
                 @media (min-width: 1024px) {
-                    .course-info-side {
+                    .playlist-info-side {
                         justify-content: auto;
                         text-align: left;
                         padding: 0;
@@ -93,7 +93,7 @@ export class _ extends LitElement {
                     column-gap: 5px;
                 }
                 @media (min-width: 1024px) {
-                    .course-items {
+                    .playlist-items {
                         border-radius: 12px;
                         overflow: hidden;
                     }
@@ -150,7 +150,7 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <div class="course-info-side">
+            <div class="playlist-info-side">
                 <slot name="thumbnail"></slot>
                 <h2 class="name" dir="auto">${this.name}</h2>
                 <div class="count-lang-author">
@@ -172,7 +172,7 @@ export class _ extends LitElement {
                     <slot name="additional-resources"></slot>
                 </div>
             </div>
-            <div class="course-items">
+            <div class="playlist-items">
                 <div class="items-header">
                     <slot name="play"></slot>
                     <slot name="share"></slot>

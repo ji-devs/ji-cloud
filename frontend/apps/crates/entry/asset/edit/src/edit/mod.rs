@@ -1,8 +1,8 @@
 mod actions;
-mod course;
 mod dom;
 mod jig;
 mod module_iframe;
+mod playlist;
 mod pro_dev;
 mod publish;
 mod sidebar;

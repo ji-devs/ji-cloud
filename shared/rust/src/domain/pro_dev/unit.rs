@@ -1,5 +1,4 @@
 //! Types for ProDev Units
-//! Types for Pro Dev Units for JIG or Courses.
 
 use crate::{
     api::endpoints::PathPart,

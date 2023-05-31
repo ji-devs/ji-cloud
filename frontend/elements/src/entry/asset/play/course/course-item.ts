@@ -1,6 +1,6 @@
 import { css, customElement, html, LitElement, property } from "lit-element";
 
-@customElement("jig-play-course-item")
+@customElement("jig-play-playlist-item")
 export class _ extends LitElement {
     static get styles() {
         return [

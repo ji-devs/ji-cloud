@@ -4,7 +4,7 @@ use awsm_web::loaders::helpers::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::asset::Asset;
 use utils::asset::{
-    CoursePlayerOptions, JigPlayerOptions, ProDevPlayerOptions, ResourceContentExt,
+    JigPlayerOptions, PlaylistPlayerOptions, ProDevPlayerOptions, ResourceContentExt,
 };
 use utils::routes::{AssetRoute, Route};
 
@@ -71,10 +71,10 @@ impl ShareAsset {
                     }
                 }
             }
-            Asset::Course(course) => {
-                let path = Route::Asset(AssetRoute::Play(AssetPlayRoute::Course(
-                    course.id,
-                    CoursePlayerOptions {
+            Asset::Playlist(playlist) => {
+                let path = Route::Asset(AssetRoute::Play(AssetPlayRoute::Playlist(
+                    playlist.id,
+                    PlaylistPlayerOptions {
                         is_student,
                         ..Default::default()
                     },
@@ -101,7 +101,7 @@ impl ShareAsset {
     pub(super) fn asset_type_name(&self) -> &'static str {
         match self.asset {
             Asset::Jig(_) => "JIG",
-            Asset::Course(_) => "course",
+            Asset::Playlist(_) => "playlist",
             Asset::Resource(_) => "resource",
             Asset::ProDev(_) => "pro-dev",
         }

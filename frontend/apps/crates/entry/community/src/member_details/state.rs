@@ -5,8 +5,8 @@ use futures_signals::signal::Mutable;
 use shared::domain::{
     asset::AssetId,
     circle::Circle,
-    course::CourseResponse,
     jig::JigResponse,
+    playlist::PlaylistResponse,
     resource::ResourceResponse,
     user::{public_user::PublicUser, UserId},
 };
@@ -45,7 +45,7 @@ impl MemberDetails {
 pub enum Creations {
     Jigs(Option<Vec<JigResponse>>),
     Resources(Option<Vec<ResourceResponse>>),
-    Courses(Option<Vec<CourseResponse>>),
+    Playlists(Option<Vec<PlaylistResponse>>),
 }
 
 #[derive(Clone, Debug)]

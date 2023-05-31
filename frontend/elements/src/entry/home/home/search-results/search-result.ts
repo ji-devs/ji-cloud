@@ -7,7 +7,7 @@ const STR_DESCRIPTION = "Description";
 const STR_ADDITIONAL_RESOURCES = "Teacher resources";
 const STR_SEE_ALL = "See more JIGs by this author";
 
-type Kind = "jig" | "resource" | "course";
+type Kind = "jig" | "resource" | "playlist";
 
 @customElement("home-search-result")
 export class _ extends LitElement {
@@ -49,7 +49,7 @@ export class _ extends LitElement {
                 :host([kind=resource]) {
                     --line-color: #beedfe;
                 }
-                :host([kind=course]) {
+                :host([kind=playlist]) {
                     --line-color: var(--green-3);
                 }
                 .wrapper {
@@ -91,7 +91,7 @@ export class _ extends LitElement {
                 :host([kind=resource]) .back {
                     background-color: #e3f5fd;
                 }
-                :host([kind=course]) .back {
+                :host([kind=playlist]) .back {
                     background-color: #e9fae5;
                 }
                 .back .scrollable-content {
@@ -104,7 +104,7 @@ export class _ extends LitElement {
                     align-content: start;
                 }
                 :host([kind=jig]) .back,
-                :host([kind=course]) .back {
+                :host([kind=playlist]) .back {
                     scrollbar-color: var(--light-gray-2) transparent;
                 }
                 :host([kind=resource]) .back {
@@ -341,7 +341,7 @@ export class _ extends LitElement {
     render() {
         let jiggling_file = this.kind === 'jig' ? "jig-jiggling.svg"
             : this.kind === "resource" ? "resource-jiggling.png"
-            : this.kind === "course" ? "course-jiggling.png"
+            : this.kind === "playlist" ? "playlist-jiggling.png"
             : "";
 
         return html`

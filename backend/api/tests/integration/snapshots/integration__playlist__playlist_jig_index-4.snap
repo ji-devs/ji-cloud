@@ -1,0 +1,40 @@
+---
+source: tests/integration/playlist.rs
+expression: body
+---
+{
+  "id": "[id]",
+  "publishedAt": "[published_at]",
+  "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+  "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+  "authorName": "Bobby Tables",
+  "likes": 0,
+  "plays": 0,
+  "liveUpToDate": true,
+  "isLiked": false,
+  "playlistData": {
+    "draftOrLive": "live",
+    "displayName": "playlist name1",
+    "language": "en",
+    "description": "draft test description",
+    "lastEdited": "[last_edited]",
+    "privacyLevel": "public",
+    "otherKeywords": "",
+    "translatedKeywords": "",
+    "translatedDescription": {},
+    "cover": {
+      "id": "[id]",
+      "kind": "Cover",
+      "is_complete": true
+    },
+    "ageRanges": [],
+    "affiliations": [],
+    "categories": [],
+    "additionalResources": [],
+    "items": [
+      "0cc084bc-7c83-11eb-9f77-e3218dffb008",
+      "19becb2b-bff7-4c1b-bb2c-16f2e098d3d3",
+      "3a71522a-cd77-11eb-8dc1-af3e35f7c743"
+    ]
+  }
+}

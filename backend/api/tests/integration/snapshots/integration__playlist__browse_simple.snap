@@ -1,0 +1,105 @@
+---
+source: tests/integration/playlist.rs
+expression: body
+---
+{
+  "playlists": [
+    {
+      "id": "3a6a3660-f3ec-11ec-b8ef-071747fa2a0d",
+      "publishedAt": "2022-06-24T18:35:33.636556Z",
+      "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+      "authorName": "Bobby Tables",
+      "likes": 0,
+      "plays": 0,
+      "liveUpToDate": false,
+      "isLiked": false,
+      "playlistData": {
+        "draftOrLive": "draft",
+        "displayName": "playlist name1",
+        "language": "en",
+        "description": "draft test description",
+        "lastEdited": "[last_edited]",
+        "privacyLevel": "public",
+        "otherKeywords": "",
+        "translatedKeywords": "",
+        "translatedDescription": {},
+        "cover": {
+          "id": "ce6e6eb0-0ea6-11ed-9785-2712225b9473",
+          "kind": "Cover",
+          "is_complete": true
+        },
+        "ageRanges": [],
+        "affiliations": [],
+        "categories": [],
+        "additionalResources": [],
+        "items": [
+          "0cc084bc-7c83-11eb-9f77-e3218dffb008",
+          "3a71522a-cd77-11eb-8dc1-af3e35f7c743"
+        ]
+      }
+    },
+    {
+      "id": "ef0c4d42-f3ec-11ec-b8ef-af940a9cfba5",
+      "publishedAt": "2022-06-22T18:35:33.636556Z",
+      "creatorId": "7b96a41c-e406-11eb-8176-efd86dd7f444",
+      "authorId": "7b96a41c-e406-11eb-8176-efd86dd7f444",
+      "authorName": "Post Gres",
+      "likes": 1,
+      "plays": 0,
+      "liveUpToDate": false,
+      "isLiked": true,
+      "playlistData": {
+        "draftOrLive": "draft",
+        "displayName": "playlist name3",
+        "language": "he",
+        "description": "draft test description",
+        "lastEdited": "[last_edited]",
+        "privacyLevel": "public",
+        "otherKeywords": "",
+        "translatedKeywords": "",
+        "translatedDescription": {},
+        "cover": {
+          "id": "266cbba8-0ea7-11ed-9785-0b828c5e915c",
+          "kind": "Cover",
+          "is_complete": true
+        },
+        "ageRanges": [],
+        "affiliations": [],
+        "categories": [],
+        "additionalResources": [],
+        "items": []
+      }
+    },
+    {
+      "id": "ef0c4d42-f3ec-11ec-b8ef-af940a9cfba5",
+      "publishedAt": "2022-06-22T18:35:33.636556Z",
+      "creatorId": "7b96a41c-e406-11eb-8176-efd86dd7f444",
+      "authorId": "7b96a41c-e406-11eb-8176-efd86dd7f444",
+      "authorName": "Post Gres",
+      "likes": 1,
+      "plays": 0,
+      "liveUpToDate": false,
+      "isLiked": true,
+      "playlistData": {
+        "draftOrLive": "live",
+        "displayName": "playlist name3",
+        "language": "en",
+        "description": "live test description",
+        "lastEdited": "[last_edited]",
+        "privacyLevel": "public",
+        "otherKeywords": "",
+        "translatedKeywords": "",
+        "translatedDescription": {},
+        "cover": null,
+        "ageRanges": [],
+        "affiliations": [],
+        "categories": [],
+        "additionalResources": [],
+        "items": []
+      }
+    }
+  ],
+  "pages": 1,
+  "totalPlaylistCount": 3
+}

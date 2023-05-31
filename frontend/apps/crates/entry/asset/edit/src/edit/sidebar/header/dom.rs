@@ -8,7 +8,7 @@ use super::super::{actions as sidebar_actions, state::Sidebar as SidebarState};
 use crate::edit::sidebar::{jig::actions::get_player_settings, state::SidebarSetting};
 use shared::domain::asset::AssetType;
 use utils::{
-    asset::{AssetPlayerOptions, CoursePlayerOptions, ProDevPlayerOptions},
+    asset::{AssetPlayerOptions, PlaylistPlayerOptions, ProDevPlayerOptions},
     prelude::*,
 };
 
@@ -24,14 +24,14 @@ impl HeaderDom {
         let asset_edit_state = Rc::clone(&sidebar_state.asset_edit_state);
         html!("jig-edit-sidebar-header", {
             .prop("slot", "header")
-            // TODO: remove once course has setting
-            .prop("hasSettings", (!asset_edit_state.asset_id.is_course_id() && !asset_edit_state.asset_id.is_pro_dev_id()))
+            // TODO: remove once playlist has setting
+            .prop("hasSettings", (!asset_edit_state.asset_id.is_playlist_id() && !asset_edit_state.asset_id.is_pro_dev_id()))
             .prop_signal("collapsed", sidebar_state.collapsed.signal())
             .prop_signal("isModulePage", asset_edit_state.route.signal_cloned().map(|route| {
                 // TODO: change?
                 matches!(
                     route,
-                    AssetEditRoute::Jig(_, JigEditRoute::Landing) | AssetEditRoute::Course(_, CourseEditRoute::Landing)
+                    AssetEditRoute::Jig(_, JigEditRoute::Landing) | AssetEditRoute::Playlist(_, PlaylistEditRoute::Landing)
                 )
             }))
             .apply(|dom| {
@@ -39,7 +39,7 @@ impl HeaderDom {
                     SidebarSetting::Jig(settings) => {
                         dom.child(settings.render())
                     },
-                    SidebarSetting::Course(settings) => {
+                    SidebarSetting::Playlist(settings) => {
                         dom.child(settings.render())
                     },
                     SidebarSetting::ProDev(settings) => {
@@ -68,7 +68,7 @@ impl HeaderDom {
                     .event(clone!(asset_edit_state => move |_:events::Click| {
                         let route = match asset_edit_state.asset_id {
                             AssetId::JigId(_) => AssetRoute::JigGallery,
-                            AssetId::CourseId(_) => AssetRoute::CourseGallery,
+                            AssetId::PlaylistId(_) => AssetRoute::PlaylistGallery,
                             AssetId::ResourceId(_) => unimplemented!(),
                             AssetId::ProDevId(_) => AssetRoute::ProDevGallery,
                         };
@@ -100,12 +100,7 @@ impl HeaderDom {
                 html!("jig-edit-sidebar-preview-button", {
                     .prop("slot", "preview")
                     .prop("assetDisplayName", {
-                        let asset_type = asset_edit_state.asset.asset_type();
-                        if asset_type != AssetType::ProDev {
-                            asset_type.display_name()
-                        } else {
-                            "course"
-                        }
+                        asset_edit_state.asset.asset_type().display_name()
                     })
                     .event(clone!(sidebar_state, asset_edit_state => move |_: events::Click| {
                         match &sidebar_state.settings {
@@ -114,12 +109,12 @@ impl HeaderDom {
                                 let settings = AssetPlayerOptions::Jig(settings);
                                 asset_edit_state.play_jig.set(Some(settings));
                             },
-                            SidebarSetting::Course(_course) => {
-                                let settings = CoursePlayerOptions {
+                            SidebarSetting::Playlist(_playlist) => {
+                                let settings = PlaylistPlayerOptions {
                                     draft_or_live: DraftOrLive::Draft,
                                     is_student: false
                                 };
-                                let settings = AssetPlayerOptions::Course(settings);
+                                let settings = AssetPlayerOptions::Playlist(settings);
                                 asset_edit_state.play_jig.set(Some(settings));
                             }
                             SidebarSetting::ProDev(_pro_dev) =>

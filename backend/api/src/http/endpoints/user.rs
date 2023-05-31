@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 use shared::{
     api::endpoints::{
         user::{
-            self, Browse, BrowseCourses, BrowseFollowers, BrowseFollowing, BrowsePublicUser,
+            self, Browse, BrowsePlaylists, BrowseFollowers, BrowseFollowing, BrowsePublicUser,
             BrowseResources, BrowseUserJigs, ChangePassword, Create, CreateColor, CreateFont,
             CreateProfile, Delete, DeleteColor, DeleteFont, Follow, GetColors, GetFonts,
             GetPublicUser, PatchProfile, Profile, ResetEmail, ResetPassword, Search, SearchUser,
@@ -1180,10 +1180,10 @@ pub fn configure(cfg: &mut ServiceConfig) {
             .to(public_user::browse_user_resources),
     )
     .route(
-        <BrowseCourses as ApiEndpoint>::Path::PATH,
-        BrowseCourses::METHOD
+        <BrowsePlaylists as ApiEndpoint>::Path::PATH,
+        BrowsePlaylists::METHOD
             .route()
-            .to(public_user::browse_user_courses),
+            .to(public_user::browse_user_playlists),
     )
     .route(
         <GetPublicUser as ApiEndpoint>::Path::PATH,

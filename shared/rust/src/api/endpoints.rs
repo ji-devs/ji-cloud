@@ -63,8 +63,8 @@ pub mod locale;
 /// Pdf endpoints
 pub mod pdf;
 
-/// Course endpoints
-pub mod course;
+/// Playlist endpoints
+pub mod playlist;
 
 /// Additional Resource endpoints
 pub mod additional_resource;

@@ -149,17 +149,17 @@ async fn browse_user_resources(port: u16) -> anyhow::Result<()> {
         "Fixture::MetaKinds",
         "Fixture::Jig",
         "Fixture::PublicUser",
-        "Fixture::Course"
+        "Fixture::Playlist"
     )
 )]
-async fn browse_user_courses(port: u16) -> anyhow::Result<()> {
-    let name = "browse_user_courses";
+async fn browse_user_playlists(port: u16) -> anyhow::Result<()> {
+    let name = "browse_user_playlists";
 
     let client = reqwest::Client::new();
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/user/{}/public/course/browse",
+            "http://0.0.0.0:{}/v1/user/{}/public/playlist/browse",
             port, "1f241e1b-b537-493f-a230-075cb16315be"
         ))
         .login()
@@ -179,7 +179,7 @@ async fn browse_user_courses(port: u16) -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/user/{}/public/course/browse",
+            "http://0.0.0.0:{}/v1/user/{}/public/playlist/browse",
             port, "7b96a41c-e406-11eb-8176-efd86dd7f444"
         ))
         .login()
@@ -207,7 +207,7 @@ async fn browse_user_courses(port: u16) -> anyhow::Result<()> {
         "Fixture::MetaKinds",
         "Fixture::Jig",
         "Fixture::PublicUser",
-        "Fixture::Course"
+        "Fixture::Playlist"
     )
 )]
 async fn browse_follower_and_unfollow(port: u16) -> anyhow::Result<()> {
@@ -337,7 +337,7 @@ async fn browse_follower_and_follow(port: u16) -> anyhow::Result<()> {
         "Fixture::MetaKinds",
         "Fixture::Jig",
         "Fixture::PublicUser",
-        "Fixture::Course"
+        "Fixture::Playlist"
     )
 )]
 async fn browse_following_and_unfollow(port: u16) -> anyhow::Result<()> {

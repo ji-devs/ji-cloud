@@ -3,7 +3,7 @@ use std::rc::Rc;
 use futures_signals::signal::Mutable;
 use shared::domain::{asset::AssetId, module::ModuleId, pro_dev::unit::ProDevUnitId};
 use utils::asset::{
-    AssetPlayerOptions, CoursePlayerOptions, JigPlayerOptions, ProDevPlayerOptions,
+    AssetPlayerOptions, JigPlayerOptions, PlaylistPlayerOptions, ProDevPlayerOptions,
 };
 
 use super::PreviewPopupCallbacks;
@@ -43,7 +43,7 @@ impl PlayerPopup {
     ) -> Rc<Self> {
         let player_options = match asset_id {
             AssetId::JigId(_) => JigPlayerOptions::default().into(),
-            AssetId::CourseId(_) => CoursePlayerOptions::default().into(),
+            AssetId::PlaylistId(_) => PlaylistPlayerOptions::default().into(),
             AssetId::ResourceId(_) => unreachable!(),
             AssetId::ProDevId(_) => ProDevPlayerOptions::default().into(),
         };

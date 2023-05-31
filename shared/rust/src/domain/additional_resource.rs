@@ -1,4 +1,4 @@
-//! Types for additional resources for JIG or Courses.
+//! Types for additional resources for JIG or Playlists.
 
 use crate::{
     api::endpoints::PathPart,
@@ -14,7 +14,7 @@ wrap_uuid! {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-/// Over-the-wire representation of a JIG or Course additional resource.
+/// Over-the-wire representation of a JIG or Playlist additional resource.
 pub struct AdditionalResource {
     /// The additional resources's ID.
     pub id: AdditionalResourceId,
@@ -38,7 +38,7 @@ make_path_parts!(CreateAssetResourcePath => "/v1/additional-resource/draft");
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct AdditionalResourceCreateRequest {
-    /// Asset Id (JIG or Course) for additional resource
+    /// Asset Id (JIG or Playlist) for additional resource
     #[serde(flatten)]
     pub asset_id: AssetId,
 
@@ -61,7 +61,7 @@ make_path_parts!(UpdateAssetResourcePath => "/v1/additional-resource/{}" => Addi
 #[derive(Serialize, Deserialize, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct AdditionalResourceUpdateRequest {
-    /// Asset Id (JIG or Course) for additional resource
+    /// Asset Id (JIG or Playlist) for additional resource
     #[serde(flatten)]
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -96,7 +96,7 @@ make_path_parts!(DeleteAssetResourcePath => "/v1/additional-resource/{}/draft" =
 #[derive(Serialize, Deserialize, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct AssetIdResource {
-    /// Asset Id (JIG or Course) for additional resource
+    /// Asset Id (JIG or Playlist) for additional resource
     #[serde(flatten)]
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
