@@ -15,12 +15,12 @@ use actix_web_httpauth::{
     headers::www_authenticate::basic::Basic,
     middleware::HttpAuthentication,
 };
+use futures::future::{self, Either};
 use ji_core::{
     config::JSON_BODY_LIMIT,
     http::{get_addr, get_tcp_fd},
     settings::RuntimeSettings,
 };
-use futures::future::{self, Either};
 use regex::Regex;
 use sentry::types::protocol::v7::value::Value as JsonValue;
 use shared::config::RemoteTarget;
