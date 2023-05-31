@@ -606,7 +606,9 @@ impl SettingsManager {
             .get_varying_secret(keys::algolia::RESOURCE_INDEX)
             .await?;
 
-        let playlist_index = self.get_varying_secret(keys::algolia::PLAYLIST_INDEX).await?;
+        let playlist_index = self
+            .get_varying_secret(keys::algolia::PLAYLIST_INDEX)
+            .await?;
 
         let circle_index = self.get_varying_secret(keys::algolia::CIRCLE_INDEX).await?;
 
