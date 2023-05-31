@@ -200,15 +200,15 @@ pub fn test_service(args: TokenStream, input: TokenStream) -> TokenStream {
 
                     let (server_handle, port) = #setup_fn(&#fixtures, &#services, pool_opts, conn_opts).await;
 
-                    use futures::FutureExt;
-                    use std::panic::AssertUnwindSafe;
+                    use ::futures::FutureExt;
+                    use ::std::panic::AssertUnwindSafe;
                     let result = AssertUnwindSafe(wrapped(port)).catch_unwind().await;
 
                     server_handle.stop(true).await;
 
                     match result {
                         Ok(result) => result,
-                        Err(error) => std::panic::resume_unwind(error),
+                        Err(error) => ::std::panic::resume_unwind(error),
                     }
                 }
             }
