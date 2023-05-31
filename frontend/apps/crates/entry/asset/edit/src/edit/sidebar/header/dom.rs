@@ -6,7 +6,6 @@ use web_sys::HtmlInputElement;
 
 use super::super::{actions as sidebar_actions, state::Sidebar as SidebarState};
 use crate::edit::sidebar::{jig::actions::get_player_settings, state::SidebarSetting};
-use shared::domain::asset::AssetType;
 use utils::{
     asset::{AssetPlayerOptions, PlaylistPlayerOptions, ProDevPlayerOptions},
     prelude::*,
