@@ -247,9 +247,9 @@ pub struct AlgoliaSettings {
     /// This key should be ratelimited, and restricted to a specific set of indicies (the media one- currently actually the "images" one) and any search suggestion indecies.
     pub frontend_search_key: Option<String>,
 
-    /// The index to use for operations relating to Courses on the algolia client.
+    /// The index to use for operations relating to Playlists on the algolia client.
     /// If [`None`], indexing and searching will be disabled.
-    pub course_index: Option<String>,
+    pub playlist_index: Option<String>,
 
     /// The index to use for operations relating to Circle on the algolia client.
     /// If [`None`], indexing and searching will be disabled.
@@ -606,7 +606,7 @@ impl SettingsManager {
             .get_varying_secret(keys::algolia::RESOURCE_INDEX)
             .await?;
 
-        let course_index = self.get_varying_secret(keys::algolia::COURSE_INDEX).await?;
+        let playlist_index = self.get_varying_secret(keys::algolia::PLAYLIST_INDEX).await?;
 
         let circle_index = self.get_varying_secret(keys::algolia::CIRCLE_INDEX).await?;
 
@@ -645,7 +645,7 @@ impl SettingsManager {
             media_index,
             jig_index,
             resource_index,
-            course_index,
+            playlist_index,
             circle_index,
             public_user_index,
             user_index,

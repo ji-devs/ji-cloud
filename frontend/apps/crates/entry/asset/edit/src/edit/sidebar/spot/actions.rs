@@ -1,8 +1,8 @@
-use super::course::actions as course_spot_actions;
 use super::jig::actions as jig_spot_actions;
+use super::playlist::actions as playlist_spot_actions;
 use super::state::SpotState;
 use super::{
-    course::actions as course_actions, jig::actions as jig_actions,
+    jig::actions as jig_actions, playlist::actions as playlist_actions,
     pro_dev::actions as pro_dev_actions,
 };
 use crate::edit::sidebar::{
@@ -47,7 +47,7 @@ pub fn add_empty_module_after(state: Rc<SpotState>) {
                 .asset_edit_state
                 .set_route_jig(JigEditRoute::Landing);
         }
-        shared::domain::asset::AssetId::CourseId(_) => unreachable!(),
+        shared::domain::asset::AssetId::PlaylistId(_) => unreachable!(),
         shared::domain::asset::AssetId::ResourceId(_) => unreachable!(),
         shared::domain::asset::AssetId::ProDevId(_) => {
             state
@@ -92,8 +92,8 @@ pub fn move_index(state: Rc<SpotState>, move_target: MoveTarget) {
                         target as u16
                     ).await;
                 },
-                SidebarSpotItem::Course(_) => {
-                    course_actions::save_course(&state).await;
+                SidebarSpotItem::Playlist(_) => {
+                    playlist_actions::save_playlist(&state).await;
                 },
                 SidebarSpotItem::ProDev(unit) => {
                     pro_dev_actions::update_unit_index(
@@ -115,8 +115,8 @@ pub fn delete(state: Rc<SpotState>) {
             SidebarSpotItem::Jig(module) => {
                 jig_actions::delete(&state, &module).await;
             },
-            SidebarSpotItem::Course(_) => {
-                course_actions::save_course(&state).await;
+            SidebarSpotItem::Playlist(_) => {
+                playlist_actions::save_playlist(&state).await;
             },
             SidebarSpotItem::ProDev(unit) =>
             {
@@ -140,10 +140,10 @@ pub fn assign_to_empty_spot(state: &Rc<SpotState>, data: String) {
             } else if let Ok(asset) = serde_json::from_str::<Asset>(&data) {
                 let mut properties = HashMap::new();
                 properties.insert("Activity Kind", format!("Added asset {}", asset.display_name()));
-                analytics::event("Course Edit Add Activity", Some(properties));
+                analytics::event("Playlist Edit Add Activity", Some(properties));
 
                 Some(
-                    course_spot_actions::assign_asset_to_empty_spot(
+                    playlist_spot_actions::assign_asset_to_empty_spot(
                         &state,
                         asset
                     ).await
@@ -152,10 +152,10 @@ pub fn assign_to_empty_spot(state: &Rc<SpotState>, data: String) {
             // else if let Ok(unit) = ModuleKind::from_str(&data) {
             //     let mut properties = HashMap::new();
             //     properties.insert("Activity Kind", format!("Added asset {}", asset.display_name()));
-            //     analytics::event("Course Edit Add Activity", Some(properties));
+            //     analytics::event("Playlist Edit Add Activity", Some(properties));
 
             //     Some(
-            //         course_spot_actions::assign_unit_to_empty_spot(
+            //         playlist_spot_actions::assign_unit_to_empty_spot(
             //             &state,
             //             asset
             //         ).await
@@ -196,11 +196,11 @@ pub fn assign_to_empty_spot(state: &Rc<SpotState>, data: String) {
                 }
 
                 // jigs are already saved in `assign_module_to_empty_spot`,
-                // but courses saving needs to run after inserting into spots.
-                if state.sidebar.asset_edit_state.asset_id.is_course_id() {
-                    // drop modules because save_course uses it
+                // but playlists saving needs to run after inserting into spots.
+                if state.sidebar.asset_edit_state.asset_id.is_playlist_id() {
+                    // drop modules because save_playlist uses it
                     drop(modules);
-                    course_spot_actions::save_course(&state).await;
+                    playlist_spot_actions::save_playlist(&state).await;
                 }
 
             };

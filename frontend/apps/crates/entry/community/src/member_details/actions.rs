@@ -7,8 +7,8 @@ use shared::{
     domain::{
         asset::{DraftOrLive, UserOrMe},
         circle::{CircleBrowsePath, CircleBrowseQuery},
-        course::{CourseBrowsePath, CourseBrowseQuery},
         jig::{JigBrowsePath, JigBrowseQuery},
+        playlist::{PlaylistBrowsePath, PlaylistBrowseQuery},
         resource::{ResourceBrowsePath, ResourceBrowseQuery},
         user::{
             public_user::{
@@ -72,7 +72,7 @@ impl MemberDetails {
         state.loader.load(clone!(state => async move {
             match creations {
                 Creations::Jigs(_) => state.load_members_jigs().await,
-                Creations::Courses(_) => state.load_members_courses().await,
+                Creations::Playlists(_) => state.load_members_playlists().await,
                 Creations::Resources(_) => state.load_members_resources().await,
             };
         }));
@@ -93,17 +93,19 @@ impl MemberDetails {
         }
     }
 
-    async fn load_members_courses(self: &Rc<Self>) {
+    async fn load_members_playlists(self: &Rc<Self>) {
         let state = self;
 
-        let req = CourseBrowseQuery {
+        let req = PlaylistBrowseQuery {
             author_id: Some(UserOrMe::User(state.member_id.0)),
             draft_or_live: Some(DraftOrLive::Live),
             ..Default::default()
         };
 
-        match endpoints::course::Browse::api_no_auth(CourseBrowsePath(), Some(req)).await {
-            Ok(res) => state.creations.set(Creations::Courses(Some(res.courses))),
+        match endpoints::playlist::Browse::api_no_auth(PlaylistBrowsePath(), Some(req)).await {
+            Ok(res) => state
+                .creations
+                .set(Creations::Playlists(Some(res.playlists))),
             Err(_) => todo!(),
         }
     }

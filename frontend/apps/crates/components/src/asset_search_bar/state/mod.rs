@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use dominator_helpers::futures::AsyncLoader;
 use shared::domain::{
-    course::CourseSearchQuery, jig::JigSearchQuery, resource::ResourceSearchQuery,
+    jig::JigSearchQuery, playlist::PlaylistSearchQuery, resource::ResourceSearchQuery,
 };
 
 mod search_state;
@@ -30,8 +30,8 @@ impl AssetSearchBar {
         self.search_selected.to_jig_search_request()
     }
 
-    pub fn get_search_request_course(&self) -> CourseSearchQuery {
-        self.search_selected.to_course_search_request()
+    pub fn get_search_request_playlist(&self) -> PlaylistSearchQuery {
+        self.search_selected.to_playlist_search_request()
     }
 
     pub fn get_search_request_resource(&self) -> ResourceSearchQuery {
@@ -42,6 +42,6 @@ impl AssetSearchBar {
 #[derive(Clone, Debug)]
 pub struct AssetSearchQuery {
     pub jig: JigSearchQuery,
-    pub course: CourseSearchQuery,
+    pub playlist: PlaylistSearchQuery,
     pub resource: ResourceSearchQuery,
 }

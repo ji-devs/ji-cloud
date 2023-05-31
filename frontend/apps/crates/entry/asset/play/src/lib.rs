@@ -4,9 +4,9 @@
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-mod course;
 mod debug;
 mod jig;
+mod playlist;
 mod pro_dev;
 mod router;
 

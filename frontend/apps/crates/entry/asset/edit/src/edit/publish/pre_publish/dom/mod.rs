@@ -9,7 +9,7 @@ use utils::{
     events,
     init::analytics,
     routes::{
-        AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, ProDevEditRoute,
+        AssetEditRoute, AssetRoute, JigEditRoute, PlaylistEditRoute, ProDevEditRoute,
         ResourceEditRoute, Route,
     },
 };
@@ -247,11 +247,11 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                             state.publish_state.asset_edit_state.set_route_resource(ResourceEditRoute::Landing);
                             Route::Asset(AssetRoute::ResourceGallery).to_string()
                         },
-                        EditableAsset::Course(course) => {
-                            state.publish_state.asset_edit_state.set_route_course(CourseEditRoute::Landing);
-                            Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
-                                course.id,
-                                CourseEditRoute::Landing
+                        EditableAsset::Playlist(playlist) => {
+                            state.publish_state.asset_edit_state.set_route_playlist(PlaylistEditRoute::Landing);
+                            Route::Asset(AssetRoute::Edit(AssetEditRoute::Playlist(
+                                playlist.id,
+                                PlaylistEditRoute::Landing
                             ))).to_string()
                         },
                         EditableAsset::ProDev(pro_dev) => {

@@ -724,13 +724,13 @@ pub struct UserBrowseQuery {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct UserBrowseResponse {
-    /// the Courses returned.
+    /// the users returned.
     pub users: Vec<UserResponse>,
 
     /// The number of pages found.
     pub pages: u32,
 
-    /// The total number of Courses found
+    /// The total number of users found
     pub total_user_count: u64,
 }
 
@@ -771,13 +771,13 @@ pub struct UserSearchQuery {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct UserSearchResponse {
-    /// the Courses returned.
+    /// the users returned.
     pub users: Vec<UserResponse>,
 
     /// The number of pages found.
     pub pages: u32,
 
-    /// The total number of Courses found
+    /// The total number of users found
     pub total_user_count: u64,
 }
 

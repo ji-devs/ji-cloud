@@ -212,13 +212,13 @@ pub struct BrowsePublicUserResourcesResponse {
     pub total_resource_count: u64,
 }
 
-make_path_parts!(BrowsePublicUserCoursesPath => "/v1/user/{}/public/course/browse" => UserId);
+make_path_parts!(BrowsePublicUserPlaylistsPath => "/v1/user/{}/public/playlist/browse" => UserId);
 
-/// Query for [`Browse`](crate::api::endpoints::user::public_user::BrowseUserCourses).
+/// Query for [`Browse`](crate::api::endpoints::user::public_user::BrowseUserPlaylists).
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
-pub struct BrowsePublicUserCoursesQuery {
-    /// The page number of the User Courses to fetch.
+pub struct BrowsePublicUserPlaylistsQuery {
+    /// The page number of the User Playlists to fetch.
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub page: Option<u32>,

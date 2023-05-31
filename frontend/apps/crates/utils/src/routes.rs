@@ -1,14 +1,14 @@
-use crate::asset::{CoursePlayerOptions, JigPlayerOptions, ProDevPlayerOptions};
+use crate::asset::{JigPlayerOptions, PlaylistPlayerOptions, ProDevPlayerOptions};
 use serde::{Deserialize, Serialize};
 use shared::domain::{
     asset::{AssetId, AssetType, DraftOrLive},
     category::CategoryId,
     circle::CircleId,
-    course::CourseId,
     image::{ImageId, ImageSearchQuery},
     jig::JigId,
     meta::{AffiliationId, AgeRangeId},
     module::{ModuleId, ModuleKind},
+    playlist::PlaylistId,
     pro_dev::{unit::ProDevUnitId, ProDevId},
     resource::ResourceId,
     session::OAuthUserProfile,
@@ -228,7 +228,7 @@ pub enum AdminResourceCurationRoute {
 pub enum AssetRoute {
     Studio,
     JigGallery,
-    CourseGallery,
+    PlaylistGallery,
     ResourceGallery,
     ProDevGallery,
     /// Here for compatibility reasons, can probably go away in a few months
@@ -241,7 +241,7 @@ pub enum AssetRoute {
 pub enum AssetEditRoute {
     Jig(JigId, JigEditRoute),
     Resource(ResourceId, ResourceEditRoute),
-    Course(CourseId, CourseEditRoute),
+    Playlist(PlaylistId, PlaylistEditRoute),
     ProDev(ProDevId, ProDevEditRoute),
 }
 
@@ -259,7 +259,7 @@ pub enum ResourceEditRoute {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum CourseEditRoute {
+pub enum PlaylistEditRoute {
     Landing,
     Cover(ModuleId),
     Publish,
@@ -276,7 +276,7 @@ pub enum ProDevEditRoute {
 #[derive(Debug, Clone)]
 pub enum AssetPlayRoute {
     Jig(JigId, Option<ModuleId>, JigPlayerOptions),
-    Course(CourseId, CoursePlayerOptions),
+    Playlist(PlaylistId, PlaylistPlayerOptions),
     ProDev(ProDevId, Option<ProDevUnitId>, ProDevPlayerOptions),
 }
 
@@ -466,7 +466,7 @@ impl Route {
             // ["jig", "edit", path] => Self::Asset(AssetRoute::RedirectToJig(path.to_string())),
             ["asset", "edit", "studio"] => Self::Asset(AssetRoute::Studio),
             ["asset", "edit", "jig-gallery"] => Self::Asset(AssetRoute::JigGallery),
-            ["asset", "edit", "course-gallery"] => Self::Asset(AssetRoute::CourseGallery),
+            ["asset", "edit", "playlist-gallery"] => Self::Asset(AssetRoute::PlaylistGallery),
             ["asset", "edit", "resource-gallery"] => Self::Asset(AssetRoute::ResourceGallery),
             ["asset", "edit", "pro-dev-gallery"] => Self::Asset(AssetRoute::ProDevGallery),
             ["asset", "edit", "jig", jig_id, "publish"] => {
@@ -506,25 +506,28 @@ impl Route {
                     ResourceEditRoute::Cover(ModuleId(Uuid::from_str(cover_id).unwrap_ji())),
                 )))
             }
-            ["asset", "edit", "course", course_id, "publish"] => {
-                Self::Asset(AssetRoute::Edit(AssetEditRoute::Course(
-                    CourseId(Uuid::from_str(course_id).unwrap_ji()),
-                    CourseEditRoute::Publish,
+            ["asset", "edit", "playlist", playlist_id, "publish"] => {
+                Self::Asset(AssetRoute::Edit(AssetEditRoute::Playlist(
+                    PlaylistId(Uuid::from_str(playlist_id).unwrap_ji()),
+                    PlaylistEditRoute::Publish,
                 )))
             }
-            ["asset", "edit", "course", "debug"] => Self::Asset(AssetRoute::Edit(
-                AssetEditRoute::Course(CourseId(Uuid::from_u128(0)), CourseEditRoute::Landing),
-            )),
-            ["asset", "edit", "course", course_id] => {
-                Self::Asset(AssetRoute::Edit(AssetEditRoute::Course(
-                    CourseId(Uuid::from_str(course_id).unwrap_ji()),
-                    CourseEditRoute::Landing,
+            ["asset", "edit", "playlist", "debug"] => {
+                Self::Asset(AssetRoute::Edit(AssetEditRoute::Playlist(
+                    PlaylistId(Uuid::from_u128(0)),
+                    PlaylistEditRoute::Landing,
                 )))
             }
-            ["asset", "edit", "course", course_id, "cover", cover_id] => {
-                Self::Asset(AssetRoute::Edit(AssetEditRoute::Course(
-                    CourseId(Uuid::from_str(course_id).unwrap_ji()),
-                    CourseEditRoute::Cover(ModuleId(Uuid::from_str(cover_id).unwrap_ji())),
+            ["asset", "edit", "playlist", playlist_id] => {
+                Self::Asset(AssetRoute::Edit(AssetEditRoute::Playlist(
+                    PlaylistId(Uuid::from_str(playlist_id).unwrap_ji()),
+                    PlaylistEditRoute::Landing,
+                )))
+            }
+            ["asset", "edit", "playlist", playlist_id, "cover", cover_id] => {
+                Self::Asset(AssetRoute::Edit(AssetEditRoute::Playlist(
+                    PlaylistId(Uuid::from_str(playlist_id).unwrap_ji()),
+                    PlaylistEditRoute::Cover(ModuleId(Uuid::from_str(cover_id).unwrap_ji())),
                 )))
             }
             ["asset", "edit", "pro-dev", pro_dev_id] => {
@@ -592,11 +595,11 @@ impl Route {
                 )))
             }
 
-            ["asset", "play", "course", course_id] => {
-                let search: CoursePlayerOptions = serde_qs::from_str(&params_string).unwrap_ji();
+            ["asset", "play", "playlist", playlist_id] => {
+                let search: PlaylistPlayerOptions = serde_qs::from_str(&params_string).unwrap_ji();
 
-                Self::Asset(AssetRoute::Play(AssetPlayRoute::Course(
-                    CourseId(Uuid::from_str(course_id).unwrap_ji()),
+                Self::Asset(AssetRoute::Play(AssetPlayRoute::Playlist(
+                    PlaylistId(Uuid::from_str(playlist_id).unwrap_ji()),
                     search,
                 )))
             }
@@ -798,7 +801,7 @@ impl From<&Route> for String {
             Route::Asset(route) => match route {
                 AssetRoute::Studio => "/asset/edit/studio".to_string(),
                 AssetRoute::JigGallery => "/asset/edit/jig-gallery".to_string(),
-                AssetRoute::CourseGallery => "/asset/edit/course-gallery".to_string(),
+                AssetRoute::PlaylistGallery => "/asset/edit/playlist-gallery".to_string(),
                 AssetRoute::ResourceGallery => "/asset/edit/resource-gallery".to_string(),
                 AssetRoute::ProDevGallery => "/asset/edit/pro-dev-gallery".to_string(),
                 AssetRoute::Edit(route) => match route {
@@ -824,15 +827,18 @@ impl From<&Route> for String {
                             )
                         }
                     },
-                    AssetEditRoute::Course(course_id, route) => match route {
-                        CourseEditRoute::Landing => {
-                            format!("/asset/edit/course/{}", course_id.0)
+                    AssetEditRoute::Playlist(playlist_id, route) => match route {
+                        PlaylistEditRoute::Landing => {
+                            format!("/asset/edit/playlist/{}", playlist_id.0)
                         }
-                        CourseEditRoute::Cover(cover_id) => {
-                            format!("/asset/edit/course/{}/cover/{}", course_id.0, cover_id.0)
+                        PlaylistEditRoute::Cover(cover_id) => {
+                            format!(
+                                "/asset/edit/playlist/{}/cover/{}",
+                                playlist_id.0, cover_id.0
+                            )
                         }
-                        CourseEditRoute::Publish => {
-                            format!("/asset/edit/course/{}/publish", course_id.0)
+                        PlaylistEditRoute::Publish => {
+                            format!("/asset/edit/playlist/{}/publish", playlist_id.0)
                         }
                     },
                     AssetEditRoute::ProDev(pro_dev_id, route) => match route {
@@ -864,9 +870,9 @@ impl From<&Route> for String {
                             format!("/asset/play/jig/{}?{}", jig_id.0, query)
                         }
                     }
-                    AssetPlayRoute::Course(course_id, player_settings) => {
+                    AssetPlayRoute::Playlist(playlist_id, player_settings) => {
                         let query = serde_qs::to_string(&player_settings).unwrap_ji();
-                        format!("/asset/play/course/{}?{}", course_id.0, query)
+                        format!("/asset/play/playlist/{}?{}", playlist_id.0, query)
                     }
                     AssetPlayRoute::ProDev(pro_dev_id, unit_id, player_settings) => {
                         let query = serde_qs::to_string(&player_settings).unwrap_ji();

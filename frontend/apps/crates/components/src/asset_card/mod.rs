@@ -74,10 +74,10 @@ pub fn render_asset_card(asset: &Asset, config: AssetCardConfig) -> Dom {
         .apply(|dom| {
             match asset {
                 Asset::Jig(_) => dom,
-                Asset::Course(course) => {
+                Asset::Playlist(playlist) => {
                     dom.child(html!("span", {
                         .prop("slot", "middle-indicator")
-                        .text(&format!("{} Units", course.course_data.items.len()))
+                        .text(&format!("{} Units", playlist.playlist_data.items.len()))
                     }))
                 },
                 Asset::Resource(resource) => {

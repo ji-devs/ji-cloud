@@ -20,7 +20,7 @@ pub const TEMPLATE_KINDS: &[&str] = &[
 
 const STR_JIG: &str = "JIG";
 const STR_RESOURCE: &str = "Resource";
-const STR_COURSE: &str = "Course";
+const STR_PLAYLIST: &str = "Playlist";
 const STR_PRO_DEV: &str = "Pro Dev";
 
 #[derive(Debug, Clone, PartialEq, EnumIter, Display, EnumString)]
@@ -64,7 +64,7 @@ impl Gallery {
         match &self.asset_type {
             AssetType::Jig => STR_JIG,
             AssetType::Resource => STR_RESOURCE,
-            AssetType::Course => STR_COURSE,
+            AssetType::Playlist => STR_PLAYLIST,
             AssetType::ProDev => STR_PRO_DEV,
         }
     }

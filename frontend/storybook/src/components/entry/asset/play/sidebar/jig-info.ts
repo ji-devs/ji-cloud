@@ -40,9 +40,9 @@ export const JigInfo = (props?: Partial<Args>) => {
             <pill-close slot="categories" label="Holidays"></pill-close>
             <pill-close slot="categories" label="Passover"></pill-close>
             <pill-close slot="categories" label="Jewish Texts"></pill-close>
-            <button-rect kind="text" slot="courses">Sefer Bereishit</button-rect>
-            <button-rect kind="text" slot="courses">Shabat</button-rect>
-            <button-rect kind="text" slot="courses">Briat Haolam</button-rect>
+            <button-rect kind="text" slot="playlists">Sefer Bereishit</button-rect>
+            <button-rect kind="text" slot="playlists">Shabat</button-rect>
+            <button-rect kind="text" slot="playlists">Briat Haolam</button-rect>
             <button-rect slot="report" color="blue">Report</button-rect>
         </jig-play-sidebar-jig-info>
     `;

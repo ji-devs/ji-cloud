@@ -19,7 +19,7 @@ impl PlayerPopup {
         html!("player-popup", {
             .prop("size", match state.asset_id {
                 AssetId::JigId(_) => "aspect-ratio",
-                AssetId::CourseId(_) => "full-screen",
+                AssetId::PlaylistId(_) => "full-screen",
                 AssetId::ResourceId(_) => unreachable!(),
                 AssetId::ProDevId(_) => "full-screen",
             })
@@ -54,8 +54,8 @@ impl PlayerPopup {
                                     (AssetId::JigId(jig_id), module_id, AssetPlayerOptions::Jig(player_options), _unit_id) => {
                                         Route::Asset(AssetRoute::Play(AssetPlayRoute::Jig(jig_id, module_id, player_options.clone())))
                                     },
-                                    (AssetId::CourseId(course_id), _module_id, AssetPlayerOptions::Course(player_options), _unit_id) => {
-                                        Route::Asset(AssetRoute::Play(AssetPlayRoute::Course(course_id, player_options.clone())))
+                                    (AssetId::PlaylistId(playlist_id), _module_id, AssetPlayerOptions::Playlist(player_options), _unit_id) => {
+                                        Route::Asset(AssetRoute::Play(AssetPlayRoute::Playlist(playlist_id, player_options.clone())))
                                     },
                                     (AssetId::ProDevId(pro_dev_id), _module_id, AssetPlayerOptions::ProDev(player_options), unit_id, ) => {
                                         Route::Asset(AssetRoute::Play(AssetPlayRoute::ProDev(pro_dev_id, unit_id, player_options.clone())))

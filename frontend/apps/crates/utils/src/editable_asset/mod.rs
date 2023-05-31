@@ -1,13 +1,13 @@
-mod editable_course;
 mod editable_jig;
+mod editable_playlist;
 mod editable_pro_dev;
 mod editable_resource;
 
 use std::{collections::HashSet, rc::Rc};
 
 use chrono::{DateTime, Utc};
-pub use editable_course::EditableCourse;
 pub use editable_jig::EditableJig;
+pub use editable_playlist::EditablePlaylist;
 pub use editable_pro_dev::EditableProDev;
 pub use editable_resource::EditableResource;
 use futures_signals::{signal::Mutable, signal_vec::MutableVec};
@@ -22,7 +22,7 @@ use shared::domain::{
 pub enum EditableAsset {
     Jig(Rc<EditableJig>),
     Resource(Rc<EditableResource>),
-    Course(Rc<EditableCourse>),
+    Playlist(Rc<EditablePlaylist>),
     ProDev(Rc<EditableProDev>),
 }
 
@@ -31,7 +31,7 @@ impl EditableAsset {
         match self {
             EditableAsset::Jig(jig) => jig.id.into(),
             EditableAsset::Resource(resource) => resource.id.into(),
-            EditableAsset::Course(course) => course.id.into(),
+            EditableAsset::Playlist(playlist) => playlist.id.into(),
             EditableAsset::ProDev(pro_dev) => pro_dev.id.into(),
         }
     }
@@ -40,7 +40,7 @@ impl EditableAsset {
         match self {
             EditableAsset::Jig(jig) => &jig.cover,
             EditableAsset::Resource(resource) => &resource.cover,
-            EditableAsset::Course(course) => &course.cover,
+            EditableAsset::Playlist(playlist) => &playlist.cover,
             EditableAsset::ProDev(pro_dev) => &pro_dev.cover,
         }
     }
@@ -49,7 +49,7 @@ impl EditableAsset {
         match self {
             EditableAsset::Jig(jig) => &jig.display_name,
             EditableAsset::Resource(resource) => &resource.display_name,
-            EditableAsset::Course(course) => &course.display_name,
+            EditableAsset::Playlist(playlist) => &playlist.display_name,
             EditableAsset::ProDev(pro_dev) => &pro_dev.display_name,
         }
     }
@@ -58,7 +58,7 @@ impl EditableAsset {
         match self {
             EditableAsset::Jig(jig) => &jig.description,
             EditableAsset::Resource(resource) => &resource.description,
-            EditableAsset::Course(course) => &course.description,
+            EditableAsset::Playlist(playlist) => &playlist.description,
             EditableAsset::ProDev(pro_dev) => &pro_dev.description,
         }
     }
@@ -67,7 +67,7 @@ impl EditableAsset {
         match self {
             EditableAsset::Jig(jig) => &jig.age_ranges,
             EditableAsset::Resource(resource) => &resource.age_ranges,
-            EditableAsset::Course(course) => &course.age_ranges,
+            EditableAsset::Playlist(playlist) => &playlist.age_ranges,
             EditableAsset::ProDev(_) => unimplemented!("unsupported age_range kind!"),
         }
     }
@@ -76,7 +76,7 @@ impl EditableAsset {
         match self {
             EditableAsset::Jig(jig) => &jig.language,
             EditableAsset::Resource(resource) => &resource.language,
-            EditableAsset::Course(course) => &course.language,
+            EditableAsset::Playlist(playlist) => &playlist.language,
             EditableAsset::ProDev(pro_dev) => &pro_dev.language,
         }
     }
@@ -85,7 +85,7 @@ impl EditableAsset {
         match self {
             EditableAsset::Jig(jig) => &jig.categories,
             EditableAsset::Resource(resource) => &resource.categories,
-            EditableAsset::Course(course) => &course.categories,
+            EditableAsset::Playlist(playlist) => &playlist.categories,
             EditableAsset::ProDev(pro_dev) => &pro_dev.categories,
         }
     }
@@ -94,7 +94,7 @@ impl EditableAsset {
         match self {
             EditableAsset::Jig(jig) => &jig.affiliations,
             EditableAsset::Resource(resource) => &resource.affiliations,
-            EditableAsset::Course(course) => &course.affiliations,
+            EditableAsset::Playlist(playlist) => &playlist.affiliations,
             EditableAsset::ProDev(_) => unimplemented!("unsupported affiliation kind!"),
         }
     }
@@ -103,7 +103,7 @@ impl EditableAsset {
         match self {
             EditableAsset::Jig(jig) => &jig.additional_resources,
             EditableAsset::Resource(resource) => &resource.additional_resources,
-            EditableAsset::Course(course) => &course.additional_resources,
+            EditableAsset::Playlist(playlist) => &playlist.additional_resources,
             EditableAsset::ProDev(pro_dev) => &pro_dev.additional_resources,
         }
     }
@@ -112,7 +112,7 @@ impl EditableAsset {
         match self {
             EditableAsset::Jig(jig) => &jig.privacy_level,
             EditableAsset::Resource(resource) => &resource.privacy_level,
-            EditableAsset::Course(course) => &course.privacy_level,
+            EditableAsset::Playlist(playlist) => &playlist.privacy_level,
             EditableAsset::ProDev(pro_dev) => &pro_dev.privacy_level,
         }
     }
@@ -121,7 +121,7 @@ impl EditableAsset {
         match self {
             EditableAsset::Jig(jig) => &jig.published_at,
             EditableAsset::Resource(resource) => &resource.published_at,
-            EditableAsset::Course(course) => &course.published_at,
+            EditableAsset::Playlist(playlist) => &playlist.published_at,
             EditableAsset::ProDev(pro_dev) => &pro_dev.published_at,
         }
     }
@@ -132,7 +132,9 @@ impl EditableAsset {
             EditableAsset::Resource(resource) => {
                 EditableAsset::Resource(Rc::new(resource.deep_clone()))
             }
-            EditableAsset::Course(course) => EditableAsset::Course(Rc::new(course.deep_clone())),
+            EditableAsset::Playlist(playlist) => {
+                EditableAsset::Playlist(Rc::new(playlist.deep_clone()))
+            }
             EditableAsset::ProDev(pro_dev) => EditableAsset::ProDev(Rc::new(pro_dev.deep_clone())),
         }
     }
@@ -141,7 +143,9 @@ impl EditableAsset {
         assert_eq!(self.asset_type(), asset.asset_type());
         match self {
             EditableAsset::Jig(jig) => jig.fill_from_jig(asset.unwrap_jig().clone()),
-            EditableAsset::Course(course) => course.fill_from_course(asset.unwrap_course().clone()),
+            EditableAsset::Playlist(playlist) => {
+                playlist.fill_from_playlist(asset.unwrap_playlist().clone())
+            }
             EditableAsset::ProDev(pro_dev) => {
                 pro_dev.fill_from_pro_dev(asset.unwrap_pro_dev().clone())
             }
@@ -163,8 +167,8 @@ impl EditableAsset {
         matches!(self, Self::Resource(_))
     }
 
-    pub fn _is_course(&self) -> bool {
-        matches!(self, Self::Course(_))
+    pub fn _is_playlist(&self) -> bool {
+        matches!(self, Self::Playlist(_))
     }
 
     pub fn _is_pro_dev(&self) -> bool {
@@ -176,7 +180,7 @@ impl From<Asset> for EditableAsset {
     fn from(asset: Asset) -> Self {
         match asset {
             Asset::Jig(jig) => EditableAsset::Jig(Rc::new(jig.into())),
-            Asset::Course(course) => EditableAsset::Course(Rc::new(course.into())),
+            Asset::Playlist(playlist) => EditableAsset::Playlist(Rc::new(playlist.into())),
             Asset::ProDev(pro_dev) => EditableAsset::ProDev(Rc::new(pro_dev.into())),
             Asset::Resource(resource) => EditableAsset::Resource(Rc::new(resource.into())),
         }
@@ -187,7 +191,9 @@ impl From<AssetId> for EditableAsset {
     fn from(asset_id: AssetId) -> Self {
         match asset_id {
             AssetId::JigId(jig_id) => EditableAsset::Jig(Rc::new(jig_id.into())),
-            AssetId::CourseId(course_id) => EditableAsset::Course(Rc::new(course_id.into())),
+            AssetId::PlaylistId(playlist_id) => {
+                EditableAsset::Playlist(Rc::new(playlist_id.into()))
+            }
             AssetId::ProDevId(pro_dev_id) => EditableAsset::ProDev(Rc::new(pro_dev_id.into())),
             AssetId::ResourceId(resource_id) => {
                 EditableAsset::Resource(Rc::new(resource_id.into()))

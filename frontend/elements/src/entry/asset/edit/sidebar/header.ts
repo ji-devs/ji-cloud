@@ -114,7 +114,7 @@ export class _ extends LitElement {
     @property({ type: Boolean, reflect: true })
     isModulePage: boolean = false;
 
-    // TODO: remove once course has settings
+    // TODO: remove once playlist has settings
     @property({ type: Boolean })
     hasSettings: boolean = true;
 

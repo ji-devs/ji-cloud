@@ -254,12 +254,12 @@ impl MemberDetails {
             }),
             html!("community-member-details-tab", {
                 .prop("slot", "creation-tabs")
-                .text("Courses")
+                .text("Playlists")
                 .prop_signal("active", state.creations.signal_ref(|creations| {
-                    matches!(creations, Creations::Courses(_))
+                    matches!(creations, Creations::Playlists(_))
                 }))
                 .event(clone!(state => move |_: events::Click| {
-                    state.set_active_creations(Creations::Courses(None));
+                    state.set_active_creations(Creations::Playlists(None));
                 }))
             }),
             html!("community-member-details-tab", {
@@ -292,17 +292,17 @@ impl MemberDetails {
                                 })).collect()
                             }
                         },
-                        Creations::Courses(Some(courses)) => {
-                            if courses.is_empty() {
+                        Creations::Playlists(Some(playlists)) => {
+                            if playlists.is_empty() {
                                 vec![
                                     html!("div", {
                                         .prop("slot", "creation-assets")
-                                        .text("User has no courses")
+                                        .text("User has no playlists")
                                     })
                                 ]
                             } else {
-                                courses.iter().map(clone!(state => move |courses| {
-                                    state.render_asset(courses.clone().into())
+                                playlists.iter().map(clone!(state => move |playlists| {
+                                    state.render_asset(playlists.clone().into())
                                 })).collect()
                             }
                         },
@@ -320,7 +320,7 @@ impl MemberDetails {
                                 })).collect()
                             }
                         },
-                        Creations::Jigs(None) | Creations::Courses(None) | Creations::Resources(None) => vec![
+                        Creations::Jigs(None) | Creations::Playlists(None) | Creations::Resources(None) => vec![
                             html!("progress", {
                                 .prop("slot", "creation-assets")
                             })

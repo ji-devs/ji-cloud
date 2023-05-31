@@ -2,7 +2,7 @@ use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::asset::AssetType;
 use utils::{
-    asset::{AssetPlayerOptions, CoursePlayerOptions, JigPlayerOptions, ProDevPlayerOptions},
+    asset::{AssetPlayerOptions, JigPlayerOptions, PlaylistPlayerOptions, ProDevPlayerOptions},
     events,
     routes::{AssetRoute, Route},
 };
@@ -18,7 +18,7 @@ impl PostPublish {
             .apply(clone!(state => move |dom| {
                 dom.prop("assetName", match state.asset_edit_state.asset.asset_type() {
                     AssetType::Jig => "JIG",
-                    AssetType::Course => "Course",
+                    AssetType::Playlist => "Playlist",
                     AssetType::Resource => "Resource",
                     AssetType::ProDev => "Pro Dev"
                 })
@@ -31,8 +31,8 @@ impl PostPublish {
                     AssetType::Jig => {
                         dom.children(state.render_jig_actions())
                     },
-                    AssetType::Course => {
-                        dom.children(state.render_course_actions())
+                    AssetType::Playlist => {
+                        dom.children(state.render_playlist_actions())
                     },
                     AssetType::ProDev => {
                         dom.children(state.render_pro_dev_actions())
@@ -96,9 +96,9 @@ impl PostPublish {
         ]
     }
 
-    fn render_course_actions(self: &Rc<Self>) -> Vec<Dom> {
+    fn render_playlist_actions(self: &Rc<Self>) -> Vec<Dom> {
         let state = self;
-        let asset_display_name = AssetType::Course.display_name();
+        let asset_display_name = AssetType::Playlist.display_name();
         let share_anchor = html!("post-publish-action", {
             .prop("kind", "share")
             .prop("assetDisplayName", asset_display_name)
@@ -112,7 +112,7 @@ impl PostPublish {
                 .prop("kind", "new")
                 .prop("assetDisplayName", asset_display_name)
                 .event(clone!(state => move |_: events::Click| {
-                    state.create_course();
+                    state.create_playlist();
                 }))
             }),
             html!("post-publish-action", {
@@ -120,7 +120,7 @@ impl PostPublish {
                 .prop("assetDisplayName", asset_display_name)
                 .prop("slot", "actions")
                 .event(clone!(state => move |_: events::Click| {
-                    let settings = AssetPlayerOptions::Course(CoursePlayerOptions::default());
+                    let settings = AssetPlayerOptions::Playlist(PlaylistPlayerOptions::default());
                     state.asset_edit_state.play_jig.set(Some(settings));
                 }))
             }),

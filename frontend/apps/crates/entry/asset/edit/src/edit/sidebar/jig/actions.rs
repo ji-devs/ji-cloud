@@ -1,5 +1,5 @@
 use crate::edit::sidebar::{
-    state::{CourseSpot, SidebarSpot, SidebarSpotItem},
+    state::{PlaylistSpot, SidebarSpot, SidebarSpotItem},
     ProDevSpot,
 };
 
@@ -98,9 +98,9 @@ pub fn on_iframe_message(state: Rc<Sidebar>, message: ModuleToJigEditorMessage) 
                 // only modules should be here, either jig.modules or any asset cover
                 let current_module_id = match &module.item {
                     SidebarSpotItem::Jig(module) => module.as_ref().map(|module| module.id),
-                    SidebarSpotItem::Course(item) => item.as_ref().map(|item| match &**item {
-                        CourseSpot::Cover(module) => module.id,
-                        CourseSpot::Item(_) => unreachable!("Only modules should be here"),
+                    SidebarSpotItem::Playlist(item) => item.as_ref().map(|item| match &**item {
+                        PlaylistSpot::Cover(module) => module.id,
+                        PlaylistSpot::Item(_) => unreachable!("Only modules should be here"),
                     }),
                     SidebarSpotItem::ProDev(item) => item.as_ref().map(|item| match &**item {
                         ProDevSpot::Cover(item) => item.id,

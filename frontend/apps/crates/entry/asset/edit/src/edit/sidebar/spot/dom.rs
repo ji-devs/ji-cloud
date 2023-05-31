@@ -6,14 +6,14 @@ use shared::domain::asset::DraftOrLive;
 use shared::domain::pro_dev::unit::ProDevUnitValue;
 use web_sys::{HtmlElement, Node, ScrollBehavior, ScrollIntoViewOptions};
 
-use super::super::course::menu::CourseMenu;
 use super::super::jig::menu::JigMenu;
+use super::super::playlist::menu::PlaylistMenu;
 use super::super::spot::actions as spot_actions;
 use super::jig::actions as jig_spot_actions;
 use super::pro_dev::actions as pro_dev_spot_actions;
 use super::{actions, state::*};
 use crate::edit::sidebar::pro_dev::menu::ProDevMenu;
-use crate::edit::sidebar::state::{CourseSpot, ModuleHighlight, SidebarSpotItem};
+use crate::edit::sidebar::state::{ModuleHighlight, PlaylistSpot, SidebarSpotItem};
 use crate::edit::sidebar::ProDevSpot;
 use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
 use futures_signals::signal::{not, SignalExt};
@@ -103,14 +103,14 @@ impl SpotState {
                                     },
                                 }
                             },
-                            SidebarSpotItem::Course(item) => {
+                            SidebarSpotItem::Playlist(item) => {
                                 if let Some(item) = item {
-                                    if let CourseSpot::Cover(cover) = &**item {
-                                        state.sidebar.asset_edit_state.set_route_course(CourseEditRoute::Cover(cover.id));
+                                    if let PlaylistSpot::Cover(cover) = &**item {
+                                        state.sidebar.asset_edit_state.set_route_playlist(PlaylistEditRoute::Cover(cover.id));
                                         return;
                                     }
                                 }
-                                state.sidebar.asset_edit_state.set_route_course(CourseEditRoute::Landing);
+                                state.sidebar.asset_edit_state.set_route_playlist(PlaylistEditRoute::Landing);
                             },
                             SidebarSpotItem::ProDev(item) => {
                                 match item {
@@ -156,10 +156,10 @@ impl SpotState {
                                         _ => None,
                                     }
                                 },
-                                SidebarSpotItem::Course(course_spot) => {
-                                    course_spot.as_ref().map(|course_spot| {
-                                        match &**course_spot {
-                                            CourseSpot::Cover(cover) => {
+                                SidebarSpotItem::Playlist(playlist_spot) => {
+                                    playlist_spot.as_ref().map(|playlist_spot| {
+                                        match &**playlist_spot {
+                                            PlaylistSpot::Cover(cover) => {
                                                 ModuleThumbnail::new(
                                                     state.sidebar.asset_edit_state.asset.id(),
                                                     Some((*cover).clone()),
@@ -167,7 +167,7 @@ impl SpotState {
                                                     DraftOrLive::Draft,
                                                 ).render_live(Some("thumbnail"))
                                             },
-                                            CourseSpot::Item(jig) => {
+                                            PlaylistSpot::Item(jig) => {
                                                 ModuleThumbnail::new(
                                                     jig.id.into(),
                                                     jig.jig_data.modules.get(0).cloned(),
@@ -360,12 +360,12 @@ impl SpotState {
                     //             dom
                     //         }
                     //     },
-                    //     Asset::Course(_) => todo!(),
+                    //     Asset::Playlist(_) => todo!(),
                     // }
 
                     match state.spot.item {
                         SidebarSpotItem::Jig(_) => dom.child(JigMenu::new(&state).render()),
-                        SidebarSpotItem::Course(_) => dom.child(CourseMenu::new(&state).render()),
+                        SidebarSpotItem::Playlist(_) => dom.child(PlaylistMenu::new(&state).render()),
                         SidebarSpotItem::ProDev(_) => dom.child(ProDevMenu::new(&state).render()),
                     }
                 }))

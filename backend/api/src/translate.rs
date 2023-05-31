@@ -98,8 +98,8 @@ struct ResourceTranslate {
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct CourseTranslate {
-    course_data_id: Uuid,
+struct PlaylistTranslate {
+    playlist_data_id: Uuid,
     text: String,
 }
 
@@ -149,9 +149,9 @@ impl GoogleTranslate {
                     .await
                     .context("update jig translation task errored"),
                 2 => self
-                    .update_course_translations()
+                    .update_playlist_translations()
                     .await
-                    .context("update course translation task errored"),
+                    .context("update playlist translation task errored"),
                 3 => self
                     .update_resource_translations()
                     .await
@@ -708,17 +708,17 @@ limit 10 for no key update skip locked;
         Ok(true)
     }
 
-    async fn update_course_translations(&self) -> anyhow::Result<bool> {
-        log::info!("reached update Course translation");
+    async fn update_playlist_translations(&self) -> anyhow::Result<bool> {
+        log::info!("reached update Playlist translation");
         let mut txn = self.db.begin().await?;
 
         let descriptions: Vec<_> = sqlx::query!(
             //language=SQL
             r#"
-select course_data.id,
+select playlist_data.id,
        description
-from course_data
-inner join course on live_id = course_data.id
+from playlist_data
+inner join playlist on live_id = playlist_data.id
 where description <> ''
       and translated_description = '{}'
       and published_at is not null
@@ -728,8 +728,8 @@ limit 20 for no key update skip locked;
  "#
         )
         .fetch(&mut txn)
-        .map_ok(|row| CourseTranslate {
-            course_data_id: row.id,
+        .map_ok(|row| PlaylistTranslate {
+            playlist_data_id: row.id,
             text: row.description,
         })
         .try_collect()
@@ -738,10 +738,10 @@ limit 20 for no key update skip locked;
         let names: Vec<_> = sqlx::query!(
             //language=SQL
             r#"
-select course_data.id,
+select playlist_data.id,
        display_name
-from course_data
-inner join course on live_id = course_data.id
+from playlist_data
+inner join playlist on live_id = playlist_data.id
 where display_name <> ''
       and translated_name = '{}'
       and published_at is not null
@@ -751,8 +751,8 @@ limit 20 for no key update skip locked;
  "#
         )
         .fetch(&mut txn)
-        .map_ok(|row| CourseTranslate {
-            course_data_id: row.id,
+        .map_ok(|row| PlaylistTranslate {
+            playlist_data_id: row.id,
             text: row.display_name,
         })
         .try_collect()
@@ -770,12 +770,12 @@ limit 20 for no key update skip locked;
                 if let Some(res) = res {
                     sqlx::query!(
                         r#"
-                            update course_data
+                            update playlist_data
                             set translated_description = $2,
                                 last_synced_at = null
                             where id = $1
                             "#,
-                        &t.course_data_id,
+                        &t.playlist_data_id,
                         json!(res),
                     )
                     .execute(&mut txn)
@@ -783,19 +783,19 @@ limit 20 for no key update skip locked;
 
                     update_asset_translation_status(
                         &mut txn,
-                        "course",
+                        "playlist",
                         "description",
-                        t.course_data_id,
+                        t.playlist_data_id,
                         TranslationStatus::Success,
                     )
                     .await?;
                 } else {
-                    log::debug!("Empty translation list for course_id: {}", t.course_data_id);
+                    log::debug!("Empty translation list for playlist_id: {}", t.playlist_data_id);
                     update_asset_translation_status(
                         &mut txn,
-                        "course",
+                        "playlist",
                         "description",
-                        t.course_data_id,
+                        t.playlist_data_id,
                         TranslationStatus::Undefined,
                     )
                     .await?;
@@ -804,16 +804,16 @@ limit 20 for no key update skip locked;
                 };
             } else {
                 log::debug!(
-                    "Could not translate description for course_id: {}, string: {}",
-                    t.course_data_id,
+                    "Could not translate description for playlist_id: {}, string: {}",
+                    t.playlist_data_id,
                     t.text
                 );
 
                 update_asset_translation_status(
                     &mut txn,
-                    "course",
+                    "playlist",
                     "description",
-                    t.course_data_id,
+                    t.playlist_data_id,
                     TranslationStatus::NoTranslation,
                 )
                 .await?;
@@ -830,12 +830,12 @@ limit 20 for no key update skip locked;
                 if let Some(res) = res {
                     sqlx::query!(
                         r#"
-                            update course_data
+                            update playlist_data
                             set translated_name = $2,
                                 last_synced_at = null
                             where id = $1
                             "#,
-                        &t.course_data_id,
+                        &t.playlist_data_id,
                         json!(res)
                     )
                     .execute(&mut txn)
@@ -843,19 +843,19 @@ limit 20 for no key update skip locked;
 
                     update_asset_translation_status(
                         &mut txn,
-                        "course",
+                        "playlist",
                         "name",
-                        t.course_data_id,
+                        t.playlist_data_id,
                         TranslationStatus::Success,
                     )
                     .await?;
                 } else {
-                    log::debug!("Empty translation list for course_id: {}", t.course_data_id);
+                    log::debug!("Empty translation list for playlist_id: {}", t.playlist_data_id);
                     update_asset_translation_status(
                         &mut txn,
-                        "course",
+                        "playlist",
                         "name",
-                        t.course_data_id,
+                        t.playlist_data_id,
                         TranslationStatus::Undefined,
                     )
                     .await?;
@@ -863,16 +863,16 @@ limit 20 for no key update skip locked;
                 };
             } else {
                 log::debug!(
-                    "Could not translate name for course_id: {}, string: {}",
-                    t.course_data_id,
+                    "Could not translate name for playlist_id: {}, string: {}",
+                    t.playlist_data_id,
                     t.text
                 );
 
                 update_asset_translation_status(
                     &mut txn,
-                    "course",
+                    "playlist",
                     "name",
-                    t.course_data_id,
+                    t.playlist_data_id,
                     TranslationStatus::NoTranslation,
                 )
                 .await?;
@@ -881,7 +881,7 @@ limit 20 for no key update skip locked;
         }
         txn.commit().await?;
 
-        log::info!("completed update Course translations");
+        log::info!("completed update Playlist translations");
 
         Ok(true)
     }

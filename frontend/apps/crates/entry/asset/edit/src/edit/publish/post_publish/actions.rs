@@ -3,9 +3,9 @@ use std::rc::Rc;
 use shared::{
     api::endpoints,
     domain::{
-        course::{CourseCreatePath, CourseCreateRequest, CourseId},
         jig::{JigCreatePath, JigCreateRequest},
         module::{ModuleBody, ModuleCreatePath, ModuleCreateRequest, ModuleKind},
+        playlist::{PlaylistCreatePath, PlaylistCreateRequest, PlaylistId},
         pro_dev::{ProDevCreatePath, ProDevCreateRequest, ProDevId},
         resource::{ResourceCreatePath, ResourceCreateRequest, ResourceId},
     },
@@ -13,7 +13,7 @@ use shared::{
 use utils::{
     prelude::ApiEndpointExt,
     routes::{
-        AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, ProDevEditRoute,
+        AssetEditRoute, AssetRoute, JigEditRoute, PlaylistEditRoute, ProDevEditRoute,
         ResourceEditRoute, Route,
     },
     unwrap::UnwrapJiExt,
@@ -55,18 +55,18 @@ impl PostPublish {
             dominator::routing::go_to_url(&url);
         });
     }
-    pub fn create_course(self: &Rc<Self>) {
+    pub fn create_playlist(self: &Rc<Self>) {
         let state = self;
         state.loader.load(async move {
-            let req = CourseCreateRequest::default();
+            let req = PlaylistCreateRequest::default();
 
-            let resp = endpoints::course::Create::api_with_auth(CourseCreatePath(), Some(req))
+            let resp = endpoints::playlist::Create::api_with_auth(PlaylistCreatePath(), Some(req))
                 .await
                 .unwrap_ji();
-            add_course_cover(&resp.id).await.unwrap_ji();
-            let url: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
+            add_playlist_cover(&resp.id).await.unwrap_ji();
+            let url: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Playlist(
                 resp.id,
-                CourseEditRoute::Landing,
+                PlaylistEditRoute::Landing,
             )))
             .into();
             dominator::routing::go_to_url(&url);
@@ -102,10 +102,10 @@ async fn add_resource_cover(resource_id: &ResourceId) -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn add_course_cover(course_id: &CourseId) -> anyhow::Result<()> {
+async fn add_playlist_cover(playlist_id: &PlaylistId) -> anyhow::Result<()> {
     let req = ModuleCreateRequest {
         body: ModuleBody::new(ModuleKind::ResourceCover),
-        parent_id: (*course_id).into(),
+        parent_id: (*playlist_id).into(),
     };
 
     endpoints::module::Create::api_with_auth(ModuleCreatePath(), Some(req)).await?;

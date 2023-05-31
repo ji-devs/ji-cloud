@@ -2,10 +2,10 @@ use super::super::ApiEndpoint;
 use crate::{
     api::Method,
     domain::{
-        course::CourseBrowseResponse,
+        playlist::PlaylistBrowseResponse,
         jig::JigBrowseResponse,
         user::public_user::{
-            BrowsePublicUserCoursesPath, BrowsePublicUserCoursesQuery,
+            BrowsePublicUserPlaylistsPath, BrowsePublicUserPlaylistsQuery,
             BrowsePublicUserFollowersPath, BrowsePublicUserFollowersQuery,
             BrowsePublicUserFollowersResponse, BrowsePublicUserFollowingPath,
             BrowsePublicUserFollowingResponse, BrowsePublicUserFollowingsQuery,
@@ -69,12 +69,12 @@ impl ApiEndpoint for BrowseUserResources {
     const METHOD: Method = Method::Get;
 }
 
-/// Browse user's courses
-pub struct BrowseUserCourses;
-impl ApiEndpoint for BrowseUserCourses {
-    type Req = BrowsePublicUserCoursesQuery;
-    type Res = CourseBrowseResponse;
-    type Path = BrowsePublicUserCoursesPath;
+/// Browse user's playlists
+pub struct BrowseUserPlaylists;
+impl ApiEndpoint for BrowseUserPlaylists {
+    type Req = BrowsePublicUserPlaylistsQuery;
+    type Res = PlaylistBrowseResponse;
+    type Path = BrowsePublicUserPlaylistsPath;
     type Err = EmptyError;
     const METHOD: Method = Method::Get;
 }

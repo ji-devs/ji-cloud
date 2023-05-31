@@ -4,7 +4,7 @@ pub(crate) mod audio;
 pub(crate) mod billing;
 pub(crate) mod category;
 pub(crate) mod circle;
-pub(crate) mod course;
+pub(crate) mod playlist;
 pub(crate) mod image;
 pub(crate) mod jig;
 pub(crate) mod locale;

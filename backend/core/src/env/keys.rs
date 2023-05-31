@@ -110,9 +110,9 @@ pub mod algolia {
     pub const RESOURCE_INDEX: &str = "ALGOLIA_RESOURCE_INDEX";
 
     /// The index to use for indexing and backend searches.
-    /// Is optional. If missing, *Course* indexing will be disabled,
+    /// Is optional. If missing, *PLAYLIST* indexing will be disabled,
     /// search related routes will return a "501 - Not Implemented" and a warning will be emitted.
-    pub const COURSE_INDEX: &str = "ALGOLIA_COURSE_INDEX";
+    pub const PLAYLIST_INDEX: &str = "ALGOLIA_COURSE_INDEX";
 
     /// The index to use for indexing and backend searches.
     /// Is optional. If missing, *circle* indexing will be disabled,

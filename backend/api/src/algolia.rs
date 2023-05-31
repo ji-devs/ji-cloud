@@ -17,7 +17,7 @@ use shared::{
         asset::PrivacyLevel,
         category::CategoryId,
         circle::CircleId,
-        course::CourseId,
+        playlist::PlaylistId,
         image::{ImageId, ImageSize},
         jig::JigId,
         meta::{AffiliationId, AgeRangeId, ImageStyleId, ImageTagIndex, ResourceTypeId},
@@ -121,7 +121,7 @@ struct BatchImage<'a> {
     usage: &'a i64,
 }
 #[derive(Serialize)]
-struct BatchCourse<'a> {
+struct BatchPlaylist<'a> {
     name: &'a str,
     language: &'a str,
     description: &'a str,
@@ -216,7 +216,7 @@ enum BatchMedia<'a> {
 enum AlgoliaIndices {
     MediaIndex,
     JigIndex,
-    CourseIndex,
+    PlaylistIndex,
     CircleIndex,
     PublicUserIndex,
     UserIndex,
@@ -229,7 +229,7 @@ impl AlgoliaIndices {
         match self {
             Self::MediaIndex => migration::MEDIA_INDEX,
             Self::JigIndex => migration::JIG_INDEX,
-            Self::CourseIndex => migration::COURSE_INDEX,
+            Self::PlaylistIndex => migration::PLAYLIST_INDEX,
             Self::CircleIndex => migration::CIRCLE_INDEX,
             Self::PublicUserIndex => migration::PUBLIC_USER_INDEX,
             Self::ResourceIndex => migration::RESOURCE_INDEX,
@@ -239,7 +239,7 @@ impl AlgoliaIndices {
     }
 }
 
-/// Manager for background task that reads updated jigs, media, courses, circles, public_user from the database, then
+/// Manager for background task that reads updated jigs, media, playlists, circles, public_user from the database, then
 /// performs batch updates to the indices.
 #[derive(Clone)]
 pub struct Manager {
@@ -248,7 +248,7 @@ pub struct Manager {
     pub media_index: String,
     pub jig_index: String,
     pub resource_index: String,
-    pub course_index: String,
+    pub playlist_index: String,
     pub circle_index: String,
     pub public_user_index: String,
     pub user_index: String,
@@ -263,7 +263,7 @@ impl Manager {
             media_index,
             jig_index,
             resource_index,
-            course_index,
+            playlist_index,
             circle_index,
             public_user_index,
             pro_dev_index,
@@ -274,7 +274,7 @@ impl Manager {
                 settings.media_index,
                 settings.jig_index,
                 settings.resource_index,
-                settings.course_index,
+                settings.playlist_index,
                 settings.circle_index,
                 settings.public_user_index,
                 settings.pro_dev_index,
@@ -285,7 +285,7 @@ impl Manager {
                     Some(media_index),
                     Some(jig_index),
                     Some(resource_index),
-                    Some(course_index),
+                    Some(playlist_index),
                     Some(circle_index),
                     Some(public_user_index),
                     Some(user_index),
@@ -296,7 +296,7 @@ impl Manager {
                     media_index,
                     jig_index,
                     resource_index,
-                    course_index,
+                    playlist_index,
                     circle_index,
                     public_user_index,
                     user_index,
@@ -312,7 +312,7 @@ impl Manager {
             media_index,
             jig_index,
             resource_index,
-            course_index,
+            playlist_index,
             circle_index,
             public_user_index,
             user_index,
@@ -336,9 +336,9 @@ impl Manager {
                     .await
                     .context("update resources task errored"),
                 3 => self
-                    .update_courses()
+                    .update_playlists()
                     .await
-                    .context("update courses task errored"),
+                    .context("update playlists task errored"),
                 4 => self
                     .update_circles()
                     .await
@@ -393,8 +393,8 @@ impl Manager {
             migration::MEDIA_HASH.to_owned(),
             AlgoliaIndices::JigIndex.as_str(),
             migration::JIG_HASH.to_owned(),
-            AlgoliaIndices::CourseIndex.as_str(),
-            migration::COURSE_HASH.to_owned(),
+            AlgoliaIndices::PlaylistIndex.as_str(),
+            migration::PLAYLIST_HASH.to_owned(),
             AlgoliaIndices::CircleIndex.as_str(),
             migration::CIRCLE_HASH.to_owned(),
             AlgoliaIndices::PublicUserIndex.as_str(),
@@ -423,8 +423,8 @@ impl Manager {
                 migration::RESOURCE_INDEX => {
                     migration::resource_index(&mut txn, &self.inner, &self.resource_index).await?
                 }
-                migration::COURSE_INDEX => {
-                    migration::course_index(&mut txn, &self.inner, &self.course_index).await?
+                migration::PLAYLIST_INDEX => {
+                    migration::playlist_index(&mut txn, &self.inner, &self.playlist_index).await?
                 }
                 migration::CIRCLE_INDEX => {
                     migration::circle_index(&mut txn, &self.inner, &self.circle_index).await?
@@ -487,8 +487,8 @@ impl Manager {
         Ok(ids?)
     }
 
-    async fn batch_courses(&self, batch: BatchWriteRequests) -> anyhow::Result<Vec<Uuid>> {
-        let resp = self.inner.batch(&self.course_index, &batch).await?;
+    async fn batch_playlists(&self, batch: BatchWriteRequests) -> anyhow::Result<Vec<Uuid>> {
+        let resp = self.inner.batch(&self.playlist_index, &batch).await?;
 
         let ids: Result<Vec<_>, _> = resp
             .object_ids
@@ -1011,52 +1011,52 @@ limit 100 for no key update skip locked;
         Ok(true)
     }
 
-    async fn update_courses(&self) -> anyhow::Result<bool> {
-        log::info!("reached update courses");
+    async fn update_playlists(&self) -> anyhow::Result<bool> {
+        log::info!("reached update playlists");
         let mut txn = self.db.begin().await?;
 
         // todo: allow for some way to do a partial update (for example, by having a channel for queueing partial updates)
         let requests: Vec<_> = sqlx::query!(
             //language=SQL
             r#"
-select course.id,
+select playlist.id,
        display_name                                                                                                 as "name",
        language                                                                                                     as "language!",
        description                                                                                                  as "description!",
        translated_description                                                                                       as "translated_description!: Json<HashMap<String, String>>",
        translated_name                                                                                              as "translated_name!: Json<HashMap<String, String>>",
        array((select affiliation_id
-              from course_data_affiliation
-              where course_data_id = course_data.id))                                                                     as "affiliations!",
+              from playlist_data_affiliation
+              where playlist_data_id = playlist_data.id))                                                                     as "affiliations!",
        array((select affiliation.display_name
               from affiliation
-                       inner join course_data_affiliation on affiliation.id = course_data_affiliation.affiliation_id
-              where course_data_affiliation.course_data_id = course_data.id))                                                as "affiliation_names!",
+                       inner join playlist_data_affiliation on affiliation.id = playlist_data_affiliation.affiliation_id
+              where playlist_data_affiliation.playlist_data_id = playlist_data.id))                                                as "affiliation_names!",
         array((select resource_type_id
-                from course_data_resource
-                where course_data_id = course_data.id))                                                                     as "resource_types!",
+                from playlist_data_resource
+                where playlist_data_id = playlist_data.id))                                                                     as "resource_types!",
         array((select resource_type.display_name
               from resource_type
-                        inner join course_data_resource on resource_type.id = course_data_resource.resource_type_id
-             where course_data_resource.course_data_id = course_data.id))                                         as "resource_type_names!",
+                        inner join playlist_data_resource on resource_type.id = playlist_data_resource.resource_type_id
+             where playlist_data_resource.playlist_data_id = playlist_data.id))                                         as "resource_type_names!",
        array((select age_range_id
-              from course_data_age_range
-              where course_data_id = course_data.id))                                                                     as "age_ranges!",
+              from playlist_data_age_range
+              where playlist_data_id = playlist_data.id))                                                                     as "age_ranges!",
        array((select age_range.display_name
               from age_range
-                       inner join course_data_age_range on age_range.id = course_data_age_range.age_range_id
-              where course_data_age_range.course_data_id = course_data.id))                                                  as "age_range_names!",
+                       inner join playlist_data_age_range on age_range.id = playlist_data_age_range.age_range_id
+              where playlist_data_age_range.playlist_data_id = playlist_data.id))                                                  as "age_range_names!",
        array((select category_id
-              from course_data_category
-              where course_data_id = course_data.id))                                                                     as "categories!",
+              from playlist_data_category
+              where playlist_data_id = playlist_data.id))                                                                     as "categories!",
        array((select name
               from category
-                       inner join course_data_category on category.id = course_data_category.category_id
-              where course_data_category.course_data_id = course_data.id))                                                   as "category_names!",
+                       inner join playlist_data_category on category.id = playlist_data_category.category_id
+              where playlist_data_category.playlist_data_id = playlist_data.id))                                                   as "category_names!",
         array(
            (select jig_id
-            from course_data_jig
-            where course_data_jig.course_data_id = course_data.id)
+            from playlist_data_jig
+            where playlist_data_jig.playlist_data_id = playlist_data.id)
        )                                                                                                            as "items!",
        privacy_level                                                                                                as "privacy_level!: PrivacyLevel",
        author_id                                                                                                    as "author_id",
@@ -1064,12 +1064,12 @@ select course.id,
        translated_keywords                                                                                          as "translated_keywords!",
        (select given_name || ' '::text || family_name
         from user_profile
-        where user_profile.user_id = course.author_id)                                                       as "author_name",
+        where user_profile.user_id = playlist.author_id)                                                       as "author_name",
         likes                                                                                                       as "likes!",
         plays                                                                                                       as "plays!",
         published_at                                                                                                as "published_at"
-from course
-         inner join course_data on live_id = course_data.id
+from playlist
+         inner join playlist_data on live_id = playlist_data.id
 where (last_synced_at is null and published_at is not null)
     or (updated_at is not null and last_synced_at < updated_at)
     or (published_at < now() is true and last_synced_at < published_at)
@@ -1099,7 +1099,7 @@ limit 100 for no key update skip locked;
             }
 
             algolia::request::BatchWriteRequest::UpdateObject {
-            body: match serde_json::to_value(&BatchCourse {
+            body: match serde_json::to_value(&BatchPlaylist {
                 name: &row.name,
                 language: &row.language,
                 description: &row.description,
@@ -1123,10 +1123,10 @@ limit 100 for no key update skip locked;
                 translated_description: &translation_description,
                 translated_name: &translation_name,
             })
-            .expect("failed to serialize BatchCourse to json")
+            .expect("failed to serialize BatchPlaylist to json")
             {
                 serde_json::Value::Object(map) => map,
-                _ => panic!("failed to serialize BatchCourse to json map"),
+                _ => panic!("failed to serialize BatchPlaylist to json map"),
             },
             object_id: row.id.to_string(),
         }})
@@ -1138,19 +1138,19 @@ limit 100 for no key update skip locked;
             return Ok(true);
         }
 
-        log::debug!("Updating a batch of {} course(s)", requests.len());
+        log::debug!("Updating a batch of {} playlist(s)", requests.len());
 
         let request = algolia::request::BatchWriteRequests { requests };
-        let ids = self.batch_courses(request).await?;
+        let ids = self.batch_playlists(request).await?;
 
-        log::debug!("Updated a batch of {} course(s)", ids.len());
+        log::debug!("Updated a batch of {} playlist(s)", ids.len());
 
         sqlx::query!(
             //language=SQL
             r#"
-update course_data
+update playlist_data
 set last_synced_at = now()
-where course_data.id = any (select live_id from course where course.id = any ($1))
+where playlist_data.id = any (select live_id from playlist where playlist.id = any ($1))
 "#,
             &ids
         )
@@ -1159,7 +1159,7 @@ where course_data.id = any (select live_id from course where course.id = any ($1
 
         txn.commit().await?;
 
-        log::info!("completed update course");
+        log::info!("completed update playlist");
 
         Ok(true)
     }
@@ -1484,10 +1484,10 @@ limit 100 for no key update skip locked;
                 translated_description: &translation_description,
                 translated_name: &translation_name,
             })
-            .expect("failed to serialize BatchCourse to json")
+            .expect("failed to serialize BatchPlaylist to json")
             {
                 serde_json::Value::Object(map) => map,
-                _ => panic!("failed to serialize BatchCourse to json map"),
+                _ => panic!("failed to serialize BatchPlaylist to json map"),
             },
             object_id: row.id.to_string(),
         }})
@@ -1597,19 +1597,19 @@ where pro_dev_data.id = any (select live_id from pro_dev where pro_dev.id = any 
         Ok(())
     }
 
-    pub async fn delete_course(&self, id: CourseId) {
-        if let Err(e) = self.try_delete_course(id).await {
+    pub async fn delete_playlist(&self, id: PlaylistId) {
+        if let Err(e) = self.try_delete_playlist(id).await {
             log::warn!(
-                "failed to delete course with id {} from algolia: {}",
+                "failed to delete playlist with id {} from algolia: {}",
                 id.0.hyphenated(),
                 e
             );
         }
     }
 
-    pub async fn try_delete_course(&self, CourseId(id): CourseId) -> anyhow::Result<()> {
+    pub async fn try_delete_playlist(&self, PlaylistId(id): PlaylistId) -> anyhow::Result<()> {
         self.inner
-            .delete_object(&self.course_index, &id.to_string())
+            .delete_object(&self.playlist_index, &id.to_string())
             .await?;
 
         Ok(())
@@ -1811,7 +1811,7 @@ pub struct Client {
     media_index: String,
     jig_index: String,
     resource_index: String,
-    course_index: String,
+    playlist_index: String,
     circle_index: String,
     public_user_index: String,
     user_index: String,
@@ -1828,7 +1828,7 @@ impl Client {
                 media_index,
                 jig_index,
                 resource_index,
-                course_index,
+                playlist_index,
                 circle_index,
                 public_user_index,
                 user_index,
@@ -1838,7 +1838,7 @@ impl Client {
                 settings.media_index,
                 settings.jig_index,
                 settings.resource_index,
-                settings.course_index,
+                settings.playlist_index,
                 settings.circle_index,
                 settings.public_user_index,
                 settings.user_index,
@@ -1849,7 +1849,7 @@ impl Client {
                     Some(media_index),
                     Some(jig_index),
                     Some(resource_index),
-                    Some(course_index),
+                    Some(playlist_index),
                     Some(circle_index),
                     Some(public_user_index),
                     Some(user_index),
@@ -1859,7 +1859,7 @@ impl Client {
                     media_index,
                     jig_index,
                     resource_index,
-                    course_index,
+                    playlist_index,
                     circle_index,
                     public_user_index,
                     user_index,
@@ -1873,7 +1873,7 @@ impl Client {
                 media_index,
                 jig_index,
                 resource_index,
-                course_index,
+                playlist_index,
                 circle_index,
                 public_user_index,
                 user_index,
@@ -2245,7 +2245,7 @@ impl Client {
     }
 
     #[instrument(skip_all)]
-    pub async fn search_course(
+    pub async fn search_playlist(
         &self,
         query: &str,
         page: Option<u32>,
@@ -2328,7 +2328,7 @@ impl Client {
         let results: SearchResponse = self
             .inner
             .search(
-                &self.course_index,
+                &self.playlist_index,
                 SearchQuery::<'_, String, AndFilter> {
                     query: Some(query),
                     page,

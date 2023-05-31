@@ -8,7 +8,7 @@ use shared::{
     api::{endpoints::user, ApiEndpoint},
     domain::{
         asset::DraftOrLive,
-        course::CourseBrowseResponse,
+        playlist::PlaylistBrowseResponse,
         jig::JigBrowseResponse,
         user::{
             public_user::{
@@ -28,7 +28,7 @@ use crate::{
     db,
     error::{self, ServiceKind},
     extractor::{get_user_id, TokenUser},
-    http::endpoints::course::{DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT},
+    http::endpoints::playlist::{DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT},
     service::ServiceData,
 };
 
@@ -211,13 +211,13 @@ pub async fn browse_user_resources(
     }))
 }
 
-/// Get a Public Users Courses
-pub async fn browse_user_courses(
+/// Get a Public Users Playlists
+pub async fn browse_user_playlists(
     db: Data<PgPool>,
     auth: Option<TokenUser>,
     path: Path<UserId>,
-    query: Option<Query<<user::BrowseCourses as ApiEndpoint>::Req>>,
-) -> Result<Json<<user::BrowseCourses as ApiEndpoint>::Res>, error::NotFound> {
+    query: Option<Query<<user::BrowsePlaylists as ApiEndpoint>::Req>>,
+) -> Result<Json<<user::BrowsePlaylists as ApiEndpoint>::Res>, error::NotFound> {
     let (query, user_id) = (
         query.map_or_else(Default::default, Query::into_inner),
         path.into_inner(),
@@ -232,7 +232,7 @@ pub async fn browse_user_courses(
         .await
         .map_err(|e| error::NotFound::InternalServerError(e))?;
 
-    let browse_future = db::course::browse(
+    let browse_future = db::playlist::browse(
         &db,
         Some(user_id),
         Some(DraftOrLive::Live),
@@ -243,7 +243,7 @@ pub async fn browse_user_courses(
         claim_id,
     );
 
-    let total_count_future = db::course::filtered_count(
+    let total_count_future = db::playlist::filtered_count(
         db.as_ref(),
         privacy_level.to_owned(),
         Some(user_id),
@@ -251,14 +251,14 @@ pub async fn browse_user_courses(
         resource_types.to_owned(),
     );
 
-    let (courses, (total_count, count)) = try_join!(browse_future, total_count_future,)?;
+    let (playlists, (total_count, count)) = try_join!(browse_future, total_count_future,)?;
 
     let pages = (count / (page_limit as u64) + (count % (page_limit as u64) != 0) as u64) as u32;
 
-    Ok(Json(CourseBrowseResponse {
-        courses,
+    Ok(Json(PlaylistBrowseResponse {
+        playlists,
         pages,
-        total_course_count: total_count,
+        total_playlist_count: total_count,
     }))
 }
 

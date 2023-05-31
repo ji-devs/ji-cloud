@@ -6,7 +6,7 @@ pub mod audio;
 pub mod billing;
 pub mod category;
 pub mod circle;
-pub mod course;
+pub mod playlist;
 pub mod image;
 pub mod jig;
 pub mod locale;

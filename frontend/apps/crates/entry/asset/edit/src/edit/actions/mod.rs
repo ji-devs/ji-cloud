@@ -6,7 +6,7 @@ use shared::domain::asset::{Asset, AssetId};
 use utils::{
     prelude::ModuleToAssetEditorMessage,
     routes::{
-        AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, ProDevEditRoute,
+        AssetEditRoute, AssetRoute, JigEditRoute, PlaylistEditRoute, ProDevEditRoute,
         ResourceEditRoute, Route,
     },
     storage,
@@ -14,8 +14,8 @@ use utils::{
 };
 use wasm_bindgen_futures::spawn_local;
 
-mod course_actions;
 mod jig_actions;
+mod playlist_actions;
 mod pro_dev_actions;
 mod resource_actions;
 
@@ -28,8 +28,8 @@ impl AssetEditState {
                 Asset::Jig(jig) => {
                     state.get_jig_spots(jig);
                 },
-                Asset::Course(course) => {
-                    state.get_course_spots(course).await;
+                Asset::Playlist(playlist) => {
+                    state.get_playlist_spots(playlist).await;
                 },
                 Asset::Resource(_) => {
                     // do nothing, resource doesn't have the sidebar
@@ -48,7 +48,9 @@ impl AssetEditState {
             AssetId::ResourceId(resource_id) => {
                 resource_actions::load_resource(resource_id).await?.into()
             }
-            AssetId::CourseId(course_id) => course_actions::load_course(course_id).await?.into(),
+            AssetId::PlaylistId(playlist_id) => {
+                playlist_actions::load_playlist(playlist_id).await?.into()
+            }
             AssetId::ProDevId(pro_dev_id) => {
                 pro_dev_actions::load_pro_dev(&pro_dev_id).await?.into()
             }
@@ -80,11 +82,11 @@ impl AssetEditState {
                     JigEditRoute::Publish,
                 ))));
             }
-            AssetId::CourseId(course_id) => {
-                self.set_route_course(CourseEditRoute::Publish);
-                Route::push_state(Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
-                    course_id,
-                    CourseEditRoute::Publish,
+            AssetId::PlaylistId(playlist_id) => {
+                self.set_route_playlist(PlaylistEditRoute::Publish);
+                Route::push_state(Route::Asset(AssetRoute::Edit(AssetEditRoute::Playlist(
+                    playlist_id,
+                    PlaylistEditRoute::Publish,
                 ))));
             }
             AssetId::ResourceId(resource_id) => {

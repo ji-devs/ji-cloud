@@ -215,7 +215,7 @@ impl From<JigPlayerSettings> for JigPlayerOptions {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
-pub struct CoursePlayerOptions {
+pub struct PlaylistPlayerOptions {
     #[serde(default)]
     pub draft_or_live: DraftOrLive,
 
@@ -235,7 +235,7 @@ pub struct ProDevPlayerOptions {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum AssetPlayerOptions {
     Jig(JigPlayerOptions),
-    Course(CoursePlayerOptions),
+    Playlist(PlaylistPlayerOptions),
     ProDev(ProDevPlayerOptions),
 }
 
@@ -243,7 +243,7 @@ impl AssetPlayerOptions {
     pub fn is_draft(&self) -> bool {
         match self {
             Self::Jig(options) => options.draft_or_live.is_draft(),
-            Self::Course(options) => options.draft_or_live.is_draft(),
+            Self::Playlist(options) => options.draft_or_live.is_draft(),
             Self::ProDev(options) => options.draft_or_live.is_draft(),
         }
     }
@@ -251,7 +251,7 @@ impl AssetPlayerOptions {
     pub fn default_from_id(asset_id: &AssetId) -> Self {
         match asset_id {
             AssetId::JigId(_) => Self::Jig(Default::default()),
-            AssetId::CourseId(_) => Self::Course(Default::default()),
+            AssetId::PlaylistId(_) => Self::Playlist(Default::default()),
             AssetId::ProDevId(_) => Self::ProDev(Default::default()),
             AssetId::ResourceId(_) => unimplemented!(),
         }
@@ -264,9 +264,9 @@ impl From<JigPlayerOptions> for AssetPlayerOptions {
     }
 }
 
-impl From<CoursePlayerOptions> for AssetPlayerOptions {
-    fn from(player_option: CoursePlayerOptions) -> Self {
-        AssetPlayerOptions::Course(player_option)
+impl From<PlaylistPlayerOptions> for AssetPlayerOptions {
+    fn from(player_option: PlaylistPlayerOptions) -> Self {
+        AssetPlayerOptions::Playlist(player_option)
     }
 }
 

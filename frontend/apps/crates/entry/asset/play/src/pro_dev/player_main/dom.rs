@@ -20,7 +20,7 @@ use utils::{
 };
 use web_sys::ShadowRoot;
 
-const STR_SHARE_COURSE: &str = "Share course";
+const STR_SHARE_PLAYLIST: &str = "Share playlist";
 const UNITS_PER_PAGE: usize = 10;
 
 impl Component<PlayerMain> for Rc<PlayerMain> {
@@ -52,7 +52,7 @@ impl PlayerMain {
         let state = self;
         let language = Language::code_to_display_name(&pro_dev.pro_dev_data.language);
 
-        html!("jig-play-course-main", {
+        html!("jig-play-playlist-main", {
             .prop("name", &pro_dev.pro_dev_data.display_name)
             .prop("description", &pro_dev.pro_dev_data.description)
             .prop("language", language)
@@ -104,7 +104,7 @@ impl PlayerMain {
                     .child(html!("fa-icon", {
                         .prop("icon", "fa-light fa-share-nodes")
                     }))
-                    .text(STR_SHARE_COURSE)
+                    .text(STR_SHARE_PLAYLIST)
                 }),
                 Some("share")
             ))
@@ -120,7 +120,7 @@ impl PlayerMain {
 
     fn render_unit(self: &Rc<Self>, unit: &ProDevUnit, i: usize) -> Dom {
         let state = self;
-        html!("jig-play-course-item", {
+        html!("jig-play-playlist-item", {
             .prop("slot", "items")
             .prop("name", &unit.display_name)
             .prop("description", &unit.description)

@@ -33,11 +33,11 @@ impl SearchResults {
         html!("home-search-results", {
             .prop_signal("loading", state.loading.signal())
             .prop_signal("jigCount", state.jigs.total.signal())
-            .prop_signal("courseCount", state.courses.total.signal())
+            .prop_signal("playlistCount", state.playlists.total.signal())
             .prop_signal("resourceCount", state.resources.total.signal())
             .prop("query", &state.query)
             .child_signal(search_results_signal(Rc::clone(&state.jigs)))
-            .child_signal(search_results_signal(Rc::clone(&state.courses)))
+            .child_signal(search_results_signal(Rc::clone(&state.playlists)))
             .child_signal(search_results_signal(Rc::clone(&state.resources)))
         })
     }

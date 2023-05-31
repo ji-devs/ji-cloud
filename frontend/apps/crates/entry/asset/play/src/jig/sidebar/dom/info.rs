@@ -109,7 +109,7 @@ fn render_jig_info(state: Rc<State>, jig: &JigResponse) -> Dom {
             })
         }))
         .child(html!("button-rect", {
-            .prop("slot", "courses")
+            .prop("slot", "playlists")
             .prop("kind", "text")
             .text("Sefer Bereishit")
         }))

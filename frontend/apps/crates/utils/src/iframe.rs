@@ -235,6 +235,6 @@ pub enum ModuleToAssetEditorMessage {
 #[derive(Debug, Serialize, Deserialize)]
 pub enum AssetPlayerToPlayerPopup {
     Close,
-    // used for course player to hide close button when jig is playing since the jig has it's own button
+    // used for playlist player to hide close button when jig is playing since the jig has it's own button
     CloseButtonShown(bool),
 }

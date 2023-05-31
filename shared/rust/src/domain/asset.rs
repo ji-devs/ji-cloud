@@ -25,7 +25,7 @@ use crate::{
 
 use super::{
     additional_resource::AdditionalResource,
-    course::{CourseId, CourseResponse},
+    playlist::{PlaylistId, PlaylistResponse},
     jig::{JigId, JigResponse},
     module::body::ThemeId,
     pro_dev::{ProDevId, ProDevResponse},
@@ -44,8 +44,8 @@ pub enum AssetType {
     /// Resource
     Resource,
 
-    /// Course
-    Course,
+    /// Playlist
+    Playlist,
 
     /// Pro Dev
     ProDev,
@@ -62,9 +62,9 @@ impl AssetType {
         matches!(self, Self::Resource)
     }
 
-    /// check if course
-    pub fn is_course(&self) -> bool {
-        matches!(self, Self::Course)
+    /// check if playlist
+    pub fn is_playlist(&self) -> bool {
+        matches!(self, Self::Playlist)
     }
 
     /// check if pro_dev
@@ -77,7 +77,7 @@ impl AssetType {
         match self {
             Self::Jig => "jig",
             Self::Resource => "resource",
-            Self::Course => "course",
+            Self::Playlist => "playlist",
             Self::ProDev => "pro-dev",
         }
     }
@@ -87,7 +87,7 @@ impl AssetType {
         match self {
             Self::Jig => "JIG",
             Self::Resource => "resource",
-            Self::Course => "course",
+            Self::Playlist => "playlist",
             Self::ProDev => "ProDev",
         }
     }
@@ -97,7 +97,7 @@ impl AssetType {
         match self {
             Self::Jig => "JIG",
             Self::Resource => "Resource",
-            Self::Course => "Course",
+            Self::Playlist => "Playlist",
             Self::ProDev => "ProDev",
         }
     }
@@ -107,7 +107,7 @@ impl AssetType {
         match self {
             Self::Jig => "JIG",
             Self::Resource => "resource",
-            Self::Course => "course",
+            Self::Playlist => "playlist",
             Self::ProDev => "ProDev course",
         }
     }
@@ -116,7 +116,7 @@ impl AssetType {
     pub fn to_asset_id(&self, uuid: Uuid) -> AssetId {
         match self {
             AssetType::Jig => JigId(uuid).into(),
-            AssetType::Course => CourseId(uuid).into(),
+            AssetType::Playlist => PlaylistId(uuid).into(),
             AssetType::Resource => ResourceId(uuid).into(),
             AssetType::ProDev => ProDevId(uuid).into(),
         }
@@ -127,7 +127,7 @@ impl From<&AssetId> for AssetType {
     fn from(asset_id: &AssetId) -> Self {
         match asset_id {
             AssetId::JigId(_) => AssetType::Jig,
-            AssetId::CourseId(_) => AssetType::Course,
+            AssetId::PlaylistId(_) => AssetType::Playlist,
             AssetId::ResourceId(_) => AssetType::Resource,
             AssetId::ProDevId(_) => AssetType::ProDev,
         }
@@ -140,7 +140,7 @@ impl TryFrom<&str> for AssetType {
     fn try_from(s: &str) -> Result<Self, Self::Error> {
         match s {
             "jig" => Ok(Self::Jig),
-            "course" => Ok(Self::Course),
+            "playlist" => Ok(Self::Playlist),
             "resource" => Ok(Self::Resource),
             "pro-dev" => Ok(Self::ProDev),
             _ => Err(()),
@@ -161,8 +161,8 @@ pub enum AssetId {
     /// JIG ID
     JigId(JigId),
 
-    /// Course ID
-    CourseId(CourseId),
+    /// Playlist ID
+    PlaylistId(PlaylistId),
 
     /// Resource ID
     ResourceId(ResourceId),
@@ -177,9 +177,9 @@ impl From<JigId> for AssetId {
     }
 }
 
-impl From<CourseId> for AssetId {
-    fn from(course_id: CourseId) -> Self {
-        Self::CourseId(course_id)
+impl From<PlaylistId> for AssetId {
+    fn from(playlist_id: PlaylistId) -> Self {
+        Self::PlaylistId(playlist_id)
     }
 }
 
@@ -196,6 +196,11 @@ impl From<ProDevId> for AssetId {
 }
 
 impl AssetId {
+    /// get asset type
+    pub fn asset_type(&self) -> AssetType {
+        self.into()
+    }
+
     /// get jig id value as ref
     pub fn unwrap_jig(&self) -> &JigId {
         match self {
@@ -204,10 +209,10 @@ impl AssetId {
         }
     }
 
-    /// get course id value as ref
-    pub fn unwrap_course(&self) -> &CourseId {
+    /// get playlist id value as ref
+    pub fn unwrap_playlist(&self) -> &PlaylistId {
         match self {
-            Self::CourseId(course_id) => course_id,
+            Self::PlaylistId(playlist_id) => playlist_id,
             _ => panic!(),
         }
     }
@@ -232,7 +237,7 @@ impl AssetId {
     pub fn uuid(&self) -> &Uuid {
         match self {
             Self::JigId(jig_id) => &jig_id.0,
-            Self::CourseId(course_id) => &course_id.0,
+            Self::PlaylistId(playlist_id) => &playlist_id.0,
             Self::ResourceId(resource_id) => &resource_id.0,
             Self::ProDevId(pro_dev_id) => &pro_dev_id.0,
         }
@@ -243,9 +248,9 @@ impl AssetId {
         matches!(self, Self::JigId(_))
     }
 
-    /// check if course
-    pub fn is_course_id(&self) -> bool {
-        matches!(self, Self::CourseId(_))
+    /// check if playlist
+    pub fn is_playlist_id(&self) -> bool {
+        matches!(self, Self::PlaylistId(_))
     }
 
     /// check if resource
@@ -266,8 +271,8 @@ pub enum Asset {
     /// JIG ID associated with the module.
     Jig(JigResponse),
 
-    /// Course ID associated with the module.
-    Course(CourseResponse),
+    /// Playlist ID associated with the module.
+    Playlist(PlaylistResponse),
 
     /// Resource ID associated with the module.
     Resource(ResourceResponse),
@@ -282,9 +287,9 @@ impl From<JigResponse> for Asset {
     }
 }
 
-impl From<CourseResponse> for Asset {
-    fn from(course: CourseResponse) -> Self {
-        Self::Course(course)
+impl From<PlaylistResponse> for Asset {
+    fn from(playlist: PlaylistResponse) -> Self {
+        Self::Playlist(playlist)
     }
 }
 
@@ -322,10 +327,10 @@ impl Asset {
         }
     }
 
-    /// get course value as ref
-    pub fn unwrap_course(&self) -> &CourseResponse {
+    /// get playlist value as ref
+    pub fn unwrap_playlist(&self) -> &PlaylistResponse {
         match self {
-            Self::Course(course) => course,
+            Self::Playlist(playlist) => playlist,
             _ => panic!(),
         }
     }
@@ -343,9 +348,9 @@ impl Asset {
         matches!(self, Self::Jig(_))
     }
 
-    /// check if is course
-    pub fn is_course(&self) -> bool {
-        matches!(self, Self::Course(_))
+    /// check if is playlist
+    pub fn is_playlist(&self) -> bool {
+        matches!(self, Self::Playlist(_))
     }
 
     /// check if is resource
@@ -362,7 +367,7 @@ impl Asset {
     pub fn id(&self) -> AssetId {
         match self {
             Self::Jig(jig) => jig.id.into(),
-            Self::Course(course) => course.id.into(),
+            Self::Playlist(playlist) => playlist.id.into(),
             Self::Resource(resource) => resource.id.into(),
             Self::ProDev(pro_dev) => pro_dev.id.into(),
         }
@@ -372,7 +377,7 @@ impl Asset {
     pub fn published_at(&self) -> Option<DateTime<Utc>> {
         match self {
             Self::Jig(jig) => jig.published_at,
-            Self::Course(course) => course.published_at,
+            Self::Playlist(playlist) => playlist.published_at,
             Self::Resource(resource) => resource.published_at,
             Self::ProDev(pro_dev) => pro_dev.published_at,
         }
@@ -382,7 +387,7 @@ impl Asset {
     pub fn display_name(&self) -> &String {
         match self {
             Self::Jig(jig) => &jig.jig_data.display_name,
-            Self::Course(course) => &course.course_data.display_name,
+            Self::Playlist(playlist) => &playlist.playlist_data.display_name,
             Self::Resource(resource) => &resource.resource_data.display_name,
             Self::ProDev(pro_dev) => &pro_dev.pro_dev_data.display_name,
         }
@@ -392,7 +397,7 @@ impl Asset {
     pub fn language(&self) -> &String {
         match self {
             Self::Jig(jig) => &jig.jig_data.language,
-            Self::Course(course) => &course.course_data.language,
+            Self::Playlist(playlist) => &playlist.playlist_data.language,
             Self::Resource(resource) => &resource.resource_data.language,
             Self::ProDev(pro_dev) => &pro_dev.pro_dev_data.language,
         }
@@ -402,7 +407,7 @@ impl Asset {
     pub fn description(&self) -> &String {
         match self {
             Self::Jig(jig) => &jig.jig_data.description,
-            Self::Course(course) => &course.course_data.description,
+            Self::Playlist(playlist) => &playlist.playlist_data.description,
             Self::Resource(resource) => &resource.resource_data.description,
             Self::ProDev(pro_dev) => &pro_dev.pro_dev_data.description,
         }
@@ -412,7 +417,7 @@ impl Asset {
     pub fn cover(&self) -> Option<&LiteModule> {
         match self {
             Self::Jig(jig) => jig.jig_data.modules.first(),
-            Self::Course(course) => course.course_data.cover.as_ref(),
+            Self::Playlist(playlist) => playlist.playlist_data.cover.as_ref(),
             Self::Resource(resource) => resource.resource_data.cover.as_ref(),
             Self::ProDev(pro_dev) => pro_dev.pro_dev_data.cover.as_ref(),
         }
@@ -422,7 +427,7 @@ impl Asset {
     pub fn privacy_level(&self) -> &PrivacyLevel {
         match self {
             Self::Jig(jig) => &jig.jig_data.privacy_level,
-            Self::Course(course) => &course.course_data.privacy_level,
+            Self::Playlist(playlist) => &playlist.playlist_data.privacy_level,
             Self::Resource(resource) => &resource.resource_data.privacy_level,
             Self::ProDev(pro_dev) => &pro_dev.pro_dev_data.privacy_level,
         }
@@ -432,7 +437,7 @@ impl Asset {
     pub fn other_keywords(&self) -> &String {
         match self {
             Self::Jig(jig) => &jig.jig_data.other_keywords,
-            Self::Course(course) => &course.course_data.other_keywords,
+            Self::Playlist(playlist) => &playlist.playlist_data.other_keywords,
             Self::Resource(resource) => &resource.resource_data.other_keywords,
             Self::ProDev(pro_dev) => &pro_dev.pro_dev_data.other_keywords,
         }
@@ -442,7 +447,7 @@ impl Asset {
     pub fn translated_keywords(&self) -> &String {
         match self {
             Self::Jig(jig) => &jig.jig_data.translated_keywords,
-            Self::Course(course) => &course.course_data.translated_keywords,
+            Self::Playlist(playlist) => &playlist.playlist_data.translated_keywords,
             Self::Resource(resource) => &resource.resource_data.translated_keywords,
             Self::ProDev(pro_dev) => &pro_dev.pro_dev_data.translated_keywords,
         }
@@ -452,7 +457,7 @@ impl Asset {
     pub fn age_ranges(&self) -> &Vec<AgeRangeId> {
         match self {
             Self::Jig(jig) => &jig.jig_data.age_ranges,
-            Self::Course(course) => &course.course_data.age_ranges,
+            Self::Playlist(playlist) => &playlist.playlist_data.age_ranges,
             Self::Resource(resource) => &resource.resource_data.age_ranges,
             Self::ProDev(_) => unimplemented!(),
         }
@@ -462,7 +467,7 @@ impl Asset {
     pub fn affiliations(&self) -> &Vec<AffiliationId> {
         match self {
             Self::Jig(jig) => &jig.jig_data.affiliations,
-            Self::Course(course) => &course.course_data.affiliations,
+            Self::Playlist(playlist) => &playlist.playlist_data.affiliations,
             Self::Resource(resource) => &resource.resource_data.affiliations,
             Self::ProDev(_) => panic!(),
         }
@@ -472,7 +477,7 @@ impl Asset {
     pub fn categories(&self) -> &Vec<CategoryId> {
         match self {
             Self::Jig(jig) => &jig.jig_data.categories,
-            Self::Course(course) => &course.course_data.categories,
+            Self::Playlist(playlist) => &playlist.playlist_data.categories,
             Self::Resource(resource) => &resource.resource_data.categories,
             Self::ProDev(pro_dev) => &pro_dev.pro_dev_data.categories,
         }
@@ -482,7 +487,7 @@ impl Asset {
     pub fn likes(&self) -> i64 {
         match self {
             Self::Jig(jig) => jig.likes,
-            Self::Course(course) => course.likes,
+            Self::Playlist(playlist) => playlist.likes,
             Self::Resource(resource) => resource.likes,
             Self::ProDev(pro_dev) => pro_dev.likes,
         }
@@ -492,7 +497,7 @@ impl Asset {
     pub fn is_liked(&self) -> bool {
         match self {
             Self::Jig(jig) => jig.is_liked,
-            Self::Course(course) => course.is_liked,
+            Self::Playlist(playlist) => playlist.is_liked,
             Self::Resource(resource) => resource.is_liked,
             Self::ProDev(_pro_dev) => todo!(),
         }
@@ -502,7 +507,7 @@ impl Asset {
     pub fn plays(&self) -> i64 {
         match self {
             Self::Jig(jig) => jig.plays,
-            Self::Course(course) => course.plays,
+            Self::Playlist(playlist) => playlist.plays,
             Self::Resource(resource) => resource.views,
             Self::ProDev(pro_dev) => pro_dev.plays,
         }
@@ -512,7 +517,7 @@ impl Asset {
     pub fn author_id(&self) -> &Option<UserId> {
         match self {
             Self::Jig(jig) => &jig.author_id,
-            Self::Course(course) => &course.author_id,
+            Self::Playlist(playlist) => &playlist.author_id,
             Self::Resource(resource) => &resource.author_id,
             Self::ProDev(pro_dev) => &pro_dev.author_id,
         }
@@ -522,7 +527,7 @@ impl Asset {
     pub fn author_name(&self) -> &Option<String> {
         match self {
             Self::Jig(jig) => &jig.author_name,
-            Self::Course(course) => &course.author_name,
+            Self::Playlist(playlist) => &playlist.author_name,
             Self::Resource(resource) => &resource.author_name,
             Self::ProDev(pro_dev) => &pro_dev.author_name,
         }
@@ -532,7 +537,7 @@ impl Asset {
     pub fn additional_resources(&self) -> &Vec<AdditionalResource> {
         match self {
             Self::Jig(jig) => &jig.jig_data.additional_resources,
-            Self::Course(course) => &course.course_data.additional_resources,
+            Self::Playlist(playlist) => &playlist.playlist_data.additional_resources,
             Self::Resource(resource) => &resource.resource_data.additional_resources,
             Self::ProDev(pro_dev) => &pro_dev.pro_dev_data.additional_resources,
         }
@@ -542,7 +547,7 @@ impl Asset {
     pub fn translated_description(&self) -> &HashMap<String, String> {
         match self {
             Self::Jig(jig) => &jig.jig_data.translated_description,
-            Self::Course(course) => &course.course_data.translated_description,
+            Self::Playlist(playlist) => &playlist.playlist_data.translated_description,
             Self::Resource(resource) => &resource.resource_data.translated_description,
             Self::ProDev(pro_dev) => &pro_dev.pro_dev_data.translated_description,
         }
@@ -552,7 +557,7 @@ impl Asset {
     pub fn theme(&self) -> ThemeId {
         match self {
             Self::Jig(jig) => jig.jig_data.theme,
-            Self::Course(_) => ThemeId::default(),
+            Self::Playlist(_) => ThemeId::default(),
             Self::Resource(_) => ThemeId::default(),
             Self::ProDev(_) => ThemeId::default(),
         }
@@ -562,7 +567,7 @@ impl Asset {
     pub fn live_up_to_date(&self) -> bool {
         match self {
             Self::Jig(jig) => jig.live_up_to_date,
-            Self::Course(course) => course.live_up_to_date,
+            Self::Playlist(playlist) => playlist.live_up_to_date,
             Self::Resource(resource) => resource.live_up_to_date,
             Self::ProDev(pro_dev) => pro_dev.live_up_to_date,
         }

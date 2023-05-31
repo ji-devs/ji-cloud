@@ -1,8 +1,8 @@
 use std::rc::Rc;
 
 use super::{
-    super::edit::publish::Publish, course::course_selection::state::CourseSelection,
-    jig::module_selection::ModuleSelection, module_iframe::ModuleIframe,
+    super::edit::publish::Publish, jig::module_selection::ModuleSelection,
+    module_iframe::ModuleIframe, playlist::playlist_selection::state::PlaylistSelection,
     pro_dev::unit_editor::UnitEditor, sidebar::Sidebar, state::AssetEditState,
 };
 use components::{
@@ -72,15 +72,15 @@ impl AssetEditState {
                                 },
                             }
                         },
-                        AssetEditRoute::Course(course_id, course_edit_route) => {
-                            match course_edit_route {
-                                CourseEditRoute::Landing => {
-                                    Some(CourseSelection::new(course_id, &state).render())
+                        AssetEditRoute::Playlist(playlist_id, playlist_edit_route) => {
+                            match playlist_edit_route {
+                                PlaylistEditRoute::Landing => {
+                                    Some(PlaylistSelection::new(playlist_id, &state).render())
                                 },
-                                CourseEditRoute::Cover(cover_id) => {
+                                PlaylistEditRoute::Cover(cover_id) => {
                                     Some(ModuleIframe::new(state.asset_id, cover_id).render())
                                 },
-                                CourseEditRoute::Publish => {
+                                PlaylistEditRoute::Publish => {
                                     Some(Publish::new(Rc::clone(&state)).render())
                                 },
                             }
@@ -142,7 +142,7 @@ impl AssetEditState {
                                 PreviewPopupCallbacks::new(close)
                             ).render(None)
                         },
-                        AssetPlayerOptions::Course(settings) => {
+                        AssetPlayerOptions::Playlist(settings) => {
                             let close = clone!(state => move || {
                                 state.play_jig.set(None);
                             });

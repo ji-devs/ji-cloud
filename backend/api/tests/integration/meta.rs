@@ -19,7 +19,7 @@ use crate::{
     )
 )]
 async fn get(port: u16) -> anyhow::Result<()> {
-    let name = "course_jig_index";
+    let name = "playlist_jig_index";
 
     let client = reqwest::Client::new();
 

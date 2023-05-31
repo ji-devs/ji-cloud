@@ -6,8 +6,8 @@ use shared::{
     api::endpoints,
     domain::{
         asset::{AssetId, AssetType},
-        course::{CourseLikePath, CourseUnlikePath},
         jig::{JigLikePath, JigUnlikePath},
+        playlist::{PlaylistLikePath, PlaylistUnlikePath},
         resource::{ResourceLikePath, ResourceUnlikePath},
     },
 };
@@ -20,8 +20,8 @@ use wasm_bindgen_futures::spawn_local;
 
 use super::SearchResultsSection;
 
-mod course_actions;
 mod jig_actions;
+mod playlist_actions;
 mod resource_actions;
 
 const PLAYED_WITHOUT_LOGIN_COUNT_KEY: &'static str = "PLAYED_WITHOUT_LOGIN_COUNT";
@@ -47,8 +47,8 @@ impl SearchResultsSection {
             AssetType::Resource => {
                 self.load_resources().await;
             }
-            AssetType::Course => {
-                self.load_courses().await;
+            AssetType::Playlist => {
+                self.load_playlists().await;
             }
             AssetType::ProDev => todo!(),
         }
@@ -87,19 +87,19 @@ impl SearchResultsSection {
                         }
                     };
                 }
-                AssetId::CourseId(course_id) => {
+                AssetId::PlaylistId(playlist_id) => {
                     match is_liked {
                         true => {
-                            endpoints::course::Like::api_with_auth_empty(
-                                CourseLikePath(course_id),
+                            endpoints::playlist::Like::api_with_auth_empty(
+                                PlaylistLikePath(playlist_id),
                                 None,
                             )
                             .await
                             .unwrap_ji();
                         }
                         false => {
-                            endpoints::course::Unlike::api_with_auth_empty(
-                                CourseUnlikePath(course_id),
+                            endpoints::playlist::Unlike::api_with_auth_empty(
+                                PlaylistUnlikePath(playlist_id),
                                 None,
                             )
                             .await

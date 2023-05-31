@@ -1,17 +1,17 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 
-export type Kind = "jig" | "resource" | "course";
+export type Kind = "jig" | "resource" | "playlist";
 
 const STR_JIGS = "JIGs";
 const STR_RESOURCES = "Resource Library";
-const STR_COURSES = "Courses";
+const STR_PLAYLISTS = "Playlists";
 
 const IMAGE_LOOKUP: {
     [key in Kind]: string;
 } = {
     ["jig"]: "jig-section.png",
     ["resource"]: "resources.webp",
-    ["course"]: "course-section.svg",
+    ["playlist"]: "playlist-section.svg",
 };
 
 @customElement("home-search-results-section")
@@ -129,7 +129,7 @@ export class _ extends LitElement {
                         ${
                             this.kind === "jig" ? STR_JIGS
                                 : this.kind === "resource" ? STR_RESOURCES
-                                : STR_COURSES
+                                : STR_PLAYLISTS
                         }
                         <span class="results-count">
                             (${this.resultsCount})

@@ -266,7 +266,7 @@ pub fn build(
             .configure(endpoints::jig::curation::configure)
             .configure(endpoints::resource::curation::configure)
             .configure(endpoints::resource::report::configure)
-            .configure(endpoints::course::configure)
+            .configure(endpoints::playlist::configure)
             .configure(endpoints::pro_dev::configure)
             .configure(endpoints::pro_dev::unit::configure)
             .configure(endpoints::admin::configure)

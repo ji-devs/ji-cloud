@@ -42,7 +42,7 @@ import "@elements/entry/asset/edit/pages/unit-edit";
 import "@elements/entry/asset/edit/pages/unit-value";
 import "@elements/entry/asset/edit/selection/card";
 import "@elements/entry/asset/edit/selection/jig-selection";
-import "@elements/entry/asset/edit/selection/course-selection";
+import "@elements/entry/asset/edit/selection/playlist-selection";
 import "@elements/entry/asset/edit/sidebar/module/menu";
 import "@elements/entry/asset/edit/sidebar/module/window";
 import "@elements/entry/asset/edit/sidebar/header";

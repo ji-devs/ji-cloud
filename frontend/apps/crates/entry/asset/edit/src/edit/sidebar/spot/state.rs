@@ -65,7 +65,7 @@ impl SpotState {
     pub fn asset_type(&self) -> &'static str {
         match &self.spot.item {
             SidebarSpotItem::Jig(_) => "jig",
-            SidebarSpotItem::Course(_) => "course",
+            SidebarSpotItem::Playlist(_) => "playlist",
             SidebarSpotItem::ProDev(_) => "pro-dev",
         }
     }
@@ -89,8 +89,8 @@ impl SpotState {
                         }
                     }
                 },
-                SidebarSpotItem::Course(course_spot) => {
-                    match course_spot {
+                SidebarSpotItem::Playlist(playlist_spot) => {
+                    match playlist_spot {
                         None => "empty",
                         Some(_) => "thumbnail",
                     }
