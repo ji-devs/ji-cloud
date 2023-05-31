@@ -49,7 +49,7 @@ pub async fn delete(state: &Rc<SpotState>, item: &Option<Rc<ProDevSpot>>) {
             None,
         )
         .await
-        .unwrap();
+        .unwrap_ji();
     }
 }
 
@@ -78,7 +78,7 @@ pub async fn update_unit_index(state: Rc<SpotState>, item: Option<&Rc<ProDevSpot
                     Some(req),
                 )
                 .await
-                .unwrap();
+                .unwrap_ji();
             }
         }
     };

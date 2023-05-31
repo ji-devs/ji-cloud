@@ -4,7 +4,7 @@ use super::{EditImage, ImageIfOrFile};
 use components::file_input::{FileInput, FileInputConfig};
 use dominator::{clone, html, DomBuilder};
 use futures_signals::signal::SignalExt;
-use utils::{component::Component, events};
+use utils::{component::Component, events, unwrap::UnwrapJiExt};
 use web_sys::{File, ShadowRoot, Url};
 
 const STR_HEADING: &str = "Profile picture";
@@ -93,5 +93,5 @@ impl Component<EditImage> for Rc<EditImage> {
 }
 
 pub fn file_to_object_url(file: &File) -> String {
-    Url::create_object_url_with_blob(file).unwrap()
+    Url::create_object_url_with_blob(file).unwrap_ji()
 }

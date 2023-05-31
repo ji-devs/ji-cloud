@@ -8,7 +8,7 @@ use shared::{
         meta::GetMetadataPath,
     },
 };
-use utils::prelude::ApiEndpointExt;
+use utils::{prelude::ApiEndpointExt, unwrap::UnwrapJiExt};
 
 use crate::jig::sidebar::state::ReportStatus;
 
@@ -16,7 +16,7 @@ use super::state::State;
 
 pub fn send_report(state: Rc<State>) {
     state.player_state.loader.load(clone!(state => async move {
-        let report_type = state.report_type.lock_ref().unwrap();
+        let report_type = state.report_type.lock_ref().unwrap_ji();
 
         let response = report::Create::api_with_auth(
             CreateJigReportPath(state.player_state.jig_id),

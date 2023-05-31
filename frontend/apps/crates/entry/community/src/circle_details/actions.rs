@@ -90,7 +90,7 @@ impl CircleDetails {
             {
                 Ok(_) => {
                     let mut user = state.community_state.user.get_cloned().unwrap_ji();
-                    let index = user.circles.iter().position(|circle| *circle == state.circle_id).unwrap();
+                    let index = user.circles.iter().position(|circle| *circle == state.circle_id).unwrap_ji();
                     user.circles.remove(index);
                     state.community_state.user.set(Some(user));
                 }

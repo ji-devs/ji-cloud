@@ -1,7 +1,7 @@
 use dominator::{clone, html, DomBuilder};
 use futures_signals::signal::SignalExt;
 use std::rc::Rc;
-use utils::{component::Component, events};
+use utils::{component::Component, events, unwrap::UnwrapJiExt};
 use web_sys::{File, HtmlElement, ShadowRoot, Url};
 
 use super::FileInput;
@@ -105,5 +105,5 @@ impl Component<FileInput> for Rc<FileInput> {
 }
 
 pub fn file_to_object_url(file: &File) -> String {
-    Url::create_object_url_with_blob(file).unwrap()
+    Url::create_object_url_with_blob(file).unwrap_ji()
 }

@@ -16,7 +16,7 @@ pub async fn load_playlist(playlist_id: PlaylistId) -> anyhow::Result<PlaylistRe
 impl AssetEditState {
     pub async fn get_playlist_spots(&self, playlist: &PlaylistResponse) {
         let mut items = vec![SidebarSpot::new_playlist_cover(
-            playlist.playlist_data.cover.clone().unwrap(),
+            playlist.playlist_data.cover.clone().unwrap_ji(),
         )];
         for jig_id in &playlist.playlist_data.items {
             let jig = get_jig(jig_id).await;

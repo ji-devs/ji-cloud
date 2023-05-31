@@ -32,7 +32,7 @@ pub async fn delete(state: &Rc<SpotState>, module: &Option<Rc<LiteModule>>) {
 
         endpoints::module::Delete::api_with_auth_empty(ModuleDeletePath(module.id), Some(req))
             .await
-            .unwrap();
+            .unwrap_ji();
     }
 }
 

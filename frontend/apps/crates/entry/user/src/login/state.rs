@@ -4,7 +4,7 @@ use futures_signals::{
     signal::{Mutable, Signal},
 };
 use std::{cell::RefCell, rc::Rc};
-use utils::routes::LoginQuery;
+use utils::{routes::LoginQuery, unwrap::UnwrapJiExt};
 
 use crate::email_handler::EmailHandler;
 
@@ -35,7 +35,7 @@ impl LoginPage {
             let error = self.email.error_signal(),
             let tried_to_submit = self.tried_to_submit.signal() => move {
                 if error.is_some() && *tried_to_submit {
-                    Some(error.unwrap())
+                    Some(error.unwrap_ji())
                 } else {
                     None
                 }

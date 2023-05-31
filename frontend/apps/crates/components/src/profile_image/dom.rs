@@ -7,7 +7,7 @@ use crate::{
 };
 use dominator::{clone, html, Dom, DomBuilder};
 use futures_signals::signal::SignalExt;
-use utils::{component::Component, events};
+use utils::{component::Component, events, unwrap::UnwrapJiExt};
 use wasm_bindgen::JsValue;
 use web_sys::{File, HtmlElement, ShadowRoot, Url};
 
@@ -142,5 +142,5 @@ fn render_popup(state: &Rc<ProfileImage>) -> Dom {
 }
 
 pub fn file_to_object_url(file: &File) -> String {
-    Url::create_object_url_with_blob(file).unwrap()
+    Url::create_object_url_with_blob(file).unwrap_ji()
 }

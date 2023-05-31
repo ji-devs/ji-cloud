@@ -23,7 +23,7 @@ impl Renderer {
         };
 
         let (entities, mut primitives, mut materials) 
-            = world.borrow::<(EntitiesViewMut, ViewMut<Primitive>, ViewMut<Material>)>().unwrap();
+            = world.borrow::<(EntitiesViewMut, ViewMut<Primitive>, ViewMut<Material>)>().unwrap_ji();
   
         let primitive = Primitive {
             geom: Geometry::Quad(self.static_geometry.unit_quad.clone()) 

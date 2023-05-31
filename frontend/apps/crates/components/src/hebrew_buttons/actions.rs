@@ -2,13 +2,14 @@ use std::rc::Rc;
 
 use super::{HebrewButtonOpened, HebrewButtons, Popup};
 use dominator::traits::StaticEvent;
+use utils::unwrap::UnwrapJiExt;
 use web_sys::{window, Event};
 
 impl HebrewButtons {
     pub(super) fn on_action_click(self: &Rc<Self>, popup: Popup) {
         let _ = window()
-            .unwrap()
-            .dispatch_event(&Event::new(HebrewButtonOpened::EVENT_TYPE).unwrap());
+            .unwrap_ji()
+            .dispatch_event(&Event::new(HebrewButtonOpened::EVENT_TYPE).unwrap_ji());
 
         let mut active_popup = self.active_popup.lock_mut();
 

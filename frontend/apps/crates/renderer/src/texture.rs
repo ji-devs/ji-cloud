@@ -48,7 +48,7 @@ impl Renderer {
             Some(id) => Ok(id),
             None => {
                 let img = loaders::image::load(url.clone()).await?;
-                let mut webgl = self.world.borrow::<GlMut>().unwrap();
+                let mut webgl = self.world.borrow::<GlMut>().unwrap_ji();
                 let id = webgl.create_texture()?;
                 webgl.assign_simple_texture(
                     id,

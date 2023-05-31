@@ -632,7 +632,7 @@ impl Route {
                 url.remove(0);
                 let url = url.join("/");
                 let url = format!("/asset/{}/jig/{}", play_or_edit, url);
-                let _ = web_sys::window().unwrap().location().set_pathname(&url);
+                let _ = web_sys::window().unwrap_ji().location().set_pathname(&url);
 
                 unreachable!()
             }

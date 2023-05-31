@@ -15,7 +15,7 @@ fn main() {
 
     let dest = &opts.get_output_path();
     if opts.clean && dest.exists() {
-        fs::remove_dir_all(dest).unwrap();
+        fs::remove_dir_all(dest).unwrap_ji();
     }
 
 
@@ -25,10 +25,10 @@ fn main() {
     let mut tera = get_tera(&opts.get_base_template_path());
 
     if opts.demo {
-        tera.extend(&get_tera(&opts.get_demo_template_path())).unwrap();
+        tera.extend(&get_tera(&opts.get_demo_template_path())).unwrap_ji();
     }
-    tera.build_inheritance_chains().unwrap();
-    tera.check_macro_files().unwrap();
+    tera.build_inheritance_chains().unwrap_ji();
+    tera.check_macro_files().unwrap_ji();
 
 
     let macro_names:Vec<&str> =
@@ -53,13 +53,13 @@ fn main() {
     {
         log::info!("rendering {}", name);
 
-        let output_string = tera.render(name, &context).unwrap();
+        let output_string = tera.render(name, &context).unwrap_ji();
 
         let output_path = dest.join(name);
         if !output_path.exists() {
-            fs::create_dir_all(output_path.parent().unwrap()).unwrap();
+            fs::create_dir_all(output_path.parent().unwrap_ji()).unwrap_ji();
         }
-        fs::write(output_path, output_string).unwrap();
+        fs::write(output_path, output_string).unwrap_ji();
     }
 }
 
@@ -86,11 +86,11 @@ fn init_logger(opts:&Opts) {
         CombinedLogger::init(vec![
             TermLogger::new(LevelFilter::Info, Config::default(), TerminalMode::Mixed),
         ])
-        .unwrap();
+        .unwrap_ji();
     } else {
         CombinedLogger::init(vec![
             TermLogger::new(LevelFilter::Warn, Config::default(), TerminalMode::Mixed),
         ])
-        .unwrap();
+        .unwrap_ji();
     }
 }

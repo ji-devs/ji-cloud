@@ -6,7 +6,7 @@ use futures_signals::{
     signal::{not, Signal},
 };
 use url::{ParseError, Url};
-use utils::events;
+use utils::{events, unwrap::UnwrapJiExt};
 use web_sys::HtmlTextAreaElement;
 
 use super::super::super::add_additional_resource::ActivePopup;
@@ -135,5 +135,5 @@ fn prepend_https_to_url(url: &str) -> Url {
     let mut fixed_url_string = String::new();
     fixed_url_string.push_str("https://");
     fixed_url_string.push_str(url);
-    Url::from_str(&fixed_url_string).unwrap()
+    Url::from_str(&fixed_url_string).unwrap_ji()
 }

@@ -1,4 +1,4 @@
-use crate::fetch::*;
+use crate::{fetch::*, unwrap::UnwrapJiExt};
 use futures_signals::signal::Mutable;
 use once_cell::sync::OnceCell;
 use shared::{
@@ -24,7 +24,7 @@ pub(crate) async fn init() {
 }
 
 pub fn get_user_mutable() -> Mutable<Option<UserProfile>> {
-    USER.get().cloned().unwrap()
+    USER.get().cloned().unwrap_ji()
 }
 
 pub fn get_user_cloned() -> Option<UserProfile> {

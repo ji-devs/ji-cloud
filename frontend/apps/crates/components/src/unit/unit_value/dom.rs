@@ -13,6 +13,7 @@ use shared::{
 use utils::{
     component::Component,
     path::{audio_lib_url, pdf_lib_url},
+    unwrap::UnwrapJiExt,
 };
 use web_sys::{File, HtmlElement, HtmlIFrameElement, ShadowRoot, Url};
 
@@ -114,5 +115,5 @@ impl UnitValueView {
 }
 
 pub fn file_to_object_url(file: &File) -> String {
-    Url::create_object_url_with_blob(file).unwrap()
+    Url::create_object_url_with_blob(file).unwrap_ji()
 }

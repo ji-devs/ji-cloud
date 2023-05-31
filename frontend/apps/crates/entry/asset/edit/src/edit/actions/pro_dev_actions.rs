@@ -2,7 +2,7 @@ use shared::{
     api::endpoints::{self},
     domain::pro_dev::{ProDevGetDraftPath, ProDevId, ProDevResponse},
 };
-use utils::prelude::ApiEndpointExt;
+use utils::{prelude::ApiEndpointExt, unwrap::UnwrapJiExt};
 
 use crate::edit::{sidebar::SidebarSpot, AssetEditState};
 
@@ -13,7 +13,7 @@ pub(crate) async fn load_pro_dev(pro_dev_id: &ProDevId) -> anyhow::Result<ProDev
 impl AssetEditState {
     pub async fn get_pro_dev_spots(&self, pro_dev: &ProDevResponse) {
         let mut items = vec![SidebarSpot::new_pro_dev_cover(
-            pro_dev.pro_dev_data.cover.clone().unwrap(),
+            pro_dev.pro_dev_data.cover.clone().unwrap_ji(),
         )];
 
         for unit in &pro_dev.pro_dev_data.units {

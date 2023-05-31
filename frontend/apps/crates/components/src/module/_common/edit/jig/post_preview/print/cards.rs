@@ -19,7 +19,7 @@ where
     Mode: ModeExt + 'static,
     Step: StepExt + 'static,
 {
-    let theme = raw_data.get_theme().unwrap();
+    let theme = raw_data.get_theme().unwrap_ji();
 
     let fonts = theme.map_theme(|theme| {
         let font_index = theme.cards.font_family;

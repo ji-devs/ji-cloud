@@ -88,7 +88,7 @@ pub fn move_index(state: Rc<SpotState>, move_target: MoveTarget) {
                 SidebarSpotItem::Jig(module) => {
                     jig_actions::update_module_index(
                         Rc::clone(&state),
-                        module.as_ref().unwrap(),
+                        module.as_ref().unwrap_ji(),
                         target as u16
                     ).await;
                 },

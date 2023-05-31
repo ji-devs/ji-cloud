@@ -3,7 +3,7 @@ use std::{rc::Rc, str::FromStr};
 use dominator::{clone, html, with_node, Dom};
 
 use url::{ParseError, Url};
-use utils::events;
+use utils::{events, unwrap::UnwrapJiExt};
 use web_sys::HtmlTextAreaElement;
 
 use super::state::AddLink;
@@ -77,5 +77,5 @@ fn prepend_https_to_url(url: &str) -> Url {
     let mut fixed_url_string = String::new();
     fixed_url_string.push_str("https://");
     fixed_url_string.push_str(url);
-    Url::from_str(&fixed_url_string).unwrap()
+    Url::from_str(&fixed_url_string).unwrap_ji()
 }

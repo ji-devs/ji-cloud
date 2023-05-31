@@ -7,7 +7,7 @@ use futures_signals::{
     signal::{Mutable, Signal},
 };
 use std::rc::Rc;
-use utils::routes::RegisterQuery;
+use utils::{routes::RegisterQuery, unwrap::UnwrapJiExt};
 
 pub struct RegisterStart {
     pub loader: AsyncLoader,
@@ -36,7 +36,7 @@ impl RegisterStart {
             let error = self.email.error_signal(),
             let tried_to_submit = self.tried_to_submit.signal() => move {
                 if error.is_some() && *tried_to_submit {
-                    Some(error.unwrap())
+                    Some(error.unwrap_ji())
                 } else {
                     None
                 }
@@ -49,7 +49,7 @@ impl RegisterStart {
             let error = self.password.error_signal(),
             let tried_to_submit = self.tried_to_submit.signal() => move {
                 if error.is_some() && *tried_to_submit {
-                    Some(error.unwrap())
+                    Some(error.unwrap_ji())
                 } else {
                     None
                 }

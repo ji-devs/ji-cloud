@@ -10,7 +10,7 @@ pub type GlMut<'a> = NonSendSync<UniqueViewMut<'a, WebGl2Renderer>>;
 
 impl Renderer {
     pub fn render(&self) {
-        let renderer = self.world.borrow::<Gl>().unwrap();
+        let renderer = self.world.borrow::<Gl>().unwrap_ji();
         renderer.gl.clear_color(0.3, 0.0, 0.0, 1.0);
 
         renderer.clear(&[

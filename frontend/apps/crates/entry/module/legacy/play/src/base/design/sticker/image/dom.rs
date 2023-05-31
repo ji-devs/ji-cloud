@@ -98,7 +98,7 @@ impl ImagePlayer {
 }
 
 fn parse_html(html: &str) -> web_sys::HtmlElement {
-    let parser = web_sys::DomParser::new().unwrap();
+    let parser = web_sys::DomParser::new().unwrap_ji();
 
     // NOTE: this is error-prone, if the text itself contains "px" then it will be replaced
     // should instead parse as proper stylesheet, or at least a regex to replace the pattern
@@ -106,12 +106,12 @@ fn parse_html(html: &str) -> web_sys::HtmlElement {
     let html = html.replace("px", "rem");
     let document = parser
         .parse_from_string(&html, web_sys::SupportedType::TextHtml)
-        .unwrap();
+        .unwrap_ji();
 
     document
         .body()
-        .unwrap()
+        .unwrap_ji()
         .first_element_child()
-        .unwrap()
+        .unwrap_ji()
         .unchecked_into()
 }

@@ -6,6 +6,7 @@ use futures_signals::{
     map_ref,
     signal::{Mutable, Signal},
 };
+use utils::unwrap::UnwrapJiExt;
 
 pub struct PasswordResetPage {
     pub token: String,
@@ -29,7 +30,7 @@ impl PasswordResetPage {
             let error = self.password.error_signal(),
             let tried_to_submit = self.tried_to_submit.signal() => move {
                 if error.is_some() && *tried_to_submit {
-                    Some(error.unwrap())
+                    Some(error.unwrap_ji())
                 } else {
                     None
                 }

@@ -121,7 +121,7 @@ impl CategoriesInput {
                     match contains {
                         false => None,
                         true => {
-                            let start = category_name.find(&input).unwrap();
+                            let start = category_name.find(&input).unwrap_ji();
                             let range = start..(start + input.len());
                             Some((category.clone(), range))
                         },
