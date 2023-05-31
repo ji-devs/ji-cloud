@@ -2,7 +2,7 @@ use actix_web::{
     web::{self, Data, Json, Path, Query, ServiceConfig},
     HttpResponse,
 };
-use core::settings::RuntimeSettings;
+use ji_core::settings::RuntimeSettings;
 use futures::try_join;
 use shared::{
     api::{endpoints::resource, ApiEndpoint, PathParts},

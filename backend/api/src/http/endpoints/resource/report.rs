@@ -1,5 +1,5 @@
 use actix_web::web::{Data, Json, Path, ServiceConfig};
-use core::settings::RuntimeSettings;
+use ji_core::settings::RuntimeSettings;
 use sendgrid::v3::Email;
 use shared::{
     api::{endpoints::resource::report, ApiEndpoint, PathParts},

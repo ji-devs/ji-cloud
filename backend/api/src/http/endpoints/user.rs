@@ -6,7 +6,7 @@ use actix_web::{
 };
 use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
 use chrono::{Duration, Utc};
-use core::{config::IMAGE_BODY_SIZE_LIMIT, settings::RuntimeSettings};
+use ji_core::{config::IMAGE_BODY_SIZE_LIMIT, settings::RuntimeSettings};
 use futures::try_join;
 use rand::thread_rng;
 use sendgrid::v3::Email;

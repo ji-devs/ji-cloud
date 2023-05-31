@@ -1,5 +1,5 @@
 use anyhow::Context;
-use core::settings::S3Settings;
+use ji_core::settings::S3Settings;
 use rusoto_core::{
     credential::{AwsCredentials, StaticProvider},
     HttpClient, Region, RusotoError,

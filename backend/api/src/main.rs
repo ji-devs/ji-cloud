@@ -14,7 +14,7 @@
 use std::thread;
 
 use anyhow::Context;
-use core::{
+use ji_core::{
     env::env_bool,
     settings::{self, SettingsManager},
 };
@@ -48,7 +48,7 @@ async fn main() -> anyhow::Result<()> {
         let settings: SettingsManager = SettingsManager::new(remote_target).await?;
 
         // // `guard` needs to remain in scope so that we don't lose our Sentry config.
-        // let guard = core::sentry::init(
+        // let guard = ji_core::sentry::init(
         //     settings.sentry_api_key().await?.as_deref(),
         //     remote_target,
         //     settings.sentry_sample_rate().await?,

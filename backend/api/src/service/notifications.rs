@@ -1,4 +1,4 @@
-use core::settings::FirebaseSettings;
+use ji_core::settings::FirebaseSettings;
 use reqwest::{self, header, StatusCode};
 use serde::{Deserialize, Serialize};
 use shared::media::MediaLibrary;

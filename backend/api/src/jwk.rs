@@ -1,5 +1,5 @@
 use anyhow::{anyhow, bail, Context};
-use core::settings::JwkAudiences;
+use ji_core::settings::JwkAudiences;
 use jsonwebtoken as jwt;
 use jwt::{Algorithm, DecodingKey, TokenData, Validation};
 use reqwest::{header, Response};
@@ -11,7 +11,7 @@ use std::{
 };
 use tokio::{sync::RwLock, task::JoinHandle};
 
-use core::config::{JWK_ISSUER_URL, JWK_URL};
+use ji_core::config::{JWK_ISSUER_URL, JWK_URL};
 
 #[derive(Debug, Deserialize)]
 struct KeyResponse {

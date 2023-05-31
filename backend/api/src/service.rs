@@ -9,7 +9,7 @@ use crate::algolia;
 use crate::error;
 use crate::error::ServiceKind;
 use crate::translate;
-use core::google::GoogleAccessTokenResponse;
+use ji_core::google::GoogleAccessTokenResponse;
 
 use self::translate::GoogleTranslate;
 use self::upload::cleaner::UploadCleaner;
@@ -213,7 +213,7 @@ impl GcpAccessKeyStore {
 
         drop(key_handler);
 
-        let token_response = core::google::get_google_token_response_from_metadata_server().await?;
+        let token_response = ji_core::google::get_google_token_response_from_metadata_server().await?;
 
         (*self.0.write().await).update(
             token_response

@@ -53,7 +53,7 @@ $RECYCLE.BIN/
 *.lnk
 
 # lock files for rust libraries
-backend/core/Cargo.lock
+backend/ji_core/Cargo.lock
 shared/rust/Cargo.lock
 config/rust/Cargo.lock
 

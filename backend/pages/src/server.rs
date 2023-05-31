@@ -15,7 +15,7 @@ use actix_web_httpauth::{
     headers::www_authenticate::basic::Basic,
     middleware::HttpAuthentication,
 };
-use core::{
+use ji_core::{
     config::JSON_BODY_LIMIT,
     http::{get_addr, get_tcp_fd},
     settings::RuntimeSettings,

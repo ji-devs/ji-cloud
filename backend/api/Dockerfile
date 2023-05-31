@@ -10,7 +10,7 @@ ENV CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
 # Add our source code.
 RUN mkdir -p /workspace/backend/api
 COPY ./shared /workspace/shared
-COPY ./backend/core /workspace/backend/core
+COPY ./backend/ji_core /workspace/backend/ji_core
 COPY ./backend/api /workspace/backend/api
 
 # Build our application.

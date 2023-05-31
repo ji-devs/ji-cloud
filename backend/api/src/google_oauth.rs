@@ -1,7 +1,7 @@
 //! Types and decoding for authenticating users through Google OAuth
 
 use anyhow::Context;
-use core::settings::GoogleOAuth;
+use ji_core::settings::GoogleOAuth;
 use http::StatusCode;
 use shared::{config::RemoteTarget, domain::session::OAuthUrlKind};
 use std::collections::HashMap;

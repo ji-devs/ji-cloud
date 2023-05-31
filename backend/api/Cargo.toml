@@ -62,7 +62,7 @@ csv = "1.1.6"
 async-stripe = { version = "0.22.2", features = ["runtime-tokio-hyper-rustls"] }
 
 # project deps
-core = { path = "../core", features = ["db"] }
+ji_core = { path = "../ji_core", features = ["db"] }
 shared = { path = "../../shared/rust", features = ["backend"] }
 macros = { path = "../../shared/macros" }
 
@@ -96,7 +96,7 @@ version = "0.3.9"
 
 
 [features]
-default = ["listenfd", "core/listenfd"]
+default = ["listenfd", "ji_core/listenfd"]
 
 # we use native-tls but this ensures we have a stable version of OpenSSL on *nix
 [target.'cfg(unix)'.dependencies]

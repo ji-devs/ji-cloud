@@ -6,7 +6,7 @@ use algolia::{
 };
 use anyhow::Context;
 use chrono::{DateTime, Utc};
-use core::settings::AlgoliaSettings;
+use ji_core::settings::AlgoliaSettings;
 use futures::TryStreamExt;
 use serde::Serialize;
 use std::collections::HashMap;

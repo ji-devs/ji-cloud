@@ -761,26 +761,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "core"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "base64 0.13.0",
- "chrono",
- "hex",
- "listenfd",
- "log",
- "reqwest",
- "sentry",
- "serde",
- "shared",
- "sqlx",
- "time 0.3.16",
- "tracing",
- "yup-oauth2",
-]
-
-[[package]]
 name = "core-foundation"
 version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1832,7 +1812,6 @@ dependencies = [
  "chrono",
  "chrono-tz",
  "cloudevents-sdk",
- "core",
  "csv",
  "dotenv",
  "env_logger",
@@ -1842,6 +1821,7 @@ dependencies = [
  "image",
  "indexmap",
  "insta",
+ "ji_core",
  "jsonwebtoken",
  "listenfd",
  "log",
@@ -1876,6 +1856,26 @@ dependencies = [
  "tracing-subscriber",
  "url",
  "uuid 1.1.2",
+ "yup-oauth2",
+]
+
+[[package]]
+name = "ji_core"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "base64 0.13.0",
+ "chrono",
+ "hex",
+ "listenfd",
+ "log",
+ "reqwest",
+ "sentry",
+ "serde",
+ "shared",
+ "sqlx",
+ "time 0.3.16",
+ "tracing",
  "yup-oauth2",
 ]
 

@@ -1,6 +1,6 @@
 use shared::config::RemoteTarget;
 
-use core::{env::req_env, settings::EmailClientSettings};
+use ji_core::{env::req_env, settings::EmailClientSettings};
 use ji_cloud_api::service::{mail, s3, storage};
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
@@ -17,7 +17,7 @@ pub enum Service {
 #[allow(dead_code)]
 pub fn email_test_guard() -> bool {
     let _ = dotenv::dotenv().ok();
-    !core::env::env_bool("TEST_SENDGRID_DISABLE")
+    !ji_core::env::env_bool("TEST_SENDGRID_DISABLE")
 }
 
 /// Holds settings related to external services, in test context only
@@ -53,13 +53,13 @@ impl TestServicesSettings {
                     .clone()
                     .ok_or_else(|| anyhow::anyhow!("Couldn't find project_id"))?;
 
-                let token = core::google::get_google_token_from_credentials(credentials).await?;
+                let token = ji_core::google::get_google_token_from_credentials(credentials).await?;
 
                 (token.as_str().to_owned(), project_id)
             }
             _ => {
                 log::info!("Falling back to json file for google cloud auth");
-                let (token, project_id) = core::google::get_access_token_response_and_project_id(
+                let (token, project_id) = ji_core::google::get_access_token_response_and_project_id(
                     RemoteTarget::Local.google_credentials_env_name(),
                 )
                 .await?;
@@ -234,7 +234,7 @@ impl TestServicesSettings {
     }
 
     async fn get_gcp_managed_secret(&self, secret_name: &str) -> anyhow::Result<String> {
-        core::google::get_secret(
+        ji_core::google::get_secret(
             self.oauth2_token.as_ref().unwrap(),
             &*self.project_id,
             secret_name,

@@ -7,7 +7,7 @@ use chrono::{Duration, Utc};
 use reqwest::Url;
 use sqlx::{postgres::PgDatabaseError, PgPool};
 
-use core::settings::{GoogleOAuth, RuntimeSettings};
+use ji_core::settings::{GoogleOAuth, RuntimeSettings};
 use shared::{
     config::RemoteTarget,
     domain::{

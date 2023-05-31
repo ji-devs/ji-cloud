@@ -8,7 +8,7 @@ use uuid::Uuid;
 
 use crate::{error, extractor::RequestOrigin};
 
-use core::{
+use ji_core::{
     config::{
         ANIMATION_BODY_SIZE_LIMIT, AUDIO_BODY_SIZE_LIMIT, CORS_ORIGINS, IMAGE_BODY_SIZE_LIMIT,
         PDF_BODY_SIZE_LIMIT,

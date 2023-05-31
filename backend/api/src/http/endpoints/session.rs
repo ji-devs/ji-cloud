@@ -3,7 +3,7 @@ use actix_web::{
     HttpResponse,
 };
 use chrono::{Duration, Utc};
-use core::settings::RuntimeSettings;
+use ji_core::settings::RuntimeSettings;
 use shared::{
     api::{endpoints::session, ApiEndpoint, PathParts},
     domain::session::{CreateSessionResponse, NewSessionResponse},

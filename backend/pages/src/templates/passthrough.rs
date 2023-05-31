@@ -1,6 +1,6 @@
 // routes that are passed on to the frontend server. Needed for resources that have to be served from the same origin
 
-use core::settings::RuntimeSettings;
+use ji_core::settings::RuntimeSettings;
 use std::{collections::HashMap, error::Error};
 
 use actix_web::{error::ErrorInternalServerError, web::Data, HttpResponse};

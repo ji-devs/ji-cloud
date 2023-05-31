@@ -1,4 +1,4 @@
-use core::settings::{self, SettingsManager};
+use ji_core::settings::{self, SettingsManager};
 
 mod logger;
 mod server;
@@ -15,7 +15,7 @@ async fn main() -> anyhow::Result<()> {
     let (_guard, settings) = {
         let settings = SettingsManager::new(remote_target).await?;
 
-        let guard = core::sentry::init(
+        let guard = ji_core::sentry::init(
             settings.sentry_pages_key().await?.as_deref(),
             remote_target,
             settings.sentry_sample_rate().await?,

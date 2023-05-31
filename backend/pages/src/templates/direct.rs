@@ -1,7 +1,7 @@
 use actix_web::http::StatusCode;
 use actix_web::{error::ErrorInternalServerError, web::Data, HttpResponse};
 use askama::Template;
-use core::settings::RuntimeSettings;
+use ji_core::settings::RuntimeSettings;
 
 #[derive(Template)]
 #[template(path = "title.html")]

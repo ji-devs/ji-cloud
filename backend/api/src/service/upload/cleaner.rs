@@ -1,5 +1,5 @@
 use anyhow::Context;
-use core::config::UPLOAD_EXPIRY_TIME;
+use ji_core::config::UPLOAD_EXPIRY_TIME;
 use sqlx::PgPool;
 
 /// Generate query to delete failed old uploads

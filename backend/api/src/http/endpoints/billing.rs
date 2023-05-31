@@ -4,7 +4,7 @@ use actix_web::{
 };
 use anyhow::anyhow;
 use chrono::{TimeZone, Utc};
-use core::settings::RuntimeSettings;
+use ji_core::settings::RuntimeSettings;
 use shared::api::endpoints::billing::{CreateSetupIntent, GetSubscriptionPlans};
 use shared::domain::billing::{
     Account, AccountType, AmountInCents, CreateSubscriptionRecord, StripeInvoiceId,

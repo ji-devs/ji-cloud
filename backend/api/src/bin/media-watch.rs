@@ -24,7 +24,7 @@ use cloudevents::Event;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use core::{
+use ji_core::{
     config::JSON_BODY_LIMIT,
     http::{get_addr, get_tcp_fd},
     settings::{self, RuntimeSettings, SettingsManager},
@@ -53,7 +53,7 @@ async fn main() -> anyhow::Result<()> {
         let settings: SettingsManager = SettingsManager::new(remote_target).await?;
 
         // FIXME use a sentry DSN for a media-watch specific project
-        let sentry_guard = core::sentry::init(
+        let sentry_guard = ji_core::sentry::init(
             settings.sentry_api_key().await?.as_deref(),
             remote_target,
             settings.sentry_sample_rate().await?,

@@ -1,5 +1,5 @@
 use actix_web::web::{Data, Json, Path, ServiceConfig};
-use core::settings::RuntimeSettings;
+use ji_core::settings::RuntimeSettings;
 use shared::{
     api::{endpoints::jig::report, ApiEndpoint, PathParts},
     domain::{

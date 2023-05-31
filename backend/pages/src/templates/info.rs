@@ -1,7 +1,7 @@
 use actix_web::{error::ErrorInternalServerError, web::Data, HttpResponse};
 use askama::Template;
-use core::google::{get_access_token_response_and_project_id, get_secret};
-use core::settings::RuntimeSettings;
+use ji_core::google::{get_access_token_response_and_project_id, get_secret};
+use ji_core::settings::RuntimeSettings;
 
 struct Role {
     _id: u32,

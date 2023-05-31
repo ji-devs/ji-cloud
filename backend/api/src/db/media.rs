@@ -4,7 +4,7 @@ use crate::image_ops::MediaKind;
 use crate::service::{s3, ServiceData};
 use actix_web::{http::StatusCode, web::Bytes};
 use anyhow::Context;
-use core::config::{ANIMATION_BODY_SIZE_LIMIT, IMAGE_BODY_SIZE_LIMIT};
+use ji_core::config::{ANIMATION_BODY_SIZE_LIMIT, IMAGE_BODY_SIZE_LIMIT};
 use sha2::Digest;
 use shared::media::{FileKind, MediaLibrary, PngImageFile};
 use sqlx::{PgConnection, PgPool};

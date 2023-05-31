@@ -3,7 +3,7 @@ use actix_web::{
     web::{Data, Path},
     HttpResponse,
 };
-use core::settings::RuntimeSettings;
+use ji_core::settings::RuntimeSettings;
 use shared::config::RemoteTarget;
 use std::borrow::Cow;
 

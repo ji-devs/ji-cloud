@@ -9,7 +9,7 @@ on:
     paths:
       - '.github/workflows/backend-media.yml'
       - 'shared/**'
-      - 'backend/core/**'
+      - 'backend/ji_core/**'
       - 'backend/api/**'
 
 jobs:

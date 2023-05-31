@@ -679,25 +679,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "core"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "base64 0.13.0",
- "chrono",
- "hex",
- "listenfd",
- "log",
- "reqwest",
- "sentry",
- "serde",
- "shared",
- "time 0.3.14",
- "tracing",
- "yup-oauth2",
-]
-
-[[package]]
 name = "core-foundation"
 version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1568,10 +1549,10 @@ dependencies = [
  "anyhow",
  "askama",
  "cached",
- "core",
  "dotenv",
  "env_logger",
  "futures",
+ "ji_core",
  "listenfd",
  "log",
  "openssl",
@@ -1580,6 +1561,25 @@ dependencies = [
  "sentry",
  "serde",
  "shared",
+]
+
+[[package]]
+name = "ji_core"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "base64 0.13.0",
+ "chrono",
+ "hex",
+ "listenfd",
+ "log",
+ "reqwest",
+ "sentry",
+ "serde",
+ "shared",
+ "time 0.3.14",
+ "tracing",
+ "yup-oauth2",
 ]
 
 [[package]]

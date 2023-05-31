@@ -4,7 +4,7 @@ use actix_web::{
     HttpRequest, HttpResponse,
 };
 use chrono::{Duration, Utc};
-use core::settings::RuntimeSettings;
+use ji_core::settings::RuntimeSettings;
 use serde::ser::Serialize;
 use shared::{
     api::{

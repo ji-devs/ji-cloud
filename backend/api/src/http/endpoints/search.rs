@@ -2,7 +2,7 @@ use actix_web::{
     http::StatusCode,
     web::{Data, Json, Query, ServiceConfig},
 };
-use core::settings::RuntimeSettings;
+use ji_core::settings::RuntimeSettings;
 use shared::{
     api::{endpoints::search, ApiEndpoint, PathParts},
     domain::search::{CreateSearchKeyResponse, WebImageSearchResponse},

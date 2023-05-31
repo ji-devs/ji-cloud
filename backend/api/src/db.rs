@@ -17,7 +17,7 @@ pub(crate) mod session;
 pub(crate) mod user;
 
 use anyhow::Context;
-use core::config::DB_POOL_CONNECTIONS;
+use ji_core::config::DB_POOL_CONNECTIONS;
 use shared::domain::{
     category::CategoryId,
     jig::JigId,

@@ -1,5 +1,5 @@
 use anyhow::Context;
-use core::settings::RuntimeSettings;
+use ji_core::settings::RuntimeSettings;
 use futures::TryStreamExt;
 use reqwest::{self};
 use serde::{Deserialize, Serialize};

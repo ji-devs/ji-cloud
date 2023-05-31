@@ -9,7 +9,7 @@ use actix_web::{
     web::{method, Data},
     HttpRequest, HttpResponse,
 };
-use core::{
+use ji_core::{
     config::JSON_BODY_LIMIT,
     env::env_bool,
     http::{get_addr, get_tcp_fd},

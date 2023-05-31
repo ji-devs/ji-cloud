@@ -1,6 +1,6 @@
 use actix_web::dev::ServerHandle;
 use chrono::{Duration, Utc};
-use core::settings::{JwkAudiences, RuntimeSettings};
+use ji_core::settings::{JwkAudiences, RuntimeSettings};
 use ji_cloud_api::http::Application;
 use rand::Rng;
 use shared::config::RemoteTarget;

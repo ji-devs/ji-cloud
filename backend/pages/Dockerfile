@@ -8,7 +8,7 @@ FROM clux/muslrust:stable AS pages-builder
 
 RUN mkdir -p /workspace/backend/pages
 COPY ./shared /workspace/shared
-COPY ./backend/core /workspace/backend/core
+COPY ./backend/ji_core /workspace/backend/ji_core
 COPY ./backend/pages /workspace/backend/pages
 
 # Build our application.

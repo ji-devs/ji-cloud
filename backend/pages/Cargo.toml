@@ -15,7 +15,7 @@ actix-web = "4.0.0-beta.9"
 
 anyhow = "1.0.64"
 askama = "0.10.5"
-core = { path = "../core" }
+ji_core = { path = "../ji_core" }
 dotenv = "0.15.0"
 env_logger = "0.9.0"
 listenfd = { version = "0.3.5", optional = true }
@@ -28,7 +28,7 @@ reqwest = "0.11.17"
 actix-web-httpauth = "0.8.0"
 
 [features]
-default = ["listenfd", "core/listenfd"]
+default = ["listenfd", "ji_core/listenfd"]
 
 [dependencies.serde]
 version = "1.0.130"

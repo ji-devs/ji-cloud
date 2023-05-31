@@ -2,7 +2,7 @@
 //!
 //! NOTE: Has nothing to do with Arc<_>. EventArc is the name of the Google Cloud Project service.
 
-use core::settings::GoogleCloudEventArcSettings;
+use ji_core::settings::GoogleCloudEventArcSettings;
 use serde::{Deserialize, Serialize};
 use shared::media::{FileKind, MediaLibrary};
 use uuid::Uuid;

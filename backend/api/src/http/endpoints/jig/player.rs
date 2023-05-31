@@ -62,7 +62,7 @@ pub mod instance {
         HttpResponse,
     };
     use chrono::{Duration, Utc};
-    use core::settings::RuntimeSettings;
+    use ji_core::settings::RuntimeSettings;
     use serde::Deserialize;
     use shared::{
         api::{endpoints::jig::player, ApiEndpoint},

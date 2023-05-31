@@ -1,4 +1,4 @@
-use core::settings::EmailClientSettings;
+use ji_core::settings::EmailClientSettings;
 use sendgrid::v3::{Content, Email, Message, Personalization, SGMap, Sender};
 use shared::domain::{
     jig::report::JigReportEmail, resource::report::ResourceReportEmail, session::OAuthProvider,
