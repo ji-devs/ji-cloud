@@ -13,8 +13,8 @@ use crate::error;
 pub struct Client {
     project_id: String,
     storage_service_name: String,
-    media_uploaded_topic: String,
-    media_processed_topic: String,
+    // media_uploaded_topic: String,
+    // media_processed_topic: String,
 }
 
 impl Client {
@@ -22,15 +22,16 @@ impl Client {
         let GoogleCloudEventArcSettings {
             project_id,
             storage_service_name,
-            media_uploaded_topic,
-            media_processed_topic,
+            // media_uploaded_topic,
+            // media_processed_topic,
+            ..
         } = settings;
 
         Ok(Self {
             project_id,
             storage_service_name,
-            media_uploaded_topic,
-            media_processed_topic,
+            // media_uploaded_topic,
+            // media_processed_topic,
         })
     }
 

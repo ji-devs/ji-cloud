@@ -18,7 +18,7 @@ use crate::{
 };
 
 pub enum CreateError {
-    ParentCategoryNotFound,
+    // ParentCategoryNotFound
     InternalServerError(anyhow::Error),
 }
 
@@ -31,11 +31,11 @@ impl<T: Into<anyhow::Error>> From<T> for CreateError {
 impl Into<actix_web::Error> for CreateError {
     fn into(self) -> actix_web::Error {
         match self {
-            Self::ParentCategoryNotFound => error::BasicError::with_message(
-                http::StatusCode::NOT_FOUND,
-                "Parent Category Not Found".to_owned(),
-            )
-            .into(),
+            // Self::ParentCategoryNotFound => error::BasicError::with_message(
+            //     http::StatusCode::NOT_FOUND,
+            //     "Parent Category Not Found".to_owned(),
+            // )
+            // .into(),
             Self::InternalServerError(e) => crate::error::ise(e),
         }
     }
