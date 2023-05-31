@@ -47,32 +47,6 @@
     },
     "query": "\nselect exists(select 1 from resource_data_resource \"rdr\" where resource_data_id = $1\n    and rdr.id = $2) as \"exists!\"\n    "
   },
-  "028a39dbccbe063de367c06c73959dee25793addad0a13388cd4d464a2496005": {
-    "describe": {
-      "columns": [
-        {
-          "name": "draft_id",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "live_id",
-          "ordinal": 1,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect draft_id, live_id from course where id = $1\n"
-  },
   "02c99d434bef7ea8602e6e462c5e93d9a0e11f47771b10b90d9482e79c18cfb0": {
     "describe": {
       "columns": [],
@@ -84,6 +58,26 @@
       }
     },
     "query": "delete from web_media_library_url where media_url = $1"
+  },
+  "02fe14cf31fdfa9521ea1058132c0079963ed2ba0f16ae69f38978453bda6c10": {
+    "describe": {
+      "columns": [
+        {
+          "name": "draft_id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect draft_id from playlist where playlist.id = $1\n"
   },
   "034484d9f50cb98103b4a710a59bd6367b5934bd4aff7668d71ca85df3fb198e": {
     "describe": {
@@ -222,6 +216,30 @@
       }
     },
     "query": "\nupdate pro_dev_data \nset created_at = now()\nwhere id = $1\n"
+  },
+  "039d6681b802a8e5e073af8a11e422f8dcf355d5126b73dc960699a685f7d5a7": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\nselect playlist_data.id,\n       display_name\nfrom playlist_data\ninner join playlist on live_id = playlist_data.id\nwhere display_name <> ''\n      and translated_name = '{}'\n      and published_at is not null\n      and name_translate_status is null\norder by coalesce(updated_at, created_at) desc\nlimit 20 for no key update skip locked;\n "
   },
   "040ce75080d45c3145b01e706eeb2f0b855eed8dd0eaae542ea24d383b4f70fe": {
     "describe": {
@@ -563,46 +581,6 @@
       }
     },
     "query": "\nwith cte as (\n    select array_agg(rd.id)\n    from resource_data \"rd\"\n          inner join resource on (draft_id = rd.id or (live_id = rd.id and rd.last_synced_at is not null and published_at is not null))\n          left join resource_admin_data \"admin\" on admin.resource_id = resource.id\n          left join resource_data_resource \"rdr\" on rd.id = rdr.resource_data_id\n    where (author_id = $1 or $1 is null)\n        and (blocked = $2 or $2 is null)\n        and (rd.privacy_level = any($3) or $3 = array[]::smallint[])\n        and (rdr.resource_type_id = any($4) or $4 = array[]::uuid[])\n        and (draft_or_live = $5 or $5 is null)\n    group by updated_at, created_at, resource.published_at, admin.resource_id\n    order by case when $6 = 0 then created_at\n        when $6 = 1 then published_at\n        else coalesce(updated_at, created_at)\n  end desc, resource_id\n),\ncte1 as (\n    select * from unnest(array((select cte.array_agg[1] from cte))) with ordinality t(id\n   , ord) order by ord\n)\nselect resource.id                                              as \"resource_id: ResourceId\",\n    privacy_level                                       as \"privacy_level: PrivacyLevel\",\n    creator_id                                          as \"creator_id?: UserId\",\n    author_id                                           as \"author_id?: UserId\",\n    (select given_name || ' '::text || family_name\n        from user_profile\n     where user_profile.user_id = author_id)            as \"author_name\",\n    created_at,\n    updated_at,\n    published_at,\n    likes,\n    views,\n    live_up_to_date,\n    exists(select 1 from resource_like where resource_id = resource.id and user_id = $9)                         as \"is_liked!\",\n   display_name                                                                  as \"display_name!\",\n   language                                                                      as \"language!\",\n   description                                                                   as \"description!\",\n   translated_description                                                        as \"translated_description!: Json<HashMap<String,String>>\",\n   draft_or_live                                                                 as \"draft_or_live!: DraftOrLive\",\n   (\n       select row(resource_data_module.id, kind, is_complete)\n       from resource_data_module\n       where resource_data_id = resource_data.id\n    )                                               as \"cover?: (ModuleId, ModuleKind, bool)\",\n   array(select row (category_id)\n         from resource_data_category\n         where resource_data_id = resource_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n   array(select row (affiliation_id)\n         from resource_data_affiliation\n         where resource_data_id = resource_data.id)     as \"affiliations!: Vec<(AffiliationId,)>\",\n   array(select row (age_range_id)\n         from resource_data_age_range\n         where resource_data_id = resource_data.id)     as \"age_ranges!: Vec<(AgeRangeId,)>\",\n   array(\n            select row (rdr.id, rdr.display_name, resource_type_id, resource_content)\n            from resource_data_resource \"rdr\"\n            where rdr.resource_data_id= resource_data.id\n        )                                               as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n   locked                                     as \"locked!\",\n   other_keywords                             as \"other_keywords!\",\n   translated_keywords                        as \"translated_keywords!\",\n   rating                                     as \"rating!: Option<ResourceRating>\",\n   blocked                                    as \"blocked!\",\n   curated                                    as \"curated!\"\nfrom cte1\ninner join resource_data on cte1.id = resource_data.id\ninner join resource on (\n    resource_data.id = resource.draft_id\n    or (\n        resource_data.id = resource.live_id\n        and last_synced_at is not null\n        and resource.published_at is not null\n    )\n)\nleft join resource_admin_data \"admin\" on admin.resource_id = resource.id\nwhere ord > (1 * $7 * $8)\norder by ord asc\nlimit $8\n"
-  },
-  "05d18fc3ce0c0d8d1aff470f3a96f24d8c064c255a0c74da1220fad096268310": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: AddId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "display_name!",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "resource_type_id!: TypeId",
-          "ordinal": 2,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "resource_content!",
-          "ordinal": 3,
-          "type_info": "Jsonb"
-        }
-      ],
-      "nullable": [
-        null,
-        null,
-        null,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int4",
-          "Int4"
-        ]
-      }
-    },
-    "query": "\n        with cte as (\n            select jdar.id              as id,\n                   jdar.display_name,\n                   resource_type_id,\n                   resource_content,\n                   author_id,\n                   updated_at,\n                   created_at\n            from jig_data_additional_resource \"jdar\"\n            inner join jig on jig.live_id = jdar.jig_data_id\n            inner join jig_data on jig.live_id = jig_data.id\n            where author_id = $1 and jig.published_at is not null\n           ),\n           cte1 as (\n              select cdr.id              as id,\n                cdr.display_name,\n                resource_type_id,\n                resource_content,\n                author_id,\n                updated_at,\n                created_at\n          from course_data_resource \"cdr\"\n          inner join course on course.live_id = cdr.course_data_id\n          inner join course_data on course.live_id = course_data.id\n          where author_id = $1 and course.published_at is not null\n          ),\n          cte2 as (\n            select *\n            from unnest(array(\n                select\n                (array_agg(id))[1] as id\n                from (select id, updated_at, created_at from cte union all select id, updated_at, created_at from cte1)\n                resource\n                group by resource.updated_at, resource.created_at\n                order by coalesce(resource.updated_at, created_at))) with ordinality t(id\n                , ord) order by ord\n         )\n          select cte3.id                as \"id!: AddId\",\n                 display_name           as \"display_name!\",\n                 resource_type_id       as \"resource_type_id!: TypeId\",\n                 resource_content        as \"resource_content!\"\n         from\n          (select * from cte\n          union all\n          select * from cte1) cte3\n        inner join cte2 on cte2.id = cte3.id\n        where ord > (1 * $2 * $3)\n        order by ord asc\n        limit $3\n            "
   },
   "07436ad6820515a6bdcbe4fc24b958f0f6c3d6546e0129b080eb010d320dde7b": {
     "describe": {
@@ -1392,170 +1370,6 @@
     },
     "query": "\nupdate resource_data_resource\nset resource_content = $3\nwhere resource_data_id = $1 and id = $2\n            "
   },
-  "1518c2e069f11ce933249e2f25d446f93495ab115666e850f9ef7d785020c469": {
-    "describe": {
-      "columns": [
-        {
-          "name": "course_id: CourseId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "privacy_level: PrivacyLevel",
-          "ordinal": 1,
-          "type_info": "Int2"
-        },
-        {
-          "name": "creator_id?: UserId",
-          "ordinal": 2,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "author_id?: UserId",
-          "ordinal": 3,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "author_name",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "published_at",
-          "ordinal": 5,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "likes",
-          "ordinal": 6,
-          "type_info": "Int8"
-        },
-        {
-          "name": "plays",
-          "ordinal": 7,
-          "type_info": "Int8"
-        },
-        {
-          "name": "live_up_to_date",
-          "ordinal": 8,
-          "type_info": "Bool"
-        },
-        {
-          "name": "is_liked!",
-          "ordinal": 9,
-          "type_info": "Bool"
-        },
-        {
-          "name": "display_name!",
-          "ordinal": 10,
-          "type_info": "Text"
-        },
-        {
-          "name": "updated_at",
-          "ordinal": 11,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "language!",
-          "ordinal": 12,
-          "type_info": "Text"
-        },
-        {
-          "name": "description!",
-          "ordinal": 13,
-          "type_info": "Text"
-        },
-        {
-          "name": "translated_description!: Json<HashMap<String,String>>",
-          "ordinal": 14,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "draft_or_live!: DraftOrLive",
-          "ordinal": 15,
-          "type_info": "Int2"
-        },
-        {
-          "name": "other_keywords!",
-          "ordinal": 16,
-          "type_info": "Text"
-        },
-        {
-          "name": "translated_keywords!",
-          "ordinal": 17,
-          "type_info": "Text"
-        },
-        {
-          "name": "cover?: (ModuleId, ModuleKind, bool)",
-          "ordinal": 18,
-          "type_info": "Record"
-        },
-        {
-          "name": "categories!: Vec<(CategoryId,)>",
-          "ordinal": 19,
-          "type_info": "RecordArray"
-        },
-        {
-          "name": "affiliations!: Vec<(AffiliationId,)>",
-          "ordinal": 20,
-          "type_info": "RecordArray"
-        },
-        {
-          "name": "age_ranges!: Vec<(AgeRangeId,)>",
-          "ordinal": 21,
-          "type_info": "RecordArray"
-        },
-        {
-          "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
-          "ordinal": 22,
-          "type_info": "RecordArray"
-        },
-        {
-          "name": "items!: Vec<(JigId,)>",
-          "ordinal": 23,
-          "type_info": "RecordArray"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        true,
-        true,
-        null,
-        true,
-        false,
-        false,
-        false,
-        null,
-        false,
-        true,
-        false,
-        false,
-        false,
-        true,
-        false,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Int2Array",
-          "UuidArray",
-          "Int4",
-          "Int4",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nwith cte as (\n    select (array_agg(cd.id))[1]\n    from course_data \"cd\"\n          left join course on (draft_id = cd.id or (live_id = cd.id and cd.last_synced_at is not null and published_at is not null))\n          left join course_data_resource \"resource\" on cd.id = resource.course_data_id\n    where (author_id = $1 or $1 is null)\n        and (cd.draft_or_live = $2 or $2 is null)\n        and (cd.privacy_level = any($3) or $3 = array[]::smallint[])\n        and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n    group by coalesce(updated_at, created_at)\n    order by coalesce(updated_at, created_at) desc\n),\ncte1 as (\n    select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n   , ord) order by ord\n)\nselect course.id                                                                as \"course_id: CourseId\",\n    privacy_level                                                               as \"privacy_level: PrivacyLevel\",\n    creator_id                                                                  as \"creator_id?: UserId\",\n    author_id                                                                   as \"author_id?: UserId\",\n    (select given_name || ' '::text || family_name\n     from user_profile\n     where user_profile.user_id = author_id)                                     as \"author_name\",\n    published_at,\n    likes,\n    plays,\n    live_up_to_date,\n    exists(select 1 from course_like where course_id = course.id and user_id = $7)    as \"is_liked!\",\n    display_name                                                                  as \"display_name!\",\n    updated_at,\n    language                                                                      as \"language!\",\n    description                                                                   as \"description!\",\n    translated_description                                                        as \"translated_description!: Json<HashMap<String,String>>\",\n    draft_or_live                                                                 as \"draft_or_live!: DraftOrLive\",\n    other_keywords                                                                as \"other_keywords!\",\n    translated_keywords                                                           as \"translated_keywords!\",\n    (\n        select row(course_data_module.id, kind, is_complete)\n        from course_data_module\n        where course_data_id = course_data.id and \"index\" = 0\n        order by \"index\"\n    )                                                   as \"cover?: (ModuleId, ModuleKind, bool)\",\n    array(select row (category_id)\n            from course_data_category\n            where course_data_id = course_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n    array(select row (affiliation_id)\n            from course_data_affiliation\n            where course_data_id = course_data.id)          as \"affiliations!: Vec<(AffiliationId,)>\",\n    array(select row (age_range_id)\n            from course_data_age_range\n            where course_data_id = course_data.id)          as \"age_ranges!: Vec<(AgeRangeId,)>\",\n    array(select row (id, display_name, resource_type_id, resource_content)\n                from course_data_resource\n                where course_data_id = course_data.id\n          )                                          as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n    array(\n        select row(jig_id)\n        from course_data_jig\n        where course_data_jig.course_data_id = course_data.id\n        order by \"index\"\n    )                                                     as \"items!: Vec<(JigId,)>\"\nfrom cte1\ninner join course_data on cte1.id = course_data.id\ninner join course on (\n    course_data.id = course.draft_id\n    or (\n        course_data.id = course.live_id\n        and last_synced_at is not null\n        and course.published_at is not null\n    )\n)\nwhere ord > (1 * $5 * $6)\norder by ord asc\nlimit $6\n"
-  },
   "160b640822791b21c7d5d057e0d388bfdf669e70b2a2eeb99056919681a607ee": {
     "describe": {
       "columns": [
@@ -1591,39 +1405,6 @@
       }
     },
     "query": "\nselect id as \"id: ResourceTypeId\", display_name, created_at, updated_at from \"resource_type\"\norder by index\n"
-  },
-  "165139235ae83a8b495edd7b0881336edd94c88970cf44da028ffc1806bf2a19": {
-    "describe": {
-      "columns": [
-        {
-          "name": "display_name!",
-          "ordinal": 0,
-          "type_info": "Text"
-        },
-        {
-          "name": "resource_type_id!: ResourceTypeId",
-          "ordinal": 1,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "resource_content!",
-          "ordinal": 2,
-          "type_info": "Jsonb"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect display_name         as \"display_name!\",\n       resource_type_id     as \"resource_type_id!: ResourceTypeId\",\n       resource_content    as \"resource_content!\"\nfrom course_data_resource \"jdar\"\nwhere course_data_id = $1\n  and jdar.id = $2\n        "
   },
   "16b8e7596de9c8c57e8a50d4b6788e6d7874603ce815762fae2380223a4ddfc0": {
     "describe": {
@@ -1924,19 +1705,6 @@
     },
     "query": "\ninsert into resource_data\n   (display_name, language, description, draft_or_live)\nvalues ($1, $2, $3, $4)\nreturning id\n"
   },
-  "1ab7020421fe6db5755143b488adb73f547bebecd211deed9a0e19dd23da0e92": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nupdate course_data_resource\nset resource_type_id = coalesce($2, resource_type_id)\nwhere id = $1 and $2 is distinct from resource_type_id\n            "
-  },
   "1b4740bdaed3605d201ab98a0dad5a254a2a58631d916d0b708e6542fcb22424": {
     "describe": {
       "columns": [
@@ -2107,6 +1875,110 @@
       }
     },
     "query": "\nwith cte as (\n    select (array_agg(pdd.id))[1]\n    from pro_dev_data \"pdd\"\n          left join pro_dev on (draft_id = pdd.id or (live_id = pdd.id and pdd.last_synced_at is not null and published_at is not null))\n          left join pro_dev_data_resource \"resource\" on pdd.id = resource.pro_dev_data_id\n    where (author_id = $1 or $1 is null)\n        and (pdd.draft_or_live = $2 or $2 is null)\n        and (pdd.privacy_level = any($3) or $3 = array[]::smallint[])\n        and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n    group by coalesce(updated_at, created_at)\n    order by coalesce(updated_at, created_at) desc\n),\ncte1 as (\n    select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n   , ord) order by ord\n)\nselect pro_dev.id                                                                as \"pro_dev_id: ProDevId\",\n    privacy_level                                                               as \"privacy_level: PrivacyLevel\",\n    creator_id                                                                  as \"creator_id?: UserId\",\n    author_id                                                                   as \"author_id?: UserId\",\n    (select given_name || ' '::text || family_name\n     from user_profile\n     where user_profile.user_id = author_id)                                     as \"author_name\",\n    published_at,\n    likes,\n    plays,\n    duration,\n    live_up_to_date,\n    display_name                                                                  as \"display_name!\",\n    updated_at,\n    language                                                                      as \"language!\",\n    description                                                                   as \"description!\",\n    translated_description                                                        as \"translated_description!: Json<HashMap<String,String>>\",\n    draft_or_live                                                                 as \"draft_or_live!: DraftOrLive\",\n    other_keywords                                                                as \"other_keywords!\",\n    translated_keywords                                                           as \"translated_keywords!\",\n    (\n        select row(pro_dev_data_module.id, kind, is_complete)\n        from pro_dev_data_module\n        where pro_dev_data_id = pro_dev_data.id and \"index\" = 0\n        order by \"index\"\n    )                                                   as \"cover?: (ModuleId, ModuleKind, bool)\",\n    array(select row (category_id)\n            from pro_dev_data_category\n            where pro_dev_data_id = pro_dev_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n    array(select row (id, display_name, resource_type_id, resource_content)\n                from pro_dev_data_resource\n                where pro_dev_data_id = pro_dev_data.id\n          )                                          as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n    array(\n            select row(pddu.unit_id, pddu.display_name, pddu.description, pddu.value)\n            from pro_dev_data_unit \"pddu\"\n            where pddu.pro_dev_data_id = pro_dev_data.id\n            order by \"index\"\n    )                                                     as \"units!: Vec<(ProDevUnitId, String, String, Value)>\"\nfrom cte1\ninner join pro_dev_data on cte1.id = pro_dev_data.id\ninner join pro_dev on (\n    pro_dev_data.id = pro_dev.draft_id\n    or (\n        pro_dev_data.id = pro_dev.live_id\n        and last_synced_at is not null\n        and pro_dev.published_at is not null\n    )\n)\nwhere ord > (1 * $5 * $6)\norder by ord asc\nlimit $6\n"
+  },
+  "1befda2de2314fd9e593d33d5426a5f527e64afa4042a456b7b9e6266410445f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "display_name!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "privacy_level!: PrivacyLevel",
+          "ordinal": 3,
+          "type_info": "Int2"
+        },
+        {
+          "name": "language!",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "description!",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_description!: Json<HashMap<String, String>>",
+          "ordinal": 6,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "other_keywords!",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_keywords!",
+          "ordinal": 8,
+          "type_info": "Text"
+        },
+        {
+          "name": "cover?: (ModuleId, ModuleKind, bool)",
+          "ordinal": 9,
+          "type_info": "Record"
+        },
+        {
+          "name": "categories!: Vec<(CategoryId,)>",
+          "ordinal": 10,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "affiliations!: Vec<(AffiliationId,)>",
+          "ordinal": 11,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "age_ranges!: Vec<(AgeRangeId,)>",
+          "ordinal": 12,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
+          "ordinal": 13,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "items!: Vec<(JigId,)>",
+          "ordinal": 14,
+          "type_info": "RecordArray"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      }
+    },
+    "query": "\nselect  id,\n        display_name                                       as \"display_name!\",\n        updated_at,\n        privacy_level                                      as \"privacy_level!: PrivacyLevel\",\n        language                                           as \"language!\",\n        description                                         as \"description!\",\n        translated_description                              as \"translated_description!: Json<HashMap<String, String>>\",\n        other_keywords                             as \"other_keywords!\",\n        translated_keywords                        as \"translated_keywords!\",\n        (\n            select row(playlist_data_module.id, kind, is_complete)\n            from playlist_data_module\n            where playlist_data_id = playlist_data.id and \"index\" = 0\n            order by \"index\"\n        )                                                   as \"cover?: (ModuleId, ModuleKind, bool)\",\n        array(select row (category_id)\n            from playlist_data_category\n            where playlist_data_id = playlist_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n        array(select row (affiliation_id)\n            from playlist_data_affiliation\n            where playlist_data_id = playlist_data.id)     as \"affiliations!: Vec<(AffiliationId,)>\",\n        array(select row (age_range_id)\n            from playlist_data_age_range\n            where playlist_data_id = playlist_data.id)     as \"age_ranges!: Vec<(AgeRangeId,)>\",\n        array(\n            select row (jdar.id, jdar.display_name, resource_type_id, resource_content)\n            from playlist_data_resource \"jdar\"\n            where jdar.playlist_data_id = playlist_data.id\n        )                                                    as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n        array(\n            select row(jig_id)\n            from playlist_data_jig\n            where playlist_data_jig.playlist_data_id = playlist_data.id\n            order by \"index\"\n        )                                                     as \"items!: Vec<(JigId,)>\"\nfrom playlist_data\ninner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\norder by ord asc\n"
   },
   "1c34eda829dd92980a83bf0ff3b38800febb950fd3b6e5f3e3694938b7bc19e3": {
     "describe": {
@@ -2279,6 +2151,29 @@
       }
     },
     "query": "\nupdate category\nset parent_id = $1,\n    updated_at = now(),\n    index = (select count(*)::int2 from category where parent_id is not distinct from $1)\nwhere id = $2\nreturning index\n"
+  },
+  "20aa732d3b4278e50430e1d04090784169f3fbc96a5b91ba446892fe2ded17ef": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text",
+          "Int2"
+        ]
+      }
+    },
+    "query": "\ninsert into playlist_data\n   (display_name, language, description, draft_or_live)\nvalues ($1, $2, $3, $4)\nreturning id\n"
   },
   "20adaa69f09c2336bdab5cf57e8c5b1b8de13d50b9330cca43e2cde3acba8bce": {
     "describe": {
@@ -2501,6 +2396,39 @@
     },
     "query": "\nselect id as \"id: JigId\"\nfrom jig\nwhere jig_focus = 1\nlimit 150\n"
   },
+  "26efd17cb0658fa49a15076f4b0a628fe22eb3dd3b2c3a466eb9eae6880b9eb3": {
+    "describe": {
+      "columns": [
+        {
+          "name": "display_name!",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "resource_type_id!: ResourceTypeId",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "resource_content!",
+          "ordinal": 2,
+          "type_info": "Jsonb"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect display_name         as \"display_name!\",\n       resource_type_id     as \"resource_type_id!: ResourceTypeId\",\n       resource_content    as \"resource_content!\"\nfrom playlist_data_resource \"jdar\"\nwhere playlist_data_id = $1\n  and jdar.id = $2\n        "
+  },
   "2771396d20d869e9cec94affe1be6219c175fd8b0303f0f7fa33ffbb11c1cc01": {
     "describe": {
       "columns": [],
@@ -2564,6 +2492,87 @@
     },
     "query": "\nselect\n    account_id as \"account_id!: AccountId\",\n    account_type as \"account_type!: AccountType\",\n    stripe_customer_id as \"stripe_customer_id?: CustomerId\",\n    payment_method as \"payment_method?: serde_json::Value\",\n    created_at,\n    updated_at\nfrom account\njoin user_account using (account_id)\nwhere user_account.user_id = $1\n"
   },
+  "2874545664fe71de6c39f388e873e9caaabbd9f75e3d578bcf5ba12bc16bab97": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: PlaylistId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "creator_id?: UserId",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_id?: UserId",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_name",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "live_id!",
+          "ordinal": 4,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "draft_id!",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "published_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "likes!",
+          "ordinal": 7,
+          "type_info": "Int8"
+        },
+        {
+          "name": "plays!",
+          "ordinal": 8,
+          "type_info": "Int8"
+        },
+        {
+          "name": "live_up_to_date!",
+          "ordinal": 9,
+          "type_info": "Bool"
+        },
+        {
+          "name": "is_liked!",
+          "ordinal": 10,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        true,
+        true,
+        null,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect playlist.id                                       as \"id!: PlaylistId\",\n       creator_id                               as \"creator_id?: UserId\",\n       author_id                                as \"author_id?: UserId\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id) as \"author_name\",\n       live_id                                  as \"live_id!\",\n       draft_id                                 as \"draft_id!\",\n       published_at,\n       likes                                    as \"likes!\",\n       plays                                    as \"plays!\",\n       live_up_to_date                          as \"live_up_to_date!\",\n       exists(select 1 from playlist_like where playlist_id = playlist.id and user_id = $2) as \"is_liked!\"\nfrom playlist\ninner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\norder by ord asc\n    "
+  },
   "28a3fa85c70b1ca84b6abc90efe6073183d682bdd2e7d52168a5223e271e2f49": {
     "describe": {
       "columns": [],
@@ -2575,6 +2584,19 @@
       }
     },
     "query": "\nupdate pro_dev_data \nset updated_at = null\nwhere id = $1\n"
+  },
+  "29a3fff0ef9ba759cb66de761d80243c888b264c14cfc2045ded1d2403c9d453": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nupdate playlist_data_resource\nset resource_type_id = coalesce($2, resource_type_id)\nwhere id = $1 and $2 is distinct from resource_type_id\n            "
   },
   "2ab2664126a2fe3c1f250ef588a47ca653de0e2544d378347dc665f81685a65f": {
     "describe": {
@@ -2596,28 +2618,28 @@
     },
     "query": "\nselect published_at  as \"published_at?\"\nfrom resource\nwhere id = $1\n    "
   },
-  "2ac26476124281a23551dda733959d7eb6841f3f7cbbafb47ae913e97a4cd187": {
+  "2b5917ce47d524b21cfd1b402fc774c68a119d81d8b9146ce9413d3b42567067": {
     "describe": {
       "columns": [
         {
-          "name": "id!: CourseId",
+          "name": "authed!",
           "ordinal": 0,
-          "type_info": "Uuid"
+          "type_info": "Bool"
         }
       ],
       "nullable": [
-        false
+        null
       ],
       "parameters": {
         "Left": [
           "Uuid",
-          "Uuid",
-          "Uuid",
+          "Int2Array",
+          "Int2",
           "Uuid"
         ]
       }
     },
-    "query": "\ninsert into course (creator_id, author_id, parents, live_id, draft_id)\nselect creator_id, $2, array_append(parents, $1), $3, $4\nfrom course\nwhere id = $1\nreturning id as \"id!: CourseId\"\n"
+    "query": "\nselect exists (\n    select 1 from user_scope where user_id = $1 and scope = any($2)\n) or (\n    exists (select 1 from user_scope where user_id = $1 and scope = $3) and\n    not exists (select 1 from playlist where playlist.id = $4 and playlist.author_id <> $1)\n) as \"authed!\"\n"
   },
   "2c9269da9de0d178512713b7fc2789ad3472cc1dcea22eecd5fb941415d37bc4": {
     "describe": {
@@ -2726,20 +2748,6 @@
     },
     "query": "\nselect pro_dev.id                               as \"id!: ProDevId\",\n       creator_id                               as \"creator_id?: UserId\",\n       author_id                                as \"author_id?: UserId\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id) as \"author_name\",\n       live_id                                  as \"live_id!\",\n       draft_id                                 as \"draft_id!\",\n       published_at,\n       likes                                    as \"likes!\",\n       plays                                    as \"plays!\",\n       live_up_to_date                          as \"live_up_to_date!\"\nfrom pro_dev\ninner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\norder by ord asc\n    "
   },
-  "2d7bafd7b464bb3dd87cf57bc759efe7e5cb73de4ee63feed43f08e2edc1270f": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nwith del_data as (\n    delete from course_data\n        where id is not distinct from $1 or id is not distinct from $2)\ndelete\nfrom course\nwhere id is not distinct from $3\n\n"
-  },
   "2d994248b9ca987a534f74b59259b90354229a730cf1b22ad6fe3f8b035e2e46": {
     "describe": {
       "columns": [
@@ -2796,6 +2804,26 @@
       }
     },
     "query": "\nselect id                                   as \"id!: ReportId\",\n       resource_id                               as \"resource_id!: ResourceId\",    \n       report_type                          as \"report_type!: ResourceReportType\",                  \n       created_at,\n       reporter_id                          as \"reporter_id?: Uuid\",\n       (\n            select given_name || ' '::text || family_name\n            from user_profile\n            where user_profile.user_id = reporter_id\n        )                                       as \"name?\",\n        (\n            select email::text\n            from user_email\n            where user_email.user_id = reporter_id\n        )                                       as \"email?\"\nfrom resource_report\nwhere id = $1 and resource_id = $2\n"
+  },
+  "2e7d45524ed2fe392b804b9225b512539934c9ac4f837f8ae1ad64faab24e2ce": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\ninsert into playlist_data\n(display_name, created_at, updated_at, language, last_synced_at, description, privacy_level, other_keywords, translated_keywords, translated_description)\nselect display_name,\n       created_at,\n       updated_at,\n       language,\n       last_synced_at,\n       description,\n       privacy_level,\n       other_keywords,\n       translated_keywords,\n       translated_description::jsonb\nfrom playlist_data\nwhere id = $1\nreturning id\n        "
   },
   "2e8b8fc6284f216dd0ddaba73da461f72cfcd37a805ce30311f45b73f1eb38d2": {
     "describe": {
@@ -3271,6 +3299,56 @@
     },
     "query": "\nselect unit_id              as \"id!: ProDevUnitId\",\n       display_name         as \"display_name!\",\n       description          as \"description!\",\n       value                as \"value!\"\nfrom pro_dev_data_unit \"pddr\"\nwhere pro_dev_data_id = $1\n  and pddr.unit_id = $2\n        "
   },
+  "36005548de905f2ece80b219f2e9f5e9c43d646c5e24f7b99e0e4de639f4295d": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: ModuleId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "body!",
+          "ordinal": 1,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "created_at!",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at!",
+          "ordinal": 3,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "kind!: ModuleKind",
+          "ordinal": 4,
+          "type_info": "Int2"
+        },
+        {
+          "name": "is_complete!",
+          "ordinal": 5,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect cdm.id          as \"id!: ModuleId\",\n       contents    as \"body!\",\n       created_at  as \"created_at!\",\n       updated_at  as \"updated_at!\",\n       kind        as \"kind!: ModuleKind\",\n       is_complete as \"is_complete!\"\nfrom playlist_data_module \"cdm\"\ninner join playlist on playlist.live_id = cdm.playlist_data_id\nwhere cdm.id is not distinct from $1\n"
+  },
   "37362a36cc3729a69d0f7db3d7b6dc381a35293d3ac94d2da2fd655322e73bbe": {
     "describe": {
       "columns": [],
@@ -3340,20 +3418,6 @@
     },
     "query": "\ninsert into circle (display_name, description, image, creator_id) values ($1, $2, $3, $4)\nreturning id as \"id: CircleId\"\n        "
   },
-  "391179cc32e75ffc1449762c744f7b5f1e6eb52eb5f10fd6288f7afc59383811": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\ndelete\nfrom course_data_resource\nwhere course_data_id = $1\n   or course_data_id = $2\n    and id = $3\n        "
-  },
   "399f537a8091d51635c2cd32bf16449c26317d1f56c576064968a2bfd57953e0": {
     "describe": {
       "columns": [],
@@ -3406,20 +3470,6 @@
     },
     "query": "\nupdate resource_data_module\nset index = index - 1\nwhere resource_data_id = $1\n  and index > $2\n"
   },
-  "39f64cd116aebc8283a0b732722a5d198b6e48d255c1f3de2ad0919bee76fb4b": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Int2"
-        ]
-      }
-    },
-    "query": "\nupdate course_data_module\nset\n    index = case when index = $2 then $3 else index + 1 end,\n    updated_at = now()\nwhere course_data_id = $1 and index between $3 and $2\n"
-  },
   "3ad66986079ea2df21f1a6af0c50510d362a19addcf3bc0f62b8f3948ea14cf8": {
     "describe": {
       "columns": [
@@ -3469,56 +3519,6 @@
       }
     },
     "query": "\nupdate resource_data\nset other_keywords = $2,\n    translated_keywords = (case when ($3::text is not null) then $3::text else (translated_keywords) end),\n    updated_at = now()\nwhere id = $1 and $2 is distinct from other_keywords"
-  },
-  "3bae9ebe8985f50000f0f1a3ba9badfaddfef99574b5ca5c35dd0aa8ca8b0fc8": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: ModuleId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "body!",
-          "ordinal": 1,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "created_at!",
-          "ordinal": 2,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at!",
-          "ordinal": 3,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "kind!: ModuleKind",
-          "ordinal": 4,
-          "type_info": "Int2"
-        },
-        {
-          "name": "is_complete!",
-          "ordinal": 5,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect cdm.id          as \"id!: ModuleId\",\n       contents    as \"body!\",\n       created_at  as \"created_at!\",\n       updated_at  as \"updated_at!\",\n       kind        as \"kind!: ModuleKind\",\n       is_complete as \"is_complete!\"\nfrom course_data_module \"cdm\"\ninner join course on course.live_id = cdm.course_data_id\nwhere cdm.id is not distinct from $1\n"
   },
   "3baefe8f0818e61f1611c99aa8d808d7c2c9717a88bfeb161433b733f2928fd1": {
     "describe": {
@@ -3689,48 +3689,17 @@
     },
     "query": "\ninsert into jig_data_module (\"index\", jig_data_id, kind, is_complete, contents)\nselect \"index\", $2 as \"jig_id\", kind, is_complete, contents\nfrom jig_data_module\nwhere jig_data_id = $1\n        "
   },
-  "420d4bf39de1178348d773dec9763d6d8f0b1f1378a53165e2d184785395df30": {
+  "43082d5f34ede50dd2d6b87b05e46f7b293f1dca74afba83f33361d5314b746b": {
     "describe": {
-      "columns": [
-        {
-          "name": "count!",
-          "ordinal": 0,
-          "type_info": "Int8"
-        }
-      ],
-      "nullable": [
-        null
-      ],
+      "columns": [],
+      "nullable": [],
       "parameters": {
         "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\n        with cte as (\n            select jdar.id              as id,\n                   jdar.display_name,\n                   resource_type_id,\n                   resource_content,\n                   author_id,\n                   updated_at,\n                   created_at\n            from jig_data_additional_resource \"jdar\"\n            inner join jig on jig.live_id = jdar.jig_data_id\n            inner join jig_data on jig.live_id = jig_data.id\n            where author_id = $1 and jig.published_at is not null\n        ),\n        cte1 as (\n              select cdr.id              as id,\n                cdr.display_name,\n                resource_type_id,\n                resource_content,\n                author_id,\n                updated_at,\n                created_at\n          from course_data_resource \"cdr\"\n          inner join course on course.live_id = cdr.course_data_id\n          inner join course_data on course.live_id = course_data.id\n          where author_id = $1 and course.published_at is not null\n        )\n        select count(id) as \"count!\"\n        from unnest(array(\n        select\n        (array_agg(id))[1] as id\n        from (select id, updated_at, created_at from cte union all select id, updated_at, created_at from cte1)\n        resource\n        group by resource.updated_at, resource.created_at)) with ordinality t(id, ord)\n            "
-  },
-  "426532a3e9fd562f2ecd47d1b0c6751b325de4b3f11c73f22f1194db874b005e": {
-    "describe": {
-      "columns": [
-        {
-          "name": "count!",
-          "ordinal": 0,
-          "type_info": "Int8"
-        }
-      ],
-      "nullable": [
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Int2Array",
           "UuidArray"
         ]
       }
     },
-    "query": "\n        with cte as (\n            select (array_agg(cd.id))[1]\n            from course_data \"cd\"\n                  inner join course on (draft_id = cd.id or (live_id = cd.id and cd.last_synced_at is not null and published_at is not null))\n                  left join course_data_resource \"resource\" on cd.id = resource.course_data_id\n            where (author_id = $1 or $1 is null)\n                and (cd.draft_or_live = $2 or $2 is null)\n                and (cd.privacy_level = any($3) or $3 = array[]::smallint[])\n                and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n            group by coalesce(updated_at, created_at)\n        )\n        select count(*) as \"count!\" from unnest(array(select cte.array_agg from cte)) with ordinality t(id, ord)\n    "
+    "query": "\nupdate playlist_data\nset last_synced_at = now()\nwhere playlist_data.id = any (select live_id from playlist where playlist.id = any ($1))\n"
   },
   "43fe8702f219dcd783e0f253f7dfe3c1786829a7dc2d043a8e79eb3deaf061e9": {
     "describe": {
@@ -3865,6 +3834,19 @@
       }
     },
     "query": "\nselect draft_id from pro_dev join pro_dev_data on pro_dev.draft_id = pro_dev_data.id where pro_dev.id = $1 for update\n"
+  },
+  "493430ee614459b5e6c10b8e1c36c73590856fe597a77c5db6be8e8c768f8452": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      }
+    },
+    "query": "\nupdate playlist_data\nset privacy_level = coalesce($2, privacy_level),\n    updated_at = now()\nwhere id = $1\n  and $2 is distinct from privacy_level\n    "
   },
   "497d102ecb4180c0d121a24d6005b7bf078dd8c59dc68949b82c62bbb41951c0": {
     "describe": {
@@ -4236,19 +4218,6 @@
     },
     "query": "\n    insert into resource_report(resource_id, report_type)\n    values ($1, $2)\n    returning id as \"id!: ReportId\"\n            "
   },
-  "4dcbd40d11584afd1488f437343dc9bdc58897c7e5c1f05dd4be25db788b5e72": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\ninsert into course_data_age_range(course_data_id, age_range_id)\nselect $2, age_range_id\nfrom course_data_age_range\nwhere course_data_id = $1\n        "
-  },
   "4e18a97518014653877111d872e69acb9d4b6599f006fcf02380360025594a25": {
     "describe": {
       "columns": [],
@@ -4261,6 +4230,27 @@
       }
     },
     "query": "\ninsert into pro_dev_data_category(pro_dev_data_id, category_id)\nselect $2, category_id\nfrom pro_dev_data_category\nwhere pro_dev_data_id = $1\n        "
+  },
+  "4e39ede2fa760d6ea636ace5bcc8b0848ff8f8d2b480eb937e463ce0e45963fa": {
+    "describe": {
+      "columns": [
+        {
+          "name": "exists!",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect exists (\n    select 1\n    from playlist_like\n    where\n        playlist_id = $1\n        and user_id = $2\n) as \"exists!\"\n    "
   },
   "4fb49fe4ad3204755e0a09d701e36d421c6a6696509bd37c238b1a835e022d7b": {
     "describe": {
@@ -4392,110 +4382,6 @@
       }
     },
     "query": "\nselect  id,\n        display_name                                       as \"display_name!\",\n        updated_at,\n        privacy_level                                      as \"privacy_level!: PrivacyLevel\",\n        language                                           as \"language!\",\n        description                                         as \"description!\",\n        translated_description                              as \"translated_description!: Json<HashMap<String, String>>\",\n        duration                                           as \"duration\",\n        other_keywords                             as \"other_keywords!\",\n        translated_keywords                        as \"translated_keywords!\",\n        (\n            select row(pro_dev_data_module.id, kind, is_complete)\n            from pro_dev_data_module\n            where pro_dev_data_id = pro_dev_data.id and \"index\" = 0\n            order by \"index\"\n        )                                                   as \"cover?: (ModuleId, ModuleKind, bool)\",\n        array(select row (category_id)\n            from pro_dev_data_category\n            where pro_dev_data_id = pro_dev_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n        array(\n            select row (pddr.id, pddr.display_name, resource_type_id, resource_content)\n            from pro_dev_data_resource \"pddr\"\n            where pddr.pro_dev_data_id = pro_dev_data.id\n        )                                                    as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n        array(\n            select row(pddu.unit_id, pddu.display_name, pddu.description, pddu.value)\n            from pro_dev_data_unit \"pddu\"\n            where pddu.pro_dev_data_id = pro_dev_data.id\n            order by \"index\"\n        )                                                     as \"units!: Vec<(ProDevUnitId, String, String, Value)>\"\nfrom pro_dev_data\ninner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\norder by ord asc\n"
-  },
-  "51a05fce94966f20937f90815425a04d7b843d864e39cf5d5b855d437b84bffa": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "display_name!",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "updated_at",
-          "ordinal": 2,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "privacy_level!: PrivacyLevel",
-          "ordinal": 3,
-          "type_info": "Int2"
-        },
-        {
-          "name": "language!",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "description!",
-          "ordinal": 5,
-          "type_info": "Text"
-        },
-        {
-          "name": "translated_description!: Json<HashMap<String, String>>",
-          "ordinal": 6,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "other_keywords!",
-          "ordinal": 7,
-          "type_info": "Text"
-        },
-        {
-          "name": "translated_keywords!",
-          "ordinal": 8,
-          "type_info": "Text"
-        },
-        {
-          "name": "cover?: (ModuleId, ModuleKind, bool)",
-          "ordinal": 9,
-          "type_info": "Record"
-        },
-        {
-          "name": "categories!: Vec<(CategoryId,)>",
-          "ordinal": 10,
-          "type_info": "RecordArray"
-        },
-        {
-          "name": "affiliations!: Vec<(AffiliationId,)>",
-          "ordinal": 11,
-          "type_info": "RecordArray"
-        },
-        {
-          "name": "age_ranges!: Vec<(AgeRangeId,)>",
-          "ordinal": 12,
-          "type_info": "RecordArray"
-        },
-        {
-          "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
-          "ordinal": 13,
-          "type_info": "RecordArray"
-        },
-        {
-          "name": "items!: Vec<(JigId,)>",
-          "ordinal": 14,
-          "type_info": "RecordArray"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        true,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "UuidArray"
-        ]
-      }
-    },
-    "query": "\nselect  id,\n        display_name                                       as \"display_name!\",\n        updated_at,\n        privacy_level                                      as \"privacy_level!: PrivacyLevel\",\n        language                                           as \"language!\",\n        description                                         as \"description!\",\n        translated_description                              as \"translated_description!: Json<HashMap<String, String>>\",\n        other_keywords                             as \"other_keywords!\",\n        translated_keywords                        as \"translated_keywords!\",\n        (\n            select row(course_data_module.id, kind, is_complete)\n            from course_data_module\n            where course_data_id = course_data.id and \"index\" = 0\n            order by \"index\"\n        )                                                   as \"cover?: (ModuleId, ModuleKind, bool)\",\n        array(select row (category_id)\n            from course_data_category\n            where course_data_id = course_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n        array(select row (affiliation_id)\n            from course_data_affiliation\n            where course_data_id = course_data.id)     as \"affiliations!: Vec<(AffiliationId,)>\",\n        array(select row (age_range_id)\n            from course_data_age_range\n            where course_data_id = course_data.id)     as \"age_ranges!: Vec<(AgeRangeId,)>\",\n        array(\n            select row (jdar.id, jdar.display_name, resource_type_id, resource_content)\n            from course_data_resource \"jdar\"\n            where jdar.course_data_id = course_data.id\n        )                                                    as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n        array(\n            select row(jig_id)\n            from course_data_jig\n            where course_data_jig.course_data_id = course_data.id\n            order by \"index\"\n        )                                                     as \"items!: Vec<(JigId,)>\"\nfrom course_data\ninner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\norder by ord asc\n"
   },
   "51a40f41372d3ac245973b6c148c56e71684c771e64465cf5c188241d4416d4a": {
     "describe": {
@@ -4674,6 +4560,20 @@
       }
     },
     "query": "\nupdate jig_data\nset audio_feedback_positive = $2,\n    audio_feedback_negative = $3,\n    updated_at = now()\nwhere id = $1 and ($2 <> audio_feedback_positive or $3 <> audio_feedback_negative)\n            "
+  },
+  "56ac9a00c8b93c8034d360fbab5d4db7412ab88e8cd7905483409fde22de4e30": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int2"
+        ]
+      }
+    },
+    "query": "\nupdate playlist_data_module\nset\n    index = case when index = $2 then $3 else index + 1 end,\n    updated_at = now()\nwhere playlist_data_id = $1 and index between $3 and $2\n"
   },
   "57014eec3c8db564db4e4702dcab29131db2551ea18c92f7e619980552215f49": {
     "describe": {
@@ -5129,6 +5029,19 @@
     },
     "query": "\nwith cte as (\n    select id      as \"pro_dev_id\",\n           creator_id,\n           author_id,\n           likes,\n           plays,\n           live_up_to_date,\n           case\n               when $2 = 0 then pro_dev.draft_id\n               when $2 = 1 then pro_dev.live_id\n               end as \"draft_or_live_id\",\n           published_at\n    from pro_dev\n    where id = $1\n)\nselect cte.pro_dev_id                                          as \"pro_dev_id: ProDevId\",\n       display_name,\n       creator_id                                             as \"creator_id?: UserId\",\n       author_id                                              as \"author_id?: UserId\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id)            as \"author_name\",\n       published_at,\n       updated_at,\n       privacy_level                                       as \"privacy_level!: PrivacyLevel\",\n       language,\n       description,\n       translated_description                              as \"translated_description!: Json<HashMap<String, String>>\",\n       likes,\n       plays,\n       live_up_to_date,\n       other_keywords,\n       translated_keywords,\n       duration,\n       (\n            select row(pro_dev_data_module.id, kind, is_complete)\n            from pro_dev_data_module\n            where pro_dev_data_id = cte.draft_or_live_id and \"index\" = 0\n            order by \"index\"\n        )                                                   as \"cover?: (ModuleId, ModuleKind, bool)\",\n       array(select row (category_id)\n             from pro_dev_data_category\n             where pro_dev_data_id = cte.draft_or_live_id)     as \"categories!: Vec<(CategoryId,)>\",\n       array(\n             select row (pddr.id, pddr.display_name, resource_type_id, resource_content)\n             from pro_dev_data_resource \"pddr\"\n             where pddr.pro_dev_data_id = cte.draft_or_live_id\n       )                                                    as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n       array(\n            select row(pddu.unit_id, pddu.display_name, pddu.description, pddu.value)\n            from pro_dev_data_unit \"pddu\"\n            where pddu.pro_dev_data_id = pro_dev_data.id\n            order by \"index\"\n    )                                                     as \"units!: Vec<(ProDevUnitId, String, String, Value)>\"\nfrom pro_dev_data\n         inner join cte on cte.draft_or_live_id = pro_dev_data.id\n"
   },
+  "598a0f5d29bc909d2970a2225e7aaac73ed2b37370aa6d83b81b602f9893a532": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      }
+    },
+    "query": "\nupdate playlist_data\nset draft_or_live = $2\nwhere id = $1\n            "
+  },
   "59c49f0ffacb928c16d48a8a91fc04e16057b123de225183c88bfd1348042e1b": {
     "describe": {
       "columns": [],
@@ -5140,28 +5053,6 @@
       }
     },
     "query": "\nupdate user_image_upload\nset uploaded_at       = now(),\n    processed_at      = now(),\n    processing_result = true\nwhere image_id = $1\n"
-  },
-  "5a313ec777ef83ffab443c1a2da405969ff1cc04c9252b62df0da4ca22442364": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "insert into course (creator_id, author_id, live_id, draft_id) values ($1, $1, $2, $3) returning id"
   },
   "5a9b960255b6c6fc729f2378573e914379136b0174c0fe049afbc8c5cf0dfe5e": {
     "describe": {
@@ -5188,6 +5079,19 @@
       }
     },
     "query": "\nupdate resource_admin_data\nset rating = coalesce($2, rating)\nwhere resource_id = $1 and $2 is distinct from rating\n            "
+  },
+  "5c74fc8320e9a7a78b6ac4fc29214b03fade67d4023300f5ec44f258167df11c": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\ninsert into playlist_data_jig(playlist_data_id, jig_id, index)\nselect $2, jig_id, index\nfrom playlist_data_jig\nwhere playlist_data_id = $1\n        "
   },
   "5d33bc73534fff84549ff5906ebd61644662ecef8d9f6d90084f4d02b5fea997": {
     "describe": {
@@ -5279,6 +5183,19 @@
     },
     "query": "\n        with cte as (\n            select (array_agg(pdd.id))[1]\n            from pro_dev_data \"pdd\"\n                  inner join pro_dev on (draft_id = pdd.id or (live_id = pdd.id and pdd.last_synced_at is not null and published_at is not null))\n                  left join pro_dev_data_resource \"resource\" on pdd.id = resource.pro_dev_data_id\n            where (author_id = $1 or $1 is null)\n                and (pdd.draft_or_live = $2 or $2 is null)\n                and (pdd.privacy_level = any($3) or $3 = array[]::smallint[])\n                and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n            group by coalesce(updated_at, created_at)\n        )\n        select count(*) as \"count!\" from unnest(array(select cte.array_agg from cte)) with ordinality t(id, ord)\n    "
   },
+  "5de961fbc4aa926cf5bdb20eb606c667acf04b955d2dc70a859254869ce6513f": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\ninsert into playlist_data_affiliation(playlist_data_id, affiliation_id)\nselect $2, affiliation_id\nfrom playlist_data_affiliation\nwhere playlist_data_id = $1\n        "
+  },
   "5e4bfa7c86f036663500b75df28a943c55cbc671a2dd296514568680f1b3733f": {
     "describe": {
       "columns": [
@@ -5365,6 +5282,27 @@
     },
     "query": "insert into jig (creator_id, author_id, live_id, draft_id) values ($1, $1, $2, $3) returning id"
   },
+  "5ec5720dbad1cd3172490973ae06e764c2b0d9fb97df958d159ae81af0470ec8": {
+    "describe": {
+      "columns": [
+        {
+          "name": "index",
+          "ordinal": 0,
+          "type_info": "Int2"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect index from playlist_data_module\nwhere playlist_data_id = $1 and playlist_data_module.id is not distinct from $2\n"
+  },
   "5f3fd649e82c3d0a8deb3a4c0bd9c6afddb137b24f8b45ed4e673acb8f00b651": {
     "describe": {
       "columns": [
@@ -5391,27 +5329,6 @@
     },
     "query": "\nselect draft_id, live_id from jig where id = $1\n"
   },
-  "5f80e1587e107a868408269864c5d3a0eac7058a24171de0dd387a3ed38285ec": {
-    "describe": {
-      "columns": [
-        {
-          "name": "exists!",
-          "ordinal": 0,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect exists (\n    select 1\n    from course_like\n    where\n        course_id = $1\n        and user_id = $2\n) as \"exists!\"\n    "
-  },
   "5ff5fa2a87043688acf1a71be7f3a293bd4cad618ed473b7ef536a116dabf50c": {
     "describe": {
       "columns": [],
@@ -5425,6 +5342,46 @@
     },
     "query": "\n    update jig_curation_data\n    set description = $2\n    where jig_id = $1 and $2 is distinct from description\n                "
   },
+  "605f9b9b03ca7908ff0a89bb4794d447710484326f57bdc6e31b59d8efbee5e8": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: AddId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "display_name!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "resource_type_id!: TypeId",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "resource_content!",
+          "ordinal": 3,
+          "type_info": "Jsonb"
+        }
+      ],
+      "nullable": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n        with cte as (\n            select jdar.id              as id,\n                   jdar.display_name,\n                   resource_type_id,\n                   resource_content,\n                   author_id,\n                   updated_at,\n                   created_at\n            from jig_data_additional_resource \"jdar\"\n            inner join jig on jig.live_id = jdar.jig_data_id\n            inner join jig_data on jig.live_id = jig_data.id\n            where author_id = $1 and jig.published_at is not null\n           ),\n           cte1 as (\n              select cdr.id              as id,\n                cdr.display_name,\n                resource_type_id,\n                resource_content,\n                author_id,\n                updated_at,\n                created_at\n          from playlist_data_resource \"cdr\"\n          inner join playlist on playlist.live_id = cdr.playlist_data_id\n          inner join playlist_data on playlist.live_id = playlist_data.id\n          where author_id = $1 and playlist.published_at is not null\n          ),\n          cte2 as (\n            select *\n            from unnest(array(\n                select\n                (array_agg(id))[1] as id\n                from (select id, updated_at, created_at from cte union all select id, updated_at, created_at from cte1)\n                resource\n                group by resource.updated_at, resource.created_at\n                order by coalesce(resource.updated_at, created_at))) with ordinality t(id\n                , ord) order by ord\n         )\n          select cte3.id                as \"id!: AddId\",\n                 display_name           as \"display_name!\",\n                 resource_type_id       as \"resource_type_id!: TypeId\",\n                 resource_content        as \"resource_content!\"\n         from\n          (select * from cte\n          union all\n          select * from cte1) cte3\n        inner join cte2 on cte2.id = cte3.id\n        where ord > (1 * $2 * $3)\n        order by ord asc\n        limit $3\n            "
+  },
   "608570654b76fe283fddb937731c721ebfee382fd9004821681ba0ebaaa953f6": {
     "describe": {
       "columns": [],
@@ -5436,6 +5393,19 @@
       }
     },
     "query": "\n        delete from \"user\" \n        using session\n        where \"user\".id = session.user_id \n        and (scope_mask & $1) = $1 \n        and expires_at <= now() \n     "
+  },
+  "61129f773aa2da10acaece369181c3c64a8b02f263db63b0f14b6439245d4956": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\ninsert into playlist_like(playlist_id, user_id)\nvalues ($1, $2)\n            "
   },
   "61c9c9b15bebc1eecf799235fe0cad3a853b4f45ea8d474dbf0c2f2e9574c9f1": {
     "describe": {
@@ -5542,11 +5512,568 @@
     },
     "query": "\ninsert into jig_data_additional_resource (jig_data_id, resource_type_id, resource_content, display_name)\nvalues ((select draft_id from jig where id = $1), $2, $3, $4)\nreturning id as \"id!: AdditionalResourceId\"\n        "
   },
-  "63241f8e8294f070408e1796472a6b320a593f5cceb359900feff2d47e363493": {
+  "63282a245bbfff4db34ea00a9f53cf8f6cbbd26ff4106d3b53f3edf3e48197d0": {
     "describe": {
       "columns": [
         {
-          "name": "course_id: CourseId",
+          "name": "id: ImageId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "library: MediaLibrary",
+          "ordinal": 1,
+          "type_info": "Int2"
+        },
+        {
+          "name": "last_used: DateTime<Utc>",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int8"
+        ]
+      }
+    },
+    "query": "\nselect image_id as \"id: ImageId\", media_library as \"library: MediaLibrary\", last_used as \"last_used: DateTime<Utc>\"\nfrom user_recent_image\nwhere user_id = $1\norder by last_used desc\nlimit $2\n            "
+  },
+  "633f41a575ccfa1f498ffc6cc6b60f8abc8aa88714085e966a3732769d3fa290": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Jsonb"
+        ]
+      }
+    },
+    "query": "\n                            update playlist_data\n                            set translated_description = $2,\n                                last_synced_at = null\n                            where id = $1\n                            "
+  },
+  "63a9ba01a124f3d9755abb0c3649bc0224d1ac27f4fe3fb52399cde83d266fd0": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: SubjectId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 3,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\n            select subject_id as \"id: SubjectId\", display_name, created_at, updated_at from subject\n            order by index\n        "
+  },
+  "640b89322af8a3bbd2f1a6c68299ec477e9a58e1aa95ffb5e23e314daf05702a": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      }
+    },
+    "query": "\n    update jig_data\n    set last_synced_at = null\n    where id = any($1)\n            "
+  },
+  "64ba22498633c2981b471b9d584e7b16173003a0a17836c3da2025076ebdfe8c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "count!",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int2",
+          "Uuid",
+          "Bool",
+          "Int2Array",
+          "UuidArray"
+        ]
+      }
+    },
+    "query": "\n        with cte as (\n            select (array_agg(jig.id))[1]\n            from jig \n                  inner join jig_data jd on (draft_id = jd.id or (live_id = jd.id and jd.last_synced_at is not null and published_at is not null))\n                  left join jig_admin_data \"admin\" on admin.jig_id = jig.id\n                  left join jig_data_additional_resource \"resource\" on jd.id = resource.jig_data_id\n            where (jd.draft_or_live = $1 or $1 is null)\n              and (author_id = $2 or $2 is null)\n              and (blocked = $3 or $3 is null)\n              and (jd.privacy_level = any($4) or $4 = array[]::smallint[])\n              and (resource.resource_type_id = any($5) or $5 = array[]::uuid[])\n            group by updated_at, created_at, jig.published_at, admin.jig_id, jig_id\n        )\n            select count(*) as \"count!\" from unnest(array((select cte.array_agg from cte))) with ordinality t(id\n           , ord)\n        "
+  },
+  "64cfdb8662f781313ee5765279e6d4b9a03cc12c3873a00386e94a1eda9e472b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "discard",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      }
+    },
+    "query": "\nwith delete as (\n        delete from user_font\n    where user_id = $1 and index = $2\n)\nselect 1 as discard\nfrom user_font\nwhere user_id = $1 and index > $2\nfor update\n        "
+  },
+  "65948829df799e30f02233bf13324d6529c60ac67d8b890ff9a1ff67ba4675c4": {
+    "describe": {
+      "columns": [
+        {
+          "name": "circle_id!: CircleId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "display_name!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "description!",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "image!: ImageId",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "member_count!",
+          "ordinal": 4,
+          "type_info": "Int8"
+        },
+        {
+          "name": "creator_id!: UserId",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at!",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      }
+    },
+    "query": "\nselect  id            as \"circle_id!: CircleId\",\n        display_name  as \"display_name!\",\n        description   as \"description!\",\n        image         as \"image!: ImageId\",\n        member_count  as \"member_count!\",\n        creator_id    as \"creator_id!: UserId\",\n        created_at    as \"created_at!\",\n        updated_at   \nfrom circle\ninner join unnest($1::uuid[])\nwith ordinality t(id, ord) using (id)\n"
+  },
+  "65bbbe5cb9eba5f0bf454b10f8b07ccf8eb3f519970d09868b486cbaa7d560a1": {
+    "describe": {
+      "columns": [
+        {
+          "name": "index",
+          "ordinal": 0,
+          "type_info": "Int2"
+        },
+        {
+          "name": "parent_id",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "delete from category where id = $1 returning index, parent_id"
+  },
+  "674424a88094e0ceb29cc4c2c4548cc97162b931eff9316fcdb78ede5cf7d7da": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Bool"
+        ]
+      }
+    },
+    "query": "\nupdate jig_admin_data\nset blocked = coalesce($2, blocked)\nwhere jig_id = $1 and $2 is distinct from blocked\n            "
+  },
+  "682dbdf7b9a0f373daad74e4f4face9e425a493e9965c6ba7c9a11e74252c866": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      }
+    },
+    "query": "update public_user set last_synced_at = now() where user_id = any($1)"
+  },
+  "684289dd550908cfb5adac9278ac9beb606e7d0ac91d8aa8a95d81100f357c3c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: ReportId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      }
+    },
+    "query": "\n    insert into jig_report(jig_id, report_type)\n    values ($1, $2)\n    returning id as \"id!: ReportId\"\n            "
+  },
+  "68a6cedcf31dbac17f23ec2cf4cdead5973b0bf72e32708d64e680ecc2997f6b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "play_count",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect play_count from jig_play_count\nwhere jig_id = $1;\n            "
+  },
+  "695ed5200a6ec80ca01f9ca3950a0ff0bc60dee8bcbe4a0954376eb26a38af1b": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Jsonb",
+          "Int2",
+          "Bool"
+        ]
+      }
+    },
+    "query": "\nupdate resource_data_module\nset contents    = coalesce($3, contents),\n    kind        = coalesce($4, kind),\n    is_complete = coalesce($5, is_complete)\nwhere resource_data_id = $1\n  and index = $2\n"
+  },
+  "695f61600966e7be0be50f3536900ac2a78517c4ef39c5386cd8f7936119ffa3": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text",
+          "Int2",
+          "Bool",
+          "Bool",
+          "Bool",
+          "Int2"
+        ]
+      }
+    },
+    "query": "\ninsert into jig_data\n   (display_name, language, description, direction, display_score, track_assessments, drag_assist, draft_or_live)\nvalues ($1, $2, $3, $4, $5, $6, $7, $8)\nreturning id\n"
+  },
+  "69b512127b70875985bb54e50242397b7e362535b1a338276778abde7b695787": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int4"
+        ]
+      }
+    },
+    "query": "update user_color set color = $3 where user_id = $1 and index = $2"
+  },
+  "6a0747806924b7638b2356bfec11e1800fc35314d887112d74731d830f397283": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\ninsert into playlist_data_age_range(playlist_data_id, age_range_id)\nselect $2, age_range_id\nfrom playlist_data_age_range\nwhere playlist_data_id = $1\n        "
+  },
+  "6a2fcbea5b62e0a5c0eb65c28769c1b3e70e3376f664d5ad84c864aaef8f0548": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "update global_animation_upload set uploaded_at = now(), processing_result = null where animation_id = $1"
+  },
+  "6ad4df2298dcd688eb035ff09918b592e3be2dac06b5ffb13012fb166daa814b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: CategoryId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 3,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "user_scopes",
+          "ordinal": 4,
+          "type_info": "Int2Array"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\nselect id                                                                 as \"id: CategoryId\",\n       name,\n       created_at,\n       updated_at,\n       user_scopes\nfrom category\nwhere parent_id is null\norder by index\n "
+  },
+  "6b18f4d20c2efb63ec1be956c25ebb85875cd8972346f74e21ca7f429d2fb9d5": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\ninsert into resource_data_affiliation(resource_data_id, affiliation_id)\nselect $2, affiliation_id\nfrom resource_data_affiliation\nwhere resource_data_id = $1\n        "
+  },
+  "6b23aa76c017f61c1cec5fb58bb315c57ab46929dcc301602997c6c71a2fc22c": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      }
+    },
+    "query": "\nupdate resource_data\nset privacy_level = coalesce($2, privacy_level)\nwhere id = $1\n  and $2 is distinct from privacy_level\n    "
+  },
+  "6bebe392e7dfa7d248a777b4c799d3000dd21c525c70300fbe2701cb9047c020": {
+    "describe": {
+      "columns": [
+        {
+          "name": "resource_id!: ResourceId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 1,
+          "type_info": "Bool"
+        },
+        {
+          "name": "language",
+          "ordinal": 2,
+          "type_info": "Bool"
+        },
+        {
+          "name": "categories",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "description",
+          "ordinal": 4,
+          "type_info": "Bool"
+        },
+        {
+          "name": "age_ranges",
+          "ordinal": 5,
+          "type_info": "Bool"
+        },
+        {
+          "name": "affiliations",
+          "ordinal": 6,
+          "type_info": "Bool"
+        },
+        {
+          "name": "additional_resources",
+          "ordinal": 7,
+          "type_info": "Bool"
+        },
+        {
+          "name": "curation_status!: ResourceCurationStatus",
+          "ordinal": 8,
+          "type_info": "Int2"
+        },
+        {
+          "name": "comments!: Vec<(ResourceCurationComment)>",
+          "ordinal": 9,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "reports!: Vec<(ResourceReport)>",
+          "ordinal": 10,
+          "type_info": "RecordArray"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect resource_id                               as \"resource_id!: ResourceId\",\n       display_name,\n       language,\n       categories,\n       description,\n       age_ranges,\n       affiliations,\n       additional_resources,\n       curation_status                          as \"curation_status!: ResourceCurationStatus\",\n       array(\n            select row (rcc.id, rcc.resource_id, comment, created_at, author_id)\n            from resource_curation_comment  \"rcc\"\n            where rcd.resource_id = rcc.resource_id\n            order by created_at desc\n       )                                         as \"comments!: Vec<(ResourceCurationComment)>\",\n       array(\n           select row (rr.id, rr.resource_id, report_type, reporter_id, created_at,      \n                        (\n                        select given_name || ' '::text || family_name\n                        from user_profile\n                        where user_profile.user_id = reporter_id\n                        ),\n                        (\n                            select email::text\n                            from user_email\n                            where user_email.user_id = reporter_id\n                        )                                                                       \n            )\n           from resource_report \"rr\"\n           where rcd.resource_id = rr.resource_id\n           order by created_at desc\n       )                                                    as \"reports!: Vec<(ResourceReport)>\"\nfrom resource_curation_data \"rcd\"\nwhere resource_id = $1\n"
+  },
+  "6cd2ae3f3a7df867e81bc9018b79dd4e1d64f4729ba071f42a70651492b89a8c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "size: ImageSize",
+          "ordinal": 0,
+          "type_info": "Int2"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect size as \"size: ImageSize\"\nfrom user_image_library\ninner join user_image_upload on user_image_library.id = user_image_upload.image_id\nwhere (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)\nfor no key update of user_image_upload\nfor share of user_image_library\nskip locked\n        "
+  },
+  "6d0a676d59147de71ebc2ac7104d4eb12413d0d2ffe551119ce34c3b0257c48b": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int2"
+        ]
+      }
+    },
+    "query": "\nupdate playlist_data_module\nset\n    index = case when index = $2 then $3 else index - 1 end,\n    updated_at = now()\nwhere playlist_data_id = $1 and index between $2 and $3\n"
+  },
+  "6e18fec7a16c1e1bbad4d1ad9cc4c180029ab0725b09d87eaf6013d4654cd365": {
+    "describe": {
+      "columns": [
+        {
+          "name": "playlist_id: PlaylistId",
           "ordinal": 0,
           "type_info": "Uuid"
         },
@@ -5694,652 +6221,7 @@
         ]
       }
     },
-    "query": "\nwith cte as (\n    select id      as \"course_id\",\n           creator_id,\n           author_id,\n           likes,\n           plays,\n           live_up_to_date,\n           case\n               when $2 = 0 then course.draft_id\n               when $2 = 1 then course.live_id\n               end as \"draft_or_live_id\",\n           published_at\n    from course\n    where id = $1\n)\nselect cte.course_id                                          as \"course_id: CourseId\",\n       display_name,\n       creator_id                                             as \"creator_id?: UserId\",\n       author_id                                              as \"author_id?: UserId\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id)            as \"author_name\",\n       published_at,\n       updated_at,\n       privacy_level                                       as \"privacy_level!: PrivacyLevel\",\n       language,\n       description,\n       translated_description                              as \"translated_description!: Json<HashMap<String, String>>\",\n       likes,\n       plays,\n       live_up_to_date,\n       other_keywords,\n       translated_keywords,\n       exists(select 1 from course_like where course_id = $1 and user_id = $3) as \"is_liked!\",\n       (\n            select row(course_data_module.id, kind, is_complete)\n            from course_data_module\n            where course_data_id = cte.draft_or_live_id and \"index\" = 0\n            order by \"index\"\n        )                                                   as \"cover?: (ModuleId, ModuleKind, bool)\",\n       array(select row (category_id)\n             from course_data_category\n             where course_data_id = cte.draft_or_live_id)     as \"categories!: Vec<(CategoryId,)>\",\n       array(select row (affiliation_id)\n             from course_data_affiliation\n             where course_data_id = cte.draft_or_live_id)     as \"affiliations!: Vec<(AffiliationId,)>\",\n       array(select row (age_range_id)\n             from course_data_age_range\n             where course_data_id = cte.draft_or_live_id)     as \"age_ranges!: Vec<(AgeRangeId,)>\",\n       array(\n             select row (jdar.id, jdar.display_name, resource_type_id, resource_content)\n             from course_data_resource \"jdar\"\n             where jdar.course_data_id = cte.draft_or_live_id\n       )                                                    as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n       array(\n           select row(jig_id)\n           from course_data_jig\n           where course_data_id = cte.draft_or_live_id\n           order by \"index\"\n       )                                                     as \"items!: Vec<(JigId,)>\"\nfrom course_data\n         inner join cte on cte.draft_or_live_id = course_data.id\n"
-  },
-  "63282a245bbfff4db34ea00a9f53cf8f6cbbd26ff4106d3b53f3edf3e48197d0": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id: ImageId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "library: MediaLibrary",
-          "ordinal": 1,
-          "type_info": "Int2"
-        },
-        {
-          "name": "last_used: DateTime<Utc>",
-          "ordinal": 2,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int8"
-        ]
-      }
-    },
-    "query": "\nselect image_id as \"id: ImageId\", media_library as \"library: MediaLibrary\", last_used as \"last_used: DateTime<Utc>\"\nfrom user_recent_image\nwhere user_id = $1\norder by last_used desc\nlimit $2\n            "
-  },
-  "63a9ba01a124f3d9755abb0c3649bc0224d1ac27f4fe3fb52399cde83d266fd0": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id: SubjectId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "display_name",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "created_at",
-          "ordinal": 2,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at",
-          "ordinal": 3,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        true
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "\n            select subject_id as \"id: SubjectId\", display_name, created_at, updated_at from subject\n            order by index\n        "
-  },
-  "640b89322af8a3bbd2f1a6c68299ec477e9a58e1aa95ffb5e23e314daf05702a": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "UuidArray"
-        ]
-      }
-    },
-    "query": "\n    update jig_data\n    set last_synced_at = null\n    where id = any($1)\n            "
-  },
-  "64ba22498633c2981b471b9d584e7b16173003a0a17836c3da2025076ebdfe8c": {
-    "describe": {
-      "columns": [
-        {
-          "name": "count!",
-          "ordinal": 0,
-          "type_info": "Int8"
-        }
-      ],
-      "nullable": [
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Int2",
-          "Uuid",
-          "Bool",
-          "Int2Array",
-          "UuidArray"
-        ]
-      }
-    },
-    "query": "\n        with cte as (\n            select (array_agg(jig.id))[1]\n            from jig \n                  inner join jig_data jd on (draft_id = jd.id or (live_id = jd.id and jd.last_synced_at is not null and published_at is not null))\n                  left join jig_admin_data \"admin\" on admin.jig_id = jig.id\n                  left join jig_data_additional_resource \"resource\" on jd.id = resource.jig_data_id\n            where (jd.draft_or_live = $1 or $1 is null)\n              and (author_id = $2 or $2 is null)\n              and (blocked = $3 or $3 is null)\n              and (jd.privacy_level = any($4) or $4 = array[]::smallint[])\n              and (resource.resource_type_id = any($5) or $5 = array[]::uuid[])\n            group by updated_at, created_at, jig.published_at, admin.jig_id, jig_id\n        )\n            select count(*) as \"count!\" from unnest(array((select cte.array_agg from cte))) with ordinality t(id\n           , ord)\n        "
-  },
-  "64cfdb8662f781313ee5765279e6d4b9a03cc12c3873a00386e94a1eda9e472b": {
-    "describe": {
-      "columns": [
-        {
-          "name": "discard",
-          "ordinal": 0,
-          "type_info": "Int4"
-        }
-      ],
-      "nullable": [
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2"
-        ]
-      }
-    },
-    "query": "\nwith delete as (\n        delete from user_font\n    where user_id = $1 and index = $2\n)\nselect 1 as discard\nfrom user_font\nwhere user_id = $1 and index > $2\nfor update\n        "
-  },
-  "64f01e53a838b6e910725d44ac1c71ee2d33e6aad13cb04c923cc65c98e7ee65": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: CourseId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "creator_id?: UserId",
-          "ordinal": 1,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "author_id?: UserId",
-          "ordinal": 2,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "author_name",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "live_id!",
-          "ordinal": 4,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "draft_id!",
-          "ordinal": 5,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "published_at",
-          "ordinal": 6,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "likes!",
-          "ordinal": 7,
-          "type_info": "Int8"
-        },
-        {
-          "name": "plays!",
-          "ordinal": 8,
-          "type_info": "Int8"
-        },
-        {
-          "name": "live_up_to_date!",
-          "ordinal": 9,
-          "type_info": "Bool"
-        },
-        {
-          "name": "is_liked!",
-          "ordinal": 10,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        false,
-        true,
-        true,
-        null,
-        false,
-        false,
-        true,
-        false,
-        false,
-        false,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "UuidArray",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect course.id                                       as \"id!: CourseId\",\n       creator_id                               as \"creator_id?: UserId\",\n       author_id                                as \"author_id?: UserId\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id) as \"author_name\",\n       live_id                                  as \"live_id!\",\n       draft_id                                 as \"draft_id!\",\n       published_at,\n       likes                                    as \"likes!\",\n       plays                                    as \"plays!\",\n       live_up_to_date                          as \"live_up_to_date!\",\n       exists(select 1 from course_like where course_id = course.id and user_id = $2) as \"is_liked!\"\nfrom course\ninner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\norder by ord asc\n    "
-  },
-  "65948829df799e30f02233bf13324d6529c60ac67d8b890ff9a1ff67ba4675c4": {
-    "describe": {
-      "columns": [
-        {
-          "name": "circle_id!: CircleId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "display_name!",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "description!",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "image!: ImageId",
-          "ordinal": 3,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "member_count!",
-          "ordinal": 4,
-          "type_info": "Int8"
-        },
-        {
-          "name": "creator_id!: UserId",
-          "ordinal": 5,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "created_at!",
-          "ordinal": 6,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at",
-          "ordinal": 7,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true
-      ],
-      "parameters": {
-        "Left": [
-          "UuidArray"
-        ]
-      }
-    },
-    "query": "\nselect  id            as \"circle_id!: CircleId\",\n        display_name  as \"display_name!\",\n        description   as \"description!\",\n        image         as \"image!: ImageId\",\n        member_count  as \"member_count!\",\n        creator_id    as \"creator_id!: UserId\",\n        created_at    as \"created_at!\",\n        updated_at   \nfrom circle\ninner join unnest($1::uuid[])\nwith ordinality t(id, ord) using (id)\n"
-  },
-  "65bbbe5cb9eba5f0bf454b10f8b07ccf8eb3f519970d09868b486cbaa7d560a1": {
-    "describe": {
-      "columns": [
-        {
-          "name": "index",
-          "ordinal": 0,
-          "type_info": "Int2"
-        },
-        {
-          "name": "parent_id",
-          "ordinal": 1,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false,
-        true
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "delete from category where id = $1 returning index, parent_id"
-  },
-  "66c7f2798010ff1fc00b0ec452672d72b7bef299ec172672b47578822c963f0f": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text",
-          "Text",
-          "Int2"
-        ]
-      }
-    },
-    "query": "\ninsert into course_data\n   (display_name, language, description, draft_or_live)\nvalues ($1, $2, $3, $4)\nreturning id\n"
-  },
-  "674424a88094e0ceb29cc4c2c4548cc97162b931eff9316fcdb78ede5cf7d7da": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Bool"
-        ]
-      }
-    },
-    "query": "\nupdate jig_admin_data\nset blocked = coalesce($2, blocked)\nwhere jig_id = $1 and $2 is distinct from blocked\n            "
-  },
-  "682dbdf7b9a0f373daad74e4f4face9e425a493e9965c6ba7c9a11e74252c866": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "UuidArray"
-        ]
-      }
-    },
-    "query": "update public_user set last_synced_at = now() where user_id = any($1)"
-  },
-  "684289dd550908cfb5adac9278ac9beb606e7d0ac91d8aa8a95d81100f357c3c": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: ReportId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2"
-        ]
-      }
-    },
-    "query": "\n    insert into jig_report(jig_id, report_type)\n    values ($1, $2)\n    returning id as \"id!: ReportId\"\n            "
-  },
-  "68a6cedcf31dbac17f23ec2cf4cdead5973b0bf72e32708d64e680ecc2997f6b": {
-    "describe": {
-      "columns": [
-        {
-          "name": "play_count",
-          "ordinal": 0,
-          "type_info": "Int8"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect play_count from jig_play_count\nwhere jig_id = $1;\n            "
-  },
-  "695ed5200a6ec80ca01f9ca3950a0ff0bc60dee8bcbe4a0954376eb26a38af1b": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Jsonb",
-          "Int2",
-          "Bool"
-        ]
-      }
-    },
-    "query": "\nupdate resource_data_module\nset contents    = coalesce($3, contents),\n    kind        = coalesce($4, kind),\n    is_complete = coalesce($5, is_complete)\nwhere resource_data_id = $1\n  and index = $2\n"
-  },
-  "695f61600966e7be0be50f3536900ac2a78517c4ef39c5386cd8f7936119ffa3": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text",
-          "Text",
-          "Int2",
-          "Bool",
-          "Bool",
-          "Bool",
-          "Int2"
-        ]
-      }
-    },
-    "query": "\ninsert into jig_data\n   (display_name, language, description, direction, display_score, track_assessments, drag_assist, draft_or_live)\nvalues ($1, $2, $3, $4, $5, $6, $7, $8)\nreturning id\n"
-  },
-  "69b512127b70875985bb54e50242397b7e362535b1a338276778abde7b695787": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Int4"
-        ]
-      }
-    },
-    "query": "update user_color set color = $3 where user_id = $1 and index = $2"
-  },
-  "6a2fcbea5b62e0a5c0eb65c28769c1b3e70e3376f664d5ad84c864aaef8f0548": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "update global_animation_upload set uploaded_at = now(), processing_result = null where animation_id = $1"
-  },
-  "6ad4df2298dcd688eb035ff09918b592e3be2dac06b5ffb13012fb166daa814b": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id: CategoryId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "name",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "created_at",
-          "ordinal": 2,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at",
-          "ordinal": 3,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "user_scopes",
-          "ordinal": 4,
-          "type_info": "Int2Array"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        true,
-        false
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "\nselect id                                                                 as \"id: CategoryId\",\n       name,\n       created_at,\n       updated_at,\n       user_scopes\nfrom category\nwhere parent_id is null\norder by index\n "
-  },
-  "6b18f4d20c2efb63ec1be956c25ebb85875cd8972346f74e21ca7f429d2fb9d5": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\ninsert into resource_data_affiliation(resource_data_id, affiliation_id)\nselect $2, affiliation_id\nfrom resource_data_affiliation\nwhere resource_data_id = $1\n        "
-  },
-  "6b23aa76c017f61c1cec5fb58bb315c57ab46929dcc301602997c6c71a2fc22c": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2"
-        ]
-      }
-    },
-    "query": "\nupdate resource_data\nset privacy_level = coalesce($2, privacy_level)\nwhere id = $1\n  and $2 is distinct from privacy_level\n    "
-  },
-  "6bb9d0f77994d96679c6e5b511b0a1f0e889cb5d1173a54af423b61408bdda98": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "display_name",
-          "ordinal": 1,
-          "type_info": "Text"
-        }
-      ],
-      "nullable": [
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "\nselect course_data.id,\n       display_name\nfrom course_data\ninner join course on live_id = course_data.id\nwhere display_name <> ''\n      and translated_name = '{}'\n      and published_at is not null\n      and name_translate_status is null\norder by coalesce(updated_at, created_at) desc\nlimit 20 for no key update skip locked;\n "
-  },
-  "6bebe392e7dfa7d248a777b4c799d3000dd21c525c70300fbe2701cb9047c020": {
-    "describe": {
-      "columns": [
-        {
-          "name": "resource_id!: ResourceId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "display_name",
-          "ordinal": 1,
-          "type_info": "Bool"
-        },
-        {
-          "name": "language",
-          "ordinal": 2,
-          "type_info": "Bool"
-        },
-        {
-          "name": "categories",
-          "ordinal": 3,
-          "type_info": "Bool"
-        },
-        {
-          "name": "description",
-          "ordinal": 4,
-          "type_info": "Bool"
-        },
-        {
-          "name": "age_ranges",
-          "ordinal": 5,
-          "type_info": "Bool"
-        },
-        {
-          "name": "affiliations",
-          "ordinal": 6,
-          "type_info": "Bool"
-        },
-        {
-          "name": "additional_resources",
-          "ordinal": 7,
-          "type_info": "Bool"
-        },
-        {
-          "name": "curation_status!: ResourceCurationStatus",
-          "ordinal": 8,
-          "type_info": "Int2"
-        },
-        {
-          "name": "comments!: Vec<(ResourceCurationComment)>",
-          "ordinal": 9,
-          "type_info": "RecordArray"
-        },
-        {
-          "name": "reports!: Vec<(ResourceReport)>",
-          "ordinal": 10,
-          "type_info": "RecordArray"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        null,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect resource_id                               as \"resource_id!: ResourceId\",\n       display_name,\n       language,\n       categories,\n       description,\n       age_ranges,\n       affiliations,\n       additional_resources,\n       curation_status                          as \"curation_status!: ResourceCurationStatus\",\n       array(\n            select row (rcc.id, rcc.resource_id, comment, created_at, author_id)\n            from resource_curation_comment  \"rcc\"\n            where rcd.resource_id = rcc.resource_id\n            order by created_at desc\n       )                                         as \"comments!: Vec<(ResourceCurationComment)>\",\n       array(\n           select row (rr.id, rr.resource_id, report_type, reporter_id, created_at,      \n                        (\n                        select given_name || ' '::text || family_name\n                        from user_profile\n                        where user_profile.user_id = reporter_id\n                        ),\n                        (\n                            select email::text\n                            from user_email\n                            where user_email.user_id = reporter_id\n                        )                                                                       \n            )\n           from resource_report \"rr\"\n           where rcd.resource_id = rr.resource_id\n           order by created_at desc\n       )                                                    as \"reports!: Vec<(ResourceReport)>\"\nfrom resource_curation_data \"rcd\"\nwhere resource_id = $1\n"
-  },
-  "6cd2ae3f3a7df867e81bc9018b79dd4e1d64f4729ba071f42a70651492b89a8c": {
-    "describe": {
-      "columns": [
-        {
-          "name": "size: ImageSize",
-          "ordinal": 0,
-          "type_info": "Int2"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect size as \"size: ImageSize\"\nfrom user_image_library\ninner join user_image_upload on user_image_library.id = user_image_upload.image_id\nwhere (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)\nfor no key update of user_image_upload\nfor share of user_image_library\nskip locked\n        "
+    "query": "\nwith cte as (\n    select id      as \"playlist_id\",\n           creator_id,\n           author_id,\n           likes,\n           plays,\n           live_up_to_date,\n           case\n               when $2 = 0 then playlist.draft_id\n               when $2 = 1 then playlist.live_id\n               end as \"draft_or_live_id\",\n           published_at\n    from playlist\n    where id = $1\n)\nselect cte.playlist_id                                          as \"playlist_id: PlaylistId\",\n       display_name,\n       creator_id                                             as \"creator_id?: UserId\",\n       author_id                                              as \"author_id?: UserId\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id)            as \"author_name\",\n       published_at,\n       updated_at,\n       privacy_level                                       as \"privacy_level!: PrivacyLevel\",\n       language,\n       description,\n       translated_description                              as \"translated_description!: Json<HashMap<String, String>>\",\n       likes,\n       plays,\n       live_up_to_date,\n       other_keywords,\n       translated_keywords,\n       exists(select 1 from playlist_like where playlist_id = $1 and user_id = $3) as \"is_liked!\",\n       (\n            select row(playlist_data_module.id, kind, is_complete)\n            from playlist_data_module\n            where playlist_data_id = cte.draft_or_live_id and \"index\" = 0\n            order by \"index\"\n        )                                                   as \"cover?: (ModuleId, ModuleKind, bool)\",\n       array(select row (category_id)\n             from playlist_data_category\n             where playlist_data_id = cte.draft_or_live_id)     as \"categories!: Vec<(CategoryId,)>\",\n       array(select row (affiliation_id)\n             from playlist_data_affiliation\n             where playlist_data_id = cte.draft_or_live_id)     as \"affiliations!: Vec<(AffiliationId,)>\",\n       array(select row (age_range_id)\n             from playlist_data_age_range\n             where playlist_data_id = cte.draft_or_live_id)     as \"age_ranges!: Vec<(AgeRangeId,)>\",\n       array(\n             select row (jdar.id, jdar.display_name, resource_type_id, resource_content)\n             from playlist_data_resource \"jdar\"\n             where jdar.playlist_data_id = cte.draft_or_live_id\n       )                                                    as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n       array(\n           select row(jig_id)\n           from playlist_data_jig\n           where playlist_data_id = cte.draft_or_live_id\n           order by \"index\"\n       )                                                     as \"items!: Vec<(JigId,)>\"\nfrom playlist_data\n         inner join cte on cte.draft_or_live_id = playlist_data.id\n"
   },
   "6e80c37673b6c8fe9ca3ca2bb99bbbb0739cca8c3eee9d5eeb0054684004c384": {
     "describe": {
@@ -6538,29 +6420,6 @@
     },
     "query": "\ninsert into user_audio_library default values\nreturning id as \"id: AudioId\"\n"
   },
-  "72e5bef48e9d7cd559375819fe7571ce8abe96f315491482ae4f89b0a0722d25": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: AdditionalResourceId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid",
-          "Jsonb",
-          "Text"
-        ]
-      }
-    },
-    "query": "\ninsert into course_data_resource (course_data_id, resource_type_id, resource_content, display_name)\nvalues ((select draft_id from course where id = $1), $2, $3, $4)\nreturning id as \"id!: AdditionalResourceId\"\n        "
-  },
   "730f7927a06ed0eac325329170086fb199a8d9fc5d32fb4be76cb9c3c4b3c5cc": {
     "describe": {
       "columns": [
@@ -6647,6 +6506,19 @@
     },
     "query": "\ninsert into animation_metadata (name, description, is_premium, publish_at, kind, is_looping) values ($1, $2, $3, $4, $5, $6)\nreturning id as \"id: AnimationId\"\n        "
   },
+  "741beb959fc4f74824a36a8b0e448e30690d1d0a750e57e819630045f010744f": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Jsonb"
+        ]
+      }
+    },
+    "query": "\n                            update playlist_data\n                            set translated_name = $2,\n                                last_synced_at = null\n                            where id = $1\n                            "
+  },
   "74fbb4de26eb4eca3d53fa73b828c6e9d8d6c49f0be6242d6c886f4753a0ad85": {
     "describe": {
       "columns": [
@@ -6726,6 +6598,45 @@
     },
     "query": "select user_id from user_auth_google where google_id = $1"
   },
+  "7687758947cd67921247e6b7295c3b5645af11bd05dac4f804d301ab74bda572": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      }
+    },
+    "query": "\nupdate playlist_data_module\nset index = index - 1\nwhere playlist_data_id = $1\n  and index > $2\n"
+  },
+  "7688e26b0446e803a2a6c7bbc0d3972a179f87536d93dd54453faf2dcb8ff404": {
+    "describe": {
+      "columns": [
+        {
+          "name": "draft_id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "live_id",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect draft_id, live_id from playlist where id = $1\n"
+  },
   "76f5138776b2544741d5bd7a20298dd4309fa398f23fac98b74873899a0f88b3": {
     "describe": {
       "columns": [
@@ -6790,32 +6701,6 @@
       }
     },
     "query": "insert into web_media_upload (media_id, uploaded_at) values ($1, now())"
-  },
-  "7bd8eff40b8bb4649064764c88f6087f405f0727abb476003a960c379a8e3bc7": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2"
-        ]
-      }
-    },
-    "query": "\nupdate course_data_module\nset index = index - 1\nwhere course_data_id = $1\n  and index > $2\n"
-  },
-  "7bf5a4f544cb4407f7ec650dc97dfd852353d332be1fdd164b560b245f283325": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2"
-        ]
-      }
-    },
-    "query": "\nupdate course_data\nset privacy_level = coalesce($2, privacy_level),\n    updated_at = now()\nwhere id = $1\n  and $2 is distinct from privacy_level\n    "
   },
   "7c3feba53bc6a89c8e97b1928038ef8b335e2b61bf7029c80c33eb14361abdc8": {
     "describe": {
@@ -6883,6 +6768,46 @@
     },
     "query": "\nupdate resource_data\nset last_synced_at = now()\nwhere resource_data.id = any (select live_id from resource where resource.id = any ($1))\n"
   },
+  "7c57b0d0965b041e39cb4a535e5f6a8a07c24f5479a692ab9cb4ac24cc292660": {
+    "describe": {
+      "columns": [
+        {
+          "name": "count!",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        with cte as (\n            select jdar.id              as id,\n                   jdar.display_name,\n                   resource_type_id,\n                   resource_content,\n                   author_id,\n                   updated_at,\n                   created_at\n            from jig_data_additional_resource \"jdar\"\n            inner join jig on jig.live_id = jdar.jig_data_id\n            inner join jig_data on jig.live_id = jig_data.id\n            where author_id = $1 and jig.published_at is not null\n        ),\n        cte1 as (\n              select cdr.id              as id,\n                cdr.display_name,\n                resource_type_id,\n                resource_content,\n                author_id,\n                updated_at,\n                created_at\n          from playlist_data_resource \"cdr\"\n          inner join playlist on playlist.live_id = cdr.playlist_data_id\n          inner join playlist_data on playlist.live_id = playlist_data.id\n          where author_id = $1 and playlist.published_at is not null\n        )\n        select count(id) as \"count!\"\n        from unnest(array(\n        select\n        (array_agg(id))[1] as id\n        from (select id, updated_at, created_at from cte union all select id, updated_at, created_at from cte1)\n        resource\n        group by resource.updated_at, resource.created_at)) with ordinality t(id, ord)\n            "
+  },
+  "7cc4dd06d23bb79d9a2ea56c294ee6a42646c877a0bfbb0991bd6dd86db82f6e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "published_at?",
+          "ordinal": 0,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect published_at  as \"published_at?\"\nfrom playlist\nwhere id = $1\n    "
+  },
   "7cd0b406b9ccb8537a66683cea7c676f43ef172d3365b5e0dbeaba27d5aa978c": {
     "describe": {
       "columns": [
@@ -6933,31 +6858,18 @@
     },
     "query": "\nselect index     as \"index!: i32\",\n       direction as \"direction: TextDirection\",\n       display_score,\n       track_assessments,\n       drag_assist,\n       expires_at as \"expires_at: DateTime<Utc>\"\nfrom jig_player_session\nwhere jig_id = $1\n"
   },
-  "7d3b39b739ff8d2bbf16dca9749521ebc130be37e4525f91deaaf16187ab2016": {
+  "7d6295f3a9896ad81c1850a00cd713b0dd18fe04a7146e147162a76b9abf2246": {
     "describe": {
-      "columns": [
-        {
-          "name": "author_id: UserId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "published_at?",
-          "ordinal": 1,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        true,
-        true
-      ],
+      "columns": [],
+      "nullable": [],
       "parameters": {
         "Left": [
+          "Uuid",
           "Uuid"
         ]
       }
     },
-    "query": "\nselect author_id    as \"author_id: UserId\",\n       published_at  as \"published_at?\"\nfrom course\nwhere id = $1\n    "
+    "query": "\ndelete from playlist_like\nwhere playlist_id = $1 and user_id = $2\n    "
   },
   "7de388b21267e45c30f82ed5f18a433423d535b7e22a752bcd95c82fc050190e": {
     "describe": {
@@ -7143,33 +7055,6 @@
     },
     "query": "\n        select jig_id as \"jig_id: JigId\", \n               direction as \"direction: TextDirection\", \n               display_score, \n               track_assessments, \n               drag_assist\n        from jig_player_session\n        where index=$1\n        "
   },
-  "8002a58a2dfa494ffa463d70fe62cd1a6ca1a26e64f76cee1ca2a23ac58f802f": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid",
-          "Jsonb"
-        ]
-      }
-    },
-    "query": "\nupdate course_data_resource\nset resource_content = $3\nwhere course_data_id = $1 and id = $2\n            "
-  },
-  "802a16b43ef2c116e61773daabc6aa9b9a98da019cbc79c113ab5c170ee424f1": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\ninsert into course_data_resource(course_data_id, resource_type_id, display_name, resource_content)\nselect $2, resource_type_id, display_name, resource_content\nfrom course_data_resource\nwhere course_data_id = $1\n        "
-  },
   "8088fa34227c64a6cc93a0c00dd61b847e661c3483858a951cc21c947ea1b83d": {
     "describe": {
       "columns": [
@@ -7342,6 +7227,27 @@
     },
     "query": "\ninsert into resource (creator_id, author_id, parents, live_id, draft_id)\nselect creator_id, $2, array_append(parents, $1), $3, $4\nfrom resource\nwhere id = $1\nreturning id as \"id!: ResourceId\"\n"
   },
+  "8392b17a33409937fdd77e550c4358d969dce77da89c9c860102d892e931c8b7": {
+    "describe": {
+      "columns": [
+        {
+          "name": "exists!",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect exists(select 1 from playlist_data_resource \"jdar\" where playlist_data_id = $1\n    and jdar.id = $2) as \"exists!\"\n    "
+  },
   "83a19967d79935450a0c984ec7c3cde0626f3347618e8dd1d84e883f73ae2898": {
     "describe": {
       "columns": [],
@@ -7410,6 +7316,19 @@
     },
     "query": "with recursive path(id, index, parent_id) as (\n    select id, ord, null::uuid\n    from category\n             inner join unnest(\n            $1::uuid[]) with ordinality t(id, ord)\n                        using (id)\n    union all\n    select c.id, c.index, p.id\n    from path p\n             inner join category c on (c.parent_id = p.id)\n)\nselect distinct id as \"id!\",\n       path.index::int2 as \"index!\",\n       path.parent_id,\n       name,\n       created_at,\n       updated_at,\n       user_scopes\n\nfrom path\n         inner join category using (id);\n"
   },
+  "84a58a1a319e72ec21bac200fe7b99a22d2c26a7fb87636c2a8e35be0dd4e412": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nupdate playlist_data\nset display_name = $2,\n    translated_name = '{}',\n    updated_at = now()\nwhere id = $1 and $2 is distinct from display_name"
+  },
   "84f05210fc0d761dda68090751705c6448814262eab6eae4c3c1fc04290cf357": {
     "describe": {
       "columns": [
@@ -7464,6 +7383,19 @@
     },
     "query": "\nupdate circle\nset description = $2,\n    updated_at = now()\nwhere id = $1 and $2 is distinct from description\n"
   },
+  "86fa88d3517936fe0febf0daa3ffc738398005934a56b038e06393862b3f6799": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nupdate playlist_data\nset language         = coalesce($2, language),\n    updated_at = now()\nwhere id = $1\n  and ($2::text is not null and $2 is distinct from language)\n"
+  },
   "87c78754f010d2cd7d18cc1024071cfd6d00983eb0d01153d7b4ad368ba20f71": {
     "describe": {
       "columns": [
@@ -7484,6 +7416,19 @@
       }
     },
     "query": "\nselect exists(select 1 from user_scope where user_id = $1 and scope = any($2)) as \"authed!\"\n"
+  },
+  "8822478e75b35beabd746417cb6342dd1d40afcf99b22c48b13ff2c8aaef0437": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n insert into playlist_data_module (\"index\", playlist_data_id, kind, is_complete, contents)\n select \"index\", $2 as \"playlist_id\", kind, is_complete, contents\n from playlist_data_module\n where playlist_data_id = $1\n            "
   },
   "886cfa63188f2755838af80e5a1585835cd903063796b378903a0163c255f160": {
     "describe": {
@@ -7533,6 +7478,18 @@
       }
     },
     "query": "\n        insert into jig_player_session_instance (session_index, ip_address, user_agent)\n        values ($1, $2, $3)\n        returning id as \"id: Uuid\"\n        "
+  },
+  "8948c9978692762a9d96fec41c4ca1b53f90eb2a6027e12d9e1e2a9c17626814": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\ndelete from playlist_data where id = $1\n    "
   },
   "8954f7a250fa53e9bb3ee9e22c807b6013f08b2cf794be6faeac9b2d01cc25e3": {
     "describe": {
@@ -7866,20 +7823,6 @@
     },
     "query": "\ndelete\nfrom resource_data_module\nwhere resource_data_id = $1 and resource_data_module.id is not distinct from $2\nreturning index\n"
   },
-  "8c211ea244871599cdc7856fbfa8f27374b1db6ce383f9e2eb9cfc0b4204bc84": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Int2"
-        ]
-      }
-    },
-    "query": "\nupdate course_data_module\nset\n    index = case when index = $2 then $3 else index - 1 end,\n    updated_at = now()\nwhere course_data_id = $1 and index between $2 and $3\n"
-  },
   "8c8ff3705f1da9ef590954f10bcd10d4381bb1822fde83203c64141539ebe454": {
     "describe": {
       "columns": [
@@ -8136,30 +8079,6 @@
     },
     "query": "\n    update pro_dev_data_unit\n    set value = coalesce($3, value)\n    where pro_dev_data_id = $1\n      and index = $2\n    "
   },
-  "8f12d40d64533edf683a09925fe2bf743c60c0047c1347b4fd2d6cc59284276c": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "description",
-          "ordinal": 1,
-          "type_info": "Text"
-        }
-      ],
-      "nullable": [
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "\nselect course_data.id,\n       description\nfrom course_data\ninner join course on live_id = course_data.id\nwhere description <> ''\n      and translated_description = '{}'\n      and published_at is not null\n      and description_translate_status is null\norder by coalesce(updated_at, created_at) desc\nlimit 20 for no key update skip locked;\n "
-  },
   "8f1e210ff17b689cd69ae47b2eb88e74893142db5328e8919768818648693bbd": {
     "describe": {
       "columns": [],
@@ -8194,6 +8113,19 @@
       }
     },
     "query": "\nwith cte as (\n    insert into user_font\n    (user_id, name, index)\n    values ($1, $2, (select count(*) from user_font where user_id = $1)) returning name\n), names as (\n    select name\n    from user_font\n    where user_id = $1\n    order by index\n)\nselect name as \"name!\" from names\nunion all\nselect name as \"name!\" from cte\n        "
+  },
+  "8f877a0423612fd21c1e2ef57a1ac9d81ba17252f1083ce283cacd6c5382ea19": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nupdate playlist_data_resource\nset display_name = coalesce($2, display_name)\nwhere id = $1 and $2 is distinct from display_name\n            "
   },
   "8ff3594259d04d0786b415f1e6577c3252ad2779bf0a9336d3ea985d54d78556": {
     "describe": {
@@ -8247,30 +8179,155 @@
     },
     "query": "\nupdate pro_dev_data_unit\nset index = index - 1\nwhere pro_dev_data_id = $1\n  and index > $2\n"
   },
-  "919b222454362d32275ccbe3582b3ac0e743b64d930d8c52c1170340834f3b76": {
+  "91637e92d0a2a1728284cf589acee2ecd5accdf8d7ca48a4f03635d2265357ba": {
     "describe": {
-      "columns": [],
-      "nullable": [],
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "language!",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "description!",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_description!: Json<HashMap<String, String>>",
+          "ordinal": 4,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "translated_name!: Json<HashMap<String, String>>",
+          "ordinal": 5,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "affiliations!",
+          "ordinal": 6,
+          "type_info": "UuidArray"
+        },
+        {
+          "name": "affiliation_names!",
+          "ordinal": 7,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "resource_types!",
+          "ordinal": 8,
+          "type_info": "UuidArray"
+        },
+        {
+          "name": "resource_type_names!",
+          "ordinal": 9,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "age_ranges!",
+          "ordinal": 10,
+          "type_info": "UuidArray"
+        },
+        {
+          "name": "age_range_names!",
+          "ordinal": 11,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "categories!",
+          "ordinal": 12,
+          "type_info": "UuidArray"
+        },
+        {
+          "name": "category_names!",
+          "ordinal": 13,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "items!",
+          "ordinal": 14,
+          "type_info": "UuidArray"
+        },
+        {
+          "name": "privacy_level!: PrivacyLevel",
+          "ordinal": 15,
+          "type_info": "Int2"
+        },
+        {
+          "name": "author_id",
+          "ordinal": 16,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "other_keywords!",
+          "ordinal": 17,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_keywords!",
+          "ordinal": 18,
+          "type_info": "Text"
+        },
+        {
+          "name": "author_name",
+          "ordinal": 19,
+          "type_info": "Text"
+        },
+        {
+          "name": "likes!",
+          "ordinal": 20,
+          "type_info": "Int8"
+        },
+        {
+          "name": "plays!",
+          "ordinal": 21,
+          "type_info": "Int8"
+        },
+        {
+          "name": "published_at",
+          "ordinal": 22,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        false,
+        true,
+        false,
+        false,
+        null,
+        false,
+        false,
+        true
+      ],
       "parameters": {
-        "Left": [
-          "Uuid"
-        ]
+        "Left": []
       }
     },
-    "query": "\nupdate course\nset plays = plays + 1\nwhere id = $1;\n            "
-  },
-  "927db96321baca9ba81e6ea1a546cf396140c976e4b808e4e5bb4328503d6322": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\ndelete from course_like\nwhere course_id = $1 and user_id = $2\n    "
+    "query": "\nselect playlist.id,\n       display_name                                                                                                 as \"name\",\n       language                                                                                                     as \"language!\",\n       description                                                                                                  as \"description!\",\n       translated_description                                                                                       as \"translated_description!: Json<HashMap<String, String>>\",\n       translated_name                                                                                              as \"translated_name!: Json<HashMap<String, String>>\",\n       array((select affiliation_id\n              from playlist_data_affiliation\n              where playlist_data_id = playlist_data.id))                                                                     as \"affiliations!\",\n       array((select affiliation.display_name\n              from affiliation\n                       inner join playlist_data_affiliation on affiliation.id = playlist_data_affiliation.affiliation_id\n              where playlist_data_affiliation.playlist_data_id = playlist_data.id))                                                as \"affiliation_names!\",\n        array((select resource_type_id\n                from playlist_data_resource\n                where playlist_data_id = playlist_data.id))                                                                     as \"resource_types!\",\n        array((select resource_type.display_name\n              from resource_type\n                        inner join playlist_data_resource on resource_type.id = playlist_data_resource.resource_type_id\n             where playlist_data_resource.playlist_data_id = playlist_data.id))                                         as \"resource_type_names!\",\n       array((select age_range_id\n              from playlist_data_age_range\n              where playlist_data_id = playlist_data.id))                                                                     as \"age_ranges!\",\n       array((select age_range.display_name\n              from age_range\n                       inner join playlist_data_age_range on age_range.id = playlist_data_age_range.age_range_id\n              where playlist_data_age_range.playlist_data_id = playlist_data.id))                                                  as \"age_range_names!\",\n       array((select category_id\n              from playlist_data_category\n              where playlist_data_id = playlist_data.id))                                                                     as \"categories!\",\n       array((select name\n              from category\n                       inner join playlist_data_category on category.id = playlist_data_category.category_id\n              where playlist_data_category.playlist_data_id = playlist_data.id))                                                   as \"category_names!\",\n        array(\n           (select jig_id\n            from playlist_data_jig\n            where playlist_data_jig.playlist_data_id = playlist_data.id)\n       )                                                                                                            as \"items!\",\n       privacy_level                                                                                                as \"privacy_level!: PrivacyLevel\",\n       author_id                                                                                                    as \"author_id\",\n       other_keywords                                                                                               as \"other_keywords!\",\n       translated_keywords                                                                                          as \"translated_keywords!\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = playlist.author_id)                                                       as \"author_name\",\n        likes                                                                                                       as \"likes!\",\n        plays                                                                                                       as \"plays!\",\n        published_at                                                                                                as \"published_at\"\nfrom playlist\n         inner join playlist_data on live_id = playlist_data.id\nwhere (last_synced_at is null and published_at is not null)\n    or (updated_at is not null and last_synced_at < updated_at)\n    or (published_at < now() is true and last_synced_at < published_at)\nlimit 100 for no key update skip locked;\n     "
   },
   "932508742699d5ebb198b02fc4f4bcaa9fd0e50c4206e6536279163533526826": {
     "describe": {
@@ -8631,19 +8688,6 @@
     },
     "query": "\nselect draft_id from pro_dev where id = $1\n"
   },
-  "95e80749cb3ce69fdb52cbc6de1835b2e5770c6a350ad0a8d05541eb17c788aa": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\ninsert into course_data_category(course_data_id, category_id)\nselect $2, category_id\nfrom course_data_category\nwhere course_data_id = $1\n        "
-  },
   "96569e9389d5fa1a63e58cd3f1b618d0edd302dab9da28604bd88276d2e344c1": {
     "describe": {
       "columns": [
@@ -8854,39 +8898,6 @@
     },
     "query": "\nselect jdm.id      as \"id!: ModuleId\",\n       contents    as \"body!\",\n       created_at  as \"created_at!\",\n       updated_at  as \"updated_at!\",\n       kind        as \"kind!: ModuleKind\",\n       is_complete as \"is_complete!\"\nfrom jig_data_module \"jdm\"\ninner join jig on jig.draft_id = jdm.jig_data_id \nwhere jdm.id is not distinct from $1 \n"
   },
-  "9a280ed5b2d646c563937e8cee1bae592f8d46322edf1769a7c89670088ac3d8": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\n insert into course_data_module (\"index\", course_data_id, kind, is_complete, contents)\n select \"index\", $2 as \"course_id\", kind, is_complete, contents\n from course_data_module\n where course_data_id = $1\n            "
-  },
-  "9a3997c4126e05a79d792f8243b525964a40cd0cb6f4039335efc1a7ecc3790a": {
-    "describe": {
-      "columns": [
-        {
-          "name": "published_at?",
-          "ordinal": 0,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        true
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect published_at  as \"published_at?\"\nfrom course\nwhere id = $1\n    "
-  },
   "9b23b8bffa20014d6e11cc9e5b6ebae981c9c32804ee3550f6731daff43883cf": {
     "describe": {
       "columns": [
@@ -9076,6 +9087,22 @@
     },
     "query": "select exists(select 1 from image_metadata where id = $1) as \"exists!\""
   },
+  "9c218b9d4f2aece13ee546d440b47c2cfea61bcbaf89a725c4aaf1ae45494103": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Jsonb",
+          "Int2",
+          "Bool"
+        ]
+      }
+    },
+    "query": "\nupdate playlist_data_module\nset contents    = coalesce($3, contents),\n    kind        = coalesce($4, kind),\n    is_complete = coalesce($5, is_complete)\nwhere playlist_data_id = $1\n  and index = $2\n"
+  },
   "9c632b62857ab74beb4f39e4efa462a34909d2c126f2e643339615722c1ed907": {
     "describe": {
       "columns": [],
@@ -9257,6 +9284,20 @@
     },
     "query": "select exists(select 1 from global_animation_upload where animation_id = $1 for no key update) as \"exists!\""
   },
+  "9f6642b7205866f10e69f564f8005e63ba0bb2bf5b88e6cb33c34f21120f6135": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nwith del_data as (\n    delete from playlist_data\n        where id is not distinct from $1 or id is not distinct from $2)\ndelete\nfrom playlist\nwhere id is not distinct from $3\n\n"
+  },
   "9f99518316804bde4081b2b71e262da9148de6f4a164b674e4bdd130eb34a2ee": {
     "describe": {
       "columns": [
@@ -9435,11 +9476,11 @@
     },
     "query": "\n    select exists(select 1 from user_follow where user_id = $1 and follower_id = $2) as \"exists!\"\n        "
   },
-  "a47efec2570cc4f4dc91ac5cbeeef6c184bfbd3ced34a523919ab35a9ec17fc0": {
+  "a47ec16a3c259f084491206d5df2b882147cab13a2368d5dd342678f4eb643fd": {
     "describe": {
       "columns": [
         {
-          "name": "draft_id",
+          "name": "id!: AdditionalResourceId",
           "ordinal": 0,
           "type_info": "Uuid"
         }
@@ -9449,74 +9490,14 @@
       ],
       "parameters": {
         "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect draft_id from course where course.id = $1\n"
-  },
-  "a4b699dfe38e3ea733cfaa637901fe2c191656b67dc0c969a3fbc578b917fdf2": {
-    "describe": {
-      "columns": [
-        {
-          "name": "index",
-          "ordinal": 0,
-          "type_info": "Int2"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
           "Uuid",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect index from course_data_module\nwhere course_data_id = $1 and course_data_module.id is not distinct from $2\n"
-  },
-  "a5609a881f8a1303a8c4eef9af25ebdf53a93d695ac5b7261615f1104d7d5dd5": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "index",
-          "ordinal": 1,
-          "type_info": "Int2"
-        }
-      ],
-      "nullable": [
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
           "Uuid",
-          "Int2",
           "Jsonb",
-          "Bool"
+          "Text"
         ]
       }
     },
-    "query": "\ninsert into course_data_module (course_data_id, kind, contents, index, is_complete)\nvalues ($1, $2, $3, (select count(*) from course_data_module where course_data_id = $1), $4)\nreturning id, \"index\"\n"
-  },
-  "a5b950a69c6f5d240bd48db3550afa9ae783df37c733ba0922e153eccf3c53c4": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "update course set live_id = $1, published_at = now() where id = $2"
+    "query": "\ninsert into playlist_data_resource (playlist_data_id, resource_type_id, resource_content, display_name)\nvalues ((select draft_id from playlist where id = $1), $2, $3, $4)\nreturning id as \"id!: AdditionalResourceId\"\n        "
   },
   "a5d457b3be130af043e60270c08575203eac8fb2e53d899a3f576784963be348": {
     "describe": {
@@ -9874,6 +9855,19 @@
     },
     "query": "\nselect id,\n       name,\n       size                                                                                     as \"size!: ImageSize\",\n       description,\n       translated_description                                                                   as \"translated_description!: Json<HashMap<String, String>>\",\n       translated_name                                                                          as \"translated_name!: Json<HashMap<String, String>>\",\n       array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as \"affiliations!\",\n       array((select affiliation.display_name\n              from affiliation\n                       inner join image_affiliation on affiliation.id = image_affiliation.affiliation_id\n              where image_affiliation.image_id = image_metadata.id))                            as \"affiliation_names!\",\n       array((select style_id from image_style where image_id = image_metadata.id))             as \"styles!\",\n       array((select style.display_name\n              from style\n                       inner join image_style on style.id = image_style.style_id\n              where image_style.image_id = image_metadata.id))                                  as \"style_names!\",\n       array((select age_range_id from image_age_range where image_id = image_metadata.id))     as \"age_ranges!\",\n       array((select age_range.display_name\n              from age_range\n                       inner join image_age_range on age_range.id = image_age_range.age_range_id\n              where image_age_range.image_id = image_metadata.id))                              as \"age_range_names!\",\n       array((select category_id from image_category where image_id = image_metadata.id))       as \"categories!\",\n       array((select name\n              from category\n                       inner join image_category on category.id = image_category.category_id\n              where image_category.image_id = image_metadata.id))                               as \"category_names!\",\n       array((select index\n              from image_tag\n                       inner join image_tag_join on image_tag.index = image_tag_join.tag_index\n              where image_tag_join.image_id = image_metadata.id))                               as \"tags!\",\n       array((select display_name\n              from image_tag\n                       inner join image_tag_join on image_tag.index = image_tag_join.tag_index\n              where image_tag_join.image_id = image_metadata.id))                               as \"tag_names!\",\n       (publish_at < now() is true)                                                             as \"is_published!\",\n       is_premium,\n       usage                                                                               as \"usage!\"\nfrom image_metadata\n         join image_upload on id = image_id\nwhere ((last_synced_at is null and publish_at is not null) or\n       (updated_at is not null and last_synced_at < updated_at) or\n       (publish_at < now() is true and last_synced_at < publish_at))\n  and processed_at is not null\nlimit 100 for no key update skip locked;\n     "
   },
+  "a9c9ab56066ed834f9e018b8093c94bf453bf740b128100bc6cc4484cf2f3450": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\ninsert into playlist_data_category(playlist_data_id, category_id)\nselect $2, category_id\nfrom playlist_data_category\nwhere playlist_data_id = $1\n        "
+  },
   "a9f4b50041b4c42e5e67520a8bdc2c0f8c43f123c5eddb2f5053f5d27ade2660": {
     "describe": {
       "columns": [],
@@ -9901,56 +9895,6 @@
       }
     },
     "query": "\ndelete\nfrom resource_data_resource\nwhere resource_data_id = $1\n   or resource_data_id = $2\n    and id = $3\n        "
-  },
-  "aa1255f482d548b4a3e189b1705edea716c0b82bb09e554a5122b13983a08236": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: ModuleId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "body!",
-          "ordinal": 1,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "created_at!",
-          "ordinal": 2,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at!",
-          "ordinal": 3,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "kind!: ModuleKind",
-          "ordinal": 4,
-          "type_info": "Int2"
-        },
-        {
-          "name": "is_complete!",
-          "ordinal": 5,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect cdm.id          as \"id!: ModuleId\",\n       contents    as \"body!\",\n       created_at  as \"created_at!\",\n       updated_at  as \"updated_at!\",\n       kind        as \"kind!: ModuleKind\",\n       is_complete as \"is_complete!\"\nfrom course_data_module \"cdm\"\ninner join course on course.draft_id = cdm.course_data_id\nwhere cdm.id is not distinct from $1\n"
   },
   "ab5d34d76960e465c8fad9c51b7c2e8526736b4ca8ef6da2cd4ceed53342b2c4": {
     "describe": {
@@ -10561,6 +10505,26 @@
     },
     "query": "\nupdate resource_data_module\nset\n    index = case when index = $2 then $3 else index - 1 end,\n    updated_at = now()\nwhere resource_data_id = $1 and index between $2 and $3\n"
   },
+  "af43a734c546244540f41fdccdd6e0a592e6017ed8921c9def6df76acac4f845": {
+    "describe": {
+      "columns": [
+        {
+          "name": "draft_id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect draft_id from playlist join playlist_data on playlist.draft_id = playlist_data.id where playlist.id = $1 for update\n"
+  },
   "af4aede4f0a20f0df53e6cecf425ee790f102a875441c7df241a9d2fa2171d20": {
     "describe": {
       "columns": [
@@ -10790,26 +10754,6 @@
     },
     "query": "\ninsert into resource_data\n(display_name, created_at, updated_at, language, last_synced_at, description, privacy_level, other_keywords, translated_keywords, translated_description)\nselect display_name,\n       created_at,\n       updated_at,\n       language,\n       last_synced_at,\n       description,\n       privacy_level,\n       other_keywords,\n       translated_keywords,\n       translated_description::jsonb\nfrom resource_data\nwhere id = $1\nreturning id\n        "
   },
-  "b16c8686d6dd580d8d45a8ec9174425b692c17ea1a9f0c19958d9f6b871639c3": {
-    "describe": {
-      "columns": [
-        {
-          "name": "draft_id",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect draft_id from course join course_data on course.draft_id = course_data.id where course.id = $1 for update\n"
-  },
   "b17bcf3e2a8034de77c43c7aa649e0566fffcd75e75988362a2b79ba298bc803": {
     "describe": {
       "columns": [],
@@ -10823,6 +10767,29 @@
     },
     "query": "\n                                update image_metadata\n                                set translated_name = $2,\n                                    last_synced_at = null\n                                where id = $1\n                                "
   },
+  "b1ef5826da246ece15a8b0705511d5eab37bb055d9ef4d2b8f773a955a812a6e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "count!",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int2Array",
+          "UuidArray"
+        ]
+      }
+    },
+    "query": "\n        with cte as (\n            select (array_agg(playlist.id))[1]\n            from playlist_data \"cd\"\n                  inner join playlist on (draft_id = cd.id or (live_id = cd.id and cd.last_synced_at is not null and published_at is not null))\n                  left join playlist_data_resource \"resource\" on cd.id = resource.playlist_data_id\n            where (author_id = $1 or $1 is null)\n                and (cd.draft_or_live = $2 or $2 is null)\n                and (cd.privacy_level = any($3) or $3 = array[]::smallint[])\n                and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n            group by coalesce(updated_at, created_at)\n        )\n        select count(*) as \"count!\" from unnest(array(select cte.array_agg from cte)) with ordinality t(id, ord)\n"
+  },
   "b211b1f87835114b657632739dc3502a1de67cb2c971b0e53c4283b9086eaa9c": {
     "describe": {
       "columns": [],
@@ -10835,6 +10802,69 @@
       }
     },
     "query": "\nupdate jig_data_module\nset index = index - 1\nwhere jig_data_id = $1\n  and index > $2\n"
+  },
+  "b2ba80703b5345dce0e391c2a3beb9ca820f0cec46fe22eae807082b694ebf44": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: ModuleId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "body!",
+          "ordinal": 1,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "created_at!",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at!",
+          "ordinal": 3,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "kind!: ModuleKind",
+          "ordinal": 4,
+          "type_info": "Int2"
+        },
+        {
+          "name": "is_complete!",
+          "ordinal": 5,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect cdm.id          as \"id!: ModuleId\",\n       contents    as \"body!\",\n       created_at  as \"created_at!\",\n       updated_at  as \"updated_at!\",\n       kind        as \"kind!: ModuleKind\",\n       is_complete as \"is_complete!\"\nfrom playlist_data_module \"cdm\"\ninner join playlist on playlist.draft_id = cdm.playlist_data_id\nwhere cdm.id is not distinct from $1\n"
+  },
+  "b2e961ba417e00528f9f4a6798dbf5b7a19d6f0fd1127ee6fb86d12a57dba2a5": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "update playlist set live_id = $1, published_at = now() where id = $2"
   },
   "b4338c9f23e8fad86b9bc505f8d366e02ca2c59cb4ac11255ef3d84e68daf79c": {
     "describe": {
@@ -10964,6 +10994,28 @@
     },
     "query": "select id as \"id: PdfId\" from user_pdf_library order by created_at desc"
   },
+  "b5b5628e87db20c9b5aa79d98c0e4d9d21d0ebd621ceb60fbf3145a72e09b89f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "insert into playlist (creator_id, author_id, live_id, draft_id) values ($1, $1, $2, $3) returning id"
+  },
   "b67b8e012384bd9845c73795310576f24736ac1d450f542962286a1a57a15cc2": {
     "describe": {
       "columns": [
@@ -11010,18 +11062,6 @@
     },
     "query": "update algolia_index_settings set updated_at = now(), index_hash = $1 where index_name = $2"
   },
-  "b6906cb50f7eea8476c665abc8040a27746c83a515e2dfbfab5017cea6c2aa4b": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "UuidArray"
-        ]
-      }
-    },
-    "query": "\nupdate course_data\nset last_synced_at = now()\nwhere course_data.id = any (select live_id from course where course.id = any ($1))\n"
-  },
   "b70a782c082bd482e4c160bbecdd7c677d3b1556bed16db0c439e73437c1de60": {
     "describe": {
       "columns": [],
@@ -11035,167 +11075,23 @@
     },
     "query": "\nupdate resource_admin_data\nset curated = coalesce($2, curated)\nwhere resource_id = $1 and $2 is distinct from curated\n            "
   },
-  "b718ae2c9646fecf857becdf0f9192275d196d807acbd82a9289d5d68b52518c": {
+  "b78062af6ca0f65e7d8c982e9872068b8bcce0b59f417049ed8a4088fc033623": {
     "describe": {
       "columns": [
         {
-          "name": "id",
+          "name": "author_id: UserId",
           "ordinal": 0,
           "type_info": "Uuid"
         },
         {
-          "name": "name",
+          "name": "published_at?",
           "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "language!",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "description!",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "translated_description!: Json<HashMap<String, String>>",
-          "ordinal": 4,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "translated_name!: Json<HashMap<String, String>>",
-          "ordinal": 5,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "affiliations!",
-          "ordinal": 6,
-          "type_info": "UuidArray"
-        },
-        {
-          "name": "affiliation_names!",
-          "ordinal": 7,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "resource_types!",
-          "ordinal": 8,
-          "type_info": "UuidArray"
-        },
-        {
-          "name": "resource_type_names!",
-          "ordinal": 9,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "age_ranges!",
-          "ordinal": 10,
-          "type_info": "UuidArray"
-        },
-        {
-          "name": "age_range_names!",
-          "ordinal": 11,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "categories!",
-          "ordinal": 12,
-          "type_info": "UuidArray"
-        },
-        {
-          "name": "category_names!",
-          "ordinal": 13,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "items!",
-          "ordinal": 14,
-          "type_info": "UuidArray"
-        },
-        {
-          "name": "privacy_level!: PrivacyLevel",
-          "ordinal": 15,
-          "type_info": "Int2"
-        },
-        {
-          "name": "author_id",
-          "ordinal": 16,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "other_keywords!",
-          "ordinal": 17,
-          "type_info": "Text"
-        },
-        {
-          "name": "translated_keywords!",
-          "ordinal": 18,
-          "type_info": "Text"
-        },
-        {
-          "name": "author_name",
-          "ordinal": 19,
-          "type_info": "Text"
-        },
-        {
-          "name": "likes!",
-          "ordinal": 20,
-          "type_info": "Int8"
-        },
-        {
-          "name": "plays!",
-          "ordinal": 21,
-          "type_info": "Int8"
-        },
-        {
-          "name": "published_at",
-          "ordinal": 22,
           "type_info": "Timestamptz"
         }
       ],
       "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        false,
         true,
-        false,
-        false,
-        null,
-        false,
-        false,
         true
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "\nselect course.id,\n       display_name                                                                                                 as \"name\",\n       language                                                                                                     as \"language!\",\n       description                                                                                                  as \"description!\",\n       translated_description                                                                                       as \"translated_description!: Json<HashMap<String, String>>\",\n       translated_name                                                                                              as \"translated_name!: Json<HashMap<String, String>>\",\n       array((select affiliation_id\n              from course_data_affiliation\n              where course_data_id = course_data.id))                                                                     as \"affiliations!\",\n       array((select affiliation.display_name\n              from affiliation\n                       inner join course_data_affiliation on affiliation.id = course_data_affiliation.affiliation_id\n              where course_data_affiliation.course_data_id = course_data.id))                                                as \"affiliation_names!\",\n        array((select resource_type_id\n                from course_data_resource\n                where course_data_id = course_data.id))                                                                     as \"resource_types!\",\n        array((select resource_type.display_name\n              from resource_type\n                        inner join course_data_resource on resource_type.id = course_data_resource.resource_type_id\n             where course_data_resource.course_data_id = course_data.id))                                         as \"resource_type_names!\",\n       array((select age_range_id\n              from course_data_age_range\n              where course_data_id = course_data.id))                                                                     as \"age_ranges!\",\n       array((select age_range.display_name\n              from age_range\n                       inner join course_data_age_range on age_range.id = course_data_age_range.age_range_id\n              where course_data_age_range.course_data_id = course_data.id))                                                  as \"age_range_names!\",\n       array((select category_id\n              from course_data_category\n              where course_data_id = course_data.id))                                                                     as \"categories!\",\n       array((select name\n              from category\n                       inner join course_data_category on category.id = course_data_category.category_id\n              where course_data_category.course_data_id = course_data.id))                                                   as \"category_names!\",\n        array(\n           (select jig_id\n            from course_data_jig\n            where course_data_jig.course_data_id = course_data.id)\n       )                                                                                                            as \"items!\",\n       privacy_level                                                                                                as \"privacy_level!: PrivacyLevel\",\n       author_id                                                                                                    as \"author_id\",\n       other_keywords                                                                                               as \"other_keywords!\",\n       translated_keywords                                                                                          as \"translated_keywords!\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = course.author_id)                                                       as \"author_name\",\n        likes                                                                                                       as \"likes!\",\n        plays                                                                                                       as \"plays!\",\n        published_at                                                                                                as \"published_at\"\nfrom course\n         inner join course_data on live_id = course_data.id\nwhere (last_synced_at is null and published_at is not null)\n    or (updated_at is not null and last_synced_at < updated_at)\n    or (published_at < now() is true and last_synced_at < published_at)\nlimit 100 for no key update skip locked;\n     "
-  },
-  "b71f8ef0e825494bd055842b9e0c7b7d2657fd4a1686cc590eec8202ac1b456a": {
-    "describe": {
-      "columns": [
-        {
-          "name": "max_index!",
-          "ordinal": 0,
-          "type_info": "Int8"
-        }
-      ],
-      "nullable": [
-        null
       ],
       "parameters": {
         "Left": [
@@ -11203,44 +11099,7 @@
         ]
       }
     },
-    "query": "select count(*) - 1 as \"max_index!\" from course_data_module where course_data_id = $1"
-  },
-  "b768705b32aa279a04eafd8d00d2ac2ef74dac0cfc9bf6419f7056f12b6fc94d": {
-    "describe": {
-      "columns": [
-        {
-          "name": "count!",
-          "ordinal": 0,
-          "type_info": "Int8"
-        }
-      ],
-      "nullable": [
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Int2Array",
-          "UuidArray"
-        ]
-      }
-    },
-    "query": "\n        with cte as (\n            select (array_agg(course.id))[1]\n            from course_data \"cd\"\n                  inner join course on (draft_id = cd.id or (live_id = cd.id and cd.last_synced_at is not null and published_at is not null))\n                  left join course_data_resource \"resource\" on cd.id = resource.course_data_id\n            where (author_id = $1 or $1 is null)\n                and (cd.draft_or_live = $2 or $2 is null)\n                and (cd.privacy_level = any($3) or $3 = array[]::smallint[])\n                and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n            group by coalesce(updated_at, created_at)\n        )\n        select count(*) as \"count!\" from unnest(array(select cte.array_agg from cte)) with ordinality t(id, ord)\n"
-  },
-  "b7d83cfd90ef7d1f18b8f070a52bccb1dc58d040a1e012e776c9cd47704efc27": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Text"
-        ]
-      }
-    },
-    "query": "\nupdate course_data\nset other_keywords = $2,\n    translated_keywords = (case when ($3::text is not null) then $3::text else (translated_keywords) end),\n    updated_at = now()\nwhere id = $1 and $2 is distinct from other_keywords"
+    "query": "\nselect author_id    as \"author_id: UserId\",\n       published_at  as \"published_at?\"\nfrom playlist\nwhere id = $1\n    "
   },
   "b8d5c88744b20dcfb8a5ecdb82abefcf3ef7ab264a1d26d64c88a8ecf54f7e0f": {
     "describe": {
@@ -11267,6 +11126,26 @@
       }
     },
     "query": "\nselect draft_id, live_id from pro_dev where id = $1\n"
+  },
+  "b8f36ca19ecaaea69115abb13d49495874b0fa3f43fff871e4a2e4077d1c1005": {
+    "describe": {
+      "columns": [
+        {
+          "name": "max_index!",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "select count(*) - 1 as \"max_index!\" from playlist_data_module where playlist_data_id = $1"
   },
   "b9595a3827091a7520dd91e64bfd465a6521548631244e2f37ab78227ddc9863": {
     "describe": {
@@ -11520,6 +11399,20 @@
     },
     "query": "\ninsert into school\n(school_name_id, email, location, account_id)\nvalues\n($1, (select email from user_email where user_id=$2), $3, $4)\nreturning school_id as \"school_id!: SchoolId\"\n"
   },
+  "bce089dbbf9be7f97f81c803dab60fa881956db7392aff47c6776fc4e4e4c4f8": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Jsonb"
+        ]
+      }
+    },
+    "query": "\nupdate playlist_data_resource\nset resource_content = $3\nwhere playlist_data_id = $1 and id = $2\n            "
+  },
   "bdfa6658d04ff049c61a416af645025bdd798b50d837f21ebd79ff76f71899e5": {
     "describe": {
       "columns": [],
@@ -11532,19 +11425,6 @@
       }
     },
     "query": "\n                            update resource_data\n                            set translated_description = $2,\n                                last_synced_at = null\n                            where id = $1\n                            "
-  },
-  "be69b38c978b947311449ac912fac411d6af3b618ed4e6091f8c85574a2ad6b7": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text"
-        ]
-      }
-    },
-    "query": "\nupdate course_data\nset language         = coalesce($2, language),\n    updated_at = now()\nwhere id = $1\n  and ($2::text is not null and $2 is distinct from language)\n"
   },
   "bfd314e70437482954c5dfb3a40ab08990a0bea43779d810e9dd903e87e10c81": {
     "describe": {
@@ -11762,6 +11642,58 @@
       }
     },
     "query": "\n    insert into pro_dev_data_unit(pro_dev_data_id, display_name, description, index, value)\n    select $2, display_name, description, index, value \n    from pro_dev_data_unit\n    where pro_dev_data_id = $1\n            "
+  },
+  "c832b96167ee47673a382ca586fb5c2c67f777cb9e7a15c3e545afa7a0baca3d": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "index",
+          "ordinal": 1,
+          "type_info": "Int2"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Jsonb",
+          "Bool"
+        ]
+      }
+    },
+    "query": "\ninsert into playlist_data_module (playlist_data_id, kind, contents, index, is_complete)\nvalues ($1, $2, $3, (select count(*) from playlist_data_module where playlist_data_id = $1), $4)\nreturning id, \"index\"\n"
+  },
+  "c87091f51c107a335c2fc82f47b88c2d2b30d021e0c0866f0e2a3a4c0210c1fd": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: PlaylistId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\ninsert into playlist (creator_id, author_id, parents, live_id, draft_id)\nselect creator_id, $2, array_append(parents, $1), $3, $4\nfrom playlist\nwhere id = $1\nreturning id as \"id!: PlaylistId\"\n"
   },
   "c877be5757f8787c2da80469a4fc50641fb63358e6516d05c7159d9c8060ac52": {
     "describe": {
@@ -12128,19 +12060,6 @@
     },
     "query": "delete from locale_entry where id = $1"
   },
-  "ceb87a1ad1d6edc211ab0297d65a7c2d489ae0c1df0fdbd0331803a78e3fa43b": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text"
-        ]
-      }
-    },
-    "query": "\nupdate course_data\nset display_name = $2,\n    translated_name = '{}',\n    updated_at = now()\nwhere id = $1 and $2 is distinct from display_name"
-  },
   "ceee83d2943409d2f3a3e5a70b7ae3d423d39cf2b15af44565c6f4100abcfc31": {
     "describe": {
       "columns": [],
@@ -12222,19 +12141,6 @@
       }
     },
     "query": "\ninsert into resource_data_module (\"index\", resource_data_id, kind, is_complete, contents)\nselect \"index\", $2 as \"resource_id\", kind, is_complete, contents\nfrom resource_data_module\nwhere resource_data_id = $1\n        "
-  },
-  "d1d6f857a204df9bb006573072660e28dc7c2ca1fab57ddd4531c9a3d54830fd": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Jsonb"
-        ]
-      }
-    },
-    "query": "\n                            update course_data\n                            set translated_name = $2,\n                                last_synced_at = null\n                            where id = $1\n                            "
   },
   "d1f58bf85a2a25f0b8de1b90427cc7313c57081dbc297a3237308bbdeeb46bd5": {
     "describe": {
@@ -12754,22 +12660,6 @@
     },
     "query": "\n            update jig_curation_data\n            set curation_status = $2\n            where jig_id = $1 and $2 is distinct from curation_status\n             "
   },
-  "dc4b4b097aabd9a7d4c876a4e5441730da81acd043b23082f87fdfb6502b0b8f": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Jsonb",
-          "Int2",
-          "Bool"
-        ]
-      }
-    },
-    "query": "\nupdate course_data_module\nset contents    = coalesce($3, contents),\n    kind        = coalesce($4, kind),\n    is_complete = coalesce($5, is_complete)\nwhere course_data_id = $1\n  and index = $2\n"
-  },
   "dc5e4bfd066126930dad28ab25adeceabbe52d53236bb74f1ba26cf733147ffb": {
     "describe": {
       "columns": [
@@ -13049,39 +12939,6 @@
     },
     "query": "\nselect exists(select 1 from pro_dev_data_unit \"pddu\" where pro_dev_data_id = $1\n    and pddu.unit_id = $2) as \"exists!\"\n    "
   },
-  "dd600a259ed3681915cc195311f529237e69284d80b248b34483c9fece560cbc": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2"
-        ]
-      }
-    },
-    "query": "\nupdate course_data\nset draft_or_live = $2\nwhere id = $1\n            "
-  },
-  "dd87acace48d19371be436174408184426e2b4a84ff01fb0465ea5298675fa7f": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\ninsert into course_data\n(display_name, created_at, updated_at, language, last_synced_at, description, privacy_level, other_keywords, translated_keywords, translated_description)\nselect display_name,\n       created_at,\n       updated_at,\n       language,\n       last_synced_at,\n       description,\n       privacy_level,\n       other_keywords,\n       translated_keywords,\n       translated_description::jsonb\nfrom course_data\nwhere id = $1\nreturning id\n        "
-  },
   "deded9faf82e036802498e441daac3471de372f8125fff31360788b263374872": {
     "describe": {
       "columns": [],
@@ -13096,29 +12953,6 @@
     },
     "query": "\ninsert into user_account\n(user_id, account_id, subscription_tier, admin, verified)\nvalues\n($1, $2, $3, true, true)"
   },
-  "df44d75bf1f59bebe2f20e0fbe5035c73a74b7daa14b4c842175485158d125a4": {
-    "describe": {
-      "columns": [
-        {
-          "name": "authed!",
-          "ordinal": 0,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2Array",
-          "Int2",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect exists (\n    select 1 from user_scope where user_id = $1 and scope = any($2)\n) or (\n    exists (select 1 from user_scope where user_id = $1 and scope = $3) and\n    not exists (select 1 from course where course.id = $4 and course.author_id <> $1)\n) as \"authed!\"\n"
-  },
   "dfa4e19f8e7729cf10c517eebdff89a4c6944387c54d30b6d0b19def3245573d": {
     "describe": {
       "columns": [],
@@ -13132,39 +12966,17 @@
     },
     "query": "\nupdate account\nset stripe_customer_id = $2,\nupdated_at = now()\nwhere account_id = $1"
   },
-  "e02fab7a9e662c32aef4e4649249b057b8e160137e3eb6f7ffd21e39d654e466": {
-    "describe": {
-      "columns": [
-        {
-          "name": "exists!",
-          "ordinal": 0,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect exists(select 1 from course_data_resource \"jdar\" where course_data_id = $1\n    and jdar.id = $2) as \"exists!\"\n    "
-  },
-  "e1aa124d0abe3fce0aa9aa9c9e875ac7b526f4b97636f125382fb74c3ad7e87e": {
+  "e135b43fef8a93d12695d5f5e9478fddff08b7236df1f62bf3307a3568714b37": {
     "describe": {
       "columns": [],
       "nullable": [],
       "parameters": {
         "Left": [
-          "Uuid",
-          "Jsonb"
+          "Uuid"
         ]
       }
     },
-    "query": "\n                            update course_data\n                            set translated_description = $2,\n                                last_synced_at = null\n                            where id = $1\n                            "
+    "query": "\nupdate playlist\nset plays = plays + 1\nwhere id = $1;\n            "
   },
   "e1ddde4b13a9162b65a46404219eb5196ec47f588195ad98149689d876bc7687": {
     "describe": {
@@ -13178,6 +12990,20 @@
       }
     },
     "query": "delete from circle_member where id = $1 and user_id = $2"
+  },
+  "e20b4591bf68cf81d48798fac81a372d0ea11690b17c245381645e6dbc49759e": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nupdate playlist_data\nset other_keywords = $2,\n    translated_keywords = (case when ($3::text is not null) then $3::text else (translated_keywords) end),\n    updated_at = now()\nwhere id = $1 and $2 is distinct from other_keywords"
   },
   "e2879fa5a3c098c9cbcea806e2d51168ba02e91b8f928a7bc2cd1f7f36872faa": {
     "describe": {
@@ -13238,6 +13064,20 @@
       }
     },
     "query": "\nselect id                               as \"id!: ImageId\",\n       name\nfrom image_metadata\n     inner join image_upload on id = image_id\nwhere name <> '' and translated_name = '{}'\nand processed_at is not null\nand name_translate_status is null\norder by coalesce(updated_at, created_at) desc\nlimit 10 for no key update skip locked;\n "
+  },
+  "e31f3ada5672bd6323af502a70568c9604522f3cf73740185ec07e8c932fdfff": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\ndelete\nfrom playlist_data_resource\nwhere playlist_data_id = $1\n   or playlist_data_id = $2\n    and id = $3\n        "
   },
   "e3da19bead8e176b5d8f316d19463ffd6c9afeabcef3bf22510c2d2902417213": {
     "describe": {
@@ -13496,6 +13336,19 @@
     },
     "query": "\nselect published_at  as \"published_at?\"\nfrom jig\nwhere id = $1\n    "
   },
+  "e74edb6ebdd2f203211741698a2fd3d230ea648df727d6b90d9d4b8c8a4d308d": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nupdate playlist_data\nset description = $2,\n    updated_at = now()\nwhere id = $1 and $2 is distinct from description"
+  },
   "e844fcef9a18fca356013f7762a171a6c6d4c0ffa6df42c1e231cf8619c331fc": {
     "describe": {
       "columns": [],
@@ -13543,6 +13396,19 @@
     },
     "query": "select exists(select 1 from user_auth_basic where email = $1::text) as \"exists!\""
   },
+  "e9f633a72fa4fad7e52f4dd94aa9c6d1c2fd6b3f256fd21248297f254a5fbb79": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\ninsert into playlist_data_resource(playlist_data_id, resource_type_id, display_name, resource_content)\nselect $2, resource_type_id, display_name, resource_content\nfrom playlist_data_resource\nwhere playlist_data_id = $1\n        "
+  },
   "eb44eafd34c17ff3cd679cd11f53fcde64f4b6039ba2b1625dd2c78ca2494a2d": {
     "describe": {
       "columns": [],
@@ -13567,19 +13433,6 @@
       }
     },
     "query": "insert into web_media_library_url (media_id, media_url) values ($1, $2)"
-  },
-  "ebf961d5777f0009b3717b25f4328a1d4e8230adc40135440a107f570062e9f6": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text"
-        ]
-      }
-    },
-    "query": "\nupdate course_data\nset description = $2,\n    updated_at = now()\nwhere id = $1 and $2 is distinct from description"
   },
   "ec58db6f7417f0821c8a35acb1da226c7206c7614b4b5f9ab890693e0b9d9e41": {
     "describe": {
@@ -13606,18 +13459,6 @@
       }
     },
     "query": "\ninsert into pro_dev_data_resource(pro_dev_data_id, resource_type_id, display_name, resource_content)\nselect $2, resource_type_id, display_name, resource_content\nfrom pro_dev_data_resource\nwhere pro_dev_data_id = $1\n        "
-  },
-  "ed07a0bf0907ac9428772e386480174ad64a167e00993a53743e1c3b9b33ce08": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\ndelete from course_data where id = $1\n    "
   },
   "ed33c777a7166f4c7db4075c12401c927fb2abd75eb4cd1c30be257e1844ed0d": {
     "describe": {
@@ -13670,6 +13511,29 @@
     },
     "query": "\nwith recursive cte(parent_id) as (\nselect parent_id from category where id = $1\nunion all\nselect c.parent_id from category c inner join cte on cte.parent_id = c.id\n) select exists(select 1 from cte where parent_id = $2) as \"would_cycle!\"\n    "
   },
+  "ee9b881b399e8381b78665a8cfceebbd2f6b7e761a4faca9d3cfc1e8ee88dfde": {
+    "describe": {
+      "columns": [
+        {
+          "name": "count!",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int2Array",
+          "UuidArray"
+        ]
+      }
+    },
+    "query": "\n        with cte as (\n            select (array_agg(cd.id))[1]\n            from playlist_data \"cd\"\n                  inner join playlist on (draft_id = cd.id or (live_id = cd.id and cd.last_synced_at is not null and published_at is not null))\n                  left join playlist_data_resource \"resource\" on cd.id = resource.playlist_data_id\n            where (author_id = $1 or $1 is null)\n                and (cd.draft_or_live = $2 or $2 is null)\n                and (cd.privacy_level = any($3) or $3 = array[]::smallint[])\n                and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n            group by coalesce(updated_at, created_at)\n        )\n        select count(*) as \"count!\" from unnest(array(select cte.array_agg from cte)) with ordinality t(id, ord)\n    "
+  },
   "ef36b57ff9ff33f2f63f72fa62022287ac897ed5075fba89ba47a1356e0e2549": {
     "describe": {
       "columns": [
@@ -13697,7 +13561,7 @@
     },
     "query": "\nselect id as \"id: ImageId\", size as \"size: ImageSize\"\nfrom user_image_library\n         inner join user_image_upload\n                    on user_image_library.id = user_image_upload.image_id\nwhere user_id = $1\n  and id = $2\n  and processing_result is true\n        "
   },
-  "efbe5d524f0f46fa04a069af5a4ab13b6165cd342afaedcd5ae7ae439693ad1b": {
+  "ef78b2700e88dd0d062028332ee0acdcaa7cbe4b6bd68e0d460a44d020920686": {
     "describe": {
       "columns": [
         {
@@ -13716,7 +13580,7 @@
         ]
       }
     },
-    "query": "\ndelete\nfrom course_data_module\nwhere course_data_id = $1 and course_data_module.id is not distinct from $2\nreturning index\n"
+    "query": "\ndelete\nfrom playlist_data_module\nwhere playlist_data_id = $1 and playlist_data_module.id is not distinct from $2\nreturning index\n"
   },
   "eff30ae62c70d51425bbc839b06bca6d805cbb345824e388cdb890f5b7e5c1ef": {
     "describe": {
@@ -13779,19 +13643,6 @@
       }
     },
     "query": "\nselect id            as \"circle_id: CircleId\",\n       display_name,\n       description,\n       image         as \"image!: ImageId\",\n       member_count,\n       creator_id    as \"creator_id: UserId\",\n       created_at,\n       updated_at\nfrom circle\nwhere id = $1\n"
-  },
-  "f012ddbdb2cdf064ed774d1467c83d3ef5d3f9d84638d310b9f935d4d0a5a7c5": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\ninsert into course_data_jig(course_data_id, jig_id, index)\nselect $2, jig_id, index\nfrom course_data_jig\nwhere course_data_id = $1\n        "
   },
   "f030360c43278db52692e52d2028840cde304af4d2dd3be5dc5a41bbffb189be": {
     "describe": {
@@ -13867,6 +13718,170 @@
     },
     "query": "\nselect count(*) as \"count!: i64\"\nfrom resource_data\ninner join resource on resource.live_id = resource_data.id\nwhere (privacy_level = coalesce($1, privacy_level))\n"
   },
+  "f21af517d04789456113caf05c2b4fe7c557905dc2068bdb0ddae2b7890ed454": {
+    "describe": {
+      "columns": [
+        {
+          "name": "playlist_id: PlaylistId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "privacy_level: PrivacyLevel",
+          "ordinal": 1,
+          "type_info": "Int2"
+        },
+        {
+          "name": "creator_id?: UserId",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_id?: UserId",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_name",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "published_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "likes",
+          "ordinal": 6,
+          "type_info": "Int8"
+        },
+        {
+          "name": "plays",
+          "ordinal": 7,
+          "type_info": "Int8"
+        },
+        {
+          "name": "live_up_to_date",
+          "ordinal": 8,
+          "type_info": "Bool"
+        },
+        {
+          "name": "is_liked!",
+          "ordinal": 9,
+          "type_info": "Bool"
+        },
+        {
+          "name": "display_name!",
+          "ordinal": 10,
+          "type_info": "Text"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 11,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "language!",
+          "ordinal": 12,
+          "type_info": "Text"
+        },
+        {
+          "name": "description!",
+          "ordinal": 13,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_description!: Json<HashMap<String,String>>",
+          "ordinal": 14,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "draft_or_live!: DraftOrLive",
+          "ordinal": 15,
+          "type_info": "Int2"
+        },
+        {
+          "name": "other_keywords!",
+          "ordinal": 16,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_keywords!",
+          "ordinal": 17,
+          "type_info": "Text"
+        },
+        {
+          "name": "cover?: (ModuleId, ModuleKind, bool)",
+          "ordinal": 18,
+          "type_info": "Record"
+        },
+        {
+          "name": "categories!: Vec<(CategoryId,)>",
+          "ordinal": 19,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "affiliations!: Vec<(AffiliationId,)>",
+          "ordinal": 20,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "age_ranges!: Vec<(AgeRangeId,)>",
+          "ordinal": 21,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
+          "ordinal": 22,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "items!: Vec<(JigId,)>",
+          "ordinal": 23,
+          "type_info": "RecordArray"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        true,
+        null,
+        true,
+        false,
+        false,
+        false,
+        null,
+        false,
+        true,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int2Array",
+          "UuidArray",
+          "Int4",
+          "Int4",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nwith cte as (\n    select (array_agg(cd.id))[1]\n    from playlist_data \"cd\"\n          left join playlist on (draft_id = cd.id or (live_id = cd.id and cd.last_synced_at is not null and published_at is not null))\n          left join playlist_data_resource \"resource\" on cd.id = resource.playlist_data_id\n    where (author_id = $1 or $1 is null)\n        and (cd.draft_or_live = $2 or $2 is null)\n        and (cd.privacy_level = any($3) or $3 = array[]::smallint[])\n        and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n    group by coalesce(updated_at, created_at)\n    order by coalesce(updated_at, created_at) desc\n),\ncte1 as (\n    select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n   , ord) order by ord\n)\nselect playlist.id                                                                as \"playlist_id: PlaylistId\",\n    privacy_level                                                               as \"privacy_level: PrivacyLevel\",\n    creator_id                                                                  as \"creator_id?: UserId\",\n    author_id                                                                   as \"author_id?: UserId\",\n    (select given_name || ' '::text || family_name\n     from user_profile\n     where user_profile.user_id = author_id)                                     as \"author_name\",\n    published_at,\n    likes,\n    plays,\n    live_up_to_date,\n    exists(select 1 from playlist_like where playlist_id = playlist.id and user_id = $7)    as \"is_liked!\",\n    display_name                                                                  as \"display_name!\",\n    updated_at,\n    language                                                                      as \"language!\",\n    description                                                                   as \"description!\",\n    translated_description                                                        as \"translated_description!: Json<HashMap<String,String>>\",\n    draft_or_live                                                                 as \"draft_or_live!: DraftOrLive\",\n    other_keywords                                                                as \"other_keywords!\",\n    translated_keywords                                                           as \"translated_keywords!\",\n    (\n        select row(playlist_data_module.id, kind, is_complete)\n        from playlist_data_module\n        where playlist_data_id = playlist_data.id and \"index\" = 0\n        order by \"index\"\n    )                                                   as \"cover?: (ModuleId, ModuleKind, bool)\",\n    array(select row (category_id)\n            from playlist_data_category\n            where playlist_data_id = playlist_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n    array(select row (affiliation_id)\n            from playlist_data_affiliation\n            where playlist_data_id = playlist_data.id)          as \"affiliations!: Vec<(AffiliationId,)>\",\n    array(select row (age_range_id)\n            from playlist_data_age_range\n            where playlist_data_id = playlist_data.id)          as \"age_ranges!: Vec<(AgeRangeId,)>\",\n    array(select row (id, display_name, resource_type_id, resource_content)\n                from playlist_data_resource\n                where playlist_data_id = playlist_data.id\n          )                                          as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n    array(\n        select row(jig_id)\n        from playlist_data_jig\n        where playlist_data_jig.playlist_data_id = playlist_data.id\n        order by \"index\"\n    )                                                     as \"items!: Vec<(JigId,)>\"\nfrom cte1\ninner join playlist_data on cte1.id = playlist_data.id\ninner join playlist on (\n    playlist_data.id = playlist.draft_id\n    or (\n        playlist_data.id = playlist.live_id\n        and last_synced_at is not null\n        and playlist.published_at is not null\n    )\n)\nwhere ord > (1 * $5 * $6)\norder by ord asc\nlimit $6\n"
+  },
   "f22eb154024da3bdbf161129b7b54575fbb3142e98c741fdf07afb9d67cffc86": {
     "describe": {
       "columns": [],
@@ -13879,6 +13894,30 @@
       }
     },
     "query": "\nupdate pro_dev_data_module\nset index = index - 1\nwhere pro_dev_data_id = $1\n  and index > $2\n"
+  },
+  "f303598d24c47932f42f3c9b1ff6f3c67a46cda7021fe00590f535f4e4ba698e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "description",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\nselect playlist_data.id,\n       description\nfrom playlist_data\ninner join playlist on live_id = playlist_data.id\nwhere description <> ''\n      and translated_description = '{}'\n      and published_at is not null\n      and description_translate_status is null\norder by coalesce(updated_at, created_at) desc\nlimit 20 for no key update skip locked;\n "
   },
   "f4463110f5544135bbcbb441792aad08a4e34be4dbf2994b9525b6ae031e3b5f": {
     "describe": {
@@ -13981,32 +14020,6 @@
       }
     },
     "query": "\nselect email::text\nfrom user_email\nwhere user_id = $1\n        "
-  },
-  "f64ca413cb24e2061000716eccedd908608e9546bb2970bf9dd078e6a8f6eef2": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\ninsert into course_data_affiliation(course_data_id, affiliation_id)\nselect $2, affiliation_id\nfrom course_data_affiliation\nwhere course_data_id = $1\n        "
-  },
-  "f65d66fd5c93ed44d622034a55b8db3173b70a1800852d6de4064e60718a2cc5": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text"
-        ]
-      }
-    },
-    "query": "\nupdate course_data_resource\nset display_name = coalesce($2, display_name)\nwhere id = $1 and $2 is distinct from display_name\n            "
   },
   "f6dde82c950296987caaaa38d188ce472c5a2bc842f15c3b9642e8021df457be": {
     "describe": {
@@ -14294,19 +14307,6 @@
       }
     },
     "query": "\nupdate subscription\nset\n    auto_renew = coalesce($2, auto_renew),\n    status = coalesce($3, status),\n    current_period_end = coalesce($4, current_period_end),\n    updated_at = now(),\n    latest_invoice_id = $5\nwhere stripe_subscription_id = $1\n"
-  },
-  "fd9a09f133a9dac7bccaa640bc504296985b400ecdda4d3196f62e8800ea6063": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\ninsert into course_like(course_id, user_id)\nvalues ($1, $2)\n            "
   },
   "fe196f274875c6e293c5e80be927ac1e35c46f7699975b24a28b8cc1c136881d": {
     "describe": {
