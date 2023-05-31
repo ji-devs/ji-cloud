@@ -1,5 +1,4 @@
 import { argsToAttrs } from "@utils/attributes";
-import "@elements/core/inputs/old/location";
 import "@elements/core/inputs/primitives/location";
 
 export default {
