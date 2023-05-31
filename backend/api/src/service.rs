@@ -213,7 +213,8 @@ impl GcpAccessKeyStore {
 
         drop(key_handler);
 
-        let token_response = ji_core::google::get_google_token_response_from_metadata_server().await?;
+        let token_response =
+            ji_core::google::get_google_token_response_from_metadata_server().await?;
 
         (*self.0.write().await).update(
             token_response

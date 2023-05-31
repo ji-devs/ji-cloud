@@ -6,8 +6,8 @@ use algolia::{
 };
 use anyhow::Context;
 use chrono::{DateTime, Utc};
-use ji_core::settings::AlgoliaSettings;
 use futures::TryStreamExt;
+use ji_core::settings::AlgoliaSettings;
 use serde::Serialize;
 use std::collections::HashMap;
 use tracing::{instrument, Instrument};
@@ -17,10 +17,10 @@ use shared::{
         asset::PrivacyLevel,
         category::CategoryId,
         circle::CircleId,
-        playlist::PlaylistId,
         image::{ImageId, ImageSize},
         jig::JigId,
         meta::{AffiliationId, AgeRangeId, ImageStyleId, ImageTagIndex, ResourceTypeId},
+        playlist::PlaylistId,
         pro_dev::ProDevId,
         resource::ResourceId,
         user::UserId,

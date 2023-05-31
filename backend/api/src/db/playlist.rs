@@ -5,10 +5,10 @@ use shared::domain::{
     additional_resource::{AdditionalResource, AdditionalResourceId as AddId, ResourceContent},
     asset::{DraftOrLive, PrivacyLevel},
     category::CategoryId,
-    playlist::{PlaylistData, PlaylistId, PlaylistResponse},
     jig::JigId,
     meta::{AffiliationId, AgeRangeId, ResourceTypeId as TypeId},
     module::{LiteModule, ModuleId, ModuleKind},
+    playlist::{PlaylistData, PlaylistId, PlaylistResponse},
     user::{UserId, UserScope},
 };
 use sqlx::{types::Json, PgConnection, PgPool};
@@ -401,7 +401,11 @@ order by ord asc
                 other_keywords: playlist_data_row.other_keywords,
                 translated_keywords: playlist_data_row.translated_keywords,
                 translated_description: playlist_data_row.translated_description.0,
-                items: playlist_data_row.items.into_iter().map(|(it,)| it).collect(),
+                items: playlist_data_row
+                    .items
+                    .into_iter()
+                    .map(|(it,)| it)
+                    .collect(),
             },
         })
         .collect();
@@ -575,7 +579,11 @@ limit $6
                 other_keywords: playlist_data_row.other_keywords,
                 translated_keywords: playlist_data_row.translated_keywords,
                 translated_description: playlist_data_row.translated_description.0,
-                items: playlist_data_row.items.into_iter().map(|(it,)| it).collect(),
+                items: playlist_data_row
+                    .items
+                    .into_iter()
+                    .map(|(it,)| it)
+                    .collect(),
             },
         })
         .collect();

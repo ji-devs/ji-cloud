@@ -2,8 +2,8 @@ use actix_web::{
     web::{self, Data, Json, Path, Query, ServiceConfig},
     HttpResponse,
 };
-use ji_core::settings::RuntimeSettings;
 use futures::try_join;
+use ji_core::settings::RuntimeSettings;
 use shared::{
     api::{endpoints::pro_dev, ApiEndpoint, PathParts},
     domain::{

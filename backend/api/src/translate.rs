@@ -1,6 +1,6 @@
 use anyhow::Context;
-use ji_core::settings::RuntimeSettings;
 use futures::TryStreamExt;
+use ji_core::settings::RuntimeSettings;
 use reqwest::{self};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -790,7 +790,10 @@ limit 20 for no key update skip locked;
                     )
                     .await?;
                 } else {
-                    log::debug!("Empty translation list for playlist_id: {}", t.playlist_data_id);
+                    log::debug!(
+                        "Empty translation list for playlist_id: {}",
+                        t.playlist_data_id
+                    );
                     update_asset_translation_status(
                         &mut txn,
                         "playlist",
@@ -850,7 +853,10 @@ limit 20 for no key update skip locked;
                     )
                     .await?;
                 } else {
-                    log::debug!("Empty translation list for playlist_id: {}", t.playlist_data_id);
+                    log::debug!(
+                        "Empty translation list for playlist_id: {}",
+                        t.playlist_data_id
+                    );
                     update_asset_translation_status(
                         &mut txn,
                         "playlist",

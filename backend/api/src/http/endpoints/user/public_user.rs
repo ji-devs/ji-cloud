@@ -8,8 +8,8 @@ use shared::{
     api::{endpoints::user, ApiEndpoint},
     domain::{
         asset::DraftOrLive,
-        playlist::PlaylistBrowseResponse,
         jig::JigBrowseResponse,
+        playlist::PlaylistBrowseResponse,
         user::{
             public_user::{
                 BrowsePublicUserFollowersResponse as BrowseFollowersResponse,

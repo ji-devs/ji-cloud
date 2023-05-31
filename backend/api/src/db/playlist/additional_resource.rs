@@ -4,10 +4,10 @@ use shared::domain::{
     additional_resource::{AdditionalResourceId, ResourceContent},
     asset::DraftOrLive,
     audio::AudioId,
-    playlist::PlaylistId,
     image::ImageId,
     meta::ResourceTypeId,
     pdf::PdfId,
+    playlist::PlaylistId,
 };
 use sqlx::PgPool;
 use url::Url;

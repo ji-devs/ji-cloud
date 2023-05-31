@@ -17,9 +17,9 @@ use argon2::{
     password_hash::{Encoding, SaltString},
     Argon2, PasswordHasher, PasswordVerifier,
 };
-use ji_core::settings::RuntimeSettings;
 use futures::future::{self, ready, FutureExt};
 use http::StatusCode;
+use ji_core::settings::RuntimeSettings;
 use rand::thread_rng;
 use shared::domain::{
     session::{SessionTokenQuery, AUTH_COOKIE_NAME, CSRF_HEADER_NAME},

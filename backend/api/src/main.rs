@@ -14,11 +14,11 @@
 use std::thread;
 
 use anyhow::Context;
+use ji_cloud_api::{algolia, db, http, jwk, logger, service, translate};
 use ji_core::{
     env::env_bool,
     settings::{self, SettingsManager},
 };
-use ji_cloud_api::{algolia, db, http, jwk, logger, service, translate};
 use sentry_tracing::EventFilter;
 use tracing_subscriber::{fmt::format::FmtSpan, layer::SubscriberExt, EnvFilter, Registry};
 

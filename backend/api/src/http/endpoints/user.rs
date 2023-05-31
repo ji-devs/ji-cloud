@@ -6,15 +6,15 @@ use actix_web::{
 };
 use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
 use chrono::{Duration, Utc};
-use ji_core::{config::IMAGE_BODY_SIZE_LIMIT, settings::RuntimeSettings};
 use futures::try_join;
+use ji_core::{config::IMAGE_BODY_SIZE_LIMIT, settings::RuntimeSettings};
 use rand::thread_rng;
 use sendgrid::v3::Email;
 use serde::{Deserialize, Serialize};
 use shared::{
     api::endpoints::{
         user::{
-            self, Browse, BrowsePlaylists, BrowseFollowers, BrowseFollowing, BrowsePublicUser,
+            self, Browse, BrowseFollowers, BrowseFollowing, BrowsePlaylists, BrowsePublicUser,
             BrowseResources, BrowseUserJigs, ChangePassword, Create, CreateColor, CreateFont,
             CreateProfile, Delete, DeleteColor, DeleteFont, Follow, GetColors, GetFonts,
             GetPublicUser, PatchProfile, Profile, ResetEmail, ResetPassword, Search, SearchUser,

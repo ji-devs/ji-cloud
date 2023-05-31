@@ -9,13 +9,13 @@ use actix_web::{
     web::{method, Data},
     HttpRequest, HttpResponse,
 };
+use futures::Future;
 use ji_core::{
     config::JSON_BODY_LIMIT,
     env::env_bool,
     http::{get_addr, get_tcp_fd},
     settings::RuntimeSettings,
 };
-use futures::Future;
 use sqlx::postgres::PgPool;
 use tracing::Span;
 use tracing_actix_web::{root_span, DefaultRootSpanBuilder, RootSpanBuilder, TracingLogger};

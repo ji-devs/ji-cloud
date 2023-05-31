@@ -2,8 +2,8 @@ use actix_web::{
     web::{self, Data, Json, Path, Query, ServiceConfig},
     HttpResponse,
 };
-use ji_core::settings::RuntimeSettings;
 use futures::try_join;
+use ji_core::settings::RuntimeSettings;
 use shared::{
     api::{endpoints::playlist, ApiEndpoint, PathParts},
     domain::{
@@ -81,9 +81,10 @@ async fn get_live(
 ) -> Result<Json<<playlist::GetLive as ApiEndpoint>::Res>, error::NotFound> {
     let user_id = get_user_id(auth);
 
-    let playlist_response = db::playlist::get_one(&db, path.into_inner(), DraftOrLive::Live, user_id)
-        .await?
-        .ok_or(error::NotFound::ResourceNotFound)?;
+    let playlist_response =
+        db::playlist::get_one(&db, path.into_inner(), DraftOrLive::Live, user_id)
+            .await?
+            .ok_or(error::NotFound::ResourceNotFound)?;
 
     Ok(Json(playlist_response))
 }
@@ -95,9 +96,10 @@ async fn get_draft(
 ) -> Result<Json<<playlist::GetDraft as ApiEndpoint>::Res>, error::NotFound> {
     let user_id = get_user_id(auth);
 
-    let playlist_response = db::playlist::get_one(&db, path.into_inner(), DraftOrLive::Draft, user_id)
-        .await?
-        .ok_or(error::NotFound::ResourceNotFound)?;
+    let playlist_response =
+        db::playlist::get_one(&db, path.into_inner(), DraftOrLive::Draft, user_id)
+            .await?
+            .ok_or(error::NotFound::ResourceNotFound)?;
 
     Ok(Json(playlist_response))
 }

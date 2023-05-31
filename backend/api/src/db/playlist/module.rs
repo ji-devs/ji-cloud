@@ -1,7 +1,7 @@
 use anyhow::Context;
 use shared::domain::{
-    playlist::PlaylistId,
     module::{Module, ModuleBody, ModuleId, ModuleKind},
+    playlist::PlaylistId,
 };
 use sqlx::PgPool;
 use std::cmp;

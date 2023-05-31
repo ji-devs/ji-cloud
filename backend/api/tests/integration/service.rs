@@ -1,7 +1,7 @@
 use shared::config::RemoteTarget;
 
-use ji_core::{env::req_env, settings::EmailClientSettings};
 use ji_cloud_api::service::{mail, s3, storage};
+use ji_core::{env::req_env, settings::EmailClientSettings};
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 #[allow(dead_code)] // temp
@@ -59,10 +59,11 @@ impl TestServicesSettings {
             }
             _ => {
                 log::info!("Falling back to json file for google cloud auth");
-                let (token, project_id) = ji_core::google::get_access_token_response_and_project_id(
-                    RemoteTarget::Local.google_credentials_env_name(),
-                )
-                .await?;
+                let (token, project_id) =
+                    ji_core::google::get_access_token_response_and_project_id(
+                        RemoteTarget::Local.google_credentials_env_name(),
+                    )
+                    .await?;
 
                 let token = token.access_token.unwrap();
 

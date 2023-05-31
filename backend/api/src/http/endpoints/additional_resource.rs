@@ -311,8 +311,12 @@ async fn delete(
             AssetId::PlaylistId(playlist_id) => {
                 db::playlist::authz(&*db, user_id, Some(playlist_id)).await?;
 
-                db::playlist::additional_resource::delete(&*db, playlist_id, additional_resource_id)
-                    .await?;
+                db::playlist::additional_resource::delete(
+                    &*db,
+                    playlist_id,
+                    additional_resource_id,
+                )
+                .await?;
             }
             AssetId::ResourceId(resource_id) => {
                 db::resource::authz(&*db, user_id, Some(resource_id)).await?;
