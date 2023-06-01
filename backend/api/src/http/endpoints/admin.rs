@@ -152,10 +152,16 @@ async fn list_school_names(
     ),
     error::Server,
 > {
-    let schools = db::account::get_school_names_with_schools(db.as_ref(), req.0.verified).await?;
+    let schools = db::account::get_school_names_with_schools(db.as_ref(), req.0.verified)
+        .await?
+        .into_iter()
+        .map(From::from)
+        .collect();
 
     Ok((
-        Json(ListSchoolNamesResponse { schools }),
+        Json(ListSchoolNamesResponse {
+            school_names: schools,
+        }),
         http::StatusCode::OK,
     ))
 }
