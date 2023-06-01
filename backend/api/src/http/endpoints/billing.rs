@@ -299,7 +299,7 @@ async fn get_or_create_customer(
     if account.stripe_customer_id.is_none() {
         let customer_id = match account.account_type {
             AccountType::School => {
-                let school = db::billing::get_school_account_by_account_id(db, &account.account_id)
+                let school = db::account::get_school_account_by_account_id(db, &account.account_id)
                     .await?
                     .ok_or(error::Billing::SchoolNotFound)?;
 

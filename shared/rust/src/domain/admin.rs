@@ -1,4 +1,5 @@
 //! Types for admin routes.
+use crate::domain::billing::{School, SchoolName, SchoolNameId};
 use chrono::Utc;
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
@@ -53,4 +54,29 @@ impl Default for DateFilterType {
     fn default() -> Self {
         Self::OnlyNew
     }
+}
+
+make_path_parts!(SchoolNameVerification => "/v1/admin/school-name");
+
+/// Request to list school names
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ListSchoolNamesRequest {
+    /// If `Some` then whether to filter by verified or unverified
+    pub verified: Option<bool>,
+}
+
+/// List of school names and their associated schools
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ListSchoolNamesResponse {
+    /// List of school names and their associated school account if one exists
+    pub schools: Vec<(SchoolName, Option<School>)>,
+}
+
+/// Request to update verification of a `SchoolName`
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct VerifySchoolNameRequest {
+    /// The ID of the school name to update verification
+    pub school_name_id: SchoolNameId,
+    /// Whether this school name should be marked verified or not
+    pub verified: bool,
 }

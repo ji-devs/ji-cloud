@@ -1,8 +1,9 @@
 use crate::db;
 use shared::domain::billing::{
-    Account, AccountId, AccountType, CustomerId, PaymentMethod, SchoolId, SchoolName, SchoolNameId,
-    SubscriptionStatus, SubscriptionTier, UserAccountSummary,
+    Account, AccountId, AccountType, CustomerId, PaymentMethod, School, SchoolId, SchoolName,
+    SchoolNameId, SubscriptionStatus, SubscriptionTier, UserAccountSummary,
 };
+use shared::domain::image::ImageId;
 use shared::domain::user::UserId;
 use sqlx::PgPool;
 use tracing::{instrument, Instrument};
@@ -320,4 +321,135 @@ pub async fn get_account_id_by_customer_id(
     )
         .fetch_optional(db)
         .await?)
+}
+
+#[instrument(skip(pool))]
+pub async fn get_school_account_by_account_id(
+    pool: &PgPool,
+    account_id: &AccountId,
+) -> sqlx::Result<Option<School>> {
+    let record = sqlx::query!(
+        // language=SQL
+        r#"
+select
+    school_id as "id!: SchoolId",
+    school_name_id as "name!: SchoolNameId",
+    location as "location?: serde_json::Value",
+    email::text as "email!",
+    description,
+    profile_image_id as "profile_image?: ImageId",
+    website,
+    organization_type,
+    account_id as "account_id!: AccountId",
+    created_at,
+    updated_at
+from school
+where account_id = $1
+"#,
+        account_id as &AccountId
+    )
+    .fetch_optional(pool)
+    .await?;
+
+    match record {
+        Some(record) => {
+            let school = School {
+                id: record.id,
+                name: get_school_name(pool, &record.name).await?.unwrap(),
+                location: record.location,
+                email: record.email,
+                description: record.description,
+                profile_image: record.profile_image,
+                website: record.website,
+                organization_type: record.organization_type,
+                account_id: record.account_id,
+                created_at: record.created_at,
+                updated_at: record.updated_at,
+            };
+
+            Ok(Some(school))
+        }
+        None => Ok(None),
+    }
+}
+
+pub async fn get_school_name(
+    pool: &PgPool,
+    school_name_id: &SchoolNameId,
+) -> sqlx::Result<Option<SchoolName>> {
+    sqlx::query_as!(
+        SchoolName,
+        // language=SQL
+        r#"
+select
+    school_name_id as "id!: SchoolNameId",
+    name::text as "name!",
+    verified
+from school_name
+where school_name_id = $1
+"#,
+        school_name_id as &SchoolNameId
+    )
+    .fetch_optional(pool)
+    .await
+}
+
+#[instrument(skip(pool))]
+pub async fn get_school_names_with_schools(
+    pool: &PgPool,
+    verified: Option<bool>,
+) -> sqlx::Result<Vec<(SchoolName, Option<School>)>> {
+    let rows = sqlx::query!(
+        // language=SQL
+        r#"
+select
+    school_name_id as "id!: SchoolNameId",
+    school_name.name::text as "school_name!",
+    school_name.verified,
+    school_id as "school_id?: SchoolId",
+    location as "location?: serde_json::Value",
+    email::text as "email?",
+    description,
+    profile_image_id as "profile_image?: ImageId",
+    website,
+    organization_type,
+    account_id as "account_id?: AccountId",
+    school.created_at,
+    school.updated_at
+from school_name
+left join school using (school_name_id)
+where
+    (not $1::bool is null and (verified = $1::bool))
+    or $1::bool is null
+"#,
+        verified as Option<bool>,
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(rows
+        .into_iter()
+        .map(|record| {
+            let school_name = SchoolName {
+                id: record.id,
+                name: record.school_name,
+                verified: record.verified,
+            };
+
+            let school = record.school_id.map(|school_id| School {
+                id: school_id,
+                name: school_name.clone(),
+                location: record.location,
+                email: record.email.unwrap(),
+                description: record.description,
+                profile_image: record.profile_image,
+                website: record.website,
+                organization_type: record.organization_type,
+                account_id: record.account_id.unwrap(),
+                created_at: record.created_at.unwrap(),
+                updated_at: record.updated_at,
+            });
+            (school_name, school)
+        })
+        .collect())
 }
