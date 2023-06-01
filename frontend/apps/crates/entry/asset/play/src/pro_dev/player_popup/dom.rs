@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use super::PlayerPopup;
-use components::stickers::embed::types::ParseUrlExt;
+use components::unit::unit_value::UnitValueView;
 use dominator::{clone, html, Dom, DomBuilder};
 use futures_signals::{
     map_ref,
@@ -9,22 +9,9 @@ use futures_signals::{
 };
 use gloo::utils::{body, document};
 use itertools::Itertools;
-use shared::{
-    domain::{
-        audio::AudioId,
-        image::ImageId,
-        module::body::_groups::design::YoutubeEmbed,
-        pdf::PdfId,
-        pro_dev::{unit::ProDevUnit, ProDevResponse},
-    },
-    media::MediaLibrary,
-};
-use utils::{
-    component::Component,
-    events,
-    path::{audio_lib_url, pdf_lib_url},
-};
-use web_sys::{HtmlDialogElement, HtmlElement, HtmlIFrameElement, ShadowRoot};
+use shared::domain::pro_dev::{unit::ProDevUnit, ProDevResponse};
+use utils::{component::Component, events};
+use web_sys::{HtmlDialogElement, ShadowRoot};
 
 const UNITS_PER_PAGE: usize = 10;
 
@@ -206,71 +193,8 @@ impl PlayerPopup {
 
     fn render_active_unit(self: &Rc<Self>, unit: ProDevUnit) -> Dom {
         html!("div", {
-            .class("player-window")
-            .child(match unit.value {
-                shared::domain::pro_dev::unit::ProDevUnitValue::ImageId(image_id) => {
-                    self.render_active_image(image_id)
-                }
-                shared::domain::pro_dev::unit::ProDevUnitValue::AudioId(audio_id) => {
-                    self.render_active_audio(audio_id)
-                }
-                shared::domain::pro_dev::unit::ProDevUnitValue::Link(url) => {
-                    self.render_active_link(url)
-                }
-                shared::domain::pro_dev::unit::ProDevUnitValue::PdfId(pdf_id) => {
-                    self.render_active_pdf(pdf_id)
-                }
-                shared::domain::pro_dev::unit::ProDevUnitValue::Video(video) => {
-                    self.render_active_video(video)
-                }
-            })
-        })
-    }
-
-    fn render_active_video(self: &Rc<Self>, video: YoutubeEmbed) -> Dom {
-        html!("video-youtube-player" => HtmlElement, {
-            .prop("videoId", video.url.get_id())
-            .apply(|mut dom| {
-                if let Some(start_at) = video.start_at {
-                    dom = dom.prop("start", start_at);
-                }
-                if let Some(end_at) = video.end_at {
-                    dom = dom.prop("end", end_at);
-                }
-                dom
-            })
-        })
-    }
-
-    fn render_active_image(self: &Rc<Self>, image: ImageId) -> Dom {
-        html!("img-ji", {
-            // would like to get rid if the styles here
-            .prop("size", "full")
-            .prop("id", image.0.to_string())
-            .prop("lib", "user")
-        })
-    }
-
-    fn render_active_link(self: &Rc<Self>, link: url::Url) -> Dom {
-        html!("iframe" => HtmlIFrameElement, {
-            .prop("src", link.to_string())
-        })
-    }
-
-    fn render_active_pdf(self: &Rc<Self>, pdf_id: PdfId) -> Dom {
-        let resp = pdf_lib_url(MediaLibrary::User, pdf_id);
-
-        html!("iframe" => HtmlIFrameElement, {
-            .prop("src", resp)
-        })
-    }
-
-    fn render_active_audio(self: &Rc<Self>, audio_id: AudioId) -> Dom {
-        let resp = audio_lib_url(MediaLibrary::User, audio_id);
-
-        html!("audio", {
-            .prop("src", resp)
-            .prop("controls", true)
+            .class("unit-play")
+            .child(UnitValueView::new(Some(unit.value)).render())
         })
     }
 }

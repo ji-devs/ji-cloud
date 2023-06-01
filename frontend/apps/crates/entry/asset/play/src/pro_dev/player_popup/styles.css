@@ -28,25 +28,18 @@ main {
     font-size: 22px;
     color: #fff;
 }
-.player-window {
-    order: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 24px 80px 0 80px;
+.unit-play {
     display: grid;
-    grid-auto-columns: 1fr;
+    margin: 24px 80px 0 80px;
     border-radius: 16px;
     overflow: hidden;
+    object-fit: contain;
 }
-.player-window > * {
+.unit-edit > * {
     width: 100%;
     height: 100%;
-    border: none; /* iframe */
-    object-fit: contain; /* img */
-}
-.player-window audio {
-    height: 40px;
+    border-radius: 16px;
+    object-fit: contain; 
 }
 .middle-section {
     display: grid;

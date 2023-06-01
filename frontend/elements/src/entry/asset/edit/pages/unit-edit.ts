@@ -78,7 +78,7 @@ export class _ extends LitElement {
                   column-gap: 40px;
                   flex-direction: row;
                   align-items: stretch;
-                  height: 60vh;
+                  height: 50vh;
                   max-height: 50vh;
                 }
 
@@ -116,11 +116,17 @@ export class _ extends LitElement {
 
                 ::slotted([slot="unit-play"]) {
                   display: grid;
-                  height: 100%;
                   border-radius: 16px;
                   overflow: hidden;
                   object-fit: contain;
+                  height: 100%;
                 }
+                /* .unit-play {
+                  display: flex;
+                  border-radius: 16px;
+                  overflow: hidden;
+                  object-fit: contain;
+                } */
 
                 main .save ::slotted([slot="add"]) {
                   /* max-height: 45px; */

@@ -88,7 +88,6 @@ impl UnitValueView {
             .prop("id", image.0.to_string())
             .prop("lib", "user")
             .prop("borderRadius", "16px")
-            .style("position", "relative")
         })
     }
 
