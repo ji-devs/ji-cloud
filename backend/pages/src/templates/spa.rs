@@ -73,7 +73,9 @@ struct SpaPageInfo {
 fn spa_template(settings: &RuntimeSettings, spa: SpaPage) -> actix_web::Result<HttpResponse> {
     let google_maps_url = match spa {
         // todo: `Cow::borrowed` ('static)
-        SpaPage::User | SpaPage::Community => Some(settings.remote_target().google_maps_url().to_owned()),
+        SpaPage::User | SpaPage::Community => {
+            Some(settings.remote_target().google_maps_url().to_owned())
+        }
         _ => None,
     };
 
