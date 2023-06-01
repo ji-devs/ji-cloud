@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use super::PlayerPopup;
-use components::{stickers::embed::types::ParseUrlExt, unit::unit_value::UnitValueView};
+use components::unit::unit_value::UnitValueView;
 use dominator::{clone, html, Dom, DomBuilder};
 use futures_signals::{
     map_ref,
@@ -9,22 +9,9 @@ use futures_signals::{
 };
 use gloo::utils::{body, document};
 use itertools::Itertools;
-use shared::{
-    domain::{
-        audio::AudioId,
-        image::ImageId,
-        module::body::_groups::design::YoutubeEmbed,
-        pdf::PdfId,
-        pro_dev::{unit::{ProDevUnit, ProDevUnitValue}, ProDevResponse},
-    },
-    media::MediaLibrary,
-};
-use utils::{
-    component::Component,
-    events,
-    path::{audio_lib_url, pdf_lib_url}, unwrap::UnwrapJiExt,
-};
-use web_sys::{HtmlDialogElement, HtmlElement, HtmlIFrameElement, ShadowRoot};
+use shared::domain::pro_dev::{unit::ProDevUnit, ProDevResponse};
+use utils::{component::Component, events};
+use web_sys::{HtmlDialogElement, ShadowRoot};
 
 const UNITS_PER_PAGE: usize = 10;
 
@@ -41,7 +28,7 @@ impl Component<PlayerPopup> for Rc<PlayerPopup> {
             .child(html!("main", {
                 .child_signal(state.active_unit_signal().map(clone!(state => move|unit| {
                     unit.map(|unit| {
-                        state.render_active_unit(unit)                
+                        state.render_active_unit(unit)
                     })
                 })))
                 .child(html!("div", {
