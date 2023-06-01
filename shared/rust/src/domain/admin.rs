@@ -65,11 +65,29 @@ pub struct ListSchoolNamesRequest {
     pub verified: Option<bool>,
 }
 
+/// A school name and it's usage in a School
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct SchoolNameUsageResponse {
+    /// A school name
+    pub school_name: SchoolName,
+    /// An optional usage of a school name
+    pub school: Option<School>,
+}
+
+impl From<(SchoolName, Option<School>)> for SchoolNameUsageResponse {
+    fn from((school_name, school): (SchoolName, Option<School>)) -> Self {
+        Self {
+            school_name,
+            school,
+        }
+    }
+}
+
 /// List of school names and their associated schools
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ListSchoolNamesResponse {
     /// List of school names and their associated school account if one exists
-    pub schools: Vec<(SchoolName, Option<School>)>,
+    pub school_names: Vec<SchoolNameUsageResponse>,
 }
 
 /// Request to update verification of a `SchoolName`
