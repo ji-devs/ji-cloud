@@ -6702,6 +6702,98 @@
     },
     "query": "insert into web_media_upload (media_id, uploaded_at) values ($1, now())"
   },
+  "7bf271906c762e0185b129234abdd0fec73ab2ad85583bf003c0bb3a6cde63d7": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: SchoolNameId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "school_name!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "verified",
+          "ordinal": 2,
+          "type_info": "Bool"
+        },
+        {
+          "name": "school_id?: SchoolId",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "location?: serde_json::Value",
+          "ordinal": 4,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "email?",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "description",
+          "ordinal": 6,
+          "type_info": "Text"
+        },
+        {
+          "name": "profile_image?: ImageId",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "website",
+          "ordinal": 8,
+          "type_info": "Text"
+        },
+        {
+          "name": "organization_type",
+          "ordinal": 9,
+          "type_info": "Text"
+        },
+        {
+          "name": "account_id?: AccountId",
+          "ordinal": 10,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 11,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 12,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        null,
+        false,
+        true,
+        true,
+        null,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Bool"
+        ]
+      }
+    },
+    "query": "\nselect\n    school_name_id as \"id!: SchoolNameId\",\n    school_name.name::text as \"school_name!\",\n    school_name.verified,\n    school_id as \"school_id?: SchoolId\",\n    location as \"location?: serde_json::Value\",\n    email::text as \"email?\",\n    description,\n    profile_image_id as \"profile_image?: ImageId\",\n    website,\n    organization_type,\n    account_id as \"account_id?: AccountId\",\n    school.created_at,\n    school.updated_at\nfrom school_name\nleft join school using (school_name_id)\nwhere\n    (not $1::bool is null and (verified = $1::bool))\n    or $1::bool is null\n"
+  },
   "7c3feba53bc6a89c8e97b1928038ef8b335e2b61bf7029c80c33eb14361abdc8": {
     "describe": {
       "columns": [

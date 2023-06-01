@@ -6,6 +6,8 @@ use actix_web::{
 use chrono::{Duration, Utc};
 use ji_core::settings::RuntimeSettings;
 use serde::ser::Serialize;
+use shared::api::endpoints::admin::ListSchoolNames;
+use shared::domain::admin::ListSchoolNamesResponse;
 use shared::{
     api::{
         endpoints::admin::{self, CreateUpdateSubscriptionPlan},
@@ -24,16 +26,6 @@ use crate::{
     extractor::{ScopeAdmin, TokenUserNoCsrfWithScope, TokenUserWithScope},
     token::{create_auth_token, SessionMask},
 };
-
-async fn create_or_update_subscription_plan(
-    _auth: TokenUserWithScope<ScopeAdmin>,
-    db: Data<PgPool>,
-    req: Json<<CreateUpdateSubscriptionPlan as ApiEndpoint>::Req>,
-) -> actix_web::Result<HttpResponse, error::Server> {
-    db::billing::upsert_subscription_plan(&db, req.into_inner()).await?;
-
-    Ok(HttpResponse::Created().finish())
-}
 
 /// Impersonate another user
 async fn impersonate(
@@ -139,6 +131,35 @@ async fn export_data(
     Ok(file.into_response(&req))
 }
 
+async fn create_or_update_subscription_plan(
+    _auth: TokenUserWithScope<ScopeAdmin>,
+    db: Data<PgPool>,
+    req: Json<<CreateUpdateSubscriptionPlan as ApiEndpoint>::Req>,
+) -> actix_web::Result<HttpResponse, error::Server> {
+    db::billing::upsert_subscription_plan(&db, req.into_inner()).await?;
+
+    Ok(HttpResponse::Created().finish())
+}
+
+async fn list_school_names(
+    _auth: TokenUserWithScope<ScopeAdmin>,
+    db: Data<PgPool>,
+    req: Json<<ListSchoolNames as ApiEndpoint>::Req>,
+) -> Result<
+    (
+        Json<<ListSchoolNames as ApiEndpoint>::Res>,
+        http::StatusCode,
+    ),
+    error::Server,
+> {
+    let schools = db::account::get_school_names_with_schools(db.as_ref(), req.0.verified).await?;
+
+    Ok((
+        Json(ListSchoolNamesResponse { schools }),
+        http::StatusCode::OK,
+    ))
+}
+
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
         <admin::Impersonate as ApiEndpoint>::Path::PATH,
@@ -149,9 +170,13 @@ pub fn configure(cfg: &mut ServiceConfig) {
         admin::ExportData::METHOD.route().to(export_data),
     )
     .route(
-        <admin::CreateUpdateSubscriptionPlan as ApiEndpoint>::Path::PATH,
+        <CreateUpdateSubscriptionPlan as ApiEndpoint>::Path::PATH,
         admin::CreateUpdateSubscriptionPlan::METHOD
             .route()
             .to(create_or_update_subscription_plan),
+    )
+    .route(
+        <ListSchoolNames as ApiEndpoint>::Path::PATH,
+        admin::ListSchoolNames::METHOD.route().to(list_school_names),
     );
 }
