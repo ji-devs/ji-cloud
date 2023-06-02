@@ -1,4 +1,4 @@
-use crate::{jig::state::JigPlayer, playlist::state::PlaylistPlayer, pro_dev::state::ProDevPlayer};
+use crate::{course::state::CoursePlayer, jig::state::JigPlayer, playlist::state::PlaylistPlayer};
 use components::overlay::container::OverlayContainer;
 use dominator::{html, Dom};
 use futures_signals::signal::{Signal, SignalExt};
@@ -27,8 +27,8 @@ impl Router {
                 utils::routes::AssetPlayRoute::Playlist(playlist_id, player_options) => {
                     PlaylistPlayer::new(playlist_id, player_options).render()
                 }
-                utils::routes::AssetPlayRoute::ProDev(pro_dev_id, unit_id, player_options) => {
-                    ProDevPlayer::new(pro_dev_id, unit_id, player_options).render()
+                utils::routes::AssetPlayRoute::Course(course_id, unit_id, player_options) => {
+                    CoursePlayer::new(course_id, unit_id, player_options).render()
                 }
             }),
             _ => None,

@@ -1,6 +1,6 @@
 use crate::edit::sidebar::{
     state::{PlaylistSpot, SidebarSpot, SidebarSpotItem},
-    ProDevSpot,
+    CourseSpot,
 };
 
 use super::super::state::Sidebar;
@@ -102,9 +102,9 @@ pub fn on_iframe_message(state: Rc<Sidebar>, message: ModuleToJigEditorMessage) 
                         PlaylistSpot::Cover(module) => module.id,
                         PlaylistSpot::Item(_) => unreachable!("Only modules should be here"),
                     }),
-                    SidebarSpotItem::ProDev(item) => item.as_ref().map(|item| match &**item {
-                        ProDevSpot::Cover(item) => item.id,
-                        ProDevSpot::Unit(_) => unreachable!("Only Units should be here"),
+                    SidebarSpotItem::Course(item) => item.as_ref().map(|item| match &**item {
+                        CourseSpot::Cover(item) => item.id,
+                        CourseSpot::Unit(_) => unreachable!("Only Units should be here"),
                     }),
                 };
                 match current_module_id {

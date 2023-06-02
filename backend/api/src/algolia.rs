@@ -17,11 +17,11 @@ use shared::{
         asset::PrivacyLevel,
         category::CategoryId,
         circle::CircleId,
+        course::CourseId,
         image::{ImageId, ImageSize},
         jig::JigId,
         meta::{AffiliationId, AgeRangeId, ImageStyleId, ImageTagIndex, ResourceTypeId},
         playlist::PlaylistId,
-        pro_dev::ProDevId,
         resource::ResourceId,
         user::UserId,
     },
@@ -148,7 +148,7 @@ struct BatchPlaylist<'a> {
 }
 
 #[derive(Serialize)]
-struct BatchProDev<'a> {
+struct BatchCourse<'a> {
     name: &'a str,
     language: &'a str,
     description: &'a str,
@@ -221,7 +221,7 @@ enum AlgoliaIndices {
     PublicUserIndex,
     UserIndex,
     ResourceIndex,
-    ProDevIndex,
+    CourseIndex,
 }
 
 impl AlgoliaIndices {
@@ -233,7 +233,7 @@ impl AlgoliaIndices {
             Self::CircleIndex => migration::CIRCLE_INDEX,
             Self::PublicUserIndex => migration::PUBLIC_USER_INDEX,
             Self::ResourceIndex => migration::RESOURCE_INDEX,
-            Self::ProDevIndex => migration::PRO_DEV_INDEX,
+            Self::CourseIndex => migration::COURSE_INDEX,
             Self::UserIndex => migration::USER_INDEX,
         }
     }
@@ -252,7 +252,7 @@ pub struct Manager {
     pub circle_index: String,
     pub public_user_index: String,
     pub user_index: String,
-    pub pro_dev_index: String,
+    pub course_index: String,
 }
 
 impl Manager {
@@ -266,7 +266,7 @@ impl Manager {
             playlist_index,
             circle_index,
             public_user_index,
-            pro_dev_index,
+            course_index,
             user_index,
         ) = match settings {
             Some(settings) => match (
@@ -277,7 +277,7 @@ impl Manager {
                 settings.playlist_index,
                 settings.circle_index,
                 settings.public_user_index,
-                settings.pro_dev_index,
+                settings.course_index,
                 settings.user_index,
             ) {
                 (
@@ -289,7 +289,7 @@ impl Manager {
                     Some(circle_index),
                     Some(public_user_index),
                     Some(user_index),
-                    Some(pro_dev_index),
+                    Some(course_index),
                 ) => (
                     settings.application_id,
                     key,
@@ -300,7 +300,7 @@ impl Manager {
                     circle_index,
                     public_user_index,
                     user_index,
-                    pro_dev_index,
+                    course_index,
                 ),
                 _ => return Ok(None),
             },
@@ -316,7 +316,7 @@ impl Manager {
             circle_index,
             public_user_index,
             user_index,
-            pro_dev_index,
+            course_index,
             db,
         }))
     }
@@ -352,7 +352,7 @@ impl Manager {
                     .await
                     .context("update users task errored"),
                 7 => self
-                    .update_pro_devs()
+                    .update_courses()
                     .await
                     .context("update pro devs task errored"),
                 _ => continue,
@@ -401,8 +401,8 @@ impl Manager {
             migration::PUBLIC_USER_HASH.to_owned(),
             AlgoliaIndices::ResourceIndex.as_str(),
             migration::RESOURCE_HASH.to_owned(),
-            AlgoliaIndices::ProDevIndex.as_str(),
-            migration::PRO_DEV_HASH.to_owned(),
+            AlgoliaIndices::CourseIndex.as_str(),
+            migration::COURSE_HASH.to_owned(),
             AlgoliaIndices::UserIndex.as_str(),
             migration::USER_HASH.to_owned(),
         )
@@ -436,8 +436,8 @@ impl Manager {
                     migration::public_user_index(&mut txn, &self.inner, &self.public_user_index)
                         .await?
                 }
-                migration::PRO_DEV_INDEX => {
-                    migration::pro_dev_index(&mut txn, &self.inner, &self.pro_dev_index).await?
+                migration::COURSE_INDEX => {
+                    migration::course_index(&mut txn, &self.inner, &self.course_index).await?
                 }
                 _ => {
                     println!("index name: {}", i);
@@ -535,8 +535,8 @@ impl Manager {
         Ok(ids?)
     }
 
-    async fn batch_pro_devs(&self, batch: BatchWriteRequests) -> anyhow::Result<Vec<Uuid>> {
-        let resp = self.inner.batch(&self.pro_dev_index, &batch).await?;
+    async fn batch_courses(&self, batch: BatchWriteRequests) -> anyhow::Result<Vec<Uuid>> {
+        let resp = self.inner.batch(&self.course_index, &batch).await?;
 
         let ids: Result<Vec<_>, _> = resp
             .object_ids
@@ -1390,7 +1390,7 @@ limit 100 for no key update skip locked;
         Ok(true)
     }
 
-    async fn update_pro_devs(&self) -> anyhow::Result<bool> {
+    async fn update_courses(&self) -> anyhow::Result<bool> {
         log::info!("reached update pro dev");
         let mut txn = self.db.begin().await?;
 
@@ -1398,30 +1398,30 @@ limit 100 for no key update skip locked;
         let requests: Vec<_> = sqlx::query!(
             //language=SQL
             r#"
-select pro_dev.id,
+select course.id,
        display_name                                                                                                 as "name",
        language                                                                                                     as "language!",
        description                                                                                                  as "description!",
        translated_description                                                                                       as "translated_description!: Json<HashMap<String, String>>",
        translated_name                                                                                              as "translated_name!: Json<HashMap<String, String>>",
        array((select resource_type_id
-               from pro_dev_data_resource
-               where pro_dev_data_id = pro_dev_data.id))                                                              as "resource_types!",
+               from course_data_resource
+               where course_data_id = course_data.id))                                                              as "resource_types!",
        array((select resource_type.display_name
              from resource_type
-                       inner join pro_dev_data_resource on resource_type.id = pro_dev_data_resource.resource_type_id
-            where pro_dev_data_resource.pro_dev_data_id = pro_dev_data.id))                                            as "resource_type_names!",
+                       inner join course_data_resource on resource_type.id = course_data_resource.resource_type_id
+            where course_data_resource.course_data_id = course_data.id))                                            as "resource_type_names!",
        array((select category_id
-              from pro_dev_data_category
-              where pro_dev_data_id = pro_dev_data.id))                                                               as "categories!",
+              from course_data_category
+              where course_data_id = course_data.id))                                                               as "categories!",
        array((select name
               from category
-                       inner join pro_dev_data_category on category.id = pro_dev_data_category.category_id
-              where pro_dev_data_category.pro_dev_data_id = pro_dev_data.id))                                          as "category_names!",
+                       inner join course_data_category on category.id = course_data_category.category_id
+              where course_data_category.course_data_id = course_data.id))                                          as "category_names!",
         array(
            (select unit_id
-            from pro_dev_data_unit
-            where pro_dev_data_unit.pro_dev_data_id = pro_dev_data.id)
+            from course_data_unit
+            where course_data_unit.course_data_id = course_data.id)
        )                                                                                                            as "units!",
        privacy_level                                                                                                as "privacy_level!: PrivacyLevel",
        author_id                                                                                                    as "author_id",
@@ -1429,12 +1429,12 @@ select pro_dev.id,
        translated_keywords                                                                                          as "translated_keywords!",
        (select given_name || ' '::text || family_name
         from user_profile
-        where user_profile.user_id = pro_dev.author_id)                                                             as "author_name",
+        where user_profile.user_id = course.author_id)                                                             as "author_name",
         likes                                                                                                       as "likes!",
         plays                                                                                                       as "plays!",
         published_at                                                                                                as "published_at"
-from pro_dev
-         inner join pro_dev_data on live_id = pro_dev_data.id
+from course
+         inner join course_data on live_id = course_data.id
 where (last_synced_at is null and published_at is not null)
     or (updated_at is not null and last_synced_at < updated_at)
     or (published_at < now() is true and last_synced_at < published_at)
@@ -1464,7 +1464,7 @@ limit 100 for no key update skip locked;
             }
 
             algolia::request::BatchWriteRequest::UpdateObject {
-            body: match serde_json::to_value(&BatchProDev {
+            body: match serde_json::to_value(&BatchCourse {
                 name: &row.name,
                 language: &row.language,
                 description: &row.description,
@@ -1499,19 +1499,19 @@ limit 100 for no key update skip locked;
             return Ok(true);
         }
 
-        log::debug!("Updating a batch of {} pro_dev(s)", requests.len());
+        log::debug!("Updating a batch of {} course(s)", requests.len());
 
         let request = algolia::request::BatchWriteRequests { requests };
-        let ids = self.batch_pro_devs(request).await?;
+        let ids = self.batch_courses(request).await?;
 
-        log::debug!("Updated a batch of {} pro_dev(s)", ids.len());
+        log::debug!("Updated a batch of {} course(s)", ids.len());
 
         sqlx::query!(
             //language=SQL
             r#"
-update pro_dev_data
+update course_data
 set last_synced_at = now()
-where pro_dev_data.id = any (select live_id from pro_dev where pro_dev.id = any ($1))
+where course_data.id = any (select live_id from course where course.id = any ($1))
 "#,
             &ids
         )
@@ -1520,7 +1520,7 @@ where pro_dev_data.id = any (select live_id from pro_dev where pro_dev.id = any 
 
         txn.commit().await?;
 
-        log::info!("completed update pro_dev");
+        log::info!("completed update course");
 
         Ok(true)
     }
@@ -1633,19 +1633,19 @@ where pro_dev_data.id = any (select live_id from pro_dev where pro_dev.id = any 
         Ok(())
     }
 
-    pub async fn delete_pro_dev(&self, id: ProDevId) {
-        if let Err(e) = self.try_delete_pro_dev(id).await {
+    pub async fn delete_course(&self, id: CourseId) {
+        if let Err(e) = self.try_delete_course(id).await {
             log::warn!(
-                "failed to delete pro_dev with id {} from algolia: {}",
+                "failed to delete course with id {} from algolia: {}",
                 id.0.hyphenated(),
                 e
             );
         }
     }
 
-    pub async fn try_delete_pro_dev(&self, ProDevId(id): ProDevId) -> anyhow::Result<()> {
+    pub async fn try_delete_course(&self, CourseId(id): CourseId) -> anyhow::Result<()> {
         self.inner
-            .delete_object(&self.pro_dev_index, &id.to_string())
+            .delete_object(&self.course_index, &id.to_string())
             .await?;
 
         Ok(())
@@ -1815,7 +1815,7 @@ pub struct Client {
     circle_index: String,
     public_user_index: String,
     user_index: String,
-    pro_dev_index: String,
+    course_index: String,
 }
 
 impl Client {
@@ -1832,7 +1832,7 @@ impl Client {
                 circle_index,
                 public_user_index,
                 user_index,
-                pro_dev_index,
+                course_index,
             ) = match (
                 settings.backend_search_key,
                 settings.media_index,
@@ -1842,7 +1842,7 @@ impl Client {
                 settings.circle_index,
                 settings.public_user_index,
                 settings.user_index,
-                settings.pro_dev_index,
+                settings.course_index,
             ) {
                 (
                     Some(key),
@@ -1853,7 +1853,7 @@ impl Client {
                     Some(circle_index),
                     Some(public_user_index),
                     Some(user_index),
-                    Some(pro_dev_index),
+                    Some(course_index),
                 ) => (
                     Inner::new(app_id, ApiKey(key))?,
                     media_index,
@@ -1863,7 +1863,7 @@ impl Client {
                     circle_index,
                     public_user_index,
                     user_index,
-                    pro_dev_index,
+                    course_index,
                 ),
                 _ => return Ok(None),
             };
@@ -1877,7 +1877,7 @@ impl Client {
                 circle_index,
                 public_user_index,
                 user_index,
-                pro_dev_index,
+                course_index,
             }))
         } else {
             Ok(None)
@@ -2579,7 +2579,7 @@ impl Client {
     }
 
     #[instrument(skip_all)]
-    pub async fn search_pro_dev(
+    pub async fn search_course(
         &self,
         query: &str,
         page: Option<u32>,
@@ -2656,7 +2656,7 @@ impl Client {
         let results: SearchResponse = self
             .inner
             .search(
-                &self.pro_dev_index,
+                &self.course_index,
                 SearchQuery::<'_, String, AndFilter> {
                     query: Some(query),
                     page,

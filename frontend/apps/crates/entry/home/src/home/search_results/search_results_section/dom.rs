@@ -125,7 +125,7 @@ impl SearchResultsSection {
                             ).render(Some("thumbnails"))
                         }))
                     },
-                    Asset::ProDev(_) => todo!()
+                    Asset::Course(_) => todo!()
                 }
             })
             .prop("description", asset.description().clone())
@@ -212,7 +212,7 @@ impl SearchResultsSection {
                                             ResourceEditRoute::Landing
                                         )))
                                     },
-                                    AssetId::ProDevId(_) => todo!()
+                                    AssetId::CourseId(_) => todo!()
                                 }.to_string()
                             })
                             .event(clone!(asset => move |_: events::Click| {
@@ -293,7 +293,7 @@ impl SearchResultsSection {
                             }
                         })
                     },
-                    AssetType::ProDev => todo!()
+                    AssetType::Course => todo!()
                 }
             })
         })

@@ -3,10 +3,10 @@ use std::{collections::HashSet, iter::FromIterator};
 use futures_signals::signal::Mutable;
 use shared::domain::{
     category::CategoryId,
+    course::CourseSearchQuery,
     jig::JigSearchQuery,
     meta::{AffiliationId, AgeRangeId},
     playlist::PlaylistSearchQuery,
-    pro_dev::ProDevSearchQuery,
     resource::ResourceSearchQuery,
     user::UserProfile,
 };
@@ -120,8 +120,8 @@ impl SearchSelected {
         }
     }
 
-    pub fn to_pro_dev_search_request(&self) -> ProDevSearchQuery {
-        ProDevSearchQuery {
+    pub fn to_course_search_request(&self) -> CourseSearchQuery {
+        CourseSearchQuery {
             q: self.query.get_cloned(),
             categories: self.categories.get_cloned().into_iter().collect(),
             page: Some(0),

@@ -21,7 +21,7 @@ impl PlayerPopup {
                 AssetId::JigId(_) => "aspect-ratio",
                 AssetId::PlaylistId(_) => "full-screen",
                 AssetId::ResourceId(_) => unreachable!(),
-                AssetId::ProDevId(_) => "full-screen",
+                AssetId::CourseId(_) => "full-screen",
             })
             .prop("preview", state.player_options.is_draft())
             .apply_if(slot.is_some(), |dom| {
@@ -57,8 +57,8 @@ impl PlayerPopup {
                                     (AssetId::PlaylistId(playlist_id), _module_id, AssetPlayerOptions::Playlist(player_options), _unit_id) => {
                                         Route::Asset(AssetRoute::Play(AssetPlayRoute::Playlist(playlist_id, player_options.clone())))
                                     },
-                                    (AssetId::ProDevId(pro_dev_id), _module_id, AssetPlayerOptions::ProDev(player_options), unit_id, ) => {
-                                        Route::Asset(AssetRoute::Play(AssetPlayRoute::ProDev(pro_dev_id, unit_id, player_options.clone())))
+                                    (AssetId::CourseId(course_id), _module_id, AssetPlayerOptions::Course(player_options), unit_id, ) => {
+                                        Route::Asset(AssetRoute::Play(AssetPlayRoute::Course(course_id, unit_id, player_options.clone())))
                                     },
                                     _ => {
                                         panic!("Invalid asset id/module id/player_options combinations")

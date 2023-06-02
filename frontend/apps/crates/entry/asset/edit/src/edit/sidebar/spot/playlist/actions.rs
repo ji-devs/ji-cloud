@@ -29,7 +29,7 @@ pub async fn save_playlist(state: &Rc<SpotState>) {
                         PlaylistSpot::Item(jig) => Some(jig.id),
                     },
                 },
-                SidebarSpotItem::ProDev(_) => unreachable!(),
+                SidebarSpotItem::Course(_) => unreachable!(),
             }
         })
         .collect_vec();
@@ -60,7 +60,7 @@ pub async fn assign_asset_to_empty_spot(_state: &Rc<SpotState>, asset: Asset) ->
         Asset::Jig(jig) => jig,
         Asset::Resource(_) => todo!(),
         Asset::Playlist(_) => unreachable!(),
-        Asset::ProDev(_) => todo!(),
+        Asset::Course(_) => todo!(),
     };
     SidebarSpot::new_playlist_item(jig)
 }

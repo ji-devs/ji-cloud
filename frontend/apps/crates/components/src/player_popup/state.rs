@@ -1,9 +1,9 @@
 use std::rc::Rc;
 
 use futures_signals::signal::Mutable;
-use shared::domain::{asset::AssetId, module::ModuleId, pro_dev::unit::ProDevUnitId};
+use shared::domain::{asset::AssetId, course::unit::CourseUnitId, module::ModuleId};
 use utils::asset::{
-    AssetPlayerOptions, JigPlayerOptions, PlaylistPlayerOptions, ProDevPlayerOptions,
+    AssetPlayerOptions, CoursePlayerOptions, JigPlayerOptions, PlaylistPlayerOptions,
 };
 
 use super::PreviewPopupCallbacks;
@@ -11,7 +11,7 @@ use super::PreviewPopupCallbacks;
 pub struct PlayerPopup {
     pub asset_id: AssetId,
     pub module_id: Option<ModuleId>,
-    pub unit_id: Option<ProDevUnitId>,
+    pub unit_id: Option<CourseUnitId>,
     pub player_options: AssetPlayerOptions,
     pub open: Mutable<bool>,
     pub callbacks: PreviewPopupCallbacks,
@@ -22,7 +22,7 @@ impl PlayerPopup {
     pub fn new(
         asset_id: AssetId,
         module_id: Option<ModuleId>,
-        unit_id: Option<ProDevUnitId>,
+        unit_id: Option<CourseUnitId>,
         player_options: AssetPlayerOptions,
         callbacks: PreviewPopupCallbacks,
     ) -> Rc<Self> {
@@ -45,7 +45,7 @@ impl PlayerPopup {
             AssetId::JigId(_) => JigPlayerOptions::default().into(),
             AssetId::PlaylistId(_) => PlaylistPlayerOptions::default().into(),
             AssetId::ResourceId(_) => unreachable!(),
-            AssetId::ProDevId(_) => ProDevPlayerOptions::default().into(),
+            AssetId::CourseId(_) => CoursePlayerOptions::default().into(),
         };
         Rc::new(Self {
             asset_id,

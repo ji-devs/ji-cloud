@@ -73,24 +73,24 @@ pub fn render_studio() -> Dom {
                 .text("My Resources")
             }),
             html!("button-rect", {
-                .prop("slot", "pro-dev-create")
+                .prop("slot", "course-create")
                 .prop("color", "red")
                 .prop("kind", "filled")
                 .prop("size", "small")
                 .event(|_: events::Click| {
-                    actions::create_pro_dev();
+                    actions::create_course();
                 })
-                .text("Create a Pro-Dev Course")
+                .text("Create a Course")
             }),
             html!("button-rect", {
-                .prop("slot", "pro-dev-gallery")
+                .prop("slot", "course-gallery")
                 .prop("color", "blue")
                 .prop("kind", "text")
                 .prop("size", "small")
                 .apply(move |dom| on_click_go_to_url!(dom, {
-                    Route::Asset(AssetRoute::ProDevGallery).to_string()
+                    Route::Asset(AssetRoute::CourseGallery).to_string()
                 }))
-                .text("My Pro-Dev Courses")
+                .text("My Courses")
             }),
             html!("button-rect", {
                 .prop("slot", "help")

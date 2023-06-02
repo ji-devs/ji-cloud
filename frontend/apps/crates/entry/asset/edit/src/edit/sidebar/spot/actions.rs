@@ -2,8 +2,8 @@ use super::jig::actions as jig_spot_actions;
 use super::playlist::actions as playlist_spot_actions;
 use super::state::SpotState;
 use super::{
-    jig::actions as jig_actions, playlist::actions as playlist_actions,
-    pro_dev::actions as pro_dev_actions,
+    course::actions as course_actions, jig::actions as jig_actions,
+    playlist::actions as playlist_actions,
 };
 use crate::edit::sidebar::{
     dragging::state::State as DragState,
@@ -49,7 +49,7 @@ pub fn add_empty_module_after(state: Rc<SpotState>) {
         }
         shared::domain::asset::AssetId::PlaylistId(_) => unreachable!(),
         shared::domain::asset::AssetId::ResourceId(_) => unreachable!(),
-        shared::domain::asset::AssetId::ProDevId(_) => {
+        shared::domain::asset::AssetId::CourseId(_) => {
             state
                 .sidebar
                 .asset_edit_state
@@ -59,7 +59,7 @@ pub fn add_empty_module_after(state: Rc<SpotState>) {
             state
                 .sidebar
                 .asset_edit_state
-                .set_route_pro_dev(ProDevEditRoute::Unit(None));
+                .set_route_course(CourseEditRoute::Unit(None));
         }
     }
 }
@@ -95,8 +95,8 @@ pub fn move_index(state: Rc<SpotState>, move_target: MoveTarget) {
                 SidebarSpotItem::Playlist(_) => {
                     playlist_actions::save_playlist(&state).await;
                 },
-                SidebarSpotItem::ProDev(unit) => {
-                    pro_dev_actions::update_unit_index(
+                SidebarSpotItem::Course(unit) => {
+                    course_actions::update_unit_index(
                         Rc::clone(&state),
                         unit.as_ref(),
                         (target - 1) as u16
@@ -118,9 +118,9 @@ pub fn delete(state: Rc<SpotState>) {
             SidebarSpotItem::Playlist(_) => {
                 playlist_actions::save_playlist(&state).await;
             },
-            SidebarSpotItem::ProDev(unit) =>
+            SidebarSpotItem::Course(unit) =>
             {
-                pro_dev_actions::delete(&state, &unit).await;
+                course_actions::delete(&state, &unit).await;
             },
         }
     }));
@@ -191,7 +191,7 @@ pub fn assign_to_empty_spot(state: &Rc<SpotState>, data: String) {
                 };
 
                 // if this is the empty module at the end
-                if !placeholder_exists && !state.sidebar.asset_edit_state.asset_id.is_pro_dev_id() {
+                if !placeholder_exists && !state.sidebar.asset_edit_state.asset_id.is_course_id() {
                     modules.push_cloned(SidebarSpot::new_empty(&state.sidebar.asset_edit_state.asset_id, None));
                 }
 

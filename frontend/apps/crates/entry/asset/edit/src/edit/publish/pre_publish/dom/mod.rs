@@ -9,7 +9,7 @@ use utils::{
     events,
     init::analytics,
     routes::{
-        AssetEditRoute, AssetRoute, JigEditRoute, PlaylistEditRoute, ProDevEditRoute,
+        AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, PlaylistEditRoute,
         ResourceEditRoute, Route,
     },
 };
@@ -254,11 +254,11 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                                 PlaylistEditRoute::Landing
                             ))).to_string()
                         },
-                        EditableAsset::ProDev(pro_dev) => {
-                            state.publish_state.asset_edit_state.set_route_pro_dev(ProDevEditRoute::Landing);
-                            Route::Asset(AssetRoute::Edit(AssetEditRoute::ProDev(
-                                pro_dev.id,
-                                ProDevEditRoute::Landing
+                        EditableAsset::Course(course) => {
+                            state.publish_state.asset_edit_state.set_route_course(CourseEditRoute::Landing);
+                            Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
+                                course.id,
+                                CourseEditRoute::Landing
                             ))).to_string()
                         },
                     };
@@ -306,7 +306,7 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                 })
             }),
         ])
-        .apply_if(!state.asset._is_pro_dev(), clone!(state => move |dom|{
+        .apply_if(!state.asset.is_course(), clone!(state => move |dom|{
             dom
                 .children(&mut [
                     PrePublish::render_categories_select(state.clone()),
@@ -316,14 +316,14 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
         }))
         .apply(clone!(state => move |dom| {
             match &*state.asset{
-                EditableAsset::ProDev(pro_dev) => {
+                EditableAsset::Course(course) => {
                     dom
                         .child(html!("input-wrapper", {
                             .prop("slot", "duration")
                             .prop("label", "Course duration")
                             .child(html!("input-hours-minutes" => HtmlElement, {
                                 .prop("type", "number")
-                                .prop_signal("value", pro_dev.duration.signal_ref(|duration| {
+                                .prop_signal("value", course.duration.signal_ref(|duration| {
                                     match duration {
                                         Some(duration) => duration.to_string(),
                                         None => {
@@ -332,13 +332,13 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                                     }
                                 }))
                                 // event not executing
-                                .event(clone!(pro_dev => move |evt: events::CustomInputNumber| {
+                                .event(clone!(course => move |evt: events::CustomInputNumber| {
                                     let value = evt.value().map(|num| num as u32);
                                     log::info!("Here2");
 
                                     log::info!("{value:?}");
 
-                                    pro_dev.duration.set(value);
+                                    course.duration.set(value);
                                 }))
                             }))
                         }))

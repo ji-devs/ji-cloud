@@ -327,7 +327,7 @@ export class _ extends LitElement {
                     </div>
                     <div class="middle open-only">
                         <div class="decorations">
-                            ${this.assetType === "pro-dev" ? nothing : this.renderDecoration()}
+                            ${this.assetType === "course" ? nothing : this.renderDecoration()}
                         </div>
                         <div class="window">
                             <slot name="window"></slot>

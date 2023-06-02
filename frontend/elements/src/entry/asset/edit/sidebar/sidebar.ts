@@ -106,7 +106,7 @@ export class _ extends LitElement {
     assetType: AssetType | "" = "";
 
     render() {
-        const coverModuleMarginTop = this.assetType === "pro-dev" ? "0px" : "180px";
+        const coverModuleMarginTop = this.assetType === "course" ? "0px" : "180px";
 
         return html`
             <div class="page-overlay collapsing-phase"></div>

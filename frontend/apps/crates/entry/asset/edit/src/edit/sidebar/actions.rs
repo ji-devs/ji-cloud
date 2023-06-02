@@ -1,6 +1,6 @@
+use super::course::actions as course_actions;
 use super::jig::actions as jig_actions;
 use super::playlist::actions as playlist_actions;
-use super::pro_dev::actions as pro_dev_actions;
 use super::state::*;
 use dominator::clone;
 use shared::domain::asset::AssetId;
@@ -16,8 +16,8 @@ pub fn navigate_to_publish(state: Rc<Sidebar>) {
             playlist_actions::navigate_to_publish(Rc::clone(&state));
         }
         AssetId::ResourceId(_) => unimplemented!(),
-        AssetId::ProDevId(_) => {
-            pro_dev_actions::navigate_to_publish(Rc::clone(&state));
+        AssetId::CourseId(_) => {
+            course_actions::navigate_to_publish(Rc::clone(&state));
         }
     }
 }
@@ -90,8 +90,8 @@ pub fn update_display_name(state: Rc<Sidebar>, value: String) {
                 playlist_actions::update_display_name(*playlist_id, value).await;
             },
             AssetId::ResourceId(_) => unimplemented!(),
-            AssetId::ProDevId(pro_dev_id) => {
-                pro_dev_actions::update_display_name(*pro_dev_id, value).await;
+            AssetId::CourseId(course_id) => {
+                course_actions::update_display_name(*course_id, value).await;
             },
         }
     }));

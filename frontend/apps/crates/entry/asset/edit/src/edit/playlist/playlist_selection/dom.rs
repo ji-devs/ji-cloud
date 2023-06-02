@@ -161,7 +161,7 @@ impl PlaylistSelection {
                                             AssetId::JigId(_) => AssetPlayerOptions::Jig(JigPlayerOptions::default()),
                                             AssetId::ResourceId(_) => todo!(),
                                             AssetId::PlaylistId(_) => unimplemented!(),
-                                            AssetId::ProDevId(_) => unimplemented!(),
+                                            AssetId::CourseId(_) => unimplemented!(),
                                         };
                                         state.play_asset.set(Some((asset_id, settings)));
                                     }))

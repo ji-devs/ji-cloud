@@ -93,9 +93,9 @@ export class _ extends LitElement {
                         <slot name="resource-gallery"></slot>
                     </div>
                     <!-- <div class="gallery-link">
-                        <img-ui path="entry/jig/gallery/pro-dev-icon.webp"></img-ui>
-                        <slot name="pro-dev-create"></slot>
-                        <slot name="pro-dev-gallery"></slot>
+                        <img-ui path="entry/jig/gallery/course-icon.webp"></img-ui>
+                        <slot name="course-create"></slot>
+                        <slot name="course-gallery"></slot>
                     </div> -->
                 </div>
 

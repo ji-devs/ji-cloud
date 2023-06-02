@@ -4,6 +4,7 @@ pub(crate) mod audio;
 pub(crate) mod billing;
 pub(crate) mod category;
 pub(crate) mod circle;
+pub(crate) mod course;
 pub(crate) mod image;
 pub(crate) mod jig;
 pub(crate) mod locale;
@@ -11,7 +12,6 @@ pub(crate) mod media;
 pub(crate) mod meta;
 pub(crate) mod pdf;
 pub(crate) mod playlist;
-pub(crate) mod pro_dev;
 pub(crate) mod resource;
 pub(crate) mod session;
 pub(crate) mod user;
@@ -20,12 +20,12 @@ use anyhow::Context;
 use ji_core::config::DB_POOL_CONNECTIONS;
 use shared::domain::{
     category::CategoryId,
+    course::unit::CourseUnitId,
     jig::JigId,
     meta::{
         AffiliationId, AgeRangeId, AnimationStyleId, ImageStyleId, ImageTagIndex, ResourceTypeId,
         SubjectId,
     },
-    pro_dev::unit::ProDevUnitId,
 };
 use sqlx::{
     postgres::{PgConnectOptions, PgPool, PgPoolOptions},
@@ -124,7 +124,7 @@ impl Metadata for SubjectId {
     const TABLE: &'static str = "subject";
 }
 
-impl Metadata for ProDevUnitId {
+impl Metadata for CourseUnitId {
     const TABLE: &'static str = "unit";
 }
 

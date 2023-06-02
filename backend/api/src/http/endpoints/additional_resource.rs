@@ -66,12 +66,12 @@ async fn create(
             )
             .await?
         }
-        AssetId::ProDevId(pro_dev_id) => {
-            db::pro_dev::authz(&*db, user_id, Some(pro_dev_id)).await?;
+        AssetId::CourseId(course_id) => {
+            db::course::authz(&*db, user_id, Some(course_id)).await?;
 
-            db::pro_dev::additional_resource::create(
+            db::course::additional_resource::create(
                 &*db,
-                pro_dev_id,
+                course_id,
                 req.display_name,
                 req.resource_type_id,
                 req.resource_content,
@@ -138,12 +138,12 @@ async fn update(
                 )
                 .await?;
             }
-            AssetId::ProDevId(pro_dev_id) => {
-                db::pro_dev::authz(&*db, user_id, Some(pro_dev_id)).await?;
+            AssetId::CourseId(course_id) => {
+                db::course::authz(&*db, user_id, Some(course_id)).await?;
 
-                db::pro_dev::additional_resource::update(
+                db::course::additional_resource::update(
                     &*db,
-                    pro_dev_id,
+                    course_id,
                     DraftOrLive::Draft,
                     additional_resource_id,
                     req.display_name,
@@ -202,10 +202,10 @@ async fn get_draft(
                 )
                 .await?
             }
-            AssetId::ProDevId(pro_dev_id) => {
-                db::pro_dev::additional_resource::get(
+            AssetId::CourseId(course_id) => {
+                db::course::additional_resource::get(
                     &db,
-                    pro_dev_id,
+                    course_id,
                     DraftOrLive::Draft,
                     additional_resource_id,
                 )
@@ -266,10 +266,10 @@ async fn get_live(
                 )
                 .await?
             }
-            AssetId::ProDevId(pro_dev_id) => {
-                db::pro_dev::additional_resource::get(
+            AssetId::CourseId(course_id) => {
+                db::course::additional_resource::get(
                     &db,
-                    pro_dev_id,
+                    course_id,
                     DraftOrLive::Live,
                     additional_resource_id,
                 )
@@ -328,10 +328,10 @@ async fn delete(
                 )
                 .await?;
             }
-            AssetId::ProDevId(pro_dev_id) => {
-                db::pro_dev::authz(&*db, user_id, Some(pro_dev_id)).await?;
+            AssetId::CourseId(course_id) => {
+                db::course::authz(&*db, user_id, Some(course_id)).await?;
 
-                db::pro_dev::additional_resource::delete(&*db, pro_dev_id, additional_resource_id)
+                db::course::additional_resource::delete(&*db, course_id, additional_resource_id)
                     .await?;
             }
         }

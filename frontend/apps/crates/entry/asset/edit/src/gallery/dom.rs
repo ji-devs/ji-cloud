@@ -304,9 +304,9 @@ fn get_asset_link(asset_id: AssetId) -> String {
             AssetEditRoute::Playlist(playlist_id, PlaylistEditRoute::Landing),
         ))
         .into(),
-        AssetId::ProDevId(pro_dev_id) => Route::Asset(AssetRoute::Edit(AssetEditRoute::ProDev(
-            pro_dev_id,
-            ProDevEditRoute::Landing,
+        AssetId::CourseId(course_id) => Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
+            course_id,
+            CourseEditRoute::Landing,
         )))
         .into(),
     }

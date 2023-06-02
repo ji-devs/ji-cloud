@@ -1,0 +1,7 @@
+---
+source: tests/integration/course/unit.rs
+expression: body
+---
+{
+  "id": "[id]"
+}

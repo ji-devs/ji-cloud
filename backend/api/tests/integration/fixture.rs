@@ -20,7 +20,7 @@ pub enum Fixture {
     PublicUser,
     Playlist,
     Resource,
-    ProDev,
+    Course,
 }
 
 impl Fixture {
@@ -46,7 +46,7 @@ impl Fixture {
             Self::PublicUser => include_str!("../../fixtures/19_public_user.sql"),
             Self::Playlist => include_str!("../../fixtures/20_playlist.sql"),
             Self::Resource => include_str!("../../fixtures/21_resource.sql"),
-            Self::ProDev => include_str!("../../fixtures/22_pro_dev.sql"),
+            Self::Course => include_str!("../../fixtures/22_course.sql"),
         }
     }
 }

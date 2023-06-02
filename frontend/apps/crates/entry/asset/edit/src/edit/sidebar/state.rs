@@ -1,11 +1,11 @@
 use super::{
-    dragging::state::State as DragState, jig::settings::JigSettings,
-    playlist::settings::PlaylistSettings, pro_dev::settings::ProDevSettings,
+    course::settings::CourseSettings, dragging::state::State as DragState,
+    jig::settings::JigSettings, playlist::settings::PlaylistSettings,
 };
 use dominator_helpers::{futures::AsyncLoader, signals::OptionSignal};
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use shared::domain::{
-    asset::AssetId, jig::JigResponse, module::LiteModule, pro_dev::unit::ProDevUnit,
+    asset::AssetId, course::unit::CourseUnit, jig::JigResponse, module::LiteModule,
 };
 use std::rc::Rc;
 use utils::{editable_asset::EditableAsset, math::PointI32};
@@ -44,7 +44,7 @@ impl Sidebar {
                 SidebarSetting::Playlist(PlaylistSettings::new(playlist))
             }
             EditableAsset::Resource(_) => unimplemented!(),
-            EditableAsset::ProDev(pro_dev) => SidebarSetting::ProDev(ProDevSettings::new(pro_dev)),
+            EditableAsset::Course(course) => SidebarSetting::Course(CourseSettings::new(course)),
         };
 
         Rc::new(Self {
@@ -114,7 +114,7 @@ impl SidebarSpot {
             AssetId::JigId(_) => SidebarSpotItem::Jig(None),
             AssetId::PlaylistId(_) => SidebarSpotItem::Playlist(None),
             AssetId::ResourceId(_) => unimplemented!(),
-            AssetId::ProDevId(_) => SidebarSpotItem::ProDev(None),
+            AssetId::CourseId(_) => SidebarSpotItem::Course(None),
         };
         Rc::new(Self {
             item,
@@ -150,19 +150,19 @@ impl SidebarSpot {
         })
     }
 
-    pub fn new_pro_dev_cover(cover: LiteModule) -> Rc<Self> {
+    pub fn new_course_cover(cover: LiteModule) -> Rc<Self> {
         Rc::new(Self {
             is_incomplete: Mutable::new(false),
             target_index: Mutable::new(None),
-            item: SidebarSpotItem::ProDev(Some(Rc::new(ProDevSpot::Cover(cover)))),
+            item: SidebarSpotItem::Course(Some(Rc::new(CourseSpot::Cover(cover)))),
         })
     }
 
-    pub fn new_pro_dev_unit(unit: ProDevUnit) -> Rc<Self> {
+    pub fn new_course_unit(unit: CourseUnit) -> Rc<Self> {
         Rc::new(Self {
             is_incomplete: Mutable::new(false),
             target_index: Mutable::new(None),
-            item: SidebarSpotItem::ProDev(Some(Rc::new(ProDevSpot::Unit(unit)))),
+            item: SidebarSpotItem::Course(Some(Rc::new(CourseSpot::Unit(unit)))),
         })
     }
 }
@@ -171,7 +171,7 @@ impl SidebarSpot {
 pub enum SidebarSpotItem {
     Jig(Option<Rc<LiteModule>>),
     Playlist(Option<Rc<PlaylistSpot>>),
-    ProDev(Option<Rc<ProDevSpot>>),
+    Course(Option<Rc<CourseSpot>>),
 }
 
 impl SidebarSpotItem {
@@ -179,14 +179,14 @@ impl SidebarSpotItem {
         match self {
             Self::Jig(module) => module.is_some(),
             Self::Playlist(playlist_spot) => playlist_spot.is_some(),
-            Self::ProDev(pro_dev_spot) => pro_dev_spot.is_some(),
+            Self::Course(course_spot) => course_spot.is_some(),
         }
     }
     pub fn is_none(&self) -> bool {
         match self {
             Self::Jig(module) => module.is_none(),
             Self::Playlist(playlist_spot) => playlist_spot.is_none(),
-            Self::ProDev(pro_dev_spot) => pro_dev_spot.is_none(),
+            Self::Course(course_spot) => course_spot.is_none(),
         }
     }
     pub fn unwrap_jig(&self) -> &Option<Rc<LiteModule>> {
@@ -201,16 +201,16 @@ impl SidebarSpotItem {
             _ => panic!(),
         }
     }
-    pub fn unwrap_pro_dev(&self) -> &Option<Rc<ProDevSpot>> {
+    pub fn unwrap_course(&self) -> &Option<Rc<CourseSpot>> {
         match self {
-            Self::ProDev(pro_dev_spot) => pro_dev_spot,
+            Self::Course(course_spot) => course_spot,
             _ => panic!(),
         }
     }
 
-    pub fn is_pro_dev(&self) -> bool {
+    pub fn is_course(&self) -> bool {
         match self {
-            Self::ProDev(_) => true,
+            Self::Course(_) => true,
             _ => false,
         }
     }
@@ -223,9 +223,9 @@ pub enum PlaylistSpot {
 }
 
 #[derive(Clone, Debug)]
-pub enum ProDevSpot {
+pub enum CourseSpot {
     Cover(LiteModule),
-    Unit(ProDevUnit),
+    Unit(CourseUnit),
 }
 
 // #[derive(Clone, Debug)]
@@ -253,5 +253,5 @@ pub enum ProDevSpot {
 pub(super) enum SidebarSetting {
     Jig(Rc<JigSettings>),
     Playlist(Rc<PlaylistSettings>),
-    ProDev(Rc<ProDevSettings>),
+    Course(Rc<CourseSettings>),
 }
