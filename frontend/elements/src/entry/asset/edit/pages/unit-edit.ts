@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 
-const STR_HEADER_FIRST = "Create a Professional Development Course";
+const STR_HEADER_FIRST = "Create a Course";
 const STR_HEADER_SECOND = "Build your course by inserting links, files, and videos";
 
 const STR_ADD_LINK = "Add Link";
