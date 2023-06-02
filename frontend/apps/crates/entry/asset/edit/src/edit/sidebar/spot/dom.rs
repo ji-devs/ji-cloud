@@ -3,18 +3,18 @@ use components::stickers::embed::types::ParseUrlExt;
 use dominator::{clone, html, with_node, Dom, DomBuilder, EventOptions};
 use futures_signals::map_ref;
 use shared::domain::asset::DraftOrLive;
-use shared::domain::pro_dev::unit::ProDevUnitValue;
+use shared::domain::course::unit::CourseUnitValue;
 use web_sys::{HtmlElement, Node, ScrollBehavior, ScrollIntoViewOptions};
 
 use super::super::jig::menu::JigMenu;
 use super::super::playlist::menu::PlaylistMenu;
 use super::super::spot::actions as spot_actions;
+use super::course::actions as course_spot_actions;
 use super::jig::actions as jig_spot_actions;
-use super::pro_dev::actions as pro_dev_spot_actions;
 use super::{actions, state::*};
-use crate::edit::sidebar::pro_dev::menu::ProDevMenu;
+use crate::edit::sidebar::course::menu::CourseMenu;
 use crate::edit::sidebar::state::{ModuleHighlight, PlaylistSpot, SidebarSpotItem};
-use crate::edit::sidebar::ProDevSpot;
+use crate::edit::sidebar::CourseSpot;
 use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
 use futures_signals::signal::{not, SignalExt};
 use std::rc::Rc;
@@ -112,15 +112,15 @@ impl SpotState {
                                 }
                                 state.sidebar.asset_edit_state.set_route_playlist(PlaylistEditRoute::Landing);
                             },
-                            SidebarSpotItem::ProDev(item) => {
+                            SidebarSpotItem::Course(item) => {
                                 match item {
                                     Some(item)=> {
                                         match &**item {
-                                            ProDevSpot::Cover(cover) => state.sidebar.asset_edit_state.set_route_pro_dev(ProDevEditRoute::Cover(cover.id)),
-                                            ProDevSpot::Unit(_) => pro_dev_spot_actions::edit(state.clone()),
+                                            CourseSpot::Cover(cover) => state.sidebar.asset_edit_state.set_route_course(CourseEditRoute::Cover(cover.id)),
+                                            CourseSpot::Unit(_) => course_spot_actions::edit(state.clone()),
                                         }
                                     }
-                                    None => state.sidebar.asset_edit_state.set_route_pro_dev(ProDevEditRoute::Unit(None))
+                                    None => state.sidebar.asset_edit_state.set_route_course(CourseEditRoute::Unit(None))
                                 }
                             },
                         }
@@ -178,10 +178,10 @@ impl SpotState {
                                         }
                                     })
                                 }
-                                SidebarSpotItem::ProDev(pro_dev_spot) => {
-                                    pro_dev_spot.as_ref().map(|pro_dev_spot| {
-                                        match &**pro_dev_spot {
-                                            ProDevSpot::Cover(cover) => {
+                                SidebarSpotItem::Course(course_spot) => {
+                                    course_spot.as_ref().map(|course_spot| {
+                                        match &**course_spot {
+                                            CourseSpot::Cover(cover) => {
                                                 ModuleThumbnail::new(
                                                     state.sidebar.asset_edit_state.asset.id(),
                                                     Some((*cover).clone()),
@@ -189,10 +189,10 @@ impl SpotState {
                                                     DraftOrLive::Draft,
                                                 ).render_live(Some("thumbnail"))
                                             },
-                                            ProDevSpot::Unit(unit) =>
+                                            CourseSpot::Unit(unit) =>
                                             {
                                                 match &unit.value {
-                                                    ProDevUnitValue::Video(youtube) => {
+                                                    CourseUnitValue::Video(youtube) => {
                                                         html!("div", {
                                                             .prop("slot", "unit")
                                                             .child(html!("video-youtube-thumbnail", {
@@ -202,7 +202,7 @@ impl SpotState {
                                                             }))
                                                         })
                                                     },
-                                                    ProDevUnitValue::Link(_) => {
+                                                    CourseUnitValue::Link(_) => {
                                                         html!("div", {
                                                             .prop("slot", "unit")
                                                             .text(format!("Unit {}", state.index).as_str())
@@ -217,7 +217,7 @@ impl SpotState {
                                                             }))
                                                         })
                                                     },
-                                                    ProDevUnitValue::PdfId(_) => {
+                                                    CourseUnitValue::PdfId(_) => {
                                                         html!("div", {
                                                             .prop("slot", "unit")
                                                             .text(format!("Unit {}", state.index).as_str())
@@ -232,7 +232,7 @@ impl SpotState {
                                                             }))
                                                         })
                                                     },
-                                                    ProDevUnitValue::ImageId(image) => {
+                                                    CourseUnitValue::ImageId(image) => {
                                                         html!("div", {
                                                             .prop("slot", "unit")
                                                             .text(format!("Unit {}", state.index).as_str())
@@ -366,7 +366,7 @@ impl SpotState {
                     match state.spot.item {
                         SidebarSpotItem::Jig(_) => dom.child(JigMenu::new(&state).render()),
                         SidebarSpotItem::Playlist(_) => dom.child(PlaylistMenu::new(&state).render()),
-                        SidebarSpotItem::ProDev(_) => dom.child(ProDevMenu::new(&state).render()),
+                        SidebarSpotItem::Course(_) => dom.child(CourseMenu::new(&state).render()),
                     }
                 }))
                 .apply(Self::render_add_button(&state))

@@ -2,17 +2,17 @@ use shared::{
     api::endpoints,
     domain::{
         asset::AssetId,
+        course::{CourseCreatePath, CourseCreateRequest},
         jig::{JigCreatePath, JigCreateRequest},
         module::{ModuleBody, ModuleCreatePath, ModuleCreateRequest, ModuleKind},
         playlist::{PlaylistCreatePath, PlaylistCreateRequest},
-        pro_dev::{ProDevCreatePath, ProDevCreateRequest},
         resource::{ResourceCreatePath, ResourceCreateRequest},
     },
 };
 use utils::{
     prelude::ApiEndpointExt,
     routes::{
-        AssetEditRoute, AssetRoute, JigEditRoute, PlaylistEditRoute, ProDevEditRoute,
+        AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, PlaylistEditRoute,
         ResourceEditRoute, Route,
     },
     unwrap::UnwrapJiExt,
@@ -80,16 +80,16 @@ async fn add_playlist_or_resource_cover(asset_id: AssetId) {
         .unwrap_ji();
 }
 
-pub fn create_pro_dev() {
+pub fn create_course() {
     spawn_local(async move {
-        let req = ProDevCreateRequest::default();
+        let req = CourseCreateRequest::default();
 
-        let resp = endpoints::pro_dev::Create::api_with_auth(ProDevCreatePath(), Some(req))
+        let resp = endpoints::course::Create::api_with_auth(CourseCreatePath(), Some(req))
             .await
             .unwrap_ji();
-        let url: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::ProDev(
+        let url: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
             resp.id,
-            ProDevEditRoute::Landing,
+            CourseEditRoute::Landing,
         )))
         .into();
         dominator::routing::go_to_url(&url);

@@ -40,9 +40,9 @@ async fn create(
             db::resource::authz(&*db, user_id, Some(resource_id)).await?;
             db::resource::module::create(&*db, resource_id, req.body, is_complete).await?
         }
-        AssetId::ProDevId(pro_dev_id) => {
-            db::pro_dev::authz(&*db, user_id, Some(pro_dev_id)).await?;
-            db::pro_dev::module::create(&*db, pro_dev_id, req.body, is_complete).await?
+        AssetId::CourseId(course_id) => {
+            db::course::authz(&*db, user_id, Some(course_id)).await?;
+            db::course::module::create(&*db, course_id, req.body, is_complete).await?
         }
     };
 
@@ -67,7 +67,7 @@ async fn get_live(
         AssetType::Resource => db::resource::module::get_live(&db, module_id)
             .await?
             .ok_or(error::NotFound::ResourceNotFound)?,
-        AssetType::ProDev => db::pro_dev::module::get_live(&db, module_id)
+        AssetType::Course => db::course::module::get_live(&db, module_id)
             .await?
             .ok_or(error::NotFound::ResourceNotFound)?,
     };
@@ -93,7 +93,7 @@ async fn get_draft(
         AssetType::Resource => db::resource::module::get_draft(&db, module_id)
             .await?
             .ok_or(error::NotFound::ResourceNotFound)?,
-        AssetType::ProDev => db::pro_dev::module::get_draft(&db, module_id)
+        AssetType::Course => db::course::module::get_draft(&db, module_id)
             .await?
             .ok_or(error::NotFound::ResourceNotFound)?,
     };
@@ -151,12 +151,12 @@ async fn update(
             )
             .await?
         }
-        AssetId::ProDevId(pro_dev_id) => {
-            db::pro_dev::authz(&*db, user_id, Some(pro_dev_id)).await?;
+        AssetId::CourseId(course_id) => {
+            db::course::authz(&*db, user_id, Some(course_id)).await?;
 
-            db::pro_dev::module::update(
+            db::course::module::update(
                 &*db,
-                pro_dev_id,
+                course_id,
                 module_id,
                 req.body.as_ref(),
                 req.index,
@@ -199,10 +199,10 @@ async fn delete(
 
             db::resource::module::delete(&*db, resource_id, module_id).await?;
         }
-        AssetId::ProDevId(pro_dev_id) => {
-            db::pro_dev::authz(&*db, user_id, Some(pro_dev_id)).await?;
+        AssetId::CourseId(course_id) => {
+            db::course::authz(&*db, user_id, Some(course_id)).await?;
 
-            db::pro_dev::module::delete(&*db, pro_dev_id, module_id).await?;
+            db::course::module::delete(&*db, course_id, module_id).await?;
         }
     };
 

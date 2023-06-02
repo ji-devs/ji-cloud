@@ -5,11 +5,11 @@ use shared::{
     domain::{
         additional_resource::ResourceContent,
         asset::{AssetId, DraftOrLive},
+        course::unit::CourseUnitValue,
         jig::{
             AudioBackground, AudioFeedbackNegative, AudioFeedbackPositive, JigPlayerSettings,
             TextDirection,
         },
-        pro_dev::unit::ProDevUnitValue,
     },
     media::{MediaLibrary, PngImageFile},
 };
@@ -224,7 +224,7 @@ pub struct PlaylistPlayerOptions {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
-pub struct ProDevPlayerOptions {
+pub struct CoursePlayerOptions {
     #[serde(default)]
     pub draft_or_live: DraftOrLive,
 
@@ -236,7 +236,7 @@ pub struct ProDevPlayerOptions {
 pub enum AssetPlayerOptions {
     Jig(JigPlayerOptions),
     Playlist(PlaylistPlayerOptions),
-    ProDev(ProDevPlayerOptions),
+    Course(CoursePlayerOptions),
 }
 
 impl AssetPlayerOptions {
@@ -244,7 +244,7 @@ impl AssetPlayerOptions {
         match self {
             Self::Jig(options) => options.draft_or_live.is_draft(),
             Self::Playlist(options) => options.draft_or_live.is_draft(),
-            Self::ProDev(options) => options.draft_or_live.is_draft(),
+            Self::Course(options) => options.draft_or_live.is_draft(),
         }
     }
 
@@ -252,7 +252,7 @@ impl AssetPlayerOptions {
         match asset_id {
             AssetId::JigId(_) => Self::Jig(Default::default()),
             AssetId::PlaylistId(_) => Self::Playlist(Default::default()),
-            AssetId::ProDevId(_) => Self::ProDev(Default::default()),
+            AssetId::CourseId(_) => Self::Course(Default::default()),
             AssetId::ResourceId(_) => unimplemented!(),
         }
     }
@@ -270,9 +270,9 @@ impl From<PlaylistPlayerOptions> for AssetPlayerOptions {
     }
 }
 
-impl From<ProDevPlayerOptions> for AssetPlayerOptions {
-    fn from(player_option: ProDevPlayerOptions) -> Self {
-        AssetPlayerOptions::ProDev(player_option)
+impl From<CoursePlayerOptions> for AssetPlayerOptions {
+    fn from(player_option: CoursePlayerOptions) -> Self {
+        AssetPlayerOptions::Course(player_option)
     }
 }
 
@@ -280,7 +280,7 @@ pub trait ResourceContentExt {
     fn get_link(&self) -> String;
 }
 
-pub trait ProDevUnitValueExt {
+pub trait CourseUnitValueExt {
     fn get_link(&self) -> String;
 }
 
@@ -297,16 +297,16 @@ impl ResourceContentExt for ResourceContent {
     }
 }
 
-impl ProDevUnitValueExt for ProDevUnitValue {
+impl CourseUnitValueExt for CourseUnitValue {
     fn get_link(&self) -> String {
         match self {
-            ProDevUnitValue::ImageId(image_id) => {
+            CourseUnitValue::ImageId(image_id) => {
                 image_lib_url(MediaLibrary::User, PngImageFile::Original, *image_id)
             }
-            ProDevUnitValue::AudioId(audio_id) => audio_lib_url(MediaLibrary::User, *audio_id),
-            ProDevUnitValue::PdfId(pdf_id) => pdf_lib_url(MediaLibrary::User, *pdf_id),
-            ProDevUnitValue::Link(url) => url.to_string(),
-            ProDevUnitValue::Video(_) => todo!(),
+            CourseUnitValue::AudioId(audio_id) => audio_lib_url(MediaLibrary::User, *audio_id),
+            CourseUnitValue::PdfId(pdf_id) => pdf_lib_url(MediaLibrary::User, *pdf_id),
+            CourseUnitValue::Link(url) => url.to_string(),
+            CourseUnitValue::Video(_) => todo!(),
         }
     }
 }

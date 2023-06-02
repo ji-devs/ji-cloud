@@ -14,7 +14,7 @@ pub const CIRCLE_INDEX: &str = "circle_index";
 pub const PUBLIC_USER_INDEX: &str = "public_user_index";
 pub const USER_INDEX: &str = "user_index";
 pub const RESOURCE_INDEX: &str = "resource_index";
-pub const PRO_DEV_INDEX: &str = "pro_dev_index";
+pub const COURSE_INDEX: &str = "course_index";
 
 #[hashfn(MEDIA_HASH)]
 pub(crate) async fn media_index(
@@ -281,8 +281,8 @@ pub(crate) async fn resource_index(
     Ok(())
 }
 
-#[hashfn(PRO_DEV_HASH)]
-pub(crate) async fn pro_dev_index(
+#[hashfn(COURSE_HASH)]
+pub(crate) async fn course_index(
     txn: &mut PgConnection,
     client: &super::Inner,
     resource_index: &str,
@@ -316,7 +316,7 @@ pub(crate) async fn pro_dev_index(
 
     client.set_settings(resource_index, &settings).await?;
 
-    sqlx::query!(r#"update algolia_index_settings set updated_at = now(), index_hash = $1 where index_name = $2"#, PRO_DEV_HASH, PRO_DEV_INDEX).execute(txn).await?;
+    sqlx::query!(r#"update algolia_index_settings set updated_at = now(), index_hash = $1 where index_name = $2"#, COURSE_HASH, COURSE_INDEX).execute(txn).await?;
 
     Ok(())
 }

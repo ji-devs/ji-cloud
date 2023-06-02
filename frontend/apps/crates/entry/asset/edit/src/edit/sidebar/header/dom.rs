@@ -7,7 +7,7 @@ use web_sys::HtmlInputElement;
 use super::super::{actions as sidebar_actions, state::Sidebar as SidebarState};
 use crate::edit::sidebar::{jig::actions::get_player_settings, state::SidebarSetting};
 use utils::{
-    asset::{AssetPlayerOptions, PlaylistPlayerOptions, ProDevPlayerOptions},
+    asset::{AssetPlayerOptions, CoursePlayerOptions, PlaylistPlayerOptions},
     prelude::*,
 };
 
@@ -24,7 +24,7 @@ impl HeaderDom {
         html!("jig-edit-sidebar-header", {
             .prop("slot", "header")
             // TODO: remove once playlist has setting
-            .prop("hasSettings", (!asset_edit_state.asset_id.is_playlist_id() && !asset_edit_state.asset_id.is_pro_dev_id()))
+            .prop("hasSettings", (!asset_edit_state.asset_id.is_playlist_id() && !asset_edit_state.asset_id.is_course_id()))
             .prop_signal("collapsed", sidebar_state.collapsed.signal())
             .prop_signal("isModulePage", asset_edit_state.route.signal_cloned().map(|route| {
                 // TODO: change?
@@ -41,7 +41,7 @@ impl HeaderDom {
                     SidebarSetting::Playlist(settings) => {
                         dom.child(settings.render())
                     },
-                    SidebarSetting::ProDev(settings) => {
+                    SidebarSetting::Course(settings) => {
                         dom.child(settings.render())
                     },
                 }
@@ -69,7 +69,7 @@ impl HeaderDom {
                             AssetId::JigId(_) => AssetRoute::JigGallery,
                             AssetId::PlaylistId(_) => AssetRoute::PlaylistGallery,
                             AssetId::ResourceId(_) => unimplemented!(),
-                            AssetId::ProDevId(_) => AssetRoute::ProDevGallery,
+                            AssetId::CourseId(_) => AssetRoute::CourseGallery,
                         };
                         let url:String = Route::Asset(route).into();
                         dominator::routing::go_to_url(&url);
@@ -116,13 +116,13 @@ impl HeaderDom {
                                 let settings = AssetPlayerOptions::Playlist(settings);
                                 asset_edit_state.play_jig.set(Some(settings));
                             }
-                            SidebarSetting::ProDev(_pro_dev) =>
+                            SidebarSetting::Course(_course) =>
                             {
-                                let settings = ProDevPlayerOptions {
+                                let settings = CoursePlayerOptions {
                                     draft_or_live: DraftOrLive::Draft,
                                     is_student: false
                                 };
-                                let settings = AssetPlayerOptions::ProDev(settings);
+                                let settings = AssetPlayerOptions::Course(settings);
                                 asset_edit_state.play_jig.set(Some(settings));
                             }
                         }

@@ -5,8 +5,8 @@ use dominator::{clone, html, Dom, DomBuilder};
 use futures_signals::signal::SignalExt;
 use shared::{
     domain::{
-        audio::AudioId, image::ImageId, module::body::_groups::design::YoutubeEmbed, pdf::PdfId,
-        pro_dev::unit::ProDevUnitValue,
+        audio::AudioId, course::unit::CourseUnitValue, image::ImageId,
+        module::body::_groups::design::YoutubeEmbed, pdf::PdfId,
     },
     media::MediaLibrary,
 };
@@ -43,23 +43,23 @@ impl Component<UnitValueView> for Rc<UnitValueView> {
 }
 
 impl UnitValueView {
-    fn render(self: &Rc<Self>, unit: ProDevUnitValue) -> Dom {
+    fn render(self: &Rc<Self>, unit: CourseUnitValue) -> Dom {
         html!("div", {
             .class("player-window")
             .child(match unit {
-                shared::domain::pro_dev::unit::ProDevUnitValue::ImageId(image_id) => {
+                shared::domain::course::unit::CourseUnitValue::ImageId(image_id) => {
                     self.render_active_image(image_id)
                 }
-                shared::domain::pro_dev::unit::ProDevUnitValue::AudioId(audio_id) => {
+                shared::domain::course::unit::CourseUnitValue::AudioId(audio_id) => {
                     self.render_active_audio(audio_id)
                 }
-                shared::domain::pro_dev::unit::ProDevUnitValue::Link(url) => {
+                shared::domain::course::unit::CourseUnitValue::Link(url) => {
                     self.render_active_link(url)
                 }
-                shared::domain::pro_dev::unit::ProDevUnitValue::PdfId(pdf_id) => {
+                shared::domain::course::unit::CourseUnitValue::PdfId(pdf_id) => {
                     self.render_active_pdf(pdf_id)
                 }
-                shared::domain::pro_dev::unit::ProDevUnitValue::Video(video) => {
+                shared::domain::course::unit::CourseUnitValue::Video(video) => {
                     self.render_active_video(video)
                 }
             })

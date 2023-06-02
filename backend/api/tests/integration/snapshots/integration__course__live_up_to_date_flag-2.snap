@@ -1,0 +1,34 @@
+---
+source: tests/integration/course.rs
+expression: body
+---
+{
+  "id": "[id]",
+  "publishedAt": "[published_at]",
+  "creatorId": "1f241e1b-b537-493f-a230-075cb16315be",
+  "authorId": "1f241e1b-b537-493f-a230-075cb16315be",
+  "authorName": "Bobby Tables",
+  "likes": 0,
+  "plays": 0,
+  "liveUpToDate": true,
+  "courseData": {
+    "draftOrLive": "live",
+    "displayName": "course name1",
+    "language": "en",
+    "description": "draft test description",
+    "lastEdited": "[last_edited]",
+    "duration": null,
+    "privacyLevel": "public",
+    "otherKeywords": "",
+    "translatedKeywords": "",
+    "translatedDescription": {},
+    "cover": {
+      "id": "[id]",
+      "kind": "Cover",
+      "is_complete": true
+    },
+    "categories": [],
+    "additionalResources": [],
+    "units": "[units]"
+  }
+}

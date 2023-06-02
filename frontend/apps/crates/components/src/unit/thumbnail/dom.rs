@@ -3,7 +3,7 @@ use crate::stickers::embed::types::ParseUrlExt;
 use super::state::*;
 use dominator::{html, Dom};
 use shared::domain::image::ImageId;
-use shared::domain::{module::body::_groups::design::YoutubeEmbed, pro_dev::unit::ProDevUnitValue};
+use shared::domain::{course::unit::CourseUnitValue, module::body::_groups::design::YoutubeEmbed};
 use std::rc::Rc;
 use utils::prelude::*;
 
@@ -18,11 +18,11 @@ impl UnitThumbnail {
             .child_signal(state.unit_value.signal_ref(|unit_value| {
                 let thumbnail = if let Some(unit) = unit_value {
                     match unit {
-                        ProDevUnitValue::ImageId(image) => render_image_thumbnail(image),
-                        ProDevUnitValue::AudioId(_) => render_audio_thumbnail(),
-                        ProDevUnitValue::Link(_) => render_link_thumbnail(),
-                        ProDevUnitValue::PdfId(_) => render_pdf_thumbnail(),
-                        ProDevUnitValue::Video(youtube) => render_youtube_thumbnail(youtube),
+                        CourseUnitValue::ImageId(image) => render_image_thumbnail(image),
+                        CourseUnitValue::AudioId(_) => render_audio_thumbnail(),
+                        CourseUnitValue::Link(_) => render_link_thumbnail(),
+                        CourseUnitValue::PdfId(_) => render_pdf_thumbnail(),
+                        CourseUnitValue::Video(youtube) => render_youtube_thumbnail(youtube),
                     }
                 } else {
                     None

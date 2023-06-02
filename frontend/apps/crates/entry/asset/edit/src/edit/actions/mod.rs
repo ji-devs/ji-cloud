@@ -6,7 +6,7 @@ use shared::domain::asset::{Asset, AssetId};
 use utils::{
     prelude::ModuleToAssetEditorMessage,
     routes::{
-        AssetEditRoute, AssetRoute, JigEditRoute, PlaylistEditRoute, ProDevEditRoute,
+        AssetEditRoute, AssetRoute, CourseEditRoute, JigEditRoute, PlaylistEditRoute,
         ResourceEditRoute, Route,
     },
     storage,
@@ -14,9 +14,9 @@ use utils::{
 };
 use wasm_bindgen_futures::spawn_local;
 
+mod course_actions;
 mod jig_actions;
 mod playlist_actions;
-mod pro_dev_actions;
 mod resource_actions;
 
 impl AssetEditState {
@@ -34,8 +34,8 @@ impl AssetEditState {
                 Asset::Resource(_) => {
                     // do nothing, resource doesn't have the sidebar
                 },
-                Asset::ProDev(pro_dev) => {
-                    state.get_pro_dev_spots(pro_dev).await;
+                Asset::Course(course) => {
+                    state.get_course_spots(course).await;
                 },
             };
             state.asset.fill_from_asset(asset);
@@ -51,9 +51,7 @@ impl AssetEditState {
             AssetId::PlaylistId(playlist_id) => {
                 playlist_actions::load_playlist(playlist_id).await?.into()
             }
-            AssetId::ProDevId(pro_dev_id) => {
-                pro_dev_actions::load_pro_dev(&pro_dev_id).await?.into()
-            }
+            AssetId::CourseId(course_id) => course_actions::load_course(&course_id).await?.into(),
         };
         Ok(asset)
     }
@@ -96,11 +94,11 @@ impl AssetEditState {
                     ResourceEditRoute::Landing,
                 ))));
             }
-            AssetId::ProDevId(pro_dev_id) => {
-                self.set_route_pro_dev(ProDevEditRoute::Publish);
-                Route::push_state(Route::Asset(AssetRoute::Edit(AssetEditRoute::ProDev(
-                    pro_dev_id,
-                    ProDevEditRoute::Publish,
+            AssetId::CourseId(course_id) => {
+                self.set_route_course(CourseEditRoute::Publish);
+                Route::push_state(Route::Asset(AssetRoute::Edit(AssetEditRoute::Course(
+                    course_id,
+                    CourseEditRoute::Publish,
                 ))));
             }
         }

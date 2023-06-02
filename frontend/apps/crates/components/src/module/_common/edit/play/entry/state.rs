@@ -170,13 +170,13 @@ where
                                 .await
                                 .map(|playlist| Asset::Playlist(playlist))
                         },
-                        AssetId::ProDevId(pro_dev_id) => {
-                            endpoints::pro_dev::GetDraft::api_no_auth(
-                                ProDevGetDraftPath(pro_dev_id.clone()),
+                        AssetId::CourseId(course_id) => {
+                            endpoints::course::GetDraft::api_no_auth(
+                                CourseGetDraftPath(course_id.clone()),
                                 None
                             )
                                 .await
-                                .map(|pro_dev| Asset::ProDev(pro_dev))
+                                .map(|course| Asset::Course(course))
                         }
                     };
 

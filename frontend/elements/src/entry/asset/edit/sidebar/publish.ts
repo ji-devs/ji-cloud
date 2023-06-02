@@ -171,7 +171,7 @@ export class _ extends LitElement {
                         </div>
                     </div>
                     <div class="middle open-only">
-                        ${this.assetType === "pro-dev" ? nothing : this.renderDecoration()}
+                        ${this.assetType === "course" ? nothing : this.renderDecoration()}
                         <div class="window">
                             <img-ui
                                 class="window-icon"

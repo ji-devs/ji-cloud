@@ -50,7 +50,7 @@ impl SearchResultsSection {
             AssetType::Playlist => {
                 self.load_playlists().await;
             }
-            AssetType::ProDev => todo!(),
+            AssetType::Course => todo!(),
         }
         utils::request_animation_frame::before_next_frame().await;
         set_page_pos(pos);
@@ -127,7 +127,7 @@ impl SearchResultsSection {
                         }
                     };
                 }
-                AssetId::ProDevId(_) => todo!(),
+                AssetId::CourseId(_) => todo!(),
             }
         });
     }

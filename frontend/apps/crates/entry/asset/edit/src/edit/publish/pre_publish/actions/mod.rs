@@ -12,16 +12,16 @@ use shared::{
 };
 use utils::{
     prelude::{ApiEndpointExt, UnwrapJiExt},
-    routes::{JigEditRoute, PlaylistEditRoute, ProDevEditRoute, ResourceEditRoute},
+    routes::{CourseEditRoute, JigEditRoute, PlaylistEditRoute, ResourceEditRoute},
 };
 
 use super::state::PrePublish;
 use crate::edit::publish::Publish;
 use utils::editable_asset::EditableAsset;
 
+mod course_actions;
 mod jig_actions;
 mod playlist_actions;
-mod pro_dev_actions;
 mod resource_actions;
 
 impl PrePublish {
@@ -80,10 +80,10 @@ impl PrePublish {
                     .asset_edit_state
                     .set_route_playlist(PlaylistEditRoute::Cover(cover_module_id.unwrap_ji()));
             }
-            EditableAsset::ProDev(_) => {
+            EditableAsset::Course(_) => {
                 self.publish_state
                     .asset_edit_state
-                    .set_route_pro_dev(ProDevEditRoute::Cover(cover_module_id.unwrap_ji()));
+                    .set_route_course(CourseEditRoute::Cover(cover_module_id.unwrap_ji()));
             }
         };
     }
@@ -103,7 +103,7 @@ impl PrePublish {
             EditableAsset::Jig(jig) => jig.modules.lock_ref().iter().all(|m| m.is_complete),
             EditableAsset::Resource(resource) => resource.cover.lock_ref().is_some(),
             EditableAsset::Playlist(playlist) => playlist.cover.lock_ref().is_some(),
-            EditableAsset::ProDev(pro_dev) => pro_dev.cover.lock_ref().is_some(),
+            EditableAsset::Course(course) => course.cover.lock_ref().is_some(),
         }
     }
 
@@ -118,8 +118,8 @@ impl PrePublish {
             EditableAsset::Playlist(playlist) => {
                 playlist_actions::save_playlist(playlist).await.unwrap_ji();
             }
-            EditableAsset::ProDev(pro_dev) => {
-                pro_dev_actions::save_pro_dev(pro_dev).await.unwrap_ji();
+            EditableAsset::Course(course) => {
+                course_actions::save_course(course).await.unwrap_ji();
             }
         };
     }
@@ -151,8 +151,8 @@ impl PrePublish {
                 EditableAsset::Playlist(playlist) => {
                     playlist_actions::publish_playlist(playlist.id).await.unwrap_ji().into()
                 }
-                EditableAsset::ProDev(pro_dev) => {
-                    pro_dev_actions::publish_pro_dev(pro_dev.id).await.unwrap_ji().into()
+                EditableAsset::Course(course) => {
+                    course_actions::publish_course(course.id).await.unwrap_ji().into()
                 }
             };
 
@@ -178,7 +178,7 @@ fn get_categories_labels(
 }
 
 fn set_default_values(asset: &EditableAsset, meta: &MetadataResponse) {
-    if !asset._is_pro_dev() {
+    if !asset.is_course() {
         let available_affiliations = meta
             .affiliations
             .iter()

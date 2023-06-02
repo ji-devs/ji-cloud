@@ -1,7 +1,0 @@
----
-source: tests/integration/pro_dev/unit.rs
-expression: body
----
-{
-  "id": "[id]"
-}

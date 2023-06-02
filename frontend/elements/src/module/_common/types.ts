@@ -63,12 +63,12 @@ export const STR_MODULE_CHOOSE_HEADER: { [key in ModuleKind]: string } = {
     "find-answer": "Create an Answer This activity",
 };
 
-export type AssetType = "jig" | "playlist" | "pro-dev";
+export type AssetType = "jig" | "playlist" | "course";
 
 export const STR_ASSET_TYPE: { [key in AssetType]: string } = {
     jig: "jig",
     playlist: "playlist",
-    "pro-dev": "pro-dev"
+    course: "course"
 };
 
 export type JigFocus = "modules" | "resources";

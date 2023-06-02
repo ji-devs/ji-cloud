@@ -103,17 +103,17 @@ pub fn render_asset_card(asset: &Asset, config: AssetCardConfig) -> Dom {
                         None => dom
                     }
                 },
-                Asset::ProDev(pro_dev) => {
+                Asset::Course(course) => {
                     dom.child(html!("span", {
                         .prop("slot", "middle-indicator")
-                        .text(&format!("{} Units", pro_dev.pro_dev_data.units.len()))
+                        .text(&format!("{} Units", course.course_data.units.len()))
                     }))
                 },
 
             }
         })
-        // TODO: Hide age for ProDev
-        .apply_if(((!asset.is_pro_dev()) && true), |dom| {
+        // TODO: Hide age for Course
+        .apply_if(((!asset.is_course()) && true), |dom| {
             let asset_age = asset.age_ranges().clone();
             dom.child_signal(from_future(get_age_ranges()).map(move |age_ranges| {
                 age_ranges.map(|age_ranges| {

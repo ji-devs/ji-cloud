@@ -78,8 +78,8 @@ pub mod circle;
 /// Module endpoints
 pub mod module;
 
-/// ProDev endpoints
-pub mod pro_dev;
+/// Course endpoints
+pub mod course;
 
 /// Billing endpoints
 pub mod billing;

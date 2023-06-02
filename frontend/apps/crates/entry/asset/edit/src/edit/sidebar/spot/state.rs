@@ -1,11 +1,11 @@
 use crate::edit::sidebar::state::{Sidebar as SidebarState, SidebarSpot, SidebarSpotItem};
-use crate::edit::sidebar::ProDevSpot;
+use crate::edit::sidebar::CourseSpot;
 use dominator::clone;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use std::cell::RefCell;
 use std::rc::Rc;
 use utils::drag::Drag;
-use utils::routes::{AssetEditRoute, JigEditRoute, ProDevEditRoute};
+use utils::routes::{AssetEditRoute, CourseEditRoute, JigEditRoute};
 use web_sys::HtmlElement;
 
 pub struct SpotState {
@@ -54,9 +54,9 @@ impl SpotState {
 
     pub fn unit_name(&self) -> String {
         match &self.spot.item {
-            SidebarSpotItem::ProDev(Some(spot)) => match &**spot {
-                ProDevSpot::Cover(_) => "Cover".to_string(),
-                ProDevSpot::Unit(unit) => unit.display_name.clone(),
+            SidebarSpotItem::Course(Some(spot)) => match &**spot {
+                CourseSpot::Cover(_) => "Cover".to_string(),
+                CourseSpot::Unit(unit) => unit.display_name.clone(),
             },
             _ => "".to_string(),
         }
@@ -66,7 +66,7 @@ impl SpotState {
         match &self.spot.item {
             SidebarSpotItem::Jig(_) => "jig",
             SidebarSpotItem::Playlist(_) => "playlist",
-            SidebarSpotItem::ProDev(_) => "pro-dev",
+            SidebarSpotItem::Course(_) => "course",
         }
     }
 
@@ -95,13 +95,13 @@ impl SpotState {
                         Some(_) => "thumbnail",
                     }
                 },
-                SidebarSpotItem::ProDev(pro_dev_spot) => {
-                    match pro_dev_spot {
+                SidebarSpotItem::Course(course_spot) => {
+                    match course_spot {
                         None => "unit",
                         Some(item) =>
                             match &**item {
-                                ProDevSpot::Cover(_) => "thumbnail",
-                                ProDevSpot::Unit(_) => "unit",
+                                CourseSpot::Cover(_) => "thumbnail",
+                                CourseSpot::Unit(_) => "unit",
                             },
                     }
                 },
@@ -140,17 +140,17 @@ impl SpotState {
                             AssetEditRoute::Jig(_, JigEditRoute::Module(module_id)) if module_id == &module.id
                         )
                     }
-                    SidebarSpotItem::ProDev(unit) => {
+                    SidebarSpotItem::Course(unit) => {
                             match unit {
                                 Some(unit) => {
                                     let id = match &**unit {
-                                        ProDevSpot::Cover(_) => None,
-                                        ProDevSpot::Unit(unit) => Some(unit.id),
+                                        CourseSpot::Cover(_) => None,
+                                        CourseSpot::Unit(unit) => Some(unit.id),
                                     };
 
                                     matches!(
                                         route,
-                                        AssetEditRoute::ProDev(_, ProDevEditRoute::Unit(unit_id)) if unit_id == &id
+                                        AssetEditRoute::Course(_, CourseEditRoute::Unit(unit_id)) if unit_id == &id
                                     )
                                 },
                                 None => {
