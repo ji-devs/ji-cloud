@@ -44,7 +44,7 @@ impl PlaylistMenu {
                 PlaylistSpot::Item(_jig_id) => {
                     vec![
                         state.item_info(),
-                        state.item_play(),
+                        // state.item_play(),
                         state.item_move_up(),
                         state.item_move_down(),
                         state.item_delete(),
@@ -52,7 +52,9 @@ impl PlaylistMenu {
                 }
             },
             None => {
-                vec![]
+                vec![
+                    state.item_delete(),
+                ]
             }
         }
     }
