@@ -873,7 +873,7 @@ pub struct School {
     pub id: SchoolId,
 
     /// Name of the school
-    pub name: SchoolName,
+    pub school_name: SchoolName,
 
     /// The school's location
     #[serde(default)]
