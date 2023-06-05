@@ -43,7 +43,7 @@ impl PlaylistMenu {
                 }
                 PlaylistSpot::Item(_jig_id) => {
                     vec![
-                        state.item_info(),
+                        // state.item_info(),
                         // state.item_play(),
                         state.item_move_up(),
                         state.item_move_down(),
@@ -93,7 +93,7 @@ impl PlaylistMenu {
         })
     }
 
-    fn item_info(self: &Rc<Self>) -> Dom {
+    fn _item_info(self: &Rc<Self>) -> Dom {
         let state = self;
         html!("menu-line", {
             .prop("slot", "lines")
@@ -104,7 +104,7 @@ impl PlaylistMenu {
         })
     }
 
-    fn item_play(self: &Rc<Self>) -> Dom {
+    fn _item_play(self: &Rc<Self>) -> Dom {
         let state = self;
         html!("menu-line", {
             .prop("slot", "lines")
