@@ -47,7 +47,7 @@ main {
     margin: 0 80px;
     align-content: center;
 }
-.name {
+.middle-section .name {
     grid-column: 2;
     grid-row: 1;
     font-size: 16px;
@@ -56,13 +56,27 @@ main {
     color: var(--dark-gray-6);
     margin: 0;
 }
-.description {
+
+.middle-section p {
+    display: grid;
+    grid-template-columns: auto auto;
+    align-items: center;
     grid-column: 2;
     grid-row: 2;
     font-size: 14px;
-    text-align: center;
-    color: var(--dark-gray-6);
     margin: 0;
+}
+
+.description {
+    color: var(--dark-gray-6);
+    text-align: end;
+    grid-column: 1;
+}
+
+.read-more {
+    grid-column: 2;
+    color: #5590fc;
+    padding-left: 8px;
 }
 .fullscreen-button {
     grid-column: 3;
@@ -117,3 +131,49 @@ main {
 .navigation-button-forward {
     color: var(--main-blue);
 }
+
+popup-info {
+    display: flex;
+    flex-direction: column;
+    border-radius: 16px;
+    justify-content: center;
+    position: absolute;
+    z-index: 1000;
+    bottom: 5vh;
+    right: 15vw;
+    background-color: white;
+    box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+    object-fit: contain;
+    padding: 17px;
+}
+
+popup-info .popup-name {
+    font-size: 17px;
+    font-weight: 600;
+    text-align: center;
+    color: var(--dark-gray-6);
+    margin: 0;
+    object-fit: contain;
+}
+
+popup-info .popup-description {
+    color: var(--dark-gray-6);
+    text-align: center;
+    object-fit: contain;
+    margin: 2px 13px 13px 13px;    
+    max-width: 20em;
+}
+
+popup-info .popup-close {
+    text-align: center;
+    font-weight: 500;
+    color: #5590fc;
+}
+
+fa-button,
+popup-info ::slotted([slot="popup-close"]) {
+    display: flex;
+    justify-content: end;
+}
+
+
