@@ -12,6 +12,7 @@ mod jig_curation;
 mod locale;
 mod resource_curation;
 mod router;
+mod schools;
 mod sidebar;
 mod strings;
 mod users;

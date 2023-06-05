@@ -384,6 +384,7 @@ where
         }
     }
 }
+
 //TODO - get rid of this, use specialization
 pub async fn api_with_auth_empty<Payload>(
     endpoint: &str,

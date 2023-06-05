@@ -141,6 +141,7 @@ web-sys = { version = "0.3.55", features = [
     'DomParser',
     'SupportedType',
     'Navigator',
+    'FormData',
 ] }
 
 [profile.release]

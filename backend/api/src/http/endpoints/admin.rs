@@ -3,12 +3,21 @@ use actix_web::{
     web::{Data, Json, Path, Query, ServiceConfig},
     HttpRequest, HttpResponse,
 };
+use anyhow::anyhow;
 use chrono::{Duration, Utc};
 use futures::future::join_all;
+use futures::try_join;
 use ji_core::settings::RuntimeSettings;
 use serde::ser::Serialize;
-use shared::api::endpoints::admin::{ImportSchoolNames, ListSchoolNames, VerifySchoolName};
-use shared::domain::admin::ListSchoolNamesResponse;
+use serde_derive::Deserialize;
+use shared::api::endpoints::admin::{
+    ImportSchoolNames, InviteUsers, SearchSchoolNames, VerifySchoolName,
+};
+use shared::domain::admin::{
+    InviteFailedReason, InviteSchoolUserFailure, InviteSchoolUsersResponse,
+    SearchSchoolNamesResponse,
+};
+use shared::domain::billing::{AccountType, SchoolId, SubscriptionTier};
 use shared::{
     api::{
         endpoints::admin::{self, CreateUpdateSubscriptionPlan},
@@ -142,26 +151,29 @@ async fn create_or_update_subscription_plan(
     Ok(HttpResponse::Created().finish())
 }
 
-async fn list_school_names(
+async fn search_school_names(
     _auth: TokenUserWithScope<ScopeAdmin>,
     db: Data<PgPool>,
-    req: Query<<ListSchoolNames as ApiEndpoint>::Req>,
+    Query(search): Query<<SearchSchoolNames as ApiEndpoint>::Req>,
 ) -> Result<
     (
-        Json<<ListSchoolNames as ApiEndpoint>::Res>,
+        Json<<SearchSchoolNames as ApiEndpoint>::Res>,
         http::StatusCode,
     ),
     error::Server,
 > {
-    let schools = db::account::get_school_names_with_schools(db.as_ref(), req.0.verified)
-        .await?
-        .into_iter()
-        .map(From::from)
-        .collect();
+    let (schools, schools_count) = try_join!(
+        db::account::find_school_names_with_schools(db.as_ref(), &search),
+        db::account::find_school_names_with_schools_count(db.as_ref(), &search)
+    )?;
+
+    let schools = schools.into_iter().map(From::from).collect();
 
     Ok((
-        Json(ListSchoolNamesResponse {
+        Json(SearchSchoolNamesResponse {
             school_names: schools,
+            pages: schools_count.paged(search.page_limit),
+            total_schools_count: schools_count,
         }),
         http::StatusCode::OK,
     ))
@@ -179,6 +191,12 @@ async fn add_school_name_if_not_exists(
     }
 }
 
+#[derive(Clone, Debug, Deserialize)]
+struct ImportSchoolNamesCsv {
+    #[serde(rename = "Account Name")]
+    school_name: String,
+}
+
 async fn import_school_names(
     _auth: TokenUserWithScope<ScopeAdmin>,
     db: Data<PgPool>,
@@ -190,20 +208,18 @@ async fn import_school_names(
     ),
     error::Server,
 > {
-    let names: Vec<_> = data
-        .lines()
-        .map(|line| add_school_name_if_not_exists(db.as_ref(), line.into()))
+    let names: Result<Vec<ImportSchoolNamesCsv>, _> = csv::ReaderBuilder::default()
+        .has_headers(true)
+        .from_reader(data.as_bytes())
+        .deserialize()
         .collect();
 
-    let exists = join_all(names)
-        .await
-        .into_iter()
-        .filter_map(|item| match item {
-            Ok(Some(item)) => Some(Ok(item)),
-            Err(error) => Some(Err(error)),
-            _ => None,
-        })
-        .collect::<Result<Vec<_>, _>>()?;
+    let mut exists = vec![];
+    for name in names? {
+        exists.push(add_school_name_if_not_exists(db.as_ref(), name.school_name).await?);
+    }
+
+    let exists: Vec<_> = exists.into_iter().flatten().collect();
 
     Ok((Json(exists), http::StatusCode::OK))
 }
@@ -216,6 +232,75 @@ async fn verify_school_name(
     db::account::verify_school_name(db.as_ref(), data.school_name_id, data.verified).await?;
 
     Ok(HttpResponse::Ok().finish())
+}
+
+async fn invite_school_user(
+    pool: &PgPool,
+    school_id: &SchoolId,
+    email: String,
+) -> Result<Option<InviteSchoolUserFailure>, error::Server> {
+    let user_id = match db::user::get_user_id_by_email(pool, &email).await? {
+        Some(user_id) => {
+            if let Some(account_summary) =
+                db::account::get_user_account_summary(pool, &user_id).await?
+            {
+                match account_summary.account_type {
+                    AccountType::School => Err(InviteFailedReason::AssociatedWithSchool),
+                    AccountType::Individual => Err(InviteFailedReason::HasIndividualAccount),
+                }
+            } else {
+                Ok(user_id)
+            }
+        }
+        None => Err(InviteFailedReason::UserNotFound),
+    };
+
+    match user_id {
+        Err(reason) => return Ok(Some(InviteSchoolUserFailure { email, reason })),
+        Ok(user_id) => {
+            let school = db::account::get_school_account_by_id(pool, &school_id)
+                .await?
+                .ok_or(anyhow!("School not found"))?;
+            db::account::associate_user_with_account(
+                pool,
+                &user_id,
+                &school.account_id,
+                &SubscriptionTier::Pro,
+                false,
+                true,
+            )
+            .await?;
+        }
+    }
+
+    Ok(None)
+}
+
+async fn invite_school_users(
+    _auth: TokenUserWithScope<ScopeAdmin>,
+    db: Data<PgPool>,
+    Json(invite_users): Json<<InviteUsers as ApiEndpoint>::Req>,
+) -> Result<(Json<<InviteUsers as ApiEndpoint>::Res>, http::StatusCode), error::Server> {
+    let emails: Vec<_> = invite_users
+        .data
+        .lines()
+        .map(|email| invite_school_user(db.as_ref(), &invite_users.school_id, email.into()))
+        .collect();
+
+    let failures: Vec<InviteSchoolUserFailure> = join_all(emails)
+        .await
+        .into_iter()
+        .filter_map(|item| match item {
+            Ok(Some(item)) => Some(Ok(item)),
+            Err(error) => Some(Err(error)),
+            _ => None,
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+
+    Ok((
+        Json(InviteSchoolUsersResponse { failures }),
+        http::StatusCode::OK,
+    ))
 }
 
 pub fn configure(cfg: &mut ServiceConfig) {
@@ -234,8 +319,10 @@ pub fn configure(cfg: &mut ServiceConfig) {
             .to(create_or_update_subscription_plan),
     )
     .route(
-        <ListSchoolNames as ApiEndpoint>::Path::PATH,
-        admin::ListSchoolNames::METHOD.route().to(list_school_names),
+        <SearchSchoolNames as ApiEndpoint>::Path::PATH,
+        admin::SearchSchoolNames::METHOD
+            .route()
+            .to(search_school_names),
     )
     .route(
         <ImportSchoolNames as ApiEndpoint>::Path::PATH,
@@ -244,5 +331,9 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <VerifySchoolName as ApiEndpoint>::Path::PATH,
         VerifySchoolName::METHOD.route().to(verify_school_name),
+    )
+    .route(
+        <InviteUsers as ApiEndpoint>::Path::PATH,
+        InviteUsers::METHOD.route().to(invite_school_users),
     );
 }

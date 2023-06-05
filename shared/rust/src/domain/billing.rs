@@ -13,6 +13,7 @@ use serde_json::Value;
 
 use crate::api::endpoints::PathPart;
 use crate::domain::image::ImageId;
+use crate::domain::user::UserProfile;
 
 /// Stripe customer ID
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -915,6 +916,20 @@ pub struct School {
     pub updated_at: Option<DateTime<Utc>>,
 }
 
+/// A user associated with an account
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct AccountUser {
+    /// The associated user
+    pub user: UserProfile,
+    /// The subscription tier the user is on
+    pub subscription_tier: Option<SubscriptionTier>,
+    /// Whether this user is an admin. For non School accounts, this user will
+    /// always be an admin
+    pub is_admin: bool,
+    /// Whether the user is verified for the account
+    pub verified: bool,
+}
+
 wrap_uuid! {
     /// Wrapper type around [`Uuid`], represents the ID of a School Name.
     pub struct SchoolNameId
@@ -952,4 +967,15 @@ pub struct CreateSchoolAccountRequest {
     pub name: SchoolNameRequest,
     /// School location
     pub location: Value,
+}
+
+make_path_parts!(GetSchoolAccountPath => "/v1/school/{}" => SchoolId);
+
+/// Request to create a new school account
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct GetSchoolAccountResponse {
+    /// School name
+    pub school: School,
+    /// School location
+    pub users: Vec<AccountUser>,
 }

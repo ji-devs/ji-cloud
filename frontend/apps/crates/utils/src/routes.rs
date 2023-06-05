@@ -1,5 +1,6 @@
 use crate::asset::{CoursePlayerOptions, JigPlayerOptions, PlaylistPlayerOptions};
 use serde::{Deserialize, Serialize};
+use shared::domain::billing::SchoolId;
 use shared::domain::{
     asset::{AssetId, AssetType, DraftOrLive},
     category::CategoryId,
@@ -133,6 +134,7 @@ pub enum AdminRoute {
     Locale,
     JigCuration(AdminJigCurationRoute),
     ResourceCuration(AdminResourceCurationRoute),
+    Schools(AdminSchoolsRoute),
     Images,
     Users(AdminUsersRoute),
     ImageSearch(Option<ImageSearchQuery>),
@@ -198,6 +200,7 @@ impl AdminRoute {
             Self::ResourceCuration(_) => scopes.contains(&UserScope::AdminAsset),
             Self::Images => scopes.contains(&UserScope::AdminAsset),
             Self::Users(_) => scopes.contains(&UserScope::Admin),
+            Self::Schools(_) => scopes.contains(&UserScope::Admin),
             Self::ImageSearch(_) | Self::ImageAdd | Self::ImageTags | Self::ImageMeta(_, _) => {
                 scopes.contains(&UserScope::ManageImage)
             }
@@ -222,6 +225,12 @@ pub enum AdminUsersRoute {
 pub enum AdminResourceCurationRoute {
     Table,
     Resource(ResourceId),
+}
+
+#[derive(Debug, Clone)]
+pub enum AdminSchoolsRoute {
+    Table,
+    School(SchoolId),
 }
 
 #[derive(Debug, Clone)]
@@ -438,6 +447,11 @@ impl Route {
                 Self::Admin(AdminRoute::ResourceCuration(
                     AdminResourceCurationRoute::Resource(resource_id),
                 ))
+            }
+            ["admin", "schools"] => Self::Admin(AdminRoute::Schools(AdminSchoolsRoute::Table)),
+            ["admin", "schools", school_id] => {
+                let school_id = SchoolId::from_str(school_id).unwrap_ji();
+                Self::Admin(AdminRoute::Schools(AdminSchoolsRoute::School(school_id)))
             }
             ["admin", "images"] => Self::Admin(AdminRoute::Images),
             ["admin", "users"] => Self::Admin(AdminRoute::Users(AdminUsersRoute::Table)),
@@ -764,6 +778,12 @@ impl From<&Route> for String {
                     AdminResourceCurationRoute::Table => "/admin/resource-curation".to_string(),
                     AdminResourceCurationRoute::Resource(resource_id) => {
                         format!("/admin/resource-curation/{}", resource_id.0)
+                    }
+                },
+                AdminRoute::Schools(schools_route) => match schools_route {
+                    AdminSchoolsRoute::Table => "/admin/schools".to_string(),
+                    AdminSchoolsRoute::School(school_id) => {
+                        format!("/admin/schools/{}", school_id.0)
                     }
                 },
                 AdminRoute::Images => "/admin/images".to_string(),

@@ -1,9 +1,12 @@
 use crate::extractor::TokenUser;
 use crate::{db, error};
-use actix_web::web::{Data, Json, ServiceConfig};
-use shared::api::endpoints::account::GetSchoolNames;
+use actix_web::web::{Data, Json, Path, ServiceConfig};
+use shared::api::endpoints::account::{GetSchoolAccount, GetSchoolNames};
 use shared::api::{endpoints::account::CreateSchoolAccount, ApiEndpoint, PathParts};
-use shared::domain::billing::{CreateSchoolAccountRequest, SchoolNameRequest};
+use shared::domain::billing::{
+    CreateSchoolAccountRequest, GetSchoolAccountResponse, SchoolId, SchoolNameRequest,
+};
+use shared::domain::user::UserScope;
 use sqlx::PgPool;
 use tracing::instrument;
 
@@ -74,6 +77,31 @@ async fn get_school_names(
     ))
 }
 
+async fn get_school_account(
+    auth: TokenUser,
+    db: Data<PgPool>,
+    path: Path<SchoolId>,
+) -> Result<Json<<GetSchoolAccount as ApiEndpoint>::Res>, error::Account> {
+    let user_id = auth.user_id();
+    let school_id = path.into_inner();
+    let school = db::account::get_school_account_by_id(db.as_ref(), &school_id)
+        .await?
+        .ok_or(error::Account::NotFound("School not found".into()))?;
+
+    if db::user::has_scopes(db.as_ref(), user_id, &[UserScope::Admin]).await?
+        || db::account::user_account_membership(db.as_ref(), &user_id, &school.account_id)
+            .await?
+            .is_some()
+    {
+        let users =
+            db::account::get_account_users_by_account_id(db.as_ref(), &school.account_id).await?;
+
+        Ok(Json(GetSchoolAccountResponse { school, users }))
+    } else {
+        Err(error::Account::Forbidden)
+    }
+}
+
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
         <CreateSchoolAccount as ApiEndpoint>::Path::PATH,
@@ -84,5 +112,9 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <GetSchoolNames as ApiEndpoint>::Path::PATH,
         GetSchoolNames::METHOD.route().to(get_school_names),
+    )
+    .route(
+        <GetSchoolAccount as ApiEndpoint>::Path::PATH,
+        GetSchoolAccount::METHOD.route().to(get_school_account),
     );
 }

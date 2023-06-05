@@ -1,11 +1,13 @@
 use crate::db;
+use shared::domain::admin::SearchSchoolNamesParams;
 use shared::domain::billing::{
-    Account, AccountId, AccountType, CustomerId, PaymentMethod, School, SchoolId, SchoolName,
-    SchoolNameId, SubscriptionStatus, SubscriptionTier, UserAccountSummary,
+    Account, AccountId, AccountType, AccountUser, CustomerId, PaymentMethod, School, SchoolId,
+    SchoolName, SchoolNameId, SubscriptionStatus, SubscriptionTier, UserAccountSummary,
 };
 use shared::domain::image::ImageId;
 use shared::domain::user::UserId;
-use sqlx::PgPool;
+use shared::domain::ItemCount;
+use sqlx::{Executor, PgPool, Postgres};
 use tracing::{instrument, Instrument};
 
 #[instrument(skip(pool))]
@@ -104,18 +106,14 @@ pub async fn create_default_individual_account(
         .await?;
 
     // Associate the user with the account and mark them as an administrator.
-    sqlx::query!(
-        // language=SQL
-        r#"
-insert into user_account
-(user_id, account_id, subscription_tier, admin, verified)
-values
-($1, $2, $3, true, true)"#,
-        user_id as &UserId,
-        account_id as AccountId,
-        subscription_tier as &SubscriptionTier,
+    associate_user_with_account(
+        &mut txn,
+        &user_id,
+        &account_id,
+        &subscription_tier,
+        true,
+        true,
     )
-    .execute(&mut txn)
     .await?;
 
     txn.commit().await?;
@@ -142,18 +140,14 @@ pub async fn create_default_school_account(
         .await?;
 
     // Associate the user with the account and mark them as an administrator.
-    sqlx::query!(
-        // language=SQL
-        r#"
-insert into user_account
-(user_id, account_id, subscription_tier, admin, verified)
-values
-($1, $2, $3, true, true)"#,
-        user_id as UserId,
-        account_id as AccountId,
-        SubscriptionTier::Pro as SubscriptionTier,
+    associate_user_with_account(
+        &mut txn,
+        &user_id,
+        &account_id,
+        &SubscriptionTier::Pro,
+        true,
+        true,
     )
-    .execute(&mut txn)
     .await?;
 
     // Create the school record
@@ -177,6 +171,34 @@ returning school_id as "school_id!: SchoolId"
     txn.commit().await?;
 
     Ok(school_id)
+}
+
+pub async fn associate_user_with_account<'c, E: Executor<'c, Database = Postgres>>(
+    executor: E,
+    user_id: &UserId,
+    account_id: &AccountId,
+    subscription_tier: &SubscriptionTier,
+    admin_user: bool,
+    verified: bool,
+) -> sqlx::Result<()> {
+    // Associate the user with the account and mark them as an administrator.
+    sqlx::query!(
+        // language=SQL
+        r#"
+insert into user_account
+(user_id, account_id, subscription_tier, admin, verified)
+values
+($1, $2, $3, $4, $5)"#,
+        user_id as &UserId,
+        account_id as &AccountId,
+        subscription_tier as &SubscriptionTier,
+        admin_user,
+        verified,
+    )
+    .execute(executor)
+    .await?;
+
+    Ok(())
 }
 
 #[instrument(skip(pool))]
@@ -266,7 +288,7 @@ where user_account.user_id = $1
 
 #[instrument(skip(db))]
 pub async fn save_customer_id(
-    db: &sqlx::Pool<sqlx::Postgres>,
+    db: &PgPool,
     account_id: &AccountId,
     customer_id: &CustomerId,
 ) -> anyhow::Result<()> {
@@ -289,7 +311,7 @@ where account_id = $1"#,
 
 #[instrument(skip(db))]
 pub async fn save_payment_method(
-    db: &sqlx::Pool<sqlx::Postgres>,
+    db: &PgPool,
     account_id: &AccountId,
     payment_method: Option<PaymentMethod>,
 ) -> anyhow::Result<()> {
@@ -311,7 +333,7 @@ where account_id = $1"#,
 
 #[instrument(skip(db))]
 pub async fn get_account_id_by_customer_id(
-    db: &sqlx::Pool<sqlx::Postgres>,
+    db: &PgPool,
     customer_id: &CustomerId,
 ) -> anyhow::Result<Option<AccountId>> {
     Ok(sqlx::query_scalar!(
@@ -321,6 +343,20 @@ pub async fn get_account_id_by_customer_id(
     )
         .fetch_optional(db)
         .await?)
+}
+
+#[instrument(skip(db))]
+pub async fn get_account_id_by_school_id(
+    db: &PgPool,
+    school_id: &SchoolId,
+) -> anyhow::Result<Option<AccountId>> {
+    Ok(sqlx::query_scalar!(
+        //language=SQL
+        r#"select account_id as "account_id: AccountId" from school where school_id = $1"#,
+        school_id as &SchoolId,
+    )
+    .fetch_optional(db)
+    .await?)
 }
 
 #[instrument(skip(pool))]
@@ -373,6 +409,93 @@ where account_id = $1
     }
 }
 
+#[instrument(skip(pool))]
+pub async fn get_account_users_by_account_id(
+    pool: &PgPool,
+    account_id: &AccountId,
+) -> anyhow::Result<Vec<AccountUser>> {
+    let records = sqlx::query!(
+        // language=SQL
+        r#"
+select
+    user_id as "user_id!: UserId",
+    subscription_tier as "subscription_tier?: SubscriptionTier",
+    admin as "is_admin!",
+    verified as "verified!"
+from user_account
+where account_id = $1
+"#,
+        account_id as &AccountId,
+    )
+    .fetch_all(pool)
+    .await?;
+
+    // TODO can probably join these calls to get_profile
+    let mut account_users = vec![];
+    for record in records {
+        let user_profile = db::user::get_profile(pool, &record.user_id).await?.unwrap();
+
+        account_users.push(AccountUser {
+            user: user_profile,
+            subscription_tier: record.subscription_tier,
+            is_admin: record.is_admin,
+            verified: record.verified,
+        });
+    }
+
+    Ok(account_users)
+}
+
+#[instrument(skip(pool))]
+pub async fn get_school_account_by_id(
+    pool: &PgPool,
+    school_id: &SchoolId,
+) -> sqlx::Result<Option<School>> {
+    let record = sqlx::query!(
+        // language=SQL
+        r#"
+select
+    school_id as "id!: SchoolId",
+    school_name_id as "name!: SchoolNameId",
+    location as "location?: serde_json::Value",
+    email::text as "email!",
+    description,
+    profile_image_id as "profile_image?: ImageId",
+    website,
+    organization_type,
+    account_id as "account_id!: AccountId",
+    created_at,
+    updated_at
+from school
+where school_id = $1
+"#,
+        school_id as &SchoolId
+    )
+    .fetch_optional(pool)
+    .await?;
+
+    match record {
+        Some(record) => {
+            let school = School {
+                id: record.id,
+                school_name: get_school_name(pool, &record.name).await?.unwrap(),
+                location: record.location,
+                email: record.email,
+                description: record.description,
+                profile_image: record.profile_image,
+                website: record.website,
+                organization_type: record.organization_type,
+                account_id: record.account_id,
+                created_at: record.created_at,
+                updated_at: record.updated_at,
+            };
+
+            Ok(Some(school))
+        }
+        None => Ok(None),
+    }
+}
+
 pub async fn get_school_name(
     pool: &PgPool,
     school_name_id: &SchoolNameId,
@@ -395,9 +518,9 @@ where school_name_id = $1
 }
 
 #[instrument(skip(pool))]
-pub async fn get_school_names_with_schools(
+pub async fn find_school_names_with_schools(
     pool: &PgPool,
-    verified: Option<bool>,
+    params: &SearchSchoolNamesParams,
 ) -> sqlx::Result<Vec<(SchoolName, Option<School>)>> {
     let rows = sqlx::query!(
         // language=SQL
@@ -414,15 +537,27 @@ select
     website,
     organization_type,
     account_id as "account_id?: AccountId",
-    school.created_at,
+    school.created_at as "created_at?",
     school.updated_at
 from school_name
 left join school using (school_name_id)
 where
-    (not $1::bool is null and (verified = $1::bool))
-    or $1::bool is null
+    (
+        (not $1::bool is null and (verified = $1::bool))
+        or $1::bool is null
+    )
+    and (
+        (not $2::text is null and (school_name.name like ('%' || $2::text || '%')::citext))
+        or $2::text is null
+    )
+order by school_name.name asc
+limit $3
+offset $4
 "#,
-        verified as Option<bool>,
+        params.verified as Option<bool>,
+        params.q,
+        i64::from(params.page_limit),
+        params.page_limit.offset(params.page),
     )
     .fetch_all(pool)
     .await?;
@@ -446,12 +581,42 @@ where
                 website: record.website,
                 organization_type: record.organization_type,
                 account_id: record.account_id.unwrap(),
-                created_at: record.created_at,
+                created_at: record.created_at.unwrap(),
                 updated_at: record.updated_at,
             });
             (school_name, school)
         })
         .collect())
+}
+
+#[instrument(skip(pool))]
+pub async fn find_school_names_with_schools_count(
+    pool: &PgPool,
+    params: &SearchSchoolNamesParams,
+) -> sqlx::Result<ItemCount> {
+    let rows = sqlx::query_scalar!(
+        // language=SQL
+        r#"
+select
+    count(*) as "total_schools!"
+from school_name
+where
+    (
+        (not $1::bool is null and (verified = $1::bool))
+        or $1::bool is null
+    )
+    and (
+        (not $2::text is null and (school_name.name like ('%' || $2::text || '%')::citext))
+        or $2::text is null
+    )
+"#,
+        params.verified as Option<bool>,
+        params.q,
+    )
+    .fetch_one(pool)
+    .await?;
+
+    Ok((rows as usize).into())
 }
 
 #[instrument(skip(pool))]
@@ -470,4 +635,32 @@ pub async fn verify_school_name(
     .await?;
 
     Ok(())
+}
+
+pub enum AccountMember {
+    Admin,
+    User,
+}
+
+pub async fn user_account_membership(
+    pool: &PgPool,
+    user_id: &UserId,
+    account_id: &AccountId,
+) -> sqlx::Result<Option<AccountMember>> {
+    let res = sqlx::query_scalar!(
+        // language=SQL
+        r#"select admin from user_account where user_id = $1 and account_id = $2"#,
+        user_id as &UserId,
+        account_id as &AccountId,
+    )
+    .fetch_optional(pool)
+    .await?;
+
+    Ok(res.map(|admin| {
+        if admin {
+            AccountMember::Admin
+        } else {
+            AccountMember::User
+        }
+    }))
 }

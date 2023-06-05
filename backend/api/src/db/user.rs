@@ -1005,13 +1005,26 @@ where user_id = $1
     .await?
     .email;
 
-    let email = if let Some(email) = email {
-        email
-    } else {
+    let Some(email) = email else {
         return Err(sqlx::Error::RowNotFound);
     };
 
     Ok(email)
+}
+
+pub async fn get_user_id_by_email(pool: &PgPool, email: &str) -> sqlx::Result<Option<UserId>> {
+    sqlx::query_scalar!(
+        // language=SQL
+        r#"
+select id as "id!: UserId"
+from "user"
+join public.user_email ue on "user".id = ue.user_id
+where ue.email = $1::text::citext
+"#,
+        email,
+    )
+    .fetch_optional(pool)
+    .await
 }
 
 pub async fn get_fonts(db: &sqlx::PgPool, user_id: UserId) -> sqlx::Result<Vec<String>> {
