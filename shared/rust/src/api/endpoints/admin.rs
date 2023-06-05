@@ -1,7 +1,8 @@
 use super::ApiEndpoint;
 use crate::domain::admin::{
-    ImportSchoolNamesPath, ListSchoolNamesRequest, ListSchoolNamesResponse,
-    SchoolNameVerificationPath, VerifySchoolNameRequest,
+    AdminSchoolNamesPath, AdminVerifySchoolNamePath, ImportSchoolNamesPath, InviteSchoolUsersPath,
+    InviteSchoolUsersRequest, InviteSchoolUsersResponse, SearchSchoolNamesParams,
+    SearchSchoolNamesResponse, VerifySchoolNameRequest,
 };
 use crate::{
     api::Method,
@@ -44,11 +45,11 @@ impl ApiEndpoint for CreateUpdateSubscriptionPlan {
 }
 
 /// List school names
-pub struct ListSchoolNames;
-impl ApiEndpoint for ListSchoolNames {
-    type Path = SchoolNameVerificationPath;
-    type Req = ListSchoolNamesRequest;
-    type Res = ListSchoolNamesResponse;
+pub struct SearchSchoolNames;
+impl ApiEndpoint for SearchSchoolNames {
+    type Path = AdminSchoolNamesPath;
+    type Req = SearchSchoolNamesParams;
+    type Res = SearchSchoolNamesResponse;
     type Err = EmptyError;
     const METHOD: Method = Method::Get;
 }
@@ -56,7 +57,7 @@ impl ApiEndpoint for ListSchoolNames {
 /// Update a school names verification flag
 pub struct VerifySchoolName;
 impl ApiEndpoint for VerifySchoolName {
-    type Path = SchoolNameVerificationPath;
+    type Path = AdminVerifySchoolNamePath;
     type Req = VerifySchoolNameRequest;
     type Res = ();
     type Err = EmptyError;
@@ -69,6 +70,16 @@ impl ApiEndpoint for ImportSchoolNames {
     type Path = ImportSchoolNamesPath;
     type Req = String;
     type Res = Vec<String>;
+    type Err = EmptyError;
+    const METHOD: Method = Method::Post;
+}
+
+/// Invite users to a school
+pub struct InviteUsers;
+impl ApiEndpoint for InviteUsers {
+    type Path = InviteSchoolUsersPath;
+    type Req = InviteSchoolUsersRequest;
+    type Res = InviteSchoolUsersResponse;
     type Err = EmptyError;
     const METHOD: Method = Method::Post;
 }

@@ -860,6 +860,8 @@ pub enum Account {
     UserHasAccount,
     SchoolNameExists(String),
     SchoolExists(SchoolNameId),
+    NotFound(String),
+    Forbidden,
 }
 
 impl<T: Into<anyhow::Error>> From<T> for Account {
@@ -887,6 +889,10 @@ impl Into<actix_web::Error> for Account {
                 format!("A school using a name with ID {id} already exists"),
             )
             .into(),
+            Self::NotFound(message) => {
+                BasicError::with_message(http::StatusCode::NOT_FOUND, message).into()
+            }
+            Self::Forbidden => BasicError::new(http::StatusCode::FORBIDDEN).into(),
         }
     }
 }
