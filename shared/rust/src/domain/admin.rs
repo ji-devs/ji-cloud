@@ -59,9 +59,10 @@ impl Default for DateFilterType {
 make_path_parts!(SchoolNameVerificationPath => "/v1/admin/school-name");
 
 /// Request to list school names
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct ListSchoolNamesRequest {
     /// If `Some` then whether to filter by verified or unverified
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub verified: Option<bool>,
 }
 
