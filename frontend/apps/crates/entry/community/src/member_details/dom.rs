@@ -76,6 +76,8 @@ impl MemberDetails {
                                     None => JsValue::UNDEFINED,
                                 }
                             })
+                            .prop("givenName", &member.given_name)
+                            .prop("familyName", &member.family_name)
                         }))
                         .children_signal_vec(state.circles.signal_ref(move |circles| {
                             circles.iter().map(move |circle| {
@@ -440,6 +442,8 @@ impl MemberDetails {
                         None => JsValue::UNDEFINED,
                     }
                 })
+                .prop("givenName", &member.given_name)
+                .prop("familyName", &member.family_name)
             }))
         })
     }

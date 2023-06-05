@@ -77,6 +77,8 @@ impl CommunityLanding {
                         None => JsValue::UNDEFINED,
                     }
                 })
+                .prop("givenName", &member.given_name)
+                .prop("familyName", &member.family_name)
             }))
             .text(&format!("{} {}", member.given_name, member.family_name))
         })

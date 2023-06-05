@@ -139,6 +139,8 @@ impl MembersList {
                         None => JsValue::UNDEFINED,
                     }
                 })
+                .prop("givenName", &member.given_name)
+                .prop("familyName", &member.family_name)
             }))
         })
     }
