@@ -17,7 +17,7 @@ use utils::{
 
 use super::UnitEditor;
 
-const STR_ADD_TO_PLAYLIST: &str = "Add to playlist";
+const STR_ADD_TO_COURSE: &str = "Add to course";
 const STR_UPDATE: &str = " Update unit ";
 
 impl UnitEditor {
@@ -263,7 +263,7 @@ impl UnitEditor {
     pub fn create_or_update_text(&self) -> String {
         match self.unit_id {
             Some(_) => STR_UPDATE.to_string(),
-            None => STR_ADD_TO_PLAYLIST.to_string(),
+            None => STR_ADD_TO_COURSE.to_string(),
         }
     }
 }
