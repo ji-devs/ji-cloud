@@ -93,7 +93,7 @@ box_outline = []
 buttons = []
 tabs = []
 overlay = []
-profile_image =[]
+editable_profile_image =[]
 help_center = []
 unit = []
 
@@ -140,6 +140,6 @@ all = [
     "buttons",
     "tabs",
     "overlay",
-    "profile_image",
+    "editable_profile_image",
     "unit"
 ]

@@ -1,6 +1,6 @@
 use components::{
+    editable_profile_image::{EditableProfileImage, EditableProfileImageConfig},
     page_header::{PageHeader, PageHeaderConfig},
-    profile_image::{ProfileImage, ProfileImageConfig},
 };
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::{
@@ -47,8 +47,8 @@ impl SettingsPage {
         state.load_initial_data();
 
         html!("user-profile", {
-            .child(ProfileImage::new(state.user.profile_image.read_only(),
-                ProfileImageConfig {
+            .child(EditableProfileImage::new(state.user.profile_image.read_only(),
+                EditableProfileImageConfig {
                     save_changes: Box::new(clone!(state => move |user| {
                         state.user.profile_image.set(user);
                         state.save_profile();

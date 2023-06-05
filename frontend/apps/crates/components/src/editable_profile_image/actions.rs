@@ -13,9 +13,9 @@ use shared::{
 use utils::{prelude::ApiEndpointExt, unwrap::UnwrapJiExt};
 use web_sys::File;
 
-use super::{ImageIdOrFile, ProfileImage};
+use super::{EditableProfileImage, ImageIdOrFile};
 
-impl ProfileImage {
+impl EditableProfileImage {
     pub fn apply_changes(self: &Rc<Self>) {
         let state = self;
         state.loader.load(clone!(state => async move {

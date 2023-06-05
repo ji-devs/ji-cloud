@@ -1,10 +1,10 @@
 use shared::domain::image::ImageId;
 
-pub struct ProfileImageConfig {
+pub struct EditableProfileImageConfig {
     pub save_changes: Box<dyn Fn(Option<ImageId>)>,
 }
 
-impl Default for ProfileImageConfig {
+impl Default for EditableProfileImageConfig {
     fn default() -> Self {
         Self {
             save_changes: Box::new(|_| {}),

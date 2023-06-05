@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use super::{ImageIdOrFile, ProfileImage};
+use super::{EditableProfileImage, ImageIdOrFile};
 use crate::{
     dialog::Dialog,
     file_input::{FileInput, FileInputConfig},
@@ -14,7 +14,7 @@ use web_sys::{File, HtmlElement, ShadowRoot, Url};
 const STR_HEADING: &str = "Profile picture";
 const STR_SAVE: &str = "Save";
 
-impl Component<ProfileImage> for Rc<ProfileImage> {
+impl Component<EditableProfileImage> for Rc<EditableProfileImage> {
     fn styles() -> &'static str {
         include_str!("./styles.css")
     }
@@ -61,7 +61,7 @@ impl Component<ProfileImage> for Rc<ProfileImage> {
     }
 }
 
-fn render_popup(state: &Rc<ProfileImage>) -> Dom {
+fn render_popup(state: &Rc<EditableProfileImage>) -> Dom {
     html!("popup-image", {
         .child(html!("style", {
             .text(include_str!("./styles.css"))

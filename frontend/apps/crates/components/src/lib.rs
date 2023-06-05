@@ -33,6 +33,8 @@ pub mod color_select;
 pub mod confirm;
 #[cfg(feature = "dialog")]
 pub mod dialog;
+#[cfg(feature = "editable_profile_image")]
+pub mod editable_profile_image;
 #[cfg(feature = "file_input")]
 pub mod file_input;
 #[cfg(feature = "firebase")]
@@ -57,8 +59,6 @@ pub mod page_header;
 pub mod pdf;
 #[cfg(feature = "player_popup")]
 pub mod player_popup;
-#[cfg(feature = "profile_image")]
-pub mod profile_image;
 #[cfg(feature = "share_jig")]
 pub mod share_asset;
 #[cfg(feature = "stickers")]
