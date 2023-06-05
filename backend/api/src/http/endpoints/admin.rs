@@ -147,7 +147,7 @@ async fn create_or_update_subscription_plan(
 async fn list_school_names(
     _auth: TokenUserWithScope<ScopeAdmin>,
     db: Data<PgPool>,
-    req: Json<<ListSchoolNames as ApiEndpoint>::Req>,
+    req: Query<<ListSchoolNames as ApiEndpoint>::Req>,
 ) -> Result<
     (
         Json<<ListSchoolNames as ApiEndpoint>::Res>,
