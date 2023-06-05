@@ -56,7 +56,7 @@ select exists(
 #[instrument(skip(pool))]
 pub async fn add_school_name(
     pool: &PgPool,
-    new_name: &str,
+    new_name: String,
     verified: bool,
 ) -> sqlx::Result<SchoolNameId> {
     sqlx::query_scalar!(
@@ -452,4 +452,22 @@ where
             (school_name, school)
         })
         .collect())
+}
+
+#[instrument(skip(pool))]
+pub async fn verify_school_name(
+    pool: &PgPool,
+    school_name_id: SchoolNameId,
+    verified: bool,
+) -> sqlx::Result<()> {
+    sqlx::query!(
+        // language=SQL
+        r#"update school_name set verified = $2 where school_name_id = $1"#,
+        school_name_id as SchoolNameId,
+        verified,
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
 }
