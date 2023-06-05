@@ -355,7 +355,7 @@ where account_id = $1
         Some(record) => {
             let school = School {
                 id: record.id,
-                name: get_school_name(pool, &record.name).await?.unwrap(),
+                school_name: get_school_name(pool, &record.name).await?.unwrap(),
                 location: record.location,
                 email: record.email,
                 description: record.description,
@@ -438,7 +438,7 @@ where
 
             let school = record.school_id.map(|school_id| School {
                 id: school_id,
-                name: school_name.clone(),
+                school_name: school_name.clone(),
                 location: record.location,
                 email: record.email.unwrap(),
                 description: record.description,

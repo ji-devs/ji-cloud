@@ -307,7 +307,7 @@ async fn get_or_create_customer(
                     client,
                     CreateCustomer {
                         email: Some(school.email.as_str()),
-                        name: Some(school.name.name.as_str()),
+                        name: Some(school.school_name.name.as_str()),
                         ..Default::default()
                     },
                 )
@@ -318,6 +318,10 @@ async fn get_or_create_customer(
                     client,
                     CreateCustomer {
                         email: Some(user_profile.email.as_str()),
+                        name: Some(&format!(
+                            "{} {}",
+                            user_profile.given_name, user_profile.family_name
+                        )),
                         ..Default::default()
                     },
                 )
