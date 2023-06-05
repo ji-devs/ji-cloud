@@ -16,6 +16,7 @@ pub struct CircleDetails {
     pub loader: AsyncLoader,
     pub community_state: Rc<Community>,
     pub(super) active_popup: Mutable<Option<ActivePopup>>,
+    pub url_copied: Mutable<bool>,
 }
 
 impl CircleDetails {
@@ -27,6 +28,7 @@ impl CircleDetails {
             loader: AsyncLoader::new(),
             community_state,
             active_popup: Mutable::new(None),
+            url_copied: Mutable::new(false),
         })
     }
 }

@@ -16,6 +16,7 @@ use shared::{
     media::MediaLibrary,
 };
 use utils::{
+    clipboard,
     component::Component,
     events,
     languages::Language,
@@ -27,7 +28,8 @@ use utils::{
 use wasm_bindgen::JsValue;
 
 // const STR_CONTACT_ADMIN: &str = "Contact admin";
-// const STR_INVITE: &str = "Invite";
+const STR_INVITE: &str = "Invite";
+const STR_COPIED: &str = "Copied!";
 const STR_MEMBER: &str = "Member";
 const STR_DELETE_CIRCLE: &str = "Delete circle";
 const STR_JOIN: &str = "Join";
@@ -47,7 +49,7 @@ impl CircleDetails {
 
         html!("empty-fragment", {
             .child_signal(state.circle.signal_ref(clone!(state => move |circle| {
-                circle.as_ref().map(|circle| {
+                circle.as_ref().map(clone!(state => move |circle| {
                     html!("community-circle-details", {
                         .prop("name", &circle.display_name)
                         .prop("description", &circle.description)
@@ -65,13 +67,26 @@ impl CircleDetails {
                             //     .prop("color", "blue")
                             //     .text(STR_CONTACT_ADMIN)
                             // }),
-                            // html!("button-rect", {
-                            //     .prop("slot", "actions")
-                            //     .prop("kind", "outline")
-                            //     .prop("size", "small")
-                            //     .prop("color", "blue")
-                            //     .text(STR_INVITE)
-                            // }),
+                            html!("button-rect", {
+                                .prop("slot", "actions")
+                                .prop("kind", "outline")
+                                .prop("size", "small")
+                                .prop("color", "blue")
+                                .text_signal(state.url_copied.signal().map(|url_copied| match url_copied {
+                                    false => STR_INVITE,
+                                    true => STR_COPIED,
+                                }))
+                                .event(clone!(state => move |_: events::Click| {
+                                    fn get_current_url() -> Option<String> {
+                                        Some(web_sys::window()?
+                                            .location()
+                                            .href().ok()?)
+                                    }
+                                    let circle_url = get_current_url().unwrap_ji();
+                                    clipboard::write_text(&circle_url);
+                                    state.url_copied.set(true);
+                                }))
+                            }),
                             // member-images
                             html!("input-search", {
                                 .prop("slot", "member-search")
@@ -159,7 +174,7 @@ impl CircleDetails {
                             state.render_member(&member)
                         })))
                     })
-                })
+                }))
             })))
 
             .child_signal(state.active_popup.signal().map(clone!(state => move |active_popup| {

@@ -52,9 +52,7 @@ impl PlaylistMenu {
                 }
             },
             None => {
-                vec![
-                    state.item_delete(),
-                ]
+                vec![state.item_delete()]
             }
         }
     }
