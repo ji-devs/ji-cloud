@@ -56,7 +56,7 @@ impl Default for DateFilterType {
     }
 }
 
-make_path_parts!(SchoolNameVerification => "/v1/admin/school-name");
+make_path_parts!(SchoolNameVerificationPath => "/v1/admin/school-name");
 
 /// Request to list school names
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -98,3 +98,5 @@ pub struct VerifySchoolNameRequest {
     /// Whether this school name should be marked verified or not
     pub verified: bool,
 }
+
+make_path_parts!(ImportSchoolNamesPath => "/v1/admin/import-school-names");

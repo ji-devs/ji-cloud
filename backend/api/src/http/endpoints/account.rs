@@ -35,7 +35,7 @@ async fn create_school_account(
             }
 
             // If it doesnt exist, then add the name
-            db::account::add_school_name(db.as_ref(), &new_name, false).await?
+            db::account::add_school_name(db.as_ref(), new_name, false).await?
         }
         SchoolNameRequest::Id(id) => {
             // If they are creating a school with an existing school name, then check that

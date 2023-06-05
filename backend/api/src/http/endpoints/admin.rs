@@ -1,12 +1,15 @@
 use actix_files::NamedFile;
+use actix_web::web::Bytes;
 use actix_web::{
     web::{Data, Json, Path, Query, ServiceConfig},
     HttpRequest, HttpResponse,
 };
 use chrono::{Duration, Utc};
+use csv::ReaderBuilder;
+use futures::future::join_all;
 use ji_core::settings::RuntimeSettings;
 use serde::ser::Serialize;
-use shared::api::endpoints::admin::ListSchoolNames;
+use shared::api::endpoints::admin::{ImportSchoolNames, ListSchoolNames, VerifySchoolName};
 use shared::domain::admin::ListSchoolNamesResponse;
 use shared::{
     api::{
@@ -166,6 +169,57 @@ async fn list_school_names(
     ))
 }
 
+async fn add_school_name_if_not_exists(
+    pool: &PgPool,
+    name: String,
+) -> sqlx::Result<Option<String>> {
+    if db::account::check_school_name_exists(pool, &name).await? {
+        Ok(Some(name))
+    } else {
+        db::account::add_school_name(pool, name, true).await?;
+        Ok(None)
+    }
+}
+
+async fn import_school_names(
+    _auth: TokenUserWithScope<ScopeAdmin>,
+    db: Data<PgPool>,
+    Json(data): Json<<ImportSchoolNames as ApiEndpoint>::Req>,
+) -> Result<
+    (
+        Json<<ImportSchoolNames as ApiEndpoint>::Res>,
+        http::StatusCode,
+    ),
+    error::Server,
+> {
+    let names: Vec<_> = data
+        .lines()
+        .map(|line| add_school_name_if_not_exists(db.as_ref(), line.into()))
+        .collect();
+
+    let exists = join_all(names)
+        .await
+        .into_iter()
+        .filter_map(|item| match item {
+            Ok(Some(item)) => Some(Ok(item)),
+            Err(error) => Some(Err(error)),
+            _ => None,
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+
+    Ok((Json(exists), http::StatusCode::OK))
+}
+
+async fn verify_school_name(
+    _auth: TokenUserWithScope<ScopeAdmin>,
+    db: Data<PgPool>,
+    Json(data): Json<<VerifySchoolName as ApiEndpoint>::Req>,
+) -> Result<HttpResponse, error::Server> {
+    db::account::verify_school_name(db.as_ref(), data.school_name_id, data.verified).await?;
+
+    Ok(HttpResponse::Ok().finish())
+}
+
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
         <admin::Impersonate as ApiEndpoint>::Path::PATH,
@@ -184,5 +238,13 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <ListSchoolNames as ApiEndpoint>::Path::PATH,
         admin::ListSchoolNames::METHOD.route().to(list_school_names),
+    )
+    .route(
+        <ImportSchoolNames as ApiEndpoint>::Path::PATH,
+        ImportSchoolNames::METHOD.route().to(import_school_names),
+    )
+    .route(
+        <VerifySchoolName as ApiEndpoint>::Path::PATH,
+        VerifySchoolName::METHOD.route().to(verify_school_name),
     );
 }

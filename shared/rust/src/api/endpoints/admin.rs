@@ -1,7 +1,7 @@
 use super::ApiEndpoint;
 use crate::domain::admin::{
-    ListSchoolNamesRequest, ListSchoolNamesResponse, SchoolNameVerification,
-    VerifySchoolNameRequest,
+    ImportSchoolNamesPath, ListSchoolNamesRequest, ListSchoolNamesResponse,
+    SchoolNameVerificationPath, VerifySchoolNameRequest,
 };
 use crate::{
     api::Method,
@@ -46,7 +46,7 @@ impl ApiEndpoint for CreateUpdateSubscriptionPlan {
 /// List school names
 pub struct ListSchoolNames;
 impl ApiEndpoint for ListSchoolNames {
-    type Path = SchoolNameVerification;
+    type Path = SchoolNameVerificationPath;
     type Req = ListSchoolNamesRequest;
     type Res = ListSchoolNamesResponse;
     type Err = EmptyError;
@@ -56,9 +56,19 @@ impl ApiEndpoint for ListSchoolNames {
 /// Update a school names verification flag
 pub struct VerifySchoolName;
 impl ApiEndpoint for VerifySchoolName {
-    type Path = SchoolNameVerification;
+    type Path = SchoolNameVerificationPath;
     type Req = VerifySchoolNameRequest;
     type Res = ();
+    type Err = EmptyError;
+    const METHOD: Method = Method::Patch;
+}
+
+/// Update a school names verification flag
+pub struct ImportSchoolNames;
+impl ApiEndpoint for ImportSchoolNames {
+    type Path = ImportSchoolNamesPath;
+    type Req = String;
+    type Res = Vec<String>;
     type Err = EmptyError;
     const METHOD: Method = Method::Post;
 }

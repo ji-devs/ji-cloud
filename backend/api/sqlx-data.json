@@ -8056,6 +8056,19 @@
     },
     "query": "\nselect media_id,\n       kind as \"kind: MediaKind\"\nfrom web_media_library_url\ninner join web_media_library on id = media_id\nwhere media_url = $1"
   },
+  "8e4fca2315dd5ebe2e8d4189a5efb8951d2824577d2d864d55e40aebca67e775": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Bool"
+        ]
+      }
+    },
+    "query": "update school_name set verified = $2 where school_name_id = $1"
+  },
   "8e91b63b58e15b8c898573ffd729ea87968e8d2efa24ee4d855ac357c193087b": {
     "describe": {
       "columns": [],
