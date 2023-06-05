@@ -21,7 +21,7 @@ use crate::{
     extractor::TokenUser,
 };
 
-/// Create a new Pro Dev Unit.
+/// Create a new Course Unit.
 async fn create(
     db: Data<PgPool>,
     auth: TokenUser,
@@ -52,7 +52,7 @@ async fn create(
     Ok((Json(CreateResponse { id }), http::StatusCode::CREATED))
 }
 
-/// Update a Pro Dev Unit.
+/// Update a Course Unit.
 async fn update(
     db: Data<PgPool>,
     auth: TokenUser,
@@ -79,7 +79,7 @@ async fn update(
     Ok(HttpResponse::NoContent().finish())
 }
 
-/// Get a Pro Dev Unit on a draft Pro Dev.
+/// Get a Course Unit on a draft Course.
 async fn get_draft(
     db: Data<PgPool>,
     _auth: TokenUser,
@@ -98,7 +98,7 @@ async fn get_draft(
     }))
 }
 
-/// Get a Pro Dev Unit on a live Pro Dev.
+/// Get a Course Unit on a live Course.
 async fn get_live(
     db: Data<PgPool>,
     _auth: TokenUser,
@@ -117,7 +117,7 @@ async fn get_live(
     }))
 }
 
-/// Delete a Pro Dev Unit.
+/// Delete a Course Unit.
 async fn delete(
     db: Data<PgPool>,
     auth: TokenUser,

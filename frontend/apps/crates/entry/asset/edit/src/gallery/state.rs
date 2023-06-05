@@ -21,7 +21,7 @@ pub const TEMPLATE_KINDS: &[&str] = &[
 const STR_JIG: &str = "JIG";
 const STR_RESOURCE: &str = "Resource";
 const STR_PLAYLIST: &str = "Playlist";
-const STR_COURSE: &str = "Pro Dev";
+const STR_COURSE: &str = "Course";
 
 #[derive(Debug, Clone, PartialEq, EnumIter, Display, EnumString)]
 pub enum VisibleAssets {

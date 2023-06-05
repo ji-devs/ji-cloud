@@ -47,7 +47,7 @@ pub enum AssetType {
     /// Playlist
     Playlist,
 
-    /// Pro Dev
+    /// Course
     Course,
 }
 
@@ -167,7 +167,7 @@ pub enum AssetId {
     /// Resource ID
     ResourceId(ResourceId),
 
-    /// Pro Dev ID
+    /// Course ID
     CourseId(CourseId),
 }
 
@@ -358,7 +358,7 @@ impl Asset {
         matches!(self, Self::Resource(_))
     }
 
-    /// check if is pro dev
+    /// check if is course
     pub fn is_course(&self) -> bool {
         matches!(self, Self::Course(_))
     }

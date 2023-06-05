@@ -263,7 +263,7 @@ pub struct AlgoliaSettings {
     /// If [`None`], indexing and searching will be disabled.
     pub user_index: Option<String>,
 
-    /// The index to use for operations relating to Pro Dev on the algolia client.
+    /// The index to use for operations relating to Course on the algolia client.
     /// If [`None`], indexing and searching will be disabled.
     pub course_index: Option<String>,
 }

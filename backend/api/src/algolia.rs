@@ -354,7 +354,7 @@ impl Manager {
                 7 => self
                     .update_courses()
                     .await
-                    .context("update pro devs task errored"),
+                    .context("update courses task errored"),
                 _ => continue,
             };
 
@@ -1391,7 +1391,7 @@ limit 100 for no key update skip locked;
     }
 
     async fn update_courses(&self) -> anyhow::Result<bool> {
-        log::info!("reached update pro dev");
+        log::info!("reached update course");
         let mut txn = self.db.begin().await?;
 
         // todo: allow for some way to do a partial update (for example, by having a channel for queueing partial updates)

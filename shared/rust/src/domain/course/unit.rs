@@ -12,23 +12,23 @@ use serde::{Deserialize, Serialize};
 use super::CourseId;
 
 wrap_uuid! {
-    /// Wrapper type around [`Uuid`](Uuid), represents the ID of a Pro Dev Unit.
+    /// Wrapper type around [`Uuid`](Uuid), represents the ID of a Course Unit.
     pub struct CourseUnitId
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-/// Unit attached to a Pro Dev.
+/// Unit attached to a Course.
 pub struct CourseUnit {
     /// Unit Id
     pub id: CourseUnitId,
-    /// Name for Pro Dev Unit
+    /// Name for Course Unit
     pub display_name: String,
 
-    /// Description of Pro Dev Unit
+    /// Description of Course Unit
     pub description: String,
 
-    /// Content of Pro Dev Unit
+    /// Content of Course Unit
     #[serde(flatten)]
     pub value: CourseUnitValue,
 }
@@ -41,13 +41,13 @@ make_path_parts!(CreateCourseUnitPath => "/v1/course/{}/unit" => CourseId);
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct CourseUnitCreateRequest {
-    /// Display name for Pro Dev Unit
+    /// Display name for Course Unit
     pub display_name: String,
 
-    /// Type of Pro Dev Unit
+    /// Type of Course Unit
     pub description: String,
 
-    /// Value of Pro Dev Unit
+    /// Value of Course Unit
     #[serde(flatten)]
     pub value: CourseUnitValue,
 }
@@ -60,23 +60,23 @@ make_path_parts!(UpdateCourseUnitPath => "/v1/course/{}/unit/{}" => CourseId, Co
 #[derive(Serialize, Deserialize, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct CourseUnitUpdateRequest {
-    /// Pro Dev Unit display name
+    /// Course Unit display name
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub display_name: Option<String>,
 
-    /// Description of Pro Dev Unit
+    /// Description of Course Unit
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub description: Option<String>,
 
-    /// Kind of Pro Dev Unit
+    /// Kind of Course Unit
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     #[serde(flatten)]
     pub value: Option<CourseUnitValue>,
 
-    /// Kind of Pro Dev Unit
+    /// Kind of Course Unit
     #[serde(default)]
     pub index: Option<u16>,
 }
@@ -87,18 +87,18 @@ make_path_parts!(GetCourseUnitLivePath => "/v1/course/{}/unit/{}/live" => Course
 
 make_path_parts!(DeleteCourseUnitPath => "/v1/course/{}/unit/{}/draft" => CourseId, CourseUnitId);
 
-/// Value of Pro Dev Unit
+/// Value of Course Unit
 #[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub enum CourseUnitValue {
-    /// Pro Dev Unit kind: image
+    /// Course Unit kind: image
     ImageId(ImageId),
-    /// Pro Dev Unit kind: audioFile
+    /// Course Unit kind: audioFile
     AudioId(AudioId),
-    /// Pro Dev Unit kind: link
+    /// Course Unit kind: link
     Link(url::Url),
-    /// Pro Dev Unit kind: pdf
+    /// Course Unit kind: pdf
     PdfId(PdfId),
-    /// Pro Dev Unit kind: YouTube Video
+    /// Course Unit kind: YouTube Video
     Video(YoutubeEmbed),
 }

@@ -93,7 +93,7 @@ impl UnitEditor {
     }
 }
 
-/// Value of Pro Dev Unit
+/// Value of Course Unit
 #[derive(Debug, Clone)]
 pub enum UnitValue {
     File(Option<UnitValueFile>),

@@ -130,7 +130,7 @@ pub mod algolia {
     pub const USER_INDEX: &str = "ALGOLIA_USER_INDEX";
 
     /// The index to use for indexing and backend searches.
-    /// Is optional. If missing, *Pro Dev* indexing will be disabled,
+    /// Is optional. If missing, *Course* indexing will be disabled,
     /// search related routes will return a "501 - Not Implemented" and a warning will be emitted.
     pub const COURSE_INDEX: &str = "ALGOLIA_COURSE_INDEX";
 

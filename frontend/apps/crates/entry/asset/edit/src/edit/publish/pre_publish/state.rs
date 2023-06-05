@@ -16,7 +16,7 @@ use super::super::Publish;
 const STR_JIG: &str = "JIG";
 const STR_RESOURCE: &str = "Resource";
 const STR_PLAYLIST: &str = "Playlist";
-const STR_COURSE: &str = "Pro Dev course";
+const STR_COURSE: &str = "Course";
 
 pub struct PrePublish {
     pub loader: AsyncLoader,
