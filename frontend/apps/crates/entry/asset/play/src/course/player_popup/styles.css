@@ -36,8 +36,6 @@ main {
     object-fit: contain;
 }
 .unit-edit > * {
-    width: 100%;
-    height: 100%;
     border-radius: 16px;
     object-fit: contain; 
 }
