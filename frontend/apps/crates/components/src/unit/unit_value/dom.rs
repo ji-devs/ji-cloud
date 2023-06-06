@@ -67,24 +67,25 @@ impl UnitValueView {
     }
 
     fn render_active_video(self: &Rc<Self>, video: YoutubeEmbed) -> Dom {
-        html!("video-youtube-player" => HtmlElement, {
-            .prop("videoId", video.url.get_id())
-            .apply(|mut dom| {
-                if let Some(start_at) = video.start_at {
-                    dom = dom.prop("start", start_at);
-                }
-                if let Some(end_at) = video.end_at {
-                    dom = dom.prop("end", end_at);
-                }
-                dom
-            })
+        html!("div", {
+            .class("video-wrapper")
+            .child(html!("video-youtube-player" => HtmlElement, {
+                .prop("videoId", video.url.get_id())
+                .apply(|mut dom| {
+                    if let Some(start_at) = video.start_at {
+                        dom = dom.prop("start", start_at);
+                    }
+                    if let Some(end_at) = video.end_at {
+                        dom = dom.prop("end", end_at);
+                    }
+                    dom
+                })
+            }))
         })
     }
 
     fn render_active_image(self: &Rc<Self>, image: ImageId) -> Dom {
         html!("img-ji", {
-            // would like to get rid if the styles here
-            // .prop("size", "full")
             .prop("id", image.0.to_string())
             .prop("lib", "user")
             .prop("borderRadius", "16px")
