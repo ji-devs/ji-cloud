@@ -15,7 +15,7 @@ use web_sys::{HtmlDialogElement, ShadowRoot};
 
 const UNITS_PER_PAGE: usize = 10;
 const STR_READ_MORE: &str = "Read more";
-const MAX_CHAR_LEN: usize = 100; 
+const MAX_CHAR_LEN: usize = 100;
 
 impl Component<PlayerPopup> for Rc<PlayerPopup> {
     fn styles() -> &'static str {
@@ -70,7 +70,7 @@ impl Component<PlayerPopup> for Rc<PlayerPopup> {
                                             }))
                                             .event(clone!(state => move|_: events::Click| {
                                                 state.render_popup.set(true)
-                                            }))                                   
+                                            }))
                                         }),
                                     ])
                                 }),
@@ -83,7 +83,7 @@ impl Component<PlayerPopup> for Rc<PlayerPopup> {
                             true => Some(state.render_info_popup()),
                             false => None,
                         }
-                    })))  
+                    })))
                     .child(html!("fa-button", {
                         .class("fullscreen-button")
                         .prop_signal("icon", state.is_full_screen.signal().map(|is_full_screen| {
@@ -230,14 +230,14 @@ impl PlayerPopup {
                 }),
                 html!("div", {
                     .class("popup-description")
-                    .text_signal(state.description_signal().map(move |description| description.unwrap_ji()))                
+                    .text_signal(state.description_signal().map(move |description| description.unwrap_ji()))
                 }),
                 html!("div", {
                     .class("popup-close")
                     .text("Close")
                     .event(clone!(state => move |_: events::Click| {
                         state.render_popup.set(false)
-                    }))               
+                    }))
                 })
             ])
         })
@@ -269,25 +269,19 @@ impl PlayerPopup {
     }
 
     fn name_signal(self: &Rc<Self>) -> impl Signal<Item = Option<String>> {
-        self.name.signal_cloned().map(
-            move |name| {
-                match name {
-                    Some(name) => Some(name),
-                    None => None,
-                }
-            },
-        )
+        self.name.signal_cloned().map(move |name| match name {
+            Some(name) => Some(name),
+            None => None,
+        })
     }
 
     fn description_signal(self: &Rc<Self>) -> impl Signal<Item = Option<String>> {
-        self.description.signal_cloned().map(
-            move |description| {
-                match description {
-                    Some(description) => Some(description),
-                    None => None,
-                }
-            },
-        )
+        self.description
+            .signal_cloned()
+            .map(move |description| match description {
+                Some(description) => Some(description),
+                None => None,
+            })
     }
 
     fn render_active_unit(self: &Rc<Self>, unit: CourseUnit) -> Dom {

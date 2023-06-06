@@ -10,7 +10,7 @@ pub struct PlayerPopup {
     pub read_more: Mutable<bool>,
     pub render_popup: Mutable<bool>,
     pub description: Mutable<Option<String>>,
-    pub name: Mutable<Option<String>>
+    pub name: Mutable<Option<String>>,
 }
 
 impl PlayerPopup {
@@ -21,7 +21,7 @@ impl PlayerPopup {
             read_more: Mutable::new(false),
             render_popup: Mutable::new(false),
             description: Mutable::new(None),
-            name: Mutable::new(None)
+            name: Mutable::new(None),
         })
     }
 }
