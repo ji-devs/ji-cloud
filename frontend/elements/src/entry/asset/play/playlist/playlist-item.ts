@@ -37,8 +37,9 @@ export class _ extends LitElement {
                 }
                 .column-3 {
                     display: grid;
-                    row-gap: 8px;
+                    row-gap: 4px;
                     color: var(--dark-gray-6);
+                    grid-template-rows: auto auto auto;
                 }
                 .name {
                     font-size: 16px;
@@ -65,6 +66,14 @@ export class _ extends LitElement {
                     display: inline-grid;
                     place-content: center;
                 }
+
+                ::slotted([slot=read-more]) {
+                    display: grid;
+                    color: #5590fc;
+                    font-size: 13px;
+                    
+                }
+
             `,
         ];
     }
@@ -81,7 +90,24 @@ export class _ extends LitElement {
     @property({ type: Boolean, reflect: true })
     done: boolean = false;
 
+    @property()
+    hideDescription: boolean = false;
+
     render() {
+        const renderDescription = () => {
+            if (this.hideDescription === true && this.description.length >= 100) {
+                return html`
+                    <div class="description" dir="auto">${this.description.substring(0, 100)}</div>
+                    <slot name="read-more"></slot>
+                `;
+            } else {
+                return html`
+                    <div class="description" dir="auto">${this.description}</div>
+                `;
+            }
+        };
+
+
         return html`
             <div class="index">${
                 this.done ? html`<fa-icon icon="fa-solid fa-check"></fa-icon>` : this.index
@@ -89,8 +115,9 @@ export class _ extends LitElement {
             <slot name="thumbnail"></slot>
             <div class="column-3">
                 <div class="name" dir="auto">${this.name}</div>
-                <div class="description" dir="auto">${this.description}</div>
+                ${renderDescription()}
             </div>
+            <slot name="popup-info"></slot>
             <slot name="play-button"></slot>
         `;
     }

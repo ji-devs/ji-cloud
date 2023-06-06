@@ -10,10 +10,12 @@ use futures_signals::{
 use gloo::utils::{body, document};
 use itertools::Itertools;
 use shared::domain::course::{unit::CourseUnit, CourseResponse};
-use utils::{component::Component, events};
+use utils::{component::Component, events, unwrap::UnwrapJiExt};
 use web_sys::{HtmlDialogElement, ShadowRoot};
 
 const UNITS_PER_PAGE: usize = 10;
+const STR_READ_MORE: &str = "Read more";
+const MAX_CHAR_LEN: usize = 100;
 
 impl Component<PlayerPopup> for Rc<PlayerPopup> {
     fn styles() -> &'static str {
@@ -33,21 +35,55 @@ impl Component<PlayerPopup> for Rc<PlayerPopup> {
                 })))
                 .child(html!("div", {
                     .class("middle-section")
-                    .children_signal_vec(state.active_unit_signal().map(move|unit| {
+                    .children_signal_vec(state.active_unit_signal().map(clone!(state => move|unit| {
                         match unit {
-                            Some(unit) => vec![
+                            Some(unit) => {
+                                let description= if &unit.description.len() >= &MAX_CHAR_LEN {
+                                    state.read_more.set(true);
+                                    state.name.set(Some(unit.display_name.clone()));
+                                    state.description.set(Some(unit.description.clone()));
+                                    &unit.description[..MAX_CHAR_LEN]
+                                }else {
+                                    state.read_more.set(false);
+                                    unit.description.as_str()
+                                };
+
+                                vec![
                                 html!("h1", {
                                     .class("name")
                                     .text(&unit.display_name)
                                 }),
                                 html!("p", {
-                                    .class("description")
-                                    .text(&unit.description)
-                                })
-                            ],
+                                    .children(&mut [
+                                        html!("div", {
+                                            .class("description")
+                                            .text(description)
+                                        }),
+                                        html!("div", {
+                                            .class("read-more")
+                                            .text_signal(state.read_more_signal().map(move |read_more| {
+                                                if let Some(read_more) = read_more {
+                                                    format!("  {}", read_more)
+                                                } else {
+                                                    format!(" ")
+                                                }
+                                            }))
+                                            .event(clone!(state => move|_: events::Click| {
+                                                state.render_popup.set(true)
+                                            }))
+                                        }),
+                                    ])
+                                }),
+                            ]},
                             None => vec![]
                         }
-                    }).to_signal_vec())
+                    })).to_signal_vec())
+                    .child_signal(state.render_popup.signal_cloned().map(clone!(state => move |popup| {
+                        match popup {
+                            true => Some(state.render_info_popup()),
+                            false => None,
+                        }
+                    })))
                     .child(html!("fa-button", {
                         .class("fullscreen-button")
                         .prop_signal("icon", state.is_full_screen.signal().map(|is_full_screen| {
@@ -126,6 +162,7 @@ impl Component<PlayerPopup> for Rc<PlayerPopup> {
                         state.player_state.current_page.set(None);
                     }))
                 }))
+
             }))
         }))
     }
@@ -177,6 +214,35 @@ impl PlayerPopup {
         })
     }
 
+    pub fn render_info_popup(self: &Rc<Self>) -> Dom {
+        let state = self;
+        html!("popup-info", {
+            .children(&mut [
+                html!("fa-button", {
+                    .prop("icon", "fa-light fa-xmark")
+                    .event(clone!(state => move |_: events::Click| {
+                        state.render_popup.set(false)
+                    }))
+                }),
+                html!("div", {
+                    .class("popup-name")
+                    .text_signal(state.name_signal().map(move |name| name.unwrap_ji()))
+                }),
+                html!("div", {
+                    .class("popup-description")
+                    .text_signal(state.description_signal().map(move |description| description.unwrap_ji()))
+                }),
+                html!("div", {
+                    .class("popup-close")
+                    .text("Close")
+                    .event(clone!(state => move |_: events::Click| {
+                        state.render_popup.set(false)
+                    }))
+                })
+            ])
+        })
+    }
+
     fn active_unit_signal(self: &Rc<Self>) -> impl Signal<Item = Option<CourseUnit>> {
         map_ref! {
             let active_unit = self.player_state.active_unit.signal(),
@@ -189,6 +255,33 @@ impl PlayerPopup {
                 }
             }
         }
+    }
+
+    fn read_more_signal(self: &Rc<Self>) -> impl Signal<Item = Option<String>> {
+        map_ref! {
+            let read_more = self.read_more.signal_cloned() => move {
+                match read_more {
+                    true => Some(STR_READ_MORE.to_string()),
+                    false => None,
+                }
+            }
+        }
+    }
+
+    fn name_signal(self: &Rc<Self>) -> impl Signal<Item = Option<String>> {
+        self.name.signal_cloned().map(move |name| match name {
+            Some(name) => Some(name),
+            None => None,
+        })
+    }
+
+    fn description_signal(self: &Rc<Self>) -> impl Signal<Item = Option<String>> {
+        self.description
+            .signal_cloned()
+            .map(move |description| match description {
+                Some(description) => Some(description),
+                None => None,
+            })
     }
 
     fn render_active_unit(self: &Rc<Self>, unit: CourseUnit) -> Dom {

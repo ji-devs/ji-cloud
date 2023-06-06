@@ -1,0 +1,42 @@
+main-popup-info {
+    display: flex;
+    flex-direction: column;
+    border-radius: 16px;
+    justify-content: center;
+    position: absolute;
+    z-index: 1000;
+    background-color: white;
+    box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+    object-fit: contain;
+    padding: 17px;
+    right: 10vw;
+}
+
+main-popup-info .popup-name {
+    font-size: 17px;
+    font-weight: 600;
+    text-align: center;
+    color: var(--dark-gray-6);
+    margin: 0;
+    object-fit: contain;
+}
+
+main-popup-info .popup-description {
+    color: var(--dark-gray-6);
+    text-align: center;
+    object-fit: contain;
+    margin: 2px 13px 13px 13px;    
+    max-width: 20em;
+}
+
+main-popup-info .popup-close {
+    text-align: center;
+    font-weight: 500;
+    color: #5590fc;
+}
+
+fa-button,
+main-popup-info ::slotted([slot="popup-close"]) {
+    display: flex;
+    justify-content: end;
+}

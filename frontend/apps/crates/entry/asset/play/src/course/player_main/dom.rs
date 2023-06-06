@@ -16,7 +16,7 @@ use shared::domain::{
 };
 use utils::{
     asset::ResourceContentExt, component::Component, events, languages::Language,
-    metadata::get_resource_types,
+    metadata::get_resource_types, unwrap::UnwrapJiExt,
 };
 use web_sys::ShadowRoot;
 
@@ -43,6 +43,7 @@ impl Component<PlayerMain> for Rc<PlayerMain> {
                     PlayerPopup::new(&state.player_state).render()
                 })
             })))
+
         }))
     }
 }
@@ -91,10 +92,13 @@ impl PlayerMain {
                     .text_signal(state.resource_name_signal(resource.resource_type_id))
                 })
             }))
-            .child(html!("fa-button", {
+            .child(html!("div", {
                 .prop("slot", "play")
-                .prop("icon", "fa-solid fa-circle-play")
+                .child(html!("fa-button", {
+                    .prop("icon", "fa-solid fa-circle-play")
+                }))
                 .event(clone!(state => move |_: events::Click| {
+                    state.render_popup.set(false);
                     state.player_state.active_unit.set(Some(0));
                     state.player_state.played_units.lock_mut().insert(0);
                 }))
@@ -124,18 +128,43 @@ impl PlayerMain {
             .prop("slot", "items")
             .prop("name", &unit.display_name)
             .prop("description", &unit.description)
+            .prop("hideDescription", true)
             .prop("index", i + 1)
             .prop_signal("done", state.player_state.played_units.signal_ref(move |played_units| played_units.contains(&i)))
             .child(html!("fa-button", {
                 .prop("slot", "play-button")
                 .prop("icon", "fa-solid fa-play")
+                .style("place-content", "center")
+                .event(clone!(state => move |_: events::Click| {
+                    state.render_popup.set(false);
+                    state.set_active_unit_and_update_page(i);
+                }))
             }))
             .child(UnitThumbnail::new(
                 unit.value.clone(),
             ).render_live(Some("thumbnail")))
-            .event(clone!(state => move |_: events::Click| {
-                state.set_active_unit_and_update_page(i);
+            .child(html!("div", {
+                .prop("slot", "read-more")
+                .text("Read more")
+                .event(clone!(state, unit => move |_: events::Click| {
+                    state.read_more.set(Some(unit.clone()));  // Here you would call the function to show the popup
+                    state.render_popup.set(true);  // Here you would call the function to show the popup
+                }))
             }))
+            .child_signal(state.render_popup.signal_cloned().map(clone!(state, unit => move |render_popup| {
+                match render_popup {
+                    true => {
+                        let popup = if &state.read_more.get_cloned().unwrap_ji().id == &unit.id {
+                            Some(state.render_info_popup(&state.read_more.get_cloned().unwrap_ji()))
+                        } else {
+                            None
+                        };
+                        popup
+                    },
+                    false => None,
+                }
+            })))
+
         })
     }
 
@@ -163,5 +192,38 @@ impl PlayerMain {
                 None => String::new(),
             },
         )
+    }
+
+    pub fn render_info_popup(self: &Rc<Self>, unit: &CourseUnit) -> Dom {
+        let state = self;
+        log::warn!("poup: {}", unit.display_name);
+        html!("main-popup-info", {
+            .prop("slot", "popup-info")
+            .children(&mut [
+                html!("fa-button", {
+                    .prop("icon", "fa-light fa-xmark")
+                    .event(clone!(state => move |_: events::Click| {
+                        state.render_popup.set(false);
+                        state.read_more.set(None);
+                    }))
+                }),
+                html!("div", {
+                    .class("popup-name")
+                    .text(&unit.display_name)
+                }),
+                html!("div", {
+                    .class("popup-description")
+                    .text(&unit.description)
+                }),
+                html!("div", {
+                    .class("popup-close")
+                    .text("Close")
+                    .event(clone!(state => move |_: events::Click| {
+                        state.render_popup.set(false);
+                        state.read_more.set(None);
+                    }))
+                })
+            ])
+        })
     }
 }
