@@ -901,8 +901,11 @@ where user_id = $1
 pub fn get_location(
     location: Option<serde_json::Value>,
 ) -> (Option<String>, Option<String>, Option<String>) {
-    let location: Option<GoogleLocation> =
-        location.and_then(|location_value| serde_json::from_value(location_value).ok());
+    let location: Option<GoogleLocation> = location.and_then(|location_str| {
+        location_str
+            .as_str()
+            .and_then(|location_str| serde_json::from_str(location_str).ok())
+    });
 
     let city: Option<&GoogleAddressComponent> = location.as_ref().and_then(|l| {
         l.place
