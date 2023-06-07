@@ -33,10 +33,17 @@ main-popup-info .popup-close {
     text-align: center;
     font-weight: 500;
     color: #5590fc;
+    margin: auto;
 }
+
+main-popup-info .popup-close:hover {
+    color: #55a8fc;
+}
+
 
 fa-button,
 main-popup-info ::slotted([slot="popup-close"]) {
     display: flex;
     justify-content: end;
+    margin-left: auto;
 }

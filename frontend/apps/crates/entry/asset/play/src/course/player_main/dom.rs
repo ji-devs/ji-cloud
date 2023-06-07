@@ -149,12 +149,12 @@ impl PlayerMain {
             .child(UnitThumbnail::new(
                 unit.value.clone(),
             ).render_live(Some("thumbnail")))
-            .child(html!("div", {
+            .child(html!("button-empty", {
                 .prop("slot", "read-more")
                 .text("Read more")
                 .event(clone!(state, unit => move |_: events::Click| {
-                    state.read_more.set(Some(unit.clone()));  // Here you would call the function to show the popup
-                    state.render_popup.set(true);  // Here you would call the function to show the popup
+                    state.read_more.set(Some(unit.clone()));
+                    state.render_popup.set(true);
                 }))
             }))
             .child_signal(state.render_popup.signal_cloned().map(clone!(state, unit => move |render_popup| {

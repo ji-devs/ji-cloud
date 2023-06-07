@@ -67,13 +67,14 @@ export class _ extends LitElement {
                     place-content: center;
                 }
 
-                ::slotted([slot=read-more]) {
-                    display: grid;
+                ::slotted([slot="read-more"]) {
                     color: #5590fc;
                     font-size: 13px;
-                    
                 }
 
+                ::slotted([slot="read-more"]:hover) {
+                    color: #fc7f55;
+                }
             `,
         ];
     }
@@ -97,8 +98,10 @@ export class _ extends LitElement {
         const renderDescription = () => {
             if (this.hideDescription === true && this.description.length >= 100) {
                 return html`
-                    <div class="description" dir="auto">${this.description.substring(0, 100)}</div>
-                    <slot name="read-more"></slot>
+                    <div class="description" dir="auto">
+                    ${this.description.substring(0, 100)}
+                    <button-empty slot="read-more"></button-empty>
+                </div>
                 `;
             } else {
                 return html`
