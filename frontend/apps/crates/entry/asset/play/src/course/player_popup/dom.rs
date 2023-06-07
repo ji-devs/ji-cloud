@@ -65,7 +65,7 @@ impl Component<PlayerPopup> for Rc<PlayerPopup> {
                                             .class("description")
                                             .text(description)
                                         }),
-                                        html!("div", {
+                                        html!("button-empty", {
                                             .class("read-more")
                                             .text_signal(state.read_more_signal().map(move |read_more| {
                                                 if let Some(read_more) = read_more {
@@ -242,7 +242,7 @@ impl PlayerPopup {
                     .class("popup-description")
                     .text_signal(state.description_signal().map(move |description| description.unwrap_ji()))
                 }),
-                html!("div", {
+                html!("button-empty", {
                     .class("popup-close")
                     .text("Close")
                     .event(clone!(state => move |_: events::Click| {

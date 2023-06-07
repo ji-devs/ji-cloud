@@ -74,7 +74,12 @@ main {
 .read-more {
     grid-column: 2;
     color: #5590fc;
-    padding-left: 8px;
+    margin-left: 8px;
+    margin-right: auto;
+}
+
+.read-more:hover {
+    color: #55a8fc;
 }
 .fullscreen-button {
     grid-column: 3;
@@ -166,12 +171,20 @@ popup-info .popup-close {
     text-align: center;
     font-weight: 500;
     color: #5590fc;
+    margin: auto;
+}
+
+popup-info .popup-close:hover {
+    color: #55a8fc;
 }
 
 fa-button,
 popup-info ::slotted([slot="popup-close"]) {
     display: flex;
     justify-content: end;
+    margin-left: auto;
 }
+
+
 
 
