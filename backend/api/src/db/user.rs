@@ -901,35 +901,29 @@ where user_id = $1
 pub fn get_location(
     location: Option<serde_json::Value>,
 ) -> (Option<String>, Option<String>, Option<String>) {
-    let location = location.map_or(None, |location_str| {
-        location_str.as_str().map_or(None, |location_str| {
-            serde_json::from_str(&location_str).ok()
-        })
-    });
-    let location: Option<GoogleLocation> = location.map_or(None, |location_value| {
-        serde_json::from_value(location_value).ok()
-    });
+    let location: Option<GoogleLocation> =
+        location.and_then(|location_value| serde_json::from_value(location_value).ok());
 
-    let city: Option<&GoogleAddressComponent> = location.as_ref().map_or(None, |l| {
+    let city: Option<&GoogleAddressComponent> = location.as_ref().and_then(|l| {
         l.place
             .address_component_by_type(GoogleAddressType::Locality)
     });
 
-    let state: Option<&GoogleAddressComponent> = location.as_ref().map_or(None, |l| {
+    let state: Option<&GoogleAddressComponent> = location.as_ref().and_then(|l| {
         l.place
             .address_component_by_type(GoogleAddressType::AdministrativeAreaLevel1)
     });
 
-    let country: Option<&GoogleAddressComponent> = location.as_ref().map_or(None, |l| {
+    let country: Option<&GoogleAddressComponent> = location.as_ref().and_then(|l| {
         l.place
             .address_component_by_type(GoogleAddressType::Country)
     });
 
-    let city = city.as_deref().map(|c| c.long_name.to_string());
+    let city = city.map(|c| c.long_name.to_string());
 
-    let state = state.as_deref().map(|c| c.short_name.to_string());
+    let state = state.map(|c| c.short_name.to_string());
 
-    let country = country.as_deref().map(|c| c.long_name.to_string());
+    let country = country.map(|c| c.long_name.to_string());
 
     (city, state, country)
 }
