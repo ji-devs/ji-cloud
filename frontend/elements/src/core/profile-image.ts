@@ -1,6 +1,7 @@
 import { LitElement, html, css, customElement, property, state } from "lit-element";
 import "@elements/core/images/ui";
 import "@elements/core/images/ji";
+import { nothing } from "lit-html";
 
 const COLORS = [
     "#85a6ef",
@@ -14,6 +15,13 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
+                :host {
+                    display: inline-grid;
+                }
+                img-ji, .placeholder, .badge {
+                    grid-column: 1;
+                    grid-row: 1;
+                }
                 img-ji, .placeholder {
                     display: inline-block;
                     height: inherit;
@@ -23,6 +31,10 @@ export class _ extends LitElement {
                     display: inline-grid;
                     place-content: center;
                     color: var(--dark-gray-6);
+                }
+                .badge {
+                    align-self: end;
+                    justify-self: end;
                 }
             `,
         ];
@@ -36,6 +48,9 @@ export class _ extends LitElement {
 
     @property()
     familyName: string = "";
+
+    @property()
+    badge?: "master-teacher" | "ji-team";
 
     render() {
         return html`
@@ -54,6 +69,13 @@ export class _ extends LitElement {
                         id="${this.imageId}"
                     ></img-ji>
                 `
+            }
+            ${
+                this.badge === "master-teacher" ? html`
+                    <img-ui class="badge" path="core/profile-image/badge-master-teacher.svg">
+                ` : this.badge === "ji-team" ?  html`
+                    <img-ui class="badge" path="core/profile-image/badge-ji-team.svg">
+                `: nothing
             }
         `;
     }

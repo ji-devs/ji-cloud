@@ -1,0 +1,110 @@
+:host {
+    display: inline-grid;
+    width: 282px;
+    height: 238px;
+    box-sizing: border-box;
+    position: relative;
+}
+.menu {
+    grid-row: 1;
+    grid-column: 1;
+    position: absolute;
+    right: 8px;
+    top: 8px;
+}
+.admin-indicator {
+    grid-row: 1;
+    grid-column: 1;
+    border-radius: 12px;
+    border: solid 1px var(--light-red-1);
+    box-sizing: border-box;
+    background-color: var(--light-red-alert);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--dark-red-1);
+    z-index: 1;
+    text-align: center;
+    height: 24px;
+    width: 104px;
+    translate: -50% -12px;
+    left: 50%;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    column-gap: 8px;
+}
+.main {
+    grid-row: 1;
+    grid-column: 1;
+    height: 100%;
+    width: 100%;
+    padding: 16px;
+    box-sizing: border-box;
+    border: solid 1px var(--light-blue-3);
+    background-color: #fff;
+    box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    display: grid;
+}
+.top-section {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 16px;
+    row-gap: 8px;
+    font-size: 16px;
+    color: var(--dark-gray-6);
+}
+.top-section profile-image {
+    grid-row: 1 / span 2;
+    height: 88px;
+    width: 88px;
+}
+.top-section .name {
+    padding-top: 8px;
+    font-weight: 600;
+    line-height: 1.2;
+
+    display: grid;
+    grid-template-columns: min-content;
+
+}
+.top-section .country {
+    padding-bottom: 8px;
+    font-weight: 500;
+    display: grid;
+    grid-template-columns: auto auto;
+    justify-content: left;
+    align-items: center;
+    column-gap: 8px;
+}
+.top-section .country img-ui {
+    height: 20px;
+}
+hr {
+    background-color: var(--light-gray-2);
+    margin: 12px 0;
+    height: 1px;
+    border: none;
+}
+.key-values {
+    font-size: 14px;
+    line-height: 1.2;
+    font-weight: 500;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    row-gap: 8px;
+    column-gap: 6px;
+}
+.key-values .key {
+    color: var(--dark-gray-3);
+}
+.key-values .values {
+    color: var(--dark-gray-6);
+}
+button-rect {
+    margin-top: 16px;
+
+    /* height: 32px;
+    overflow: hidden; */
+}

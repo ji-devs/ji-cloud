@@ -13,6 +13,8 @@ mod member_details;
 mod members_list;
 mod search;
 mod state;
+// mod member_card;
+// mod circle_card;
 
 use state::Community;
 use wasm_bindgen::prelude::*;

@@ -143,5 +143,15 @@ impl MembersList {
                 .prop("familyName", &member.family_name)
             }))
         })
+        // let state = self;
+        // MemberCard {
+        //     member,
+        //     slot: "items",
+        //     following: Mutable::new(false).read_only(),
+        //     on_follow: Box::new(clone!(state => move|following| {
+
+        //     })),
+        //     menu: None,
+        // }.render()
     }
 }

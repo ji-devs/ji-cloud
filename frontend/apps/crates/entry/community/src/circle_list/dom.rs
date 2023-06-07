@@ -144,5 +144,14 @@ impl CirclesList {
                 .prop("status", "")
             }))
         })
+        // let state = self;
+        // CircleCard {
+        //     circle,
+        //     slot: "items",
+        //     is_member: Mutable::new(true).read_only(),
+        //     on_member: Box::new(clone!(state => move |member| {
+
+        //     })),
+        // }.render()
     }
 }
