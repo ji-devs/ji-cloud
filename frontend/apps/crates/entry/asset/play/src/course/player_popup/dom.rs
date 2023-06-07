@@ -10,7 +10,13 @@ use futures_signals::{
 use gloo::utils::{body, document};
 use itertools::Itertools;
 use shared::domain::course::{unit::CourseUnit, CourseResponse};
-use utils::{component::Component, events, unwrap::UnwrapJiExt};
+use utils::{
+    component::Component,
+    events,
+    js_wrappers::is_iframe,
+    prelude::{AssetPlayerToPlayerPopup, IframeAction, IframeMessageExt},
+    unwrap::UnwrapJiExt,
+};
 use web_sys::{HtmlDialogElement, ShadowRoot};
 
 const UNITS_PER_PAGE: usize = 10;
@@ -158,6 +164,10 @@ impl Component<PlayerPopup> for Rc<PlayerPopup> {
                     .class("close")
                     .prop("icon", "fa-light fa-xmark")
                     .event(clone!(state => move |_: events::Click| {
+                        if is_iframe() {
+                            let _ = IframeAction::new(AssetPlayerToPlayerPopup::CloseButtonShown(true))
+                                .try_post_message_to_parent();
+                        }
                         state.player_state.active_unit.set(None);
                         state.player_state.current_page.set(None);
                     }))

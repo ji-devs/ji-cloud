@@ -15,8 +15,14 @@ use shared::domain::{
     meta::{ResourceType, ResourceTypeId},
 };
 use utils::{
-    asset::ResourceContentExt, component::Component, events, languages::Language,
-    metadata::get_resource_types, unwrap::UnwrapJiExt,
+    asset::ResourceContentExt,
+    component::Component,
+    events,
+    js_wrappers::is_iframe,
+    languages::Language,
+    metadata::get_resource_types,
+    prelude::{AssetPlayerToPlayerPopup, IframeAction, IframeMessageExt},
+    unwrap::UnwrapJiExt,
 };
 use web_sys::ShadowRoot;
 
@@ -172,10 +178,16 @@ impl PlayerMain {
         let current_page = active_unit / UNITS_PER_PAGE;
         self.player_state.current_page.set(Some(current_page));
         self.player_state.active_unit.set(Some(active_unit));
+
         self.player_state
             .played_units
             .lock_mut()
             .insert(active_unit);
+
+        if is_iframe() {
+            let _ = IframeAction::new(AssetPlayerToPlayerPopup::CloseButtonShown(false))
+                .try_post_message_to_parent();
+        }
     }
 
     fn resource_name_signal(
