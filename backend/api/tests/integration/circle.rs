@@ -227,9 +227,7 @@ async fn remove_member(port: u16) -> anyhow::Result<()> {
     let resp: reqwest::Response = client
         .delete(&format!(
             "http://0.0.0.0:{}/v1/circle/{}/members/{}",
-            port,
-            "a3126bec-f185-11ec-b9e4-5fa4e257b5a1",
-            "a641fd6e-e41b-11eb-8176-57df101c2201"
+            port, "a3126bec-f185-11ec-b9e4-5fa4e257b5a1", "a641fd6e-e41b-11eb-8176-57df101c2201"
         ))
         .login()
         .send()
@@ -241,8 +239,7 @@ async fn remove_member(port: u16) -> anyhow::Result<()> {
     let resp = client
         .get(&format!(
             "http://0.0.0.0:{}/v1/circle/{}",
-            port,
-            "829606d0-f185-11ec-b9e4-5fadfd7252f6"
+            port, "829606d0-f185-11ec-b9e4-5fadfd7252f6"
         ))
         .login()
         .send()
