@@ -19,7 +19,7 @@ expression: body
   "over_18": true,
   "timezone": "US/Pacific",
   "bio": "",
-  "location_public": false,
+  "location_public": true,
   "organization_public": true,
   "persona_public": false,
   "languages_spoken_public": false,
