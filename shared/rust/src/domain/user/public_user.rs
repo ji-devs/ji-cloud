@@ -51,10 +51,15 @@ pub struct PublicUser {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub persona: Option<Vec<String>>, // only here if persona_public is true
 
-    /// Location of User
+    /// Country of User
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub location: Option<serde_json::Value>, // only here if location_public is true
+    pub country_short: Option<String>, // only here if country_public is true
+
+    /// Country of User
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub country_long: Option<String>, // only here if country_public is true
 
     /// Circles associated with User
     #[serde(default)]

@@ -186,7 +186,7 @@ limit $3
     let v: Vec<_> = users
         .into_iter()
         .map(|user_row| {
-            let (city, state, country) = get_location(user_row.location);
+            let location = get_location(user_row.location);
 
             UserResponse {
                 id: user_row.id,
@@ -194,9 +194,9 @@ limit $3
                 given_name: user_row.given_name,
                 family_name: user_row.family_name,
                 email: user_row.email,
-                city,
-                state,
-                country,
+                city: location.city,
+                state: location.state,
+                country: location.country_long,
                 organization: user_row.organization,
                 created_at: user_row.created_at.date_naive(),
                 language: user_row.language_emails,
@@ -238,7 +238,7 @@ with ordinality t(id, ord) using (id)
     let v = res
         .into_iter()
         .map(|row| {
-            let (city, state, country) = get_location(row.location);
+            let location = get_location(row.location);
 
             UserResponse {
                 id: row.id,
@@ -246,9 +246,9 @@ with ordinality t(id, ord) using (id)
                 given_name: row.given_name,
                 family_name: row.family_name,
                 email: row.email,
-                city,
-                state,
-                country,
+                city: location.city,
+                state: location.state,
+                country: location.country_long,
                 organization: row.organization,
                 created_at: row.created_at.date_naive(),
                 language: row.language_emails,
@@ -898,9 +898,14 @@ where user_id = $1
     Ok(given_name)
 }
 
-pub fn get_location(
-    location: Option<serde_json::Value>,
-) -> (Option<String>, Option<String>, Option<String>) {
+// keeping the struct here because it's so far only used here
+pub struct Location {
+    pub city: Option<String>,
+    pub state: Option<String>,
+    pub country_short: Option<String>,
+    pub country_long: Option<String>,
+}
+pub fn get_location(location: Option<serde_json::Value>) -> Location {
     let location: Option<GoogleLocation> = location.and_then(|location_str| {
         location_str
             .as_str()
@@ -923,12 +928,16 @@ pub fn get_location(
     });
 
     let city = city.map(|c| c.long_name.to_string());
-
     let state = state.map(|c| c.short_name.to_string());
+    let country_short = country.map(|c| c.short_name.to_string());
+    let country_long = country.map(|c| c.long_name.to_string());
 
-    let country = country.map(|c| c.long_name.to_string());
-
-    (city, state, country)
+    Location {
+        city,
+        state,
+        country_short,
+        country_long,
+    }
 }
 
 pub async fn get_email(txn: &mut PgConnection, user_id: UserId) -> sqlx::Result<String> {

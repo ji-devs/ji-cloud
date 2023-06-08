@@ -1270,7 +1270,7 @@ limit 100 for no key update skip locked;
         )
         .fetch(&mut txn)
         .map_ok(|row| {
-            let (city, state, country) = get_location(row.location);
+            let location = get_location(row.location);
 
             algolia::request::BatchWriteRequest::UpdateObject {
                 body: match serde_json::to_value(&BatchUser {
@@ -1280,9 +1280,9 @@ limit 100 for no key update skip locked;
                     email: &row.email,
                     language_emails: &row.language_emails,
                     organization: row.organization,
-                    city,
-                    state,
-                    country,
+                    city: location.city,
+                    state: location.state,
+                    country: location.country_short,
                     created_at: row.created_at,
                 })
                 .expect("failed to serialize BatchUser to json")

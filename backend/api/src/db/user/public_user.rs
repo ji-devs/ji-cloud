@@ -11,6 +11,8 @@ use shared::domain::{
 use sqlx::PgPool;
 use uuid::Uuid;
 
+use super::get_location;
+
 pub async fn get(db: &PgPool, user_id: UserId) -> anyhow::Result<Option<PublicUser>> {
     let profile = sqlx::query!(
         r#"
@@ -38,18 +40,22 @@ pub async fn get(db: &PgPool, user_id: UserId) -> anyhow::Result<Option<PublicUs
     .fetch_optional(db)
     .await?;
 
-    let res = profile.map(|row| PublicUser {
-        id: row.id,
-        username: row.username,
-        given_name: row.given_name,
-        family_name: row.family_name,
-        bio: row.bio,
-        profile_image: row.profile_image,
-        languages_spoken: row.languages_spoken,
-        organization: row.organization,
-        persona: row.persona,
-        location: row.location,
-        circles: row.circles,
+    let res = profile.map(|row| {
+        let location = get_location(row.location);
+        PublicUser {
+            id: row.id,
+            username: row.username,
+            given_name: row.given_name,
+            family_name: row.family_name,
+            bio: row.bio,
+            profile_image: row.profile_image,
+            languages_spoken: row.languages_spoken,
+            organization: row.organization,
+            persona: row.persona,
+            country_short: location.country_short,
+            country_long: location.country_long,
+            circles: row.circles,
+        }
     });
 
     Ok(res)
@@ -111,18 +117,22 @@ pub async fn browse_users(
 
     let res: Vec<_> = user_data
         .into_iter()
-        .map(|row| PublicUser {
-            id: row.id,
-            username: row.username,
-            given_name: row.given_name,
-            family_name: row.family_name,
-            bio: row.bio,
-            profile_image: row.profile_image,
-            languages_spoken: row.languages_spoken,
-            organization: row.organization,
-            persona: row.persona,
-            location: row.location,
-            circles: row.circles,
+        .map(|row| {
+            let location = get_location(row.location);
+            PublicUser {
+                id: row.id,
+                username: row.username,
+                given_name: row.given_name,
+                family_name: row.family_name,
+                bio: row.bio,
+                profile_image: row.profile_image,
+                languages_spoken: row.languages_spoken,
+                organization: row.organization,
+                persona: row.persona,
+                country_short: location.country_short,
+                country_long: location.country_long,
+                circles: row.circles,
+            }
         })
         .collect();
 
@@ -324,18 +334,22 @@ pub async fn get_by_ids(db: &PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<PublicUse
 
     let v = res
         .into_iter()
-        .map(|row| PublicUser {
-            id: row.id,
-            username: row.username,
-            given_name: row.given_name,
-            family_name: row.family_name,
-            bio: row.bio,
-            profile_image: row.profile_image,
-            languages_spoken: row.languages_spoken,
-            organization: row.organization,
-            persona: row.persona,
-            location: row.location,
-            circles: row.circles,
+        .map(|row| {
+            let location = get_location(row.location);
+            PublicUser {
+                id: row.id,
+                username: row.username,
+                given_name: row.given_name,
+                family_name: row.family_name,
+                bio: row.bio,
+                profile_image: row.profile_image,
+                languages_spoken: row.languages_spoken,
+                organization: row.organization,
+                persona: row.persona,
+                country_short: location.country_short,
+                country_long: location.country_long,
+                circles: row.circles,
+            }
         })
         .collect();
 
@@ -464,18 +478,22 @@ pub async fn browse_followers(
 
     let res: Vec<_> = user_data
         .into_iter()
-        .map(|row| PublicUser {
-            id: row.id,
-            username: row.username,
-            given_name: row.given_name,
-            family_name: row.family_name,
-            bio: row.bio,
-            profile_image: row.profile_image,
-            languages_spoken: row.languages_spoken,
-            organization: row.organization,
-            persona: row.persona,
-            location: row.location,
-            circles: row.circles,
+        .map(|row| {
+            let location = get_location(row.location);
+            PublicUser {
+                id: row.id,
+                username: row.username,
+                given_name: row.given_name,
+                family_name: row.family_name,
+                bio: row.bio,
+                profile_image: row.profile_image,
+                languages_spoken: row.languages_spoken,
+                organization: row.organization,
+                persona: row.persona,
+                country_short: location.country_short,
+                country_long: location.country_long,
+                circles: row.circles,
+            }
         })
         .collect();
 
@@ -534,18 +552,23 @@ pub async fn browse_following(
 
     let res: Vec<_> = user_data
         .into_iter()
-        .map(|row| PublicUser {
-            id: row.id,
-            username: row.username,
-            given_name: row.given_name,
-            family_name: row.family_name,
-            bio: row.bio,
-            profile_image: row.profile_image,
-            languages_spoken: row.languages_spoken,
-            organization: row.organization,
-            persona: row.persona,
-            location: row.location,
-            circles: row.circles,
+        .map(|row| {
+            let location = get_location(row.location);
+
+            PublicUser {
+                id: row.id,
+                username: row.username,
+                given_name: row.given_name,
+                family_name: row.family_name,
+                bio: row.bio,
+                profile_image: row.profile_image,
+                languages_spoken: row.languages_spoken,
+                organization: row.organization,
+                persona: row.persona,
+                country_short: location.country_short,
+                country_long: location.country_long,
+                circles: row.circles,
+            }
         })
         .collect();
 
