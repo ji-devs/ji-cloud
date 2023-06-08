@@ -192,6 +192,78 @@ async fn leave_circle(port: u16) -> anyhow::Result<()> {
 
     Ok(())
 }
+
+#[test_service(
+    setup = "setup_service",
+    fixtures("Fixture::User", "Fixture::Image", "Fixture::Circle")
+)]
+async fn remove_member(port: u16) -> anyhow::Result<()> {
+    let name: &str = "remove_member";
+
+    let client = reqwest::Client::new();
+
+    let resp = client
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/circle/{}",
+            port, "a3126bec-f185-11ec-b9e4-5fa4e257b5a1"
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(
+        format!("{}-1",name),
+        body, {
+            ".**.createdAt" => "[created_at]",
+            ".**.lastEdited" => "[last_edited]",
+        }
+    );
+
+    let resp: reqwest::Response = client
+        .delete(&format!(
+            "http://0.0.0.0:{}/v1/circle/{}/members/{}",
+            port,
+            "a3126bec-f185-11ec-b9e4-5fa4e257b5a1",
+            "a641fd6e-e41b-11eb-8176-57df101c2201"
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::NO_CONTENT);
+
+    let resp = client
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/circle/{}",
+            port,
+            "829606d0-f185-11ec-b9e4-5fadfd7252f6"
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(
+        format!("{}-2",name),
+        body, {
+            ".**.createdAt" => "[created_at]",
+            ".**.lastEdited" => "[last_edited]",
+        }
+    );
+
+    Ok(())
+}
+
 #[test_service(
     setup = "setup_service",
     fixtures("Fixture::User", "Fixture::Image", "Fixture::Circle")

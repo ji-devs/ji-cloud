@@ -181,6 +181,8 @@ make_path_parts!(JoinCirclePath => "/v1/circle/{}/join" => CircleId);
 
 make_path_parts!(LeaveCirclePath => "/v1/circle/{}/leave" => CircleId);
 
+make_path_parts!(CircleRemoveMemberPath => "/v1/circle/{}/members/{}" => CircleId, UserId);
+
 make_path_parts!(CircleBrowseMembersPath => "/v1/circle/{}/members" => CircleId);
 
 /// Members associated with Circle

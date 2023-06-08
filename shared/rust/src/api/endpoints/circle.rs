@@ -6,7 +6,7 @@ use crate::{
             CircleBrowseQuery, CircleBrowseResponse, CircleCreatePath, CircleCreateRequest,
             CircleDeletePath, CircleGetPath, CircleId, CircleSearchPath, CircleSearchQuery,
             CircleSearchResponse, CircleUpdateRequest, JoinCirclePath, LeaveCirclePath,
-            UpdateCirclePath,
+            UpdateCirclePath, CircleRemoveMemberPath,
         },
         CreateResponse,
     },
@@ -124,6 +124,16 @@ impl ApiEndpoint for LeaveCircle {
     type Req = ();
     type Res = ();
     type Path = LeaveCirclePath;
+    type Err = EmptyError;
+    const METHOD: Method = Method::Delete;
+}
+
+/// Remove member from a Circle.
+pub struct RemoveMember;
+impl ApiEndpoint for RemoveMember {
+    type Req = ();
+    type Res = ();
+    type Path = CircleRemoveMemberPath;
     type Err = EmptyError;
     const METHOD: Method = Method::Delete;
 }
