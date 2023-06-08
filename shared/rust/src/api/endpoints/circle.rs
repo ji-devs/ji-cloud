@@ -4,9 +4,9 @@ use crate::{
         circle::{
             BrowseMembersResponse, Circle, CircleBrowseMembersPath, CircleBrowsePath,
             CircleBrowseQuery, CircleBrowseResponse, CircleCreatePath, CircleCreateRequest,
-            CircleDeletePath, CircleGetPath, CircleId, CircleSearchPath, CircleSearchQuery,
-            CircleSearchResponse, CircleUpdateRequest, JoinCirclePath, LeaveCirclePath,
-            UpdateCirclePath, CircleRemoveMemberPath,
+            CircleDeletePath, CircleGetPath, CircleId, CircleRemoveMemberPath, CircleSearchPath,
+            CircleSearchQuery, CircleSearchResponse, CircleUpdateRequest, JoinCirclePath,
+            LeaveCirclePath, UpdateCirclePath,
         },
         CreateResponse,
     },
