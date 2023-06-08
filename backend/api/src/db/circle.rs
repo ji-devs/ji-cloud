@@ -160,7 +160,11 @@ insert into circle_member(id, user_id) values($1, $2)
     Ok(())
 }
 
-pub async fn leave_circle(db: &PgPool, user_id: UserId, id: CircleId) -> anyhow::Result<()> {
+pub async fn removed_circle_member(
+    db: &PgPool,
+    user_id: UserId,
+    id: CircleId,
+) -> anyhow::Result<()> {
     sqlx::query!(
         "delete from circle_member where id = $1 and user_id = $2",
         id.0,

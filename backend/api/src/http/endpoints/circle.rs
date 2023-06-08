@@ -134,7 +134,24 @@ async fn leave(
         .await
         .map_err(|_| error::NotFound::ResourceNotFound)?;
 
-    db::circle::leave_circle(&db, user_id, id)
+    db::circle::removed_circle_member(&db, user_id, id)
+        .await
+        .map_err(|e| error::NotFound::InternalServerError(e))?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
+async fn remove_member(
+    db: Data<PgPool>,
+    claims: TokenUser,
+    path: Path<(CircleId, UserId)>,
+) -> Result<HttpResponse, error::NotFound> {
+    let (circle_id, deleted_user_id) = path.into_inner();
+    let admin_user_id = claims.user_id();
+
+    db::circle::authz(&*db, admin_user_id, Some(circle_id)).await?;
+
+    db::circle::removed_circle_member(&db, deleted_user_id, circle_id)
         .await
         .map_err(|e| error::NotFound::InternalServerError(e))?;
 
@@ -333,6 +350,10 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <circle::JoinCircle as ApiEndpoint>::Path::PATH,
         circle::JoinCircle::METHOD.route().to(join),
+    )
+    .route(
+        <circle::RemoveMember as ApiEndpoint>::Path::PATH,
+        circle::RemoveMember::METHOD.route().to(remove_member),
     )
     .route(
         <circle::LeaveCircle as ApiEndpoint>::Path::PATH,
