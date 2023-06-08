@@ -102,7 +102,7 @@ impl DebugSettings {
 }
 
 pub fn init(asset_id: AssetId, _module_id: ModuleId) {
-    if asset_id == AssetId::JigId(JigId(Uuid::from_u128(0))) {
+    if asset_id == AssetId::JigId(JigId::from_u128(0)) {
         SETTINGS
             .set(DebugSettings::debug(Some(InitData {
                 stickers: vec![

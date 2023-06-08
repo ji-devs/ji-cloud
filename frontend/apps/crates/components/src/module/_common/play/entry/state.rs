@@ -27,7 +27,6 @@ use std::rc::Rc;
 use std::str::FromStr;
 use utils::languages::Language;
 use utils::{iframe::*, prelude::*};
-use uuid::Uuid;
 
 pub struct GenericState<RawData, Mode, Step, Base>
 where
@@ -107,7 +106,7 @@ where
             *_self.asset.borrow_mut() = {
                 if _self.opts.skip_load_jig {
                     Some(Asset::Jig(JigResponse {
-                        id: JigId(Uuid::from_u128(0)),
+                        id: JigId::from_u128(0),
                         admin_data: JigAdminData {
                             rating: None,
                             blocked: false,

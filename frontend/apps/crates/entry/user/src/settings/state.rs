@@ -7,7 +7,6 @@ use shared::domain::{
     meta::{AffiliationId, AgeRangeId, MetadataResponse, SubjectId},
     user::{PatchProfileRequest, UserId, UserProfile},
 };
-use uuid::Uuid;
 
 pub struct SettingsPage {
     pub user: SettingsPageUser,
@@ -71,7 +70,7 @@ pub struct SettingsPageUser {
 impl SettingsPageUser {
     pub fn empty() -> Self {
         Self {
-            id: Mutable::new(UserId(Uuid::from_u128(0))),
+            id: Mutable::new(UserId::from_u128(0)),
             username: Mutable::new(String::new()),
             email: Mutable::new(String::new()),
             given_name: Mutable::new(String::new()),

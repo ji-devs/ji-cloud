@@ -3,7 +3,6 @@ use std::{rc::Rc, str::FromStr};
 use dominator::clone;
 use shared::domain::module::ModuleId;
 use utils::{storage::get_local_storage, unwrap::UnwrapJiExt};
-use uuid::Uuid;
 
 use crate::edit::sidebar::state::SidebarSpot;
 
@@ -32,7 +31,7 @@ fn get_module_to_paste() -> Option<ModuleId> {
         Some(value) => {
             let value: Vec<&str> = value.split(',').collect();
             // let jig_id = JigId(Uuid::from_str(value[0]).unwrap_ji());
-            let module_id = ModuleId(Uuid::from_str(value[1]).unwrap_ji());
+            let module_id = ModuleId::from_str(value[1]).unwrap_ji();
             // value
             log::info!("{:?}{:?}", value, 90);
 
