@@ -20,7 +20,10 @@ use shared::{
         },
     },
 };
-use utils::prelude::{get_user_mutable, ApiEndpointExt};
+use utils::{
+    location::Country,
+    prelude::{get_user_mutable, ApiEndpointExt},
+};
 
 use super::{Connections, Creations, MemberDetails};
 
@@ -265,7 +268,7 @@ impl MemberDetails {
 }
 
 fn user_to_public_user(user: UserProfile) -> PublicUser {
-    // includes fields not marked as public
+    let location = Country::from_google_location(&user.location);
     PublicUser {
         id: user.id,
         username: user.username,
@@ -277,6 +280,7 @@ fn user_to_public_user(user: UserProfile) -> PublicUser {
         bio: Some(user.bio),
         languages_spoken: Some(user.languages_spoken),
         persona: Some(user.persona),
-        location: user.location,
+        country_short: location.as_ref().map(|location| location.code.clone()),
+        country_long: location.as_ref().map(|location| location.name.clone()),
     }
 }

@@ -47,10 +47,10 @@ impl MemberDetails {
                         .prop("givenName", &member.given_name)
                         .prop("familyName", &member.family_name)
                         .apply(|mut dom| {
-                            if let Some(_location) = &member.location {
+                            // if let Some(_location) = &member.location {
                                 // add city
                                 // dom = dom.prop("city", city)
-                            }
+                            // }
                             if let Some(languages_spoken) = &member.languages_spoken {
                                 if languages_spoken.len() > 0 {
                                     let languages = languages_spoken.iter().map(|l| Language::code_to_display_name(l)).join(", ");

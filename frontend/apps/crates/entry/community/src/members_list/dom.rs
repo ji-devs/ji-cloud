@@ -7,7 +7,6 @@ use shared::domain::user::public_user::PublicUser;
 use utils::{
     events,
     languages::Language,
-    location::Country,
     routes::{CommunityMembersRoute, CommunityRoute, Route},
 };
 use wasm_bindgen::JsValue;
@@ -113,9 +112,11 @@ impl MembersList {
             .prop("slot", "items")
             .prop("name", &format!("{} {}", member.given_name, member.family_name))
             .apply(|mut dom| {
-                if let Some(country) = Country::from_google_location(&member.location) {
-                    dom = dom.prop("countryCode", country.code);
-                    dom = dom.prop("countryName", country.name);
+                if let Some(country_short) = &member.country_short {
+                    dom = dom.prop("countryCode", country_short);
+                }
+                if let Some(country_long) = &member.country_long {
+                    dom = dom.prop("countryName", country_long);
                 }
                 dom
             })
