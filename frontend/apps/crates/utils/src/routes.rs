@@ -363,7 +363,7 @@ impl Route {
                 Self::Community(CommunityRoute::Members(CommunityMembersRoute::List))
             }
             ["community", "members", user_id] => {
-                let user_id = UserId(Uuid::from_str(user_id).unwrap_ji());
+                let user_id = UserId::from_str(user_id).unwrap_ji();
                 Self::Community(CommunityRoute::Members(CommunityMembersRoute::Member(
                     user_id,
                 )))
@@ -372,7 +372,7 @@ impl Route {
                 Self::Community(CommunityRoute::Circles(CommunityCirclesRoute::List))
             }
             ["community", "circles", circle_id] => {
-                let circle_id = CircleId(Uuid::from_str(circle_id).unwrap_ji());
+                let circle_id = CircleId::from_str(circle_id).unwrap_ji();
                 Self::Community(CommunityRoute::Circles(CommunityCirclesRoute::Circle(
                     circle_id,
                 )))
@@ -427,14 +427,14 @@ impl Route {
                 Self::Admin(AdminRoute::JigCuration(AdminJigCurationRoute::Table))
             }
             ["admin", "jig-curation", jig_id] => {
-                let jig_id = JigId(Uuid::from_str(jig_id).unwrap_ji());
+                let jig_id = JigId::from_str(jig_id).unwrap_ji();
                 Self::Admin(AdminRoute::JigCuration(AdminJigCurationRoute::Jig(jig_id)))
             }
             ["admin", "resource-curation"] => Self::Admin(AdminRoute::ResourceCuration(
                 AdminResourceCurationRoute::Table,
             )),
             ["admin", "resource-curation", resource_id] => {
-                let resource_id = ResourceId(Uuid::from_str(resource_id).unwrap_ji());
+                let resource_id = ResourceId::from_str(resource_id).unwrap_ji();
                 Self::Admin(AdminRoute::ResourceCuration(
                     AdminResourceCurationRoute::Resource(resource_id),
                 ))
@@ -442,7 +442,7 @@ impl Route {
             ["admin", "images"] => Self::Admin(AdminRoute::Images),
             ["admin", "users"] => Self::Admin(AdminRoute::Users(AdminUsersRoute::Table)),
             ["admin", "users", user_id] => {
-                let user_id = UserId(Uuid::from_str(user_id).unwrap_ji());
+                let user_id = UserId::from_str(user_id).unwrap_ji();
                 Self::Admin(AdminRoute::Users(AdminUsersRoute::User(user_id)))
             }
             ["admin", "locale"] => Self::Admin(AdminRoute::Locale),
@@ -458,7 +458,7 @@ impl Route {
             ["admin", "image-add"] => Self::Admin(AdminRoute::ImageAdd),
             ["admin", "image-tags"] => Self::Admin(AdminRoute::ImageTags),
             ["admin", "image-meta", id, flag] => {
-                let id = ImageId(Uuid::from_str(id).unwrap_ji());
+                let id = ImageId::from_str(id).unwrap_ji();
                 Self::Admin(AdminRoute::ImageMeta(id, bool::from_str(flag).unwrap_ji()))
             }
             ["admin", "export"] => Self::Admin(AdminRoute::Export),
@@ -469,94 +469,85 @@ impl Route {
             ["asset", "edit", "playlist-gallery"] => Self::Asset(AssetRoute::PlaylistGallery),
             ["asset", "edit", "resource-gallery"] => Self::Asset(AssetRoute::ResourceGallery),
             ["asset", "edit", "course-gallery"] => Self::Asset(AssetRoute::CourseGallery),
-            ["asset", "edit", "jig", jig_id, "publish"] => {
-                Self::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
-                    JigId(Uuid::from_str(jig_id).unwrap_ji()),
-                    JigEditRoute::Publish,
-                )))
-            }
+            ["asset", "edit", "jig", jig_id, "publish"] => Self::Asset(AssetRoute::Edit(
+                AssetEditRoute::Jig(JigId::from_str(jig_id).unwrap_ji(), JigEditRoute::Publish),
+            )),
             ["asset", "edit", "jig", "debug"] => Self::Asset(AssetRoute::Edit(
-                AssetEditRoute::Jig(JigId(Uuid::from_u128(0)), JigEditRoute::Landing),
+                AssetEditRoute::Jig(JigId::from_u128(0), JigEditRoute::Landing),
             )),
             ["asset", "edit", "jig", jig_id] => Self::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
-                JigId(Uuid::from_str(jig_id).unwrap_ji()),
+                JigId::from_str(jig_id).unwrap_ji(),
                 JigEditRoute::Landing,
             ))),
             ["asset", "edit", "jig", jig_id, module_id] => {
                 Self::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
-                    JigId(Uuid::from_str(jig_id).unwrap_ji()),
-                    JigEditRoute::Module(ModuleId(Uuid::from_str(module_id).unwrap_ji())),
+                    JigId::from_str(jig_id).unwrap_ji(),
+                    JigEditRoute::Module(ModuleId::from_str(module_id).unwrap_ji()),
                 )))
             }
-            ["asset", "edit", "resource", "debug"] => {
-                Self::Asset(AssetRoute::Edit(AssetEditRoute::Resource(
-                    ResourceId(Uuid::from_u128(0)),
-                    ResourceEditRoute::Landing,
-                )))
-            }
+            ["asset", "edit", "resource", "debug"] => Self::Asset(AssetRoute::Edit(
+                AssetEditRoute::Resource(ResourceId::from_u128(0), ResourceEditRoute::Landing),
+            )),
             ["asset", "edit", "resource", resource_id] => {
                 Self::Asset(AssetRoute::Edit(AssetEditRoute::Resource(
-                    ResourceId(Uuid::from_str(resource_id).unwrap_ji()),
+                    ResourceId::from_str(resource_id).unwrap_ji(),
                     ResourceEditRoute::Landing,
                 )))
             }
             ["asset", "edit", "resource", resource_id, "cover", cover_id] => {
                 Self::Asset(AssetRoute::Edit(AssetEditRoute::Resource(
-                    ResourceId(Uuid::from_str(resource_id).unwrap_ji()),
-                    ResourceEditRoute::Cover(ModuleId(Uuid::from_str(cover_id).unwrap_ji())),
+                    ResourceId::from_str(resource_id).unwrap_ji(),
+                    ResourceEditRoute::Cover(ModuleId::from_str(cover_id).unwrap_ji()),
                 )))
             }
             ["asset", "edit", "playlist", playlist_id, "publish"] => {
                 Self::Asset(AssetRoute::Edit(AssetEditRoute::Playlist(
-                    PlaylistId(Uuid::from_str(playlist_id).unwrap_ji()),
+                    PlaylistId::from_str(playlist_id).unwrap_ji(),
                     PlaylistEditRoute::Publish,
                 )))
             }
-            ["asset", "edit", "playlist", "debug"] => {
-                Self::Asset(AssetRoute::Edit(AssetEditRoute::Playlist(
-                    PlaylistId(Uuid::from_u128(0)),
-                    PlaylistEditRoute::Landing,
-                )))
-            }
+            ["asset", "edit", "playlist", "debug"] => Self::Asset(AssetRoute::Edit(
+                AssetEditRoute::Playlist(PlaylistId::from_u128(0), PlaylistEditRoute::Landing),
+            )),
             ["asset", "edit", "playlist", playlist_id] => {
                 Self::Asset(AssetRoute::Edit(AssetEditRoute::Playlist(
-                    PlaylistId(Uuid::from_str(playlist_id).unwrap_ji()),
+                    PlaylistId::from_str(playlist_id).unwrap_ji(),
                     PlaylistEditRoute::Landing,
                 )))
             }
             ["asset", "edit", "playlist", playlist_id, "cover", cover_id] => {
                 Self::Asset(AssetRoute::Edit(AssetEditRoute::Playlist(
-                    PlaylistId(Uuid::from_str(playlist_id).unwrap_ji()),
-                    PlaylistEditRoute::Cover(ModuleId(Uuid::from_str(cover_id).unwrap_ji())),
+                    PlaylistId::from_str(playlist_id).unwrap_ji(),
+                    PlaylistEditRoute::Cover(ModuleId::from_str(cover_id).unwrap_ji()),
                 )))
             }
             ["asset", "edit", "course", course_id] => {
                 Self::Asset(AssetRoute::Edit(AssetEditRoute::Course(
-                    CourseId(Uuid::from_str(course_id).unwrap_ji()),
+                    CourseId::from_str(course_id).unwrap_ji(),
                     CourseEditRoute::Landing,
                 )))
             }
             ["asset", "edit", "course", course_id, "unit"] => {
                 Self::Asset(AssetRoute::Edit(AssetEditRoute::Course(
-                    CourseId(Uuid::from_str(course_id).unwrap_ji()),
+                    CourseId::from_str(course_id).unwrap_ji(),
                     CourseEditRoute::Unit(None),
                 )))
             }
             ["asset", "edit", "course", course_id, "unit", unit_id] => {
                 Self::Asset(AssetRoute::Edit(AssetEditRoute::Course(
-                    CourseId(Uuid::from_str(course_id).unwrap_ji()),
-                    CourseEditRoute::Unit(Some(CourseUnitId(Uuid::from_str(unit_id).unwrap_ji()))),
+                    CourseId::from_str(course_id).unwrap_ji(),
+                    CourseEditRoute::Unit(Some(CourseUnitId::from_str(unit_id).unwrap_ji())),
                 )))
             }
             ["asset", "edit", "course", course_id, "cover", cover_id] => {
                 Self::Asset(AssetRoute::Edit(AssetEditRoute::Course(
-                    CourseId(Uuid::from_str(course_id).unwrap_ji()),
-                    CourseEditRoute::Cover(ModuleId(Uuid::from_str(cover_id).unwrap_ji())),
+                    CourseId::from_str(course_id).unwrap_ji(),
+                    CourseEditRoute::Cover(ModuleId::from_str(cover_id).unwrap_ji()),
                 )))
             }
             ["asset", "edit", "course", course_id, "publish"] => {
                 Self::Asset(AssetRoute::Edit(AssetEditRoute::Course(
-                    CourseId(Uuid::from_str(course_id).unwrap_ji()),
+                    CourseId::from_str(course_id).unwrap_ji(),
                     CourseEditRoute::Publish,
                 )))
             }
@@ -564,8 +555,8 @@ impl Route {
                 let search: JigPlayerOptions = serde_qs::from_str(&params_string).unwrap_ji();
 
                 Self::Asset(AssetRoute::Play(AssetPlayRoute::Jig(
-                    JigId(Uuid::from_u128(0)),
-                    Some(ModuleId(Uuid::from_u128(0))),
+                    JigId::from_u128(0),
+                    Some(ModuleId::from_u128(0)),
                     search,
                 )))
             }
@@ -579,7 +570,7 @@ impl Route {
                 };
 
                 Self::Asset(AssetRoute::Play(AssetPlayRoute::Jig(
-                    JigId(Uuid::from_str(jig_id).unwrap_ji()),
+                    JigId::from_str(jig_id).unwrap_ji(),
                     None,
                     options,
                 )))
@@ -589,8 +580,8 @@ impl Route {
                 let search: JigPlayerOptions = serde_qs::from_str(&params_string).unwrap_ji();
 
                 Self::Asset(AssetRoute::Play(AssetPlayRoute::Jig(
-                    JigId(Uuid::from_str(jig_id).unwrap_ji()),
-                    Some(ModuleId(Uuid::from_str(module_id).unwrap_ji())),
+                    JigId::from_str(jig_id).unwrap_ji(),
+                    Some(ModuleId::from_str(module_id).unwrap_ji()),
                     search,
                 )))
             }
@@ -599,7 +590,7 @@ impl Route {
                 let search: PlaylistPlayerOptions = serde_qs::from_str(&params_string).unwrap_ji();
 
                 Self::Asset(AssetRoute::Play(AssetPlayRoute::Playlist(
-                    PlaylistId(Uuid::from_str(playlist_id).unwrap_ji()),
+                    PlaylistId::from_str(playlist_id).unwrap_ji(),
                     search,
                 )))
             }
@@ -608,7 +599,7 @@ impl Route {
                 let search: CoursePlayerOptions = serde_qs::from_str(&params_string).unwrap_ji();
 
                 Self::Asset(AssetRoute::Play(AssetPlayRoute::Course(
-                    CourseId(Uuid::from_str(course_id).unwrap_ji()),
+                    CourseId::from_str(course_id).unwrap_ji(),
                     None,
                     search,
                 )))
@@ -618,8 +609,8 @@ impl Route {
                 let search: CoursePlayerOptions = serde_qs::from_str(&params_string).unwrap_ji();
 
                 Self::Asset(AssetRoute::Play(AssetPlayRoute::Course(
-                    CourseId(Uuid::from_str(course_id).unwrap_ji()),
-                    Some(CourseUnitId(Uuid::from_str(unit_id).unwrap_ji())),
+                    CourseId::from_str(course_id).unwrap_ji(),
+                    Some(CourseUnitId::from_str(unit_id).unwrap_ji()),
                     search,
                 )))
             }
@@ -645,7 +636,7 @@ impl Route {
                 Self::Module(ModuleRoute::Edit(
                     ModuleKind::from_str(kind).expect_ji("unknown module kind!"),
                     asset_id,
-                    ModuleId(Uuid::from_u128(0)),
+                    ModuleId::from_u128(0),
                 ))
             }
             ["module", kind, "edit", asset_type, asset_id, module_id] => {
@@ -655,7 +646,7 @@ impl Route {
                 Self::Module(ModuleRoute::Edit(
                     ModuleKind::from_str(kind).expect_ji("unknown module kind!"),
                     asset_id,
-                    ModuleId(Uuid::from_str(module_id).unwrap_ji()),
+                    ModuleId::from_str(module_id).unwrap_ji(),
                 ))
             }
             ["module", kind, "play", asset_type, "debug"]
@@ -666,7 +657,7 @@ impl Route {
                 Self::Module(ModuleRoute::Play(
                     ModuleKind::from_str(kind).expect_ji("unknown module kind!"),
                     asset_id,
-                    ModuleId(Uuid::from_u128(0)),
+                    ModuleId::from_u128(0),
                 ))
             }
             ["module", kind, "play", asset_type, asset_id, module_id] => {
@@ -676,7 +667,7 @@ impl Route {
                 Self::Module(ModuleRoute::Play(
                     ModuleKind::from_str(kind).expect_ji("unknown module kind!"),
                     asset_id,
-                    ModuleId(Uuid::from_str(module_id).unwrap_ji()),
+                    ModuleId::from_str(module_id).unwrap_ji(),
                 ))
             }
 

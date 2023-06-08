@@ -53,6 +53,23 @@ macro_rules! wrap_uuid {
                 write!(f, "{}", self.0)
             }
         }
+
+        impl std::str::FromStr for $t {
+            type Err = uuid::Error;
+
+            #[inline]
+            fn from_str(value: &str) -> Result<Self, Self::Err> {
+                Ok(Self(uuid::Uuid::from_str(value)?))
+            }
+        }
+
+        impl $t {
+            /// Creates a wrapped UUID from a 128 bit value
+            #[inline]
+            $vis const fn from_u128(v: u128) -> Self {
+                Self(uuid::Uuid::from_u128(v))
+            }
+        }
     }
 }
 

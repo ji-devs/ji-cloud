@@ -12,9 +12,9 @@ use utils::themes::ThemeId;
 use uuid::Uuid;
 
 pub fn get_jig() -> JigResponse {
-    let module_id = ModuleId(Uuid::from_u128(0));
+    let module_id = ModuleId::from_u128(0);
     JigResponse {
-        id: JigId(Uuid::from_u128(0)),
+        id: JigId::from_u128(0),
         admin_data: JigAdminData {
             rating: None,
             blocked: false,

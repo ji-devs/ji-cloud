@@ -204,7 +204,7 @@ where
                     };
                 } else {
                     *_self.asset.borrow_mut() = Some(Asset::Jig(JigResponse {
-                        id: JigId(uuid::Uuid::from_u128(0)),
+                        id: JigId::from_u128(0),
                         admin_data: JigAdminData {
                             rating: None,
                             blocked: false,
