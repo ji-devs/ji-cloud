@@ -3,8 +3,8 @@ use crate::{
     domain::{
         session::NewSessionResponse,
         user::{
-            CreateProfilePath, CreateProfileRequest, GetProfilePath, PatchProfilePath,
-            PatchProfileRequest, UserProfile,
+            CreateProfilePath, CreateProfileRequest, GetProfilePath, PatchProfileAdminDataPath,
+            PatchProfileAdminDataRequest, PatchProfilePath, PatchProfileRequest, UserProfile,
         },
     },
     error::EmptyError,
@@ -54,6 +54,16 @@ pub struct Patch;
 impl ApiEndpoint for Patch {
     type Path = PatchProfilePath;
     type Req = PatchProfileRequest;
+    type Res = ();
+    type Err = EmptyError;
+    const METHOD: Method = Method::Patch;
+}
+
+/// Update a user profile data that only an admin can update. E.g. badge.
+pub struct PatchProfileAdminData;
+impl ApiEndpoint for PatchProfileAdminData {
+    type Path = PatchProfileAdminDataPath;
+    type Req = PatchProfileAdminDataRequest;
     type Res = ();
     type Err = EmptyError;
     const METHOD: Method = Method::Patch;

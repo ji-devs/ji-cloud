@@ -10,6 +10,7 @@ expression: body
       "givenName": "Post",
       "familyName": "Gres",
       "profileImage": null,
+      "badge": null,
       "languagesSpoken": [
         "en_US"
       ],

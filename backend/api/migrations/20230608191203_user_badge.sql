@@ -1,0 +1,1 @@
+ALTER TABLE user_profile ADD COLUMN badge int2 DEFAULT NULL;

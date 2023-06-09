@@ -10,6 +10,7 @@ expression: body
       "givenName": "Bobby",
       "familyName": "Tables",
       "profileImage": null,
+      "badge": null,
       "organization": "test org",
       "circles": []
     },
@@ -19,6 +20,7 @@ expression: body
       "givenName": "Scrappy",
       "familyName": "Doo",
       "profileImage": null,
+      "badge": null,
       "organization": "test2 org",
       "circles": []
     }

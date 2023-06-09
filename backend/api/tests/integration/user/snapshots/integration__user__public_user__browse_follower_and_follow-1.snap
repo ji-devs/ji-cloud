@@ -10,6 +10,7 @@ expression: body
       "givenName": "Scrappy",
       "familyName": "Doo",
       "profileImage": null,
+      "badge": null,
       "organization": "test2 org",
       "circles": []
     }

@@ -6,7 +6,7 @@ use shared::domain::{
     circle::CircleId,
     image::ImageId,
     meta::ResourceTypeId as TypeId,
-    user::{public_user::PublicUser, UserId},
+    user::{public_user::PublicUser, UserBadge, UserId},
 };
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -21,6 +21,7 @@ pub async fn get(db: &PgPool, user_id: UserId) -> anyhow::Result<Option<PublicUs
             given_name  as "given_name!",
             family_name as "family_name!",
             profile_image_id       as "profile_image?: ImageId",
+            badge                  as "badge!: Option<UserBadge>",
             (select languages_spoken from user_profile where user_profile.user_id = "user".id and languages_spoken_public is true)      as "languages_spoken?: Vec<String>",
             (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?",
             (select persona from user_profile where user_profile.user_id = "user".id and persona_public is true)      as "persona?: Vec<String>",
@@ -55,6 +56,7 @@ pub async fn get(db: &PgPool, user_id: UserId) -> anyhow::Result<Option<PublicUs
             country_short: location.country_short,
             country_long: location.country_long,
             circles: row.circles,
+            badge: row.badge,
         }
     });
 
@@ -91,6 +93,7 @@ pub async fn browse_users(
                 given_name             as "given_name!",
                 family_name            as "family_name!",
                 profile_image_id       as "profile_image?: ImageId",
+                badge                  as "badge!: Option<UserBadge>",
                 (select languages_spoken from user_profile where user_profile.user_id = "user".id and languages_spoken_public is true)      as "languages_spoken?: Vec<String>",
                 (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?",
                 (select persona from user_profile where user_profile.user_id = "user".id and persona_public is true)      as "persona?: Vec<String>",
@@ -132,6 +135,7 @@ pub async fn browse_users(
                 country_short: location.country_short,
                 country_long: location.country_long,
                 circles: row.circles,
+                badge: row.badge,
             }
         })
         .collect();
@@ -312,6 +316,7 @@ pub async fn get_by_ids(db: &PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<PublicUse
                 given_name             as "given_name!",
                 family_name            as "family_name!",
                 profile_image_id       as "profile_image?: ImageId",
+                badge                  as "badge!: Option<UserBadge>",
                 (select languages_spoken from user_profile where user_profile.user_id = "user".id and languages_spoken_public is true)      as "languages_spoken?: Vec<String>",
                 (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?",
                 (select persona from user_profile where user_profile.user_id = "user".id and persona_public is true)      as "persona?: Vec<String>",
@@ -349,6 +354,7 @@ pub async fn get_by_ids(db: &PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<PublicUse
                 country_short: location.country_short,
                 country_long: location.country_long,
                 circles: row.circles,
+                badge: row.badge,
             }
         })
         .collect();
@@ -452,6 +458,7 @@ pub async fn browse_followers(
                 given_name             as "given_name!",
                 family_name            as "family_name!",
                 profile_image_id       as "profile_image?: ImageId",
+                badge                  as "badge!: Option<UserBadge>",
                 (select languages_spoken from user_profile where user_profile.user_id = "user".id and languages_spoken_public is true)      as "languages_spoken?: Vec<String>",
                 (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?",
                 (select persona from user_profile where user_profile.user_id = "user".id and persona_public is true)      as "persona?: Vec<String>",
@@ -493,6 +500,7 @@ pub async fn browse_followers(
                 country_short: location.country_short,
                 country_long: location.country_long,
                 circles: row.circles,
+                badge: row.badge,
             }
         })
         .collect();
@@ -527,6 +535,7 @@ pub async fn browse_following(
                 given_name             as "given_name!",
                 family_name            as "family_name!",
                 profile_image_id       as "profile_image?: ImageId",
+                badge                  as "badge!: Option<UserBadge>",
                 (select languages_spoken from user_profile where user_profile.user_id = "user".id and languages_spoken_public is true)      as "languages_spoken?: Vec<String>",
                 (select organization from user_profile where user_profile.user_id = "user".id and organization_public is true)  as "organization?",
                 (select persona from user_profile where user_profile.user_id = "user".id and persona_public is true)      as "persona?: Vec<String>",
@@ -568,6 +577,7 @@ pub async fn browse_following(
                 country_short: location.country_short,
                 country_long: location.country_long,
                 circles: row.circles,
+                badge: row.badge,
             }
         })
         .collect();

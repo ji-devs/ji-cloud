@@ -9,8 +9,8 @@ use shared::domain::{
         SubjectId,
     },
     user::{
-        CreateProfileRequest, OtherUser, PatchProfileRequest, UserId, UserProfile,
-        UserProfileExport, UserResponse, UserScope,
+        CreateProfileRequest, OtherUser, PatchProfileAdminDataRequest, PatchProfileRequest,
+        UserBadge, UserId, UserProfile, UserProfileExport, UserResponse, UserScope,
     },
 };
 use sqlx::{PgConnection, PgPool};
@@ -56,6 +56,7 @@ select
     language_app,
     language_emails,
     bio,
+    badge                  as "badge!: Option<UserBadge>",
     location_public,
     languages_spoken_public,
     persona_public,
@@ -131,6 +132,7 @@ where id = $1"#,
         affiliations: row.affiliations.into_iter().map(AffiliationId).collect(),
         circles: row.circles.into_iter().map(CircleId).collect(),
         account_summary: None,
+        badge: row.badge,
     }))
 }
 
@@ -573,20 +575,20 @@ where user_id = $1 and languages_spoken is distinct from $2
         //language=SQL
         r#"
 update user_profile
-set username               = coalesce($2, username),
-    given_name             = coalesce($3, given_name),
-    family_name            = coalesce($4, family_name),
-    language_app           = coalesce($5, language_app),
-    language_emails        = coalesce($6, language_emails),
-    timezone               = coalesce($7, timezone),
-    opt_into_edu_resources = coalesce($8, opt_into_edu_resources),
-    persona_public         = coalesce($9, persona_public),
-    organization_public    = coalesce($10, organization_public),
-    location_public        = coalesce($11, location_public),
+set username                = coalesce($2, username),
+    given_name              = coalesce($3, given_name),
+    family_name             = coalesce($4, family_name),
+    language_app            = coalesce($5, language_app),
+    language_emails         = coalesce($6, language_emails),
+    timezone                = coalesce($7, timezone),
+    opt_into_edu_resources  = coalesce($8, opt_into_edu_resources),
+    persona_public          = coalesce($9, persona_public),
+    organization_public     = coalesce($10, organization_public),
+    location_public         = coalesce($11, location_public),
     languages_spoken_public = coalesce($12, languages_spoken_public),
-    bio                    = coalesce($13, bio),
-    bio_public             = coalesce($14, bio_public),
-    updated_at             = coalesce(now(), updated_at)
+    bio                     = coalesce($13, bio),
+    bio_public              = coalesce($14, bio_public),
+    updated_at              = coalesce(now(), updated_at)
 where user_id = $1
   and (($2::text is not null and $2 is distinct from username) or
        ($3::text is not null and $3 is distinct from given_name) or
@@ -630,6 +632,52 @@ where user_id = $1
         req.age_ranges.as_deref(),
     )
     .await?;
+
+    txn.commit().await?;
+
+    Ok(())
+}
+
+#[instrument(skip(db, req))]
+pub async fn update_profile_admin_data(
+    db: &PgPool,
+    user_id: UserId,
+    req: PatchProfileAdminDataRequest,
+) -> Result<(), error::UserUpdate> {
+    let mut txn = db.begin().await?;
+
+    if !sqlx::query!(
+        //language=SQL
+        r#"
+select exists(select 1 from user_profile where user_id = $1 for update) as "exists!"
+    "#,
+        user_id.0
+    )
+    .fetch_one(&mut txn)
+    .instrument(tracing::info_span!("user exists"))
+    .await?
+    .exists
+    {
+        return Err(error::UserUpdate::UserNotFound);
+    }
+
+    if let Some(badge) = req.badge {
+        sqlx::query!(
+            //language=SQL
+            r#"
+update user_profile
+set badge      = coalesce($2, badge),
+    updated_at = coalesce(now(), updated_at)
+where user_id = $1
+and ($2 is distinct from badge)
+        "#,
+            user_id.0,
+            badge.map(|b| b as i16),
+        )
+        .execute(&mut txn)
+        .instrument(tracing::info_span!("update user_profile"))
+        .await?;
+    }
 
     txn.commit().await?;
 

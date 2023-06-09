@@ -29,7 +29,9 @@ pub use fonts::{
     Create as CreateFont, Delete as DeleteFont, Get as GetFonts, Update as UpdateFont,
 };
 
-pub use profile::{Create as CreateProfile, Get as Profile, Patch as PatchProfile};
+pub use profile::{
+    Create as CreateProfile, Get as Profile, Patch as PatchProfile, PatchProfileAdminData,
+};
 
 pub use public_user::{
     BrowseFollowers, BrowseFollowing, BrowsePublicUser, BrowseUserJigs,

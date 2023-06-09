@@ -10,6 +10,8 @@ use crate::{
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 
+use super::UserBadge;
+
 make_path_parts!(PublicUserGetPath => "/v1/user/{}/public" => UserId);
 
 /// A lite profile for other Users to view
@@ -35,6 +37,10 @@ pub struct PublicUser {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bio: Option<String>, // only here if bio_public is true
+
+    /// Badge associated with User
+    #[serde(default)]
+    pub badge: Option<UserBadge>,
 
     /// Language spoken of User
     #[serde(default)]

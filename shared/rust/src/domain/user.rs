@@ -115,6 +115,18 @@ pub struct ResetEmailResponse {
     pub paseto_token: String,
 }
 
+/// user badge
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[serde(rename_all = "camelCase")]
+#[repr(i16)]
+pub enum UserBadge {
+    /// Master teacher
+    MasterTeacher = 0,
+    /// JI team member
+    JiTeam = 1,
+}
+
 /// A user's profile.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UserProfile {
@@ -159,6 +171,9 @@ pub struct UserProfile {
 
     /// Bio for User
     pub bio: String,
+
+    /// Badge of User
+    pub badge: Option<UserBadge>,
 
     /// Allow location to be public
     #[serde(default)]
@@ -598,6 +613,17 @@ pub struct PatchProfileRequest {
     #[serde(deserialize_with = "super::deserialize_optional_field")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub location: Option<Option<serde_json::Value>>,
+}
+
+make_path_parts!(PatchProfileAdminDataPath => "/v1/user/me/profile/{}/admin-data" => UserId);
+
+/// Request for [`PatchProfileAdminData`](crate::api::endpoints::user::PatchProfileAdminData)
+#[derive(Debug, Default, Serialize, Deserialize)]
+pub struct PatchProfileAdminDataRequest {
+    /// Users badge
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub badge: Option<Option<UserBadge>>,
 }
 
 make_path_parts!(CreateUserPath => "/v1/user");

@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use actix_web::{
-    web::{Bytes, Data, Json, Query, ServiceConfig},
+    web::{self, Bytes, Data, Json, Query, ServiceConfig},
     HttpResponse,
 };
 use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
@@ -17,8 +17,9 @@ use shared::{
             self, Browse, BrowseFollowers, BrowseFollowing, BrowsePlaylists, BrowsePublicUser,
             BrowseResources, BrowseUserJigs, ChangePassword, Create, CreateColor, CreateFont,
             CreateProfile, Delete, DeleteColor, DeleteFont, Follow, GetColors, GetFonts,
-            GetPublicUser, PatchProfile, Profile, ResetEmail, ResetPassword, Search, SearchUser,
-            Unfollow, UpdateColor, UpdateFont, UserLookup, VerifyEmail, VerifyResetEmail,
+            GetPublicUser, PatchProfile, PatchProfileAdminData, Profile, ResetEmail, ResetPassword,
+            Search, SearchUser, Unfollow, UpdateColor, UpdateFont, UserLookup, VerifyEmail,
+            VerifyResetEmail,
         },
         ApiEndpoint, PathParts,
     },
@@ -837,6 +838,20 @@ async fn patch_profile(
     Ok(HttpResponse::NoContent().finish())
 }
 
+/// Update your profile.
+async fn patch_profile_admin_data(
+    db: Data<PgPool>,
+    _auth: TokenUserWithScope<ScopeAdmin>,
+    req: Json<<PatchProfileAdminData as ApiEndpoint>::Req>,
+    path: web::Path<UserId>,
+) -> Result<HttpResponse, error::UserUpdate> {
+    let user_id: UserId = path.into_inner();
+
+    db::user::update_profile_admin_data(&*db, user_id, req.into_inner()).await?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
 /// Get a user's profile.
 #[instrument(skip_all)]
 async fn get_profile(
@@ -1114,6 +1129,12 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <CreateProfile as ApiEndpoint>::Path::PATH,
         CreateProfile::METHOD.route().to(create_profile),
+    )
+    .route(
+        <PatchProfileAdminData as ApiEndpoint>::Path::PATH,
+        PatchProfileAdminData::METHOD
+            .route()
+            .to(patch_profile_admin_data),
     )
     .route(
         <PatchProfile as ApiEndpoint>::Path::PATH,
