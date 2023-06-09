@@ -8,7 +8,7 @@ use crate::{
             JigGetLivePath, JigId, JigLikePath, JigLikedPath, JigLikedResponse, JigPlayPath,
             JigPublishPath, JigResponse, JigSearchPath, JigSearchQuery, JigSearchResponse,
             JigTransferAdminPath, JigUnlikePath, JigUpdateAdminDataRequest, JigUpdateDraftDataPath,
-            JigUpdateDraftDataRequest,
+            JigUpdateDraftDataRequest, GetJigPlaylistsResponse, GetJigPlaylistsPath,
         },
         CreateResponse,
     },
@@ -321,3 +321,18 @@ impl ApiEndpoint for RemoveResource {
 }
 use crate::api::endpoints::PathPart;
 macros::make_path_parts!(RemoveResourcePath => "/v1/jig/{}/resources" => JigId);
+
+/// Playlists containing JIG id
+///
+/// # Authorization
+/// * Standard + [`UserScope::ManageJig`](crate::domain::user::UserScope)
+///
+pub struct GetJigPlaylists;
+impl ApiEndpoint for GetJigPlaylists {
+    type Req = ();
+    type Res = GetJigPlaylistsResponse;
+    type Path = GetJigPlaylistsPath;
+    type Err = EmptyError;
+    const METHOD: Method = Method::Get;
+}
+

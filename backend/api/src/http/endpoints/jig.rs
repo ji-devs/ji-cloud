@@ -10,8 +10,8 @@ use shared::{
     domain::{
         asset::{DraftOrLive, PrivacyLevel, UserOrMe},
         jig::{
-            JigBrowseResponse, JigCountResponse, JigCreateRequest, JigId, JigLikedResponse,
-            JigSearchResponse,
+            GetJigPlaylistsResponse, JigBrowseResponse, JigCountResponse, JigCreateRequest, JigId,
+            JigLikedResponse, JigSearchResponse,
         },
         user::UserId,
         CreateResponse,
@@ -223,6 +223,22 @@ async fn browse(
         pages,
         total_jig_count: total_count,
     }))
+}
+
+#[instrument(skip(db, claims))]
+async fn get_jig_playlists(
+    db: Data<PgPool>,
+    claims: TokenUser,
+    path: web::Path<JigId>,
+) -> Result<Json<<jig::GetJigPlaylists as ApiEndpoint>::Res>, error::Auth> {
+    let jig_id = path.into_inner();
+    let user_id = claims.user_id();
+
+    db::jig::authz(&db, user_id, Some(jig_id)).await?;
+
+    let playlists = db::jig::get_jig_playlists(db.as_ref(), jig_id, user_id).await?;
+
+    Ok(Json(GetJigPlaylistsResponse { playlists }))
 }
 
 fn filters_for_ids_or<T: Into<Uuid> + Copy>(ids: &[T]) -> Vec<Uuid> {
@@ -633,14 +649,12 @@ pub fn configure(cfg: &mut ServiceConfig) {
             .to(player::get_play_count),
     )
     .route(
-        <jig::player::PlayCount as ApiEndpoint>::Path::PATH,
-        jig::player::PlayCount::METHOD
-            .route()
-            .to(player::get_play_count),
-    )
-    .route(
         <jig::Count as ApiEndpoint>::Path::PATH,
         jig::Count::METHOD.route().to(count),
+    )
+    .route(
+        <jig::GetJigPlaylists as ApiEndpoint>::Path::PATH,
+        jig::GetJigPlaylists::METHOD.route().to(get_jig_playlists),
     )
     .route(
         <jig::Play as ApiEndpoint>::Path::PATH,
