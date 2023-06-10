@@ -209,7 +209,7 @@ select cte.jig_id                                          as "jig_id: JigId",
         liked_count,
         play_count,
         live_up_to_date,
-        exists(select 1 from jig_like where jig_id = $1 and user_id = $3)    as "is_liked!", 
+        exists(select 1 from jig_like where jig_id = $1 and user_id = $3)    as "is_liked!",
         locked,
         other_keywords,
         translated_keywords,
@@ -554,7 +554,7 @@ with cte as (
           inner join jig on (draft_id = jd.id or (live_id = jd.id and jd.last_synced_at is not null and published_at is not null))
           left join jig_admin_data "admin" on admin.jig_id = jig.id
           left join jig_data_additional_resource "resource" on jd.id = resource.jig_data_id
-    where (author_id = $1 or $1 is null) 
+    where (author_id = $1 or $1 is null)
         and (jd.draft_or_live = $2 or $2 is null)
         and (blocked = $3 or $3 is null)
         and (jd.privacy_level = any($4) or $4 = array[]::smallint[])
@@ -1039,7 +1039,7 @@ pub async fn filtered_count(
         r#"
         with cte as (
             select (array_agg(jig.id))[1]
-            from jig 
+            from jig
                   inner join jig_data jd on (draft_id = jd.id or (live_id = jd.id and jd.last_synced_at is not null and published_at is not null))
                   left join jig_admin_data "admin" on admin.jig_id = jig.id
                   left join jig_data_additional_resource "resource" on jd.id = resource.jig_data_id
@@ -1398,7 +1398,7 @@ pub async fn transfer_jigs(
 
     let from_exists = sqlx::query!(
         r#"
-select exists (select 1 from "user" where id = $1) as "check_from!"        
+select exists (select 1 from "user" where id = $1) as "check_from!"
         "#,
         from.0
     )
@@ -1412,7 +1412,7 @@ select exists (select 1 from "user" where id = $1) as "check_from!"
 
     let to_exists = sqlx::query!(
         r#"
-select exists (select 1 from "user" where id = $1) as "check_to!"        
+select exists (select 1 from "user" where id = $1) as "check_to!"
         "#,
         to.0
     )
@@ -1434,7 +1434,7 @@ select exists (select 1 from "user" where id = $1) as "check_to!"
 
     let ids = sqlx::query!(
         r#"
-update jig 
+update jig
 set author_id = $1,
     creator_id = $1
 where (creator_id = $2 or author_id = $2)
@@ -1572,24 +1572,6 @@ select exists (
     Ok(exists)
 }
 
-pub async fn is_admin(db: &PgPool, user_id: UserId) -> Result<bool, error::Auth> {
-    let authed = sqlx::query!(
-        r#"
-select exists(select 1 from user_scope where user_id = $1 and scope = any($2)) as "authed!"
-"#,
-        user_id.0,
-        &[UserScope::Admin as i16, UserScope::AdminJig as i16][..],
-    )
-    .fetch_one(db)
-    .await?
-    .authed;
-
-    if !authed {
-        return Ok(false);
-    }
-
-    Ok(true)
-}
 pub async fn is_logged_in(db: &PgPool, user_id: UserId) -> Result<(), error::Auth> {
     sqlx::query!(
         r#"

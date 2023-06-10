@@ -865,7 +865,7 @@ where course_data_id = $1
         //language=SQL
         r#"
     insert into course_data_unit(course_data_id, display_name, description, index, value)
-    select $2, display_name, description, index, value 
+    select $2, display_name, description, index, value
     from course_data_unit
     where course_data_id = $1
             "#,
@@ -876,25 +876,6 @@ where course_data_id = $1
     .await?;
 
     Ok(new_id)
-}
-
-pub async fn is_admin(db: &PgPool, user_id: UserId) -> Result<bool, error::Auth> {
-    let authed = sqlx::query!(
-        r#"
-select exists(select 1 from user_scope where user_id = $1 and scope = any($2)) as "authed!"
-"#,
-        user_id.0,
-        &[UserScope::Admin as i16, UserScope::AdminJig as i16][..],
-    )
-    .fetch_one(db)
-    .await?
-    .authed;
-
-    if !authed {
-        return Ok(false);
-    }
-
-    Ok(true)
 }
 
 pub async fn clone_course(
@@ -943,7 +924,7 @@ pub async fn update_timestamps(
     sqlx::query!(
         //language=SQL
         r#"
-update course_data 
+update course_data
 set created_at = now()
 where id = $1
 "#,
@@ -955,7 +936,7 @@ where id = $1
     sqlx::query!(
         //language=SQL
         r#"
-update course_data 
+update course_data
 set updated_at = null
 where id = $1
 "#,

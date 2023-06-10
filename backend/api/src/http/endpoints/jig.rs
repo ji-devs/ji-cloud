@@ -4,6 +4,7 @@ use actix_web::{
 };
 use futures::try_join;
 use ji_core::settings::RuntimeSettings;
+use shared::domain::user::UserScope;
 use shared::{
     api::{endpoints::jig, ApiEndpoint, PathParts},
     domain::{
@@ -506,7 +507,13 @@ async fn auth_claims(
     };
 
     if let Some(user) = claims {
-        let is_admin = db::jig::is_admin(&*db, UserId(user.0.user_id)).await?;
+        let is_admin = db::user::has_scopes(
+            &*db,
+            UserId(user.0.user_id),
+            &[UserScope::Admin, UserScope::AdminJig],
+        )
+        .await?;
+
         let user_id = user.user_id();
 
         if let Some(author) = author_id {
