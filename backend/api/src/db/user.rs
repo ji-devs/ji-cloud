@@ -1088,3 +1088,20 @@ pub async fn filtered_count(db: &PgPool, user_id: Option<UserId>) -> sqlx::Resul
 
     Ok(users.count as u64)
 }
+
+#[instrument(skip(db))]
+pub async fn has_scopes(db: &PgPool, user_id: UserId, scopes: &[UserScope]) -> sqlx::Result<bool> {
+    let scopes: Vec<_> = scopes.iter().map(|scope| *scope as i16).collect();
+    let authed = sqlx::query!(
+        r#"
+select exists(select 1 from user_scope where user_id = $1 and scope = any($2)) as "authed!"
+"#,
+        user_id.0,
+        &scopes[..],
+    )
+    .fetch_one(db)
+    .await?
+    .authed;
+
+    Ok(authed)
+}
