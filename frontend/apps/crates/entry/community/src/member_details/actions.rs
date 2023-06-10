@@ -278,6 +278,7 @@ fn user_to_public_user(user: UserProfile) -> PublicUser {
         organization: user.organization,
         circles: user.circles,
         bio: Some(user.bio),
+        badge: user.badge,
         languages_spoken: Some(user.languages_spoken),
         persona: Some(user.persona),
         country_short: location.as_ref().map(|location| location.code.clone()),
