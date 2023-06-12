@@ -168,6 +168,7 @@ select  cte1.id                 as "id!: UserId",
         user_email.email::text as "email!",
         language_emails,
         user_email.created_at  as "created_at!",
+        badge                  as "badge!: Option<UserBadge>",
         organization,
         location
 from cte1
@@ -202,6 +203,7 @@ limit $3
                 organization: user_row.organization,
                 created_at: user_row.created_at.date_naive(),
                 language: user_row.language_emails,
+                badge: user_row.badge,
             }
         })
         .collect();
@@ -224,6 +226,7 @@ select  "user".id                 as "id!: UserId",
         user_email.email::text as "email!",
         language_emails,
         user_email.created_at  as "created_at!",
+        badge                  as "badge!: Option<UserBadge>",
         organization,
         location
 from "user"
@@ -254,6 +257,7 @@ with ordinality t(id, ord) using (id)
                 organization: row.organization,
                 created_at: row.created_at.date_naive(),
                 language: row.language_emails,
+                badge: row.badge,
             }
         })
         .collect();

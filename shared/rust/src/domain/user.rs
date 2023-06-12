@@ -292,6 +292,10 @@ pub struct UserResponse {
 
     /// The user's preferred email language for newsletters.
     pub language: String,
+
+    /// The user's city.
+    #[serde(default)]
+    pub badge: Option<UserBadge>,
 }
 
 /// A user's profile export representation.
