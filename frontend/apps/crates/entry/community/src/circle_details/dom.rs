@@ -244,7 +244,7 @@ impl CircleDetails {
                 }
                 dom
             })
-            .event_with_options(&EventOptions::bubbles(), move |e: events::Click| {
+            .event_with_options(&EventOptions::bubbles(), move |_: events::Click| {
                 let url = Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(member_id))).to_string();
                 dominator::routing::go_to_url(&url);
             })
