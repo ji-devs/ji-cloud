@@ -593,6 +593,78 @@ async fn live_up_to_date_flag(port: u16) -> anyhow::Result<()> {
     Ok(())
 }
 
+#[test_service(
+    setup = "setup_service",
+    fixtures(
+        "Fixture::MetaKinds",
+        "Fixture::User",
+        "Fixture::Jig",
+        "Fixture::Playlist"
+    )
+)]
+async fn jig_in_playlists(port: u16) -> anyhow::Result<()> {
+    let name = "jig_in_playlists";
+    let client = reqwest::Client::new();
+
+    let jig_id = "3a71522a-cd77-11eb-8dc1-af3e35f7c743";
+
+    let resp = client
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/jig/{jig_id}/playlists",
+            port
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(
+        format!("{}-1",name),
+        body, {
+            ".**.lastEdited" => "[last_edited]"
+        }
+    );
+
+    // let _resp = client
+    //     .put(&format!(
+    //         "http://0.0.0.0:{}/v1/jig/19becb2b-bff7-4c1b-bb2c-16f2e098d3d3/draft/publish",
+    //         port
+    //     ))
+    //     .login()
+    //     .send()
+    //     .await?
+    //     .error_for_status()?;
+
+    // let resp = client
+    //     .get(&format!(
+    //         "http://0.0.0.0:{}/v1/jig/19becb2b-bff7-4c1b-bb2c-16f2e098d3d3/live",
+    //         port
+    //     ))
+    //     .login()
+    //     .send()
+    //     .await?
+    //     .error_for_status()?;
+
+    // let body: serde_json::Value = resp.json().await?;
+
+    // insta::assert_json_snapshot!(
+    //     format!("{}-2",name),
+    //     body, {
+    //         // Really just need to redact the module ID because it is recreated for the live data,
+    //         // but I couldn't get a selector working correctly... So redacting all IDs.
+    //         ".**.id" => "[id]",
+    //         ".**.lastEdited" => "[last_edited]",
+    //         ".**.publishedAt" => "[published_at]",
+    //         ".**.feedbackPositive" => "[audio]",
+    //         ".**.feedbackNegative" => "[audio]"
+    //     }
+    // );
+
+    Ok(())
+}
+
 // #[ignore]
 // #[test_service(
 //     setup = "setup_service",

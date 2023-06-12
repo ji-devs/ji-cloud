@@ -11,6 +11,7 @@ use shared::domain::{
     },
     meta::{AffiliationId, AgeRangeId, ResourceTypeId as TypeId},
     module::{body::ThemeId, LiteModule, ModuleId, ModuleKind},
+    playlist::{PlaylistData, PlaylistId, PlaylistResponse},
     user::{UserId, UserScope},
 };
 use sqlx::{types::Json, PgConnection, PgPool};
@@ -1570,6 +1571,151 @@ select exists (
     .exists;
 
     Ok(exists)
+}
+
+#[instrument(skip(db))]
+pub async fn get_jig_playlists(
+    db: &sqlx::Pool<sqlx::Postgres>,
+    jig_id: JigId,
+    user_id: UserId,
+) -> sqlx::Result<Vec<PlaylistResponse>> {
+    let mut txn = db.begin().await?;
+
+    let playlist_data = sqlx::query!(
+    //language=SQL
+    r#"
+select playlist.id                                                                as "playlist_id: PlaylistId",
+    privacy_level                                                               as "privacy_level: PrivacyLevel",
+    creator_id                                                                  as "creator_id?: UserId",
+    author_id                                                                   as "author_id?: UserId",
+    (select given_name || ' '::text || family_name
+     from user_profile
+     where user_profile.user_id = author_id)                                     as "author_name",
+    published_at,
+    likes,
+    plays,
+    live_up_to_date,
+    exists(select 1 from playlist_like where playlist_id = playlist.id and user_id = $2)    as "is_liked!",
+    display_name                                                                  as "display_name!",
+    updated_at,
+    language                                                                      as "language!",
+    description                                                                   as "description!",
+    translated_description                                                        as "translated_description!: Json<HashMap<String,String>>",
+    draft_or_live                                                                 as "draft_or_live!: DraftOrLive",
+    other_keywords                                                                as "other_keywords!",
+    translated_keywords                                                           as "translated_keywords!",
+    (
+        select row(playlist_data_module.id, kind, is_complete)
+        from playlist_data_module
+        where playlist_data_id = playlist_data.id and "index" = 0
+        order by "index"
+    )                                                   as "cover?: (ModuleId, ModuleKind, bool)",
+    array(select row (category_id)
+            from playlist_data_category
+            where playlist_data_id = playlist_data.id)     as "categories!: Vec<(CategoryId,)>",
+    array(select row (affiliation_id)
+            from playlist_data_affiliation
+            where playlist_data_id = playlist_data.id)          as "affiliations!: Vec<(AffiliationId,)>",
+    array(select row (age_range_id)
+            from playlist_data_age_range
+            where playlist_data_id = playlist_data.id)          as "age_ranges!: Vec<(AgeRangeId,)>",
+    array(select row (id, display_name, resource_type_id, resource_content)
+                from playlist_data_resource
+                where playlist_data_id = playlist_data.id
+          )                                          as "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
+    array(
+        select row(jig_id)
+        from playlist_data_jig
+        where playlist_data_jig.playlist_data_id = playlist_data.id
+        order by "index"
+    )                                                     as "items!: Vec<(JigId,)>"
+from playlist_data_jig "pdj"
+inner join playlist_data on pdj.playlist_data_id = playlist_data.id
+inner join playlist on 
+        playlist_data.id = playlist.live_id
+        and last_synced_at is not null
+        and playlist.published_at is not null
+where jig_id = $1 
+order by coalesce(updated_at, created_at) desc
+"#,
+    jig_id.0,
+    user_id.0
+)
+    .fetch_all(&mut txn)
+    .instrument(tracing::info_span!("query playlist_data"))
+    .await?;
+
+    let v: Vec<_> = playlist_data
+        .into_iter()
+        .map(|playlist_data_row| PlaylistResponse {
+            id: playlist_data_row.playlist_id,
+            published_at: playlist_data_row.published_at,
+            creator_id: playlist_data_row.creator_id,
+            author_id: playlist_data_row.author_id,
+            author_name: playlist_data_row.author_name,
+            likes: playlist_data_row.likes,
+            plays: playlist_data_row.plays,
+            live_up_to_date: playlist_data_row.live_up_to_date,
+            is_liked: playlist_data_row.is_liked,
+            playlist_data: PlaylistData {
+                draft_or_live: playlist_data_row.draft_or_live,
+                display_name: playlist_data_row.display_name,
+                language: playlist_data_row.language,
+                cover: playlist_data_row
+                    .cover
+                    .map(|(id, kind, is_complete)| LiteModule {
+                        id,
+                        kind,
+                        is_complete,
+                    }),
+                categories: playlist_data_row
+                    .categories
+                    .into_iter()
+                    .map(|(it,)| it)
+                    .collect(),
+                last_edited: playlist_data_row.updated_at,
+                description: playlist_data_row.description,
+                age_ranges: playlist_data_row
+                    .age_ranges
+                    .into_iter()
+                    .map(|(it,)| it)
+                    .collect(),
+                affiliations: playlist_data_row
+                    .affiliations
+                    .into_iter()
+                    .map(|(it,)| it)
+                    .collect(),
+                additional_resources: playlist_data_row
+                    .additional_resource
+                    .into_iter()
+                    .map(|(id, display_name, resource_type_id, resource_content)| {
+                        AdditionalResource {
+                            id,
+                            display_name,
+                            resource_type_id,
+                            resource_content: serde_json::from_value::<ResourceContent>(
+                                resource_content,
+                            )
+                            .unwrap(),
+                        }
+                    })
+                    .collect(),
+                privacy_level: playlist_data_row.privacy_level,
+                other_keywords: playlist_data_row.other_keywords,
+                translated_keywords: playlist_data_row.translated_keywords,
+                translated_description: playlist_data_row.translated_description.0,
+                items: playlist_data_row
+                    .items
+                    .into_iter()
+                    .map(|(it,)| it)
+                    .collect(),
+            },
+        })
+        .collect();
+
+    txn.rollback().await?;
+
+    Ok(v)
 }
 
 pub async fn is_logged_in(db: &PgPool, user_id: UserId) -> Result<(), error::Auth> {

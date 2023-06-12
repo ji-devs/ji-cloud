@@ -21,6 +21,7 @@ use super::{
     category::CategoryId,
     meta::{AffiliationId, AgeRangeId, ResourceTypeId},
     module::LiteModule,
+    playlist::PlaylistResponse,
     user::UserId,
 };
 use crate::{api::endpoints::PathPart, domain::module::body::ThemeId};
@@ -805,3 +806,13 @@ pub struct JigLikedResponse {
 make_path_parts!(JigPlayPath => "/v1/jig/{}/play" => JigId);
 
 make_path_parts!(JigAdminDataUpdatePath => "/v1/jig/{}/admin" => JigId);
+
+/// Response list of Playlists that JIG is associated with.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct GetJigPlaylistsResponse {
+    /// the jigs returned.
+    pub playlists: Vec<PlaylistResponse>,
+}
+
+macros::make_path_parts!(GetJigPlaylistsPath => "/v1/jig/{}/playlists" => JigId);
