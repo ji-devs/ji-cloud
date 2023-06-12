@@ -5,12 +5,13 @@ use super::{
     edit_name::EditName, ActivePopup, CircleDetails,
 };
 use components::dialog::Dialog;
-use dominator::{clone, html, Dom};
+use dominator::{clone, html, Dom, EventOptions};
 use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
 use itertools::Itertools;
 use shared::{
+    api::endpoints::circle::RemoveMember,
     domain::{
-        circle::Circle,
+        circle::{Circle, CircleRemoveMemberPath},
         user::{public_user::PublicUser, UserId},
     },
     media::MediaLibrary,
@@ -20,11 +21,12 @@ use utils::{
     component::Component,
     events,
     languages::Language,
-    prelude::get_user_id,
+    prelude::{get_user_id, ApiEndpointExt},
     routes::{CommunityMembersRoute, CommunityRoute, Route},
     unwrap::UnwrapJiExt,
 };
 use wasm_bindgen::JsValue;
+use wasm_bindgen_futures::spawn_local;
 
 // const STR_CONTACT_ADMIN: &str = "Contact admin";
 const STR_INVITE: &str = "Invite";
@@ -219,6 +221,8 @@ impl CircleDetails {
     }
 
     fn render_member(self: &Rc<Self>, member: &PublicUser) -> Dom {
+        let state = self;
+        let member_id = member.id;
         html!("community-list-member", {
             .prop("slot", "members")
             .prop("name", &format!("{} {}", member.given_name, member.family_name))
@@ -240,9 +244,10 @@ impl CircleDetails {
                 }
                 dom
             })
-            .apply(move |dom| dominator::on_click_go_to_url!(dom, {
-                Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(member.id))).to_string()
-            }))
+            .event_with_options(&EventOptions::bubbles(), move |e: events::Click| {
+                let url = Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(member_id))).to_string();
+                dominator::routing::go_to_url(&url);
+            })
             .child(html!("profile-image", {
                 .prop("slot", "img")
                 .prop("imageId", {
@@ -253,6 +258,26 @@ impl CircleDetails {
                 })
                 .prop("givenName", &member.given_name)
                 .prop("familyName", &member.family_name)
+            }))
+            .child(html!("button-rect", {
+                .prop("slot", "status")
+                .text("Remove")
+                .event(clone!(state => move |e: events::Click| {
+                    e.stop_propagation();
+                    spawn_local(clone!(state => async move {
+                        RemoveMember::api_with_auth_empty(
+                            CircleRemoveMemberPath(state.circle_id, member_id),
+                            None,
+                        ).await.unwrap_ji();
+                        let mut members = state.members.lock_mut();
+                        if let Some(index) = members.iter().position(|member| member.id == member_id) {
+                            members.remove(index);
+                        }
+                        if let Some(circle) = state.circle.lock_mut().as_mut() {
+                            circle.member_count -= 1;
+                        }
+                    }));
+                }))
             }))
         })
     }
