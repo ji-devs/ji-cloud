@@ -1,6 +1,6 @@
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
-use shared::domain::user::{UserId, UserResponse};
+use shared::domain::user::{UserBadge, UserId, UserResponse};
 
 #[derive(Clone)]
 pub struct EditableUser {
@@ -15,6 +15,7 @@ pub struct EditableUser {
     pub country: Mutable<String>,
     pub language: Mutable<String>,
     pub organization: Mutable<String>,
+    pub badge: Mutable<Option<UserBadge>>,
     pub loader: AsyncLoader,
 }
 
@@ -32,6 +33,7 @@ impl From<UserResponse> for EditableUser {
             state: Mutable::new(user.state.unwrap_or_default()),
             country: Mutable::new(user.country.unwrap_or_default()),
             email: Mutable::new(user.email),
+            badge: Mutable::new(user.badge),
             loader: AsyncLoader::new(),
         }
     }

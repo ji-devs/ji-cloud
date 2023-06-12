@@ -116,7 +116,7 @@ pub struct ResetEmailResponse {
 }
 
 /// user badge
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[serde(rename_all = "camelCase")]
 #[repr(i16)]
@@ -125,6 +125,16 @@ pub enum UserBadge {
     MasterTeacher = 0,
     /// JI team member
     JiTeam = 1,
+}
+
+impl UserBadge {
+    /// get display name
+    pub fn display_name(&self) -> &'static str {
+        match self {
+            UserBadge::MasterTeacher => "Master Teacher",
+            UserBadge::JiTeam => "JI Team",
+        }
+    }
 }
 
 /// A user's profile.

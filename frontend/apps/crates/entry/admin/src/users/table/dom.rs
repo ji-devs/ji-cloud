@@ -1,10 +1,12 @@
 use crate::users::editable_user::EditableUser;
 
 use super::state::*;
-use dominator::{clone, html, Dom};
+use dominator::{clone, html, with_node, Dom};
 use futures_signals::{map_ref, signal::SignalExt, signal_vec::SignalVecExt};
+use shared::domain::user::UserBadge;
 use std::rc::Rc;
-use utils::{events, routes::AdminUsersRoute};
+use utils::{events, routes::AdminUsersRoute, unwrap::UnwrapJiExt};
+use web_sys::HtmlSelectElement;
 
 impl UsersTable {
     pub fn render(self: Rc<Self>) -> Dom {
@@ -114,6 +116,35 @@ impl UsersTable {
                                 })
                             )
                         }),
+                        html!("label", {
+                            .child(html!("select" => HtmlSelectElement, {
+                                .with_node!(select => {
+                                    .prop_signal("value", user.badge.signal().map(|badge| {
+                                        badge_to_json(badge)
+                                    }))
+                                    .children(&mut [
+                                        html!("option", {
+                                            .prop("value", badge_to_json(None))
+                                        }),
+                                        html!("option", {
+                                            .text(&UserBadge::MasterTeacher.display_name())
+                                            .prop("value", badge_to_json(Some(UserBadge::MasterTeacher)))
+                                        }),
+                                        html!("option", {
+                                            .text(&UserBadge::JiTeam.display_name())
+                                            .prop("value", badge_to_json(Some(UserBadge::JiTeam)))
+                                        }),
+                                    ])
+                                    .event(clone!(state, user, select => move |_: events::Change| {
+                                        let value = select.value();
+                                        let value = json_to_badge(&value);
+                                        user.badge.set(value);
+
+                                        state.save_admin_data(&user);
+                                    }))
+                                })
+                            }))
+                        }),
                         html!("span", {
                             .text_signal(user.country.signal_cloned())
                         }),
@@ -137,4 +168,12 @@ impl UsersTable {
             })))
         })
     }
+}
+
+fn badge_to_json(badge: Option<UserBadge>) -> String {
+    serde_json::to_string(&badge).unwrap_ji()
+}
+
+fn json_to_badge(json: &str) -> Option<UserBadge> {
+    serde_json::from_str(json).unwrap_ji()
 }
