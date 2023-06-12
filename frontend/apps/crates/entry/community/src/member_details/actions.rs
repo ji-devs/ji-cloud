@@ -283,6 +283,5 @@ fn user_to_public_user(user: UserProfile) -> PublicUser {
         persona: Some(user.persona),
         country_short: location.as_ref().map(|location| location.code.clone()),
         country_long: location.as_ref().map(|location| location.name.clone()),
-        badge: None,
     }
 }
