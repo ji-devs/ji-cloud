@@ -1718,24 +1718,6 @@ order by coalesce(updated_at, created_at) desc
     Ok(v)
 }
 
-pub async fn is_admin(db: &PgPool, user_id: UserId) -> Result<bool, error::Auth> {
-    let authed = sqlx::query!(
-        r#"
-select exists(select 1 from user_scope where user_id = $1 and scope = any($2)) as "authed!"
-"#,
-        user_id.0,
-        &[UserScope::Admin as i16, UserScope::AdminJig as i16][..],
-    )
-    .fetch_one(db)
-    .await?
-    .authed;
-
-    if !authed {
-        return Ok(false);
-    }
-
-    Ok(true)
-}
 pub async fn is_logged_in(db: &PgPool, user_id: UserId) -> Result<(), error::Auth> {
     sqlx::query!(
         r#"

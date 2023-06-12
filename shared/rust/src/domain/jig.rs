@@ -21,7 +21,8 @@ use super::{
     category::CategoryId,
     meta::{AffiliationId, AgeRangeId, ResourceTypeId},
     module::LiteModule,
-    user::UserId, playlist::PlaylistResponse,
+    playlist::PlaylistResponse,
+    user::UserId,
 };
 use crate::{api::endpoints::PathPart, domain::module::body::ThemeId};
 

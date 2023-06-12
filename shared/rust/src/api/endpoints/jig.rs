@@ -2,13 +2,14 @@ use crate::{
     api::Method,
     domain::{
         jig::{
-            JigAdminDataUpdatePath, JigAdminTransferRequest, JigBrowsePath, JigBrowseQuery,
-            JigBrowseResponse, JigClonePath, JigCountPath, JigCountResponse, JigCoverPath,
-            JigCreatePath, JigCreateRequest, JigDeleteAllPath, JigDeletePath, JigGetDraftPath,
-            JigGetLivePath, JigId, JigLikePath, JigLikedPath, JigLikedResponse, JigPlayPath,
-            JigPublishPath, JigResponse, JigSearchPath, JigSearchQuery, JigSearchResponse,
-            JigTransferAdminPath, JigUnlikePath, JigUpdateAdminDataRequest, JigUpdateDraftDataPath,
-            JigUpdateDraftDataRequest, GetJigPlaylistsResponse, GetJigPlaylistsPath,
+            GetJigPlaylistsPath, GetJigPlaylistsResponse, JigAdminDataUpdatePath,
+            JigAdminTransferRequest, JigBrowsePath, JigBrowseQuery, JigBrowseResponse,
+            JigClonePath, JigCountPath, JigCountResponse, JigCoverPath, JigCreatePath,
+            JigCreateRequest, JigDeleteAllPath, JigDeletePath, JigGetDraftPath, JigGetLivePath,
+            JigId, JigLikePath, JigLikedPath, JigLikedResponse, JigPlayPath, JigPublishPath,
+            JigResponse, JigSearchPath, JigSearchQuery, JigSearchResponse, JigTransferAdminPath,
+            JigUnlikePath, JigUpdateAdminDataRequest, JigUpdateDraftDataPath,
+            JigUpdateDraftDataRequest,
         },
         CreateResponse,
     },
@@ -335,4 +336,3 @@ impl ApiEndpoint for GetJigPlaylists {
     type Err = EmptyError;
     const METHOD: Method = Method::Get;
 }
-

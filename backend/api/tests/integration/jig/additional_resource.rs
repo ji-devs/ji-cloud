@@ -13,7 +13,6 @@ use shared::domain::{
 };
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 use std::str::FromStr;
-use uuid::Uuid;
 
 #[test_service(
     setup = "setup_service",
