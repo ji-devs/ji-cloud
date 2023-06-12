@@ -626,6 +626,7 @@ make_path_parts!(PatchProfileAdminDataPath => "/v1/user/me/profile/{}/admin-data
 pub struct PatchProfileAdminDataRequest {
     /// Users badge
     #[serde(default)]
+    #[serde(deserialize_with = "super::deserialize_optional_field")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub badge: Option<Option<UserBadge>>,
 }
