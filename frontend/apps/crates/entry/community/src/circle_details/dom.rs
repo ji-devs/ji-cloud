@@ -51,6 +51,7 @@ impl CircleDetails {
         html!("empty-fragment", {
             .child_signal(state.circle.signal_ref(clone!(state => move |circle| {
                 circle.as_ref().map(clone!(state => move |circle| {
+                    let is_circle_admin = is_circle_admin(circle);
                     html!("community-circle-details", {
                         .prop("name", &circle.display_name)
                         .prop("description", &circle.description)
@@ -172,7 +173,7 @@ impl CircleDetails {
                             })
                         })))
                         .children_signal_vec(state.members.signal_vec_cloned().map(clone!(state => move |member| {
-                            state.render_member(&member)
+                            state.render_member(&member, is_circle_admin)
                         })))
                     })
                 }))
@@ -220,7 +221,7 @@ impl CircleDetails {
         })
     }
 
-    fn render_member(self: &Rc<Self>, member: &PublicUser) -> Dom {
+    fn render_member(self: &Rc<Self>, member: &PublicUser, is_circle_admin: bool) -> Dom {
         let state = self;
         let member_id = member.id;
         html!("community-list-member", {
@@ -259,26 +260,35 @@ impl CircleDetails {
                 .prop("givenName", &member.given_name)
                 .prop("familyName", &member.family_name)
             }))
-            .child(html!("button-rect", {
-                .prop("slot", "status")
-                .text("Remove")
-                .event(clone!(state => move |e: events::Click| {
-                    e.stop_propagation();
-                    spawn_local(clone!(state => async move {
-                        RemoveMember::api_with_auth_empty(
-                            CircleRemoveMemberPath(state.circle_id, member_id),
-                            None,
-                        ).await.unwrap_ji();
-                        let mut members = state.members.lock_mut();
-                        if let Some(index) = members.iter().position(|member| member.id == member_id) {
-                            members.remove(index);
-                        }
-                        if let Some(circle) = state.circle.lock_mut().as_mut() {
-                            circle.member_count -= 1;
-                        }
-                    }));
+            .apply_if(is_circle_admin, |dom| {
+                dom.child(html!("button-rect", {
+                    .prop("slot", "status")
+                    .text("Remove")
+                    .event(clone!(state => move |e: events::Click| {
+                        e.stop_propagation();
+                        spawn_local(clone!(state => async move {
+                            RemoveMember::api_with_auth_empty(
+                                CircleRemoveMemberPath(state.circle_id, member_id),
+                                None,
+                            ).await.unwrap_ji();
+                            let mut members = state.members.lock_mut();
+                            if let Some(index) = members.iter().position(|member| member.id == member_id) {
+                                members.remove(index);
+                            }
+                            if let Some(circle) = state.circle.lock_mut().as_mut() {
+                                circle.member_count -= 1;
+                            }
+                        }));
+                    }))
                 }))
-            }))
+            })
         })
     }
+}
+
+fn is_circle_admin(circle: &Circle) -> bool {
+    matches!(
+        (circle, get_user_id()),
+        (circle, Some(user_id)) if circle.created_by == user_id
+    )
 }
