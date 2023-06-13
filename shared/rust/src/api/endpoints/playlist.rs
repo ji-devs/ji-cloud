@@ -30,7 +30,7 @@ use super::ApiEndpoint;
 ///
 /// # Authorization
 /// * TokenUser
-/// * One of `Admin`, `AdminJig`, or `ManageSelfJig`
+/// * One of `Admin`, `AdminAsset`, or `ManageSelfAsset`
 pub struct Create;
 impl ApiEndpoint for Create {
     type Req = PlaylistCreateRequest;
@@ -44,7 +44,7 @@ impl ApiEndpoint for Create {
 ///
 /// # Authorization
 /// * Creator ID of Playlist
-/// * One of `Admin`, `AdminJig`,, or `ManageSelfJig` for owned Playlists
+/// * One of `Admin`, `AdminAsset`,, or `ManageSelfAsset` for owned Playlists
 ///
 /// # Errors
 ///
@@ -61,7 +61,7 @@ impl ApiEndpoint for GetLive {
 ///
 /// # Authorization
 /// * Creator ID of Playlist
-/// * One of `Admin`, `AdminJig`,, or `ManageSelfJig` for owned Playlists
+/// * One of `Admin`, `AdminAsset`,, or `ManageSelfAsset` for owned Playlists
 ///
 /// # Errors
 /// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
@@ -85,7 +85,7 @@ impl ApiEndpoint for GetDraft {
 /// See [`Playlist Data`](crate::domain::playlist::PlaylistData) for the over-the-wire representation.
 ///
 /// # Authorization
-/// * One of `Admin`, `AdminJig`, or `ManageSelfJig` for owned Playlists
+/// * One of `Admin`, `AdminAsset`, or `ManageSelfAsset` for owned Playlists
 pub struct UpdateDraftData;
 impl ApiEndpoint for UpdateDraftData {
     type Req = PlaylistUpdateDraftDataRequest;
@@ -99,7 +99,7 @@ impl ApiEndpoint for UpdateDraftData {
 ///
 /// # Authorization
 /// * Creator ID of Playlist
-/// * One of `Admin`, `AdminJig`, or `ManageSelfJig`
+/// * One of `Admin`, `AdminAsset`, or `ManageSelfAsset`
 pub struct Publish;
 impl ApiEndpoint for Publish {
     type Req = ();
@@ -139,7 +139,7 @@ impl ApiEndpoint for Search {
 ///
 /// # Authorization
 /// * Creator ID of Playlist
-/// * One of `Admin`, `AdminJig`, or `ManageSelfJig` for owned Playlists
+/// * One of `Admin`, `AdminAsset`, or `ManageSelfAsset` for owned Playlists
 pub struct Delete;
 impl ApiEndpoint for Delete {
     type Req = ();
@@ -152,7 +152,7 @@ impl ApiEndpoint for Delete {
 /// Clone a Playlist. This clones both the draft and live.
 ///
 /// # Authorization
-/// * One of `Admin`, `AdminJig`, or `ManageSelfJig`
+/// * One of `Admin`, `AdminAsset`, or `ManageSelfAsset`
 ///
 /// # Errors
 /// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.

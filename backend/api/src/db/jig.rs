@@ -1631,11 +1631,11 @@ select playlist.id                                                              
     )                                                     as "items!: Vec<(JigId,)>"
 from playlist_data_jig "pdj"
 inner join playlist_data on pdj.playlist_data_id = playlist_data.id
-inner join playlist on 
+inner join playlist on
         playlist_data.id = playlist.live_id
         and last_synced_at is not null
         and playlist.published_at is not null
-where jig_id = $1 
+where jig_id = $1
 order by coalesce(updated_at, created_at) desc
 "#,
     jig_id.0,
@@ -1742,8 +1742,8 @@ select exists(select 1 from user_scope where user_id = $1 and scope = any($2)) a
                 user_id.0,
                 &[
                     UserScope::Admin as i16,
-                    UserScope::AdminJig as i16,
-                    UserScope::ManageSelfJig as i16,
+                    UserScope::AdminAsset as i16,
+                    UserScope::ManageSelfAsset as i16,
                 ][..],
             )
             .fetch_one(db)
@@ -1762,8 +1762,8 @@ select exists (
 ) as "authed!"
 "#,
                 user_id.0,
-                &[UserScope::Admin as i16, UserScope::AdminJig as i16,][..],
-                UserScope::ManageSelfJig as i16,
+                &[UserScope::Admin as i16, UserScope::AdminAsset as i16,][..],
+                UserScope::ManageSelfAsset as i16,
                 id.0
             )
             .fetch_one(db)

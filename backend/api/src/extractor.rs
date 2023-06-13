@@ -218,7 +218,7 @@ pub struct ScopeAdminJig;
 
 impl Scope for ScopeAdminJig {
     fn scope() -> UserScope {
-        UserScope::AdminJig
+        UserScope::AdminAsset
     }
 }
 

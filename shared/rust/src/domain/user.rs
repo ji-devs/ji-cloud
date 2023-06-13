@@ -38,8 +38,8 @@ pub enum UserScope {
     /// The user can create/delete/modify images.
     ManageImage = 3,
 
-    /// The user can delete/modify *any* jigs.
-    AdminJig = 4,
+    /// The user can delete/modify *any* asset.
+    AdminAsset = 4,
 
     /// The user can create/delete/modify animations.
     ManageAnimation = 6,
@@ -47,8 +47,8 @@ pub enum UserScope {
     /// The user can create/delete/modify locale entries.
     ManageEntry = 7,
 
-    /// The user can create/modify/delete jigs of their own.
-    ManageSelfJig = 8,
+    /// The user can create/modify/delete assets of their own.
+    ManageSelfAsset = 8,
 
     /// The User can create/delete/modify audio files of their own.
     ManageAudio = 9,
@@ -65,10 +65,10 @@ impl TryFrom<i16> for UserScope {
             1 => Ok(Self::Admin),
             2 => Ok(Self::ManageCategory),
             3 => Ok(Self::ManageImage),
-            4 => Ok(Self::AdminJig),
+            4 => Ok(Self::AdminAsset),
             6 => Ok(Self::ManageAnimation),
             7 => Ok(Self::ManageEntry),
-            8 => Ok(Self::ManageSelfJig),
+            8 => Ok(Self::ManageSelfAsset),
             9 => Ok(Self::ManageAudio),
             10 => Ok(Self::Resources),
             _ => anyhow::bail!("Scope {} is invalid", i),

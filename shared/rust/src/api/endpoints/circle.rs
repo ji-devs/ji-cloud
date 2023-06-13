@@ -19,7 +19,7 @@ use super::ApiEndpoint;
 ///
 /// # Authorization
 /// * TokenUser
-/// * One of `Admin`, `AdminJig`, or `ManageSelfJig`
+/// * One of `Admin`, `AdminAsset`, or `ManageSelfAsset`
 pub struct Create;
 impl ApiEndpoint for Create {
     type Req = CircleCreateRequest;
@@ -32,7 +32,7 @@ impl ApiEndpoint for Create {
 /// Update the Circle.
 ///
 /// # Authorization
-/// * One of `Admin`, `AdminJig`, or `ManageSelfJig` for owned Circles
+/// * One of `Admin`, `AdminAsset`, or `ManageSelfAsset` for owned Circles
 ///
 pub struct Update;
 impl ApiEndpoint for Update {
@@ -47,7 +47,7 @@ impl ApiEndpoint for Update {
 ///
 /// # Authorization
 /// * TokenUser of owned Circles
-/// * One of `Admin`, `AdminJig`, or `ManageSelfJig` for owned Circles
+/// * One of `Admin`, `AdminAsset`, or `ManageSelfAsset` for owned Circles
 ///
 pub struct Browse;
 impl ApiEndpoint for Browse {
@@ -74,7 +74,7 @@ impl ApiEndpoint for Search {
 /// Delete a Circle.
 ///
 /// # Authorization
-/// * One of `Admin`, `AdminJig`, or `ManageSelfJig` for owned Circles
+/// * One of `Admin`, `AdminAsset`, or `ManageSelfAsset` for owned Circles
 pub struct Delete;
 impl ApiEndpoint for Delete {
     type Req = ();
@@ -87,7 +87,7 @@ impl ApiEndpoint for Delete {
 /// Get a Circle's by ID.
 ///
 /// # Authorization
-/// * One of `Admin`, `AdminJig`,, or `ManageSelfJig` for owned Circles
+/// * One of `Admin`, `AdminAsset`,, or `ManageSelfAsset` for owned Circles
 ///
 /// # Errors
 /// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
@@ -104,7 +104,7 @@ impl ApiEndpoint for Get {
 /// Join a Circle.
 /// # Authorization
 /// * TokenUser
-/// * One of `Admin`, `AdminJig`,, or `ManageSelfJig` for owned Circles
+/// * One of `Admin`, `AdminAsset`,, or `ManageSelfAsset` for owned Circles
 ///
 /// # Errors
 /// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.

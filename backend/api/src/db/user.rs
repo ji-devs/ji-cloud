@@ -451,7 +451,7 @@ set
     sqlx::query!(
         "insert into user_scope (user_id, scope) values ($1, $2)",
         user_id.0,
-        UserScope::ManageSelfJig as i16
+        UserScope::ManageSelfAsset as i16
     )
     .execute(&mut *txn)
     .instrument(tracing::info_span!("insert user_scope"))

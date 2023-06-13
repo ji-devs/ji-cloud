@@ -40,7 +40,7 @@ pub mod report;
 /// 4. Finalize draft changes by calling [`Publish`]
 ///
 /// # Authorization
-/// * One of `Admin`, `AdminJig`, or `ManageSelfJig`
+/// * One of `Admin`, `AdminAsset`, or `ManageSelfAsset`
 pub struct Create;
 impl ApiEndpoint for Create {
     type Req = JigCreateRequest;
@@ -69,7 +69,7 @@ impl ApiEndpoint for GetLive {
 /// Get a JIG's draft data by ID.
 ///
 /// # Authorization
-/// * One of `Admin`, `AdminJig`,, or `ManageSelfJig` for owned JIGs
+/// * One of `Admin`, `AdminAsset`,, or `ManageSelfAsset` for owned JIGs
 ///
 /// # Errors
 /// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
@@ -93,7 +93,7 @@ impl ApiEndpoint for GetDraft {
 /// See [`JigData`](crate::domain::jig::JigData) for the over-the-wire representation.
 ///
 /// # Authorization
-/// * One of `Admin`, `AdminJig`,, or `ManageSelfJig` for owned JIGs
+/// * One of `Admin`, `AdminAsset`,, or `ManageSelfAsset` for owned JIGs
 pub struct UpdateDraftData;
 impl ApiEndpoint for UpdateDraftData {
     type Req = JigUpdateDraftDataRequest;
@@ -119,7 +119,7 @@ impl ApiEndpoint for Publish {
 /// Browse JIGs. Returns the draft data copies in the response.
 ///
 /// # Authorization
-/// * One of `Admin`, `AdminJig`, or `ManageSelfJig`
+/// * One of `Admin`, `AdminAsset`, or `ManageSelfAsset`
 pub struct Browse;
 impl ApiEndpoint for Browse {
     type Req = JigBrowseQuery;
@@ -145,7 +145,7 @@ impl ApiEndpoint for Search {
 /// Clone a JIG. This clones both the draft and live.
 ///
 /// # Authorization
-/// * One of `Admin`, `AdminJig`, or `ManageSelfJig`
+/// * One of `Admin`, `AdminAsset`, or `ManageSelfAsset`
 ///
 /// # Errors
 /// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
@@ -164,7 +164,7 @@ impl ApiEndpoint for Clone {
 /// Delete a JIG.
 ///
 /// # Authorization
-/// * One of `Admin`, `AdminJig`, or `ManageSelfJig` for owned JIGs
+/// * One of `Admin`, `AdminAsset`, or `ManageSelfAsset` for owned JIGs
 pub struct Delete;
 impl ApiEndpoint for Delete {
     type Req = ();
@@ -177,7 +177,7 @@ impl ApiEndpoint for Delete {
 /// Delete all jigs associated with current user.
 ///
 /// # Authorization
-/// * One of `Admin`, `AdminJig`, or `ManageSelfJig` for owned JIGs
+/// * One of `Admin`, `AdminAsset`, or `ManageSelfAsset` for owned JIGs
 pub struct DeleteAll;
 impl ApiEndpoint for DeleteAll {
     type Req = ();
@@ -190,7 +190,7 @@ impl ApiEndpoint for DeleteAll {
 /// Indicates that a jig has a cover
 ///
 /// # Authorization
-/// * One of `Admin`, `AdminJig`, or `ManageSelfJig` for owned JIGs
+/// * One of `Admin`, `AdminAsset`, or `ManageSelfAsset` for owned JIGs
 pub struct Cover;
 impl ApiEndpoint for Cover {
     type Req = ();

@@ -943,6 +943,71 @@
     },
     "query": "\nupdate resource_data\nset updated_at = now()\nfrom resource\nwhere resource.live_id = $1\n            "
   },
+  "0be9afaec8eeb457f3b2772543183f1b38413298cd7d71596fd7daba58a810e7": {
+    "describe": {
+      "columns": [
+        {
+          "name": "circle_id!: CircleId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "display_name!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "description!",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "image!: ImageId",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "member_count!",
+          "ordinal": 4,
+          "type_info": "Int8"
+        },
+        {
+          "name": "creator_id!: UserId",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "UuidArray",
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n        with cte as (\n            select (array_agg(circle.id))[1]\n            from circle\n            left join circle_member \"cm\" on cm.id = circle.id\n            where (creator_id = $1 or $1 is null)\n            and (cm.user_id = any($2) or $2 = array[]::uuid[])\n            group by created_at\n            order by created_at desc\n        ),\n        cte1 as (\n            select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n           , ord) order by ord\n        )\n        select  circle.id            as \"circle_id!: CircleId\",\n                display_name        as \"display_name!\",\n                description         as \"description!\",\n                image               as \"image!: ImageId\",\n                member_count        as \"member_count!\",\n                creator_id          as \"creator_id!: UserId\",\n                created_at,\n                updated_at\n        from cte1\n            left join circle on cte1.id = circle.id\n            where ord > (1 * $3 * $4)\n            order by ord\n            limit $4\n            "
+  },
   "0c1c7b277c304f840daa9bc798c86d9d5d42a3ccaa6929d6fe668626ccf95c15": {
     "describe": {
       "columns": [],
@@ -2166,71 +2231,6 @@
       }
     },
     "query": "\ninsert into playlist_data\n   (display_name, language, description, draft_or_live)\nvalues ($1, $2, $3, $4)\nreturning id\n"
-  },
-  "20adaa69f09c2336bdab5cf57e8c5b1b8de13d50b9330cca43e2cde3acba8bce": {
-    "describe": {
-      "columns": [
-        {
-          "name": "circle_id!: CircleId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "display_name!",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "description!",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "image!: ImageId",
-          "ordinal": 3,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "member_count!",
-          "ordinal": 4,
-          "type_info": "Int8"
-        },
-        {
-          "name": "creator_id!: UserId",
-          "ordinal": 5,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "created_at",
-          "ordinal": 6,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at",
-          "ordinal": 7,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "UuidArray",
-          "Int4",
-          "Int4"
-        ]
-      }
-    },
-    "query": "\n        with cte as (\n            select (array_agg(circle.id))[1]\n            from circle\n            left join circle_member \"cm\" on cm.id = circle.id\n            where (creator_id = $1 or $1 is null)\n            and (cm.user_id = any($2) or $2 = array[]::uuid[])\n            group by created_at\n            order by created_at desc\n        ),\n        cte1 as (\n            select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n           , ord) order by ord\n        )\n        select  circle.id            as \"circle_id!: CircleId\",\n                display_name        as \"display_name!\",\n                description         as \"description!\",\n                image               as \"image!: ImageId\",\n                member_count        as \"member_count!\",\n                creator_id          as \"creator_id!: UserId\",\n                created_at,\n                updated_at   \n        from cte1\n            left join circle on cte1.id = circle.id\n            where ord > (1 * $3 * $4)\n            order by ord \n            limit $4\n            "
   },
   "23307aa6d384c434c13fa6b6572ff0e774a348c80a2100ef9e533e55eeb2c9d7": {
     "describe": {
@@ -3882,6 +3882,68 @@
     },
     "query": "\nselect resource_data.id,\n       display_name\nfrom resource_data\ninner join resource on live_id = resource_data.id\nwhere display_name <> '' and translated_name = '{}'\nand published_at is not null\nand name_translate_status is null\norder by coalesce(updated_at, created_at) desc\nlimit 10 for no key update skip locked;\n         "
   },
+  "4933c82c06a211999270cfb53d4bfd389b86e12e4a792b859de6be37bd7d8dc5": {
+    "describe": {
+      "columns": [
+        {
+          "name": "circle_id!: CircleId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "display_name!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "description!",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "image!: ImageId",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "member_count!",
+          "ordinal": 4,
+          "type_info": "Int8"
+        },
+        {
+          "name": "creator_id!: UserId",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at!",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      }
+    },
+    "query": "\nselect  id            as \"circle_id!: CircleId\",\n        display_name  as \"display_name!\",\n        description   as \"description!\",\n        image         as \"image!: ImageId\",\n        member_count  as \"member_count!\",\n        creator_id    as \"creator_id!: UserId\",\n        created_at    as \"created_at!\",\n        updated_at\nfrom circle\ninner join unnest($1::uuid[])\nwith ordinality t(id, ord) using (id)\n"
+  },
   "493430ee614459b5e6c10b8e1c36c73590856fe597a77c5db6be8e8c768f8452": {
     "describe": {
       "columns": [],
@@ -5245,68 +5307,6 @@
     },
     "query": "\nwith delete as (\n        delete from user_font\n    where user_id = $1 and index = $2\n)\nselect 1 as discard\nfrom user_font\nwhere user_id = $1 and index > $2\nfor update\n        "
   },
-  "65948829df799e30f02233bf13324d6529c60ac67d8b890ff9a1ff67ba4675c4": {
-    "describe": {
-      "columns": [
-        {
-          "name": "circle_id!: CircleId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "display_name!",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "description!",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "image!: ImageId",
-          "ordinal": 3,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "member_count!",
-          "ordinal": 4,
-          "type_info": "Int8"
-        },
-        {
-          "name": "creator_id!: UserId",
-          "ordinal": 5,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "created_at!",
-          "ordinal": 6,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at",
-          "ordinal": 7,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true
-      ],
-      "parameters": {
-        "Left": [
-          "UuidArray"
-        ]
-      }
-    },
-    "query": "\nselect  id            as \"circle_id!: CircleId\",\n        display_name  as \"display_name!\",\n        description   as \"description!\",\n        image         as \"image!: ImageId\",\n        member_count  as \"member_count!\",\n        creator_id    as \"creator_id!: UserId\",\n        created_at    as \"created_at!\",\n        updated_at   \nfrom circle\ninner join unnest($1::uuid[])\nwith ordinality t(id, ord) using (id)\n"
-  },
   "65bbbe5cb9eba5f0bf454b10f8b07ccf8eb3f519970d09868b486cbaa7d560a1": {
     "describe": {
       "columns": [
@@ -6330,6 +6330,165 @@
       }
     },
     "query": "\n        select index as \"index: ImageTagIndex\", display_name, created_at, updated_at from \"image_tag\"\n        order by index\n    "
+  },
+  "75b07264f5405f13f12805ad021059fdff9b6d7dbd8def71b2a6ef8d125c586e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "playlist_id: PlaylistId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "privacy_level: PrivacyLevel",
+          "ordinal": 1,
+          "type_info": "Int2"
+        },
+        {
+          "name": "creator_id?: UserId",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_id?: UserId",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_name",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "published_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "likes",
+          "ordinal": 6,
+          "type_info": "Int8"
+        },
+        {
+          "name": "plays",
+          "ordinal": 7,
+          "type_info": "Int8"
+        },
+        {
+          "name": "live_up_to_date",
+          "ordinal": 8,
+          "type_info": "Bool"
+        },
+        {
+          "name": "is_liked!",
+          "ordinal": 9,
+          "type_info": "Bool"
+        },
+        {
+          "name": "display_name!",
+          "ordinal": 10,
+          "type_info": "Text"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 11,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "language!",
+          "ordinal": 12,
+          "type_info": "Text"
+        },
+        {
+          "name": "description!",
+          "ordinal": 13,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_description!: Json<HashMap<String,String>>",
+          "ordinal": 14,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "draft_or_live!: DraftOrLive",
+          "ordinal": 15,
+          "type_info": "Int2"
+        },
+        {
+          "name": "other_keywords!",
+          "ordinal": 16,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_keywords!",
+          "ordinal": 17,
+          "type_info": "Text"
+        },
+        {
+          "name": "cover?: (ModuleId, ModuleKind, bool)",
+          "ordinal": 18,
+          "type_info": "Record"
+        },
+        {
+          "name": "categories!: Vec<(CategoryId,)>",
+          "ordinal": 19,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "affiliations!: Vec<(AffiliationId,)>",
+          "ordinal": 20,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "age_ranges!: Vec<(AgeRangeId,)>",
+          "ordinal": 21,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
+          "ordinal": 22,
+          "type_info": "RecordArray"
+        },
+        {
+          "name": "items!: Vec<(JigId,)>",
+          "ordinal": 23,
+          "type_info": "RecordArray"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        true,
+        null,
+        true,
+        false,
+        false,
+        false,
+        null,
+        false,
+        true,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect playlist.id                                                                as \"playlist_id: PlaylistId\",\n    privacy_level                                                               as \"privacy_level: PrivacyLevel\",\n    creator_id                                                                  as \"creator_id?: UserId\",\n    author_id                                                                   as \"author_id?: UserId\",\n    (select given_name || ' '::text || family_name\n     from user_profile\n     where user_profile.user_id = author_id)                                     as \"author_name\",\n    published_at,\n    likes,\n    plays,\n    live_up_to_date,\n    exists(select 1 from playlist_like where playlist_id = playlist.id and user_id = $2)    as \"is_liked!\",\n    display_name                                                                  as \"display_name!\",\n    updated_at,\n    language                                                                      as \"language!\",\n    description                                                                   as \"description!\",\n    translated_description                                                        as \"translated_description!: Json<HashMap<String,String>>\",\n    draft_or_live                                                                 as \"draft_or_live!: DraftOrLive\",\n    other_keywords                                                                as \"other_keywords!\",\n    translated_keywords                                                           as \"translated_keywords!\",\n    (\n        select row(playlist_data_module.id, kind, is_complete)\n        from playlist_data_module\n        where playlist_data_id = playlist_data.id and \"index\" = 0\n        order by \"index\"\n    )                                                   as \"cover?: (ModuleId, ModuleKind, bool)\",\n    array(select row (category_id)\n            from playlist_data_category\n            where playlist_data_id = playlist_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n    array(select row (affiliation_id)\n            from playlist_data_affiliation\n            where playlist_data_id = playlist_data.id)          as \"affiliations!: Vec<(AffiliationId,)>\",\n    array(select row (age_range_id)\n            from playlist_data_age_range\n            where playlist_data_id = playlist_data.id)          as \"age_ranges!: Vec<(AgeRangeId,)>\",\n    array(select row (id, display_name, resource_type_id, resource_content)\n                from playlist_data_resource\n                where playlist_data_id = playlist_data.id\n          )                                          as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n    array(\n        select row(jig_id)\n        from playlist_data_jig\n        where playlist_data_jig.playlist_data_id = playlist_data.id\n        order by \"index\"\n    )                                                     as \"items!: Vec<(JigId,)>\"\nfrom playlist_data_jig \"pdj\"\ninner join playlist_data on pdj.playlist_data_id = playlist_data.id\ninner join playlist on\n        playlist_data.id = playlist.live_id\n        and last_synced_at is not null\n        and playlist.published_at is not null\nwhere jig_id = $1\norder by coalesce(updated_at, created_at) desc\n"
   },
   "760185608bd03a9a30aba9100ecc18e170aed0b1008c5f51ad0c7c6f564b090e": {
     "describe": {
@@ -10778,165 +10937,6 @@
       }
     },
     "query": "\nselect\n    school_name_id as \"id!: SchoolNameId\",\n    name::text as \"name!\",\n    verified\nfrom school_name\nwhere school_name_id = $1\n"
-  },
-  "b13e2294d614c4e12d8972bfc57c954e5a7e6b8d00a1168c57d0e3561e1e914f": {
-    "describe": {
-      "columns": [
-        {
-          "name": "playlist_id: PlaylistId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "privacy_level: PrivacyLevel",
-          "ordinal": 1,
-          "type_info": "Int2"
-        },
-        {
-          "name": "creator_id?: UserId",
-          "ordinal": 2,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "author_id?: UserId",
-          "ordinal": 3,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "author_name",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "published_at",
-          "ordinal": 5,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "likes",
-          "ordinal": 6,
-          "type_info": "Int8"
-        },
-        {
-          "name": "plays",
-          "ordinal": 7,
-          "type_info": "Int8"
-        },
-        {
-          "name": "live_up_to_date",
-          "ordinal": 8,
-          "type_info": "Bool"
-        },
-        {
-          "name": "is_liked!",
-          "ordinal": 9,
-          "type_info": "Bool"
-        },
-        {
-          "name": "display_name!",
-          "ordinal": 10,
-          "type_info": "Text"
-        },
-        {
-          "name": "updated_at",
-          "ordinal": 11,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "language!",
-          "ordinal": 12,
-          "type_info": "Text"
-        },
-        {
-          "name": "description!",
-          "ordinal": 13,
-          "type_info": "Text"
-        },
-        {
-          "name": "translated_description!: Json<HashMap<String,String>>",
-          "ordinal": 14,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "draft_or_live!: DraftOrLive",
-          "ordinal": 15,
-          "type_info": "Int2"
-        },
-        {
-          "name": "other_keywords!",
-          "ordinal": 16,
-          "type_info": "Text"
-        },
-        {
-          "name": "translated_keywords!",
-          "ordinal": 17,
-          "type_info": "Text"
-        },
-        {
-          "name": "cover?: (ModuleId, ModuleKind, bool)",
-          "ordinal": 18,
-          "type_info": "Record"
-        },
-        {
-          "name": "categories!: Vec<(CategoryId,)>",
-          "ordinal": 19,
-          "type_info": "RecordArray"
-        },
-        {
-          "name": "affiliations!: Vec<(AffiliationId,)>",
-          "ordinal": 20,
-          "type_info": "RecordArray"
-        },
-        {
-          "name": "age_ranges!: Vec<(AgeRangeId,)>",
-          "ordinal": 21,
-          "type_info": "RecordArray"
-        },
-        {
-          "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
-          "ordinal": 22,
-          "type_info": "RecordArray"
-        },
-        {
-          "name": "items!: Vec<(JigId,)>",
-          "ordinal": 23,
-          "type_info": "RecordArray"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        true,
-        true,
-        null,
-        true,
-        false,
-        false,
-        false,
-        null,
-        false,
-        true,
-        false,
-        false,
-        false,
-        true,
-        false,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect playlist.id                                                                as \"playlist_id: PlaylistId\",\n    privacy_level                                                               as \"privacy_level: PrivacyLevel\",\n    creator_id                                                                  as \"creator_id?: UserId\",\n    author_id                                                                   as \"author_id?: UserId\",\n    (select given_name || ' '::text || family_name\n     from user_profile\n     where user_profile.user_id = author_id)                                     as \"author_name\",\n    published_at,\n    likes,\n    plays,\n    live_up_to_date,\n    exists(select 1 from playlist_like where playlist_id = playlist.id and user_id = $2)    as \"is_liked!\",\n    display_name                                                                  as \"display_name!\",\n    updated_at,\n    language                                                                      as \"language!\",\n    description                                                                   as \"description!\",\n    translated_description                                                        as \"translated_description!: Json<HashMap<String,String>>\",\n    draft_or_live                                                                 as \"draft_or_live!: DraftOrLive\",\n    other_keywords                                                                as \"other_keywords!\",\n    translated_keywords                                                           as \"translated_keywords!\",\n    (\n        select row(playlist_data_module.id, kind, is_complete)\n        from playlist_data_module\n        where playlist_data_id = playlist_data.id and \"index\" = 0\n        order by \"index\"\n    )                                                   as \"cover?: (ModuleId, ModuleKind, bool)\",\n    array(select row (category_id)\n            from playlist_data_category\n            where playlist_data_id = playlist_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n    array(select row (affiliation_id)\n            from playlist_data_affiliation\n            where playlist_data_id = playlist_data.id)          as \"affiliations!: Vec<(AffiliationId,)>\",\n    array(select row (age_range_id)\n            from playlist_data_age_range\n            where playlist_data_id = playlist_data.id)          as \"age_ranges!: Vec<(AgeRangeId,)>\",\n    array(select row (id, display_name, resource_type_id, resource_content)\n                from playlist_data_resource\n                where playlist_data_id = playlist_data.id\n          )                                          as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n    array(\n        select row(jig_id)\n        from playlist_data_jig\n        where playlist_data_jig.playlist_data_id = playlist_data.id\n        order by \"index\"\n    )                                                     as \"items!: Vec<(JigId,)>\"\nfrom playlist_data_jig \"pdj\"\ninner join playlist_data on pdj.playlist_data_id = playlist_data.id\ninner join playlist on \n        playlist_data.id = playlist.live_id\n        and last_synced_at is not null\n        and playlist.published_at is not null\nwhere jig_id = $1 \norder by coalesce(updated_at, created_at) desc\n"
   },
   "b1513ce8a836f80987c480701be8ab9dbc124d8a4556503a4ad2dc77b1ae50d2": {
     "describe": {

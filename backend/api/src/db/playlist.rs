@@ -978,8 +978,8 @@ select exists(select 1 from user_scope where user_id = $1 and scope = any($2)) a
                 user_id.0,
                 &[
                     UserScope::Admin as i16,
-                    UserScope::AdminJig as i16,
-                    UserScope::ManageSelfJig as i16,
+                    UserScope::AdminAsset as i16,
+                    UserScope::ManageSelfAsset as i16,
                 ][..],
             )
             .fetch_one(db)
@@ -998,8 +998,8 @@ select exists (
 ) as "authed!"
 "#,
                 user_id.0,
-                &[UserScope::Admin as i16, UserScope::AdminJig as i16,][..],
-                UserScope::ManageSelfJig as i16,
+                &[UserScope::Admin as i16, UserScope::AdminAsset as i16,][..],
+                UserScope::ManageSelfAsset as i16,
                 id.0
             )
             .fetch_one(db)

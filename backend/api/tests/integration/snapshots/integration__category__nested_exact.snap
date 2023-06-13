@@ -18,7 +18,7 @@ expression: body
       "id": "01cff7d8-e910-11ea-8281-7f86c625a156",
       "user_scopes": [
         "Admin",
-        "AdminJig",
+        "AdminAsset",
         "ManageImage"
       ],
       "name": "A.1",
