@@ -31,7 +31,7 @@ impl ApiEndpoint for GetLive {
 /// Get a Module by it's concrete ID.
 ///
 /// # Authorization
-/// * One of `Admin`, `AdminJig`,, or `ManageSelfJig` for owned JIGs or Playlists
+/// * One of `Admin`, `AdminJig`,, or `ManageSelfAsset` for owned JIGs or Playlists
 ///
 /// # Errors
 /// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.

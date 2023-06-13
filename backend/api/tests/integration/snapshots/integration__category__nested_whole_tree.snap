@@ -21,7 +21,7 @@ expression: body
               "id": "01cff7d8-e910-11ea-8281-7f86c625a156",
               "user_scopes": [
                 "Admin",
-                "AdminJig",
+                "AdminAsset",
                 "ManageImage"
               ],
               "name": "A.1",
@@ -37,7 +37,7 @@ expression: body
           "user_scopes": [
             "ManageAnimation",
             "ManageEntry",
-            "ManageSelfJig"
+            "ManageSelfAsset"
           ],
           "name": "B",
           "created_at": "2020-08-28T09:22:02.261811Z",

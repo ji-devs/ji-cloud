@@ -210,11 +210,11 @@ pub async fn browse(
                 member_count        as "member_count!",
                 creator_id          as "creator_id!: UserId",
                 created_at,
-                updated_at   
+                updated_at
         from cte1
             left join circle on cte1.id = circle.id
             where ord > (1 * $3 * $4)
-            order by ord 
+            order by ord
             limit $4
             "#,
         creator_id.map(|x| x.0),
@@ -257,7 +257,7 @@ select  id            as "circle_id!: CircleId",
         member_count  as "member_count!",
         creator_id    as "creator_id!: UserId",
         created_at    as "created_at!",
-        updated_at   
+        updated_at
 from circle
 inner join unnest($1::uuid[])
 with ordinality t(id, ord) using (id)
@@ -333,8 +333,8 @@ select exists(select 1 from user_scope where user_id = $1 and scope = any($2)) a
                 user_id.0,
                 &[
                     UserScope::Admin as i16,
-                    UserScope::AdminJig as i16,
-                    UserScope::ManageSelfJig as i16,
+                    UserScope::AdminAsset as i16,
+                    UserScope::ManageSelfAsset as i16,
                 ][..],
             )
             .fetch_one(db)
@@ -353,8 +353,8 @@ select exists (
 ) as "authed!"
 "#,
                 user_id.0,
-                &[UserScope::Admin as i16, UserScope::AdminJig as i16,][..],
-                UserScope::ManageSelfJig as i16,
+                &[UserScope::Admin as i16, UserScope::AdminAsset as i16,][..],
+                UserScope::ManageSelfAsset as i16,
                 id.0
             )
             .fetch_one(db)

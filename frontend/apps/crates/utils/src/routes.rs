@@ -194,9 +194,9 @@ impl AdminRoute {
             Self::Landing => true,
             Self::Categories => scopes.contains(&UserScope::ManageCategory),
             Self::Locale => false,
-            Self::JigCuration(_) => scopes.contains(&UserScope::AdminJig),
-            Self::ResourceCuration(_) => scopes.contains(&UserScope::AdminJig),
-            Self::Images => scopes.contains(&UserScope::AdminJig),
+            Self::JigCuration(_) => scopes.contains(&UserScope::AdminAsset),
+            Self::ResourceCuration(_) => scopes.contains(&UserScope::AdminAsset),
+            Self::Images => scopes.contains(&UserScope::AdminAsset),
             Self::Users(_) => scopes.contains(&UserScope::Admin),
             Self::ImageSearch(_) | Self::ImageAdd | Self::ImageTags | Self::ImageMeta(_, _) => {
                 scopes.contains(&UserScope::ManageImage)

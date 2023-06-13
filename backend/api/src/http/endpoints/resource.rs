@@ -458,7 +458,7 @@ async fn auth_claims(
         let is_admin = db::user::has_scopes(
             &*db,
             UserId(user.0.user_id),
-            &[UserScope::Admin, UserScope::AdminJig],
+            &[UserScope::Admin, UserScope::AdminAsset],
         )
         .await?;
         let user_id = user.user_id();
