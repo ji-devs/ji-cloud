@@ -8,6 +8,7 @@ use dominator::{clone, html, with_node, Dom, EventOptions};
 use futures_signals::signal::{Signal, SignalExt};
 use shared::domain::user::{UserId, UserProfile};
 use utils::{
+    component::Component,
     events,
     init::analytics,
     prelude::{get_user_cloned, get_user_id},

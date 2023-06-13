@@ -1,3 +1,4 @@
+mod actions;
 mod dom;
 mod state;
 

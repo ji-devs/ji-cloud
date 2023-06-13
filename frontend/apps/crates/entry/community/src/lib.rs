@@ -9,11 +9,11 @@ mod circle_details;
 mod circle_list;
 mod dom;
 mod landing;
+mod member_card;
 mod member_details;
 mod members_list;
 mod search;
 mod state;
-// mod member_card;
 // mod circle_card;
 
 use state::Community;

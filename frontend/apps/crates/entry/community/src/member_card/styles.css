@@ -1,9 +1,13 @@
-:host {
+a {
     display: inline-grid;
     width: 282px;
     height: 238px;
     box-sizing: border-box;
     position: relative;
+}
+.main-link {
+    text-decoration: auto;
+    color: unset;
 }
 .menu {
     grid-row: 1;

@@ -31,6 +31,8 @@ export class _ extends LitElement {
                     display: inline-grid;
                     place-content: center;
                     color: var(--dark-gray-6);
+                    font-size: 32px;
+                    font-weight: 600;
                 }
                 .badge {
                     align-self: end;

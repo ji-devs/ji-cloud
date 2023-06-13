@@ -27,6 +27,7 @@ impl MembersList {
                     state.members.set(Some(res.users));
                     let page_count = page_count(res.total_user_count as u32, state.items_per_page);
                     state.total_pages.set(page_count);
+                    state.total_user_count.set(Some(res.total_user_count as u32))
                 },
                 Err(_) => todo!(),
             }

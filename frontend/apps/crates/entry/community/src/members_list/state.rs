@@ -10,6 +10,7 @@ pub struct MembersList {
     pub loader: AsyncLoader,
     pub total_pages: Mutable<u32>,
     pub active_page: Mutable<u32>,
+    pub total_user_count: Mutable<Option<u32>>,
 }
 
 impl MembersList {
@@ -20,6 +21,7 @@ impl MembersList {
             loader: AsyncLoader::new(),
             total_pages: Mutable::new(0),
             active_page: Mutable::new(1),
+            total_user_count: Mutable::new(None),
         })
     }
 }

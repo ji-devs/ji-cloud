@@ -9,4 +9,5 @@ pub struct MemberCard<'a> {
     pub menu: Option<Dom>,
     pub following: ReadOnlyMutable<bool>,
     pub on_follow: Box<dyn Fn(bool)>,
+    pub admin_tag: bool,
 }
