@@ -670,8 +670,8 @@ select exists(select 1 from user_profile where user_id = $1 for update) as "exis
             //language=SQL
             r#"
 update user_profile
-set badge      = coalesce($2, badge),
-    updated_at = coalesce(now(), updated_at)
+set badge      = $2,
+    updated_at = now()
 where user_id = $1
 and ($2 is distinct from badge)
         "#,
