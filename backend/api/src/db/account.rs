@@ -405,7 +405,7 @@ pub async fn get_school_names_with_schools(
 select
     school_name_id as "id!: SchoolNameId",
     school_name.name::text as "school_name!",
-    school_name.verified,
+    school_name.verified as "verified!",
     school_id as "school_id?: SchoolId",
     location as "location?: serde_json::Value",
     email::text as "email?",
@@ -446,7 +446,7 @@ where
                 website: record.website,
                 organization_type: record.organization_type,
                 account_id: record.account_id.unwrap(),
-                created_at: record.created_at.unwrap(),
+                created_at: record.created_at,
                 updated_at: record.updated_at,
             });
             (school_name, school)
