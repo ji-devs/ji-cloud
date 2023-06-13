@@ -25,6 +25,7 @@ impl CirclesList {
                     state.circles.set(Some(res.circles));
                     let page_count = page_count(res.total_circle_count as u32, state.items_per_page);
                     state.total_pages.set(page_count);
+                    state.total_circles_count.set(Some(res.total_circle_count as u32));
                 },
                 Err(_) => todo!(),
             }

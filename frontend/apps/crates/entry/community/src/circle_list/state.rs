@@ -11,6 +11,7 @@ pub struct CirclesList {
     pub create_popup_open: Mutable<bool>,
     pub total_pages: Mutable<u32>,
     pub active_page: Mutable<u32>,
+    pub total_circles_count: Mutable<Option<u32>>,
 }
 
 impl CirclesList {
@@ -22,6 +23,7 @@ impl CirclesList {
             create_popup_open: Mutable::new(false),
             total_pages: Mutable::new(0),
             active_page: Mutable::new(1),
+            total_circles_count: Mutable::new(None),
         })
     }
 }
