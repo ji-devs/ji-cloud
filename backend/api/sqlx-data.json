@@ -12649,82 +12649,6 @@
     },
     "query": "\nupdate jig_data_additional_resource\nset resource_content = $3\nwhere jig_data_id = $1 and id = $2\n            "
   },
-  "d629ff77595d804662795d88ae5313e79641fb0a24bb2738f041d479ab2771fc": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: UserId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "username",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "given_name",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "family_name",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "email!",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "language_emails",
-          "ordinal": 5,
-          "type_info": "Text"
-        },
-        {
-          "name": "created_at!",
-          "ordinal": 6,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "badge!: Option<UserBadge>",
-          "ordinal": 7,
-          "type_info": "Int2"
-        },
-        {
-          "name": "organization",
-          "ordinal": 8,
-          "type_info": "Text"
-        },
-        {
-          "name": "location",
-          "ordinal": 9,
-          "type_info": "Jsonb"
-        }
-      ],
-      "nullable": [
-        null,
-        false,
-        false,
-        false,
-        null,
-        false,
-        false,
-        true,
-        true,
-        true
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int4",
-          "Int4"
-        ]
-      }
-    },
-    "query": "\nwith cte as (\n    select (array_agg(\"user\".id))[1]\n    from \"user\"\n        left join user_profile on \"user\".id = user_profile.user_id\n        left join user_email using(user_id)\n    where (\"user\".id = $1 or $1 is null)\n    group by \"user\".created_at\n    order by \"user\".created_at desc\n),\ncte1 as (\n    select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n   , ord) order by ord\n)\nselect  cte1.id                 as \"id!: UserId\",\n        username,\n        given_name,\n        family_name,\n        user_email.email::text as \"email!\",\n        language_emails,\n        user_email.created_at  as \"created_at!\",\n        badge                  as \"badge!: Option<UserBadge>\",\n        organization,\n        location\nfrom cte1\n        inner join user_profile on cte1.id = user_profile.user_id\n        inner join user_email using(user_id)\nwhere ord > (1 * $2 * $3)\norder by ord asc\nlimit $3\n"
-  },
   "d935de8ff747d8408644105a61f99219aee129fd49e240cd3843d8374b02ea29": {
     "describe": {
       "columns": [
@@ -14685,6 +14609,82 @@
       }
     },
     "query": "\nselect exists (\n    select 1 from user_scope where user_id = $1 and scope = any($2)\n) or (\n    exists (select 1 from user_scope where user_id = $1 and scope = $3) and\n    not exists (select 1 from circle where id = $4 and circle.creator_id <> $1)\n) as \"authed!\"\n"
+  },
+  "fba04591f3552addde0e97868f54a3d9327ae23cd7427589092b81cbb7959bb6": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: UserId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "username",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "given_name",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "family_name",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "email!",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "language_emails",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "created_at!",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "badge!: Option<UserBadge>",
+          "ordinal": 7,
+          "type_info": "Int2"
+        },
+        {
+          "name": "organization",
+          "ordinal": 8,
+          "type_info": "Text"
+        },
+        {
+          "name": "location",
+          "ordinal": 9,
+          "type_info": "Jsonb"
+        }
+      ],
+      "nullable": [
+        null,
+        false,
+        false,
+        false,
+        null,
+        false,
+        false,
+        true,
+        true,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int8",
+          "Int8"
+        ]
+      }
+    },
+    "query": "\nwith cte as (\n    select (array_agg(\"user\".id))[1]\n    from \"user\"\n        left join user_profile on \"user\".id = user_profile.user_id\n        left join user_email using(user_id)\n    where (\"user\".id = $1 or $1 is null)\n    group by \"user\".created_at\n    order by \"user\".created_at desc\n),\ncte1 as (\n    select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n   , ord) order by ord\n)\nselect  cte1.id                 as \"id!: UserId\",\n        username,\n        given_name,\n        family_name,\n        user_email.email::text as \"email!\",\n        language_emails,\n        user_email.created_at  as \"created_at!\",\n        badge                  as \"badge!: Option<UserBadge>\",\n        organization,\n        location\nfrom cte1\n        inner join user_profile on cte1.id = user_profile.user_id\n        inner join user_email using(user_id)\norder by ord asc\nlimit $3\noffset $2\n"
   },
   "fc6bfe176017b10253bc42ecb9f96f0533953b10ea0ad57299f99a3a17bc6721": {
     "describe": {

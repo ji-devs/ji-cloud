@@ -174,12 +174,12 @@ select  cte1.id                 as "id!: UserId",
 from cte1
         inner join user_profile on cte1.id = user_profile.user_id
         inner join user_email using(user_id)
-where ord > (1 * $2 * $3)
 order by ord asc
 limit $3
+offset $2
 "#,
         author_id.map(|x| x.0),
-        page,
+        (page * page_limit as i32) as i32,
         page_limit as i32,
     )
     .fetch_all(&mut txn)
