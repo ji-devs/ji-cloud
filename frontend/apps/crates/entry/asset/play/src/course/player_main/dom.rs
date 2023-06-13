@@ -149,7 +149,7 @@ impl PlayerMain {
             .child(UnitThumbnail::new(
                 unit.value.clone(),
             ).render_live(Some("thumbnail")))
-            .child(html!("button-empty", {
+            .child(html!("div", {
                 .prop("slot", "read-more")
                 .text("Read more")
                 .event(clone!(state, unit => move |_: events::Click| {

@@ -39,7 +39,7 @@ export class _ extends LitElement {
                     display: grid;
                     row-gap: 4px;
                     color: var(--dark-gray-6);
-                    grid-template-rows: auto auto auto;
+                    grid-template-rows: auto auto;
                 }
                 .name {
                     font-size: 16px;
@@ -47,12 +47,14 @@ export class _ extends LitElement {
                 }
                 .description {
                     display: none;
+                    justify-content: end;
+                    row-gap: 4px;
+                    margin-right: auto;
                 }
                 @media (min-width: 1024px) {
                     .description {
                         display: block;
                         overflow-wrap: break-word;
-                        white-space: pre-wrap;
                         font-size: 12px;
                     }
                 }
@@ -70,10 +72,11 @@ export class _ extends LitElement {
                 ::slotted([slot="read-more"]) {
                     color: #5590fc;
                     font-size: 13px;
+                    margin-right: auto;
                 }
 
                 ::slotted([slot="read-more"]:hover) {
-                    color: #fc7f55;
+                    color: #55a8fc;
                 }
             `,
         ];
@@ -99,9 +102,9 @@ export class _ extends LitElement {
             if (this.hideDescription === true && this.description.length >= 100) {
                 return html`
                     <div class="description" dir="auto">
-                    ${this.description.substring(0, 100)}
-                    <button-empty slot="read-more"></button-empty>
-                </div>
+                    ${this.description.substring(0, 100)}</div>
+                    <slot name="read-more"></slot>
+                
                 `;
             } else {
                 return html`
