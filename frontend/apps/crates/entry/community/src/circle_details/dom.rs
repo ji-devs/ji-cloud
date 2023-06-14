@@ -65,14 +65,12 @@ impl CircleDetails {
                             // html!("button-rect", {
                             //     .prop("slot", "actions")
                             //     .prop("kind", "outline")
-                            //     .prop("size", "small")
                             //     .prop("color", "blue")
                             //     .text(STR_CONTACT_ADMIN)
                             // }),
                             html!("button-rect", {
                                 .prop("slot", "actions")
                                 .prop("kind", "outline")
-                                .prop("size", "small")
                                 .prop("color", "blue")
                                 .text_signal(state.url_copied.signal().map(|url_copied| match url_copied {
                                     false => STR_INVITE,
@@ -102,7 +100,6 @@ impl CircleDetails {
                                     html!("button-rect", {
                                         .prop("slot", "actions")
                                         .prop("kind", "outline")
-                                        .prop("size", "small")
                                         .prop("color", "red")
                                         .text(STR_DELETE_CIRCLE)
                                         .event(clone!(state => move |_: events::Click| {
@@ -147,7 +144,6 @@ impl CircleDetails {
                                     html!("button-rect", {
                                         .prop("slot", "actions")
                                         .prop("kind", "outline")
-                                        .prop("size", "small")
                                         .prop("color", "green")
                                         .child(html!("fa-icon", {
                                             .prop("icon", "fa-solid fa-check")
@@ -162,7 +158,6 @@ impl CircleDetails {
                                     html!("button-rect", {
                                         .prop("slot", "actions")
                                         .prop("kind", "outline")
-                                        .prop("size", "small")
                                         .prop("color", "blue")
                                         .text(STR_JOIN)
                                         .event(clone!(state => move |_: events::Click| {

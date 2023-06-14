@@ -193,7 +193,7 @@ impl Community {
                 },
                 {
                     html!("community-nav-item", {
-                        .prop("label", "Course")
+                        .prop("label", "Courses")
                         .child(html!("fa-icon", {
                             .prop("icon", "fa-thin fa-clapperboard-play")
                         }))
@@ -201,7 +201,7 @@ impl Community {
                             &EventOptions::preventable(),
                             |e: events::Click| {
                                 e.prevent_default();
-                                track_nav_item("Course");
+                                track_nav_item("Courses");
                                 let _ = web_sys::window()
                                     .unwrap_ji()
                                     .alert_with_message("Coming soon");

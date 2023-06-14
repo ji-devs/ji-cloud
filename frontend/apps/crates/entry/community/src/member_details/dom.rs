@@ -214,7 +214,6 @@ impl MemberDetails {
                         html!("button-rect", {
                             .prop("slot", "follow")
                             .prop("kind", "outline")
-                            .prop("size", "small")
                             .prop("color", "green")
                             .child(html!("fa-icon", {
                                 .prop("icon", "fa-solid fa-check")
@@ -229,7 +228,6 @@ impl MemberDetails {
                         html!("button-rect", {
                             .prop("slot", "follow")
                             .prop("kind", "outline")
-                            .prop("size", "small")
                             .prop("color", "blue")
                             .text(STR_FOLLOW)
                             .event(clone!(state => move |_: events::Click| {

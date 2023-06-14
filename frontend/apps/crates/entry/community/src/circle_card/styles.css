@@ -5,6 +5,7 @@ a {
     position: relative;
     display: inline-grid;
     grid-template-rows: 52px 52px 1fr;
+    text-decoration: auto;
 }
 .logo {
     grid-row: 1 / span 2;
