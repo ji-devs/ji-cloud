@@ -104,6 +104,7 @@ pub async fn browse(
         query.page.unwrap_or(0),
         page_limit as u64,
         query.circles.to_owned(),
+        query.order_by,
     );
 
     let total_count_future =
