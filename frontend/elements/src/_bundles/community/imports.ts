@@ -31,6 +31,7 @@ import "@elements/entry/community/member-details-connection";
 import "@elements/entry/community/list-member";
 import "@elements/entry/community/nav-item";
 import "@elements/entry/community/create-circle";
+import "@elements/module/video/youtube-player";
 
 
 import "@elements/entry/community/private-public-switch";

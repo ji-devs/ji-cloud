@@ -6,6 +6,7 @@ use shared::{
     api::endpoints,
     domain::{
         circle::{CircleBrowsePath, CircleBrowseQuery},
+        course::{CourseBrowsePath, CourseBrowseQuery},
         user::public_user::{PublicUserBrowsePath, UserBrowseQuery},
     },
 };
@@ -20,6 +21,7 @@ impl CommunityLanding {
             join!(
                 state.load_top_members(),
                 state.load_top_circles(),
+                state.load_top_courses(),
             );
         }));
     }
@@ -27,7 +29,7 @@ impl CommunityLanding {
     async fn load_top_members(self: &Rc<Self>) {
         let state = self;
         let req = UserBrowseQuery {
-            page_limit: Some(6),
+            page_limit: Some(10),
             ..Default::default()
         };
 
@@ -44,13 +46,28 @@ impl CommunityLanding {
     async fn load_top_circles(self: &Rc<Self>) {
         let state = self;
         let req = CircleBrowseQuery {
-            page_limit: Some(6),
+            page_limit: Some(5),
             ..Default::default()
         };
 
         match endpoints::circle::Browse::api_no_auth(CircleBrowsePath(), Some(req)).await {
             Ok(res) => {
                 state.top_circles.set(Some(res.circles));
+            }
+            Err(_) => todo!(),
+        }
+    }
+
+    async fn load_top_courses(self: &Rc<Self>) {
+        let state = self;
+        let req = CourseBrowseQuery {
+            page_limit: Some(10),
+            ..Default::default()
+        };
+
+        match endpoints::course::Browse::api_no_auth(CourseBrowsePath(), Some(req)).await {
+            Ok(res) => {
+                state.top_courses.set(Some(res.courses));
             }
             Err(_) => todo!(),
         }

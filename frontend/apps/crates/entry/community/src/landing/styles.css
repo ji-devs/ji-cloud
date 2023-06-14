@@ -1,0 +1,107 @@
+:host {
+    padding: 24px;
+    gap: 24px;
+    display: flex;
+    flex-direction: column;
+}
+@media (min-width: 1024px) {
+    :host {
+        display: grid;
+        gap: 24px;
+        grid-template-columns: minmax(485px, 1fr) 1fr;
+        grid-template-rows: auto 760px auto;
+    }
+}
+section {
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.08);
+    border: solid 1px var(--light-orange-3);
+    background-color: #fff;
+    display: grid;
+}
+.header {
+    border-bottom: solid 2px var(--light-orange-3);
+    padding-bottom: 20px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+}
+.header h3 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--dark-blue-4);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+section.top-members button-rect,
+section.top-circles button-rect {
+    margin-top: 40px;
+    justify-self: center;
+}
+.top-members {
+    grid-row: 1 / span 2;
+    align-content: space-between;
+}
+.top-members .members {
+    display: grid;
+    grid-template-columns: auto 1fr 3fr 2fr 1fr;
+}
+.top-members .members .row {
+    display: contents;
+}
+.top-members .members .row:nth-child(even) .cell {
+    background-color: #fff6d9;
+}
+.top-members .members .row .cell {
+    height: 80px;
+    color: var(--dark-gray-6);
+    display: inline-grid;
+    align-content: center;
+}
+.top-members .members .row .cell.index {
+    color: var(--dark-gray-3);
+    font-weight: 600;
+    padding-inline: 16px;
+}
+.top-members .members .row .cell.image profile-image {
+    height: 56px;
+    width: 56px;
+}
+.top-members .members .row .cell.name {
+    padding-inline: 12px;
+    font-weight: 500;
+}
+.top-members .members .row .cell.flag img-ui {
+    width: 37px;
+}
+.top-members .members .row .cell.creation-count {
+    justify-content: end;
+    font-weight: bold;
+    padding-right: 26px;
+}
+video-youtube-player {
+    aspect-ratio: 16 / 9;
+    /* un-setting width and height because it's set in the element, but should probably not be set there in the first place */
+    height: unset;
+    width: unset;
+    background: transparent;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.top-circles .circles {
+    overflow: auto;
+    display: grid;
+    row-gap: 28px;
+}
+.top-courses {
+    grid-column: 1 / span 2;
+}
+.top-courses .courses {
+    overflow-x: auto;
+    display: grid;
+    grid-auto-flow: column;
+    gap: 32px;
+}
