@@ -9,6 +9,7 @@ use crate::{
 };
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
+use strum_macros::Display;
 
 use super::UserBadge;
 
@@ -115,6 +116,11 @@ pub struct UserBrowseQuery {
     #[serde(deserialize_with = "from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub circles: Vec<CircleId>,
+
+    /// The hits per page to be returned
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub order_by: Option<OrderBy>,
 }
 
 /// A lite profile for other Users to view
@@ -328,3 +334,14 @@ pub struct BrowsePublicUserFollowingResponse {
 make_path_parts!(PublicUserFollowPath => "/v1/user/{}/follow" => UserId);
 
 make_path_parts!(PublicUserUnfollowPath => "/v1/user/{}/unfollow" => UserId);
+
+/// Sort browse results by timestamp
+#[derive(Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Debug, Display)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[serde(rename_all = "camelCase")]
+#[repr(i16)]
+pub enum OrderBy {
+    /// Order Asset by asset count
+    #[strum(serialize = "AssetCount")]
+    AssetCount = 0,
+}

@@ -6,7 +6,10 @@ use shared::domain::{
     circle::CircleId,
     image::ImageId,
     meta::ResourceTypeId as TypeId,
-    user::{public_user::PublicUser, UserBadge, UserId},
+    user::{
+        public_user::{OrderBy, PublicUser},
+        UserBadge, UserId,
+    },
 };
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -81,6 +84,7 @@ pub async fn browse_users(
     page: u32,
     page_limit: u64,
     circles: Vec<CircleId>,
+    order_by: Option<OrderBy>,
 ) -> anyhow::Result<Vec<PublicUser>> {
     let mut txn = pool.begin().await?;
 
@@ -89,16 +93,26 @@ pub async fn browse_users(
     let user_data = sqlx::query!(
         r#"
         with cte as (
-            select (array_agg(up.user_id))[1]
+            select up.user_id as "user_id",
+            ((select count(*) from jig where jig.author_id = up.user_id and jig.published_at is not null) + 
+            (select count(*) from resource where resource.author_id = up.user_id and resource.published_at is not null) + 
+            (select count(*) from course where course.author_id = up.user_id and course.published_at is not null) + 
+            (select count(*) from playlist where playlist.author_id = up.user_id and playlist.published_at is not null))      as "total_asset_count"
             from user_profile "up"
-            inner join "user" on up.user_id = "user".id 
-            left join circle_member "cm" on cm.user_id = up.user_id
-            where cm.id = any($1) or $1 = array[]::uuid[]
-            group by "user".created_at
-            order by "user".created_at desc
         ),
         cte1 as (
-            select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id
+            select (array_agg(cte.user_id))[1]
+            from cte
+            inner join "user" on cte.user_id = "user".id 
+            left join circle_member "cm" on cm.user_id = cte.user_id
+            where cm.id = any($1) or $1 = array[]::uuid[]
+            group by "user".created_at, cte.total_asset_count
+            order by case when $4 = 0 then cte.total_asset_count
+                else extract(epoch from "user".created_at)
+            end desc        
+        ),
+        cte2 as (
+            select * from unnest(array(select cte1.array_agg from cte1)) with ordinality t(id
            , ord) order by ord
         )
         select  user_id                as "id!: UserId",
@@ -125,9 +139,9 @@ pub async fn browse_users(
                     inner join circle on bm.id = circle.id
                     where bm.user_id = "user".id
                 )) as "circles!: Vec<CircleId>"
-        from cte1
-        inner join user_profile on cte1.id = user_profile.user_id
-        inner join "user" on cte1.id = "user".id
+        from cte2
+        inner join user_profile on cte2.id = user_profile.user_id
+        inner join "user" on cte2.id = "user".id
         where ord > (1 * $2 * $3)
         order by ord
         limit $3
@@ -135,6 +149,7 @@ pub async fn browse_users(
             &circle_ids[..],
             page as i32,
             page_limit as i32,
+            order_by.map(|it| it as i32) 
         )
             .fetch_all(&mut txn)
             .await?;
