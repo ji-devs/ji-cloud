@@ -12,7 +12,8 @@ expression: body
       "profileImage": null,
       "badge": null,
       "organization": "test2 org",
-      "circles": []
+      "circles": [],
+      "totalAssetCount": 0
     }
   ],
   "pages": 1,

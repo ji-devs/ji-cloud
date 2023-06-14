@@ -15,7 +15,9 @@ expression: body
         "en_US"
       ],
       "organization": "test1 org",
-      "circles": []
+      "circles": [],
+      "playlistCount": 1,
+      "totalAssetCount": 1
     }
   ],
   "pages": 1,

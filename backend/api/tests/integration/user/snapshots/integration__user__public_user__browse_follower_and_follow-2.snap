@@ -12,7 +12,8 @@ expression: body
       "profileImage": null,
       "badge": null,
       "organization": "test org",
-      "circles": []
+      "circles": [],
+      "totalAssetCount": 0
     },
     {
       "id": "a641fd6e-e41b-11eb-8176-57df101c2201",
@@ -22,7 +23,8 @@ expression: body
       "profileImage": null,
       "badge": null,
       "organization": "test2 org",
-      "circles": []
+      "circles": [],
+      "totalAssetCount": 0
     }
   ],
   "pages": 1,
