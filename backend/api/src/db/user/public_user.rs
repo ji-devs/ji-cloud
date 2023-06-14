@@ -27,6 +27,14 @@ pub async fn get(db: &PgPool, user_id: UserId) -> anyhow::Result<Option<PublicUs
             (select persona from user_profile where user_profile.user_id = "user".id and persona_public is true)      as "persona?: Vec<String>",
             (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?",
             (select bio from user_profile where user_profile.user_id = "user".id and bio_public is true)      as "bio?",
+            (select (CASE WHEN count(*) > 0 THEN count(*) else null end) from jig where jig.author_id = "user".id and jig.published_at is not null)      as "jig_count?",
+            (select (CASE WHEN count(*) > 0 THEN count(*) else null end) from resource where resource.author_id = "user".id and resource.published_at is not null)      as "resource_count?",
+            (select (CASE WHEN count(*) > 0 THEN count(*) else null end) from course where course.author_id = "user".id and course.published_at is not null)      as "course_count?",
+            (select (CASE WHEN count(*) > 0 THEN count(*) else null end) from playlist where playlist.author_id = "user".id and playlist.published_at is not null)      as "playlist_count?",
+            ((select count(*) from jig where jig.author_id = "user".id and jig.published_at is not null) + 
+            (select count(*) from resource where resource.author_id = "user".id and resource.published_at is not null) + 
+            (select count(*) from course where course.author_id = "user".id and course.published_at is not null) + 
+            (select count(*) from playlist where playlist.author_id = "user".id and playlist.published_at is not null))      as "total_asset_count!",
             array(select circle.id
                 from circle_member bm
                 inner join circle on bm.id = circle.id
@@ -57,6 +65,11 @@ pub async fn get(db: &PgPool, user_id: UserId) -> anyhow::Result<Option<PublicUs
             country_long: location.country_long,
             circles: row.circles,
             badge: row.badge,
+            jig_count: row.jig_count.map(|i| i as u64),
+            resource_count: row.resource_count.map(|i| i as u64),
+            course_count: row.course_count.map(|i| i as u64),
+            playlist_count: row.playlist_count.map(|i| i as u64),
+            total_asset_count: row.total_asset_count as u64,
         }
     });
 
@@ -99,6 +112,14 @@ pub async fn browse_users(
                 (select persona from user_profile where user_profile.user_id = "user".id and persona_public is true)      as "persona?: Vec<String>",
                 (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?",
                 (select bio from user_profile where user_profile.user_id = "user".id and bio_public is true)      as "bio?",
+                (select (CASE WHEN count(*) > 0 THEN count(*) else null end) from jig where jig.author_id = "user".id and jig.published_at is not null)      as "jig_count?",
+                (select (CASE WHEN count(*) > 0 THEN count(*) else null end) from resource where resource.author_id = "user".id and resource.published_at is not null)      as "resource_count?",
+                (select (CASE WHEN count(*) > 0 THEN count(*) else null end) from course where course.author_id = "user".id and course.published_at is not null)      as "course_count?",
+                (select (CASE WHEN count(*) > 0 THEN count(*) else null end) from playlist where playlist.author_id = "user".id and playlist.published_at is not null)      as "playlist_count?",
+                ((select count(*) from jig where jig.author_id = "user".id and jig.published_at is not null) + 
+                (select count(*) from resource where resource.author_id = "user".id and resource.published_at is not null) + 
+                (select count(*) from course where course.author_id = "user".id and course.published_at is not null) + 
+                (select count(*) from playlist where playlist.author_id = "user".id and playlist.published_at is not null))      as "total_asset_count!",
                 (select array(select circle.id
                     from circle_member bm
                     inner join circle on bm.id = circle.id
@@ -136,6 +157,11 @@ pub async fn browse_users(
                 country_long: location.country_long,
                 circles: row.circles,
                 badge: row.badge,
+                jig_count: row.jig_count.map(|i| i as u64),
+                resource_count: row.resource_count.map(|i| i as u64),
+                course_count: row.course_count.map(|i| i as u64),
+                playlist_count: row.playlist_count.map(|i| i as u64),
+                total_asset_count: row.total_asset_count as u64,
             }
         })
         .collect();
@@ -322,6 +348,14 @@ pub async fn get_by_ids(db: &PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<PublicUse
                 (select persona from user_profile where user_profile.user_id = "user".id and persona_public is true)      as "persona?: Vec<String>",
                 (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?",
                 (select bio from user_profile where user_profile.user_id = "user".id and bio_public is true)      as "bio?",
+                (select (case when count(*) > 0 THEN count(*) else null end) from jig where jig.author_id = "user".id and jig.published_at is not null)      as "jig_count?",
+                (select (case when count(*) > 0 THEN count(*) else null end) from resource where resource.author_id = "user".id and resource.published_at is not null)      as "resource_count?",
+                (select (case when count(*) > 0 THEN count(*) else null end) from course where course.author_id = "user".id and course.published_at is not null)      as "course_count?",
+                (select (case when count(*) > 0 THEN count(*) else null end) from playlist where playlist.author_id = "user".id and playlist.published_at is not null)      as "playlist_count?",
+                ((select count(*) from jig where jig.author_id = "user".id and jig.published_at is not null) + 
+                (select count(*) from resource where resource.author_id = "user".id and resource.published_at is not null) + 
+                (select count(*) from course where course.author_id = "user".id and course.published_at is not null) + 
+                (select count(*) from playlist where playlist.author_id = "user".id and playlist.published_at is not null))      as "total_asset_count!",
                 (select array(select circle.id
                     from circle_member bm
                     inner join circle on bm.id = circle.id
@@ -355,6 +389,11 @@ pub async fn get_by_ids(db: &PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<PublicUse
                 country_long: location.country_long,
                 circles: row.circles,
                 badge: row.badge,
+                jig_count: row.jig_count.map(|i| i as u64),
+                resource_count: row.resource_count.map(|i| i as u64),
+                course_count: row.course_count.map(|i| i as u64),
+                playlist_count: row.playlist_count.map(|i| i as u64),
+                total_asset_count: row.total_asset_count as u64,
             }
         })
         .collect();
@@ -464,6 +503,14 @@ pub async fn browse_followers(
                 (select persona from user_profile where user_profile.user_id = "user".id and persona_public is true)      as "persona?: Vec<String>",
                 (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?",
                 (select bio from user_profile where user_profile.user_id = "user".id and bio_public is true)      as "bio?",
+                (select (case when count(*) > 0 THEN count(*) else null end) from jig where jig.author_id = "user".id and jig.published_at is not null)      as "jig_count?",
+                (select (case when count(*) > 0 THEN count(*) else null end) from resource where resource.author_id = "user".id and resource.published_at is not null)      as "resource_count?",
+                (select (case when count(*) > 0 THEN count(*) else null end) from course where course.author_id = "user".id and course.published_at is not null)      as "course_count?",
+                (select (case when count(*) > 0 THEN count(*) else null end) from playlist where playlist.author_id = "user".id and playlist.published_at is not null)      as "playlist_count?",
+                ((select count(*) from jig where jig.author_id = "user".id and jig.published_at is not null) + 
+                (select count(*) from resource where resource.author_id = "user".id and resource.published_at is not null) + 
+                (select count(*) from course where course.author_id = "user".id and course.published_at is not null) + 
+                (select count(*) from playlist where playlist.author_id = "user".id and playlist.published_at is not null))      as "total_asset_count!",
                 (select array(select circle.id
                     from circle_member bm
                     left join circle on bm.id = circle.id
@@ -501,6 +548,11 @@ pub async fn browse_followers(
                 country_long: location.country_long,
                 circles: row.circles,
                 badge: row.badge,
+                jig_count: row.jig_count.map(|i| i as u64),
+                resource_count: row.resource_count.map(|i| i as u64),
+                course_count: row.course_count.map(|i| i as u64),
+                playlist_count: row.playlist_count.map(|i| i as u64),
+                total_asset_count: row.total_asset_count as u64,
             }
         })
         .collect();
@@ -541,6 +593,14 @@ pub async fn browse_following(
                 (select persona from user_profile where user_profile.user_id = "user".id and persona_public is true)      as "persona?: Vec<String>",
                 (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?",
                 (select bio from user_profile where user_profile.user_id = "user".id and bio_public is true)      as "bio?",
+                (select (case when count(*) > 0 THEN count(*) else null end) from jig where jig.author_id = "user".id and jig.published_at is not null)      as "jig_count?",
+                (select (case when count(*) > 0 THEN count(*) else null end) from resource where resource.author_id = "user".id and resource.published_at is not null)      as "resource_count?",
+                (select (case when count(*) > 0 THEN count(*) else null end) from course where course.author_id = "user".id and course.published_at is not null)      as "course_count?",
+                (select (case when count(*) > 0 THEN count(*) else null end) from playlist where playlist.author_id = "user".id and playlist.published_at is not null)      as "playlist_count?",
+                ((select count(*) from jig where jig.author_id = "user".id and jig.published_at is not null) + 
+                (select count(*) from resource where resource.author_id = "user".id and resource.published_at is not null) + 
+                (select count(*) from course where course.author_id = "user".id and course.published_at is not null) + 
+                (select count(*) from playlist where playlist.author_id = "user".id and playlist.published_at is not null))      as "total_asset_count!",
                 array(select circle.id
                     from circle_member bm
                     left join circle on bm.id = circle.id
@@ -578,6 +638,11 @@ pub async fn browse_following(
                 country_long: location.country_long,
                 circles: row.circles,
                 badge: row.badge,
+                jig_count: row.jig_count.map(|i| i as u64),
+                resource_count: row.resource_count.map(|i| i as u64),
+                course_count: row.course_count.map(|i| i as u64),
+                playlist_count: row.playlist_count.map(|i| i as u64),
+                total_asset_count: row.total_asset_count as u64,
             }
         })
         .collect();

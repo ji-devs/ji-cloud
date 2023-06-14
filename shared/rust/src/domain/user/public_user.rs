@@ -70,6 +70,29 @@ pub struct PublicUser {
     /// Circles associated with User
     #[serde(default)]
     pub circles: Vec<CircleId>,
+
+    /// Number of Jigs
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub jig_count: Option<u64>,
+
+    /// Number of Resources
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub resource_count: Option<u64>,
+
+    /// Number of Courses
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub course_count: Option<u64>,
+
+    /// Number of playlists
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub playlist_count: Option<u64>,
+
+    /// Total number of assets
+    pub total_asset_count: u64,
 }
 
 make_path_parts!(PublicUserBrowsePath => "/v1/user/public/browse");

@@ -15,7 +15,8 @@ expression: body
       "circles": [
         "829606d0-f185-11ec-b9e4-5fadfd7252f6",
         "a3126bec-f185-11ec-b9e4-5fa4e257b5a1"
-      ]
+      ],
+      "totalAssetCount": 0
     },
     {
       "id": "1f241e1b-b537-493f-a230-075cb16315be",
@@ -27,7 +28,8 @@ expression: body
       "organization": "test org",
       "circles": [
         "829606d0-f185-11ec-b9e4-5fadfd7252f6"
-      ]
+      ],
+      "totalAssetCount": 0
     }
   ],
   "pages": 1,
