@@ -1,5 +1,5 @@
 use shared::domain::{
-    circle::{Circle, CircleId},
+    circle::{Circle, CircleId, OrderBy},
     image::ImageId,
     user::{UserId, UserScope},
 };
@@ -183,6 +183,7 @@ pub async fn browse(
     users: Vec<UserId>,
     page_limit: u32,
     page: i32,
+    order_by: Option<OrderBy>,
 ) -> sqlx::Result<Vec<Circle>> {
     let mut txn = db.begin().await?;
 
@@ -190,17 +191,19 @@ pub async fn browse(
 
     let circle_data = sqlx::query!(
         r#"
-        with cte as (
+        with cte1 as (
             select (array_agg(circle.id))[1]
             from circle
             left join circle_member "cm" on cm.id = circle.id
             where (creator_id = $1 or $1 is null)
             and (cm.user_id = any($2) or $2 = array[]::uuid[])
-            group by created_at
-            order by created_at desc
+            group by circle.created_at, member_count
+            order by case when $5 = 0 then member_count
+                else extract(epoch from created_at)
+            end desc  
         ),
-        cte1 as (
-            select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id
+        cte2 as (
+            select * from unnest(array(select cte1.array_agg from cte1)) with ordinality t(id
            , ord) order by ord
         )
         select  circle.id            as "circle_id!: CircleId",
@@ -211,8 +214,8 @@ pub async fn browse(
                 creator_id          as "creator_id!: UserId",
                 created_at,
                 updated_at
-        from cte1
-            left join circle on cte1.id = circle.id
+        from cte2
+            left join circle on cte2.id = circle.id
             where ord > (1 * $3 * $4)
             order by ord
             limit $4
@@ -221,6 +224,7 @@ pub async fn browse(
         &user_ids[..],
         page as i32,
         page_limit as i32,
+        order_by.map(|it| it as i32)
     )
     .fetch_all(&mut txn)
     .await?;

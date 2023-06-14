@@ -212,6 +212,7 @@ async fn browse(
         query.users.to_owned(),
         page_limit,
         query.page.unwrap_or(0) as i32,
+        query.order_by.to_owned(),
     );
 
     let total_count_future =

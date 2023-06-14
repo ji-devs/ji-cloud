@@ -266,7 +266,7 @@ async fn remove_member(port: u16) -> anyhow::Result<()> {
     fixtures("Fixture::User", "Fixture::Image", "Fixture::Circle")
 )]
 async fn browse_circles(port: u16) -> anyhow::Result<()> {
-    let name = "browse_circle";
+    let name = "browse_circles";
 
     let client = reqwest::Client::new();
 
