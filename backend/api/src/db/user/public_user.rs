@@ -149,7 +149,7 @@ pub async fn browse_users(
             &circle_ids[..],
             page as i32,
             page_limit as i32,
-            order_by.map(|it| it as i32) 
+            order_by.map(|it| it as i32)
         )
             .fetch_all(&mut txn)
             .await?;
