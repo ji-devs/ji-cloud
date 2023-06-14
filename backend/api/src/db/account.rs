@@ -446,7 +446,7 @@ where
                 website: record.website,
                 organization_type: record.organization_type,
                 account_id: record.account_id.unwrap(),
-                created_at: record.created_at,
+                created_at: record.created_at.unwrap(),
                 updated_at: record.updated_at,
             });
             (school_name, school)
