@@ -36,7 +36,7 @@ impl ResourceDetails {
                     .prop("slot", "open")
                     .prop("color", "blue")
                     .prop("kind", "outline")
-                    .prop("size", "small")
+                    .prop("size", "regular")
                     .text("Open")
                     .child(html!("fa-icon", {
                         .prop("icon", "fa-regular fa-up-right-from-square")

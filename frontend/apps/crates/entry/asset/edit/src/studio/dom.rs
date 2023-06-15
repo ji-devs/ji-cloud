@@ -16,7 +16,7 @@ pub fn render_studio() -> Dom {
                 .prop("slot", "jig-create")
                 .prop("color", "red")
                 .prop("kind", "filled")
-                .prop("size", "small")
+                .prop("size", "regular")
                 .event(|_: events::Click| {
                     actions::create_jig();
                 })
@@ -26,7 +26,7 @@ pub fn render_studio() -> Dom {
                 .prop("slot", "jig-gallery")
                 .prop("color", "blue")
                 .prop("kind", "text")
-                .prop("size", "small")
+                .prop("size", "regular")
                 .apply(move |dom| on_click_go_to_url!(dom, {
                     Route::Asset(AssetRoute::JigGallery).to_string()
                 }))
@@ -36,7 +36,7 @@ pub fn render_studio() -> Dom {
                 .prop("slot", "playlist-create")
                 .prop("color", "red")
                 .prop("kind", "filled")
-                .prop("size", "small")
+                .prop("size", "regular")
                 .event(|_: events::Click| {
                     actions::create_playlist();
                 })
@@ -46,7 +46,7 @@ pub fn render_studio() -> Dom {
                 .prop("slot", "playlist-gallery")
                 .prop("color", "blue")
                 .prop("kind", "text")
-                .prop("size", "small")
+                .prop("size", "regular")
                 .apply(move |dom| on_click_go_to_url!(dom, {
                     Route::Asset(AssetRoute::PlaylistGallery).to_string()
                 }))
@@ -56,7 +56,7 @@ pub fn render_studio() -> Dom {
                 .prop("slot", "resource-create")
                 .prop("color", "red")
                 .prop("kind", "filled")
-                .prop("size", "small")
+                .prop("size", "regular")
                 .event(|_: events::Click| {
                     actions::create_resource();
                 })
@@ -66,7 +66,7 @@ pub fn render_studio() -> Dom {
                 .prop("slot", "resource-gallery")
                 .prop("color", "blue")
                 .prop("kind", "text")
-                .prop("size", "small")
+                .prop("size", "regular")
                 .apply(move |dom| on_click_go_to_url!(dom, {
                     Route::Asset(AssetRoute::ResourceGallery).to_string()
                 }))
@@ -76,7 +76,7 @@ pub fn render_studio() -> Dom {
                 .prop("slot", "course-create")
                 .prop("color", "red")
                 .prop("kind", "filled")
-                .prop("size", "small")
+                .prop("size", "regular")
                 .event(|_: events::Click| {
                     actions::create_course();
                 })
@@ -86,7 +86,7 @@ pub fn render_studio() -> Dom {
                 .prop("slot", "course-gallery")
                 .prop("color", "blue")
                 .prop("kind", "text")
-                .prop("size", "small")
+                .prop("size", "regular")
                 .apply(move |dom| on_click_go_to_url!(dom, {
                     Route::Asset(AssetRoute::CourseGallery).to_string()
                 }))
@@ -95,7 +95,7 @@ pub fn render_studio() -> Dom {
             html!("button-rect", {
                 .prop("slot", "help")
                 .prop("kind", "outline")
-                .prop("size", "small")
+                .prop("size", "regular")
                 .prop("color", "white")
                 .prop("href", Route::Home(HomeRoute::Help).to_string())
                 .text("Help")

@@ -53,7 +53,7 @@
 //                             html!("button-rect", {
 //                                 .prop("kind", "text")
 //                                 .prop("color", "blue")
-//                                 .prop("size", "small")
+//                                 .prop("size", "regular")
 //                                 .prop("weight", "normal")
 //                                 .prop("href", actions::search_url(""))
 //                                 .text(STR_CONTENT_ACTION)
@@ -66,7 +66,7 @@
 //                             html!("button-rect", {
 //                                 .prop("kind", "text")
 //                                 .prop("color", "blue")
-//                                 .prop("size", "small")
+//                                 .prop("size", "regular")
 //                                 .prop("weight", "normal")
 //                                 .prop("href", &Route::Jig(JigRoute::Gallery).to_string())
 //                                 .text(STR_CREATE_ACTION)
@@ -79,7 +79,7 @@
 //                             html!("button-rect", {
 //                                 .prop("kind", "text")
 //                                 .prop("color", "blue")
-//                                 .prop("size", "small")
+//                                 .prop("size", "regular")
 //                                 .prop("weight", "normal")
 //                                 .prop("href", &Route::Jig(JigRoute::Gallery).to_string())
 //                                 .text(STR_CUSTOMIZE_ACTION)
@@ -92,7 +92,7 @@
 //                             html!("button-rect", {
 //                                 .prop("kind", "text")
 //                                 .prop("color", "blue")
-//                                 .prop("size", "small")
+//                                 .prop("size", "regular")
 //                                 .prop("weight", "normal")
 //                                 .text(STR_COMMUNITY_ACTION)
 //                                 .child(html!("br"))
@@ -106,7 +106,7 @@
 //                             html!("button-rect", {
 //                                 .prop("kind", "text")
 //                                 .prop("color", "blue")
-//                                 .prop("size", "small")
+//                                 .prop("size", "regular")
 //                                 .prop("weight", "normal")
 //                                 .text(STR_CLASSROOM_ACTION)
 //                                 .child(html!("br"))

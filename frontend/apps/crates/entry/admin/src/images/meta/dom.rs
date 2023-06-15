@@ -101,7 +101,7 @@ impl ImageMetaPage {
                                     .prop("slot", "replace")
                                     .prop("kind", "text")
                                     .prop("color", "blue")
-                                    .prop("size", "small")
+                                    .prop("size", "regular")
                                     .text(STR_REPLACE)
                                     .event(clone!(state => move |_evt:events::Click| {
                                         if let Some(elem) = state.file_input.borrow().as_ref() {
@@ -113,7 +113,7 @@ impl ImageMetaPage {
                                     .prop("slot", "delete")
                                     .prop("kind", "text")
                                     .prop("color", "blue")
-                                    .prop("size", "small")
+                                    .prop("size", "regular")
                                     .text(STR_DELETE)
                                     .event(clone!(state => move |_evt:events::Click| {
                                         state.delete_modal.set_neq(true);
@@ -146,7 +146,7 @@ impl ImageMetaPage {
                                 html!("button-rect", {
                                     .prop("slot", "next")
                                     .prop("color", "red")
-                                    .prop("size", "medium")
+                                    .prop("size", "regular")
                                     .text_signal(state.section.signal().map(|section| {
                                         match section {
                                             Section::General | Section::Categories => STR_NEXT,

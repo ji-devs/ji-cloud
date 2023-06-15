@@ -120,7 +120,7 @@ impl AssetSearchBar {
                     }),
                     html!("button-rect", {
                         .prop("slot", "button")
-                        .prop("size", "small")
+                        .prop("size", "regular")
                         .prop("bold", true)
                         .text(STR_SEARCH)
                         .event(clone!(on_search => move |_: events::Click| {

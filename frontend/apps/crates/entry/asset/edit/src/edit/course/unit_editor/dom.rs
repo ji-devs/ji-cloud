@@ -165,7 +165,7 @@ impl Component<UnitEditor> for Rc<UnitEditor> {
                 html!("button-rect", {
                     .prop_signal("disabled", is_valid.map(|value| !value))
                     .prop("slot", "add")
-                    .prop("size", "medium")
+                    .prop("size", "regular")
                     .text(&state.create_or_update_text())
                     .style("font-size", "medium")
                     .event(clone!(state => move |_: events::Click| {

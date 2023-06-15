@@ -9,8 +9,6 @@ interface Args {
     size: Size;
     color: Color;
     kind: Kind;
-    bold: boolean;
-    italic: boolean;
     submit: boolean;
     disabled: boolean;
     href: string;
@@ -20,11 +18,9 @@ interface Args {
 }
 
 const DEFAULT_ARGS: Args = {
-    size: "medium",
+    size: "regular",
     color: "red",
     kind: "filled",
-    bold: false,
-    italic: false,
     submit: false,
     disabled: false,
     href: "",
@@ -45,13 +41,13 @@ Rectangle.argTypes = {
     size: {
         control: {
             type: "inline-radio",
-            options: ["small", "medium", "large"],
+            options: ["regular", "large"],
         },
     },
     color: {
         control: {
             type: "inline-radio",
-            options: ["red", "blue", "green"],
+            options: ["red", "blue", "green", "grey"],
         },
     },
     kind: {

@@ -155,7 +155,7 @@ impl Step2Page {
                 html!("button-rect-icon", {
                     .prop("slot", "submit")
                     .prop("color", "red")
-                    .prop("size", "medium")
+                    .prop("size", "regular")
                     .prop("iconAfter", "arrow")
                     .text(STR_ONE_MORE_STEP)
                     .event(clone!(state => move |_evt:events::Click| {

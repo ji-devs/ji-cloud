@@ -1,9 +1,9 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import { ifDefined } from "lit-html/directives/if-defined";
 
-export type Color = "red" | "blue" | "green" | "darkGray" | "lightBlue" | "alert";
-export type Size = "small" | "medium" | "large";
+export type Color = "red" | "blue" | "green" | "grey";
 export type Kind = "filled" | "text" | "outline";
+export type Size = "regular" | "large";
 
 /*
 Some thoughts, this comment can be removed once this is resolved
@@ -22,69 +22,42 @@ export class _ extends LitElement {
         return [
             css`
                 :host {
-                    border-radius: 24px;
-                    border: none;
                     cursor: pointer;
                     display: inline-grid;
                     place-content: center;
-                    background-color: transparent;
-                    box-sizing: border-box;
-                    padding: 0;
-                    user-select: none;
-                    font-size: 14px;
-                    line-height: 30px;
                 }
 
-                :host([disabled]) {
-                    pointer-events: none;
-                }
-
-                :host([color="darkGray"]) {
-                    /* Just taken from the first time it was needed... */
-                    color: #4a4a4a;
-                }
-                :host([color="lightGray"]) {
-                    --color: var(--light-gray-4);
-                }
                 :host([color="red"]) {
                     --color: var(--main-red);
                 }
                 :host([color="red"]:hover) {
-                    --color: var(--dark-red-2);
-                }
-                :host([color="alert"]) {
-                    --color: var(--dark-red-2);
-                }
-                :host([color="alert"]:hover) {
-                    --color: var(--red-alert);
+                    --color: var(--dark-red-1);
                 }
                 :host([color="blue"]) {
-                    --color: #5590fc;
+                    --color: var(--dark-blue-1);
                 }
-
-                :host([color="blue"]:hover),
-                :host([hoverColor="blue"]:hover) {
-                    --color: #387af4;
-                }
-                :host([color="lightBlue"]) {
-                    --color: var(--light-blue-4);
-                }
-                :host([color="lightBlue"]:hover) {
-                    --color: var(--light-blue-3);
+                :host([color="blue"]:hover) {
+                    --color: var(--dark-blue-3);
                 }
                 :host([color="green"]) {
-                    --color: #71cf92;
+                    --color: var(--main-green);
                 }
                 :host([color="green"]:hover) {
-                    --color: #46ba6f;
+                    --color: var(--dark-green-1);
+                }
+                :host([color="grey"]) {
+                    --color: var(--dark-gray-3)
+                }
+                :host([color="grey"]:hover) {
+                    --color: var(--dark-gray-4); /*my own color*/
                 }
 
-                :host([color="orange"]) {
-                    --color: #fc7551;
+                :host([disabled]) {
+                    pointer-events: none;
+                    cursor: not-allowed;
+                    --color: var(--light-gray-4);
                 }
-                :host([color="white"]) {
-                    --color: #e8f3ff;
-                }
+
                 :host([kind="filled"]) {
                     background-color: var(--color);
                     color: #ffffff;
@@ -98,70 +71,57 @@ export class _ extends LitElement {
                     border-radius: 0;
                 }
 
-                :host([bold]) {
-                    font-weight: bold;
+                :host([size="regular"]) {
+                    font-size: 14px;
+                    border-radius: 16px;
+                }
+                :host([size="large"]) {
+                    font-size: 16px;
+                    border-radius: 20px;
                 }
 
-                :host([italic]) {
-                    font-style: italic;
+                :host([size="regular"]) .inner {
+                    height: 32px;
+                }
+                :host([size="large"]) .inner {
+                    height: 40px;
+                }
+                :host([size="regular"][kind="filled"]) .inner,
+                :host([size="regular"][kind="outline"]) .inner {
+                    padding-inline: 16px;
+                }
+                :host([size="large"][kind="filled"]) .inner,
+                :host([size="large"][kind="outline"]) .inner {
+                    padding-inline: 24px;
                 }
 
-                :host([size="small"]:not([kind="text"])) .inner {
-                    padding: 0 10px;
-                }
-                :host([size="medium"]:not([kind="text"])) .inner {
-                    padding: 10px 18px;
-                }
-                :host([size="large"]:not([kind="text"])) .inner {
-                    padding: 12px 30px;
-                }
-
-                :host([disabled][kind="filled"]) {
-                    background-color: var(--light-gray-4);
-                    color: #ffffff;
-                }
-                :host([disabled][kind="outline"]) {
-                    color: var(--light-gray-4);
-                    border: solid 1px var(--light-gray-4);
-                }
-                :host([disabled][kind="text"]) {
-                    color: var(--light-gray-4);
-                }
-
-                button,
-                a {
+                .inner {
                     all: unset;
+                    user-select: none;
                     color: inherit;
                     display: flex;
-                    column-gap: 6px;
+                    align-items: center;
+                    column-gap: 5px;
+                    font-weight: 600;
                 }
 
-                button {
+                /* button.inner {
                     display: flex;
                     flex-direction: row;
                     align-items: center;
-                }
+                } */
             `,
         ];
     }
 
     @property({ reflect: true })
-    size: Size = "medium";
+    size: Size = "regular";
 
     @property({ reflect: true })
     color: Color = "red";
 
     @property({ reflect: true })
-    hoverColor: Color | "" = "";
-
-    @property({ reflect: true })
     kind: Kind = "filled";
-
-    @property({ type: Boolean, reflect: true })
-    bold: boolean = false;
-
-    @property({ type: Boolean, reflect: true }) // needed?
-    italic: boolean = false;
 
     @property({ type: Boolean, reflect: true })
     disabled: boolean = false;

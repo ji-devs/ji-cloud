@@ -322,7 +322,7 @@ impl JigPlayer {
                                                             .prop("slot", "actions")
                                                             .prop("kind", "text")
                                                             .prop("color", "lightBlue")
-                                                            .prop("size", "small")
+                                                            .prop("size", "regular")
                                                             .event(clone!(hover => move |_evt: events::PointerEnter| hover.set_neq(true)))
                                                             .event(clone!(hover => move |_evt: events::PointerLeave| hover.set_neq(false)))
                                                             .child(html!("img-ui", {
@@ -347,7 +347,7 @@ impl JigPlayer {
                                                             .prop("slot", "actions")
                                                             .prop("kind", "filled")
                                                             .prop("color", "blue")
-                                                            .prop("size", "small")
+                                                            .prop("size", "regular")
                                                             .style("margin-left", "auto")
                                                             .event(clone!(hover => move |_evt: events::PointerEnter| hover.set_neq(true)))
                                                             .event(clone!(hover => move |_evt: events::PointerLeave| hover.set_neq(false)))

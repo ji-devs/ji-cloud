@@ -250,7 +250,7 @@ impl SearchResultsSection {
                             .prop("slot", "play-button")
                             .prop("color", "red")
                             .prop("bold", true)
-                            .prop("size", "small")
+                            .prop("size", "regular")
                             .prop("iconBeforePath", "search/cards/play.svg")
                             .text("Play")
                             .event(clone!(state => move |_: events::Click| {
@@ -267,7 +267,7 @@ impl SearchResultsSection {
                                         .prop("slot", "play-button")
                                         .prop("color", "red")
                                         .prop("bold", true)
-                                        .prop("size", "small")
+                                        .prop("size", "regular")
                                         .prop("href", resource.resource_content.get_link())
                                         .prop("target", "_BLANK")
                                         .text("View")

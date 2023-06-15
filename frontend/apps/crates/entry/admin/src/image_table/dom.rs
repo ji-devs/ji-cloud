@@ -67,7 +67,7 @@ impl Component<ImageTable> for Rc<ImageTable> {
             .child(html!("button-rect", {
                 .prop("slot", "controls")
                 .prop("color", "blue")
-                .prop("size", "small")
+                .prop("size", "regular")
                 .text("Mass edit")
                 .prop_signal("disabled", state.selected_images.signal_ref(|selected_images| {
                     selected_images.is_empty()

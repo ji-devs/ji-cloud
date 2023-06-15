@@ -15,7 +15,7 @@ impl CompletePage {
                     .child(
                         html!("button-rect", {
                             .prop("color", "red")
-                            .prop("size", "small")
+                            .prop("size", "regular")
                             .text(STR_SUBMIT)
                         })
                     )

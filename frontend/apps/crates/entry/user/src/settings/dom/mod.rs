@@ -165,7 +165,7 @@ impl SettingsPage {
                 html!("button-rect", {
                     .prop("kind", "outline")
                     .prop("color", "blue")
-                    .prop("size", "small")
+                    .prop("size", "regular")
                     .prop("slot", "age-groups-edit")
                     .text(STR_EDIT)
                     .event(clone!(state => move |_: events::Click| {
@@ -197,7 +197,7 @@ impl SettingsPage {
                 html!("button-rect", {
                     .prop("kind", "outline")
                     .prop("color", "blue")
-                    .prop("size", "small")
+                    .prop("size", "regular")
                     .prop("slot", "relevant-subjects-edit")
                     .text(STR_EDIT)
                     .event(clone!(state => move |_: events::Click| {
@@ -229,7 +229,7 @@ impl SettingsPage {
                 html!("button-rect", {
                     .prop("kind", "outline")
                     .prop("color", "blue")
-                    .prop("size", "small")
+                    .prop("size", "regular")
                     .prop("slot", "affiliations-edit")
                     .text(STR_EDIT)
                     .event(clone!(state => move |_: events::Click| {
@@ -246,7 +246,7 @@ impl SettingsPage {
                             .child(html!("button-rect", {
                                 .prop("kind", "outline")
                                 .prop("color", "blue")
-                                .prop("size", "small")
+                                .prop("size", "regular")
                                 .prop("slot", "relevant-subjects-edit")
                                 .prop("disabled", status == ResetPasswordStatus::Loading)
                                 .text(STR_EDIT)

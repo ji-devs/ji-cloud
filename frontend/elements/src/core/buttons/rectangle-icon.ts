@@ -25,16 +25,10 @@ export class _ extends LitElement {
     }
 
     @property({ reflect: true })
-    size: Size = "medium";
+    size: Size = "regular";
 
     @property({ reflect: true })
     color: Color = "red";
-
-    @property({ type: Boolean })
-    bold: boolean = false;
-
-    @property({ type: Boolean }) // needed?
-    italic: boolean = false;
 
     @property({ type: Boolean })
     disabled: boolean = false;
@@ -107,8 +101,6 @@ export class _ extends LitElement {
                 color="${this.color}"
                 ?submit="${this.submit}"
                 ?disabled="${this.disabled}"
-                ?bold="${this.bold}"
-                ?italic="${this.italic}"
                 href="${ifDefined(this.href)}"
                 target="${ifDefined(this.target)}"
             >

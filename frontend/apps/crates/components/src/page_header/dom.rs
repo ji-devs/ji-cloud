@@ -59,7 +59,7 @@ impl PageHeader {
             .child(html!("button-rect", {
                 .prop("slot", "donate")
                 .prop("color", "green")
-                .prop("size", "small")
+                .prop("size", "regular")
                 .prop("bold", true)
                 .prop("href", DONATE_LINK)
                 .prop("target", "_blank")
@@ -117,7 +117,7 @@ fn render_logged_in(state: Rc<PageHeader>, user: &UserProfile) -> Vec<Dom> {
             html!("button-rect", {
                 .prop("slot", "logout")
                 .prop("kind", "outline")
-                .prop("size", "small")
+                .prop("size", "regular")
                 .prop("color", "blue")
                 .text(STR_LOGOUT)
                 .event(clone!(state => move |_: events::Click| {

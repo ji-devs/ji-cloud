@@ -36,7 +36,7 @@ pub fn render(state: Rc<State>) -> Dom {
             }),
             html!("button-rect", {
                 .prop_signal("disabled", state.is_valid_signal().map(|valid| !valid))
-                .prop("size", "small")
+                .prop("size", "regular")
                 .prop("iconAfter", "done")
                 .prop("slot", "done-btn")
                 .text(super::strings::STR_DONE)

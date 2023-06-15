@@ -254,7 +254,7 @@ impl Component<MassEditing> for Rc<MassEditing> {
                         html!("button-rect", {
                             .prop("color", "blue")
                             .prop("kind", "text")
-                            .prop("size", "small")
+                            .prop("size", "regular")
                             .text("Cancel")
                             .event(clone!(state => move |_: events::Click| {
                                 state.images_state.mass_editing.set(false);
@@ -263,7 +263,7 @@ impl Component<MassEditing> for Rc<MassEditing> {
                         html!("button-rect", {
                             .prop("color", "blue")
                             .prop("kind", "filled")
-                            .prop("size", "small")
+                            .prop("size", "regular")
                             .text("Apply")
                             .event(clone!(state => move |_: events::Click| {
                                 state.save_changes();

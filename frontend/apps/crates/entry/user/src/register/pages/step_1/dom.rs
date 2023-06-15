@@ -80,7 +80,7 @@ impl Step1Page {
                 html!("button-rect-icon", {
                     .prop("slot", "submit")
                     .prop("color", "red")
-                    .prop("size", "medium")
+                    .prop("size", "regular")
                     .prop("iconAfter", "arrow")
                     .text(STR_NEXT)
                     .event(clone!(state => move |_evt:events::Click| {

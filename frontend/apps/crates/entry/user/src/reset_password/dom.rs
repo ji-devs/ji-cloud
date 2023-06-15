@@ -29,7 +29,7 @@ impl PasswordResetPage {
             .child(html!("button-rect", {
                 .prop("slot", "submit")
                 .prop("color", "red")
-                .prop("size", "medium")
+                .prop("size", "regular")
                 .text(strings::STR_SUBMIT)
                 .event(clone!(state => move |_evt:events::Click| {
                     state.change_password();

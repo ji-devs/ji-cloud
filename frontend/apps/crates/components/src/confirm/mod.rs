@@ -70,7 +70,7 @@ impl Confirm {
                                             .text(&self.message)
                                         }),
                                         html!("button-rect", {
-                                            .prop("size", "small")
+                                            .prop("size", "regular")
                                             .prop("color", "red")
                                             .prop("kind", "outline")
                                             .text(&self.cancel_text)
@@ -82,7 +82,7 @@ impl Confirm {
                                             }))
                                         }),
                                         html!("button-rect", {
-                                            .prop("size", "small")
+                                            .prop("size", "regular")
                                             .prop("color", "red")
                                             .prop("kind", "filled")
                                             .text(&self.confirm_text)

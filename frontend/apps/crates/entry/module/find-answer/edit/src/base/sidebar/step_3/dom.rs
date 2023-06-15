@@ -184,7 +184,7 @@ pub fn render(state: Rc<Step3>) -> Dom {
                     })
                     .child(html!("div", {
                         .child(html!("button-icon", {
-                            .prop("size", "medium")
+                            .prop("size", "regular")
                             .prop("color", "blue")
                             .prop("icon", "circle-+-blue")
                             .event(clone!(state => move|_: events::Click| {

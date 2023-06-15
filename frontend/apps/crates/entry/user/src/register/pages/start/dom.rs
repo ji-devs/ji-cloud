@@ -67,7 +67,7 @@ impl RegisterStart {
                     html!("button-rect-icon", {
                         .prop("slot", "submit")
                         .prop("color", "red")
-                        .prop("size", "medium")
+                        .prop("size", "regular")
                         .prop("iconAfter", "arrow")
                         .text(strings::STR_CONTINUE)
                         .event(clone!(state => move |_evt:events::Click| {

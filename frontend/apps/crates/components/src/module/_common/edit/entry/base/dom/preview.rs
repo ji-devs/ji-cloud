@@ -46,7 +46,7 @@ where
                 .prop("slot", "btn")
                 .prop("color", "red")
                 .prop("kind", "filled")
-                .prop("size", "small")
+                .prop("size", "regular")
                 .text(strings::STR_DONE)
                 .child(html!("img-ui", {
                     .prop("path", "core/buttons/rect/arrow-right-yellow.svg")
@@ -147,7 +147,7 @@ where
             .prop("slot", "actions")
             .prop("color", "red")
             .prop("kind", "filled")
-            .prop("size", "small")
+            .prop("size", "regular")
             .text(strings::STR_DONE)
             .child(html!("img-ui", {
                 .prop("path", "core/buttons/rect/arrow-right-yellow.svg")
