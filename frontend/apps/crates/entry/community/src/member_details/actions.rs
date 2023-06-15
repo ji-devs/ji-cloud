@@ -7,6 +7,7 @@ use shared::{
     domain::{
         asset::{DraftOrLive, UserOrMe},
         circle::{CircleBrowsePath, CircleBrowseQuery},
+        course::{CourseBrowsePath, CourseBrowseQuery},
         jig::{JigBrowsePath, JigBrowseQuery},
         playlist::{PlaylistBrowsePath, PlaylistBrowseQuery},
         resource::{ResourceBrowsePath, ResourceBrowseQuery},
@@ -23,21 +24,40 @@ use shared::{
 use utils::{
     location::Country,
     prelude::{get_user_mutable, ApiEndpointExt},
+    unwrap::UnwrapJiExt,
 };
 
-use super::{Connections, Creations, MemberDetails};
+use super::MemberDetails;
 
 impl MemberDetails {
     pub fn load_data(self: &Rc<Self>) {
         let state = self;
         state.loader.load(clone!(state => async move {
-            join!(
-                state.load_member(),
-                state.load_circles(),
-                state.load_members_jigs(),
-                state.load_members_followers(),
-            );
+            state.load_batch_1().await;
+            state.load_batch_2().await;
+            state.load_batch_3().await;
         }));
+    }
+
+    async fn load_batch_1(self: &Rc<Self>) {
+        self.load_member().await;
+    }
+
+    async fn load_batch_2(self: &Rc<Self>) {
+        join!(
+            self.load_members_jigs(),
+            self.load_members_playlists(),
+            self.load_members_resources(),
+            self.load_members_courses(),
+        );
+    }
+
+    async fn load_batch_3(self: &Rc<Self>) {
+        join!(
+            self.load_members_circles(),
+            self.load_members_following(),
+            self.load_members_followers(),
+        );
     }
 
     async fn load_member(self: &Rc<Self>) {
@@ -53,7 +73,7 @@ impl MemberDetails {
         }
     }
 
-    async fn load_circles(self: &Rc<Self>) {
+    async fn load_members_circles(self: &Rc<Self>) {
         let state = self;
 
         let req = CircleBrowseQuery {
@@ -63,22 +83,10 @@ impl MemberDetails {
 
         match endpoints::circle::Browse::api_no_auth(CircleBrowsePath(), Some(req)).await {
             Ok(res) => {
-                state.circles.set(res.circles);
+                state.circles.set(Some(res.circles));
             }
             Err(_) => todo!(),
         }
-    }
-
-    pub fn set_active_creations(self: &Rc<Self>, creations: Creations) {
-        let state = self;
-        state.creations.set(creations.clone());
-        state.loader.load(clone!(state => async move {
-            match creations {
-                Creations::Jigs(_) => state.load_members_jigs().await,
-                Creations::Playlists(_) => state.load_members_playlists().await,
-                Creations::Resources(_) => state.load_members_resources().await,
-            };
-        }));
     }
 
     async fn load_members_jigs(self: &Rc<Self>) {
@@ -90,10 +98,10 @@ impl MemberDetails {
             ..Default::default()
         };
 
-        match endpoints::jig::Browse::api_no_auth(JigBrowsePath(), Some(req)).await {
-            Ok(res) => state.creations.set(Creations::Jigs(Some(res.jigs))),
-            Err(_) => todo!(),
-        }
+        let res = endpoints::jig::Browse::api_no_auth(JigBrowsePath(), Some(req))
+            .await
+            .unwrap_ji();
+        state.jigs.set(Some(res.jigs));
     }
 
     async fn load_members_playlists(self: &Rc<Self>) {
@@ -105,12 +113,10 @@ impl MemberDetails {
             ..Default::default()
         };
 
-        match endpoints::playlist::Browse::api_no_auth(PlaylistBrowsePath(), Some(req)).await {
-            Ok(res) => state
-                .creations
-                .set(Creations::Playlists(Some(res.playlists))),
-            Err(_) => todo!(),
-        }
+        let res = endpoints::playlist::Browse::api_no_auth(PlaylistBrowsePath(), Some(req))
+            .await
+            .unwrap_ji();
+        state.playlists.set(Some(res.playlists));
     }
 
     async fn load_members_resources(self: &Rc<Self>) {
@@ -122,23 +128,25 @@ impl MemberDetails {
             ..Default::default()
         };
 
-        match endpoints::resource::Browse::api_no_auth(ResourceBrowsePath(), Some(req)).await {
-            Ok(res) => state
-                .creations
-                .set(Creations::Resources(Some(res.resources))),
-            Err(_) => todo!(),
-        }
+        let res = endpoints::resource::Browse::api_no_auth(ResourceBrowsePath(), Some(req))
+            .await
+            .unwrap_ji();
+        state.resources.set(Some(res.resources));
     }
 
-    pub fn set_active_connections(self: &Rc<Self>, connections: Connections) {
+    async fn load_members_courses(self: &Rc<Self>) {
         let state = self;
-        state.connections.set(connections.clone());
-        state.loader.load(clone!(state => async move {
-            match connections {
-                Connections::Followers(_) => state.load_members_followers().await,
-                Connections::Following(_) => state.load_members_following().await,
-            };
-        }));
+
+        let req = CourseBrowseQuery {
+            author_id: Some(UserOrMe::User(state.member_id.0)),
+            draft_or_live: Some(DraftOrLive::Live),
+            ..Default::default()
+        };
+
+        let res = endpoints::course::Browse::api_no_auth(CourseBrowsePath(), Some(req))
+            .await
+            .unwrap_ji();
+        state.courses.set(Some(res.courses));
     }
 
     async fn load_members_followers(self: &Rc<Self>) {
@@ -152,17 +160,9 @@ impl MemberDetails {
             BrowsePublicUserFollowersPath(state.member_id),
             Some(req),
         )
-        .await;
-        match res {
-            Ok(res) => {
-                state
-                    .connections
-                    .set(Connections::Followers(Some(res.followers)));
-
-                // state.followers.lock_mut().extend(res.followers);
-            }
-            Err(_) => todo!(),
-        }
+        .await
+        .unwrap_ji();
+        state.followers.set(Some(res.followers));
     }
 
     async fn load_members_following(self: &Rc<Self>) {
@@ -176,15 +176,9 @@ impl MemberDetails {
             BrowsePublicUserFollowingPath(state.member_id),
             Some(req),
         )
-        .await;
-        match res {
-            Ok(res) => {
-                state
-                    .connections
-                    .set(Connections::Following(Some(res.followings)));
-            }
-            Err(_) => todo!(),
-        }
+        .await
+        .unwrap_ji();
+        state.following.set(Some(res.followings));
     }
 
     pub fn follow_member(self: &Rc<Self>) {

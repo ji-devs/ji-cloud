@@ -5,6 +5,7 @@ use futures_signals::signal::Mutable;
 use shared::domain::{
     asset::AssetId,
     circle::Circle,
+    course::CourseResponse,
     jig::JigResponse,
     playlist::PlaylistResponse,
     resource::ResourceResponse,
@@ -16,10 +17,14 @@ use crate::state::Community;
 pub struct MemberDetails {
     pub member_id: UserId,
     pub member: Mutable<Option<PublicUser>>,
-    pub circles: Mutable<Vec<Circle>>,
     pub loader: AsyncLoader,
-    pub creations: Mutable<Creations>,
-    pub connections: Mutable<Connections>,
+    pub jigs: Mutable<Option<Vec<JigResponse>>>,
+    pub resources: Mutable<Option<Vec<ResourceResponse>>>,
+    pub playlists: Mutable<Option<Vec<PlaylistResponse>>>,
+    pub courses: Mutable<Option<Vec<CourseResponse>>>,
+    pub circles: Mutable<Option<Vec<Circle>>>,
+    pub followers: Mutable<Option<Vec<PublicUser>>>,
+    pub following: Mutable<Option<Vec<PublicUser>>>,
     pub play_asset: Mutable<Option<AssetId>>,
     pub community_state: Rc<Community>,
     pub(super) active_popup: Mutable<Option<ActivePopup>>,
@@ -30,28 +35,19 @@ impl MemberDetails {
         Rc::new(Self {
             member_id,
             member: Mutable::new(None),
-            circles: Mutable::new(vec![]),
             loader: AsyncLoader::new(),
-            creations: Mutable::new(Creations::Jigs(None)),
-            connections: Mutable::new(Connections::Followers(None)),
+            jigs: Mutable::new(None),
+            resources: Mutable::new(None),
+            playlists: Mutable::new(None),
+            courses: Mutable::new(None),
+            circles: Mutable::new(None),
+            followers: Mutable::new(None),
+            following: Mutable::new(None),
             play_asset: Mutable::new(None),
             community_state,
             active_popup: Mutable::new(None),
         })
     }
-}
-
-#[derive(Clone, Debug)]
-pub enum Creations {
-    Jigs(Option<Vec<JigResponse>>),
-    Resources(Option<Vec<ResourceResponse>>),
-    Playlists(Option<Vec<PlaylistResponse>>),
-}
-
-#[derive(Clone, Debug)]
-pub enum Connections {
-    Followers(Option<Vec<PublicUser>>),
-    Following(Option<Vec<PublicUser>>),
 }
 
 #[derive(Clone, Copy, Debug)]

@@ -1,5 +1,6 @@
 a {
     width: 100%;
+    min-width: 282px;
     height: 244px;
     box-sizing: border-box;
     position: relative;
