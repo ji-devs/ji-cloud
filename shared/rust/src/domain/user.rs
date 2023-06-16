@@ -128,6 +128,14 @@ pub enum UserBadge {
 }
 
 impl UserBadge {
+    /// get str
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            UserBadge::MasterTeacher => "master-teacher",
+            UserBadge::JiTeam => "ji-team",
+        }
+    }
+
     /// get display name
     pub fn display_name(&self) -> &'static str {
         match self {

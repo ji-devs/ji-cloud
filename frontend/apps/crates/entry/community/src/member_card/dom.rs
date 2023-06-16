@@ -69,6 +69,12 @@ impl MemberCard<'_> {
                                         })
                                         .prop("givenName", &self.member.given_name)
                                         .prop("familyName", &self.member.family_name)
+                                        .apply(|mut dom| {
+                                            if let Some(badge) = &self.member.badge {
+                                                dom = dom.prop("badge", badge.as_str());
+                                            }
+                                            dom
+                                        })
                                     }),
                                     html!("div", {
                                         .class("name")
