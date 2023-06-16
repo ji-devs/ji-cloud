@@ -7,7 +7,7 @@ use shared::{
     domain::{
         circle::{CircleBrowsePath, CircleBrowseQuery},
         course::{CourseBrowsePath, CourseBrowseQuery},
-        user::public_user::{PublicUserBrowsePath, UserBrowseQuery},
+        user::public_user::{self, PublicUserBrowsePath, UserBrowseQuery},
     },
 };
 use utils::prelude::ApiEndpointExt;
@@ -30,6 +30,7 @@ impl CommunityLanding {
         let state = self;
         let req = UserBrowseQuery {
             page_limit: Some(10),
+            order_by: Some(public_user::OrderBy::AssetCount),
             ..Default::default()
         };
 

@@ -218,7 +218,7 @@ impl CommunityLanding {
             .child(html!("span", {
                 .class("cell")
                 .class("creation-count")
-                .text(&20.to_string())
+                .text(&member.total_asset_count.to_string())
             }))
         })
     }
