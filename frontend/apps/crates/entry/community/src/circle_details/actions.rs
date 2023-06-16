@@ -43,6 +43,7 @@ impl CircleDetails {
         match endpoints::circle::Get::api_no_auth(CircleGetPath(state.circle_id), None).await {
             Ok(circle) => {
                 state.circle.set(Some(circle));
+                // state.joined.set(); TODO:
             }
             Err(_) => todo!(),
         }

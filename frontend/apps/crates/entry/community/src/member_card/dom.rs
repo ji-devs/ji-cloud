@@ -35,6 +35,10 @@ impl MemberCard<'_> {
                     .apply(|mut dom| {
                         if let Some(menu) = self.menu {
                             dom = dom.child(html!("div", {
+                                .event_with_options(&EventOptions{ bubbles: true, preventable: true }, move |e: events::Click| {
+                                    e.prevent_default();
+                                    e.stop_propagation();
+                                })
                                 .class("menu")
                                 .child(menu)
                             }));

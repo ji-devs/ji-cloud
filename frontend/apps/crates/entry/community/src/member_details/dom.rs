@@ -417,7 +417,7 @@ impl MemberDetails {
                 .child(html!("h4", {
                     .text("Followers")
                 }))
-                .child_signal(state.followers.signal_cloned().map(clone!(state => move|followers| {
+                .child_signal(state.followers.signal_cloned().map(move|followers| {
                     Some(match followers {
                         None => html!("progress"),
                         Some(followers) => {
@@ -436,7 +436,7 @@ impl MemberDetails {
                             })
                         },
                     })
-                })))
+                }))
             }))
         })
     }

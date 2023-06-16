@@ -12,6 +12,7 @@ use crate::state::Community;
 pub struct CircleDetails {
     pub circle_id: CircleId,
     pub circle: Mutable<Option<Circle>>,
+    pub joined: Mutable<Option<bool>>,
     pub members: MutableVec<PublicUser>,
     pub loader: AsyncLoader,
     pub community_state: Rc<Community>,
@@ -24,6 +25,7 @@ impl CircleDetails {
         Rc::new(Self {
             circle_id,
             circle: Mutable::new(None),
+            joined: Mutable::new(None),
             members: MutableVec::new(),
             loader: AsyncLoader::new(),
             community_state,
