@@ -5,8 +5,8 @@ use crate::{
         course::{
             CourseBrowsePath, CourseBrowseQuery, CourseBrowseResponse, CourseClonePath,
             CourseCreatePath, CourseCreateRequest, CourseDeletePath, CourseGetDraftPath,
-            CourseGetLivePath, CourseId, CoursePublishPath, CourseResponse, CourseSearchPath,
-            CourseSearchQuery, CourseSearchResponse, CourseUpdateDraftDataPath,
+            CourseGetLivePath, CourseId, CoursePlayPath, CoursePublishPath, CourseResponse,
+            CourseSearchPath, CourseSearchQuery, CourseSearchResponse, CourseUpdateDraftDataPath,
             CourseUpdateDraftDataRequest,
         },
         CreateResponse,
@@ -168,4 +168,17 @@ impl ApiEndpoint for Clone {
     type Res = CreateResponse<CourseId>;
     type Err = EmptyError;
     const METHOD: Method = Method::Post;
+}
+
+/// Add to play count for a Course
+///
+/// # Authorization
+/// * None
+pub struct Play;
+impl ApiEndpoint for Play {
+    type Req = ();
+    type Res = ();
+    type Path = CoursePlayPath;
+    type Err = EmptyError;
+    const METHOD: Method = Method::Put;
 }

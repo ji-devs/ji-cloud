@@ -999,6 +999,44 @@ select exists (
     Ok(())
 }
 
+pub async fn course_play(db: &PgPool, id: CourseId) -> anyhow::Result<()> {
+    let mut txn = db.begin().await?;
+
+    let course = sqlx::query!(
+        // language=SQL
+        r#"
+select published_at as "published_at?"
+from course
+where id = $1
+    "#,
+        id.0
+    )
+    .fetch_one(&mut txn)
+    .await?;
+
+    //check if course has been published and playable
+    if course.published_at == None {
+        return Err(anyhow::anyhow!("Course has not been published"));
+    };
+
+    //update Jig play count
+    sqlx::query!(
+        // language=SQL
+        r#"
+update course
+set plays = plays + 1
+where id = $1;
+            "#,
+        id.0,
+    )
+    .execute(db)
+    .await?;
+
+    txn.commit().await?;
+
+    Ok(())
+}
+
 async fn update_draft_or_live(
     conn: &mut PgConnection,
     course_data_id: Uuid,

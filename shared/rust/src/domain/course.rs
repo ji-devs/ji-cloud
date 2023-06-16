@@ -341,3 +341,5 @@ pub struct CourseSearchResponse {
 }
 
 make_path_parts!(CourseDeletePath => "/v1/course/{}" => CourseId);
+
+make_path_parts!(CoursePlayPath => "/v1/course/{}/play" => CourseId);

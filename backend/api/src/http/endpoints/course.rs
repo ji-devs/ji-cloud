@@ -302,6 +302,16 @@ async fn clone(
     Ok(HttpResponse::Created().json(CreateResponse { id }))
 }
 
+/// Add a play to a Course
+async fn play(
+    db: Data<PgPool>,
+    path: web::Path<CourseId>,
+) -> Result<HttpResponse, error::NotFound> {
+    db::course::course_play(&*db, path.into_inner()).await?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
 #[instrument]
 async fn page_limit(page_limit: Option<u32>) -> anyhow::Result<u32> {
     if let Some(limit) = page_limit {
@@ -395,6 +405,10 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <course::Search as ApiEndpoint>::Path::PATH,
         course::Search::METHOD.route().to(search),
+    )
+    .route(
+        <course::Play as ApiEndpoint>::Path::PATH,
+        course::Play::METHOD.route().to(play),
     )
     .route(
         <course::UpdateDraftData as ApiEndpoint>::Path::PATH,
