@@ -56,7 +56,7 @@ select
     language_app,
     language_emails,
     bio,
-    badge                  as "badge!: Option<UserBadge>",
+    badge                  as "badge?: UserBadge",
     location_public,
     languages_spoken_public,
     persona_public,
@@ -168,7 +168,7 @@ select  cte1.id                 as "id!: UserId",
         user_email.email::text as "email!",
         language_emails,
         user_email.created_at  as "created_at!",
-        badge                  as "badge!: Option<UserBadge>",
+        badge                  as "badge?: UserBadge",
         organization,
         location
 from cte1
@@ -226,7 +226,7 @@ select  "user".id                 as "id!: UserId",
         user_email.email::text as "email!",
         language_emails,
         user_email.created_at  as "created_at!",
-        badge                  as "badge!: Option<UserBadge>",
+        badge                  as "badge?: UserBadge",
         organization,
         location
 from "user"
