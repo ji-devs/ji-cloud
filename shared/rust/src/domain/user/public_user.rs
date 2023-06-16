@@ -117,7 +117,7 @@ pub struct UserBrowseQuery {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub circles: Vec<CircleId>,
 
-    /// The hits per page to be returned
+    /// Order by sort
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub order_by: Option<OrderBy>,

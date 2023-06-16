@@ -5,6 +5,7 @@ use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 
 use crate::api::endpoints::PathPart;
+use strum_macros::Display;
 
 use super::{asset::UserOrMe, image::ImageId, user::UserId};
 
@@ -111,6 +112,11 @@ pub struct CircleBrowseQuery {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub page_limit: Option<u32>,
+
+    /// Order by sort
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub order_by: Option<OrderBy>,
 }
 
 /// Response for [`Browse`](crate::api::endpoints::circle::Browse).
@@ -193,4 +199,15 @@ pub struct BrowseMembersResponse {
 
     /// user id of member
     pub count: u32,
+}
+
+/// Sort browse results
+#[derive(Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Debug, Display)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[serde(rename_all = "camelCase")]
+#[repr(i16)]
+pub enum OrderBy {
+    /// Order Circles by member count
+    #[strum(serialize = "MemberCount")]
+    MemberCount = 0,
 }
