@@ -170,6 +170,7 @@ async fn browse(
         query.page.unwrap_or(0) as i32,
         page_limit,
         resource_types.to_owned(),
+        query.order_by,
     );
 
     let total_count_future = db::course::filtered_count(
