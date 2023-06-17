@@ -3,6 +3,7 @@ use chrono::{DateTime, Utc};
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use strum_macros::Display;
 
 use self::unit::{CourseUnit, CourseUnitId};
 
@@ -238,6 +239,11 @@ pub struct CourseBrowseQuery {
     #[serde(deserialize_with = "super::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub resource_types: Vec<ResourceTypeId>,
+
+    /// Order by sort
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub order_by: Option<OrderBy>,
 }
 
 /// Response for [`Browse`](crate::api::endpoints::course::Browse).
@@ -341,3 +347,16 @@ pub struct CourseSearchResponse {
 }
 
 make_path_parts!(CourseDeletePath => "/v1/course/{}" => CourseId);
+
+make_path_parts!(CoursePlayPath => "/v1/course/{}/play" => CourseId);
+
+/// Sort browse results
+#[derive(Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Debug, Display)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[serde(rename_all = "camelCase")]
+#[repr(i16)]
+pub enum OrderBy {
+    /// Order Course by play count
+    #[strum(serialize = "PlayCount")]
+    PlayCount = 0,
+}

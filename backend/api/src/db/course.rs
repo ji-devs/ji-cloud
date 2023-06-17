@@ -7,7 +7,7 @@ use shared::domain::{
     category::CategoryId,
     course::{
         unit::{CourseUnit, CourseUnitId, CourseUnitValue},
-        CourseData, CourseId, CourseResponse,
+        CourseData, CourseId, CourseResponse, OrderBy,
     },
     meta::ResourceTypeId as TypeId,
     module::{LiteModule, ModuleId, ModuleKind},
@@ -401,6 +401,7 @@ pub async fn browse(
     page: i32,
     page_limit: u32,
     resource_types: Vec<Uuid>,
+    order_by: Option<OrderBy>,
 ) -> sqlx::Result<Vec<CourseResponse>> {
     let mut txn = db.begin().await?;
 
@@ -418,8 +419,10 @@ with cte as (
         and (pdd.draft_or_live = $2 or $2 is null)
         and (pdd.privacy_level = any($3) or $3 = array[]::smallint[])
         and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])
-    group by coalesce(updated_at, created_at)
-    order by coalesce(updated_at, created_at) desc
+    group by coalesce(updated_at, created_at), plays
+        order by case when $7 = 0 then plays
+        else extract(epoch from coalesce(updated_at, created_at))
+    end desc
 ),
 cte1 as (
     select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id
@@ -484,6 +487,7 @@ limit $6
     &resource_types[..],
     page,
     page_limit as i32,
+    order_by.map(|it| it as i32)
 )
     .fetch_all(&mut txn)
     .instrument(tracing::info_span!("query course_data"))
@@ -995,6 +999,44 @@ select exists (
     if !authed {
         return Err(error::Auth::Forbidden);
     }
+
+    Ok(())
+}
+
+pub async fn course_play(db: &PgPool, id: CourseId) -> anyhow::Result<()> {
+    let mut txn = db.begin().await?;
+
+    let course = sqlx::query!(
+        // language=SQL
+        r#"
+select published_at as "published_at?"
+from course
+where id = $1
+    "#,
+        id.0
+    )
+    .fetch_one(&mut txn)
+    .await?;
+
+    //check if course has been published and playable
+    if course.published_at == None {
+        return Err(anyhow::anyhow!("Course has not been published"));
+    };
+
+    //update Jig play count
+    sqlx::query!(
+        // language=SQL
+        r#"
+update course
+set plays = plays + 1
+where id = $1;
+            "#,
+        id.0,
+    )
+    .execute(db)
+    .await?;
+
+    txn.commit().await?;
 
     Ok(())
 }
