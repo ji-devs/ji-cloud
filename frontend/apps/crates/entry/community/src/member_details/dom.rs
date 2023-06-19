@@ -357,7 +357,11 @@ impl MemberDetails {
             .prop("id", "network")
             .class("network-section")
             .child(html!("h3", {
-                .text("'s network")
+                .text_signal(state.member.signal_ref(|member| {
+                    member.as_ref().map(|member| {
+                        format!("{} {}'s network", member.given_name, member.family_name)
+                    }).unwrap_or_default()
+                }))
             }))
             .child(html!("div", {
                 .class("items-container")
