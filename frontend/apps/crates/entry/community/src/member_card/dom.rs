@@ -117,7 +117,10 @@ impl MemberCard<'_> {
                                     }),
                                     html!("span", {
                                         .class("value")
-                                        .text("296")
+                                        .text(&match self.member.total_asset_count {
+                                            0 => String::new(),
+                                            count => count.to_string()
+                                        })
                                     }),
                                     html!("span", {
                                         .class("key")
