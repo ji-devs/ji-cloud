@@ -166,3 +166,7 @@ section h4 {
 ::-webkit-scrollbar-thumb:hover {
     background-color: var(--light-gray-3);
 }
+* {
+    scrollbar-color: var(--light-gray-2) var(--light-gray-2);
+    scrollbar-width: thin;
+}
