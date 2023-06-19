@@ -45,27 +45,26 @@ impl Component<CommunityLanding> for Rc<CommunityLanding> {
                 .class("members")
                 .child(html!("div", {
                     .class("row")
-                    .class("header-row")
                     .child(html!("span", {
-                        .class("cell")
+                        .class("cell-header")
                         .class("index")
                     }))
                     .child(html!("span", {
-                        .class("cell")
+                        .class("cell-header")
                         .class("image")
                     }))
                     .child(html!("span", {
-                        .class("cell")
+                        .class("cell-header")
                         .class("name")
                         .text("Name")
                     }))
                     .child(html!("span", {
-                        .class("cell")
+                        .class("cell-header")
                         .class("flag")
                         .text("Country")
                     }))
                     .child(html!("span", {
-                        .class("cell")
+                        .class("cell-header")
                         .class("creation-count")
                         .text("Creations")
                     }))

@@ -55,6 +55,11 @@ section.top-circles button-rect {
 .top-members .members .row:nth-child(even) .cell {
     background-color: #fff6d9;
 }
+.top-members .members .row .cell-header {
+    margin-bottom: 14px;
+    font-size: 13px;
+    color: var(--dark-gray-5);
+}
 .top-members .members .row .cell {
     height: 80px;
     color: var(--dark-gray-6);
@@ -70,8 +75,11 @@ section.top-circles button-rect {
     height: 56px;
     width: 56px;
 }
+.top-members .members .row .cell-header.name,
 .top-members .members .row .cell.name {
     padding-inline: 12px;
+}
+.top-members .members .row .cell.name {
     font-weight: 500;
 }
 .top-members .members .row .cell.flag img-ui {
