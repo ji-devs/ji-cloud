@@ -5,7 +5,7 @@ use futures::join;
 use shared::{
     api::endpoints,
     domain::{
-        circle::{CircleBrowsePath, CircleBrowseQuery},
+        circle::{self, CircleBrowsePath, CircleBrowseQuery},
         course::{CourseBrowsePath, CourseBrowseQuery},
         user::public_user::{self, PublicUserBrowsePath, UserBrowseQuery},
     },
@@ -48,6 +48,7 @@ impl CommunityLanding {
         let state = self;
         let req = CircleBrowseQuery {
             page_limit: Some(5),
+            order_by: Some(circle::OrderBy::MemberCount),
             ..Default::default()
         };
 
