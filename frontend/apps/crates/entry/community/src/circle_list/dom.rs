@@ -23,13 +23,16 @@ impl Component<CirclesList> for Rc<CirclesList> {
         state.load_circles();
         dom.child(html!("div", {
             .class("header")
-            .child(html!("h1", {
-                .text("Circles")
-            }))
-            .child(html!("span", {
-                .class("circles-count")
-                .text_signal(self.total_circles_count.signal().map(|t| {
-                    t.map(|t| t.to_string()).unwrap_or_default()
+            .child(html!("div", {
+                .class("left-side")
+                .child(html!("h1", {
+                    .text("Circles")
+                }))
+                .child(html!("span", {
+                    .class("circles-count")
+                    .text_signal(self.total_circles_count.signal().map(|t| {
+                        t.map(|t| t.to_string()).unwrap_or_default()
+                    }))
                 }))
             }))
             .child(html!("button-rect", {
