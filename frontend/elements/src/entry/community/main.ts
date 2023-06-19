@@ -1,7 +1,6 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import "../../core/page-footer/page-footer";
 
-const STR_COMMUNITY = "Community";
 const STR_PINCUS_PARTNERSHIP = "In partnership with the Pincus Fund";
 
 @customElement("community-main")
@@ -34,15 +33,18 @@ export class _ extends LitElement {
                         grid-template-columns: auto auto;
                     }
                 }
-                h2 {
+                ::slotted([slot=title]) {
                     margin: 0;
                     color: #fed758;
                     font-weight: 900;
                     font-size: 32px;
+                    align-self: start;
+                    justify-self: start;
+                    text-decoration: none;
                     text-align: center;
                 }
                 @media (min-width: 1024px) {
-                    h2 {
+                    ::slotted([slot=title]) {
                         text-align: left;
                     }
                 }
@@ -78,7 +80,7 @@ export class _ extends LitElement {
             <slot name="jigzi-header"></slot>
             <header>
                 <div class="width-holder">
-                    <h2>${STR_COMMUNITY}</h2>
+                    <slot name="title"></slot>
                     <slot name="nav"></slot>
                     <slot name="search-bar"></slot>
                 </div>

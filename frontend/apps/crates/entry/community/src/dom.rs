@@ -4,7 +4,7 @@ use components::{
     overlay::container::OverlayContainer,
     page_header::{PageHeader, PageHeaderConfig, PageLinks},
 };
-use dominator::{clone, html, with_node, Dom, EventOptions};
+use dominator::{clone, html, link, with_node, Dom, EventOptions};
 use futures_signals::signal::{Signal, SignalExt};
 use shared::domain::user::{UserId, UserProfile};
 use utils::{
@@ -39,6 +39,10 @@ impl Community {
                     ..Default::default()
                 }).render(),
                 self.render_nav(),
+                link!(Route::Community(CommunityRoute::Landing).to_string(), {
+                    .prop("slot", "title")
+                    .text("Community")
+                }),
                 html!("form", {
                     .prop("slot", "search-bar")
                     .event_with_options(
