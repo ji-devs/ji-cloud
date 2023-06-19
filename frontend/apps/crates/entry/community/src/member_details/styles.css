@@ -150,3 +150,19 @@ section h4 {
     padding-inline: 24px;
     padding-bottom: 18px;
 }
+
+/* scrollbar */
+::-webkit-scrollbar {
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+    margin-inline: 24px;
+}
+::-webkit-scrollbar-thumb {
+    background-color: var(--light-gray-2);
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--light-gray-3);
+}
