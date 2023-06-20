@@ -237,11 +237,10 @@ impl JigPlayer {
                                                 route = format!("{}?draft_or_live=draft", route);
                                             }
 
-                                            let url = unsafe {
-                                                SETTINGS.get_unchecked()
-                                                    .remote_target
-                                                    .spa_iframe(&route)
-                                            };
+                                            let url = SETTINGS.get()
+                                                .unwrap_ji()
+                                                .remote_target
+                                                .spa_iframe(&route);
                                             url
                                         },
                                     }

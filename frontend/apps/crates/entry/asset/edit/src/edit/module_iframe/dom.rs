@@ -22,11 +22,10 @@ impl ModuleIframe {
                     None => String::new(),
                     Some(module_kind) => {
                         let path = Route::Module(ModuleRoute::Edit(module_kind, state.asset_id, state.module_id)).to_string();
-                        let url = unsafe {
-                            SETTINGS.get_unchecked()
-                                .remote_target
-                                .spa_iframe(&path)
-                        };
+                        let url = SETTINGS.get()
+                            .unwrap_ji()
+                            .remote_target
+                            .spa_iframe(&path);
                         url
                     },
                 }

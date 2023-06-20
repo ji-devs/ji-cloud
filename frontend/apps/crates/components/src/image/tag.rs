@@ -1,3 +1,5 @@
+use num_derive::FromPrimitive;
+use num_traits::FromPrimitive;
 use strum_macros::EnumIter;
 
 const STR_BACKGROUND_LAYER_1: &str = "Background Layer 1";
@@ -20,7 +22,7 @@ const STR_WARDROBE: &str = "Wardrobe";
 const STR_STAGE: &str = "Stage";
 
 #[repr(i16)]
-#[derive(EnumIter, Debug, PartialEq, Copy, Clone, Eq, Hash)]
+#[derive(EnumIter, Debug, PartialEq, Copy, Clone, Eq, Hash, FromPrimitive)]
 pub enum ImageTag {
     BackgroundLayer1 = 0,
     BackgroundLayer2 = 1,
@@ -71,9 +73,9 @@ impl ImageTag {
     }
 }
 
-//it's up to the caller to ensure a valid value!
-impl From<i16> for ImageTag {
-    fn from(value: i16) -> Self {
-        unsafe { std::mem::transmute(value) }
+impl TryFrom<i16> for ImageTag {
+    type Error = ();
+    fn try_from(value: i16) -> Result<Self, ()> {
+        FromPrimitive::from_i16(value).ok_or(())
     }
 }

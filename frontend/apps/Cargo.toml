@@ -96,6 +96,8 @@ chrono-tz = { version = "0.6.0", features = ["serde"] }
 convert_case = "0.6.0"
 zxcvbn = "2.1.2"
 const_format = "0.2.5"
+num-traits = "0.2"
+num-derive = "0.3"
 web-sys = { version = "0.3.55", features = [
     'Url',
     'Request',

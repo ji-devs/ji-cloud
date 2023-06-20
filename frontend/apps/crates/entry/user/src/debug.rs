@@ -41,5 +41,5 @@ cfg_if! {
 }
 
 pub fn settings() -> &'static DebugSettings {
-    unsafe { SETTINGS.get_unchecked() }
+    SETTINGS.get().unwrap_ji()
 }

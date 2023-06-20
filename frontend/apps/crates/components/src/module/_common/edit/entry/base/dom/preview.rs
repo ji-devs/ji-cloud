@@ -200,7 +200,7 @@ where
         let route: String =
             Route::Module(ModuleRoute::Play(RawData::kind(), asset_id, module_id)).into();
 
-        let url = unsafe { SETTINGS.get_unchecked().remote_target.spa_iframe(&route) };
+        let url = SETTINGS.get().unwrap_ji().remote_target.spa_iframe(&route);
 
         format!("{}?iframe_data=true", url)
     };

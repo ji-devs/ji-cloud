@@ -86,7 +86,7 @@ pub async fn init(asset_id: AssetId, _module_id: ModuleId) {
 }
 
 pub fn settings() -> &'static DebugSettings {
-    unsafe { SETTINGS.get_unchecked() }
+    SETTINGS.get().unwrap_ji()
 }
 
 #[derive(Deserialize, Debug)]

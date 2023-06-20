@@ -159,7 +159,7 @@ impl ShareAsset {
                 match student_code {
                     None => String::new(),
                     Some(student_code) => {
-                        let url = unsafe { SETTINGS.get_unchecked().remote_target.pages_url_iframe() };
+                        let url = SETTINGS.get().unwrap_ji().remote_target.pages_url_iframe();
                         url + &Route::Kids(KidsRoute::StudentCode(Some(student_code))).to_string()
                     },
                 }
@@ -208,7 +208,7 @@ impl ShareAsset {
                     .prop_signal("disabled", state.student_code.signal_ref(|x| x.is_none()))
                     .event(clone!(state => move |_: events::Click| {
                         if let Some(student_code) = &*state.student_code.lock_ref() {
-                            let url = unsafe { SETTINGS.get_unchecked().remote_target.pages_url_iframe() };
+                            let url = SETTINGS.get().unwrap_ji().remote_target.pages_url_iframe();
                             let url = url + &Route::Kids(KidsRoute::StudentCode(Some(student_code.clone()))).to_string();
                             clipboard::write_text(&url);
                             ShareAsset::set_copied_mutable(state.copied_student_url.clone());

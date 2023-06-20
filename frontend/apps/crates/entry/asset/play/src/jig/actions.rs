@@ -365,12 +365,11 @@ fn set_timer_paused(state: &Rc<JigPlayer>, paused: bool) {
 
 pub fn send_iframe_message(state: Rc<JigPlayer>, data: JigToModulePlayerMessage) {
     let iframe_origin: String = Route::Home(HomeRoute::Home).into();
-    let iframe_origin = unsafe {
-        SETTINGS
-            .get_unchecked()
-            .remote_target
-            .spa_iframe(&iframe_origin)
-    };
+    let iframe_origin = SETTINGS
+        .get()
+        .unwrap_ji()
+        .remote_target
+        .spa_iframe(&iframe_origin);
 
     match &*state.iframe.borrow() {
         None => {

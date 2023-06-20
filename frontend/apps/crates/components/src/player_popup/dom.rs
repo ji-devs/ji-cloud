@@ -65,11 +65,10 @@ impl PlayerPopup {
                                     }
                                 }.to_string();
 
-                                let url = unsafe {
-                                    SETTINGS.get_unchecked()
-                                        .remote_target
-                                        .spa_iframe(&url)
-                                };
+                                let url = SETTINGS.get()
+                                    .unwrap_ji()
+                                    .remote_target
+                                    .spa_iframe(&url);
                                 url
                             })
                             .global_event(clone!(state => move |event: events::Message| {

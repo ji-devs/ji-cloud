@@ -44,6 +44,8 @@ gloo-utils = { workspace = true }
 rgb = { workspace = true }
 regex = { workspace = true }
 const_format = { workspace = true }
+num-traits = { workspace = true }
+num-derive = { workspace = true }
 
 [features]
 quiet = ["utils/quiet"]

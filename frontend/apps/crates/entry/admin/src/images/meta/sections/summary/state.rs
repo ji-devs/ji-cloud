@@ -4,6 +4,7 @@ use crate::images::meta::{
 };
 use futures_signals::{signal::SignalExt, signal_vec::SignalVec};
 use std::rc::Rc;
+use utils::unwrap::UnwrapJiExt;
 
 use components::image::tag::ImageTag;
 use dominator::clone;
@@ -87,7 +88,12 @@ impl State {
             .signal_ref(|tag_indices| {
                 tag_indices
                     .iter()
-                    .map(|tag_index| ImageTag::from(*tag_index).display_name().to_string())
+                    .map(|tag_index| {
+                        ImageTag::try_from(*tag_index)
+                            .unwrap_ji()
+                            .display_name()
+                            .to_string()
+                    })
                     .collect::<Vec<String>>()
             })
             .to_signal_vec()
