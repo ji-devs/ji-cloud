@@ -3,7 +3,7 @@ use std::rc::Rc;
 use dominator::clone;
 use shared::{
     api::endpoints,
-    domain::user::public_user::{PublicUserBrowsePath, UserBrowseQuery},
+    domain::user::public_user::{OrderBy, PublicUserBrowsePath, UserBrowseQuery},
 };
 use utils::prelude::ApiEndpointExt;
 
@@ -19,6 +19,7 @@ impl MembersList {
             let req = UserBrowseQuery {
                 page: Some(state.active_page.get() - 1),
                 page_limit: Some(state.items_per_page),
+                order_by: Some(OrderBy::AssetCount),
                 ..Default::default()
             };
 
