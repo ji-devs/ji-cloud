@@ -243,86 +243,110 @@ impl MemberDetails {
             .child(html!("h3", {
                 .text("Jigzi creations")
             }))
-            .child(html!("div", {
-                .class("items-container")
-                .class("jigs")
-                .child(html!("h4", {
-                    .text("JIGs")
-                }))
-                .child_signal(state.jigs.signal_cloned().map(clone!(state => move|jigs| {
-                    Some(match jigs {
-                        None => html!("progress"),
-                        Some(jigs) => {
-                            html!("div", {
+            .child_signal(state.jigs.signal_cloned().map(clone!(state => move|jigs| {
+                if matches!(&jigs, Some(jigs) if jigs.is_empty()) {
+                    return None;
+                }
+                Some(match jigs {
+                    None => html!("progress"),
+                    Some(jigs) => {
+                        if jigs.is_empty() {
+                            return None;
+                        }
+                        html!("div", {
+                            .class("items-container")
+                            .class("jigs")
+                            .child(html!("h4", {
+                                .text("Jigs")
+                            }))
+                            .child(html!("div", {
                                 .class("items")
                                 .children(jigs.into_iter().map(|jig| {
                                     state.render_asset(jig.into())
                                 }))
-                            })
-                        },
-                    })
-                })))
-            }))
-            .child(html!("div", {
-                .class("items-container")
-                .class("playlists")
-                .child(html!("h4", {
-                    .text("Playlists")
-                }))
-                .child_signal(state.playlists.signal_cloned().map(clone!(state => move|playlists| {
-                    Some(match playlists {
-                        None => html!("progress"),
-                        Some(playlists) => {
-                            html!("div", {
+                            }))
+                        })
+                    },
+                })
+            })))
+            .child_signal(state.playlists.signal_cloned().map(clone!(state => move|playlists| {
+                if matches!(&playlists, Some(playlists) if playlists.is_empty()) {
+                    return None;
+                }
+                Some(match playlists {
+                    None => html!("progress"),
+                    Some(playlists) => {
+                        if playlists.is_empty() {
+                            return None;
+                        }
+                        html!("div", {
+                            .class("items-container")
+                            .class("playlists")
+                            .child(html!("h4", {
+                                .text("Playlists")
+                            }))
+                            .child(html!("div", {
                                 .class("items")
                                 .children(playlists.into_iter().map(|playlist| {
                                     state.render_asset(playlist.into())
                                 }))
-                            })
-                        },
-                    })
-                })))
-            }))
-            .child(html!("div", {
-                .class("items-container")
-                .class("resources")
-                .child(html!("h4", {
-                    .text("Resources")
-                }))
-                .child_signal(state.resources.signal_cloned().map(clone!(state => move|resources| {
-                    Some(match resources {
-                        None => html!("progress"),
-                        Some(resources) => {
-                            html!("div", {
+                            }))
+                        })
+                    },
+                })
+            })))
+            .child_signal(state.resources.signal_cloned().map(clone!(state => move|resources| {
+                if matches!(&resources, Some(resources) if resources.is_empty()) {
+                    return None;
+                }
+                Some(match resources {
+                    None => html!("progress"),
+                    Some(resources) => {
+                        if resources.is_empty() {
+                            return None;
+                        }
+                        html!("div", {
+                            .class("items-container")
+                            .class("resources")
+                            .child(html!("h4", {
+                                .text("Resources")
+                            }))
+                            .child(html!("div", {
                                 .class("items")
-                                .children(resources.into_iter().map(|resource| {
-                                    state.render_asset(resource.into())
+                                .children(resources.into_iter().map(|resources| {
+                                    state.render_asset(resources.into())
                                 }))
-                            })
-                        },
-                    })
-                })))
-            }))
-            .child(html!("div", {
-                .class("items-container")
-                .class("courses")
-                .child(html!("h4", {
-                    .text("Courses")
-                }))
-                .child_signal(state.courses.signal_cloned().map(clone!(state => move|courses| {
-                    Some(match courses {
-                        None => html!("progress"),
-                        Some(courses) => {
-                            html!("div", {
+                            }))
+                        })
+                    },
+                })
+            })))
+            .child_signal(state.courses.signal_cloned().map(clone!(state => move|courses| {
+                if matches!(&courses, Some(courses) if courses.is_empty()) {
+                    return None;
+                }
+                Some(match courses {
+                    None => html!("progress"),
+                    Some(courses) => {
+                        if courses.is_empty() {
+                            return None;
+                        }
+                        html!("div", {
+                            .class("items-container")
+                            .class("courses")
+                            .child(html!("h4", {
+                                .text("Courses")
+                            }))
+                            .child(html!("div", {
                                 .class("items")
                                 .children(courses.into_iter().map(|course| {
                                     state.render_asset(course.into())
                                 }))
-                            })
-                        },
-                    })
-                })))
-            }))
+                            }))
+                        })
+                    },
+                })
+            })))
         })
     }
 
@@ -363,19 +387,25 @@ impl MemberDetails {
                     }).unwrap_or_default()
                 }))
             }))
-            .child(html!("div", {
-                .class("items-container")
-                .class("circles")
-                .child(html!("h4", {
-                    .text("Circles")
-                }))
-                .child_signal(state.circles.signal_ref(|circles| {
-                    Some(match circles {
-                        None => html!("progress"),
-                        Some(circle) => {
-                            html!("div", {
+            .child_signal(state.circles.signal_ref(move|circles| {
+                if matches!(&circles, Some(circles) if circles.is_empty()) {
+                    return None;
+                }
+                Some(match circles {
+                    None => html!("progress"),
+                    Some(circles) => {
+                        if circles.is_empty() {
+                            return None;
+                        }
+                        html!("div", {
+                            .class("items-container")
+                            .class("circles")
+                            .child(html!("h4", {
+                                .text("Circles")
+                            }))
+                            .child(html!("div", {
                                 .class("items")
-                                .children(circle.into_iter().map(|circle| {
+                                .children(circles.into_iter().map(|circle| {
                                     CircleCard {
                                         circle,
                                         slot: "",
@@ -383,24 +413,30 @@ impl MemberDetails {
                                         on_member: Box::new(|_|{})
                                     }.render()
                                 }))
-                            })
-                        },
-                    })
-                }))
+                            }))
+                        })
+                    },
+                })
             }))
-            .child(html!("div", {
-                .class("items-container")
-                .class("following")
-                .child(html!("h4", {
-                    .text("Following")
-                }))
-                .child_signal(state.following.signal_ref(move|following| {
-                    Some(match following {
-                        None => html!("progress"),
-                        Some(following) => {
-                            html!("div", {
+            .child_signal(state.following.signal_ref(move|following| {
+                if matches!(&following, Some(following) if following.is_empty()) {
+                    return None;
+                }
+                Some(match following {
+                    None => html!("progress"),
+                    Some(following) => {
+                        if following.is_empty() {
+                            return None;
+                        }
+                        html!("div", {
+                            .class("items-container")
+                            .class("following")
+                            .child(html!("h4", {
+                                .text("Following")
+                            }))
+                            .child(html!("div", {
                                 .class("items")
-                                .children(following.iter().map(|member| {
+                                .children(following.into_iter().map(|member| {
                                     MemberCard {
                                         member,
                                         slot: "",
@@ -410,24 +446,30 @@ impl MemberDetails {
                                         admin_tag: false
                                     }.render()
                                 }))
-                            })
-                        },
-                    })
-                }))
+                            }))
+                        })
+                    },
+                })
             }))
-            .child(html!("div", {
-                .class("items-container")
-                .class("followers")
-                .child(html!("h4", {
-                    .text("Followers")
-                }))
-                .child_signal(state.followers.signal_cloned().map(move|followers| {
-                    Some(match followers {
-                        None => html!("progress"),
-                        Some(followers) => {
-                            html!("div", {
+            .child_signal(state.followers.signal_ref(move|followers| {
+                if matches!(&followers, Some(followers) if followers.is_empty()) {
+                    return None;
+                }
+                Some(match followers {
+                    None => html!("progress"),
+                    Some(followers) => {
+                        if followers.is_empty() {
+                            return None;
+                        }
+                        html!("div", {
+                            .class("items-container")
+                            .class("followers")
+                            .child(html!("h4", {
+                                .text("Followers")
+                            }))
+                            .child(html!("div", {
                                 .class("items")
-                                .children(followers.iter().map(|member| {
+                                .children(followers.into_iter().map(|member| {
                                     MemberCard {
                                         member,
                                         slot: "",
@@ -437,10 +479,10 @@ impl MemberDetails {
                                         admin_tag: false
                                     }.render()
                                 }))
-                            })
-                        },
-                    })
-                }))
+                            }))
+                        })
+                    },
+                })
             }))
         })
     }
