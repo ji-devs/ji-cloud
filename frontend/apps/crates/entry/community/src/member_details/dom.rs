@@ -360,6 +360,7 @@ impl MemberDetails {
                 dense: true,
                 menu: Some(Rc::new(clone!(state => move || {
                     html!("menu-kebab", {
+                        .prop("slot", "menu")
                         .children(&mut [
                             html!("menu-line", {
                                 .prop("icon", "play")
