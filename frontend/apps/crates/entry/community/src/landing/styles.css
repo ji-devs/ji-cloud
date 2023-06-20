@@ -17,7 +17,6 @@ section {
     border: solid 1px var(--light-orange-3);
     background-color: #fff;
     display: grid;
-    padding-block: 24px;
 }
 .header {
     border-bottom: solid 2px var(--light-orange-3);
@@ -99,6 +98,12 @@ video-youtube-player {
     border-radius: 4px;
     overflow: hidden;
 }
+.top-members {
+    padding-block: 24px;
+}
+.top-circles {
+    padding-block: 24px;
+}
 .top-circles .circles {
     padding-inline: 10px;
     margin-inline: 14px;
@@ -107,9 +112,13 @@ video-youtube-player {
     row-gap: 28px;
 }
 .top-courses {
+    padding-top: 24px;
     grid-column: 1 / span 2;
 }
 .top-courses .courses {
+    padding-inline: 24px;
+    padding-block: 10px;
+    margin-block: 14px;
     overflow-x: auto;
     display: grid;
     grid-auto-flow: column;
@@ -119,6 +128,7 @@ video-youtube-player {
 /* scrollbar */
 ::-webkit-scrollbar {
     width: 6px;
+    height: 6px;
 }
 ::-webkit-scrollbar-track {
     background: transparent;
