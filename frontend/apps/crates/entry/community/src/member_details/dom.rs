@@ -258,6 +258,9 @@ impl MemberDetails {
                             .class("jigs")
                             .child(html!("h4", {
                                 .text("Jigs")
+                                .text_signal(state.jigs_count.signal().map(|count| {
+                                    count.map(|count| format!(" ({})", count.to_string())).unwrap_or_default()
+                                }))
                             }))
                             .child(html!("div", {
                                 .class("items")
@@ -284,6 +287,9 @@ impl MemberDetails {
                             .class("playlists")
                             .child(html!("h4", {
                                 .text("Playlists")
+                                .text_signal(state.playlists_count.signal().map(|count| {
+                                    count.map(|count| format!(" ({})", count.to_string())).unwrap_or_default()
+                                }))
                             }))
                             .child(html!("div", {
                                 .class("items")
@@ -310,6 +316,9 @@ impl MemberDetails {
                             .class("resources")
                             .child(html!("h4", {
                                 .text("Resources")
+                                .text_signal(state.resources_count.signal().map(|count| {
+                                    count.map(|count| format!(" ({})", count.to_string())).unwrap_or_default()
+                                }))
                             }))
                             .child(html!("div", {
                                 .class("items")
@@ -336,6 +345,9 @@ impl MemberDetails {
                             .class("courses")
                             .child(html!("h4", {
                                 .text("Courses")
+                                .text_signal(state.courses_count.signal().map(|count| {
+                                    count.map(|count| format!(" ({})", count.to_string())).unwrap_or_default()
+                                }))
                             }))
                             .child(html!("div", {
                                 .class("items")
@@ -388,7 +400,7 @@ impl MemberDetails {
                     }).unwrap_or_default()
                 }))
             }))
-            .child_signal(state.circles.signal_ref(move|circles| {
+            .child_signal(state.circles.signal_ref(clone!(state => move|circles| {
                 if matches!(&circles, Some(circles) if circles.is_empty()) {
                     return None;
                 }
@@ -403,6 +415,9 @@ impl MemberDetails {
                             .class("circles")
                             .child(html!("h4", {
                                 .text("Circles")
+                                .text_signal(state.circles_count.signal().map(|count| {
+                                    count.map(|count| format!(" ({})", count.to_string())).unwrap_or_default()
+                                }))
                             }))
                             .child(html!("div", {
                                 .class("items")
@@ -418,8 +433,8 @@ impl MemberDetails {
                         })
                     },
                 })
-            }))
-            .child_signal(state.following.signal_ref(move|following| {
+            })))
+            .child_signal(state.following.signal_ref(clone!(state => move|following| {
                 if matches!(&following, Some(following) if following.is_empty()) {
                     return None;
                 }
@@ -434,6 +449,9 @@ impl MemberDetails {
                             .class("following")
                             .child(html!("h4", {
                                 .text("Following")
+                                .text_signal(state.following_count.signal().map(|count| {
+                                    count.map(|count| format!(" ({})", count.to_string())).unwrap_or_default()
+                                }))
                             }))
                             .child(html!("div", {
                                 .class("items")
@@ -451,8 +469,8 @@ impl MemberDetails {
                         })
                     },
                 })
-            }))
-            .child_signal(state.followers.signal_ref(move|followers| {
+            })))
+            .child_signal(state.followers.signal_ref(clone!(state => move |followers| {
                 if matches!(&followers, Some(followers) if followers.is_empty()) {
                     return None;
                 }
@@ -467,6 +485,9 @@ impl MemberDetails {
                             .class("followers")
                             .child(html!("h4", {
                                 .text("Followers")
+                                .text_signal(state.followers_count.signal().map(|count| {
+                                    count.map(|count| format!(" ({})", count.to_string())).unwrap_or_default()
+                                }))
                             }))
                             .child(html!("div", {
                                 .class("items")
@@ -484,7 +505,7 @@ impl MemberDetails {
                         })
                     },
                 })
-            }))
+            })))
         })
     }
 

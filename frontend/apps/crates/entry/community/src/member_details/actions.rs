@@ -84,6 +84,7 @@ impl MemberDetails {
         match endpoints::circle::Browse::api_no_auth(CircleBrowsePath(), Some(req)).await {
             Ok(res) => {
                 state.circles.set(Some(res.circles));
+                state.circles_count.set(Some(res.total_circle_count));
             }
             Err(_) => todo!(),
         }
@@ -102,6 +103,7 @@ impl MemberDetails {
             .await
             .unwrap_ji();
         state.jigs.set(Some(res.jigs));
+        state.jigs_count.set(Some(res.total_jig_count));
     }
 
     async fn load_members_playlists(self: &Rc<Self>) {
@@ -117,6 +119,7 @@ impl MemberDetails {
             .await
             .unwrap_ji();
         state.playlists.set(Some(res.playlists));
+        state.playlists_count.set(Some(res.total_playlist_count));
     }
 
     async fn load_members_resources(self: &Rc<Self>) {
@@ -132,6 +135,7 @@ impl MemberDetails {
             .await
             .unwrap_ji();
         state.resources.set(Some(res.resources));
+        state.resources_count.set(Some(res.total_resource_count));
     }
 
     async fn load_members_courses(self: &Rc<Self>) {
@@ -147,6 +151,7 @@ impl MemberDetails {
             .await
             .unwrap_ji();
         state.courses.set(Some(res.courses));
+        state.courses_count.set(Some(res.total_course_count));
     }
 
     async fn load_members_followers(self: &Rc<Self>) {
@@ -163,6 +168,7 @@ impl MemberDetails {
         .await
         .unwrap_ji();
         state.followers.set(Some(res.followers));
+        state.followers_count.set(Some(res.total_follower_count));
     }
 
     async fn load_members_following(self: &Rc<Self>) {
@@ -179,6 +185,7 @@ impl MemberDetails {
         .await
         .unwrap_ji();
         state.following.set(Some(res.followings));
+        state.following_count.set(Some(res.total_following_count));
     }
 
     pub fn follow_member(self: &Rc<Self>) {
