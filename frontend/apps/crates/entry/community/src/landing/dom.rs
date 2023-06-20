@@ -1,6 +1,9 @@
 use std::rc::Rc;
 
-use components::asset_card::{render_asset_card, AssetCardBottomIndicator, AssetCardConfig};
+use components::{
+    asset_card::{render_asset_card, AssetCardBottomIndicator, AssetCardConfig},
+    player_popup::{PlayerPopup, PreviewPopupCallbacks},
+};
 use dominator::{clone, events, html, link, Dom, DomBuilder};
 use futures_signals::signal::{Mutable, SignalExt};
 use shared::domain::user::public_user::PublicUser;
@@ -152,25 +155,51 @@ impl Component<CommunityLanding> for Rc<CommunityLanding> {
             }))
             .child(html!("div", {
                 .class("courses")
-                .children_signal_vec(state.top_courses.signal_ref(move |top_courses| {
+                .children_signal_vec(state.top_courses.signal_ref(clone!(state => move |top_courses| {
                     match top_courses {
                         None => vec![html!("progress")],
                         Some(top_courses) => {
-                            top_courses.into_iter().map(|courses| {
+                            top_courses.into_iter().map(clone!(state => move |courses| {
+                                let courses_id = courses.id;
                                 render_asset_card(
                                     &courses.clone().into(),
                                     AssetCardConfig {
                                         bottom_indicator: AssetCardBottomIndicator::Author,
                                         dense: true,
+                                        menu: Some(Rc::new(clone!(state => move || {
+                                            html!("menu-kebab", {
+                                                .prop("slot", "menu")
+                                                .children(&mut [
+                                                    html!("menu-line", {
+                                                        .prop("icon", "jig-play")
+                                                        .event(clone!(state => move |_: events::Click| {
+                                                            state.play_course.set(Some(courses_id));
+                                                        }))
+                                                    })
+                                                ])
+                                            })
+                                        }))),
                                         ..Default::default()
                                     }
                                 )
-                            }).collect()
+                            })).collect()
                         },
                     }
-                }).to_signal_vec())
+                })).to_signal_vec())
             }))
         }))
+        .child_signal(state.play_course.signal().map(clone!(state => move |play_course| {
+            play_course.map(|course_id| {
+                PlayerPopup::new_default_player_options(
+                    course_id.into(),
+                    PreviewPopupCallbacks {
+                        close: Box::new(clone!(state => move|| {
+                            state.play_course.set(None);
+                        }))
+                    },
+                ).render(None)
+            })
+        })))
     }
 }
 
