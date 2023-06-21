@@ -28,7 +28,7 @@ fa-button {
     height: 120px;
     width: 120px;
     border-radius: 50%;
-
+    object-fit: cover;
 }
 .has-image button-rect {
     justify-self: center;

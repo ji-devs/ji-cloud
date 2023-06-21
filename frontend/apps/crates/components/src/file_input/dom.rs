@@ -50,8 +50,9 @@ impl Component<FileInput> for Rc<FileInput> {
                         Some(value) if state.preview_images && value.type_().starts_with("image/") => {
                             Some(html!("img", {
                                 .style("overflow", "hidden")
-                                .style("max-width", "100%")
-                                .style("max-height", "100%")
+                                .style("width", "100%")
+                                .style("height", "100%")
+                                .style("object-fit", "cover")
                                 .prop("src", file_to_object_url(&value))
                             }))
                         },

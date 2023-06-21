@@ -21,6 +21,9 @@
     display: inline-block;
     overflow: hidden;
     border: solid 2px var(--main-yellow);
+    object-fit: cover;
+    height: 100%;
+    width: 100%;
 }
 .header .edit-image {
     grid-column: 1;
