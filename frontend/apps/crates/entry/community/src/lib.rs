@@ -8,6 +8,7 @@ mod actions;
 mod circle_card;
 mod circle_details;
 mod circle_list;
+mod courses_list;
 mod dom;
 mod landing;
 mod member_card;

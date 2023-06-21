@@ -13,14 +13,13 @@ use utils::{
     init::analytics,
     prelude::{get_user_cloned, get_user_id},
     routes::{CommunityCirclesRoute, CommunityMembersRoute, CommunityRoute, Route, UserRoute},
-    unwrap::UnwrapJiExt,
 };
 use web_sys::HtmlInputElement;
 
 use crate::{
-    circle_details::CircleDetails, circle_list::CirclesList, landing::CommunityLanding,
-    member_details::MemberDetails, members_list::MembersList, search::CommunitySearch,
-    state::Community,
+    circle_details::CircleDetails, circle_list::CirclesList, courses_list::CoursesList,
+    landing::CommunityLanding, member_details::MemberDetails, members_list::MembersList,
+    search::CommunitySearch, state::Community,
 };
 
 const STR_SEARCH: &str = "Search Jigzi Community";
@@ -84,33 +83,38 @@ impl Community {
 
     fn dom_signal(self: &Rc<Self>) -> impl Signal<Item = Option<Dom>> {
         let state = self;
-        Community::route_signal().map(clone!(state => move |route| match route {
-            Route::Community(route) => Some(match route {
-                CommunityRoute::Landing => CommunityLanding::new().render(),
-                CommunityRoute::Search(search) => {
-                    state.q.set(search.q.clone());
-                    CommunitySearch::new(*search).render()
-                },
-                CommunityRoute::Members(route) => match route {
-                    CommunityMembersRoute::List => MembersList::new().render(),
-                    CommunityMembersRoute::Member(member_id) => {
-                        MemberDetails::new(
-                            Rc::clone(&state),
-                            member_id
-                        ).render()
-                    }
-                },
-                CommunityRoute::Circles(route) => match route {
-                    CommunityCirclesRoute::List => CirclesList::new().render(),
-                    CommunityCirclesRoute::Circle(circle_id) => {
-                        CircleDetails::new(
-                            Rc::clone(&state),
-                            circle_id
-                        ).render()
+        Community::route_signal().map(clone!(state => move |route|{
+
+            log::info!("route change: {:?}", route);
+            match route {
+                Route::Community(route) => Some(match route {
+                    CommunityRoute::Landing => CommunityLanding::new().render(),
+                    CommunityRoute::Search(search) => {
+                        state.q.set(search.q.clone());
+                        CommunitySearch::new(*search).render()
                     },
-                },
-            }),
-            _ => None,
+                    CommunityRoute::Members(route) => match route {
+                        CommunityMembersRoute::List => MembersList::new().render(),
+                        CommunityMembersRoute::Member(member_id) => {
+                            MemberDetails::new(
+                                Rc::clone(&state),
+                                member_id
+                            ).render()
+                        }
+                    },
+                    CommunityRoute::Circles(route) => match route {
+                        CommunityCirclesRoute::List => CirclesList::new().render(),
+                        CommunityCirclesRoute::Circle(circle_id) => {
+                            CircleDetails::new(
+                                Rc::clone(&state),
+                                circle_id
+                            ).render()
+                        },
+                    },
+                    CommunityRoute::Courses => CoursesList::new().render(),
+                }),
+                _ => None,
+            }
         }))
     }
 
@@ -196,21 +200,19 @@ impl Community {
                     })
                 },
                 {
+                    let route = Route::Community(CommunityRoute::Courses).to_string();
                     html!("community-nav-item", {
                         .prop("label", "Courses")
+                        .prop("href", &route)
                         .child(html!("fa-icon", {
                             .prop("icon", "fa-thin fa-clapperboard-play")
                         }))
-                        .event_with_options(
-                            &EventOptions::preventable(),
-                            |e: events::Click| {
-                                e.prevent_default();
-                                track_nav_item("Courses");
-                                let _ = web_sys::window()
-                                    .unwrap_ji()
-                                    .alert_with_message("Coming soon");
-                            }
-                        )
+                        .event(|_: events::Click| {
+                            track_nav_item("Courses");
+                        })
+                        .apply(move |dom| dominator::on_click_go_to_url!(dom, {
+                            route
+                        }))
                     })
                 },
             ])

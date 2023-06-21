@@ -101,6 +101,7 @@ pub enum CommunityRoute {
     Search(Box<CommunitySearchQuery>),
     Members(CommunityMembersRoute),
     Circles(CommunityCirclesRoute),
+    Courses,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
@@ -386,6 +387,7 @@ impl Route {
                     circle_id,
                 )))
             }
+            ["community", "courses"] => Self::Community(CommunityRoute::Courses),
             ["user", "settings"] => Self::User(UserRoute::Settings),
             ["user", "login"] => {
                 let query = serde_qs::from_str(&params_string).unwrap_ji();
@@ -734,6 +736,7 @@ impl From<&Route> for String {
                         format!("/community/circles/{}", circle_id.0)
                     }
                 },
+                CommunityRoute::Courses => "/community/courses".to_string(),
             },
             Route::Dev(route) => match route {
                 DevRoute::Showcase(id, page) => format!("/dev/showcase/{}?page={}", id, page),
