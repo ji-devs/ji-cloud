@@ -117,11 +117,6 @@ impl MemberDetails {
                         .prop("href", "#network")
                         .text("Network")
                     }),
-                    // html!("button-rect", {
-                    //     .prop("kind", "outline")
-                    //     .prop("color", "grey")
-                    //     .text("Circles ??? what does this do?")
-                    // }),
                 ])
             }))
             .apply_if(!is_current_user, clone!(state => move |dom| {
