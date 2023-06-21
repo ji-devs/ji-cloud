@@ -1,12 +1,17 @@
+use crate::db::account::AccountMember;
 use crate::extractor::TokenUser;
 use crate::{db, error};
 use actix_web::web::{Data, Json, Path, ServiceConfig};
-use shared::api::endpoints::account::{GetSchoolAccount, GetSchoolNames};
+use actix_web::HttpResponse;
+use shared::api::endpoints::account::{
+    GetSchoolAccount, GetSchoolNames, UpdateSchoolAccount, UpdateSchoolName,
+};
 use shared::api::{endpoints::account::CreateSchoolAccount, ApiEndpoint, PathParts};
 use shared::domain::billing::{
-    CreateSchoolAccountRequest, GetSchoolAccountResponse, SchoolId, SchoolNameRequest,
+    AccountId, CreateSchoolAccountRequest, GetSchoolAccountResponse, SchoolId, SchoolNameRequest,
+    SchoolNameValue, UpdateSchoolAccountRequest,
 };
-use shared::domain::user::UserScope;
+use shared::domain::user::{UserId, UserScope};
 use sqlx::PgPool;
 use tracing::instrument;
 
@@ -32,7 +37,7 @@ async fn create_school_account(
         SchoolNameRequest::Value(new_name) => {
             // If the user is creating a school with a new school name that we don't already
             // know about, then check whether that name already exists
-            if db::account::check_school_name_exists(db.as_ref(), &new_name).await? {
+            if db::account::check_school_name_exists(db.as_ref(), new_name.as_ref()).await? {
                 // Otherwise, return an error to the client
                 return Err(error::Account::SchoolNameExists(new_name));
             }
@@ -68,6 +73,69 @@ async fn create_school_account(
 }
 
 #[instrument(skip_all)]
+async fn update_school_account(
+    auth: TokenUser,
+    db: Data<PgPool>,
+    path: Path<SchoolId>,
+    req: Json<<UpdateSchoolAccount as ApiEndpoint>::Req>,
+) -> Result<HttpResponse, error::Account> {
+    let user_id = auth.user_id();
+    let school_id = path.into_inner();
+
+    let school = db::account::get_school_account_by_id(db.as_ref(), &school_id)
+        .await?
+        .ok_or(error::Account::NotFound("School not found".into()))?;
+
+    user_authorization(db.as_ref(), &user_id, &school.account_id)
+        .await?
+        .is_authorized(true)?;
+
+    let req: UpdateSchoolAccountRequest = req.into_inner();
+
+    db::account::update_school_account(db.as_ref(), &school_id, req.into()).await?;
+
+    Ok(HttpResponse::Ok().finish())
+}
+
+#[instrument(skip_all)]
+async fn update_school_name(
+    auth: TokenUser,
+    db: Data<PgPool>,
+    path: Path<SchoolId>,
+    req: Json<<UpdateSchoolName as ApiEndpoint>::Req>,
+) -> Result<HttpResponse, error::Account> {
+    let user_id = auth.user_id();
+    let school_id = path.into_inner();
+
+    let new_name: SchoolNameValue = req.into_inner();
+
+    let school = db::account::get_school_account_by_id(db.as_ref(), &school_id)
+        .await?
+        .ok_or(error::Account::NotFound("School not found".into()))?;
+
+    let authorization = user_authorization(db.as_ref(), &user_id, &school.account_id).await?;
+    authorization.is_authorized(true)?;
+
+    if db::account::check_renamed_school_name_exists(db.as_ref(), new_name.as_ref(), &school_id)
+        .await?
+    {
+        return Err(error::Account::SchoolNameExists(new_name));
+    }
+
+    // If the user is a system administrator then the verified flag is automatically set to true.
+    // Otherwise it's false for all other users.
+    db::account::update_school_name(
+        db.as_ref(),
+        &school.school_name.id,
+        new_name,
+        authorization.is_system_administrator(),
+    )
+    .await?;
+
+    Ok(HttpResponse::Ok().finish())
+}
+
+#[instrument(skip_all)]
 async fn get_school_names(
     _auth: TokenUser,
     db: Data<PgPool>,
@@ -84,22 +152,56 @@ async fn get_school_account(
 ) -> Result<Json<<GetSchoolAccount as ApiEndpoint>::Res>, error::Account> {
     let user_id = auth.user_id();
     let school_id = path.into_inner();
+
     let school = db::account::get_school_account_by_id(db.as_ref(), &school_id)
         .await?
         .ok_or(error::Account::NotFound("School not found".into()))?;
 
-    if db::user::has_scopes(db.as_ref(), user_id, &[UserScope::Admin]).await?
-        || db::account::user_account_membership(db.as_ref(), &user_id, &school.account_id)
-            .await?
-            .is_some()
-    {
-        let users =
-            db::account::get_account_users_by_account_id(db.as_ref(), &school.account_id).await?;
+    user_authorization(db.as_ref(), &user_id, &school.account_id).await?;
 
-        Ok(Json(GetSchoolAccountResponse { school, users }))
-    } else {
-        Err(error::Account::Forbidden)
+    let users =
+        db::account::get_account_users_by_account_id(db.as_ref(), &school.account_id).await?;
+
+    Ok(Json(GetSchoolAccountResponse { school, users }))
+}
+
+enum UserAuthorization {
+    SystemAdministrator,
+    AccountAdministrator,
+    AccountMember,
+}
+
+impl UserAuthorization {
+    fn is_system_administrator(&self) -> bool {
+        matches!(self, UserAuthorization::SystemAdministrator)
     }
+
+    fn is_authorized(&self, require_account_admin: bool) -> Result<(), error::Account> {
+        match self {
+            UserAuthorization::AccountMember if require_account_admin => {
+                Err(error::Account::Forbidden)
+            }
+            _ => Ok(()),
+        }
+    }
+}
+
+async fn user_authorization(
+    db: &PgPool,
+    user_id: &UserId,
+    account_id: &AccountId,
+) -> Result<UserAuthorization, error::Account> {
+    Ok(
+        if db::user::has_scopes(db, *user_id, &[UserScope::Admin]).await? {
+            UserAuthorization::SystemAdministrator
+        } else {
+            match db::account::user_account_membership(db, user_id, account_id).await? {
+                Some(AccountMember::Admin) => UserAuthorization::AccountAdministrator,
+                Some(AccountMember::User) => UserAuthorization::AccountMember,
+                None => return Err(error::Account::Forbidden),
+            }
+        },
+    )
 }
 
 pub fn configure(cfg: &mut ServiceConfig) {
@@ -116,5 +218,15 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <GetSchoolAccount as ApiEndpoint>::Path::PATH,
         GetSchoolAccount::METHOD.route().to(get_school_account),
+    )
+    .route(
+        <UpdateSchoolAccount as ApiEndpoint>::Path::PATH,
+        UpdateSchoolAccount::METHOD
+            .route()
+            .to(update_school_account),
+    )
+    .route(
+        <UpdateSchoolName as ApiEndpoint>::Path::PATH,
+        UpdateSchoolName::METHOD.route().to(update_school_name),
     );
 }

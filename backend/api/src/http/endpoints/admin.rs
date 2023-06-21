@@ -186,7 +186,7 @@ async fn add_school_name_if_not_exists(
     if db::account::check_school_name_exists(pool, &name).await? {
         Ok(Some(name))
     } else {
-        db::account::add_school_name(pool, name, true).await?;
+        db::account::add_school_name(pool, name.into(), true).await?;
         Ok(None)
     }
 }

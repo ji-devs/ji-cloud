@@ -1,7 +1,8 @@
 use super::ApiEndpoint;
 use crate::domain::billing::{
-    CreateSchoolAccountRequest, GetSchoolAccountPath, GetSchoolAccountResponse, SchoolAccountPath,
-    SchoolId, SchoolName, SchoolNamePath,
+    CreateSchoolAccountPath, CreateSchoolAccountRequest, GetSchoolAccountResponse,
+    SchoolAccountPath, SchoolId, SchoolName, SchoolNamePath, SchoolNameValue,
+    UpdateSchoolAccountRequest, UpdateSchoolNamePath,
 };
 use crate::{api::Method, error::EmptyError};
 
@@ -18,7 +19,7 @@ impl ApiEndpoint for GetSchoolNames {
 /// Create a new school account
 pub struct CreateSchoolAccount;
 impl ApiEndpoint for CreateSchoolAccount {
-    type Path = SchoolAccountPath;
+    type Path = CreateSchoolAccountPath;
     type Req = CreateSchoolAccountRequest;
     type Res = SchoolId;
     type Err = EmptyError;
@@ -28,7 +29,7 @@ impl ApiEndpoint for CreateSchoolAccount {
 /// Get a school account
 pub struct GetSchoolAccount;
 impl ApiEndpoint for GetSchoolAccount {
-    type Path = GetSchoolAccountPath;
+    type Path = SchoolAccountPath;
     type Req = ();
     type Res = GetSchoolAccountResponse;
     type Err = EmptyError;
@@ -37,3 +38,20 @@ impl ApiEndpoint for GetSchoolAccount {
 
 /// Update a school account
 pub struct UpdateSchoolAccount;
+impl ApiEndpoint for UpdateSchoolAccount {
+    type Path = SchoolAccountPath;
+    type Req = UpdateSchoolAccountRequest;
+    type Res = ();
+    type Err = EmptyError;
+    const METHOD: Method = Method::Put;
+}
+
+/// Update a school name
+pub struct UpdateSchoolName;
+impl ApiEndpoint for UpdateSchoolName {
+    type Path = UpdateSchoolNamePath;
+    type Req = SchoolNameValue;
+    type Res = ();
+    type Err = EmptyError;
+    const METHOD: Method = Method::Patch;
+}

@@ -28,7 +28,7 @@ pub use user::{
 
 pub mod event_arc;
 pub use event_arc::EventArc;
-use shared::domain::billing::{AccountType, SchoolNameId, SubscriptionType};
+use shared::domain::billing::{AccountType, SchoolNameId, SchoolNameValue, SubscriptionType};
 use shared::domain::meta::MetaKind;
 
 /// Represents an error returned by the api.
@@ -858,7 +858,7 @@ impl From<Service> for Billing {
 pub enum Account {
     InternalServerError(anyhow::Error),
     UserHasAccount,
-    SchoolNameExists(String),
+    SchoolNameExists(SchoolNameValue),
     SchoolExists(SchoolNameId),
     NotFound(String),
     Forbidden,
