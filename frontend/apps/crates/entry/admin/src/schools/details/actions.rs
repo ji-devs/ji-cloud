@@ -4,7 +4,7 @@ use shared::api::endpoints;
 use shared::domain::admin::{InviteSchoolUsersRequest, VerifySchoolNameRequest};
 use shared::domain::{
     admin::{AdminVerifySchoolNamePath, InviteSchoolUsersPath},
-    billing::GetSchoolAccountPath,
+    billing::SchoolAccountPath,
 };
 use std::rc::Rc;
 use utils::prelude::ApiEndpointExt;
@@ -15,7 +15,7 @@ impl SchoolDetails {
         let state = Rc::clone(self);
         state.parent.loader.load(clone!(state => async move {
             match endpoints::account::GetSchoolAccount::api_with_auth(
-                GetSchoolAccountPath(state.school_id),
+                SchoolAccountPath(state.school_id),
                 None,
             )
             .await

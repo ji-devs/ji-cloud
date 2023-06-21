@@ -2,7 +2,8 @@ use crate::db;
 use shared::domain::admin::SearchSchoolNamesParams;
 use shared::domain::billing::{
     Account, AccountId, AccountType, AccountUser, CustomerId, PaymentMethod, School, SchoolId,
-    SchoolName, SchoolNameId, SubscriptionStatus, SubscriptionTier, UserAccountSummary,
+    SchoolName, SchoolNameId, SchoolNameValue, SubscriptionStatus, SubscriptionTier,
+    UpdateSchoolAccountRequest, UserAccountSummary,
 };
 use shared::domain::image::ImageId;
 use shared::domain::user::UserId;
@@ -40,6 +41,31 @@ pub async fn check_school_name_exists(pool: &PgPool, name: &str) -> sqlx::Result
 }
 
 #[instrument(skip(pool))]
+pub async fn check_renamed_school_name_exists(
+    pool: &PgPool,
+    name: &str,
+    current_school_id: &SchoolId,
+) -> sqlx::Result<bool> {
+    sqlx::query_scalar!(
+        //language=SQL
+        r#"
+select exists(
+    select 1
+    from school_name
+    left join school using (school_name_id)
+    where
+        citext_eq(name, $1::text::citext)
+        and (school_id is null or school_id != $2)
+) as "exists!"
+"#,
+        name.trim(),
+        current_school_id as &SchoolId,
+    )
+    .fetch_one(pool)
+    .await
+}
+
+#[instrument(skip(pool))]
 pub async fn check_user_has_account(pool: &PgPool, user_id: UserId) -> sqlx::Result<bool> {
     let exists = sqlx::query_scalar!(
         // language=SQL
@@ -58,9 +84,11 @@ select exists(
 #[instrument(skip(pool))]
 pub async fn add_school_name(
     pool: &PgPool,
-    new_name: String,
+    new_name: SchoolNameValue,
     verified: bool,
 ) -> sqlx::Result<SchoolNameId> {
+    let new_name = String::from(new_name);
+
     sqlx::query_scalar!(
         // language=SQL
         r#"
@@ -73,6 +101,34 @@ returning school_name_id as "school_name_id!: SchoolNameId"
     )
     .fetch_one(pool)
     .await
+}
+
+#[instrument(skip(pool))]
+pub async fn update_school_name(
+    pool: &PgPool,
+    school_name_id: &SchoolNameId,
+    new_name: SchoolNameValue,
+    verified: bool,
+) -> sqlx::Result<()> {
+    let new_name = String::from(new_name);
+
+    sqlx::query!(
+        // language=SQL
+        r#"
+update school_name
+set
+    name = $2::text::citext,
+    verified = $3
+where school_name_id = $1
+"#,
+        school_name_id as &SchoolNameId,
+        new_name.trim(),
+        verified,
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
 }
 
 #[instrument(skip(pool))]
@@ -171,6 +227,40 @@ returning school_id as "school_id!: SchoolId"
     txn.commit().await?;
 
     Ok(school_id)
+}
+
+#[instrument(skip(pool))]
+pub async fn update_school_account(
+    pool: &PgPool,
+    school_id: &SchoolId,
+    update: UpdateSchoolAccountRequest,
+) -> sqlx::Result<()> {
+    // Create the school record
+    sqlx::query_scalar!(
+        // language=SQL
+        r#"
+update school
+    set
+        location = coalesce($2, location),
+        email = coalesce($3::text, email),
+        description = coalesce($4, description),
+        profile_image_id = coalesce($5, profile_image_id),
+        website = coalesce($6, website),
+        organization_type = coalesce($7, organization_type)
+where school_id = $1
+"#,
+        school_id as &SchoolId,
+        update.location,
+        update.email,
+        update.description,
+        update.profile_image as Option<ImageId>,
+        update.website,
+        update.organization_type,
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
 }
 
 pub async fn associate_user_with_account<'c, E: Executor<'c, Database = Postgres>>(
@@ -637,6 +727,7 @@ pub async fn verify_school_name(
     Ok(())
 }
 
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum AccountMember {
     Admin,
     User,

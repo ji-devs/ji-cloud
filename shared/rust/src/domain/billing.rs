@@ -4,7 +4,7 @@ use chrono::{DateTime, Utc};
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::fmt::Debug;
+use std::fmt::{Debug, Formatter};
 use strum_macros::{Display, EnumString};
 
 #[cfg(feature = "backend")]
@@ -949,16 +949,45 @@ pub struct SchoolName {
     pub verified: bool,
 }
 
+/// Representation of a school name value
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(transparent)]
+pub struct SchoolNameValue(String);
+
+impl std::fmt::Display for SchoolNameValue {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl From<SchoolNameValue> for String {
+    fn from(value: SchoolNameValue) -> Self {
+        value.0
+    }
+}
+
+impl From<String> for SchoolNameValue {
+    fn from(value: String) -> Self {
+        SchoolNameValue(value)
+    }
+}
+
+impl AsRef<str> for SchoolNameValue {
+    fn as_ref(&self) -> &str {
+        &self.0
+    }
+}
+
 /// Whether the user is creating a new school name or chosen an existing name that we know about
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum SchoolNameRequest {
     /// Attempt to create a new name
-    Value(String),
+    Value(SchoolNameValue),
     /// Use an existing name
     Id(SchoolNameId),
 }
 
-make_path_parts!(SchoolAccountPath => "/v1/school");
+make_path_parts!(CreateSchoolAccountPath => "/v1/school");
 
 /// Request to create a new school account
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -969,7 +998,7 @@ pub struct CreateSchoolAccountRequest {
     pub location: Value,
 }
 
-make_path_parts!(GetSchoolAccountPath => "/v1/school/{}" => SchoolId);
+make_path_parts!(SchoolAccountPath => "/v1/school/{}" => SchoolId);
 
 /// Request to create a new school account
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -979,3 +1008,39 @@ pub struct GetSchoolAccountResponse {
     /// School location
     pub users: Vec<AccountUser>,
 }
+
+/// Request to update a school profile.
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
+pub struct UpdateSchoolAccountRequest {
+    /// The school's location
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub location: Option<Value>,
+
+    /// The school's email address
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub email: Option<String>,
+
+    /// Description for school
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+
+    /// ID to the school's profile image in the user image library.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub profile_image: Option<ImageId>,
+
+    /// Website for the school
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub website: Option<String>,
+
+    /// Organization type
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub organization_type: Option<String>,
+}
+
+make_path_parts!(UpdateSchoolNamePath => "/v1/school/{}/school-name" => SchoolId);
