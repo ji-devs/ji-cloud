@@ -84,8 +84,6 @@ impl Community {
     fn dom_signal(self: &Rc<Self>) -> impl Signal<Item = Option<Dom>> {
         let state = self;
         Community::route_signal().map(clone!(state => move |route|{
-
-            log::info!("route change: {:?}", route);
             match route {
                 Route::Community(route) => Some(match route {
                     CommunityRoute::Landing => CommunityLanding::new().render(),
