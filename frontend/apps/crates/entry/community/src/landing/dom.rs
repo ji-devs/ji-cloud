@@ -171,7 +171,7 @@ impl Component<CommunityLanding> for Rc<CommunityLanding> {
                                                 .prop("slot", "menu")
                                                 .children(&mut [
                                                     html!("menu-line", {
-                                                        .prop("icon", "jig-play")
+                                                        .prop("icon", "play")
                                                         .event(clone!(state => move |_: events::Click| {
                                                             state.play_course.set(Some(courses_id));
                                                         }))
