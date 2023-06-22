@@ -35,12 +35,13 @@ use crate::{
 /// Get a User
 pub async fn get(
     db: Data<PgPool>,
-    _auth: Option<TokenUser>,
+    auth: Option<TokenUser>,
     path: Path<UserId>,
 ) -> Result<Json<<user::GetPublicUser as ApiEndpoint>::Res>, error::NotFound> {
     let user_id = path.into_inner();
+    let token_user = get_user_id(auth);
 
-    let user = db::user::public_user::get(&db, user_id)
+    let user = db::user::public_user::get(&db, user_id, token_user)
         .await?
         .ok_or(error::NotFound::ResourceNotFound)?;
 
@@ -78,7 +79,7 @@ pub async fn search(
         .await?
         .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
 
-    let users: Vec<_> = db::user::public_user::get_by_ids(db.as_ref(), &ids).await?;
+    let users: Vec<_> = db::user::public_user::get_by_ids(db.as_ref(), &ids, user_id).await?;
 
     Ok(Json(SearchPublicUserResponse {
         users,
@@ -90,10 +91,11 @@ pub async fn search(
 /// Browse Public User profiles
 pub async fn browse(
     db: Data<PgPool>,
-    _auth: Option<TokenUser>,
+    auth: Option<TokenUser>,
     query: Option<Query<<user::BrowsePublicUser as ApiEndpoint>::Req>>,
 ) -> Result<Json<<user::BrowsePublicUser as ApiEndpoint>::Res>, error::NotFound> {
     let query = query.map_or_else(Default::default, Query::into_inner);
+    let token_user = get_user_id(auth);
 
     let page_limit = page_limit(query.page_limit)
         .await
@@ -105,6 +107,7 @@ pub async fn browse(
         page_limit as u64,
         query.circles.to_owned(),
         query.order_by,
+        token_user,
     );
 
     let total_count_future =
@@ -296,7 +299,7 @@ pub async fn unfollow(
 /// Get a Public User's Followers
 pub async fn browse_user_followers(
     db: Data<PgPool>,
-    _auth: Option<TokenUser>,
+    auth: Option<TokenUser>,
     path: Path<UserId>,
     query: Option<Query<<user::BrowseFollowers as ApiEndpoint>::Req>>,
 ) -> Result<Json<<user::BrowseFollowers as ApiEndpoint>::Res>, error::NotFound> {
@@ -304,6 +307,7 @@ pub async fn browse_user_followers(
         query.map_or_else(Default::default, Query::into_inner),
         path.into_inner(),
     );
+    let token_user = get_user_id(auth);
 
     let page_limit = page_limit(query.page_limit)
         .await
@@ -314,6 +318,7 @@ pub async fn browse_user_followers(
         user_id,
         query.page.unwrap_or(0),
         page_limit as u64,
+        token_user,
     );
 
     let total_count_future = db::user::public_user::total_follower_count(db.as_ref(), user_id);
@@ -334,12 +339,15 @@ pub async fn browse_user_followers(
 pub async fn browse_user_followings(
     db: Data<PgPool>,
     path: Path<UserId>,
+    auth: Option<TokenUser>,
     query: Option<Query<<user::BrowseFollowing as ApiEndpoint>::Req>>,
 ) -> Result<Json<<user::BrowseFollowing as ApiEndpoint>::Res>, error::NotFound> {
     let (query, user_id) = (
         query.map_or_else(Default::default, Query::into_inner),
         path.into_inner(),
     );
+
+    let token_user = get_user_id(auth);
 
     let page_limit = page_limit(query.page_limit)
         .await
@@ -350,6 +358,7 @@ pub async fn browse_user_followings(
         user_id,
         query.page.unwrap_or(0),
         page_limit as u64,
+        token_user,
     );
 
     let total_count_future = db::user::public_user::total_following_count(db.as_ref(), user_id);
