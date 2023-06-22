@@ -2,11 +2,11 @@ use crate::{
     api::Method,
     domain::{
         circle::{
-            BrowseMembersResponse, Circle, CircleBrowseMembersPath, CircleBrowsePath,
-            CircleBrowseQuery, CircleBrowseResponse, CircleCreatePath, CircleCreateRequest,
-            CircleDeletePath, CircleGetPath, CircleId, CircleRemoveMemberPath, CircleSearchPath,
-            CircleSearchQuery, CircleSearchResponse, CircleUpdateRequest, JoinCirclePath,
-            LeaveCirclePath, UpdateCirclePath,
+            BrowseMembersQuery, BrowseMembersResponse, Circle, CircleBrowseMembersPath,
+            CircleBrowsePath, CircleBrowseQuery, CircleBrowseResponse, CircleCreatePath,
+            CircleCreateRequest, CircleDeletePath, CircleGetPath, CircleId, CircleRemoveMemberPath,
+            CircleSearchPath, CircleSearchQuery, CircleSearchResponse, CircleUpdateRequest,
+            JoinCirclePath, LeaveCirclePath, UpdateCirclePath,
         },
         CreateResponse,
     },
@@ -141,7 +141,7 @@ impl ApiEndpoint for RemoveMember {
 /// Browse members of a Circle.
 pub struct BrowseMembers;
 impl ApiEndpoint for BrowseMembers {
-    type Req = ();
+    type Req = BrowseMembersQuery;
     type Res = BrowseMembersResponse;
     type Path = CircleBrowseMembersPath;
     type Err = EmptyError;

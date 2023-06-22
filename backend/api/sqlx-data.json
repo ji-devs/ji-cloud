@@ -4381,6 +4381,30 @@
     },
     "query": "insert into session (token, user_id, impersonator_id, expires_at, scope_mask) values ($1, $2, $3, $4, $5)"
   },
+  "453c59161e01f8cc14e0060389085398e57a3f0c0a72ae8555f9007a0e0a5779": {
+    "describe": {
+      "columns": [
+        {
+          "name": "user_id: UserId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Bool",
+          "Int2",
+          "Int2Array",
+          "Int2Array"
+        ]
+      }
+    },
+    "query": "\n        with user_scopes as (\n            select cm.user_id,\n                   array_agg(scope) as scopes\n            from circle_member cm\n            left join user_scope on cm.user_id = user_scope.user_id\n            where cm.id = $1\n            group by cm.user_id\n        )\n        select us.user_id  \"user_id: UserId\"\n        from user_scopes us\n        left join circle_member cm on cm.user_id = us.user_id\n        where cm.id = $1 and\n            (case when $2 = false then $3 <> any(us.scopes) and ($4 @> us.scopes or $5 @> us.scopes)\n                  when $2 = true then $3 = any(us.scopes)\n                else us.scopes is not null\n            end\n            )\n"
+  },
   "457c728cb149fc869a3625cb05fc1188616305fa009f1dedcafecd42e3814998": {
     "describe": {
       "columns": [
@@ -9396,26 +9420,6 @@
       }
     },
     "query": "\n        with cte as (\n            select array_agg(resource.id)\n            from resource\n                  inner join resource_data \"rd\" on (draft_id = rd.id or (live_id = rd.id and rd.last_synced_at is not null and published_at is not null))\n                  left join resource_admin_data \"admin\" on admin.resource_id = resource.id\n                  left join resource_data_resource \"rdr\" on rd.id = rdr.resource_data_id\n            where (rd.draft_or_live = $1 or $1 is null)\n                and (author_id = $2 or $2 is null)\n                and (blocked = $3 or $3 is null)\n                and (rd.privacy_level = any($4) or $4 = array[]::smallint[])\n                and (rdr.resource_type_id = any($5) or $5 = array[]::uuid[])\n            group by updated_at, created_at, resource.published_at, admin.resource_id, resource_id\n        )\n            select count(*) as \"count!\" from unnest(array((select cte.array_agg[1] from cte))) with ordinality t(id\n           , ord)\n        "
-  },
-  "93e782118504e721380274424d8150074764f95f3c0dd6bb4628921dc39a6083": {
-    "describe": {
-      "columns": [
-        {
-          "name": "user_id: UserId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect user_id  \"user_id: UserId\"\nfrom circle_member\nwhere id = $1\n"
   },
   "943425e13636b972656a1c40172ae281420bdd0c840c0bac045bc1b1cdbc6957": {
     "describe": {

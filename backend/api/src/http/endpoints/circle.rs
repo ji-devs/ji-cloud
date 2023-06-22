@@ -240,14 +240,16 @@ async fn browse_members(
     db: Data<PgPool>,
     _claims: TokenUser,
     path: Path<CircleId>,
+    query: Option<Query<<circle::BrowseMembers as ApiEndpoint>::Req>>,
 ) -> Result<Json<<circle::BrowseMembers as ApiEndpoint>::Res>, error::NotFound> {
     let id = path.into_inner();
+    let query = query.map_or_else(Default::default, Query::into_inner);
 
     db::circle::valid_circle(&db, id)
         .await
         .map_err(|_| error::NotFound::ResourceNotFound)?;
 
-    let members = db::circle::browse_circle_members(&db, id)
+    let members = db::circle::browse_circle_members(&db, id, query.admin)
         .await
         .map_err(|e| error::NotFound::InternalServerError(e))?;
 
