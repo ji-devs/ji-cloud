@@ -10,5 +10,6 @@ expression: body
   "memberCount": 2,
   "image": "8a2469b4-ffaa-11eb-86a5-330f321d2a3f",
   "createdAt": "[created_at]",
-  "lastEdited": "[last_edited]"
+  "lastEdited": "[last_edited]",
+  "joined": false
 }

@@ -112,7 +112,11 @@ pub async fn delete(db: &PgPool, id: CircleId) -> sqlx::Result<()> {
     conn.commit().await
 }
 
-pub async fn get_one(db: &PgPool, id: CircleId) -> anyhow::Result<Option<Circle>> {
+pub async fn get_one(
+    db: &PgPool,
+    id: CircleId,
+    token_user: Option<UserId>,
+) -> anyhow::Result<Option<Circle>> {
     let res = sqlx::query!(
         r#"
 select id            as "circle_id: CircleId",
@@ -122,11 +126,13 @@ select id            as "circle_id: CircleId",
        member_count,
        creator_id    as "creator_id: UserId",
        created_at,
-       updated_at
+       updated_at,
+       exists(select 1 from circle_member where user_id = $2 and circle.id = circle_member.id) as "joined!"
 from circle
 where id = $1
 "#,
-        id.0
+        id.0,
+        token_user.map(|id| id.0)
     )
     .fetch_optional(db)
     .await?;
@@ -140,6 +146,7 @@ where id = $1
         member_count: row.member_count as u32,
         created_at: row.created_at,
         last_edited: row.updated_at,
+        joined: row.joined,
     });
 
     Ok(circle)
@@ -184,6 +191,7 @@ pub async fn browse(
     page_limit: u32,
     page: i32,
     order_by: Option<OrderBy>,
+    token_user: Option<UserId>,
 ) -> sqlx::Result<Vec<Circle>> {
     let mut txn = db.begin().await?;
 
@@ -213,7 +221,8 @@ pub async fn browse(
                 member_count        as "member_count!",
                 creator_id          as "creator_id!: UserId",
                 created_at,
-                updated_at
+                updated_at,
+                exists(select 1 from circle_member where user_id = $6 and circle.id = circle_member.id) as "joined!"
         from cte2
             left join circle on cte2.id = circle.id
             where ord > (1 * $3 * $4)
@@ -224,7 +233,8 @@ pub async fn browse(
         &user_ids[..],
         page as i32,
         page_limit as i32,
-        order_by.map(|it| it as i32)
+        order_by.map(|it| it as i32),
+        token_user.map(|id| id.0)
     )
     .fetch_all(&mut txn)
     .await?;
@@ -240,6 +250,7 @@ pub async fn browse(
             member_count: row.member_count as u32,
             created_at: row.created_at,
             last_edited: row.updated_at,
+            joined: row.joined,
         })
         .collect();
 
@@ -248,7 +259,11 @@ pub async fn browse(
     Ok(res)
 }
 
-pub async fn get_by_ids(db: &PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Circle>> {
+pub async fn get_by_ids(
+    db: &PgPool,
+    ids: &[Uuid],
+    token_user: Option<UserId>,
+) -> sqlx::Result<Vec<Circle>> {
     let mut txn = db.begin().await?;
 
     let res: Vec<_> = sqlx::query!(
@@ -261,12 +276,14 @@ select  id            as "circle_id!: CircleId",
         member_count  as "member_count!",
         creator_id    as "creator_id!: UserId",
         created_at    as "created_at!",
-        updated_at
+        updated_at,
+        exists(select 1 from circle_member where user_id = $2 and circle.id = circle_member.id) as "joined!"
 from circle
 inner join unnest($1::uuid[])
 with ordinality t(id, ord) using (id)
 "#,
-        ids
+        ids,
+        token_user.map(|id| id.0)
     )
     .fetch_all(&mut txn)
     .await?;
@@ -282,6 +299,7 @@ with ordinality t(id, ord) using (id)
             member_count: row.member_count as u32,
             created_at: row.created_at,
             last_edited: row.updated_at,
+            joined: row.joined,
         })
         .collect();
 

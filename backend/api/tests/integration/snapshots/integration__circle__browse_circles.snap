@@ -12,7 +12,8 @@ expression: body
       "memberCount": 1,
       "image": "89125d88-ffaa-11eb-86a5-9fd50ab8d8df",
       "createdAt": "2021-10-25T21:54:39.723583Z",
-      "lastEdited": "[last_edited]"
+      "lastEdited": "[last_edited]",
+      "joined": false
     },
     {
       "id": "829606d0-f185-11ec-b9e4-5fadfd7252f6",
@@ -22,7 +23,8 @@ expression: body
       "memberCount": 2,
       "image": "89fa4c10-ffaa-11eb-86a5-870d6a01dc37",
       "createdAt": "2021-10-24T21:54:39.723583Z",
-      "lastEdited": "[last_edited]"
+      "lastEdited": "[last_edited]",
+      "joined": true
     },
     {
       "id": "a3126bec-f185-11ec-b9e4-5fa4e257b5a1",
@@ -32,7 +34,8 @@ expression: body
       "memberCount": 2,
       "image": "8a2469b4-ffaa-11eb-86a5-330f321d2a3f",
       "createdAt": "2021-10-23T21:54:39.723583Z",
-      "lastEdited": "[last_edited]"
+      "lastEdited": "[last_edited]",
+      "joined": false
     }
   ],
   "pages": 1,

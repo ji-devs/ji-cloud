@@ -80,7 +80,7 @@ async fn get_live(
     auth: Option<TokenUser>,
     path: web::Path<PlaylistId>,
 ) -> Result<Json<<playlist::GetLive as ApiEndpoint>::Res>, error::NotFound> {
-    let user_id = get_user_id(auth);
+    let user_id = get_user_id(&auth);
 
     let playlist_response =
         db::playlist::get_one(&db, path.into_inner(), DraftOrLive::Live, user_id)
@@ -95,7 +95,7 @@ async fn get_draft(
     auth: Option<TokenUser>,
     path: web::Path<PlaylistId>,
 ) -> Result<Json<<playlist::GetDraft as ApiEndpoint>::Res>, error::NotFound> {
-    let user_id = get_user_id(auth);
+    let user_id = get_user_id(&auth);
 
     let playlist_response =
         db::playlist::get_one(&db, path.into_inner(), DraftOrLive::Draft, user_id)
