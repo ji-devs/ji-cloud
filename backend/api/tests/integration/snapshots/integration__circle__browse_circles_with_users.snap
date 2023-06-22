@@ -12,7 +12,8 @@ expression: body
       "memberCount": 1,
       "image": "89125d88-ffaa-11eb-86a5-9fd50ab8d8df",
       "createdAt": "[created_at]",
-      "lastEdited": "[last_edited]"
+      "lastEdited": "[last_edited]",
+      "joined": false
     },
     {
       "id": "a3126bec-f185-11ec-b9e4-5fa4e257b5a1",
@@ -22,7 +23,8 @@ expression: body
       "memberCount": 2,
       "image": "8a2469b4-ffaa-11eb-86a5-330f321d2a3f",
       "createdAt": "[created_at]",
-      "lastEdited": "[last_edited]"
+      "lastEdited": "[last_edited]",
+      "joined": false
     }
   ],
   "pages": 1,

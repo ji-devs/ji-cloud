@@ -17,7 +17,7 @@ use sqlx::PgPool;
 use crate::{
     db::{self},
     error::{self, ServiceKind},
-    extractor::TokenUser,
+    extractor::{get_user_id, TokenUser},
     http::endpoints::jig::page_limit,
     service::ServiceData,
 };
@@ -95,8 +95,11 @@ async fn delete(
 async fn get_one(
     db: Data<PgPool>,
     path: Path<CircleId>,
+    auth: Option<TokenUser>,
 ) -> Result<Json<<circle::Get as ApiEndpoint>::Res>, error::NotFound> {
-    let circle_response = db::circle::get_one(&db, path.into_inner())
+    let token_user = get_user_id(&auth);
+
+    let circle_response = db::circle::get_one(&db, path.into_inner(), token_user)
         .await?
         .ok_or(error::NotFound::ResourceNotFound)?;
 
@@ -184,7 +187,7 @@ async fn search(
         .await?
         .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
 
-    let circles: Vec<_> = db::circle::get_by_ids(db.as_ref(), &ids).await?;
+    let circles: Vec<_> = db::circle::get_by_ids(db.as_ref(), &ids, creator_id).await?;
 
     Ok(Json(CircleSearchResponse {
         circles,
@@ -200,6 +203,8 @@ async fn browse(
 ) -> Result<Json<<circle::Browse as ApiEndpoint>::Res>, error::Auth> {
     let query = query.map_or_else(Default::default, Query::into_inner);
 
+    let token_user = get_user_id(&claims);
+
     let creator_id = auth_claims(&db, claims, query.creator_id).await?;
 
     let page_limit = page_limit(query.page_limit)
@@ -213,6 +218,7 @@ async fn browse(
         page_limit,
         query.page.unwrap_or(0) as i32,
         query.order_by.to_owned(),
+        token_user,
     );
 
     let total_count_future =

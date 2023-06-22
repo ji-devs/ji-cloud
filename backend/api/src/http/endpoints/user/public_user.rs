@@ -39,7 +39,7 @@ pub async fn get(
     path: Path<UserId>,
 ) -> Result<Json<<user::GetPublicUser as ApiEndpoint>::Res>, error::NotFound> {
     let user_id = path.into_inner();
-    let token_user = get_user_id(auth);
+    let token_user = get_user_id(&auth);
 
     let user = db::user::public_user::get(&db, user_id, token_user)
         .await?
@@ -95,7 +95,7 @@ pub async fn browse(
     query: Option<Query<<user::BrowsePublicUser as ApiEndpoint>::Req>>,
 ) -> Result<Json<<user::BrowsePublicUser as ApiEndpoint>::Res>, error::NotFound> {
     let query = query.map_or_else(Default::default, Query::into_inner);
-    let token_user = get_user_id(auth);
+    let token_user = get_user_id(&auth);
 
     let page_limit = page_limit(query.page_limit)
         .await
@@ -137,7 +137,7 @@ pub async fn browse_user_jigs(
         path.into_inner(),
     );
 
-    let claim_id = get_user_id(auth);
+    let claim_id = get_user_id(&auth);
 
     let page_limit = page_limit(query.page_limit)
         .await
@@ -227,7 +227,7 @@ pub async fn browse_user_playlists(
         path.into_inner(),
     );
 
-    let claim_id = get_user_id(auth);
+    let claim_id = get_user_id(&auth);
 
     let privacy_level = vec![];
     let resource_types = vec![];
@@ -307,7 +307,7 @@ pub async fn browse_user_followers(
         query.map_or_else(Default::default, Query::into_inner),
         path.into_inner(),
     );
-    let token_user = get_user_id(auth);
+    let token_user = get_user_id(&auth);
 
     let page_limit = page_limit(query.page_limit)
         .await
@@ -347,7 +347,7 @@ pub async fn browse_user_followings(
         path.into_inner(),
     );
 
-    let token_user = get_user_id(auth);
+    let token_user = get_user_id(&auth);
 
     let page_limit = page_limit(query.page_limit)
         .await

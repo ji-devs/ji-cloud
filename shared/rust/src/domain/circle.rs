@@ -42,6 +42,9 @@ pub struct Circle {
 
     /// When Circle was last edited
     pub last_edited: Option<DateTime<Utc>>,
+
+    /// Current user is member of circle
+    pub joined: bool,
 }
 
 make_path_parts!(CircleCreatePath => "/v1/circle");
