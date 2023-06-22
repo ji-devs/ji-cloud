@@ -2509,6 +2509,75 @@
     },
     "query": "\nupdate course_data_unit\nset display_name    = coalesce($3, display_name),\n    description     = coalesce($4, description)\nwhere course_data_id = $1\n  and index = $2\n"
   },
+  "262b13911165728439f387888fd7af894d88affed22585d8dd8bbd396c7531a4": {
+    "describe": {
+      "columns": [
+        {
+          "name": "circle_id!: CircleId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "display_name!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "description!",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "image!: ImageId",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "member_count!",
+          "ordinal": 4,
+          "type_info": "Int8"
+        },
+        {
+          "name": "creator_id!: UserId",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at!",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "joined!",
+          "ordinal": 8,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect  id            as \"circle_id!: CircleId\",\n        display_name  as \"display_name!\",\n        description   as \"description!\",\n        image         as \"image!: ImageId\",\n        member_count  as \"member_count!\",\n        creator_id    as \"creator_id!: UserId\",\n        created_at    as \"created_at!\",\n        updated_at,\n        exists(select 1 from circle_member where user_id = $2 and circle.id = circle_member.id) as \"joined!\"\nfrom circle\ninner join unnest($1::uuid[])\nwith ordinality t(id, ord) using (id)\n"
+  },
   "26efd17cb0658fa49a15076f4b0a628fe22eb3dd3b2c3a466eb9eae6880b9eb3": {
     "describe": {
       "columns": [
@@ -4239,68 +4308,6 @@
     },
     "query": "\nselect resource_data.id,\n       display_name\nfrom resource_data\ninner join resource on live_id = resource_data.id\nwhere display_name <> '' and translated_name = '{}'\nand published_at is not null\nand name_translate_status is null\norder by coalesce(updated_at, created_at) desc\nlimit 10 for no key update skip locked;\n         "
   },
-  "4933c82c06a211999270cfb53d4bfd389b86e12e4a792b859de6be37bd7d8dc5": {
-    "describe": {
-      "columns": [
-        {
-          "name": "circle_id!: CircleId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "display_name!",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "description!",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "image!: ImageId",
-          "ordinal": 3,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "member_count!",
-          "ordinal": 4,
-          "type_info": "Int8"
-        },
-        {
-          "name": "creator_id!: UserId",
-          "ordinal": 5,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "created_at!",
-          "ordinal": 6,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at",
-          "ordinal": 7,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true
-      ],
-      "parameters": {
-        "Left": [
-          "UuidArray"
-        ]
-      }
-    },
-    "query": "\nselect  id            as \"circle_id!: CircleId\",\n        display_name  as \"display_name!\",\n        description   as \"description!\",\n        image         as \"image!: ImageId\",\n        member_count  as \"member_count!\",\n        creator_id    as \"creator_id!: UserId\",\n        created_at    as \"created_at!\",\n        updated_at\nfrom circle\ninner join unnest($1::uuid[])\nwith ordinality t(id, ord) using (id)\n"
-  },
   "493430ee614459b5e6c10b8e1c36c73590856fe597a77c5db6be8e8c768f8452": {
     "describe": {
       "columns": [],
@@ -5311,72 +5318,6 @@
       }
     },
     "query": "\ninsert into playlist_data_jig(playlist_data_id, jig_id, index)\nselect $2, jig_id, index\nfrom playlist_data_jig\nwhere playlist_data_id = $1\n        "
-  },
-  "5cbec8381223eb011a41f037a900423703525d65a4d4f2cd853c91dfd42471be": {
-    "describe": {
-      "columns": [
-        {
-          "name": "circle_id!: CircleId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "display_name!",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "description!",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "image!: ImageId",
-          "ordinal": 3,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "member_count!",
-          "ordinal": 4,
-          "type_info": "Int8"
-        },
-        {
-          "name": "creator_id!: UserId",
-          "ordinal": 5,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "created_at",
-          "ordinal": 6,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at",
-          "ordinal": 7,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "UuidArray",
-          "Int4",
-          "Int4",
-          "Int4"
-        ]
-      }
-    },
-    "query": "\n        with cte1 as (\n            select (array_agg(circle.id))[1]\n            from circle\n            left join circle_member \"cm\" on cm.id = circle.id\n            where (creator_id = $1 or $1 is null)\n            and (cm.user_id = any($2) or $2 = array[]::uuid[])\n            group by circle.created_at, member_count\n            order by case when $5 = 0 then member_count\n                else extract(epoch from created_at)\n            end desc  \n        ),\n        cte2 as (\n            select * from unnest(array(select cte1.array_agg from cte1)) with ordinality t(id\n           , ord) order by ord\n        )\n        select  circle.id            as \"circle_id!: CircleId\",\n                display_name        as \"display_name!\",\n                description         as \"description!\",\n                image               as \"image!: ImageId\",\n                member_count        as \"member_count!\",\n                creator_id          as \"creator_id!: UserId\",\n                created_at,\n                updated_at\n        from cte2\n            left join circle on cte2.id = circle.id\n            where ord > (1 * $3 * $4)\n            order by ord\n            limit $4\n            "
   },
   "5d39b246259043965846dc0fd205dc25a7a1263d74d2a6451b15c70052ec4844": {
     "describe": {
@@ -12114,6 +12055,75 @@
     },
     "query": "\nupdate playlist_data_resource\nset resource_content = $3\nwhere playlist_data_id = $1 and id = $2\n            "
   },
+  "bd95d3cd5b445f69b7e3ff5b998449809bc925172a749621b4712ae1c0f63804": {
+    "describe": {
+      "columns": [
+        {
+          "name": "circle_id: CircleId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "description",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "image!: ImageId",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "member_count",
+          "ordinal": 4,
+          "type_info": "Int8"
+        },
+        {
+          "name": "creator_id: UserId",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "joined!",
+          "ordinal": 8,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect id            as \"circle_id: CircleId\",\n       display_name,\n       description,\n       image         as \"image!: ImageId\",\n       member_count,\n       creator_id    as \"creator_id: UserId\",\n       created_at,\n       updated_at,\n       exists(select 1 from circle_member where user_id = $2 and circle.id = circle_member.id) as \"joined!\"\nfrom circle\nwhere id = $1\n"
+  },
   "bdfa6658d04ff049c61a416af645025bdd798b50d837f21ebd79ff76f71899e5": {
     "describe": {
       "columns": [],
@@ -14481,6 +14491,79 @@
     },
     "query": "\ndelete\nfrom playlist_data_module\nwhere playlist_data_id = $1 and playlist_data_module.id is not distinct from $2\nreturning index\n"
   },
+  "efa9546c0e328baa75583f8c6130eaf639c4703182bfc71ddb1046932ce04f4d": {
+    "describe": {
+      "columns": [
+        {
+          "name": "circle_id!: CircleId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "display_name!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "description!",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "image!: ImageId",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "member_count!",
+          "ordinal": 4,
+          "type_info": "Int8"
+        },
+        {
+          "name": "creator_id!: UserId",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "joined!",
+          "ordinal": 8,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "UuidArray",
+          "Int4",
+          "Int4",
+          "Int4",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        with cte1 as (\n            select (array_agg(circle.id))[1]\n            from circle\n            left join circle_member \"cm\" on cm.id = circle.id\n            where (creator_id = $1 or $1 is null)\n            and (cm.user_id = any($2) or $2 = array[]::uuid[])\n            group by circle.created_at, member_count\n            order by case when $5 = 0 then member_count\n                else extract(epoch from created_at)\n            end desc  \n        ),\n        cte2 as (\n            select * from unnest(array(select cte1.array_agg from cte1)) with ordinality t(id\n           , ord) order by ord\n        )\n        select  circle.id            as \"circle_id!: CircleId\",\n                display_name        as \"display_name!\",\n                description         as \"description!\",\n                image               as \"image!: ImageId\",\n                member_count        as \"member_count!\",\n                creator_id          as \"creator_id!: UserId\",\n                created_at,\n                updated_at,\n                exists(select 1 from circle_member where user_id = $6 and circle.id = circle_member.id) as \"joined!\"\n        from cte2\n            left join circle on cte2.id = circle.id\n            where ord > (1 * $3 * $4)\n            order by ord\n            limit $4\n            "
+  },
   "efbe5d524f0f46fa04a069af5a4ab13b6165cd342afaedcd5ae7ae439693ad1b": {
     "describe": {
       "columns": [
@@ -14501,68 +14584,6 @@
       }
     },
     "query": "\ndelete\nfrom course_data_module\nwhere course_data_id = $1 and course_data_module.id is not distinct from $2\nreturning index\n"
-  },
-  "eff30ae62c70d51425bbc839b06bca6d805cbb345824e388cdb890f5b7e5c1ef": {
-    "describe": {
-      "columns": [
-        {
-          "name": "circle_id: CircleId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "display_name",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "description",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "image!: ImageId",
-          "ordinal": 3,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "member_count",
-          "ordinal": 4,
-          "type_info": "Int8"
-        },
-        {
-          "name": "creator_id: UserId",
-          "ordinal": 5,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "created_at",
-          "ordinal": 6,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at",
-          "ordinal": 7,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect id            as \"circle_id: CircleId\",\n       display_name,\n       description,\n       image         as \"image!: ImageId\",\n       member_count,\n       creator_id    as \"creator_id: UserId\",\n       created_at,\n       updated_at\nfrom circle\nwhere id = $1\n"
   },
   "f0690dfd7a2dab5daf86dbcf154b3e886c65c43baeae1d4337e6541f78357bfe": {
     "describe": {
