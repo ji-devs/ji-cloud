@@ -16,7 +16,11 @@ use uuid::Uuid;
 
 use super::get_location;
 
-pub async fn get(db: &PgPool, user_id: UserId) -> anyhow::Result<Option<PublicUser>> {
+pub async fn get(
+    db: &PgPool,
+    user_id: UserId,
+    token: Option<UserId>,
+) -> anyhow::Result<Option<PublicUser>> {
     let profile = sqlx::query!(
         r#"
     select  user_id as "id!: UserId",
@@ -42,12 +46,14 @@ pub async fn get(db: &PgPool, user_id: UserId) -> anyhow::Result<Option<PublicUs
                 from circle_member bm
                 inner join circle on bm.id = circle.id
                 where bm.user_id = "user".id
-            ) as "circles!: Vec<CircleId>"
+            ) as "circles!: Vec<CircleId>",
+            exists(select 1 from user_follow where follower_id = $2 and user_id = "user".id) as "following!"
         from "user"
-            inner join user_profile on "user".id = user_profile.user_id
+        inner join user_profile on "user".id = user_profile.user_id
         where id = $1
         "#,
-        user_id.0
+        user_id.0,
+        token.map(|id| id.0)
     )
     .fetch_optional(db)
     .await?;
@@ -63,6 +69,7 @@ pub async fn get(db: &PgPool, user_id: UserId) -> anyhow::Result<Option<PublicUs
             profile_image: row.profile_image,
             languages_spoken: row.languages_spoken,
             organization: row.organization,
+            following: row.following,
             persona: row.persona,
             country_short: location.country_short,
             country_long: location.country_long,
@@ -85,6 +92,7 @@ pub async fn browse_users(
     page_limit: u64,
     circles: Vec<CircleId>,
     order_by: Option<OrderBy>,
+    token: Option<UserId>,
 ) -> anyhow::Result<Vec<PublicUser>> {
     let mut txn = pool.begin().await?;
 
@@ -138,7 +146,8 @@ pub async fn browse_users(
                     from circle_member bm
                     inner join circle on bm.id = circle.id
                     where bm.user_id = "user".id
-                )) as "circles!: Vec<CircleId>"
+                )) as "circles!: Vec<CircleId>",
+                exists(select 1 from user_follow where follower_id = $5 and user_id = "user".id) as "following!"
         from cte2
         inner join user_profile on cte2.id = user_profile.user_id
         inner join "user" on cte2.id = "user".id
@@ -149,7 +158,8 @@ pub async fn browse_users(
             &circle_ids[..],
             page as i32,
             page_limit as i32,
-            order_by.map(|it| it as i32)
+            order_by.map(|it| it as i32),
+            token.map(|id| id.0)
         )
             .fetch_all(&mut txn)
             .await?;
@@ -168,6 +178,7 @@ pub async fn browse_users(
                 languages_spoken: row.languages_spoken,
                 organization: row.organization,
                 persona: row.persona,
+                following: row.following,
                 country_short: location.country_short,
                 country_long: location.country_long,
                 circles: row.circles,
@@ -346,7 +357,11 @@ pub async fn unfollow(
     Ok(())
 }
 
-pub async fn get_by_ids(db: &PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<PublicUser>> {
+pub async fn get_by_ids(
+    db: &PgPool,
+    ids: &[Uuid],
+    token: Option<UserId>,
+) -> sqlx::Result<Vec<PublicUser>> {
     let mut txn = db.begin().await?;
 
     let res: Vec<_> = sqlx::query!(
@@ -375,13 +390,15 @@ pub async fn get_by_ids(db: &PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<PublicUse
                     from circle_member bm
                     inner join circle on bm.id = circle.id
                     where bm.user_id = "user".id
-                )) as "circles!: Vec<CircleId>"
-                from "user"
-                inner join user_profile on "user".id = user_profile.user_id
-                inner join unnest($1::uuid[])
-                with ordinality t(id, ord) using (id)
+                )) as "circles!: Vec<CircleId>",
+                exists(select 1 from user_follow where follower_id = $2 and user_id = "user".id) as "following!"
+            from "user"
+            inner join user_profile on "user".id = user_profile.user_id
+            inner join unnest($1::uuid[])
+            with ordinality t(id, ord) using (id)
 "#,
-        ids
+            ids,
+            token.map(|id| id.0)
     )
     .fetch_all(&mut txn)
     .await?;
@@ -404,6 +421,7 @@ pub async fn get_by_ids(db: &PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<PublicUse
                 country_long: location.country_long,
                 circles: row.circles,
                 badge: row.badge,
+                following: row.following,
                 jig_count: row.jig_count.map(|i| i as u64),
                 resource_count: row.resource_count.map(|i| i as u64),
                 course_count: row.course_count.map(|i| i as u64),
@@ -492,6 +510,7 @@ pub async fn browse_followers(
     user_id: UserId,
     page: u32,
     page_limit: u64,
+    token: Option<UserId>,
 ) -> sqlx::Result<Vec<PublicUser>> {
     let mut txn = pool.begin().await?;
 
@@ -530,17 +549,18 @@ pub async fn browse_followers(
                     from circle_member bm
                     left join circle on bm.id = circle.id
                     where bm.user_id = "user".id or circle.creator_id = "user".id
-                )) as "circles!: Vec<CircleId>"
+                )) as "circles!: Vec<CircleId>",
+                exists(select 1 from user_follow where follower_id = $4 and user_id = "user".id) as "following!"
         from cte
         inner join user_profile on cte.id = user_profile.user_id
         inner join "user" on (cte.id = "user".id)
         where ord > (1 * $2 * $3)
         limit $3;
-
             "#,
             user_id.0,
             page as i32,
             page_limit as i32,
+            token.map(|id| id.0)
         )
             .fetch_all(&mut txn)
             .await?;
@@ -559,6 +579,7 @@ pub async fn browse_followers(
                 languages_spoken: row.languages_spoken,
                 organization: row.organization,
                 persona: row.persona,
+                following: row.following,
                 country_short: location.country_short,
                 country_long: location.country_long,
                 circles: row.circles,
@@ -582,6 +603,7 @@ pub async fn browse_following(
     user_id: UserId,
     page: u32,
     page_limit: u64,
+    token: Option<UserId>,
 ) -> sqlx::Result<Vec<PublicUser>> {
     let mut txn = pool.begin().await?;
 
@@ -620,7 +642,8 @@ pub async fn browse_following(
                     from circle_member bm
                     left join circle on bm.id = circle.id
                     where bm.user_id = "user".id or circle.creator_id = "user".id
-                ) as "circles!: Vec<CircleId>"
+                ) as "circles!: Vec<CircleId>",
+                exists(select 1 from user_follow where follower_id = $4 and user_id = "user".id) as "following!"
             from cte
             inner join user_profile on cte.id = user_profile.user_id
             inner join "user" on (cte.id = "user".id)
@@ -630,6 +653,7 @@ pub async fn browse_following(
             user_id.0,
             page as i32,
             page_limit as i32,
+            token.map(|id| id.0)
         )
             .fetch_all(&mut txn)
             .await?;
@@ -653,6 +677,7 @@ pub async fn browse_following(
                 country_long: location.country_long,
                 circles: row.circles,
                 badge: row.badge,
+                following: row.following,
                 jig_count: row.jig_count.map(|i| i as u64),
                 resource_count: row.resource_count.map(|i| i as u64),
                 course_count: row.course_count.map(|i| i as u64),

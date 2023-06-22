@@ -284,7 +284,6 @@ async fn browse_circles(port: u16) -> anyhow::Result<()> {
     insta::assert_json_snapshot!(
         format!("{}",name),
         body, {
-            ".**.createdAt" => "[created_at]",
             ".**.lastEdited" => "[last_edited]",
         }
     );

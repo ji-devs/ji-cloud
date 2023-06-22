@@ -34,6 +34,9 @@ pub struct PublicUser {
     /// Profile image of User
     pub profile_image: Option<ImageId>,
 
+    /// following this user or not
+    pub following: bool,
+
     /// Bio of User
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
