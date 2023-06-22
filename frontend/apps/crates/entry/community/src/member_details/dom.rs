@@ -23,7 +23,8 @@ use utils::{
     unwrap::UnwrapJiExt,
 };
 use wasm_bindgen::JsValue;
-use web_sys::ShadowRoot;
+use wasm_bindgen::JsCast;
+use web_sys::{ShadowRoot, ScrollIntoViewOptions, ScrollBehavior, HtmlElement};
 
 const STR_FOLLOWING: &str = "Following";
 const STR_FOLLOW: &str = "Follow";
@@ -108,14 +109,18 @@ impl MemberDetails {
                     html!("button-rect", {
                         .prop("kind", "filled")
                         .prop("color", "blue")
-                        .prop("href", "#creations")
                         .text("Jigzi creations")
+                        .event(|e: events::Click| {
+                            jump_to(e.dyn_target().unwrap_ji(), "#creations");
+                        })
                     }),
                     html!("button-rect", {
                         .prop("kind", "outline")
                         .prop("color", "grey")
-                        .prop("href", "#network")
                         .text("Network")
+                        .event(|e: events::Click| {
+                            jump_to(e.dyn_target().unwrap_ji(), "#network");
+                        })
                     }),
                 ])
             }))
@@ -606,4 +611,10 @@ impl MemberDetails {
                 })
             }))
     }
+}
+
+fn jump_to(el: HtmlElement, selector: &str) -> Option<()> {
+    let el = el.get_root_node().dyn_into::<ShadowRoot>().ok()?.query_selector(selector).ok()??;
+    el.scroll_into_view_with_scroll_into_view_options(ScrollIntoViewOptions::new().behavior(ScrollBehavior::Smooth));
+    Some(())
 }
