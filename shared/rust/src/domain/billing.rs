@@ -781,6 +781,8 @@ pub struct CreateSubscriptionRequest {
     pub setup_intent_id: Option<String>,
     /// Plan ID to create the subscription for
     pub plan_id: PlanId,
+    /// Promotion code
+    pub promotion_code: Option<String>,
 }
 
 make_path_parts!(CreateSubscriptionPath => "/v1/subscribe");

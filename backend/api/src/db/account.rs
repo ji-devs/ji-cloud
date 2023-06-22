@@ -320,6 +320,7 @@ left join (
             account_id, subscription_id, max(created_at)
         from subscription
         group by account_id, subscription_id
+        order by created_at desc
         limit 1
     ) as recent_subscription using (subscription_id)
 ) as subscription using (account_id)

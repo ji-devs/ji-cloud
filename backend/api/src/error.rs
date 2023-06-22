@@ -33,10 +33,11 @@ use shared::domain::meta::MetaKind;
 
 /// Represents an error returned by the api.
 // mostly used in this module
-#[allow(clippy::clippy::module_name_repetitions)]
+#[allow(clippy::module_name_repetitions)]
 pub type BasicError = ApiError<EmptyError>;
 
 /// Represents actix-web config errors
+#[allow(clippy::module_name_repetitions)]
 #[derive(Debug)]
 pub enum ConfigError {
     JsonPayloadError(JsonPayloadError),
@@ -46,19 +47,19 @@ pub enum ConfigError {
 
 impl From<actix_web::error::JsonPayloadError> for ConfigError {
     fn from(error: JsonPayloadError) -> Self {
-        ConfigError::JsonPayloadError(error)
+        Self::JsonPayloadError(error)
     }
 }
 
 impl From<actix_web::error::QueryPayloadError> for ConfigError {
     fn from(error: QueryPayloadError) -> Self {
-        ConfigError::QueryPayloadError(error)
+        Self::QueryPayloadError(error)
     }
 }
 
 impl From<actix_web::error::PathError> for ConfigError {
     fn from(error: PathError) -> Self {
-        ConfigError::PathError(error)
+        Self::PathError(error)
     }
 }
 
@@ -810,6 +811,7 @@ pub enum Billing {
     SubscriptionExists,
     SchoolNotFound,
     IncorrectPlanType(AccountType, SubscriptionType),
+    InvalidPromotionCode(String),
 }
 
 impl<T: Into<anyhow::Error>> From<T> for Billing {
@@ -843,6 +845,11 @@ impl Into<actix_web::Error> for Billing {
             Self::IncorrectPlanType(expected, found) => BasicError::with_message(
                 http::StatusCode::BAD_REQUEST,
                 format!("Expected {expected}, found {found}"),
+            )
+            .into(),
+            Self::InvalidPromotionCode(code) => BasicError::with_message(
+                http::StatusCode::BAD_REQUEST,
+                format!("Invalid promotion code {code}"),
             )
             .into(),
         }

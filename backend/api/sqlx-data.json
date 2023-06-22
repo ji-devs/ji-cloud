@@ -601,6 +601,56 @@
     },
     "query": "\nselect unit_id              as \"id!: CourseUnitId\",\n       display_name         as \"display_name!\",\n       description          as \"description!\",\n       value                as \"value!\"\nfrom course_data_unit \"pddr\"\nwhere course_data_id = $1\n  and pddr.unit_id = $2\n        "
   },
+  "06464f5fac33bf63af2876a3c21b96f1107f4bbd9bb01a8766abe1b65f989620": {
+    "describe": {
+      "columns": [
+        {
+          "name": "account_type!: AccountType",
+          "ordinal": 0,
+          "type_info": "Int2"
+        },
+        {
+          "name": "subscription_tier?: SubscriptionTier",
+          "ordinal": 1,
+          "type_info": "Int2"
+        },
+        {
+          "name": "subscription_status?: SubscriptionStatus",
+          "ordinal": 2,
+          "type_info": "Int2"
+        },
+        {
+          "name": "is_admin!",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "verified!",
+          "ordinal": 4,
+          "type_info": "Bool"
+        },
+        {
+          "name": "overdue!",
+          "ordinal": 5,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        true,
+        false,
+        false,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect\n    account.account_type as \"account_type!: AccountType\",\n    user_account.subscription_tier as \"subscription_tier?: SubscriptionTier\",\n    subscription.status as \"subscription_status?: SubscriptionStatus\",\n    user_account.admin as \"is_admin!\",\n    user_account.verified as \"verified!\",\n    case\n        when subscription.amount_due > 0 then true\n        else false\n    end as \"overdue!\"\nfrom user_account\ninner join account using (account_id)\nleft join (\n    select subscription.account_id, status, amount_due\n    from subscription\n    join (\n        select\n            account_id, subscription_id, max(created_at)\n        from subscription\n        group by account_id, subscription_id\n        order by created_at desc\n        limit 1\n    ) as recent_subscription using (subscription_id)\n) as subscription using (account_id)\nwhere user_account.user_id = $1\n"
+  },
   "07436ad6820515a6bdcbe4fc24b958f0f6c3d6546e0129b080eb010d320dde7b": {
     "describe": {
       "columns": [
@@ -8710,56 +8760,6 @@
       }
     },
     "query": "\ninsert into resource_data_module (resource_data_id, kind, contents, index, is_complete)\nvalues ($1, $2, $3, (select count(*) from resource_data_module where resource_data_id = $1), $4)\nreturning id, \"index\"\n"
-  },
-  "95227c256a254f4a2f2c1233cc73a041c724ced2ca86b97c276559872f07ccc8": {
-    "describe": {
-      "columns": [
-        {
-          "name": "account_type!: AccountType",
-          "ordinal": 0,
-          "type_info": "Int2"
-        },
-        {
-          "name": "subscription_tier?: SubscriptionTier",
-          "ordinal": 1,
-          "type_info": "Int2"
-        },
-        {
-          "name": "subscription_status?: SubscriptionStatus",
-          "ordinal": 2,
-          "type_info": "Int2"
-        },
-        {
-          "name": "is_admin!",
-          "ordinal": 3,
-          "type_info": "Bool"
-        },
-        {
-          "name": "verified!",
-          "ordinal": 4,
-          "type_info": "Bool"
-        },
-        {
-          "name": "overdue!",
-          "ordinal": 5,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        false,
-        true,
-        false,
-        false,
-        false,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect\n    account.account_type as \"account_type!: AccountType\",\n    user_account.subscription_tier as \"subscription_tier?: SubscriptionTier\",\n    subscription.status as \"subscription_status?: SubscriptionStatus\",\n    user_account.admin as \"is_admin!\",\n    user_account.verified as \"verified!\",\n    case\n        when subscription.amount_due > 0 then true\n        else false\n    end as \"overdue!\"\nfrom user_account\ninner join account using (account_id)\nleft join (\n    select subscription.account_id, status, amount_due\n    from subscription\n    join (\n        select\n            account_id, subscription_id, max(created_at)\n        from subscription\n        group by account_id, subscription_id\n        limit 1\n    ) as recent_subscription using (subscription_id)\n) as subscription using (account_id)\nwhere user_account.user_id = $1\n"
   },
   "9532ae58ce1c2ac56c8ef079148fed881571b9efceb087e4723e2248ef13d82e": {
     "describe": {

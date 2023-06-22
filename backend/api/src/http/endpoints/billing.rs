@@ -22,8 +22,8 @@ use std::borrow::Borrow;
 use std::str::FromStr;
 use stripe::{
     Client, CreateCustomer, CreateSubscription as CreateStripeSubscription,
-    CreateSubscriptionItems, Customer, CustomerInvoiceSettings, EventObject, EventType,
-    SetupIntent, SetupIntentId, UpdateCustomer, Webhook,
+    CreateSubscriptionItems, Customer, CustomerInvoiceSettings, EventObject, EventType, List,
+    ListPromotionCodes, PromotionCode, SetupIntent, SetupIntentId, UpdateCustomer, Webhook,
 };
 use tracing::instrument;
 
@@ -66,7 +66,7 @@ async fn create_subscription(
 
     let account = get_or_create_customer(db.as_ref(), &client, &user_profile, &plan).await?;
 
-    if account
+    if !account
         .account_type
         .matches_subscription_type(&plan.subscription_type)
     {
@@ -106,6 +106,30 @@ async fn create_subscription(
             .map_err(error::Billing::Stripe)?;
     }
 
+    let promotion_code = if let Some(promotion_code) = &req.promotion_code {
+        let list_params = ListPromotionCodes {
+            active: Some(true),
+            code: Some(promotion_code),
+            ..Default::default()
+        };
+
+        let List {
+            data: mut codes, ..
+        } = PromotionCode::list(&client, &list_params)
+            .await
+            .map_err(error::Billing::Stripe)?;
+
+        if codes.is_empty() || codes.len() > 1 {
+            return Err(error::Billing::InvalidPromotionCode(
+                promotion_code.to_string(),
+            ));
+        }
+
+        Some(codes.pop().unwrap().id)
+    } else {
+        None
+    };
+
     // Create a Stripe subscription
     let stripe_subscription = {
         let mut params = CreateStripeSubscription::new(stripe_customer_id);
@@ -113,6 +137,8 @@ async fn create_subscription(
             price: Some(plan.price_id.into()),
             ..Default::default()
         }]);
+
+        params.promotion_code = promotion_code;
 
         // This will mark the subscription as incomplete until the payment intent has been
         // confirmed.
