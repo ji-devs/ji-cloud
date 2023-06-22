@@ -148,9 +148,9 @@ impl Component<CommunityLanding> for Rc<CommunityLanding> {
                     .prop("color", "blue")
                     .prop("kind", "text")
                     .text(STR_SEE_ALL_COURSES)
-                    .event(move |_: events::Click| {
-                        todo!()
-                    })
+                    .apply(move |dom| dominator::on_click_go_to_url!(dom, {
+                        Route::Community(CommunityRoute::Courses).to_string()
+                    }))
                 }))
             }))
             .child(html!("div", {
