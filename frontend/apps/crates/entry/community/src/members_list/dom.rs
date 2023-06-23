@@ -1,10 +1,7 @@
 use std::rc::Rc;
 
 use dominator::{class, clone, html, pseudo, with_node, DomBuilder};
-use futures_signals::{
-    map_ref,
-    signal::{Mutable, SignalExt},
-};
+use futures_signals::{map_ref, signal::SignalExt};
 use utils::{component::Component, events};
 use web_sys::{HtmlInputElement, ShadowRoot};
 
@@ -36,30 +33,23 @@ impl Component<MembersList> for Rc<MembersList> {
         .children_signal_vec(
             state
                 .members
-                .signal_ref(move |members| {
-                    match members {
-                        None => {
-                            vec![html!("progress", {
-                                .prop("slot", "items")
-                            })]
-                        }
-                        Some(members) => {
-                            members
-                                .iter()
-                                .map(|member| {
-                                    MemberCard {
-                                        member,
-                                        slot: "",
-                                        menu: None,
-                                        following: Mutable::new(false).read_only(), // TODO: use internal mutable instead
-                                        on_follow: Box::new(|_| {}),
-                                        admin_tag: false,
-                                    }
-                                    .render()
-                                })
-                                .collect()
-                        }
+                .signal_ref(move |members| match members {
+                    None => {
+                        vec![html!("progress", {
+                            .prop("slot", "items")
+                        })]
                     }
+                    Some(members) => members
+                        .iter()
+                        .map(|member| {
+                            MemberCard {
+                                member,
+                                menu: None,
+                                admin_tag: false,
+                            }
+                            .render()
+                        })
+                        .collect(),
                 })
                 .to_signal_vec(),
         )

@@ -7,10 +7,7 @@ use super::{
 use crate::member_card::MemberCard;
 use components::dialog::Dialog;
 use dominator::{clone, html, Dom, DomBuilder};
-use futures_signals::{
-    signal::{Mutable, SignalExt},
-    signal_vec::SignalVecExt,
-};
+use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
 use shared::{
     api::endpoints::circle::RemoveMember,
     domain::{
@@ -265,9 +262,6 @@ impl CircleDetails {
         };
         MemberCard {
             member,
-            slot: "",
-            following: Mutable::new(false).read_only(),
-            on_follow: Box::new(|_| {}),
             admin_tag: member_is_admin,
             menu,
         }

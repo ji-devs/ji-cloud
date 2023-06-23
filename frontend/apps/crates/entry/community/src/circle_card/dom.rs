@@ -9,14 +9,13 @@ use super::{actions, CircleCard};
 impl CircleCard<'_> {
     pub fn render(self) -> Dom {
         let circle_id = self.circle.id;
-        let joined_mutable = Mutable::new(false);
+        let joined_mutable = Mutable::new(self.circle.joined);
         let path = Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::Circle(
             circle_id,
         )))
         .to_string();
 
         html!("div", {
-            .prop("slot", self.slot)
             .shadow_root!(ShadowRootMode::Open => {
                 .child(html!("style", {
                     .text(&include_str!("./styles.css"))

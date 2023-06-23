@@ -5,7 +5,7 @@ use components::{
     player_popup::{PlayerPopup, PreviewPopupCallbacks},
 };
 use dominator::{clone, events, html, link, Dom, DomBuilder};
-use futures_signals::signal::{Mutable, SignalExt};
+use futures_signals::signal::SignalExt;
 use shared::domain::user::public_user::PublicUser;
 use utils::{
     component::Component,
@@ -117,9 +117,6 @@ impl Component<CommunityLanding> for Rc<CommunityLanding> {
                             top_circles.iter().map(|circle| {
                                 CircleCard {
                                     circle,
-                                    slot: "",
-                                    is_member: Mutable::new(false).read_only(),
-                                    on_member: Box::new(|_| {})
                                 }.render()
                             }).collect()
                         },

@@ -12,7 +12,7 @@ use components::{
     player_popup::{PlayerPopup, PreviewPopupCallbacks},
 };
 use dominator::{clone, html, Dom, DomBuilder};
-use futures_signals::signal::{Mutable, Signal, SignalExt};
+use futures_signals::signal::{Signal, SignalExt};
 use itertools::Itertools;
 use shared::domain::{asset::Asset, user::public_user::PublicUser};
 use utils::{
@@ -423,9 +423,6 @@ impl MemberDetails {
                                 .children(circles.into_iter().map(|circle| {
                                     CircleCard {
                                         circle,
-                                        slot: "",
-                                        is_member: Mutable::new(false).read_only(),
-                                        on_member: Box::new(|_|{})
                                     }.render()
                                 }))
                             }))
@@ -457,10 +454,7 @@ impl MemberDetails {
                                 .children(following.into_iter().map(|member| {
                                     MemberCard {
                                         member,
-                                        slot: "",
                                         menu: None,
-                                        following: Mutable::new(false).read_only(),
-                                        on_follow: Box::new(|_| {}),
                                         admin_tag: false
                                     }.render()
                                 }))
@@ -493,10 +487,7 @@ impl MemberDetails {
                                 .children(followers.into_iter().map(|member| {
                                     MemberCard {
                                         member,
-                                        slot: "",
                                         menu: None,
-                                        following: Mutable::new(false).read_only(),
-                                        on_follow: Box::new(|_| {}),
                                         admin_tag: false
                                     }.render()
                                 }))

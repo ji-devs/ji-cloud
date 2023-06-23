@@ -2,10 +2,7 @@ use std::rc::Rc;
 
 use components::overlay::handle::OverlayHandle;
 use dominator::{class, clone, html, pseudo, with_node, DomBuilder};
-use futures_signals::{
-    map_ref,
-    signal::{Mutable, SignalExt},
-};
+use futures_signals::{map_ref, signal::SignalExt};
 use utils::{component::Component, events};
 use web_sys::{HtmlInputElement, ShadowRoot};
 
@@ -55,15 +52,7 @@ impl Component<CirclesList> for Rc<CirclesList> {
                     }
                     Some(circles) => circles
                         .iter()
-                        .map(|circle| {
-                            CircleCard {
-                                circle,
-                                slot: "",
-                                is_member: Mutable::new(false).read_only(),
-                                on_member: Box::new(|_| {}),
-                            }
-                            .render()
-                        })
+                        .map(|circle| CircleCard { circle }.render())
                         .collect(),
                 })
                 .to_signal_vec(),

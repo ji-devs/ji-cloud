@@ -13,14 +13,13 @@ use super::{actions, MemberCard};
 impl MemberCard<'_> {
     pub fn render(self) -> Dom {
         let member_id = self.member.id;
-        let following_mutable = Mutable::new(false);
+        let following_mutable = Mutable::new(self.member.following);
         let path = Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(
             member_id,
         )))
         .to_string();
 
         html!("div", {
-            .prop("slot", self.slot)
             .shadow_root!(ShadowRootMode::Open => {
                 .child(html!("style", {
                     .text(&include_str!("./styles.css"))
