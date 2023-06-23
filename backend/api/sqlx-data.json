@@ -4509,6 +4509,56 @@
     },
     "query": "\nselect index from resource_data_module\nwhere resource_data_id = $1 and resource_data_module.id is not distinct from $2\n"
   },
+  "4aba8094109d0eec8afa425d389e51a8b139fbc87dd904adfbdfc12504db3d76": {
+    "describe": {
+      "columns": [
+        {
+          "name": "account_id!: AccountId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_type!: AccountType",
+          "ordinal": 1,
+          "type_info": "Int2"
+        },
+        {
+          "name": "stripe_customer_id?: CustomerId",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "payment_method?: serde_json::Value",
+          "ordinal": 3,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect\n    account_id as \"account_id!: AccountId\",\n    account_type as \"account_type!: AccountType\",\n    stripe_customer_id as \"stripe_customer_id?: CustomerId\",\n    payment_method as \"payment_method?: serde_json::Value\",\n    created_at,\n    updated_at\nfrom account\nwhere account_id = $1\n"
+  },
   "4b0a802704e088bec4174f5d5998820846fa31f711bd57e683c27891f7a3b12e": {
     "describe": {
       "columns": [],

@@ -333,6 +333,50 @@ where user_account.user_id = $1
 }
 
 #[instrument(skip(pool))]
+pub async fn get_account_by_id(
+    pool: &PgPool,
+    account_id: &AccountId,
+) -> anyhow::Result<Option<Account>> {
+    let account = sqlx::query!(
+        // language=SQL
+        r#"
+select
+    account_id as "account_id!: AccountId",
+    account_type as "account_type!: AccountType",
+    stripe_customer_id as "stripe_customer_id?: CustomerId",
+    payment_method as "payment_method?: serde_json::Value",
+    created_at,
+    updated_at
+from account
+where account_id = $1
+"#,
+        account_id as &AccountId,
+    )
+    .fetch_optional(pool)
+    .await?;
+
+    match account {
+        Some(account) => Ok(Some(Account {
+            account_id: account.account_id,
+            account_type: account.account_type,
+            stripe_customer_id: account.stripe_customer_id,
+            payment_method: match account.payment_method {
+                Some(payment_method) => serde_json::from_value(payment_method)?,
+                None => None,
+            },
+            subscription: db::billing::get_latest_subscription_by_account_id(
+                pool,
+                account.account_id,
+            )
+            .await?,
+            created_at: account.created_at,
+            updated_at: account.updated_at,
+        })),
+        None => Ok(None),
+    }
+}
+
+#[instrument(skip(pool))]
 pub async fn get_account_by_user_id(
     pool: &PgPool,
     user_id: &UserId,

@@ -3,13 +3,14 @@ use crate::extractor::TokenUser;
 use crate::{db, error};
 use actix_web::web::{Data, Json, Path, ServiceConfig};
 use actix_web::HttpResponse;
+use futures::try_join;
 use shared::api::endpoints::account::{
     GetSchoolAccount, GetSchoolNames, UpdateSchoolAccount, UpdateSchoolName,
 };
 use shared::api::{endpoints::account::CreateSchoolAccount, ApiEndpoint, PathParts};
 use shared::domain::billing::{
-    AccountId, CreateSchoolAccountRequest, GetSchoolAccountResponse, SchoolId, SchoolNameRequest,
-    SchoolNameValue, UpdateSchoolAccountRequest,
+    AccountId, AccountIfAuthorized, CreateSchoolAccountRequest, GetSchoolAccountResponse, SchoolId,
+    SchoolNameRequest, SchoolNameValue, UpdateSchoolAccountRequest,
 };
 use shared::domain::user::{UserId, UserScope};
 use sqlx::PgPool;
@@ -88,7 +89,7 @@ async fn update_school_account(
 
     user_authorization(db.as_ref(), &user_id, &school.account_id)
         .await?
-        .is_authorized(true)?;
+        .test_authorized(true)?;
 
     let req: UpdateSchoolAccountRequest = req.into_inner();
 
@@ -114,7 +115,7 @@ async fn update_school_name(
         .ok_or(error::Account::NotFound("School not found".into()))?;
 
     let authorization = user_authorization(db.as_ref(), &user_id, &school.account_id).await?;
-    authorization.is_authorized(true)?;
+    authorization.test_authorized(true)?;
 
     if db::account::check_renamed_school_name_exists(db.as_ref(), new_name.as_ref(), &school_id)
         .await?
@@ -157,12 +158,28 @@ async fn get_school_account(
         .await?
         .ok_or(error::Account::NotFound("School not found".into()))?;
 
-    user_authorization(db.as_ref(), &user_id, &school.account_id).await?;
+    let authorization = user_authorization(db.as_ref(), &user_id, &school.account_id).await?;
 
-    let users =
-        db::account::get_account_users_by_account_id(db.as_ref(), &school.account_id).await?;
+    let (account, users) = try_join!(
+        async {
+            if authorization.is_authorized(true) {
+                Ok(AccountIfAuthorized::Authorized(
+                    db::account::get_account_by_id(db.as_ref(), &school.account_id)
+                        .await?
+                        .ok_or(anyhow::anyhow!("School {} account is missing", school.id))?,
+                ))
+            } else {
+                Ok(AccountIfAuthorized::Unauthorized)
+            }
+        },
+        db::account::get_account_users_by_account_id(db.as_ref(), &school.account_id),
+    )?;
 
-    Ok(Json(GetSchoolAccountResponse { school, users }))
+    Ok(Json(GetSchoolAccountResponse {
+        school,
+        account,
+        users,
+    }))
 }
 
 enum UserAuthorization {
@@ -176,12 +193,18 @@ impl UserAuthorization {
         matches!(self, UserAuthorization::SystemAdministrator)
     }
 
-    fn is_authorized(&self, require_account_admin: bool) -> Result<(), error::Account> {
+    fn test_authorized(&self, require_account_admin: bool) -> Result<(), error::Account> {
+        if self.is_authorized(require_account_admin) {
+            Ok(())
+        } else {
+            Err(error::Account::Forbidden)
+        }
+    }
+
+    fn is_authorized(&self, require_account_admin: bool) -> bool {
         match self {
-            UserAuthorization::AccountMember if require_account_admin => {
-                Err(error::Account::Forbidden)
-            }
-            _ => Ok(()),
+            UserAuthorization::AccountMember if require_account_admin => false,
+            _ => true,
         }
     }
 }
