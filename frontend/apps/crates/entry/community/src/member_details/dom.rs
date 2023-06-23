@@ -22,8 +22,7 @@ use utils::{
     prelude::{get_user_cloned, get_user_id},
     unwrap::UnwrapJiExt,
 };
-use wasm_bindgen::JsCast;
-use wasm_bindgen::JsValue;
+use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{HtmlElement, ScrollBehavior, ScrollIntoViewOptions, ShadowRoot};
 
 const STR_FOLLOWING: &str = "Following";
