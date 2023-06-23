@@ -1007,8 +1007,21 @@ make_path_parts!(SchoolAccountPath => "/v1/school/{}" => SchoolId);
 pub struct GetSchoolAccountResponse {
     /// School name
     pub school: School,
+    /// Account associated with the school
+    pub account: AccountIfAuthorized,
     /// School location
     pub users: Vec<AccountUser>,
+}
+
+/// A school account only if the user requesting the account is a system admin or an account admin.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[allow(clippy::large_enum_variant)]
+#[serde(untagged)]
+pub enum AccountIfAuthorized {
+    /// The user is authorized
+    Authorized(Account),
+    /// The user is not authorized
+    Unauthorized,
 }
 
 /// Request to update a school profile.
