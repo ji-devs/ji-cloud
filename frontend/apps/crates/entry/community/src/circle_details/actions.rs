@@ -42,8 +42,8 @@ impl CircleDetails {
 
         match endpoints::circle::Get::api_no_auth(CircleGetPath(state.circle_id), None).await {
             Ok(circle) => {
+                state.joined.set(Some(circle.joined));
                 state.circle.set(Some(circle));
-                // state.joined.set(); TODO:
             }
             Err(_) => todo!(),
         }
@@ -77,6 +77,7 @@ impl CircleDetails {
                     let mut user = state.community_state.user.get_cloned().unwrap_ji();
                     user.circles.push(state.circle_id);
                     state.community_state.user.set(Some(user));
+                    state.joined.set(Some(true));
                 }
                 Err(_) => todo!(),
             }
@@ -94,6 +95,7 @@ impl CircleDetails {
                     let index = user.circles.iter().position(|circle| *circle == state.circle_id).unwrap_ji();
                     user.circles.remove(index);
                     state.community_state.user.set(Some(user));
+                    state.joined.set(Some(false));
                 }
                 Err(_) => todo!(),
             }

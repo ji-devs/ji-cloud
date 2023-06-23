@@ -27,7 +27,6 @@ const STR_SEARCH: &str = "Search Jigzi Community";
 impl Community {
     pub fn render(self: &Rc<Self>) -> Dom {
         let state = self;
-        state.load_data();
         analytics::event("Community Loaded", None);
 
         html!("community-main", {

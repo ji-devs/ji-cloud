@@ -67,6 +67,7 @@ impl MemberDetails {
             .await
         {
             Ok(member) => {
+                state.is_following.set(Some(member.following));
                 state.member.set(Some(member));
             }
             Err(_) => todo!(),
@@ -197,10 +198,7 @@ impl MemberDetails {
             ).await;
             match res {
                 Ok(_) => {
-                    let mut followings = state.community_state.followings.lock_mut();
-                    if let Some(followings) = &mut *followings {
-                        followings.push(state.member_id);
-                    }
+                    state.is_following.set(Some(true));
                 },
                 Err(_) => todo!(),
             }
@@ -216,13 +214,7 @@ impl MemberDetails {
             ).await;
             match res {
                 Ok(_) => {
-                    let mut followings = state.community_state.followings.lock_mut();
-                    if let Some(followings) = &mut *followings {
-                        let index = followings.iter().position(|followee| followee == &state.member_id);
-                        if let Some(index) = index {
-                            followings.remove(index);
-                        }
-                    }
+                    state.is_following.set(Some(false));
                 },
                 Err(_) => todo!(),
             }

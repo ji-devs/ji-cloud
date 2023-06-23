@@ -17,6 +17,7 @@ use crate::state::Community;
 pub struct MemberDetails {
     pub member_id: UserId,
     pub member: Mutable<Option<PublicUser>>,
+    pub is_following: Mutable<Option<bool>>,
     pub loader: AsyncLoader,
     pub jigs: Mutable<Option<Vec<JigResponse>>>,
     pub jigs_count: Mutable<Option<u64>>,
@@ -43,6 +44,7 @@ impl MemberDetails {
             member_id,
             community_state,
             member: Mutable::new(None),
+            is_following: Mutable::new(None),
             loader: AsyncLoader::new(),
             jigs: Mutable::new(None),
             resources: Mutable::new(None),

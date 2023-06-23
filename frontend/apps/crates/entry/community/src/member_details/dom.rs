@@ -12,7 +12,7 @@ use components::{
     player_popup::{PlayerPopup, PreviewPopupCallbacks},
 };
 use dominator::{clone, html, Dom, DomBuilder};
-use futures_signals::signal::{Signal, SignalExt};
+use futures_signals::signal::SignalExt;
 use itertools::Itertools;
 use shared::domain::{asset::Asset, user::public_user::PublicUser};
 use utils::{
@@ -124,7 +124,37 @@ impl MemberDetails {
                 ])
             }))
             .apply_if(!is_current_user, clone!(state => move |dom| {
-                dom.child_signal(state.follow_button_signal())
+                dom.child_signal(state.is_following.signal().map(clone!(state => move |is_following| {
+                    is_following.map(clone!(state => move |is_following| {
+                        match is_following {
+                            true => {
+                                html!("button-rect", {
+                                    .class("follow-button")
+                                    .prop("kind", "outline")
+                                    .prop("color", "green")
+                                    .child(html!("fa-icon", {
+                                        .prop("icon", "fa-solid fa-check")
+                                    }))
+                                    .text(STR_FOLLOWING)
+                                    .event(clone!(state => move |_: events::Click| {
+                                        state.unfollow_member();
+                                    }))
+                                })
+                            },
+                            false => {
+                                html!("button-rect", {
+                                    .class("follow-button")
+                                    .prop("kind", "outline")
+                                    .prop("color", "blue")
+                                    .text(STR_FOLLOW)
+                                    .event(clone!(state => move |_: events::Click| {
+                                        state.follow_member();
+                                    }))
+                                })
+                            },
+                        }
+                    }))
+                })))
             }))
         })
     }
@@ -558,48 +588,6 @@ impl MemberDetails {
                 })
             }),
         ))
-    }
-
-    fn follow_button_signal(self: &Rc<Self>) -> impl Signal<Item = Option<Dom>> {
-        let state = self;
-        state
-            .community_state
-            .followings
-            .signal_ref(clone!(state => move |users_followings| {
-                let is_following = match users_followings {
-                    None => false,
-                    Some(users_followings) => {
-                        users_followings.iter().any(|followee| followee == &state.member_id)
-                    },
-                };
-                Some(match is_following {
-                    true => {
-                        html!("button-rect", {
-                            .class("follow-button")
-                            .prop("kind", "outline")
-                            .prop("color", "green")
-                            .child(html!("fa-icon", {
-                                .prop("icon", "fa-solid fa-check")
-                            }))
-                            .text(STR_FOLLOWING)
-                            .event(clone!(state => move |_: events::Click| {
-                                state.unfollow_member();
-                            }))
-                        })
-                    },
-                    false => {
-                        html!("button-rect", {
-                            .class("follow-button")
-                            .prop("kind", "outline")
-                            .prop("color", "blue")
-                            .text(STR_FOLLOW)
-                            .event(clone!(state => move |_: events::Click| {
-                                state.follow_member();
-                            }))
-                        })
-                    },
-                })
-            }))
     }
 }
 
