@@ -28,7 +28,8 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: nightly
+#          toolchain: nightly
+          toolchain: nightly-2023-06-08
           components: rustfmt
 
       - run: cargo check --all --manifest-path frontend/apps/Cargo.toml
@@ -41,7 +42,8 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: nightly
+#          toolchain: nightly
+          toolchain: nightly-2023-06-08
           components: rustfmt
 
       - run: cargo fmt --all --manifest-path frontend/apps/Cargo.toml --check

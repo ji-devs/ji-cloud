@@ -67,7 +67,8 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: nightly
+#          toolchain: nightly
+          toolchain: nightly-2023-06-08
 
       - uses: davidB/rust-cargo-make@master
 
