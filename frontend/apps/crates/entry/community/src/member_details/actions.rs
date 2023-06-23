@@ -289,5 +289,6 @@ fn user_to_public_user(user: UserProfile) -> PublicUser {
         course_count: None,
         playlist_count: None,
         total_asset_count: 0, // TODO: bad idea
+        following: false,
     }
 }

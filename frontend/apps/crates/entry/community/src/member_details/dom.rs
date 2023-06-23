@@ -22,9 +22,9 @@ use utils::{
     prelude::{get_user_cloned, get_user_id},
     unwrap::UnwrapJiExt,
 };
-use wasm_bindgen::JsValue;
 use wasm_bindgen::JsCast;
-use web_sys::{ShadowRoot, ScrollIntoViewOptions, ScrollBehavior, HtmlElement};
+use wasm_bindgen::JsValue;
+use web_sys::{HtmlElement, ScrollBehavior, ScrollIntoViewOptions, ShadowRoot};
 
 const STR_FOLLOWING: &str = "Following";
 const STR_FOLLOW: &str = "Follow";
@@ -614,7 +614,14 @@ impl MemberDetails {
 }
 
 fn jump_to(el: HtmlElement, selector: &str) -> Option<()> {
-    let el = el.get_root_node().dyn_into::<ShadowRoot>().ok()?.query_selector(selector).ok()??;
-    el.scroll_into_view_with_scroll_into_view_options(ScrollIntoViewOptions::new().behavior(ScrollBehavior::Smooth));
+    let el = el
+        .get_root_node()
+        .dyn_into::<ShadowRoot>()
+        .ok()?
+        .query_selector(selector)
+        .ok()??;
+    el.scroll_into_view_with_scroll_into_view_options(
+        ScrollIntoViewOptions::new().behavior(ScrollBehavior::Smooth),
+    );
     Some(())
 }
