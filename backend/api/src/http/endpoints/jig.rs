@@ -228,13 +228,11 @@ async fn browse(
 #[instrument(skip(db, claims))]
 async fn get_jig_playlists(
     db: Data<PgPool>,
-    claims: TokenUser,
+    claims: Option<TokenUser>,
     path: web::Path<JigId>,
 ) -> Result<Json<<jig::GetJigPlaylists as ApiEndpoint>::Res>, error::Auth> {
     let jig_id = path.into_inner();
-    let user_id = claims.user_id();
-
-    db::jig::authz(&db, user_id, Some(jig_id)).await?;
+    let user_id = get_user_id(&claims);
 
     let playlists = db::jig::get_jig_playlists(db.as_ref(), jig_id, user_id).await?;
 

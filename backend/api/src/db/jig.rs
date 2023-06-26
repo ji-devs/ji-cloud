@@ -1577,7 +1577,7 @@ select exists (
 pub async fn get_jig_playlists(
     db: &sqlx::Pool<sqlx::Postgres>,
     jig_id: JigId,
-    user_id: UserId,
+    user_id: Option<UserId>,
 ) -> sqlx::Result<Vec<PlaylistResponse>> {
     let mut txn = db.begin().await?;
 
@@ -1639,7 +1639,7 @@ where jig_id = $1
 order by coalesce(updated_at, created_at) desc
 "#,
     jig_id.0,
-    user_id.0
+    user_id.map(|x| x.0)
 )
     .fetch_all(&mut txn)
     .instrument(tracing::info_span!("query playlist_data"))
