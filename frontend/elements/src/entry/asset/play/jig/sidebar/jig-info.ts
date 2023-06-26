@@ -105,6 +105,20 @@ export class _ extends LitElement {
                 }
                 .playlists-section .playlists {
                     display: grid;
+                    row-gap: 5px;
+                    margin-right: auto;
+                }
+                ::slotted(a[slot=playlists]) {
+                    color: var(--main-blue);
+                    font-weight: 450;
+                    text-decoration: none;
+                    font-size: 13px;
+                    display: flex;
+                    column-gap: 5px;
+                }
+
+                ::slotted(a[slot=playlists]:hover) {
+                    color: #55a8fc;
                 }
                 .report-section {
                     grid-template-columns: auto auto;
@@ -154,7 +168,7 @@ export class _ extends LitElement {
                         <div class="first-line">
                             <div class="author">
                                 ${this.byJiTeam
-                                    ? html`
+                ? html`
                                           <img-ui
                                               path="entry/home/search-results/ji-logo-blue.svg"
                                           ></img-ui>
@@ -162,7 +176,7 @@ export class _ extends LitElement {
                                               >${STR_JI_TEAM} -
                                           </span>
                                       `
-                                    : nothing}
+                : nothing}
                                 ${this.author}
                             </div>
                             <span class="published-at">
@@ -206,12 +220,11 @@ export class _ extends LitElement {
                         <div>
                             <h4>${STR_PLAYLISTS}</h4>
                             <!-- TODO: enable when ready -->
-                            <!-- <h5>${STR_PLAYLISTS_SUBHEADING}</h5> -->
+                            <h5>${STR_PLAYLISTS_SUBHEADING}</h5>
                         </div>
                         <div class="playlists">
                             <!-- TODO: enable when ready -->
-                            <!-- <slot name="playlists"></slot> -->
-                            Coming soon!
+                            <slot name="playlists"></slot>
                         </div>
                     </section>
                     <section class="report-section">

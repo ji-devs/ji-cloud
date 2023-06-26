@@ -10,6 +10,7 @@ use shared::domain::{
         body::{Audio, ModuleAssist, ModuleAssistType},
         ModuleId,
     },
+    playlist::PlaylistResponse,
 };
 use utils::asset::JigPlayerOptions;
 use web_sys::HtmlIFrameElement;
@@ -42,6 +43,7 @@ pub struct JigPlayer {
     pub bg_audio_playing: Mutable<bool>,
     pub module_assist_audio_handle: Rc<RefCell<Option<AudioHandle>>>,
     pub resource_types: Mutable<Vec<ResourceType>>,
+    pub playlists: Mutable<Vec<PlaylistResponse>>,
     pub module_assist: Mutable<Option<PlayModuleAssist>>,
     pub module_assist_visible: Mutable<bool>,
     pub is_full_screen: Mutable<bool>,
@@ -82,6 +84,7 @@ impl JigPlayer {
             bg_audio_playing: Mutable::new(true),
             module_assist_audio_handle: Rc::new(RefCell::new(None)),
             resource_types: Default::default(),
+            playlists: Default::default(),
             module_assist: Mutable::new(None),
             module_assist_visible: Mutable::new(false),
             is_full_screen: Mutable::new(false),

@@ -7,6 +7,7 @@ use super::{
 use components::audio::mixer::{AudioHandle, AUDIO_MIXER};
 use dominator::clone;
 use futures_signals::signal::SignalExt;
+use shared::domain::jig::GetJigPlaylistsPath;
 use shared::{
     api::endpoints::{self, jig},
     domain::{
@@ -243,6 +244,7 @@ fn module_assist_done(state: Rc<JigPlayer>, play_module_assist: PlayModuleAssist
 pub fn load_data(state: Rc<JigPlayer>) {
     state.loader.load(clone!(state => async move {
         load_resource_types(Rc::clone(&state)).await;
+        load_jig_playlists(Rc::clone(&state)).await;
         load_jig(Rc::clone(&state)).await;
     }));
 }
@@ -305,6 +307,19 @@ async fn load_resource_types(state: Rc<JigPlayer>) {
         Err(_) => todo!(),
         Ok(meta) => {
             state.resource_types.set(meta.resource_types);
+        }
+    };
+}
+
+pub(crate) async fn load_jig_playlists(state: Rc<JigPlayer>) {
+    match endpoints::jig::GetJigPlaylists::api_no_auth(GetJigPlaylistsPath(state.jig_id), None)
+        .await
+    {
+        Err(_) => todo!(),
+        Ok(resp) => {
+            log::warn!("inside call");
+
+            state.playlists.set(resp.playlists);
         }
     };
 }
