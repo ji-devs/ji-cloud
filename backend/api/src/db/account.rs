@@ -301,17 +301,18 @@ pub async fn get_user_account_summary(
         // language=SQL
         r#"
 select
-    account.account_type as "account_type!: AccountType",
     user_account.subscription_tier as "subscription_tier?: SubscriptionTier",
     subscription.status as "subscription_status?: SubscriptionStatus",
     user_account.admin as "is_admin!",
     user_account.verified as "verified!",
+    school.school_id as "school_id?: SchoolId",
     case
         when subscription.amount_due > 0 then true
         else false
     end as "overdue!"
 from user_account
 inner join account using (account_id)
+left join school using (account_id)
 left join (
     select subscription.account_id, status, amount_due
     from subscription
