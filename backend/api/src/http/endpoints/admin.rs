@@ -244,9 +244,9 @@ async fn invite_school_user(
             if let Some(account_summary) =
                 db::account::get_user_account_summary(pool, &user_id).await?
             {
-                match account_summary.account_type {
-                    AccountType::School => Err(InviteFailedReason::AssociatedWithSchool),
-                    AccountType::Individual => Err(InviteFailedReason::HasIndividualAccount),
+                match account_summary.school_id {
+                    Some(_) => Err(InviteFailedReason::AssociatedWithSchool),
+                    None => Err(InviteFailedReason::HasIndividualAccount),
                 }
             } else {
                 Ok(user_id)

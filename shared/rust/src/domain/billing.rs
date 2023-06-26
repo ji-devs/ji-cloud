@@ -849,8 +849,8 @@ pub struct Account {
 /// `None` for a free account, or `Pro`.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UserAccountSummary {
-    /// Type of the account
-    pub account_type: AccountType,
+    /// ID of the school if this is a School account
+    pub school_id: Option<SchoolId>,
     /// The subscription tier the user is on
     pub subscription_tier: Option<SubscriptionTier>,
     /// Status of the accounts subscription, if any
