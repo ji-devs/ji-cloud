@@ -996,8 +996,34 @@ make_path_parts!(CreateSchoolAccountPath => "/v1/school");
 pub struct CreateSchoolAccountRequest {
     /// School name
     pub name: SchoolNameRequest,
+
+    /// The school's email address
+    pub email: String,
+
     /// School location
-    pub location: Value,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub location: Option<Value>,
+
+    /// Description for school
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+
+    /// ID to the school's profile image in the user image library.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub profile_image: Option<ImageId>,
+
+    /// Website for the school
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub website: Option<String>,
+
+    /// Organization type
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub organization_type: Option<String>,
 }
 
 make_path_parts!(SchoolAccountPath => "/v1/school/{}" => SchoolId);

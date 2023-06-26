@@ -34,7 +34,7 @@ async fn create_school_account(
 
     let req: CreateSchoolAccountRequest = req.into_inner();
 
-    let school_name_id = match req.name {
+    let school_name_id = match req.name.clone() {
         SchoolNameRequest::Value(new_name) => {
             // If the user is creating a school with a new school name that we don't already
             // know about, then check whether that name already exists
@@ -61,13 +61,8 @@ async fn create_school_account(
     // currently logged in user as the admin and their email as the schools contact email.
     Ok((
         Json(
-            db::account::create_default_school_account(
-                db.as_ref(),
-                auth.user_id(),
-                school_name_id,
-                req.location,
-            )
-            .await?,
+            db::account::create_school_account(db.as_ref(), auth.user_id(), &school_name_id, req)
+                .await?,
         ),
         http::StatusCode::CREATED,
     ))
