@@ -1,9 +1,9 @@
 use crate::db;
 use shared::domain::admin::SearchSchoolNamesParams;
 use shared::domain::billing::{
-    Account, AccountId, AccountType, AccountUser, CustomerId, PaymentMethod, School, SchoolId,
-    SchoolName, SchoolNameId, SchoolNameValue, SubscriptionStatus, SubscriptionTier,
-    UpdateSchoolAccountRequest, UserAccountSummary,
+    Account, AccountId, AccountType, AccountUser, CreateSchoolAccountRequest, CustomerId,
+    PaymentMethod, School, SchoolId, SchoolName, SchoolNameId, SchoolNameValue, SubscriptionStatus,
+    SubscriptionTier, UpdateSchoolAccountRequest, UserAccountSummary,
 };
 use shared::domain::image::ImageId;
 use shared::domain::user::UserId;
@@ -178,11 +178,11 @@ pub async fn create_default_individual_account(
 }
 
 #[instrument(skip(pool))]
-pub async fn create_default_school_account(
+pub async fn create_school_account(
     pool: &PgPool,
     user_id: UserId,
-    school_name_id: SchoolNameId,
-    location: serde_json::Value,
+    school_name_id: &SchoolNameId,
+    create_school: CreateSchoolAccountRequest,
 ) -> sqlx::Result<SchoolId> {
     let mut txn = pool.begin().await?;
 
@@ -211,15 +211,19 @@ pub async fn create_default_school_account(
         // language=SQL
         r#"
 insert into school
-(school_name_id, email, location, account_id)
+    (school_name_id, account_id, email, location, description, website, organization_type, profile_image_id)
 values
-($1, (select email from user_email where user_id=$2), $3, $4)
+    ($1, $2, $3::text::citext, $4, $5, $6, $7, $8)
 returning school_id as "school_id!: SchoolId"
 "#,
-        school_name_id as SchoolNameId,
-        user_id as UserId,
-        location,
+        school_name_id as &SchoolNameId,
         account_id as AccountId,
+        create_school.email,
+        create_school.location,
+        create_school.description,
+        create_school.website,
+        create_school.organization_type,
+        create_school.profile_image as Option<ImageId>,
     )
     .fetch_one(&mut txn)
     .await?;
