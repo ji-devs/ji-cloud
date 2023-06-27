@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use dominator::{class, clone, html, pseudo, with_node, DomBuilder};
 use futures_signals::{map_ref, signal::SignalExt};
-use utils::{component::Component, events};
+use utils::{component::Component, events, prelude::get_user_id};
 use web_sys::{HtmlInputElement, ShadowRoot};
 
 use crate::member_card::MemberCard;
@@ -16,6 +16,7 @@ impl Component<MembersList> for Rc<MembersList> {
 
     fn dom(&self, dom: DomBuilder<ShadowRoot>) -> DomBuilder<ShadowRoot> {
         let state = self;
+        let current_user_id = get_user_id();
         state.load_members();
 
         dom.child(html!("div", {
@@ -41,6 +42,10 @@ impl Component<MembersList> for Rc<MembersList> {
                     }
                     Some(members) => members
                         .iter()
+                        .filter(|m| {
+                            // exclude current user
+                            matches!(current_user_id, Some(id) if id != m.id)
+                        })
                         .map(|member| {
                             MemberCard {
                                 member,
