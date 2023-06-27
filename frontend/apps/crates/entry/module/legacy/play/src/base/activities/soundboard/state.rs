@@ -24,7 +24,8 @@ impl Soundboard {
         let items = raw
             .items
             .iter()
-            .map(|raw_item| SoundboardItem::new(base.clone(), raw_item))
+            .enumerate()
+            .map(|(index, raw_item)| SoundboardItem::new(base.clone(), raw_item, index))
             .collect();
 
         let _self = Rc::new(Self {
@@ -49,13 +50,15 @@ pub struct SoundboardItem {
     pub jump_index: Option<usize>,
     pub hotspot: Rc<Hotspot>,
     pub revealed: Mutable<bool>,
+    pub index: usize
 }
 
 impl SoundboardItem {
-    pub fn new(base: Rc<Base>, raw: &RawSoundboardItem) -> Rc<Self> {
+    pub fn new(base: Rc<Base>, raw: &RawSoundboardItem, index: usize) -> Rc<Self> {
         let hotspot = Hotspot::new(raw.hotspot.clone());
 
         Rc::new(Self {
+            index,
             audio_filename: raw.audio_filename.clone(),
             text: raw.text.clone(),
             jump_index: raw.jump_index,
