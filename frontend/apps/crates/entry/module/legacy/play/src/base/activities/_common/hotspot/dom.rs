@@ -2,7 +2,7 @@ use components::{
     overlay::handle::OverlayHandle,
     traces::svg::{render_single_shape, ShapeStyle, ShapeStyleVar, SvgCallbacks, TransformSize},
 };
-use dominator::animation::{Percentage, easing, MutableAnimation};
+use dominator::animation::{easing, MutableAnimation, Percentage};
 use dominator::{apply_methods, clone, html, with_node, Dom, DomBuilder};
 use futures_signals::signal::{Signal, SignalExt};
 use utils::resize::ResizeInfo;
@@ -37,11 +37,10 @@ impl Hotspot {
                 None::<fn(web_sys::SvgElement)>,
                 None::<fn(web_sys::SvgElement)>,
                 Some(move |dom: DomBuilder<SvgElement>| {
-
                     fade_animation.animate_to(Percentage::new(0.0));
 
                     apply_methods!(dom, {
-                        .attr_signal("opacity", opacity_signal(fade_animation.clone())) 
+                        .attr_signal("opacity", opacity_signal(fade_animation.clone()))
                         .with_node!(elem => {
                             .apply(OverlayHandle::lifecycle(clone!(tooltip_text, fade_animation => move || {
                                 html!("empty-fragment", {
@@ -53,7 +52,7 @@ impl Hotspot {
                                             html!("overlay-tooltip-bubble", {
                                                 .text(text)
                                                 .style("pointer-events", "none")
-                                                .style_signal("opacity", opacity_signal(fade_animation.clone())) 
+                                                .style_signal("opacity", opacity_signal(fade_animation.clone()))
                                                 .prop("target", elem.clone())
                                                 .prop("targetAnchor", "bm")
                                                 .prop("contentAnchor", "oppositeV")

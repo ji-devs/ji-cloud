@@ -50,7 +50,7 @@ pub struct SoundboardItem {
     pub jump_index: Option<usize>,
     pub hotspot: Rc<Hotspot>,
     pub revealed: Mutable<bool>,
-    pub index: usize
+    pub index: usize,
 }
 
 impl SoundboardItem {
