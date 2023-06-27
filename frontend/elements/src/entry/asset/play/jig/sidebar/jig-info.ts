@@ -88,6 +88,7 @@ export class _ extends LitElement {
                     flex-wrap: wrap;
                     gap: 12px;
                     padding: 8px 0;
+                    word-break: break-all;
                 }
                 ::slotted(a[slot=additional-resources]) {
                     color: var(--main-blue);
@@ -205,7 +206,7 @@ export class _ extends LitElement {
                                 <strong>${this.playedCount}</strong>
                             </span>
                         </div>
-                        <p class="description">${this.description}</p>
+                        <p class="description" dir="auto">${this.description}</p>
                         <div class="categories">
                             <slot name="categories"></slot>
                         </div>
