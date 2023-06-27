@@ -6,9 +6,6 @@ use web_sys::{File, HtmlElement, ShadowRoot, Url};
 
 use super::FileInput;
 
-const STR_LABEL_PRIMARY: &str = "Upload or drag file here";
-const STR_LABEL_SECONDARY: &str = "Stretches to fit. Max ";
-
 impl Component<FileInput> for Rc<FileInput> {
     fn styles() -> &'static str {
         include_str!("./styles.css")
@@ -72,12 +69,11 @@ impl Component<FileInput> for Rc<FileInput> {
                                     false => vec![
                                         html!("p", {
                                             .class("pick-file-message")
-                                            .text(STR_LABEL_PRIMARY)
+                                            .text(&state.label_primary)
                                         }),
                                         html!("p", {
                                             .class("file-size")
-                                            .text(STR_LABEL_SECONDARY)
-                                            .text(&format!("{}", state.max_size))
+                                            .text(&state.label_secondary)
                                         }),
                                     ],
                                 }

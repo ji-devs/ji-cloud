@@ -22,6 +22,8 @@ pub struct FileInput {
     slot: Option<&'static str>,
     show_border: bool,
     preview_images: bool,
+    label_primary: String,
+    label_secondary: String,
     error_msg_type: String,
     error_msg_size: String,
 }
@@ -38,6 +40,8 @@ impl FileInput {
             slot: config.slot,
             show_border: config.show_border,
             preview_images: config.preview_images,
+            label_primary: config.label_primary,
+            label_secondary: config.label_secondary,
             error_msg_type: config.error_msg_type,
             error_msg_size: config.error_msg_size,
         })

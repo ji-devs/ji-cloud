@@ -73,6 +73,7 @@ impl Component<EditImage> for Rc<EditImage> {
                                         })),
                                         preview_images: true,
                                         accept: "image/*",
+                                        label_secondary: String::from("For best results, use a square image. Max 5 MB."),
                                         ..Default::default()
                                     }).render()
                                 },
