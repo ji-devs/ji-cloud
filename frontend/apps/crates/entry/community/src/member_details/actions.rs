@@ -63,8 +63,11 @@ impl MemberDetails {
     async fn load_member(self: &Rc<Self>) {
         let state = self;
 
-        match endpoints::user::GetPublicUser::api_with_auth(PublicUserGetPath(state.member_id), None)
-            .await
+        match endpoints::user::GetPublicUser::api_with_auth(
+            PublicUserGetPath(state.member_id),
+            None,
+        )
+        .await
         {
             Ok(member) => {
                 state.is_following.set(Some(member.following));
