@@ -14,6 +14,7 @@ use serde_json::Value;
 use crate::api::endpoints::PathPart;
 use crate::domain::image::ImageId;
 use crate::domain::user::UserProfile;
+use crate::domain::{UpdateNonNullable, UpdateNullable};
 
 /// Stripe customer ID
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -1053,35 +1054,29 @@ pub enum AccountIfAuthorized {
 /// Request to update a school profile.
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct UpdateSchoolAccountRequest {
-    /// The school's location
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub location: Option<Value>,
-
     /// The school's email address
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub email: Option<String>,
+    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+    pub email: UpdateNonNullable<String>,
+
+    /// The school's location
+    #[serde(default, skip_serializing_if = "UpdateNullable::is_keep")]
+    pub location: UpdateNullable<Value>,
 
     /// Description for school
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
+    #[serde(default, skip_serializing_if = "UpdateNullable::is_keep")]
+    pub description: UpdateNullable<String>,
 
     /// ID to the school's profile image in the user image library.
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub profile_image: Option<ImageId>,
+    #[serde(default, skip_serializing_if = "UpdateNullable::is_keep")]
+    pub profile_image: UpdateNullable<ImageId>,
 
     /// Website for the school
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub website: Option<String>,
+    #[serde(default, skip_serializing_if = "UpdateNullable::is_keep")]
+    pub website: UpdateNullable<String>,
 
     /// Organization type
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub organization_type: Option<String>,
+    #[serde(default, skip_serializing_if = "UpdateNullable::is_keep")]
+    pub organization_type: UpdateNullable<String>,
 }
 
 make_path_parts!(UpdateSchoolNamePath => "/v1/school/{}/school-name" => SchoolId);

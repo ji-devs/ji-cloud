@@ -164,9 +164,9 @@ pub async fn create_default_individual_account(
     // Associate the user with the account and mark them as an administrator.
     associate_user_with_account(
         &mut txn,
-        &user_id,
+        user_id,
         &account_id,
-        &subscription_tier,
+        subscription_tier,
         true,
         true,
     )
@@ -245,21 +245,26 @@ pub async fn update_school_account(
         r#"
 update school
     set
-        location = coalesce($2, location),
-        email = coalesce($3::text, email),
-        description = coalesce($4, description),
-        profile_image_id = coalesce($5, profile_image_id),
-        website = coalesce($6, website),
-        organization_type = coalesce($7, organization_type)
+        email = coalesce($2::text::citext, email),
+        location = case when $3 then $4 else location end,
+        description = case when $5 then $6 else description end,
+        profile_image_id = case when $7 then $8 else profile_image_id end,
+        website = case when $9 then $10 else website end,
+        organization_type = case when $11 then $12 else organization_type end
 where school_id = $1
 "#,
         school_id as &SchoolId,
-        update.location,
-        update.email,
-        update.description,
-        update.profile_image as Option<ImageId>,
-        update.website,
-        update.organization_type,
+        update.email.into_option(),
+        update.location.is_change(),
+        update.location.into_option(),
+        update.description.is_change(),
+        update.description.into_option(),
+        update.profile_image.is_change(),
+        update.profile_image.into_option() as Option<ImageId>,
+        update.website.is_change(),
+        update.website.into_option(),
+        update.organization_type.is_change(),
+        update.organization_type.into_option(),
     )
     .execute(pool)
     .await?;
