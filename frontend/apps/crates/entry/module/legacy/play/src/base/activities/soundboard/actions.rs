@@ -55,7 +55,12 @@ impl SoundboardItem {
 
         for item in &parent.items {
             item.hotspot.tooltip_text.set(None);
+            if item.index != state.index {
+                item.hotspot.fade_out();
+            }
         }
+
+        state.hotspot.jump_in();
 
         state.hotspot.tooltip_text.set(state.text.clone());
 
