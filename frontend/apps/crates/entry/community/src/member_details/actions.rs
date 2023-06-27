@@ -63,7 +63,7 @@ impl MemberDetails {
     async fn load_member(self: &Rc<Self>) {
         let state = self;
 
-        match endpoints::user::GetPublicUser::api_no_auth(PublicUserGetPath(state.member_id), None)
+        match endpoints::user::GetPublicUser::api_with_auth(PublicUserGetPath(state.member_id), None)
             .await
         {
             Ok(member) => {
@@ -82,7 +82,7 @@ impl MemberDetails {
             ..Default::default()
         };
 
-        match endpoints::circle::Browse::api_no_auth(CircleBrowsePath(), Some(req)).await {
+        match endpoints::circle::Browse::api_with_auth(CircleBrowsePath(), Some(req)).await {
             Ok(res) => {
                 state.circles.set(Some(res.circles));
                 state.circles_count.set(Some(res.total_circle_count));
@@ -100,7 +100,7 @@ impl MemberDetails {
             ..Default::default()
         };
 
-        let res = endpoints::jig::Browse::api_no_auth(JigBrowsePath(), Some(req))
+        let res = endpoints::jig::Browse::api_with_auth(JigBrowsePath(), Some(req))
             .await
             .unwrap_ji();
         state.jigs.set(Some(res.jigs));
@@ -116,7 +116,7 @@ impl MemberDetails {
             ..Default::default()
         };
 
-        let res = endpoints::playlist::Browse::api_no_auth(PlaylistBrowsePath(), Some(req))
+        let res = endpoints::playlist::Browse::api_with_auth(PlaylistBrowsePath(), Some(req))
             .await
             .unwrap_ji();
         state.playlists.set(Some(res.playlists));
@@ -132,7 +132,7 @@ impl MemberDetails {
             ..Default::default()
         };
 
-        let res = endpoints::resource::Browse::api_no_auth(ResourceBrowsePath(), Some(req))
+        let res = endpoints::resource::Browse::api_with_auth(ResourceBrowsePath(), Some(req))
             .await
             .unwrap_ji();
         state.resources.set(Some(res.resources));
@@ -148,7 +148,7 @@ impl MemberDetails {
             ..Default::default()
         };
 
-        let res = endpoints::course::Browse::api_no_auth(CourseBrowsePath(), Some(req))
+        let res = endpoints::course::Browse::api_with_auth(CourseBrowsePath(), Some(req))
             .await
             .unwrap_ji();
         state.courses.set(Some(res.courses));
@@ -162,7 +162,7 @@ impl MemberDetails {
             ..Default::default()
         };
 
-        let res = endpoints::user::BrowseFollowers::api_no_auth(
+        let res = endpoints::user::BrowseFollowers::api_with_auth(
             BrowsePublicUserFollowersPath(state.member_id),
             Some(req),
         )
@@ -179,7 +179,7 @@ impl MemberDetails {
             ..Default::default()
         };
 
-        let res = endpoints::user::BrowseFollowing::api_no_auth(
+        let res = endpoints::user::BrowseFollowing::api_with_auth(
             BrowsePublicUserFollowingPath(state.member_id),
             Some(req),
         )

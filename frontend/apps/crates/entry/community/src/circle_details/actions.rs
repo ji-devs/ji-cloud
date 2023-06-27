@@ -40,7 +40,7 @@ impl CircleDetails {
     async fn load_circle(self: &Rc<Self>) {
         let state = self;
 
-        match endpoints::circle::Get::api_no_auth(CircleGetPath(state.circle_id), None).await {
+        match endpoints::circle::Get::api_with_auth(CircleGetPath(state.circle_id), None).await {
             Ok(circle) => {
                 state.joined.set(Some(circle.joined));
                 state.circle.set(Some(circle));
@@ -57,7 +57,7 @@ impl CircleDetails {
             ..Default::default()
         };
 
-        match endpoints::user::BrowsePublicUser::api_no_auth(PublicUserBrowsePath(), Some(req))
+        match endpoints::user::BrowsePublicUser::api_with_auth(PublicUserBrowsePath(), Some(req))
             .await
         {
             Ok(res) => {

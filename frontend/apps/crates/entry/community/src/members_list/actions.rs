@@ -23,7 +23,7 @@ impl MembersList {
                 ..Default::default()
             };
 
-            match endpoints::user::BrowsePublicUser::api_no_auth(PublicUserBrowsePath(), Some(req)).await {
+            match endpoints::user::BrowsePublicUser::api_with_auth(PublicUserBrowsePath(), Some(req)).await {
                 Ok(res) => {
                     state.members.set(Some(res.users));
                     let page_count = page_count(res.total_user_count as u32, state.items_per_page);

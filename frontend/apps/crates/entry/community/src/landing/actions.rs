@@ -34,7 +34,7 @@ impl CommunityLanding {
             ..Default::default()
         };
 
-        match endpoints::user::BrowsePublicUser::api_no_auth(PublicUserBrowsePath(), Some(req))
+        match endpoints::user::BrowsePublicUser::api_with_auth(PublicUserBrowsePath(), Some(req))
             .await
         {
             Ok(res) => {
@@ -52,7 +52,7 @@ impl CommunityLanding {
             ..Default::default()
         };
 
-        match endpoints::circle::Browse::api_no_auth(CircleBrowsePath(), Some(req)).await {
+        match endpoints::circle::Browse::api_with_auth(CircleBrowsePath(), Some(req)).await {
             Ok(res) => {
                 state.top_circles.set(Some(res.circles));
             }
@@ -68,7 +68,7 @@ impl CommunityLanding {
             ..Default::default()
         };
 
-        match endpoints::course::Browse::api_no_auth(CourseBrowsePath(), Some(req)).await {
+        match endpoints::course::Browse::api_with_auth(CourseBrowsePath(), Some(req)).await {
             Ok(res) => {
                 state.top_courses.set(Some(res.courses));
             }

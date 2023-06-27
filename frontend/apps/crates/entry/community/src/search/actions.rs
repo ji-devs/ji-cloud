@@ -52,7 +52,7 @@ impl CommunitySearch {
             ..Default::default()
         };
 
-        match endpoints::user::Search::api_no_auth(PublicUserSearchPath(), Some(req)).await {
+        match endpoints::user::Search::api_with_auth(PublicUserSearchPath(), Some(req)).await {
             Ok(res) => {
                 state.members.lock_mut().extend(res.users);
                 state.member_count.set_neq(res.total_user_count as u32);
@@ -70,7 +70,7 @@ impl CommunitySearch {
             ..Default::default()
         };
 
-        match endpoints::circle::Search::api_no_auth(CircleSearchPath(), Some(req)).await {
+        match endpoints::circle::Search::api_with_auth(CircleSearchPath(), Some(req)).await {
             Ok(res) => {
                 state.circles.lock_mut().extend(res.circles);
                 state.circle_count.set_neq(res.total_circle_count as u32);

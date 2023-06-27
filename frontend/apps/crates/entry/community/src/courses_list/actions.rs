@@ -23,7 +23,7 @@ impl CoursesList {
                 ..Default::default()
             };
 
-            match endpoints::course::Browse::api_no_auth(CourseBrowsePath(), Some(req)).await {
+            match endpoints::course::Browse::api_with_auth(CourseBrowsePath(), Some(req)).await {
                 Ok(res) => {
                     state.courses.set(Some(res.courses));
                     let page_count = page_count(res.total_course_count as u32, state.items_per_page);
