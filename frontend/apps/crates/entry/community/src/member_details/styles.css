@@ -116,6 +116,7 @@ section h4 {
 .about-section .about-text {
     font-size: 14px;
     color: #383838;
+    white-space: pre-wrap;
 }
 .items-container {
     display: grid;

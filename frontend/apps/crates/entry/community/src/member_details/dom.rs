@@ -256,6 +256,7 @@ impl MemberDetails {
                     dom = dom
                         .child(html!("p", {
                             .class("about-text")
+                            .attr("dir", "auto")
                             .text(&bio)
                         }))
                 }

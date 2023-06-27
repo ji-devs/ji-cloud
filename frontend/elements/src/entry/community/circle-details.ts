@@ -111,6 +111,9 @@ export class _ extends LitElement {
                     font-size: 20px;
                     font-weight: bold;
                 }
+                .about-section p {
+                    white-space: pre-wrap;
+                }
                 .members-section {
                     display: grid;
                     align-items: start;

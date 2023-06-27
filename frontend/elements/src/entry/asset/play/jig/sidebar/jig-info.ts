@@ -77,6 +77,7 @@ export class _ extends LitElement {
                     font-size: 12px;
                     color: var(--dark-gray-6);
                     margin: 0;
+                    white-space: pre-wrap;
                 }
                 .categories {
                     display: flex;
