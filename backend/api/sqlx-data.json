@@ -12200,6 +12200,26 @@
     },
     "query": "\nupdate course_data\nset language         = coalesce($2, language),\n    updated_at = now()\nwhere id = $1\n  and ($2::text is not null and $2 is distinct from language)\n"
   },
+  "bf0a2a8d7b749e196a2257a8107e10bdfc0651fb139362a3e067efcc31b859c4": {
+    "describe": {
+      "columns": [
+        {
+          "name": "exists!",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n    select exists(select 1 from user_profile where lower(username) = lower($1)) as \"exists!\"\n        "
+  },
   "bfd314e70437482954c5dfb3a40ab08990a0bea43779d810e9dd903e87e10c81": {
     "describe": {
       "columns": [],
