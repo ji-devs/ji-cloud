@@ -5,11 +5,12 @@ use futures_signals::{
     map_ref,
     signal::{Signal, SignalExt},
 };
-use shared::domain::{jig::JigResponse, meta::ResourceTypeId};
+use shared::domain::{asset::DraftOrLive, jig::JigResponse, meta::ResourceTypeId};
 use utils::{
     ages::AgeRangeVecExt,
-    asset::{published_at_string, ResourceContentExt},
+    asset::{published_at_string, PlaylistPlayerOptions, ResourceContentExt},
     events,
+    routes::{AssetPlayRoute, AssetRoute, Route},
 };
 
 use super::{super::state::State, report, track_action};
@@ -93,7 +94,6 @@ fn render_jig_info(state: Rc<State>, jig: &JigResponse) -> Dom {
                 .prop("label", &category_id.0.to_string())
             })
         }))
-
         .children(jig.jig_data.additional_resources.iter().map(|resource| {
             html!("a", {
                 .prop("slot", "additional-resources")
@@ -107,11 +107,18 @@ fn render_jig_info(state: Rc<State>, jig: &JigResponse) -> Dom {
                 .text_signal(resource_type_name_signal(Rc::clone(&state), resource.resource_type_id))
             })
         }))
-        .child(html!("button-rect", {
-            .prop("slot", "playlists")
-            .prop("kind", "text")
-            .text("Sefer Bereishit")
-        }))
+        .children_signal_vec(state.player_state.playlists.signal_cloned().map(clone!(state => move |playlist| {
+            playlist.into_iter().map(|playlist| {
+                html!("a", {
+                    .prop("slot", "playlists")
+                    .prop("target", "_BLANK")
+                    .prop("title", &playlist.playlist_data.display_name)
+                    .prop("href",  Route::Asset(AssetRoute::Play(AssetPlayRoute::Playlist(playlist.id, PlaylistPlayerOptions {draft_or_live: DraftOrLive::Live, is_student: state.player_state.player_options.is_student}))).to_string())
+                    .text(format!(" {}  ", &playlist.playlist_data.display_name).as_str())
+
+                })
+            }).collect()
+        })).to_signal_vec())
         .children_signal_vec(report::render(Rc::clone(&state)).to_signal_vec())
     })
 }
