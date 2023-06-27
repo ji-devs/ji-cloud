@@ -1,3 +1,4 @@
+use crate::error::Username::Taken;
 use chrono::{DateTime, Utc};
 use chrono_tz::Tz;
 use shared::domain::{
@@ -407,6 +408,21 @@ pub async fn upsert_profile(
     profile_image_id: Option<ImageId>,
     user_id: UserId,
 ) -> Result<(), error::UserUpdate> {
+    if sqlx::query!(
+        //language=SQL
+        r#"
+    select exists(select 1 from user_profile where lower(username) = lower($1)) as "exists!"
+        "#,
+        &req.username
+    )
+    .fetch_one(&mut *txn)
+    .instrument(tracing::info_span!("user is not in user"))
+    .await?
+    .exists
+    {
+        return Err(error::UserUpdate::Username(Taken));
+    };
+
     sqlx::query!(
         //language=SQL
         r#"
