@@ -17,7 +17,7 @@ use shared::domain::admin::{
     InviteFailedReason, InviteSchoolUserFailure, InviteSchoolUsersResponse,
     SearchSchoolNamesResponse,
 };
-use shared::domain::billing::{AccountType, SchoolId, SubscriptionTier};
+use shared::domain::billing::{SchoolId, SubscriptionTier};
 use shared::{
     api::{
         endpoints::admin::{self, CreateUpdateSubscriptionPlan},

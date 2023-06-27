@@ -4059,24 +4059,6 @@
     },
     "query": "\ninsert into user_image_library (user_id, size)\nvalues ($1, $2)\nreturning id as \"id: ImageId\"\n"
   },
-  "4078969842e27522ca876885320351ffe46b25a7ac0d27b1fafd1999030324f5": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Jsonb",
-          "Text",
-          "Text",
-          "Uuid",
-          "Text",
-          "Text"
-        ]
-      }
-    },
-    "query": "\nupdate school\n    set\n        location = coalesce($2, location),\n        email = coalesce($3::text, email),\n        description = coalesce($4, description),\n        profile_image_id = coalesce($5, profile_image_id),\n        website = coalesce($6, website),\n        organization_type = coalesce($7, organization_type)\nwhere school_id = $1\n"
-  },
   "40bb444f63e339442ab06c565b77f38a9196dcce2afcd517807106fe0b8719f3": {
     "describe": {
       "columns": [],
@@ -10620,6 +10602,33 @@
     },
     "query": "\ninsert into jig_data\n(display_name, created_at, updated_at, language, last_synced_at, description, theme, audio_background,\n audio_feedback_negative, audio_feedback_positive, direction, display_score, drag_assist, track_assessments, privacy_level, other_keywords, translated_keywords, translated_description)\nselect display_name,\n       created_at,\n       updated_at,\n       language,\n       last_synced_at,\n       description,\n       theme,\n       audio_background,\n       audio_feedback_negative,\n       audio_feedback_positive,\n       direction,\n       display_score,\n       drag_assist,\n       track_assessments,\n       privacy_level,\n       other_keywords,\n       translated_keywords,\n       translated_description::jsonb\nfrom jig_data\nwhere id = $1\nreturning id\n        "
   },
+  "abe1970d7338a9ae697662a24a8f5ace0e64473edd7f378b7bdbdfc859590499": {
+    "describe": {
+      "columns": [
+        {
+          "name": "school_id!: SchoolId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Text",
+          "Jsonb",
+          "Text",
+          "Text",
+          "Text",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\ninsert into school\n    (school_name_id, account_id, email, location, description, website, organization_type, profile_image_id)\nvalues\n    ($1, $2, $3::text::citext, $4, $5, $6, $7, $8)\nreturning school_id as \"school_id!: SchoolId\"\n"
+  },
   "abe8fdba2626df204b680c636918cef5fa26f18f628d7bced58edacdb26e0b63": {
     "describe": {
       "columns": [
@@ -12067,29 +12076,6 @@
       }
     },
     "query": "\nselect\n    plan_id as \"plan_id: PlanId\",\n    product_id as \"product_id: StripeProductId\",\n    price_id as \"price_id: StripePriceId\",\n    subscription_tier as \"subscription_tier: SubscriptionTier\",\n    subscription_type as \"subscription_type: SubscriptionType\",\n    billing_interval as \"billing_interval: BillingInterval\",\n    account_limit as \"account_limit: AccountLimit\",\n    amount_in_cents as \"amount_in_cents: AmountInCents\",\n    trial_period as \"trial_period?: TrialPeriod\",\n    created_at as \"created_at: DateTime<Utc>\",\n    updated_at as \"updated_at: DateTime<Utc>\"\nfrom subscription_plan\n"
-  },
-  "bcd8c7c9571ef3696454a831dedeceb24516f4cc91c79060bf23d57d079ad9b2": {
-    "describe": {
-      "columns": [
-        {
-          "name": "school_id!: SchoolId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid",
-          "Jsonb",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\ninsert into school\n(school_name_id, email, location, account_id)\nvalues\n($1, (select email from user_email where user_id=$2), $3, $4)\nreturning school_id as \"school_id!: SchoolId\"\n"
   },
   "bce089dbbf9be7f97f81c803dab60fa881956db7392aff47c6776fc4e4e4c4f8": {
     "describe": {
@@ -15254,6 +15240,29 @@
       }
     },
     "query": "\nselect exists (\n    select 1 from user_scope where user_id = $1 and scope = any($2)\n) or (\n    exists (select 1 from user_scope where user_id = $1 and scope = $3) and\n    not exists (select 1 from circle where id = $4 and circle.creator_id <> $1)\n) as \"authed!\"\n"
+  },
+  "fc0f59cf1b8df9ed1d7bbbf3562245dbb03836c0fab9640accc889ff4000f710": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Bool",
+          "Jsonb",
+          "Bool",
+          "Text",
+          "Bool",
+          "Uuid",
+          "Bool",
+          "Text",
+          "Bool",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nupdate school\n    set\n        email = coalesce($2::text::citext, email),\n        location = case when $3 then $4 else location end,\n        description = case when $5 then $6 else description end,\n        profile_image_id = case when $7 then $8 else profile_image_id end,\n        website = case when $9 then $10 else website end,\n        organization_type = case when $11 then $12 else organization_type end\nwhere school_id = $1\n"
   },
   "fc6bfe176017b10253bc42ecb9f96f0533953b10ea0ad57299f99a3a17bc6721": {
     "describe": {

@@ -121,7 +121,7 @@ use uuid::Uuid;
 #[derive(Debug)]
 pub struct Base64<T>(pub T);
 
-impl<T: std::fmt::Display> serde::Serialize for Base64<T> {
+impl<T: Display> serde::Serialize for Base64<T> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
@@ -171,22 +171,143 @@ impl From<Publish> for chrono::DateTime<Utc> {
         match publish {
             Publish::At(t) => t,
             Publish::In(d) => {
-                // todo: error instead of panicing
+                // todo: error instead of panicking
                 Utc::now() + chrono::Duration::from_std(d).expect("Really really big duration?")
             }
         }
     }
 }
 
-/// New-type representing the current page of a list of items
-#[derive(Serialize, Deserialize, Copy, Debug, Clone, Ord, PartialOrd, Eq, PartialEq)]
-pub struct Page(usize);
+/// Clearer representation of an optional nullable field.
+///
+/// Requires `#[serde(default, skip_serializing_if = "Update::is_keep")]` to be applied to
+/// fields which use this type.
+#[derive(Clone, Debug, Serialize)]
+#[serde(untagged)]
+pub enum UpdateNullable<T> {
+    /// Use the current value stored in the database. Equivalent of `undefined` in JS.
+    Keep,
+    /// Set the value to `null` or the equivalent.
+    Unset,
+    /// Use the given value.
+    Change(T),
+}
 
-impl Default for Page {
+impl<T> Default for UpdateNullable<T> {
     fn default() -> Self {
-        Self(Default::default())
+        Self::Keep
     }
 }
+
+impl<'de, T> Deserialize<'de> for UpdateNullable<T>
+where
+    T: Deserialize<'de>,
+{
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        #[derive(Debug, Deserialize)]
+        #[serde(untagged)]
+        enum UpdateMap<T> {
+            Unset,
+            Change(T),
+        }
+
+        let mapping = UpdateMap::deserialize(deserializer)?;
+
+        let update = match mapping {
+            UpdateMap::Unset => Self::Unset,
+            UpdateMap::Change(val) => Self::Change(val),
+        };
+
+        Ok(update)
+    }
+}
+
+impl<T> UpdateNullable<T> {
+    /// Whether this is the `Keep` variant
+    pub fn is_keep(&self) -> bool {
+        matches!(self, Self::Keep)
+    }
+
+    /// Whether this is the `Keep` variant
+    pub fn is_unset(&self) -> bool {
+        matches!(self, Self::Unset)
+    }
+
+    /// Whether this is the `Change` variant
+    pub fn is_change(&self) -> bool {
+        matches!(self, Self::Change(_))
+    }
+
+    /// Similar to `Option<Option<T>>::flatten()`, this converts the variant into an `Option<T>`.
+    ///
+    /// Useful for coalesce updates.
+    pub fn into_option(self) -> Option<T> {
+        match self {
+            Self::Keep | Self::Unset => None,
+            Self::Change(v) => Some(v),
+        }
+    }
+}
+
+/// Clearer representation of an optional non-nullable field.
+///
+/// Requires `#[serde(default, skip_serializing_if = "Update::is_keep")]` to be applied to
+/// fields which use this type.
+#[derive(Clone, Debug, Serialize)]
+#[serde(untagged)]
+pub enum UpdateNonNullable<T> {
+    /// Use the current value stored in the database. Equivalent of `undefined` in JS.
+    Keep,
+    /// Use the given value.
+    Change(T),
+}
+
+impl<T> Default for UpdateNonNullable<T> {
+    fn default() -> Self {
+        Self::Keep
+    }
+}
+
+impl<'de, T> Deserialize<'de> for UpdateNonNullable<T>
+where
+    T: Deserialize<'de>,
+{
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        Ok(Self::Change(T::deserialize(deserializer)?))
+    }
+}
+
+impl<T> UpdateNonNullable<T> {
+    /// Whether this is the `Keep` variant
+    pub fn is_keep(&self) -> bool {
+        matches!(self, Self::Keep)
+    }
+
+    /// Whether this is the `Change` variant
+    pub fn is_change(&self) -> bool {
+        matches!(self, Self::Change(_))
+    }
+
+    /// Similar to `Option<Option<T>>::flatten()`, this converts the variant into an `Option<T>`.
+    ///
+    /// Useful for coalesce updates.
+    pub fn into_option(self) -> Option<T> {
+        match self {
+            Self::Keep => None,
+            Self::Change(v) => Some(v),
+        }
+    }
+}
+
+/// New-type representing the current page of a list of items
+#[derive(Copy, Debug, Default, Clone, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
+pub struct Page(usize);
 
 impl From<usize> for Page {
     fn from(value: usize) -> Self {
