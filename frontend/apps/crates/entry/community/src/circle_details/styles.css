@@ -86,6 +86,9 @@ section h3 {
 .about-section .section-header {
     margin-bottom: 16px;
 }
+.about-section p {
+    white-space: pre-wrap;
+}
 .members-section {
     display: grid;
     grid-template-columns: repeat(auto-fill, 282px);
@@ -94,9 +97,6 @@ section h3 {
 }
 .members-section h3 {
     grid-column: 1 / -1;
-}
-.members-section p {
-    white-space: pre-wrap;
 }
 .members-section .members {
     display: contents;
