@@ -95,6 +95,9 @@ section h3 {
 .members-section h3 {
     grid-column: 1 / -1;
 }
+.members-section p {
+    white-space: pre-wrap;
+}
 .members-section .members {
     display: contents;
 }

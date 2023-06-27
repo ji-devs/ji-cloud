@@ -206,6 +206,7 @@ impl CircleDetails {
             }))
             .child(html!("p", {
                 .text(&circle.description)
+                .attr("dir", "auto")
             }))
         })
     }
