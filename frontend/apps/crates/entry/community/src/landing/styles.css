@@ -3,12 +3,15 @@
     display: flex;
     flex-direction: column;
 }
+.main {
+    display: contents;
+}
 @media (min-width: 1024px) {
-    :host {
+    .main {
         display: grid;
         gap: 24px;
         grid-template-columns: minmax(485px, 1fr) 1fr;
-        grid-template-rows: auto 760px auto;
+        height: 1050px;
     }
 }
 section {
@@ -43,6 +46,7 @@ section.top-circles button-rect {
 .top-members {
     grid-row: 1 / span 2;
     align-content: space-between;
+    padding: 24px;
 }
 .top-members .members {
     display: grid;
@@ -98,11 +102,9 @@ video-youtube-player {
     border-radius: 4px;
     overflow: hidden;
 }
-.top-members {
-    padding-block: 24px;
-}
 .top-circles {
     padding-block: 24px;
+    overflow: hidden;
 }
 .top-circles .circles {
     padding-inline: 10px;

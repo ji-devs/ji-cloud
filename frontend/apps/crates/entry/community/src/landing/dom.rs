@@ -33,170 +33,173 @@ impl Component<CommunityLanding> for Rc<CommunityLanding> {
         state.load_data();
 
         dom
-        .child(html!("section", {
-            .class("top-members")
             .child(html!("div", {
-                .class("header")
-                .child(html!("h3", {
-                    .child(html!("img-ui", {
-                        .prop("path", "entry/community/landing/member.svg")
-                    }))
-                    .text("Jigzi’s top 10 creators")
-                }))
-            }))
-            .child(html!("div", {
-                .class("members")
-                .child(html!("div", {
-                    .class("row")
-                    .child(html!("span", {
-                        .class("cell-header")
-                        .class("index")
-                    }))
-                    .child(html!("span", {
-                        .class("cell-header")
-                        .class("image")
-                    }))
-                    .child(html!("span", {
-                        .class("cell-header")
-                        .class("name")
-                        .text("Name")
-                    }))
-                    .child(html!("span", {
-                        .class("cell-header")
-                        .class("flag")
-                        .text("Country")
-                    }))
-                    .child(html!("span", {
-                        .class("cell-header")
-                        .class("creation-count")
-                        .text("Creations")
-                    }))
-                }))
-                .children_signal_vec(state.top_members.signal_ref(clone!(state => move |top_members| {
-                    match top_members {
-                        None => vec![html!("progress")],
-                        Some(top_members) => {
-                            top_members.iter().enumerate().map(|(index, member)| {
-                                state.render_member(member, index)
-                            }).collect()
-                        },
-                    }
-                })).to_signal_vec())
-            }))
-            .child(html!("button-rect", {
-                .prop("color", "blue")
-                .text(STR_SEE_ALL_MEMBERS)
-                .apply(move |dom| dominator::on_click_go_to_url!(dom, {
-                    Route::Community(CommunityRoute::Members(CommunityMembersRoute::List)).to_string()
-                }))
-            }))
-        }))
-        .child(html!("video-youtube-player", {
-            .prop("videoId", WELCOME_VIDEO_ID)
-            .prop("autoplay", true)
-            .prop("muted", true)
-            .prop("loop", true)
-        }))
-        .child(html!("section", {
-            .class("top-circles")
-            .child(html!("div", {
-                .class("header")
-                .child(html!("h3", {
-                    .child(html!("img-ui", {
-                        .prop("path", "entry/community/landing/circle.svg")
-                    }))
-                    .text("Popular circles")
-                }))
-            }))
-            .child(html!("div", {
-                .class("circles")
-                .children_signal_vec(state.top_circles.signal_ref(move |top_circles| {
-                    match top_circles {
-                        None => vec![html!("progress")],
-                        Some(top_circles) => {
-                            top_circles.iter().map(|circle| {
-                                CircleCard {
-                                    circle,
-                                }.render()
-                            }).collect()
-                        },
-                    }
-                }).to_signal_vec())
-            }))
-            .child(html!("button-rect", {
-                .prop("color", "blue")
-                .text(STR_SEE_ALL_CIRCLES)
-                .apply(move |dom| dominator::on_click_go_to_url!(dom, {
-                    Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::List)).to_string()
-                }))
-            }))
-        }))
-        .child(html!("section", {
-            .class("top-courses")
-            .child(html!("div", {
-                .class("header")
-                .child(html!("h3", {
-                    .child(html!("img-ui", {
-                        .prop("path", "entry/community/landing/course.svg")
-                    }))
-                    .text("Courses")
-                }))
-                .child(html!("button-rect", {
-                    .prop("color", "blue")
-                    .prop("kind", "text")
-                    .text(STR_SEE_ALL_COURSES)
-                    .apply(move |dom| dominator::on_click_go_to_url!(dom, {
-                        Route::Community(CommunityRoute::Courses).to_string()
-                    }))
-                }))
-            }))
-            .child(html!("div", {
-                .class("courses")
-                .children_signal_vec(state.top_courses.signal_ref(clone!(state => move |top_courses| {
-                    match top_courses {
-                        None => vec![html!("progress")],
-                        Some(top_courses) => {
-                            top_courses.into_iter().map(clone!(state => move |courses| {
-                                let courses_id = courses.id;
-                                render_asset_card(
-                                    &courses.clone().into(),
-                                    AssetCardConfig {
-                                        bottom_indicator: AssetCardBottomIndicator::Author,
-                                        dense: true,
-                                        menu: Some(Rc::new(clone!(state => move || {
-                                            html!("menu-kebab", {
-                                                .prop("slot", "menu")
-                                                .children(&mut [
-                                                    html!("menu-line", {
-                                                        .prop("icon", "play")
-                                                        .event(clone!(state => move |_: events::Click| {
-                                                            state.play_course.set(Some(courses_id));
-                                                        }))
-                                                    })
-                                                ])
-                                            })
-                                        }))),
-                                        ..Default::default()
-                                    }
-                                )
-                            })).collect()
-                        },
-                    }
-                })).to_signal_vec())
-            }))
-        }))
-        .child_signal(state.play_course.signal().map(clone!(state => move |play_course| {
-            play_course.map(|course_id| {
-                PlayerPopup::new_default_player_options(
-                    course_id.into(),
-                    PreviewPopupCallbacks {
-                        close: Box::new(clone!(state => move|| {
-                            state.play_course.set(None);
+                .class("main")
+                .child(html!("section", {
+                    .class("top-members")
+                    .child(html!("div", {
+                        .class("header")
+                        .child(html!("h3", {
+                            .child(html!("img-ui", {
+                                .prop("path", "entry/community/landing/member.svg")
+                            }))
+                            .text("Jigzi’s top 10 creators")
                         }))
-                    },
-                ).render(None)
-            })
-        })))
+                    }))
+                    .child(html!("div", {
+                        .class("members")
+                        .child(html!("div", {
+                            .class("row")
+                            .child(html!("span", {
+                                .class("cell-header")
+                                .class("index")
+                            }))
+                            .child(html!("span", {
+                                .class("cell-header")
+                                .class("image")
+                            }))
+                            .child(html!("span", {
+                                .class("cell-header")
+                                .class("name")
+                                .text("Name")
+                            }))
+                            .child(html!("span", {
+                                .class("cell-header")
+                                .class("flag")
+                                .text("Country")
+                            }))
+                            .child(html!("span", {
+                                .class("cell-header")
+                                .class("creation-count")
+                                .text("Creations")
+                            }))
+                        }))
+                        .children_signal_vec(state.top_members.signal_ref(clone!(state => move |top_members| {
+                            match top_members {
+                                None => vec![html!("progress")],
+                                Some(top_members) => {
+                                    top_members.iter().enumerate().map(|(index, member)| {
+                                        state.render_member(member, index)
+                                    }).collect()
+                                },
+                            }
+                        })).to_signal_vec())
+                    }))
+                    .child(html!("button-rect", {
+                        .prop("color", "blue")
+                        .text(STR_SEE_ALL_MEMBERS)
+                        .apply(move |dom| dominator::on_click_go_to_url!(dom, {
+                            Route::Community(CommunityRoute::Members(CommunityMembersRoute::List)).to_string()
+                        }))
+                    }))
+                }))
+                .child(html!("video-youtube-player", {
+                    .prop("videoId", WELCOME_VIDEO_ID)
+                    .prop("autoplay", true)
+                    .prop("muted", true)
+                    .prop("loop", true)
+                }))
+                .child(html!("section", {
+                    .class("top-circles")
+                    .child(html!("div", {
+                        .class("header")
+                        .child(html!("h3", {
+                            .child(html!("img-ui", {
+                                .prop("path", "entry/community/landing/circle.svg")
+                            }))
+                            .text("Popular circles")
+                        }))
+                    }))
+                    .child(html!("div", {
+                        .class("circles")
+                        .children_signal_vec(state.top_circles.signal_ref(move |top_circles| {
+                            match top_circles {
+                                None => vec![html!("progress")],
+                                Some(top_circles) => {
+                                    top_circles.iter().map(|circle| {
+                                        CircleCard {
+                                            circle,
+                                        }.render()
+                                    }).collect()
+                                },
+                            }
+                        }).to_signal_vec())
+                    }))
+                    .child(html!("button-rect", {
+                        .prop("color", "blue")
+                        .text(STR_SEE_ALL_CIRCLES)
+                        .apply(move |dom| dominator::on_click_go_to_url!(dom, {
+                            Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::List)).to_string()
+                        }))
+                    }))
+                }))
+            }))
+            .child(html!("section", {
+                .class("top-courses")
+                .child(html!("div", {
+                    .class("header")
+                    .child(html!("h3", {
+                        .child(html!("img-ui", {
+                            .prop("path", "entry/community/landing/course.svg")
+                        }))
+                        .text("Courses")
+                    }))
+                    .child(html!("button-rect", {
+                        .prop("color", "blue")
+                        .prop("kind", "text")
+                        .text(STR_SEE_ALL_COURSES)
+                        .apply(move |dom| dominator::on_click_go_to_url!(dom, {
+                            Route::Community(CommunityRoute::Courses).to_string()
+                        }))
+                    }))
+                }))
+                .child(html!("div", {
+                    .class("courses")
+                    .children_signal_vec(state.top_courses.signal_ref(clone!(state => move |top_courses| {
+                        match top_courses {
+                            None => vec![html!("progress")],
+                            Some(top_courses) => {
+                                top_courses.into_iter().map(clone!(state => move |courses| {
+                                    let courses_id = courses.id;
+                                    render_asset_card(
+                                        &courses.clone().into(),
+                                        AssetCardConfig {
+                                            bottom_indicator: AssetCardBottomIndicator::Author,
+                                            dense: true,
+                                            menu: Some(Rc::new(clone!(state => move || {
+                                                html!("menu-kebab", {
+                                                    .prop("slot", "menu")
+                                                    .children(&mut [
+                                                        html!("menu-line", {
+                                                            .prop("icon", "play")
+                                                            .event(clone!(state => move |_: events::Click| {
+                                                                state.play_course.set(Some(courses_id));
+                                                            }))
+                                                        })
+                                                    ])
+                                                })
+                                            }))),
+                                            ..Default::default()
+                                        }
+                                    )
+                                })).collect()
+                            },
+                        }
+                    })).to_signal_vec())
+                }))
+            }))
+            .child_signal(state.play_course.signal().map(clone!(state => move |play_course| {
+                play_course.map(|course_id| {
+                    PlayerPopup::new_default_player_options(
+                        course_id.into(),
+                        PreviewPopupCallbacks {
+                            close: Box::new(clone!(state => move|| {
+                                state.play_course.set(None);
+                            }))
+                        },
+                    ).render(None)
+                })
+            })))
     }
 }
 
