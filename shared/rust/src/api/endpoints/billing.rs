@@ -1,12 +1,9 @@
 use super::ApiEndpoint;
-use crate::domain::billing::{
-    CreateSetupIntentPath, CreateSetupIntentRequest, SubscriptionPlansResponse,
-};
+use crate::domain::billing::{CreateSetupIntentPath, CreateSetupIntentRequest};
 use crate::{
     api::Method,
     domain::billing::{
         CreateSubscriptionPath, CreateSubscriptionRequest, CreateSubscriptionResponse,
-        SubscriptionPlanPath,
     },
     error::EmptyError,
 };
@@ -29,14 +26,4 @@ impl ApiEndpoint for CreateSetupIntent {
     type Res = String;
     type Err = EmptyError;
     const METHOD: Method = Method::Post;
-}
-
-/// Get available subscription plans
-pub struct GetSubscriptionPlans;
-impl ApiEndpoint for GetSubscriptionPlans {
-    type Path = SubscriptionPlanPath;
-    type Req = ();
-    type Res = SubscriptionPlansResponse;
-    type Err = EmptyError;
-    const METHOD: Method = Method::Get;
 }

@@ -7,8 +7,6 @@ use std::collections::HashMap;
 use std::fmt::{Debug, Formatter};
 use strum_macros::{Display, EnumString};
 
-#[cfg(feature = "backend")]
-use anyhow::anyhow;
 use serde_json::Value;
 
 use crate::api::endpoints::PathPart;
@@ -297,10 +295,8 @@ pub struct Subscription {
     pub subscription_id: SubscriptionId,
     /// The Stripe subscription ID
     pub stripe_subscription_id: StripeSubscriptionId,
-    /// The subscription plan ID
-    pub subscription_plan_id: PlanId,
-    /// The subscription tier
-    pub tier: SubscriptionTier,
+    /// The subscription type
+    pub subscription_plan_type: PlanType,
     /// Whether the subscription auto-renews
     pub auto_renew: bool,
     /// The subscription status
@@ -329,8 +325,6 @@ pub struct CreateSubscriptionRecord {
     pub stripe_subscription_id: StripeSubscriptionId,
     /// The subscription plan ID
     pub subscription_plan_id: PlanId,
-    /// The subscription tier
-    pub tier: SubscriptionTier,
     /// Whether the subscription auto-renews
     pub auto_renew: bool,
     /// The subscription status
@@ -429,6 +423,96 @@ pub enum SubscriptionType {
     Individual = 0,
     /// A school subscription
     School = 1,
+}
+
+/// Possible individual subscription plans
+#[derive(
+    Debug, Display, Serialize, Deserialize, Clone, Copy, Eq, Ord, PartialOrd, PartialEq, Hash,
+)]
+#[serde(rename_all = "kebab-case")]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[repr(i16)]
+pub enum PlanType {
+    /// Basic level, monthly
+    IndividualBasicMonthly = 0,
+    /// Basic level, annually
+    IndividualBasicAnnually = 1,
+    /// Pro level, monthly
+    IndividualProMonthly = 2,
+    /// Pro level, annually
+    IndividualProAnnually = 3,
+    /// School Level 1
+    SchoolLevel1 = 4,
+    /// School Level 2
+    SchoolLevel2 = 5,
+    /// School Level 3
+    SchoolLevel3 = 6,
+    /// School Level 4
+    SchoolLevel4 = 7,
+    /// School Unlimited
+    SchoolUnlimited = 8,
+}
+
+const ACCOUNT_LIMIT_L1: i64 = 4;
+const ACCOUNT_LIMIT_L2: i64 = 10;
+const ACCOUNT_LIMIT_L3: i64 = 20;
+const ACCOUNT_LIMIT_L4: i64 = 30;
+
+const INDIVIDUAL_TRIAL_PERIOD: i64 = 7;
+const SCHOOL_TRIAL_PERIOD: i64 = 7;
+
+impl PlanType {
+    /// `SubscriptionTier` of the current plan
+    #[must_use]
+    pub const fn subscription_tier(&self) -> SubscriptionTier {
+        match self {
+            Self::IndividualBasicMonthly | Self::IndividualBasicAnnually => SubscriptionTier::Basic,
+            _ => SubscriptionTier::Pro,
+        }
+    }
+
+    /// Account limit of the current plan
+    #[must_use]
+    pub const fn account_limit(&self) -> Option<AccountLimit> {
+        match self {
+            Self::SchoolLevel1 => Some(AccountLimit(ACCOUNT_LIMIT_L1)),
+            Self::SchoolLevel2 => Some(AccountLimit(ACCOUNT_LIMIT_L2)),
+            Self::SchoolLevel3 => Some(AccountLimit(ACCOUNT_LIMIT_L3)),
+            Self::SchoolLevel4 => Some(AccountLimit(ACCOUNT_LIMIT_L4)),
+            Self::SchoolUnlimited => None,
+            _ => Some(AccountLimit(1)),
+        }
+    }
+
+    /// Subscription type of the current plant
+    #[must_use]
+    pub const fn subscription_type(&self) -> SubscriptionType {
+        match self {
+            Self::IndividualBasicMonthly
+            | Self::IndividualBasicAnnually
+            | Self::IndividualProMonthly
+            | Self::IndividualProAnnually => SubscriptionType::Individual,
+            _ => SubscriptionType::School,
+        }
+    }
+
+    /// Trial period of the current plan
+    #[must_use]
+    pub const fn trial_period(&self) -> TrialPeriod {
+        match self.subscription_type() {
+            SubscriptionType::Individual => TrialPeriod(INDIVIDUAL_TRIAL_PERIOD),
+            SubscriptionType::School => TrialPeriod(SCHOOL_TRIAL_PERIOD),
+        }
+    }
+
+    /// Billing interval for the current plan
+    #[must_use]
+    pub const fn billing_interval(&self) -> BillingInterval {
+        match self {
+            Self::IndividualBasicMonthly | Self::IndividualProMonthly => BillingInterval::Monthly,
+            _ => BillingInterval::Annually,
+        }
+    }
 }
 
 /// The type of account
@@ -543,233 +627,24 @@ wrap_uuid! {
 pub struct SubscriptionPlan {
     /// Local ID of the subscription plan
     pub plan_id: PlanId,
-    /// Stripe product ID
-    pub product_id: StripeProductId,
+    /// Plan type
+    pub plan_type: PlanType,
     /// Stripe price ID
     pub price_id: StripePriceId,
-    /// Subscription tier
-    pub subscription_tier: SubscriptionTier,
-    /// Subscription plan type
-    pub subscription_type: SubscriptionType,
-    /// Billing interval
-    pub billing_interval: BillingInterval,
-    /// The account limit for this subscription
-    ///
-    /// For [SubscriptionType::Individual] subscriptions, this will _always_ be `Some(1)`.
-    pub account_limit: Option<AccountLimit>,
-    /// Current price of subscription in cents
-    pub amount_in_cents: AmountInCents,
-    /// Trial period, if any
-    pub trial_period: Option<TrialPeriod>,
     /// When the plan was originally created.
     pub created_at: DateTime<Utc>,
     /// When the plan was last updated.
     pub updated_at: Option<DateTime<Utc>>,
 }
 
-/// Request to create or update a subscription plan
-///
-/// In Stripe this would correspond to a Price within a Product.
-#[derive(Debug, Serialize, Deserialize, Clone)]
-#[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
-pub struct CreateUpdateSubscriptionPlanRequest {
-    /// Stripe product ID
-    pub product_id: StripeProductId,
-    /// Stripe price ID
-    pub price_id: StripePriceId,
-    /// Subscription tier
-    pub subscription_tier: SubscriptionTier,
-    /// Subscription plan type
-    pub subscription_type: SubscriptionType,
-    /// Billing interval
-    pub billing_interval: BillingInterval,
-    /// The account limit for this subscription
-    ///
-    /// For [SubscriptionType::Individual] subscriptions, this will _always_ be `Some(1)`.
-    pub account_limit: Option<AccountLimit>,
-    /// Current price of subscription in cents
-    pub amount_in_cents: AmountInCents,
-    /// Trial period, if any
-    pub trial_period: Option<TrialPeriod>,
-}
-
 make_path_parts!(SubscriptionPlanPath => "/v1/plans");
 
-/// Mapped into plan details
+/// Request to create or update a subscription plans
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct SubscriptionPlanDetailsResponse {
-    /// Local subscription plan ID
-    pub plan_id: PlanId,
-    /// Amount in cents to subscribe to this plan
-    pub amount_in_cents: AmountInCents,
-    /// Trial period
-    pub trial_period: Option<TrialPeriod>,
-    /// Billing interval
-    pub billing_interval: BillingInterval,
-    /// Subscription type
-    pub subscription_type: SubscriptionType,
-    /// Subscription tier
-    pub subscription_tier: SubscriptionTier,
-}
-
-impl From<SubscriptionPlan> for SubscriptionPlanDetailsResponse {
-    fn from(plan: SubscriptionPlan) -> Self {
-        Self {
-            plan_id: plan.plan_id,
-            amount_in_cents: plan.amount_in_cents,
-            trial_period: plan.trial_period,
-            billing_interval: plan.billing_interval,
-            subscription_type: plan.subscription_type,
-            subscription_tier: plan.subscription_tier,
-        }
-    }
-}
-
-/// Mapped individual plans
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct IndividualPlanResponse {
-    /// Basic plan monthly
-    pub basic_monthly: PlanId,
-    /// Basic plan annual
-    pub basic_annual: PlanId,
-    /// Pro plan monthly
-    pub pro_monthly: PlanId,
-    /// Pro plan annual
-    pub pro_annual: PlanId,
-}
-
-/// Mapped school plans
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct SchoolPlanResponse {
-    /// Annual school plans with an account limit
-    pub limited_annual: HashMap<AccountLimit, PlanId>,
-    /// Annual school plan without a limit
-    pub unlimited_annual: PlanId,
-}
-
-/// Subscription plans mapped into a response
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct SubscriptionPlansResponse {
-    /// Plans
-    pub plans: HashMap<PlanId, SubscriptionPlanDetailsResponse>,
-    /// Individual plan lookups
-    pub individual: IndividualPlanResponse,
-    /// School plan lookups
-    pub school: SchoolPlanResponse,
-}
-
-#[cfg(feature = "backend")]
-impl TryFrom<Vec<SubscriptionPlan>> for SubscriptionPlansResponse {
-    type Error = anyhow::Error;
-
-    fn try_from(plans: Vec<SubscriptionPlan>) -> Result<Self, Self::Error> {
-        let mut builder = SubscriptionPlansResponseBuilder::default();
-        for plan in plans {
-            builder.set_from_plan(plan);
-        }
-
-        builder.build()
-    }
-}
-
-/// Allows to easily build a subscription plans response from database records
-#[derive(Default, Debug, Serialize, Deserialize, Clone)]
-#[cfg(feature = "backend")]
-struct SubscriptionPlansResponseBuilder {
-    /// Plans map
-    plans: HashMap<PlanId, SubscriptionPlanDetailsResponse>,
-    /// Individual basic monthly
-    individual_basic_monthly: Option<PlanId>,
-    /// Individual basic annual
-    individual_basic_annual: Option<PlanId>,
-    /// Individual pro monthly
-    individual_pro_monthly: Option<PlanId>,
-    /// Individual pro annual
-    individual_pro_annual: Option<PlanId>,
-    /// Annual school plans with account limits
-    school_limited_annual: HashMap<AccountLimit, PlanId>,
-    /// Annual school plan without an account limit
-    school_unlimited_annual: Option<PlanId>,
-}
-
-#[cfg(feature = "backend")]
-impl SubscriptionPlansResponseBuilder {
-    /// Set the appropriate plan from a subscription plan record
-    fn set_from_plan(&mut self, plan: SubscriptionPlan) {
-        let subscription_type = plan.subscription_type;
-        let subscription_tier = plan.subscription_tier;
-        let billing_interval = plan.billing_interval;
-        let account_limit = plan.account_limit;
-
-        let response = SubscriptionPlanDetailsResponse::from(plan);
-        let plan_id = response.plan_id;
-        self.plans.insert(plan_id, response);
-
-        match subscription_type {
-            SubscriptionType::Individual => match (subscription_tier, billing_interval) {
-                (SubscriptionTier::Basic, BillingInterval::Monthly) => {
-                    self.individual_basic_monthly = Some(plan_id);
-                }
-                (SubscriptionTier::Basic, BillingInterval::Annually) => {
-                    self.individual_basic_annual = Some(plan_id);
-                }
-                (SubscriptionTier::Pro, BillingInterval::Monthly) => {
-                    self.individual_pro_monthly = Some(plan_id);
-                }
-                (SubscriptionTier::Pro, BillingInterval::Annually) => {
-                    self.individual_pro_annual = Some(plan_id);
-                }
-            },
-            SubscriptionType::School => match (account_limit, billing_interval) {
-                (None, BillingInterval::Annually) => {
-                    self.school_unlimited_annual = Some(plan_id);
-                }
-                (Some(account_limit), BillingInterval::Annually) => {
-                    self.school_limited_annual.insert(account_limit, plan_id);
-                }
-                _ => {
-                    // There are no monthly plans for schools. If the data exists, we can safely
-                    // ignore it.
-                }
-            },
-        }
-    }
-
-    /// Build the subscription plans response.
-    ///
-    /// Will return an error if:
-    /// - Either or both of the individual plans are missing;
-    /// - The unlimited school plan is missing;
-    /// - Or, there are no limited school plans.
-    fn build(self) -> anyhow::Result<SubscriptionPlansResponse> {
-        if self.school_limited_annual.is_empty() {
-            return Err(anyhow!("Missing limited school plans"));
-        }
-
-        Ok(SubscriptionPlansResponse {
-            plans: self.plans,
-            individual: IndividualPlanResponse {
-                basic_monthly: self
-                    .individual_basic_monthly
-                    .ok_or(anyhow!("Missing monthly Individual Basic plan"))?,
-                basic_annual: self
-                    .individual_basic_annual
-                    .ok_or(anyhow!("Missing annual Individual Basic plan"))?,
-                pro_monthly: self
-                    .individual_pro_monthly
-                    .ok_or(anyhow!("Missing monthly Individual Pro plan"))?,
-                pro_annual: self
-                    .individual_pro_annual
-                    .ok_or(anyhow!("Missing annual Individual Pro plan"))?,
-            },
-            school: SchoolPlanResponse {
-                limited_annual: self.school_limited_annual,
-                unlimited_annual: self
-                    .school_unlimited_annual
-                    .ok_or(anyhow!("Missing annual School Unlimited plan"))?,
-            },
-        })
-    }
+pub struct UpdateSubscriptionPlansRequest {
+    /// Map of price ids
+    #[serde(flatten)]
+    pub plans: HashMap<PlanType, StripePriceId>,
 }
 
 /// Request to create a subscription.
@@ -780,8 +655,8 @@ impl SubscriptionPlansResponseBuilder {
 pub struct CreateSubscriptionRequest {
     /// Optional setup intent ID if a payment method was created prior to subscribing.
     pub setup_intent_id: Option<String>,
-    /// Plan ID to create the subscription for
-    pub plan_id: PlanId,
+    /// Plan to create the subscription for
+    pub plan_type: PlanType,
     /// Promotion code
     pub promotion_code: Option<String>,
 }
@@ -806,8 +681,8 @@ pub struct CreateSubscriptionResponse {
 /// users existing payment method. Otherwise, a payment method will be saved.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct CreateSetupIntentRequest {
-    /// Plan ID to create the subscription for
-    pub plan_id: PlanId,
+    /// Plan to create the subscription for
+    pub plan_type: PlanType,
 }
 
 make_path_parts!(CreateSetupIntentPath => "/v1/billing/payment-method");

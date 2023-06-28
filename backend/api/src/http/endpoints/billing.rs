@@ -5,7 +5,7 @@ use actix_web::{
 use anyhow::anyhow;
 use chrono::{TimeZone, Utc};
 use ji_core::settings::RuntimeSettings;
-use shared::api::endpoints::billing::{CreateSetupIntent, GetSubscriptionPlans};
+use shared::api::endpoints::billing::CreateSetupIntent;
 use shared::domain::billing::{
     Account, AccountType, AmountInCents, CreateSubscriptionRecord, StripeInvoiceId,
     StripeSubscriptionId, SubscriptionStatus, SubscriptionType, UpdateSubscriptionRecord,
@@ -53,14 +53,14 @@ async fn create_subscription(
     let user_id = auth.user_id();
 
     // Fetch the subscription plan details
-    let plan: SubscriptionPlan = db::billing::get_subscription_plan_by_id(&db, req.plan_id)
+    let plan: SubscriptionPlan = db::billing::get_subscription_plan_by_type(&db, req.plan_type)
         .await?
-        .ok_or(error::Billing::NotFound)?;
+        .ok_or(error::Billing::NotFound(format!("Plan {}", req.plan_type)))?;
 
     // Fetch the profile for the user that's creating the subscription
     let user_profile: UserProfile = db::user::get_profile(db.as_ref(), &user_id)
         .await?
-        .ok_or(error::Billing::NotFound)?;
+        .ok_or(error::Billing::NotFound(format!("User {:?}", user_id)))?;
 
     let client = create_stripe_client(&settings)?;
 
@@ -68,11 +68,11 @@ async fn create_subscription(
 
     if !account
         .account_type
-        .matches_subscription_type(&plan.subscription_type)
+        .matches_subscription_type(&plan.plan_type.subscription_type())
     {
         return Err(error::Billing::IncorrectPlanType(
             account.account_type,
-            plan.subscription_type,
+            plan.plan_type.subscription_type(),
         ));
     }
 
@@ -147,14 +147,12 @@ async fn create_subscription(
 
         // If the user hasn't previously had a subscription, then we can set their trial period.
         if account.subscription.is_none() {
-            if let Some(trial_period) = plan.trial_period {
-                params.trial_period_days = Some(trial_period.inner() as u32);
-                params.trial_settings = Some(stripe::CreateSubscriptionTrialSettings {
-                    end_behavior: stripe::CreateSubscriptionTrialSettingsEndBehavior {
-                        missing_payment_method: stripe::CreateSubscriptionTrialSettingsEndBehaviorMissingPaymentMethod::Cancel,
-                    },
-                });
-            }
+            params.trial_period_days = Some(plan.plan_type.trial_period().inner() as u32);
+            params.trial_settings = Some(stripe::CreateSubscriptionTrialSettings {
+                end_behavior: stripe::CreateSubscriptionTrialSettingsEndBehavior {
+                    missing_payment_method: stripe::CreateSubscriptionTrialSettingsEndBehaviorMissingPaymentMethod::Cancel,
+                },
+            });
         }
 
         stripe::Subscription::create(&client, params)
@@ -206,8 +204,7 @@ async fn create_subscription(
     let subscription = CreateSubscriptionRecord {
         stripe_subscription_id,
         subscription_plan_id: plan.plan_id,
-        tier: plan.subscription_tier,
-        auto_renew: true,           // TODO is this always true initially?
+        auto_renew: true,
         status: Default::default(), // This will be updated in the webhook
         current_period_end: Utc
             .timestamp_opt(stripe_subscription.current_period_end, 0)
@@ -239,14 +236,14 @@ async fn create_setup_intent(
     let user_id = auth.user_id();
 
     // Fetch the subscription plan details
-    let plan: SubscriptionPlan = db::billing::get_subscription_plan_by_id(&db, req.plan_id)
+    let plan: SubscriptionPlan = db::billing::get_subscription_plan_by_type(&db, req.plan_type)
         .await?
-        .ok_or(error::Billing::NotFound)?;
+        .ok_or(error::Billing::NotFound(format!("Plan {}", req.plan_type)))?;
 
     // Fetch the profile for the user that wants to subscribe
     let user_profile: UserProfile = db::user::get_profile(db.as_ref(), &user_id)
         .await?
-        .ok_or(error::Billing::NotFound)?;
+        .ok_or(error::Billing::NotFound(format!("User {:?}", user_id)))?;
 
     let client = create_stripe_client(&settings)?;
 
@@ -301,7 +298,10 @@ async fn get_or_create_customer(
 
             account
         } else {
-            if !matches!(plan.subscription_type, SubscriptionType::Individual) {
+            if !matches!(
+                plan.plan_type.subscription_type(),
+                SubscriptionType::Individual
+            ) {
                 return Err(error::Billing::IncorrectPlanType(
                     AccountType::Individual,
                     SubscriptionType::School,
@@ -311,7 +311,7 @@ async fn get_or_create_customer(
             db::account::create_default_individual_account(
                 db,
                 &user_profile.id,
-                &plan.subscription_tier,
+                &plan.plan_type.subscription_tier(),
             )
             .await?;
 
@@ -502,14 +502,6 @@ async fn save_payment_method(
     Ok(())
 }
 
-pub async fn get_subscription_plans(
-    db: Data<PgPool>,
-) -> Result<Json<<GetSubscriptionPlans as ApiEndpoint>::Res>, error::Billing> {
-    let plans = db::billing::get_subscription_plans(db.as_ref()).await?;
-
-    Ok(Json(plans.try_into()?))
-}
-
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
         <CreateSubscription as ApiEndpoint>::Path::PATH,
@@ -519,11 +511,5 @@ pub fn configure(cfg: &mut ServiceConfig) {
         <CreateSetupIntent as ApiEndpoint>::Path::PATH,
         CreateSetupIntent::METHOD.route().to(create_setup_intent),
     )
-    .route("/v1/stripe-webhook", Method::Post.route().to(webhook))
-    .route(
-        <GetSubscriptionPlans as ApiEndpoint>::Path::PATH,
-        GetSubscriptionPlans::METHOD
-            .route()
-            .to(get_subscription_plans),
-    );
+    .route("/v1/stripe-webhook", Method::Post.route().to(webhook));
 }

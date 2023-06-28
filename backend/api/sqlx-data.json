@@ -242,86 +242,6 @@
     },
     "query": "\nselect playlist_data.id,\n       display_name\nfrom playlist_data\ninner join playlist on live_id = playlist_data.id\nwhere display_name <> ''\n      and translated_name = '{}'\n      and published_at is not null\n      and name_translate_status is null\norder by coalesce(updated_at, created_at) desc\nlimit 20 for no key update skip locked;\n "
   },
-  "040ce75080d45c3145b01e706eeb2f0b855eed8dd0eaae542ea24d383b4f70fe": {
-    "describe": {
-      "columns": [
-        {
-          "name": "plan_id: PlanId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "product_id: StripeProductId",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "price_id: StripePriceId",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "subscription_tier: SubscriptionTier",
-          "ordinal": 3,
-          "type_info": "Int2"
-        },
-        {
-          "name": "subscription_type: SubscriptionType",
-          "ordinal": 4,
-          "type_info": "Int2"
-        },
-        {
-          "name": "billing_interval: BillingInterval",
-          "ordinal": 5,
-          "type_info": "Int2"
-        },
-        {
-          "name": "account_limit: AccountLimit",
-          "ordinal": 6,
-          "type_info": "Int8"
-        },
-        {
-          "name": "amount_in_cents: AmountInCents",
-          "ordinal": 7,
-          "type_info": "Int8"
-        },
-        {
-          "name": "trial_period?: TrialPeriod",
-          "ordinal": 8,
-          "type_info": "Int8"
-        },
-        {
-          "name": "created_at: DateTime<Utc>",
-          "ordinal": 9,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at: DateTime<Utc>",
-          "ordinal": 10,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        false,
-        true,
-        false,
-        true
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect\n    plan_id as \"plan_id: PlanId\",\n    product_id as \"product_id: StripeProductId\",\n    price_id as \"price_id: StripePriceId\",\n    subscription_tier as \"subscription_tier: SubscriptionTier\",\n    subscription_type as \"subscription_type: SubscriptionType\",\n    billing_interval as \"billing_interval: BillingInterval\",\n    account_limit as \"account_limit: AccountLimit\",\n    amount_in_cents as \"amount_in_cents: AmountInCents\",\n    trial_period as \"trial_period?: TrialPeriod\",\n    created_at as \"created_at: DateTime<Utc>\",\n    updated_at as \"updated_at: DateTime<Utc>\"\nfrom subscription_plan\nwhere plan_id = $1\n"
-  },
   "041c763ec559907841f70e45f627d3864a9e9fef4929d6b96327064617a2f5ec": {
     "describe": {
       "columns": [
@@ -3261,34 +3181,6 @@
     },
     "query": "update user_profile set last_synced_at = now() where user_id = any($1)"
   },
-  "2fa31716ddf106229af4f14aa684b20745717c19465d2145991b8c727f68e1de": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: SubscriptionId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Uuid",
-          "Int2",
-          "Bool",
-          "Int2",
-          "Timestamptz",
-          "Uuid",
-          "Text",
-          "Int8"
-        ]
-      }
-    },
-    "query": "\ninsert into subscription\n    (\n        stripe_subscription_id,\n        subscription_plan_id,\n        subscription_tier,\n        auto_renew,\n        status,\n        current_period_end,\n        account_id,\n        latest_invoice_id,\n        amount_due\n    )\nvalues\n    ($1, $2, $3, $4, $5, $6, $7, $8, $9)\nreturning subscription_id as \"id!: SubscriptionId\"\n"
-  },
   "309109ef31f64630b41aa1fcd908b73399c46ebc23656d54f3266964eedc2bd3": {
     "describe": {
       "columns": [
@@ -3730,6 +3622,50 @@
     },
     "query": "\ndelete\nfrom course_data_resource\nwhere course_data_id = $1\n   or course_data_id = $2\n    and id = $3\n        "
   },
+  "3942e29aed4f2a0b9ec6801f805cf42a0ce6592ae4077c3e5d3d7375370ff18d": {
+    "describe": {
+      "columns": [
+        {
+          "name": "plan_id: PlanId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "plan_type: PlanType",
+          "ordinal": 1,
+          "type_info": "Int2"
+        },
+        {
+          "name": "price_id: StripePriceId",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "created_at: DateTime<Utc>",
+          "ordinal": 3,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at: DateTime<Utc>",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect\n    plan_id as \"plan_id: PlanId\",\n    plan_type as \"plan_type: PlanType\",\n    price_id as \"price_id: StripePriceId\",\n    created_at as \"created_at: DateTime<Utc>\",\n    updated_at as \"updated_at: DateTime<Utc>\"\nfrom subscription_plan\nwhere plan_id = $1\n"
+  },
   "399f537a8091d51635c2cd32bf16449c26317d1f56c576064968a2bfd57953e0": {
     "describe": {
       "columns": [],
@@ -4153,6 +4089,50 @@
       }
     },
     "query": "insert into session (token, user_id, impersonator_id, expires_at, scope_mask) values ($1, $2, $3, $4, $5)"
+  },
+  "457c728cb149fc869a3625cb05fc1188616305fa009f1dedcafecd42e3814998": {
+    "describe": {
+      "columns": [
+        {
+          "name": "plan_id: PlanId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "plan_type: PlanType",
+          "ordinal": 1,
+          "type_info": "Int2"
+        },
+        {
+          "name": "price_id: StripePriceId",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "created_at: DateTime<Utc>",
+          "ordinal": 3,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at: DateTime<Utc>",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Int2"
+        ]
+      }
+    },
+    "query": "\nselect\n    plan_id as \"plan_id: PlanId\",\n    plan_type as \"plan_type: PlanType\",\n    price_id as \"price_id: StripePriceId\",\n    created_at as \"created_at: DateTime<Utc>\",\n    updated_at as \"updated_at: DateTime<Utc>\"\nfrom subscription_plan\nwhere plan_type = $1\n"
   },
   "46c33b81e5196642a75aa8374f72f013f66a7b798de0b2a5a5f5a2928b1f7d7d": {
     "describe": {
@@ -5597,25 +5577,6 @@
     },
     "query": "\nselect exists(select 1 from user_image_library where user_id = $1 and id = $2) as \"exists!\"\n    "
   },
-  "628420d3e65bdd621925596f9f00faa7f0ef620de80e871e6975a1c6cb643ad5": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text",
-          "Int2",
-          "Int2",
-          "Int2",
-          "Int8",
-          "Int8",
-          "Int8"
-        ]
-      }
-    },
-    "query": "\ninsert into subscription_plan\n    (product_id, price_id, subscription_tier, subscription_type, billing_interval, account_limit, amount_in_cents)\nvalues\n    ($1, $2, $3, $4, $5, $6, $7)\non conflict (product_id, price_id) do update\nset\n    product_id = $1,\n    price_id = $2,\n    subscription_tier = $3,\n    subscription_type = $4,\n    billing_interval = $5,\n    account_limit = $6,\n    amount_in_cents = $7,\n    trial_period = $8\n"
-  },
   "62d96e4b30f7828cbc7255b3be93f16aa1a868bd5a9780ae80079dbbfe858694": {
     "describe": {
       "columns": [
@@ -6935,6 +6896,33 @@
     },
     "query": "\ninsert into image_tag (index, display_name)\nvalues ($1, $2)\nreturning index as \"index: ImageTagIndex\", display_name\n            "
   },
+  "781c2b492b9b6468c1474113d2233a8b7dd904ae1a00547270aa4582b9cedd46": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: SubscriptionId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Uuid",
+          "Bool",
+          "Int2",
+          "Timestamptz",
+          "Uuid",
+          "Text",
+          "Int8"
+        ]
+      }
+    },
+    "query": "\ninsert into subscription\n    (\n        stripe_subscription_id,\n        subscription_plan_id,\n        auto_renew,\n        status,\n        current_period_end,\n        account_id,\n        latest_invoice_id,\n        amount_due\n    )\nvalues\n    ($1, $2, $3, $4, $5, $6, $7, $8)\nreturning subscription_id as \"id!: SubscriptionId\"\n"
+  },
   "78b48e52d416cf94b8daaf7ce4b6dcbb7bae4ba6c5f85bc4121c626f37c4df4e": {
     "describe": {
       "columns": [],
@@ -6972,6 +6960,86 @@
       }
     },
     "query": "insert into web_media_upload (media_id, uploaded_at) values ($1, now())"
+  },
+  "7ab0e2ac1e5a462b4537363ac07b06867927cadda248c508494779634725ef49": {
+    "describe": {
+      "columns": [
+        {
+          "name": "subscription_id!: SubscriptionId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "stripe_subscription_id!: StripeSubscriptionId",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "subscription_plan_type!: PlanType",
+          "ordinal": 2,
+          "type_info": "Int2"
+        },
+        {
+          "name": "auto_renew",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "status!: SubscriptionStatus",
+          "ordinal": 4,
+          "type_info": "Int2"
+        },
+        {
+          "name": "current_period_end!: DateTime<Utc>",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "account_id!: AccountId",
+          "ordinal": 6,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "latest_invoice_id?: StripeInvoiceId",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "amount_due_in_cents?: AmountInCents",
+          "ordinal": 8,
+          "type_info": "Int8"
+        },
+        {
+          "name": "created_at!: DateTime<Utc>",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at?: DateTime<Utc>",
+          "ordinal": 10,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect\n    subscription_id as \"subscription_id!: SubscriptionId\",\n    stripe_subscription_id as \"stripe_subscription_id!: StripeSubscriptionId\",\n    subscription_plan.plan_type as \"subscription_plan_type!: PlanType\",\n    auto_renew,\n    status as \"status!: SubscriptionStatus\",\n    current_period_end as \"current_period_end!: DateTime<Utc>\",\n    account_id as \"account_id!: AccountId\",\n    latest_invoice_id as \"latest_invoice_id?: StripeInvoiceId\",\n    amount_due as \"amount_due_in_cents?: AmountInCents\",\n    subscription.created_at as \"created_at!: DateTime<Utc>\",\n    subscription.updated_at as \"updated_at?: DateTime<Utc>\"\nfrom subscription\ninner join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\nwhere subscription_id = $1\n"
   },
   "7bd8eff40b8bb4649064764c88f6087f405f0727abb476003a960c379a8e3bc7": {
     "describe": {
@@ -7208,92 +7276,6 @@
       }
     },
     "query": "\nselect count(distinct circle.id) as \"count!: i64\"\n    from circle\n    left join circle_member \"cm\" on cm.id = circle.id\n    where (creator_id = $1 or $1 is null)\n    and (cm.user_id = any($2) or $2 = array[]::uuid[])\n"
-  },
-  "7e120d5c19d04fdb8dca975e52e574169f1a1a256ad72b3444d34dd58041f02b": {
-    "describe": {
-      "columns": [
-        {
-          "name": "subscription_id!: SubscriptionId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "stripe_subscription_id!: StripeSubscriptionId",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "subscription_plan_id!: PlanId",
-          "ordinal": 2,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "tier!: SubscriptionTier",
-          "ordinal": 3,
-          "type_info": "Int2"
-        },
-        {
-          "name": "auto_renew",
-          "ordinal": 4,
-          "type_info": "Bool"
-        },
-        {
-          "name": "status!: SubscriptionStatus",
-          "ordinal": 5,
-          "type_info": "Int2"
-        },
-        {
-          "name": "current_period_end!: DateTime<Utc>",
-          "ordinal": 6,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "account_id!: AccountId",
-          "ordinal": 7,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "latest_invoice_id?: StripeInvoiceId",
-          "ordinal": 8,
-          "type_info": "Text"
-        },
-        {
-          "name": "amount_due_in_cents?: AmountInCents",
-          "ordinal": 9,
-          "type_info": "Int8"
-        },
-        {
-          "name": "created_at!: DateTime<Utc>",
-          "ordinal": 10,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at?: DateTime<Utc>",
-          "ordinal": 11,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        true,
-        false,
-        true
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect\n    subscription_id as \"subscription_id!: SubscriptionId\",\n    stripe_subscription_id as \"stripe_subscription_id!: StripeSubscriptionId\",\n    subscription_plan_id as \"subscription_plan_id!: PlanId\",\n    subscription_tier as \"tier!: SubscriptionTier\",\n    auto_renew,\n    status as \"status!: SubscriptionStatus\",\n    current_period_end as \"current_period_end!: DateTime<Utc>\",\n    account_id as \"account_id!: AccountId\",\n    latest_invoice_id as \"latest_invoice_id?: StripeInvoiceId\",\n    amount_due as \"amount_due_in_cents?: AmountInCents\",\n    created_at as \"created_at!: DateTime<Utc>\",\n    updated_at as \"updated_at?: DateTime<Utc>\"\nfrom subscription\nwhere account_id = $1\norder by created_at desc\nlimit 1\n"
   },
   "7e1c8257d60df047475bd6d69644c3f38c978227b4af14bc7e72d098b087cdb9": {
     "describe": {
@@ -7958,6 +7940,86 @@
       }
     },
     "query": "\nupdate circle\nset description = $2,\n    updated_at = now()\nwhere id = $1 and $2 is distinct from description\n"
+  },
+  "860a67a1724506f0f6f18b69cdd30b00883dae8192be10dfe83c65ab9e6b6de2": {
+    "describe": {
+      "columns": [
+        {
+          "name": "subscription_id!: SubscriptionId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "stripe_subscription_id!: StripeSubscriptionId",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "subscription_plan_type!: PlanType",
+          "ordinal": 2,
+          "type_info": "Int2"
+        },
+        {
+          "name": "auto_renew",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "status!: SubscriptionStatus",
+          "ordinal": 4,
+          "type_info": "Int2"
+        },
+        {
+          "name": "current_period_end!: DateTime<Utc>",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "account_id!: AccountId",
+          "ordinal": 6,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "latest_invoice_id?: StripeInvoiceId",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "amount_due_in_cents?: AmountInCents",
+          "ordinal": 8,
+          "type_info": "Int8"
+        },
+        {
+          "name": "created_at!: DateTime<Utc>",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at?: DateTime<Utc>",
+          "ordinal": 10,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect\n    subscription_id as \"subscription_id!: SubscriptionId\",\n    stripe_subscription_id as \"stripe_subscription_id!: StripeSubscriptionId\",\n    subscription_plan.plan_type as \"subscription_plan_type!: PlanType\",\n    auto_renew,\n    status as \"status!: SubscriptionStatus\",\n    current_period_end as \"current_period_end!: DateTime<Utc>\",\n    account_id as \"account_id!: AccountId\",\n    latest_invoice_id as \"latest_invoice_id?: StripeInvoiceId\",\n    amount_due as \"amount_due_in_cents?: AmountInCents\",\n    subscription.created_at as \"created_at!: DateTime<Utc>\",\n    subscription.updated_at as \"updated_at?: DateTime<Utc>\"\nfrom subscription\ninner join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\nwhere account_id = $1\norder by subscription.created_at desc\nlimit 1\n"
   },
   "86b018a6740d90547e7a7ee620398484bbb935a953433386139b520efc356188": {
     "describe": {
@@ -11999,84 +12061,6 @@
     },
     "query": "delete from circle where id = $1"
   },
-  "bcd76b5f13042928018552bb7136cceb2943e00c42ad986d871d364c97276531": {
-    "describe": {
-      "columns": [
-        {
-          "name": "plan_id: PlanId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "product_id: StripeProductId",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "price_id: StripePriceId",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "subscription_tier: SubscriptionTier",
-          "ordinal": 3,
-          "type_info": "Int2"
-        },
-        {
-          "name": "subscription_type: SubscriptionType",
-          "ordinal": 4,
-          "type_info": "Int2"
-        },
-        {
-          "name": "billing_interval: BillingInterval",
-          "ordinal": 5,
-          "type_info": "Int2"
-        },
-        {
-          "name": "account_limit: AccountLimit",
-          "ordinal": 6,
-          "type_info": "Int8"
-        },
-        {
-          "name": "amount_in_cents: AmountInCents",
-          "ordinal": 7,
-          "type_info": "Int8"
-        },
-        {
-          "name": "trial_period?: TrialPeriod",
-          "ordinal": 8,
-          "type_info": "Int8"
-        },
-        {
-          "name": "created_at: DateTime<Utc>",
-          "ordinal": 9,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at: DateTime<Utc>",
-          "ordinal": 10,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        false,
-        true,
-        false,
-        true
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "\nselect\n    plan_id as \"plan_id: PlanId\",\n    product_id as \"product_id: StripeProductId\",\n    price_id as \"price_id: StripePriceId\",\n    subscription_tier as \"subscription_tier: SubscriptionTier\",\n    subscription_type as \"subscription_type: SubscriptionType\",\n    billing_interval as \"billing_interval: BillingInterval\",\n    account_limit as \"account_limit: AccountLimit\",\n    amount_in_cents as \"amount_in_cents: AmountInCents\",\n    trial_period as \"trial_period?: TrialPeriod\",\n    created_at as \"created_at: DateTime<Utc>\",\n    updated_at as \"updated_at: DateTime<Utc>\"\nfrom subscription_plan\n"
-  },
   "bce089dbbf9be7f97f81c803dab60fa881956db7392aff47c6776fc4e4e4c4f8": {
     "describe": {
       "columns": [],
@@ -14674,6 +14658,19 @@
     },
     "query": "\nselect count(*) as \"count!: i64\"\nfrom resource_data\ninner join resource on resource.live_id = resource_data.id\nwhere (privacy_level = coalesce($1, privacy_level))\n"
   },
+  "f206ec0b1c020544ecfa7646aa07af52f492ced75033641ff3022dacc33fb256": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int2",
+          "Text"
+        ]
+      }
+    },
+    "query": "\ninsert into subscription_plan\n    (plan_type, price_id)\nvalues\n    ($1, $2)\non conflict (plan_type) do update\nset\n    plan_type = $1,\n    price_id = $2,\n    updated_at = now()\n"
+  },
   "f21af517d04789456113caf05c2b4fe7c557905dc2068bdb0ddae2b7890ed454": {
     "describe": {
       "columns": [
@@ -15011,92 +15008,6 @@
       }
     },
     "query": "\nwith del_data as (\n    delete from resource_data\n        where id is not distinct from $1 or id is not distinct from $2)\ndelete\nfrom resource\nwhere id is not distinct from $3\n\n"
-  },
-  "f788e5a78a022fd8345437f9733a69e63ee0c05eba4ad970daba9c69d23b9e57": {
-    "describe": {
-      "columns": [
-        {
-          "name": "subscription_id!: SubscriptionId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "stripe_subscription_id!: StripeSubscriptionId",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "subscription_plan_id!: PlanId",
-          "ordinal": 2,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "tier!: SubscriptionTier",
-          "ordinal": 3,
-          "type_info": "Int2"
-        },
-        {
-          "name": "auto_renew",
-          "ordinal": 4,
-          "type_info": "Bool"
-        },
-        {
-          "name": "status!: SubscriptionStatus",
-          "ordinal": 5,
-          "type_info": "Int2"
-        },
-        {
-          "name": "current_period_end!: DateTime<Utc>",
-          "ordinal": 6,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "account_id!: AccountId",
-          "ordinal": 7,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "latest_invoice_id?: StripeInvoiceId",
-          "ordinal": 8,
-          "type_info": "Text"
-        },
-        {
-          "name": "amount_due_in_cents?: AmountInCents",
-          "ordinal": 9,
-          "type_info": "Int8"
-        },
-        {
-          "name": "created_at!: DateTime<Utc>",
-          "ordinal": 10,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at?: DateTime<Utc>",
-          "ordinal": 11,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        true,
-        false,
-        true
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect\n    subscription_id as \"subscription_id!: SubscriptionId\",\n    stripe_subscription_id as \"stripe_subscription_id!: StripeSubscriptionId\",\n    subscription_plan_id as \"subscription_plan_id!: PlanId\",\n    subscription_tier as \"tier!: SubscriptionTier\",\n    auto_renew,\n    status as \"status!: SubscriptionStatus\",\n    current_period_end as \"current_period_end!: DateTime<Utc>\",\n    account_id as \"account_id!: AccountId\",\n    latest_invoice_id as \"latest_invoice_id?: StripeInvoiceId\",\n    amount_due as \"amount_due_in_cents?: AmountInCents\",\n    created_at as \"created_at!: DateTime<Utc>\",\n    updated_at as \"updated_at?: DateTime<Utc>\"\nfrom subscription\nwhere subscription_id = $1\n"
   },
   "f885c76fd750edde5adbd1d426d6f92c91f336d5ffbbcee318e1f18cf31ca72b": {
     "describe": {

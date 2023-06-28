@@ -17,10 +17,10 @@ use shared::domain::admin::{
     InviteFailedReason, InviteSchoolUserFailure, InviteSchoolUsersResponse,
     SearchSchoolNamesResponse,
 };
-use shared::domain::billing::{SchoolId, SubscriptionTier};
+use shared::domain::billing::{SchoolId, SubscriptionTier, UpdateSubscriptionPlansRequest};
 use shared::{
     api::{
-        endpoints::admin::{self, CreateUpdateSubscriptionPlan},
+        endpoints::admin::{self, CreateUpdateSubscriptionPlans},
         ApiEndpoint, PathParts,
     },
     domain::{
@@ -141,12 +141,16 @@ async fn export_data(
     Ok(file.into_response(&req))
 }
 
-async fn create_or_update_subscription_plan(
+async fn create_or_update_subscription_plans(
     _auth: TokenUserWithScope<ScopeAdmin>,
     db: Data<PgPool>,
-    req: Json<<CreateUpdateSubscriptionPlan as ApiEndpoint>::Req>,
+    req: Json<<CreateUpdateSubscriptionPlans as ApiEndpoint>::Req>,
 ) -> actix_web::Result<HttpResponse, error::Server> {
-    db::billing::upsert_subscription_plan(&db, req.into_inner()).await?;
+    let UpdateSubscriptionPlansRequest { plans } = req.into_inner();
+
+    for (plan_type, price_id) in plans {
+        db::billing::upsert_subscription_plan(&db, plan_type, price_id).await?;
+    }
 
     Ok(HttpResponse::Created().finish())
 }
@@ -313,10 +317,10 @@ pub fn configure(cfg: &mut ServiceConfig) {
         admin::ExportData::METHOD.route().to(export_data),
     )
     .route(
-        <CreateUpdateSubscriptionPlan as ApiEndpoint>::Path::PATH,
-        admin::CreateUpdateSubscriptionPlan::METHOD
+        <CreateUpdateSubscriptionPlans as ApiEndpoint>::Path::PATH,
+        admin::CreateUpdateSubscriptionPlans::METHOD
             .route()
-            .to(create_or_update_subscription_plan),
+            .to(create_or_update_subscription_plans),
     )
     .route(
         <SearchSchoolNames as ApiEndpoint>::Path::PATH,
