@@ -22,11 +22,16 @@ export class _ extends LitElement {
                 }
                 .body {
                     padding: 0 24px;
+                    overflow-y: auto;
+                    max-height: 496px;
                 }
-                section {
+                .body section {
                     padding: 20px 0;
                     display: grid;
                     row-gap: 16px;
+                    max-width: 390px;
+                    border-bottom: solid 1px #d5e4ff;
+
                 }
                 section:not(:last-child) {
                     border-bottom: solid 1px #d5e4ff;
@@ -77,7 +82,8 @@ export class _ extends LitElement {
                     font-size: 12px;
                     color: var(--dark-gray-6);
                     margin: 0;
-                    white-space: pre-wrap;
+                    max-width: 350px;
+                    overflow-wrap: break-word;
                 }
                 .categories {
                     display: flex;
@@ -98,6 +104,7 @@ export class _ extends LitElement {
                     font-size: 12px;
                     display: flex;
                     column-gap: 5px;
+                    overflow-wrap: break-word;
                 }
                 .playlists-section h5 {
                     margin: 0;
