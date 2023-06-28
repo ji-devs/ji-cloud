@@ -91,7 +91,7 @@ impl NameError {
     pub fn as_str(&self) -> &'static str {
         match self {
             Self::Empty => "Can't be empty!",
-            Self::Exists => "Already exists!",
+            Self::Exists => "Sorry, this username is taken. Please try another.",
         }
     }
 }
