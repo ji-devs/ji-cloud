@@ -806,7 +806,7 @@ pub enum Billing {
     InternalServerError(anyhow::Error),
     Service(Service),
     Stripe(StripeError),
-    NotFound,
+    NotFound(String),
     BadRequest,
     SubscriptionExists,
     SchoolNotFound,
@@ -829,10 +829,11 @@ impl Into<actix_web::Error> for Billing {
             }
             Self::Service(e) => e.into(),
             Self::Stripe(e) => ise(e.into()),
-            Self::NotFound => {
-                BasicError::with_message(http::StatusCode::NOT_FOUND, "Resource not found".into())
-                    .into()
-            }
+            Self::NotFound(e) => BasicError::with_message(
+                http::StatusCode::NOT_FOUND,
+                format!("Resource not found: {e}"),
+            )
+            .into(),
             Self::SubscriptionExists => BasicError::with_message(
                 http::StatusCode::BAD_REQUEST,
                 "Account has existing subscription".into(),
