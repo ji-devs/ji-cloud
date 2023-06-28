@@ -42,15 +42,12 @@ impl Component<MembersList> for Rc<MembersList> {
                     }
                     Some(members) => members
                         .iter()
-                        .filter(|m| {
-                            // exclude current user
-                            matches!(current_user_id, Some(id) if id != m.id)
-                        })
                         .map(|member| {
                             MemberCard {
                                 member,
                                 menu: None,
                                 admin_tag: false,
+                                current_user_id,
                             }
                             .render()
                         })

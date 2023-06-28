@@ -50,6 +50,7 @@ a {
     box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.08);
     border-radius: 8px;
     display: grid;
+    grid-template-rows: auto auto auto 48px;
 }
 .top-section {
     display: grid;
@@ -107,8 +108,5 @@ hr {
     color: var(--dark-gray-6);
 }
 button-rect {
-    margin-top: 14px;
-
-    /* height: 32px;
-    overflow: hidden; */
+    align-self: end;
 }

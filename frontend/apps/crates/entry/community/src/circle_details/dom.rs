@@ -214,6 +214,7 @@ impl CircleDetails {
     fn render_members(self: &Rc<Self>, circle: &Circle, current_user_admin: bool) -> Dom {
         let state = self;
         let circle = circle.clone();
+        let current_user_id = get_user_id();
         html!("section", {
             .class("members-section")
             .child(html!("h3", {
@@ -222,7 +223,7 @@ impl CircleDetails {
             .child(html!("div", {
                 .class("members")
                 .children_signal_vec(state.members.signal_vec_cloned().map(clone!(state => move |member| {
-                    state.render_member(&member, &circle, current_user_admin)
+                    state.render_member(&member, &circle, current_user_admin, current_user_id)
                 })))
             }))
         })
@@ -233,6 +234,7 @@ impl CircleDetails {
         member: &PublicUser,
         circle: &Circle,
         current_user_admin: bool,
+        current_user_id: Option<UserId>,
     ) -> Dom {
         let state = self;
         let member_id = member.id;
@@ -265,6 +267,7 @@ impl CircleDetails {
             member,
             admin_tag: member_is_admin,
             menu,
+            current_user_id,
         }
         .render()
     }

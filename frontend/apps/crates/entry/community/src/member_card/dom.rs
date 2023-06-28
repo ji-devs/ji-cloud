@@ -13,6 +13,7 @@ use super::{actions, MemberCard};
 impl MemberCard<'_> {
     pub fn render(self) -> Dom {
         let member_id = self.member.id;
+        let current_user_id = self.current_user_id;
         let following_mutable = Mutable::new(self.member.following);
         let path = Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(
             member_id,
@@ -141,6 +142,10 @@ impl MemberCard<'_> {
                             }),
                         ])
                         .child_signal(following_mutable.signal().map(move |following| {
+                            if matches!(current_user_id, Some(current_user_id) if current_user_id == member_id) {
+                                // don't show follow buttons on current user
+                                return None;
+                            }
                             Some(match following {
                                 true => {
                                     html!("button-rect", {

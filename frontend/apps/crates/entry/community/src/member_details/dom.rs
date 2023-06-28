@@ -462,6 +462,7 @@ impl MemberDetails {
                 })
             })))
             .child_signal(state.following.signal_ref(clone!(state => move|following| {
+                let current_user_id = get_user_id();
                 if matches!(&following, Some(following) if following.is_empty()) {
                     return None;
                 }
@@ -486,7 +487,8 @@ impl MemberDetails {
                                     MemberCard {
                                         member,
                                         menu: None,
-                                        admin_tag: false
+                                        admin_tag: false,
+                                        current_user_id,
                                     }.render()
                                 }))
                             }))
@@ -495,6 +497,7 @@ impl MemberDetails {
                 })
             })))
             .child_signal(state.followers.signal_ref(clone!(state => move |followers| {
+                let current_user_id = get_user_id();
                 if matches!(&followers, Some(followers) if followers.is_empty()) {
                     return None;
                 }
@@ -519,7 +522,8 @@ impl MemberDetails {
                                     MemberCard {
                                         member,
                                         menu: None,
-                                        admin_tag: false
+                                        admin_tag: false,
+                                        current_user_id,
                                     }.render()
                                 }))
                             }))
