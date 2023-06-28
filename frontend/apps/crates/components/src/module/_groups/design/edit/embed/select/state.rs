@@ -21,7 +21,7 @@ pub(super) enum EmbedHostType {
     // Puzzel,
     Quizlet,
     Thinglink,
-    Sutori,
+    // Sutori,
 }
 impl EmbedHostType {
     pub(super) fn display_name(&self) -> &'static str {
@@ -36,7 +36,7 @@ impl EmbedHostType {
             // EmbedHostType::Puzzel => "Puzzel",
             EmbedHostType::Quizlet => "Quizlet",
             EmbedHostType::Thinglink => "Thinglink",
-            EmbedHostType::Sutori => "Sutori",
+            // EmbedHostType::Sutori => "Sutori",
         }
     }
     pub(super) fn as_str(&self) -> &'static str {
@@ -51,7 +51,7 @@ impl EmbedHostType {
             // EmbedHostType::Puzzel => "puzzel",
             EmbedHostType::Quizlet => "quizlet",
             EmbedHostType::Thinglink => "thinglink",
-            EmbedHostType::Sutori => "sutori",
+            // EmbedHostType::Sutori => "sutori",
         }
     }
 }

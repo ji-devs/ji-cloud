@@ -234,7 +234,7 @@ fn partial_to_type(partial: &PartialEmbedHost) -> EmbedHostType {
         PartialEmbedHost::Puzzel(_) => todo!(),
         PartialEmbedHost::Quizlet(_) => EmbedHostType::Quizlet,
         PartialEmbedHost::Thinglink(_) => EmbedHostType::Thinglink,
-        PartialEmbedHost::Sutori(_) => EmbedHostType::Sutori,
+        PartialEmbedHost::Sutori(_) => todo!(),
     }
 }
 fn type_to_partial(partial: &EmbedHostType) -> PartialEmbedHost {
@@ -249,6 +249,6 @@ fn type_to_partial(partial: &EmbedHostType) -> PartialEmbedHost {
         // EmbedHostType::Puzzel => PartialEmbedHost::Puzzel(Default::default()),
         EmbedHostType::Quizlet => PartialEmbedHost::Quizlet(Default::default()),
         EmbedHostType::Thinglink => PartialEmbedHost::Thinglink(Default::default()),
-        EmbedHostType::Sutori => PartialEmbedHost::Sutori(Default::default()),
+        // EmbedHostType::Sutori => PartialEmbedHost::Sutori(Default::default()),
     }
 }
