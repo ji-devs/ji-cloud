@@ -18,6 +18,7 @@ use shared::domain::{
     meta::AgeRangeId,
     module::LiteModule,
     resource::{ResourceId, ResourceResponse, ResourceUpdateDraftDataRequest},
+    UpdateNonNullable,
 };
 
 use crate::prelude::ApiEndpointExt;
@@ -38,6 +39,7 @@ pub struct EditableResource {
     pub other_keywords: Mutable<String>,
     pub rating: Mutable<Option<ResourceRating>>,
     pub blocked: Mutable<bool>,
+    pub premium: Mutable<bool>,
     pub likes: Mutable<i64>,
     pub views: Mutable<i64>,
     pub author_name: Option<String>,
@@ -63,6 +65,7 @@ impl From<ResourceResponse> for EditableResource {
             other_keywords: Mutable::new(resource.resource_data.other_keywords),
             rating: Mutable::new(resource.admin_data.rating),
             blocked: Mutable::new(resource.admin_data.blocked),
+            premium: Mutable::new(resource.admin_data.premium),
             likes: Mutable::new(resource.likes),
             views: Mutable::new(resource.views),
             author_name: resource.author_name,
@@ -88,6 +91,7 @@ impl From<ResourceId> for EditableResource {
             other_keywords: Default::default(),
             rating: Default::default(),
             blocked: Default::default(),
+            premium: Default::default(),
             likes: Default::default(),
             views: Default::default(),
             author_name: Default::default(),
@@ -131,6 +135,7 @@ impl EditableResource {
         self.likes.set(resource.likes);
         self.views.set(resource.views);
         self.blocked.set(resource.admin_data.blocked);
+        self.premium.set(resource.admin_data.premium);
     }
 
     pub fn deep_clone(&self) -> Self {
@@ -151,6 +156,7 @@ impl EditableResource {
             other_keywords: Mutable::new(self.other_keywords.get_cloned()),
             rating: Mutable::new(self.rating.get()),
             blocked: Mutable::new(self.blocked.get()),
+            premium: Mutable::new(self.premium.get()),
             likes: Mutable::new(self.likes.get()),
             views: Mutable::new(self.views.get()),
             author_name: self.author_name.clone(),
@@ -175,8 +181,9 @@ impl EditableResource {
 
     pub fn to_update_admin_data_request(&self) -> ResourceUpdateAdminDataRequest {
         ResourceUpdateAdminDataRequest {
-            rating: self.rating.get_cloned(),
-            blocked: Some(self.blocked.get()),
+            rating: self.rating.get_cloned().into(),
+            blocked: UpdateNonNullable::Change(self.blocked.get()),
+            premium: UpdateNonNullable::Change(self.premium.get()),
             ..Default::default()
         }
     }

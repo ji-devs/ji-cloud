@@ -154,6 +154,12 @@ impl ResourceCuration {
             resource.publish().await.unwrap_ji();
         }))
     }
+
+    pub fn save_admin_data(self: &Rc<Self>, resource: &Rc<EditableResource>) {
+        self.loader.load(clone!(resource => async move {
+            resource.save_admin_data().await.unwrap_ji();
+        }))
+    }
 }
 
 #[derive(Clone, Debug)]

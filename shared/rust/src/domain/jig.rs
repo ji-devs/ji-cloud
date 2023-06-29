@@ -24,6 +24,7 @@ use super::{
     playlist::PlaylistResponse,
     user::UserId,
 };
+use crate::domain::UpdateNonNullable;
 use crate::{api::endpoints::PathPart, domain::module::body::ThemeId};
 
 wrap_uuid! {
@@ -166,36 +167,20 @@ pub struct JigAdminData {
 #[serde(rename_all = "camelCase")]
 pub struct JigUpdateAdminDataRequest {
     /// Rating for jig, weighted for jig search
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub rating: Option<JigRating>,
+    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+    pub rating: UpdateNonNullable<JigRating>,
 
     /// if true does not appear in search
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub blocked: Option<bool>,
+    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+    pub blocked: UpdateNonNullable<bool>,
 
     /// Indicates jig has been curated by admin
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub curated: Option<bool>,
-}
+    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+    pub curated: UpdateNonNullable<bool>,
 
-/// These fields can be edited by admin and can be viewed by everyone
-#[derive(Serialize, Deserialize, Debug, Default)]
-#[serde(rename_all = "camelCase")]
-pub struct JigAdminUpdateData {
-    /// Rating for jig, weighted for jig search
-    pub rating: Option<Option<JigRating>>,
-
-    /// if true does not appear in search
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub blocked: Option<bool>,
-
-    /// Indicates jig has been curated by admin
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub curated: Option<bool>,
+    /// Indicates jig is premium content
+    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+    pub premium: UpdateNonNullable<bool>,
 }
 
 /// Transfer Jig from one user to another.

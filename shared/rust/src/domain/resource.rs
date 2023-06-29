@@ -10,6 +10,7 @@ pub mod report;
 pub use report::{ReportId, ResourceReport};
 
 use crate::api::endpoints::PathPart;
+use crate::domain::UpdateNonNullable;
 
 use super::{
     additional_resource::AdditionalResource,
@@ -467,36 +468,20 @@ pub struct ResourceAdminData {
 #[serde(rename_all = "camelCase")]
 pub struct ResourceUpdateAdminDataRequest {
     /// Rating for resource, weighted for resource search
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub rating: Option<ResourceRating>,
+    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+    pub rating: UpdateNonNullable<ResourceRating>,
 
     /// if true does not appear in search
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub blocked: Option<bool>,
+    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+    pub blocked: UpdateNonNullable<bool>,
 
     /// Indicates resource has been curated by admin
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub curated: Option<bool>,
-}
+    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+    pub curated: UpdateNonNullable<bool>,
 
-/// These fields can be edited by admin and can be viewed by everyone
-#[derive(Serialize, Deserialize, Debug, Default)]
-#[serde(rename_all = "camelCase")]
-pub struct ResourceAdminUpdateData {
-    /// Rating for resource, weighted for resource search
-    pub rating: Option<Option<ResourceRating>>,
-
-    /// if true does not appear in search
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub blocked: Option<bool>,
-
-    /// Indicates resource has been curated by admin
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub curated: Option<bool>,
+    /// Indicates resource is premium content
+    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+    pub premium: UpdateNonNullable<bool>,
 }
 
 /// Admin rating for Resource

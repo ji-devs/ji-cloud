@@ -20,6 +20,7 @@ use shared::domain::{
     jig::{JigId, JigResponse, JigUpdateDraftDataRequest},
     meta::AgeRangeId,
     module::LiteModule,
+    UpdateNonNullable,
 };
 
 use crate::prelude::ApiEndpointExt;
@@ -50,6 +51,7 @@ pub struct EditableJig {
     pub other_keywords: Mutable<String>,
     pub rating: Mutable<Option<JigRating>>,
     pub blocked: Mutable<bool>,
+    pub premium: Mutable<bool>,
     pub likes: Mutable<i64>,
     pub plays: Mutable<i64>,
     pub author_name: Option<String>,
@@ -84,6 +86,7 @@ impl From<JigResponse> for EditableJig {
             other_keywords: Mutable::new(jig.jig_data.other_keywords),
             rating: Mutable::new(jig.admin_data.rating),
             blocked: Mutable::new(jig.admin_data.blocked),
+            premium: Mutable::new(jig.admin_data.premium),
             likes: Mutable::new(jig.likes),
             plays: Mutable::new(jig.plays),
             author_name: jig.author_name,
@@ -118,6 +121,7 @@ impl From<JigId> for EditableJig {
             other_keywords: Default::default(),
             rating: Default::default(),
             blocked: Default::default(),
+            premium: Default::default(),
             likes: Default::default(),
             plays: Default::default(),
             author_name: Default::default(),
@@ -192,6 +196,7 @@ impl EditableJig {
             other_keywords: Mutable::new(self.other_keywords.get_cloned()),
             rating: Mutable::new(self.rating.get()),
             blocked: Mutable::new(self.blocked.get()),
+            premium: Mutable::new(self.premium.get()),
             likes: Mutable::new(self.likes.get()),
             plays: Mutable::new(self.plays.get()),
             author_name: self.author_name.clone(),
@@ -228,8 +233,9 @@ impl EditableJig {
 
     pub fn to_update_admin_data_request(&self) -> JigUpdateAdminDataRequest {
         JigUpdateAdminDataRequest {
-            rating: self.rating.get_cloned(),
-            blocked: Some(self.blocked.get()),
+            rating: self.rating.get_cloned().into(),
+            blocked: UpdateNonNullable::Change(self.blocked.get()),
+            premium: UpdateNonNullable::Change(self.premium.get()),
             ..Default::default()
         }
     }

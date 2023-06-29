@@ -227,17 +227,17 @@ where
 
 impl<T> UpdateNullable<T> {
     /// Whether this is the `Keep` variant
-    pub fn is_keep(&self) -> bool {
+    pub const fn is_keep(&self) -> bool {
         matches!(self, Self::Keep)
     }
 
     /// Whether this is the `Keep` variant
-    pub fn is_unset(&self) -> bool {
+    pub const fn is_unset(&self) -> bool {
         matches!(self, Self::Unset)
     }
 
     /// Whether this is the `Change` variant
-    pub fn is_change(&self) -> bool {
+    pub const fn is_change(&self) -> bool {
         matches!(self, Self::Change(_))
     }
 
@@ -285,12 +285,12 @@ where
 
 impl<T> UpdateNonNullable<T> {
     /// Whether this is the `Keep` variant
-    pub fn is_keep(&self) -> bool {
+    pub const fn is_keep(&self) -> bool {
         matches!(self, Self::Keep)
     }
 
     /// Whether this is the `Change` variant
-    pub fn is_change(&self) -> bool {
+    pub const fn is_change(&self) -> bool {
         matches!(self, Self::Change(_))
     }
 
@@ -302,6 +302,12 @@ impl<T> UpdateNonNullable<T> {
             Self::Keep => None,
             Self::Change(v) => Some(v),
         }
+    }
+}
+
+impl<T> From<Option<T>> for UpdateNonNullable<T> {
+    fn from(value: Option<T>) -> Self {
+        value.map(UpdateNonNullable::Change).unwrap_or_default()
     }
 }
 

@@ -149,6 +149,12 @@ impl JigCuration {
             jig.publish().await.unwrap_ji();
         }))
     }
+
+    pub fn save_admin_data(self: &Rc<Self>, jig: &Rc<EditableJig>) {
+        self.loader.load(clone!(jig => async move {
+            jig.save_admin_data().await.unwrap_ji();
+        }))
+    }
 }
 
 #[derive(Clone, Debug)]

@@ -397,7 +397,7 @@ async fn update_admin_data(
 
     let req = req.map_or_else(Default::default, Json::into_inner);
 
-    db::jig::update_admin_data(&*db, id, req.rating, req.blocked, req.curated)
+    db::jig::update_admin_data(&*db, id, req)
         .await
         .map_err(|_| error::NotFound::ResourceNotFound)?;
 
