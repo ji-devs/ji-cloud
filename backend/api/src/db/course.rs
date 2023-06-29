@@ -1,6 +1,7 @@
 use crate::translate::translate_text;
 use anyhow::Context;
 use serde_json::value::Value;
+use shared::domain::course::{CourseAdminData, CourseRating};
 use shared::domain::{
     additional_resource::{AdditionalResource, AdditionalResourceId as AddId, ResourceContent},
     asset::{DraftOrLive, PrivacyLevel},
@@ -135,8 +136,13 @@ with cte as (
                when $2 = 0 then course.draft_id
                when $2 = 1 then course.live_id
                end as "draft_or_live_id",
-           published_at
+           published_at,
+           rating,
+           blocked,
+           curated,
+           is_premium
     from course
+    left join course_admin_data "admin" on admin.course_id = course.id
     where id = $1
 )
 select cte.course_id                                          as "course_id: CourseId",
@@ -158,6 +164,10 @@ select cte.course_id                                          as "course_id: Cou
        other_keywords,
        translated_keywords,
        duration,
+       rating                                               as "rating?: CourseRating",
+       blocked                                              as "blocked",
+       curated,
+       is_premium                                           as "premium",
        (
             select row(course_data_module.id, kind, is_complete)
             from course_data_module
@@ -238,6 +248,12 @@ from course_data
                 })
                 .collect(),
         },
+        admin_data: CourseAdminData {
+            rating: row.rating,
+            blocked: row.blocked,
+            curated: row.curated,
+            premium: row.premium,
+        },
     });
 
     Ok(course)
@@ -264,10 +280,15 @@ select course.id                               as "id!: CourseId",
        published_at,
        likes                                    as "likes!",
        plays                                    as "plays!",
-       live_up_to_date                          as "live_up_to_date!"
+       live_up_to_date                          as "live_up_to_date!",
+       rating                                   as "rating?: CourseRating",
+       blocked                                  as "blocked!",
+       curated                                  as "curated!",
+       is_premium                               as "premium!"
 from course
 inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
+inner join course_admin_data "admin" on admin.course_id = course.id
 order by ord asc
     "#,
         ids,
@@ -384,6 +405,12 @@ order by ord asc
                     })
                     .collect(),
             },
+            admin_data: CourseAdminData {
+                rating: course_row.rating,
+                blocked: course_row.blocked,
+                curated: course_row.curated,
+                premium: course_row.premium,
+            },
         })
         .collect();
 
@@ -448,6 +475,10 @@ select course.id                                                                
     draft_or_live                                                                 as "draft_or_live!: DraftOrLive",
     other_keywords                                                                as "other_keywords!",
     translated_keywords                                                           as "translated_keywords!",
+    rating                                     as "rating?: CourseRating",
+    blocked                                    as "blocked!",
+    curated                                    as "curated!",
+    is_premium                                 as "premium!",
     (
         select row(course_data_module.id, kind, is_complete)
         from course_data_module
@@ -477,6 +508,7 @@ inner join course on (
         and course.published_at is not null
     )
 )
+left join course_admin_data "admin" on admin.course_id = course.id
 where ord > (1 * $5 * $6)
 order by ord asc
 limit $6
@@ -552,6 +584,12 @@ limit $6
                         value: serde_json::from_value::<CourseUnitValue>(value).unwrap(),
                     })
                     .collect(),
+            },
+            admin_data: CourseAdminData {
+                rating: course_data_row.rating,
+                blocked: course_data_row.blocked,
+                curated: course_data_row.curated,
+                premium: course_data_row.premium,
             },
         })
         .collect();

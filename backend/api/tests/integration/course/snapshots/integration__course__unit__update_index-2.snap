@@ -49,5 +49,11 @@ expression: body
         "imageId": "3095d05e-f2c7-11ea-89c3-3b621dd74a1f"
       }
     ]
+  },
+  "adminData": {
+    "rating": null,
+    "blocked": false,
+    "curated": false,
+    "premium": false
   }
 }

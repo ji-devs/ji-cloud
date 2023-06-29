@@ -457,6 +457,9 @@ pub struct ResourceAdminData {
 
     /// Indicates resource has been curated by admin
     pub curated: bool,
+
+    /// Whether the resource is a premium resource
+    pub premium: bool,
 }
 
 /// These fields can be edited by admin and can be viewed by everyone

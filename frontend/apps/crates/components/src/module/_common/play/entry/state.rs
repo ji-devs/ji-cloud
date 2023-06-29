@@ -111,6 +111,7 @@ where
                             rating: None,
                             blocked: false,
                             curated: true,
+                            premium: false,
                         },
                         creator_id: None,
                         author_id: None,

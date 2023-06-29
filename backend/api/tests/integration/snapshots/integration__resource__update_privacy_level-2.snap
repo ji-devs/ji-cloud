@@ -37,6 +37,7 @@ expression: body
   "adminData": {
     "rating": null,
     "blocked": false,
-    "curated": false
+    "curated": false,
+    "premium": false
   }
 }

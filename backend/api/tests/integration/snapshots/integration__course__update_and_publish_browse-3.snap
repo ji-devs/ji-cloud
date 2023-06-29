@@ -26,5 +26,11 @@ expression: body
     "categories": [],
     "additionalResources": [],
     "units": []
+  },
+  "adminData": {
+    "rating": null,
+    "blocked": false,
+    "curated": false,
+    "premium": false
   }
 }

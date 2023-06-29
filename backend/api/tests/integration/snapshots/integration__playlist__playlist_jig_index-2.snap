@@ -36,5 +36,11 @@ expression: body
       "19becb2b-bff7-4c1b-bb2c-16f2e098d3d3",
       "3a71522a-cd77-11eb-8dc1-af3e35f7c743"
     ]
+  },
+  "adminData": {
+    "rating": null,
+    "blocked": false,
+    "curated": false,
+    "premium": false
   }
 }

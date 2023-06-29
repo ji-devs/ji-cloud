@@ -155,7 +155,8 @@ with cte as (
            published_at,
            rating,
            blocked,
-           curated
+           curated,
+           is_premium
     from resource
     left join resource_admin_data "admin" on admin.resource_id = resource.id
     where id = $1
@@ -184,6 +185,7 @@ select cte.resource_id                                          as "resource_id:
         blocked                                              as "blocked",
         exists(select 1 from resource_like where resource_id = $1 and user_id = $3)  as "is_liked!",
         curated,
+        is_premium                                           as "premium",
         (
                 select row(resource_data_module.id, kind, is_complete)
                 from resource_data_module
@@ -262,6 +264,7 @@ from resource_data
             rating: row.rating,
             blocked: row.blocked,
             curated: row.curated,
+            premium: row.premium,
         },
     });
 
@@ -295,7 +298,8 @@ select resource.id                                       as "id!: ResourceId",
        rating                                   as "rating?: ResourceRating",
        exists(select 1 from resource_like where resource_id = resource.id and user_id = $2) as "is_liked!",
        blocked                                  as "blocked!",
-       curated                                  as "curated!"
+       curated                                  as "curated!",
+       is_premium                               as "premium!"
 from resource
 inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
@@ -425,6 +429,7 @@ order by ord asc
                 rating: resource_row.rating,
                 blocked: resource_row.blocked,
                 curated: resource_row.curated,
+                premium: resource_row.premium,
             },
         })
         .collect();
@@ -518,7 +523,8 @@ select resource.id                                              as "resource_id:
    translated_keywords                        as "translated_keywords!",
    rating                                     as "rating!: Option<ResourceRating>",
    blocked                                    as "blocked!",
-   curated                                    as "curated!"
+   curated                                    as "curated!",
+   is_premium                                 as "premium!"
 from cte1
 inner join resource_data on cte1.id = resource_data.id
 inner join resource on (
@@ -615,6 +621,7 @@ limit $8
                 rating: resource_data_row.rating,
                 blocked: resource_data_row.blocked,
                 curated: resource_data_row.curated,
+                premium: resource_data_row.premium,
             },
         })
         .collect();
