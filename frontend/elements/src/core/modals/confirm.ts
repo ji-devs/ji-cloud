@@ -150,7 +150,7 @@ export class _ extends BaseButton {
             color = "red";
             kind = "outline";
         } else if (isPrimary && this.dangerous) {
-            color = "alert"
+            color = "red"
         } else if (!isPrimary && !this.dangerous) {
             kind = "text";
         }
@@ -167,7 +167,7 @@ export class _ extends BaseButton {
 
         return html`
             <div @click=${this.onConfirm}>
-                <button-rect color=${color} kind=${kind} size="small">
+                <button-rect color=${color} kind=${kind}>
                     ${icon}
                     ${this.confirm_text}
                 </button-rect>
@@ -184,7 +184,7 @@ export class _ extends BaseButton {
 
         return html`
             <div @click=${this.onCancel}>
-                <button-rect color=${color} kind=${kind} size="small">
+                <button-rect color=${color} kind=${kind}>
                     ${icon}
                     ${this.cancel_text}
                 </button-rect>
