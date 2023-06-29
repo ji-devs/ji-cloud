@@ -3,6 +3,7 @@ name: Api - Backend - PR
 on:
   pull_request:
     paths:
+      - '.github/workflows/backend-api-pr.yml'
       - 'shared/**'
       - 'backend/ji_core/**'
       - 'backend/api/**'
@@ -20,30 +21,23 @@ jobs:
     name: Format
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@master
         with:
-          profile: minimal
           toolchain: stable
-          override: true
           components: rustfmt
 
-      - uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all --manifest-path backend/api/Cargo.toml -- --check
+      - run: cargo fmt --all --manifest-path backend/api/Cargo.toml --check
   check:
     name: Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@master
         with:
-          profile: minimal
           toolchain: stable
-          override: true
 
       - uses: actions/cache@v2
         with:
@@ -53,12 +47,7 @@ jobs:
             backend/api/target
           key: ${{ runner.os }}-check-${{ hashFiles('backend/api/Cargo.lock') }}
 
-      - uses: actions-rs/cargo@v1
-        with:
-          command: check
-          args: >
-            --manifest-path backend/api/Cargo.toml
-            --no-default-features
+      - run: cargo check --manifest-path backend/api/Cargo.toml --no-default-features
 
   # work in progress: currently yarn doesn't work right
   test:
@@ -83,13 +72,11 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@master
         with:
-          profile: minimal
           toolchain: stable
-          override: true
 
       - uses: actions/cache@v2
         with:
@@ -99,12 +86,7 @@ jobs:
             backend/api/target
           key: ${{ runner.os }}-test-backend-rs-${{ hashFiles('backend/api/Cargo.lock') }}
 
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: >
-            --manifest-path backend/api/Cargo.toml
-            --no-default-features
+      - run: cargo test --manifest-path backend/api/Cargo.toml --no-default-features
         env:
           DATABASE_URL: postgres://postgres:password@localhost
           SQLX_OFFLINE: 1
