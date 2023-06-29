@@ -51,6 +51,12 @@ expression: body
             "link": "https://jigzi.org/"
           }
         ]
+      },
+      "adminData": {
+        "rating": null,
+        "blocked": false,
+        "curated": false,
+        "premium": false
       }
     },
     {
@@ -88,6 +94,12 @@ expression: body
             "imageId": "92d8bb6e-0aa4-11ec-9f5e-83e2c58fc397"
           }
         ]
+      },
+      "adminData": {
+        "rating": null,
+        "blocked": false,
+        "curated": false,
+        "premium": false
       }
     }
   ],

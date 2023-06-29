@@ -32,6 +32,12 @@ expression: body
         "categories": [],
         "additionalResources": [],
         "units": []
+      },
+      "adminData": {
+        "rating": null,
+        "blocked": false,
+        "curated": false,
+        "premium": false
       }
     },
     {
@@ -65,6 +71,12 @@ expression: body
             "pdfId": "128e0870-6813-11ec-a1fd-73f800abf897"
           }
         ]
+      },
+      "adminData": {
+        "rating": null,
+        "blocked": false,
+        "curated": false,
+        "premium": false
       }
     }
   ],

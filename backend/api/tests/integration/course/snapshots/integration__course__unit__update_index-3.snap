@@ -49,5 +49,11 @@ expression: body
         "link": "https://jigzi.org/"
       }
     ]
+  },
+  "adminData": {
+    "rating": null,
+    "blocked": false,
+    "curated": false,
+    "premium": false
   }
 }

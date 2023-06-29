@@ -102,6 +102,51 @@ pub struct CourseData {
     pub units: Vec<CourseUnit>,
 }
 
+/// Admin rating for a course
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Eq, PartialEq)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[serde(rename_all = "camelCase")]
+#[repr(i16)]
+pub enum CourseRating {
+    #[allow(missing_docs)]
+    One = 1,
+    #[allow(missing_docs)]
+    Two = 2,
+    #[allow(missing_docs)]
+    Three = 3,
+}
+
+impl TryFrom<u8> for CourseRating {
+    type Error = ();
+
+    fn try_from(num: u8) -> Result<Self, Self::Error> {
+        match num {
+            1 => Ok(Self::One),
+            2 => Ok(Self::Two),
+            3 => Ok(Self::Three),
+            _ => Err(()),
+        }
+    }
+}
+
+/// These fields can be edited by admin and can be viewed by everyone
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct CourseAdminData {
+    /// Rating for jig, weighted for jig search
+    #[serde(default)]
+    pub rating: Option<CourseRating>,
+
+    /// if true does not appear in search
+    pub blocked: bool,
+
+    /// Indicates jig has been curated by admin
+    pub curated: bool,
+
+    /// Whether the resource is a premium resource
+    pub premium: bool,
+}
+
 /// The response returned when a request for `GET`ing a Course is successful.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -132,6 +177,9 @@ pub struct CourseResponse {
 
     /// The data of the requested Course.
     pub course_data: CourseData,
+
+    /// Admin data for a course
+    pub admin_data: CourseAdminData,
 }
 
 make_path_parts!(CourseGetLivePath => "/v1/course/{}/live" => CourseId);

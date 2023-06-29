@@ -112,6 +112,51 @@ pub struct PlaylistData {
     pub items: Vec<JigId>,
 }
 
+/// Admin rating for a course
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Eq, PartialEq)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[serde(rename_all = "camelCase")]
+#[repr(i16)]
+pub enum PlaylistRating {
+    #[allow(missing_docs)]
+    One = 1,
+    #[allow(missing_docs)]
+    Two = 2,
+    #[allow(missing_docs)]
+    Three = 3,
+}
+
+impl TryFrom<u8> for PlaylistRating {
+    type Error = ();
+
+    fn try_from(num: u8) -> Result<Self, Self::Error> {
+        match num {
+            1 => Ok(Self::One),
+            2 => Ok(Self::Two),
+            3 => Ok(Self::Three),
+            _ => Err(()),
+        }
+    }
+}
+
+/// These fields can be edited by admin and can be viewed by everyone
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct PlaylistAdminData {
+    /// Rating for jig, weighted for jig search
+    #[serde(default)]
+    pub rating: Option<PlaylistRating>,
+
+    /// if true does not appear in search
+    pub blocked: bool,
+
+    /// Indicates jig has been curated by admin
+    pub curated: bool,
+
+    /// Whether the resource is a premium resource
+    pub premium: bool,
+}
+
 /// The response returned when a request for `GET`ing a Playlist is successful.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -145,6 +190,9 @@ pub struct PlaylistResponse {
 
     /// The data of the requested Playlist.
     pub playlist_data: PlaylistData,
+
+    /// Admin data for a course
+    pub admin_data: PlaylistAdminData,
 }
 
 make_path_parts!(PlaylistGetLivePath => "/v1/playlist/{}/live" => PlaylistId);

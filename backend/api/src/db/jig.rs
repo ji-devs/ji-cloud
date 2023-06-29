@@ -1,6 +1,7 @@
 use crate::translate::translate_text;
 use anyhow::Context;
 use serde_json::value::Value;
+use shared::domain::playlist::{PlaylistAdminData, PlaylistRating};
 use shared::domain::{
     additional_resource::{AdditionalResource, AdditionalResourceId as AddId, ResourceContent},
     asset::{DraftOrLive, OrderBy, PrivacyLevel},
@@ -181,7 +182,8 @@ with cte as (
            published_at,
            rating,
            blocked,
-           curated
+           curated,
+           is_premium
     from jig
     left join jig_play_count on jig_play_count.jig_id = jig.id
     left join jig_admin_data "admin" on admin.jig_id = jig.id
@@ -217,6 +219,7 @@ select cte.jig_id                                          as "jig_id: JigId",
         rating                                               as "rating?: JigRating",
         blocked                                              as "blocked",
         curated,
+        is_premium                                           as "premium",
         array(select row (unnest(audio_feedback_positive))) as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
         array(select row (unnest(audio_feedback_negative))) as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
         array(
@@ -322,6 +325,7 @@ from jig_data
             rating: row.rating,
             blocked: row.blocked,
             curated: row.curated,
+            premium: row.premium,
         },
     });
 
@@ -359,7 +363,8 @@ select jig.id                                       as "id!: JigId",
        )                                        as "play_count!",
        rating                                   as "rating?: JigRating",
        blocked                                  as "blocked!",
-       curated                                  as "curated!"
+       curated                                  as "curated!",
+       is_premium                               as "premium!"
 from jig
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
@@ -520,6 +525,7 @@ order by ord asc
                 rating: jig_row.rating,
                 blocked: jig_row.blocked,
                 curated: jig_row.curated,
+                premium: jig_row.premium,
             },
         })
         .collect();
@@ -626,7 +632,8 @@ select jig.id                                              as "jig_id: JigId",
    translated_keywords                        as "translated_keywords!",
    rating                                     as "rating!: Option<JigRating>",
    blocked                                    as "blocked!",
-   curated                                    as "curated!"
+   curated                                    as "curated!",
+   is_premium                                 as "premium!"
 from cte1
 inner join jig_data on cte1.id = jig_data.id
 inner join jig on (
@@ -744,6 +751,7 @@ limit $8
                 rating: jig_data_row.rating,
                 blocked: jig_data_row.blocked,
                 curated: jig_data_row.curated,
+                premium: jig_data_row.premium,
             },
         })
         .collect();
@@ -1604,6 +1612,10 @@ select playlist.id                                                              
     draft_or_live                                                                 as "draft_or_live!: DraftOrLive",
     other_keywords                                                                as "other_keywords!",
     translated_keywords                                                           as "translated_keywords!",
+    rating                                     as "rating!: Option<PlaylistRating>",
+    blocked                                    as "blocked!",
+    curated                                    as "curated!",
+    is_premium                                 as "premium!",
     (
         select row(playlist_data_module.id, kind, is_complete)
         from playlist_data_module
@@ -1635,6 +1647,7 @@ inner join playlist on
         playlist_data.id = playlist.live_id
         and last_synced_at is not null
         and playlist.published_at is not null
+left join playlist_admin_data "admin" on admin.playlist_id = playlist.id
 where jig_id = $1
 order by coalesce(updated_at, created_at) desc
 "#,
@@ -1709,6 +1722,12 @@ order by coalesce(updated_at, created_at) desc
                     .into_iter()
                     .map(|(it,)| it)
                     .collect(),
+            },
+            admin_data: PlaylistAdminData {
+                rating: playlist_data_row.rating,
+                blocked: playlist_data_row.blocked,
+                curated: playlist_data_row.curated,
+                premium: playlist_data_row.premium,
             },
         })
         .collect();

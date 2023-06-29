@@ -1,6 +1,7 @@
 use crate::translate::translate_text;
 use anyhow::Context;
 use serde_json::value::Value;
+use shared::domain::playlist::{PlaylistAdminData, PlaylistRating};
 use shared::domain::{
     additional_resource::{AdditionalResource, AdditionalResourceId as AddId, ResourceContent},
     asset::{DraftOrLive, PrivacyLevel},
@@ -145,8 +146,13 @@ with cte as (
                when $2 = 0 then playlist.draft_id
                when $2 = 1 then playlist.live_id
                end as "draft_or_live_id",
-           published_at
+           published_at,
+           rating,
+           blocked,
+           curated,
+           is_premium
     from playlist
+    left join playlist_admin_data "admin" on admin.playlist_id = playlist.id
     where id = $1
 )
 select cte.playlist_id                                          as "playlist_id: PlaylistId",
@@ -167,6 +173,10 @@ select cte.playlist_id                                          as "playlist_id:
        live_up_to_date,
        other_keywords,
        translated_keywords,
+       rating                                               as "rating?: PlaylistRating",
+       blocked                                              as "blocked",
+       curated,
+       is_premium                                           as "premium",
        exists(select 1 from playlist_like where playlist_id = $1 and user_id = $3) as "is_liked!",
        (
             select row(playlist_data_module.id, kind, is_complete)
@@ -248,6 +258,12 @@ from playlist_data
             translated_description: row.translated_description.0,
             items: row.items.into_iter().map(|(it,)| it).collect(),
         },
+        admin_data: PlaylistAdminData {
+            rating: row.rating,
+            blocked: row.blocked,
+            curated: row.curated,
+            premium: row.premium,
+        },
     });
 
     Ok(playlist)
@@ -276,10 +292,15 @@ select playlist.id                                       as "id!: PlaylistId",
        likes                                    as "likes!",
        plays                                    as "plays!",
        live_up_to_date                          as "live_up_to_date!",
-       exists(select 1 from playlist_like where playlist_id = playlist.id and user_id = $2) as "is_liked!"
+       exists(select 1 from playlist_like where playlist_id = playlist.id and user_id = $2) as "is_liked!",
+       rating                                   as "rating?: PlaylistRating",
+       blocked                                  as "blocked!",
+       curated                                  as "curated!",
+       is_premium                               as "premium!"
 from playlist
 inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
+inner join playlist_admin_data "admin" on admin.playlist_id = playlist.id
 order by ord asc
     "#,
         ids,
@@ -407,6 +428,12 @@ order by ord asc
                     .map(|(it,)| it)
                     .collect(),
             },
+            admin_data: PlaylistAdminData {
+                rating: playlist_row.rating,
+                blocked: playlist_row.blocked,
+                curated: playlist_row.curated,
+                premium: playlist_row.premium,
+            },
         })
         .collect();
 
@@ -469,6 +496,10 @@ select playlist.id                                                              
     draft_or_live                                                                 as "draft_or_live!: DraftOrLive",
     other_keywords                                                                as "other_keywords!",
     translated_keywords                                                           as "translated_keywords!",
+    rating                                     as "rating?: PlaylistRating",
+    blocked                                    as "blocked!",
+    curated                                    as "curated!",
+    is_premium                                 as "premium!",
     (
         select row(playlist_data_module.id, kind, is_complete)
         from playlist_data_module
@@ -504,6 +535,7 @@ inner join playlist on (
         and playlist.published_at is not null
     )
 )
+left join playlist_admin_data "admin" on admin.playlist_id = playlist.id
 where ord > (1 * $5 * $6)
 order by ord asc
 limit $6
@@ -584,6 +616,12 @@ limit $6
                     .into_iter()
                     .map(|(it,)| it)
                     .collect(),
+            },
+            admin_data: PlaylistAdminData {
+                rating: playlist_data_row.rating,
+                blocked: playlist_data_row.blocked,
+                curated: playlist_data_row.curated,
+                premium: playlist_data_row.premium,
             },
         })
         .collect();
