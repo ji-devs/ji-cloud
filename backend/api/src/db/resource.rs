@@ -1,6 +1,7 @@
 use crate::translate::translate_text;
 use anyhow::Context;
 use serde_json::value::Value;
+use shared::domain::resource::ResourceUpdateAdminDataRequest;
 use shared::domain::{
     additional_resource::{AdditionalResource, AdditionalResourceId as AddId, ResourceContent},
     asset::{DraftOrLive, OrderBy, PrivacyLevel},
@@ -1092,41 +1093,32 @@ where id = $1;
 pub async fn update_admin_data(
     pool: &PgPool,
     resource_id: ResourceId,
-    rating: Option<ResourceRating>,
-    blocked: Option<bool>,
-    curated: Option<bool>,
+    admin_data: ResourceUpdateAdminDataRequest,
 ) -> Result<(), error::NotFound> {
     let mut txn = pool.begin().await?;
 
-    if let Some(rating) = rating {
-        sqlx::query!(
-            //language=SQL
-            r#"
-update resource_admin_data
-set rating = coalesce($2, rating)
-where resource_id = $1 and $2 is distinct from rating
-            "#,
-            resource_id.0,
-            rating as i16
-        )
-        .execute(&mut txn)
-        .await?;
-    }
+    let blocked = admin_data.blocked.into_option();
 
-    if let Some(blocked) = blocked {
-        sqlx::query!(
-            //language=SQL
-            r#"
+    sqlx::query!(
+        // language=SQL
+        r#"
 update resource_admin_data
-set blocked = coalesce($2, blocked)
-where resource_id = $1 and $2 is distinct from blocked
-            "#,
-            resource_id.0,
-            blocked
-        )
-        .execute(&mut txn)
-        .await?;
-
+set
+    rating = coalesce($2, rating),
+    blocked = coalesce($3, blocked),
+    curated = coalesce($4, curated),
+    is_premium = coalesce($5, is_premium)
+where resource_id = $1
+"#,
+        resource_id.0,
+        admin_data.rating.into_option() as Option<ResourceRating>,
+        blocked,
+        admin_data.curated.into_option(),
+        admin_data.premium.into_option(),
+    )
+    .execute(&mut txn)
+    .await?;
+    if blocked.is_some() {
         sqlx::query!(
             //language=SQL
             r#"
@@ -1136,21 +1128,6 @@ from resource
 where resource.live_id = $1
             "#,
             resource_id.0,
-        )
-        .execute(&mut txn)
-        .await?;
-    }
-
-    if let Some(curated) = curated {
-        sqlx::query!(
-            //language=SQL
-            r#"
-update resource_admin_data
-set curated = coalesce($2, curated)
-where resource_id = $1 and $2 is distinct from curated
-            "#,
-            resource_id.0,
-            curated
         )
         .execute(&mut txn)
         .await?;

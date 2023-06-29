@@ -49,6 +49,7 @@ export class _ extends LitElement {
         "Resource Name",
         "Type",
         // "Description",
+        "Premium",
         "Blocked",
         "Author",
         "Views",

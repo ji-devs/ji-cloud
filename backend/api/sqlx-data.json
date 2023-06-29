@@ -5216,6 +5216,22 @@
     },
     "query": "\ninsert into jig_data_affiliation(jig_data_id, affiliation_id)\nselect $2, affiliation_id\nfrom jig_data_affiliation\nwhere jig_data_id = $1\n        "
   },
+  "542c1ed6d3c478319c191c8ef59cb3e0bb931e31c86f7bf1c3886755d61d24ea": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Bool",
+          "Bool",
+          "Bool"
+        ]
+      }
+    },
+    "query": "\nupdate jig_admin_data\nset\n    rating = coalesce($2, rating),\n    blocked = coalesce($3, blocked),\n    curated = coalesce($4, curated),\n    is_premium = coalesce($5, is_premium)\nwhere jig_id = $1\n"
+  },
   "5486fe6499a2253171fa11aaa873fe04f3136bd0f50e203ec4961bd1cff1d76e": {
     "describe": {
       "columns": [
@@ -5663,19 +5679,6 @@
       }
     },
     "query": "\nupdate resource_data\nset draft_or_live = $2\nwhere id = $1\n            "
-  },
-  "5b485fce74433a8e28d937570db0f534f034f927f73d0f414a6f42022e2baefe": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2"
-        ]
-      }
-    },
-    "query": "\nupdate resource_admin_data\nset rating = coalesce($2, rating)\nwhere resource_id = $1 and $2 is distinct from rating\n            "
   },
   "5c1a115b0d19fbd9cf70491dbf05e47ce8af063817b55567e0f3733b432c364c": {
     "describe": {
@@ -6251,6 +6254,22 @@
     },
     "query": "\nselect image_id as \"id: ImageId\", media_library as \"library: MediaLibrary\", last_used as \"last_used: DateTime<Utc>\"\nfrom user_recent_image\nwhere user_id = $1\norder by last_used desc\nlimit $2\n            "
   },
+  "632d00dc2765c5c309cc7abb128dfbea29aeb9323d8b5aec5e098e3bd50ff771": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Bool",
+          "Bool",
+          "Bool"
+        ]
+      }
+    },
+    "query": "\nupdate resource_admin_data\nset\n    rating = coalesce($2, rating),\n    blocked = coalesce($3, blocked),\n    curated = coalesce($4, curated),\n    is_premium = coalesce($5, is_premium)\nwhere resource_id = $1\n"
+  },
   "633f41a575ccfa1f498ffc6cc6b60f8abc8aa88714085e966a3732769d3fa290": {
     "describe": {
       "columns": [],
@@ -6381,19 +6400,6 @@
       }
     },
     "query": "\ninsert into course_data\n   (display_name, language, description, draft_or_live)\nvalues ($1, $2, $3, $4)\nreturning id\n"
-  },
-  "674424a88094e0ceb29cc4c2c4548cc97162b931eff9316fcdb78ede5cf7d7da": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Bool"
-        ]
-      }
-    },
-    "query": "\nupdate jig_admin_data\nset blocked = coalesce($2, blocked)\nwhere jig_id = $1 and $2 is distinct from blocked\n            "
   },
   "682dbdf7b9a0f373daad74e4f4face9e425a493e9965c6ba7c9a11e74252c866": {
     "describe": {
@@ -11791,19 +11797,6 @@
     },
     "query": "\nupdate course_data\nset last_synced_at = now()\nwhere course_data.id = any (select live_id from course where course.id = any ($1))\n"
   },
-  "b70a782c082bd482e4c160bbecdd7c677d3b1556bed16db0c439e73437c1de60": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Bool"
-        ]
-      }
-    },
-    "query": "\nupdate resource_admin_data\nset curated = coalesce($2, curated)\nwhere resource_id = $1 and $2 is distinct from curated\n            "
-  },
   "b71200212dc730077b667ff292da9382aca3f4cf46f694f47042281fb3974b0f": {
     "describe": {
       "columns": [],
@@ -12274,19 +12267,6 @@
     },
     "query": "\nselect draft_id from jig where jig.id = $1\n"
   },
-  "bab8cb0f1b8d5d1469737c4ff0109dac29be187ec62ac71124145e605722cf46": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Bool"
-        ]
-      }
-    },
-    "query": "\nupdate resource_admin_data\nset blocked = coalesce($2, blocked)\nwhere resource_id = $1 and $2 is distinct from blocked\n            "
-  },
   "bb4dfa1f6500b1004a0165718cf4c67cb5518fd374f30740a27fe094f73b9dc2": {
     "describe": {
       "columns": [
@@ -12500,19 +12480,6 @@
       }
     },
     "query": "\n    select exists(select 1 from user_profile where lower(username) = lower($1)) as \"exists!\"\n        "
-  },
-  "bfd314e70437482954c5dfb3a40ab08990a0bea43779d810e9dd903e87e10c81": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Bool"
-        ]
-      }
-    },
-    "query": "\nupdate jig_admin_data\nset curated = coalesce($2, curated)\nwhere jig_id = $1 and $2 is distinct from curated\n            "
   },
   "c0503b4756010f70f84bfc842758cc356568bcb7324b0c0a8454f49511300942": {
     "describe": {
@@ -12834,19 +12801,6 @@
       }
     },
     "query": "\ndelete\nfrom course_data_unit\nwhere course_data_id = $1 and course_data_unit.unit_id is not distinct from $2\nreturning index\n"
-  },
-  "ca807853c119226252820e8cd0f9476d114f3e5e98ffed0dcd059d05063760a4": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2"
-        ]
-      }
-    },
-    "query": "\nupdate jig_admin_data\nset rating = coalesce($2, rating)\nwhere jig_id = $1 and $2 is distinct from rating\n            "
   },
   "cb1eb42e7bcc8143deb3eec658b4a6d23278f99ce5bf5062886d0b18c1b2b1d3": {
     "describe": {

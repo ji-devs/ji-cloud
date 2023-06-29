@@ -163,6 +163,15 @@ impl ResourceTable {
                             }))
                             .prop("target", "_BLANK")
                         }),
+
+                        html!("input-checkbox", {
+                            .prop_signal("checked", resource.premium.signal())
+                            .event(clone!(state, resource => move |_evt: events::CustomToggle| {
+                                resource.premium.set(!resource.premium.get());
+                                state.curation_state.save_admin_data(&resource);
+                            }))
+                        }),
+
                         html!("span", {
                             .child(html!("fa-button", {
                                 .prop("slot", "block")

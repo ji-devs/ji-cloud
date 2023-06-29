@@ -143,6 +143,14 @@ impl JigTable {
                             }))
                         }),
 
+                        html!("input-checkbox", {
+                            .prop_signal("checked", jig.premium.signal())
+                            .event(clone!(state, jig => move |_evt: events::CustomToggle| {
+                                jig.premium.set(!jig.premium.get());
+                                state.curation_state.save_admin_data(&jig);
+                            }))
+                        }),
+
                         html!("span", {
                             .child(html!("fa-button", {
                                 .prop("slot", "block")
