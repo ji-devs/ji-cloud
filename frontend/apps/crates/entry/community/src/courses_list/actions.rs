@@ -3,7 +3,10 @@ use std::rc::Rc;
 use dominator::clone;
 use shared::{
     api::endpoints,
-    domain::course::{CourseBrowsePath, CourseBrowseQuery, OrderBy},
+    domain::{
+        asset::DraftOrLive,
+        course::{CourseBrowsePath, CourseBrowseQuery, OrderBy},
+    },
 };
 use utils::prelude::ApiEndpointExt;
 
@@ -20,6 +23,7 @@ impl CoursesList {
                 page: Some(state.active_page.get() - 1),
                 page_limit: Some(state.items_per_page),
                 order_by: Some(OrderBy::PlayCount),
+                draft_or_live: Some(DraftOrLive::Live),
                 ..Default::default()
             };
 

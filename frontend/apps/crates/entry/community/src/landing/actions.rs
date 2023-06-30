@@ -5,6 +5,7 @@ use futures::join;
 use shared::{
     api::endpoints,
     domain::{
+        asset::DraftOrLive,
         circle::{self, CircleBrowsePath, CircleBrowseQuery},
         course::{self, CourseBrowsePath, CourseBrowseQuery},
         user::public_user::{self, PublicUserBrowsePath, UserBrowseQuery},
@@ -65,6 +66,7 @@ impl CommunityLanding {
         let req = CourseBrowseQuery {
             page_limit: Some(10),
             order_by: Some(course::OrderBy::PlayCount),
+            draft_or_live: Some(DraftOrLive::Live),
             ..Default::default()
         };
 
