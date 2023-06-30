@@ -60,8 +60,8 @@ impl CommunitySearch {
                 };
                 dom
             })
-            .apply(move |dom| dominator::on_click_go_to_url!(dom, {
-                Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(member.id))).to_string()
+            .apply(move |dom| utils::on_click_go_to_url!(dom, {
+                Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(member.id)))
             }))
             .child(html!("profile-image", {
                 .prop("slot", "img")
@@ -83,8 +83,8 @@ impl CommunitySearch {
             .prop("name", &circle.display_name)
             .prop("memberCount", circle.member_count)
             .prop("description", &circle.description)
-            .apply(move |dom| dominator::on_click_go_to_url!(dom, {
-                Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::Circle(circle.id))).to_string()
+            .apply(move |dom| utils::on_click_go_to_url!(dom, {
+                Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::Circle(circle.id)))
             }))
             .child(html!("img-ji", {
                 .prop("slot", "img")

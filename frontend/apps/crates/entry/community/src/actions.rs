@@ -9,8 +9,6 @@ impl Community {
         let query = CommunitySearchQuery {
             q: self.q.get_cloned(),
         };
-        dominator::routing::go_to_url(
-            &Route::Community(CommunityRoute::Search(Box::new(query))).to_string(),
-        );
+        Route::Community(CommunityRoute::Search(Box::new(query))).go_to();
     }
 }

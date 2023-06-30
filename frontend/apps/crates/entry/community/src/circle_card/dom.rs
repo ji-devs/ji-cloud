@@ -10,10 +10,9 @@ impl CircleCard<'_> {
     pub fn render(self) -> Dom {
         let circle_id = self.circle.id;
         let joined_mutable = Mutable::new(self.circle.joined);
-        let path = Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::Circle(
+        let route = Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::Circle(
             circle_id,
-        )))
-        .to_string();
+        )));
 
         html!("div", {
             .shadow_root!(ShadowRootMode::Open => {
@@ -22,11 +21,11 @@ impl CircleCard<'_> {
                 }))
                 .child(html!("a", {
                     .class("main-link")
-                    .attr("href", &path)
-                    .event_with_options(&EventOptions {bubbles: true, preventable: true}, move |e: events::Click| {
+                    .attr("href", &route.to_string())
+                    .event_with_options(&EventOptions {bubbles: true, preventable: true}, clone!(route => move |e: events::Click| {
                         e.prevent_default();
-                        dominator::routing::go_to_url(&path);
-                    })
+                        route.go_to();
+                    }))
                     .child(html!("div", {
                         .class("logo")
                         .child(html!("img-ji", {

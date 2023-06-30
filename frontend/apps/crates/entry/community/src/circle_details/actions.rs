@@ -138,8 +138,7 @@ impl CircleDetails {
             match endpoints::circle::Delete::api_with_auth_empty(CircleDeletePath(state.circle_id), None).await
             {
                 Ok(_) => {
-                    let route = Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::List));
-                    dominator::routing::go_to_url(&route.to_string());
+                    Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::List)).go_to();
                 }
                 Err(_) => todo!(),
             }

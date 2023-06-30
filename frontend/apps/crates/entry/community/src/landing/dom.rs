@@ -4,7 +4,7 @@ use components::{
     asset_card::{render_asset_card, AssetCardBottomIndicator, AssetCardConfig},
     player_popup::{PlayerPopup, PreviewPopupCallbacks},
 };
-use dominator::{clone, events, html, link, Dom, DomBuilder};
+use dominator::{clone, events, html, Dom, DomBuilder};
 use futures_signals::signal::SignalExt;
 use shared::domain::user::public_user::PublicUser;
 use utils::{
@@ -88,8 +88,8 @@ impl Component<CommunityLanding> for Rc<CommunityLanding> {
                     .child(html!("button-rect", {
                         .prop("color", "blue")
                         .text(STR_SEE_ALL_MEMBERS)
-                        .apply(move |dom| dominator::on_click_go_to_url!(dom, {
-                            Route::Community(CommunityRoute::Members(CommunityMembersRoute::List)).to_string()
+                        .apply(move |dom| utils::on_click_go_to_url!(dom, {
+                            Route::Community(CommunityRoute::Members(CommunityMembersRoute::List))
                         }))
                     }))
                 }))
@@ -128,8 +128,8 @@ impl Component<CommunityLanding> for Rc<CommunityLanding> {
                     .child(html!("button-rect", {
                         .prop("color", "blue")
                         .text(STR_SEE_ALL_CIRCLES)
-                        .apply(move |dom| dominator::on_click_go_to_url!(dom, {
-                            Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::List)).to_string()
+                        .apply(move |dom| utils::on_click_go_to_url!(dom, {
+                            Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::List))
                         }))
                     }))
                 }))
@@ -148,8 +148,8 @@ impl Component<CommunityLanding> for Rc<CommunityLanding> {
                         .prop("color", "blue")
                         .prop("kind", "text")
                         .text(STR_SEE_ALL_COURSES)
-                        .apply(move |dom| dominator::on_click_go_to_url!(dom, {
-                            Route::Community(CommunityRoute::Courses).to_string()
+                        .apply(move |dom| utils::on_click_go_to_url!(dom, {
+                            Route::Community(CommunityRoute::Courses)
                         }))
                     }))
                 }))
@@ -205,7 +205,7 @@ impl Component<CommunityLanding> for Rc<CommunityLanding> {
 
 impl CommunityLanding {
     fn render_member(self: &Rc<Self>, member: &PublicUser, index: usize) -> Dom {
-        link!(Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(member.id))).to_string(), {
+        utils::link!(Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(member.id))), {
             .class("row")
             .child(html!("span", {
                 .class("cell")

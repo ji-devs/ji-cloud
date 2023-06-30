@@ -15,10 +15,9 @@ impl MemberCard<'_> {
         let member_id = self.member.id;
         let current_user_id = self.current_user_id;
         let following_mutable = Mutable::new(self.member.following);
-        let path = Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(
+        let route = Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(
             member_id,
-        )))
-        .to_string();
+        )));
 
         html!("div", {
             .shadow_root!(ShadowRootMode::Open => {
@@ -27,10 +26,10 @@ impl MemberCard<'_> {
                 }))
                 .child(html!("a", {
                     .class("main-link")
-                    .attr("href", &path)
+                    .attr("href", &route.to_string())
                     .event_with_options(&EventOptions {bubbles: true, preventable: true}, move |e: events::Click| {
                         e.prevent_default();
-                        dominator::routing::go_to_url(&path);
+                        route.go_to();
                     })
                     .apply(|mut dom| {
                         if let Some(menu) = self.menu {

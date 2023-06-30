@@ -1,4 +1,5 @@
 use crate::asset::{CoursePlayerOptions, JigPlayerOptions, PlaylistPlayerOptions};
+use gloo::utils::window;
 use serde::{Deserialize, Serialize};
 use shared::domain::billing::SchoolId;
 use shared::domain::{
@@ -322,6 +323,7 @@ impl Display for Route {
 }
 
 impl Route {
+    // TODO: add docs when to use redirect, push_state, go_to. And should probably have better naming
     pub fn redirect(self) {
         let location = web_sys::window().unwrap_ji().location();
         let s: String = self.into();
@@ -332,6 +334,11 @@ impl Route {
         let history = web_sys::window().unwrap_ji().history().unwrap_ji();
         let url: String = self.into();
         let _ = history.push_state_with_url(&JsValue::NULL, "", Some(&url));
+    }
+
+    pub fn go_to(&self) {
+        dominator::routing::go_to_url(&self.to_string());
+        window().scroll_to_with_x_and_y(0.0, 0.0);
     }
 
     pub fn from_url(url: &str) -> Self {
@@ -936,4 +943,35 @@ pub fn get_param(param: &str) -> Option<String> {
     let params = url.search_params();
 
     params.get(param)
+}
+
+/// alternative to dominator::on_click_go_to_url
+#[macro_export]
+macro_rules! on_click_go_to_url {
+    ($this:ident, $route:expr) => {{
+        // ($this:ident, $route:ident) => {{
+        let route = $route;
+
+        $this.event_with_options(
+            &dominator::EventOptions::preventable(),
+            move |e: $crate::events::Click| {
+                e.prevent_default();
+                route.go_to();
+            },
+        )
+    }};
+}
+
+/// alternative to dominator::link
+#[macro_export]
+macro_rules! link {
+    ($url:expr, { $($methods:tt)* }) => {{
+        let url = $url;
+
+        dominator::html!("a", {
+            .attr("href", &url.to_string())
+            .apply(move |dom| $crate::on_click_go_to_url!(dom, url))
+            $($methods)*
+        })
+    }};
 }

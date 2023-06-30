@@ -4,7 +4,7 @@ use components::{
     overlay::container::OverlayContainer,
     page_header::{PageHeader, PageHeaderConfig, PageLinks},
 };
-use dominator::{clone, html, link, with_node, Dom, EventOptions};
+use dominator::{clone, html, with_node, Dom, EventOptions};
 use futures_signals::signal::{Signal, SignalExt};
 use shared::domain::user::{UserId, UserProfile};
 use utils::{
@@ -37,7 +37,7 @@ impl Community {
                     ..Default::default()
                 }).render(),
                 self.render_nav(),
-                link!(Route::Community(CommunityRoute::Landing).to_string(), {
+                utils::link!(Route::Community(CommunityRoute::Landing), {
                     .prop("slot", "title")
                     .text("Community")
                 }),
@@ -123,10 +123,10 @@ impl Community {
                 {
                     let route = match user_id {
                         Some(user_id) => {
-                            Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(user_id))).to_string()
+                            Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(user_id)))
                         },
                         _ => {
-                            Route::User(UserRoute::Login(Default::default())).to_string()
+                            Route::User(UserRoute::Login(Default::default()))
                         },
                     };
                     html!("community-nav-item", {
@@ -145,24 +145,22 @@ impl Community {
                             }
                         })
                         .prop("label", "My profile")
-                        .prop("href", &route)
+                        .prop("href", &route.to_string())
                         .prop_signal("active", Community::route_signal().map(move |route| {
                             matches!(route, Route::Community(CommunityRoute::Members(route)) if is_current_users_page(&user_id, &route))
                         }))
                         // only use local router if logged in, otherwise full redirect
-                        .apply_if(user_id.is_some(), move |dom| dominator::on_click_go_to_url!(dom, {
-                            route
-                        }))
+                        .apply_if(user_id.is_some(), move |dom| utils::on_click_go_to_url!(dom, route))
                         .event(|_: events::Click| {
                             track_nav_item("My profile");
                         })
                     })
                 },
                 {
-                    let route = Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::List)).to_string();
+                    let route = Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::List));
                     html!("community-nav-item", {
                         .prop("label", "Circles")
-                        .prop("href", &route)
+                        .prop("href", &route.to_string())
                         .prop_signal("active", Community::route_signal().map(|route| {
                             matches!(route, Route::Community(CommunityRoute::Circles(_)))
                         }))
@@ -172,16 +170,14 @@ impl Community {
                         .event(|_: events::Click| {
                             track_nav_item("Circles");
                         })
-                        .apply(move |dom| dominator::on_click_go_to_url!(dom, {
-                            route
-                        }))
+                        .apply(move |dom| utils::on_click_go_to_url!(dom, route))
                     })
                 },
                 {
-                    let route = Route::Community(CommunityRoute::Members(CommunityMembersRoute::List)).to_string();
+                    let route = Route::Community(CommunityRoute::Members(CommunityMembersRoute::List));
                     html!("community-nav-item", {
                         .prop("label", "Members")
-                        .prop("href", &route)
+                        .prop("href", &route.to_string())
                         .prop_signal("active", Community::route_signal().map(clone!(user_id => move |route| {
                             matches!(route, Route::Community(CommunityRoute::Members(route)) if !is_current_users_page(&user_id, &route))
                         })))
@@ -191,25 +187,21 @@ impl Community {
                         .event(|_: events::Click| {
                             track_nav_item("Members");
                         })
-                        .apply(move |dom| dominator::on_click_go_to_url!(dom, {
-                            route
-                        }))
+                        .apply(move |dom| utils::on_click_go_to_url!(dom, route))
                     })
                 },
                 {
-                    let route = Route::Community(CommunityRoute::Courses).to_string();
+                    let route = Route::Community(CommunityRoute::Courses);
                     html!("community-nav-item", {
                         .prop("label", "Courses")
-                        .prop("href", &route)
+                        .prop("href", &route.to_string())
                         .child(html!("fa-icon", {
                             .prop("icon", "fa-thin fa-clapperboard-play")
                         }))
                         .event(|_: events::Click| {
                             track_nav_item("Courses");
                         })
-                        .apply(move |dom| dominator::on_click_go_to_url!(dom, {
-                            route
-                        }))
+                        .apply(move |dom| utils::on_click_go_to_url!(dom, route))
                     })
                 },
             ])
