@@ -18,13 +18,13 @@ pub struct CreateCircle {
 }
 
 impl CreateCircle {
-    pub fn new(circle_list_state: Rc<CirclesList>) -> Rc<Self> {
+    pub fn new(circle_list_state: &Rc<CirclesList>) -> Rc<Self> {
         Rc::new(Self {
             loader: AsyncLoader::new(),
             name: Mutable::default(),
             description: Mutable::default(),
             image: Mutable::default(),
-            circle_list_state,
+            circle_list_state: Rc::clone(circle_list_state),
         })
     }
 

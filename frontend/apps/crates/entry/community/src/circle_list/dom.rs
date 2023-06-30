@@ -1,9 +1,8 @@
 use std::rc::Rc;
 
-use components::overlay::handle::OverlayHandle;
 use dominator::{class, clone, html, pseudo, with_node, DomBuilder};
 use futures_signals::{map_ref, signal::SignalExt};
-use utils::{component::Component, events};
+use utils::{component::Component, dialog, events};
 use web_sys::{HtmlInputElement, ShadowRoot};
 
 use crate::circle_card::CircleCard;
@@ -128,16 +127,11 @@ impl Component<CirclesList> for Rc<CirclesList> {
                 .create_popup_open
                 .signal()
                 .map(clone!(state => move |open| {
-                    match open {
-                        false => None,
-                        true => {
-                            Some(html!("empty-fragment", {
-                                .apply(OverlayHandle::lifecycle(clone!(state => move || {
-                                    CreateCircle::new(Rc::clone(&state)).render()
-                                })))
-                            }))
-                        },
-                    }
+                    open.then(|| {
+                        dialog!{
+                            .child(CreateCircle::new(&state).render())
+                        }
+                    })
                 })),
         )
     }

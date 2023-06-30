@@ -8,7 +8,6 @@ use super::{
 };
 use components::{
     asset_card::{render_asset_card, AssetCardBottomIndicator, AssetCardConfig},
-    dialog::Dialog,
     player_popup::{PlayerPopup, PreviewPopupCallbacks},
 };
 use dominator::{clone, html, Dom, DomBuilder};
@@ -17,7 +16,7 @@ use itertools::Itertools;
 use shared::domain::{asset::Asset, user::public_user::PublicUser};
 use utils::{
     component::Component,
-    events,
+    dialog, events,
     languages::Language,
     prelude::{get_user_cloned, get_user_id},
     unwrap::UnwrapJiExt,
@@ -542,41 +541,36 @@ impl MemberDetails {
                 .signal()
                 .map(clone!(state => move |active_popup| {
                     active_popup.map(clone!(state => move |active_popup| {
-                        Dialog::render(
-                            clone!(state => move || {
-                                let callbacks = EditProfileCallbacks {
-                                    save_changes: Box::new(clone!(state => move|user| {
-                                        state.save_profile_changes(user);
-                                    })),
-                                    close: Box::new(clone!(state => move || {
-                                        state.active_popup.set(None);
-                                    }))
-                                };
-                                match active_popup {
-                                    ActivePopup::About => {
-                                        EditAbout::new(
-                                            get_user_cloned().unwrap_ji(),
-                                            callbacks
-                                        ).render()
-                                    },
-                                    ActivePopup::Bio => {
-                                        EditBio::new(
-                                            get_user_cloned().unwrap_ji(),
-                                            callbacks
-                                        ).render()
-                                    },
-                                    ActivePopup::Image => {
-                                        EditImage::new(
-                                            get_user_cloned().unwrap_ji(),
-                                            callbacks
-                                        ).render()
-                                    },
-                                }
-                            }),
-                            Some(Box::new(clone!(state => move || {
+                        let callbacks = EditProfileCallbacks {
+                            save_changes: Box::new(clone!(state => move|user| {
+                                state.save_profile_changes(user);
+                            })),
+                            close: Box::new(clone!(state => move || {
                                 state.active_popup.set(None);
-                            })))
-                        )
+                            }))
+                        };
+                        dialog!{
+                            .child(match active_popup {
+                                ActivePopup::About => {
+                                    EditAbout::new(
+                                        get_user_cloned().unwrap_ji(),
+                                        callbacks
+                                    ).render()
+                                },
+                                ActivePopup::Bio => {
+                                    EditBio::new(
+                                        get_user_cloned().unwrap_ji(),
+                                        callbacks
+                                    ).render()
+                                },
+                                ActivePopup::Image => {
+                                    EditImage::new(
+                                        get_user_cloned().unwrap_ji(),
+                                        callbacks
+                                    ).render()
+                                },
+                            })
+                        }
                     }))
                 })),
         )

@@ -5,7 +5,6 @@ use super::{
     edit_name::EditName, ActivePopup, CircleDetails,
 };
 use crate::member_card::MemberCard;
-use components::dialog::Dialog;
 use dominator::{clone, html, Dom, DomBuilder};
 use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
 use shared::{
@@ -19,7 +18,7 @@ use shared::{
 use utils::{
     clipboard,
     component::Component,
-    events,
+    dialog, events,
     prelude::{get_user_id, ApiEndpointExt},
     unwrap::UnwrapJiExt,
 };
@@ -280,41 +279,36 @@ impl CircleDetails {
                 .signal()
                 .map(clone!(state => move |active_popup| {
                     active_popup.map(clone!(state => move |active_popup| {
-                        Dialog::render(
-                            clone!(state => move || {
-                                let callbacks = EditCirclesCallbacks {
-                                    save_changes: Box::new(clone!(state => move|circle| {
-                                        state.save_circle_changes(circle);
-                                    })),
-                                    close: Box::new(clone!(state => move || {
-                                        state.active_popup.set(None);
-                                    }))
-                                };
-                                match active_popup {
-                                    ActivePopup::About => {
-                                        EditAbout::new(
-                                            state.circle.get_cloned().unwrap_ji(),
-                                            callbacks
-                                        ).render()
-                                    },
-                                    ActivePopup::Name => {
-                                        EditName::new(
-                                            state.circle.get_cloned().unwrap_ji(),
-                                            callbacks
-                                        ).render()
-                                    },
-                                    ActivePopup::Image => {
-                                        EditImage::new(
-                                            state.circle.get_cloned().unwrap_ji(),
-                                            callbacks
-                                        ).render()
-                                    },
-                                }
-                            }),
-                            Some(Box::new(clone!(state => move || {
+                        let callbacks = EditCirclesCallbacks {
+                            save_changes: Box::new(clone!(state => move|circle| {
+                                state.save_circle_changes(circle);
+                            })),
+                            close: Box::new(clone!(state => move || {
                                 state.active_popup.set(None);
-                            })))
-                        )
+                            }))
+                        };
+                        dialog!{
+                            .child(match active_popup {
+                                ActivePopup::About => {
+                                    EditAbout::new(
+                                        state.circle.get_cloned().unwrap_ji(),
+                                        callbacks
+                                    ).render()
+                                },
+                                ActivePopup::Name => {
+                                    EditName::new(
+                                        state.circle.get_cloned().unwrap_ji(),
+                                        callbacks
+                                    ).render()
+                                },
+                                ActivePopup::Image => {
+                                    EditImage::new(
+                                        state.circle.get_cloned().unwrap_ji(),
+                                        callbacks
+                                    ).render()
+                                },
+                            })
+                        }
                     }))
                 })),
         )

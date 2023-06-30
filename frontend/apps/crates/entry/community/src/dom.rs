@@ -1,9 +1,6 @@
 use std::{collections::HashMap, rc::Rc};
 
-use components::{
-    overlay::container::OverlayContainer,
-    page_header::{PageHeader, PageHeaderConfig, PageLinks},
-};
+use components::page_header::{PageHeader, PageHeaderConfig, PageLinks};
 use dominator::{clone, html, with_node, Dom, EventOptions};
 use futures_signals::signal::{Signal, SignalExt};
 use shared::domain::user::{UserId, UserProfile};
@@ -76,7 +73,6 @@ impl Community {
                 })
             ])
             .child_signal(self.dom_signal())
-            .child(OverlayContainer::new().render(None))
         })
     }
 
