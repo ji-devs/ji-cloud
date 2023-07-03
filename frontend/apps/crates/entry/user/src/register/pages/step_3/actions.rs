@@ -65,7 +65,7 @@ pub fn submit(state: Rc<State>) {
         match resp {
             Ok(resp) => {
                 storage::save_csrf_token(&resp.csrf);
-                let route: String = Route::User(UserRoute::RegisterComplete).into();
+                let route: String = Route::User(UserRoute::Welcome).into();
                 dominator::routing::go_to_url(&route);
             }
             Err(err) => {

@@ -93,10 +93,10 @@ pub enum UserRoute {
     SendEmailConfirmation(String), //the email address
     VerifyEmail(String),           //the token
     PasswordReset(String),         //the token
-    RegisterComplete,
     SchoolStart(PlanType),
     SchoolEnd,
     Subscribe(PlanType),
+    Welcome,
 }
 
 #[derive(Debug, Clone)]
@@ -442,7 +442,6 @@ impl Route {
             ["user", "password-reset", token] => {
                 Self::User(UserRoute::PasswordReset(token.to_string()))
             }
-            ["user", "register-complete"] => Self::User(UserRoute::RegisterComplete),
             ["user", "no-auth"] => Self::User(UserRoute::NoAuth),
             ["user", "school-start", plan_type] => {
                 let plan_type = serde_qs::from_str(plan_type).unwrap_ji();
@@ -453,6 +452,7 @@ impl Route {
                 let plan_type = serde_qs::from_str(plan_type).unwrap_ji();
                 Self::User(UserRoute::Subscribe(plan_type))
             }
+            ["user", "welcome"] => Self::User(UserRoute::Welcome),
             ["admin", "jig-curation"] => {
                 Self::Admin(AdminRoute::JigCuration(AdminJigCurationRoute::Table))
             }
@@ -785,7 +785,7 @@ impl From<&Route> for String {
                 }
                 UserRoute::VerifyEmail(token) => format!("/user/verify-email/{}", token),
                 UserRoute::PasswordReset(token) => format!("/user/password-reset/{}", token),
-                UserRoute::RegisterComplete => "/user/register-complete".to_string(),
+                UserRoute::Welcome => "/user/welcome".to_string(),
                 UserRoute::NoAuth => "/user/no-auth".to_string(),
                 UserRoute::SchoolStart(plan_type) => {
                     let query = serde_qs::to_string(&plan_type).unwrap_ji();

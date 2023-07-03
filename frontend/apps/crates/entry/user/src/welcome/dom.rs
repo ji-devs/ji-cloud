@@ -1,11 +1,13 @@
+use std::rc::Rc;
+
 use dominator::{html, Dom};
 
 use crate::strings::register::complete::*;
 
-pub struct CompletePage {}
+use super::Welcome;
 
-impl CompletePage {
-    pub fn render() -> Dom {
+impl Welcome {
+    pub fn render(self: &Rc<Self>) -> Dom {
         html!("page-register-complete", {
             .child(
                 html!("a", {

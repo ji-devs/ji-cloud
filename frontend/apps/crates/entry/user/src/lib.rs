@@ -18,6 +18,7 @@ mod school_start;
 mod settings;
 mod strings;
 mod subscribe;
+mod welcome;
 
 use wasm_bindgen::prelude::*;
 

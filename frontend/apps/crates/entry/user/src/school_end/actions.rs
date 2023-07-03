@@ -24,7 +24,7 @@ impl SchoolEnd {
                 ..Default::default()
             };
             endpoints::account::UpdateSchoolAccount::api_with_auth_empty(SchoolAccountPath(state.school_id), Some(req)).await.unwrap_ji();
-            dominator::routing::go_to_url(&Route::User(UserRoute::RegisterComplete).to_string());
+            dominator::routing::go_to_url(&Route::User(UserRoute::Welcome).to_string());
         }));
     }
 }

@@ -51,7 +51,7 @@ impl Subscribe {
 fn get_next_page_url() -> String {
     let route = match get_school_id() {
         Some(_) => Route::User(UserRoute::SchoolEnd),
-        None => Route::User(UserRoute::RegisterComplete),
+        None => Route::User(UserRoute::Welcome),
     };
     format!(
         "{}{}",
