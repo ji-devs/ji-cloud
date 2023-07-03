@@ -26,7 +26,7 @@ use utils::{
 };
 use web_sys::ShadowRoot;
 
-const STR_SHARE_PLAYLIST: &str = "Share playlist";
+const STR_SHARE_PLAYLIST: &str = "Share course";
 const UNITS_PER_PAGE: usize = 10;
 
 impl Component<PlayerMain> for Rc<PlayerMain> {
