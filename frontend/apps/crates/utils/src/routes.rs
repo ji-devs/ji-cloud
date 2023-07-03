@@ -1,7 +1,7 @@
 use crate::asset::{CoursePlayerOptions, JigPlayerOptions, PlaylistPlayerOptions};
 use gloo::utils::window;
 use serde::{Deserialize, Serialize};
-use shared::domain::billing::SchoolId;
+use shared::domain::billing::{PlanType, SchoolId};
 use shared::domain::{
     asset::{AssetId, AssetType, DraftOrLive},
     category::CategoryId,
@@ -94,6 +94,9 @@ pub enum UserRoute {
     VerifyEmail(String),           //the token
     PasswordReset(String),         //the token
     RegisterComplete,
+    SchoolStart(PlanType),
+    SchoolEnd,
+    Subscribe(PlanType),
 }
 
 #[derive(Debug, Clone)]
@@ -441,6 +444,15 @@ impl Route {
             }
             ["user", "register-complete"] => Self::User(UserRoute::RegisterComplete),
             ["user", "no-auth"] => Self::User(UserRoute::NoAuth),
+            ["user", "school-start", plan_type] => {
+                let plan_type = serde_qs::from_str(plan_type).unwrap_ji();
+                Self::User(UserRoute::SchoolStart(plan_type))
+            }
+            ["user", "school-end"] => Self::User(UserRoute::SchoolEnd),
+            ["user", "subscribe", plan_type] => {
+                let plan_type = serde_qs::from_str(plan_type).unwrap_ji();
+                Self::User(UserRoute::Subscribe(plan_type))
+            }
             ["admin", "jig-curation"] => {
                 Self::Admin(AdminRoute::JigCuration(AdminJigCurationRoute::Table))
             }
@@ -775,6 +787,15 @@ impl From<&Route> for String {
                 UserRoute::PasswordReset(token) => format!("/user/password-reset/{}", token),
                 UserRoute::RegisterComplete => "/user/register-complete".to_string(),
                 UserRoute::NoAuth => "/user/no-auth".to_string(),
+                UserRoute::SchoolStart(plan_type) => {
+                    let query = serde_qs::to_string(&plan_type).unwrap_ji();
+                    format!("/user/school-start?{}", query)
+                }
+                UserRoute::SchoolEnd => "/user/school-end".to_string(),
+                UserRoute::Subscribe(plan_type) => {
+                    let query = serde_qs::to_string(&plan_type).unwrap_ji();
+                    format!("/user/subscribe?{}", query)
+                }
             },
             Route::Admin(route) => match route {
                 AdminRoute::Landing => "/admin".to_string(),

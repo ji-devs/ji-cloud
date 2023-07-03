@@ -13,8 +13,11 @@ mod password_handler;
 mod register;
 mod reset_password;
 mod router;
+mod school_end;
+mod school_start;
 mod settings;
 mod strings;
+mod subscribe;
 
 use wasm_bindgen::prelude::*;
 

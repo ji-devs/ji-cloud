@@ -1094,6 +1094,7 @@ dependencies = [
  "futures",
  "futures-signals",
  "gloo-timers",
+ "gloo-utils",
  "htmlescape",
  "js-sys",
  "log",

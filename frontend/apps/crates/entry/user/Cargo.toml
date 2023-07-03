@@ -41,6 +41,7 @@ anyhow = { workspace = true }
 chrono = { workspace = true, features = ["serde"] }
 chrono-tz = { workspace = true, features = ["serde"] }
 zxcvbn = { workspace = true }
+gloo-utils = { workspace = true }
 
 [features]
 default = ["wee_alloc"]

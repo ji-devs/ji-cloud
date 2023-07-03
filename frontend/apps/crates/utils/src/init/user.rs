@@ -3,7 +3,10 @@ use futures_signals::signal::Mutable;
 use once_cell::sync::OnceCell;
 use shared::{
     api::endpoints::user::Profile,
-    domain::user::{GetProfilePath, UserId, UserProfile},
+    domain::{
+        billing::SchoolId,
+        user::{GetProfilePath, UserId, UserProfile},
+    },
 };
 
 static USER: OnceCell<Mutable<Option<UserProfile>>> = OnceCell::new();
@@ -37,4 +40,14 @@ pub fn is_user_set() -> bool {
 
 pub fn get_user_id() -> Option<UserId> {
     get_user_mutable().lock_ref().as_ref().map(|user| user.id)
+}
+
+pub fn get_school_id() -> Option<SchoolId> {
+    let school_id = get_user_mutable()
+        .lock_ref()
+        .as_ref()?
+        .account_summary
+        .as_ref()?
+        .school_id?;
+    Some(school_id)
 }

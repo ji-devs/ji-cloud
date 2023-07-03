@@ -182,10 +182,11 @@ impl From<Publish> for chrono::DateTime<Utc> {
 ///
 /// Requires `#[serde(default, skip_serializing_if = "Update::is_keep")]` to be applied to
 /// fields which use this type.
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, Default)]
 #[serde(untagged)]
 pub enum UpdateNullable<T> {
     /// Use the current value stored in the database. Equivalent of `undefined` in JS.
+    #[default]
     Keep,
     /// Set the value to `null` or the equivalent.
     Unset,
@@ -193,9 +194,12 @@ pub enum UpdateNullable<T> {
     Change(T),
 }
 
-impl<T> Default for UpdateNullable<T> {
-    fn default() -> Self {
-        Self::Keep
+impl<T> From<Option<T>> for UpdateNullable<T> {
+    fn from(value: Option<T>) -> Self {
+        match value {
+            Some(value) => Self::Change(value),
+            None => Self::Unset,
+        }
     }
 }
 

@@ -10,7 +10,10 @@ use crate::{
         dom::RegisterPage, pages::complete::dom::CompletePage as RegisterCompletePage, state::Step,
     },
     reset_password::PasswordResetPage,
+    school_end::SchoolEnd,
+    school_start::SchoolStart,
     settings::state::SettingsPage,
+    subscribe::Subscribe,
 };
 use dominator::{html, Dom};
 use futures_signals::signal::{Signal, SignalExt};
@@ -52,6 +55,9 @@ impl Router {
                 UserRoute::PasswordReset(token) => {
                     Some(PasswordResetPage::render(PasswordResetPage::new(token)))
                 }
+                UserRoute::SchoolStart(plan_type) => Some(SchoolStart::new(plan_type).render()),
+                UserRoute::SchoolEnd => Some(SchoolEnd::new().render()),
+                UserRoute::Subscribe(plan_type) => Some(Subscribe::new(plan_type).render()),
             },
             _ => None,
         })
