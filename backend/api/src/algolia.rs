@@ -1184,13 +1184,13 @@ where playlist_data.id = any (select live_id from playlist where playlist.id = a
                 inner join circle on bm.id = circle.id
                 where bm.user_id = "user".id
             )) as "circles!"
-        from user_profile "up"
-        left join "user" on "user".id = up.user_id
-        left join public_user on public_user.user_id = up.user_id
-where (public_user.last_synced_at is null or
-       (up.updated_at is not null and public_user.last_synced_at < up.updated_at))
-limit 50;
-     "#
+    from user_profile "up"
+    inner join "user" on "user".id = up.user_id
+    inner join public_user on public_user.user_id = up.user_id
+    where (public_user.last_synced_at is null or
+          (up.updated_at is not null and public_user.last_synced_at < up.updated_at))
+    limit 100 for no key update skip locked;
+       "#
         )
         .fetch(&mut txn)
         .map_ok(|row| {
