@@ -77,7 +77,14 @@ impl MemberCard<'_> {
                                     }),
                                     html!("div", {
                                         .class("name")
-                                        .text(&format!("{} {}", self.member.given_name, self.member.family_name))
+                                        .child(html!("p", {
+                                            .apply(|mut dom| {
+                                                let name = format!("{} {}", self.member.given_name, self.member.family_name);
+                                                dom = dom.text(&name);
+                                                dom = dom.prop("title", &name);
+                                                dom
+                                            })
+                                        }))
                                         // .child(html!("div", {
                                         //     .class("given-name")
                                         //     .text(&self.member.given_name)
@@ -130,9 +137,8 @@ impl MemberCard<'_> {
                                         .apply(|mut dom| {
                                             if let Some(languages_spoken) = &self.member.languages_spoken {
                                                 let languages = languages_spoken.iter().map(|l| Language::code_to_display_name(l)).join(", ");
-                                                dom = dom.child(html!("div", {
-                                                    .text(&languages)
-                                                }));
+                                                dom = dom.text(&languages);
+                                                dom = dom.prop("title", &languages);
                                             }
                                             dom
                                         })

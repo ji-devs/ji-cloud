@@ -41,6 +41,7 @@ impl CircleCard<'_> {
                         .class("main")
                         .child(html!("p", {
                             .class("name")
+                            .prop("title", &self.circle.display_name)
                             .text(&self.circle.display_name)
                         }))
                         .child(html!("hr"))

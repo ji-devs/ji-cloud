@@ -66,16 +66,20 @@ a {
     width: 88px;
 }
 .top-section .name {
-    padding-top: 8px;
+    margin-top: 8px;
     font-weight: 600;
     line-height: 1.2;
-
-    display: grid;
-    grid-template-columns: min-content;
-
+}
+.top-section .name p {
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
 .top-section .country {
-    padding-bottom: 8px;
+    margin-bottom: 8px;
     font-weight: 500;
     display: grid;
     grid-template-columns: auto auto;
@@ -104,8 +108,11 @@ hr {
 .key-values .key {
     color: var(--dark-gray-3);
 }
-.key-values .values {
+.key-values .value {
     color: var(--dark-gray-6);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 button-rect {
     align-self: end;
