@@ -1,22 +1,26 @@
 :host {
     display: grid;
-    grid-template-columns: 6fr 13fr;
-    grid-template-columns: 300px 1fr;
-    grid-template-rows: auto auto auto;
     gap: 24px;
+}
+@media (min-width: 1024px) {
+    :host {
+        grid-template-columns: 6fr 13fr;
+        grid-template-columns: 300px 1fr;
+        grid-template-rows: auto auto auto;
+    }
 }
 .header {
     grid-column: 1 / -1;
     display: grid;
-    grid-template-columns: 120px 1fr 138px;
-    grid-template-rows: auto auto auto auto;
-    column-gap: 32px;
+    justify-items: center;
+    text-align: center;
+    row-gap: 16px;
 }
 .header profile-image {
-    grid-row: 1 / -1;
-    grid-column: 1;
     align-self: start;
     aspect-ratio: 1 / 1;
+    height: 120px;
+    width: 120px;
 }
 .header .edit-image {
     grid-row: 1;
@@ -25,13 +29,11 @@
     justify-self: end;
 }
 .header .name {
-    grid-column: 2;
     font-size: 40px;
     font-weight: 800;
     color: var(--dark-blue-4);
 }
 .header .badge {
-    grid-column: 2;
     height: 24px;
     line-height: 24px;
     font-size: 16px;
@@ -39,7 +41,6 @@
     color: #383838;
 }
 .header hr {
-    grid-column: 2 / -1;
     width: 100%;
     box-sizing: border-box;
     border: none;
@@ -47,14 +48,41 @@
     margin: 16px 0;
 }
 .header .anchors {
-    grid-column: 2 / -1;
     display: flex;
     gap: 16px;
 }
 .header .follow-button {
-    grid-column: 3;
-    grid-row: 1;
     align-self: center;
+}
+@media (min-width: 1024px) {
+    .header {
+        justify-items: left;
+        text-align: left;
+        row-gap: 0;
+        column-gap: 32px;
+        grid-template-columns: 120px 1fr 138px;
+        grid-template-rows: auto auto auto auto;
+    }
+    .header profile-image {
+        grid-row: 1 / -1;
+        grid-column: 1;
+    }
+    .header .name {
+        grid-column: 2;
+    }
+    .header .badge {
+        grid-column: 2;
+    }
+    .header hr {
+        grid-column: 2 / -1;
+    }
+    .header .anchors {
+        grid-column: 2 / -1;
+    }
+    .header .follow-button {
+        grid-column: 3;
+        grid-row: 1;
+    }
 }
 section {
     padding: 24px;
@@ -85,10 +113,12 @@ section h4 {
     font-weight: 500;
     color: var(--dark-gray-5);
 }
-.about-section {
-    grid-column: 1;
-    grid-row: 2/-1;
-    align-self: start;
+@media (min-width: 1024px) {
+    .about-section {
+        grid-column: 1;
+        grid-row: 2/-1;
+        align-self: start;
+    }
 }
 .about-section .icon-label {
     display: grid;
@@ -130,11 +160,13 @@ section h4 {
     justify-content: start;
     gap: 24px;
 }
-.creations-section {
-    grid-column: 2;
-}
-.network-section {
-    grid-column: 2;
+@media (min-width: 1024px) {
+    .creations-section {
+        grid-column: 2;
+    }
+    .network-section {
+        grid-column: 2;
+    }
 }
 .creations-section,
 .network-section {

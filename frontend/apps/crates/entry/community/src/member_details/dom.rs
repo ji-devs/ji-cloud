@@ -100,28 +100,6 @@ impl MemberDetails {
                     dom
                 })
             }))
-            .child(html!("hr"))
-            .child(html!("div", {
-                .class("anchors")
-                .children(&mut [
-                    html!("button-rect", {
-                        .prop("kind", "filled")
-                        .prop("color", "blue")
-                        .text("Jigzi creations")
-                        .event(|e: events::Click| {
-                            jump_to(e.dyn_target().unwrap_ji(), "#creations");
-                        })
-                    }),
-                    html!("button-rect", {
-                        .prop("kind", "outline")
-                        .prop("color", "grey")
-                        .text("Network")
-                        .event(|e: events::Click| {
-                            jump_to(e.dyn_target().unwrap_ji(), "#network");
-                        })
-                    }),
-                ])
-            }))
             .apply_if(!is_current_user, clone!(state => move |dom| {
                 dom.child_signal(state.is_following.signal().map(clone!(state => move |is_following| {
                     is_following.map(clone!(state => move |is_following| {
@@ -154,6 +132,28 @@ impl MemberDetails {
                         }
                     }))
                 })))
+            }))
+            .child(html!("hr"))
+            .child(html!("div", {
+                .class("anchors")
+                .children(&mut [
+                    html!("button-rect", {
+                        .prop("kind", "filled")
+                        .prop("color", "blue")
+                        .text("Jigzi creations")
+                        .event(|e: events::Click| {
+                            jump_to(e.dyn_target().unwrap_ji(), "#creations");
+                        })
+                    }),
+                    html!("button-rect", {
+                        .prop("kind", "outline")
+                        .prop("color", "grey")
+                        .text("Network")
+                        .event(|e: events::Click| {
+                            jump_to(e.dyn_target().unwrap_ji(), "#network");
+                        })
+                    }),
+                ])
             }))
         })
     }

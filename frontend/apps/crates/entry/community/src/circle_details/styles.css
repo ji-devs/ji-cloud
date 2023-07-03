@@ -1,19 +1,24 @@
 :host {
     display: grid;
-    grid-template-columns: 300px 1fr;
-    grid-template-rows: auto auto;
     align-items: start;
     gap: 24px;
+}
+@media (min-width: 1024px) {
+    :host {
+        grid-template-columns: 300px 1fr;
+        grid-template-rows: auto auto;
+    }
 }
 .header {
     grid-column: 1 / -1;
     display: grid;
-    grid-template-columns: 120px auto 1fr;
-    grid-template-rows: auto 1fr;
     column-gap: 32px;
+    grid-template-rows: 120px auto auto;
+    justify-content: center;
+    justify-items: center;
 }
 .header img-ji {
-    grid-row: 1 / -1;
+    grid-row: 1;
     grid-column: 1;
     align-self: start;
     aspect-ratio: 1 / 1;
@@ -23,7 +28,7 @@
     border: solid 2px var(--main-yellow);
     object-fit: cover;
     height: 100%;
-    width: 100%;
+    /* width: 100%; */
 }
 .header .edit-image {
     grid-column: 1;
@@ -44,27 +49,49 @@
     align-self: center;
 }
 .header hr {
-    grid-column: 2 / -1;
-    width: 100%;
-    box-sizing: border-box;
-    border: none;
-    border-bottom: solid 1px var(--light-gray-2);
-    margin: 0;
-    align-self: center;
+    display: block;
 }
 .header .actions {
-    grid-column: 3;
-    grid-row: 1;
     display: flex;
     align-items: center;
     justify-content: end;
     gap: 34px;
 }
+@media (min-width: 1024px) {
+    .header {
+        grid-template-rows: auto 1fr;
+        grid-template-columns: 120px auto 1fr;
+        justify-content: unset;
+        justify-items: unset;
+    }
+    .header .edit-image {
+        grid-column: 1;
+        grid-row: 1;
+    }
+    .header hr {
+        grid-column: 2 / -1;
+        width: 100%;
+        box-sizing: border-box;
+        border: none;
+        border-bottom: solid 1px var(--light-gray-2);
+        margin: 0;
+        align-self: center;
+    }
+    .header .actions {
+        grid-column: 3;
+        grid-row: 1;
+    }
+}
 section {
-    padding: 24px;
     border-radius: 16px;
     border: solid 1px var(--light-orange-3);
     background-color: var(--white);
+    padding: 12px;
+}
+@media (min-width: 1024px) {
+    section {
+        padding: 24px;
+    }
 }
 section .section-header {
     display: flex;
