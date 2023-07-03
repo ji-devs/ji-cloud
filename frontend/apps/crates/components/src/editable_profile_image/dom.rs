@@ -27,14 +27,16 @@ impl Component<EditableProfileImage> for Rc<EditableProfileImage> {
         let state = self;
 
         dom.child(html!("profile-image", {
-                .class("image-slot")
-                .prop("slot", "profile-image")
-                .prop_signal("imageId", state.profile_image.signal_ref(|profile_image| {
-                    match profile_image {
-                        Some(image_id) => JsValue::from_str(&image_id.0.to_string()),
-                        None => JsValue::UNDEFINED,
-                    }
+            .class("image-slot")
+            .prop("slot", "profile-image")
+            .prop_signal("imageId", state.profile_image.signal_ref(|profile_image| {
+                match profile_image {
+                    Some(image_id) => JsValue::from_str(&image_id.0.to_string()),
+                    None => JsValue::UNDEFINED,
+                }
             }))
+            .prop_signal("givenName", state.given_name.signal_cloned())
+            .prop_signal("familyName", state.family_name.signal_cloned())
         }))
         .child(html!("fa-button", {
             .class("edit-button")

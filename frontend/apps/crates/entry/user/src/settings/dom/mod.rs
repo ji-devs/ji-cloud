@@ -47,7 +47,10 @@ impl SettingsPage {
         state.load_initial_data();
 
         html!("user-profile", {
-            .child(EditableProfileImage::new(state.user.profile_image.read_only(),
+            .child(EditableProfileImage::new(
+                state.user.profile_image.read_only(),
+                state.user.given_name.read_only(),
+                state.user.family_name.read_only(),
                 EditableProfileImageConfig {
                     save_changes: Box::new(clone!(state => move |user| {
                         state.user.profile_image.set(user);

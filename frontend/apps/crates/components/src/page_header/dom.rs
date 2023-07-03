@@ -133,6 +133,8 @@ fn render_logged_in(state: Rc<PageHeader>, user: &UserProfile) -> Vec<Dom> {
                         None => JsValue::UNDEFINED,
                     }
                 })
+                .prop("givenName", &user.given_name)
+                .prop("familyName", &user.family_name)
             }),
             html!("profile-image", {
                 .prop("slot", "overlay-profile-image")
@@ -142,6 +144,8 @@ fn render_logged_in(state: Rc<PageHeader>, user: &UserProfile) -> Vec<Dom> {
                         None => JsValue::UNDEFINED,
                     }
                 })
+                .prop("givenName", &user.given_name)
+                .prop("familyName", &user.family_name)
             }),
         ])
         .child(html!("a", {

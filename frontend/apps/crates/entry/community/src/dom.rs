@@ -11,6 +11,7 @@ use utils::{
     prelude::{get_user_cloned, get_user_id},
     routes::{CommunityCirclesRoute, CommunityMembersRoute, CommunityRoute, Route, UserRoute},
 };
+use wasm_bindgen::JsValue;
 use web_sys::HtmlInputElement;
 
 use crate::{
@@ -128,12 +129,17 @@ impl Community {
                     html!("community-nav-item", {
                         .child({
                             match get_user_cloned() {
-                                Some(UserProfile { profile_image: Some(image_id), .. }) => {
+                                Some(UserProfile { profile_image, given_name, family_name, .. }) => {
                                     html!("profile-image", {
-                                        .prop("imageId", &image_id.0.to_string())
+                                        .prop("imageId", match profile_image {
+                                            Some(image_id) => JsValue::from_str(&image_id.0.to_string()),
+                                            None => JsValue::UNDEFINED,
+                                        })
+                                        .prop("givenName", &given_name)
+                                        .prop("familyName", &family_name)
                                     })
                                 },
-                                _ => {
+                                None => {
                                     html!("fa-icon", {
                                         .prop("icon", "fa-thin fa-user-tie-hair")
                                     })

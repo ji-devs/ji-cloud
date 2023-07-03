@@ -9,6 +9,8 @@ use web_sys::File;
 
 pub struct EditableProfileImage {
     pub profile_image: ReadOnlyMutable<Option<ImageId>>,
+    pub given_name: ReadOnlyMutable<String>,
+    pub family_name: ReadOnlyMutable<String>,
     pub config: EditableProfileImageConfig,
     pub(super) image: Mutable<Option<ImageIdOrFile>>,
     pub loader: AsyncLoader,
@@ -18,6 +20,8 @@ pub struct EditableProfileImage {
 impl EditableProfileImage {
     pub fn new(
         profile_image: ReadOnlyMutable<Option<ImageId>>,
+        given_name: ReadOnlyMutable<String>,
+        family_name: ReadOnlyMutable<String>,
         config: EditableProfileImageConfig,
     ) -> Rc<Self> {
         let image = Mutable::new(None);
@@ -35,6 +39,8 @@ impl EditableProfileImage {
         Rc::new(Self {
             config,
             profile_image,
+            given_name,
+            family_name,
             image,
             loader: AsyncLoader::new(),
             popup_open: Mutable::new(false),
