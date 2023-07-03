@@ -46,7 +46,7 @@ export class _ extends LitElement {
                     --color: var(--dark-green-1);
                 }
                 :host([color="grey"]) {
-                    --color: var(--dark-gray-3)
+                    --color: var(--dark-gray-3);
                 }
                 :host([color="grey"]:hover) {
                     --color: var(--dark-gray-4); /*my own color*/

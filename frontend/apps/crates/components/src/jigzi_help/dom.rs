@@ -75,7 +75,7 @@ impl JigziHelp {
                                             .child(html!("button-rect", {
                                                 .prop("slot", "actions")
                                                 .prop("kind", "text")
-                                                .prop("color", "lightBlue")
+                                                .prop("color", "green")
                                                 .style("margin-left", "auto")
                                                 .text(STR_NO_SHOW_AGAIN)
                                                 .event(clone!(state => move |_evt: events::Click| {

@@ -52,7 +52,7 @@ impl ModuleSelection {
                     Rc::new(Some(clone!(state => move || {
                         html!("button-rect", {
                             .prop("kind", "text")
-                            .prop("color", "lightBlue")
+                            .prop("color", "green")
                             .text(STR_SHOW_ONBOARDING)
                             .event(clone!(state => move |_evt: events::Click| {
                                 state.asset_edit_state.show_onboarding.set_neq(true);

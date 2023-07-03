@@ -20,7 +20,7 @@ export class _ extends LitElement {
             <button-rect
                 .disabled=${!enabled}
                 style="pointer-events: ${pointer}"
-                size="small"
+                size="regular"
                 iconAfter="arrow"
                 @click=${() => {
                     if (enabled) {
