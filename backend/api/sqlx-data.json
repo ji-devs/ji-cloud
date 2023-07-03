@@ -12547,6 +12547,27 @@
     },
     "query": "\n    select exists(select 1 from user_profile where lower(username) = lower($1)) as \"exists!\"\n        "
   },
+  "bf8018c2bd265ba9c3761fff51a1910989dce917461d98255d13b87a04c36d11": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: UserId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      }
+    },
+    "query": "select user_id as \"id: UserId\" from user_profile where (user_id = $1 and $1 is not null) or (lower(username) = lower($2) and $2 is not null)"
+  },
   "c0503b4756010f70f84bfc842758cc356568bcb7324b0c0a8454f49511300942": {
     "describe": {
       "columns": [],
@@ -13444,27 +13465,6 @@
       }
     },
     "query": "\nwith cte as (\n    insert into user_color\n    (user_id, color, index)\n    values ($1, $2, (select count(*) from user_color where user_id = $1)) returning color\n), colors as (\n    select color\n    from user_color\n    where user_id = $1\n    order by index\n)\nselect color as \"color!\" from colors\nunion all\nselect color as \"color!\" from cte\n    "
-  },
-  "d4d6e14dd8b8d8af673fa0a1928526f5a35136a3af46272746667802200158e4": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id: UserId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text"
-        ]
-      }
-    },
-    "query": "select user_id as \"id: UserId\" from user_profile where (user_id = $1 and $1 is not null) or (username = $2 and $2 is not null)"
   },
   "d51353640336b46516c6e2877ae86bb04e1f905c6893cc21275ec7ebc7ce7327": {
     "describe": {
