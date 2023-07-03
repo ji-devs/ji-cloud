@@ -32,7 +32,7 @@ pub async fn lookup(
 ) -> anyhow::Result<Option<OtherUser>> {
     Ok(sqlx::query_as!(
         OtherUser,
-        r#"select user_id as "id: UserId" from user_profile where (user_id = $1 and $1 is not null) or (username = $2 and $2 is not null)"#,
+        r#"select user_id as "id: UserId" from user_profile where (user_id = $1 and $1 is not null) or (lower(username) = lower($2) and $2 is not null)"#,
         id.map(|x| x.0),
         name
     )
