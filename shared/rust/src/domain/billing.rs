@@ -729,6 +729,8 @@ pub struct UserAccountSummary {
     pub school_id: Option<SchoolId>,
     /// The subscription tier the user is on
     pub subscription_tier: Option<SubscriptionTier>,
+    /// The type of plan the user's account is subscribed to
+    pub plan_type: Option<PlanType>,
     /// Status of the accounts subscription, if any
     pub subscription_status: Option<SubscriptionStatus>,
     /// Whether this user is an admin. For non School accounts, this user will

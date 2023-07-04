@@ -2,8 +2,8 @@ use crate::db;
 use shared::domain::admin::SearchSchoolNamesParams;
 use shared::domain::billing::{
     Account, AccountId, AccountType, AccountUser, CreateSchoolAccountRequest, CustomerId,
-    PaymentMethod, School, SchoolId, SchoolName, SchoolNameId, SchoolNameValue, SubscriptionStatus,
-    SubscriptionTier, UpdateSchoolAccountRequest, UserAccountSummary,
+    PaymentMethod, PlanType, School, SchoolId, SchoolName, SchoolNameId, SchoolNameValue,
+    SubscriptionStatus, SubscriptionTier, UpdateSchoolAccountRequest, UserAccountSummary,
 };
 use shared::domain::image::ImageId;
 use shared::domain::user::UserId;
@@ -311,6 +311,7 @@ pub async fn get_user_account_summary(
         r#"
 select
     user_account.subscription_tier as "subscription_tier?: SubscriptionTier",
+    subscription_plan.plan_type as "plan_type?: PlanType",
     subscription.status as "subscription_status?: SubscriptionStatus",
     user_account.admin as "is_admin!",
     user_account.verified as "verified!",
@@ -323,7 +324,7 @@ from user_account
 inner join account using (account_id)
 left join school using (account_id)
 left join (
-    select subscription.account_id, status, amount_due
+    select subscription.account_id, status, amount_due, subscription_plan_id
     from subscription
     join (
         select
@@ -334,6 +335,7 @@ left join (
         limit 1
     ) as recent_subscription using (subscription_id)
 ) as subscription using (account_id)
+left join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id
 where user_account.user_id = $1
 "#,
         user_id as &UserId,
