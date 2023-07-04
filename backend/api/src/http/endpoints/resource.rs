@@ -253,6 +253,21 @@ pub(super) async fn publish_draft_to_live(
 
     sqlx::query!(
         //language=SQL
+        r#"
+        update user_asset_data 
+        set resource_count = resource_count + 1,
+        total_asset_count = total_asset_count + 1
+        from resource
+        where author_id = user_id and
+              published_at is null and 
+              id = $1"#,
+        resource_id.0
+    )
+    .execute(&mut *txn)
+    .await?;
+
+    sqlx::query!(
+        //language=SQL
         "update resource set live_id = $1, published_at = now() where id = $2",
         new_live_id,
         resource_id.0
