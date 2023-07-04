@@ -46,6 +46,14 @@ pub enum HomeRoute {
     Home,
     Search(Option<Box<SearchQueryParams>>),
     Help,
+    Pricing(HomePricingRoute),
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum HomePricingRoute {
+    #[default]
+    Individual,
+    Schools,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
@@ -364,6 +372,10 @@ impl Route {
                 Self::Home(HomeRoute::Search(Some(Box::new(search))))
             }
             ["home", "help"] => Self::Home(HomeRoute::Help),
+            ["home", "pricing"] => Self::Home(HomeRoute::Pricing(HomePricingRoute::Individual)),
+            ["home", "pricing", "school"] => {
+                Self::Home(HomeRoute::Pricing(HomePricingRoute::Schools))
+            }
             ["kids"] => Self::Kids(KidsRoute::StudentCode(None)),
             ["kids", code] => Self::Kids(KidsRoute::StudentCode(Some(code.to_string()))),
             ["dev", "showcase", id] => {
@@ -730,6 +742,10 @@ impl From<&Route> for String {
                     }
                 },
                 HomeRoute::Help => "/home/help".to_string(),
+                HomeRoute::Pricing(route) => match route {
+                    HomePricingRoute::Individual => "/home/pricing".to_string(),
+                    HomePricingRoute::Schools => "/home/pricing/school".to_string(),
+                },
             },
             Route::Kids(route) => match route {
                 KidsRoute::StudentCode(code) => match code {

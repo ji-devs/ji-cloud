@@ -7,6 +7,7 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 mod help_center;
 mod home;
+mod pricing;
 mod router;
 
 use std::rc::Rc;

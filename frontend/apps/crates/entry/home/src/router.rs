@@ -1,4 +1,4 @@
-use crate::home::Home;
+use crate::{home::Home, pricing::Pricing};
 
 use components::overlay::container::OverlayContainer;
 use dominator::{html, Dom};
@@ -31,6 +31,7 @@ impl Router {
                         Some(Home::new_search(search_query).render(true))
                     }
                     HomeRoute::Help => Some(help_center::render_help_center()),
+                    HomeRoute::Pricing(route) => Some(Pricing::new(route).render()),
                 },
                 _ => None,
             }
