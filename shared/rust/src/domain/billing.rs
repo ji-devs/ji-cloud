@@ -462,6 +462,21 @@ const INDIVIDUAL_TRIAL_PERIOD: i64 = 7;
 const SCHOOL_TRIAL_PERIOD: i64 = 7;
 
 impl PlanType {
+    /// Represents the plan type as a `str`
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::IndividualBasicMonthly => "individual-basic-monthly",
+            Self::IndividualBasicAnnually => "individual-basic-annually",
+            Self::IndividualProMonthly => "individual-pro-monthly",
+            Self::IndividualProAnnually => "individual-pro-annually",
+            Self::SchoolLevel1 => "school-level-1",
+            Self::SchoolLevel2 => "school-level-2",
+            Self::SchoolLevel3 => "school-level-3",
+            Self::SchoolLevel4 => "school-level-4",
+            Self::SchoolUnlimited => "school-unlimited",
+        }
+    }
+
     /// `SubscriptionTier` of the current plan
     #[must_use]
     pub const fn subscription_tier(&self) -> SubscriptionTier {
@@ -511,6 +526,25 @@ impl PlanType {
         match self {
             Self::IndividualBasicMonthly | Self::IndividualProMonthly => BillingInterval::Monthly,
             _ => BillingInterval::Annually,
+        }
+    }
+}
+
+impl TryFrom<&str> for PlanType {
+    type Error = ();
+
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        match s {
+            "individual-basic-monthly" => Ok(Self::IndividualBasicMonthly),
+            "individual-basic-annually" => Ok(Self::IndividualBasicAnnually),
+            "individual-pro-monthly" => Ok(Self::IndividualProMonthly),
+            "individual-pro-annually" => Ok(Self::IndividualProAnnually),
+            "school-level-1" => Ok(Self::SchoolLevel1),
+            "school-level-2" => Ok(Self::SchoolLevel2),
+            "school-level-3" => Ok(Self::SchoolLevel3),
+            "school-level-4" => Ok(Self::SchoolLevel4),
+            "school-unlimited" => Ok(Self::SchoolUnlimited),
+            _ => Err(()),
         }
     }
 }

@@ -19,6 +19,10 @@ impl Subscribe {
         state.start_intent();
 
         html!("div", {
+            .child(html!("p", {
+                .text("Plan: ")
+                .text(state.plan_type.as_str())
+            }))
             .children_signal_vec(state.stripe_client_secret.signal_cloned().map(clone!(state => move |secret| {
                 secret.map(clone!(state => move |secret| {
                     vec![

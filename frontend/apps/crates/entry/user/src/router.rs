@@ -6,10 +6,7 @@ use crate::{
     email::verify::VerifyEmailPage,
     login::LoginPage,
     oauth::dom::OauthPage,
-    register::{
-        dom::RegisterPage,
-        state::Step,
-    },
+    register::{dom::RegisterPage, state::Step},
     reset_password::PasswordResetPage,
     school_end::SchoolEnd,
     school_start::SchoolStart,

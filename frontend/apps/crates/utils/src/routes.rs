@@ -444,12 +444,12 @@ impl Route {
             }
             ["user", "no-auth"] => Self::User(UserRoute::NoAuth),
             ["user", "school-start", plan_type] => {
-                let plan_type = serde_qs::from_str(plan_type).unwrap_ji();
+                let plan_type = (*plan_type).try_into().unwrap_ji();
                 Self::User(UserRoute::SchoolStart(plan_type))
             }
             ["user", "school-end"] => Self::User(UserRoute::SchoolEnd),
             ["user", "subscribe", plan_type] => {
-                let plan_type = serde_qs::from_str(plan_type).unwrap_ji();
+                let plan_type = (*plan_type).try_into().unwrap_ji();
                 Self::User(UserRoute::Subscribe(plan_type))
             }
             ["user", "welcome"] => Self::User(UserRoute::Welcome),
@@ -788,13 +788,11 @@ impl From<&Route> for String {
                 UserRoute::Welcome => "/user/welcome".to_string(),
                 UserRoute::NoAuth => "/user/no-auth".to_string(),
                 UserRoute::SchoolStart(plan_type) => {
-                    let query = serde_qs::to_string(&plan_type).unwrap_ji();
-                    format!("/user/school-start?{}", query)
+                    format!("/user/school-start/{}", plan_type.as_str())
                 }
                 UserRoute::SchoolEnd => "/user/school-end".to_string(),
                 UserRoute::Subscribe(plan_type) => {
-                    let query = serde_qs::to_string(&plan_type).unwrap_ji();
-                    format!("/user/subscribe?{}", query)
+                    format!("/user/subscribe/{}", plan_type.as_str())
                 }
             },
             Route::Admin(route) => match route {

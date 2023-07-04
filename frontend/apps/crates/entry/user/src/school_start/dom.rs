@@ -9,6 +9,10 @@ impl SchoolStart {
     pub fn render(self: &Rc<Self>) -> Dom {
         let state = self;
         html!("div", {
+            .child(html!("p", {
+                .text("Plan: ")
+                .text(state.plan_type.as_str())
+            }))
             .child(html!("input-wrapper", {
                 .prop("label", "Name")
                 .child(html!("input" => HtmlInputElement, {
