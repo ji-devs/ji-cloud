@@ -44,15 +44,19 @@ export class _ extends LitElement {
         ];
     }
 
+    @property()
+    plan: string = "";
+
     render() {
         return html`
             <div class="content">
                 <div class="title">
                     <h1>${STR_TITLE}</h1>
+                    <h4>${this.plan}</h4>
                     <title-ji color="black">${STR_SUB}</title-ji>
                     <title-ji color="black">${STR_SUBSUB}</title-ji>
                 </div>
-                <slot name="button"></slot>
+                <slot name="actions"></slot>
             </div>
         `;
     }

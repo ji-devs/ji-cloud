@@ -4,7 +4,7 @@ use once_cell::sync::OnceCell;
 use shared::{
     api::endpoints::user::Profile,
     domain::{
-        billing::SchoolId,
+        billing::{PlanType, SchoolId},
         user::{GetProfilePath, UserId, UserProfile},
     },
 };
@@ -50,4 +50,14 @@ pub fn get_school_id() -> Option<SchoolId> {
         .as_ref()?
         .school_id?;
     Some(school_id)
+}
+
+pub fn get_plan_type() -> Option<PlanType> {
+    let plan = get_user_mutable()
+        .lock_ref()
+        .as_ref()?
+        .account_summary
+        .as_ref()?
+        .plan_type?;
+    Some(plan)
 }
