@@ -5229,6 +5229,62 @@
     },
     "query": "delete from animation_metadata where id = $1 returning kind as \"kind: AnimationKind\""
   },
+  "5191c36820fdd5dbf670d0af9ca46bc7158a12f9bfe1bdd3f39d4d5fef49df6f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "subscription_tier?: SubscriptionTier",
+          "ordinal": 0,
+          "type_info": "Int2"
+        },
+        {
+          "name": "plan_type?: PlanType",
+          "ordinal": 1,
+          "type_info": "Int2"
+        },
+        {
+          "name": "subscription_status?: SubscriptionStatus",
+          "ordinal": 2,
+          "type_info": "Int2"
+        },
+        {
+          "name": "is_admin!",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "verified!",
+          "ordinal": 4,
+          "type_info": "Bool"
+        },
+        {
+          "name": "school_id?: SchoolId",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "overdue!",
+          "ordinal": 6,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect\n    user_account.subscription_tier as \"subscription_tier?: SubscriptionTier\",\n    subscription_plan.plan_type as \"plan_type?: PlanType\",\n    subscription.status as \"subscription_status?: SubscriptionStatus\",\n    user_account.admin as \"is_admin!\",\n    user_account.verified as \"verified!\",\n    school.school_id as \"school_id?: SchoolId\",\n    case\n        when subscription.amount_due > 0 then true\n        else false\n    end as \"overdue!\"\nfrom user_account\ninner join account using (account_id)\nleft join school using (account_id)\nleft join (\n    select subscription.account_id, status, amount_due, subscription_plan_id\n    from subscription\n    join (\n        select\n            account_id, subscription_id, max(created_at)\n        from subscription\n        group by account_id, subscription_id\n        order by created_at desc\n        limit 1\n    ) as recent_subscription using (subscription_id)\n) as subscription using (account_id)\nleft join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\nwhere user_account.user_id = $1\n"
+  },
   "51a40f41372d3ac245973b6c148c56e71684c771e64465cf5c188241d4416d4a": {
     "describe": {
       "columns": [],
@@ -10448,56 +10504,6 @@
       }
     },
     "query": "\ninsert into jig_data_module (jig_data_id, kind, contents, index, is_complete)\nvalues ($1, $2, $3, (select count(*) from jig_data_module where jig_data_id = $1), $4)\nreturning id, \"index\"\n"
-  },
-  "a73a1c4e0851a94a76aebf90873b05b67dfeee85cf1561a8ec83b9a5f4857352": {
-    "describe": {
-      "columns": [
-        {
-          "name": "subscription_tier?: SubscriptionTier",
-          "ordinal": 0,
-          "type_info": "Int2"
-        },
-        {
-          "name": "subscription_status?: SubscriptionStatus",
-          "ordinal": 1,
-          "type_info": "Int2"
-        },
-        {
-          "name": "is_admin!",
-          "ordinal": 2,
-          "type_info": "Bool"
-        },
-        {
-          "name": "verified!",
-          "ordinal": 3,
-          "type_info": "Bool"
-        },
-        {
-          "name": "school_id?: SchoolId",
-          "ordinal": 4,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "overdue!",
-          "ordinal": 5,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        true,
-        false,
-        false,
-        false,
-        false,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect\n    user_account.subscription_tier as \"subscription_tier?: SubscriptionTier\",\n    subscription.status as \"subscription_status?: SubscriptionStatus\",\n    user_account.admin as \"is_admin!\",\n    user_account.verified as \"verified!\",\n    school.school_id as \"school_id?: SchoolId\",\n    case\n        when subscription.amount_due > 0 then true\n        else false\n    end as \"overdue!\"\nfrom user_account\ninner join account using (account_id)\nleft join school using (account_id)\nleft join (\n    select subscription.account_id, status, amount_due\n    from subscription\n    join (\n        select\n            account_id, subscription_id, max(created_at)\n        from subscription\n        group by account_id, subscription_id\n        order by created_at desc\n        limit 1\n    ) as recent_subscription using (subscription_id)\n) as subscription using (account_id)\nwhere user_account.user_id = $1\n"
   },
   "a7597f668f530133865fe74a396da14ff51dcb53fc0537df95964ae98649ce1d": {
     "describe": {
