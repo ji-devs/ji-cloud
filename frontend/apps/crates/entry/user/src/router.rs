@@ -1,5 +1,5 @@
 use components::overlay::container::OverlayContainer;
-use utils::routes::*;
+use utils::{component::Component, routes::*};
 
 use crate::{
     email::confirmation::SendEmailConfirmationPage,

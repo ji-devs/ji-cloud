@@ -1,18 +1,35 @@
 use super::state::SchoolStart;
-use dominator::{clone, html, with_node, Dom};
+use dominator::{clone, html, with_node, DomBuilder};
 use futures_signals::signal::SignalExt;
 use std::rc::Rc;
-use utils::{events, unwrap::UnwrapJiExt};
-use web_sys::HtmlInputElement;
+use utils::{component::Component, events, unwrap::UnwrapJiExt};
+use web_sys::{HtmlInputElement, ShadowRoot};
 
-impl SchoolStart {
-    pub fn render(self: &Rc<Self>) -> Dom {
+impl Component<SchoolStart> for Rc<SchoolStart> {
+    fn styles() -> &'static str {
+        include_str!("./styles.css")
+    }
+
+    fn dom(&self, dom: DomBuilder<ShadowRoot>) -> DomBuilder<ShadowRoot> {
         let state = self;
-        html!("div", {
-            .child(html!("p", {
-                .text("Plan: ")
-                .text(state.plan_type.as_str())
-            }))
+        dom.child(html!("h1", {
+            .text("Start a school plan")
+        }))
+        // html!("p", {
+        //     .text("Plan: ")
+        //     .text(state.plan_type.as_str())
+        // })
+        .child(html!("h2", {
+            .text("Try Jigzi School FREE for 14 days")
+            .text(" : ")
+            .text(state.plan_type.as_str())
+        }))
+        .child(html!("hr"))
+        .child(html!("h2", {
+            .text("Who is this plan for?")
+        }))
+        .child(html!("div", {
+            .class("inputs")
             .child(html!("input-wrapper", {
                 .prop("label", "Name")
                 .child(html!("input" => HtmlInputElement, {
@@ -40,12 +57,12 @@ impl SchoolStart {
                     }))
                 }))
             }))
-            .child(html!("button-rect", {
-                .text("Next")
-                .event(clone!(state => move |_: events::Click| {
-                    state.save();
-                }))
+        }))
+        .child(html!("button-rect", {
+            .text("Continue")
+            .event(clone!(state => move |_: events::Click| {
+                state.save();
             }))
-        })
+        }))
     }
 }
