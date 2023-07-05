@@ -50,32 +50,73 @@ impl Pricing {
             .child(html!("button-rect", {
                 .prop("kind", "outline")
                 .prop("color", "blue")
+                .style("position", "fixed")
+                .style("right", "16px")
+                .style("background-color", "#ffffff")
+                .style("z-index", "10000")
+                .style("bottom", "16px")
                 .text("Questions?")
             }))
         })
     }
 
     fn render_individual(self: &Rc<Self>) -> Vec<Dom> {
+        let frequency = Mutable::new(Frequency::Monthly);
         vec![
-            html!("button-rect", {
-                .prop("href", Route::User(UserRoute::Subscribe(PlanType::IndividualBasicMonthly)).to_string())
-                .text("Basic Monthly")
+            html!("pricing-toggle", {
+                .prop_signal("value", frequency.signal().map(|f| -> &str {f.into()}))
+                .event(clone!(frequency => move |e: events::CustomString| {
+                    let value: &str = &e.value();
+                    frequency.set(value.try_into().unwrap_ji());
+                }))
             }),
-            html!("button-rect", {
-                .prop("href", Route::User(UserRoute::Subscribe(PlanType::IndividualBasicAnnually)).to_string())
-                .text("Basic Annually")
-            }),
-            html!("button-rect", {
-                .prop("href", Route::User(UserRoute::Subscribe(PlanType::IndividualProMonthly)).to_string())
-                .text("Pro Monthly")
-            }),
-            html!("button-rect", {
-                .prop("href", Route::User(UserRoute::Subscribe(PlanType::IndividualProAnnually)).to_string())
-                .text("Pro Annually")
-            }),
-            html!("pricing-toggle", {}),
             html!("pricing-table", {
                 .prop("kind", "individuals")
+                .prop_signal("frequency", frequency.signal().map(|frequency| match frequency {
+                    Frequency::Annually => "Annually",
+                    Frequency::Monthly => "Monthly",
+                }))
+                .child(html!("pricing-message", {
+                    .prop("slot", "pricing-message")
+                }))
+                // .child(html!("button-rect", {
+                //     .prop("slot", "free-action")
+                //     .prop("kind", "filled")
+                //     .prop("color", "blue")
+                //     .prop_signal("href", frequency.signal().map(|frequency| {
+                //         let plan = match frequency {
+
+                //         };
+                //         Route::User(UserRoute::Subscribe(plan)).to_string()
+                //     }))
+                //     .text("Start 7-day trial")
+                // }))
+                .child(html!("button-rect", {
+                    .prop("slot", "basic-action")
+                    .prop("kind", "filled")
+                    .prop("color", "blue")
+                    .prop_signal("href", frequency.signal().map(|frequency| {
+                        let plan = match frequency {
+                            Frequency::Annually => PlanType::IndividualBasicAnnually,
+                            Frequency::Monthly => PlanType::IndividualBasicMonthly,
+                        };
+                        Route::User(UserRoute::Subscribe(plan)).to_string()
+                    }))
+                    .text("Start 7-day trial")
+                }))
+                .child(html!("button-rect", {
+                    .prop("slot", "pro-action")
+                    .prop("kind", "filled")
+                    .prop("color", "blue")
+                    .prop_signal("href", frequency.signal().map(|frequency| {
+                        let plan = match frequency {
+                            Frequency::Annually => PlanType::IndividualProAnnually,
+                            Frequency::Monthly => PlanType::IndividualProMonthly,
+                        };
+                        Route::User(UserRoute::Subscribe(plan)).to_string()
+                    }))
+                    .text("Start 7-day trial")
+                }))
             }),
         ]
     }
@@ -84,20 +125,27 @@ impl Pricing {
         let selected_index: Mutable<SchoolPlan> = Mutable::new(SchoolPlan::Level3);
 
         vec![
-            html!("pricing-message", {}),
-            html!("pricing-school-pricing", {
-                .prop_signal("selectedIndex", selected_index.signal().map(|i| -> u8 {i.into()}))
-                .event(clone!(selected_index => move |e: events::CustomNumber| {
-                    let index = e.number().unwrap_ji() as u8;
-                    selected_index.set(index.try_into().unwrap_ji());
-                }))
-                .child(html!("button-rect", {
-                    .prop("slot", "start-button")
-                    .prop("kind", "filled")
-                    .prop("color", "blue")
-                    .text("Start 7-day trial")
-                    .prop_signal("href", selected_index.signal().map(|selected_index| {
-                        Route::User(UserRoute::SchoolStart(selected_index.into())).to_string()
+            html!("div", {
+                .style("display", "grid")
+                .style("grid-template-columns", "auto auto")
+                .style("align-items", "center")
+                .style("justify-content", "space-around")
+                .style("align-items", "end")
+                .child(html!("pricing-message", {}))
+                .child(html!("pricing-school-pricing", {
+                    .prop_signal("selectedIndex", selected_index.signal().map(|i| -> u8 {i.into()}))
+                    .event(clone!(selected_index => move |e: events::CustomNumber| {
+                        let index = e.number().unwrap_ji() as u8;
+                        selected_index.set(index.try_into().unwrap_ji());
+                    }))
+                    .child(html!("button-rect", {
+                        .prop("slot", "start-button")
+                        .prop("kind", "filled")
+                        .prop("color", "blue")
+                        .text("Start 7-day trial")
+                        .prop_signal("href", selected_index.signal().map(|selected_index| {
+                            Route::User(UserRoute::SchoolStart(selected_index.into())).to_string()
+                        }))
                     }))
                 }))
             }),
@@ -105,6 +153,33 @@ impl Pricing {
                 .prop("kind", "schools")
             }),
         ]
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+enum Frequency {
+    Annually,
+    Monthly,
+}
+
+impl TryFrom<&str> for Frequency {
+    type Error = ();
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "annually" => Ok(Self::Annually),
+            "monthly" => Ok(Self::Monthly),
+            _ => Err(()),
+        }
+    }
+}
+
+impl From<Frequency> for &str {
+    fn from(value: Frequency) -> Self {
+        match value {
+            Frequency::Annually => "annually",
+            Frequency::Monthly => "monthly",
+        }
     }
 }
 

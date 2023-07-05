@@ -124,26 +124,37 @@ export class _ extends LitElement {
             .cell fa-icon {
                 color: var(--dark-blue-4);
             }
-            .price-cell {
-                color: var(--dark-gray-6);
+            .individuals-desktop-price {
+                display: none;
             }
-            .price-cell .plan-name {
+            @media (min-width: 1024px) {
+                :host([kind=individuals]) .individuals-desktop-price {
+                    display: contents;
+                }
+                .individuals-desktop-price .cell {
+                    color: var(--dark-gray-6);
+                }
+            }
+            .individuals-desktop-price .cell.message {
+                padding-bottom: 0;
+            }
+            .individuals-desktop-price .plan-name {
                 margin: 0;
                 font-size: 16px;
                 font-weight: 700;
             }
-            .price-cell .plan-price {
+            .individuals-desktop-price .plan-price {
                 margin: 0;
                 margin-top: 30px;
                 font-size: 38px;
                 font-weight: 700;
             }
-            .price-cell .frequency {
+            .individuals-desktop-price .frequency {
                 margin: 0;
                 font-size: 13px;
                 font-weight: 400;
             }
-            .price-cell button {
+            .individuals-desktop-price button {
                 margin-top: 35px;
             }
             .custom-subscription, table {
@@ -159,29 +170,33 @@ export class _ extends LitElement {
     @property({ reflect: true })
     kind: Kind = "individuals";
 
+    @property({ reflect: true })
+    frequency?: string;
+
     render() {
         return html`
             <div class="table-wrapper">
                 <div class="table">
-                    <div class="row begin-row end-row white" style="display: none">
-                        <div class="cell">
-                            <pricing-message></pricing-message>
+                    <div class="row begin-row end-row white individuals-desktop-price">
+                        <div class="cell message">
+                            <slot name="pricing-message"></slot>
                         </div>
-                        <div class="cell price-cell">
+                        <div class="cell">
                             <h5 class="plan-name">Free</h5>
                             <h3 class="plan-price">$0.00</h3>
+                            <slot name="free-action"></slot>
                         </div>
-                        <div class="cell price-cell">
+                        <div class="cell">
                             <h5 class="plan-name">Basic</h5>
                             <h3 class="plan-price">$14.99</h3>
-                            <p class="frequency">Monthly</p>
-                            <button-rect kind="filled" color="blue">Start 7-day trial</button-rect>
+                            <p class="frequency">${this.frequency}</p>
+                            <slot name="basic-action"></slot>
                         </div>
-                        <div class="cell price-cell">
+                        <div class="cell">
                             <h5 class="plan-name">Pro</h5>
                             <h3 class="plan-price">$29.99</h3>
-                            <p class="frequency">Monthly</p>
-                            <button-rect kind="filled" color="blue">Start 7-day trial</button-rect>
+                            <p class="frequency">${this.frequency}</p>
+                            <slot name="pro-action"></slot>
                         </div>
                     </div>
                     <div class="row begin-row blue">

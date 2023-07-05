@@ -7,6 +7,7 @@ export class _ extends LitElement {
             :host {
                 display: grid;
                 justify-items: center;
+                padding-block: 22px;
             }
             h3 {
                 font-size: 14px;

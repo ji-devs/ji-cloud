@@ -1,5 +1,7 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 
+type Mode = 'monthly' | 'annually';
+
 @customElement("pricing-toggle")
 export class _ extends LitElement {
     static get styles() {
@@ -40,7 +42,7 @@ export class _ extends LitElement {
             :host([value=monthly]) .dot {
                 translate: 0%;
             }
-            :host([value=annual]) .dot {
+            :host([value=annually]) .dot {
                 translate: 100%;
             }
             .annual-tag {
@@ -55,20 +57,29 @@ export class _ extends LitElement {
     }
 
     @property({ reflect: true })
-    value: 'monthly' | 'annual' = "monthly";
+    value: Mode = "monthly";
 
     toggle() {
-        this.value = this.value === "annual" ? "monthly" : "annual";
+        const value = this.value === "annually" ? "monthly" : "annually";
+        this.change(value);
+    }
+
+    change(value: Mode) {
+        this.dispatchEvent(new CustomEvent("custom-string", {
+            detail: {
+                value,
+            }
+        }));
     }
 
     render() {
         return html`
-            <div @click=${() => this.value = "monthly"}>Monthly</div>
+            <div @click=${() => this.change("monthly")}>Monthly</div>
             <div class="toggle" @click=${this.toggle}>
                 <div class="track"></div>
                 <div class="dot"></div>
             </div>
-            <div @click=${() => this.value = "annual"}>
+            <div @click=${() => this.change("annually")}>
                 Annual
                 <span class="annual-tag">Get 2 months FREE!</span>
             </div>
