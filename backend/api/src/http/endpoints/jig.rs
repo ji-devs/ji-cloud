@@ -293,6 +293,21 @@ pub(super) async fn publish_draft_to_live(
 
     sqlx::query!(
         //language=SQL
+        r#"
+        update user_asset_data 
+        set jig_count = jig_count + 1,
+        total_asset_count = total_asset_count + 1
+        from jig
+        where author_id = user_id and
+              published_at is null and 
+              id = $1"#,
+        jig_id.0
+    )
+    .execute(&mut *txn)
+    .await?;
+
+    sqlx::query!(
+        //language=SQL
         "update jig set live_id = $1, published_at = now() where id = $2",
         new_live_id,
         jig_id.0

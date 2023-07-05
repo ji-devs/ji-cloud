@@ -984,6 +984,21 @@ pub async fn delete(pool: &PgPool, id: JigId) -> Result<(), error::Delete> {
     sqlx::query!(
         //language=SQL
         r#"
+    update user_asset_data 
+    set jig_count = jig_count - 1,
+        total_asset_count = total_asset_count - 1
+    from jig
+    where author_id = user_id and
+          published_at is not null and 
+          id = $1"#,
+        id.0
+    )
+    .execute(&mut *txn)
+    .await?;
+
+    sqlx::query!(
+        //language=SQL
+        r#"
 with del_data as (
     delete from jig_data
         where id is not distinct from $1 or id is not distinct from $2)

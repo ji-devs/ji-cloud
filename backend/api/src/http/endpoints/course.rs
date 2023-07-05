@@ -223,6 +223,21 @@ pub(super) async fn publish_draft_to_live(
 
     sqlx::query!(
         //language=SQL
+        r#"
+        update user_asset_data 
+        set course_count = course_count + 1,
+        total_asset_count = total_asset_count + 1
+        from course
+        where author_id = user_id and
+              published_at is null and 
+              id = $1"#,
+        course_id.0
+    )
+    .execute(&mut *txn)
+    .await?;
+
+    sqlx::query!(
+        //language=SQL
         "update course set live_id = $1, published_at = now() where id = $2",
         new_live_id,
         course_id.0

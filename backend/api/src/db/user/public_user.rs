@@ -100,22 +100,15 @@ pub async fn browse_users(
 
     let user_data = sqlx::query!(
         r#"
-        with cte as (
-            select up.user_id as "user_id",
-            ((select count(*) from jig where jig.author_id = up.user_id and jig.published_at is not null) + 
-            (select count(*) from resource where resource.author_id = up.user_id and resource.published_at is not null) + 
-            (select count(*) from course where course.author_id = up.user_id and course.published_at is not null) + 
-            (select count(*) from playlist where playlist.author_id = up.user_id and playlist.published_at is not null))      as "total_asset_count"
-            from user_profile "up"
-        ),
-        cte1 as (
-            select (array_agg(cte.user_id))[1]
-            from cte
-            inner join "user" on cte.user_id = "user".id 
-            left join circle_member "cm" on cm.user_id = cte.user_id
+        with cte1 as (
+            select (array_agg(public_user.user_id))[1]
+            from public_user
+            left join user_asset_data "uad" on public_user.user_id = uad.user_id
+            inner join "user" on public_user.user_id = "user".id 
+            left join circle_member "cm" on cm.user_id = public_user.user_id
             where cm.id = any($1) or $1 = array[]::uuid[]
-            group by "user".created_at, cte.total_asset_count
-            order by case when $4 = 0 then cte.total_asset_count
+            group by "user".created_at, total_asset_count
+            order by case when $4 = 0 then total_asset_count
                 else extract(epoch from "user".created_at)
             end desc        
         ),
@@ -123,7 +116,7 @@ pub async fn browse_users(
             select * from unnest(array(select cte1.array_agg from cte1)) with ordinality t(id
            , ord) order by ord
         )
-        select  user_id                as "id!: UserId",
+        select  user_profile.user_id                as "id!: UserId",
                 username               as "username!",
                 given_name             as "given_name!",
                 family_name            as "family_name!",
@@ -134,14 +127,11 @@ pub async fn browse_users(
                 (select persona from user_profile where user_profile.user_id = "user".id and persona_public is true)      as "persona?: Vec<String>",
                 (select location from user_profile where user_profile.user_id = "user".id and location_public is true)      as "location?",
                 (select bio from user_profile where user_profile.user_id = "user".id and bio_public is true)      as "bio?",
-                (select (CASE WHEN count(*) > 0 THEN count(*) else null end) from jig where jig.author_id = "user".id and jig.published_at is not null)      as "jig_count?",
-                (select (CASE WHEN count(*) > 0 THEN count(*) else null end) from resource where resource.author_id = "user".id and resource.published_at is not null)      as "resource_count?",
-                (select (CASE WHEN count(*) > 0 THEN count(*) else null end) from course where course.author_id = "user".id and course.published_at is not null)      as "course_count?",
-                (select (CASE WHEN count(*) > 0 THEN count(*) else null end) from playlist where playlist.author_id = "user".id and playlist.published_at is not null)      as "playlist_count?",
-                ((select count(*) from jig where jig.author_id = "user".id and jig.published_at is not null) + 
-                (select count(*) from resource where resource.author_id = "user".id and resource.published_at is not null) + 
-                (select count(*) from course where course.author_id = "user".id and course.published_at is not null) + 
-                (select count(*) from playlist where playlist.author_id = "user".id and playlist.published_at is not null))      as "total_asset_count!",
+                (select (CASE WHEN jig_count > 0 THEN jig_count else null end))      as "jig_count?",
+                (select (CASE WHEN resource_count > 0 THEN resource_count else null end))      as "resource_count?",
+                (select (CASE WHEN course_count > 0 THEN course_count else null end))      as "course_count?",
+                (select (CASE WHEN playlist_count > 0 THEN playlist_count else null end))      as "playlist_count?",
+                total_asset_count      as "total_asset_count!",
                 (select array(select circle.id
                     from circle_member bm
                     inner join circle on bm.id = circle.id
@@ -150,6 +140,7 @@ pub async fn browse_users(
                 exists(select 1 from user_follow where follower_id = $5 and user_id = "user".id) as "following!"
         from cte2
         inner join user_profile on cte2.id = user_profile.user_id
+        inner join user_asset_data "uad" on cte2.id = uad.user_id  
         inner join "user" on cte2.id = "user".id
         where ord > (1 * $2 * $3)
         order by ord

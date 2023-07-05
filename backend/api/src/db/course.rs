@@ -729,6 +729,21 @@ pub async fn delete(pool: &PgPool, id: CourseId) -> Result<(), error::Delete> {
     sqlx::query!(
         //language=SQL
         r#"
+        update user_asset_data 
+        set course_count = course_count - 1,
+        total_asset_count = total_asset_count - 1
+        from course
+        where author_id = user_id and
+              published_at is not null and 
+              id = $1"#,
+        id.0
+    )
+    .execute(&mut *txn)
+    .await?;
+
+    sqlx::query!(
+        //language=SQL
+        r#"
 with del_data as (
     delete from course_data
         where id is not distinct from $1 or id is not distinct from $2)
