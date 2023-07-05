@@ -43,6 +43,7 @@ impl Default for AudioRecorder {
 impl AudioRecorder {
     pub fn new() -> Self {
         let config = RecorderConfig {
+            // TODO: change to a local file
             wasm_url: "https://unpkg.com/vmsg@0.3.0/vmsg.wasm".to_string(),
         };
         let config = serde_wasm_bindgen::to_value(&config).unwrap_ji();
