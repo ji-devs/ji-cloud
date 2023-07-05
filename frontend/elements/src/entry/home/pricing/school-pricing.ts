@@ -85,19 +85,23 @@ export class _ extends LitElement {
     }
 
     @property({ type: Number, reflect: true })
-    selectedIndex: number = 2;
+    selectedIndex: number = 1;
 
-    private onChange(index: number, _e: Event) {
-        this.selectedIndex = index;
+    private onChange(index: number) {
+        this.dispatchEvent(new CustomEvent("custom-number", {
+            detail: {
+                number: index,
+            }
+        }));
     }
 
     render() {
         return html`
             <style>
                 .indicator {
-                    transform: translateX(${this.selectedIndex - 1}00%);
+                    transform: translateX(${this.selectedIndex}00%);
                 }
-                .options label:nth-child(${this.selectedIndex}) .count {
+                .options label:nth-child(${this.selectedIndex + 1}) .count {
                     color: #fff;
                 }
             </style>
@@ -110,33 +114,33 @@ export class _ extends LitElement {
                     <label>
                         <span class="label-top">up to</span>
                         <span class="count">4</span>
-                        <input name="count" type="radio" @change=${(e: Event) => this.onChange(1, e)}>
+                        <input name="count" type="radio" @change=${() => this.onChange(0)}>
                     </label>
                     <label>
                         <span class="label-top">up to</span>
                         <span class="count">10</span>
-                        <input name="count" type="radio" @change=${(e: Event) => this.onChange(2, e)}>
+                        <input name="count" type="radio" @change=${() => this.onChange(1)}>
                     </label>
                     <label>
                         <span class="label-top">up to</span>
                         <span class="count">20</span>
-                        <input name="count" type="radio" @change=${(e: Event) => this.onChange(3, e)}>
+                        <input name="count" type="radio" @change=${() => this.onChange(2)}>
                     </label>
                     <label>
                         <span class="label-top">up to</span>
                         <span class="count">30</span>
-                        <input name="count" type="radio" @change=${(e: Event) => this.onChange(4, e)}>
+                        <input name="count" type="radio" @change=${() => this.onChange(3)}>
                     </label>
                     <label>
                         <span class="label-top">More than</span>
                         <span class="count">30+</span>
-                        <input name="count" type="radio" @change=${(e: Event) => this.onChange(5, e)}>
+                        <input name="count" type="radio" @change=${() => this.onChange(4)}>
                     </label>
                 </div>
             </div>
             <div class="price">$1500</div>
             <div class="annually">Annually</div>
-            <button-rect kind="filled" color="blue">Start 7-day trial</button-rect>
+            <slot name="start-button"></slot>
         `;
     }
 }
