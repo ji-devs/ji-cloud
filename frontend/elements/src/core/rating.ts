@@ -30,9 +30,9 @@ export class _ extends LitElement {
         //     rating = undefined;
         // }
 
-        this.dispatchEvent(new CustomEvent("custom-rating-change", {
+        this.dispatchEvent(new CustomEvent("custom-number", {
             detail: {
-                rating,
+                number: rating,
             }
         }));
     }

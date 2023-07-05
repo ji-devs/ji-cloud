@@ -172,6 +172,20 @@ impl CustomString {
     }
 }
 
+// Custom Rating
+#[derive(Deserialize, Debug)]
+pub struct CustomNumberData {
+    pub number: Option<f64>,
+}
+
+make_custom_event_serde!("custom-number", CustomNumber, CustomNumberData);
+
+impl CustomNumber {
+    pub fn number(&self) -> Option<f64> {
+        self.data().number
+    }
+}
+
 // Custom Search
 #[derive(Deserialize, Debug)]
 pub struct CustomSearchData {
@@ -272,17 +286,3 @@ make_custom_event_serde!("custom-confirm", CustomConfirm, CustomConfirmData);
 pub struct CustomCancelData;
 
 make_custom_event_serde!("custom-cancel", CustomCancel, CustomCancelData);
-
-// Custom Rating
-#[derive(Deserialize, Debug)]
-pub struct CustomRatingData {
-    pub rating: Option<u8>,
-}
-
-make_custom_event_serde!("custom-rating-change", CustomRatingChange, CustomRatingData);
-
-impl CustomRatingChange {
-    pub fn rating(&self) -> Option<u8> {
-        self.data().rating
-    }
-}

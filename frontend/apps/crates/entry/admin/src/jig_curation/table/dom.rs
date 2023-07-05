@@ -196,10 +196,10 @@ impl JigTable {
                                     None => 0,
                                 }
                             }))
-                            .event(clone!(state, jig => move |e: events::CustomRatingChange| {
-                                let rating = e.rating();
+                            .event(clone!(state, jig => move |e: events::CustomNumber| {
+                                let rating = e.number();
                                 let rating = rating.map(|rating| {
-                                    JigRating::try_from(rating).unwrap_ji()
+                                    JigRating::try_from(rating as u8).unwrap_ji()
                                 });
                                 jig.rating.set(rating);
                                 state.curation_state.save_and_publish(&jig);

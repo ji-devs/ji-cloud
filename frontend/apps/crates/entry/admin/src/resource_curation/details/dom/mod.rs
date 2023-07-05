@@ -59,10 +59,10 @@ impl ResourceDetails {
                             rating as u8
                         })
                     }))
-                    .event(clone!(state => move |e: events::CustomRatingChange| {
-                        let rating = e.rating();
+                    .event(clone!(state => move |e: events::CustomNumber| {
+                        let rating = e.number();
                         let rating = rating.map(|rating| {
-                            ResourceRating::try_from(rating).unwrap_ji()
+                            ResourceRating::try_from(rating as u8).unwrap_ji()
                         });
                         state.resource.rating.set(rating);
                     }))
