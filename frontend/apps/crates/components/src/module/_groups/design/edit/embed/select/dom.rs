@@ -1,27 +1,13 @@
 use std::rc::Rc;
 
 use crate::stickers::embed::types::PartialEmbedHost;
-use const_format::formatcp;
 use dominator::{clone, html, with_node, Dom, DomBuilder};
 use futures_signals::signal::SignalExt;
 use itertools::Itertools;
-use utils::{component::Component, events};
+use utils::{component::Component, events, gap};
 use web_sys::{HtmlElement, ShadowRoot};
 
 use super::{EmbedHostType, EmbedSelect};
-
-macro_rules! gap {
-    ($size:expr) => {
-        {
-            const SIZE_U32: u32 = $size; // needed to asset type
-            const SIZE_STR: &str = formatcp!("{}px", SIZE_U32);
-            html!("div", {
-                .style("height", SIZE_STR)
-                .style("width", SIZE_STR)
-            })
-        }
-    };
-}
 
 const STR_SELECT_TITLE: &str = "Click to embed:";
 const STR_DELETE: &str = "Delete";

@@ -1,3 +1,5 @@
+pub use const_format::formatcp;
+
 #[macro_export]
 macro_rules! dialog {
     ( $($methods:tt)* ) => {{
@@ -26,4 +28,37 @@ macro_rules! dialog {
             $($methods)*
         })
     }};
+}
+
+#[macro_export]
+macro_rules! gap {
+    ($size:expr) => {
+        {
+            const SIZE_U32: u32 = $size; // needed to assert type
+            const SIZE_STR: &str = $crate::quick_elements::formatcp!("{}px", SIZE_U32);
+            html!("div", {
+                .style("height", SIZE_STR)
+                .style("width", SIZE_STR)
+            })
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! icon {
+    ($icon:expr) => {
+        {
+            html!("fa-icon", {
+                .prop("icon", $icon)
+            })
+        }
+    };
+    ($icon:expr, { $($methods:tt)* }) => {
+        {
+            html!("fa-icon", {
+                .prop("icon", $icon)
+                $($methods)*
+            })
+        }
+    };
 }
