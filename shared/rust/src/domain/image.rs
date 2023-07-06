@@ -30,7 +30,7 @@ pub enum ImageSize {
     /// The image is a sticker.
     Sticker = 1,
     /// The image is a user profile picture
-    // TODO: Rename since it's also used for circles
+    // TODO: Rename since it's also used for circles and schools
     UserProfile = 2,
 }
 
