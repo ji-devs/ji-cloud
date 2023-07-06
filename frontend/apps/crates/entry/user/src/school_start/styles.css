@@ -1,4 +1,4 @@
-:host {
+main {
     display: grid;
     gap: 16px;
     max-width: 536px;

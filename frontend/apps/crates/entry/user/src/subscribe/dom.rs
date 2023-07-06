@@ -41,47 +41,52 @@ impl Component<Subscribe> for Rc<Subscribe> {
 
         state.start_intent();
 
-        dom.child(html!("h1", {
-            .text("Try Jigzi school FREE for 14 days")
-            .text(" : ")
-            .text(state.plan_type.as_str())
+        dom.child(html!("auth-page", {
+            .prop("img", "entry/user/side/main.webp")
+            .child(html!("main", {
+                .child(html!("h1", {
+                    .text("Try Jigzi school FREE for 14 days")
+                    .text(" : ")
+                    .text(state.plan_type.as_str())
+                }))
+                .child(html!("p", {
+                    .class("list-item")
+                    .child(icon!("fa-solid fa-check"))
+                    .text("Get a 14 day trial, cancel any time.")
+                }))
+                .child(html!("p", {
+                    .class("list-item")
+                    .child(icon!("fa-solid fa-check"))
+                    .text("Get a reminder 24 hours before your trial ends.")
+                }))
+                .child(gap!(30))
+                .child(html!("h2", {
+                    .text("Payment method")
+                }))
+                .child(html!("hr"))
+                .child(html!("h2", {
+                    .text("Request other payment method")
+                }))
+                .child(html!("slot"))
+                .child(gap!(48))
+                .child_signal(state.stripe_client_secret.signal_cloned().map(
+                    clone!(state => move |secret| {
+                        secret.map(|_| {
+                            html!("button-rect", {
+                                .prop("size", "large")
+                                .text("Start free trial")
+                                .event(clone!(state => move |_: events::Click| {
+                                    let stripe = state.stripe.take();
+                                    state.loader.load(async move {
+                                        stripe.unwrap_ji().submit(&get_next_page_url()).await;
+                                    });
+                                }))
+                            })
+                        })
+                    }),
+                ))
+            }))
         }))
-        .child(html!("p", {
-            .class("list-item")
-            .child(icon!("fa-solid fa-check"))
-            .text("Get a 14 day trial, cancel any time.")
-        }))
-        .child(html!("p", {
-            .class("list-item")
-            .child(icon!("fa-solid fa-check"))
-            .text("Get a reminder 24 hours before your trial ends.")
-        }))
-        .child(gap!(30))
-        .child(html!("h2", {
-            .text("Payment method")
-        }))
-        .child(html!("hr"))
-        .child(html!("h2", {
-            .text("Request other payment method")
-        }))
-        .child(html!("slot"))
-        .child(gap!(48))
-        .child_signal(state.stripe_client_secret.signal_cloned().map(
-            clone!(state => move |secret| {
-                secret.map(|_| {
-                    html!("button-rect", {
-                        .prop("size", "large")
-                        .text("Start free trial")
-                        .event(clone!(state => move |_: events::Click| {
-                            let stripe = state.stripe.take();
-                            state.loader.load(async move {
-                                stripe.unwrap_ji().submit(&get_next_page_url()).await;
-                            });
-                        }))
-                    })
-                })
-            }),
-        ))
     }
 }
 
