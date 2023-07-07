@@ -11,7 +11,8 @@ use crate::{
     school_end::SchoolEnd,
     school_start::SchoolStart,
     settings::state::SettingsPage,
-    subscribe::Subscribe,
+    subscribe1::Subscribe1,
+    subscribe2::Subscribe2,
     welcome::Welcome,
 };
 use dominator::{html, Dom};
@@ -55,7 +56,8 @@ impl Router {
                 }
                 UserRoute::SchoolStart(plan_type) => Some(SchoolStart::new(plan_type).render()),
                 UserRoute::SchoolEnd => Some(SchoolEnd::new().render()),
-                UserRoute::Subscribe(plan_type) => Some(Subscribe::new(plan_type).render()),
+                UserRoute::Subscribe1(plan_type) => Some(Subscribe1::new(plan_type).render()),
+                UserRoute::Subscribe2(plan_type) => Some(Subscribe2::new(plan_type).render()),
                 UserRoute::Welcome => Some(Welcome::new().render()),
             },
             _ => None,

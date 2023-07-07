@@ -100,7 +100,7 @@ impl Pricing {
                             Frequency::Annually => PlanType::IndividualBasicAnnually,
                             Frequency::Monthly => PlanType::IndividualBasicMonthly,
                         };
-                        Route::User(UserRoute::Subscribe(plan)).to_string()
+                        Route::User(UserRoute::Subscribe1(plan)).to_string()
                     }))
                     .text("Start 7-day trial")
                 }))
@@ -113,7 +113,7 @@ impl Pricing {
                             Frequency::Annually => PlanType::IndividualProAnnually,
                             Frequency::Monthly => PlanType::IndividualProMonthly,
                         };
-                        Route::User(UserRoute::Subscribe(plan)).to_string()
+                        Route::User(UserRoute::Subscribe1(plan)).to_string()
                     }))
                     .text("Start 7-day trial")
                 }))

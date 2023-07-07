@@ -1,19 +1,13 @@
-use crate::subscribe::stripe::Stripe;
+use super::stripe::Stripe;
 
-use super::state::Subscribe;
+use super::state::Subscribe1;
 use dominator::{clone, html, with_node, DomBuilder};
 use futures_signals::signal::SignalExt;
 use std::rc::Rc;
-use utils::{
-    component::Component,
-    events, gap, icon,
-    prelude::{get_school_id, SETTINGS},
-    routes::{Route, UserRoute},
-    unwrap::UnwrapJiExt,
-};
+use utils::{component::Component, events, gap, icon};
 use web_sys::{HtmlElement, ShadowRoot};
 
-impl Component<Subscribe> for Rc<Subscribe> {
+impl Component<Subscribe1> for Rc<Subscribe1> {
     fn styles() -> &'static str {
         include_str!("./styles.css")
     }
@@ -76,10 +70,7 @@ impl Component<Subscribe> for Rc<Subscribe> {
                                 .prop("size", "large")
                                 .text("Start free trial")
                                 .event(clone!(state => move |_: events::Click| {
-                                    let stripe = state.stripe.take();
-                                    state.loader.load(async move {
-                                        stripe.unwrap_ji().submit(&get_next_page_url()).await;
-                                    });
+                                    state.submit();
                                 }))
                             })
                         })
@@ -88,16 +79,4 @@ impl Component<Subscribe> for Rc<Subscribe> {
             }))
         }))
     }
-}
-
-fn get_next_page_url() -> String {
-    let route = match get_school_id() {
-        Some(_) => Route::User(UserRoute::SchoolEnd),
-        None => Route::User(UserRoute::Welcome),
-    };
-    format!(
-        "{}{}",
-        SETTINGS.get().unwrap_ji().remote_target.pages_url(),
-        route.to_string()
-    )
 }
