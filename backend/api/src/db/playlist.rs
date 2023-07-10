@@ -1,7 +1,7 @@
 use crate::translate::translate_text;
 use anyhow::Context;
 use serde_json::value::Value;
-use shared::domain::playlist::{PlaylistAdminData, PlaylistRating};
+use shared::domain::playlist::{PlaylistAdminData, PlaylistRating, PlaylistUpdateAdminDataRequest};
 use shared::domain::{
     additional_resource::{AdditionalResource, AdditionalResourceId as AddId, ResourceContent},
     asset::{DraftOrLive, PrivacyLevel},
@@ -1239,6 +1239,55 @@ where id = $1;
     )
     .execute(db)
     .await?;
+
+    txn.commit().await?;
+
+    Ok(())
+}
+
+pub async fn update_admin_data(
+    pool: &PgPool,
+    playlist_id: PlaylistId,
+    admin_data: PlaylistUpdateAdminDataRequest,
+) -> Result<(), error::NotFound> {
+    let mut txn = pool.begin().await?;
+
+    let blocked = admin_data.blocked.into_option();
+
+    sqlx::query!(
+        // language=SQL
+        r#"
+update playlist_admin_data
+set
+    rating = coalesce($2, rating),
+    blocked = coalesce($3, blocked),
+    curated = coalesce($4, curated),
+    is_premium = coalesce($5, is_premium)
+where playlist_id = $1
+"#,
+        playlist_id.0,
+        admin_data.rating.into_option() as Option<PlaylistRating>,
+        blocked,
+        admin_data.curated.into_option(),
+        admin_data.premium.into_option(),
+    )
+    .execute(&mut txn)
+    .await?;
+
+    if blocked.is_some() {
+        sqlx::query!(
+            //language=SQL
+            r#"
+update playlist_data
+set updated_at = now()
+from playlist
+where playlist.live_id = $1
+            "#,
+            playlist_id.0,
+        )
+        .execute(&mut txn)
+        .await?;
+    }
 
     txn.commit().await?;
 

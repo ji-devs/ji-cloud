@@ -5,11 +5,13 @@
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 mod categories;
+mod course_curation;
 mod export;
 mod image_table;
 mod images;
 mod jig_curation;
 mod locale;
+mod playlist_curation;
 mod resource_curation;
 mod router;
 mod schools;

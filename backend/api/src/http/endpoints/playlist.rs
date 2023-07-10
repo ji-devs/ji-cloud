@@ -21,6 +21,7 @@ use sqlx::PgPool;
 use tracing::instrument;
 use uuid::Uuid;
 
+use crate::extractor::{ScopeAdmin, TokenUserWithScope};
 use crate::{
     db::{self, playlist::CreatePlaylistError},
     error::{self, ServiceKind},
@@ -450,6 +451,24 @@ async fn view(
     Ok(HttpResponse::NoContent().finish())
 }
 
+/// Update a Course's admin data.
+async fn update_admin_data(
+    db: Data<PgPool>,
+    _auth: TokenUserWithScope<ScopeAdmin>,
+    req: Option<Json<<playlist::PlaylistAdminDataUpdate as ApiEndpoint>::Req>>,
+    path: web::Path<PlaylistId>,
+) -> Result<HttpResponse, error::NotFound> {
+    let id = path.into_inner();
+
+    let req = req.map_or_else(Default::default, Json::into_inner);
+
+    db::playlist::update_admin_data(&db, id, req)
+        .await
+        .map_err(|_| error::NotFound::ResourceNotFound)?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
         <playlist::Create as ApiEndpoint>::Path::PATH,
@@ -502,5 +521,11 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <playlist::Unlike as ApiEndpoint>::Path::PATH,
         playlist::Unlike::METHOD.route().to(unlike),
+    )
+    .route(
+        <playlist::PlaylistAdminDataUpdate as ApiEndpoint>::Path::PATH,
+        playlist::PlaylistAdminDataUpdate::METHOD
+            .route()
+            .to(update_admin_data),
     );
 }

@@ -16,6 +16,8 @@ use futures_signals::{
     signal::{Mutable, SignalExt},
 };
 
+use crate::course_curation::CourseCuration;
+use crate::playlist_curation::PlaylistCuration;
 use crate::{
     categories::dom::CategoriesPage,
     export::Export,
@@ -32,6 +34,7 @@ use crate::{
     users::Users,
 };
 use std::cell::RefCell;
+
 pub struct Router {
     app: RefCell<Option<AppState>>,
     profile: Mutable<Option<Option<UserProfile>>>,
@@ -116,6 +119,8 @@ impl Router {
                                                 AdminRoute::Users(users_route) => Some(state.with_child(route, Users::new(users_route).render())),
                                                 AdminRoute::JigCuration(curation_route) => Some(state.with_child(route, JigCuration::new(curation_route).render())),
                                                 AdminRoute::ResourceCuration(curation_route) => Some(state.with_child(route, ResourceCuration::new(curation_route).render())),
+                                                AdminRoute::CourseCuration(curation_route) => Some(state.with_child(route, CourseCuration::new(curation_route).render())),
+                                                AdminRoute::PlaylistCuration(curation_route) => Some(state.with_child(route, PlaylistCuration::new(curation_route).render())),
                                                 AdminRoute::Schools(schools_route) => Some(state.with_child(route, Schools::new(schools_route).render())),
                                                 AdminRoute::Images => Some(state.with_child(route, ImageTable::new().render())),
                                                 AdminRoute::Export => Some(state.with_child(route, Export::new().render())),

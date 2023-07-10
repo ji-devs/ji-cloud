@@ -131,9 +131,9 @@ impl EditableResource {
         self.published_at.set(resource.published_at);
         self.other_keywords
             .set(resource.resource_data.other_keywords);
-        self.rating.set(resource.admin_data.rating);
         self.likes.set(resource.likes);
         self.views.set(resource.views);
+        self.rating.set(resource.admin_data.rating);
         self.blocked.set(resource.admin_data.blocked);
         self.premium.set(resource.admin_data.premium);
     }

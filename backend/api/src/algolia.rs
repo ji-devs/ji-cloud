@@ -1259,7 +1259,7 @@ where playlist_data.id = any (select live_id from playlist where playlist.id = a
             language_emails                          as "language_emails!",
             organization                             as "organization?",
             location                                 as "location?",
-            user_email.created_at                    as "created_at"                   
+            user_email.created_at                    as "created_at"
 from user_profile "up"
         inner join "user" on "user".id = up.user_id
         inner join user_email on user_email.user_id = up.user_id
@@ -2592,6 +2592,7 @@ impl Client {
         translated_keywords: Option<String>,
         privacy_level: &[PrivacyLevel],
         page_limit: u32,
+        blocked: Option<bool>,
     ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
         let mut and_filters = algolia::filter::AndFilter { filters: vec![] };
 
@@ -2644,6 +2645,16 @@ impl Client {
                 filter: FacetFilter {
                     facet_name: "translated_keywords".to_owned(),
                     value: translated_keywords,
+                },
+                invert: false,
+            }))
+        }
+
+        if let Some(blocked) = blocked {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "blocked".to_owned(),
+                    value: blocked.to_string(),
                 },
                 invert: false,
             }))

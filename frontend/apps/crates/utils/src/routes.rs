@@ -148,6 +148,8 @@ pub enum AdminRoute {
     Locale,
     JigCuration(AdminJigCurationRoute),
     ResourceCuration(AdminResourceCurationRoute),
+    CourseCuration(AdminCourseCurationRoute),
+    PlaylistCuration(AdminPlaylistCurationRoute),
     Schools(AdminSchoolsRoute),
     Images,
     Users(AdminUsersRoute),
@@ -212,6 +214,8 @@ impl AdminRoute {
             Self::Locale => false,
             Self::JigCuration(_) => scopes.contains(&UserScope::AdminAsset),
             Self::ResourceCuration(_) => scopes.contains(&UserScope::AdminAsset),
+            Self::CourseCuration(_) => scopes.contains(&UserScope::AdminAsset),
+            Self::PlaylistCuration(_) => scopes.contains(&UserScope::AdminAsset),
             Self::Images => scopes.contains(&UserScope::AdminAsset),
             Self::Users(_) => scopes.contains(&UserScope::Admin),
             Self::Schools(_) => scopes.contains(&UserScope::Admin),
@@ -221,6 +225,18 @@ impl AdminRoute {
             Self::Export => scopes.contains(&UserScope::Admin),
         }
     }
+}
+
+#[derive(Debug, Clone)]
+pub enum AdminCourseCurationRoute {
+    Table,
+    Course(CourseId),
+}
+
+#[derive(Debug, Clone)]
+pub enum AdminPlaylistCurationRoute {
+    Table,
+    Playlist(PlaylistId),
 }
 
 #[derive(Debug, Clone)]
@@ -484,6 +500,24 @@ impl Route {
                 let resource_id = ResourceId::from_str(resource_id).unwrap_ji();
                 Self::Admin(AdminRoute::ResourceCuration(
                     AdminResourceCurationRoute::Resource(resource_id),
+                ))
+            }
+            ["admin", "course-curation"] => {
+                Self::Admin(AdminRoute::CourseCuration(AdminCourseCurationRoute::Table))
+            }
+            ["admin", "course-curation", course_id] => {
+                let course_id = CourseId::from_str(course_id).unwrap_ji();
+                Self::Admin(AdminRoute::CourseCuration(
+                    AdminCourseCurationRoute::Course(course_id),
+                ))
+            }
+            ["admin", "playlist-curation"] => Self::Admin(AdminRoute::PlaylistCuration(
+                AdminPlaylistCurationRoute::Table,
+            )),
+            ["admin", "playlist-curation", playlist_id] => {
+                let playlist_id = PlaylistId::from_str(playlist_id).unwrap_ji();
+                Self::Admin(AdminRoute::PlaylistCuration(
+                    AdminPlaylistCurationRoute::Playlist(playlist_id),
                 ))
             }
             ["admin", "schools"] => Self::Admin(AdminRoute::Schools(AdminSchoolsRoute::Table)),
@@ -831,6 +865,18 @@ impl From<&Route> for String {
                     AdminResourceCurationRoute::Table => "/admin/resource-curation".to_string(),
                     AdminResourceCurationRoute::Resource(resource_id) => {
                         format!("/admin/resource-curation/{}", resource_id.0)
+                    }
+                },
+                AdminRoute::CourseCuration(curation_route) => match curation_route {
+                    AdminCourseCurationRoute::Table => "/admin/course-curation".to_string(),
+                    AdminCourseCurationRoute::Course(course_id) => {
+                        format!("/admin/course-curation/{}", course_id.0)
+                    }
+                },
+                AdminRoute::PlaylistCuration(curation_route) => match curation_route {
+                    AdminPlaylistCurationRoute::Table => "/admin/playlist-curation".to_string(),
+                    AdminPlaylistCurationRoute::Playlist(playlist_id) => {
+                        format!("/admin/playlist-curation/{}", playlist_id.0)
                     }
                 },
                 AdminRoute::Schools(schools_route) => match schools_route {

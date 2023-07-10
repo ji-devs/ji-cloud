@@ -41,6 +41,16 @@ impl Sidebar {
                         &curr_route,
                     ),
                     SidebarItem::new(
+                        AdminRoute::CourseCuration(AdminCourseCurationRoute::Table),
+                        profile,
+                        &curr_route,
+                    ),
+                    SidebarItem::new(
+                        AdminRoute::PlaylistCuration(AdminPlaylistCurationRoute::Table),
+                        profile,
+                        &curr_route,
+                    ),
+                    SidebarItem::new(
                         AdminRoute::Users(AdminUsersRoute::Table),
                         profile,
                         &curr_route,
@@ -82,6 +92,8 @@ impl SidebarItem {
             AdminRoute::Users(_) => "users",
             AdminRoute::JigCuration(_) => "jig-curation",
             AdminRoute::ResourceCuration(_) => "resource-curation",
+            AdminRoute::CourseCuration(_) => "course-curation",
+            AdminRoute::PlaylistCuration(_) => "playlist-curation",
             AdminRoute::Schools(_) => "schools",
             AdminRoute::Images => "images",
             AdminRoute::Export => "export",

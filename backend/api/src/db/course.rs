@@ -1,7 +1,7 @@
 use crate::translate::translate_text;
 use anyhow::Context;
 use serde_json::value::Value;
-use shared::domain::course::{CourseAdminData, CourseRating};
+use shared::domain::course::{CourseAdminData, CourseRating, CourseUpdateAdminDataRequest};
 use shared::domain::{
     additional_resource::{AdditionalResource, AdditionalResourceId as AddId, ResourceContent},
     asset::{DraftOrLive, PrivacyLevel},
@@ -425,6 +425,7 @@ pub async fn browse(
     author_id: Option<UserId>,
     draft_or_live: Option<DraftOrLive>,
     privacy_level: Vec<PrivacyLevel>,
+    blocked: Option<bool>,
     page: i32,
     page_limit: u32,
     resource_types: Vec<Uuid>,
@@ -441,9 +442,11 @@ with cte as (
     select (array_agg(pdd.id))[1]
     from course_data "pdd"
           left join course on (draft_id = pdd.id or (live_id = pdd.id and pdd.last_synced_at is not null and published_at is not null))
+          left join course_admin_data "admin" on admin.course_id = course.id
           left join course_data_resource "resource" on pdd.id = resource.course_data_id
     where (author_id = $1 or $1 is null)
         and (pdd.draft_or_live = $2 or $2 is null)
+        and (blocked = $8 or $8 is null)
         and (pdd.privacy_level = any($3) or $3 = array[]::smallint[])
         and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])
     group by coalesce(updated_at, created_at), plays
@@ -519,7 +522,8 @@ limit $6
     &resource_types[..],
     page,
     page_limit as i32,
-    order_by.map(|it| it as i32)
+    order_by.map(|it| it as i32),
+    blocked,
 )
     .fetch_all(&mut txn)
     .instrument(tracing::info_span!("query course_data"))
@@ -769,6 +773,7 @@ where id is not distinct from $3
 pub async fn filtered_count(
     db: &PgPool,
     privacy_level: Vec<PrivacyLevel>,
+    blocked: Option<bool>,
     author_id: Option<UserId>,
     draft_or_live: Option<DraftOrLive>,
     resource_types: Vec<Uuid>,
@@ -782,9 +787,11 @@ pub async fn filtered_count(
             select (array_agg(pdd.id))[1]
             from course_data "pdd"
                   inner join course on (draft_id = pdd.id or (live_id = pdd.id and pdd.last_synced_at is not null and published_at is not null))
+                  left join course_admin_data "admin" on admin.course_id = course.id
                   left join course_data_resource "resource" on pdd.id = resource.course_data_id
             where (author_id = $1 or $1 is null)
                 and (pdd.draft_or_live = $2 or $2 is null)
+                and (blocked = $5 or $5 is null)
                 and (pdd.privacy_level = any($3) or $3 = array[]::smallint[])
                 and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])
             group by coalesce(updated_at, created_at)
@@ -794,7 +801,8 @@ pub async fn filtered_count(
         author_id.map(|it| it.0),
         draft_or_live.map(|it| it as i16),
         &privacy_level[..],
-        &resource_types[..]
+        &resource_types[..],
+        blocked
     )
     .fetch_one(db)
     .await?;
@@ -806,9 +814,11 @@ pub async fn filtered_count(
             select (array_agg(course.id))[1]
             from course_data "cd"
                   inner join course on (draft_id = cd.id or (live_id = cd.id and cd.last_synced_at is not null and published_at is not null))
+                  left join course_admin_data "admin" on admin.course_id = course.id
                   left join course_data_resource "resource" on cd.id = resource.course_data_id
             where (author_id = $1 or $1 is null)
                 and (cd.draft_or_live = $2 or $2 is null)
+                and (blocked = $5 or $5 is null)
                 and (cd.privacy_level = any($3) or $3 = array[]::smallint[])
                 and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])
             group by coalesce(updated_at, created_at)
@@ -818,7 +828,8 @@ pub async fn filtered_count(
         author_id.map(|it| it.0),
         draft_or_live.map(|it| it as i16),
         &privacy_level[..],
-        &resource_types[..]
+        &resource_types[..],
+        blocked
     )
     .fetch_one(db)
     .await?;
@@ -1111,6 +1122,55 @@ where id = $1
     )
     .execute(&mut *conn)
     .await?;
+
+    Ok(())
+}
+
+pub async fn update_admin_data(
+    pool: &PgPool,
+    course_id: CourseId,
+    admin_data: CourseUpdateAdminDataRequest,
+) -> Result<(), error::NotFound> {
+    let mut txn = pool.begin().await?;
+
+    let blocked = admin_data.blocked.into_option();
+
+    sqlx::query!(
+        // language=SQL
+        r#"
+update course_admin_data
+set
+    rating = coalesce($2, rating),
+    blocked = coalesce($3, blocked),
+    curated = coalesce($4, curated),
+    is_premium = coalesce($5, is_premium)
+where course_id = $1
+"#,
+        course_id.0,
+        admin_data.rating.into_option() as Option<CourseRating>,
+        blocked,
+        admin_data.curated.into_option(),
+        admin_data.premium.into_option(),
+    )
+    .execute(&mut txn)
+    .await?;
+
+    if blocked.is_some() {
+        sqlx::query!(
+            //language=SQL
+            r#"
+update course_data
+set updated_at = now()
+from course
+where course.live_id = $1
+            "#,
+            course_id.0,
+        )
+        .execute(&mut txn)
+        .await?;
+    }
+
+    txn.commit().await?;
 
     Ok(())
 }

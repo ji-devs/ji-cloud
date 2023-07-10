@@ -5,16 +5,24 @@ use std::rc::Rc;
 use chrono::{DateTime, Utc};
 use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::MutableVec;
+use shared::api::endpoints;
 use shared::domain::additional_resource::AdditionalResource;
 use shared::domain::asset::PrivacyLevel;
 use shared::domain::jig::JigId;
 use shared::domain::meta::AffiliationId;
+use shared::domain::playlist::{
+    PlaylistAdminDataUpdatePath, PlaylistPublishPath, PlaylistRating,
+    PlaylistUpdateAdminDataRequest, PlaylistUpdateDraftDataPath,
+};
 use shared::domain::{
     category::CategoryId,
     meta::AgeRangeId,
     module::LiteModule,
     playlist::{PlaylistId, PlaylistResponse, PlaylistUpdateDraftDataRequest},
+    UpdateNonNullable,
 };
+
+use crate::prelude::ApiEndpointExt;
 
 #[derive(Clone)]
 pub struct EditablePlaylist {
@@ -30,6 +38,9 @@ pub struct EditablePlaylist {
     pub affiliations: Mutable<HashSet<AffiliationId>>,
     pub additional_resources: Rc<MutableVec<AdditionalResource>>,
     pub privacy_level: Mutable<PrivacyLevel>,
+    pub rating: Mutable<Option<PlaylistRating>>,
+    pub blocked: Mutable<bool>,
+    pub premium: Mutable<bool>,
 }
 
 impl From<PlaylistResponse> for EditablePlaylist {
@@ -48,6 +59,9 @@ impl From<PlaylistResponse> for EditablePlaylist {
                 playlist.playlist_data.additional_resources,
             )),
             privacy_level: Mutable::new(playlist.playlist_data.privacy_level),
+            rating: Mutable::new(playlist.admin_data.rating),
+            blocked: Mutable::new(playlist.admin_data.blocked),
+            premium: Mutable::new(playlist.admin_data.premium),
             published_at: Mutable::new(playlist.published_at),
         }
     }
@@ -66,6 +80,9 @@ impl From<PlaylistId> for EditablePlaylist {
             affiliations: Default::default(),
             additional_resources: Default::default(),
             privacy_level: Default::default(),
+            rating: Default::default(),
+            blocked: Default::default(),
+            premium: Default::default(),
             published_at: Default::default(),
             items: Default::default(),
         }
@@ -90,6 +107,9 @@ impl EditablePlaylist {
             .lock_mut()
             .replace_cloned(playlist.playlist_data.additional_resources);
         self.privacy_level.set(playlist.playlist_data.privacy_level);
+        self.rating.set(playlist.admin_data.rating);
+        self.blocked.set(playlist.admin_data.blocked);
+        self.premium.set(playlist.admin_data.premium);
         self.published_at.set(playlist.published_at);
     }
 
@@ -109,6 +129,9 @@ impl EditablePlaylist {
                 self.additional_resources.lock_ref().to_vec(),
             )),
             privacy_level: Mutable::new(self.privacy_level.get()),
+            rating: Mutable::new(self.rating.get()),
+            blocked: Mutable::new(self.blocked.get()),
+            premium: Mutable::new(self.premium.get()),
         }
     }
 
@@ -126,5 +149,36 @@ impl EditablePlaylist {
             // items: Some(self.items.lock_ref().to_vec()),
             ..Default::default()
         }
+    }
+
+    pub fn to_update_admin_data_request(&self) -> PlaylistUpdateAdminDataRequest {
+        PlaylistUpdateAdminDataRequest {
+            rating: self.rating.get_cloned().into(),
+            blocked: UpdateNonNullable::Change(self.blocked.get()),
+            premium: UpdateNonNullable::Change(self.premium.get()),
+            ..Default::default()
+        }
+    }
+
+    pub async fn save_draft(&self) -> anyhow::Result<()> {
+        let req = self.to_playlist_update_request();
+        endpoints::playlist::UpdateDraftData::api_with_auth_empty(
+            PlaylistUpdateDraftDataPath(self.id),
+            Some(req),
+        )
+        .await
+    }
+
+    pub async fn save_admin_data(&self) -> anyhow::Result<()> {
+        let req = self.to_update_admin_data_request();
+        endpoints::playlist::PlaylistAdminDataUpdate::api_with_auth_empty(
+            PlaylistAdminDataUpdatePath(self.id),
+            Some(req),
+        )
+        .await
+    }
+
+    pub async fn publish(&self) -> anyhow::Result<()> {
+        endpoints::playlist::Publish::api_with_auth_empty(PlaylistPublishPath(self.id), None).await
     }
 }
