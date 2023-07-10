@@ -29,7 +29,7 @@ impl SchoolStart {
             endpoints::account::CreateSchoolAccount::api_with_auth(CreateSchoolAccountPath(), Some(req)).await.unwrap_ji();
             let user = endpoints::user::Profile::api_with_auth(GetProfilePath(), None).await.unwrap_ji();
             get_user_mutable().set(Some(user));
-            go_to_url(&Route::User(UserRoute::Subscribe(state.plan_type)).to_string());
+            go_to_url(&Route::User(UserRoute::Subscribe1(state.plan_type)).to_string());
         }));
     }
 }

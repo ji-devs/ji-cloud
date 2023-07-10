@@ -18,6 +18,7 @@ use sqlx::PgPool;
 use tracing::instrument;
 use uuid::Uuid;
 
+use crate::extractor::{ScopeAdmin, TokenUserWithScope};
 use crate::{
     db::{self, course::CreateCourseError},
     error::{self, ServiceKind},
@@ -153,8 +154,14 @@ async fn browse(
 ) -> Result<Json<<course::Browse as ApiEndpoint>::Res>, error::Auth> {
     let query = query.map_or_else(Default::default, Query::into_inner);
 
-    let (author_id, privacy_level) =
-        auth_claims(db.as_ref(), claims, query.author_id, query.privacy_level).await?;
+    let (author_id, privacy_level, blocked) = auth_claims(
+        db.as_ref(),
+        claims,
+        query.author_id,
+        query.privacy_level,
+        query.blocked,
+    )
+    .await?;
 
     let page_limit = page_limit(query.page_limit)
         .await
@@ -167,6 +174,7 @@ async fn browse(
         author_id,
         query.draft_or_live,
         privacy_level.to_owned(),
+        blocked,
         query.page.unwrap_or(0) as i32,
         page_limit,
         resource_types.to_owned(),
@@ -176,12 +184,14 @@ async fn browse(
     let total_count_future = db::course::filtered_count(
         db.as_ref(),
         privacy_level.to_owned(),
+        blocked,
         author_id,
         query.draft_or_live,
         resource_types.to_owned(),
     );
 
     let (courses, (total_count, count)) = try_join!(browse_future, total_count_future,)?;
+    println!("COURSES {}", courses.len());
 
     let pages = (count / (page_limit as u64) + (count % (page_limit as u64) != 0) as u64) as u32;
 
@@ -224,12 +234,12 @@ pub(super) async fn publish_draft_to_live(
     sqlx::query!(
         //language=SQL
         r#"
-        update user_asset_data 
+        update user_asset_data
         set course_count = course_count + 1,
         total_asset_count = total_asset_count + 1
         from course
         where author_id = user_id and
-              published_at is null and 
+              published_at is null and
               id = $1"#,
         course_id.0
     )
@@ -274,8 +284,14 @@ async fn search(
         .await
         .map_err(|e| error::Service::InternalServerError(e))?;
 
-    let (author_id, privacy_level) =
-        auth_claims(&*db, claims, query.author_id, query.privacy_level).await?;
+    let (author_id, privacy_level, blocked) = auth_claims(
+        &*db,
+        claims,
+        query.author_id,
+        query.privacy_level,
+        query.blocked,
+    )
+    .await?;
 
     let (ids, pages, total_hits) = algolia
         .search_course(
@@ -290,6 +306,7 @@ async fn search(
             query.translated_keywords,
             &privacy_level,
             page_limit,
+            blocked,
         )
         .await?
         .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
@@ -328,6 +345,24 @@ async fn play(
     Ok(HttpResponse::NoContent().finish())
 }
 
+/// Update a Course's admin data.
+async fn update_admin_data(
+    db: Data<PgPool>,
+    _auth: TokenUserWithScope<ScopeAdmin>,
+    req: Option<Json<<course::CourseAdminDataUpdate as ApiEndpoint>::Req>>,
+    path: web::Path<CourseId>,
+) -> Result<HttpResponse, error::NotFound> {
+    let id = path.into_inner();
+
+    let req = req.map_or_else(Default::default, Json::into_inner);
+
+    db::course::update_admin_data(&db, id, req)
+        .await
+        .map_err(|_| error::NotFound::ResourceNotFound)?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
 #[instrument]
 async fn page_limit(page_limit: Option<u32>) -> anyhow::Result<u32> {
     if let Some(limit) = page_limit {
@@ -346,7 +381,8 @@ async fn auth_claims(
     claims: Option<TokenUser>,
     author_id: Option<UserOrMe>,
     privacy_level: Vec<PrivacyLevel>,
-) -> Result<(Option<UserId>, Vec<PrivacyLevel>), error::Auth> {
+    blocked: Option<bool>,
+) -> Result<(Option<UserId>, Vec<PrivacyLevel>, Option<bool>), error::Auth> {
     if claims.is_none() && author_id == Some(UserOrMe::Me) {
         return Err(error::Auth::Forbidden);
     };
@@ -354,31 +390,29 @@ async fn auth_claims(
     if let Some(user) = claims {
         let user_id = user.user_id();
         let is_admin =
-            db::user::has_scopes(&*db, user_id, &[UserScope::Admin, UserScope::AdminAsset]).await?;
+            db::user::has_scopes(db, user_id, &[UserScope::Admin, UserScope::AdminAsset]).await?;
 
         if let Some(author) = author_id {
             let user_id = user.user_id();
 
-            let (author_id, privacy) = match author {
-                UserOrMe::Me => (Some(user_id), privacy_level),
+            let (author_id, privacy, blocked) = match author {
+                UserOrMe::Me => (Some(user_id), privacy_level, blocked),
                 UserOrMe::User(id) => {
                     let user_id = UserId(id);
 
                     if is_admin {
-                        (Some(user_id), privacy_level)
+                        (Some(user_id), privacy_level, blocked)
                     } else {
-                        (Some(user_id), vec![PrivacyLevel::Public])
+                        (Some(user_id), vec![PrivacyLevel::Public], Some(false))
                     }
                 }
             };
-            return Ok((author_id, privacy));
+            Ok((author_id, privacy, blocked))
+        } else if is_admin {
+            Ok((None, privacy_level, None))
         } else {
-            if is_admin {
-                return Ok((None, privacy_level));
-            } else {
-                return Ok((None, vec![PrivacyLevel::Public]));
-            }
-        };
+            Ok((None, vec![PrivacyLevel::Public], Some(false)))
+        }
     } else {
         let author_id = author_id.map(|it| match it {
             UserOrMe::Me => None,
@@ -386,11 +420,11 @@ async fn auth_claims(
         });
 
         if let Some(id) = author_id {
-            return Ok((id, vec![PrivacyLevel::Public]));
+            Ok((id, vec![PrivacyLevel::Public], Some(false)))
         } else {
-            return Ok((None, vec![PrivacyLevel::Public]));
+            Ok((None, vec![PrivacyLevel::Public], Some(false)))
         }
-    };
+    }
 }
 
 pub fn configure(cfg: &mut ServiceConfig) {
@@ -433,5 +467,11 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <course::Delete as ApiEndpoint>::Path::PATH,
         course::Delete::METHOD.route().to(delete),
+    )
+    .route(
+        <course::CourseAdminDataUpdate as ApiEndpoint>::Path::PATH,
+        course::CourseAdminDataUpdate::METHOD
+            .route()
+            .to(update_admin_data),
     );
 }

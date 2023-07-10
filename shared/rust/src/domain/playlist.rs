@@ -1,5 +1,6 @@
 //! Types for Playlists.
 
+use crate::domain::UpdateNonNullable;
 use chrono::{DateTime, Utc};
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
@@ -437,6 +438,27 @@ pub struct PlaylistLikedResponse {
     pub is_liked: bool,
 }
 
+/// These fields can be edited by admin and can be viewed by everyone
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct PlaylistUpdateAdminDataRequest {
+    /// Rating for jig, weighted for jig search
+    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+    pub rating: UpdateNonNullable<PlaylistRating>,
+
+    /// if true does not appear in search
+    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+    pub blocked: UpdateNonNullable<bool>,
+
+    /// Indicates jig has been curated by admin
+    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+    pub curated: UpdateNonNullable<bool>,
+
+    /// Indicates jig is premium content
+    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+    pub premium: UpdateNonNullable<bool>,
+}
+
 make_path_parts!(PlaylistDeletePath => "/v1/playlist/{}" => PlaylistId);
 
 make_path_parts!(PlaylistClonePath => "/v1/playlist/{}/clone" => PlaylistId);
@@ -448,3 +470,5 @@ make_path_parts!(PlaylistUnlikePath => "/v1/playlist/{}/unlike" => PlaylistId);
 make_path_parts!(PlaylistLikedPath => "/v1/playlist/{}/like" => PlaylistId);
 
 make_path_parts!(PlaylistViewPath => "/v1/playlist/{}/view" => PlaylistId);
+
+make_path_parts!(PlaylistAdminDataUpdatePath => "/v1/playlist/{}/admin" => PlaylistId);

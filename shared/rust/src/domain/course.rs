@@ -1,4 +1,5 @@
 //! Types for Courses.
+use crate::domain::UpdateNonNullable;
 use chrono::{DateTime, Utc};
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
@@ -276,6 +277,11 @@ pub struct CourseBrowseQuery {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub privacy_level: Vec<PrivacyLevel>,
 
+    /// Optionally filter courses by blocked status
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub blocked: Option<bool>,
+
     /// The hits per page to be returned
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -360,6 +366,11 @@ pub struct CourseSearchQuery {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub privacy_level: Vec<PrivacyLevel>,
 
+    /// Optionally search for blocked or non-blocked courses
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub blocked: Option<bool>,
+
     /// The hits per page to be returned
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -407,4 +418,27 @@ pub enum OrderBy {
     /// Order Course by play count
     #[strum(serialize = "PlayCount")]
     PlayCount = 0,
+}
+
+make_path_parts!(CourseAdminDataUpdatePath => "/v1/course/{}/admin" => CourseId);
+
+/// These fields can be edited by admin and can be viewed by everyone
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct CourseUpdateAdminDataRequest {
+    /// Rating for jig, weighted for jig search
+    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+    pub rating: UpdateNonNullable<CourseRating>,
+
+    /// if true does not appear in search
+    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+    pub blocked: UpdateNonNullable<bool>,
+
+    /// Indicates jig has been curated by admin
+    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+    pub curated: UpdateNonNullable<bool>,
+
+    /// Indicates jig is premium content
+    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+    pub premium: UpdateNonNullable<bool>,
 }

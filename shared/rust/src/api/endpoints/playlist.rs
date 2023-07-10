@@ -1,3 +1,4 @@
+use crate::domain::playlist::{PlaylistAdminDataUpdatePath, PlaylistUpdateAdminDataRequest};
 use crate::{
     api::Method,
     domain::{
@@ -218,4 +219,24 @@ impl ApiEndpoint for View {
     type Res = ();
     type Err = EmptyError;
     const METHOD: Method = Method::Put;
+}
+
+/// Update an admin data for a JIG.
+///
+/// # Authorization
+///
+/// * Standard + [`UserScope::AdminAsset`](crate::domain::user::UserScope)
+///
+/// # Errors
+///
+/// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
+/// * [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
+/// * [`BadRequest`](http::StatusCode::BAD_REQUEST) if the request is missing/invalid.
+pub struct PlaylistAdminDataUpdate;
+impl ApiEndpoint for PlaylistAdminDataUpdate {
+    type Path = PlaylistAdminDataUpdatePath;
+    type Req = PlaylistUpdateAdminDataRequest;
+    type Res = ();
+    type Err = EmptyError;
+    const METHOD: Method = Method::Patch;
 }

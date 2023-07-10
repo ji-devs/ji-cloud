@@ -5,14 +5,22 @@ use std::rc::Rc;
 use chrono::{DateTime, Utc};
 use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::MutableVec;
+use shared::api::endpoints;
 use shared::domain::additional_resource::AdditionalResource;
 use shared::domain::asset::PrivacyLevel;
 use shared::domain::course::unit::CourseUnit;
+use shared::domain::course::{
+    CourseAdminDataUpdatePath, CoursePublishPath, CourseRating, CourseUpdateAdminDataRequest,
+    CourseUpdateDraftDataPath,
+};
 use shared::domain::{
     category::CategoryId,
     course::{CourseId, CourseResponse, CourseUpdateDraftDataRequest},
     module::LiteModule,
+    UpdateNonNullable,
 };
+
+use crate::prelude::ApiEndpointExt;
 
 #[derive(Clone)]
 pub struct EditableCourse {
@@ -28,6 +36,9 @@ pub struct EditableCourse {
     pub categories: Mutable<HashSet<CategoryId>>,
     pub additional_resources: Rc<MutableVec<AdditionalResource>>,
     pub privacy_level: Mutable<PrivacyLevel>,
+    pub rating: Mutable<Option<CourseRating>>,
+    pub blocked: Mutable<bool>,
+    pub premium: Mutable<bool>,
 }
 
 impl From<CourseResponse> for EditableCourse {
@@ -44,6 +55,9 @@ impl From<CourseResponse> for EditableCourse {
                 course.course_data.additional_resources,
             )),
             privacy_level: Mutable::new(course.course_data.privacy_level),
+            rating: Mutable::new(course.admin_data.rating),
+            blocked: Mutable::new(course.admin_data.blocked),
+            premium: Mutable::new(course.admin_data.premium),
             published_at: Mutable::new(course.published_at),
             duration: Mutable::new(course.course_data.duration),
         }
@@ -61,6 +75,9 @@ impl From<CourseId> for EditableCourse {
             categories: Default::default(),
             additional_resources: Default::default(),
             privacy_level: Default::default(),
+            rating: Default::default(),
+            blocked: Default::default(),
+            premium: Default::default(),
             published_at: Default::default(),
             units: Default::default(),
             duration: Default::default(),
@@ -83,6 +100,9 @@ impl EditableCourse {
             .lock_mut()
             .replace_cloned(course.course_data.additional_resources);
         self.privacy_level.set(course.course_data.privacy_level);
+        self.rating.set(course.admin_data.rating);
+        self.blocked.set(course.admin_data.blocked);
+        self.premium.set(course.admin_data.premium);
         self.published_at.set(course.published_at);
     }
 
@@ -100,6 +120,9 @@ impl EditableCourse {
                 self.additional_resources.lock_ref().to_vec(),
             )),
             privacy_level: Mutable::new(self.privacy_level.get()),
+            rating: Mutable::new(self.rating.get()),
+            blocked: Mutable::new(self.blocked.get()),
+            premium: Mutable::new(self.premium.get()),
             duration: Mutable::new(self.duration.get()),
         }
     }
@@ -116,5 +139,36 @@ impl EditableCourse {
             // units: Some(self.units.lock_ref().to_vec()),
             ..Default::default()
         }
+    }
+
+    pub fn to_update_admin_data_request(&self) -> CourseUpdateAdminDataRequest {
+        CourseUpdateAdminDataRequest {
+            rating: self.rating.get_cloned().into(),
+            blocked: UpdateNonNullable::Change(self.blocked.get()),
+            premium: UpdateNonNullable::Change(self.premium.get()),
+            ..Default::default()
+        }
+    }
+
+    pub async fn save_draft(&self) -> anyhow::Result<()> {
+        let req = self.to_course_update_request();
+        endpoints::course::UpdateDraftData::api_with_auth_empty(
+            CourseUpdateDraftDataPath(self.id),
+            Some(req),
+        )
+        .await
+    }
+
+    pub async fn save_admin_data(&self) -> anyhow::Result<()> {
+        let req = self.to_update_admin_data_request();
+        endpoints::course::CourseAdminDataUpdate::api_with_auth_empty(
+            CourseAdminDataUpdatePath(self.id),
+            Some(req),
+        )
+        .await
+    }
+
+    pub async fn publish(&self) -> anyhow::Result<()> {
+        endpoints::course::Publish::api_with_auth_empty(CoursePublishPath(self.id), None).await
     }
 }

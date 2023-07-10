@@ -163,10 +163,11 @@ impl EditableJig {
         self.drag_assist
             .set(jig.jig_data.default_player_settings.drag_assist);
         self.other_keywords.set(jig.jig_data.other_keywords);
-        self.rating.set(jig.admin_data.rating);
         self.likes.set(jig.likes);
         self.plays.set(jig.plays);
+        self.rating.set(jig.admin_data.rating);
         self.blocked.set(jig.admin_data.blocked);
+        self.premium.set(jig.admin_data.premium);
     }
 
     pub fn deep_clone(&self) -> Self {

@@ -27,6 +27,8 @@ import "@elements/entry/admin/jig-curation/jig-table";
 import "@elements/entry/admin/jig-curation/jig-details";
 import "@elements/entry/admin/resource-curation/resource-table";
 import "@elements/entry/admin/resource-curation/resource-details";
+import "@elements/entry/admin/course-curation/course-table";
+import "@elements/entry/admin/playlist-curation/playlist-table";
 import "@elements/entry/admin/tables/order-by";
 import "@elements/entry/admin/tables/pagination";
 import "@elements/entry/admin/tables/table-line";
