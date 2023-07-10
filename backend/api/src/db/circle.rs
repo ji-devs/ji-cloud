@@ -308,17 +308,42 @@ with ordinality t(id, ord) using (id)
     Ok(v)
 }
 
-pub async fn browse_circle_members(db: &PgPool, id: CircleId) -> anyhow::Result<Vec<UserId>> {
+pub async fn browse_circle_members(
+    db: &PgPool,
+    id: CircleId,
+    admin: Option<bool>,
+) -> anyhow::Result<Vec<UserId>> {
     let mut txn = db.begin().await?;
 
     let res = sqlx::query!(
         //language=SQL
         r#"
-select user_id  "user_id: UserId"
-from circle_member
-where id = $1
+        with user_scopes as (
+            select cm.user_id,
+                   array_agg(scope) as scopes
+            from circle_member cm
+            left join user_scope on cm.user_id = user_scope.user_id
+            where cm.id = $1
+            group by cm.user_id
+        )
+        select us.user_id  "user_id: UserId"
+        from user_scopes us
+        left join circle_member cm on cm.user_id = us.user_id
+        where cm.id = $1 and
+            (case when $2 = false then $3 <> any(us.scopes) and ($4 @> us.scopes or $5 @> us.scopes)
+                  when $2 = true then $3 = any(us.scopes)
+                else us.scopes is not null
+            end
+            )
 "#,
-        id.0
+        id.0,
+        admin.map(|x| x),
+        UserScope::Admin as i16,
+        &[
+            UserScope::ManageSelfAsset as i16,
+            UserScope::Resources as i16,
+        ][..],
+        &[UserScope::ManageSelfAsset as i16,][..],
     )
     .fetch_all(&mut txn)
     .await?;
@@ -416,6 +441,20 @@ select count(distinct circle.id) as "count!: i64"
 
     Ok(circle.count as u64)
 }
+
+// fn filter_admin(admin: Option<bool>) -> &'static [i16] {
+//     match admin {
+//         Some(admin) => match admin {
+//             true => &[UserScope::Admin as i16][..],
+//             false => &[UserScope::ManageSelfAsset as i16][..],
+//         },
+//         None => &[
+//             UserScope::Admin as i16,
+//             UserScope::AdminAsset as i16,
+//             UserScope::ManageSelfAsset as i16,
+//         ][..],
+//     }
+// }
 
 fn filters_for_ids_or<T: Into<Uuid> + Copy>(ids: &[T]) -> Vec<Uuid> {
     let mut vect: Vec<Uuid> = vec![];

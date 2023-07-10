@@ -194,6 +194,16 @@ make_path_parts!(CircleRemoveMemberPath => "/v1/circle/{}/members/{}" => CircleI
 
 make_path_parts!(CircleBrowseMembersPath => "/v1/circle/{}/members" => CircleId);
 
+/// Browse for Circles
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct BrowseMembersQuery {
+    /// filter members by scope
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub admin: Option<bool>,
+}
+
 /// Members associated with Circle
 #[derive(Serialize, Deserialize)]
 pub struct BrowseMembersResponse {
