@@ -5,7 +5,7 @@ use actix_web::web::{Data, Json, Path, ServiceConfig};
 use actix_web::HttpResponse;
 use futures::try_join;
 use shared::api::endpoints::account::{
-    GetSchoolAccount, GetSchoolNames, UpdateSchoolAccount, UpdateSchoolName,
+    DeleteSchoolAccount, GetSchoolAccount, GetSchoolNames, UpdateSchoolAccount, UpdateSchoolName,
 };
 use shared::api::{endpoints::account::CreateSchoolAccount, ApiEndpoint, PathParts};
 use shared::domain::billing::{
@@ -177,6 +177,66 @@ async fn get_school_account(
     }))
 }
 
+async fn delete_school_account(
+    auth: TokenUser,
+    db: Data<PgPool>,
+    path: Path<SchoolId>,
+) -> Result<HttpResponse, error::Account> {
+    let user_id = auth.user_id();
+    let school_id = path.into_inner();
+
+    let school = db::account::get_school_account_by_id(db.as_ref(), &school_id)
+        .await?
+        .ok_or(error::Account::NotFound("School not found".into()))?;
+
+    let authorization = user_authorization(db.as_ref(), &user_id, &school.account_id).await?;
+
+    authorization.test_authorized(true)?;
+
+    let (account, users) = try_join!(
+        db::account::get_account_by_id(db.as_ref(), &school.account_id),
+        db::account::get_account_users_by_account_id(db.as_ref(), &school.account_id),
+    )?;
+    let account = account.ok_or(anyhow::anyhow!("School {} account is missing", school.id))?;
+
+    if let Some(subscription) = account.subscription {
+        if subscription.status.is_valid() {
+            return Err(error::Account::Forbidden);
+        }
+    }
+
+    match authorization {
+        UserAuthorization::AccountAdministrator => {
+            // If the current user is an account admin and they're the only member of this school,
+            // then the school account can be deleted.
+            if users.len() > 1 {
+                return Err(error::Account::Forbidden);
+            }
+        }
+        UserAuthorization::SystemAdministrator => {
+            // System admins can only delete an account once no users are associated or they're the admin and only user
+            if !users.is_empty() {
+                if users.len() == 1 {
+                    let user = users.first().unwrap();
+                    if user.user.id != user_id {
+                        // Cannot delete if the associated user is not the current user
+                        return Err(error::Account::Forbidden);
+                    }
+                } else {
+                    // Multiple users
+                    return Err(error::Account::Forbidden);
+                }
+            }
+        }
+        _ => return Err(error::Account::Forbidden),
+    }
+
+    db::account::delete_school_account(db.as_ref(), &school.account_id).await?;
+
+    Ok(HttpResponse::Ok().finish())
+}
+
+#[derive(Debug)]
 enum UserAuthorization {
     SystemAdministrator,
     AccountAdministrator,
@@ -246,5 +306,11 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <UpdateSchoolName as ApiEndpoint>::Path::PATH,
         UpdateSchoolName::METHOD.route().to(update_school_name),
+    )
+    .route(
+        <DeleteSchoolAccount as ApiEndpoint>::Path::PATH,
+        DeleteSchoolAccount::METHOD
+            .route()
+            .to(delete_school_account),
     );
 }
