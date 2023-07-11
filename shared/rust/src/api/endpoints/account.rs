@@ -55,3 +55,13 @@ impl ApiEndpoint for UpdateSchoolName {
     type Err = EmptyError;
     const METHOD: Method = Method::Patch;
 }
+
+/// Delete a school account
+pub struct DeleteSchoolAccount;
+impl ApiEndpoint for DeleteSchoolAccount {
+    type Path = SchoolAccountPath;
+    type Req = ();
+    type Res = ();
+    type Err = EmptyError;
+    const METHOD: Method = Method::Delete;
+}

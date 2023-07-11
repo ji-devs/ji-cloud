@@ -8018,6 +8018,18 @@
     },
     "query": "\ninsert into image_tag (index, display_name)\nvalues ($1, $2)\nreturning index as \"index: ImageTagIndex\", display_name\n            "
   },
+  "77f60b9a2306fb7da9427e19032e5d1a1319d3098ad49b933313b3b4b429fb3e": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "delete from user_account where account_id = $1"
+  },
   "781c2b492b9b6468c1474113d2233a8b7dd904ae1a00547270aa4582b9cedd46": {
     "describe": {
       "columns": [
@@ -14028,6 +14040,18 @@
     },
     "query": "\ninsert into course_data\n(display_name, created_at, updated_at, language, last_synced_at, description, privacy_level, other_keywords, translated_keywords, translated_description)\nselect display_name,\n       created_at,\n       updated_at,\n       language,\n       last_synced_at,\n       description,\n       privacy_level,\n       other_keywords,\n       translated_keywords,\n       translated_description::jsonb\nfrom course_data\nwhere id = $1\nreturning id\n        "
   },
+  "df0f36024a994b31c943b7efa75bb1c59caf04d634e6e6f49bd0c7cf0e5bad08": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "delete from school where account_id = $1"
+  },
   "df44d75bf1f59bebe2f20e0fbe5035c73a74b7daa14b4c842175485158d125a4": {
     "describe": {
       "columns": [
@@ -14635,6 +14659,18 @@
     },
     "query": "\nupdate image_metadata \nset usage = usage + 1\nwhere id = $1\n"
   },
+  "eb595400a88e9be593ac46b9ccc0955394712e191f7041deaad26618349b4017": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "delete from subscription where account_id = $1"
+  },
   "eb85238e221f20b3ad291f2bc9f6db1c632136d7e15358dbf5d0947c60a3aaa6": {
     "describe": {
       "columns": [],
@@ -15156,6 +15192,18 @@
       }
     },
     "query": "\ninsert into subscription_plan\n    (plan_type, price_id)\nvalues\n    ($1, $2)\non conflict (plan_type) do update\nset\n    plan_type = $1,\n    price_id = $2,\n    updated_at = now()\n"
+  },
+  "f225ebce06cdbc7b9593060bd6968c2ffe4a9a41218a5019915473146748c8bf": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "delete from account where account_id = $1"
   },
   "f303598d24c47932f42f3c9b1ff6f3c67a46cda7021fe00590f535f4e4ba698e": {
     "describe": {

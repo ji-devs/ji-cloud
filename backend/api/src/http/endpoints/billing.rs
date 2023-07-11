@@ -66,16 +66,6 @@ async fn create_subscription(
 
     let account = get_or_create_customer(db.as_ref(), &client, &user_profile, &plan).await?;
 
-    if !account
-        .account_type
-        .matches_subscription_type(&plan.plan_type.subscription_type())
-    {
-        return Err(error::Billing::IncorrectPlanType(
-            account.account_type,
-            plan.plan_type.subscription_type(),
-        ));
-    }
-
     let stripe_customer_id = stripe::CustomerId::from(account.stripe_customer_id.unwrap().clone());
 
     if let Some(setup_intent_id) = &req.setup_intent_id {
@@ -294,6 +284,16 @@ async fn get_or_create_customer(
                     // If a subscription exists, we don't want to create a new subscription
                     return Err(error::Billing::SubscriptionExists)?;
                 }
+            }
+
+            if !account
+                .account_type
+                .matches_subscription_type(&plan.plan_type.subscription_type())
+            {
+                return Err(error::Billing::IncorrectPlanType(
+                    AccountType::Individual,
+                    SubscriptionType::School,
+                ));
             }
 
             account

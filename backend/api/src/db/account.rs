@@ -41,6 +41,36 @@ pub async fn check_school_name_exists(pool: &PgPool, name: &str) -> sqlx::Result
 }
 
 #[instrument(skip(pool))]
+pub async fn delete_school_account(pool: &PgPool, account_id: &AccountId) -> sqlx::Result<()> {
+    sqlx::query!(
+        "delete from school where account_id = $1",
+        account_id as &AccountId
+    )
+    .execute(pool)
+    .await?;
+    sqlx::query!(
+        "delete from subscription where account_id = $1",
+        account_id as &AccountId
+    )
+    .execute(pool)
+    .await?;
+    sqlx::query!(
+        "delete from user_account where account_id = $1",
+        account_id as &AccountId
+    )
+    .execute(pool)
+    .await?;
+    sqlx::query!(
+        "delete from account where account_id = $1",
+        account_id as &AccountId
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
+}
+
+#[instrument(skip(pool))]
 pub async fn check_renamed_school_name_exists(
     pool: &PgPool,
     name: &str,
