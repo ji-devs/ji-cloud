@@ -3,7 +3,7 @@ pub use const_format::formatcp;
 #[macro_export]
 macro_rules! dialog {
     ( $($methods:tt)* ) => {{
-        use dominator::{pseudo, html, class};
+        use dominator::html;
         html!("dialog" => web_sys::HtmlDialogElement, {
             .after_inserted(|dialog: web_sys::HtmlDialogElement| {
                 let _ = dialog.show_modal();
