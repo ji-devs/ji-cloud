@@ -2,7 +2,7 @@ use super::state::*;
 use dominator::{clone, html, Dom};
 use std::rc::Rc;
 use strum::IntoEnumIterator;
-use utils::prelude::*;
+use utils::{paywall, prelude::*};
 
 pub fn render_design(state: Rc<ThemeSelector>, slot: Option<&str>, action: Option<Dom>) -> Dom {
     render(None, state, slot, action)
@@ -35,6 +35,14 @@ fn render(
                 .prop("premium", theme_id.map_theme(|theme| theme).premium)
                 .prop_signal("selected", state.selected_signal(theme_id))
                 .event(clone!(state => move |_evt:events::Click| {
+                    if !paywall::can_use_theme(theme_id.map_theme(|theme| theme).premium) {
+                        paywall::dialog_play("
+                            Looking to use our premium themes?
+                            Upgrade now for UNLIMITED JIGs and resources.
+                        ");
+                        return;
+                    }
+
                     state.set_theme(theme_id);
                 }))
             })

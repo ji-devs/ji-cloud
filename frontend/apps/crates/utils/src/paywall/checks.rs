@@ -63,7 +63,14 @@ pub fn can_print() -> bool {
         PlanTier::Free => false,
     }
 }
-pub fn can_use_premium_image(is_premium: bool) -> bool {
+pub fn can_use_image(is_premium: bool) -> bool {
+    match get_plan_tier() {
+        PlanTier::Pro => true,
+        PlanTier::Basic => !is_premium,
+        PlanTier::Free => !is_premium,
+    }
+}
+pub fn can_use_theme(is_premium: bool) -> bool {
     match get_plan_tier() {
         PlanTier::Pro => true,
         PlanTier::Basic => !is_premium,

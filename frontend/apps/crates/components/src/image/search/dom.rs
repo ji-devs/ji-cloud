@@ -153,7 +153,7 @@ fn render_image(state: Rc<State>, image: PremiumableImage, slot: &str) -> Dom {
         .prop("lib", image.lib.to_str())
         .prop("id", image.id.0.to_string())
         .event(clone!(state, image => move |_: events::Click| {
-            if !paywall::can_use_premium_image(image.is_premium) {
+            if !paywall::can_use_image(image.is_premium) {
                 paywall::dialog_limit("
                     Looking to access our premium themes and images?
                     Upgrade now for UNLIMITED premium assets.
@@ -163,7 +163,7 @@ fn render_image(state: Rc<State>, image: PremiumableImage, slot: &str) -> Dom {
             state.set_selected(image.clone().into());
         }))
         .event(clone!(image => move |evt: events::DragStart| {
-            if !paywall::can_use_premium_image(image.is_premium) {
+            if !paywall::can_use_image(image.is_premium) {
                 paywall::dialog_limit("
                     Looking to access our premium themes and images?
                     Upgrade now for UNLIMITED premium assets.
