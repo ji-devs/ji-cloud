@@ -1,5 +1,5 @@
 use cfg_if::cfg_if;
-use wasm_bindgen::UnwrapThrowExt;
+
 /*
  * debug switching between unwrap_ji() and unwrap_ji()
  * just use unwrap_ji() and expect_ji() everywhere
@@ -33,6 +33,7 @@ cfg_if! {
             }
         }
     } else {
+        use wasm_bindgen::UnwrapThrowExt;
 
         impl<T> UnwrapJiExt<T> for Option<T> {
             fn expect_ji(self, message: &str) -> T {
