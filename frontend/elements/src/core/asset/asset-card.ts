@@ -16,11 +16,11 @@ export class _ extends LitElement {
                     display: grid;
                     border-radius: 20px;
                     box-shadow: 2px 3px 10px 0 rgba(215, 215, 215, 0.5);
-                    overflow: hidden;
                     background-color: white;
                     width: 280px;
                     height: 246px;
                     grid-template-rows: auto 0px 1fr;
+                    position: relative;
                 }
                 :host([dense]) {
                     width: 216px;
@@ -42,6 +42,7 @@ export class _ extends LitElement {
                     grid-row: 1;
                     grid-column: 1;
                     aspect-ratio: 16 / 9;
+                    border-radius: 20px 20px 0 0;
                 }
                 .middle {
                     height: 30px;
@@ -149,6 +150,15 @@ export class _ extends LitElement {
                 .bottom-indicator ::slotted([slot=bottom-indicator]:hover) {
                     color: var(--main-blue);
                 }
+                .premium {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    position: absolute;
+                    width: 100%;
+                    top: -26px;
+                    pointer-events: none;
+                }
                 :host([kind=jig]) .bottom-indicator {
                     background-color: #fff6d9;
                 }
@@ -182,6 +192,9 @@ export class _ extends LitElement {
 
     @property({ type: Boolean, reflect: true })
     showBottomIndicator: boolean = true;
+
+    @property({ type: Boolean })
+    premium: boolean = false;
 
     @property({ type: Boolean, reflect: true })
     private hasMiddleIndicator: boolean = false;
@@ -217,7 +230,7 @@ export class _ extends LitElement {
         let playedLabel = this.kind === 'resource' ? STR_VIEWED : STR_PLAYED;
         return html`
             <slot
-                name="menu" 
+                name="menu"
                 @click=${(e: Event) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -227,6 +240,15 @@ export class _ extends LitElement {
                     e.stopPropagation();
                 }}
             ></slot>
+            <div class="premium">
+                ${this.premium
+                    ? html`<img-ui
+                        class="jiggling"
+                        path="icons/pro-icon.svg"
+                    ></img-ui>`
+                    : nothing
+                }
+            </div>
             <slot name="image"></slot>
             <div class="middle">
                 <slot name="like"></slot>
