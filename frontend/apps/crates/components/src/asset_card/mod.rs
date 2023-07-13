@@ -34,6 +34,7 @@ pub fn render_asset_card(asset: &Asset, config: AssetCardConfig) -> Dom {
         .prop("playedCount", asset.plays())
         .prop("likedCount", asset.likes())
         .prop("language", asset.language())
+        .prop("premium", asset.premium())
         .prop("showBottomIndicator", !matches!(config.bottom_indicator, AssetCardBottomIndicator::Hide))
         .apply(|dom| {
             match config.slot {

@@ -119,8 +119,8 @@ video-youtube-player {
 }
 .top-courses .courses {
     padding-inline: 24px;
-    padding-block: 10px;
-    margin-block: 14px;
+    padding-block: 26px 10px;
+    margin-block: 0 14px;
     overflow-x: auto;
     display: grid;
     grid-auto-flow: column;

@@ -572,6 +572,16 @@ impl Asset {
             Self::Course(course) => course.live_up_to_date,
         }
     }
+
+    /// whether the current asset is a premium asset
+    pub fn premium(&self) -> bool {
+        match self {
+            Self::Jig(asset) => asset.admin_data.premium,
+            Self::Playlist(asset) => asset.admin_data.premium,
+            Self::Resource(asset) => asset.admin_data.premium,
+            Self::Course(asset) => asset.admin_data.premium,
+        }
+    }
 }
 
 // dyn_clone::clone_trait_object!(Asset);
