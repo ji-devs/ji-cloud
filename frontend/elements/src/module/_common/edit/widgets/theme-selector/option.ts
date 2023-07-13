@@ -1,6 +1,7 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
 import { ThemeId, THEMES } from "@elements/_themes/themes";
+import {nothing} from "lit-html";
 
 const themeIconPath = (theme: ThemeId, hover: boolean, optionType?: String): string => {
     return `theme/${theme}/icon${optionType ? `-${optionType}` : ""}${hover ? "-hover" : ""}.jpg`;
@@ -40,6 +41,36 @@ export class _ extends LitElement {
                     flex-direction: column;
                     align-items: center;
                     margin-top: 16px;
+                }
+
+                .content > div {
+                    position: relative;
+                }
+
+                .content .premium {
+                    padding: 0 4px;
+                    border-radius: 2px;
+                    border: solid 1px var(--light-blue-3);
+                    background-color: var(--white);
+                    position: absolute;
+                    left: 6px;
+                    bottom: 12px;
+                }
+
+                .content .premium img-ui {
+                    width: 11px;
+                }
+
+                .content .premium .premium-label {
+                    display: none;
+                    font-family: 'Poppins', sans-serif;
+                    font-size: 11px;
+                    font-weight: 600;
+                    margin-left: 6px;
+                }
+
+                .content .premium:hover .premium-label {
+                    display: inline-block;
                 }
 
                 img-ui {
@@ -83,6 +114,9 @@ export class _ extends LitElement {
     @property({ type: String })
     optionType?: String;
 
+    @property({ type: Boolean })
+    premium: boolean = false;
+
     onEnter() {
         this.hover = true;
     }
@@ -112,14 +146,23 @@ export class _ extends LitElement {
                 @mouseleave="${this.onLeave.bind(this)}"
             >
                 <div class="content">
-                    <img-ui
-                        class=${imageClass}
-                        path="${themeIconPath(theme, false, optionType)}"
-                    ></img-ui>
-                    <img-ui
-                        class=${imageHoverClass}
-                        path="${themeIconPath(theme, true, optionType)}"
-                    ></img-ui>
+                    <div>
+                        ${this.premium
+                            ? html`<span class="premium"><img-ui
+                                class="jiggling"
+                                path="icons/pro-icon-small.svg"
+                            ></img-ui><span class="premium-label">Pro</span></span>`
+                            : nothing
+                        }
+                        <img-ui
+                            class=${imageClass}
+                            path="${themeIconPath(theme, false, optionType)}"
+                        ></img-ui>
+                        <img-ui
+                            class=${imageHoverClass}
+                            path="${themeIconPath(theme, true, optionType)}"
+                        ></img-ui>
+                    </div>
                     <div class="label">${THEMES[theme].label.en}</div>
                 </div>
             </section>
