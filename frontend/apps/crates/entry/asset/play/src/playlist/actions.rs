@@ -15,6 +15,7 @@ use shared::{
 use utils::{
     iframe::{AssetPlayerToPlayerPopup, IframeAction, IframeMessageExt},
     js_wrappers::is_iframe,
+    paywall,
     prelude::ApiEndpointExt,
     unwrap::UnwrapJiExt,
 };
@@ -53,6 +54,16 @@ impl PlaylistPlayer {
 
         match playlist {
             Ok(playlist) => {
+                if !paywall::can_play_jig(playlist.admin_data.premium) {
+                    paywall::dialog_play(
+                        "
+                        Looking to access our premium content?
+                        Upgrade now for UNLIMITED playlists.
+                    ",
+                    );
+                    return;
+                }
+
                 let jig_ids = playlist.playlist_data.items.clone();
                 state.playlist.set(Some(playlist));
                 state.load_jigs(jig_ids).await;

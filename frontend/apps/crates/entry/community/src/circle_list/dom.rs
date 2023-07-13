@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use dominator::{class, clone, html, pseudo, with_node, DomBuilder};
 use futures_signals::{map_ref, signal::SignalExt};
-use utils::{component::Component, dialog, events};
+use utils::{component::Component, dialog, events, paywall};
 use web_sys::{HtmlInputElement, ShadowRoot};
 
 use crate::circle_card::CircleCard;
@@ -36,6 +36,14 @@ impl Component<CirclesList> for Rc<CirclesList> {
                 .prop("color", "blue")
                 .text("Start a circle")
                 .event(clone!(state => move |_: events::Click| {
+                    if !paywall::can_create_circle() {
+                        paywall::dialog_limit("
+                            Looking to create a Circle?
+                            Upgrade now for UNLIMITED JIGs and resources.
+                        ");
+                        return;
+                    }
+
                     state.create_popup_open.set(true);
                 }))
             }))

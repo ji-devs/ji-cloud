@@ -27,6 +27,7 @@ use shared::{
 use utils::{
     iframe::{IframeAction, JigToModulePlayerMessage, ModuleToJigPlayerMessage},
     keyboard::{Key, KeyEvent},
+    paywall,
     prelude::{ApiEndpointExt, SETTINGS},
     routes::{HomeRoute, Route},
     unwrap::UnwrapJiExt,
@@ -258,6 +259,7 @@ async fn load_jig(state: Rc<JigPlayer>) {
                 };
 
                 // Fetch whether the current user has liked this JIG.
+                // TODO: now included in JigResponse
                 let jig_liked = {
                     match &jig {
                         // Only fetch liked status if the jig request didn't error, the user is
@@ -284,6 +286,14 @@ async fn load_jig(state: Rc<JigPlayer>) {
 
         match jig {
             Ok(jig) => {
+                if !paywall::can_play_jig(jig.admin_data.premium) {
+                    paywall::dialog_play("
+                        Looking to access our premium content?
+                        Upgrade now for UNLIMITED JIGs and resources.
+                    ");
+                    return;
+                }
+
                 // state.active_module.set(Some(resp.jig.modules[0].clone()));
                 if let Some(start_module_id) = state.start_module_id {
                     if let Some((index, _)) = jig.jig_data.modules.iter().enumerate().find(|module| {

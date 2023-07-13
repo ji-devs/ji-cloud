@@ -6,10 +6,12 @@ use dominator::clone;
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::MutableVec;
+use shared::domain::image::ImageId;
 use shared::domain::meta::ImageStyle;
 use shared::domain::search::{ImageType, WebImageSearchItem};
 use shared::domain::user::UserProfile;
 use shared::domain::{meta::ImageStyleId, module::body::Image};
+use shared::media::MediaLibrary;
 use std::{cell::RefCell, collections::HashSet, rc::Rc};
 
 pub const RECENT_COUNT: u16 = 12;
@@ -112,9 +114,34 @@ impl ImageSearchKind {
     }
 }
 
+/// Image that can be premium
+#[derive(Clone, Debug)]
+pub struct PremiumableImage {
+    pub id: ImageId,
+    pub lib: MediaLibrary,
+    pub is_premium: bool,
+}
+impl From<PremiumableImage> for Image {
+    fn from(image: PremiumableImage) -> Image {
+        Image {
+            id: image.id,
+            lib: image.lib,
+        }
+    }
+}
+impl PremiumableImage {
+    pub fn from_image_free(image: Image) -> PremiumableImage {
+        PremiumableImage {
+            id: image.id,
+            lib: image.lib,
+            is_premium: false,
+        }
+    }
+}
+
 #[derive(Clone)]
 pub enum SearchMode {
-    Sticker(Rc<MutableVec<Image>>),
+    Sticker(Rc<MutableVec<PremiumableImage>>),
     Web(Rc<MutableVec<WebImageSearchItem>>),
 }
 

@@ -7,13 +7,24 @@ use shared::{
     },
 };
 use std::rc::Rc;
-use utils::prelude::ApiEndpointExt;
+use utils::{paywall, prelude::ApiEndpointExt};
 
 use super::state::CoursePlayer;
 
 impl CoursePlayer {
     pub fn load_data(self: &Rc<Self>) {
         let state = self;
+
+        if !paywall::can_play_course() {
+            paywall::dialog_play(
+                "
+                    Looking to view a course?
+                    Upgrade now for UNLIMITED JIGs and resources.
+                ",
+            );
+            return;
+        }
+
         state.loader.load(clone!(state => async move {
             let course = match state.player_options.draft_or_live {
                 DraftOrLive::Live => {

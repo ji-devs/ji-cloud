@@ -61,3 +61,28 @@ pub fn get_plan_type() -> Option<PlanType> {
         .plan_type?;
     Some(plan)
 }
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum PlanTier {
+    Pro,
+    Basic,
+    Free,
+}
+
+pub fn get_plan_tier() -> PlanTier {
+    match get_plan_type() {
+        Some(
+            PlanType::IndividualProMonthly
+            | PlanType::IndividualProAnnually
+            | PlanType::SchoolLevel1
+            | PlanType::SchoolLevel2
+            | PlanType::SchoolLevel3
+            | PlanType::SchoolLevel4
+            | PlanType::SchoolUnlimited,
+        ) => PlanTier::Pro,
+        Some(PlanType::IndividualBasicMonthly | PlanType::IndividualBasicAnnually) => {
+            PlanTier::Basic
+        }
+        None => PlanTier::Free,
+    }
+}

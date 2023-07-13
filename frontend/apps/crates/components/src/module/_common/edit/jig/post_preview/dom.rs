@@ -6,7 +6,7 @@ use shared::domain::module::{
     ModuleKind,
 };
 use std::rc::Rc;
-use utils::{init::analytics, prelude::*};
+use utils::{init::analytics, paywall, prelude::*};
 
 impl PostPreview {
     pub fn render<RawData, Mode, Step>(self: &Rc<Self>, raw_data: RawData) -> Dom
@@ -60,6 +60,14 @@ impl PostPreview {
                                 .event(clone!(state => move |_evt:events::Click| {
                                     analytics::event("Jig Edit Print Cards", None);
 
+                                    if !paywall::can_print() {
+                                        paywall::dialog_limit("
+                                            Looking to print content?
+                                            Upgrade now for UNLIMITED JIGs and resources.
+                                        ");
+                                        return;
+                                    }
+
                                     if state.print_cards(&raw_data).is_err() {
                                         let _ = web_sys::window()
                                             .unwrap_ji()
@@ -74,6 +82,15 @@ impl PostPreview {
                                 .prop("kind", "print")
                                 .event(clone!(state => move |_evt:events::Click| {
                                     analytics::event("Jig Edit Print Design", None);
+
+                                    if !paywall::can_print() {
+                                        paywall::dialog_limit("
+                                            Looking to print content?
+                                            Upgrade now for UNLIMITED JIGs and resources.
+                                        ");
+                                        return;
+                                    }
+
                                     state.print_design();
                                 }))
                             }))

@@ -29,6 +29,7 @@ pub mod metadata;
 pub mod mixin;
 pub mod panic_hook;
 pub mod path;
+pub mod paywall;
 pub mod prelude;
 pub mod quick_elements;
 pub mod request_animation_frame;

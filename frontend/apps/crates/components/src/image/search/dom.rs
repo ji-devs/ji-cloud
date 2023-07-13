@@ -1,18 +1,19 @@
 use crate::image::search::state::{ImageSearchKind, NextPage, SearchMode};
 
-use super::{actions, state::State, types::*};
+use super::{
+    actions,
+    state::{PremiumableImage, State},
+    types::*,
+};
 use dominator::{clone, html, Dom};
 use futures_signals::{
     signal::SignalExt,
     signal_vec::{MutableVec, SignalVec, SignalVecExt},
 };
-use shared::domain::{
-    module::body::Image,
-    search::{ImageType, WebImageSearchItem},
-};
+use shared::domain::search::{ImageType, WebImageSearchItem};
 use std::{pin::Pin, rc::Rc};
 use strum::IntoEnumIterator;
-use utils::prelude::*;
+use utils::{paywall, prelude::*};
 
 const STR_SHOW_ONLY_BACKGROUNDS: &str = "Only background";
 const STR_DONT_INCLUDE_BACKGROUND: &str = "No backgrounds";
@@ -84,7 +85,7 @@ pub fn render_loaded(state: Rc<State>, action: Option<Dom>) -> Dom {
             }))
         }))
         .children_signal_vec(state.recent_list.signal_vec_cloned().map(clone!(state => move |image| {
-            render_image(Rc::clone(&state), image, "recent")
+            render_image(Rc::clone(&state), PremiumableImage::from_image_free(image), "recent")
         })))
         .children_signal_vec(state.search_mode.signal_cloned().switch_signal_vec(clone!(state => move |search_mode| {
             images_signal_vec(Rc::clone(&state), &search_mode)
@@ -145,18 +146,32 @@ fn images_signal_vec(
     }
 }
 
-fn render_image(state: Rc<State>, image: Image, slot: &str) -> Dom {
+fn render_image(state: Rc<State>, image: PremiumableImage, slot: &str) -> Dom {
     html!("img-ji", {
         .prop("slot", slot)
         .prop("size", "thumb")
         .prop("lib", image.lib.to_str())
         .prop("id", image.id.0.to_string())
         .event(clone!(state, image => move |_: events::Click| {
-            state.set_selected(image.clone());
+            if !paywall::can_use_premium_image(image.is_premium) {
+                paywall::dialog_limit("
+                    Looking to access our premium themes and images?
+                    Upgrade now for UNLIMITED premium assets.
+                ");
+                return;
+            }
+            state.set_selected(image.clone().into());
         }))
         .event(clone!(image => move |evt: events::DragStart| {
+            if !paywall::can_use_premium_image(image.is_premium) {
+                paywall::dialog_limit("
+                    Looking to access our premium themes and images?
+                    Upgrade now for UNLIMITED premium assets.
+                ");
+                return;
+            }
             if let Some(data_transfer) = evt.data_transfer() {
-                let data = ImageDataTransfer::Image(image.clone());
+                let data = ImageDataTransfer::Image(image.clone().into());
                 let json = serde_json::to_string(&data).unwrap_ji();
                 let _ = data_transfer.set_data(IMAGE_SEARCH_DATA_TRANSFER, &json);
                 data_transfer.set_drop_effect("all");

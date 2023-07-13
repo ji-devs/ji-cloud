@@ -9,7 +9,7 @@ use shared::{
     },
 };
 use std::rc::Rc;
-use utils::prelude::*;
+use utils::{paywall, prelude::*};
 
 mod course_actions;
 mod jig_actions;
@@ -100,8 +100,31 @@ impl Gallery {
         }));
     }
 
+    pub fn can_create(self: &Rc<Self>) -> bool {
+        // todo handle properly the case where total_asset_count is not yet loaded
+        let total_existing = self.total_asset_count.get().unwrap_or_default();
+        match self.asset_type {
+            AssetType::Jig => paywall::can_create_jig(total_existing),
+            AssetType::Resource => paywall::can_create_resource(total_existing),
+            AssetType::Playlist => paywall::can_create_playlist(total_existing),
+            AssetType::Course => paywall::can_create_course(total_existing),
+        }
+    }
+
     pub fn create_asset(self: &Rc<Self>) {
         let state = Rc::clone(self);
+
+        if !state.can_create() {
+            // TODO: wrong message
+            paywall::dialog_limit(
+                "
+                    Looking to create more than 5 JIGs?
+                    Upgrade now for UNLIMITED access to Jigzi Studio.
+                ",
+            );
+            return;
+        }
+
         state.loader.load(clone!(state => async move {
             match state.asset_type {
                 AssetType::Jig => jig_actions::create_jig().await,

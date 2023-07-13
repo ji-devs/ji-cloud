@@ -3,7 +3,7 @@ use crate::image::search::state::{ImageSearchKind, NextPage, SearchMode, RECENT_
 use crate::image::tag::ImageTag;
 
 use super::super::upload::upload_image;
-use super::state::State;
+use super::state::{PremiumableImage, State};
 use dominator::clone;
 use futures::future::join;
 use futures_signals::signal_vec::MutableVec;
@@ -56,7 +56,7 @@ pub async fn web_to_image(url: Url) -> Result<Image, ()> {
 impl State {
     pub fn set_selected(&self, image: Image) {
         if let Some(on_select) = self.callbacks.on_select.as_ref() {
-            on_select(Some(image.clone()));
+            on_select(Some(image.clone().into()));
         }
         add_recent(self, &image);
     }
@@ -210,12 +210,13 @@ async fn search_async(state: Rc<State>, page: u32) {
 
     match res {
         Ok(res) => {
-            let images: Vec<Image> = res
+            let images: Vec<PremiumableImage> = res
                 .images
                 .iter()
-                .map(|i| Image {
+                .map(|i| PremiumableImage {
                     id: i.metadata.id,
                     lib: MediaLibrary::Global,
+                    is_premium: i.metadata.is_premium,
                 })
                 .collect();
 
