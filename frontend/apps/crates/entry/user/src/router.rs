@@ -54,7 +54,9 @@ impl Router {
                 UserRoute::PasswordReset(token) => {
                     Some(PasswordResetPage::render(PasswordResetPage::new(token)))
                 }
-                UserRoute::SchoolStart(plan_type) => Some(SchoolStart::new(plan_type).render()),
+                UserRoute::SchoolStart(plan_type) => {
+                    SchoolStart::new(plan_type).map(|state| state.render())
+                }
                 UserRoute::SchoolEnd => Some(SchoolEnd::new().render()),
                 UserRoute::Subscribe1(plan_type) => Some(Subscribe1::new(plan_type).render()),
                 UserRoute::Subscribe2(plan_type) => Some(Subscribe2::new(plan_type).render()),
