@@ -95,6 +95,9 @@ pub struct Theme {
 
     #[serde(rename(deserialize = "cards"))]
     pub cards: Cards,
+
+    #[serde(default)]
+    pub premium: bool,
 }
 
 #[derive(Debug, Deserialize)]

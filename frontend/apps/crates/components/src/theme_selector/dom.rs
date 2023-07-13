@@ -32,6 +32,7 @@ fn render(
             html!("theme-selector-option", {
                 .prop("theme", theme_id.as_str_id())
                 .prop("optionType", option_type)
+                .prop("premium", theme_id.map_theme(|theme| theme).premium)
                 .prop_signal("selected", state.selected_signal(theme_id))
                 .event(clone!(state => move |_evt:events::Click| {
                     state.set_theme(theme_id);
