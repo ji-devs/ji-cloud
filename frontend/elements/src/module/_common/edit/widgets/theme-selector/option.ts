@@ -55,10 +55,15 @@ export class _ extends LitElement {
                     position: absolute;
                     left: 6px;
                     bottom: 12px;
+                    height: 12px;
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
                 }
 
                 .content .premium img-ui {
                     width: 11px;
+                    margin-bottom: initial;
                 }
 
                 .content .premium .premium-label {

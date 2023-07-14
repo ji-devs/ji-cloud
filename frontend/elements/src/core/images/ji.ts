@@ -8,6 +8,9 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
+                :host {
+                    position: relative;
+                }
                 img {
                     display: inherit;
                     width: inherit;
@@ -16,6 +19,32 @@ export class _ extends LitElement {
                     max-width: 100%;
                     object-fit: inherit;
                     border-radius: var(--border-radius, 0);
+                }
+                .premium {
+                    padding: 0 4px;
+                    border-radius: 2px;
+                    border: solid 1px var(--light-blue-3);
+                    background-color: var(--white);
+                    position: absolute;
+                    left: 6px;
+                    bottom: 6px;
+                    height: 12px;
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                }
+                .premium img-ui {
+                    width: 11px;
+                }
+                .premium .premium-label {
+                    display: none;
+                    font-family: 'Poppins', sans-serif;
+                    font-size: 11px;
+                    font-weight: 600;
+                    margin-left: 6px;
+                }
+                .premium:hover .premium-label {
+                    display: inline-block;
                 }
             `,
         ];
@@ -43,6 +72,9 @@ export class _ extends LitElement {
     //use with cacheBust true to force reloading when id changes to the same thing
     @property()
     borderRadius: string = "0";
+
+    @property({ type: Boolean })
+    premium: boolean = false;
 
     firstUpdated() {
         this.style.setProperty('--border-radius', this.borderRadius);
@@ -79,7 +111,7 @@ export class _ extends LitElement {
         this.fallbackVisible = true;
     }
 
-    render() {
+    render_image() {
         const { lib, size, id, fallbackVisible, cacheBust, draggable } = this;
 
         let src = imageLib({ lib, size, id });
@@ -110,5 +142,20 @@ export class _ extends LitElement {
                 />`;
             }
         }
+    }
+
+    render() {
+        let image_html = this.render_image();
+
+        return html`
+            ${this.premium
+                ? html`<span class="premium"><img-ui
+                    class="jiggling"
+                    path="icons/pro-icon-small.svg"
+                ></img-ui><span class="premium-label">Pro</span></span>`
+                : nothing
+            }
+            ${image_html}
+        `;
     }
 }
