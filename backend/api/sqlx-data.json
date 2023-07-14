@@ -1590,22 +1590,6 @@
     },
     "query": "\nupdate resource_data\nset display_name = $2,\n    translated_name = '{}',\n    updated_at = now()\nwhere id = $1 and $2 is distinct from display_name"
   },
-  "198e5ee1a96ddebe5b4b174beffdc24f980858e148b2aba35b516386d09d39ef": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid",
-          "Int2",
-          "Bool",
-          "Bool"
-        ]
-      }
-    },
-    "query": "\ninsert into user_account\n(user_id, account_id, subscription_tier, admin, verified)\nvalues\n($1, $2, $3, $4, $5)"
-  },
   "19e0b4ddf95507058d054928c0275e5091e02c75fd1b74867e54d0188ba2c56a": {
     "describe": {
       "columns": [
@@ -4444,6 +4428,38 @@
     },
     "query": "\ndelete from resource_data where id = $1\n    "
   },
+  "3dc2565e6d15f19ba905610dd1bd333fa8ecd06b167dacb0449d431175365dc4": {
+    "describe": {
+      "columns": [
+        {
+          "name": "user_id!: UserId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "is_admin!",
+          "ordinal": 1,
+          "type_info": "Bool"
+        },
+        {
+          "name": "verified!",
+          "ordinal": 2,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect\n    user_id as \"user_id!: UserId\",\n    admin as \"is_admin!\",\n    verified as \"verified!\"\nfrom user_account\nwhere account_id = $1\n"
+  },
   "3e940a4ae4a432d2cc0ce4a8de4f98eacd1a9b8b356ecfaeeb5c9cd686ad008e": {
     "describe": {
       "columns": [],
@@ -5643,62 +5659,6 @@
       }
     },
     "query": "delete from animation_metadata where id = $1 returning kind as \"kind: AnimationKind\""
-  },
-  "5191c36820fdd5dbf670d0af9ca46bc7158a12f9bfe1bdd3f39d4d5fef49df6f": {
-    "describe": {
-      "columns": [
-        {
-          "name": "subscription_tier?: SubscriptionTier",
-          "ordinal": 0,
-          "type_info": "Int2"
-        },
-        {
-          "name": "plan_type?: PlanType",
-          "ordinal": 1,
-          "type_info": "Int2"
-        },
-        {
-          "name": "subscription_status?: SubscriptionStatus",
-          "ordinal": 2,
-          "type_info": "Int2"
-        },
-        {
-          "name": "is_admin!",
-          "ordinal": 3,
-          "type_info": "Bool"
-        },
-        {
-          "name": "verified!",
-          "ordinal": 4,
-          "type_info": "Bool"
-        },
-        {
-          "name": "school_id?: SchoolId",
-          "ordinal": 5,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "overdue!",
-          "ordinal": 6,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        true,
-        false,
-        false,
-        false,
-        false,
-        false,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect\n    user_account.subscription_tier as \"subscription_tier?: SubscriptionTier\",\n    subscription_plan.plan_type as \"plan_type?: PlanType\",\n    subscription.status as \"subscription_status?: SubscriptionStatus\",\n    user_account.admin as \"is_admin!\",\n    user_account.verified as \"verified!\",\n    school.school_id as \"school_id?: SchoolId\",\n    case\n        when subscription.amount_due > 0 then true\n        else false\n    end as \"overdue!\"\nfrom user_account\ninner join account using (account_id)\nleft join school using (account_id)\nleft join (\n    select subscription.account_id, status, amount_due, subscription_plan_id\n    from subscription\n    join (\n        select\n            account_id, subscription_id, max(created_at)\n        from subscription\n        group by account_id, subscription_id\n        order by created_at desc\n        limit 1\n    ) as recent_subscription using (subscription_id)\n) as subscription using (account_id)\nleft join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\nwhere user_account.user_id = $1\n"
   },
   "51a40f41372d3ac245973b6c148c56e71684c771e64465cf5c188241d4416d4a": {
     "describe": {
@@ -8411,6 +8371,21 @@
     },
     "query": "\nselect count(distinct circle.id) as \"count!: i64\"\n    from circle\n    left join circle_member \"cm\" on cm.id = circle.id\n    where (creator_id = $1 or $1 is null)\n    and (cm.user_id = any($2) or $2 = array[]::uuid[])\n"
   },
+  "7ed5f007e50173d816514b56f308c12ccbbfd8ad1eb488ab54d86bf3f325f6fa": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Bool",
+          "Bool"
+        ]
+      }
+    },
+    "query": "\ninsert into user_account\n(user_id, account_id, admin, verified)\nvalues\n($1, $2, $3, $4)"
+  },
   "7f4908d542be3a32a0d877287e49a87f69834904c30affc1dce2454cd0c8d4de": {
     "describe": {
       "columns": [],
@@ -9413,6 +9388,56 @@
     },
     "query": "update school_name set verified = $2 where school_name_id = $1"
   },
+  "8e5a50263d350298d760428b35fba776ca020e3e79093e546f7e763522bf4ac3": {
+    "describe": {
+      "columns": [
+        {
+          "name": "plan_type?: PlanType",
+          "ordinal": 0,
+          "type_info": "Int2"
+        },
+        {
+          "name": "subscription_status?: SubscriptionStatus",
+          "ordinal": 1,
+          "type_info": "Int2"
+        },
+        {
+          "name": "is_admin!",
+          "ordinal": 2,
+          "type_info": "Bool"
+        },
+        {
+          "name": "verified!",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "school_id?: SchoolId",
+          "ordinal": 4,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "overdue!",
+          "ordinal": 5,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect\n    subscription_plan.plan_type as \"plan_type?: PlanType\",\n    subscription.status as \"subscription_status?: SubscriptionStatus\",\n    user_account.admin as \"is_admin!\",\n    user_account.verified as \"verified!\",\n    school.school_id as \"school_id?: SchoolId\",\n    case\n        when subscription.amount_due > 0 then true\n        else false\n    end as \"overdue!\"\nfrom user_account\ninner join account using (account_id)\nleft join school using (account_id)\nleft join (\n    select subscription.account_id, status, amount_due, subscription_plan_id\n    from subscription\n    join (\n        select\n            account_id, subscription_id, max(created_at)\n        from subscription\n        group by account_id, subscription_id\n        order by created_at desc\n        limit 1\n    ) as recent_subscription using (subscription_id)\n) as subscription using (account_id)\nleft join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\nwhere user_account.user_id = $1\n"
+  },
   "8e91b63b58e15b8c898573ffd729ea87968e8d2efa24ee4d855ac357c193087b": {
     "describe": {
       "columns": [],
@@ -9674,44 +9699,6 @@
       }
     },
     "query": "\nupdate course\nset plays = plays + 1\nwhere id = $1;\n            "
-  },
-  "93203f88defcf7ef2265df806686253b77ce9449daf2c1995e5063ef3446f836": {
-    "describe": {
-      "columns": [
-        {
-          "name": "user_id!: UserId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "subscription_tier?: SubscriptionTier",
-          "ordinal": 1,
-          "type_info": "Int2"
-        },
-        {
-          "name": "is_admin!",
-          "ordinal": 2,
-          "type_info": "Bool"
-        },
-        {
-          "name": "verified!",
-          "ordinal": 3,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        false,
-        true,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect\n    user_id as \"user_id!: UserId\",\n    subscription_tier as \"subscription_tier?: SubscriptionTier\",\n    admin as \"is_admin!\",\n    verified as \"verified!\"\nfrom user_account\nwhere account_id = $1\n"
   },
   "932508742699d5ebb198b02fc4f4bcaa9fd0e50c4206e6536279163533526826": {
     "describe": {

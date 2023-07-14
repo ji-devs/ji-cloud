@@ -687,7 +687,8 @@ pub struct UpdateSubscriptionPlansRequest {
 /// users existing payment method. Otherwise, a payment method will be saved.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct CreateSubscriptionRequest {
-    /// Optional setup intent ID if a payment method was created prior to subscribing.
+    /// Optional setup intent ID if a payment method was created prior to subscribing. Setting this
+    /// mark the payment method as the default payment method.
     pub setup_intent_id: Option<String>,
     /// Plan to create the subscription for
     pub plan_type: PlanType,
@@ -761,8 +762,6 @@ pub struct Account {
 pub struct UserAccountSummary {
     /// ID of the school if this is a School account
     pub school_id: Option<SchoolId>,
-    /// The subscription tier the user is on
-    pub subscription_tier: Option<SubscriptionTier>,
     /// The type of plan the user's account is subscribed to
     pub plan_type: Option<PlanType>,
     /// Status of the accounts subscription, if any
@@ -835,8 +834,6 @@ pub struct School {
 pub struct AccountUser {
     /// The associated user
     pub user: UserProfile,
-    /// The subscription tier the user is on
-    pub subscription_tier: Option<SubscriptionTier>,
     /// Whether this user is an admin. For non School accounts, this user will
     /// always be an admin
     pub is_admin: bool,
