@@ -19,7 +19,9 @@ impl Subscribe2 {
         spawn_local(clone!(state => async move {
             let req: CreateSubscriptionRequest = CreateSubscriptionRequest {
                 plan_type: state.plan_type,
-                setup_intent_id: Default::default(),
+                setup_intent_id: state.params
+                    .as_ref()
+                    .and_then(|params| params.setup_intent.clone()),
                 promotion_code: Default::default()
             };
             endpoints::billing::CreateSubscription::api_with_auth(CreateSubscriptionPath(), Some(req)).await.unwrap_ji();

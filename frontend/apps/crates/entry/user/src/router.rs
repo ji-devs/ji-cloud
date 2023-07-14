@@ -59,7 +59,9 @@ impl Router {
                 }
                 UserRoute::SchoolEnd => Some(SchoolEnd::new().render()),
                 UserRoute::Subscribe1(plan_type) => Some(Subscribe1::new(plan_type).render()),
-                UserRoute::Subscribe2(plan_type) => Some(Subscribe2::new(plan_type).render()),
+                UserRoute::Subscribe2(plan_type, params) => {
+                    Some(Subscribe2::new(plan_type, params).render())
+                }
                 UserRoute::Welcome => Some(Welcome::new().render()),
             },
             _ => None,
