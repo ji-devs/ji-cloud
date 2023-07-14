@@ -45,7 +45,7 @@
     "winter-snow": {
         "id": "winter-snow",
         "label": {
-            "en": "Winter Snow"
+            "en": "Winter Wonder"
         },
         "fontFamilies": [
             "'Assistant-SemiBold', 'Sunflower-Medium'",
@@ -88,7 +88,7 @@
     "watermelon-summer": {
         "id": "watermelon-summer",
         "label": {
-            "en": "Watermelon Summer"
+            "en": "Watermelon"
         },
         "fontFamilies": [
             "'Shesek FM Regular', 'Itim-Regular'",
@@ -172,7 +172,7 @@
     "rosh-hashanah": {
         "id": "rosh-hashanah",
         "label": {
-            "en": "Rosh Hashanah"
+            "en": "Honeycomb"
         },
         "fontFamilies": [
             "'Tinos-Regular', 'Tinos-Regular'",
@@ -215,7 +215,7 @@
     "purim": {
         "id": "purim",
         "label": {
-            "en": "Purim"
+            "en": "Happy Purim"
         },
         "fontFamilies": [
             "'Tinos-Regular'",
@@ -257,7 +257,7 @@
     "our-israel": {
         "id": "our-israel",
         "label": {
-            "en": "Our Israel"
+            "en": "My Israel"
         },
         "fontFamilies": [
             "'VarelaRound-Heb', 'Courgette-Regular'",
@@ -342,7 +342,7 @@
     "lovely-spring": {
         "id": "lovely-spring",
         "label": {
-            "en": "Lovely Spring"
+            "en": "Lemon Mint"
         },
         "fontFamilies": [
             "'VarelaRound-Heb', 'Courgette-Regular'",
@@ -384,7 +384,7 @@
     "lost-in-space": {
         "id": "lost-in-space",
         "label": {
-            "en": "Lost in Space"
+            "en": "Starstruck"
         },
         "fontFamilies": [
             "'Alef-Heb', 'Goldman-Regular'",
@@ -427,7 +427,7 @@
     "comix": {
         "id": "comix",
         "label": {
-            "en": "Comix"
+            "en": "Comic Book"
         },
         "fontFamilies": [
             "'SuezOne-Regular', 'CarterOne-Regular'",
@@ -469,7 +469,7 @@
     "back-to-school": {
         "id": "back-to-school",
         "label": {
-            "en": "Back-to-School"
+            "en": "Class Doodles"
         },
         "fontFamilies": [
             "'Shesek FM Regular', 'Itim-Regular'",
@@ -511,7 +511,7 @@
     "jigzi": {
         "id": "jigzi",
         "label": {
-            "en": "Jigzi"
+            "en": "Mellow Yellow"
         },
         "fontFamilies": [
             "'Alef-Bold'",
@@ -554,7 +554,7 @@
     "jewish-text": {
         "id": "jewish-text",
         "label": {
-            "en": "Jewish Text"
+            "en": "Torah Kids"
         },
         "fontFamilies": [
             "'Frank Ruhl Libre - Medium','Roboto Slab - Bold'",
@@ -597,7 +597,7 @@
     "illuminating-hanukkah": {
         "id": "illuminating-hanukkah",
         "label": {
-            "en": "Illuminating Chanukah"
+            "en": "My Menorah"
         },
         "fontFamilies": [
             "'Tinos-Regular'",
@@ -639,7 +639,7 @@
     "happy-sukkot": {
         "id": "happy-sukkot",
         "label": {
-            "en": "Happy Sukkot"
+            "en": "Arba Minim"
         },
         "fontFamilies": [
             "'Amatic-Regular', 'IndieFlower-Regular'",
@@ -681,7 +681,7 @@
     "happy-shavuot": {
         "id": "happy-shavuot",
         "label": {
-            "en": "Happy Shavuot"
+            "en": "Wheat Fields"
         },
         "fontFamilies": [
             "'Tinos-Regular'",
@@ -723,7 +723,7 @@
     "happy-passover": {
         "id": "happy-passover",
         "label": {
-            "en": "Happy Passover"
+            "en": "Floral Passover"
         },
         "fontFamilies": [
             "'Tinos-Regular'",
@@ -766,7 +766,7 @@
     "exciting-fall": {
         "id": "exciting-fall",
         "label": {
-            "en": "Exciting Fall"
+            "en": "Urban Fall"
         },
         "fontFamilies": [
             "'Bellefair-Regular', 'Merienda-Regular'",
@@ -855,7 +855,7 @@
     "happy-brush": {
         "id": "happy-brush",
         "label": {
-            "en": "Happy Brush"
+            "en": "Happy Vibes"
         },
         "fontFamilies": [
             "'Frank Ruhl Libre - Bold', 'Roboto Slab - Bold'",
@@ -902,7 +902,7 @@
     "abstract": {
         "id": "abstract",
         "label": {
-            "en": "Abstract"
+            "en": "3D Purple"
         },
         "fontFamilies": [
             "'VarelaRound-Regular', 'quicksand'",
@@ -944,7 +944,7 @@
     "apple-with-honey": {
         "id": "apple-with-honey",
         "label": {
-            "en": "Apple with honey"
+            "en": "Apples & honey"
         },
         "fontFamilies": [
             "'Tinos-Regular', 'Tinos-Regular'",
@@ -986,7 +986,7 @@
     "autumn": {
         "id": "autumn",
         "label": {
-            "en": "Autumn"
+            "en": "Autumn Leaves"
         },
         "fontFamilies": [
             "'Bellefair-Regular', 'Merienda-Regular'",
@@ -1028,7 +1028,7 @@
     "my-workspace": {
         "id": "my-workspace",
         "label": {
-            "en": "My Workspace"
+            "en": "My Desktop"
         },
         "fontFamilies": [
             "'CabinSketch-bold','VarelaRound-Regular'",
@@ -1071,7 +1071,7 @@
     "camping": {
         "id": "camping",
         "label": {
-            "en": "Camping"
+            "en": "Campfire Stories"
         },
         "fontFamilies": [
             "'VarelaRound-Heb', 'Laila-Medium'",
@@ -1155,7 +1155,7 @@
     "chanukah-lights": {
         "id": "chanukah-lights",
         "label": {
-            "en": "Chanukah lights"
+            "en": "Festival of Lights"
         },
         "fontFamilies": [
             "'Tinos-Regular', 'Tinos-Regular'",
@@ -1197,7 +1197,7 @@
     "denim": {
         "id": "denim",
         "label": {
-            "en": "Denim"
+            "en": "Denim Days"
         },
         "fontFamilies": [
             "'SuezOne-Regular', 'CarterOne-Regular'",
@@ -1281,7 +1281,7 @@
     "happy-birthday": {
         "id": "happy-birthday",
         "label": {
-            "en": "Happy birthday"
+            "en": "Happy Birthday"
         },
         "fontFamilies": [
             "'Shesek FM Regular', 'Itim-Regular'",
@@ -1323,7 +1323,7 @@
     "ice-age": {
         "id": "ice-age",
         "label": {
-            "en": "Ice age"
+            "en": "Ice Age"
         },
         "fontFamilies": [
             "'Assistant-SemiBold', 'Sunflower-Medium'",
@@ -1366,7 +1366,7 @@
     "israel": {
         "id": "israel",
         "label": {
-            "en": "Israel"
+            "en": "Yom Ha'Atzmaut"
         },
         "fontFamilies": [
             "'VarelaRound-Heb', 'Courgette-Regular'",
@@ -1408,7 +1408,7 @@
     "jerusalem-city": {
         "id": "jerusalem-city",
         "label": {
-            "en": "Jerusalem city"
+            "en": "My Jerusalem"
         },
         "fontFamilies": [
             "'Tinos-Regular', 'Tinos-Regular'",
@@ -1450,7 +1450,7 @@
     "jerusalem-wall": {
         "id": "jerusalem-wall",
         "label": {
-            "en": "Jerusalem wall"
+            "en": "Western Wall"
         },
         "fontFamilies": [
             "'Tinos-Regular', 'Tinos-Regular'",
@@ -1492,7 +1492,7 @@
     "jungle": {
         "id": "jungle",
         "label": {
-            "en": "Jungle"
+            "en": "Jungle Tales"
         },
         "fontFamilies": [
             "'SuezOne-Regular', 'Acme-regular'",
@@ -1534,7 +1534,7 @@
     "our-planet": {
         "id": "our-planet",
         "label": {
-            "en": "Our planet"
+            "en": "Go Green"
         },
         "fontFamilies": [
             "'SecularOne-Regular', 'FredokaOne-regular'",
@@ -1576,7 +1576,7 @@
     "passover-matza": {
         "id": "passover-matza",
         "label": {
-            "en": "Passover matza"
+            "en": "Matzah & Maror"
         },
         "fontFamilies": [
             "'Tinos-Regular'",
@@ -1618,7 +1618,7 @@
     "passover-seder": {
         "id": "passover-seder",
         "label": {
-            "en": "Passover seder"
+            "en": "Passover Seder"
         },
         "fontFamilies": [
             "'Tinos-Regular'",
@@ -1660,7 +1660,7 @@
     "pomegranate": {
         "id": "pomegranate",
         "label": {
-            "en": "Pomegranate"
+            "en": "Happy New Year"
         },
         "fontFamilies": [
             "'Tinos-Regular'",
@@ -1702,7 +1702,7 @@
     "purim-feast": {
         "id": "purim-feast",
         "label": {
-            "en": "Purim feast"
+            "en": "Carnival"
         },
         "fontFamilies": [
             "'Tinos-Regular'",
@@ -1744,7 +1744,7 @@
     "purim-sweets": {
         "id": "purim-sweets",
         "label": {
-            "en": "Purim sweets"
+            "en": "Treats & Sweets"
         },
         "fontFamilies": [
             "'Tinos-Regular'",
@@ -1786,7 +1786,7 @@
     "shavuot-dishes": {
         "id": "shavuot-dishes",
         "label": {
-            "en": "Shavuot dishes"
+            "en": "Dairy Delights"
         },
         "fontFamilies": [
             "'Tinos-Regular'",
@@ -1828,7 +1828,7 @@
     "shavuot-fields": {
         "id": "shavuot-fields",
         "label": {
-            "en": "Shavuot fields"
+            "en": "Shavuot"
         },
         "fontFamilies": [
             "'Tinos-Regular'",
@@ -1870,7 +1870,7 @@
     "space": {
         "id": "space",
         "label": {
-            "en": "Spacewalk"
+            "en": "Space Explorer"
         },
         "fontFamilies": [
             "'Alef-Heb', 'Goldman-Regular'",
@@ -1913,7 +1913,7 @@
     "spring": {
         "id": "spring",
         "label": {
-            "en": "Spring"
+            "en": "Springtime"
         },
         "fontFamilies": [
             "'VarelaRound-Heb', 'Courgette-Regular'",
@@ -1997,7 +1997,7 @@
     "summer-pool": {
         "id": "summer-pool",
         "label": {
-            "en": "Summer pool"
+            "en": "Flip Flop Summer"
         },
         "fontFamilies": [
             "'Shesek FM Regular', 'Itim-Regular'",
@@ -2039,7 +2039,7 @@
     "surreal": {
         "id": "surreal",
         "label": {
-            "en": "Surreal"
+            "en": "Cloud 9"
         },
         "fontFamilies": [
             "'VarelaRound-Heb', 'Courgette-Regular'",
@@ -2081,7 +2081,7 @@
     "theater": {
         "id": "theater",
         "label": {
-            "en": "Theater"
+            "en": "Drama Theater"
         },
         "fontFamilies": [
             "'Alef-Heb', 'BerkshireSwash'",
@@ -2123,7 +2123,7 @@
     "travel": {
         "id": "travel",
         "label": {
-            "en": "Travel"
+            "en": "Go Travel"
         },
         "fontFamilies": [
             "'Rubik', 'ArimaMadurai-regular'",
@@ -2207,7 +2207,7 @@
     "jigzi-green": {
         "id": "jigzi-green",
         "label": {
-            "en": "Jigzi Green"
+            "en": "Green Bean"
         },
         "fontFamilies": [
             "'Noto-Sans-Hebrew', 'Poppins-regular'",
@@ -2249,7 +2249,7 @@
     "jigzi-blue": {
         "id": "jigzi-blue",
         "label": {
-            "en": "Jigzi Blue"
+            "en": "True Blue"
         },
         "fontFamilies": [
             "'Shesek FM Regular', 'Poppins-regular'",
@@ -2291,7 +2291,7 @@
     "jigzi-red": {
         "id": "jigzi-red",
         "label": {
-            "en": "Jigzi Red"
+            "en": "Ruby Red"
         },
         "fontFamilies": [
             "'Noto-Sans-Hebrew', 'Poppins-regular'",
@@ -2333,7 +2333,7 @@
     "nature": {
         "id": "nature",
         "label": {
-            "en": "Nature"
+            "en": "Discover Nature"
         },
         "fontFamilies": [
             "'GveretLevinAlefAlefAlef-Regular', 'Itim-Regular'",
@@ -2375,7 +2375,7 @@
     "flowers": {
         "id": "flowers",
         "label": {
-            "en": "Flowers"
+            "en": "Origami Flowers"
         },
         "fontFamilies": [
             "'Shesek Dfus FM Regular', 'Nunito-light'",
@@ -2417,7 +2417,7 @@
     "sport": {
         "id": "sport",
         "label": {
-            "en": "Sport"
+            "en": "Sports Game"
         },
         "fontFamilies": [
             "'RubikMarkerHatch', 'RubikMarkerHatch'",
@@ -2459,7 +2459,7 @@
     "valentine_s-day": {
         "id": "valentine_s-day",
         "label": {
-            "en": "Valentine"
+            "en": "Origami Hearts"
         },
         "fontFamilies": [
             "'GveretLevinAlefAlefAlef-Regular', 'Itim-Regular'",
@@ -2627,7 +2627,7 @@
     "tubishvat": {
         "id": "tubishvat",
         "label": {
-            "en": "Tu Bishvat"
+            "en": "Farmland Fun"
         },
         "fontFamilies": [
             "'RubikDirt', 'RubikDirt'",
