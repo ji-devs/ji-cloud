@@ -308,12 +308,7 @@ async fn get_or_create_customer(
                 ));
             }
 
-            db::account::create_default_individual_account(
-                db,
-                &user_profile.id,
-                &plan.plan_type.subscription_tier(),
-            )
-            .await?;
+            db::account::create_default_individual_account(db, &user_profile.id).await?;
 
             db::account::get_account_by_user_id(db, &user_profile.id)
                 .await?

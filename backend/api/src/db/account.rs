@@ -3,7 +3,7 @@ use shared::domain::admin::SearchSchoolNamesParams;
 use shared::domain::billing::{
     Account, AccountId, AccountType, AccountUser, CreateSchoolAccountRequest, CustomerId,
     PaymentMethod, PlanType, School, SchoolId, SchoolName, SchoolNameId, SchoolNameValue,
-    SubscriptionStatus, SubscriptionTier, UpdateSchoolAccountRequest, UserAccountSummary,
+    SubscriptionStatus, UpdateSchoolAccountRequest, UserAccountSummary,
 };
 use shared::domain::image::ImageId;
 use shared::domain::user::UserId;
@@ -179,7 +179,6 @@ pub async fn check_school_exists(
 pub async fn create_default_individual_account(
     pool: &PgPool,
     user_id: &UserId,
-    subscription_tier: &SubscriptionTier,
 ) -> sqlx::Result<AccountId> {
     let mut txn = pool.begin().await?;
     // Create an account record
@@ -192,15 +191,7 @@ pub async fn create_default_individual_account(
         .await?;
 
     // Associate the user with the account and mark them as an administrator.
-    associate_user_with_account(
-        &mut txn,
-        user_id,
-        &account_id,
-        subscription_tier,
-        true,
-        true,
-    )
-    .await?;
+    associate_user_with_account(&mut txn, user_id, &account_id, true, true).await?;
 
     txn.commit().await?;
 
@@ -226,15 +217,7 @@ pub async fn create_school_account(
         .await?;
 
     // Associate the user with the account and mark them as an administrator.
-    associate_user_with_account(
-        &mut txn,
-        &user_id,
-        &account_id,
-        &SubscriptionTier::Pro,
-        true,
-        true,
-    )
-    .await?;
+    associate_user_with_account(&mut txn, &user_id, &account_id, true, true).await?;
 
     // Create the school record
     let school_id = sqlx::query_scalar!(
@@ -306,7 +289,6 @@ pub async fn associate_user_with_account<'c, E: Executor<'c, Database = Postgres
     executor: E,
     user_id: &UserId,
     account_id: &AccountId,
-    subscription_tier: &SubscriptionTier,
     admin_user: bool,
     verified: bool,
 ) -> sqlx::Result<()> {
@@ -315,12 +297,11 @@ pub async fn associate_user_with_account<'c, E: Executor<'c, Database = Postgres
         // language=SQL
         r#"
 insert into user_account
-(user_id, account_id, subscription_tier, admin, verified)
+(user_id, account_id, admin, verified)
 values
-($1, $2, $3, $4, $5)"#,
+($1, $2, $3, $4)"#,
         user_id as &UserId,
         account_id as &AccountId,
-        subscription_tier as &SubscriptionTier,
         admin_user,
         verified,
     )
@@ -340,7 +321,6 @@ pub async fn get_user_account_summary(
         // language=SQL
         r#"
 select
-    user_account.subscription_tier as "subscription_tier?: SubscriptionTier",
     subscription_plan.plan_type as "plan_type?: PlanType",
     subscription.status as "subscription_status?: SubscriptionStatus",
     user_account.admin as "is_admin!",
@@ -596,7 +576,6 @@ pub async fn get_account_users_by_account_id(
         r#"
 select
     user_id as "user_id!: UserId",
-    subscription_tier as "subscription_tier?: SubscriptionTier",
     admin as "is_admin!",
     verified as "verified!"
 from user_account
@@ -614,7 +593,6 @@ where account_id = $1
 
         account_users.push(AccountUser {
             user: user_profile,
-            subscription_tier: record.subscription_tier,
             is_admin: record.is_admin,
             verified: record.verified,
         });

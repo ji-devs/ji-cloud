@@ -17,7 +17,7 @@ use shared::domain::admin::{
     InviteFailedReason, InviteSchoolUserFailure, InviteSchoolUsersResponse,
     SearchSchoolNamesResponse,
 };
-use shared::domain::billing::{SchoolId, SubscriptionTier, UpdateSubscriptionPlansRequest};
+use shared::domain::billing::{SchoolId, UpdateSubscriptionPlansRequest};
 use shared::{
     api::{
         endpoints::admin::{self, CreateUpdateSubscriptionPlans},
@@ -269,7 +269,6 @@ async fn invite_school_user(
                 pool,
                 &user_id,
                 &school.account_id,
-                &SubscriptionTier::Pro,
                 false,
                 true,
             )
