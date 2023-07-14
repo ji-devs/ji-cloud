@@ -89,6 +89,24 @@ pub struct SearchQueryParams {
     pub categories: Vec<CategoryId>,
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct StripeRedirectParams {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub setup_intent: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub setup_intent_client_secret: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub redirect_status: Option<SetupIntentStatus>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "snake_case")]
+pub enum SetupIntentStatus {
+    Succeeded,
+    Processing,
+    RequiresPaymentMethod,
+}
+
 #[derive(Debug, Clone)]
 pub enum UserRoute {
     NoAuth,
@@ -104,7 +122,7 @@ pub enum UserRoute {
     SchoolStart(PlanType),
     SchoolEnd,
     Subscribe1(PlanType),
-    Subscribe2(PlanType),
+    Subscribe2(PlanType, Option<StripeRedirectParams>),
     Welcome,
 }
 
@@ -483,7 +501,14 @@ impl Route {
             }
             ["user", "subscribe-2", plan_type] => {
                 let plan_type = (*plan_type).try_into().unwrap_ji();
-                Self::User(UserRoute::Subscribe2(plan_type))
+
+                let params = if !params_string.is_empty() {
+                    Some(serde_qs::from_str(&params_string).unwrap_ji())
+                } else {
+                    None
+                };
+
+                Self::User(UserRoute::Subscribe2(plan_type, params))
             }
             ["user", "welcome"] => Self::User(UserRoute::Welcome),
             ["admin", "jig-curation"] => {
@@ -849,7 +874,7 @@ impl From<&Route> for String {
                 UserRoute::Subscribe1(plan_type) => {
                     format!("/user/subscribe-1/{}", plan_type.as_str())
                 }
-                UserRoute::Subscribe2(plan_type) => {
+                UserRoute::Subscribe2(plan_type, _) => {
                     format!("/user/subscribe-2/{}", plan_type.as_str())
                 }
             },
