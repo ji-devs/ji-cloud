@@ -22,7 +22,7 @@ pub mod unit;
 
 wrap_uuid! {
     /// Wrapper type around [`Uuid`], represents the ID of a Course.
-    pub struct CourseId
+    pub struct CourseId("course")
 }
 
 make_path_parts!(CourseCreatePath => "/v1/course");
@@ -289,7 +289,7 @@ pub struct CourseBrowseQuery {
 
     /// Optionally filter by `additional resources`
     #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(serialize_with = "super::csv_encode_strong_ids")]
     #[serde(deserialize_with = "super::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub resource_types: Vec<ResourceTypeId>,
@@ -378,14 +378,14 @@ pub struct CourseSearchQuery {
 
     /// Optionally filter by `additional resources`
     #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(serialize_with = "super::csv_encode_strong_ids")]
     #[serde(deserialize_with = "super::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub resource_types: Vec<ResourceTypeId>,
 
     /// Optionally filter by `categories`
     #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(serialize_with = "super::csv_encode_strong_ids")]
     #[serde(deserialize_with = "super::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub categories: Vec<CategoryId>,

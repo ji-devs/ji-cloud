@@ -25,6 +25,7 @@ use std::future::Future;
 use std::marker::PhantomData;
 use std::rc::Rc;
 use std::str::FromStr;
+use strong_id::StrongUuid;
 use utils::languages::Language;
 use utils::{iframe::*, prelude::*};
 

@@ -43,6 +43,7 @@ rgb = { workspace = true }
 lazy_static = { workspace = true }
 unicode-segmentation = { workspace = true }
 const_format = { workspace = true }
+strong_id = { workspace = true }
 
 [features]
 debug_log = []

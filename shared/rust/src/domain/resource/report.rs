@@ -11,7 +11,7 @@ use super::ResourceId;
 
 wrap_uuid! {
     /// Wrapper type around [`Uuid`](Uuid), represents the ID of a curation comment.
-    pub struct ReportId
+    pub struct ReportId("res_rep")
 }
 
 make_path_parts!(GetResourceReportPath => "/v1/resource/{}/report/{}" => ResourceId, ReportId);

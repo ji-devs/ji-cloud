@@ -33,7 +33,7 @@ impl AnimationKind {
 
 wrap_uuid! {
     /// Wrapper type around [`Uuid`], represents the ID of an animation.
-    pub struct AnimationId
+    pub struct AnimationId("anim")
 }
 
 make_path_parts!(AnimationGetPath => "/v1/animation/{}" => AnimationId);

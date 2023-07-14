@@ -47,7 +47,7 @@ order by index
 }
 
 #[instrument(skip(db))]
-pub async fn get_exact(db: &sqlx::PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Category>> {
+pub async fn get_exact(db: &sqlx::PgPool, ids: &[CategoryId]) -> sqlx::Result<Vec<Category>> {
     sqlx::query!(
         //language=SQL
         r#"
@@ -60,7 +60,7 @@ from category
          inner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)
 order by t.ord
 "#,
-        ids
+        &ids.iter().map(|id| id.0).collect::<Vec<_>>(),
     )
     .fetch(db)
     .map_ok(|it| Category {
@@ -81,11 +81,15 @@ order by t.ord
 }
 
 #[instrument(skip(db))]
-pub async fn get_subtree(db: &sqlx::PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Category>> {
-    sqlx::query_file_as!(RawCategory, "query/category/get_subtree.sql", ids)
-        .fetch_all(db)
-        .await
-        .map(build_tree)
+pub async fn get_subtree(db: &sqlx::PgPool, ids: &[CategoryId]) -> sqlx::Result<Vec<Category>> {
+    sqlx::query_file_as!(
+        RawCategory,
+        "query/category/get_subtree.sql",
+        &ids.iter().map(|id| id.0).collect::<Vec<_>>()
+    )
+    .fetch_all(db)
+    .await
+    .map(build_tree)
 }
 
 #[instrument(skip_all)]
@@ -110,11 +114,18 @@ order by index
 }
 
 #[instrument(skip_all)]
-pub async fn get_ancestor_tree(db: &sqlx::PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Category>> {
-    sqlx::query_file_as!(RawCategory, "query/category/get_ancestor_tree.sql", ids)
-        .fetch_all(db)
-        .await
-        .map(build_tree)
+pub async fn get_ancestor_tree(
+    db: &sqlx::PgPool,
+    ids: &[CategoryId],
+) -> sqlx::Result<Vec<Category>> {
+    sqlx::query_file_as!(
+        RawCategory,
+        "query/category/get_ancestor_tree.sql",
+        &ids.iter().map(|id| id.0).collect::<Vec<_>>()
+    )
+    .fetch_all(db)
+    .await
+    .map(build_tree)
 }
 
 #[instrument(skip(db))]

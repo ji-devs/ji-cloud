@@ -29,7 +29,7 @@ use crate::{api::endpoints::PathPart, domain::module::body::ThemeId};
 
 wrap_uuid! {
     /// Wrapper type around [`Uuid`], represents the ID of a JIG.
-    pub struct JigId
+    pub struct JigId("jig")
 }
 
 make_path_parts!(JigCreatePath => "/v1/jig");
@@ -613,7 +613,7 @@ pub struct JigBrowseQuery {
 
     /// Optionally filter by `additional resources`
     #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(serialize_with = "super::csv_encode_strong_ids")]
     #[serde(deserialize_with = "super::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub resource_types: Vec<ResourceTypeId>,
@@ -663,7 +663,7 @@ pub struct JigSearchQuery {
     ///
     /// Note: Currently does nothing
     #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(serialize_with = "super::csv_encode_strong_ids")]
     #[serde(deserialize_with = "super::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub age_ranges: Vec<AgeRangeId>,
@@ -672,21 +672,21 @@ pub struct JigSearchQuery {
     ///
     /// Note: Currently does nothing
     #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(serialize_with = "super::csv_encode_strong_ids")]
     #[serde(deserialize_with = "super::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub affiliations: Vec<AffiliationId>,
 
     /// Optionally filter by `additional resources`
     #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(serialize_with = "super::csv_encode_strong_ids")]
     #[serde(deserialize_with = "super::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub resource_types: Vec<ResourceTypeId>,
 
     /// Optionally filter by `categories`
     #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(serialize_with = "super::csv_encode_strong_ids")]
     #[serde(deserialize_with = "super::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub categories: Vec<CategoryId>,

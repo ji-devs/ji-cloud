@@ -8,42 +8,37 @@ use crate::api::endpoints::PathPart;
 
 wrap_uuid! {
     /// Wrapper type around [`Uuid`], represents [`ImageStyle::id`].
-    pub struct ImageStyleId
+    pub struct ImageStyleId("img_style")
 }
 
 wrap_uuid! {
     /// Wrapper type around [`Uuid`], represents [`AnimationStyle::id`].
-    pub struct AnimationStyleId
+    pub struct AnimationStyleId("anim_style")
 }
 
 wrap_uuid! {
     /// Wrapper type around [`Uuid`], represents [`AudioStyle::id`]. Note: not yet implemented
-    pub struct AudioStyleId
+    pub struct AudioStyleId("aud_style")
 }
 
 wrap_uuid! {
     /// Wrapper type around [`Uuid`], represents [`AgeRange::id`].
-    pub struct AgeRangeId
+    pub struct AgeRangeId("age_range")
 }
 
 wrap_uuid! {
     /// Wrapper type around [`Uuid`], represents [`Affiliation::id`].
-    pub struct AffiliationId
+    pub struct AffiliationId("aff")
 }
 
 wrap_uuid! {
     /// Wrapper type around [`Uuid`], represents [`AdditionalResource::id`].
-    pub struct ResourceTypeId
+    pub struct ResourceTypeId("res_type")
 }
 
 wrap_uuid! {
     /// Wrapper type around [`Uuid`], represents [`Subject::id`].
-    pub struct SubjectId
-}
-
-wrap_uuid! {
-    /// Wrapper type around [`Uuid`], represents [`Report::id`].
-    pub struct ReportId
+    pub struct SubjectId("subject")
 }
 
 /// Wrapper type around [`i16`](std::i16), represents the index of an image tag.

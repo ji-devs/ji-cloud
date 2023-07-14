@@ -85,6 +85,7 @@ pub async fn get_metadata() -> Arc<Metadata> {
             let meta = future.await;
 
             let mut state = STATE.lock().unwrap_ji();
+            log::info!("METADATA READY");
             *state = State::Ready(meta.clone());
             drop(state);
 

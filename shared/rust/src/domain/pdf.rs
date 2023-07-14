@@ -63,7 +63,7 @@ pub mod user {
 
 wrap_uuid! {
     /// Wrapper type around [`Uuid`](Uuid), represents the ID of an Pdf file.
-    pub struct PdfId
+    pub struct PdfId("pdf")
 }
 
 /// Response for getting a single Pdf file.

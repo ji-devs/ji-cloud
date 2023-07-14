@@ -28,49 +28,52 @@ macro_rules! into_i16_index {
 /// wrap_uuid! {
 ///   /// Represents a My ID
 ///   #[serde(rename_all = "camelCase")]
-///   pub struct MyId
+///   pub struct MyId("my_id")
 /// }
 /// ```
 macro_rules! wrap_uuid {
     (
         $(#[$outer:meta])*
-        $vis:vis struct $t:ident
+        $vis:vis struct $t:ident$(($prefix:literal))?
     ) => {
-        #[derive(Copy, Clone, Debug, Eq, PartialEq, Serialize, Deserialize, PathPart, Hash)]
-        $(#[$outer])*
-        #[cfg_attr(feature = "backend", derive(sqlx::Type))]
-        #[cfg_attr(feature = "backend", sqlx(transparent))]
-        $vis struct $t(pub uuid::Uuid);
-
-        impl From<$t> for uuid::Uuid {
-            fn from(t: $t) -> Self {
-                t.0
-            }
+        ::strong_id::strong_uuid! {
+            #[derive(PathPart)]
+            $(#[$outer])*
+            #[cfg_attr(feature = "backend", derive(sqlx::Type))]
+            #[cfg_attr(feature = "backend", sqlx(transparent))]
+            $vis struct $t(pub Uuid$( => $prefix)?)
         }
 
-        impl std::fmt::Display for $t {
-            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                write!(f, "{}", self.0)
-            }
-        }
+         impl ::serde::Serialize for $t {
+              fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+              where
+                   S: ::serde::Serializer,
+              {
+                   serializer.serialize_str(&self.to_string())
+              }
+         }
 
-        impl std::str::FromStr for $t {
-            type Err = uuid::Error;
+         impl<'de> ::serde::Deserialize<'de> for $t {
+              fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+              where
+                   D: ::serde::Deserializer<'de>,
+              {
 
-            #[inline]
-            fn from_str(value: &str) -> Result<Self, Self::Err> {
-                Ok(Self(uuid::Uuid::from_str(value)?))
-            }
-        }
+                  let str_value = String::deserialize(deserializer)?;
 
-        impl $t {
-            /// Creates a wrapped UUID from a 128 bit value
-            #[inline]
-            #[must_use]
-            $vis const fn from_u128(v: u128) -> Self {
-                Self(uuid::Uuid::from_u128(v))
-            }
-        }
+                  Ok(match str_value.parse::<Self>() {
+                      Ok(id) => id,
+                      Err(error) => {
+                          // Try to decode Uuid
+                          let uuid = str_value.parse::<::uuid::Uuid>().map_err(|_| {
+                              ::serde::de::Error::custom(error.to_string())
+                          })?;
+
+                          Self(uuid)
+                      }
+                  })
+              }
+         }
     }
 }
 
@@ -112,7 +115,10 @@ pub mod auth {
 }
 
 use chrono::Utc;
-use ser::{csv_encode_i16_indices, csv_encode_uuids, deserialize_optional_field, from_csv};
+use ser::{
+    csv_encode_i16_indices, csv_encode_strong_ids, csv_encode_uuids, deserialize_optional_field,
+    from_csv,
+};
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 use uuid::Uuid;

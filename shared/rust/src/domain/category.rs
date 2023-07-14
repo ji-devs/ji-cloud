@@ -11,7 +11,7 @@ wrap_uuid! {
     /// Wrapper type around [`Uuid`], represents the ID of a category.
     ///
     /// [`Uuid`]: ../../uuid/struct.Uuid.html
-    pub struct CategoryId
+    pub struct CategoryId("cat")
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -105,9 +105,9 @@ pub struct GetCategoryRequest {
     // the backend _could_ transmute the `CategoryId`s into `Uuid`s, but that's `unsafe`.
     /// The exact ids to be included in the response.
     #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(serialize_with = "super::csv_encode_strong_ids")]
     #[serde(deserialize_with = "super::from_csv")]
-    pub ids: Vec<Uuid>,
+    pub ids: Vec<CategoryId>,
 
     /// Which direction to follow the tree.
     #[serde(default)]

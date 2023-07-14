@@ -6,6 +6,7 @@ use std::{
     marker::PhantomData,
     str::FromStr,
 };
+use strong_id::StrongId;
 
 use uuid::Uuid;
 
@@ -51,6 +52,26 @@ where
         write!(&mut out, ",{}", item.hyphenated())
             .expect("`String` call to `write!` shouldn't fail");
     }
+
+    serializer.serialize_str(&out)
+}
+
+/// Serializes a slice of StrongIds into CSV format
+///
+/// ## Note:
+/// * Algolia takes CSV format arrays: https://www.algolia.com/doc/rest-api/search/#arrays
+pub fn csv_encode_strong_ids<T: StrongId<Uuid>, S>(
+    ids: &[T],
+    serializer: S,
+) -> Result<S::Ok, S::Error>
+where
+    S: serde::Serializer,
+{
+    let out = ids
+        .iter()
+        .map(|id| format!("{id}"))
+        .collect::<Vec<_>>()
+        .join(",");
 
     serializer.serialize_str(&out)
 }

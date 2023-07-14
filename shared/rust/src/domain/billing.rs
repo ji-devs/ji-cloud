@@ -126,7 +126,7 @@ pub enum PaymentMethodType {
 
 wrap_uuid! {
     /// Local payment method ID
-    pub struct PaymentMethodId
+    pub struct PaymentMethodId("pm")
 }
 
 /// Payment method
@@ -285,7 +285,7 @@ impl From<stripe::SubscriptionStatus> for SubscriptionStatus {
 
 wrap_uuid! {
     /// Local subscription ID
-    pub struct SubscriptionId
+    pub struct SubscriptionId("sub")
 }
 
 /// An existing subscription for a customer
@@ -628,7 +628,7 @@ impl TrialPeriod {
 
 wrap_uuid! {
     /// Local charge ID
-    pub struct ChargeId
+    pub struct ChargeId("ch")
 }
 
 /// A charge to a customer for a subscription
@@ -650,7 +650,7 @@ pub struct Charge {
 
 wrap_uuid! {
     /// Local subscription plan ID
-    pub struct PlanId
+    pub struct PlanId("plan")
 }
 
 /// A subscription plan
@@ -724,7 +724,7 @@ make_path_parts!(CreateSetupIntentPath => "/v1/billing/payment-method");
 
 wrap_uuid! {
     /// Account ID
-    pub struct AccountId
+    pub struct AccountId("acc")
 }
 
 /// A billing account
@@ -777,7 +777,7 @@ pub struct UserAccountSummary {
 
 wrap_uuid! {
     /// Wrapper type around [`Uuid`], represents the ID of a School.
-    pub struct SchoolId
+    pub struct SchoolId("sch")
 }
 
 /// A school profile.
@@ -843,7 +843,7 @@ pub struct AccountUser {
 
 wrap_uuid! {
     /// Wrapper type around [`Uuid`], represents the ID of a School Name.
-    pub struct SchoolNameId
+    pub struct SchoolNameId("sn")
 }
 
 make_path_parts!(SchoolNamePath => "/v1/school-name");

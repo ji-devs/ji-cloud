@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 
 wrap_uuid! {
     /// Wrapper type around [`Uuid`](Uuid), represents the ID of an additional resource.
-    pub struct AdditionalResourceId
+    pub struct AdditionalResourceId("ar")
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
