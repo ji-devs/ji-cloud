@@ -251,6 +251,16 @@ export class _ extends LitElement {
                     transform: scaleX(-1) translateY(-60px);
                 }
 
+                .premium {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    position: absolute;
+                    width: 100%;
+                    top: -26px;
+                    pointer-events: none;
+                }
+
                 /*
                 * [Ty] Added to temporarily disable the jiggling on the back of search result
                 * cards
@@ -305,6 +315,9 @@ export class _ extends LitElement {
     @property({ type: Boolean })
     showAdditionalResources: boolean = true;
 
+    @property({ type: Boolean })
+    premium: boolean = false;
+
     @property({ type: Boolean, reflect: true })
     flipped: boolean = false;
 
@@ -346,6 +359,14 @@ export class _ extends LitElement {
 
         return html`
             <div class="wrapper">
+                <div class="premium">
+                    ${this.premium
+                        ? html`<img-ui
+                                path="icons/pro-icon.svg"
+                            ></img-ui>`
+                        : nothing
+                    }
+                </div>
                 <img-ui
                     class="jiggling"
                     path="search/cards/${jiggling_file}"

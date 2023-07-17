@@ -243,7 +243,6 @@ export class _ extends LitElement {
             <div class="premium">
                 ${this.premium
                     ? html`<img-ui
-                        class="jiggling"
                         path="icons/pro-icon.svg"
                     ></img-ui>`
                     : nothing

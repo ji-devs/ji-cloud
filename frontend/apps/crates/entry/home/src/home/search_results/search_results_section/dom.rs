@@ -88,6 +88,7 @@ impl SearchResultsSection {
             .prop("playedCount", asset.plays())
             .prop("likedCount", asset.likes())
             .prop("language", asset.language())
+            .prop("premium", asset.premium())
             .prop_signal("flipped", share_asset.active_popup.signal_cloned().map(|active_popup| active_popup.is_some()))
             .prop("kind", state.asset_type.as_str())
             .prop("publishedAt", {
