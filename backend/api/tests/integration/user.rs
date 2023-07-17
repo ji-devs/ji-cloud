@@ -5,7 +5,10 @@ use crate::{
 use http::StatusCode;
 use macros::test_service;
 
-use shared::domain::{meta::AffiliationId, user::PatchProfileRequest};
+use shared::domain::{
+    meta::AffiliationId,
+    user::{PatchProfileRequest, UserBadge},
+};
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 mod color;
@@ -90,7 +93,42 @@ async fn patch_profile(port: u16) -> anyhow::Result<()> {
     Ok(())
 }
 
-//
+#[test_service(setup = "setup_service", fixtures("Fixture::User", "Fixture::Image"))]
+async fn browse_user_badges(port: u16) -> anyhow::Result<()> {
+    let name = "browse_user_badges";
+
+    let client = reqwest::Client::new();
+
+    let resp = client
+        .get(&format!("http://0.0.0.0:{}/v1/user/browse", port))
+        .query(&[("badge", "noBadge")])
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(
+    format!("{}-1", name),
+    body, { ".updated_at" => "[timestamptz]" });
+
+    let resp = client
+        .get(&format!("http://0.0.0.0:{}/v1/user/browse", port))
+        .query(&[("badge", "jiTeam")])
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(
+    format!("{}-2", name),
+    body, { ".updated_at" => "[timestamptz]" });
+
+    Ok(())
+}
 
 // Ignored tests aren't captured. Will resolve later
 //

@@ -17,7 +17,7 @@ use shared::domain::{
     user::{UserId, UserScope},
 };
 use sqlx::{types::Json, PgConnection, PgPool};
-use std::{collections::HashMap, ops::Deref};
+use std::collections::HashMap;
 use tracing::{instrument, Instrument};
 use uuid::Uuid;
 
@@ -1429,7 +1429,7 @@ select exists (select 1 from "user" where id = $1) as "check_to!"
     let mut ids = Vec::new();
 
     for id in jig_ids {
-        let id = id.deref().0;
+        let id = id.0;
 
         ids.push(id)
     }

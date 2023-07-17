@@ -5,6 +5,38 @@ expression: body
 {
   "users": [
     {
+      "id": "1f241e1b-b537-493f-a230-075cb16315be",
+      "username": "test",
+      "givenName": "Bobby",
+      "familyName": "Tables",
+      "profileImage": null,
+      "following": false,
+      "badge": "jiTeam",
+      "organization": "test org",
+      "circles": [
+        "829606d0-f185-11ec-b9e4-5fadfd7252f6"
+      ],
+      "totalAssetCount": 0
+    },
+    {
+      "id": "7b96a41c-e406-11eb-8176-efd86dd7f444",
+      "username": "test1",
+      "givenName": "Post",
+      "familyName": "Gres",
+      "profileImage": null,
+      "following": true,
+      "badge": "masterTeacher",
+      "languagesSpoken": [
+        "en_US"
+      ],
+      "organization": "test1 org",
+      "circles": [
+        "a3126bec-f185-11ec-b9e4-5fa4e257b5a1",
+        "57a1eaaa-f182-11ec-a96e-13f3929f5b22"
+      ],
+      "totalAssetCount": 0
+    },
+    {
       "id": "a641fd6e-e41b-11eb-8176-57df101c2201",
       "username": "test2",
       "givenName": "Scrappy",
@@ -18,22 +50,8 @@ expression: body
         "a3126bec-f185-11ec-b9e4-5fa4e257b5a1"
       ],
       "totalAssetCount": 0
-    },
-    {
-      "id": "1f241e1b-b537-493f-a230-075cb16315be",
-      "username": "test",
-      "givenName": "Bobby",
-      "familyName": "Tables",
-      "profileImage": null,
-      "following": false,
-      "badge": null,
-      "organization": "test org",
-      "circles": [
-        "829606d0-f185-11ec-b9e4-5fadfd7252f6"
-      ],
-      "totalAssetCount": 0
     }
   ],
   "pages": 1,
-  "totalUserCount": 2
+  "totalUserCount": 3
 }

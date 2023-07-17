@@ -125,6 +125,8 @@ pub enum UserBadge {
     MasterTeacher = 0,
     /// JI team member
     JiTeam = 1,
+    ///  No Badge
+    NoBadge = 10,
 }
 
 impl UserBadge {
@@ -133,6 +135,7 @@ impl UserBadge {
         match self {
             UserBadge::MasterTeacher => "master-teacher",
             UserBadge::JiTeam => "ji-team",
+            UserBadge::NoBadge => "",
         }
     }
 
@@ -141,6 +144,7 @@ impl UserBadge {
         match self {
             UserBadge::MasterTeacher => "Master Teacher",
             UserBadge::JiTeam => "JI Team",
+            UserBadge::NoBadge => "",
         }
     }
 }
@@ -767,6 +771,12 @@ pub struct UserBrowseQuery {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub page_limit: Option<u32>,
+
+    /// Optional filter for user badges
+    #[serde(default)]
+    #[serde(deserialize_with = "super::from_csv")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub badge: Vec<UserBadge>,
 }
 
 /// Response for [`Browse`](crate::api::endpoints::user::Browse).

@@ -11,7 +11,7 @@ expression: body
       "familyName": "Tables",
       "profileImage": null,
       "following": false,
-      "badge": null,
+      "badge": "jiTeam",
       "organization": "test org",
       "circles": [],
       "totalAssetCount": 0
