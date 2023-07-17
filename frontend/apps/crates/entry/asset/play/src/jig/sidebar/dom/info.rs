@@ -64,7 +64,7 @@ fn render_jig_info(state: Rc<State>, jig: &JigResponse) -> Dom {
         .prop("playedCount", jig.plays as usize)
         .prop("likedCount", jig.likes as usize)
         .prop("language", &jig.jig_data.language)
-        // .prop("author", jig.author_id)
+        .prop("author", jig.author_name.clone())
         .prop("publishedAt", {
             match jig.published_at {
                 Some(publish_at) => published_at_string(publish_at, false),
