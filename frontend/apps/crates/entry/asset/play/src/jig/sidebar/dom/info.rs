@@ -94,31 +94,42 @@ fn render_jig_info(state: Rc<State>, jig: &JigResponse) -> Dom {
                 .prop("label", &category_id.0.to_string())
             })
         }))
-        .children(jig.jig_data.additional_resources.iter().map(|resource| {
-            html!("a", {
-                .prop("slot", "additional-resources")
-                .prop("target", "_BLANK")
-                .prop("title", &resource.display_name)
-                .prop("href", resource.resource_content.get_link())
-                .child(html!("fa-icon", {
-                    .prop("icon", "fa-light fa-file")
-                }))
-                .text(format!(" {}  ", &resource.display_name).as_str())
-                .text_signal(resource_type_name_signal(Rc::clone(&state), resource.resource_type_id))
-            })
-        }))
-        .children_signal_vec(state.player_state.playlists.signal_cloned().map(clone!(state => move |playlist| {
-            playlist.into_iter().map(|playlist| {
+        .apply_if(!jig.jig_data.additional_resources.is_empty(),|dom| {
+            dom.prop("showResources", true)
+            .children(jig.jig_data.additional_resources.iter().map(|resource| {
                 html!("a", {
-                    .prop("slot", "playlists")
+                    .prop("slot", "additional-resources")
                     .prop("target", "_BLANK")
-                    .prop("title", &playlist.playlist_data.display_name)
-                    .prop("href",  Route::Asset(AssetRoute::Play(AssetPlayRoute::Playlist(playlist.id, PlaylistPlayerOptions {draft_or_live: DraftOrLive::Live, is_student: state.player_state.player_options.is_student}))).to_string())
-                    .text(format!(" {}  ", &playlist.playlist_data.display_name).as_str())
-
+                    .prop("title", &resource.display_name)
+                    .prop("href", resource.resource_content.get_link())
+                    .child(html!("fa-icon", {
+                        .prop("icon", "fa-light fa-file")
+                    }))
+                    .text(format!(" {}  ", &resource.display_name).as_str())
+                    .text_signal(resource_type_name_signal(Rc::clone(&state), resource.resource_type_id))
                 })
-            }).collect()
-        })).to_signal_vec())
+            }))
+        })
+        .apply_if(!state.player_state.playlists.get_cloned().is_empty() ,|dom| {
+            dom.prop("showPlaylists", true)
+            .children_signal_vec(state.player_state.playlists.signal_cloned().map(clone!(state => move |playlist| {
+                playlist.into_iter().map(|playlist| {
+                    html!("a", {
+                        .prop("slot", "playlists")
+                        .prop("target", "_BLANK")
+                        .prop("title", &playlist.playlist_data.display_name)
+                        .prop("href",  Route::Asset(
+                                            AssetRoute::Play(AssetPlayRoute::Playlist(playlist.id,
+                                                    PlaylistPlayerOptions {
+                                                        draft_or_live: DraftOrLive::Live,
+                                                        is_student: state.player_state.player_options.is_student
+                                                    }))).to_string()
+                                )
+                        .text(format!(" {}  ", &playlist.playlist_data.display_name).as_str())
+                    })
+                }).collect()
+            })).to_signal_vec())
+        })
         .children_signal_vec(report::render(Rc::clone(&state)).to_signal_vec())
     })
 }

@@ -159,6 +159,12 @@ export class _ extends LitElement {
     @property({ type: Boolean })
     byJiTeam: boolean = false;
 
+    @property({ type: Boolean })
+    showResources: boolean = false;
+
+    @property({ type: Boolean })
+    showPlaylists: boolean = false;
+
     @property()
     author: string = "";
 
@@ -222,23 +228,30 @@ export class _ extends LitElement {
                             <slot name="categories"></slot>
                         </div>
                     </section>
-                    <section class="additional-resources-section">
-                        <h4>${STR_ADDITIONAL_RESOURCES}</h4>
-                        <div class="additional-resources-items">
-                            <slot name="additional-resources"></slot>
-                        </div>
-                    </section>
-                    <section class="playlists-section">
+                    ${
+                        this.showResources ? html`
+                        <section class="additional-resources-section">
+                            <h4>${STR_ADDITIONAL_RESOURCES}</h4>
+                            <div class="additional-resources-items">
+                                <slot name="additional-resources"></slot>
+                            </div>
+                        </section>` 
+                        :   nothing
+                    }
+                    ${
+                        this.showPlaylists ? html`
+                        <section class="playlists-section">
                         <div>
                             <h4>${STR_PLAYLISTS}</h4>
-                            <!-- TODO: enable when ready -->
                             <h5>${STR_PLAYLISTS_SUBHEADING}</h5>
                         </div>
                         <div class="playlists">
                             <!-- TODO: enable when ready -->
                             <slot name="playlists"></slot>
                         </div>
-                    </section>
+                        </section>  ` 
+                        :   nothing
+                    }
                     <section class="report-section">
                         <slot name="report"></slot>
                         <slot name="report-sent"></slot>
