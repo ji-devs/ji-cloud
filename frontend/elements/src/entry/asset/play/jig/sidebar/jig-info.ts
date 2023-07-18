@@ -38,6 +38,11 @@ export class _ extends LitElement {
                 section:first-child {
                     padding-top: 0;
                 }
+                a {
+                    text-decoration: none;
+                    color: inherit;
+                    display: grid;
+                }
                 h4 {
                     margin: 0;
                     color: var(--dark-gray-6);
@@ -56,7 +61,11 @@ export class _ extends LitElement {
                     color: var(--main-blue);
                     display: flex;
                     align-items: center;
+                    cursor: pointer;
                     justify-content: center;
+                }
+                .author:hover {
+                    color: #55a8fc;
                 }
                 .author .by-ji-team {
                     font-weight: 800;
@@ -174,6 +183,12 @@ export class _ extends LitElement {
     @property()
     description: string = "";
 
+    @property()
+    href: string = "";
+
+    @property()
+    target: string = "";
+
     render() {
         return html`
             <popup-body>
@@ -181,19 +196,21 @@ export class _ extends LitElement {
                 <h3 slot="heading">${this.name}</h3>
                 <h4 slot="author-line">                
                     <div class="author-published">
-                            <div class="author">
-                                ${this.byJiTeam
-                ? html`
-                                          <img-ui
-                                              path="entry/home/search-results/ji-logo-blue.svg"
-                                          ></img-ui>
-                                          <span class="by-ji-team"
-                                              >${STR_JI_TEAM} -
-                                          </span>
-                                      `
-                : nothing}
-                                ${this.author}
-                            </div>
+                            <a href=${this.href} .target=${this.target}>
+                                <div class="author">
+                                    ${this.byJiTeam
+                    ? html`
+                                            <img-ui
+                                                path="entry/home/search-results/ji-logo-blue.svg"
+                                            ></img-ui>
+                                            <span class="by-ji-team"
+                                                >${STR_JI_TEAM} -
+                                            </span>
+                                        `
+                    : nothing}
+                                    ${this.author}
+                                </div>
+                            </a>
                             <span class="published-at">
                                 <img-ui
                                     path="entry/home/search-results/time.svg"
@@ -246,7 +263,6 @@ export class _ extends LitElement {
                             <h5>${STR_PLAYLISTS_SUBHEADING}</h5>
                         </div>
                         <div class="playlists">
-                            <!-- TODO: enable when ready -->
                             <slot name="playlists"></slot>
                         </div>
                         </section>  ` 
