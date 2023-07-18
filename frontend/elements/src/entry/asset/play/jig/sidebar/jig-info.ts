@@ -21,7 +21,7 @@ export class _ extends LitElement {
                     font-size: 14px;
                 }
                 .body {
-                    padding: 0 24px;
+                    padding: 13px 24px;
                     overflow-y: auto;
                     max-height: 496px;
                 }
@@ -31,7 +31,6 @@ export class _ extends LitElement {
                     row-gap: 16px;
                     max-width: 390px;
                     border-bottom: solid 1px #d5e4ff;
-
                 }
                 section:not(:last-child) {
                     border-bottom: solid 1px #d5e4ff;
@@ -45,9 +44,11 @@ export class _ extends LitElement {
                     font-size: inherit;
                     font-weight: 500;
                 }
-                .first-line {
+                .author-published {
                     display: flex;
                     justify-content: space-between;
+                    border-bottom: solid 1px #d5e4ff;
+                    margin: 0 12px;
                 }
                 .author {
                     font-weight: 500;
@@ -69,11 +70,11 @@ export class _ extends LitElement {
                     align-items: center;
                     column-gap: 5px;
                 }
-                .second-line {
+                .first-line {
                     display: flex;
                     justify-content: space-between;
                 }
-                .second-line span {
+                .first-line span {
                     display: flex;
                     align-items: center;
                     column-gap: 5px;
@@ -172,9 +173,8 @@ export class _ extends LitElement {
             <popup-body>
                 <slot slot="close" name="close"></slot>
                 <h3 slot="heading">${this.name}</h3>
-                <div class="body" slot="body">
-                    <section class="main-info-section">
-                        <div class="first-line">
+                <h4 slot="author-line">                
+                    <div class="author-published">
                             <div class="author">
                                 ${this.byJiTeam
                 ? html`
@@ -194,8 +194,11 @@ export class _ extends LitElement {
                                 ></img-ui>
                                 ${this.publishedAt}
                             </span>
-                        </div>
-                        <div class="second-line">
+                    </div>
+                </h4>
+                <div class="body" slot="body">
+                    <section class="main-info-section">
+                        <div class="first-line">
                             <span>
                                 <slot name="ages"></slot>
                             </span>
