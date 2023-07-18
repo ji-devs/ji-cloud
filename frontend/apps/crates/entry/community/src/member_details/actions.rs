@@ -195,7 +195,7 @@ impl MemberDetails {
     pub fn follow_member(self: &Rc<Self>) {
         let state = self;
         state.loader.load(clone!(state => async move {
-            let res = endpoints::user::Follow::api_with_auth_empty(
+            let res = endpoints::user::Follow::api_with_auth(
                 PublicUserFollowPath(state.member_id),
                 None
             ).await;
@@ -211,7 +211,7 @@ impl MemberDetails {
     pub fn unfollow_member(self: &Rc<Self>) {
         let state = self;
         state.loader.load(clone!(state => async move {
-            let res = endpoints::user::Unfollow::api_with_auth_empty(
+            let res = endpoints::user::Unfollow::api_with_auth(
                 PublicUserUnfollowPath(state.member_id),
                 None
             ).await;
@@ -252,7 +252,7 @@ impl MemberDetails {
                 location: Some(updated_profile.location.clone()),
             };
 
-            let res = endpoints::user::PatchProfile::api_with_auth_empty(PatchProfilePath(), Some(req)).await;
+            let res = endpoints::user::PatchProfile::api_with_auth(PatchProfilePath(), Some(req)).await;
             if let Err(_err) = res {
                 todo!()
             }

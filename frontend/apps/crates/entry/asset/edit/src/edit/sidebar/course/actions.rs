@@ -19,11 +19,12 @@ pub async fn update_course(
     course_id: &CourseId,
     req: CourseUpdateDraftDataRequest,
 ) -> anyhow::Result<()> {
-    endpoints::course::UpdateDraftData::api_with_auth_empty(
+    endpoints::course::UpdateDraftData::api_with_auth(
         CourseUpdateDraftDataPath(course_id.clone()),
         Some(req),
     )
     .await
+    .into_anyhow()
 }
 
 pub async fn update_display_name(course_id: CourseId, value: String) {

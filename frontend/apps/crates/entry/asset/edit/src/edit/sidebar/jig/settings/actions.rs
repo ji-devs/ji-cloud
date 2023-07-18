@@ -30,7 +30,7 @@ pub fn update_jig_settings(state: Rc<JigSettings>) {
     let req = state.get_jig_update_req();
 
     state.loader.load(clone!(state => async move {
-        let _ = endpoints::jig::UpdateDraftData::api_with_auth_empty(
+        let _ = endpoints::jig::UpdateDraftData::api_with_auth(
             JigUpdateDraftDataPath(state.jig.id.clone()),
             Some(req),
         )

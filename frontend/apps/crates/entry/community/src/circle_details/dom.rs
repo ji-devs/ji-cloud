@@ -246,7 +246,7 @@ impl CircleDetails {
                     .prop("icon", "delete")
                     .event(clone!(state => move |_: events::Click| {
                         spawn_local(clone!(state => async move {
-                            RemoveMember::api_with_auth_empty(
+                            RemoveMember::api_with_auth(
                                 CircleRemoveMemberPath(state.circle_id, member_id),
                                 None,
                             ).await.unwrap_ji();

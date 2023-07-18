@@ -30,14 +30,14 @@ pub fn render(state: Rc<State>, jig: &JigResponse) -> Dom {
 
                     let response = if jig_liked {
                         // Unlike the JIG
-                        jig::Unlike::api_with_auth_empty(
+                        jig::Unlike::api_with_auth(
                             JigUnlikePath(jig.id),
                             None
                         )
                         .await
                     } else {
                         // Like the JIG
-                        jig::Like::api_with_auth_empty(
+                        jig::Like::api_with_auth(
                             JigLikePath(jig.id),
                             None
                         )

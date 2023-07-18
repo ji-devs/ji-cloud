@@ -20,7 +20,7 @@ use shared::domain::{
     UpdateNonNullable,
 };
 
-use crate::prelude::ApiEndpointExt;
+use crate::prelude::{ApiEndpointExt, ErrorExt};
 
 #[derive(Clone)]
 pub struct EditableCourse {
@@ -152,23 +152,27 @@ impl EditableCourse {
 
     pub async fn save_draft(&self) -> anyhow::Result<()> {
         let req = self.to_course_update_request();
-        endpoints::course::UpdateDraftData::api_with_auth_empty(
+        endpoints::course::UpdateDraftData::api_with_auth(
             CourseUpdateDraftDataPath(self.id),
             Some(req),
         )
         .await
+        .into_anyhow()
     }
 
     pub async fn save_admin_data(&self) -> anyhow::Result<()> {
         let req = self.to_update_admin_data_request();
-        endpoints::course::CourseAdminDataUpdate::api_with_auth_empty(
+        endpoints::course::CourseAdminDataUpdate::api_with_auth(
             CourseAdminDataUpdatePath(self.id),
             Some(req),
         )
         .await
+        .into_anyhow()
     }
 
     pub async fn publish(&self) -> anyhow::Result<()> {
-        endpoints::course::Publish::api_with_auth_empty(CoursePublishPath(self.id), None).await
+        endpoints::course::Publish::api_with_auth(CoursePublishPath(self.id), None)
+            .await
+            .into_anyhow()
     }
 }

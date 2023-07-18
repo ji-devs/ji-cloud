@@ -2,7 +2,7 @@ use super::state::*;
 use dominator::clone;
 use shared::{api::endpoints::user::*, domain::user::*};
 use std::rc::Rc;
-use utils::prelude::ApiEndpointExt;
+use utils::prelude::{ApiEndpointExt, ErrorExt};
 
 use crate::register::state::{Step, Step1Data};
 
@@ -60,8 +60,9 @@ async fn username_exists(name: String) -> bool {
         name: Some(name),
     };
 
-    let resp: anyhow::Result<OtherUser> =
-        UserLookup::api_no_auth(UserLookupPath(), Some(query)).await;
+    let resp: anyhow::Result<OtherUser> = UserLookup::api_no_auth(UserLookupPath(), Some(query))
+        .await
+        .into_anyhow();
 
     resp.is_ok()
 }

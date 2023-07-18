@@ -1,4 +1,5 @@
 pub use crate::{
+    error_ext::*,
     events,
     fetch::*,
     iframe::*,

@@ -2,12 +2,14 @@ use shared::{
     api::endpoints::{self},
     domain::course::{CourseGetDraftPath, CourseId, CourseResponse},
 };
-use utils::{prelude::ApiEndpointExt, unwrap::UnwrapJiExt};
+use utils::prelude::{ApiEndpointExt, ErrorExt, UnwrapJiExt};
 
 use crate::edit::{sidebar::SidebarSpot, AssetEditState};
 
 pub(crate) async fn load_course(course_id: &CourseId) -> anyhow::Result<CourseResponse> {
-    endpoints::course::GetDraft::api_with_auth(CourseGetDraftPath(course_id.clone()), None).await
+    endpoints::course::GetDraft::api_with_auth(CourseGetDraftPath(course_id.clone()), None)
+        .await
+        .into_anyhow()
 }
 
 impl AssetEditState {

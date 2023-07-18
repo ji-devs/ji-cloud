@@ -36,7 +36,7 @@ pub async fn delete(state: &Rc<SpotState>, item: &Option<Rc<CourseSpot>>) {
             CourseSpot::Unit(item) => item.id,
         };
 
-        endpoints::course::unit::Delete::api_with_auth_empty(
+        endpoints::course::unit::Delete::api_with_auth(
             DeleteCourseUnitPath(
                 state
                     .sidebar
@@ -65,7 +65,7 @@ pub async fn update_unit_index(state: Rc<SpotState>, item: Option<&Rc<CourseSpot
         match &**item {
             CourseSpot::Cover(_) => unimplemented!(),
             CourseSpot::Unit(item) => {
-                endpoints::course::unit::Update::api_with_auth_empty(
+                endpoints::course::unit::Update::api_with_auth(
                     UpdateCourseUnitPath(
                         state
                             .sidebar

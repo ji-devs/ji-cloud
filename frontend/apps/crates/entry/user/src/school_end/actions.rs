@@ -39,7 +39,7 @@ impl SchoolEnd {
                 organization_type: state.organization_type.get_cloned().into(),
                 ..Default::default()
             };
-            endpoints::account::UpdateSchoolAccount::api_with_auth_empty(SchoolAccountPath(state.school_id), Some(req)).await.unwrap_ji();
+            endpoints::account::UpdateSchoolAccount::api_with_auth(SchoolAccountPath(state.school_id), Some(req)).await.unwrap_ji();
             dominator::routing::go_to_url(&Route::User(UserRoute::Welcome).to_string());
         }));
     }

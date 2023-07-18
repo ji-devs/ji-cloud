@@ -77,7 +77,7 @@ pub fn load_initial(
 pub fn save(state: Rc<State>, req: ImageUpdateRequest) {
     state.loader.load(clone!(state => async move {
 
-        match endpoints::image::UpdateMetadata::api_with_auth_empty(ImageUpdatePath(state.id.clone()), Some(req)).await {
+        match endpoints::image::UpdateMetadata::api_with_auth(ImageUpdatePath(state.id.clone()), Some(req)).await {
             Ok(_) => {
             },
             Err(_err) => {
@@ -143,7 +143,7 @@ pub fn change_description(state: Rc<State>, image: Rc<MutableImage>, description
 
 pub fn delete(state: Rc<State>) {
     state.loader.load(clone!(state => async move {
-        match endpoints::image::Delete::api_with_auth_empty(ImageDeletePath(state.id), None).await {
+        match endpoints::image::Delete::api_with_auth(ImageDeletePath(state.id), None).await {
             Ok(_) => {
                 let route:String = Route::Admin(AdminRoute::ImageSearch(None)).into();
                 dominator::routing::go_to_url(&route);

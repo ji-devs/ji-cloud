@@ -105,7 +105,7 @@ async fn add_cover(course_id: &CourseId) {
 }
 
 pub async fn delete_course(course_id: CourseId) -> anyhow::Result<()> {
-    endpoints::course::Delete::api_with_auth_empty(CourseDeletePath(course_id), None)
+    endpoints::course::Delete::api_with_auth(CourseDeletePath(course_id), None)
         .await
-        .map(|_| ())
+        .into_anyhow()
 }

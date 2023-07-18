@@ -12,7 +12,7 @@ impl CourseSettings {
         let req = state.get_course_update_req();
 
         state.loader.load(clone!(state => async move {
-            let _ = endpoints::course::UpdateDraftData::api_with_auth_empty(
+            let _ = endpoints::course::UpdateDraftData::api_with_auth(
                 CourseUpdateDraftDataPath(state.course.id),
                 Some(req),
             )

@@ -15,7 +15,7 @@ impl AdditionalResourceComponent {
             let req = AssetIdResource {
                 asset_id: Some(state.publish_state.asset.id()),
             };
-            let res = endpoints::additional_resource::Delete::api_with_auth_empty(
+            let res = endpoints::additional_resource::Delete::api_with_auth(
                 DeleteAssetResourcePath(state.additional_resource.id.clone()),
                 Some(req)
             ).await;

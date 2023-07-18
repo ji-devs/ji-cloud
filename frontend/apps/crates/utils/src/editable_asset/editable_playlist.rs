@@ -22,7 +22,7 @@ use shared::domain::{
     UpdateNonNullable,
 };
 
-use crate::prelude::ApiEndpointExt;
+use crate::prelude::{ApiEndpointExt, ErrorExt};
 
 #[derive(Clone)]
 pub struct EditablePlaylist {
@@ -162,23 +162,27 @@ impl EditablePlaylist {
 
     pub async fn save_draft(&self) -> anyhow::Result<()> {
         let req = self.to_playlist_update_request();
-        endpoints::playlist::UpdateDraftData::api_with_auth_empty(
+        endpoints::playlist::UpdateDraftData::api_with_auth(
             PlaylistUpdateDraftDataPath(self.id),
             Some(req),
         )
         .await
+        .into_anyhow()
     }
 
     pub async fn save_admin_data(&self) -> anyhow::Result<()> {
         let req = self.to_update_admin_data_request();
-        endpoints::playlist::PlaylistAdminDataUpdate::api_with_auth_empty(
+        endpoints::playlist::PlaylistAdminDataUpdate::api_with_auth(
             PlaylistAdminDataUpdatePath(self.id),
             Some(req),
         )
         .await
+        .into_anyhow()
     }
 
     pub async fn publish(&self) -> anyhow::Result<()> {
-        endpoints::playlist::Publish::api_with_auth_empty(PlaylistPublishPath(self.id), None).await
+        endpoints::playlist::Publish::api_with_auth(PlaylistPublishPath(self.id), None)
+            .await
+            .into_anyhow()
     }
 }

@@ -20,7 +20,7 @@ impl SendResetLink {
                 email
             };
 
-            let res = endpoints::user::ResetPassword::api_no_auth_empty(ResetPasswordPath(), Some(req)).await;
+            let res = endpoints::user::ResetPassword::api_no_auth(ResetPasswordPath(), Some(req)).await;
 
             match res {
                 Ok(_) => {

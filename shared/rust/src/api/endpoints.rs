@@ -1,3 +1,5 @@
+use std::error::Error;
+
 use crate::api::Method;
 pub use macros::{make_path_parts, PathPart};
 use serde::{de::DeserializeOwned, Serialize};
@@ -15,10 +17,10 @@ pub trait ApiEndpoint {
     type Req: Serialize;
 
     /// The response type for this endpoint.
-    type Res: DeserializeOwned + Serialize;
+    type Res: DeserializeOwned + Serialize + 'static;
 
     /// The (inner) error type for this endpoint.
-    type Err: DeserializeOwned + Serialize;
+    type Err: DeserializeOwned + Serialize + Error + 'static;
 
     /// The method used to make a request to the endpoint.
     const METHOD: Method;

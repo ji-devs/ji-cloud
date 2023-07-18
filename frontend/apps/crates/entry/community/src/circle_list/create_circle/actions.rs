@@ -88,7 +88,6 @@ async fn get_circle(circle_id: &CircleId) -> anyhow::Result<Circle> {
 
 async fn join_circle(circle_id: &CircleId) -> anyhow::Result<()> {
     // let path = endpoints::circle::JoinCircle::PATH.replace("{id}", &circle_id.0.to_string());
-    endpoints::circle::JoinCircle::api_with_auth_empty(JoinCirclePath(circle_id.clone()), None)
-        .await?;
+    endpoints::circle::JoinCircle::api_with_auth(JoinCirclePath(circle_id.clone()), None).await?;
     Ok(())
 }

@@ -26,11 +26,12 @@ pub fn navigate_to_publish(state: Rc<Sidebar>) {
 }
 
 pub async fn update_jig(jig_id: &JigId, req: JigUpdateDraftDataRequest) -> anyhow::Result<()> {
-    endpoints::jig::UpdateDraftData::api_with_auth_empty(
+    endpoints::jig::UpdateDraftData::api_with_auth(
         JigUpdateDraftDataPath(jig_id.clone()),
         Some(req),
     )
     .await
+    .into_anyhow()
 }
 
 pub async fn update_display_name(jig_id: JigId, value: String) {
@@ -191,6 +192,7 @@ pub async fn update_module(
     module_id: &ModuleId,
     req: ModuleUpdateRequest,
 ) -> anyhow::Result<()> {
-    endpoints::module::Update::api_with_auth_empty(ModuleUploadPath(module_id.clone()), Some(req))
+    endpoints::module::Update::api_with_auth(ModuleUploadPath(module_id.clone()), Some(req))
         .await
+        .map_err(|e| e.into())
 }

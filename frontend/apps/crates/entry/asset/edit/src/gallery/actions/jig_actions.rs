@@ -77,7 +77,7 @@ pub async fn copy_jig(jig_id: JigId) -> Result<Asset, ()> {
 }
 
 pub async fn delete_jig(jig_id: JigId) -> anyhow::Result<()> {
-    endpoints::jig::Delete::api_with_auth_empty(JigDeletePath(jig_id), None)
+    endpoints::jig::Delete::api_with_auth(JigDeletePath(jig_id), None)
         .await
-        .map(|_| ())
+        .into_anyhow()
 }

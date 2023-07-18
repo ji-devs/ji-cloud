@@ -162,11 +162,8 @@ pub fn move_category(content_state: Rc<ContentState>, dir: Direction) {
             user_scopes: None,
         };
         content_state.state.loader.load(async move {
-            match endpoints::category::Update::api_with_auth_empty(
-                UpdateCategoryPath(id),
-                Some(req),
-            )
-            .await
+            match endpoints::category::Update::api_with_auth(UpdateCategoryPath(id), Some(req))
+                .await
             {
                 Ok(_) => {}
                 Err(_) => {
@@ -178,21 +175,24 @@ pub fn move_category(content_state: Rc<ContentState>, dir: Direction) {
 }
 
 pub fn delete_category(content_state: Rc<ContentState>) {
-    content_state.state.loader.load(clone!(content_state => async move {
-        let id = content_state.cat.id;
+    content_state
+        .state
+        .loader
+        .load(clone!(content_state => async move {
+            let id = content_state.cat.id;
 
-        match endpoints::category::Delete::api_with_auth_empty(DeleteCategoryPath(id), None).await {
-            Ok(_) => {
-                content_state
-                    .with_siblings_mut(move |mut children|
-                        children.retain(|x| x.id != id)
-                    );
-            },
-            Err(_) => {
-                log::info!("err!")
+            match endpoints::category::Delete::api_with_auth(DeleteCategoryPath(id), None).await {
+                Ok(_) => {
+                    content_state
+                        .with_siblings_mut(move |mut children|
+                            children.retain(|x| x.id != id)
+                        );
+                },
+                Err(_) => {
+                    log::info!("err!")
+                }
             }
-        }
-    }));
+        }));
 }
 
 pub fn rename_category(cat: &Rc<Category>, state: Rc<State>, name: String) {
@@ -207,9 +207,7 @@ pub fn rename_category(cat: &Rc<Category>, state: Rc<State>, name: String) {
             user_scopes: None,
         };
 
-        match endpoints::category::Update::api_with_auth_empty(UpdateCategoryPath(id), Some(req))
-            .await
-        {
+        match endpoints::category::Update::api_with_auth(UpdateCategoryPath(id), Some(req)).await {
             Ok(_) => {}
             Err(_) => {
                 log::info!("err!")

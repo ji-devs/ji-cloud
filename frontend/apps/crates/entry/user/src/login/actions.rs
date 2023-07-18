@@ -17,7 +17,7 @@ pub fn signin_email(state: Rc<LoginPage>) {
         let email = state.email.get_value();
         let password = state.password.borrow().clone();
 
-        let (resp, _):(anyhow::Result<CreateSessionResponse>, u16) = session::Create::api_with_basic_token_status(&email, &password, CreateSessionPath(), None::<()>).await;
+        let (resp, _) = session::Create::api_with_basic_token_status(&email, &password, CreateSessionPath(), None::<()>).await;
 
         match resp {
             Ok(resp) => {

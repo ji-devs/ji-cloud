@@ -13,8 +13,10 @@ impl SendEmailConfirmationPage {
         self.loader.load(async move {
             let query = VerifyEmailRequest::Resend { email };
 
-            let resp: anyhow::Result<()> =
-                user::VerifyEmail::api_no_auth_empty(VerifyEmailPath(), Some(query)).await;
+            let resp: anyhow::Result<_> =
+                user::VerifyEmail::api_no_auth(VerifyEmailPath(), Some(query))
+                    .await
+                    .into_anyhow();
 
             match resp {
                 Ok(_) => {

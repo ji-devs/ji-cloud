@@ -53,7 +53,7 @@ impl SchoolTable {
     pub fn set_verified(self: &Rc<Self>, school_name_id: SchoolNameId, verified: bool) {
         let state = Rc::clone(self);
         state.parent.loader.load(clone!(state => async move {
-            match endpoints::admin::VerifySchoolName::api_with_auth_empty(AdminVerifySchoolNamePath(), Some(VerifySchoolNameRequest {
+            match endpoints::admin::VerifySchoolName::api_with_auth(AdminVerifySchoolNamePath(), Some(VerifySchoolNameRequest {
                 school_name_id,
                 verified,
             })).await {

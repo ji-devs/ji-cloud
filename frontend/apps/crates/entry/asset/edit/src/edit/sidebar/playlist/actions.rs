@@ -16,11 +16,12 @@ pub async fn update_playlist(
     playlist_id: &PlaylistId,
     req: PlaylistUpdateDraftDataRequest,
 ) -> anyhow::Result<()> {
-    endpoints::playlist::UpdateDraftData::api_with_auth_empty(
+    endpoints::playlist::UpdateDraftData::api_with_auth(
         PlaylistUpdateDraftDataPath(playlist_id.clone()),
         Some(req),
     )
     .await
+    .into_anyhow()
 }
 
 pub async fn update_display_name(playlist_id: PlaylistId, value: String) {

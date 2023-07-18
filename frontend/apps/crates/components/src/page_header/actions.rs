@@ -21,7 +21,7 @@ pub fn fetch_profile(state: Rc<PageHeader>) {
 
 pub fn logout(state: Rc<PageHeader>) {
     state.loader.load(clone!(state => async move {
-        let server = endpoints::session::Delete::api_with_auth_empty(DeleteSessionPath(), None).await;
+        let server = endpoints::session::Delete::api_with_auth(DeleteSessionPath(), None).await;
         let local = delete_csrf_token();
 
         match (local, server) {

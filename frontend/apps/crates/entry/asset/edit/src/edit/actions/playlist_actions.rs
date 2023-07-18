@@ -5,12 +5,14 @@ use shared::{
         playlist::{PlaylistGetDraftPath, PlaylistId, PlaylistResponse},
     },
 };
-use utils::{prelude::ApiEndpointExt, unwrap::UnwrapJiExt};
+use utils::prelude::{ApiEndpointExt, ErrorExt, UnwrapJiExt};
 
 use crate::edit::{sidebar::SidebarSpot, AssetEditState};
 
 pub async fn load_playlist(playlist_id: PlaylistId) -> anyhow::Result<PlaylistResponse> {
-    playlist::GetDraft::api_with_auth(PlaylistGetDraftPath(playlist_id.clone()), None).await
+    playlist::GetDraft::api_with_auth(PlaylistGetDraftPath(playlist_id.clone()), None)
+        .await
+        .into_anyhow()
 }
 
 impl AssetEditState {

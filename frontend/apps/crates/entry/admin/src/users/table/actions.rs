@@ -33,7 +33,7 @@ impl UsersTable {
             let req = PatchProfileAdminDataRequest {
                 badge: Some(user.badge.get()),
             };
-            endpoints::user::PatchProfileAdminData::api_with_auth_empty(
+            endpoints::user::PatchProfileAdminData::api_with_auth(
                 PatchProfileAdminDataPath(user.id),
                 Some(req),
             )

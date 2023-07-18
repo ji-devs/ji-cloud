@@ -11,7 +11,7 @@ use shared::{
     },
 };
 use utils::{
-    prelude::{ApiEndpointExt, UnwrapJiExt},
+    prelude::{ApiEndpointExt, ErrorExt, UnwrapJiExt},
     routes::{CourseEditRoute, JigEditRoute, PlaylistEditRoute, ResourceEditRoute},
 };
 
@@ -199,12 +199,14 @@ async fn load_categories() -> anyhow::Result<Vec<Category>> {
         scope: Some(CategoryTreeScope::Descendants),
     };
 
-    match category::Get::api_with_auth(GetCategoryPath(), Some(req)).await {
-        Ok(resp) => Ok(resp.categories),
-        Err(e) => Err(e),
-    }
+    category::Get::api_with_auth(GetCategoryPath(), Some(req))
+        .await
+        .map(|res| res.categories)
+        .into_anyhow()
 }
 
 pub async fn load_metadata() -> anyhow::Result<MetadataResponse> {
-    meta::Get::api_with_auth(GetMetadataPath(), None).await
+    meta::Get::api_with_auth(GetMetadataPath(), None)
+        .await
+        .map_err(|e| e.into())
 }

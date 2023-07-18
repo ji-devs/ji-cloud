@@ -115,7 +115,8 @@ pub async fn copy_resource(resource_id: ResourceId) -> Result<Asset, ()> {
 }
 
 pub async fn delete_resource(resource_id: ResourceId) -> anyhow::Result<()> {
-    endpoints::resource::Delete::api_with_auth_empty(ResourceDeletePath(resource_id), None)
+    endpoints::resource::Delete::api_with_auth(ResourceDeletePath(resource_id), None)
         .await
         .map(|_| ())
+        .into_anyhow()
 }

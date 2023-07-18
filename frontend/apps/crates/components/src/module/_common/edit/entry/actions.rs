@@ -159,7 +159,7 @@ pub fn save<RawData, Mode, Step>(
             body: Some(body),
             parent_id: asset_id,
         });
-        let _ = Update::api_with_auth_empty(ModuleUploadPath(module_id.clone()), req).await;
+        let _ = Update::api_with_auth(ModuleUploadPath(module_id.clone()), req).await;
 
         // Update the sidebar with this modules completion status
         let _ = IframeAction::new(ModuleToJigEditorMessage::Complete(module_id, is_complete))

@@ -4,9 +4,14 @@
    the non_status versions do side effects based on the status (e.g. redirect to no-auth page)
 */
 
-use std::future;
+use std::{
+    any::TypeId,
+    error::Error,
+    fmt::{self, Display},
+    future, result,
+};
 
-use serde::{de::DeserializeOwned, Serialize};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use shared::api::{method::Method, PathParts};
 
 use crate::{
@@ -21,7 +26,7 @@ use super::init::settings::SETTINGS;
 use async_trait::async_trait;
 use awsm_web::loaders::fetch::{
     fetch_upload_file_abortable, fetch_upload_file_with_headers, fetch_with_data,
-    fetch_with_headers_and_data, fetch_with_headers_and_data_abortable,
+    fetch_with_headers_and_data, fetch_with_headers_and_data_abortable, Response,
 };
 use web_sys::File;
 
@@ -32,21 +37,53 @@ pub const GET: &str = "GET";
 
 pub type IsAborted = bool;
 
-const DESERIALIZE_ERR: &str = "couldn't deserialize error in fetch";
 const DESERIALIZE_OK: &str = "couldn't deserialize ok in fetch";
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum ApiError<T: fmt::Debug + Display> {
+    Connection,
+    Response(T),
+}
+impl<T> fmt::Display for ApiError<T>
+where
+    T: fmt::Debug + Display,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ApiError::Connection => write!(f, "Error when communicating with server"),
+            ApiError::Response(e) => write!(f, "Error: {e}"),
+        }
+    }
+}
+impl<T> Error for ApiError<T> where T: fmt::Debug + Display {}
+
+impl<E> From<E> for ApiError<E>
+where
+    E: Error,
+{
+    fn from(e: E) -> Self {
+        ApiError::Response(e)
+    }
+}
+
+pub type ApiResult<T, E> = std::result::Result<T, ApiError<E>>;
 
 // extension trait to make calling the API very convenient
 #[async_trait(?Send)]
 pub trait ApiEndpointExt {
     type Path: PathParts;
     type Req: Serialize;
-    type Res: DeserializeOwned + Serialize;
+    type Res: DeserializeOwned + Serialize + 'static;
+    type Err: DeserializeOwned + Serialize + Error + 'static;
 
     // const EXTPATH: &'static str;
     const EXT_METHOD: Method;
 
     /**** WITH AUTH ****/
-    async fn api_with_auth(path: Self::Path, data: Option<Self::Req>) -> anyhow::Result<Self::Res> {
+    async fn api_with_auth(
+        path: Self::Path,
+        data: Option<Self::Req>,
+    ) -> ApiResult<Self::Res, Self::Err> {
         let (resp, status) = Self::api_with_auth_status(path, data).await;
 
         side_effect_status_code(status).await;
@@ -56,7 +93,7 @@ pub trait ApiEndpointExt {
     async fn api_with_auth_status(
         path: Self::Path,
         data: Option<Self::Req>,
-    ) -> (anyhow::Result<Self::Res>, u16) {
+    ) -> (ApiResult<Self::Res, Self::Err>, u16) {
         Self::api_with_auth_status_abortable(None, path, data)
             .await
             .unwrap_ji()
@@ -65,7 +102,7 @@ pub trait ApiEndpointExt {
         abort_controller: Option<&AbortController>,
         path: Self::Path,
         data: Option<Self::Req>,
-    ) -> Result<anyhow::Result<Self::Res>, IsAborted> {
+    ) -> Result<ApiResult<Self::Res, Self::Err>, IsAborted> {
         let resp = Self::api_with_auth_status_abortable(abort_controller, path, data).await;
 
         if let Ok((_, status)) = resp {
@@ -78,7 +115,7 @@ pub trait ApiEndpointExt {
         abort_controller: Option<&AbortController>,
         path: Self::Path,
         data: Option<Self::Req>,
-    ) -> Result<(anyhow::Result<Self::Res>, u16), IsAborted> {
+    ) -> Result<(ApiResult<Self::Res, Self::Err>, u16), IsAborted> {
         if let Ok(token) = env_var("LOCAL_API_AUTH_OVERRIDE") {
             Self::api_with_token_status_abortable(&token, abort_controller, path, data).await
         } else {
@@ -100,13 +137,15 @@ pub trait ApiEndpointExt {
 
                     if res.ok() {
                         Ok((
-                            Ok(res.json_from_str().await.expect_ji(DESERIALIZE_OK)),
+                            Ok(Self::res_to_json(res).await.expect_ji(DESERIALIZE_OK)),
                             status,
                         ))
                     } else {
                         Ok((
-                            // Err(anyhow::anyhow!(DESERIALIZE_ERR)),
-                            Err(anyhow::anyhow!(DESERIALIZE_ERR)),
+                            Err(Self::res_to_json(res)
+                                .await
+                                .map(|e| ApiError::Response(e))
+                                .expect_ji(DESERIALIZE_OK)),
                             status,
                         ))
                     }
@@ -115,53 +154,18 @@ pub trait ApiEndpointExt {
                     if err.is_abort() {
                         Err(true)
                     } else {
-                        panic!("request failed but was not aborted");
+                        Ok((Err(ApiError::Connection), 0))
                     }
                 }
             }
         }
     }
-    //TODO - get rid of this, use specialization
-    async fn api_with_auth_empty(path: Self::Path, data: Option<Self::Req>) -> anyhow::Result<()> {
-        let (resp, status) = Self::api_with_auth_empty_status(path, data).await;
-
-        side_effect_status_code(status).await;
-
-        resp
-    }
-    async fn api_with_auth_empty_status(
-        path: Self::Path,
-        data: Option<Self::Req>,
-    ) -> (anyhow::Result<()>, u16) {
-        if let Ok(token) = env_var("LOCAL_API_AUTH_OVERRIDE") {
-            Self::api_with_token_empty_status(&token, path, data).await
-        } else {
-            let csrf = load_csrf_token().unwrap_or_default();
-
-            let (url, data) = api_get_query(&path.get_filled(), Self::EXT_METHOD, data);
-
-            let res = fetch_with_headers_and_data(
-                &url,
-                Self::EXT_METHOD.as_str(),
-                true,
-                &[(CSRF_HEADER_NAME, &csrf)],
-                data,
-            )
-            .await
-            .unwrap_ji();
-
-            let status = res.status();
-
-            if res.ok() {
-                (Ok(()), status)
-            } else {
-                (Err(anyhow::anyhow!(DESERIALIZE_ERR)), status)
-            }
-        }
-    }
 
     /**** NO AUTH ****/
-    async fn api_no_auth(path: Self::Path, data: Option<Self::Req>) -> anyhow::Result<Self::Res> {
+    async fn api_no_auth(
+        path: Self::Path,
+        data: Option<Self::Req>,
+    ) -> ApiResult<Self::Res, Self::Err> {
         let (resp, status) = Self::api_no_auth_status(path, data).await;
 
         side_effect_status_code(status).await;
@@ -171,7 +175,7 @@ pub trait ApiEndpointExt {
     async fn api_no_auth_status(
         path: Self::Path,
         data: Option<Self::Req>,
-    ) -> (anyhow::Result<Self::Res>, u16) {
+    ) -> (ApiResult<Self::Res, Self::Err>, u16) {
         let (url, data) = api_get_query(&path.get_filled(), Self::EXT_METHOD, data);
 
         let res = fetch_with_data(&url, Self::EXT_METHOD.as_str(), false, data)
@@ -182,41 +186,14 @@ pub trait ApiEndpointExt {
 
         if res.ok() {
             (
-                Ok(res.json_from_str().await.expect_ji(DESERIALIZE_OK)),
+                Ok(Self::res_to_json(res).await.expect_ji(DESERIALIZE_OK)),
                 status,
             )
         } else {
             (
-                // Err(anyhow::anyhow!(res.json_from_str().await.expect_ji(DESERIALIZE_ERR))),
-                Err(anyhow::anyhow!(DESERIALIZE_ERR)),
+                Err(Self::res_to_json(res).await.expect_ji(DESERIALIZE_OK)),
                 status,
             )
-        }
-    }
-    //TODO - get rid of this, use specialization
-    async fn api_no_auth_empty(path: Self::Path, data: Option<Self::Req>) -> anyhow::Result<()> {
-        let (resp, status) = Self::api_no_auth_empty_status(path, data).await;
-
-        side_effect_status_code(status).await;
-
-        resp
-    }
-    async fn api_no_auth_empty_status(
-        path: Self::Path,
-        data: Option<Self::Req>,
-    ) -> (anyhow::Result<()>, u16) {
-        let (url, data) = api_get_query(&path.get_filled(), Self::EXT_METHOD, data);
-
-        let res = fetch_with_data(&url, Self::EXT_METHOD.as_str(), false, data)
-            .await
-            .unwrap_ji();
-
-        let status = res.status();
-
-        if res.ok() {
-            (Ok(()), status)
-        } else {
-            (Err(anyhow::anyhow!(DESERIALIZE_ERR)), status)
         }
     }
 
@@ -225,7 +202,7 @@ pub trait ApiEndpointExt {
         token: &str,
         path: Self::Path,
         data: Option<Self::Req>,
-    ) -> anyhow::Result<Self::Res> {
+    ) -> ApiResult<Self::Res, Self::Err> {
         let (resp, status) = Self::api_with_token_status(token, path, data).await;
 
         side_effect_status_code(status).await;
@@ -236,7 +213,7 @@ pub trait ApiEndpointExt {
         token: &str,
         path: Self::Path,
         data: Option<Self::Req>,
-    ) -> (anyhow::Result<Self::Res>, u16) {
+    ) -> (ApiResult<Self::Res, Self::Err>, u16) {
         Self::api_with_token_status_abortable(token, None, path, data)
             .await
             .unwrap_ji()
@@ -246,7 +223,7 @@ pub trait ApiEndpointExt {
         abort_controller: Option<&AbortController>,
         path: Self::Path,
         data: Option<Self::Req>,
-    ) -> Result<(anyhow::Result<Self::Res>, u16), IsAborted> {
+    ) -> Result<(ApiResult<Self::Res, Self::Err>, u16), IsAborted> {
         let bearer = format!("Bearer {}", token);
 
         let (url, data) = api_get_query(&path.get_filled(), Self::EXT_METHOD, data);
@@ -266,59 +243,23 @@ pub trait ApiEndpointExt {
 
                 if res.ok() {
                     Ok((
-                        Ok(res.json_from_str().await.expect_ji(DESERIALIZE_OK)),
+                        Ok(Self::res_to_json(res).await.expect_ji(DESERIALIZE_OK)),
                         status,
                     ))
                 } else {
-                    Ok((Err(anyhow::anyhow!(DESERIALIZE_ERR)), status))
+                    Ok((
+                        Err(Self::res_to_json(res).await.expect_ji(DESERIALIZE_OK)),
+                        status,
+                    ))
                 }
             }
             Err(err) => {
                 if err.is_abort() {
                     Err(true)
                 } else {
-                    panic!("request failed but was not aborted");
+                    Ok((Err(ApiError::Connection), 0))
                 }
             }
-        }
-    }
-    //TODO - get rid of this, use specialization
-    async fn api_with_token_empty(
-        token: &str,
-        path: Self::Path,
-        data: Option<Self::Req>,
-    ) -> anyhow::Result<()> {
-        let (resp, status) = Self::api_with_token_empty_status(token, path, data).await;
-
-        side_effect_status_code(status).await;
-
-        resp
-    }
-    async fn api_with_token_empty_status(
-        token: &str,
-        path: Self::Path,
-        data: Option<Self::Req>,
-    ) -> (anyhow::Result<()>, u16) {
-        let bearer = format!("Bearer {}", token);
-
-        let (url, data) = api_get_query(&path.get_filled(), Self::EXT_METHOD, data);
-
-        let res = fetch_with_headers_and_data(
-            &url,
-            Self::EXT_METHOD.as_str(),
-            true,
-            &[("Authorization", &bearer)],
-            data,
-        )
-        .await
-        .unwrap_ji();
-
-        let status = res.status();
-
-        if res.ok() {
-            (Ok(()), status)
-        } else {
-            (Err(anyhow::anyhow!(DESERIALIZE_ERR)), status)
         }
     }
 
@@ -328,7 +269,7 @@ pub trait ApiEndpointExt {
     async fn api_no_auth_with_credentials(
         path: Self::Path,
         data: Option<Self::Req>,
-    ) -> anyhow::Result<Self::Res> {
+    ) -> ApiResult<Self::Res, Self::Err> {
         let (resp, status) = Self::api_no_auth_with_credentials_status(path, data).await;
 
         side_effect_status_code(status).await;
@@ -338,7 +279,7 @@ pub trait ApiEndpointExt {
     async fn api_no_auth_with_credentials_status(
         path: Self::Path,
         data: Option<Self::Req>,
-    ) -> (anyhow::Result<Self::Res>, u16) {
+    ) -> (ApiResult<Self::Res, Self::Err>, u16) {
         let (url, data) = api_get_query(&path.get_filled(), Self::EXT_METHOD, data);
 
         let res = fetch_with_data(&url, Self::EXT_METHOD.as_str(), true, data)
@@ -349,11 +290,14 @@ pub trait ApiEndpointExt {
 
         if res.ok() {
             (
-                Ok(res.json_from_str().await.expect_ji(DESERIALIZE_OK)),
+                Ok(Self::res_to_json(res).await.expect_ji(DESERIALIZE_OK)),
                 status,
             )
         } else {
-            (Err(anyhow::anyhow!(DESERIALIZE_ERR)), status)
+            (
+                Err(Self::res_to_json(res).await.expect_ji(DESERIALIZE_OK)),
+                status,
+            )
         }
     }
 
@@ -364,7 +308,7 @@ pub trait ApiEndpointExt {
         password: &str,
         path: Self::Path,
         data: Option<Self::Req>,
-    ) -> anyhow::Result<Self::Res> {
+    ) -> ApiResult<Self::Res, Self::Err> {
         let (resp, status) = Self::api_with_basic_token_status(user_id, password, path, data).await;
 
         side_effect_status_code(status).await;
@@ -376,7 +320,7 @@ pub trait ApiEndpointExt {
         password: &str,
         path: Self::Path,
         data: Option<Self::Req>,
-    ) -> (anyhow::Result<Self::Res>, u16) {
+    ) -> (ApiResult<Self::Res, Self::Err>, u16) {
         let credentials = format!("{}:{}", user_id, password);
         let token = base64::encode(credentials.as_bytes());
         let basic = format!("Basic {}", token);
@@ -397,12 +341,30 @@ pub trait ApiEndpointExt {
 
         if res.ok() {
             (
-                Ok(res.json_from_str().await.expect_ji(DESERIALIZE_OK)),
+                Ok(Self::res_to_json(res).await.expect_ji(DESERIALIZE_OK)),
                 status,
             )
         } else {
-            (Err(anyhow::anyhow!(DESERIALIZE_ERR)), status)
+            (
+                Err(Self::res_to_json(res).await.expect_ji(DESERIALIZE_OK)),
+                status,
+            )
         }
+    }
+
+    // TODO: use specialization once stable instead.
+    /// Similar to awsm_web::loaders::fetch::Response::json_from_str, but treats an empty string as valid input for `()`
+    async fn res_to_json<T>(res: Response) -> Result<T, ApiError<Self::Err>>
+    where
+        T: DeserializeOwned + 'static,
+    {
+        let mut text = res.text().await.map_err(|_| ApiError::Connection)?;
+        if TypeId::of::<T>() == TypeId::of::<()>() {
+            if text.is_empty() {
+                text = String::from("null");
+            }
+        }
+        serde_json::from_str(&text).map_err(|_| ApiError::Connection)
     }
 }
 
@@ -411,6 +373,7 @@ impl<T: ApiEndpoint> ApiEndpointExt for T {
     type Path = T::Path;
     type Req = T::Req;
     type Res = T::Res;
+    type Err = T::Err;
 
     const EXT_METHOD: Method = T::METHOD;
 }
@@ -428,7 +391,7 @@ pub async fn upload_file_gcs(
     url: &str,
     file: &File,
     abort_controller: Option<&AbortController>,
-) -> Result<(), awsm_web::errors::Error> {
+) -> result::Result<(), awsm_web::errors::Error> {
     let (resp, status) = upload_file_gcs_status(url, file, abort_controller).await;
 
     side_effect_status_code(status).await;
@@ -440,7 +403,7 @@ pub async fn upload_file_gcs_status(
     url: &str,
     file: &File,
     abort_controller: Option<&AbortController>,
-) -> (Result<(), awsm_web::errors::Error>, u16) {
+) -> (result::Result<(), awsm_web::errors::Error>, u16) {
     match fetch_upload_file_abortable(url, file, Method::Put.as_str(), abort_controller).await {
         Ok(res) => {
             let status = res.status();
@@ -456,7 +419,11 @@ pub async fn upload_file_gcs_status(
 }
 
 //TODO - deprecate! All uploads should go through GCS signed urls
-pub async fn api_upload_file(endpoint: &str, file: &File, method: Method) -> Result<(), ()> {
+pub async fn api_upload_file(
+    endpoint: &str,
+    file: &File,
+    method: Method,
+) -> result::Result<(), ()> {
     let (resp, status) = api_upload_file_status(endpoint, file, method).await;
 
     side_effect_status_code(status).await;
@@ -468,7 +435,7 @@ pub async fn api_upload_file_status(
     endpoint: &str,
     file: &File,
     method: Method,
-) -> (Result<(), ()>, u16) {
+) -> (result::Result<(), ()>, u16) {
     let (url, _) = api_get_query::<()>(endpoint, method, None);
 
     let csrf = load_csrf_token().unwrap_or_default();

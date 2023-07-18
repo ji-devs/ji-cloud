@@ -23,7 +23,7 @@ use shared::domain::{
     UpdateNonNullable,
 };
 
-use crate::prelude::ApiEndpointExt;
+use crate::prelude::{ApiEndpointExt, ErrorExt};
 
 #[derive(Clone)]
 pub struct EditableJig {
@@ -243,23 +243,24 @@ impl EditableJig {
 
     pub async fn save_draft(&self) -> anyhow::Result<()> {
         let req = self.to_jig_update_request();
-        endpoints::jig::UpdateDraftData::api_with_auth_empty(
-            JigUpdateDraftDataPath(self.id),
-            Some(req),
-        )
-        .await
+        endpoints::jig::UpdateDraftData::api_with_auth(JigUpdateDraftDataPath(self.id), Some(req))
+            .await
+            .into_anyhow()
     }
 
     pub async fn save_admin_data(&self) -> anyhow::Result<()> {
         let req = self.to_update_admin_data_request();
-        endpoints::jig::JigAdminDataUpdate::api_with_auth_empty(
+        endpoints::jig::JigAdminDataUpdate::api_with_auth(
             JigAdminDataUpdatePath(self.id),
             Some(req),
         )
         .await
+        .into_anyhow()
     }
 
     pub async fn publish(&self) -> anyhow::Result<()> {
-        endpoints::jig::Publish::api_with_auth_empty(JigPublishPath(self.id), None).await
+        endpoints::jig::Publish::api_with_auth(JigPublishPath(self.id), None)
+            .await
+            .map_err(|e| e.into())
     }
 }

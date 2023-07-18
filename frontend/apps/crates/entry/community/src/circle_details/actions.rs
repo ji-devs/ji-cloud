@@ -71,7 +71,7 @@ impl CircleDetails {
         let state = self;
 
         state.loader.load(clone!(state => async move {
-            match endpoints::circle::JoinCircle::api_with_auth_empty(JoinCirclePath(state.circle_id), None).await
+            match endpoints::circle::JoinCircle::api_with_auth(JoinCirclePath(state.circle_id), None).await
             {
                 Ok(_) => {
                     let mut user = state.community_state.user.get_cloned().unwrap_ji();
@@ -88,7 +88,7 @@ impl CircleDetails {
         let state = self;
 
         state.loader.load(clone!(state => async move {
-            match endpoints::circle::LeaveCircle::api_with_auth_empty(LeaveCirclePath(state.circle_id), None).await
+            match endpoints::circle::LeaveCircle::api_with_auth(LeaveCirclePath(state.circle_id), None).await
             {
                 Ok(_) => {
                     let mut user = state.community_state.user.get_cloned().unwrap_ji();
@@ -112,7 +112,7 @@ impl CircleDetails {
                 image: Some(circle.image),
             };
 
-            let res = endpoints::circle::Update::api_with_auth_empty(UpdateCirclePath(state.circle_id), Some(req)).await;
+            let res = endpoints::circle::Update::api_with_auth(UpdateCirclePath(state.circle_id), Some(req)).await;
             if let Err(_err) = res {
                 todo!()
             }
@@ -135,7 +135,7 @@ impl CircleDetails {
                 },
             };
 
-            match endpoints::circle::Delete::api_with_auth_empty(CircleDeletePath(state.circle_id), None).await
+            match endpoints::circle::Delete::api_with_auth(CircleDeletePath(state.circle_id), None).await
             {
                 Ok(_) => {
                     Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::List)).go_to();

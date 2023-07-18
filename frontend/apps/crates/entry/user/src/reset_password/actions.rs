@@ -28,7 +28,7 @@ impl PasswordResetPage {
                 force_logout: true
             };
 
-            let (resp, _status):(anyhow::Result<()>, u16) = user::ChangePassword::api_no_auth_empty_status(ChangePasswordPath(), Some(query)).await;
+            let (resp, _status) = user::ChangePassword::api_no_auth_status(ChangePasswordPath(), Some(query)).await;
 
             match resp {
                 Ok(_) => {

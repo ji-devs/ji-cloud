@@ -100,22 +100,18 @@ pub async fn create_entry(bundle_id: Uuid) -> DisplayableEntry {
 
 pub async fn save_entry(entry: &DisplayableEntry) {
     let body: UpdateEntryRequest = entry.clone().into();
-    let res = endpoints::locale::entry::Update::api_with_auth_empty(
-        UpdateEntryPath(entry.id),
-        Some(body),
-    )
-    .await;
+    let res =
+        endpoints::locale::entry::Update::api_with_auth(UpdateEntryPath(entry.id), Some(body))
+            .await;
     if res.is_err() {
         panic!();
     }
 }
 
 pub async fn delete_entry(entry_id: u32) {
-    let res = endpoints::locale::entry::Delete::api_with_auth_empty(
-        DeleteEntryPath(entry_id.clone()),
-        None,
-    )
-    .await;
+    let res =
+        endpoints::locale::entry::Delete::api_with_auth(DeleteEntryPath(entry_id.clone()), None)
+            .await;
     if res.is_err() {
         panic!();
     }

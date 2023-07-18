@@ -109,7 +109,7 @@ pub async fn copy_playlist(playlist_id: PlaylistId) -> Result<Asset, ()> {
 }
 
 pub async fn delete_playlist(playlist_id: PlaylistId) -> anyhow::Result<()> {
-    endpoints::playlist::Delete::api_with_auth_empty(PlaylistDeletePath(playlist_id), None)
+    endpoints::playlist::Delete::api_with_auth(PlaylistDeletePath(playlist_id), None)
         .await
-        .map(|_| ())
+        .into_anyhow()
 }

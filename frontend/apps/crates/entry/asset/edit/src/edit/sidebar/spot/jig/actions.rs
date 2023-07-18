@@ -30,7 +30,7 @@ pub async fn delete(state: &Rc<SpotState>, module: &Option<Rc<LiteModule>>) {
             parent_id: state.sidebar.asset_edit_state.asset_id,
         };
 
-        endpoints::module::Delete::api_with_auth_empty(ModuleDeletePath(module.id), Some(req))
+        endpoints::module::Delete::api_with_auth(ModuleDeletePath(module.id), Some(req))
             .await
             .unwrap_ji();
     }

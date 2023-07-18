@@ -276,7 +276,7 @@ impl SearchResultsSection {
                                             track_action("play", asset.clone());
 
                                             state.loader.load(clone!(asset => async move {
-                                                let _ = resource::View::api_no_auth_empty(
+                                                let _ = resource::View::api_no_auth(
                                                     ResourceViewPath(asset.unwrap_resource().id),
                                                     None,
                                                 ).await;

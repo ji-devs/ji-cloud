@@ -15,7 +15,9 @@ impl VerifyEmailPage {
         };
 
         let resp: anyhow::Result<Option<NewSessionResponse>> =
-            user::VerifyEmail::api_no_auth_with_credentials(VerifyEmailPath(), Some(query)).await;
+            user::VerifyEmail::api_no_auth_with_credentials(VerifyEmailPath(), Some(query))
+                .await
+                .into_anyhow();
 
         match resp {
             Ok(resp) => match resp {

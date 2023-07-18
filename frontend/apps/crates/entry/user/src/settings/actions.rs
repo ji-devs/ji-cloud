@@ -28,7 +28,7 @@ impl SettingsPage {
                 email: state.user.email.get_cloned()
             };
 
-            let res = endpoints::user::ResetPassword::api_no_auth_empty(ResetPasswordPath(), Some(req)).await;
+            let res = endpoints::user::ResetPassword::api_no_auth(ResetPasswordPath(), Some(req)).await;
 
             match res {
                 Ok(_) => {
@@ -74,7 +74,7 @@ impl SettingsPage {
         state.loader.load(clone!(state => async move {
             let info = state.user.to_update();
 
-            let res = user::PatchProfile::api_with_auth_empty(PatchProfilePath(), Some(info)).await;
+            let res = user::PatchProfile::api_with_auth(PatchProfilePath(), Some(info)).await;
             if let Err(_err) = res {
                 todo!()
             }

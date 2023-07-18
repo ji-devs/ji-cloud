@@ -21,7 +21,7 @@ use shared::domain::{
     UpdateNonNullable,
 };
 
-use crate::prelude::ApiEndpointExt;
+use crate::prelude::{ApiEndpointExt, ErrorExt};
 
 #[derive(Clone)]
 pub struct EditableResource {
@@ -190,23 +190,27 @@ impl EditableResource {
 
     pub async fn save_draft(&self) -> anyhow::Result<()> {
         let req = self.to_resource_update_request();
-        endpoints::resource::UpdateDraftData::api_with_auth_empty(
+        endpoints::resource::UpdateDraftData::api_with_auth(
             ResourceUpdateDraftDataPath(self.id),
             Some(req),
         )
         .await
+        .into_anyhow()
     }
 
     pub async fn save_admin_data(&self) -> anyhow::Result<()> {
         let req = self.to_update_admin_data_request();
-        endpoints::resource::ResourceAdminDataUpdate::api_with_auth_empty(
+        endpoints::resource::ResourceAdminDataUpdate::api_with_auth(
             ResourceAdminDataUpdatePath(self.id),
             Some(req),
         )
         .await
+        .into_anyhow()
     }
 
     pub async fn publish(&self) -> anyhow::Result<()> {
-        endpoints::resource::Publish::api_with_auth_empty(ResourcePublishPath(self.id), None).await
+        endpoints::resource::Publish::api_with_auth(ResourcePublishPath(self.id), None)
+            .await
+            .into_anyhow()
     }
 }

@@ -73,24 +73,21 @@ impl SearchResultsSection {
                 AssetId::JigId(jig_id) => {
                     match is_liked {
                         true => {
-                            endpoints::jig::Like::api_with_auth_empty(JigLikePath(jig_id), None)
+                            endpoints::jig::Like::api_with_auth(JigLikePath(jig_id), None)
                                 .await
                                 .unwrap_ji();
                         }
                         false => {
-                            endpoints::jig::Unlike::api_with_auth_empty(
-                                JigUnlikePath(jig_id),
-                                None,
-                            )
-                            .await
-                            .unwrap_ji();
+                            endpoints::jig::Unlike::api_with_auth(JigUnlikePath(jig_id), None)
+                                .await
+                                .unwrap_ji();
                         }
                     };
                 }
                 AssetId::PlaylistId(playlist_id) => {
                     match is_liked {
                         true => {
-                            endpoints::playlist::Like::api_with_auth_empty(
+                            endpoints::playlist::Like::api_with_auth(
                                 PlaylistLikePath(playlist_id),
                                 None,
                             )
@@ -98,7 +95,7 @@ impl SearchResultsSection {
                             .unwrap_ji();
                         }
                         false => {
-                            endpoints::playlist::Unlike::api_with_auth_empty(
+                            endpoints::playlist::Unlike::api_with_auth(
                                 PlaylistUnlikePath(playlist_id),
                                 None,
                             )
@@ -110,7 +107,7 @@ impl SearchResultsSection {
                 AssetId::ResourceId(resource_id) => {
                     match is_liked {
                         true => {
-                            endpoints::resource::Like::api_with_auth_empty(
+                            endpoints::resource::Like::api_with_auth(
                                 ResourceLikePath(resource_id),
                                 None,
                             )
@@ -118,7 +115,7 @@ impl SearchResultsSection {
                             .unwrap_ji();
                         }
                         false => {
-                            endpoints::resource::Unlike::api_with_auth_empty(
+                            endpoints::resource::Unlike::api_with_auth(
                                 ResourceUnlikePath(resource_id),
                                 None,
                             )

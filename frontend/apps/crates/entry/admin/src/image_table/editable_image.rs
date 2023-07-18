@@ -78,11 +78,8 @@ impl EditableImage {
 
     pub async fn save(&self) {
         let req = self.to_image_update_request();
-        match endpoints::image::UpdateMetadata::api_with_auth_empty(
-            ImageUpdatePath(self.id),
-            Some(req),
-        )
-        .await
+        match endpoints::image::UpdateMetadata::api_with_auth(ImageUpdatePath(self.id), Some(req))
+            .await
         {
             Ok(_) => {}
             Err(_err) => {

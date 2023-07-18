@@ -37,8 +37,7 @@ pub async fn add_user_color(state: Rc<State>, color: RGBA8) -> Result<(), anyhow
 
 pub async fn delete_user_color(state: Rc<State>, index: usize) {
     let res =
-        endpoints::user::DeleteColor::api_with_auth_empty(UserColorDeletePath(index as i32), None)
-            .await;
+        endpoints::user::DeleteColor::api_with_auth(UserColorDeletePath(index as i32), None).await;
 
     match res {
         Err(_) => {}

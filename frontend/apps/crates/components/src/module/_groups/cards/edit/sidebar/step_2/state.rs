@@ -40,7 +40,7 @@ impl<RawData: RawDataExt, E: ExtraExt> Step2<RawData, E> {
                     ..JigUpdateDraftDataRequest::default()
                 };
 
-                let _ = endpoints::jig::UpdateDraftData::api_with_auth_empty(
+                let _ = endpoints::jig::UpdateDraftData::api_with_auth(
                     JigUpdateDraftDataPath(jig_id),
                     Some(req),
                 )

@@ -56,7 +56,7 @@ impl SchoolDetails {
 
         if let Some(school) = state.school.get_cloned() {
             state.parent.loader.load(clone!(state => async move {
-            match endpoints::admin::VerifySchoolName::api_with_auth_empty(AdminVerifySchoolNamePath(), Some(VerifySchoolNameRequest {
+            match endpoints::admin::VerifySchoolName::api_with_auth(AdminVerifySchoolNamePath(), Some(VerifySchoolNameRequest {
                 school_name_id: school.school_name.id,
                 verified: true,
             })).await {

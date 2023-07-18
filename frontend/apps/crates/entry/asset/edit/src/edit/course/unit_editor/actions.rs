@@ -73,7 +73,7 @@ impl UnitEditor {
                     index: target_index,
                 };
 
-                let _ = unit::Update::api_with_auth_empty(
+                let _ = unit::Update::api_with_auth(
                     UpdateCourseUnitPath(
                         state.asset_edit_state.asset_id.unwrap_course().clone(),
                         id,
@@ -147,7 +147,7 @@ impl UnitEditor {
         };
 
         if let Some(unit_id) = self.unit_id {
-            let res = unit::Update::api_with_auth_empty(
+            let res = unit::Update::api_with_auth(
                 UpdateCourseUnitPath(
                     state.asset_edit_state.asset_id.unwrap_course().clone(),
                     unit_id,
@@ -273,7 +273,7 @@ impl UnitEditor {
 //         Some(id) => id,
 //         None => todo!(),
 //     };
-//     let res = endpoints::image::user::Delete::api_no_auth_empty(UserImageDeletePath(id), None)
+//     let res = endpoints::image::user::Delete::api_no_auth(UserImageDeletePath(id), None)
 //         .await;
 
 //     match res {
@@ -294,7 +294,7 @@ impl UnitEditor {
 //         None => todo!(),
 //     };
 
-//     let res = endpoints::audio::user::Delete::api_no_auth_empty(UserAudioDeletePath(id), None)
+//     let res = endpoints::audio::user::Delete::api_no_auth(UserAudioDeletePath(id), None)
 //         .await;
 
 //     match res {
@@ -315,7 +315,7 @@ impl UnitEditor {
 //         None => todo!(),
 //     };
 
-//     let res = endpoints::pdf::user::Delete::api_no_auth_empty(UserPdfDeletePath(id), None)
+//     let res = endpoints::pdf::user::Delete::api_no_auth(UserPdfDeletePath(id), None)
 //         .await;
 
 //     match res {

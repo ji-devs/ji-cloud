@@ -43,7 +43,7 @@ impl ImageTags {
                             display_name: Some(tag.display_name().to_string()),
                             index: None
                         };
-                        let _ = endpoints::image::tag::Update::api_with_auth_empty(
+                        let _ = endpoints::image::tag::Update::api_with_auth(
                             ImageTagUpdatePath(tag.as_index()),
                             Some(req)
                         ).await.unwrap_ji();
@@ -81,7 +81,7 @@ impl ImageTags {
                 });
 
             for index in to_remove.iter() {
-                let _ = endpoints::image::tag::Delete::api_with_auth_empty(
+                let _ = endpoints::image::tag::Delete::api_with_auth(
                     ImageTagDeletePath(*index),
                     None
                 ).await.unwrap_ji();

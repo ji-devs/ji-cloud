@@ -11,6 +11,7 @@ pub mod component;
 pub mod drag;
 pub mod editable_asset;
 pub mod env;
+pub mod error_ext;
 pub mod events;
 pub mod fetch;
 pub mod firebase;

@@ -1,5 +1,8 @@
 //! Home of the error types.
 
+use std::error::Error;
+use std::fmt::{self, Debug, Display};
+
 use serde::{Deserialize, Serialize};
 
 use crate::domain::meta::MetaKind;
@@ -12,6 +15,7 @@ pub mod auth {
     pub use super::EmptyError as RegisterError;
 }
 
+/// TODO: Don't think this is used much, consider removing.
 /// Represents an error returned by the api.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ApiError<T> {
@@ -28,6 +32,12 @@ pub struct ApiError<T> {
     #[serde(flatten)]
     pub extra: T,
 }
+impl<T> Display for ApiError<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.message)
+    }
+}
+impl<T: Debug> Error for ApiError<T> {}
 
 #[cfg(feature = "backend")]
 impl<T: Serialize> From<ApiError<T>> for actix_web::Error {
@@ -82,3 +92,9 @@ pub struct MetadataNotFound {
     /// are split per media group kind.
     pub media_group_kind: Option<MediaGroupKind>,
 }
+impl fmt::Display for MetadataNotFound {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Metadata not found")
+    }
+}
+impl Error for MetadataNotFound {}

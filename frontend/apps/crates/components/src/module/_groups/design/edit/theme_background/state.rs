@@ -48,7 +48,7 @@ where
                         ..JigUpdateDraftDataRequest::default()
                     };
 
-                    let _ = endpoints::jig::UpdateDraftData::api_with_auth_empty(JigUpdateDraftDataPath(jig_id.clone()), Some(req))
+                    let _ = endpoints::jig::UpdateDraftData::api_with_auth(JigUpdateDraftDataPath(jig_id.clone()), Some(req))
                         .await;
                 })
             }

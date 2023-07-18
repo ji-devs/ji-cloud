@@ -39,7 +39,7 @@ pub async fn save_playlist(state: &Rc<SpotState>) {
         ..Default::default()
     };
 
-    let _ = endpoints::playlist::UpdateDraftData::api_with_auth_empty(
+    let _ = endpoints::playlist::UpdateDraftData::api_with_auth(
         PlaylistUpdateDraftDataPath(*state.sidebar.asset_edit_state.asset_id.unwrap_playlist()),
         Some(req),
     )

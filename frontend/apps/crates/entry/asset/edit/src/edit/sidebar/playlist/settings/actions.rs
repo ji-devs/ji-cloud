@@ -12,7 +12,7 @@ impl PlaylistSettings {
         let req = state.get_playlist_update_req();
 
         state.loader.load(clone!(state => async move {
-            let _ = endpoints::playlist::UpdateDraftData::api_with_auth_empty(
+            let _ = endpoints::playlist::UpdateDraftData::api_with_auth(
                 PlaylistUpdateDraftDataPath(state.playlist.id),
                 Some(req),
             )

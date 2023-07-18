@@ -32,7 +32,7 @@ impl RegisterStart {
                 password
             };
 
-            let (resp, status):(anyhow::Result<()>, u16) = user::Create::api_no_auth_empty_status(CreateUserPath(), Some(query)).await;
+            let (resp, status) = user::Create::api_no_auth_status(CreateUserPath(), Some(query)).await;
 
             match resp {
                 Ok(_) => {
