@@ -338,11 +338,10 @@ left join (
     from subscription
     join (
         select
-            account_id, subscription_id, max(created_at)
+            distinct on (account_id)
+            account_id, subscription_id
         from subscription
-        group by account_id, subscription_id
-        order by created_at desc
-        limit 1
+        order by account_id, created_at desc
     ) as recent_subscription using (subscription_id)
 ) as subscription using (account_id)
 left join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id
