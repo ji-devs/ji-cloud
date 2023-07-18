@@ -10,7 +10,8 @@ use utils::{
     ages::AgeRangeVecExt,
     asset::{published_at_string, PlaylistPlayerOptions, ResourceContentExt},
     events,
-    routes::{AssetPlayRoute, AssetRoute, Route},
+    routes::{AssetPlayRoute, AssetRoute, CommunityMembersRoute, CommunityRoute, Route},
+    unwrap::UnwrapJiExt,
 };
 
 use super::{super::state::State, report, track_action};
@@ -65,6 +66,8 @@ fn render_jig_info(state: Rc<State>, jig: &JigResponse) -> Dom {
         .prop("likedCount", jig.likes as usize)
         .prop("language", &jig.jig_data.language)
         .prop("author", jig.author_name.clone())
+        .prop("target", "_BLANK")
+        .prop("href",  Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(jig.author_id.unwrap_ji()))).to_string())
         .prop("publishedAt", {
             match jig.published_at {
                 Some(publish_at) => published_at_string(publish_at, false),
