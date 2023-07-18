@@ -7,7 +7,7 @@ const STR_LIKED = "Likes";
 const STR_PLAYED = "Plays";
 const STR_ADDITIONAL_RESOURCES = "Teacher resources";
 const STR_PLAYLISTS = "Playlists";
-const STR_PLAYLISTS_SUBHEADING = "This JIG is a apart of the following playlists:";
+const STR_PLAYLISTS_SUBHEADING = "This JIG is a part of the following playlists:";
 
 @customElement("jig-play-sidebar-jig-info")
 export class _ extends LitElement {
