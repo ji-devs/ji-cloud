@@ -6577,6 +6577,56 @@
     },
     "query": "\nselect exists(select 1 from user_image_library where user_id = $1 and id = $2) as \"exists!\"\n    "
   },
+  "623f17401360608227b31698dad2ece2b30355867df2ae6bbf9b4a92703fda25": {
+    "describe": {
+      "columns": [
+        {
+          "name": "plan_type?: PlanType",
+          "ordinal": 0,
+          "type_info": "Int2"
+        },
+        {
+          "name": "subscription_status?: SubscriptionStatus",
+          "ordinal": 1,
+          "type_info": "Int2"
+        },
+        {
+          "name": "is_admin!",
+          "ordinal": 2,
+          "type_info": "Bool"
+        },
+        {
+          "name": "verified!",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "school_id?: SchoolId",
+          "ordinal": 4,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "overdue!",
+          "ordinal": 5,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect\n    subscription_plan.plan_type as \"plan_type?: PlanType\",\n    subscription.status as \"subscription_status?: SubscriptionStatus\",\n    user_account.admin as \"is_admin!\",\n    user_account.verified as \"verified!\",\n    school.school_id as \"school_id?: SchoolId\",\n    case\n        when subscription.amount_due > 0 then true\n        else false\n    end as \"overdue!\"\nfrom user_account\ninner join account using (account_id)\nleft join school using (account_id)\nleft join (\n    select subscription.account_id, status, amount_due, subscription_plan_id\n    from subscription\n    join (\n        select\n            distinct on (account_id)\n            account_id, subscription_id\n        from subscription\n        order by account_id, created_at desc\n    ) as recent_subscription using (subscription_id)\n) as subscription using (account_id)\nleft join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\nwhere user_account.user_id = $1\n"
+  },
   "62d96e4b30f7828cbc7255b3be93f16aa1a868bd5a9780ae80079dbbfe858694": {
     "describe": {
       "columns": [
@@ -9196,56 +9246,6 @@
       }
     },
     "query": "update school_name set verified = $2 where school_name_id = $1"
-  },
-  "8e5a50263d350298d760428b35fba776ca020e3e79093e546f7e763522bf4ac3": {
-    "describe": {
-      "columns": [
-        {
-          "name": "plan_type?: PlanType",
-          "ordinal": 0,
-          "type_info": "Int2"
-        },
-        {
-          "name": "subscription_status?: SubscriptionStatus",
-          "ordinal": 1,
-          "type_info": "Int2"
-        },
-        {
-          "name": "is_admin!",
-          "ordinal": 2,
-          "type_info": "Bool"
-        },
-        {
-          "name": "verified!",
-          "ordinal": 3,
-          "type_info": "Bool"
-        },
-        {
-          "name": "school_id?: SchoolId",
-          "ordinal": 4,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "overdue!",
-          "ordinal": 5,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect\n    subscription_plan.plan_type as \"plan_type?: PlanType\",\n    subscription.status as \"subscription_status?: SubscriptionStatus\",\n    user_account.admin as \"is_admin!\",\n    user_account.verified as \"verified!\",\n    school.school_id as \"school_id?: SchoolId\",\n    case\n        when subscription.amount_due > 0 then true\n        else false\n    end as \"overdue!\"\nfrom user_account\ninner join account using (account_id)\nleft join school using (account_id)\nleft join (\n    select subscription.account_id, status, amount_due, subscription_plan_id\n    from subscription\n    join (\n        select\n            account_id, subscription_id, max(created_at)\n        from subscription\n        group by account_id, subscription_id\n        order by created_at desc\n        limit 1\n    ) as recent_subscription using (subscription_id)\n) as subscription using (account_id)\nleft join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\nwhere user_account.user_id = $1\n"
   },
   "8e91b63b58e15b8c898573ffd729ea87968e8d2efa24ee4d855ac357c193087b": {
     "describe": {
