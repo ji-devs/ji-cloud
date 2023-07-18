@@ -12,7 +12,8 @@ export class _ extends LitElement {
                     background-color: #fff;
                 }
                 header {
-                    padding: 12px;
+                    padding: 12px 12px 10px 12px;
+                    height: 80px;
                 }
                 nav {
                     display: flex;
@@ -41,8 +42,12 @@ export class _ extends LitElement {
                     line-height: 1em;
                     font-weight: 600;
                     margin: 0 12px;
-                    padding-bottom: 12px;
-                    border-bottom: solid 1px #d5e4ff;
+                }
+                ::slotted([slot="author-line"]) {
+                    font-size: 20px;
+                    line-height: 1em;
+                    font-weight: 600;
+                    margin: 0 12px;
                 }
             `,
         ];
@@ -60,6 +65,7 @@ export class _ extends LitElement {
                     </span>
                 </nav>
                 <slot name="heading"></slot>
+                <slot name="author-line"></slot>
             </header>
             <slot name="body"></slot>
         `;
