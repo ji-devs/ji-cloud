@@ -57,7 +57,7 @@ select
     language_app,
     language_emails,
     bio,
-    badge                  as "badge?: UserBadge",
+    (select case when badge <> 10 then badge else null end) as "badge?: UserBadge",
     location_public,
     languages_spoken_public,
     persona_public,
@@ -137,24 +137,27 @@ where id = $1"#,
     }))
 }
 
-#[instrument(skip(db))]
 pub async fn browse(
     db: &sqlx::Pool<sqlx::Postgres>,
     author_id: Option<UserId>,
     page: i32,
     page_limit: u32,
+    badge: Vec<UserBadge>,
 ) -> sqlx::Result<Vec<UserResponse>> {
     let mut txn = db.begin().await?;
+
+    let badges: Vec<i16> = badge.iter().map(|x| *x as i16).collect();
 
     let users = sqlx::query!(
         //language=SQL
         r#"
 with cte as (
-    select (array_agg("user".id))[1]
-    from "user"
-        left join user_profile on "user".id = user_profile.user_id
-        left join user_email using(user_id)
-    where ("user".id = $1 or $1 is null)
+    select (array_agg(user_profile.user_id))[1]
+    from user_profile
+        inner join "user" on "user".id = user_profile.user_id
+        inner join user_email on user_profile.user_id = user_email.user_id
+    where (user_profile.user_id = $1 or $1 is null)
+      and (user_profile.badge = any($4) or $4 = array[]::smallint[])
     group by "user".created_at
     order by "user".created_at desc
 ),
@@ -169,12 +172,12 @@ select  cte1.id                 as "id!: UserId",
         user_email.email::text as "email!",
         language_emails,
         user_email.created_at  as "created_at!",
-        badge                  as "badge?: UserBadge",
+        (select case when badge <> 10 then badge else null end) as "badge?: UserBadge",
         organization,
         location
 from cte1
         inner join user_profile on cte1.id = user_profile.user_id
-        inner join user_email using(user_id)
+        inner join user_email on cte1.id = user_email.user_id
 order by ord asc
 limit $3
 offset $2
@@ -182,6 +185,7 @@ offset $2
         author_id.map(|x| x.0),
         (page * page_limit as i32) as i32,
         page_limit as i32,
+        &badges[..]
     )
     .fetch_all(&mut txn)
     .instrument(tracing::info_span!("query user_profile"))
@@ -227,7 +231,7 @@ select  "user".id                 as "id!: UserId",
         user_email.email::text as "email!",
         language_emails,
         user_email.created_at  as "created_at!",
-        badge                  as "badge?: UserBadge",
+        (select case when badge <> 10 then badge else null end)                  as "badge?: UserBadge",
         organization,
         location
 from "user"
@@ -1098,23 +1102,30 @@ where index > $2 and user_id = $1
 
 // `None` here means do not filter.
 #[instrument(skip(db))]
-pub async fn filtered_count(db: &PgPool, user_id: Option<UserId>) -> sqlx::Result<u64> {
+pub async fn filtered_count(
+    db: &PgPool,
+    user_id: Option<UserId>,
+    badge: Vec<UserBadge>,
+) -> sqlx::Result<u64> {
+    let badges: Vec<i16> = badge.iter().map(|x| *x as i16).collect();
+
     let users = sqlx::query!(
         //language=SQL
         r#"
         with cte as (
             select (array_agg(user_profile.user_id))[1]
             from user_profile
-            left join "user" on "user".id = user_profile.user_id
-            left join user_email using(user_id)
+            inner join "user" on "user".id = user_profile.user_id
+            inner join user_email on user_email.user_id = user_profile.user_id
             where ("user".id = $1 or $1 is null)
-            group by family_name
-            order by family_name desc
+            and (user_profile.badge = any($2) or $2 = array[]::smallint[])
+            group by "user".created_at
+            order by "user".created_at desc
         )
         select count(*) as "count!" from unnest(array(select cte.array_agg from cte)) with ordinality t(id, ord)
         "#,
         user_id.map(|it| it.0),
-
+        &badges[..]
     )
     .fetch_one(db)
     .await?;

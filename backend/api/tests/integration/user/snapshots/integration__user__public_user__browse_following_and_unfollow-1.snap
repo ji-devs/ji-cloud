@@ -11,7 +11,7 @@ expression: body
       "familyName": "Gres",
       "profileImage": null,
       "following": true,
-      "badge": null,
+      "badge": "masterTeacher",
       "languagesSpoken": [
         "en_US"
       ],

@@ -1,0 +1,24 @@
+---
+source: tests/integration/user.rs
+expression: body
+---
+{
+  "users": [
+    {
+      "id": "a641fd6e-e41b-11eb-8176-57df101c2201",
+      "username": "test2",
+      "givenName": "Scrappy",
+      "familyName": "Doo",
+      "email": "fooodoosfakeemail23@teting28FE.test",
+      "country": null,
+      "state": null,
+      "city": null,
+      "organization": "test2 org",
+      "createdAt": "2020-08-07",
+      "language": "en",
+      "badge": null
+    }
+  ],
+  "pages": 1,
+  "totalUserCount": 1
+}
