@@ -988,3 +988,12 @@ pub struct UpdateSchoolAccountRequest {
 }
 
 make_path_parts!(UpdateSchoolNamePath => "/v1/school/{}/school-name" => SchoolId);
+
+make_path_parts!(IndividualAccountPath => "/v1/user/me/account");
+
+/// Individual account response
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
+pub struct IndividualAccountResponse {
+    /// The users account, if any
+    pub account: Option<Account>,
+}

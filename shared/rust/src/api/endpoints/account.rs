@@ -1,8 +1,8 @@
 use super::ApiEndpoint;
 use crate::domain::billing::{
     CreateSchoolAccountPath, CreateSchoolAccountRequest, GetSchoolAccountResponse,
-    SchoolAccountPath, SchoolId, SchoolName, SchoolNamePath, SchoolNameValue,
-    UpdateSchoolAccountRequest, UpdateSchoolNamePath,
+    IndividualAccountPath, IndividualAccountResponse, SchoolAccountPath, SchoolId, SchoolName,
+    SchoolNamePath, SchoolNameValue, UpdateSchoolAccountRequest, UpdateSchoolNamePath,
 };
 use crate::{api::Method, error::EmptyError};
 
@@ -64,4 +64,14 @@ impl ApiEndpoint for DeleteSchoolAccount {
     type Res = ();
     type Err = EmptyError;
     const METHOD: Method = Method::Delete;
+}
+
+/// Get the account for the logged in user
+pub struct GetIndividualAccount;
+impl ApiEndpoint for GetIndividualAccount {
+    type Path = IndividualAccountPath;
+    type Req = ();
+    type Res = IndividualAccountResponse;
+    type Err = EmptyError;
+    const METHOD: Method = Method::Get;
 }

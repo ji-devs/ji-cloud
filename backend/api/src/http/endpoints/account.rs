@@ -5,12 +5,14 @@ use actix_web::web::{Data, Json, Path, ServiceConfig};
 use actix_web::HttpResponse;
 use futures::try_join;
 use shared::api::endpoints::account::{
-    DeleteSchoolAccount, GetSchoolAccount, GetSchoolNames, UpdateSchoolAccount, UpdateSchoolName,
+    DeleteSchoolAccount, GetIndividualAccount, GetSchoolAccount, GetSchoolNames,
+    UpdateSchoolAccount, UpdateSchoolName,
 };
 use shared::api::{endpoints::account::CreateSchoolAccount, ApiEndpoint, PathParts};
 use shared::domain::billing::{
-    AccountId, AccountIfAuthorized, CreateSchoolAccountRequest, GetSchoolAccountResponse, SchoolId,
-    SchoolNameRequest, SchoolNameValue, UpdateSchoolAccountRequest,
+    AccountId, AccountIfAuthorized, CreateSchoolAccountRequest, GetSchoolAccountResponse,
+    IndividualAccountResponse, SchoolId, SchoolNameRequest, SchoolNameValue,
+    UpdateSchoolAccountRequest,
 };
 use shared::domain::user::{UserId, UserScope};
 use sqlx::PgPool;
@@ -236,6 +238,22 @@ async fn delete_school_account(
     Ok(HttpResponse::Ok().finish())
 }
 
+async fn get_individual_account(
+    auth: TokenUser,
+    db: Data<PgPool>,
+) -> Result<Json<<GetIndividualAccount as ApiEndpoint>::Res>, error::Account> {
+    let account = db::account::get_account_by_user_id(db.as_ref(), &auth.user_id()).await?;
+
+    if let Some(account) = &account {
+        if account.account_type.has_admin() {
+            // We only want to return individual account details here.
+            return Err(error::Account::Forbidden);
+        }
+    }
+
+    Ok(Json(IndividualAccountResponse { account }))
+}
+
 #[derive(Debug)]
 enum UserAuthorization {
     SystemAdministrator,
@@ -312,5 +330,11 @@ pub fn configure(cfg: &mut ServiceConfig) {
         DeleteSchoolAccount::METHOD
             .route()
             .to(delete_school_account),
+    )
+    .route(
+        <GetIndividualAccount as ApiEndpoint>::Path::PATH,
+        GetIndividualAccount::METHOD
+            .route()
+            .to(get_individual_account),
     );
 }
