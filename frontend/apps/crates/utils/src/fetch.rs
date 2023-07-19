@@ -136,18 +136,12 @@ pub trait ApiEndpointExt {
                     let status = res.status();
 
                     if res.ok() {
-                        Ok((
-                            Ok(Self::res_to_json(res).await.expect_ji(DESERIALIZE_OK)),
-                            status,
-                        ))
+                        Ok((Self::res_to_json(res).await, status))
                     } else {
-                        Ok((
-                            Err(Self::res_to_json(res)
-                                .await
-                                .map(|e| ApiError::Response(e))
-                                .expect_ji(DESERIALIZE_OK)),
-                            status,
-                        ))
+                        let res: Result<Self::Err, _> = Self::res_to_json(res).await;
+                        // since `!res.ok()` this should be an Err even if parsing succeeded.
+                        let res = result_err_only(res);
+                        Ok((res, status))
                     }
                 }
                 Err(err) => {
@@ -185,15 +179,12 @@ pub trait ApiEndpointExt {
         let status = res.status();
 
         if res.ok() {
-            (
-                Ok(Self::res_to_json(res).await.expect_ji(DESERIALIZE_OK)),
-                status,
-            )
+            (Self::res_to_json(res).await, status)
         } else {
-            (
-                Err(Self::res_to_json(res).await.expect_ji(DESERIALIZE_OK)),
-                status,
-            )
+            let res: Result<Self::Err, _> = Self::res_to_json(res).await;
+            // since `!res.ok()` this should be an Err even if parsing succeeded.
+            let res = result_err_only(res);
+            (res, status)
         }
     }
 
@@ -242,15 +233,12 @@ pub trait ApiEndpointExt {
                 let status = res.status();
 
                 if res.ok() {
-                    Ok((
-                        Ok(Self::res_to_json(res).await.expect_ji(DESERIALIZE_OK)),
-                        status,
-                    ))
+                    Ok((Self::res_to_json(res).await, status))
                 } else {
-                    Ok((
-                        Err(Self::res_to_json(res).await.expect_ji(DESERIALIZE_OK)),
-                        status,
-                    ))
+                    let res: Result<Self::Err, _> = Self::res_to_json(res).await;
+                    // since `!res.ok()` this should be an Err even if parsing succeeded.
+                    let res = result_err_only(res);
+                    Ok((res, status))
                 }
             }
             Err(err) => {
@@ -294,10 +282,10 @@ pub trait ApiEndpointExt {
                 status,
             )
         } else {
-            (
-                Err(Self::res_to_json(res).await.expect_ji(DESERIALIZE_OK)),
-                status,
-            )
+            let res: Result<Self::Err, _> = Self::res_to_json(res).await;
+            // since `!res.ok()` this should be an Err even if parsing succeeded.
+            let res = result_err_only(res);
+            (res, status)
         }
     }
 
@@ -345,10 +333,10 @@ pub trait ApiEndpointExt {
                 status,
             )
         } else {
-            (
-                Err(Self::res_to_json(res).await.expect_ji(DESERIALIZE_OK)),
-                status,
-            )
+            let res: Result<Self::Err, _> = Self::res_to_json(res).await;
+            // since `!res.ok()` this should be an Err even if parsing succeeded.
+            let res = result_err_only(res);
+            (res, status)
         }
     }
 
@@ -359,12 +347,29 @@ pub trait ApiEndpointExt {
         T: DeserializeOwned + 'static,
     {
         let mut text = res.text().await.map_err(|_| ApiError::Connection)?;
+        log::info!("{text:#?}");
         if TypeId::of::<T>() == TypeId::of::<()>() {
             if text.is_empty() {
                 text = String::from("null");
             }
         }
-        serde_json::from_str(&text).map_err(|_| ApiError::Connection)
+        serde_json::from_str(&text).map_err(|e| {
+            log::info!("Parsing error: {e}");
+            ApiError::Connection
+        })
+    }
+}
+
+// takes a result and return an error whether the input is Ok or Err. Calls into in both cases.
+// useful in after parsing the servers error response, we need an Err whether the parsing was successful or not.
+fn result_err_only<IT, IE, OT, OE>(result: Result<IT, IE>) -> Result<OT, OE>
+where
+    IT: Into<OE>,
+    IE: Into<OE>,
+{
+    match result {
+        Ok(v) => Err(v.into()),
+        Err(e) => Err(e.into()),
     }
 }
 
