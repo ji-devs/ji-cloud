@@ -83,7 +83,7 @@ impl Toast {
         TOASTS.with(|toasts| {
             toasts.lock_mut().push_cloned((id, self));
         });
-        Timeout::new(6_00000, move || {
+        Timeout::new(6_000, move || {
             TOASTS.with(|toasts| {
                 toasts.lock_mut().retain(|el| el.0 != id);
             });
