@@ -40,4 +40,5 @@ pub mod screenshot;
 pub mod storage;
 pub mod text;
 pub mod themes;
+pub mod toasts;
 pub mod unwrap;

@@ -347,7 +347,6 @@ pub trait ApiEndpointExt {
         T: DeserializeOwned + 'static,
     {
         let mut text = res.text().await.map_err(|_| ApiError::Connection)?;
-        log::info!("{text:#?}");
         if TypeId::of::<T>() == TypeId::of::<()>() {
             if text.is_empty() {
                 text = String::from("null");
