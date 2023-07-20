@@ -58,7 +58,7 @@ impl From<UserResponse> for EditableUser {
 
                 format!("{school_name} ({user_type})")
             }
-            None => "N/A",
+            None => "N/A".to_string(),
         };
 
         Self {
