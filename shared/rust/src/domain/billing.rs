@@ -257,6 +257,12 @@ impl SubscriptionStatus {
     pub const fn is_valid(&self) -> bool {
         matches!(self, Self::Active | Self::Canceled)
     }
+
+    /// Whether the subscription is active.
+    #[must_use]
+    pub const fn is_active(&self) -> bool {
+        matches!(self, Self::Active)
+    }
 }
 
 #[cfg(feature = "backend")]
@@ -301,6 +307,8 @@ pub struct Subscription {
     pub auto_renew: bool,
     /// The subscription status
     pub status: SubscriptionStatus,
+    /// Whether the subscription is in a trial period
+    pub is_trial: bool,
     /// When the subscriptions current period ends/expires
     pub current_period_end: DateTime<Utc>,
     /// Account ID to associate this subscription with.
@@ -325,8 +333,6 @@ pub struct CreateSubscriptionRecord {
     pub stripe_subscription_id: StripeSubscriptionId,
     /// The subscription plan ID
     pub subscription_plan_id: PlanId,
-    /// Whether the subscription auto-renews
-    pub auto_renew: bool,
     /// The subscription status
     pub status: SubscriptionStatus,
     /// When the subscriptions current period ends/expires
@@ -341,19 +347,23 @@ pub struct CreateSubscriptionRecord {
 }
 
 /// Data used to update a new subscription record
-#[derive(Debug, Serialize, Deserialize, Clone, sqlx::Type)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[cfg(feature = "backend")]
 pub struct UpdateSubscriptionRecord {
     /// The Stripe subscription ID
     pub stripe_subscription_id: StripeSubscriptionId,
-    /// Whether the subscription auto-renews
-    pub auto_renew: Option<bool>,
     /// The subscription status
-    pub status: Option<SubscriptionStatus>,
+    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+    pub status: UpdateNonNullable<SubscriptionStatus>,
     /// When the subscriptions current period ends/expires
-    pub current_period_end: Option<DateTime<Utc>>,
+    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+    pub current_period_end: UpdateNonNullable<DateTime<Utc>>,
     /// ID of the latest unpaid invoice generated for this subscription
-    pub latest_invoice_id: Option<StripeInvoiceId>,
+    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+    pub latest_invoice_id: UpdateNonNullable<StripeInvoiceId>,
+    /// Whether the subscription is in a trial period
+    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+    pub is_trial: UpdateNonNullable<bool>,
 }
 
 #[cfg(feature = "backend")]
@@ -362,10 +372,10 @@ impl UpdateSubscriptionRecord {
     pub fn new(stripe_subscription_id: StripeSubscriptionId) -> Self {
         Self {
             stripe_subscription_id,
-            auto_renew: None,
-            status: None,
-            current_period_end: None,
-            latest_invoice_id: None,
+            status: UpdateNonNullable::Keep,
+            current_period_end: UpdateNonNullable::Keep,
+            latest_invoice_id: UpdateNonNullable::Keep,
+            is_trial: UpdateNonNullable::Keep,
         }
     }
 }
@@ -380,20 +390,24 @@ impl TryFrom<stripe::Subscription> for UpdateSubscriptionRecord {
         let latest_invoice_id = value
             .latest_invoice
             .as_ref()
-            .map(|invoice| StripeInvoiceId::from(&invoice.id()));
+            .map(|invoice| StripeInvoiceId::from(&invoice.id()))
+            .into();
 
         Ok(Self {
             stripe_subscription_id: value.id.into(),
-            auto_renew: None, // TODO need to impl this
+            is_trial: UpdateNonNullable::Change(matches!(
+                value.status,
+                stripe::SubscriptionStatus::Trialing
+            )),
             // This is weird.
-            status: Some(if value.ended_at.is_some() {
+            status: UpdateNonNullable::Change(if value.ended_at.is_some() {
                 SubscriptionStatus::Expired
             } else if value.canceled_at.is_some() {
                 SubscriptionStatus::Canceled
             } else {
                 SubscriptionStatus::from(value.status)
             }),
-            current_period_end: Some(
+            current_period_end: UpdateNonNullable::Change(
                 Utc.timestamp_opt(value.current_period_end, 0)
                     .latest()
                     .ok_or(anyhow::anyhow!("Invalid timestamp"))?,

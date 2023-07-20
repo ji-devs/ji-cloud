@@ -96,7 +96,6 @@ insert into subscription
     (
         stripe_subscription_id,
         subscription_plan_id,
-        auto_renew,
         status,
         current_period_end,
         account_id,
@@ -104,12 +103,11 @@ insert into subscription
         amount_due
     )
 values
-    ($1, $2, $3, $4, $5, $6, $7, $8)
+    ($1, $2, $3, $4, $5, $6, $7)
 returning subscription_id as "id!: SubscriptionId"
 "#,
         subscription.stripe_subscription_id as StripeSubscriptionId,
         subscription.subscription_plan_id as PlanId,
-        subscription.auto_renew,
         subscription.status as SubscriptionStatus,
         subscription.current_period_end,
         subscription.account_id as AccountId,
@@ -133,20 +131,25 @@ pub async fn save_subscription(
         r#"
 update subscription
 set
-    auto_renew = coalesce($2, auto_renew),
-    status = coalesce($3, status),
-    current_period_end = coalesce($4, current_period_end),
+    status = coalesce($2, status),
+    current_period_end = coalesce($3, current_period_end),
     updated_at = now(),
-    latest_invoice_id = $5
+    latest_invoice_id = case when $4 then $5 else latest_invoice_id end,
+    is_trial = $6
 where stripe_subscription_id = $1
 "#,
         subscription.stripe_subscription_id as StripeSubscriptionId,
-        subscription.auto_renew,
-        subscription.status.map(|status| status as i16),
-        subscription.current_period_end,
+        subscription
+            .status
+            .into_option()
+            .map(|status| status as i16),
+        subscription.current_period_end.into_option(),
+        subscription.latest_invoice_id.is_change(),
         subscription
             .latest_invoice_id
+            .into_option()
             .map(|invoice_id| invoice_id.inner()),
+        subscription.is_trial.into_option(),
     )
     .execute(pool)
     .await?;
@@ -189,7 +192,7 @@ select
     subscription_id as "subscription_id!: SubscriptionId",
     stripe_subscription_id as "stripe_subscription_id!: StripeSubscriptionId",
     subscription_plan.plan_type as "subscription_plan_type!: PlanType",
-    auto_renew,
+    is_trial,
     status as "status!: SubscriptionStatus",
     current_period_end as "current_period_end!: DateTime<Utc>",
     account_id as "account_id!: AccountId",
@@ -210,8 +213,9 @@ where subscription_id = $1
         subscription_id: row.subscription_id,
         stripe_subscription_id: row.stripe_subscription_id,
         subscription_plan_type: row.subscription_plan_type,
-        auto_renew: row.auto_renew,
+        auto_renew: row.status.is_active(),
         status: row.status,
+        is_trial: row.is_trial,
         current_period_end: row.current_period_end,
         account_id: row.account_id,
         latest_invoice_id: row.latest_invoice_id,
@@ -235,7 +239,7 @@ select
     subscription_id as "subscription_id!: SubscriptionId",
     stripe_subscription_id as "stripe_subscription_id!: StripeSubscriptionId",
     subscription_plan.plan_type as "subscription_plan_type!: PlanType",
-    auto_renew,
+    is_trial,
     status as "status!: SubscriptionStatus",
     current_period_end as "current_period_end!: DateTime<Utc>",
     account_id as "account_id!: AccountId",
@@ -258,8 +262,9 @@ limit 1
         subscription_id: row.subscription_id,
         stripe_subscription_id: row.stripe_subscription_id,
         subscription_plan_type: row.subscription_plan_type,
-        auto_renew: row.auto_renew,
+        auto_renew: row.status.is_active(),
         status: row.status,
+        is_trial: row.is_trial,
         current_period_end: row.current_period_end,
         account_id: row.account_id,
         latest_invoice_id: row.latest_invoice_id,

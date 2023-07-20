@@ -1,7 +1,6 @@
 use crate::error::Username::Taken;
 use chrono::{DateTime, Utc};
 use chrono_tz::Tz;
-use serde_json::Value;
 use shared::domain::billing::{AmountInCents, PlanType, SubscriptionStatus};
 use shared::domain::{
     admin::DateFilterType,
@@ -174,6 +173,7 @@ account_cte as (
         subscription.status,
         subscription.current_period_end,
         subscription.amount_due,
+        subscription.is_trial,
         user_account.admin,
         school_name.name
     from user_account
@@ -184,7 +184,8 @@ account_cte as (
             status,
             amount_due,
             subscription_plan_id,
-            current_period_end
+            current_period_end,
+            is_trial
         from subscription
         join (
             select
@@ -211,6 +212,7 @@ select  cte1.id                 as "id!: UserId",
         account_cte.plan_type as "plan_type?: PlanType",
         account_cte.status as "subscription_status?: SubscriptionStatus",
         account_cte.current_period_end as "current_period_end?: DateTime<Utc>",
+        account_cte.is_trial as "is_trial?",
         account_cte.amount_due as "amount_due_in_cents?: AmountInCents",
         account_cte.admin as "is_admin?",
         account_cte.name::text as "school_name?"
@@ -251,6 +253,7 @@ offset $2
                 badge: user_row.badge,
                 plan_type: user_row.plan_type,
                 subscription_status: user_row.subscription_status,
+                is_trial: user_row.is_trial,
                 current_period_end: user_row.current_period_end,
                 amount_due_in_cents: user_row.amount_due_in_cents,
                 is_admin: user_row.is_admin,
@@ -276,6 +279,7 @@ with account_cte as (
         subscription_plan.plan_type,
         subscription.status,
         subscription.current_period_end,
+        subscription.is_trial,
         subscription.amount_due,
         user_account.admin,
         school_name.name
@@ -287,7 +291,8 @@ with account_cte as (
             status,
             amount_due,
             subscription_plan_id,
-            current_period_end
+            current_period_end,
+            is_trial
         from subscription
         join (
             select
@@ -313,6 +318,7 @@ select  "user".id                 as "id!: UserId",
         location,
         account_cte.plan_type as "plan_type?: PlanType",
         account_cte.status as "subscription_status?: SubscriptionStatus",
+        account_cte.is_trial as "is_trial?",
         account_cte.current_period_end as "current_period_end?: DateTime<Utc>",
         account_cte.amount_due as "amount_due_in_cents?: AmountInCents",
         account_cte.admin as "is_admin?",
@@ -349,6 +355,7 @@ with ordinality t(id, ord) using (id)
                 badge: row.badge,
                 plan_type: row.plan_type,
                 subscription_status: row.subscription_status,
+                is_trial: row.is_trial,
                 current_period_end: row.current_period_end,
                 amount_due_in_cents: row.amount_due_in_cents,
                 is_admin: row.is_admin,

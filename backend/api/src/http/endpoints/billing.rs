@@ -194,7 +194,6 @@ async fn create_subscription(
     let subscription = CreateSubscriptionRecord {
         stripe_subscription_id,
         subscription_plan_id: plan.plan_id,
-        auto_renew: true,
         status: Default::default(), // This will be updated in the webhook
         current_period_end: Utc
             .timestamp_opt(stripe_subscription.current_period_end, 0)

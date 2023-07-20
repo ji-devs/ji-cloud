@@ -994,6 +994,125 @@
     },
     "query": "\nselect id as \"id: ResourceTypeId\", display_name, created_at, updated_at from \"resource_type\"\norder by index\n"
   },
+  "169c76ec5bd6eb880ee08d95bc74655d5e685f9136f157677aa664446dc77e0e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: UserId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "username",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "given_name",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "family_name",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "email!",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "language_emails",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "created_at!",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "badge?: UserBadge",
+          "ordinal": 7,
+          "type_info": "Int2"
+        },
+        {
+          "name": "organization",
+          "ordinal": 8,
+          "type_info": "Text"
+        },
+        {
+          "name": "location",
+          "ordinal": 9,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "plan_type?: PlanType",
+          "ordinal": 10,
+          "type_info": "Int2"
+        },
+        {
+          "name": "subscription_status?: SubscriptionStatus",
+          "ordinal": 11,
+          "type_info": "Int2"
+        },
+        {
+          "name": "current_period_end?: DateTime<Utc>",
+          "ordinal": 12,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "is_trial?",
+          "ordinal": 13,
+          "type_info": "Bool"
+        },
+        {
+          "name": "amount_due_in_cents?: AmountInCents",
+          "ordinal": 14,
+          "type_info": "Int8"
+        },
+        {
+          "name": "is_admin?",
+          "ordinal": 15,
+          "type_info": "Bool"
+        },
+        {
+          "name": "school_name?",
+          "ordinal": 16,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        null,
+        false,
+        false,
+        false,
+        null,
+        false,
+        false,
+        null,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int8",
+          "Int8",
+          "Int2Array"
+        ]
+      }
+    },
+    "query": "\nwith cte as (\n    select (array_agg(user_profile.user_id))[1]\n    from user_profile\n        inner join \"user\" on \"user\".id = user_profile.user_id\n        inner join user_email on user_profile.user_id = user_email.user_id\n    where (user_profile.user_id = $1 or $1 is null)\n      and (user_profile.badge = any($4) or $4 = array[]::smallint[])\n    group by \"user\".created_at\n    order by \"user\".created_at desc\n),\ncte1 as (\n    select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n   , ord) order by ord\n),\naccount_cte as (\n    select\n        user_account.user_id,\n        subscription_plan.plan_type,\n        subscription.status,\n        subscription.current_period_end,\n        subscription.amount_due,\n        subscription.is_trial,\n        user_account.admin,\n        school_name.name\n    from user_account\n    inner join account using (account_id)\n    left join (\n        select\n            subscription.account_id,\n            status,\n            amount_due,\n            subscription_plan_id,\n            current_period_end,\n            is_trial\n        from subscription\n        join (\n            select\n                distinct on (account_id)\n                account_id, subscription_id\n            from subscription\n            order by account_id, created_at desc\n        ) as recent_subscription using (subscription_id)\n    ) as subscription using (account_id)\n    left join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\n    left join school using (account_id)\n    left join school_name on school.school_name_id = school_name.school_name_id\n)\nselect  cte1.id                 as \"id!: UserId\",\n        username,\n        given_name,\n        family_name,\n        user_email.email::text as \"email!\",\n        language_emails,\n        user_email.created_at  as \"created_at!\",\n        (select case when badge <> 10 then badge else null end) as \"badge?: UserBadge\",\n        organization,\n        location,\n        account_cte.plan_type as \"plan_type?: PlanType\",\n        account_cte.status as \"subscription_status?: SubscriptionStatus\",\n        account_cte.current_period_end as \"current_period_end?: DateTime<Utc>\",\n        account_cte.is_trial as \"is_trial?\",\n        account_cte.amount_due as \"amount_due_in_cents?: AmountInCents\",\n        account_cte.admin as \"is_admin?\",\n        account_cte.name::text as \"school_name?\"\nfrom cte1\n        left join account_cte on cte1.id = account_cte.user_id\n        inner join user_profile on cte1.id = user_profile.user_id\n        inner join user_email on cte1.id = user_email.user_id\norder by ord asc\nlimit $3\noffset $2\n"
+  },
   "16b8e7596de9c8c57e8a50d4b6788e6d7874603ce815762fae2380223a4ddfc0": {
     "describe": {
       "columns": [
@@ -1379,6 +1498,86 @@
       }
     },
     "query": "\nupdate jig_curation_data\nset categories = $2\nwhere jig_id = $1 and $2 is distinct from categories\n            "
+  },
+  "184cb9258ccc1f1c12ec5627373acc6de2b0c265d107e95f633f8d7353678a64": {
+    "describe": {
+      "columns": [
+        {
+          "name": "subscription_id!: SubscriptionId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "stripe_subscription_id!: StripeSubscriptionId",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "subscription_plan_type!: PlanType",
+          "ordinal": 2,
+          "type_info": "Int2"
+        },
+        {
+          "name": "is_trial",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "status!: SubscriptionStatus",
+          "ordinal": 4,
+          "type_info": "Int2"
+        },
+        {
+          "name": "current_period_end!: DateTime<Utc>",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "account_id!: AccountId",
+          "ordinal": 6,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "latest_invoice_id?: StripeInvoiceId",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "amount_due_in_cents?: AmountInCents",
+          "ordinal": 8,
+          "type_info": "Int8"
+        },
+        {
+          "name": "created_at!: DateTime<Utc>",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at?: DateTime<Utc>",
+          "ordinal": 10,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect\n    subscription_id as \"subscription_id!: SubscriptionId\",\n    stripe_subscription_id as \"stripe_subscription_id!: StripeSubscriptionId\",\n    subscription_plan.plan_type as \"subscription_plan_type!: PlanType\",\n    is_trial,\n    status as \"status!: SubscriptionStatus\",\n    current_period_end as \"current_period_end!: DateTime<Utc>\",\n    account_id as \"account_id!: AccountId\",\n    latest_invoice_id as \"latest_invoice_id?: StripeInvoiceId\",\n    amount_due as \"amount_due_in_cents?: AmountInCents\",\n    subscription.created_at as \"created_at!: DateTime<Utc>\",\n    subscription.updated_at as \"updated_at?: DateTime<Utc>\"\nfrom subscription\ninner join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\nwhere subscription_id = $1\n"
   },
   "186b601e5471ff005bb0c6e1ddeb8321d6e3d7dbf05f77ff8db9f962baec9710": {
     "describe": {
@@ -2817,6 +3016,32 @@
       }
     },
     "query": "\nupdate jig_data\nset language         = coalesce($2, language),\n    theme            = coalesce($3, theme),\n    updated_at = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from language) or\n       ($3::smallint is not null and $3 is distinct from theme))\n"
+  },
+  "346d12533244b1e5e900804d38745af0aa3e1136469a9328c03e8429452c54e2": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: SubscriptionId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Uuid",
+          "Int2",
+          "Timestamptz",
+          "Uuid",
+          "Text",
+          "Int8"
+        ]
+      }
+    },
+    "query": "\ninsert into subscription\n    (\n        stripe_subscription_id,\n        subscription_plan_id,\n        status,\n        current_period_end,\n        account_id,\n        latest_invoice_id,\n        amount_due\n    )\nvalues\n    ($1, $2, $3, $4, $5, $6, $7)\nreturning subscription_id as \"id!: SubscriptionId\"\n"
   },
   "34b1dd32f76952aba5206b08017300b1a6bc63f329481d1fc5858d0a87fad235": {
     "describe": {
@@ -4924,119 +5149,6 @@
     },
     "query": "\nselect display_name         as \"display_name!\",\n       resource_type_id     as \"resource_type_id!: ResourceTypeId\",\n       resource_content    as \"resource_content!\"\nfrom jig_data_additional_resource \"jdar\"\nwhere jig_data_id = $1\n  and jdar.id = $2\n        "
   },
-  "4aa4ba891f606af4dedc1cc541e9160609b32d54da0ad663714bb4e7998e7c44": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: UserId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "username",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "given_name",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "family_name",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "email!",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "language_emails",
-          "ordinal": 5,
-          "type_info": "Text"
-        },
-        {
-          "name": "created_at!",
-          "ordinal": 6,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "badge?: UserBadge",
-          "ordinal": 7,
-          "type_info": "Int2"
-        },
-        {
-          "name": "organization",
-          "ordinal": 8,
-          "type_info": "Text"
-        },
-        {
-          "name": "location",
-          "ordinal": 9,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "plan_type?: PlanType",
-          "ordinal": 10,
-          "type_info": "Int2"
-        },
-        {
-          "name": "subscription_status?: SubscriptionStatus",
-          "ordinal": 11,
-          "type_info": "Int2"
-        },
-        {
-          "name": "current_period_end?: DateTime<Utc>",
-          "ordinal": 12,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "amount_due_in_cents?: AmountInCents",
-          "ordinal": 13,
-          "type_info": "Int8"
-        },
-        {
-          "name": "is_admin?",
-          "ordinal": 14,
-          "type_info": "Bool"
-        },
-        {
-          "name": "school_name?",
-          "ordinal": 15,
-          "type_info": "Text"
-        }
-      ],
-      "nullable": [
-        null,
-        false,
-        false,
-        false,
-        null,
-        false,
-        false,
-        null,
-        true,
-        true,
-        false,
-        false,
-        false,
-        true,
-        false,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int8",
-          "Int8",
-          "Int2Array"
-        ]
-      }
-    },
-    "query": "\nwith cte as (\n    select (array_agg(user_profile.user_id))[1]\n    from user_profile\n        inner join \"user\" on \"user\".id = user_profile.user_id\n        inner join user_email on user_profile.user_id = user_email.user_id\n    where (user_profile.user_id = $1 or $1 is null)\n      and (user_profile.badge = any($4) or $4 = array[]::smallint[])\n    group by \"user\".created_at\n    order by \"user\".created_at desc\n),\ncte1 as (\n    select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n   , ord) order by ord\n),\naccount_cte as (\n    select\n        user_account.user_id,\n        subscription_plan.plan_type,\n        subscription.status,\n        subscription.current_period_end,\n        subscription.amount_due,\n        user_account.admin,\n        school_name.name\n    from user_account\n    inner join account using (account_id)\n    left join (\n        select\n            subscription.account_id,\n            status,\n            amount_due,\n            subscription_plan_id,\n            current_period_end\n        from subscription\n        join (\n            select\n                distinct on (account_id)\n                account_id, subscription_id\n            from subscription\n            order by account_id, created_at desc\n        ) as recent_subscription using (subscription_id)\n    ) as subscription using (account_id)\n    left join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\n    left join school using (account_id)\n    left join school_name on school.school_name_id = school_name.school_name_id\n)\nselect  cte1.id                 as \"id!: UserId\",\n        username,\n        given_name,\n        family_name,\n        user_email.email::text as \"email!\",\n        language_emails,\n        user_email.created_at  as \"created_at!\",\n        (select case when badge <> 10 then badge else null end) as \"badge?: UserBadge\",\n        organization,\n        location,\n        account_cte.plan_type as \"plan_type?: PlanType\",\n        account_cte.status as \"subscription_status?: SubscriptionStatus\",\n        account_cte.current_period_end as \"current_period_end?: DateTime<Utc>\",\n        account_cte.amount_due as \"amount_due_in_cents?: AmountInCents\",\n        account_cte.admin as \"is_admin?\",\n        account_cte.name::text as \"school_name?\"\nfrom cte1\n        left join account_cte on cte1.id = account_cte.user_id\n        inner join user_profile on cte1.id = user_profile.user_id\n        inner join user_email on cte1.id = user_email.user_id\norder by ord asc\nlimit $3\noffset $2\n"
-  },
   "4ab4c7e45ea4d4dead6ad479dd764474979f932fbb3f8e65657c946afea2d4eb": {
     "describe": {
       "columns": [
@@ -7043,6 +7155,23 @@
     },
     "query": "\nselect id                                                                 as \"id: CategoryId\",\n       name,\n       created_at,\n       updated_at,\n       user_scopes\nfrom category\nwhere parent_id is null\norder by index\n "
   },
+  "6affe97fb540077705c801d5d6a2ba4ae139146653e2fef4e683fe0daf50bd84": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int2",
+          "Timestamptz",
+          "Bool",
+          "Text",
+          "Bool"
+        ]
+      }
+    },
+    "query": "\nupdate subscription\nset\n    status = coalesce($2, status),\n    current_period_end = coalesce($3, current_period_end),\n    updated_at = now(),\n    latest_invoice_id = case when $4 then $5 else latest_invoice_id end,\n    is_trial = $6\nwhere stripe_subscription_id = $1\n"
+  },
   "6b18f4d20c2efb63ec1be956c25ebb85875cd8972346f74e21ca7f429d2fb9d5": {
     "describe": {
       "columns": [],
@@ -7887,33 +8016,6 @@
     },
     "query": "delete from user_account where account_id = $1"
   },
-  "781c2b492b9b6468c1474113d2233a8b7dd904ae1a00547270aa4582b9cedd46": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: SubscriptionId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Uuid",
-          "Bool",
-          "Int2",
-          "Timestamptz",
-          "Uuid",
-          "Text",
-          "Int8"
-        ]
-      }
-    },
-    "query": "\ninsert into subscription\n    (\n        stripe_subscription_id,\n        subscription_plan_id,\n        auto_renew,\n        status,\n        current_period_end,\n        account_id,\n        latest_invoice_id,\n        amount_due\n    )\nvalues\n    ($1, $2, $3, $4, $5, $6, $7, $8)\nreturning subscription_id as \"id!: SubscriptionId\"\n"
-  },
   "78b48e52d416cf94b8daaf7ce4b6dcbb7bae4ba6c5f85bc4121c626f37c4df4e": {
     "describe": {
       "columns": [],
@@ -7951,86 +8053,6 @@
       }
     },
     "query": "insert into web_media_upload (media_id, uploaded_at) values ($1, now())"
-  },
-  "7ab0e2ac1e5a462b4537363ac07b06867927cadda248c508494779634725ef49": {
-    "describe": {
-      "columns": [
-        {
-          "name": "subscription_id!: SubscriptionId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "stripe_subscription_id!: StripeSubscriptionId",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "subscription_plan_type!: PlanType",
-          "ordinal": 2,
-          "type_info": "Int2"
-        },
-        {
-          "name": "auto_renew",
-          "ordinal": 3,
-          "type_info": "Bool"
-        },
-        {
-          "name": "status!: SubscriptionStatus",
-          "ordinal": 4,
-          "type_info": "Int2"
-        },
-        {
-          "name": "current_period_end!: DateTime<Utc>",
-          "ordinal": 5,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "account_id!: AccountId",
-          "ordinal": 6,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "latest_invoice_id?: StripeInvoiceId",
-          "ordinal": 7,
-          "type_info": "Text"
-        },
-        {
-          "name": "amount_due_in_cents?: AmountInCents",
-          "ordinal": 8,
-          "type_info": "Int8"
-        },
-        {
-          "name": "created_at!: DateTime<Utc>",
-          "ordinal": 9,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at?: DateTime<Utc>",
-          "ordinal": 10,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        true,
-        false,
-        true
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect\n    subscription_id as \"subscription_id!: SubscriptionId\",\n    stripe_subscription_id as \"stripe_subscription_id!: StripeSubscriptionId\",\n    subscription_plan.plan_type as \"subscription_plan_type!: PlanType\",\n    auto_renew,\n    status as \"status!: SubscriptionStatus\",\n    current_period_end as \"current_period_end!: DateTime<Utc>\",\n    account_id as \"account_id!: AccountId\",\n    latest_invoice_id as \"latest_invoice_id?: StripeInvoiceId\",\n    amount_due as \"amount_due_in_cents?: AmountInCents\",\n    subscription.created_at as \"created_at!: DateTime<Utc>\",\n    subscription.updated_at as \"updated_at?: DateTime<Utc>\"\nfrom subscription\ninner join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\nwhere subscription_id = $1\n"
   },
   "7bd8eff40b8bb4649064764c88f6087f405f0727abb476003a960c379a8e3bc7": {
     "describe": {
@@ -8697,86 +8719,6 @@
     },
     "query": "\nupdate circle\nset description = $2,\n    updated_at = now()\nwhere id = $1 and $2 is distinct from description\n"
   },
-  "860a67a1724506f0f6f18b69cdd30b00883dae8192be10dfe83c65ab9e6b6de2": {
-    "describe": {
-      "columns": [
-        {
-          "name": "subscription_id!: SubscriptionId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "stripe_subscription_id!: StripeSubscriptionId",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "subscription_plan_type!: PlanType",
-          "ordinal": 2,
-          "type_info": "Int2"
-        },
-        {
-          "name": "auto_renew",
-          "ordinal": 3,
-          "type_info": "Bool"
-        },
-        {
-          "name": "status!: SubscriptionStatus",
-          "ordinal": 4,
-          "type_info": "Int2"
-        },
-        {
-          "name": "current_period_end!: DateTime<Utc>",
-          "ordinal": 5,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "account_id!: AccountId",
-          "ordinal": 6,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "latest_invoice_id?: StripeInvoiceId",
-          "ordinal": 7,
-          "type_info": "Text"
-        },
-        {
-          "name": "amount_due_in_cents?: AmountInCents",
-          "ordinal": 8,
-          "type_info": "Int8"
-        },
-        {
-          "name": "created_at!: DateTime<Utc>",
-          "ordinal": 9,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at?: DateTime<Utc>",
-          "ordinal": 10,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        true,
-        false,
-        true
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect\n    subscription_id as \"subscription_id!: SubscriptionId\",\n    stripe_subscription_id as \"stripe_subscription_id!: StripeSubscriptionId\",\n    subscription_plan.plan_type as \"subscription_plan_type!: PlanType\",\n    auto_renew,\n    status as \"status!: SubscriptionStatus\",\n    current_period_end as \"current_period_end!: DateTime<Utc>\",\n    account_id as \"account_id!: AccountId\",\n    latest_invoice_id as \"latest_invoice_id?: StripeInvoiceId\",\n    amount_due as \"amount_due_in_cents?: AmountInCents\",\n    subscription.created_at as \"created_at!: DateTime<Utc>\",\n    subscription.updated_at as \"updated_at?: DateTime<Utc>\"\nfrom subscription\ninner join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\nwhere account_id = $1\norder by subscription.created_at desc\nlimit 1\n"
-  },
   "86b018a6740d90547e7a7ee620398484bbb935a953433386139b520efc356188": {
     "describe": {
       "columns": [],
@@ -8848,6 +8790,122 @@
       }
     },
     "query": "update jig set live_id = $1, published_at = now() where id = $2"
+  },
+  "88d4579a4ddef195712ac196e75e5ab0194ebb4a77034565a3053ba443855018": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: UserId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "username",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "given_name",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "family_name",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "email!",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "language_emails",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "created_at!",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "badge?: UserBadge",
+          "ordinal": 7,
+          "type_info": "Int2"
+        },
+        {
+          "name": "organization",
+          "ordinal": 8,
+          "type_info": "Text"
+        },
+        {
+          "name": "location",
+          "ordinal": 9,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "plan_type?: PlanType",
+          "ordinal": 10,
+          "type_info": "Int2"
+        },
+        {
+          "name": "subscription_status?: SubscriptionStatus",
+          "ordinal": 11,
+          "type_info": "Int2"
+        },
+        {
+          "name": "is_trial?",
+          "ordinal": 12,
+          "type_info": "Bool"
+        },
+        {
+          "name": "current_period_end?: DateTime<Utc>",
+          "ordinal": 13,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "amount_due_in_cents?: AmountInCents",
+          "ordinal": 14,
+          "type_info": "Int8"
+        },
+        {
+          "name": "is_admin?",
+          "ordinal": 15,
+          "type_info": "Bool"
+        },
+        {
+          "name": "school_name?",
+          "ordinal": 16,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        null,
+        false,
+        false,
+        null,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      }
+    },
+    "query": "\nwith account_cte as (\n    select\n        user_account.user_id,\n        subscription_plan.plan_type,\n        subscription.status,\n        subscription.current_period_end,\n        subscription.is_trial,\n        subscription.amount_due,\n        user_account.admin,\n        school_name.name\n    from user_account\n    inner join account using (account_id)\n    left join (\n        select\n            subscription.account_id,\n            status,\n            amount_due,\n            subscription_plan_id,\n            current_period_end,\n            is_trial\n        from subscription\n        join (\n            select\n                distinct on (account_id)\n                account_id, subscription_id\n            from subscription\n            order by account_id, created_at desc\n        ) as recent_subscription using (subscription_id)\n    ) as subscription using (account_id)\n    left join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\n    left join school using (account_id)\n    left join school_name on school.school_name_id = school_name.school_name_id\n)\nselect  \"user\".id                 as \"id!: UserId\",\n        username,\n        given_name,\n        family_name,\n        user_email.email::text as \"email!\",\n        language_emails,\n        user_email.created_at  as \"created_at!\",\n        (select case when badge <> 10 then badge else null end)                  as \"badge?: UserBadge\",\n        organization,\n        location,\n        account_cte.plan_type as \"plan_type?: PlanType\",\n        account_cte.status as \"subscription_status?: SubscriptionStatus\",\n        account_cte.is_trial as \"is_trial?\",\n        account_cte.current_period_end as \"current_period_end?: DateTime<Utc>\",\n        account_cte.amount_due as \"amount_due_in_cents?: AmountInCents\",\n        account_cte.admin as \"is_admin?\",\n        account_cte.name::text as \"school_name?\"\nfrom \"user\"\nleft join account_cte on \"user\".id = account_cte.user_id\ninner join user_profile on \"user\".id = user_profile.user_id\ninner join user_email on user_email.user_id = \"user\".id\ninner join unnest($1::uuid[])\nwith ordinality t(id, ord) using (id)\n"
   },
   "88f0b8dffce417087a9ca7732ca5d41b13d686ab6388d7fa26a7b62e68ae613e": {
     "describe": {
@@ -10084,6 +10142,86 @@
       }
     },
     "query": "\ninsert into jig (creator_id, author_id, parents, live_id, draft_id)\nselect creator_id, $2, array_append(parents, $1), $3, $4\nfrom jig\nwhere id = $1\nreturning id as \"id!: JigId\"\n"
+  },
+  "9b4a063a93c1aa5e3a71cf1fadf668f33a6a2ea70f6b3d6eaf45c80f45e0d31b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "subscription_id!: SubscriptionId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "stripe_subscription_id!: StripeSubscriptionId",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "subscription_plan_type!: PlanType",
+          "ordinal": 2,
+          "type_info": "Int2"
+        },
+        {
+          "name": "is_trial",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "status!: SubscriptionStatus",
+          "ordinal": 4,
+          "type_info": "Int2"
+        },
+        {
+          "name": "current_period_end!: DateTime<Utc>",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "account_id!: AccountId",
+          "ordinal": 6,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "latest_invoice_id?: StripeInvoiceId",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "amount_due_in_cents?: AmountInCents",
+          "ordinal": 8,
+          "type_info": "Int8"
+        },
+        {
+          "name": "created_at!: DateTime<Utc>",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at?: DateTime<Utc>",
+          "ordinal": 10,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect\n    subscription_id as \"subscription_id!: SubscriptionId\",\n    stripe_subscription_id as \"stripe_subscription_id!: StripeSubscriptionId\",\n    subscription_plan.plan_type as \"subscription_plan_type!: PlanType\",\n    is_trial,\n    status as \"status!: SubscriptionStatus\",\n    current_period_end as \"current_period_end!: DateTime<Utc>\",\n    account_id as \"account_id!: AccountId\",\n    latest_invoice_id as \"latest_invoice_id?: StripeInvoiceId\",\n    amount_due as \"amount_due_in_cents?: AmountInCents\",\n    subscription.created_at as \"created_at!: DateTime<Utc>\",\n    subscription.updated_at as \"updated_at?: DateTime<Utc>\"\nfrom subscription\ninner join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\nwhere account_id = $1\norder by subscription.created_at desc\nlimit 1\n"
   },
   "9b861485e86da04aaa69d4863da15659c65606df112805e833c162510b8aad6d": {
     "describe": {
@@ -13090,116 +13228,6 @@
     },
     "query": "\n    select  user_id as \"id!: UserId\",\n            username   as \"username!\",\n            given_name  as \"given_name!\",\n            family_name as \"family_name!\",\n            profile_image_id       as \"profile_image?: ImageId\",\n            (select case when badge <> 10 then badge else null end) as \"badge?: UserBadge\",\n            (select languages_spoken from user_profile where user_profile.user_id = \"user\".id and languages_spoken_public is true)      as \"languages_spoken?: Vec<String>\",\n            (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n            (select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\",\n            (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n            (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n            (select (CASE WHEN count(*) > 0 THEN count(*) else null end) from jig where jig.author_id = \"user\".id and jig.published_at is not null)      as \"jig_count?\",\n            (select (CASE WHEN count(*) > 0 THEN count(*) else null end) from resource where resource.author_id = \"user\".id and resource.published_at is not null)      as \"resource_count?\",\n            (select (CASE WHEN count(*) > 0 THEN count(*) else null end) from course where course.author_id = \"user\".id and course.published_at is not null)      as \"course_count?\",\n            (select (CASE WHEN count(*) > 0 THEN count(*) else null end) from playlist where playlist.author_id = \"user\".id and playlist.published_at is not null)      as \"playlist_count?\",\n            ((select count(*) from jig where jig.author_id = \"user\".id and jig.published_at is not null) + \n            (select count(*) from resource where resource.author_id = \"user\".id and resource.published_at is not null) + \n            (select count(*) from course where course.author_id = \"user\".id and course.published_at is not null) + \n            (select count(*) from playlist where playlist.author_id = \"user\".id and playlist.published_at is not null))      as \"total_asset_count!\",\n            array(select circle.id\n                from circle_member bm\n                inner join circle on bm.id = circle.id\n                where bm.user_id = \"user\".id\n            ) as \"circles!: Vec<CircleId>\",\n            exists(select 1 from user_follow where follower_id = $2 and user_id = \"user\".id) as \"following!\"\n        from \"user\"\n        inner join user_profile on \"user\".id = user_profile.user_id\n        where id = $1\n        "
   },
-  "cea5eb373d96615f074f12abd74141915a7c13d1c4c03d92c55b49ec11de6472": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: UserId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "username",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "given_name",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "family_name",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "email!",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "language_emails",
-          "ordinal": 5,
-          "type_info": "Text"
-        },
-        {
-          "name": "created_at!",
-          "ordinal": 6,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "badge?: UserBadge",
-          "ordinal": 7,
-          "type_info": "Int2"
-        },
-        {
-          "name": "organization",
-          "ordinal": 8,
-          "type_info": "Text"
-        },
-        {
-          "name": "location",
-          "ordinal": 9,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "plan_type?: PlanType",
-          "ordinal": 10,
-          "type_info": "Int2"
-        },
-        {
-          "name": "subscription_status?: SubscriptionStatus",
-          "ordinal": 11,
-          "type_info": "Int2"
-        },
-        {
-          "name": "current_period_end?: DateTime<Utc>",
-          "ordinal": 12,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "amount_due_in_cents?: AmountInCents",
-          "ordinal": 13,
-          "type_info": "Int8"
-        },
-        {
-          "name": "is_admin?",
-          "ordinal": 14,
-          "type_info": "Bool"
-        },
-        {
-          "name": "school_name?",
-          "ordinal": 15,
-          "type_info": "Text"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        null,
-        false,
-        false,
-        null,
-        true,
-        true,
-        false,
-        false,
-        false,
-        true,
-        false,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "UuidArray"
-        ]
-      }
-    },
-    "query": "\nwith account_cte as (\n    select\n        user_account.user_id,\n        subscription_plan.plan_type,\n        subscription.status,\n        subscription.current_period_end,\n        subscription.amount_due,\n        user_account.admin,\n        school_name.name\n    from user_account\n    inner join account using (account_id)\n    left join (\n        select\n            subscription.account_id,\n            status,\n            amount_due,\n            subscription_plan_id,\n            current_period_end\n        from subscription\n        join (\n            select\n                distinct on (account_id)\n                account_id, subscription_id\n            from subscription\n            order by account_id, created_at desc\n        ) as recent_subscription using (subscription_id)\n    ) as subscription using (account_id)\n    left join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\n    left join school using (account_id)\n    left join school_name on school.school_name_id = school_name.school_name_id\n)\nselect  \"user\".id                 as \"id!: UserId\",\n        username,\n        given_name,\n        family_name,\n        user_email.email::text as \"email!\",\n        language_emails,\n        user_email.created_at  as \"created_at!\",\n        (select case when badge <> 10 then badge else null end)                  as \"badge?: UserBadge\",\n        organization,\n        location,\n        account_cte.plan_type as \"plan_type?: PlanType\",\n        account_cte.status as \"subscription_status?: SubscriptionStatus\",\n        account_cte.current_period_end as \"current_period_end?: DateTime<Utc>\",\n        account_cte.amount_due as \"amount_due_in_cents?: AmountInCents\",\n        account_cte.admin as \"is_admin?\",\n        account_cte.name::text as \"school_name?\"\nfrom \"user\"\nleft join account_cte on \"user\".id = account_cte.user_id\ninner join user_profile on \"user\".id = user_profile.user_id\ninner join user_email on user_email.user_id = \"user\".id\ninner join unnest($1::uuid[])\nwith ordinality t(id, ord) using (id)\n"
-  },
   "ceee83d2943409d2f3a3e5a70b7ae3d423d39cf2b15af44565c6f4100abcfc31": {
     "describe": {
       "columns": [],
@@ -15619,22 +15647,6 @@
       }
     },
     "query": "\nupdate image_metadata\nset publish_at = $2, updated_at = now()\nwhere id = $1 and $2 is distinct from publish_at"
-  },
-  "fd45af8ea769e72533e53da95568de7e0f54ad39ded9e90d56b4304cd9b3cc4f": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Bool",
-          "Int2",
-          "Timestamptz",
-          "Text"
-        ]
-      }
-    },
-    "query": "\nupdate subscription\nset\n    auto_renew = coalesce($2, auto_renew),\n    status = coalesce($3, status),\n    current_period_end = coalesce($4, current_period_end),\n    updated_at = now(),\n    latest_invoice_id = $5\nwhere stripe_subscription_id = $1\n"
   },
   "fe196f274875c6e293c5e80be927ac1e35c46f7699975b24a28b8cc1c136881d": {
     "describe": {
