@@ -236,7 +236,7 @@ pub enum BillingInterval {
 }
 
 /// Status of a subscription
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Display, Serialize, Deserialize, Clone)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[repr(i16)]
 pub enum SubscriptionStatus {
@@ -434,22 +434,31 @@ pub enum SubscriptionType {
 #[repr(i16)]
 pub enum PlanType {
     /// Basic level, monthly
+    #[strum(serialize = "Individual Basic Monthly")]
     IndividualBasicMonthly = 0,
     /// Basic level, annually
+    #[strum(serialize = "Individual Basic Annual")]
     IndividualBasicAnnually = 1,
     /// Pro level, monthly
+    #[strum(serialize = "Individual Pro Monthly")]
     IndividualProMonthly = 2,
     /// Pro level, annually
+    #[strum(serialize = "Individual Pro Annual")]
     IndividualProAnnually = 3,
     /// School Level 1
+    #[strum(serialize = "School - Up to 4")]
     SchoolLevel1 = 4,
     /// School Level 2
+    #[strum(serialize = "School - Up to 10")]
     SchoolLevel2 = 5,
     /// School Level 3
+    #[strum(serialize = "School - Up to 20")]
     SchoolLevel3 = 6,
     /// School Level 4
+    #[strum(serialize = "School - Up to 30")]
     SchoolLevel4 = 7,
     /// School Unlimited
+    #[strum(serialize = "School - 30+")]
     SchoolUnlimited = 8,
 }
 

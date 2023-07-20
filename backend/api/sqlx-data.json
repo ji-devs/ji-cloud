@@ -4924,6 +4924,119 @@
     },
     "query": "\nselect display_name         as \"display_name!\",\n       resource_type_id     as \"resource_type_id!: ResourceTypeId\",\n       resource_content    as \"resource_content!\"\nfrom jig_data_additional_resource \"jdar\"\nwhere jig_data_id = $1\n  and jdar.id = $2\n        "
   },
+  "4aa4ba891f606af4dedc1cc541e9160609b32d54da0ad663714bb4e7998e7c44": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: UserId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "username",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "given_name",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "family_name",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "email!",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "language_emails",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "created_at!",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "badge?: UserBadge",
+          "ordinal": 7,
+          "type_info": "Int2"
+        },
+        {
+          "name": "organization",
+          "ordinal": 8,
+          "type_info": "Text"
+        },
+        {
+          "name": "location",
+          "ordinal": 9,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "plan_type?: PlanType",
+          "ordinal": 10,
+          "type_info": "Int2"
+        },
+        {
+          "name": "subscription_status?: SubscriptionStatus",
+          "ordinal": 11,
+          "type_info": "Int2"
+        },
+        {
+          "name": "current_period_end?: DateTime<Utc>",
+          "ordinal": 12,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "amount_due_in_cents?: AmountInCents",
+          "ordinal": 13,
+          "type_info": "Int8"
+        },
+        {
+          "name": "is_admin?",
+          "ordinal": 14,
+          "type_info": "Bool"
+        },
+        {
+          "name": "school_name?",
+          "ordinal": 15,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        null,
+        false,
+        false,
+        false,
+        null,
+        false,
+        false,
+        null,
+        true,
+        true,
+        false,
+        false,
+        false,
+        true,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int8",
+          "Int8",
+          "Int2Array"
+        ]
+      }
+    },
+    "query": "\nwith cte as (\n    select (array_agg(user_profile.user_id))[1]\n    from user_profile\n        inner join \"user\" on \"user\".id = user_profile.user_id\n        inner join user_email on user_profile.user_id = user_email.user_id\n    where (user_profile.user_id = $1 or $1 is null)\n      and (user_profile.badge = any($4) or $4 = array[]::smallint[])\n    group by \"user\".created_at\n    order by \"user\".created_at desc\n),\ncte1 as (\n    select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n   , ord) order by ord\n),\naccount_cte as (\n    select\n        user_account.user_id,\n        subscription_plan.plan_type,\n        subscription.status,\n        subscription.current_period_end,\n        subscription.amount_due,\n        user_account.admin,\n        school_name.name\n    from user_account\n    inner join account using (account_id)\n    left join (\n        select\n            subscription.account_id,\n            status,\n            amount_due,\n            subscription_plan_id,\n            current_period_end\n        from subscription\n        join (\n            select\n                distinct on (account_id)\n                account_id, subscription_id\n            from subscription\n            order by account_id, created_at desc\n        ) as recent_subscription using (subscription_id)\n    ) as subscription using (account_id)\n    left join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\n    left join school using (account_id)\n    left join school_name on school.school_name_id = school_name.school_name_id\n)\nselect  cte1.id                 as \"id!: UserId\",\n        username,\n        given_name,\n        family_name,\n        user_email.email::text as \"email!\",\n        language_emails,\n        user_email.created_at  as \"created_at!\",\n        (select case when badge <> 10 then badge else null end) as \"badge?: UserBadge\",\n        organization,\n        location,\n        account_cte.plan_type as \"plan_type?: PlanType\",\n        account_cte.status as \"subscription_status?: SubscriptionStatus\",\n        account_cte.current_period_end as \"current_period_end?: DateTime<Utc>\",\n        account_cte.amount_due as \"amount_due_in_cents?: AmountInCents\",\n        account_cte.admin as \"is_admin?\",\n        account_cte.name::text as \"school_name?\"\nfrom cte1\n        left join account_cte on cte1.id = account_cte.user_id\n        inner join user_profile on cte1.id = user_profile.user_id\n        inner join user_email on cte1.id = user_email.user_id\norder by ord asc\nlimit $3\noffset $2\n"
+  },
   "4ab4c7e45ea4d4dead6ad479dd764474979f932fbb3f8e65657c946afea2d4eb": {
     "describe": {
       "columns": [
@@ -5594,83 +5707,6 @@
       }
     },
     "query": "\nupdate resource_data_resource\nset resource_type_id = coalesce($2, resource_type_id)\nwhere id = $1 and $2 is distinct from resource_type_id\n            "
-  },
-  "578c7489c0b0b195dca011d76e986ba4fca6dfd54df07a15a00f40fb64d459f9": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: UserId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "username",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "given_name",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "family_name",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "email!",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "language_emails",
-          "ordinal": 5,
-          "type_info": "Text"
-        },
-        {
-          "name": "created_at!",
-          "ordinal": 6,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "badge?: UserBadge",
-          "ordinal": 7,
-          "type_info": "Int2"
-        },
-        {
-          "name": "organization",
-          "ordinal": 8,
-          "type_info": "Text"
-        },
-        {
-          "name": "location",
-          "ordinal": 9,
-          "type_info": "Jsonb"
-        }
-      ],
-      "nullable": [
-        null,
-        false,
-        false,
-        false,
-        null,
-        false,
-        false,
-        null,
-        true,
-        true
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int8",
-          "Int8",
-          "Int2Array"
-        ]
-      }
-    },
-    "query": "\nwith cte as (\n    select (array_agg(user_profile.user_id))[1]\n    from user_profile\n        inner join \"user\" on \"user\".id = user_profile.user_id\n        inner join user_email on user_profile.user_id = user_email.user_id\n    where (user_profile.user_id = $1 or $1 is null)\n      and (user_profile.badge = any($4) or $4 = array[]::smallint[])\n    group by \"user\".created_at\n    order by \"user\".created_at desc\n),\ncte1 as (\n    select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n   , ord) order by ord\n)\nselect  cte1.id                 as \"id!: UserId\",\n        username,\n        given_name,\n        family_name,\n        user_email.email::text as \"email!\",\n        language_emails,\n        user_email.created_at  as \"created_at!\",\n        (select case when badge <> 10 then badge else null end) as \"badge?: UserBadge\",\n        organization,\n        location\nfrom cte1\n        inner join user_profile on cte1.id = user_profile.user_id\n        inner join user_email on cte1.id = user_email.user_id\norder by ord asc\nlimit $3\noffset $2\n"
   },
   "57b72bbdece8deb3ac84c44b94157afbd3d50d16c893613f54145b9ca7e255d0": {
     "describe": {
@@ -9509,80 +9545,6 @@
     },
     "query": "\nupdate course\nset plays = plays + 1\nwhere id = $1;\n            "
   },
-  "9295ca771a2276ae36a6b43b7e81a3434fa1c3d171f86277b13a73cf8e9c9260": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: UserId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "username",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "given_name",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "family_name",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "email!",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "language_emails",
-          "ordinal": 5,
-          "type_info": "Text"
-        },
-        {
-          "name": "created_at!",
-          "ordinal": 6,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "badge?: UserBadge",
-          "ordinal": 7,
-          "type_info": "Int2"
-        },
-        {
-          "name": "organization",
-          "ordinal": 8,
-          "type_info": "Text"
-        },
-        {
-          "name": "location",
-          "ordinal": 9,
-          "type_info": "Jsonb"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        null,
-        false,
-        false,
-        null,
-        true,
-        true
-      ],
-      "parameters": {
-        "Left": [
-          "UuidArray"
-        ]
-      }
-    },
-    "query": "\nselect  \"user\".id                 as \"id!: UserId\",\n        username,\n        given_name,\n        family_name,\n        user_email.email::text as \"email!\",\n        language_emails,\n        user_email.created_at  as \"created_at!\",\n        (select case when badge <> 10 then badge else null end)                  as \"badge?: UserBadge\",\n        organization,\n        location\nfrom \"user\"\ninner join user_profile on \"user\".id = user_profile.user_id\ninner join user_email on user_email.user_id = \"user\".id\ninner join unnest($1::uuid[])\nwith ordinality t(id, ord) using (id)\n"
-  },
   "932508742699d5ebb198b02fc4f4bcaa9fd0e50c4206e6536279163533526826": {
     "describe": {
       "columns": [
@@ -13127,6 +13089,116 @@
       }
     },
     "query": "\n    select  user_id as \"id!: UserId\",\n            username   as \"username!\",\n            given_name  as \"given_name!\",\n            family_name as \"family_name!\",\n            profile_image_id       as \"profile_image?: ImageId\",\n            (select case when badge <> 10 then badge else null end) as \"badge?: UserBadge\",\n            (select languages_spoken from user_profile where user_profile.user_id = \"user\".id and languages_spoken_public is true)      as \"languages_spoken?: Vec<String>\",\n            (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n            (select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\",\n            (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n            (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n            (select (CASE WHEN count(*) > 0 THEN count(*) else null end) from jig where jig.author_id = \"user\".id and jig.published_at is not null)      as \"jig_count?\",\n            (select (CASE WHEN count(*) > 0 THEN count(*) else null end) from resource where resource.author_id = \"user\".id and resource.published_at is not null)      as \"resource_count?\",\n            (select (CASE WHEN count(*) > 0 THEN count(*) else null end) from course where course.author_id = \"user\".id and course.published_at is not null)      as \"course_count?\",\n            (select (CASE WHEN count(*) > 0 THEN count(*) else null end) from playlist where playlist.author_id = \"user\".id and playlist.published_at is not null)      as \"playlist_count?\",\n            ((select count(*) from jig where jig.author_id = \"user\".id and jig.published_at is not null) + \n            (select count(*) from resource where resource.author_id = \"user\".id and resource.published_at is not null) + \n            (select count(*) from course where course.author_id = \"user\".id and course.published_at is not null) + \n            (select count(*) from playlist where playlist.author_id = \"user\".id and playlist.published_at is not null))      as \"total_asset_count!\",\n            array(select circle.id\n                from circle_member bm\n                inner join circle on bm.id = circle.id\n                where bm.user_id = \"user\".id\n            ) as \"circles!: Vec<CircleId>\",\n            exists(select 1 from user_follow where follower_id = $2 and user_id = \"user\".id) as \"following!\"\n        from \"user\"\n        inner join user_profile on \"user\".id = user_profile.user_id\n        where id = $1\n        "
+  },
+  "cea5eb373d96615f074f12abd74141915a7c13d1c4c03d92c55b49ec11de6472": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: UserId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "username",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "given_name",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "family_name",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "email!",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "language_emails",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "created_at!",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "badge?: UserBadge",
+          "ordinal": 7,
+          "type_info": "Int2"
+        },
+        {
+          "name": "organization",
+          "ordinal": 8,
+          "type_info": "Text"
+        },
+        {
+          "name": "location",
+          "ordinal": 9,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "plan_type?: PlanType",
+          "ordinal": 10,
+          "type_info": "Int2"
+        },
+        {
+          "name": "subscription_status?: SubscriptionStatus",
+          "ordinal": 11,
+          "type_info": "Int2"
+        },
+        {
+          "name": "current_period_end?: DateTime<Utc>",
+          "ordinal": 12,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "amount_due_in_cents?: AmountInCents",
+          "ordinal": 13,
+          "type_info": "Int8"
+        },
+        {
+          "name": "is_admin?",
+          "ordinal": 14,
+          "type_info": "Bool"
+        },
+        {
+          "name": "school_name?",
+          "ordinal": 15,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        null,
+        false,
+        false,
+        null,
+        true,
+        true,
+        false,
+        false,
+        false,
+        true,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      }
+    },
+    "query": "\nwith account_cte as (\n    select\n        user_account.user_id,\n        subscription_plan.plan_type,\n        subscription.status,\n        subscription.current_period_end,\n        subscription.amount_due,\n        user_account.admin,\n        school_name.name\n    from user_account\n    inner join account using (account_id)\n    left join (\n        select\n            subscription.account_id,\n            status,\n            amount_due,\n            subscription_plan_id,\n            current_period_end\n        from subscription\n        join (\n            select\n                distinct on (account_id)\n                account_id, subscription_id\n            from subscription\n            order by account_id, created_at desc\n        ) as recent_subscription using (subscription_id)\n    ) as subscription using (account_id)\n    left join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\n    left join school using (account_id)\n    left join school_name on school.school_name_id = school_name.school_name_id\n)\nselect  \"user\".id                 as \"id!: UserId\",\n        username,\n        given_name,\n        family_name,\n        user_email.email::text as \"email!\",\n        language_emails,\n        user_email.created_at  as \"created_at!\",\n        (select case when badge <> 10 then badge else null end)                  as \"badge?: UserBadge\",\n        organization,\n        location,\n        account_cte.plan_type as \"plan_type?: PlanType\",\n        account_cte.status as \"subscription_status?: SubscriptionStatus\",\n        account_cte.current_period_end as \"current_period_end?: DateTime<Utc>\",\n        account_cte.amount_due as \"amount_due_in_cents?: AmountInCents\",\n        account_cte.admin as \"is_admin?\",\n        account_cte.name::text as \"school_name?\"\nfrom \"user\"\nleft join account_cte on \"user\".id = account_cte.user_id\ninner join user_profile on \"user\".id = user_profile.user_id\ninner join user_email on user_email.user_id = \"user\".id\ninner join unnest($1::uuid[])\nwith ordinality t(id, ord) using (id)\n"
   },
   "ceee83d2943409d2f3a3e5a70b7ae3d423d39cf2b15af44565c6f4100abcfc31": {
     "describe": {

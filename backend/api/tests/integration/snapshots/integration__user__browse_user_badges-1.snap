@@ -16,7 +16,13 @@ expression: body
       "organization": "test2 org",
       "createdAt": "2020-08-07",
       "language": "en",
-      "badge": null
+      "badge": null,
+      "planType": null,
+      "subscriptionStatus": null,
+      "currentPeriodEnd": null,
+      "amountDueInCents": null,
+      "isAdmin": null,
+      "schoolName": null
     }
   ],
   "pages": 1,

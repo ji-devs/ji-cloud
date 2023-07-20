@@ -55,7 +55,10 @@ export class _ extends LitElement {
         "City",
         "School/Organization",
         "Signup Date",
-        "Language"
+        "Language",
+        "Subscription",
+        "Period End",
+        "School Account",
     ];
 
     render() {
