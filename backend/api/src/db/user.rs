@@ -1,6 +1,8 @@
 use crate::error::Username::Taken;
 use chrono::{DateTime, Utc};
 use chrono_tz::Tz;
+use serde_json::Value;
+use shared::domain::billing::{AmountInCents, PlanType, SubscriptionStatus};
 use shared::domain::{
     admin::DateFilterType,
     circle::CircleId,
@@ -164,6 +166,37 @@ with cte as (
 cte1 as (
     select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id
    , ord) order by ord
+),
+account_cte as (
+    select
+        user_account.user_id,
+        subscription_plan.plan_type,
+        subscription.status,
+        subscription.current_period_end,
+        subscription.amount_due,
+        user_account.admin,
+        school_name.name
+    from user_account
+    inner join account using (account_id)
+    left join (
+        select
+            subscription.account_id,
+            status,
+            amount_due,
+            subscription_plan_id,
+            current_period_end
+        from subscription
+        join (
+            select
+                distinct on (account_id)
+                account_id, subscription_id
+            from subscription
+            order by account_id, created_at desc
+        ) as recent_subscription using (subscription_id)
+    ) as subscription using (account_id)
+    left join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id
+    left join school using (account_id)
+    left join school_name on school.school_name_id = school_name.school_name_id
 )
 select  cte1.id                 as "id!: UserId",
         username,
@@ -174,8 +207,15 @@ select  cte1.id                 as "id!: UserId",
         user_email.created_at  as "created_at!",
         (select case when badge <> 10 then badge else null end) as "badge?: UserBadge",
         organization,
-        location
+        location,
+        account_cte.plan_type as "plan_type?: PlanType",
+        account_cte.status as "subscription_status?: SubscriptionStatus",
+        account_cte.current_period_end as "current_period_end?: DateTime<Utc>",
+        account_cte.amount_due as "amount_due_in_cents?: AmountInCents",
+        account_cte.admin as "is_admin?",
+        account_cte.name::text as "school_name?"
 from cte1
+        left join account_cte on cte1.id = account_cte.user_id
         inner join user_profile on cte1.id = user_profile.user_id
         inner join user_email on cte1.id = user_email.user_id
 order by ord asc
@@ -209,6 +249,12 @@ offset $2
                 created_at: user_row.created_at.date_naive(),
                 language: user_row.language_emails,
                 badge: user_row.badge,
+                plan_type: user_row.plan_type,
+                subscription_status: user_row.subscription_status,
+                current_period_end: user_row.current_period_end,
+                amount_due_in_cents: user_row.amount_due_in_cents,
+                is_admin: user_row.is_admin,
+                school_name: user_row.school_name,
             }
         })
         .collect();
@@ -224,6 +270,37 @@ pub async fn get_by_ids(db: &PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<UserRespo
     let res: Vec<_> = sqlx::query!(
         //language=SQL
         r#"
+with account_cte as (
+    select
+        user_account.user_id,
+        subscription_plan.plan_type,
+        subscription.status,
+        subscription.current_period_end,
+        subscription.amount_due,
+        user_account.admin,
+        school_name.name
+    from user_account
+    inner join account using (account_id)
+    left join (
+        select
+            subscription.account_id,
+            status,
+            amount_due,
+            subscription_plan_id,
+            current_period_end
+        from subscription
+        join (
+            select
+                distinct on (account_id)
+                account_id, subscription_id
+            from subscription
+            order by account_id, created_at desc
+        ) as recent_subscription using (subscription_id)
+    ) as subscription using (account_id)
+    left join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id
+    left join school using (account_id)
+    left join school_name on school.school_name_id = school_name.school_name_id
+)
 select  "user".id                 as "id!: UserId",
         username,
         given_name,
@@ -233,8 +310,15 @@ select  "user".id                 as "id!: UserId",
         user_email.created_at  as "created_at!",
         (select case when badge <> 10 then badge else null end)                  as "badge?: UserBadge",
         organization,
-        location
+        location,
+        account_cte.plan_type as "plan_type?: PlanType",
+        account_cte.status as "subscription_status?: SubscriptionStatus",
+        account_cte.current_period_end as "current_period_end?: DateTime<Utc>",
+        account_cte.amount_due as "amount_due_in_cents?: AmountInCents",
+        account_cte.admin as "is_admin?",
+        account_cte.name::text as "school_name?"
 from "user"
+left join account_cte on "user".id = account_cte.user_id
 inner join user_profile on "user".id = user_profile.user_id
 inner join user_email on user_email.user_id = "user".id
 inner join unnest($1::uuid[])
@@ -263,6 +347,12 @@ with ordinality t(id, ord) using (id)
                 created_at: row.created_at.date_naive(),
                 language: row.language_emails,
                 badge: row.badge,
+                plan_type: row.plan_type,
+                subscription_status: row.subscription_status,
+                current_period_end: row.current_period_end,
+                amount_due_in_cents: row.amount_due_in_cents,
+                is_admin: row.is_admin,
+                school_name: row.school_name,
             }
         })
         .collect();

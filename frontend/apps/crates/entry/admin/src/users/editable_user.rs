@@ -16,11 +16,51 @@ pub struct EditableUser {
     pub language: Mutable<String>,
     pub organization: Mutable<String>,
     pub badge: Mutable<Option<UserBadge>>,
+    pub subscription: String,
+    pub current_period_end: String,
+    pub school_account: String,
     pub loader: AsyncLoader,
 }
 
 impl From<UserResponse> for EditableUser {
     fn from(user: UserResponse) -> Self {
+        let subscription = match user.plan_type {
+            Some(plan_type) => {
+                let due = {
+                    let due = user
+                        .amount_due_in_cents
+                        .map(|due| due.inner())
+                        .unwrap_or_default();
+                    if due > 0 {
+                        format!(", Due: {}", (due as f32) / 100.0)
+                    } else {
+                        Default::default()
+                    }
+                };
+
+                format!(
+                    "{plan_type} ({}{due})",
+                    user.subscription_status
+                        .map(|status| status.to_string())
+                        .unwrap_or_default()
+                )
+            }
+            None => Default::default(),
+        };
+
+        let school_account = match user.school_name {
+            Some(school_name) => {
+                let user_type = if user.is_admin.unwrap_or_default() {
+                    "Admin".to_string()
+                } else {
+                    "User".to_string()
+                };
+
+                format!("{school_name} ({user_type})")
+            }
+            None => "N/A",
+        };
+
         Self {
             id: user.id,
             username: Mutable::new(user.username),
@@ -34,6 +74,12 @@ impl From<UserResponse> for EditableUser {
             country: Mutable::new(user.country.unwrap_or_default()),
             email: Mutable::new(user.email),
             badge: Mutable::new(user.badge),
+            subscription,
+            current_period_end: user
+                .current_period_end
+                .map(|period| period.to_string())
+                .unwrap_or_default(),
+            school_account,
             loader: AsyncLoader::new(),
         }
     }

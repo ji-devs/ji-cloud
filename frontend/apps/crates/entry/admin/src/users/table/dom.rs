@@ -163,6 +163,15 @@ impl UsersTable {
                         html!("span", {
                             .text_signal(user.language.signal_cloned())
                         }),
+                        html!("span", {
+                            .text(&user.subscription)
+                        }),
+                        html!("span", {
+                            .text(&user.current_period_end)
+                        }),
+                        html!("span", {
+                            .text(&user.school_account)
+                        }),
                     ])
                 })
             })))

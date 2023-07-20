@@ -16,7 +16,13 @@ expression: body
       "organization": "test org",
       "createdAt": "2020-08-09",
       "language": "en",
-      "badge": "jiTeam"
+      "badge": "jiTeam",
+      "planType": null,
+      "subscriptionStatus": null,
+      "currentPeriodEnd": null,
+      "amountDueInCents": null,
+      "isAdmin": null,
+      "schoolName": null
     }
   ],
   "pages": 1,

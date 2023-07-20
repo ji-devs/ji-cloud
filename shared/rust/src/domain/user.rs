@@ -5,7 +5,7 @@ use macros::make_path_parts;
 use serde::{Deserialize, Serialize, Serializer};
 use std::convert::TryFrom;
 
-use crate::domain::billing::UserAccountSummary;
+use crate::domain::billing::{AmountInCents, PlanType, SubscriptionStatus, UserAccountSummary};
 use crate::{
     api::endpoints::PathPart,
     domain::{
@@ -318,6 +318,30 @@ pub struct UserResponse {
     /// The user's city.
     #[serde(default)]
     pub badge: Option<UserBadge>,
+
+    /// The users subscription plan type
+    #[serde(default)]
+    pub plan_type: Option<PlanType>,
+
+    /// The users subscription status
+    #[serde(default)]
+    pub subscription_status: Option<SubscriptionStatus>,
+
+    /// The users subscription expiry/renewal date
+    #[serde(default)]
+    pub current_period_end: Option<DateTime<Utc>>,
+
+    /// The amount due on the users subscription
+    #[serde(default)]
+    pub amount_due_in_cents: Option<AmountInCents>,
+
+    /// Whether the user is an admin of the account
+    #[serde(default)]
+    pub is_admin: Option<bool>,
+
+    /// The school name associated with the users account
+    #[serde(default)]
+    pub school_name: Option<String>,
 }
 
 /// A user's profile export representation.
