@@ -19,6 +19,7 @@ expression: body
       "badge": null,
       "planType": null,
       "subscriptionStatus": null,
+      "isTrial": null,
       "currentPeriodEnd": null,
       "amountDueInCents": null,
       "isAdmin": null,
