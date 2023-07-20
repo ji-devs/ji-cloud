@@ -327,6 +327,10 @@ pub struct UserResponse {
     #[serde(default)]
     pub subscription_status: Option<SubscriptionStatus>,
 
+    /// Whether the user's subscription is in a trial period
+    #[serde(default)]
+    pub is_trial: Option<bool>,
+
     /// The users subscription expiry/renewal date
     #[serde(default)]
     pub current_period_end: Option<DateTime<Utc>>,

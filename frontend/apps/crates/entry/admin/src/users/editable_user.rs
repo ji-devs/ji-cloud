@@ -58,7 +58,22 @@ impl From<UserResponse> for EditableUser {
 
                 format!("{school_name} ({user_type})")
             }
-            None => "N/A".to_string(),
+            None => Default::default(),
+        };
+
+        let current_period_end = match user.current_period_end {
+            Some(current_period_end) => {
+                let trial = user.is_trial.map_or(Default::default(), |is_trial| {
+                    if is_trial {
+                        "(Trial)".to_string()
+                    } else {
+                        Default::default()
+                    }
+                });
+
+                format!("{}{trial}", current_period_end.date_naive().to_string())
+            }
+            None => Default::default(),
         };
 
         Self {
@@ -75,10 +90,7 @@ impl From<UserResponse> for EditableUser {
             email: Mutable::new(user.email),
             badge: Mutable::new(user.badge),
             subscription,
-            current_period_end: user
-                .current_period_end
-                .map(|period| period.to_string())
-                .unwrap_or_default(),
+            current_period_end,
             school_account,
             loader: AsyncLoader::new(),
         }
