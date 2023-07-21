@@ -4,13 +4,19 @@ use actix_web::{
     HttpResponse, Responder,
 };
 
+use crate::{
+    db::{self, account::AccountMember},
+    error,
+};
 use chrono::{DateTime, Utc};
 use http::StatusCode;
-use shared::domain::user::UserScope;
+use shared::domain::billing::AccountId;
+use shared::domain::user::{UserId, UserScope};
 use shared::domain::{
     category::{Category, CategoryId},
     session::AUTH_COOKIE_NAME,
 };
+use sqlx::PgPool;
 use std::{cell::RefCell, convert::TryFrom, rc::Rc};
 use std::{collections::HashMap, fmt};
 use tracing::instrument;
@@ -168,4 +174,50 @@ impl Responder for NoContentClearAuth {
             .cookie(cookie)
             .finish()
     }
+}
+
+#[derive(Debug)]
+pub enum UserAuthorization {
+    SystemAdministrator,
+    AccountAdministrator,
+    AccountMember,
+}
+
+impl UserAuthorization {
+    pub fn is_system_administrator(&self) -> bool {
+        matches!(self, UserAuthorization::SystemAdministrator)
+    }
+
+    pub fn test_authorized(&self, require_account_admin: bool) -> Result<(), error::Account> {
+        if self.is_authorized(require_account_admin) {
+            Ok(())
+        } else {
+            Err(error::Account::Forbidden)
+        }
+    }
+
+    pub fn is_authorized(&self, require_account_admin: bool) -> bool {
+        match self {
+            UserAuthorization::AccountMember if require_account_admin => false,
+            _ => true,
+        }
+    }
+}
+
+pub async fn user_authorization(
+    db: &PgPool,
+    user_id: &UserId,
+    account_id: &AccountId,
+) -> Result<UserAuthorization, error::Account> {
+    Ok(
+        if db::user::has_scopes(db, *user_id, &[UserScope::Admin]).await? {
+            UserAuthorization::SystemAdministrator
+        } else {
+            match db::account::user_account_membership(db, user_id, account_id).await? {
+                Some(AccountMember::Admin) => UserAuthorization::AccountAdministrator,
+                Some(AccountMember::User) => UserAuthorization::AccountMember,
+                None => return Err(error::Account::Forbidden),
+            }
+        },
+    )
 }

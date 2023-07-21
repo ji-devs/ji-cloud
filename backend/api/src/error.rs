@@ -812,6 +812,7 @@ pub enum Billing {
     SchoolNotFound,
     IncorrectPlanType(AccountType, SubscriptionType),
     InvalidPromotionCode(String),
+    Forbidden,
 }
 
 impl<T: Into<anyhow::Error>> From<T> for Billing {
@@ -853,6 +854,7 @@ impl Into<actix_web::Error> for Billing {
                 format!("Invalid promotion code {code}"),
             )
             .into(),
+            Self::Forbidden => BasicError::new(http::StatusCode::FORBIDDEN).into(),
         }
     }
 }
@@ -860,6 +862,16 @@ impl Into<actix_web::Error> for Billing {
 impl From<Service> for Billing {
     fn from(err: Service) -> Self {
         Self::Service(err)
+    }
+}
+
+impl From<Account> for Billing {
+    fn from(value: Account) -> Self {
+        match value {
+            Account::Forbidden => Self::Forbidden,
+            Account::InternalServerError(error) => Self::InternalServerError(error),
+            _ => Self::BadRequest,
+        }
     }
 }
 
