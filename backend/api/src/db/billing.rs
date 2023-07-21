@@ -277,7 +277,7 @@ limit 1
 }
 
 #[instrument(skip(pool))]
-pub async fn get_stripe_subscription_id_with_invoice_id(
+pub async fn get_stripe_subscription_id_by_invoice_id(
     pool: &PgPool,
     invoice_id: &StripeInvoiceId,
 ) -> sqlx::Result<Option<StripeSubscriptionId>> {

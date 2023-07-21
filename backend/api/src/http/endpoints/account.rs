@@ -1,4 +1,4 @@
-use crate::db::account::AccountMember;
+use crate::domain::{user_authorization, UserAuthorization};
 use crate::extractor::TokenUser;
 use crate::{db, error};
 use actix_web::web::{Data, Json, Path, ServiceConfig};
@@ -10,11 +10,10 @@ use shared::api::endpoints::account::{
 };
 use shared::api::{endpoints::account::CreateSchoolAccount, ApiEndpoint, PathParts};
 use shared::domain::billing::{
-    AccountId, AccountIfAuthorized, CreateSchoolAccountRequest, GetSchoolAccountResponse,
+    AccountIfAuthorized, CreateSchoolAccountRequest, GetSchoolAccountResponse,
     IndividualAccountResponse, SchoolId, SchoolNameRequest, SchoolNameValue,
     UpdateSchoolAccountRequest,
 };
-use shared::domain::user::{UserId, UserScope};
 use sqlx::PgPool;
 use tracing::instrument;
 
@@ -252,52 +251,6 @@ async fn get_individual_account(
     }
 
     Ok(Json(IndividualAccountResponse { account }))
-}
-
-#[derive(Debug)]
-enum UserAuthorization {
-    SystemAdministrator,
-    AccountAdministrator,
-    AccountMember,
-}
-
-impl UserAuthorization {
-    fn is_system_administrator(&self) -> bool {
-        matches!(self, UserAuthorization::SystemAdministrator)
-    }
-
-    fn test_authorized(&self, require_account_admin: bool) -> Result<(), error::Account> {
-        if self.is_authorized(require_account_admin) {
-            Ok(())
-        } else {
-            Err(error::Account::Forbidden)
-        }
-    }
-
-    fn is_authorized(&self, require_account_admin: bool) -> bool {
-        match self {
-            UserAuthorization::AccountMember if require_account_admin => false,
-            _ => true,
-        }
-    }
-}
-
-async fn user_authorization(
-    db: &PgPool,
-    user_id: &UserId,
-    account_id: &AccountId,
-) -> Result<UserAuthorization, error::Account> {
-    Ok(
-        if db::user::has_scopes(db, *user_id, &[UserScope::Admin]).await? {
-            UserAuthorization::SystemAdministrator
-        } else {
-            match db::account::user_account_membership(db, user_id, account_id).await? {
-                Some(AccountMember::Admin) => UserAuthorization::AccountAdministrator,
-                Some(AccountMember::User) => UserAuthorization::AccountMember,
-                None => return Err(error::Account::Forbidden),
-            }
-        },
-    )
 }
 
 pub fn configure(cfg: &mut ServiceConfig) {

@@ -5,7 +5,7 @@ use actix_web::{
 use anyhow::anyhow;
 use chrono::{TimeZone, Utc};
 use ji_core::settings::RuntimeSettings;
-use shared::api::endpoints::billing::CreateSetupIntent;
+use shared::api::endpoints::billing::{CancelSubscription, CreateSetupIntent};
 use shared::domain::billing::{
     Account, AccountType, AmountInCents, CreateSubscriptionRecord, StripeInvoiceId,
     StripeSubscriptionId, SubscriptionStatus, SubscriptionType, UpdateSubscriptionRecord,
@@ -23,10 +23,12 @@ use std::str::FromStr;
 use stripe::{
     Client, CreateCustomer, CreateSubscription as CreateStripeSubscription,
     CreateSubscriptionItems, Customer, CustomerInvoiceSettings, EventObject, EventType, List,
-    ListPromotionCodes, PromotionCode, SetupIntent, SetupIntentId, UpdateCustomer, Webhook,
+    ListPromotionCodes, PromotionCode, SetupIntent, SetupIntentId, UpdateCustomer,
+    UpdateSubscription, Webhook,
 };
 use tracing::instrument;
 
+use crate::domain::user_authorization;
 use crate::{db, error, extractor::TokenUser};
 
 /// Create a new subscription for an authenticated user.
@@ -207,6 +209,60 @@ async fn create_subscription(
     db::billing::create_subscription(db.as_ref(), subscription).await?;
 
     Ok((Json(create_response), http::StatusCode::CREATED))
+}
+
+#[instrument(skip_all)]
+async fn cancel_subscription(
+    auth: TokenUser,
+    db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
+) -> Result<HttpResponse, error::Billing> {
+    let user_id = auth.user_id();
+    let account = db::account::get_account_by_user_id(db.as_ref(), &user_id)
+        .await?
+        .ok_or_else(|| error::Billing::NotFound("User does not have an account".into()))?;
+
+    user_authorization(db.as_ref(), &user_id, &account.account_id)
+        .await
+        .map_err(Into::<error::Billing>::into)?
+        .test_authorized(true)?;
+
+    let subscription =
+        db::billing::get_latest_subscription_by_account_id(db.as_ref(), account.account_id)
+            .await?
+            .ok_or_else(|| {
+                error::Billing::NotFound("User does not have an existing subscription".into())
+            })?;
+
+    if !subscription.status.is_active() {
+        return Err(error::Billing::NotFound(
+            "User does not have an active subscription".into(),
+        ));
+    }
+
+    let client = create_stripe_client(&settings)?;
+
+    let stripe_id: Result<stripe::SubscriptionId, anyhow::Error> =
+        subscription.stripe_subscription_id.try_into();
+
+    let stripe_id: stripe::SubscriptionId =
+        stripe_id.map_err(error::Billing::InternalServerError)?;
+
+    let update_subscription = UpdateSubscription {
+        cancel_at_period_end: Some(true),
+        ..Default::default()
+    };
+
+    let updated_subscription =
+        stripe::Subscription::update(&client, &stripe_id, update_subscription).await?;
+
+    db::billing::save_subscription(
+        db.as_ref(),
+        UpdateSubscriptionRecord::try_from(updated_subscription)?,
+    )
+    .await?;
+
+    Ok(HttpResponse::NoContent().finish())
 }
 
 #[instrument(skip_all)]
@@ -422,7 +478,7 @@ async fn webhook(
                         let invoice_id = StripeInvoiceId::from(&invoice.id);
 
                         if let Some(subscription_id) =
-                            db::billing::get_stripe_subscription_id_with_invoice_id(
+                            db::billing::get_stripe_subscription_id_by_invoice_id(
                                 db.as_ref(),
                                 &invoice_id,
                             )
@@ -500,6 +556,10 @@ pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
         <CreateSubscription as ApiEndpoint>::Path::PATH,
         CreateSubscription::METHOD.route().to(create_subscription),
+    )
+    .route(
+        <CancelSubscription as ApiEndpoint>::Path::PATH,
+        CancelSubscription::METHOD.route().to(cancel_subscription),
     )
     .route(
         <CreateSetupIntent as ApiEndpoint>::Path::PATH,

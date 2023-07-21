@@ -189,6 +189,15 @@ impl From<stripe::SubscriptionId> for StripeSubscriptionId {
     }
 }
 
+#[cfg(feature = "backend")]
+impl TryFrom<StripeSubscriptionId> for stripe::SubscriptionId {
+    type Error = anyhow::Error;
+
+    fn try_from(value: StripeSubscriptionId) -> Result<Self, Self::Error> {
+        <Self as std::str::FromStr>::from_str(&value.0).map_err(Into::into)
+    }
+}
+
 /// Stripe invoice ID
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type), sqlx(transparent))]
@@ -1020,3 +1029,5 @@ pub struct IndividualAccountResponse {
     /// The users account, if any
     pub account: Option<Account>,
 }
+
+make_path_parts!(SubscriptionPath => "/v1/subscription");
