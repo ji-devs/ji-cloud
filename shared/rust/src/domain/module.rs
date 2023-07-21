@@ -16,8 +16,7 @@ wrap_uuid! {
     /// Wrapper type around [`Uuid`](Uuid), represents the **unique ID** of a module.
     ///
     /// This uniquely identifies a module. There is no other module that shares this ID.
-    #[serde(rename_all = "camelCase")]
-    pub struct ModuleId
+    pub struct ModuleId("mod")
 }
 
 /// Represents the various kinds of data a module can represent.

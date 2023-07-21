@@ -23,7 +23,7 @@ use super::{
 
 wrap_uuid! {
     /// Wrapper type around [`Uuid`], represents the ID of a Resource.
-    pub struct ResourceId
+    pub struct ResourceId("res")
 }
 
 make_path_parts!(ResourceCreatePath => "/v1/resource");
@@ -267,7 +267,7 @@ pub struct ResourceBrowseQuery {
 
     /// Optionally filter by `additional resources`
     #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(serialize_with = "super::csv_encode_strong_ids")]
     #[serde(deserialize_with = "super::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub resource_types: Vec<ResourceTypeId>,
@@ -323,7 +323,7 @@ pub struct ResourceSearchQuery {
     ///
     /// Note: Currently does nothing
     #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(serialize_with = "super::csv_encode_strong_ids")]
     #[serde(deserialize_with = "super::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub age_ranges: Vec<AgeRangeId>,
@@ -332,21 +332,21 @@ pub struct ResourceSearchQuery {
     ///
     /// Note: Currently does nothing
     #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(serialize_with = "super::csv_encode_strong_ids")]
     #[serde(deserialize_with = "super::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub affiliations: Vec<AffiliationId>,
 
     /// Optionally filter by `additional resources`
     #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(serialize_with = "super::csv_encode_strong_ids")]
     #[serde(deserialize_with = "super::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub resource_types: Vec<ResourceTypeId>,
 
     /// Optionally filter by `categories`
     #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(serialize_with = "super::csv_encode_strong_ids")]
     #[serde(deserialize_with = "super::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub categories: Vec<CategoryId>,

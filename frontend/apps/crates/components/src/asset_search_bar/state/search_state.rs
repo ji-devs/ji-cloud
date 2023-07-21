@@ -51,7 +51,6 @@ impl SearchSelected {
     }
 
     pub fn from_query_params(search: SearchQueryParams) -> Self {
-        log::info!("{:?}", search.is_rated);
         let s = Self {
             affiliations: Mutable::new(HashSet::from_iter(search.affiliations)),
             categories: Mutable::new(HashSet::from_iter(search.categories)),
@@ -61,7 +60,6 @@ impl SearchSelected {
             rated_only: Mutable::new(search.is_rated.unwrap_or(true)),
             query: Mutable::new(search.q),
         };
-        log::info!("{:?}", s.rated_only);
 
         s
     }

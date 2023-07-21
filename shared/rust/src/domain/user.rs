@@ -19,7 +19,7 @@ pub mod public_user;
 
 wrap_uuid! {
     /// Wrapper type around [`Uuid`], represents the ID of a User.
-    pub struct UserId
+    pub struct UserId("user")
 }
 
 /// Represents a user's permissions.

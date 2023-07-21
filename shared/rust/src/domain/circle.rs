@@ -11,8 +11,7 @@ use super::{asset::UserOrMe, image::ImageId, user::UserId};
 
 wrap_uuid! {
     /// Wrapper type around [`Uuid`], represents the ID of a Circle.
-    #[serde(rename_all = "camelCase")]
-    pub struct CircleId
+    pub struct CircleId("cir")
 }
 
 /// The response returned when a request for `GET`ing a Circle is successful.
@@ -101,7 +100,7 @@ pub struct CircleBrowseQuery {
     /// creator of circles
     /// The hits per page to be returned
     #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(serialize_with = "super::csv_encode_strong_ids")]
     #[serde(deserialize_with = "super::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub users: Vec<UserId>,

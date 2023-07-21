@@ -20,6 +20,7 @@ use std::{
     fmt::{Debug, Display},
     str::FromStr,
 };
+use strong_id::StrongUuid;
 use uuid::Uuid;
 use wasm_bindgen::prelude::*;
 use web_sys::Url;
@@ -71,19 +72,19 @@ pub struct SearchQueryParams {
     pub is_rated: Option<bool>,
 
     #[serde(default)]
-    #[serde(serialize_with = "shared::domain::ser::csv_encode_uuids")]
+    #[serde(serialize_with = "shared::domain::ser::csv_encode_strong_ids")]
     #[serde(deserialize_with = "shared::domain::ser::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub age_ranges: Vec<AgeRangeId>,
 
     #[serde(default)]
-    #[serde(serialize_with = "shared::domain::ser::csv_encode_uuids")]
+    #[serde(serialize_with = "shared::domain::ser::csv_encode_strong_ids")]
     #[serde(deserialize_with = "shared::domain::ser::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub affiliations: Vec<AffiliationId>,
 
     #[serde(default)]
-    #[serde(serialize_with = "shared::domain::ser::csv_encode_uuids")]
+    #[serde(serialize_with = "shared::domain::ser::csv_encode_strong_ids")]
     #[serde(deserialize_with = "shared::domain::ser::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub categories: Vec<CategoryId>,

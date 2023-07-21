@@ -65,7 +65,7 @@ pub mod user {
 
 wrap_uuid! {
     /// Wrapper type around [`Uuid`](Uuid), represents the ID of an audio file.
-    pub struct AudioId
+    pub struct AudioId("aud")
 }
 
 /// Represents different kinds of audio.

@@ -8,6 +8,7 @@ use super::state::SearchResults;
 impl SearchResults {
     pub fn render(self: &Rc<Self>) -> Dom {
         let state = self;
+        log::info!("RENDER SR");
 
         let search_results_signal = |section: Rc<SearchResultsSection>| {
             // Ensure that jigs and resources are rendered until all requests have completed

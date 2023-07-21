@@ -10,7 +10,7 @@ use super::{report::JigReport, JigId};
 
 wrap_uuid! {
     /// Wrapper type around [`Uuid`](Uuid), represents the ID of a curation comment.
-    pub struct CommentId
+    pub struct CommentId("jig_com")
 }
 
 make_path_parts!(JigCurationPath => "/v1/jig/{}/curation" => JigId);

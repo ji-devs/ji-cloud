@@ -13,7 +13,7 @@ use super::CourseId;
 
 wrap_uuid! {
     /// Wrapper type around [`Uuid`](Uuid), represents the ID of a Course Unit.
-    pub struct CourseUnitId
+    pub struct CourseUnitId("cu")
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

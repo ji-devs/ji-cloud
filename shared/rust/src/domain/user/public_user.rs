@@ -4,7 +4,7 @@ use crate::{
     api::endpoints::PathPart,
     domain::{
         additional_resource::AdditionalResource, asset::UserOrMe, circle::CircleId,
-        csv_encode_uuids, from_csv, image::ImageId, user::UserId,
+        csv_encode_strong_ids, from_csv, image::ImageId, user::UserId,
     },
 };
 use macros::make_path_parts;
@@ -115,7 +115,7 @@ pub struct UserBrowseQuery {
 
     /// Circle's that has user joined
     #[serde(default)]
-    #[serde(serialize_with = "csv_encode_uuids")]
+    #[serde(serialize_with = "csv_encode_strong_ids")]
     #[serde(deserialize_with = "from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub circles: Vec<CircleId>,

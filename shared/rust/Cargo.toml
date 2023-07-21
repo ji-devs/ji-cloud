@@ -33,6 +33,7 @@ async-stripe = { version = "0.22.2", features = ["runtime-tokio-hyper-rustls"], 
 macros = { path = "../macros" }
 unicode-segmentation = "1.8.0"
 derive_setters = "0.1.5"
+strong_id = { version = "0.2.0" }
 
 # wasm
 wasm-bindgen = { version = "0.2.78", optional = true }

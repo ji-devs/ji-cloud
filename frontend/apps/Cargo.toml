@@ -98,6 +98,7 @@ zxcvbn = "2.1.2"
 const_format = "0.2.5"
 num-traits = "0.2"
 num-derive = "0.3"
+strong_id = { version = "0.2.0" }
 web-sys = { version = "0.3.55", features = [
     'Url',
     'Request',

@@ -62,6 +62,7 @@ async fn fetch_profile(state: Rc<Home>) {
 }
 
 async fn search_async(state: Rc<Home>) {
+    log::info!("SEARCHING");
     let search_state = SearchResults::new(&state, true);
     state
         .mode
