@@ -103,12 +103,11 @@ fn render_jig_info(state: Rc<State>, jig: &JigResponse) -> Dom {
                 html!("a", {
                     .prop("slot", "additional-resources")
                     .prop("target", "_BLANK")
-                    .prop("title", &resource.display_name)
                     .prop("href", resource.resource_content.get_link())
+                    .prop("title", &resource.display_name)
                     .child(html!("fa-icon", {
                         .prop("icon", "fa-light fa-file")
                     }))
-                    .text(format!(" {}  ", &resource.display_name).as_str())
                     .text_signal(resource_type_name_signal(Rc::clone(&state), resource.resource_type_id))
                 })
             }))

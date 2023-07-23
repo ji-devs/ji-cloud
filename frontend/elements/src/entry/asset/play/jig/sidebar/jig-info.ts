@@ -199,7 +199,7 @@ export class _ extends LitElement {
                             <a href=${this.href} .target=${this.target}>
                                 <div class="author">
                                     ${this.byJiTeam
-                    ? html`
+                ? html`
                                             <img-ui
                                                 path="entry/home/search-results/ji-logo-blue.svg"
                                             ></img-ui>
@@ -207,7 +207,7 @@ export class _ extends LitElement {
                                                 >${STR_JI_TEAM} -
                                             </span>
                                         `
-                    : nothing}
+                : nothing}
                                     ${this.author}
                                 </div>
                             </a>
@@ -245,18 +245,16 @@ export class _ extends LitElement {
                             <slot name="categories"></slot>
                         </div>
                     </section>
-                    ${
-                        this.showResources ? html`
+                    ${this.showResources ? html`
                         <section class="additional-resources-section">
                             <h4>${STR_ADDITIONAL_RESOURCES}</h4>
                             <div class="additional-resources-items">
-                                <slot name="additional-resources"></slot>
+                                 <slot name="additional-resources"></slot>
                             </div>
-                        </section>` 
-                        :   nothing
-                    }
-                    ${
-                        this.showPlaylists ? html`
+                        </section>`
+                : nothing
+            }
+                    ${this.showPlaylists ? html`
                         <section class="playlists-section">
                         <div>
                             <h4>${STR_PLAYLISTS}</h4>
@@ -265,9 +263,9 @@ export class _ extends LitElement {
                         <div class="playlists">
                             <slot name="playlists"></slot>
                         </div>
-                        </section>  ` 
-                        :   nothing
-                    }
+                        </section>  `
+                : nothing
+            }
                     <section class="report-section">
                         <slot name="report"></slot>
                         <slot name="report-sent"></slot>

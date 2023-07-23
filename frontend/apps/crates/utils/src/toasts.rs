@@ -1,4 +1,3 @@
-use std::error::Error;
 use std::sync::Arc;
 use std::{borrow::Cow, sync::Mutex};
 
