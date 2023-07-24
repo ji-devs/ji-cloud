@@ -153,3 +153,13 @@ pub fn init() {
         )
     });
 }
+
+#[macro_export]
+macro_rules! bail_on_err {
+    ($v:expr) => {
+        match $v {
+            Ok(v) => v,
+            Err(_) => return,
+        }
+    };
+}

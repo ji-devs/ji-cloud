@@ -5,6 +5,8 @@ use shared::{
     domain::user::GetProfilePath,
 };
 use utils::{
+    bail_on_err,
+    error_ext::ErrorExt,
     prelude::{get_user_mutable, ApiEndpointExt},
     routes::{Route, UserRoute},
     unwrap::UnwrapJiExt,
@@ -31,10 +33,12 @@ impl SchoolStart {
                 website: Default::default(),
                 organization_type: Default::default()
             };
-            endpoints::account::CreateSchoolAccount::api_with_auth(CreateSchoolAccountPath(), Some(req)).await.unwrap_ji();
+            let res = endpoints::account::CreateSchoolAccount::api_with_auth(CreateSchoolAccountPath(), Some(req)).await.toast_on_err();
+            bail_on_err!(res);
 
             // Update current user state - UserProfile should include account summary now.
-            let user = endpoints::user::Profile::api_with_auth(GetProfilePath(), None).await.unwrap_ji();
+            let res = endpoints::user::Profile::api_with_auth(GetProfilePath(), None).await.toast_on_err();
+            let user = bail_on_err!(res);
             get_user_mutable().set(Some(user));
 
             go_to_url(&Route::User(UserRoute::Subscribe1(state.plan_type)).to_string());
