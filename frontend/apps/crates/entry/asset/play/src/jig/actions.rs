@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{collections::HashMap, rc::Rc};
 
 use super::{
     state::{can_load_liked_status, JigPlayer, PlayModuleAssist},
@@ -7,11 +7,15 @@ use super::{
 use components::audio::mixer::{AudioHandle, AUDIO_MIXER};
 use dominator::clone;
 use futures_signals::signal::SignalExt;
-use shared::domain::jig::GetJigPlaylistsPath;
+use shared::domain::{
+    category::{Category, CategoryId, CategoryTreeScope, GetCategoryRequest},
+    jig::GetJigPlaylistsPath,
+};
 use shared::{
     api::endpoints::{self, jig},
     domain::{
         asset::DraftOrLive,
+        category::GetCategoryPath,
         jig::{
             player::{ModuleConfig, PlayerNavigationHandler, Seconds},
             AudioBackground, JigGetDraftPath, JigGetLivePath, JigLikedPath, JigPlayPath,
@@ -244,6 +248,7 @@ fn module_assist_done(state: Rc<JigPlayer>, play_module_assist: PlayModuleAssist
 
 pub fn load_data(state: Rc<JigPlayer>) {
     state.loader.load(clone!(state => async move {
+        load_categories(Rc::clone(&state)).await;
         load_resource_types(Rc::clone(&state)).await;
         load_jig_playlists(Rc::clone(&state)).await;
         load_jig(Rc::clone(&state)).await;
@@ -319,6 +324,42 @@ async fn load_resource_types(state: Rc<JigPlayer>) {
             state.resource_types.set(meta.resource_types);
         }
     };
+}
+
+async fn load_categories(state: Rc<JigPlayer>) {
+    log::warn!("load categories");
+
+    let req = GetCategoryRequest {
+        ids: Vec::new(),
+        scope: Some(CategoryTreeScope::Descendants),
+    };
+
+    match endpoints::category::Get::api_with_auth(GetCategoryPath(), Some(req)).await {
+        Err(_) => todo!(),
+        Ok(categories) => {
+            state.categories.set(categories.categories.to_owned());
+            let mut category_label_lookup = HashMap::new();
+            get_categories_labels(
+                &categories.categories.to_owned(),
+                &mut category_label_lookup,
+                "",
+            );
+            state.category_label_lookup.set(category_label_lookup)
+        }
+    };
+}
+
+fn get_categories_labels(
+    categories: &Vec<Category>,
+    lookup: &mut HashMap<CategoryId, String>,
+    base_name: &str,
+) {
+    for category in categories {
+        let name = format!("{}{}", base_name, category.name);
+        lookup.insert(category.id, name.clone());
+        let base_name = name + "/";
+        get_categories_labels(&category.children, lookup, &base_name);
+    }
 }
 
 pub(crate) async fn load_jig_playlists(state: Rc<JigPlayer>) {

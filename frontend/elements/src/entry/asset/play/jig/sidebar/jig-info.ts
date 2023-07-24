@@ -100,6 +100,12 @@ export class _ extends LitElement {
                     flex-wrap: wrap;
                     grid-gap: 8px;
                 }
+                ::slotted([slot="category-labels"]) {
+                    display: flex;
+                    flex-wrap: wrap;
+                    column-gap: 10px;
+                    row-gap: 12px;
+                }
                 .additional-resources-items {
                     display: flex;
                     flex-wrap: wrap;
@@ -242,7 +248,7 @@ export class _ extends LitElement {
                         </div>
                         <p class="description" dir="auto">${this.description}</p>
                         <div class="categories">
-                            <slot name="categories"></slot>
+                            <slot name="category-labels"></slot>
                         </div>
                     </section>
                     ${this.showResources ? html`

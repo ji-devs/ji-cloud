@@ -28,6 +28,7 @@ import "@elements/entry/asset/_common/sidebar-modules/module";
 import "@elements/entry/asset/_common/age-range";
 import "@elements/entry/asset/play/jig/sidebar/action";
 import "@elements/entry/asset/play/jig/sidebar/jig-info";
+import "@elements/entry/asset/play/jig/sidebar/jig-info-category"
 import "@elements/entry/asset/play/jig/sidebar/report";
 import "@elements/entry/asset/play/jig/sidebar/sidebar";
 import "@elements/core/images/composed/module-screenshot";

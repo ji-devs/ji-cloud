@@ -5,7 +5,11 @@ use futures_signals::{
     map_ref,
     signal::{Signal, SignalExt},
 };
-use shared::domain::{asset::DraftOrLive, jig::JigResponse, meta::ResourceTypeId};
+use shared::domain::{
+    asset::{Asset, DraftOrLive},
+    jig::JigResponse,
+    meta::ResourceTypeId,
+};
 use utils::{
     ages::AgeRangeVecExt,
     asset::{published_at_string, PlaylistPlayerOptions, ResourceContentExt},
@@ -59,6 +63,8 @@ fn info_open_signal(state: Rc<State>) -> impl Signal<Item = bool> {
 }
 
 fn render_jig_info(state: Rc<State>, jig: &JigResponse) -> Dom {
+    let asset = Asset::from(jig.clone());
+
     html!("jig-play-sidebar-jig-info", {
         .prop("slot", "overlay")
         .prop("name", &jig.jig_data.display_name)
@@ -91,11 +97,19 @@ fn render_jig_info(state: Rc<State>, jig: &JigResponse) -> Dom {
                 state.info_popup_active.set(false);
             }))
         }))
-        .children(jig.jig_data.categories.iter().map(|category_id| {
-            html!("pill-close", {
-                .prop("slot", "categories")
-                .prop("label", &category_id.0.to_string())
-            })
+        .apply_if(!asset.categories().is_empty(), clone!(asset, state => move |dom| {
+            dom.child(html!("div", {
+                .prop("slot", "category-labels")
+                .child(html!("div", {
+                    .children(asset.categories().iter().map(|category_id| {
+                        html!("jig-info-category", {
+                            .prop_signal("label", state.player_state.category_label_lookup.signal_cloned().map(clone!(category_id => move |category_label_lookup| {
+                                category_label_lookup.get(&category_id).unwrap_ji().clone()
+                            })))
+                        })
+                    }))
+                }))
+            }))
         }))
         .apply_if(!jig.jig_data.additional_resources.is_empty(),|dom| {
             dom.prop("showResources", true)

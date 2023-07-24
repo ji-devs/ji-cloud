@@ -1,9 +1,10 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use awsm_web::loaders::helpers::AsyncLoader;
 use components::audio::mixer::AudioHandle;
 use futures_signals::signal::Mutable;
 use shared::domain::{
+    category::{Category, CategoryId},
     jig::{player::PlayerNavigationHandler, JigId, JigResponse},
     meta::ResourceType,
     module::{
@@ -43,6 +44,8 @@ pub struct JigPlayer {
     pub bg_audio_playing: Mutable<bool>,
     pub module_assist_audio_handle: Rc<RefCell<Option<AudioHandle>>>,
     pub resource_types: Mutable<Vec<ResourceType>>,
+    pub categories: Mutable<Vec<Category>>,
+    pub category_label_lookup: Mutable<HashMap<CategoryId, String>>,
     pub playlists: Mutable<Vec<PlaylistResponse>>,
     pub module_assist: Mutable<Option<PlayModuleAssist>>,
     pub module_assist_visible: Mutable<bool>,
@@ -84,6 +87,8 @@ impl JigPlayer {
             bg_audio_playing: Mutable::new(true),
             module_assist_audio_handle: Rc::new(RefCell::new(None)),
             resource_types: Default::default(),
+            categories: Default::default(),
+            category_label_lookup: Default::default(),
             playlists: Default::default(),
             module_assist: Mutable::new(None),
             module_assist_visible: Mutable::new(false),
