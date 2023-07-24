@@ -4,7 +4,7 @@ use chrono::{DateTime, Utc};
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::fmt::{Debug, Formatter};
+use std::fmt::{self, Debug, Formatter};
 use strum_macros::{Display, EnumString};
 
 use serde_json::Value;
@@ -49,6 +49,12 @@ pub struct StripePaymentMethodId(String);
 /// Last 4 digits of a card number
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Last4(String);
+
+impl fmt::Display for Last4 {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
 
 /// Payment network associated with a [Card]
 #[derive(Debug, Serialize, Deserialize, Clone, EnumString)]
@@ -512,6 +518,21 @@ impl PlanType {
             Self::SchoolLevel3 => "school-level-3",
             Self::SchoolLevel4 => "school-level-4",
             Self::SchoolUnlimited => "school-unlimited",
+        }
+    }
+
+    /// Get a readable name
+    pub fn display_name(&self) -> &'static str {
+        match self {
+            Self::IndividualBasicMonthly => "Basic - Monthly plan",
+            Self::IndividualBasicAnnually => "Basic - Annually plan",
+            Self::IndividualProMonthly => "Pro - Monthly plan",
+            Self::IndividualProAnnually => "Pro - Annually plan",
+            Self::SchoolLevel1
+            | Self::SchoolLevel2
+            | Self::SchoolLevel3
+            | Self::SchoolLevel4
+            | Self::SchoolUnlimited => "School annual plan",
         }
     }
 

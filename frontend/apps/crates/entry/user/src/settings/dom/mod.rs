@@ -20,12 +20,13 @@ use web_sys::{HtmlElement, HtmlInputElement};
 
 use crate::settings::{
     dom::options_popup::PopupCallbacks,
-    state::{ActivePopup, ResetPasswordStatus},
+    state::{ActivePopup, IndividualOrSchool, ResetPasswordStatus},
 };
 
 use super::state::SettingsPage;
 
 mod options_popup;
+mod plan_info;
 
 const STR_EDIT: &str = " Edit";
 
@@ -267,6 +268,21 @@ impl SettingsPage {
                     },
                 })
             })))
+            .prop_signal("showPlan", state.plan_info.signal_ref(|plan| plan.is_some()))
+            .prop_signal("planSectionTitle", state.plan_info.signal_ref(|plan| {
+                plan.as_ref().map(|plan| {
+                    match plan.individual_or_school {
+                        IndividualOrSchool::Individual => "My current plan",
+                        IndividualOrSchool::School(_) => "School plan",
+                    }
+                })
+            }))
+            .children_signal_vec(state.plan_info.signal_ref(clone!(state => move |plan_info| {
+                match plan_info {
+                    Some(plan_info) => state.render_plan_section(plan_info),
+                    None => vec![],
+                }
+            })).to_signal_vec())
             .child_signal(state.render_popups())
         })
     }

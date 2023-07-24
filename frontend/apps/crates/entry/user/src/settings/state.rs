@@ -1,8 +1,10 @@
 use std::rc::Rc;
 
+use chrono::{DateTime, Utc};
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::{signal::Mutable, signal_vec::MutableVec};
 use shared::domain::{
+    billing::{PaymentMethodType, SchoolId},
     image::ImageId,
     meta::{AffiliationId, AgeRangeId, MetadataResponse, SubjectId},
     user::{PatchProfileRequest, UserId, UserProfile},
@@ -14,6 +16,7 @@ pub struct SettingsPage {
     pub reset_password_status: Mutable<ResetPasswordStatus>,
     pub loader: AsyncLoader,
     pub metadata: Mutable<Option<MetadataResponse>>,
+    pub(super) plan_info: Mutable<Option<PlanSectionInfo>>,
 }
 
 impl SettingsPage {
@@ -24,6 +27,7 @@ impl SettingsPage {
             reset_password_status: Mutable::new(ResetPasswordStatus::default()),
             loader: AsyncLoader::new(),
             metadata: Mutable::new(None),
+            plan_info: Default::default(),
         })
     }
 }
@@ -120,4 +124,19 @@ impl SettingsPageUser {
             ..Default::default()
         }
     }
+}
+
+#[derive(Clone)]
+pub(super) struct PlanSectionInfo {
+    pub auto_renew: Mutable<bool>,
+    pub payment_method_type: PaymentMethodType,
+    pub price: u32,
+    pub current_period_end: DateTime<Utc>,
+    pub individual_or_school: IndividualOrSchool,
+}
+
+#[derive(strum_macros::EnumIs, Clone)]
+pub(super) enum IndividualOrSchool {
+    Individual,
+    School(SchoolId),
 }

@@ -6,10 +6,11 @@ import {
     property,
     query,
 } from "lit-element";
+import { nothing } from "lit-html";
 
-const STR_BASIC_INFO = "Basic info";
-const STR_JIGZI_FILTERS = "Jigzi Filters";
 const STR_MY_SETTINGS = "My Settings";
+const STR_BASIC_INFO = "Basic info";
+const STR_JIGZI_FILTERS = "Jigzi filters";
 
 const STR_EMAIL = "Email";
 const STR_PASSWORD = "Password";
@@ -21,6 +22,11 @@ const STR_RELEVANT_AGE_GROUPS = "Relevant age groups";
 const STR_RELEVANT_SUBJECTS = "Relevant subjects";
 const STR_AFFILIATION = "Affiliation";
 const STR_FILTER_MESSAGE = "A note about our filters: Ji believes in making Jewish education accessible to ALL Jews, of all ages and affiliations. If you would like to see only what Jigzi tags as relevant to you, use these filters to fine-tune your search results. If you would like to see ALL our images, resources and JIGs leave these blank.";
+const STR_PLAN = "Plan";
+const STR_PRICE = "Price";
+const STR_RENEWS_ON = "Renews on";
+const STR_AUTO_RENEWS = "Auto renew";
+const STR_PAYMENT_METHOD = "Payment method";
 
 @customElement("user-profile")
 export class _ extends LitElement {
@@ -216,6 +222,37 @@ export class _ extends LitElement {
                     flex-wrap: wrap;
                     gap: 12px;
                 }
+                #plan {
+                    row-gap: 16px;
+                }
+                #plan h2 {
+                    margin-bottom: 8px;
+                }
+                ::slotted([slot=plan-type]),
+                ::slotted([slot=plan-price]),
+                ::slotted([slot=plan-renews-on]) {
+                    font-size: 14px;
+                    font-weight: 500;
+                    color: var(--dark-gray-6);
+                    margin: 0;
+                }
+                ::slotted([slot=plan-auto-renew]) {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+                ::slotted([slot=plan-payment-method]) {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    font-size: 14px;
+                    color: var(--dark-gray-6);
+                }
+                ::slotted([slot=change-to-annual]) {
+                    margin-top: 16px;
+                    grid-column: 1 / -1;
+                    justify-self: start;
+                }
                 ::slotted(dialog-overlay) {
                     background-color: #00000080;
                 }
@@ -228,6 +265,12 @@ export class _ extends LitElement {
 
     @property()
     email: string = "";
+
+    @property({ type: Boolean })
+    showPlan: boolean = false;
+
+    @property()
+    planSectionTitle: string = "";
 
     @query("main")
     main!: HTMLElement;
@@ -352,6 +395,42 @@ export class _ extends LitElement {
                             <slot class="edit-button" name="affiliations-edit"></slot>
                         </label>
                     </section>
+                    ${ this.showPlan ? html`
+                        <section id="plan">
+                            <h2>${this.planSectionTitle}</h2>
+                            <label class="tags-label">
+                                <span class="key">${STR_PLAN}</span>
+                                <div class="value">
+                                    <slot name="plan-type"></slot>
+                                </div>
+                            </label>
+                            <label class="tags-label">
+                                <span class="key">${STR_PRICE}</span>
+                                <div class="value">
+                                    <slot name="plan-price"></slot>
+                                </div>
+                            </label>
+                            <label class="tags-label">
+                                <span class="key">${STR_RENEWS_ON}</span>
+                                <div class="value">
+                                    <slot name="plan-renews-on"></slot>
+                                </div>
+                            </label>
+                            <label class="tags-label">
+                                <span class="key">${STR_AUTO_RENEWS}</span>
+                                <div class="value">
+                                    <slot name="plan-auto-renew"></slot>
+                                </div>
+                            </label>
+                            <label class="tags-label">
+                                <span class="key">${STR_PAYMENT_METHOD}</span>
+                                <div class="value">
+                                    <slot name="plan-payment-method"></slot>
+                                </div>
+                            </label>
+                            <slot name="change-to-annual"></slot>
+                        </section>
+                    ` : nothing }
                 </div>
             </main>
             <slot name="popup"></slot>

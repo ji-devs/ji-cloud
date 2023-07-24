@@ -20,6 +20,7 @@ import "@elements/core/inputs/composed/checkbox";
 import "@elements/core/inputs/composed/select/select";
 import "@elements/core/inputs/composed/select/option";
 import "@elements/core/inputs/composed/password";
+import "@elements/core/inputs/composed/switch";
 import "@elements/core/inputs/wrapper";
 import "@elements/core/inputs/primitives/location";
 import "@elements/core/inputs/primitives/file";
