@@ -1,4 +1,5 @@
 import { LitElement, html, css, customElement, property, TemplateResult } from "lit-element";
+import { nothing } from "lit-html";
 
 export type Kind = 'individuals' | 'schools';
 
@@ -121,8 +122,24 @@ export class _ extends LitElement {
             .cell p {
                 margin: 0;
             }
-            .cell fa-icon {
-                color: var(--dark-blue-4);
+            .school-only-row {
+                font-weight: 600;
+            }
+            .school-only-row .cell {
+                grid-template-columns: 1fr auto 1fr;
+                justify-items: start;
+                gap: 16px;
+            }
+            .school-only-row .cell fa-icon {
+                grid-column: 2;
+            }
+            .school-only-row .school-only-label {
+                font-size: 12px;
+                font-weight: bold;
+                color: #149546;
+                border-radius: 12px;
+                border: solid 1px #149647;
+                padding: 3px 8px;
             }
             .individuals-desktop-price {
                 display: none;
@@ -207,8 +224,8 @@ export class _ extends LitElement {
                             `,
                             individuals: html`
                                 <div class="cell">Access to FREE content that is a productive screen-time alternative. Interactive. Educational. Fun.</div>
-                                <div class="cell">Parents and educators who want full-access to high quality educational content for students.</div>
-                                <div class="cell">Full-access educators who also want to create high quality lessons with their own material.</div>
+                                <div class="cell">Parents and educators who want full-access to high-quality educational content for students.</div>
+                                <div class="cell">Full-access educators who also want to create high-quality lessons with their own material.</div>
                             `
                         })}
                     </div>
@@ -238,14 +255,27 @@ export class _ extends LitElement {
                             `
                         })}
                     </div>
-                    <div class="row end-row white">
-                        <div class="cell cell-header">Premium JIGs, courses & resources</div>
+                    <div class="row white">
+                        <div class="cell cell-header">Unlimited access to JIGs, playlists, & resources</div>
                         ${cells(this.kind, {
                             schools: html`
                                 <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
                             `,
                             individuals: html`
                                 <div class="cell">FREE content only</div>
+                                <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
+                                <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
+                            `
+                        })}
+                    </div>
+                    <div class="row end-row white">
+                        <div class="cell cell-header">Create a playlist of Jigzi content</div>
+                        ${cells(this.kind, {
+                            schools: html`
+                                <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
+                            `,
+                            individuals: html`
+                                <div class="cell"><fa-icon icon="fa-solid fa-dash"></fa-icon></div>
                                 <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
                                 <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
                             `
@@ -278,32 +308,19 @@ export class _ extends LitElement {
                         })}
                     </div>
                     <div class="row blue">
-                        <div class="cell cell-header">Create courses & upload resources</div>
+                        <div class="cell cell-header">Full access to ALL images & themes</div>
                         ${cells(this.kind, {
                             schools: html`
                                 <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
                             `,
                             individuals: html`
-                                <div class="cell"><fa-icon icon="fa-solid fa-dash"></fa-icon></div>
-                                <div class="cell"><fa-icon icon="fa-solid fa-dash"></fa-icon></div>
+                                <div class="cell">FREE images & themes</div>
+                                <div class="cell">FREE images & themes</div>
                                 <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
                             `
                         })}
                     </div>
                     <div class="row blue">
-                        <div class="cell cell-header">Premium assets & creation tools</div>
-                        ${cells(this.kind, {
-                            schools: html`
-                                <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
-                            `,
-                            individuals: html`
-                                <div class="cell">FREE images & themes</div>
-                                <div class="cell">FREE images & themes</div>
-                                <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
-                            `
-                        })}
-                    </div>
-                    <div class="row end-row blue">
                         <div class="cell cell-header">Print images, posters & flashcards</div>
                         ${cells(this.kind, {
                             schools: html`
@@ -316,11 +333,37 @@ export class _ extends LitElement {
                             `
                         })}
                     </div>
-                    <div class="row begin-row white">
-                        <div class="cell cell-header"><h4>Classroom <span class="coming-soon">Coming Soon</span></h4></div>
+                    <div class="row blue">
+                        <div class="cell cell-header">Upload & share your own resources</div>
                         ${cells(this.kind, {
                             schools: html`
                                 <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
+                            `,
+                            individuals: html`
+                                <div class="cell"><fa-icon icon="fa-solid fa-dash"></fa-icon></div>
+                                <div class="cell">Limited to 5 resources</div>
+                                <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
+                            `
+                        })}
+                    </div>
+                    <!-- <div class="row end-row blue">
+                        <div class="cell cell-header">Create courses with embedded links & videos</div>
+                        ${cells(this.kind, {
+                            schools: html`
+                                <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
+                            `,
+                            individuals: html`
+                            <div class="cell"><fa-icon icon="fa-solid fa-dash"></fa-icon></div>
+                                <div class="cell"><fa-icon icon="fa-solid fa-dash"></fa-icon></div>
+                                <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
+                            `
+                        })}
+                    </div> -->
+                    <div class="row begin-row white">
+                        <div class="cell cell-header"><h4>ClassMate<span class="coming-soon">Coming Soon</span></h4></div>
+                        ${cells(this.kind, {
+                            schools: html`
+                                <div class="cell empty"></div>
                             `,
                             individuals: html`
                                 <div class="cell empty"></div>
@@ -356,7 +399,7 @@ export class _ extends LitElement {
                         })}
                     </div>
                     <div class="row end-row white">
-                        <div class="cell cell-header">Jigzi studio classroom for students to create JIGs.</div>
+                        <div class="cell cell-header">Create a JIGZONE for students to create their own JIGs!</div>
                         ${cells(this.kind, {
                             schools: html`
                                 <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
@@ -382,7 +425,7 @@ export class _ extends LitElement {
                         })}
                     </div>
                     <div class="row end-row blue">
-                        <div class="cell cell-header">Join our community circles & ProDev courses.</div>
+                        <div class="cell cell-header">A community profile page displaying your Jigzi creations</div>
                         ${cells(this.kind, {
                             schools: html`
                                 <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
@@ -394,6 +437,54 @@ export class _ extends LitElement {
                             `
                         })}
                     </div>
+                    <div class="row end-row blue">
+                        <div class="cell cell-header">Follow favorite creators & join circles to build your personal community</div>
+                        ${cells(this.kind, {
+                            schools: html`
+                                <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
+                            `,
+                            individuals: html`
+                                <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
+                                <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
+                                <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
+                            `
+                        })}
+                    </div>
+                    <!-- <div class="row end-row blue">
+                        <div class="cell cell-header">Access courses for professional development</div>
+                        ${cells(this.kind, {
+                            schools: html`
+                                <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
+                            `,
+                            individuals: html`
+                                <div class="cell"><fa-icon icon="fa-solid fa-dash"></fa-icon></div>
+                                <div class="cell"><fa-icon icon="fa-solid fa-dash"></fa-icon></div>
+                                <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
+                            `
+                        })}
+                    </div> -->
+                    <div class="row end-row blue">
+                        <div class="cell cell-header">Create courses for professional development</div>
+                        ${cells(this.kind, {
+                            schools: html`
+                                <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
+                            `,
+                            individuals: html`
+                                <div class="cell"><fa-icon icon="fa-solid fa-dash"></fa-icon></div>
+                                <div class="cell"><fa-icon icon="fa-solid fa-dash"></fa-icon></div>
+                                <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
+                            `
+                        })}
+                    </div>
+                    ${ this.kind === "schools" ? html`
+                        <div class="row end-row blue school-only-row">
+                            <div class="cell cell-header">School community page for all your staff creations!</div>
+                            <div class="cell">
+                                <fa-icon icon="fa-solid fa-check"></fa-icon>
+                                <span class="school-only-label">Just for Schools!</span>
+                            </div>
+                        </div>
+                    ` : nothing }
                     <div class="row begin-row white">
                         <div class="cell cell-header"><h4>Support</h4></div>
                         ${cells(this.kind, {
@@ -408,7 +499,7 @@ export class _ extends LitElement {
                         })}
                     </div>
                     <div class="row white">
-                        <div class="cell cell-header">Jigzi tutorials & monthly webinars</div>
+                        <div class="cell cell-header">Jigzi tutorials & webinars</div>
                         ${cells(this.kind, {
                             schools: html`
                                 <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
@@ -433,6 +524,15 @@ export class _ extends LitElement {
                             `
                         })}
                     </div>
+                    ${ this.kind === "schools" ? html`
+                        <div class="row end-row blue school-only-row">
+                            <div class="cell cell-header">Professional platform training by Jigzi experts</div>
+                            <div class="cell">
+                                <fa-icon icon="fa-solid fa-check"></fa-icon>
+                                <span class="school-only-label">Just for Schools!</span>
+                            </div>
+                        </div>
+                    ` : nothing }
                 </div>
                 <p class="custom-subscription">
                     Can’t find a subscription that fits your needs?
