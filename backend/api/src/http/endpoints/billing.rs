@@ -5,10 +5,11 @@ use actix_web::{
 use anyhow::anyhow;
 use chrono::{TimeZone, Utc};
 use ji_core::settings::RuntimeSettings;
-use shared::api::endpoints::billing::{CancelSubscription, CreateSetupIntent};
+use shared::api::endpoints::billing::{CreateSetupIntent, UpdateSubscriptionCancellation};
 use shared::domain::billing::{
-    Account, AccountType, AmountInCents, CreateSubscriptionRecord, StripeInvoiceId,
-    StripeSubscriptionId, SubscriptionStatus, SubscriptionType, UpdateSubscriptionRecord,
+    Account, AccountType, AmountInCents, CancellationStatus, CreateSubscriptionRecord,
+    StripeInvoiceId, StripeSubscriptionId, SubscriptionStatus, SubscriptionType,
+    UpdateSubscriptionRecord,
 };
 use shared::{
     api::{endpoints::billing::CreateSubscription, ApiEndpoint, Method, PathParts},
@@ -62,7 +63,7 @@ async fn create_subscription(
     // Fetch the profile for the user that's creating the subscription
     let user_profile: UserProfile = db::user::get_profile(db.as_ref(), &user_id)
         .await?
-        .ok_or(error::Billing::NotFound(format!("User {:?}", user_id)))?;
+        .ok_or(error::Billing::NotFound(format!("User {user_id}")))?;
 
     let client = create_stripe_client(&settings)?;
 
@@ -71,15 +72,16 @@ async fn create_subscription(
     let stripe_customer_id = stripe::CustomerId::from(account.stripe_customer_id.unwrap().clone());
 
     if let Some(setup_intent_id) = &req.setup_intent_id {
-        let setup_intent_id =
-            SetupIntentId::from_str(setup_intent_id).map_err(|_| error::Billing::BadRequest)?;
+        let setup_intent_id = SetupIntentId::from_str(setup_intent_id).map_err(|_| {
+            error::Billing::BadRequest(Some("Invalid Setup Intent ID value".into()))
+        })?;
         let setup_intent = SetupIntent::retrieve(&client, &setup_intent_id, &[])
             .await
-            .map_err(|_| error::Billing::BadRequest)?;
+            .map_err(|_| error::Billing::BadRequest(Some("Invalid Setup Intent ID".into())))?;
 
         let payment_method_id = setup_intent
             .payment_method
-            .ok_or(error::Billing::BadRequest)?
+            .ok_or(error::Billing::BadRequest(None))?
             .id()
             .to_string();
 
@@ -212,10 +214,11 @@ async fn create_subscription(
 }
 
 #[instrument(skip_all)]
-async fn cancel_subscription(
+async fn update_subscription_cancel_status(
     auth: TokenUser,
     db: Data<PgPool>,
     settings: Data<RuntimeSettings>,
+    req: Json<<UpdateSubscriptionCancellation as ApiEndpoint>::Req>,
 ) -> Result<HttpResponse, error::Billing> {
     let user_id = auth.user_id();
     let account = db::account::get_account_by_user_id(db.as_ref(), &user_id)
@@ -234,12 +237,6 @@ async fn cancel_subscription(
                 error::Billing::NotFound("User does not have an existing subscription".into())
             })?;
 
-    if !subscription.status.is_active() {
-        return Err(error::Billing::NotFound(
-            "User does not have an active subscription".into(),
-        ));
-    }
-
     let client = create_stripe_client(&settings)?;
 
     let stripe_id: Result<stripe::SubscriptionId, anyhow::Error> =
@@ -248,9 +245,31 @@ async fn cancel_subscription(
     let stripe_id: stripe::SubscriptionId =
         stripe_id.map_err(error::Billing::InternalServerError)?;
 
-    let update_subscription = UpdateSubscription {
-        cancel_at_period_end: Some(true),
-        ..Default::default()
+    let update_subscription = match &req.status {
+        CancellationStatus::CancelAtPeriodEnd => {
+            if !subscription.status.is_active() {
+                return Err(error::Billing::BadRequest(Some(
+                    "User does not have an active subscription".into(),
+                )));
+            }
+
+            UpdateSubscription {
+                cancel_at_period_end: Some(true),
+                ..Default::default()
+            }
+        }
+        CancellationStatus::RemoveCancellation => {
+            if !subscription.status.is_canceled() {
+                return Err(error::Billing::BadRequest(Some(
+                    "User does not have a canceled subscription".into(),
+                )));
+            }
+
+            UpdateSubscription {
+                cancel_at_period_end: Some(false),
+                ..Default::default()
+            }
+        }
     };
 
     let updated_subscription =
@@ -288,7 +307,7 @@ async fn create_setup_intent(
     // Fetch the profile for the user that wants to subscribe
     let user_profile: UserProfile = db::user::get_profile(db.as_ref(), &user_id)
         .await?
-        .ok_or(error::Billing::NotFound(format!("User {:?}", user_id)))?;
+        .ok_or(error::Billing::NotFound(format!("User {user_id}")))?;
 
     let client = create_stripe_client(&settings)?;
 
@@ -442,7 +461,9 @@ async fn webhook(
     let stripe_signature = req
         .headers()
         .get("Stripe-Signature")
-        .ok_or(error::Billing::BadRequest)?
+        .ok_or(error::Billing::BadRequest(Some(
+            "Missing Stripe-Signature".into(),
+        )))?
         .to_str()
         .ok()
         .unwrap_or_default();
@@ -558,8 +579,10 @@ pub fn configure(cfg: &mut ServiceConfig) {
         CreateSubscription::METHOD.route().to(create_subscription),
     )
     .route(
-        <CancelSubscription as ApiEndpoint>::Path::PATH,
-        CancelSubscription::METHOD.route().to(cancel_subscription),
+        <UpdateSubscriptionCancellation as ApiEndpoint>::Path::PATH,
+        UpdateSubscriptionCancellation::METHOD
+            .route()
+            .to(update_subscription_cancel_status),
     )
     .route(
         <CreateSetupIntent as ApiEndpoint>::Path::PATH,

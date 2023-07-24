@@ -272,6 +272,12 @@ impl SubscriptionStatus {
     pub const fn is_active(&self) -> bool {
         matches!(self, Self::Active)
     }
+
+    /// Whether the subscription is canceled.
+    #[must_use]
+    pub const fn is_canceled(&self) -> bool {
+        matches!(self, Self::Canceled)
+    }
 }
 
 #[cfg(feature = "backend")]
@@ -1030,4 +1036,22 @@ pub struct IndividualAccountResponse {
     pub account: Option<Account>,
 }
 
-make_path_parts!(SubscriptionPath => "/v1/subscription");
+/// Set a subscriptions cancellation status
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "kebab-case")]
+pub enum CancellationStatus {
+    /// Cancel a subscription at the period end
+    #[serde(rename = "period-end")]
+    CancelAtPeriodEnd,
+    /// Remove a cancellation on a subscription
+    #[serde(rename = "remove")]
+    RemoveCancellation,
+}
+/// Whether to cancel a subscription at period end or to remove a cancellation status.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct SubscriptionCancellationStatusRequest {
+    /// Set the cancellation status of a subscription
+    pub status: CancellationStatus,
+}
+
+make_path_parts!(UpdateSubscriptionCancellationPath => "/v1/subscription/cancel");

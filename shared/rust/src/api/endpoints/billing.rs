@@ -1,5 +1,8 @@
 use super::ApiEndpoint;
-use crate::domain::billing::{CreateSetupIntentPath, CreateSetupIntentRequest, SubscriptionPath};
+use crate::domain::billing::{
+    CreateSetupIntentPath, CreateSetupIntentRequest, SubscriptionCancellationStatusRequest,
+    UpdateSubscriptionCancellationPath,
+};
 use crate::{
     api::Method,
     domain::billing::{
@@ -18,14 +21,14 @@ impl ApiEndpoint for CreateSubscription {
     const METHOD: Method = Method::Post;
 }
 
-/// Cancel a subscription
-pub struct CancelSubscription;
-impl ApiEndpoint for CancelSubscription {
-    type Path = SubscriptionPath;
-    type Req = ();
+/// Set the cancellation status of a subscription
+pub struct UpdateSubscriptionCancellation;
+impl ApiEndpoint for UpdateSubscriptionCancellation {
+    type Path = UpdateSubscriptionCancellationPath;
+    type Req = SubscriptionCancellationStatusRequest;
     type Res = ();
     type Err = EmptyError;
-    const METHOD: Method = Method::Delete;
+    const METHOD: Method = Method::Patch;
 }
 
 /// Create a setup intent so that a customer can add a payment method

@@ -807,7 +807,7 @@ pub enum Billing {
     Service(Service),
     Stripe(StripeError),
     NotFound(String),
-    BadRequest,
+    BadRequest(Option<String>),
     SubscriptionExists,
     SchoolNotFound,
     IncorrectPlanType(AccountType, SubscriptionType),
@@ -825,9 +825,11 @@ impl Into<actix_web::Error> for Billing {
     fn into(self) -> actix_web::Error {
         match self {
             Self::InternalServerError(e) => ise(e),
-            Self::BadRequest => {
-                BasicError::with_message(http::StatusCode::BAD_REQUEST, "Bad request".into()).into()
-            }
+            Self::BadRequest(message) => BasicError::with_message(
+                http::StatusCode::BAD_REQUEST,
+                message.unwrap_or("Bad request".into()),
+            )
+            .into(),
             Self::Service(e) => e.into(),
             Self::Stripe(e) => ise(e.into()),
             Self::NotFound(e) => BasicError::with_message(
@@ -870,7 +872,7 @@ impl From<Account> for Billing {
         match value {
             Account::Forbidden => Self::Forbidden,
             Account::InternalServerError(error) => Self::InternalServerError(error),
-            _ => Self::BadRequest,
+            _ => Self::BadRequest(None),
         }
     }
 }
