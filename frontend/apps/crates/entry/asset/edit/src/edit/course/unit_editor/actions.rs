@@ -182,9 +182,7 @@ impl UnitEditor {
                 let mut units = state.editable_course.units.lock_mut();
                 let mut spots = state.asset_edit_state.sidebar_spots.lock_mut();
 
-
                 let unit_index = units.iter().position(|x| x.id == state.unit_id.unwrap_ji());
-
 
                 if let Some(unit_index) = unit_index {
                     let mut unit = units.remove(unit_index);

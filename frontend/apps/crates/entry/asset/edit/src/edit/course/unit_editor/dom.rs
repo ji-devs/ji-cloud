@@ -37,11 +37,10 @@ impl Component<UnitEditor> for Rc<UnitEditor> {
         let is_valid = map_ref! {
             let display_name = state.display_name.signal_cloned(),
             let description = state.description.signal_cloned(),
-            let value = state.value.signal_cloned(),
-            let changed = state.changed.signal_cloned()
+            let value = state.value.signal_cloned()
 
             => {
-                !display_name.trim().is_empty() && !description.trim().is_empty() && UnitValue::is_some(value) && changed.to_owned()
+                !display_name.trim().is_empty() && !description.trim().is_empty() && UnitValue::is_some(value)
             }
         };
 
