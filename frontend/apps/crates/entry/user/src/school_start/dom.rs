@@ -34,7 +34,7 @@ impl Component<SchoolStart> for Rc<SchoolStart> {
                 .child(html!("div", {
                     .class("inputs")
                     .child(html!("input-wrapper", {
-                        .prop("label", "Name")
+                        .prop("label", "School/Organization*")
                         .child(html!("input" => HtmlInputElement, {
                             .with_node!(elem => {
                                 .prop_signal("value", state.name.signal_cloned())
