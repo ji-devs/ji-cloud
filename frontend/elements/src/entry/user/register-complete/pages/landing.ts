@@ -25,10 +25,12 @@ export class _ extends LitElement {
                     background-position: center center;
                 }
                 .content {
-                    width: 500px;
+                    width: 628px;
+                    max-width: 95vw;
                     border-radius: 32px;
                     box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
                     padding: 64px;
+                    box-sizing: border-box;
                     background-color: #fff;
                 }
                 .title {
