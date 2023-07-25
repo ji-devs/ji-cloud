@@ -3,8 +3,8 @@ use futures_signals::signal::{Mutable, SignalExt};
 use shared::domain::billing::PlanType;
 use std::rc::Rc;
 use utils::{
-    events,
-    routes::{HomePricingRoute, HomeRoute, Route, UserRoute},
+    events, on_click_go_to_url,
+    routes::{HomePlanRoute, HomePricingRoute, HomeRoute, Route, UserRoute},
     unwrap::UnwrapJiExt,
 };
 
@@ -117,6 +117,29 @@ impl Pricing {
                     }))
                     .text("Start 7-day trial")
                 }))
+                .children(&mut [
+                    // html!("button-rect", {
+                    //     .prop("slot", "learn-more-free")
+                    //     .prop("kind", "text")
+                    //     .prop("color", "blue")
+                    //     .text("Learn more")
+                    //     .on_click_go_to_url!(Route::Home(HomeRoute::Plan(HomePlanRoute::Free)))
+                    // }),
+                    html!("button-rect", {
+                        .prop("slot", "learn-more-basic")
+                        .prop("kind", "text")
+                        .prop("color", "blue")
+                        .text("Learn more")
+                        .on_click_go_to_url!(Route::Home(HomeRoute::Plan(HomePlanRoute::Basic)))
+                    }),
+                    html!("button-rect", {
+                        .prop("slot", "learn-more-pro")
+                        .prop("kind", "text")
+                        .prop("color", "blue")
+                        .text("Learn more")
+                        .on_click_go_to_url!(Route::Home(HomeRoute::Plan(HomePlanRoute::Basic)))
+                    }),
+                ])
             }),
         ]
     }
@@ -151,6 +174,13 @@ impl Pricing {
             }),
             html!("pricing-table", {
                 .prop("kind", "schools")
+                .child(html!("button-rect", {
+                    .prop("slot", "learn-more-school")
+                    .prop("kind", "text")
+                    .prop("color", "blue")
+                    .text("Learn more")
+                    .on_click_go_to_url!(Route::Home(HomeRoute::Plan(HomePlanRoute::School)))
+                }))
             }),
         ]
     }
