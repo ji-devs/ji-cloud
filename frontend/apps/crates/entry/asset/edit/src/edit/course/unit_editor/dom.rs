@@ -32,8 +32,6 @@ impl Component<UnitEditor> for Rc<UnitEditor> {
     fn dom(&self, dom: DomBuilder<ShadowRoot>) -> DomBuilder<ShadowRoot> {
         let state = self;
 
-        state.load_unit();
-
         let is_valid = map_ref! {
             let display_name = state.display_name.signal_cloned(),
             let description = state.description.signal_cloned(),
