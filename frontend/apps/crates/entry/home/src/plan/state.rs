@@ -8,8 +8,6 @@ pub struct Plan {
 
 impl Plan {
     pub fn new(route: HomePlanRoute) -> Rc<Self> {
-        Rc::new(Self {
-            route,
-        })
+        Rc::new(Self { route })
     }
 }
