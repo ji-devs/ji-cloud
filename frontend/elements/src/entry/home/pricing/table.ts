@@ -217,10 +217,12 @@ export class _ extends LitElement {
                         </div>
                     </div>
                     <div class="row begin-row blue">
-                        <div class="cell cell-header"><h4>Recommended for</h4></div>
+                        <div class="cell cell-header">
+                            ${ this.kind === "individuals" ? html`<h4>Recommended for</h4>` : nothing }
+                        </div>
                         ${cells(this.kind, {
                             schools: html`
-                                <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
+                                <div class="cell">For schools that want the best for their teachers and students!</div>
                             `,
                             individuals: html`
                                 <div class="cell">Access to FREE content that is a productive screen-time alternative. Interactive. Educational. Fun.</div>
@@ -233,12 +235,12 @@ export class _ extends LitElement {
                         <div class="cell empty"></div>
                         ${cells(this.kind, {
                             schools: html`
-                                <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
+                                <div class="cell"><slot name="learn-more-school"></slot></div>
                             `,
                             individuals: html`
-                                <div class="cell"><button-rect kind="text" color="blue">Learn more</button-rect></div>
-                                <div class="cell"><button-rect kind="text" color="blue">Learn more</button-rect></div>
-                                <div class="cell"><button-rect kind="text" color="blue">Learn more</button-rect></div>
+                                <div class="cell"><slot name="learn-more-free"></slot></div>
+                                <div class="cell"><slot name="learn-more-basic"></slot></div>
+                                <div class="cell"><slot name="learn-more-pro"></slot></div>
                             `
                         })}
                     </div>
