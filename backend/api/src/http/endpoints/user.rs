@@ -32,6 +32,7 @@ use shared::{
             VerifyResetEmailRequest,
         },
     },
+    error::{IntoAnyhow, ServiceError, ServiceKindError},
     media::MediaLibrary,
 };
 use sqlx::{postgres::PgDatabaseError, Acquire, PgConnection, PgPool};
@@ -40,7 +41,7 @@ use tracing::{instrument, Instrument};
 use crate::{
     db::{self, user::upsert_profile},
     domain::NoContentClearAuth,
-    error::{self, ServiceKind},
+    error::{self},
     extractor::{ScopeAdmin, SessionCreateProfile, SessionDelete, TokenSessionOf, TokenUser},
     service::{mail, s3, ServiceData},
     token::{create_auth_token, SessionMask},
@@ -63,7 +64,7 @@ async fn send_verification_email(
     email_address: String,
     mail: &mail::Client,
     pages_url: &str,
-) -> Result<(), error::Service> {
+) -> Result<(), ServiceError> {
     let session = db::session::create(
         &mut *txn,
         user_id,
@@ -71,11 +72,12 @@ async fn send_verification_email(
         SessionMask::VERIFY_EMAIL,
         None,
     )
-    .await?;
+    .await
+    .into_anyhow()?;
 
     let template = mail
         .signup_verify_template()
-        .map_err(error::Service::DisabledService)?;
+        .map_err(ServiceError::DisabledService)?;
 
     let email_link = format!("{}/user/verify-email/{}", pages_url, session);
 
@@ -92,12 +94,14 @@ async fn send_welcome_jigzi_email(
     email_address: String,
     mail: &mail::Client,
     pages_url: &str,
-) -> Result<(), error::Service> {
-    let first_name = db::user::get_given_name(&mut *txn, user_id).await?;
+) -> Result<(), ServiceError> {
+    let first_name = db::user::get_given_name(&mut *txn, user_id)
+        .await
+        .into_anyhow()?;
 
     let template = mail
         .welcome_jigzi_template()
-        .map_err(error::Service::DisabledService)?;
+        .map_err(ServiceError::DisabledService)?;
 
     mail.send_welcome_jigzi(
         template,
@@ -105,8 +109,7 @@ async fn send_welcome_jigzi_email(
         pages_url.to_string(),
         first_name,
     )
-    .await
-    .map_err(|e| error::Service::InternalServerError(e))?;
+    .await?;
 
     Ok(())
 }
@@ -119,7 +122,7 @@ async fn send_password_email(
     mail: &mail::Client,
     pages_url: &str,
     is_oauth: bool,
-) -> Result<(), error::Service> {
+) -> Result<(), ServiceError> {
     if !is_oauth {
         let session = db::session::create(
             &mut *txn,
@@ -128,13 +131,16 @@ async fn send_password_email(
             SessionMask::CHANGE_PASSWORD,
             None,
         )
-        .await?;
+        .await
+        .into_anyhow()?;
 
-        let first_name = db::user::get_given_name(&mut *txn, user_id).await?;
+        let first_name = db::user::get_given_name(&mut *txn, user_id)
+            .await
+            .into_anyhow()?;
 
         let template = mail
             .password_reset_template()
-            .map_err(error::Service::DisabledService)?;
+            .map_err(ServiceError::DisabledService)?;
 
         let email_link = format!("{}/user/password-reset/{}", pages_url, session);
 
@@ -155,7 +161,7 @@ async fn send_reset_email(
     email_address: String,
     mail: &mail::Client,
     pages_url: &str,
-) -> Result<(), error::Service> {
+) -> Result<(), ServiceError> {
     let session = db::session::create(
         &mut *txn,
         user_id,
@@ -163,13 +169,16 @@ async fn send_reset_email(
         SessionMask::CHANGE_EMAIL,
         None,
     )
-    .await?;
+    .await
+    .into_anyhow()?;
 
-    let first_name = db::user::get_given_name(&mut *txn, user_id).await?;
+    let first_name = db::user::get_given_name(&mut *txn, user_id)
+        .await
+        .into_anyhow()?;
 
     let template = mail
         .email_reset_template()
-        .map_err(error::Service::DisabledService)?;
+        .map_err(ServiceError::DisabledService)?;
 
     let email_link = format!("{}/user/verify-email-reset/{}", pages_url, session);
 
@@ -210,7 +219,7 @@ async fn create_user(
         return Err(anyhow::anyhow!("properly handle empty password error").into());
     }
 
-    let mut txn = db.begin().await?;
+    let mut txn = db.begin().await.into_anyhow()?;
 
     let email = req.email.to_lowercase();
 
@@ -221,7 +230,8 @@ async fn create_user(
     )
     .fetch_one(&mut txn)
     .instrument(tracing::info_span!("check basic exists"))
-    .await?
+    .await
+    .into_anyhow()?
     .exists;
 
     let exists_google = sqlx::query!(
@@ -230,15 +240,16 @@ async fn create_user(
     )
     .fetch_one(&mut txn)
     .instrument(tracing::info_span!("check google exists"))
-    .await?
+    .await
+    .into_anyhow()?
     .exists;
     match (exists_basic, exists_google) {
         (true, _) => {
-            txn.rollback().await?;
+            txn.rollback().await.into_anyhow()?;
             return Err(error::Email::TakenBasic.into());
         }
         (false, true) => {
-            txn.rollback().await?;
+            txn.rollback().await.into_anyhow()?;
             return Err(error::Email::TakenGoogle.into());
         }
         (false, false) => (), // do nothing
@@ -247,7 +258,8 @@ async fn create_user(
     let user = sqlx::query!(r#"insert into "user" default values returning id"#)
         .fetch_one(&mut txn)
         .instrument(tracing::info_span!("insert user"))
-        .await?;
+        .await
+        .into_anyhow()?;
 
     let pass_hash = hash_password(req.password).await?;
 
@@ -259,7 +271,8 @@ async fn create_user(
     )
     .execute(&mut txn)
     .instrument(tracing::info_span!("insert user_basic_auth"))
-    .await?;
+    .await
+    .into_anyhow()?;
 
     send_verification_email(
         &mut txn,
@@ -271,7 +284,7 @@ async fn create_user(
     .await
     .map_err(error::Register::from)?;
 
-    txn.commit().await?;
+    txn.commit().await.into_anyhow()?;
 
     Ok(HttpResponse::NoContent().finish())
 }
@@ -325,15 +338,15 @@ where
             )
             .await
             .map_err(|it| match it {
-                error::Service::InternalServerError(it) => {
-                    error::VerifyEmail::InternalServerError(it)
+                ServiceError::InternalServerError(it) => {
+                    error::VerifyEmail::InternalServerError(it.into())
                 }
-                error::Service::DisabledService(it) => {
+                ServiceError::DisabledService(it) => {
                     error::ServiceSession::DisabledService(it).into()
                 }
-                error::Service::Forbidden => error::VerifyEmail::Forbidden,
+                ServiceError::Forbidden => error::VerifyEmail::Forbidden,
 
-                error::Service::ResourceNotFound => error::VerifyEmail::ResourceNotFound,
+                ServiceError::ResourceNotFound => error::VerifyEmail::ResourceNotFound,
             })?;
 
             txn.commit().await?;
@@ -592,7 +605,7 @@ async fn email_reset(
     let req = req.into_inner();
     let user_id = claims.user_id();
 
-    let mut txn = db.begin().await?;
+    let mut txn = db.begin().await.into_anyhow()?;
 
     let lowercase_email = req.email.to_lowercase();
 
@@ -604,7 +617,8 @@ async fn email_reset(
     )
     .fetch_one(&mut txn)
     .instrument(tracing::info_span!("validate email"))
-    .await?
+    .await
+    .into_anyhow()?
     .exists;
 
     let exists_google = sqlx::query!(
@@ -613,16 +627,17 @@ async fn email_reset(
     )
     .fetch_one(&mut txn)
     .instrument(tracing::info_span!("check google exists"))
-    .await?
+    .await
+    .into_anyhow()?
     .exists;
 
     match (exists_basic, exists_google) {
         (true, _) => {
-            txn.rollback().await?;
+            txn.rollback().await.into_anyhow()?;
             return Err(error::Email::TakenBasic.into());
         }
         (false, true) => {
-            txn.rollback().await?;
+            txn.rollback().await.into_anyhow()?;
             return Err(error::Email::TakenGoogle.into());
         }
         (false, false) => (), // do nothing
@@ -648,7 +663,7 @@ async fn email_reset(
     .await
     .map_err(error::Register::from)?;
 
-    txn.commit().await?;
+    txn.commit().await.into_anyhow()?;
 
     Ok(Json(ResetEmailResponse { paseto_token }))
 }
@@ -719,15 +734,15 @@ async fn verify_email_reset(
             )
             .await
             .map_err(|it| match it {
-                error::Service::InternalServerError(it) => {
-                    error::VerifyEmail::InternalServerError(it)
+                ServiceError::InternalServerError(it) => {
+                    error::VerifyEmail::InternalServerError(it.into())
                 }
-                error::Service::DisabledService(it) => {
+                ServiceError::DisabledService(it) => {
                     error::ServiceSession::DisabledService(it).into()
                 }
-                error::Service::Forbidden => error::VerifyEmail::Forbidden,
+                ServiceError::Forbidden => error::VerifyEmail::Forbidden,
 
-                error::Service::ResourceNotFound => error::VerifyEmail::Forbidden,
+                ServiceError::ResourceNotFound => error::VerifyEmail::Forbidden,
             })?;
 
             txn.commit().await?;
@@ -898,10 +913,10 @@ async fn reset_password(
     req: Json<<ResetPassword as ApiEndpoint>::Req>,
     db: Data<PgPool>,
     mail: ServiceData<mail::Client>,
-) -> Result<HttpResponse, error::Service> {
+) -> Result<HttpResponse, ServiceError> {
     let req = req.into_inner();
 
-    let mut txn = db.begin().await?;
+    let mut txn = db.begin().await.into_anyhow()?;
 
     let email = req.email.to_lowercase();
 
@@ -922,7 +937,7 @@ async fn reset_password(
     )
     .fetch_optional(&mut txn)
     .instrument(tracing::info_span!("get user_id"))
-    .await?;
+    .await.into_anyhow()?;
 
     let (user_id, is_oauth) = match user {
         Some(user) => (user.user_id, user.is_oauth),
@@ -939,7 +954,7 @@ async fn reset_password(
     )
     .await?;
 
-    txn.commit().await?;
+    txn.commit().await.into_anyhow()?;
 
     Ok(HttpResponse::NoContent().finish())
 }
@@ -995,13 +1010,14 @@ async fn put_password(
     )
     .fetch_optional(&mut txn)
     .instrument(tracing::info_span!("get user_id"))
-    .await?;
+    .await.into_anyhow()?;
 
     if let Some(user_to_delete) = user_to_delete {
         sqlx::query!(r#"delete from "user" where id = $1"#, user_to_delete.id.0)
             .execute(&mut txn)
             .instrument(tracing::info_span!("delete user_to_delete"))
-            .await?;
+            .await
+            .into_anyhow()?;
     }
 
     sqlx::query!(
@@ -1015,13 +1031,15 @@ values ($1, $2::text, $3)
     )
     .execute(&mut txn)
     .instrument(tracing::info_span!("insert user_auth_basic"))
-    .await?;
+    .await
+    .into_anyhow()?;
 
     if force_logout {
         sqlx::query!("delete from session where user_id = $1", user_id.0)
             .execute(&mut txn)
             .instrument(tracing::info_span!("delete session"))
-            .await?;
+            .await
+            .into_anyhow()?;
     }
 
     txn.commit().await?;
@@ -1070,19 +1088,19 @@ pub async fn search(
     _auth: TokenUserWithScope<ScopeAdmin>,
     algolia: ServiceData<crate::algolia::Client>,
     query: Option<Query<<user::SearchUser as ApiEndpoint>::Req>>,
-) -> Result<Json<<user::SearchUser as ApiEndpoint>::Res>, error::Service> {
+) -> Result<Json<<user::SearchUser as ApiEndpoint>::Res>, ServiceError> {
     let query = query.map_or_else(Default::default, Query::into_inner);
 
-    let page_limit = page_limit(query.page_limit)
-        .await
-        .map_err(|e| error::Service::InternalServerError(e))?;
+    let page_limit = page_limit(query.page_limit).await?;
 
     let (ids, pages, total_hits) = algolia
         .search_user(&query.q, query.user_id, page_limit, query.page)
         .await?
-        .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
+        .ok_or_else(|| ServiceError::DisabledService(ServiceKindError::Algolia))?;
 
-    let users: Vec<_> = db::user::get_by_ids(db.as_ref(), &ids).await?;
+    let users: Vec<_> = db::user::get_by_ids(db.as_ref(), &ids)
+        .await
+        .into_anyhow()?;
 
     Ok(Json(UserSearchResponse {
         users,

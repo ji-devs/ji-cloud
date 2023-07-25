@@ -16,12 +16,13 @@ use ji_core::{
     http::{get_addr, get_tcp_fd},
     settings::RuntimeSettings,
 };
+use shared::error::ConfigError;
 use sqlx::postgres::PgPool;
 use tracing::Span;
 use tracing_actix_web::{root_span, DefaultRootSpanBuilder, RootSpanBuilder, TracingLogger};
 
 use crate::{
-    error::{BasicError, ConfigError},
+    error::BasicError,
     service::{self, mail, s3, upload::cleaner, ServiceData},
     translate,
 };
@@ -314,9 +315,7 @@ where
     E: Into<ConfigError>,
 {
     // Convert the error into our custom user-facing error, and then into an actix error.
-    // Note: error.into().into() works fine, but doesn't look pretty.
-    let config_error = error.into();
-    config_error.into()
+    Into::<ConfigError>::into(error).into()
 }
 
 pub struct JigziSpanBuilder;

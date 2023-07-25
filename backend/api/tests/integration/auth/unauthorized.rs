@@ -1,6 +1,7 @@
 use http::StatusCode;
+use ji_cloud_api::error::ApiResponseError;
 use macros::test_service;
-use shared::error::{ApiError, EmptyError};
+use shared::error::EmptyError;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{fixture::Fixture, helpers::setup_service};
@@ -15,7 +16,7 @@ async fn unauthorized(route: &str, port: u16) -> anyhow::Result<()> {
 
     assert_eq!(resp.status(), StatusCode::UNAUTHORIZED);
 
-    let body: ApiError<EmptyError> = resp.json().await?;
+    let body: ApiResponseError<EmptyError> = resp.json().await?;
 
     assert_eq!(body.code, StatusCode::UNAUTHORIZED);
 

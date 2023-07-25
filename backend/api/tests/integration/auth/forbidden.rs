@@ -1,13 +1,14 @@
 use http::{Method, StatusCode};
 use macros::test_service;
 use serde_json::json;
-use shared::error::{ApiError, EmptyError};
+use shared::error::EmptyError;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use crate::{
     fixture::Fixture,
     helpers::{setup_service, LoginExt},
 };
+use ji_cloud_api::error::ApiResponseError;
 use shared::domain::{
     asset::AssetId,
     jig::JigId,
@@ -37,7 +38,7 @@ async fn forbidden(
 
     assert_eq!(resp.status(), StatusCode::FORBIDDEN);
 
-    let body: ApiError<EmptyError> = resp.json().await?;
+    let body: ApiResponseError<EmptyError> = resp.json().await?;
 
     assert_eq!(body.code, StatusCode::FORBIDDEN);
 

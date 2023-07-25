@@ -82,7 +82,7 @@ impl Into<actix_web::Error> for GoogleOAuth {
         match self {
             Self::InternalServerError(e) => super::ise(e.context("google oauth error")),
 
-            Self::Disabled => super::ServiceKind::GoogleOAuth.into(),
+            Self::Disabled => super::ServiceKindError::GoogleOAuth.into(),
 
             GoogleOAuth::InvalidCode => {
                 BasicError::with_message(http::StatusCode::UNAUTHORIZED, "Invalid Code".to_owned())

@@ -16,6 +16,7 @@ use shared::{
         user::UserId,
         CreateResponse,
     },
+    error::{IntoAnyhow, ServiceError, ServiceKindError},
 };
 use sqlx::PgPool;
 use tracing::instrument;
@@ -24,7 +25,7 @@ use uuid::Uuid;
 use crate::extractor::{ScopeAdmin, TokenUserWithScope};
 use crate::{
     db::{self, playlist::CreatePlaylistError},
-    error::{self, ServiceKind},
+    error::{self},
     extractor::{get_user_id, TokenUser},
     service::ServiceData,
 };
@@ -239,12 +240,12 @@ pub(super) async fn publish_draft_to_live(
     sqlx::query!(
         //language=SQL
         r#"
-        update user_asset_data 
+        update user_asset_data
         set playlist_count = playlist_count + 1,
         total_asset_count = total_asset_count + 1
         from playlist
         where author_id = user_id and
-              published_at is null and 
+              published_at is null and
               id = $1"#,
         playlist_id.0
     )
@@ -283,11 +284,11 @@ async fn search(
     claims: Option<TokenUser>,
     algolia: ServiceData<crate::algolia::Client>,
     query: Option<Query<<playlist::Search as ApiEndpoint>::Req>>,
-) -> Result<Json<<playlist::Search as ApiEndpoint>::Res>, error::Service> {
+) -> Result<Json<<playlist::Search as ApiEndpoint>::Res>, ServiceError> {
     let query = query.map_or_else(Default::default, Query::into_inner);
     let page_limit = page_limit(query.page_limit)
         .await
-        .map_err(|e| error::Service::InternalServerError(e))?;
+        .map_err(|e| ServiceError::InternalServerError(e.into()))?;
 
     let (author_id, user_id, privacy_level) =
         auth_claims(&*db, claims, query.author_id, query.privacy_level).await?;
@@ -310,10 +311,11 @@ async fn search(
             page_limit,
         )
         .await?
-        .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
+        .ok_or_else(|| ServiceError::DisabledService(ServiceKindError::Algolia))?;
 
-    let playlists: Vec<_> =
-        db::playlist::get_by_ids(db.as_ref(), &ids, DraftOrLive::Live, user_id).await?;
+    let playlists: Vec<_> = db::playlist::get_by_ids(db.as_ref(), &ids, DraftOrLive::Live, user_id)
+        .await
+        .into_anyhow()?;
 
     Ok(Json(PlaylistSearchResponse {
         playlists,

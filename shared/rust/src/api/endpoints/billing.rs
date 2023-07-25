@@ -3,12 +3,12 @@ use crate::domain::billing::{
     CreateSetupIntentPath, CreateSetupIntentRequest, SubscriptionCancellationStatusRequest,
     UpdateSubscriptionCancellationPath,
 };
+use crate::error::BillingError;
 use crate::{
     api::Method,
     domain::billing::{
         CreateSubscriptionPath, CreateSubscriptionRequest, CreateSubscriptionResponse,
     },
-    error::EmptyError,
 };
 
 /// Create a subscription and store payment info if provided
@@ -17,7 +17,7 @@ impl ApiEndpoint for CreateSubscription {
     type Path = CreateSubscriptionPath;
     type Req = CreateSubscriptionRequest;
     type Res = Option<CreateSubscriptionResponse>;
-    type Err = EmptyError;
+    type Err = BillingError;
     const METHOD: Method = Method::Post;
 }
 
@@ -27,7 +27,7 @@ impl ApiEndpoint for UpdateSubscriptionCancellation {
     type Path = UpdateSubscriptionCancellationPath;
     type Req = SubscriptionCancellationStatusRequest;
     type Res = ();
-    type Err = EmptyError;
+    type Err = BillingError;
     const METHOD: Method = Method::Patch;
 }
 
@@ -37,6 +37,6 @@ impl ApiEndpoint for CreateSetupIntent {
     type Path = CreateSetupIntentPath;
     type Req = CreateSetupIntentRequest;
     type Res = String;
-    type Err = EmptyError;
+    type Err = BillingError;
     const METHOD: Method = Method::Post;
 }

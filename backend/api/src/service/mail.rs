@@ -3,9 +3,8 @@ use sendgrid::v3::{Content, Email, Message, Personalization, SGMap, Sender};
 use shared::domain::{
     jig::report::JigReportEmail, resource::report::ResourceReportEmail, session::OAuthProvider,
 };
+use shared::error::ServiceKindError;
 use tracing::instrument;
-
-use crate::error;
 
 use super::Service;
 
@@ -110,8 +109,8 @@ impl Client {
         let subject = format!("Reset your password");
 
         let value = format!(
-            r#" 
-Looks like you requested a reset password link but you didn't sign up with a password, you signed up with a {} account. 
+            r#"
+Looks like you requested a reset password link but you didn't sign up with a password, you signed up with a {} account.
 Please try logging in with your {} account.
             "#,
             oauth_provider.as_str(),
@@ -232,41 +231,41 @@ Please try logging in with your {} account.
         Ok(())
     }
 
-    pub fn signup_verify_template(&self) -> Result<SignupVerifyTemplate<'_>, error::ServiceKind> {
+    pub fn signup_verify_template(&self) -> Result<SignupVerifyTemplate<'_>, ServiceKindError> {
         // todo: make the error more specific?
         self.signup_verify_template
             .as_deref()
             .map(SignupVerifyTemplate)
-            .ok_or(error::ServiceKind::Mail)
+            .ok_or(ServiceKindError::Mail)
     }
 
-    pub fn password_reset_template(&self) -> Result<PasswordResetTemplate<'_>, error::ServiceKind> {
+    pub fn password_reset_template(&self) -> Result<PasswordResetTemplate<'_>, ServiceKindError> {
         // todo: make the error more specific?
         self.password_reset_template
             .as_deref()
             .map(PasswordResetTemplate)
-            .ok_or(error::ServiceKind::Mail)
+            .ok_or(ServiceKindError::Mail)
     }
 
-    pub fn email_reset_template(&self) -> Result<EmailResetTemplate<'_>, error::ServiceKind> {
+    pub fn email_reset_template(&self) -> Result<EmailResetTemplate<'_>, ServiceKindError> {
         // todo: make the error more specific?
         self.email_reset_template
             .as_deref()
             .map(EmailResetTemplate)
-            .ok_or(error::ServiceKind::Mail)
+            .ok_or(ServiceKindError::Mail)
     }
 
-    pub fn welcome_jigzi_template(&self) -> Result<WelcomeJigziTemplate<'_>, error::ServiceKind> {
+    pub fn welcome_jigzi_template(&self) -> Result<WelcomeJigziTemplate<'_>, ServiceKindError> {
         // todo: make the error more specific?
         self.welcome_jigzi_template
             .as_deref()
             .map(WelcomeJigziTemplate)
-            .ok_or(error::ServiceKind::Mail)
+            .ok_or(ServiceKindError::Mail)
     }
 }
 
 impl Service for Client {
-    const DISABLED_ERROR: error::ServiceKind = error::ServiceKind::Mail;
+    const DISABLED_ERROR: ServiceKindError = ServiceKindError::Mail;
 }
 
 #[repr(transparent)]

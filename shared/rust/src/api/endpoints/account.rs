@@ -1,10 +1,11 @@
 use super::ApiEndpoint;
+use crate::api::Method;
 use crate::domain::billing::{
     CreateSchoolAccountPath, CreateSchoolAccountRequest, GetSchoolAccountResponse,
     IndividualAccountPath, IndividualAccountResponse, SchoolAccountPath, SchoolId, SchoolName,
     SchoolNamePath, SchoolNameValue, UpdateSchoolAccountRequest, UpdateSchoolNamePath,
 };
-use crate::{api::Method, error::EmptyError};
+use crate::error::AccountError;
 
 /// Return a list of known school names
 pub struct GetSchoolNames;
@@ -12,7 +13,7 @@ impl ApiEndpoint for GetSchoolNames {
     type Path = SchoolNamePath;
     type Req = ();
     type Res = Vec<SchoolName>;
-    type Err = EmptyError;
+    type Err = AccountError;
     const METHOD: Method = Method::Get;
 }
 
@@ -22,7 +23,7 @@ impl ApiEndpoint for CreateSchoolAccount {
     type Path = CreateSchoolAccountPath;
     type Req = CreateSchoolAccountRequest;
     type Res = SchoolId;
-    type Err = EmptyError;
+    type Err = AccountError;
     const METHOD: Method = Method::Post;
 }
 
@@ -32,7 +33,7 @@ impl ApiEndpoint for GetSchoolAccount {
     type Path = SchoolAccountPath;
     type Req = ();
     type Res = GetSchoolAccountResponse;
-    type Err = EmptyError;
+    type Err = AccountError;
     const METHOD: Method = Method::Get;
 }
 
@@ -42,7 +43,7 @@ impl ApiEndpoint for UpdateSchoolAccount {
     type Path = SchoolAccountPath;
     type Req = UpdateSchoolAccountRequest;
     type Res = ();
-    type Err = EmptyError;
+    type Err = AccountError;
     const METHOD: Method = Method::Put;
 }
 
@@ -52,7 +53,7 @@ impl ApiEndpoint for UpdateSchoolName {
     type Path = UpdateSchoolNamePath;
     type Req = SchoolNameValue;
     type Res = ();
-    type Err = EmptyError;
+    type Err = AccountError;
     const METHOD: Method = Method::Patch;
 }
 
@@ -62,7 +63,7 @@ impl ApiEndpoint for DeleteSchoolAccount {
     type Path = SchoolAccountPath;
     type Req = ();
     type Res = ();
-    type Err = EmptyError;
+    type Err = AccountError;
     const METHOD: Method = Method::Delete;
 }
 
@@ -72,6 +73,6 @@ impl ApiEndpoint for GetIndividualAccount {
     type Path = IndividualAccountPath;
     type Req = ();
     type Res = IndividualAccountResponse;
-    type Err = EmptyError;
+    type Err = AccountError;
     const METHOD: Method = Method::Get;
 }

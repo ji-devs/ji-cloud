@@ -32,7 +32,7 @@ impl<T: Into<anyhow::Error>> From<T> for Storage {
 impl Into<actix_web::Error> for Storage {
     fn into(self) -> actix_web::Error {
         match self {
-            Self::Disabled => super::ServiceKind::GoogleCloudStorage.into(),
+            Self::Disabled => super::ServiceKindError::GoogleCloudStorage.into(),
             Self::FileTooLarge => super::Upload::FileTooLarge.into(),
             Self::InvalidGrant => BasicError::with_message(
                 StatusCode::UNAUTHORIZED,

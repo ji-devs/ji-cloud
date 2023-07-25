@@ -11,7 +11,7 @@ use crate::{
         billing::{SubscriptionPlanPath, UpdateSubscriptionPlansRequest},
         session::{ImpersonatePath, NewSessionResponse},
     },
-    error::{ApiError, EmptyError},
+    error::EmptyError,
 };
 
 /// Impersonate another user.
@@ -30,7 +30,7 @@ impl ApiEndpoint for ExportData {
     type Path = ExportDataPath;
     type Req = ExportDataRequest;
     type Res = ();
-    type Err = ApiError<()>;
+    type Err = EmptyError;
     const METHOD: Method = Method::Get;
 }
 

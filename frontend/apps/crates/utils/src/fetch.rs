@@ -4,6 +4,7 @@
    the non_status versions do side effects based on the status (e.g. redirect to no-auth page)
 */
 
+use std::fmt::Debug;
 use std::{
     any::TypeId,
     error::Error,
@@ -31,6 +32,7 @@ use awsm_web::loaders::fetch::{
 use web_sys::File;
 
 pub use awsm_web::loaders::helpers::{spawn_handle, AbortController, FutureHandle};
+use shared::error::ApiError;
 
 pub const POST: &str = "POST";
 pub const GET: &str = "GET";
@@ -40,33 +42,26 @@ pub type IsAborted = bool;
 const DESERIALIZE_OK: &str = "couldn't deserialize ok in fetch";
 
 #[derive(Debug, Serialize, Deserialize)]
-pub enum ApiError<T: fmt::Debug + Display> {
+pub enum FetchError<T: Debug + Display> {
     Connection,
-    Response(T),
+    Parse,
+    Response(ApiError<T>),
 }
-impl<T> fmt::Display for ApiError<T>
+impl<T> fmt::Display for FetchError<T>
 where
     T: fmt::Debug + Display,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ApiError::Connection => write!(f, "Error when communicating with server"),
-            ApiError::Response(e) => write!(f, "Error: {e}"),
+            FetchError::Connection => write!(f, "Error when communicating with server"),
+            FetchError::Parse => write!(f, "Error parsing server response"),
+            FetchError::Response(e) => write!(f, "Error: {e}"),
         }
     }
 }
-impl<T> Error for ApiError<T> where T: fmt::Debug + Display {}
+impl<T> Error for FetchError<T> where T: Debug + Display {}
 
-impl<E> From<E> for ApiError<E>
-where
-    E: Error,
-{
-    fn from(e: E) -> Self {
-        ApiError::Response(e)
-    }
-}
-
-pub type ApiResult<T, E> = std::result::Result<T, ApiError<E>>;
+pub type ApiResult<T, E> = Result<T, FetchError<E>>;
 
 // extension trait to make calling the API very convenient
 #[async_trait(?Send)]
@@ -138,9 +133,9 @@ pub trait ApiEndpointExt {
                     if res.ok() {
                         Ok((Self::res_to_json(res).await, status))
                     } else {
-                        let res: Result<Self::Err, _> = Self::res_to_json(res).await;
+                        let res: Result<ApiError<Self::Err>, _> = Self::res_to_json(res).await;
                         // since `!res.ok()` this should be an Err even if parsing succeeded.
-                        let res = result_err_only(res);
+                        let res = error_response_to_err(res);
                         Ok((res, status))
                     }
                 }
@@ -148,7 +143,7 @@ pub trait ApiEndpointExt {
                     if err.is_abort() {
                         Err(true)
                     } else {
-                        Ok((Err(ApiError::Connection), 0))
+                        Ok((Err(FetchError::Connection), 0))
                     }
                 }
             }
@@ -181,9 +176,9 @@ pub trait ApiEndpointExt {
         if res.ok() {
             (Self::res_to_json(res).await, status)
         } else {
-            let res: Result<Self::Err, _> = Self::res_to_json(res).await;
+            let res: Result<ApiError<Self::Err>, _> = Self::res_to_json(res).await;
             // since `!res.ok()` this should be an Err even if parsing succeeded.
-            let res = result_err_only(res);
+            let res = error_response_to_err(res);
             (res, status)
         }
     }
@@ -235,9 +230,9 @@ pub trait ApiEndpointExt {
                 if res.ok() {
                     Ok((Self::res_to_json(res).await, status))
                 } else {
-                    let res: Result<Self::Err, _> = Self::res_to_json(res).await;
+                    let res: Result<ApiError<Self::Err>, _> = Self::res_to_json(res).await;
                     // since `!res.ok()` this should be an Err even if parsing succeeded.
-                    let res = result_err_only(res);
+                    let res = error_response_to_err(res);
                     Ok((res, status))
                 }
             }
@@ -245,7 +240,7 @@ pub trait ApiEndpointExt {
                 if err.is_abort() {
                     Err(true)
                 } else {
-                    Ok((Err(ApiError::Connection), 0))
+                    Ok((Err(FetchError::Connection), 0))
                 }
             }
         }
@@ -282,9 +277,9 @@ pub trait ApiEndpointExt {
                 status,
             )
         } else {
-            let res: Result<Self::Err, _> = Self::res_to_json(res).await;
+            let res: Result<ApiError<Self::Err>, _> = Self::res_to_json(res).await;
             // since `!res.ok()` this should be an Err even if parsing succeeded.
-            let res = result_err_only(res);
+            let res = error_response_to_err(res);
             (res, status)
         }
     }
@@ -333,20 +328,20 @@ pub trait ApiEndpointExt {
                 status,
             )
         } else {
-            let res: Result<Self::Err, _> = Self::res_to_json(res).await;
+            let res: Result<ApiError<Self::Err>, _> = Self::res_to_json(res).await;
             // since `!res.ok()` this should be an Err even if parsing succeeded.
-            let res = result_err_only(res);
+            let res = error_response_to_err(res);
             (res, status)
         }
     }
 
     // TODO: use specialization once stable instead.
     /// Similar to awsm_web::loaders::fetch::Response::json_from_str, but treats an empty string as valid input for `()`
-    async fn res_to_json<T>(res: Response) -> Result<T, ApiError<Self::Err>>
+    async fn res_to_json<T>(res: Response) -> Result<T, FetchError<Self::Err>>
     where
         T: DeserializeOwned + 'static,
     {
-        let mut text = res.text().await.map_err(|_| ApiError::Connection)?;
+        let mut text = res.text().await.map_err(|_| FetchError::Parse)?;
         if TypeId::of::<T>() == TypeId::of::<()>() {
             if text.is_empty() {
                 text = String::from("null");
@@ -354,22 +349,23 @@ pub trait ApiEndpointExt {
         }
         serde_json::from_str(&text).map_err(|e| {
             log::info!("Parsing error: {e}");
-            ApiError::Connection
+            FetchError::Parse
         })
     }
 }
 
 // takes a result and return an error whether the input is Ok or Err. Calls into in both cases.
 // useful in after parsing the servers error response, we need an Err whether the parsing was successful or not.
-fn result_err_only<IT, IE, OT, OE>(result: Result<IT, IE>) -> Result<OT, OE>
+fn error_response_to_err<T, E>(res: Result<ApiError<E>, FetchError<E>>) -> Result<T, FetchError<E>>
 where
-    IT: Into<OE>,
-    IE: Into<OE>,
+    E: Debug + Display,
 {
-    match result {
-        Ok(v) => Err(v.into()),
-        Err(e) => Err(e.into()),
-    }
+    let err = match res {
+        Ok(error) => FetchError::Response(error),
+        Err(error) => error,
+    };
+
+    Err(err)
 }
 
 // impl the extension for all endpoints

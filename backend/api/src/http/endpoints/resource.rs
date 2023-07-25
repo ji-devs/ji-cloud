@@ -5,6 +5,7 @@ use actix_web::{
 use futures::try_join;
 use ji_core::settings::RuntimeSettings;
 use shared::domain::user::UserScope;
+use shared::error::{ServiceError, ServiceKindError};
 use shared::{
     api::{endpoints::resource, ApiEndpoint, PathParts},
     domain::{
@@ -16,6 +17,7 @@ use shared::{
         user::UserId,
         CreateResponse,
     },
+    error::IntoAnyhow,
 };
 use sqlx::PgPool;
 use tracing::instrument;
@@ -23,7 +25,7 @@ use uuid::Uuid;
 
 use crate::{
     db::{self, resource::CreateResourceError},
-    error::{self, ServiceKind},
+    error::{self},
     extractor::{get_user_id, ScopeAdmin, TokenUser, TokenUserWithScope},
     service::ServiceData,
 };
@@ -254,12 +256,12 @@ pub(super) async fn publish_draft_to_live(
     sqlx::query!(
         //language=SQL
         r#"
-        update user_asset_data 
+        update user_asset_data
         set resource_count = resource_count + 1,
         total_asset_count = total_asset_count + 1
         from resource
         where author_id = user_id and
-              published_at is null and 
+              published_at is null and
               id = $1"#,
         resource_id.0
     )
@@ -315,12 +317,12 @@ async fn search(
     claims: Option<TokenUser>,
     algolia: ServiceData<crate::algolia::Client>,
     query: Option<Query<<resource::Search as ApiEndpoint>::Req>>,
-) -> Result<Json<<resource::Search as ApiEndpoint>::Res>, error::Service> {
+) -> Result<Json<<resource::Search as ApiEndpoint>::Res>, ServiceError> {
     let query = query.map_or_else(Default::default, Query::into_inner);
 
     let page_limit = page_limit(query.page_limit)
         .await
-        .map_err(|e| error::Service::InternalServerError(e))?;
+        .map_err(|e| ServiceError::InternalServerError(e.into()))?;
 
     let (author_id, user_id, privacy_level, blocked) = auth_claims(
         &*db,
@@ -350,10 +352,11 @@ async fn search(
             query.is_rated,
         )
         .await?
-        .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
+        .ok_or_else(|| ServiceError::DisabledService(ServiceKindError::Algolia))?;
 
-    let resources: Vec<_> =
-        db::resource::get_by_ids(db.as_ref(), &ids, DraftOrLive::Live, user_id).await?;
+    let resources: Vec<_> = db::resource::get_by_ids(db.as_ref(), &ids, DraftOrLive::Live, user_id)
+        .await
+        .into_anyhow()?;
 
     Ok(Json(ResourceSearchResponse {
         resources,
