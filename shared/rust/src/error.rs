@@ -1,78 +1,26 @@
 //! Home of the error types.
 
+mod account;
+mod billing;
+mod config;
+mod service;
+
 use std::error::Error;
-use std::fmt::{self, Debug, Display};
+use std::fmt::{self, Debug, Display, Formatter};
+
+#[cfg(feature = "backend")]
+use actix_web::{body::BoxBody, HttpResponse, ResponseError};
 
 use serde::{Deserialize, Serialize};
+use thiserror::Error;
 
 use crate::domain::meta::MetaKind;
 use crate::media::MediaGroupKind;
 
-/// auth errors
-#[deprecated]
-pub mod auth {
-    #[deprecated]
-    pub use super::EmptyError as RegisterError;
-}
-
-/// TODO: Don't think this is used much, consider removing.
-/// Represents an error returned by the api.
-#[derive(Serialize, Deserialize, Debug)]
-pub struct ApiError<T> {
-    /// The status code of the error.
-    #[serde(with = "http_serde::status_code")]
-    pub code: http::StatusCode,
-
-    /// A message describing the error.
-    ///
-    /// Note: This message is for human readability and is explicitly *not* stable, do not use this message to figure out what error was returned.
-    pub message: String,
-
-    /// Any optional additional information.
-    #[serde(flatten)]
-    pub extra: T,
-}
-impl<T> Display for ApiError<T> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.message)
-    }
-}
-impl<T: Debug> Error for ApiError<T> {}
-
-#[cfg(feature = "backend")]
-impl<T: Serialize> From<ApiError<T>> for actix_web::Error {
-    fn from(e: ApiError<T>) -> Self {
-        let resp = actix_web::HttpResponse::build(e.code).json(e);
-        actix_web::error::InternalError::from_response("", resp).into()
-    }
-}
-
-impl<T: Default> ApiError<T> {
-    /// Creates a new error based off the provided status code
-    #[must_use]
-    pub fn new(code: http::StatusCode) -> Self {
-        Self {
-            message: code
-                .canonical_reason()
-                .unwrap_or("Unknown Error")
-                .to_owned(),
-            code,
-            extra: T::default(),
-        }
-    }
-
-    /// Creates a new error based off the provided status code and with the provided message.
-    #[must_use]
-    pub fn with_message(code: http::StatusCode, message: String) -> Self {
-        Self {
-            message,
-            code,
-            extra: T::default(),
-        }
-    }
-}
-
-impl<T> ApiError<T> {}
+pub use account::AccountError;
+pub use billing::BillingError;
+pub use config::ConfigError;
+pub use service::{ServiceError, ServiceKindError};
 
 /// An `extra` error type that represents "no extension"
 #[derive(Serialize, Deserialize, Debug, Default, thiserror::Error)]
@@ -92,9 +40,101 @@ pub struct MetadataNotFound {
     /// are split per media group kind.
     pub media_group_kind: Option<MediaGroupKind>,
 }
-impl fmt::Display for MetadataNotFound {
+impl Display for MetadataNotFound {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Metadata not found")
     }
 }
 impl Error for MetadataNotFound {}
+
+/// Helper trait
+pub trait IntoAnyhow<T> {
+    /// Convert `self` into a result with an anyhow error
+    ///
+    /// # Errors
+    ///
+    /// Maps the error in a Result into an [`anyhow::Error`].
+    fn into_anyhow(self) -> anyhow::Result<T>;
+}
+
+// Blanket impl
+impl<T, E> IntoAnyhow<T> for Result<T, E>
+where
+    E: Error + Send + Sync + 'static + Into<anyhow::Error>,
+{
+    fn into_anyhow(self) -> anyhow::Result<T> {
+        self.map_err(Into::into)
+    }
+}
+
+/// Useful for serializing errors that don't implement Serialize, or errors where we don't want the
+/// error details to be transported to the client.
+#[derive(Debug, Error)]
+pub enum TransientError<T: Debug + Display> {
+    /// The actual error
+    #[error("API error {0}")]
+    Error(T),
+    /// An error placeholder
+    #[error("")]
+    Missing,
+}
+
+impl<T: Debug + Display> Default for TransientError<T> {
+    fn default() -> Self {
+        Self::Missing
+    }
+}
+
+impl<T: Debug + Display> From<T> for TransientError<T> {
+    fn from(value: T) -> Self {
+        Self::Error(value)
+    }
+}
+
+#[cfg(feature = "backend")]
+impl<T> TransientError<T>
+where
+    T: ResponseError + Debug + Display,
+{
+    #[allow(missing_docs)]
+    fn status_code(&self) -> http::StatusCode {
+        match self {
+            Self::Error(inner) => inner.status_code(),
+            Self::Missing => http::StatusCode::INTERNAL_SERVER_ERROR,
+        }
+    }
+}
+
+#[allow(missing_docs)]
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum ApiError<T> {
+    ApiError(T),
+    ConfigError(ConfigError),
+}
+
+#[cfg(feature = "backend")]
+impl<T> ResponseError for ApiError<T>
+where
+    T: ResponseError + Serialize,
+{
+    fn status_code(&self) -> http::StatusCode {
+        match self {
+            Self::ConfigError(error) => error.status_code(),
+            Self::ApiError(error) => error.status_code(),
+        }
+    }
+
+    fn error_response(&self) -> HttpResponse<BoxBody> {
+        HttpResponse::build(self.status_code()).json(self)
+    }
+}
+
+impl<T: Display> Display for ApiError<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::ConfigError(error) => write!(f, "{error}"),
+            Self::ApiError(error) => write!(f, "{error}"),
+        }
+    }
+}

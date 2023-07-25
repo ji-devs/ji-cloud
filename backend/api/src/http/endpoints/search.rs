@@ -3,6 +3,7 @@ use actix_web::{
     web::{Data, Json, Query, ServiceConfig},
 };
 use ji_core::settings::RuntimeSettings;
+use shared::error::ServiceError;
 use shared::{
     api::{endpoints::search, ApiEndpoint, PathParts},
     domain::search::{CreateSearchKeyResponse, WebImageSearchResponse},
@@ -16,7 +17,7 @@ use crate::{error, extractor::TokenUser, service::ServiceData};
 async fn create_key(
     algolia: ServiceData<crate::algolia::SearchKeyStore>,
     claims: TokenUser,
-) -> actix_web::Result<(Json<<search::CreateKey as ApiEndpoint>::Res>, StatusCode), error::Service> // TODO check this
+) -> actix_web::Result<(Json<<search::CreateKey as ApiEndpoint>::Res>, StatusCode), ServiceError> // TODO check this
 {
     let key =
         algolia.generate_virtual_key(Some(claims.0.user_id), Some(chrono::Duration::minutes(15)));

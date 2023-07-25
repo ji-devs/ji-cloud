@@ -6,12 +6,10 @@
 //!     * `actix_web::Error` -- server errors, used by actix for error logging
 //!     * `anyhow::Error` -- general intermediate error representation
 
-use actix_web::{
-    error::{JsonPayloadError, PathError, QueryPayloadError},
-    HttpResponse, ResponseError,
-};
-use shared::error::{ApiError, EmptyError, MetadataNotFound};
-use stripe::StripeError;
+use actix_web::HttpResponse;
+use serde::{Deserialize, Serialize};
+use shared::error::{EmptyError, MetadataNotFound};
+use shared::error::{ServiceError, ServiceKindError};
 
 use crate::db::meta::MetaWrapperError;
 
@@ -28,58 +26,72 @@ pub use user::{
 
 pub mod event_arc;
 pub use event_arc::EventArc;
-use shared::domain::billing::{AccountType, SchoolNameId, SchoolNameValue, SubscriptionType};
+
 use shared::domain::meta::MetaKind;
+
+/// TODO: Remove once all usages have migrated to the new [`ApiError`] struct.
+///
+/// Represents an error returned by the api.
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ApiResponseError<T> {
+    /// The status code of the error.
+    #[serde(skip)]
+    pub code: http::StatusCode,
+
+    /// A message describing the error.
+    ///
+    /// Note: This message is for human readability and is explicitly *not* stable, do not use this message to figure out what error was returned.
+    pub message: String,
+
+    /// Any optional additional information.
+    #[serde(flatten)]
+    pub extra: T,
+}
+impl<T> std::fmt::Display for ApiResponseError<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.message)
+    }
+}
+impl<T: std::fmt::Debug> std::error::Error for ApiResponseError<T> {}
+
+impl<T: Serialize> From<ApiResponseError<T>> for actix_web::Error {
+    fn from(e: ApiResponseError<T>) -> Self {
+        let resp = HttpResponse::build(e.code).json(e);
+        actix_web::error::InternalError::from_response("", resp).into()
+    }
+}
+
+impl<T: Default> ApiResponseError<T> {
+    /// Creates a new error based off the provided status code
+    #[must_use]
+    pub fn new(code: http::StatusCode) -> Self {
+        Self {
+            message: code
+                .canonical_reason()
+                .unwrap_or("Unknown Error")
+                .to_owned(),
+            code,
+            extra: T::default(),
+        }
+    }
+
+    /// Creates a new error based off the provided status code and with the provided message.
+    #[must_use]
+    pub fn with_message(code: http::StatusCode, message: String) -> Self {
+        Self {
+            message,
+            code,
+            extra: T::default(),
+        }
+    }
+}
+
+impl<T> ApiResponseError<T> {}
 
 /// Represents an error returned by the api.
 // mostly used in this module
 #[allow(clippy::module_name_repetitions)]
-pub type BasicError = ApiError<EmptyError>;
-
-/// Represents actix-web config errors
-#[allow(clippy::module_name_repetitions)]
-#[derive(Debug)]
-pub enum ConfigError {
-    JsonPayloadError(JsonPayloadError),
-    QueryPayloadError(QueryPayloadError),
-    PathError(PathError),
-}
-
-impl From<actix_web::error::JsonPayloadError> for ConfigError {
-    fn from(error: JsonPayloadError) -> Self {
-        Self::JsonPayloadError(error)
-    }
-}
-
-impl From<actix_web::error::QueryPayloadError> for ConfigError {
-    fn from(error: QueryPayloadError) -> Self {
-        Self::QueryPayloadError(error)
-    }
-}
-
-impl From<actix_web::error::PathError> for ConfigError {
-    fn from(error: PathError) -> Self {
-        Self::PathError(error)
-    }
-}
-
-impl From<ConfigError> for actix_web::Error {
-    fn from(error: ConfigError) -> Self {
-        match error {
-            ConfigError::JsonPayloadError(error) => {
-                BasicError::with_message(error.status_code(), "Invalid JSON body".to_string())
-                    .into()
-            }
-            ConfigError::QueryPayloadError(error) => {
-                BasicError::with_message(error.status_code(), "Invalid query".to_string()).into()
-            }
-            ConfigError::PathError(error) => {
-                BasicError::with_message(error.status_code(), "Invalid path parameters".to_string())
-                    .into()
-            }
-        }
-    }
-}
+pub type BasicError = ApiResponseError<EmptyError>;
 
 #[non_exhaustive]
 pub enum Auth {
@@ -165,80 +177,12 @@ impl Into<actix_web::Error> for Server {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
-pub enum ServiceKind {
-    Algolia,
-    S3,
-    GoogleCloudStorage,
-    GoogleCloudEventArc,
-    GoogleOAuth,
-    GoogleCloudAccessKeyStore,
-    Mail,
-    FirebaseCloudMessaging,
-    UploadCleaner,
-    GoogleTranslate,
-    Stripe,
-}
-
-impl ServiceKind {
-    pub fn as_str(&self) -> &str {
-        match self {
-            Self::Algolia => "Algolia",
-            Self::S3 => "S3",
-            Self::GoogleCloudStorage => "Google Cloud Storage",
-            Self::GoogleCloudEventArc => "Google Cloud EventArc",
-            Self::GoogleOAuth => "Google OAuth",
-            Self::GoogleCloudAccessKeyStore => "Google Cloud Access Key Store",
-            Self::Mail => "Sendgrid Mail",
-            Self::FirebaseCloudMessaging => "Firebase Cloud Messaging",
-            Self::UploadCleaner => "Media Upload Cleaner",
-            Self::GoogleTranslate => "Google Translate",
-            Self::Stripe => "Stripe",
-        }
-    }
-}
-
-impl Into<actix_web::Error> for ServiceKind {
-    fn into(self) -> actix_web::Error {
-        BasicError::with_message(
-            http::StatusCode::NOT_IMPLEMENTED,
-            format!("{} is disabled", self.as_str()).to_owned(),
-        )
-        .into()
-    }
-}
-
-#[derive(Debug)]
-pub enum Service {
-    InternalServerError(anyhow::Error),
-    DisabledService(ServiceKind),
-    Forbidden,
-    ResourceNotFound,
-}
-
-impl<T: Into<anyhow::Error>> From<T> for Service {
-    fn from(e: T) -> Self {
-        Self::InternalServerError(e.into())
-    }
-}
-
-impl From<Auth> for Service {
+impl From<Auth> for ServiceError {
     fn from(e: Auth) -> Self {
         match e {
-            Auth::InternalServerError(e) => Self::InternalServerError(e),
+            Auth::InternalServerError(e) => Self::InternalServerError(e.into()),
             Auth::Forbidden => Self::Forbidden,
             Auth::ResourceNotFound(_) => Self::ResourceNotFound,
-        }
-    }
-}
-
-impl Into<actix_web::Error> for Service {
-    fn into(self) -> actix_web::Error {
-        match self {
-            Self::InternalServerError(e) => ise(e),
-            Self::DisabledService(s) => s.into(),
-            Self::Forbidden => BasicError::new(http::StatusCode::FORBIDDEN).into(),
-            Self::ResourceNotFound => BasicError::new(http::StatusCode::NOT_FOUND).into(),
         }
     }
 }
@@ -246,7 +190,7 @@ impl Into<actix_web::Error> for Service {
 #[derive(Debug)]
 pub enum ServiceSession {
     InternalServerError(anyhow::Error),
-    DisabledService(ServiceKind),
+    DisabledService(ServiceKindError),
     Unauthorized,
 }
 
@@ -260,7 +204,11 @@ impl Into<actix_web::Error> for ServiceSession {
     fn into(self) -> actix_web::Error {
         match self {
             Self::InternalServerError(e) => ise(e),
-            Self::DisabledService(s) => s.into(),
+            Self::DisabledService(s) => BasicError::with_message(
+                http::StatusCode::NOT_IMPLEMENTED,
+                format!("{s} is disabled"),
+            )
+            .into(),
             Self::Unauthorized => BasicError::new(http::StatusCode::UNAUTHORIZED).into(),
         }
     }
@@ -454,7 +402,7 @@ impl<T: Into<anyhow::Error>> From<T> for CreateWithMetadata {
 impl Into<actix_web::Error> for CreateWithMetadata {
     fn into(self) -> actix_web::Error {
         match self {
-            Self::MissingMetadata(data) => ApiError {
+            Self::MissingMetadata(data) => ApiResponseError {
                 code: http::StatusCode::UNPROCESSABLE_ENTITY,
                 message: "Metadata not Found".to_owned(),
                 extra: data,
@@ -493,7 +441,7 @@ impl<T: Into<anyhow::Error>> From<T> for UpdateWithMetadata {
 impl Into<actix_web::Error> for UpdateWithMetadata {
     fn into(self) -> actix_web::Error {
         match self {
-            Self::MissingMetadata(data) => ApiError {
+            Self::MissingMetadata(data) => ApiResponseError {
                 code: http::StatusCode::UNPROCESSABLE_ENTITY,
                 message: "Metadata not Found".to_owned(),
                 extra: data,
@@ -798,123 +746,6 @@ impl From<Auth> for JigCode {
             Auth::InternalServerError(e) => Self::InternalServerError(e),
             Auth::Forbidden => Self::Forbidden,
             Auth::ResourceNotFound(_) => Self::ResourceNotFound,
-        }
-    }
-}
-
-pub enum Billing {
-    InternalServerError(anyhow::Error),
-    Service(Service),
-    Stripe(StripeError),
-    NotFound(String),
-    BadRequest(Option<String>),
-    SubscriptionExists,
-    SchoolNotFound,
-    IncorrectPlanType(AccountType, SubscriptionType),
-    InvalidPromotionCode(String),
-    Forbidden,
-}
-
-impl<T: Into<anyhow::Error>> From<T> for Billing {
-    fn from(e: T) -> Self {
-        Self::InternalServerError(e.into())
-    }
-}
-
-impl Into<actix_web::Error> for Billing {
-    fn into(self) -> actix_web::Error {
-        match self {
-            Self::InternalServerError(e) => ise(e),
-            Self::BadRequest(message) => BasicError::with_message(
-                http::StatusCode::BAD_REQUEST,
-                message.unwrap_or("Bad request".into()),
-            )
-            .into(),
-            Self::Service(e) => e.into(),
-            Self::Stripe(e) => ise(e.into()),
-            Self::NotFound(e) => BasicError::with_message(
-                http::StatusCode::NOT_FOUND,
-                format!("Resource not found: {e}"),
-            )
-            .into(),
-            Self::SubscriptionExists => BasicError::with_message(
-                http::StatusCode::BAD_REQUEST,
-                "Account has existing subscription".into(),
-            )
-            .into(),
-            Self::SchoolNotFound => {
-                BasicError::with_message(http::StatusCode::NOT_FOUND, "School not found".into())
-                    .into()
-            }
-            Self::IncorrectPlanType(expected, found) => BasicError::with_message(
-                http::StatusCode::BAD_REQUEST,
-                format!("Expected {expected}, found {found}"),
-            )
-            .into(),
-            Self::InvalidPromotionCode(code) => BasicError::with_message(
-                http::StatusCode::BAD_REQUEST,
-                format!("Invalid promotion code {code}"),
-            )
-            .into(),
-            Self::Forbidden => BasicError::new(http::StatusCode::FORBIDDEN).into(),
-        }
-    }
-}
-
-impl From<Service> for Billing {
-    fn from(err: Service) -> Self {
-        Self::Service(err)
-    }
-}
-
-impl From<Account> for Billing {
-    fn from(value: Account) -> Self {
-        match value {
-            Account::Forbidden => Self::Forbidden,
-            Account::InternalServerError(error) => Self::InternalServerError(error),
-            _ => Self::BadRequest(None),
-        }
-    }
-}
-
-pub enum Account {
-    InternalServerError(anyhow::Error),
-    UserHasAccount,
-    SchoolNameExists(SchoolNameValue),
-    SchoolExists(SchoolNameId),
-    NotFound(String),
-    Forbidden,
-}
-
-impl<T: Into<anyhow::Error>> From<T> for Account {
-    fn from(e: T) -> Self {
-        Self::InternalServerError(e.into())
-    }
-}
-
-impl Into<actix_web::Error> for Account {
-    fn into(self) -> actix_web::Error {
-        match self {
-            Self::InternalServerError(e) => ise(e),
-            Self::UserHasAccount => BasicError::with_message(
-                http::StatusCode::BAD_REQUEST,
-                format!("User already has an existing account"),
-            )
-            .into(),
-            Self::SchoolNameExists(name) => BasicError::with_message(
-                http::StatusCode::BAD_REQUEST,
-                format!("A school name of {name} already exists"),
-            )
-            .into(),
-            Self::SchoolExists(id) => BasicError::with_message(
-                http::StatusCode::BAD_REQUEST,
-                format!("A school using a name with ID {id} already exists"),
-            )
-            .into(),
-            Self::NotFound(message) => {
-                BasicError::with_message(http::StatusCode::NOT_FOUND, message).into()
-            }
-            Self::Forbidden => BasicError::new(http::StatusCode::FORBIDDEN).into(),
         }
     }
 }

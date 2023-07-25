@@ -13,6 +13,7 @@ use shared::{
         user::UserId,
         CreateResponse,
     },
+    error::{IntoAnyhow, ServiceError, ServiceKindError},
 };
 use sqlx::PgPool;
 use tracing::instrument;
@@ -21,7 +22,7 @@ use uuid::Uuid;
 use crate::extractor::{ScopeAdmin, TokenUserWithScope};
 use crate::{
     db::{self, course::CreateCourseError},
-    error::{self, ServiceKind},
+    error::{self},
     extractor::TokenUser,
     service::ServiceData,
 };
@@ -278,11 +279,11 @@ async fn search(
     claims: Option<TokenUser>,
     algolia: ServiceData<crate::algolia::Client>,
     query: Option<Query<<course::Search as ApiEndpoint>::Req>>,
-) -> Result<Json<<course::Search as ApiEndpoint>::Res>, error::Service> {
+) -> Result<Json<<course::Search as ApiEndpoint>::Res>, ServiceError> {
     let query = query.map_or_else(Default::default, Query::into_inner);
     let page_limit = page_limit(query.page_limit)
         .await
-        .map_err(|e| error::Service::InternalServerError(e))?;
+        .map_err(|e| ServiceError::InternalServerError(e.into()))?;
 
     let (author_id, privacy_level, blocked) = auth_claims(
         &*db,
@@ -309,9 +310,11 @@ async fn search(
             blocked,
         )
         .await?
-        .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
+        .ok_or_else(|| ServiceError::DisabledService(ServiceKindError::Algolia))?;
 
-    let courses: Vec<_> = db::course::get_by_ids(db.as_ref(), &ids, DraftOrLive::Live).await?;
+    let courses: Vec<_> = db::course::get_by_ids(db.as_ref(), &ids, DraftOrLive::Live)
+        .await
+        .into_anyhow()?;
 
     Ok(Json(CourseSearchResponse {
         courses,

@@ -1,4 +1,4 @@
-use super::{ise, BasicError, Service, ServiceSession};
+use super::{ise, BasicError, ServiceError, ServiceSession};
 use http::StatusCode;
 
 pub enum NotFound {
@@ -67,12 +67,12 @@ pub enum Register {
     InternalServerError(anyhow::Error),
     Username(Username),
     VerifyEmail(VerifyEmail),
-    Service(Service),
+    Service(ServiceError),
 }
 
-impl<T: Into<anyhow::Error>> From<T> for Register {
-    fn from(e: T) -> Self {
-        Self::InternalServerError(e.into())
+impl From<anyhow::Error> for Register {
+    fn from(e: anyhow::Error) -> Self {
+        Self::InternalServerError(e)
     }
 }
 
@@ -101,8 +101,8 @@ impl From<VerifyEmail> for Register {
     }
 }
 
-impl From<Service> for Register {
-    fn from(err: Service) -> Self {
+impl From<ServiceError> for Register {
+    fn from(err: ServiceError) -> Self {
         Self::Service(err)
     }
 }

@@ -26,6 +26,7 @@ use crate::{
     token::{create_auth_token, SessionMask},
 };
 use shared::domain::session::OAuthUserProfile;
+use shared::error::{IntoAnyhow, ServiceError, ServiceKindError};
 
 fn handle_user_email_error(e: sqlx::Error) -> error::OAuth {
     let db_err = match &e {
@@ -44,7 +45,7 @@ pub async fn get_url(
     req: HttpRequest,
     config: Data<RuntimeSettings>,
     path: Path<(GetOAuthUrlServiceKind, OAuthUrlKind)>,
-) -> Result<Json<GetOAuthUrlResponse>, error::Service> {
+) -> Result<Json<GetOAuthUrlResponse>, ServiceError> {
     let (service_kind, url_kind) = path.into_inner();
 
     match service_kind {
@@ -55,13 +56,11 @@ pub async fn get_url(
     let oauth_config = config
         .google_oauth
         .as_ref()
-        .ok_or(error::Service::DisabledService(
-            error::ServiceKind::GoogleOAuth,
-        ))?;
+        .ok_or(ServiceError::DisabledService(ServiceKindError::GoogleOAuth))?;
 
     let route = oauth_url(config.remote_target(), url_kind);
 
-    let mut url: Url = req.url_for_static("google_cloud_oauth")?;
+    let mut url: Url = req.url_for_static("google_cloud_oauth").into_anyhow()?;
 
     // todo: add / verify `state`
 

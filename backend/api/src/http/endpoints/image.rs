@@ -10,13 +10,14 @@ use shared::{
         CreateResponse, ImageBrowseResponse, ImageId, ImageMetadata, ImageResponse,
         ImageSearchResponse, ImageUpdateRequest, ImageUploadResponse,
     },
+    error::{ServiceError, ServiceKindError},
     media::{FileKind, MediaLibrary, PngImageFile},
 };
 use sqlx::{postgres::PgDatabaseError, PgPool};
 
 use crate::{
     db::{self, meta::handle_metadata_err, nul_if_empty},
-    error::{self, ServiceKind},
+    error::{self},
     extractor::{RequestOrigin, ScopeManageImage, TokenUser, TokenUserWithScope},
     service::{self, s3, ServiceData},
 };
@@ -141,12 +142,12 @@ async fn search(
     algolia: ServiceData<crate::algolia::Client>,
     _claims: TokenUser,
     query: Option<Query<<endpoints::image::Search as ApiEndpoint>::Req>>,
-) -> Result<Json<<endpoints::image::Search as ApiEndpoint>::Res>, error::Service> {
+) -> Result<Json<<endpoints::image::Search as ApiEndpoint>::Res>, ServiceError> {
     let query = query.map_or_else(Default::default, Query::into_inner);
 
     let page_limit = page_limit(query.page_limit)
         .await
-        .map_err(|e| error::Service::InternalServerError(e))?;
+        .map_err(|e| ServiceError::InternalServerError(e.into()))?;
 
     let (ids, pages, total_hits) = algolia
         .search_image(
@@ -164,10 +165,11 @@ async fn search(
             page_limit,
         )
         .await?
-        .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
+        .ok_or_else(|| ServiceError::DisabledService(ServiceKindError::Algolia))?;
 
     let images: Vec<_> = db::image::get(db.as_ref(), &ids)
-        .err_into::<error::Service>()
+        .err_into::<anyhow::Error>()
+        .err_into::<ServiceError>()
         .and_then(|metadata: ImageMetadata| async { Ok(ImageResponse { metadata }) })
         .try_collect()
         .await?;

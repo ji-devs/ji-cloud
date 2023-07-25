@@ -11,12 +11,13 @@ use shared::{
         user::UserId,
         CreateResponse,
     },
+    error::{IntoAnyhow, ServiceError, ServiceKindError},
 };
 use sqlx::PgPool;
 
 use crate::{
     db::{self},
-    error::{self, ServiceKind},
+    error::{self},
     extractor::{get_user_id, TokenUser},
     http::endpoints::jig::page_limit,
     service::ServiceData,
@@ -167,12 +168,12 @@ async fn search(
     claims: Option<TokenUser>,
     algolia: ServiceData<crate::algolia::Client>,
     query: Option<Query<<circle::Search as ApiEndpoint>::Req>>,
-) -> Result<Json<<circle::Search as ApiEndpoint>::Res>, error::Service> {
+) -> Result<Json<<circle::Search as ApiEndpoint>::Res>, ServiceError> {
     let query = query.map_or_else(Default::default, Query::into_inner);
 
     let page_limit = page_limit(query.page_limit)
         .await
-        .map_err(|e| error::Service::InternalServerError(e))?;
+        .map_err(|e| ServiceError::InternalServerError(e.into()))?;
 
     let creator_id = auth_claims(&db, claims, query.creator_id).await?;
 
@@ -185,9 +186,11 @@ async fn search(
             query.page,
         )
         .await?
-        .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
+        .ok_or_else(|| ServiceError::DisabledService(ServiceKindError::Algolia))?;
 
-    let circles: Vec<_> = db::circle::get_by_ids(db.as_ref(), &ids, creator_id).await?;
+    let circles: Vec<_> = db::circle::get_by_ids(db.as_ref(), &ids, creator_id)
+        .await
+        .into_anyhow()?;
 
     Ok(Json(CircleSearchResponse {
         circles,

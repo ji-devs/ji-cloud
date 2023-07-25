@@ -2,7 +2,7 @@ use std::{fs::File, io::BufWriter, path::PathBuf};
 
 use indicatif::ProgressBar;
 use shared::{
-    error::{ApiError, EmptyError},
+    error::{ApiResponseError, EmptyError},
     media::MediaKind,
 };
 
@@ -24,7 +24,7 @@ pub async fn run(
     match response.error_for_status_ref() {
         Ok(_) => {}
         Err(_) => {
-            let error_json = response.json::<ApiError<EmptyError>>().await?;
+            let error_json = response.json::<ApiResponseError<EmptyError>>().await?;
 
             anyhow::bail!(
                 "request failed ({}): {}",

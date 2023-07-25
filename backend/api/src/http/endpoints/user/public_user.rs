@@ -20,13 +20,15 @@ use shared::{
             UserId,
         },
     },
+    error::{IntoAnyhow, ServiceError},
 };
 
+use shared::error::ServiceKindError;
 use sqlx::PgPool;
 
 use crate::{
     db,
-    error::{self, ServiceKind},
+    error::{self},
     extractor::{get_user_id, TokenUser},
     http::endpoints::playlist::{DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT},
     service::ServiceData,
@@ -54,12 +56,12 @@ pub async fn search(
     claims: Option<TokenUser>,
     algolia: ServiceData<crate::algolia::Client>,
     query: Option<Query<<user::Search as ApiEndpoint>::Req>>,
-) -> Result<Json<<user::Search as ApiEndpoint>::Res>, error::Service> {
+) -> Result<Json<<user::Search as ApiEndpoint>::Res>, ServiceError> {
     let query = query.map_or_else(Default::default, Query::into_inner);
 
     let page_limit = page_limit(query.page_limit)
         .await
-        .map_err(|e| error::Service::InternalServerError(e))?;
+        .map_err(|e| ServiceError::InternalServerError(e.into()))?;
 
     let user_id = db::user::public_user::auth_claims(&db, claims, query.user_id).await?;
 
@@ -77,9 +79,11 @@ pub async fn search(
             query.page,
         )
         .await?
-        .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
+        .ok_or_else(|| ServiceError::DisabledService(ServiceKindError::Algolia))?;
 
-    let users: Vec<_> = db::user::public_user::get_by_ids(db.as_ref(), &ids, user_id).await?;
+    let users: Vec<_> = db::user::public_user::get_by_ids(db.as_ref(), &ids, user_id)
+        .await
+        .into_anyhow()?;
 
     Ok(Json(SearchPublicUserResponse {
         users,

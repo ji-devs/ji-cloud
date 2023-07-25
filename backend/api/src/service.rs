@@ -6,10 +6,10 @@ use futures::future::{ready, Ready};
 use tokio::sync::RwLock;
 
 use crate::algolia;
-use crate::error;
-use crate::error::ServiceKind;
+
 use crate::translate;
 use ji_core::google::GoogleAccessTokenResponse;
+use shared::error::{ServiceError, ServiceKindError};
 
 use self::translate::GoogleTranslate;
 use self::upload::cleaner::UploadCleaner;
@@ -22,49 +22,49 @@ pub mod storage;
 pub mod upload;
 
 pub trait Service {
-    const DISABLED_ERROR: error::ServiceKind;
+    const DISABLED_ERROR: ServiceKindError;
 }
 
 impl Service for algolia::Client {
-    const DISABLED_ERROR: error::ServiceKind = error::ServiceKind::Algolia;
+    const DISABLED_ERROR: ServiceKindError = ServiceKindError::Algolia;
 }
 
 impl Service for algolia::SearchKeyStore {
     // todo: this should have a different error?
-    const DISABLED_ERROR: error::ServiceKind = error::ServiceKind::Algolia;
+    const DISABLED_ERROR: ServiceKindError = ServiceKindError::Algolia;
 }
 
 impl Service for s3::Client {
-    const DISABLED_ERROR: error::ServiceKind = error::ServiceKind::S3;
+    const DISABLED_ERROR: ServiceKindError = ServiceKindError::S3;
 }
 
 impl Service for storage::Client {
-    const DISABLED_ERROR: error::ServiceKind = error::ServiceKind::GoogleCloudStorage;
+    const DISABLED_ERROR: ServiceKindError = ServiceKindError::GoogleCloudStorage;
 }
 
 impl Service for crate::service::event_arc::Client {
-    const DISABLED_ERROR: error::ServiceKind = error::ServiceKind::GoogleCloudEventArc;
+    const DISABLED_ERROR: ServiceKindError = ServiceKindError::GoogleCloudEventArc;
 }
 
 impl Service for crate::service::notifications::Client {
-    const DISABLED_ERROR: error::ServiceKind = error::ServiceKind::FirebaseCloudMessaging;
+    const DISABLED_ERROR: ServiceKindError = ServiceKindError::FirebaseCloudMessaging;
 }
 
 impl Service for GcpAccessKeyStore {
-    const DISABLED_ERROR: ServiceKind = ServiceKind::Algolia;
+    const DISABLED_ERROR: ServiceKindError = ServiceKindError::Algolia;
 }
 
 // TODO: set up for algolia
 impl Service for algolia::Manager {
-    const DISABLED_ERROR: ServiceKind = ServiceKind::Algolia;
+    const DISABLED_ERROR: ServiceKindError = ServiceKindError::Algolia;
 }
 
 impl Service for UploadCleaner {
-    const DISABLED_ERROR: ServiceKind = error::ServiceKind::UploadCleaner;
+    const DISABLED_ERROR: ServiceKindError = ServiceKindError::UploadCleaner;
 }
 
 impl Service for GoogleTranslate {
-    const DISABLED_ERROR: ServiceKind = error::ServiceKind::GoogleTranslate;
+    const DISABLED_ERROR: ServiceKindError = ServiceKindError::GoogleTranslate;
 }
 #[derive(Debug)]
 pub struct ServiceData<T: ?Sized>(Arc<T>);
@@ -105,15 +105,15 @@ impl<T: Service + ?Sized> From<Arc<T>> for ServiceData<T> {
 }
 
 impl<T: Service + ?Sized + 'static> FromRequest for ServiceData<T> {
+    type Error = ServiceError;
     type Future = Ready<Result<Self, Self::Error>>;
-    type Error = error::Service;
 
     #[inline]
     fn from_request(req: &actix_web::HttpRequest, _: &mut actix_http::Payload) -> Self::Future {
         let data = req
             .app_data::<ServiceData<T>>()
             .cloned()
-            .ok_or(error::Service::DisabledService(T::DISABLED_ERROR));
+            .ok_or(ServiceError::DisabledService(T::DISABLED_ERROR));
 
         ready(data)
     }

@@ -855,30 +855,6 @@
     },
     "query": "\nselect exists (\n    select 1 from user_scope where user_id = $1 and scope = any($2)\n) or (\n    exists (select 1 from user_scope where user_id = $1 and scope = $3) and\n    not exists (select 1 from jig where jig.id = $4 and jig.author_id <> $1)\n) as \"authed!\"\n"
   },
-  "13a585a91078e3a8d974641dd55160e6057508e815fabeb3386fe4011c79153f": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\n        update user_asset_data \n        set resource_count = resource_count + 1,\n        total_asset_count = total_asset_count + 1\n        from resource\n        where author_id = user_id and\n              published_at is null and \n              id = $1"
-  },
-  "13ff5f48acc1806d421ced3ab8c3fd2e59e5d3912a6ba12b6d08c42b89672a2e": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\n        update user_asset_data \n        set playlist_count = playlist_count + 1,\n        total_asset_count = total_asset_count + 1\n        from playlist\n        where author_id = user_id and\n              published_at is null and \n              id = $1"
-  },
   "140ff97c5bd0b551e1c2b0026a53c713117faf011a3f7f9e6f7e420cc481204a": {
     "describe": {
       "columns": [],
@@ -7031,6 +7007,18 @@
     },
     "query": "\nselect play_count from jig_play_count\nwhere jig_id = $1;\n            "
   },
+  "68b0cdf2330e61ee24a41779cd6a9a2d5d4b6aa32856cb5168bf45afd98d6ccf": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        update user_asset_data\n        set resource_count = resource_count + 1,\n        total_asset_count = total_asset_count + 1\n        from resource\n        where author_id = user_id and\n              published_at is null and\n              id = $1"
+  },
   "695ed5200a6ec80ca01f9ca3950a0ff0bc60dee8bcbe4a0954376eb26a38af1b": {
     "describe": {
       "columns": [],
@@ -11848,6 +11836,18 @@
     },
     "query": "\nselect\n    school_name_id as \"id!: SchoolNameId\",\n    name::text as \"name!\",\n    verified\nfrom school_name\nwhere school_name_id = $1\n"
   },
+  "b112cb6d91c1a044dc07e04f50d8a9529160e5d8f410dd23bf2b0b5004111342": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        update user_asset_data\n        set playlist_count = playlist_count + 1,\n        total_asset_count = total_asset_count + 1\n        from playlist\n        where author_id = user_id and\n              published_at is null and\n              id = $1"
+  },
   "b1513ce8a836f80987c480701be8ab9dbc124d8a4556503a4ad2dc77b1ae50d2": {
     "describe": {
       "columns": [
@@ -14715,6 +14715,18 @@
     },
     "query": "\ninsert into playlist_data_resource(playlist_data_id, resource_type_id, display_name, resource_content)\nselect $2, resource_type_id, display_name, resource_content\nfrom playlist_data_resource\nwhere playlist_data_id = $1\n        "
   },
+  "eab2089a1c8b9b7544a0577117381536a67d58cea994f56ed3f512375de03083": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        update user_asset_data\n        set jig_count = jig_count + 1,\n        total_asset_count = total_asset_count + 1\n        from jig\n        where author_id = user_id and\n              published_at is null and\n              id = $1"
+  },
   "eb44eafd34c17ff3cd679cd11f53fcde64f4b6039ba2b1625dd2c78ca2494a2d": {
     "describe": {
       "columns": [],
@@ -15058,18 +15070,6 @@
       }
     },
     "query": "\nupdate jig_data\nset display_name = $2,\n    translated_name = '{}',\n    updated_at = now()\nwhere id = $1 and $2 is distinct from display_name"
-  },
-  "f1bb0858fbc395bf5d1b2f4563bab9d4fbea0924387e66c745022f1a7fefb28c": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\n        update user_asset_data \n        set jig_count = jig_count + 1,\n        total_asset_count = total_asset_count + 1\n        from jig\n        where author_id = user_id and\n              published_at is null and \n              id = $1"
   },
   "f1da735aa16c69d6e293d1c1b28cb018017f891f1e79dc7f3ed2a633880f493b": {
     "describe": {

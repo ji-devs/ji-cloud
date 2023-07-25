@@ -11,12 +11,15 @@ use shared::domain::billing::{
     StripeInvoiceId, StripeSubscriptionId, SubscriptionStatus, SubscriptionType,
     UpdateSubscriptionRecord,
 };
+use shared::error::BillingError;
+
 use shared::{
     api::{endpoints::billing::CreateSubscription, ApiEndpoint, Method, PathParts},
     domain::{
         billing::{CreateSubscriptionResponse, CustomerId, PaymentMethod, SubscriptionPlan},
         user::UserProfile,
     },
+    error::{IntoAnyhow, ServiceError, ServiceKindError},
 };
 use sqlx::PgPool;
 use std::borrow::Borrow;
@@ -30,7 +33,7 @@ use stripe::{
 use tracing::instrument;
 
 use crate::domain::user_authorization;
-use crate::{db, error, extractor::TokenUser};
+use crate::{db, extractor::TokenUser};
 
 /// Create a new subscription for an authenticated user.
 ///
@@ -51,19 +54,20 @@ async fn create_subscription(
         Json<<CreateSubscription as ApiEndpoint>::Res>,
         http::StatusCode,
     ),
-    error::Billing,
+    <CreateSubscription as ApiEndpoint>::Err,
 > {
     let user_id = auth.user_id();
 
     // Fetch the subscription plan details
     let plan: SubscriptionPlan = db::billing::get_subscription_plan_by_type(&db, req.plan_type)
-        .await?
-        .ok_or(error::Billing::NotFound(format!("Plan {}", req.plan_type)))?;
+        .await
+        .into_anyhow()?
+        .ok_or(BillingError::NotFound(format!("Plan {}", req.plan_type)))?;
 
     // Fetch the profile for the user that's creating the subscription
     let user_profile: UserProfile = db::user::get_profile(db.as_ref(), &user_id)
         .await?
-        .ok_or(error::Billing::NotFound(format!("User {user_id}")))?;
+        .ok_or(BillingError::NotFound(format!("User {user_id}")))?;
 
     let client = create_stripe_client(&settings)?;
 
@@ -72,16 +76,17 @@ async fn create_subscription(
     let stripe_customer_id = stripe::CustomerId::from(account.stripe_customer_id.unwrap().clone());
 
     if let Some(setup_intent_id) = &req.setup_intent_id {
-        let setup_intent_id = SetupIntentId::from_str(setup_intent_id).map_err(|_| {
-            error::Billing::BadRequest(Some("Invalid Setup Intent ID value".into()))
-        })?;
+        let setup_intent_id = SetupIntentId::from_str(setup_intent_id)
+            .map_err(|_| BillingError::InvalidSetupIntentId)?;
         let setup_intent = SetupIntent::retrieve(&client, &setup_intent_id, &[])
             .await
-            .map_err(|_| error::Billing::BadRequest(Some("Invalid Setup Intent ID".into())))?;
+            .map_err(|_| BillingError::InvalidSetupIntentId)?;
 
         let payment_method_id = setup_intent
             .payment_method
-            .ok_or(error::Billing::BadRequest(None))?
+            .ok_or(BillingError::InternalServerError(
+                anyhow!("Missing payment_method from SetupIntent").into(),
+            ))?
             .id()
             .to_string();
 
@@ -95,9 +100,7 @@ async fn create_subscription(
             ..Default::default()
         };
 
-        Customer::update(&client, &stripe_customer_id, update_customer)
-            .await
-            .map_err(error::Billing::Stripe)?;
+        Customer::update(&client, &stripe_customer_id, update_customer).await?;
     }
 
     let promotion_code = if let Some(promotion_code) = &req.promotion_code {
@@ -109,12 +112,10 @@ async fn create_subscription(
 
         let List {
             data: mut codes, ..
-        } = PromotionCode::list(&client, &list_params)
-            .await
-            .map_err(error::Billing::Stripe)?;
+        } = PromotionCode::list(&client, &list_params).await?;
 
         if codes.is_empty() || codes.len() > 1 {
-            return Err(error::Billing::InvalidPromotionCode(
+            return Err(BillingError::InvalidPromotionCode(
                 promotion_code.to_string(),
             ));
         }
@@ -149,9 +150,7 @@ async fn create_subscription(
             });
         }
 
-        stripe::Subscription::create(&client, params)
-            .await
-            .map_err(error::Billing::Stripe)?
+        stripe::Subscription::create(&client, params).await?
     };
 
     let stripe_subscription_id: StripeSubscriptionId = stripe_subscription.id.into();
@@ -208,7 +207,9 @@ async fn create_subscription(
         amount_due_in_cents,
     };
 
-    db::billing::create_subscription(db.as_ref(), subscription).await?;
+    db::billing::create_subscription(db.as_ref(), subscription)
+        .await
+        .into_anyhow()?;
 
     Ok((Json(create_response), http::StatusCode::CREATED))
 }
@@ -219,22 +220,23 @@ async fn update_subscription_cancel_status(
     db: Data<PgPool>,
     settings: Data<RuntimeSettings>,
     req: Json<<UpdateSubscriptionCancellation as ApiEndpoint>::Req>,
-) -> Result<HttpResponse, error::Billing> {
+) -> Result<HttpResponse, <UpdateSubscriptionCancellation as ApiEndpoint>::Err> {
     let user_id = auth.user_id();
     let account = db::account::get_account_by_user_id(db.as_ref(), &user_id)
         .await?
-        .ok_or_else(|| error::Billing::NotFound("User does not have an account".into()))?;
+        .ok_or_else(|| BillingError::NotFound("User does not have an account".into()))?;
 
     user_authorization(db.as_ref(), &user_id, &account.account_id)
         .await
-        .map_err(Into::<error::Billing>::into)?
+        .map_err(Into::<BillingError>::into)?
         .test_authorized(true)?;
 
     let subscription =
         db::billing::get_latest_subscription_by_account_id(db.as_ref(), account.account_id)
-            .await?
+            .await
+            .into_anyhow()?
             .ok_or_else(|| {
-                error::Billing::NotFound("User does not have an existing subscription".into())
+                BillingError::NotFound("User does not have an existing subscription".into())
             })?;
 
     let client = create_stripe_client(&settings)?;
@@ -242,15 +244,12 @@ async fn update_subscription_cancel_status(
     let stripe_id: Result<stripe::SubscriptionId, anyhow::Error> =
         subscription.stripe_subscription_id.try_into();
 
-    let stripe_id: stripe::SubscriptionId =
-        stripe_id.map_err(error::Billing::InternalServerError)?;
+    let stripe_id: stripe::SubscriptionId = stripe_id?;
 
     let update_subscription = match &req.status {
         CancellationStatus::CancelAtPeriodEnd => {
             if !subscription.status.is_active() {
-                return Err(error::Billing::BadRequest(Some(
-                    "User does not have an active subscription".into(),
-                )));
+                return Err(BillingError::NoActiveSubscription);
             }
 
             UpdateSubscription {
@@ -260,9 +259,7 @@ async fn update_subscription_cancel_status(
         }
         CancellationStatus::RemoveCancellation => {
             if !subscription.status.is_canceled() {
-                return Err(error::Billing::BadRequest(Some(
-                    "User does not have a canceled subscription".into(),
-                )));
+                return Err(BillingError::NoCanceledSubscription);
             }
 
             UpdateSubscription {
@@ -279,7 +276,8 @@ async fn update_subscription_cancel_status(
         db.as_ref(),
         UpdateSubscriptionRecord::try_from(updated_subscription)?,
     )
-    .await?;
+    .await
+    .into_anyhow()?;
 
     Ok(HttpResponse::NoContent().finish())
 }
@@ -295,19 +293,20 @@ async fn create_setup_intent(
         Json<<CreateSetupIntent as ApiEndpoint>::Res>,
         http::StatusCode,
     ),
-    error::Billing,
+    <CreateSetupIntent as ApiEndpoint>::Err,
 > {
     let user_id = auth.user_id();
 
     // Fetch the subscription plan details
     let plan: SubscriptionPlan = db::billing::get_subscription_plan_by_type(&db, req.plan_type)
-        .await?
-        .ok_or(error::Billing::NotFound(format!("Plan {}", req.plan_type)))?;
+        .await
+        .into_anyhow()?
+        .ok_or(BillingError::NotFound(format!("Plan {}", req.plan_type)))?;
 
     // Fetch the profile for the user that wants to subscribe
     let user_profile: UserProfile = db::user::get_profile(db.as_ref(), &user_id)
         .await?
-        .ok_or(error::Billing::NotFound(format!("User {user_id}")))?;
+        .ok_or(BillingError::NotFound(format!("User {user_id}")))?;
 
     let client = create_stripe_client(&settings)?;
 
@@ -333,11 +332,11 @@ async fn create_setup_intent(
 }
 
 #[instrument(skip_all)]
-fn create_stripe_client(settings: &RuntimeSettings) -> Result<Client, error::Billing> {
+fn create_stripe_client(settings: &RuntimeSettings) -> Result<Client, BillingError> {
     let secret = settings
         .stripe_secret_key
         .as_ref()
-        .ok_or(error::Service::DisabledService(error::ServiceKind::Stripe))?;
+        .ok_or(ServiceError::DisabledService(ServiceKindError::Stripe))?;
 
     Ok(Client::new(secret))
 }
@@ -349,14 +348,14 @@ async fn get_or_create_customer(
     client: &Client,
     user_profile: &UserProfile,
     plan: &SubscriptionPlan,
-) -> Result<Account, error::Billing> {
+) -> Result<Account, BillingError> {
     let mut account =
         if let Some(account) = db::account::get_account_by_user_id(db, &user_profile.id).await? {
             if let Some(subscription) = &account.subscription {
                 // Check whether they have an _active_ subscription
                 if !matches!(subscription.status, SubscriptionStatus::Expired) {
                     // If a subscription exists, we don't want to create a new subscription
-                    return Err(error::Billing::SubscriptionExists)?;
+                    return Err(BillingError::SubscriptionExists)?;
                 }
             }
 
@@ -364,7 +363,7 @@ async fn get_or_create_customer(
                 .account_type
                 .matches_subscription_type(&plan.plan_type.subscription_type())
             {
-                return Err(error::Billing::IncorrectPlanType(
+                return Err(BillingError::IncorrectPlanType(
                     AccountType::Individual,
                     SubscriptionType::School,
                 ));
@@ -376,27 +375,28 @@ async fn get_or_create_customer(
                 plan.plan_type.subscription_type(),
                 SubscriptionType::Individual
             ) {
-                return Err(error::Billing::IncorrectPlanType(
+                return Err(BillingError::IncorrectPlanType(
                     AccountType::Individual,
                     SubscriptionType::School,
                 ));
             }
 
-            db::account::create_default_individual_account(db, &user_profile.id).await?;
+            db::account::create_default_individual_account(db, &user_profile.id)
+                .await
+                .into_anyhow()?;
 
             db::account::get_account_by_user_id(db, &user_profile.id)
                 .await?
-                .ok_or(error::Billing::InternalServerError(anyhow!(
-                    "Missing account"
-                )))?
+                .ok_or(BillingError::from(anyhow!("Missing account")))?
         };
 
     if account.stripe_customer_id.is_none() {
         let customer_id = match account.account_type {
             AccountType::School => {
                 let school = db::account::get_school_account_by_account_id(db, &account.account_id)
-                    .await?
-                    .ok_or(error::Billing::SchoolNotFound)?;
+                    .await
+                    .into_anyhow()?
+                    .ok_or(BillingError::SchoolNotFound)?;
 
                 create_stripe_customer(
                     client,
@@ -436,12 +436,8 @@ async fn get_or_create_customer(
 async fn create_stripe_customer(
     client: &Client,
     create_customer: CreateCustomer<'_>,
-) -> Result<CustomerId, error::Billing> {
-    Ok(Customer::create(client, create_customer)
-        .await
-        .map_err(error::Billing::Stripe)?
-        .id
-        .into())
+) -> Result<CustomerId, BillingError> {
+    Ok(Customer::create(client, create_customer).await?.id.into())
 }
 
 #[instrument(skip_all)]
@@ -450,20 +446,18 @@ async fn webhook(
     req: HttpRequest,
     settings: Data<RuntimeSettings>,
     payload: web::Bytes,
-) -> Result<HttpResponse, error::Billing> {
+) -> Result<HttpResponse, BillingError> {
     let secret = settings
         .stripe_webhook_secret
         .as_ref()
-        .ok_or(error::Service::DisabledService(error::ServiceKind::Stripe))?;
+        .ok_or(ServiceError::DisabledService(ServiceKindError::Stripe))?;
 
     let payload_str = std::str::from_utf8(payload.borrow()).unwrap();
 
     let stripe_signature = req
         .headers()
         .get("Stripe-Signature")
-        .ok_or(error::Billing::BadRequest(Some(
-            "Missing Stripe-Signature".into(),
-        )))?
+        .ok_or(BillingError::MissingStripeSignature)?
         .to_str()
         .ok()
         .unwrap_or_default();
@@ -491,7 +485,9 @@ async fn webhook(
                         // subscription is updated when an invoice is paid/unpaid/etc.
                         let update_subscription = UpdateSubscriptionRecord::try_from(subscription)?;
 
-                        db::billing::save_subscription(db.as_ref(), update_subscription).await?;
+                        db::billing::save_subscription(db.as_ref(), update_subscription)
+                            .await
+                            .into_anyhow()?;
                     }
                     EventObject::Invoice(invoice) => {
                         let _span = tracing::info_span!("invoice event");
@@ -503,14 +499,16 @@ async fn webhook(
                                 db.as_ref(),
                                 &invoice_id,
                             )
-                            .await?
+                            .await
+                            .into_anyhow()?
                         {
                             db::billing::set_subscription_amount_due(
                                 db.as_ref(),
                                 subscription_id,
                                 AmountInCents::new(invoice.amount_remaining.unwrap_or_default()),
                             )
-                            .await?;
+                            .await
+                            .into_anyhow()?;
                         }
                     }
                     _ => {
