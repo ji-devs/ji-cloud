@@ -7,6 +7,7 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 mod help_center;
 mod home;
+mod plan;
 mod pricing;
 mod router;
 

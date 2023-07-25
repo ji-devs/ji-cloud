@@ -1,4 +1,4 @@
-use crate::{home::Home, pricing::Pricing};
+use crate::{home::Home, plan::Plan, pricing::Pricing};
 
 use components::overlay::container::OverlayContainer;
 use dominator::{html, Dom};
@@ -15,6 +15,7 @@ impl Router {
 
     pub fn render() -> Dom {
         html!("main", {
+            .style("display", "grid")
             .child_signal(Self::dom_signal())
             .child(OverlayContainer::new().render(None))
         })
@@ -32,6 +33,7 @@ impl Router {
                     }
                     HomeRoute::Help => Some(help_center::render_help_center()),
                     HomeRoute::Pricing(route) => Some(Pricing::new(route).render()),
+                    HomeRoute::Plan(route) => Some(Plan::new(route).render()),
                 },
                 _ => None,
             }
