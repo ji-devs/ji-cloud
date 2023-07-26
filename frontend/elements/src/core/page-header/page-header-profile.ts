@@ -172,6 +172,10 @@ export class _ extends LitElement {
                         <slot name="user-links"></slot>
                     </div>
                     <div class="divider"></div>
+                    <div class="user-links">
+                        <slot name="setting-links"></slot>
+                    </div>
+                    <div class="divider"></div>
                     <div class="logout">
                         <slot name="logout"></slot>
                     </div>
