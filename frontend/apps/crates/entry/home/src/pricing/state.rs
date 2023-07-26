@@ -35,7 +35,9 @@ impl Default for Variables {
             discount_percentage_school: Default::default(),
             bubble_color: String::from("var(--light-orange-3)"),
             bubble_title: String::from("Sign up now!"),
-            bubble_message: String::from("Thousands of educators around the world use Jigzi for their lessons.")
+            bubble_message: String::from(
+                "Thousands of educators around the world use Jigzi for their lessons.",
+            ),
         }
     }
 }

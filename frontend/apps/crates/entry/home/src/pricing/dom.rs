@@ -9,8 +9,8 @@ use utils::{
     unwrap::UnwrapJiExt,
 };
 
-use super::Variables;
 use super::Pricing;
+use super::Variables;
 
 const PLAN_PRICE_BASIC: u32 = 23_99;
 const PLAN_PRICE_PRO: u32 = 29_99;
