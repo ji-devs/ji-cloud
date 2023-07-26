@@ -65,7 +65,7 @@ impl From<UserResponse> for EditableUser {
             Some(current_period_end) => {
                 let trial = user.is_trial.map_or(Default::default(), |is_trial| {
                     if is_trial {
-                        "(Trial)".to_string()
+                        " (Trial)".to_string()
                     } else {
                         Default::default()
                     }
