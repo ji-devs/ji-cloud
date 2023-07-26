@@ -1,3 +1,4 @@
+use awsm_web::loaders::fetch::fetch_url;
 use dominator::{clone, html, Dom};
 use futures_signals::signal::{Mutable, SignalExt};
 use shared::domain::billing::PlanType;
@@ -8,12 +9,38 @@ use utils::{
     unwrap::UnwrapJiExt,
 };
 
+use super::Variables;
 use super::Pricing;
+
+const PLAN_PRICE_BASIC: u32 = 23_99;
+const PLAN_PRICE_PRO: u32 = 29_99;
+const PLAN_PRICE_SCHOOL: u32 = 1_500_00;
 
 impl Pricing {
     pub fn render(self: &Rc<Self>) -> Dom {
         let state = self;
         html!("div", {
+            .future(clone!(state => async move {
+                let str_config_url = utils::path::config_cdn_url("pricing.json");
+                let mut updated: Variables = fetch_url(&str_config_url)
+                    .await
+                    .unwrap_ji()
+                    .json_from_str()
+                    .await
+                    .unwrap_ji();
+                state.variables.replace_with(|current| {
+                    if updated.bubble_color.is_empty() {
+                        updated.bubble_color = current.bubble_color.clone();
+                    }
+                    if updated.bubble_title.is_empty() {
+                        updated.bubble_title = current.bubble_title.clone();
+                    }
+                    if updated.bubble_message.is_empty() {
+                        updated.bubble_message = current.bubble_message.clone();
+                    }
+                    updated
+                });
+            }))
             .child(html!("pricing-banner", {
                 .child(html!("button", {
                     .prop("slot", "tab")
@@ -61,6 +88,7 @@ impl Pricing {
     }
 
     fn render_individual(self: &Rc<Self>) -> Vec<Dom> {
+        let state = self;
         let frequency = Mutable::new(Frequency::Monthly);
         vec![
             html!("pricing-toggle", {
@@ -72,12 +100,19 @@ impl Pricing {
             }),
             html!("pricing-table", {
                 .prop("kind", "individuals")
+                .prop("plan_price_basic", PLAN_PRICE_BASIC)
+                .prop("plan_price_pro", PLAN_PRICE_PRO)
+                .prop_signal("discount_percentage_basic", state.variables.signal_ref(|v| v.discount_percentage_basic))
+                .prop_signal("discount_percentage_pro", state.variables.signal_ref(|v| v.discount_percentage_pro))
                 .prop_signal("frequency", frequency.signal().map(|frequency| match frequency {
                     Frequency::Annually => "Annually",
                     Frequency::Monthly => "Monthly",
                 }))
                 .child(html!("pricing-message", {
                     .prop("slot", "pricing-message")
+                    .prop_signal("color", state.variables.signal_ref(|v| v.bubble_color.clone()))
+                    .prop_signal("title", state.variables.signal_ref(|v| v.bubble_title.clone()))
+                    .prop_signal("message", state.variables.signal_ref(|v| v.bubble_message.clone()))
                 }))
                 // .child(html!("button-rect", {
                 //     .prop("slot", "free-action")
@@ -145,6 +180,7 @@ impl Pricing {
     }
 
     fn render_school(self: &Rc<Self>) -> Vec<Dom> {
+        let state = self;
         let selected_index: Mutable<SchoolPlan> = Mutable::new(SchoolPlan::Level3);
 
         vec![
@@ -154,8 +190,18 @@ impl Pricing {
                 .style("align-items", "center")
                 .style("justify-content", "space-around")
                 .style("align-items", "end")
-                .child(html!("pricing-message", {}))
+                // for mobile:
+                // grid-template-columns: auto;
+                // padding: 30px;
+                // gap: 30px;
+                .child(html!("pricing-message", {
+                    .prop_signal("color", state.variables.signal_ref(|v| v.bubble_color.clone()))
+                    .prop_signal("title", state.variables.signal_ref(|v| v.bubble_title.clone()))
+                    .prop_signal("message", state.variables.signal_ref(|v| v.bubble_message.clone()))
+                }))
                 .child(html!("pricing-school-pricing", {
+                    .prop("plan_price", PLAN_PRICE_SCHOOL)
+                    .prop_signal("discount_percentage", state.variables.signal_ref(|v| v.discount_percentage_school))
                     .prop_signal("selectedIndex", selected_index.signal().map(|i| -> u8 {i.into()}))
                     .event(clone!(selected_index => move |e: events::CustomNumber| {
                         let index = e.number().unwrap_ji() as u8;

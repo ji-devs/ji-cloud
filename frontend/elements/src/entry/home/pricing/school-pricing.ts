@@ -1,4 +1,6 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
+import { percentage, price } from "./table";
+import { nothing } from "lit-html";
 
 @customElement("pricing-school-pricing")
 export class _ extends LitElement {
@@ -71,11 +73,24 @@ export class _ extends LitElement {
             .options input {
                 display: none;
             }
+            .price-line {
+                display: grid;
+                grid-template-columns: 1fr auto 1fr;
+                gap: 8px;
+            }
             .price {
+                grid-column: 2;
                 font-size: 38px;
                 font-weight: 700;
                 color: var(--dark-gray-6);
                 line-height: 1;
+            }
+            .price-original {
+                grid-column: 3;
+                font-size: 16px;
+                font-weight: 600;
+                color: var(--dark-gray-3);
+                text-decoration: line-through;
             }
             .annually {
                 font-size: 13px;
@@ -87,6 +102,12 @@ export class _ extends LitElement {
 
     @property({ type: Number, reflect: true })
     selectedIndex: number = 1;
+
+    @property({ type: Number, reflect: true })
+    plan_price?: number;
+
+    @property({ type: Number, reflect: true })
+    discount_percentage?: number;
 
     private onChange(index: number) {
         this.dispatchEvent(new CustomEvent("custom-number", {
@@ -139,7 +160,14 @@ export class _ extends LitElement {
                     </label>
                 </div>
             </div>
-            <div class="price">$1500</div>
+            <div class="price-line">
+                <div class="price">${price(
+                    this.discount_percentage ? percentage(this.plan_price, this.discount_percentage) : this.plan_price
+                )}</div>
+                <div class="price-original">
+                    ${this.discount_percentage ? price(this.plan_price) : nothing }
+                </div>
+            </div>
             <div class="annually">Annually</div>
             <slot name="start-button"></slot>
         `;

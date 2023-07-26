@@ -97,7 +97,6 @@ export class _ extends LitElement {
                     grid-column: 1;
                     font-size: inherit;
                     font-weight: inherit;
-                    text-align: center;
                     /* padding-top: 24px!important; */
                 }
                 /* .cell:not(.cell-header) {
@@ -148,31 +147,72 @@ export class _ extends LitElement {
                 :host([kind=individuals]) .individuals-desktop-price {
                     display: contents;
                 }
-                .individuals-desktop-price .cell {
-                    color: var(--dark-gray-6);
-                }
+            }
+            .individuals-desktop-price .cell {
+                color: var(--dark-gray-6);
             }
             .individuals-desktop-price .cell.message {
                 padding-bottom: 0;
             }
-            .individuals-desktop-price .plan-name {
+            .individuals-desktop-price .cell:not(.message) {
+                align-content: space-between;
+                grid-template-rows: 30px 16px 38px 16px 50px;
+                height: 212px;
+                width: 100%;
+                box-sizing: border-box;
+                justify-content: stretch;
+            }
+            .individuals-desktop-price .plan-price-original {
                 margin: 0;
                 font-size: 16px;
+                line-height: 1em;
+                font-weight: 600;
+                color: var(--dark-gray-3);
+                text-decoration: line-through;
+                grid-row: 2;
+            }
+            .individuals-desktop-price .plan-name-line {
+                grid-row: 1;
+                display: grid;
+                grid-template-columns: 1fr auto 1fr;
+                align-items: center;
+                justify-items: end;
+            }
+            .individuals-desktop-price .plan-name-line .plan-name {
+                margin: 0;
+                font-size: 16px;
+                line-height: 1em;
                 font-weight: 700;
+                grid-column: 2;
+            }
+            .individuals-desktop-price .plan-name-line .discount-percentage {
+                width: 60px;
+                height: 30px;
+                border-radius: 4px;
+                background-color: var(--dark-green-1);
+                font-size: 16px;
+                font-weight: bold;
+                color: #ffffff;
+                display: inline-grid;
+                place-content: center;
             }
             .individuals-desktop-price .plan-price {
                 margin: 0;
-                margin-top: 30px;
                 font-size: 38px;
+                line-height: 1em;
                 font-weight: 700;
+                grid-row: 3;
             }
             .individuals-desktop-price .frequency {
                 margin: 0;
                 font-size: 13px;
                 font-weight: 400;
+                grid-row: 4;
             }
-            .individuals-desktop-price button {
-                margin-top: 35px;
+            .individuals-desktop-price ::slotted(*) {
+                align-self: end;
+                grid-row: 5;
+                justify-self: center;
             }
             .custom-subscription, table {
                 max-width: 1100px;
@@ -190,6 +230,18 @@ export class _ extends LitElement {
     @property({ reflect: true })
     frequency?: string;
 
+    @property({ type: Number, reflect: true })
+    plan_price_pro?: number;
+
+    @property({ type: Number, reflect: true })
+    plan_price_basic?: number;
+
+    @property({ type: Number, reflect: true })
+    discount_percentage_pro?: number;
+
+    @property({ type: Number, reflect: true })
+    discount_percentage_basic?: number;
+
     render() {
         return html`
             <div class="table-wrapper">
@@ -199,19 +251,37 @@ export class _ extends LitElement {
                             <slot name="pricing-message"></slot>
                         </div>
                         <div class="cell">
-                            <h5 class="plan-name">Free</h5>
+                            <div class="plan-name-line">
+                                <h5 class="plan-name">Free</h5>
+                            </div>
                             <h3 class="plan-price">$0.00</h3>
                             <slot name="free-action"></slot>
                         </div>
                         <div class="cell">
-                            <h5 class="plan-name">Basic</h5>
-                            <h3 class="plan-price">$14.99</h3>
+                            <div class="plan-name-line">
+                                <h5 class="plan-name">Basic</h5>
+                                ${this.discount_percentage_basic ? html`
+                                    <span class="discount-percentage">-${this.discount_percentage_basic}%</span>
+                                ` : nothing}
+                            </div>
+                            <h6 class="plan-price-original">${this.discount_percentage_basic ? price(this.plan_price_basic) : nothing}</h6>
+                            <h3 class="plan-price">${price(
+                                this.discount_percentage_basic ? percentage(this.plan_price_basic, this.discount_percentage_basic) : this.plan_price_basic
+                            )}</h3>
                             <p class="frequency">${this.frequency}</p>
                             <slot name="basic-action"></slot>
                         </div>
                         <div class="cell">
-                            <h5 class="plan-name">Pro</h5>
-                            <h3 class="plan-price">$29.99</h3>
+                            <div class="plan-name-line">
+                                <h5 class="plan-name">Pro</h5>
+                                ${this.discount_percentage_basic ? html`
+                                    <span class="discount-percentage">-${this.discount_percentage_pro}%</span>
+                                ` : nothing}
+                            </div>
+                            <h6 class="plan-price-original">${this.discount_percentage_pro ? price(this.plan_price_pro) : nothing}</h6>
+                            <h3 class="plan-price">${price(
+                                this.discount_percentage_pro ? percentage(this.plan_price_pro, this.discount_percentage_pro) : this.plan_price_pro
+                            )}</h3>
                             <p class="frequency">${this.frequency}</p>
                             <slot name="pro-action"></slot>
                         </div>
@@ -551,4 +621,17 @@ interface CellsConfig {
 }
 function cells(kind: Kind, config: CellsConfig): TemplateResult {
     return kind === "individuals" ? config.individuals : config.schools;
+}
+
+const formatter = new Intl.NumberFormat('en-us', { style: 'currency', currency: 'USD' });
+export function price(price: number | undefined): string {
+    if (price === undefined)
+        return "";
+    return formatter.format(price / 100);
+}
+
+export function percentage(num?: number, percentage?: number): number | undefined {
+    if(num === undefined || percentage === undefined)
+        return;
+    return num - ( num * percentage / 100);
 }

@@ -23,10 +23,6 @@ export class _ extends LitElement {
                 position: relative;
                 padding: 0px 20px;
                 box-sizing: border-box;
-                background-color: var(--light-orange-3);
-            }
-            :host([discount]) .talk {
-                background-color: var(--green-3);
             }
             .talk::after {
                 content: "";
@@ -36,7 +32,6 @@ export class _ extends LitElement {
                 bottom: 0px;
                 border-right: 30px solid transparent;
                 box-sizing: border-box;
-                border-top: 12px solid var(--light-orange-3);
             }
             :host([discount]) .talk::after {
                 border-top-color: var(--green-3);
@@ -68,22 +63,30 @@ export class _ extends LitElement {
         `];
     }
 
-    @property({ type: Boolean, reflect: true })
-    discount: boolean = false;
+    @property()
+    color: string = "";
 
     @property()
-    title: string = "20% OFF";
+    title: string = "";
 
     @property()
-    message: string = "special launch prices valid until 13.05.23";
+    message: string = "";
 
     render() {
         return html`
+            <style>
+                .talk {
+                    background-color: ${this.color};
+                }
+                .talk::after {
+                    border-top: 12px solid ${this.color};
+                }
+            </style>
             <span class="talk">
-                <h5>choose Jigzi!</h5>
-                <p>Join the thousands of educators around the world who</p>
+                <h5>${this.title}</h5>
+                <p>${this.message}</p>
             </span>
-            <img-ui class="jigling-image" path="temp/pricing-jigling.png"></img-ui>
+            <img-ui class="jigling-image" path="entry/home/pricing/jigling.png"></img-ui>
         `;
     }
 }
