@@ -24,9 +24,12 @@ const STR_LOGOUT: &str = "Logout";
 const STR_ADMIN: &str = "Admin";
 const STR_DONATE: &str = "Donate";
 
-const STR_MY_SETTINGS: &str = "My settings";
-const STR_MY_PROFILE: &str = "My profile";
-const STR_MY_CREATIONS: &str = "My Creations";
+const STR_ACCOUNT: &str = "Account";
+const STR_PROFILE: &str = "Profile";
+const STR_MY_JIGS: &str = "My JIGs";
+const STR_MY_PLAYLISTS: &str = "My playlists";
+const STR_MY_COURSES: &str = "My courses";
+const STR_MY_RESOURCES: &str = "My resources";
 
 impl PageHeader {
     pub fn render(self: Rc<PageHeader>) -> Dom {
@@ -150,29 +153,51 @@ fn render_logged_in(state: Rc<PageHeader>, user: &UserProfile) -> Vec<Dom> {
         ])
         .child(html!("a", {
             .prop("slot", "user-links")
-            .prop("href", Route::Asset(AssetRoute::Studio).to_string())
+            .prop("href",  Route::Asset(AssetRoute::JigGallery).to_string())
             .child(html!("img-ui", {
                 .prop("path", "core/page-header/jig-icon.svg")
             }))
-            .text(STR_MY_CREATIONS)
+            .text(STR_MY_JIGS)
         }))
         .child(html!("a", {
             .prop("slot", "user-links")
-            .prop("href", Route::User(UserRoute::Settings).to_string())
-
-            .child(html!("fa-icon", {
-                .prop("icon", "fa-light fa-gear")
+            .prop("href", Route::Asset(AssetRoute::PlaylistGallery).to_string())
+            .child(html!("img-ui", {
+                .prop("path", "core/page-header/nav-icon-assets.svg")
             }))
-            .text(STR_MY_SETTINGS)
+            .text(STR_MY_PLAYLISTS)
         }))
         .child(html!("a", {
             .prop("slot", "user-links")
+            .prop("href", Route::Asset(AssetRoute::CourseGallery).to_string())
+            .child(html!("img-ui", {
+                .prop("path", "core/page-header/nav-icon-assets.svg")
+            }))
+            .text(STR_MY_COURSES)
+        }))
+        .child(html!("a", {
+            .prop("slot", "user-links")
+            .prop("href", Route::Asset(AssetRoute::ResourceGallery).to_string())
+            .child(html!("img-ui", {
+                .prop("path", "core/page-header/nav-icon-resource.svg")
+            }))
+            .text(STR_MY_RESOURCES)
+        }))
+        .child(html!("a", {
+            .prop("slot", "setting-links")
             .prop("href",  Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(user.id))).to_string())
-
             .child(html!("fa-icon", {
                 .prop("icon", "fa-light fa-user")
             }))
-            .text(STR_MY_PROFILE)
+            .text(STR_PROFILE)
+        }))
+        .child(html!("a", {
+            .prop("slot", "setting-links")
+            .prop("href", Route::User(UserRoute::Settings).to_string())
+            .child(html!("fa-icon", {
+                .prop("icon", "fa-light fa-gear")
+            }))
+            .text(STR_ACCOUNT)
         }))
         .child_signal(has_privileges(Rc::clone(&state), UserScope::Admin).map(|admin_privileges| {
             match admin_privileges {
