@@ -85,12 +85,27 @@ export class _ extends LitElement {
                 color: var(--dark-gray-6);
                 line-height: 1;
             }
+            .discount-wrapper {
+                display: flex;
+                gap: 16px;
+            }
             .price-original {
                 grid-column: 3;
                 font-size: 16px;
                 font-weight: 600;
                 color: var(--dark-gray-3);
                 text-decoration: line-through;
+            }
+            .discount-percentage {
+                width: 60px;
+                height: 30px;
+                border-radius: 4px;
+                background-color: var(--dark-green-1);
+                font-size: 16px;
+                font-weight: bold;
+                color: #ffffff;
+                display: inline-grid;
+                place-content: center;
             }
             .annually {
                 font-size: 13px;
@@ -164,9 +179,12 @@ export class _ extends LitElement {
                 <div class="price">${price(
                     this.discount_percentage ? percentage(this.plan_price, this.discount_percentage) : this.plan_price
                 )}</div>
-                <div class="price-original">
-                    ${this.discount_percentage ? price(this.plan_price) : nothing }
-                </div>
+                ${this.discount_percentage ? html`
+                    <div class="discount-wrapper">
+                        <div class="price-original">${this.discount_percentage ? price(this.plan_price) : nothing }</div>
+                        <span class="discount-percentage">-${this.discount_percentage}%</span>
+                    </div>
+                ` : nothing }
             </div>
             <div class="annually">Annually</div>
             <slot name="start-button"></slot>
