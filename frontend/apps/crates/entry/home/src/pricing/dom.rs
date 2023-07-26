@@ -1,6 +1,7 @@
 use awsm_web::loaders::fetch::fetch_url;
 use dominator::{clone, html, Dom};
 use futures_signals::signal::{Mutable, SignalExt};
+use js_sys::Date;
 use shared::domain::billing::PlanType;
 use std::rc::Rc;
 use utils::{
@@ -21,7 +22,7 @@ impl Pricing {
         let state = self;
         html!("div", {
             .future(clone!(state => async move {
-                let str_config_url = utils::path::config_cdn_url("pricing.json");
+                let str_config_url = format!("{}?{}", utils::path::config_cdn_url("pricing.json"), Date::now().to_string());
                 let mut updated: Variables = fetch_url(&str_config_url)
                     .await
                     .unwrap_ji()

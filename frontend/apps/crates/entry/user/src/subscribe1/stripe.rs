@@ -33,6 +33,7 @@ extern "C" {
     fn mount(this: &StripePaymentElement, domElement: HtmlElement);
 }
 
+// TODO: move to utils?
 macro_rules! js_object {
     ($($value:tt)+) => {
         <wasm_bindgen::JsValue as JsValueSerdeExt>::from_serde(&json!($($value)+)).unwrap_ji()
