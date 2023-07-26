@@ -5,6 +5,7 @@ use shared::domain::course::unit::CourseUnit;
 use shared::{
     api::endpoints,
     domain::course::{CourseId, CourseUpdateDraftDataPath, CourseUpdateDraftDataRequest},
+    error::IntoAnyhow,
 };
 use std::rc::Rc;
 use utils::prelude::*;

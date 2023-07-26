@@ -8,6 +8,7 @@ use shared::{
             JigDeletePath, JigGetDraftPath, JigId, JigSearchPath, JigSearchQuery,
         },
     },
+    error::IntoAnyhow,
 };
 use std::rc::Rc;
 use utils::prelude::*;

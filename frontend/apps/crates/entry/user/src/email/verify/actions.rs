@@ -5,6 +5,7 @@ use shared::{
         session::NewSessionResponse,
         user::{VerifyEmailPath, VerifyEmailRequest},
     },
+    error::IntoAnyhow,
 };
 use utils::{prelude::*, storage};
 

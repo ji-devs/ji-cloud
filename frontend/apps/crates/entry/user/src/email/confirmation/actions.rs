@@ -2,6 +2,7 @@ use super::state::*;
 use shared::{
     api::endpoints::user,
     domain::user::{VerifyEmailPath, VerifyEmailRequest},
+    error::IntoAnyhow,
 };
 use utils::prelude::*;
 

@@ -16,9 +16,8 @@ async fn unauthorized(route: &str, port: u16) -> anyhow::Result<()> {
 
     assert_eq!(resp.status(), StatusCode::UNAUTHORIZED);
 
-    let body: ApiResponseError<EmptyError> = resp.json().await?;
-
-    assert_eq!(body.code, StatusCode::UNAUTHORIZED);
+    // Make sure it doesn't panic decoding the error
+    let _: ApiResponseError<EmptyError> = resp.json().await?;
 
     Ok(())
 }

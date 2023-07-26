@@ -21,8 +21,9 @@ use shared::domain::{
     playlist::{PlaylistId, PlaylistResponse, PlaylistUpdateDraftDataRequest},
     UpdateNonNullable,
 };
+use shared::error::IntoAnyhow;
 
-use crate::prelude::{ApiEndpointExt, ErrorExt};
+use crate::prelude::ApiEndpointExt;
 
 #[derive(Clone)]
 pub struct EditablePlaylist {

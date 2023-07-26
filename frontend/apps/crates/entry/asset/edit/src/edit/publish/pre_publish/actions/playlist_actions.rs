@@ -4,8 +4,9 @@ use shared::{
         PlaylistGetDraftPath, PlaylistId, PlaylistPublishPath, PlaylistResponse,
         PlaylistUpdateDraftDataPath,
     },
+    error::IntoAnyhow,
 };
-use utils::prelude::{ApiEndpointExt, ErrorExt};
+use utils::prelude::ApiEndpointExt;
 
 use utils::editable_asset::EditablePlaylist;
 

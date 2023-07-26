@@ -3,7 +3,6 @@ source: tests/integration/image.rs
 expression: body
 ---
 {
-  "code": 422,
   "message": "Metadata not Found",
   "id": null,
   "index": 22,

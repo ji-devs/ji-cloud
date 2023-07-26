@@ -2,6 +2,7 @@ use super::super::state::Sidebar;
 use shared::{
     api::endpoints,
     domain::playlist::{PlaylistId, PlaylistUpdateDraftDataPath, PlaylistUpdateDraftDataRequest},
+    error::IntoAnyhow,
 };
 use std::rc::Rc;
 use utils::prelude::*;
