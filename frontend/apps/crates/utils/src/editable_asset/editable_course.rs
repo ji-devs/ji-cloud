@@ -19,8 +19,9 @@ use shared::domain::{
     module::LiteModule,
     UpdateNonNullable,
 };
+use shared::error::IntoAnyhow;
 
-use crate::prelude::{ApiEndpointExt, ErrorExt};
+use crate::prelude::ApiEndpointExt;
 
 #[derive(Clone)]
 pub struct EditableCourse {

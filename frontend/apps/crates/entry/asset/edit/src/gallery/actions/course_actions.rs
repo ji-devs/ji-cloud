@@ -10,6 +10,7 @@ use shared::{
         },
         module::{ModuleBody, ModuleCreatePath, ModuleCreateRequest, ModuleKind},
     },
+    error::IntoAnyhow,
 };
 use std::rc::Rc;
 use utils::prelude::*;

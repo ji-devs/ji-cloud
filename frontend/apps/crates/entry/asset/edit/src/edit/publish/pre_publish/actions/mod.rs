@@ -9,9 +9,10 @@ use shared::{
         category::{Category, CategoryId, CategoryTreeScope, GetCategoryPath, GetCategoryRequest},
         meta::{GetMetadataPath, MetadataResponse},
     },
+    error::IntoAnyhow,
 };
 use utils::{
-    prelude::{ApiEndpointExt, ErrorExt, UnwrapJiExt},
+    prelude::{ApiEndpointExt, UnwrapJiExt},
     routes::{CourseEditRoute, JigEditRoute, PlaylistEditRoute, ResourceEditRoute},
 };
 

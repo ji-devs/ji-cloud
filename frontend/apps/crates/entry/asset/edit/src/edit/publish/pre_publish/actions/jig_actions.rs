@@ -1,8 +1,9 @@
 use shared::{
     api::endpoints::jig,
     domain::jig::{JigGetDraftPath, JigId, JigPublishPath, JigResponse, JigUpdateDraftDataPath},
+    error::IntoAnyhow,
 };
-use utils::prelude::{ApiEndpointExt, ErrorExt};
+use utils::prelude::ApiEndpointExt;
 
 use utils::editable_asset::EditableJig;
 

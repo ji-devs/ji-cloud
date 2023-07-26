@@ -3,8 +3,9 @@ use shared::{
     domain::course::{
         CourseGetDraftPath, CourseId, CoursePublishPath, CourseResponse, CourseUpdateDraftDataPath,
     },
+    error::IntoAnyhow,
 };
-use utils::prelude::{ApiEndpointExt, ErrorExt};
+use utils::prelude::ApiEndpointExt;
 
 use utils::editable_asset::EditableCourse;
 

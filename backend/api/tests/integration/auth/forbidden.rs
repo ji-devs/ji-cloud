@@ -38,9 +38,8 @@ async fn forbidden(
 
     assert_eq!(resp.status(), StatusCode::FORBIDDEN);
 
-    let body: ApiResponseError<EmptyError> = resp.json().await?;
-
-    assert_eq!(body.code, StatusCode::FORBIDDEN);
+    // Make sure it doesn't panic decoding the error
+    let _: ApiResponseError<EmptyError> = resp.json().await?;
 
     Ok(())
 }

@@ -4,8 +4,9 @@ use shared::{
         ResourceGetDraftPath, ResourceId, ResourcePublishPath, ResourceResponse,
         ResourceUpdateDraftDataPath,
     },
+    error::IntoAnyhow,
 };
-use utils::prelude::{ApiEndpointExt, ErrorExt};
+use utils::prelude::ApiEndpointExt;
 
 use utils::editable_asset::EditableResource;
 

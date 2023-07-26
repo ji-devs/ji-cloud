@@ -1,8 +1,9 @@
 use shared::{
     api::endpoints::{self},
     domain::course::{CourseGetDraftPath, CourseId, CourseResponse},
+    error::IntoAnyhow,
 };
-use utils::prelude::{ApiEndpointExt, ErrorExt, UnwrapJiExt};
+use utils::prelude::{ApiEndpointExt, UnwrapJiExt};
 
 use crate::edit::{sidebar::SidebarSpot, AssetEditState};
 

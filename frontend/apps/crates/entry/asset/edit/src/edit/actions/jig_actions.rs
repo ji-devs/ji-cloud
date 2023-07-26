@@ -6,6 +6,7 @@ use shared::{
         jig::{JigGetDraftPath, JigId, JigResponse},
         module::ModuleKind,
     },
+    error::IntoAnyhow,
 };
 use utils::prelude::*;
 

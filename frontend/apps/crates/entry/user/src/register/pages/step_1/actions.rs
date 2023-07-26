@@ -1,8 +1,8 @@
 use super::state::*;
 use dominator::clone;
-use shared::{api::endpoints::user::*, domain::user::*};
+use shared::{api::endpoints::user::*, domain::user::*, error::IntoAnyhow};
 use std::rc::Rc;
-use utils::prelude::{ApiEndpointExt, ErrorExt};
+use utils::prelude::ApiEndpointExt;
 
 use crate::register::state::{Step, Step1Data};
 

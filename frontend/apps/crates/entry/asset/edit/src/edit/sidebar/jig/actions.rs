@@ -16,6 +16,7 @@ use shared::{
             ModuleKind, ModuleUpdateRequest, ModuleUploadPath,
         },
     },
+    error::IntoAnyhow,
 };
 use std::rc::Rc;
 use utils::{asset::JigPlayerOptions, iframe::ModuleToJigEditorMessage, prelude::*};

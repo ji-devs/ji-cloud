@@ -11,6 +11,7 @@ use shared::{
             ResourceSearchPath, ResourceSearchQuery,
         },
     },
+    error::IntoAnyhow,
 };
 use std::rc::Rc;
 use utils::prelude::*;

@@ -4,8 +4,9 @@ use shared::{
         jig::{JigGetLivePath, JigId, JigResponse},
         playlist::{PlaylistGetDraftPath, PlaylistId, PlaylistResponse},
     },
+    error::IntoAnyhow,
 };
-use utils::prelude::{ApiEndpointExt, ErrorExt, UnwrapJiExt};
+use utils::prelude::{ApiEndpointExt, UnwrapJiExt};
 
 use crate::edit::{sidebar::SidebarSpot, AssetEditState};
 

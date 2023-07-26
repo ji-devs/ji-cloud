@@ -10,6 +10,7 @@ use shared::{
             PlaylistSearchPath, PlaylistSearchQuery,
         },
     },
+    error::IntoAnyhow,
 };
 use std::rc::Rc;
 use utils::prelude::*;
