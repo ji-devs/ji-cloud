@@ -24,7 +24,6 @@ const STR_AFFILIATION = "Affiliation";
 const STR_FILTER_MESSAGE = "A note about our filters: Ji believes in making Jewish education accessible to ALL Jews, of all ages and affiliations. If you would like to see only what Jigzi tags as relevant to you, use these filters to fine-tune your search results. If you would like to see ALL our images, resources and JIGs leave these blank.";
 const STR_PLAN = "Plan";
 const STR_PRICE = "Price";
-const STR_RENEWS_ON = "Renews on";
 const STR_AUTO_RENEWS = "Auto renew";
 const STR_PAYMENT_METHOD = "Payment method";
 
@@ -411,7 +410,9 @@ export class _ extends LitElement {
                                 </div>
                             </label>
                             <label class="tags-label">
-                                <span class="key">${STR_RENEWS_ON}</span>
+                                <span class="key">
+                                    <slot name="plan-renewal-label"></slot>
+                                </span>
                                 <div class="value">
                                     <slot name="plan-renews-on"></slot>
                                 </div>

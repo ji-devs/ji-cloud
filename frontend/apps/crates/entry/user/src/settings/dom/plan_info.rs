@@ -10,6 +10,9 @@ use utils::{
 
 use crate::settings::state::{PlanSectionInfo, SettingsPage};
 
+const STR_RENEWS_ON: &str = "Renews on";
+const STR_EXPIRES_ON: &str = "Expires on";
+
 #[derive(Clone, Copy, strum_macros::EnumIs)]
 enum PaymentFrequency {
     Annually,
@@ -51,6 +54,13 @@ impl SettingsPage {
             html!("p", {
                 .prop("slot", "plan-renews-on")
                 .text(&plan_info.current_period_end.format("%h %e, %Y").to_string())
+            }),
+            html!("p", {
+                .prop("slot", "plan-renewal-label")
+                .text_signal(auto_renew.signal().map(|auto_renew| match auto_renew {
+                    true => STR_RENEWS_ON,
+                    false => STR_EXPIRES_ON,
+                }))
             }),
             html!("div", {
                 .prop("slot", "plan-auto-renew")
