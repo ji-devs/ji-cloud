@@ -131,14 +131,16 @@ pub async fn save_subscription(
         r#"
 update subscription
 set
-    status = coalesce($2, status),
-    current_period_end = coalesce($3, current_period_end),
+    subscription_plan_id = coalesce($2, subscription_plan_id),
+    status = coalesce($3, status),
+    current_period_end = coalesce($4, current_period_end),
     updated_at = now(),
-    latest_invoice_id = case when $4 then $5 else latest_invoice_id end,
-    is_trial = $6
+    latest_invoice_id = case when $5 then $6 else latest_invoice_id end,
+    is_trial = $7
 where stripe_subscription_id = $1
 "#,
         subscription.stripe_subscription_id as StripeSubscriptionId,
+        subscription.subscription_plan_id.into_option() as Option<PlanId>,
         subscription
             .status
             .into_option()

@@ -7143,23 +7143,6 @@
     },
     "query": "\nselect id                                                                 as \"id: CategoryId\",\n       name,\n       created_at,\n       updated_at,\n       user_scopes\nfrom category\nwhere parent_id is null\norder by index\n "
   },
-  "6affe97fb540077705c801d5d6a2ba4ae139146653e2fef4e683fe0daf50bd84": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Int2",
-          "Timestamptz",
-          "Bool",
-          "Text",
-          "Bool"
-        ]
-      }
-    },
-    "query": "\nupdate subscription\nset\n    status = coalesce($2, status),\n    current_period_end = coalesce($3, current_period_end),\n    updated_at = now(),\n    latest_invoice_id = case when $4 then $5 else latest_invoice_id end,\n    is_trial = $6\nwhere stripe_subscription_id = $1\n"
-  },
   "6b18f4d20c2efb63ec1be956c25ebb85875cd8972346f74e21ca7f429d2fb9d5": {
     "describe": {
       "columns": [],
@@ -8930,6 +8913,24 @@
       }
     },
     "query": "\n        insert into jig_player_session_instance (session_index, ip_address, user_agent)\n        values ($1, $2, $3)\n        returning id as \"id: Uuid\"\n        "
+  },
+  "893a4b6ab8be25393dd24791688e015cb1e0da22ada7c402f8e03525b82e92f7": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Uuid",
+          "Int2",
+          "Timestamptz",
+          "Bool",
+          "Text",
+          "Bool"
+        ]
+      }
+    },
+    "query": "\nupdate subscription\nset\n    subscription_plan_id = coalesce($2, subscription_plan_id),\n    status = coalesce($3, status),\n    current_period_end = coalesce($4, current_period_end),\n    updated_at = now(),\n    latest_invoice_id = case when $5 then $6 else latest_invoice_id end,\n    is_trial = $7\nwhere stripe_subscription_id = $1\n"
   },
   "8948c9978692762a9d96fec41c4ca1b53f90eb2a6027e12d9e1e2a9c17626814": {
     "describe": {

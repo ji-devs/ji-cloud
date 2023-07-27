@@ -5,7 +5,9 @@ use actix_web::{
 use anyhow::anyhow;
 use chrono::{TimeZone, Utc};
 use ji_core::settings::RuntimeSettings;
-use shared::api::endpoints::billing::{CreateSetupIntent, UpdateSubscriptionCancellation};
+use shared::api::endpoints::billing::{
+    CreateSetupIntent, UpdateSubscriptionCancellation, UpgradeSubscriptionPlan,
+};
 use shared::domain::billing::{
     Account, AccountType, AmountInCents, CancellationStatus, CreateSubscriptionRecord,
     StripeInvoiceId, StripeSubscriptionId, SubscriptionStatus, SubscriptionType,
@@ -13,6 +15,7 @@ use shared::domain::billing::{
 };
 use shared::error::BillingError;
 
+use shared::domain::UpdateNonNullable;
 use shared::{
     api::{endpoints::billing::CreateSubscription, ApiEndpoint, Method, PathParts},
     domain::{
@@ -27,13 +30,40 @@ use std::str::FromStr;
 use stripe::{
     Client, CreateCustomer, CreateSubscription as CreateStripeSubscription,
     CreateSubscriptionItems, Customer, CustomerInvoiceSettings, EventObject, EventType, List,
-    ListPromotionCodes, PromotionCode, SetupIntent, SetupIntentId, UpdateCustomer,
+    ListPromotionCodes, PromotionCode, PromotionCodeId, SetupIntent, SetupIntentId, UpdateCustomer,
     UpdateSubscription, Webhook,
 };
 use tracing::instrument;
 
 use crate::domain::user_authorization;
 use crate::{db, extractor::TokenUser};
+
+async fn retrieve_promotion_code_id(
+    client: &Client,
+    promotion_code: &Option<String>,
+) -> Result<Option<PromotionCodeId>, BillingError> {
+    Ok(if let Some(promotion_code) = &promotion_code {
+        let list_params = ListPromotionCodes {
+            active: Some(true),
+            code: Some(promotion_code),
+            ..Default::default()
+        };
+
+        let List {
+            data: mut codes, ..
+        } = PromotionCode::list(&client, &list_params).await?;
+
+        if codes.is_empty() || codes.len() > 1 {
+            return Err(BillingError::InvalidPromotionCode(
+                promotion_code.to_string(),
+            ));
+        }
+
+        Some(codes.pop().unwrap().id)
+    } else {
+        None
+    })
+}
 
 /// Create a new subscription for an authenticated user.
 ///
@@ -103,28 +133,6 @@ async fn create_subscription(
         Customer::update(&client, &stripe_customer_id, update_customer).await?;
     }
 
-    let promotion_code = if let Some(promotion_code) = &req.promotion_code {
-        let list_params = ListPromotionCodes {
-            active: Some(true),
-            code: Some(promotion_code),
-            ..Default::default()
-        };
-
-        let List {
-            data: mut codes, ..
-        } = PromotionCode::list(&client, &list_params).await?;
-
-        if codes.is_empty() || codes.len() > 1 {
-            return Err(BillingError::InvalidPromotionCode(
-                promotion_code.to_string(),
-            ));
-        }
-
-        Some(codes.pop().unwrap().id)
-    } else {
-        None
-    };
-
     // Create a Stripe subscription
     let stripe_subscription = {
         let mut params = CreateStripeSubscription::new(stripe_customer_id);
@@ -133,7 +141,7 @@ async fn create_subscription(
             ..Default::default()
         }]);
 
-        params.promotion_code = promotion_code;
+        params.promotion_code = retrieve_promotion_code_id(&client, &req.promotion_code).await?;
 
         // This will mark the subscription as incomplete until the payment intent has been
         // confirmed.
@@ -283,6 +291,83 @@ async fn update_subscription_cancel_status(
 }
 
 #[instrument(skip_all)]
+async fn upgrade_subscription_plan(
+    auth: TokenUser,
+    db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
+    req: Json<<UpgradeSubscriptionPlan as ApiEndpoint>::Req>,
+) -> Result<HttpResponse, <UpgradeSubscriptionPlan as ApiEndpoint>::Err> {
+    let user_id = auth.user_id();
+    let account = db::account::get_account_by_user_id(db.as_ref(), &user_id)
+        .await?
+        .ok_or_else(|| BillingError::NotFound("User does not have an account".into()))?;
+
+    user_authorization(db.as_ref(), &user_id, &account.account_id)
+        .await
+        .map_err(Into::<BillingError>::into)?
+        .test_authorized(true)?;
+
+    let subscription =
+        db::billing::get_latest_subscription_by_account_id(db.as_ref(), account.account_id)
+            .await
+            .into_anyhow()?
+            .ok_or_else(|| {
+                BillingError::NotFound("User does not have an existing subscription".into())
+            })?;
+
+    // Fetch the subscription plan details
+    let plan: SubscriptionPlan = db::billing::get_subscription_plan_by_type(&db, req.plan_type)
+        .await
+        .into_anyhow()?
+        .ok_or(BillingError::NotFound(format!("Plan {}", req.plan_type)))?;
+
+    if !plan
+        .plan_type
+        .can_upgrade_from(subscription.subscription_plan_type)
+    {
+        return Err(BillingError::InvalidUpgradePlanType {
+            upgrade_to: plan.plan_type,
+            upgrade_from: subscription.subscription_plan_type,
+        });
+    }
+
+    let client = create_stripe_client(&settings)?;
+
+    let stripe_id: Result<stripe::SubscriptionId, anyhow::Error> =
+        subscription.stripe_subscription_id.try_into();
+
+    let stripe_id: stripe::SubscriptionId = stripe_id?;
+
+    let stripe_subscription = stripe::Subscription::retrieve(&client, &stripe_id, &[]).await?;
+
+    let price_item = stripe_subscription.items.data.first().ok_or(anyhow!(
+        "Expected exactly one subscription item for subscription {stripe_id}"
+    ))?;
+
+    let update_subscription = UpdateSubscription {
+        items: Some(vec![stripe::UpdateSubscriptionItems {
+            id: Some(price_item.id.to_string()),
+            price: Some(plan.price_id.into()),
+            ..Default::default()
+        }]),
+        promotion_code: retrieve_promotion_code_id(&client, &req.promotion_code).await?,
+        ..Default::default()
+    };
+
+    let updated_subscription =
+        stripe::Subscription::update(&client, &stripe_id, update_subscription).await?;
+
+    let mut update_record = UpdateSubscriptionRecord::try_from(updated_subscription)?;
+    update_record.subscription_plan_id = UpdateNonNullable::Change(plan.plan_id);
+
+    db::billing::save_subscription(db.as_ref(), update_record)
+        .await
+        .into_anyhow()?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
+#[instrument(skip_all)]
 async fn create_setup_intent(
     auth: TokenUser,
     db: Data<PgPool>,
@@ -363,10 +448,10 @@ async fn get_or_create_customer(
                 .account_type
                 .matches_subscription_type(&plan.plan_type.subscription_type())
             {
-                return Err(BillingError::IncorrectPlanType(
-                    AccountType::Individual,
-                    SubscriptionType::School,
-                ));
+                return Err(BillingError::IncorrectPlanType {
+                    expected: AccountType::Individual,
+                    found: SubscriptionType::School,
+                });
             }
 
             account
@@ -375,10 +460,10 @@ async fn get_or_create_customer(
                 plan.plan_type.subscription_type(),
                 SubscriptionType::Individual
             ) {
-                return Err(BillingError::IncorrectPlanType(
-                    AccountType::Individual,
-                    SubscriptionType::School,
-                ));
+                return Err(BillingError::IncorrectPlanType {
+                    expected: AccountType::Individual,
+                    found: SubscriptionType::School,
+                });
             }
 
             db::account::create_default_individual_account(db, &user_profile.id)
@@ -581,6 +666,12 @@ pub fn configure(cfg: &mut ServiceConfig) {
         UpdateSubscriptionCancellation::METHOD
             .route()
             .to(update_subscription_cancel_status),
+    )
+    .route(
+        <UpgradeSubscriptionPlan as ApiEndpoint>::Path::PATH,
+        UpgradeSubscriptionPlan::METHOD
+            .route()
+            .to(upgrade_subscription_plan),
     )
     .route(
         <CreateSetupIntent as ApiEndpoint>::Path::PATH,
