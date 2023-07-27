@@ -373,6 +373,8 @@ pub struct CreateSubscriptionRecord {
 pub struct UpdateSubscriptionRecord {
     /// The Stripe subscription ID
     pub stripe_subscription_id: StripeSubscriptionId,
+    /// The subscription plan ID
+    pub subscription_plan_id: UpdateNonNullable<PlanId>,
     /// The subscription status
     #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
     pub status: UpdateNonNullable<SubscriptionStatus>,
@@ -390,9 +392,11 @@ pub struct UpdateSubscriptionRecord {
 #[cfg(feature = "backend")]
 impl UpdateSubscriptionRecord {
     /// Create a new instance with just the stripe subscription ID set
-    pub fn new(stripe_subscription_id: StripeSubscriptionId) -> Self {
+    #[must_use]
+    pub const fn new(stripe_subscription_id: StripeSubscriptionId) -> Self {
         Self {
             stripe_subscription_id,
+            subscription_plan_id: UpdateNonNullable::Keep,
             status: UpdateNonNullable::Keep,
             current_period_end: UpdateNonNullable::Keep,
             latest_invoice_id: UpdateNonNullable::Keep,
@@ -416,6 +420,7 @@ impl TryFrom<stripe::Subscription> for UpdateSubscriptionRecord {
 
         Ok(Self {
             stripe_subscription_id: value.id.into(),
+            subscription_plan_id: UpdateNonNullable::Keep,
             is_trial: UpdateNonNullable::Change(matches!(
                 value.status,
                 stripe::SubscriptionStatus::Trialing
@@ -507,7 +512,8 @@ const SCHOOL_TRIAL_PERIOD: i64 = 7;
 
 impl PlanType {
     /// Represents the plan type as a `str`
-    pub fn as_str(&self) -> &'static str {
+    #[must_use]
+    pub const fn as_str(&self) -> &'static str {
         match self {
             Self::IndividualBasicMonthly => "individual-basic-monthly",
             Self::IndividualBasicAnnually => "individual-basic-annually",
@@ -522,7 +528,8 @@ impl PlanType {
     }
 
     /// Get a readable name
-    pub fn display_name(&self) -> &'static str {
+    #[must_use]
+    pub const fn display_name(&self) -> &'static str {
         match self {
             Self::IndividualBasicMonthly => "Basic - Monthly plan",
             Self::IndividualBasicAnnually => "Basic - Annually plan",
@@ -585,6 +592,34 @@ impl PlanType {
         match self {
             Self::IndividualBasicMonthly | Self::IndividualProMonthly => BillingInterval::Monthly,
             _ => BillingInterval::Annually,
+        }
+    }
+
+    /// Whether it is possible to upgrade from another plan type to self
+    #[must_use]
+    pub const fn can_upgrade_from(&self, from_type: Self) -> bool {
+        // NOTE: Cannot go from any annual plan to a monthly plan.
+        match self {
+            Self::IndividualBasicAnnually | Self::IndividualProMonthly => {
+                matches!(from_type, Self::IndividualBasicMonthly)
+            }
+            Self::IndividualProAnnually => matches!(
+                from_type,
+                Self::IndividualBasicMonthly
+                    | Self::IndividualBasicAnnually
+                    | Self::IndividualProMonthly
+            ),
+            Self::SchoolLevel2 => matches!(from_type, Self::SchoolLevel1),
+            Self::SchoolLevel3 => matches!(from_type, Self::SchoolLevel1 | Self::SchoolLevel2,),
+            Self::SchoolLevel4 => matches!(
+                from_type,
+                Self::SchoolLevel1 | Self::SchoolLevel2 | Self::SchoolLevel3,
+            ),
+            Self::SchoolUnlimited => matches!(
+                from_type,
+                Self::SchoolLevel1 | Self::SchoolLevel2 | Self::SchoolLevel3 | Self::SchoolLevel4,
+            ),
+            _ => false,
         }
     }
 }
@@ -755,7 +790,7 @@ pub struct CreateSubscriptionRequest {
     pub promotion_code: Option<String>,
 }
 
-make_path_parts!(CreateSubscriptionPath => "/v1/subscribe");
+make_path_parts!(CreateSubscriptionPath => "/v1/billing/subscribe");
 
 /// Create subscription response.
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -1068,6 +1103,7 @@ pub enum CancellationStatus {
     #[serde(rename = "remove")]
     RemoveCancellation,
 }
+
 /// Whether to cancel a subscription at period end or to remove a cancellation status.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SubscriptionCancellationStatusRequest {
@@ -1075,4 +1111,17 @@ pub struct SubscriptionCancellationStatusRequest {
     pub status: CancellationStatus,
 }
 
-make_path_parts!(UpdateSubscriptionCancellationPath => "/v1/subscription/cancel");
+make_path_parts!(UpdateSubscriptionCancellationPath => "/v1/billing/subscription/cancel");
+
+/// Request to upgrade a subscription plan
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct UpgradeSubscriptionPlanRequest {
+    /// The plan type to upgrade to
+    pub plan_type: PlanType,
+    /// Promotion code
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub promotion_code: Option<String>,
+}
+
+make_path_parts!(UpgradeSubscriptionPlanPath => "/v1/billing/subscription/upgrade");

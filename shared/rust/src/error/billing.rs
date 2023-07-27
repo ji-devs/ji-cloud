@@ -1,4 +1,4 @@
-use crate::domain::billing::{AccountType, SubscriptionType};
+use crate::domain::billing::{AccountType, PlanType, SubscriptionType};
 use crate::error::service::ServiceError;
 use crate::error::TransientError;
 use serde::{Deserialize, Serialize};
@@ -43,12 +43,20 @@ pub enum BillingError {
     SubscriptionExists,
     #[error("School not found")]
     SchoolNotFound,
-    #[error("Incorrect plan type. Expected {0}, found {1}.")]
-    IncorrectPlanType(AccountType, SubscriptionType),
+    #[error("Incorrect plan type. Expected {expected}, found {found}.")]
+    IncorrectPlanType {
+        expected: AccountType,
+        found: SubscriptionType,
+    },
     #[error("Invalid promotion code {0}")]
     InvalidPromotionCode(String),
     #[error("Forbidden")]
     Forbidden,
+    #[error("Cannot upgrade to {upgrade_to} from {upgrade_from}")]
+    InvalidUpgradePlanType {
+        upgrade_to: PlanType,
+        upgrade_from: PlanType,
+    },
 }
 
 #[cfg(feature = "backend")]
