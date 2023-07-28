@@ -232,7 +232,7 @@ impl Pricing {
                         .prop("slot", "start-button")
                         .prop("kind", "filled")
                         .prop("color", "blue")
-                        .text("Start 7-day trial")
+                        .text("Start 14-day trial")
                         .prop_signal("href", map_ref! {
                             let selected_index = selected_index.signal(),
                             let promo_code = state.school_promo_code_signal() => {

@@ -142,7 +142,7 @@ export class _ extends LitElement {
                     color: #fff;
                 }
             </style>
-            <h3>How many pro-accounts?</h3>
+            <h3>How many Teacher Pro accounts?</h3>
             <div class="options-wrapper">
                 <div class="indicator-wrapper">
                     <div class="indicator"></div>

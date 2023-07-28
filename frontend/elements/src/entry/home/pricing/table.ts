@@ -597,7 +597,7 @@ export class _ extends LitElement {
                         })}
                     </div>
                     ${ this.kind === "schools" ? html`
-                        <div class="row end-row blue school-only-row">
+                        <div class="row end-row white school-only-row">
                             <div class="cell cell-header">Professional platform training by Jigzi experts</div>
                             <div class="cell">
                                 <fa-icon icon="fa-solid fa-check"></fa-icon>
