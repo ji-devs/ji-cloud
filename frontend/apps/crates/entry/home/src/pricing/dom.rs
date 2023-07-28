@@ -1,4 +1,5 @@
 use awsm_web::loaders::fetch::fetch_url;
+use components::{page_footer, page_header::PageHeader};
 use dominator::{clone, html, Dom};
 use futures_signals::{
     map_ref,
@@ -22,8 +23,9 @@ const PLAN_PRICE_SCHOOL: u32 = 1_500_00;
 
 impl Pricing {
     pub fn render(self: &Rc<Self>) -> Dom {
-        let state = self;
+        let state: &Rc<Pricing> = self;
         html!("div", {
+            .child(PageHeader::new(Default::default()).render())
             .future(clone!(state => async move {
                 let str_config_url = format!("{}?{}", utils::path::config_cdn_url("pricing.json"), Date::now().to_string());
                 let mut updated: Variables = fetch_url(&str_config_url)
@@ -88,6 +90,7 @@ impl Pricing {
                 .style("bottom", "16px")
                 .text("Questions?")
             }))
+            .child(page_footer::dom::render(None))
         })
     }
 
