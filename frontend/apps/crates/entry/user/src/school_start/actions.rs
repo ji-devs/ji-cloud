@@ -41,7 +41,7 @@ impl SchoolStart {
             let user = bail_on_err!(res);
             get_user_mutable().set(Some(user));
 
-            go_to_url(&Route::User(UserRoute::Subscribe1(state.plan_type)).to_string());
+            go_to_url(&Route::User(UserRoute::Subscribe1(state.plan_type, state.promo.clone())).to_string());
         }));
     }
 }

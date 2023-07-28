@@ -1,6 +1,9 @@
 use awsm_web::loaders::fetch::fetch_url;
 use dominator::{clone, html, Dom};
-use futures_signals::signal::{Mutable, SignalExt};
+use futures_signals::{
+    map_ref,
+    signal::{Mutable, Signal, SignalExt},
+};
 use js_sys::Date;
 use shared::domain::billing::PlanType;
 use std::rc::Rc;
@@ -131,26 +134,32 @@ impl Pricing {
                     .prop("slot", "basic-action")
                     .prop("kind", "filled")
                     .prop("color", "blue")
-                    .prop_signal("href", frequency.signal().map(|frequency| {
-                        let plan = match frequency {
-                            Frequency::Annually => PlanType::IndividualBasicAnnually,
-                            Frequency::Monthly => PlanType::IndividualBasicMonthly,
-                        };
-                        Route::User(UserRoute::Subscribe1(plan)).to_string()
-                    }))
+                    .prop_signal("href", map_ref! {
+                        let frequency = frequency.signal(),
+                        let promo_code = state.basic_promo_code_signal() => {
+                            let plan = match frequency {
+                                Frequency::Annually => PlanType::IndividualBasicAnnually,
+                                Frequency::Monthly => PlanType::IndividualBasicMonthly,
+                            };
+                            Route::User(UserRoute::Subscribe1(plan, promo_code.clone())).to_string()
+                        }
+                    })
                     .text("Start 7-day trial")
                 }))
                 .child(html!("button-rect", {
                     .prop("slot", "pro-action")
                     .prop("kind", "filled")
                     .prop("color", "blue")
-                    .prop_signal("href", frequency.signal().map(|frequency| {
-                        let plan = match frequency {
-                            Frequency::Annually => PlanType::IndividualProAnnually,
-                            Frequency::Monthly => PlanType::IndividualProMonthly,
-                        };
-                        Route::User(UserRoute::Subscribe1(plan)).to_string()
-                    }))
+                    .prop_signal("href", map_ref! {
+                        let frequency = frequency.signal(),
+                        let promo_code = state.pro_promo_code_signal() => {
+                            let plan = match frequency {
+                                Frequency::Annually => PlanType::IndividualProAnnually,
+                                Frequency::Monthly => PlanType::IndividualProMonthly,
+                            };
+                            Route::User(UserRoute::Subscribe1(plan, promo_code.clone())).to_string()
+                        }
+                    })
                     .text("Start 7-day trial")
                 }))
                 .children(&mut [
@@ -213,9 +222,12 @@ impl Pricing {
                         .prop("kind", "filled")
                         .prop("color", "blue")
                         .text("Start 7-day trial")
-                        .prop_signal("href", selected_index.signal().map(|selected_index| {
-                            Route::User(UserRoute::SchoolStart(selected_index.into())).to_string()
-                        }))
+                        .prop_signal("href", map_ref! {
+                            let selected_index = selected_index.signal(),
+                            let promo_code = state.school_promo_code_signal() => {
+                                Route::User(UserRoute::SchoolStart((*selected_index).into(), promo_code.clone())).to_string()
+                            }
+                        })
                     }))
                 }))
             }),
@@ -230,6 +242,33 @@ impl Pricing {
                 }))
             }),
         ]
+    }
+
+    fn pro_promo_code_signal(self: &Rc<Self>) -> impl Signal<Item = Option<String>> {
+        self.variables.signal_ref(|variables| {
+            if variables.promo_code_pro.is_empty() {
+                return None;
+            }
+            Some(variables.promo_code_pro.clone())
+        })
+    }
+
+    fn basic_promo_code_signal(self: &Rc<Self>) -> impl Signal<Item = Option<String>> {
+        self.variables.signal_ref(|variables| {
+            if variables.promo_code_basic.is_empty() {
+                return None;
+            }
+            Some(variables.promo_code_basic.clone())
+        })
+    }
+
+    fn school_promo_code_signal(self: &Rc<Self>) -> impl Signal<Item = Option<String>> {
+        self.variables.signal_ref(|variables| {
+            if variables.promo_code_school.is_empty() {
+                return None;
+            }
+            Some(variables.promo_code_school.clone())
+        })
     }
 }
 

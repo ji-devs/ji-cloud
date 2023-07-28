@@ -22,7 +22,7 @@ impl Subscribe2 {
                 setup_intent_id: state.params
                     .as_ref()
                     .and_then(|params| params.setup_intent.clone()),
-                promotion_code: Default::default()
+                promotion_code: state.promo.clone(),
             };
             endpoints::billing::CreateSubscription::api_with_auth(CreateSubscriptionPath(), Some(req)).await.unwrap_ji();
             go_to_url(&get_next_page_url());

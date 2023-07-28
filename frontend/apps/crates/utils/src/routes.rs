@@ -115,6 +115,8 @@ pub enum SetupIntentStatus {
     RequiresPaymentMethod,
 }
 
+type PromotionCode = String;
+
 #[derive(Debug, Clone)]
 pub enum UserRoute {
     NoAuth,
@@ -127,10 +129,14 @@ pub enum UserRoute {
     SendEmailConfirmation(String), //the email address
     VerifyEmail(String),           //the token
     PasswordReset(String),         //the token
-    SchoolStart(PlanType),
+    SchoolStart(PlanType, Option<PromotionCode>),
     SchoolEnd,
-    Subscribe1(PlanType),
-    Subscribe2(PlanType, Option<StripeRedirectParams>),
+    Subscribe1(PlanType, Option<PromotionCode>),
+    Subscribe2(
+        PlanType,
+        Option<StripeRedirectParams>,
+        Option<PromotionCode>,
+    ),
     Welcome,
 }
 
@@ -502,15 +508,18 @@ impl Route {
             }
             ["user", "no-auth"] => Self::User(UserRoute::NoAuth),
             ["user", "school-start", plan_type] => {
+                let promo = params_map.get("promo");
                 let plan_type = (*plan_type).try_into().unwrap_ji();
-                Self::User(UserRoute::SchoolStart(plan_type))
+                Self::User(UserRoute::SchoolStart(plan_type, promo))
             }
             ["user", "school-end"] => Self::User(UserRoute::SchoolEnd),
             ["user", "subscribe-1", plan_type] => {
+                let promo = params_map.get("promo");
                 let plan_type = (*plan_type).try_into().unwrap_ji();
-                Self::User(UserRoute::Subscribe1(plan_type))
+                Self::User(UserRoute::Subscribe1(plan_type, promo))
             }
             ["user", "subscribe-2", plan_type] => {
+                let promo = params_map.get("promo");
                 let plan_type = (*plan_type).try_into().unwrap_ji();
 
                 let params = if !params_string.is_empty() {
@@ -519,7 +528,7 @@ impl Route {
                     None
                 };
 
-                Self::User(UserRoute::Subscribe2(plan_type, params))
+                Self::User(UserRoute::Subscribe2(plan_type, params, promo))
             }
             ["user", "welcome"] => Self::User(UserRoute::Welcome),
             ["admin", "jig-curation"] => {
@@ -883,16 +892,25 @@ impl From<&Route> for String {
                 UserRoute::PasswordReset(token) => format!("/user/password-reset/{}", token),
                 UserRoute::Welcome => "/user/welcome".to_string(),
                 UserRoute::NoAuth => "/user/no-auth".to_string(),
-                UserRoute::SchoolStart(plan_type) => {
-                    format!("/user/school-start/{}", plan_type.as_str())
-                }
+                UserRoute::SchoolStart(plan_type, promo) => match promo {
+                    Some(promo) => {
+                        format!("/user/school-start/{}?promo={}", plan_type.as_str(), promo)
+                    }
+                    None => format!("/user/school-start/{}", plan_type.as_str()),
+                },
                 UserRoute::SchoolEnd => "/user/school-end".to_string(),
-                UserRoute::Subscribe1(plan_type) => {
-                    format!("/user/subscribe-1/{}", plan_type.as_str())
-                }
-                UserRoute::Subscribe2(plan_type, _) => {
-                    format!("/user/subscribe-2/{}", plan_type.as_str())
-                }
+                UserRoute::Subscribe1(plan_type, promo) => match promo {
+                    Some(promo) => {
+                        format!("/user/subscribe-1/{}?promo={}", plan_type.as_str(), promo)
+                    }
+                    None => format!("/user/subscribe-1/{}", plan_type.as_str()),
+                },
+                UserRoute::Subscribe2(plan_type, _, promo) => match promo {
+                    Some(promo) => {
+                        format!("/user/subscribe-2/{}?promo={}", plan_type.as_str(), promo)
+                    }
+                    None => format!("/user/subscribe-2/{}", plan_type.as_str()),
+                },
             },
             Route::Admin(route) => match route {
                 AdminRoute::Landing => "/admin".to_string(),

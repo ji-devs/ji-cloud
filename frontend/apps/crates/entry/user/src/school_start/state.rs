@@ -13,10 +13,11 @@ pub struct SchoolStart {
     pub location: Mutable<Option<serde_json::Value>>,
     pub loader: AsyncLoader,
     pub tried_to_submit: Mutable<bool>,
+    pub promo: Option<String>,
 }
 impl SchoolStart {
     /// Redirecting and returning None if the use is not logged in
-    pub fn new(plan_type: PlanType) -> Option<Rc<Self>> {
+    pub fn new(plan_type: PlanType, promo: Option<String>) -> Option<Rc<Self>> {
         let user = get_user_mutable();
         let user = user.lock_ref();
         let user = if let Some(user) = &*user {
@@ -32,6 +33,7 @@ impl SchoolStart {
             name: Mutable::new(user.organization.clone().unwrap_or_default()),
             location: Mutable::new(user.location.clone()),
             tried_to_submit: Default::default(),
+            promo,
         }))
     }
 }
