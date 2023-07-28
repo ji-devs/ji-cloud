@@ -17,8 +17,10 @@ use utils::{
 use super::Pricing;
 use super::Variables;
 
-const PLAN_PRICE_BASIC: u32 = 23_99;
-const PLAN_PRICE_PRO: u32 = 29_99;
+const PLAN_PRICE_MONTHLY_BASIC: u32 = 23_99;
+const PLAN_PRICE_ANNUAL_BASIC: u32 = 239_99;
+const PLAN_PRICE_MONTHLY_PRO: u32 = 29_99;
+const PLAN_PRICE_ANNUAL_PRO: u32 = 299_99;
 const PLAN_PRICE_SCHOOL: u32 = 1_500_00;
 
 impl Pricing {
@@ -107,8 +109,14 @@ impl Pricing {
             }),
             html!("pricing-table", {
                 .prop("kind", "individuals")
-                .prop("plan_price_basic", PLAN_PRICE_BASIC)
-                .prop("plan_price_pro", PLAN_PRICE_PRO)
+                .prop_signal("plan_price_basic", frequency.signal().map(|frequency| match frequency {
+                    Frequency::Annually => PLAN_PRICE_ANNUAL_BASIC,
+                    Frequency::Monthly => PLAN_PRICE_MONTHLY_BASIC,
+                }))
+                .prop_signal("plan_price_pro", frequency.signal().map(|frequency| match frequency {
+                    Frequency::Annually => PLAN_PRICE_ANNUAL_PRO,
+                    Frequency::Monthly => PLAN_PRICE_MONTHLY_PRO,
+                }))
                 .prop_signal("discount_percentage_basic", state.variables.signal_ref(|v| v.discount_percentage_basic))
                 .prop_signal("discount_percentage_pro", state.variables.signal_ref(|v| v.discount_percentage_pro))
                 .prop_signal("frequency", frequency.signal().map(|frequency| match frequency {
