@@ -881,7 +881,62 @@ pub struct School {
     pub id: SchoolId,
 
     /// Name of the school
-    pub school_name: SchoolName,
+    pub school_name: String,
+
+    /// The school's location
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub location: Option<Value>,
+
+    /// The school's email address
+    pub email: String,
+
+    /// Description for school
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+
+    /// ID to the school's profile image in the user image library.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub profile_image: Option<ImageId>,
+
+    /// Website for the school
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub website: Option<String>,
+
+    /// Organization type
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub organization_type: Option<String>,
+
+    /// The school's account ID
+    pub account_id: AccountId,
+
+    /// When the school was created.
+    pub created_at: DateTime<Utc>,
+
+    /// When the school was last updated.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub updated_at: Option<DateTime<Utc>>,
+}
+
+/// Same as [`School`] but includes internal fields
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct AdminSchool {
+    /// The school's id.
+    pub id: SchoolId,
+
+    /// Name of the school
+    pub school_name: String,
+
+    /// Internal name of the school
+    pub internal_school_name: Option<SchoolName>,
+
+    /// Whether the school is verified
+    pub verified: bool,
 
     /// The school's location
     #[serde(default)]
@@ -949,9 +1004,6 @@ pub struct SchoolName {
     pub id: SchoolNameId,
     /// The school name
     pub name: String,
-    /// Whether the school name has been verified
-    #[serde(default)]
-    pub verified: bool,
 }
 
 /// Representation of a school name value
@@ -998,7 +1050,7 @@ make_path_parts!(CreateSchoolAccountPath => "/v1/school");
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct CreateSchoolAccountRequest {
     /// School name
-    pub name: SchoolNameRequest,
+    pub name: String,
 
     /// The school's email address
     pub email: String,
@@ -1081,7 +1133,7 @@ pub struct UpdateSchoolAccountRequest {
     pub organization_type: UpdateNullable<String>,
 }
 
-make_path_parts!(UpdateSchoolNamePath => "/v1/school/{}/school-name" => SchoolId);
+make_path_parts!(UpdateSchoolNamePath => "/v1/school-names/{}" => SchoolNameId);
 
 make_path_parts!(IndividualAccountPath => "/v1/user/me/account");
 

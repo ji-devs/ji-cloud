@@ -2,14 +2,14 @@ use crate::schools::Schools;
 use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::MutableVec;
 use shared::domain::admin::InviteSchoolUserFailure;
-use shared::domain::billing::{AccountUser, School, SchoolId};
+use shared::domain::billing::{AccountUser, AdminSchool, SchoolId};
 use std::rc::Rc;
 use web_sys::HtmlTextAreaElement;
 
 pub struct SchoolDetails {
     pub parent: Rc<Schools>,
     pub school_id: SchoolId,
-    pub school: Mutable<Option<School>>,
+    pub school: Mutable<Option<AdminSchool>>,
     pub users: MutableVec<Rc<AccountUser>>,
     pub current_action: Mutable<CurrentAction>,
     pub errored_users: Mutable<Vec<String>>,

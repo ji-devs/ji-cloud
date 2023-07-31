@@ -1,8 +1,7 @@
 //! Types for admin routes.
-use crate::domain::{
-    billing::{School, SchoolId, SchoolName, SchoolNameId},
-    ItemCount, Page, PageLimit,
-};
+use crate::api::endpoints::PathPart;
+use crate::domain::billing::{Account, AccountUser, AdminSchool};
+use crate::domain::{billing::SchoolId, ItemCount, Page, PageLimit};
 use chrono::Utc;
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
@@ -24,7 +23,6 @@ impl Default for ExportType {
 }
 
 make_path_parts!(ExportDataPath => "/v1/admin/export");
-
 /// Request to export data
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ExportDataRequest {
@@ -59,15 +57,15 @@ impl Default for DateFilterType {
     }
 }
 
-make_path_parts!(AdminSchoolNamesPath => "/v1/admin/school-name");
+make_path_parts!(AdminSchoolsPath => "/v1/admin/schools");
 
 /// Request to list school names
 #[derive(Default, Serialize, Deserialize, Debug, Clone)]
-pub struct SearchSchoolNamesParams {
+pub struct SearchSchoolsParams {
     /// String to search school names by
     #[serde(skip_serializing_if = "Option::is_none")]
     pub q: Option<String>,
-    /// If `Some` then whether to filter by verified or unverified, otherwise return all school names
+    /// If `Some` then whether to filter by verified or unverified, otherwise return all schools
     #[serde(skip_serializing_if = "Option::is_none")]
     pub verified: Option<bool>,
     /// Current page of results
@@ -78,43 +76,38 @@ pub struct SearchSchoolNamesParams {
     pub page_limit: PageLimit,
 }
 
-/// A school name and it's usage in a School
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct SchoolNameUsageResponse {
-    /// A school name
-    pub school_name: SchoolName,
-    /// An optional usage of a school name
-    pub school: Option<School>,
-}
-
-impl From<(SchoolName, Option<School>)> for SchoolNameUsageResponse {
-    fn from((school_name, school): (SchoolName, Option<School>)) -> Self {
-        Self {
-            school_name,
-            school,
-        }
-    }
-}
-
 /// List of school names and their associated schools
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct SearchSchoolNamesResponse {
-    /// List of school names and their associated school account if one exists
-    pub school_names: Vec<SchoolNameUsageResponse>,
+pub struct SearchSchoolsResponse {
+    /// List of schools
+    pub schools: Vec<AdminSchool>,
     /// Count of pages
     pub pages: ItemCount,
     /// Total count of schools for this query
     pub total_schools_count: ItemCount,
 }
 
-make_path_parts!(AdminVerifySchoolNamePath => "/v1/admin/school-name/verify");
+make_path_parts!(AdminSchoolAccountPath => "/v1/admin/schools/{}" => SchoolId);
+
+/// Request to create a new school account
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct GetAdminSchoolAccountResponse {
+    /// School name
+    pub school: AdminSchool,
+    /// Account associated with the school
+    pub account: Account,
+    /// School location
+    pub users: Vec<AccountUser>,
+}
+
+make_path_parts!(AdminVerifySchoolPath => "/v1/admin/schools/verify");
 
 /// Request to update verification of a `SchoolName`
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct VerifySchoolNameRequest {
-    /// The ID of the school name to update verification
-    pub school_name_id: SchoolNameId,
-    /// Whether this school name should be marked verified or not
+pub struct VerifySchoolRequest {
+    /// The ID of the school to update verification
+    pub school_id: SchoolId,
+    /// Whether this school should be marked verified or not
     pub verified: bool,
 }
 

@@ -182,10 +182,6 @@ pub enum UserAuthorization {
 }
 
 impl UserAuthorization {
-    pub fn is_system_administrator(&self) -> bool {
-        matches!(self, UserAuthorization::SystemAdministrator)
-    }
-
     pub fn test_authorized(&self, require_account_admin: bool) -> Result<(), AccountError> {
         if self.is_authorized(require_account_admin) {
             Ok(())

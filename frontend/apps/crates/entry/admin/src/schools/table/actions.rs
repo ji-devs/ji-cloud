@@ -4,10 +4,10 @@ use crate::schools::table::TableState;
 use dominator::clone;
 use shared::api::endpoints;
 use shared::domain::admin::{
-    AdminSchoolNamesPath, AdminVerifySchoolNamePath, ImportSchoolNamesPath,
-    SearchSchoolNamesParams, VerifySchoolNameRequest,
+    AdminSchoolsPath, AdminVerifySchoolPath, ImportSchoolNamesPath, SearchSchoolsParams,
+    VerifySchoolRequest,
 };
-use shared::domain::billing::SchoolNameId;
+use shared::domain::billing::SchoolId;
 use shared::domain::{Page, PageLimit};
 use std::rc::Rc;
 use utils::prelude::ApiEndpointExt;
@@ -23,7 +23,7 @@ impl SchoolTable {
 
     pub async fn load_schools(self: &Rc<Self>) {
         let search_query = self.parent.search_filters.q.get_cloned();
-        let req = SearchSchoolNamesParams {
+        let req = SearchSchoolsParams {
             q: if search_query.is_empty() {
                 None
             } else {
@@ -34,14 +34,12 @@ impl SchoolTable {
             page_limit: PageLimit::default(),
         };
 
-        match endpoints::admin::SearchSchoolNames::api_with_auth(AdminSchoolNamesPath(), Some(req))
-            .await
-        {
+        match endpoints::admin::SearchSchools::api_with_auth(AdminSchoolsPath(), Some(req)).await {
             Err(_) => todo!(),
             Ok(res) => {
                 self.total_pages.set(Some(res.pages));
                 self.schools.lock_mut().replace_cloned(
-                    res.school_names
+                    res.schools
                         .into_iter()
                         .map(|school| Rc::new(school))
                         .collect(),
@@ -50,11 +48,11 @@ impl SchoolTable {
         }
     }
 
-    pub fn set_verified(self: &Rc<Self>, school_name_id: SchoolNameId, verified: bool) {
+    pub fn set_verified(self: &Rc<Self>, school_id: SchoolId, verified: bool) {
         let state = Rc::clone(self);
         state.parent.loader.load(clone!(state => async move {
-            match endpoints::admin::VerifySchoolName::api_with_auth(AdminVerifySchoolNamePath(), Some(VerifySchoolNameRequest {
-                school_name_id,
+            match endpoints::admin::VerifySchool::api_with_auth(AdminVerifySchoolPath(), Some(VerifySchoolRequest {
+                school_id,
                 verified,
             })).await {
                 Err(error) => {
