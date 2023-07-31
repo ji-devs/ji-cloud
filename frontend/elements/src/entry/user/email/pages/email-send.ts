@@ -20,6 +20,9 @@ export class _ extends LitElement {
                     font-size: 30px;
                     font-weight: 900;
                     color: #5662a3;
+                    /* needed for long email addresses on mobile */
+                    word-wrap: break-word;
+                    max-width: 90vw;
                 }
                 .subtitle {
                     font-size: 18px;
