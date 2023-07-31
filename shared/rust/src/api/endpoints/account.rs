@@ -2,20 +2,10 @@ use super::ApiEndpoint;
 use crate::api::Method;
 use crate::domain::billing::{
     CreateSchoolAccountPath, CreateSchoolAccountRequest, GetSchoolAccountResponse,
-    IndividualAccountPath, IndividualAccountResponse, SchoolAccountPath, SchoolId, SchoolName,
-    SchoolNamePath, SchoolNameValue, UpdateSchoolAccountRequest, UpdateSchoolNamePath,
+    IndividualAccountPath, IndividualAccountResponse, SchoolAccountPath, SchoolId, SchoolNameValue,
+    UpdateSchoolAccountRequest, UpdateSchoolNamePath,
 };
 use crate::error::AccountError;
-
-/// Return a list of known school names
-pub struct GetSchoolNames;
-impl ApiEndpoint for GetSchoolNames {
-    type Path = SchoolNamePath;
-    type Req = ();
-    type Res = Vec<SchoolName>;
-    type Err = AccountError;
-    const METHOD: Method = Method::Get;
-}
 
 /// Create a new school account
 pub struct CreateSchoolAccount;

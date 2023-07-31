@@ -20,7 +20,7 @@ impl SchoolDetails {
             }))
             .child_signal(state.school.signal_cloned().map(clone!(state => move |school| {
                 school.and_then(clone!(state => move |school| {
-                    if !school.school_name.verified {
+                    if !school.verified {
                         Some(html!("button-rect", {
                             .prop("slot", "back")
                             .prop("color", "blue")
@@ -56,7 +56,18 @@ impl SchoolDetails {
                                 .child(html!("input", {
                                     .prop("type", "text")
                                     .prop("disabled", true)
-                                    .prop("value", school.school_name.name)
+                                    .prop("value", school.school_name)
+                                }))
+                            }),
+                            html!("input-wrapper", {
+                                .prop("label", "Internal School name")
+                                .child(html!("input", {
+                                    .prop("type", "text")
+                                    .prop("disabled", true)
+                                    .prop("value", school.internal_school_name
+                                        .map(|school_name| school_name.name)
+                                        .unwrap_or_default()
+                                    )
                                 }))
                             }),
                             html!("input-wrapper", {

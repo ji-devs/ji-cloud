@@ -449,8 +449,8 @@ async fn get_or_create_customer(
                 .matches_subscription_type(&plan.plan_type.subscription_type())
             {
                 return Err(BillingError::IncorrectPlanType {
-                    expected: AccountType::Individual,
-                    found: SubscriptionType::School,
+                    expected: account.account_type,
+                    found: plan.plan_type.subscription_type(),
                 });
             }
 
@@ -487,7 +487,7 @@ async fn get_or_create_customer(
                     client,
                     CreateCustomer {
                         email: Some(school.email.as_str()),
-                        name: Some(school.school_name.name.as_str()),
+                        name: Some(school.school_name.as_str()),
                         ..Default::default()
                     },
                 )

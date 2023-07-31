@@ -175,7 +175,7 @@ account_cte as (
         subscription.amount_due,
         subscription.is_trial,
         user_account.admin,
-        school_name.name
+        school.school_name
     from user_account
     inner join account using (account_id)
     left join (
@@ -197,7 +197,6 @@ account_cte as (
     ) as subscription using (account_id)
     left join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id
     left join school using (account_id)
-    left join school_name on school.school_name_id = school_name.school_name_id
 )
 select  cte1.id                 as "id!: UserId",
         username,
@@ -215,7 +214,7 @@ select  cte1.id                 as "id!: UserId",
         account_cte.is_trial as "is_trial?",
         account_cte.amount_due as "amount_due_in_cents?: AmountInCents",
         account_cte.admin as "is_admin?",
-        account_cte.name::text as "school_name?"
+        account_cte.school_name::text as "school_name?"
 from cte1
         left join account_cte on cte1.id = account_cte.user_id
         inner join user_profile on cte1.id = user_profile.user_id
@@ -282,7 +281,7 @@ with account_cte as (
         subscription.is_trial,
         subscription.amount_due,
         user_account.admin,
-        school_name.name
+        school.school_name
     from user_account
     inner join account using (account_id)
     left join (
@@ -304,7 +303,6 @@ with account_cte as (
     ) as subscription using (account_id)
     left join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id
     left join school using (account_id)
-    left join school_name on school.school_name_id = school_name.school_name_id
 )
 select  "user".id                 as "id!: UserId",
         username,
@@ -322,7 +320,7 @@ select  "user".id                 as "id!: UserId",
         account_cte.current_period_end as "current_period_end?: DateTime<Utc>",
         account_cte.amount_due as "amount_due_in_cents?: AmountInCents",
         account_cte.admin as "is_admin?",
-        account_cte.name::text as "school_name?"
+        account_cte.school_name::text as "school_name?"
 from "user"
 left join account_cte on "user".id = account_cte.user_id
 inner join user_profile on "user".id = user_profile.user_id

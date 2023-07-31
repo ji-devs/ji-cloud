@@ -10,12 +10,9 @@ use futures::try_join;
 use ji_core::settings::RuntimeSettings;
 use serde::ser::Serialize;
 use serde_derive::Deserialize;
-use shared::api::endpoints::admin::{
-    ImportSchoolNames, InviteUsers, SearchSchoolNames, VerifySchoolName,
-};
+use shared::api::endpoints::admin::{ImportSchoolNames, InviteUsers, SearchSchools, VerifySchool};
 use shared::domain::admin::{
-    InviteFailedReason, InviteSchoolUserFailure, InviteSchoolUsersResponse,
-    SearchSchoolNamesResponse,
+    InviteFailedReason, InviteSchoolUserFailure, InviteSchoolUsersResponse, SearchSchoolsResponse,
 };
 use shared::domain::billing::{SchoolId, UpdateSubscriptionPlansRequest};
 use shared::{
@@ -158,14 +155,8 @@ async fn create_or_update_subscription_plans(
 async fn search_school_names(
     _auth: TokenUserWithScope<ScopeAdmin>,
     db: Data<PgPool>,
-    Query(search): Query<<SearchSchoolNames as ApiEndpoint>::Req>,
-) -> Result<
-    (
-        Json<<SearchSchoolNames as ApiEndpoint>::Res>,
-        http::StatusCode,
-    ),
-    error::Server,
-> {
+    Query(search): Query<<SearchSchools as ApiEndpoint>::Req>,
+) -> Result<(Json<<SearchSchools as ApiEndpoint>::Res>, http::StatusCode), error::Server> {
     let (schools, schools_count) = try_join!(
         db::account::find_school_names_with_schools(db.as_ref(), &search),
         db::account::find_school_names_with_schools_count(db.as_ref(), &search)
@@ -174,8 +165,8 @@ async fn search_school_names(
     let schools = schools.into_iter().map(From::from).collect();
 
     Ok((
-        Json(SearchSchoolNamesResponse {
-            school_names: schools,
+        Json(SearchSchoolsResponse {
+            schools: schools,
             pages: schools_count.paged(search.page_limit),
             total_schools_count: schools_count,
         }),
@@ -190,7 +181,7 @@ async fn add_school_name_if_not_exists(
     if db::account::check_school_name_exists(pool, &name).await? {
         Ok(Some(name))
     } else {
-        db::account::add_school_name(pool, name.into(), true).await?;
+        db::account::add_school_name(pool, name.into()).await?;
         Ok(None)
     }
 }
@@ -228,12 +219,12 @@ async fn import_school_names(
     Ok((Json(exists), http::StatusCode::OK))
 }
 
-async fn verify_school_name(
+async fn verify_school(
     _auth: TokenUserWithScope<ScopeAdmin>,
     db: Data<PgPool>,
-    Json(data): Json<<VerifySchoolName as ApiEndpoint>::Req>,
+    Json(data): Json<<VerifySchool as ApiEndpoint>::Req>,
 ) -> Result<HttpResponse, error::Server> {
-    db::account::verify_school_name(db.as_ref(), data.school_name_id, data.verified).await?;
+    db::account::verify_school(db.as_ref(), data.school_id, data.verified).await?;
 
     Ok(HttpResponse::Ok().finish())
 }
@@ -322,18 +313,16 @@ pub fn configure(cfg: &mut ServiceConfig) {
             .to(create_or_update_subscription_plans),
     )
     .route(
-        <SearchSchoolNames as ApiEndpoint>::Path::PATH,
-        admin::SearchSchoolNames::METHOD
-            .route()
-            .to(search_school_names),
+        <SearchSchools as ApiEndpoint>::Path::PATH,
+        admin::SearchSchools::METHOD.route().to(search_school_names),
     )
     .route(
         <ImportSchoolNames as ApiEndpoint>::Path::PATH,
         ImportSchoolNames::METHOD.route().to(import_school_names),
     )
     .route(
-        <VerifySchoolName as ApiEndpoint>::Path::PATH,
-        VerifySchoolName::METHOD.route().to(verify_school_name),
+        <VerifySchool as ApiEndpoint>::Path::PATH,
+        VerifySchool::METHOD.route().to(verify_school),
     )
     .route(
         <InviteUsers as ApiEndpoint>::Path::PATH,

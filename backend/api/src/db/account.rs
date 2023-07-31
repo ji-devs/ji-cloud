@@ -1,33 +1,15 @@
 use crate::db;
-use shared::domain::admin::SearchSchoolNamesParams;
+use shared::domain::admin::SearchSchoolsParams;
 use shared::domain::billing::{
-    Account, AccountId, AccountType, AccountUser, CreateSchoolAccountRequest, CustomerId,
-    PaymentMethod, PlanType, School, SchoolId, SchoolName, SchoolNameId, SchoolNameValue,
-    SubscriptionStatus, UpdateSchoolAccountRequest, UserAccountSummary,
+    Account, AccountId, AccountType, AccountUser, AdminSchool, CreateSchoolAccountRequest,
+    CustomerId, PaymentMethod, PlanType, School, SchoolId, SchoolName, SchoolNameId,
+    SchoolNameValue, SubscriptionStatus, UpdateSchoolAccountRequest, UserAccountSummary,
 };
 use shared::domain::image::ImageId;
 use shared::domain::user::UserId;
 use shared::domain::ItemCount;
 use sqlx::{Executor, PgPool, Postgres};
 use tracing::{instrument, Instrument};
-
-#[instrument(skip(pool))]
-pub async fn get_verified_school_names(pool: &PgPool) -> sqlx::Result<Vec<SchoolName>> {
-    sqlx::query_as!(
-        SchoolName,
-        //language=SQL
-        r#"
-select
-    school_name_id as "id!: SchoolNameId",
-    name::text as "name!",
-    verified
-from school_name
-where verified = true
-"#,
-    )
-    .fetch_all(pool)
-    .await
-}
 
 #[instrument(skip(pool))]
 pub async fn check_school_name_exists(pool: &PgPool, name: &str) -> sqlx::Result<bool> {
@@ -74,7 +56,7 @@ pub async fn delete_school_account(pool: &PgPool, account_id: &AccountId) -> sql
 pub async fn check_renamed_school_name_exists(
     pool: &PgPool,
     name: &str,
-    current_school_id: &SchoolId,
+    current_name_id: &SchoolNameId,
 ) -> sqlx::Result<bool> {
     sqlx::query_scalar!(
         //language=SQL
@@ -82,14 +64,13 @@ pub async fn check_renamed_school_name_exists(
 select exists(
     select 1
     from school_name
-    left join school using (school_name_id)
     where
         citext_eq(name, $1::text::citext)
-        and (school_id is null or school_id != $2)
+        and (school_name_id is null or school_name_id != $2)
 ) as "exists!"
 "#,
         name.trim(),
-        current_school_id as &SchoolId,
+        current_name_id as &SchoolNameId,
     )
     .fetch_one(pool)
     .await
@@ -115,19 +96,17 @@ select exists(
 pub async fn add_school_name(
     pool: &PgPool,
     new_name: SchoolNameValue,
-    verified: bool,
 ) -> sqlx::Result<SchoolNameId> {
     let new_name = String::from(new_name);
 
     sqlx::query_scalar!(
         // language=SQL
         r#"
-insert into school_name (name, verified)
-values ($1::text::citext, $2)
+insert into school_name (name)
+values ($1::text::citext)
 returning school_name_id as "school_name_id!: SchoolNameId"
 "#,
         new_name.trim(),
-        verified,
     )
     .fetch_one(pool)
     .await
@@ -138,7 +117,6 @@ pub async fn update_school_name(
     pool: &PgPool,
     school_name_id: &SchoolNameId,
     new_name: SchoolNameValue,
-    verified: bool,
 ) -> sqlx::Result<()> {
     let new_name = String::from(new_name);
 
@@ -147,32 +125,16 @@ pub async fn update_school_name(
         r#"
 update school_name
 set
-    name = $2::text::citext,
-    verified = $3
+    name = $2::text::citext
 where school_name_id = $1
 "#,
         school_name_id as &SchoolNameId,
         new_name.trim(),
-        verified,
     )
     .execute(pool)
     .await?;
 
     Ok(())
-}
-
-#[instrument(skip(pool))]
-pub async fn check_school_exists(
-    pool: &PgPool,
-    school_name_id: &SchoolNameId,
-) -> sqlx::Result<bool> {
-    sqlx::query_scalar!(
-        // language=SQL
-        r#"select exists(select 1 from school where school_name_id = $1) as "exists!""#,
-        school_name_id as &SchoolNameId,
-    )
-    .fetch_one(pool)
-    .await
 }
 
 #[instrument(skip(pool))]
@@ -202,7 +164,6 @@ pub async fn create_default_individual_account(
 pub async fn create_school_account(
     pool: &PgPool,
     user_id: UserId,
-    school_name_id: &SchoolNameId,
     create_school: CreateSchoolAccountRequest,
 ) -> sqlx::Result<SchoolId> {
     let mut txn = pool.begin().await?;
@@ -224,12 +185,12 @@ pub async fn create_school_account(
         // language=SQL
         r#"
 insert into school
-    (school_name_id, account_id, email, location, description, website, organization_type, profile_image_id)
+    (school_name, account_id, email, location, description, website, organization_type, profile_image_id)
 values
-    ($1, $2, $3::text::citext, $4, $5, $6, $7, $8)
+    ($1::text::citext, $2, $3::text::citext, $4, $5, $6, $7, $8)
 returning school_id as "school_id!: SchoolId"
 "#,
-        school_name_id as &SchoolNameId,
+        create_school.name,
         account_id as AccountId,
         create_school.email,
         create_school.location,
@@ -525,7 +486,7 @@ pub async fn get_school_account_by_account_id(
         r#"
 select
     school_id as "id!: SchoolId",
-    school_name_id as "name!: SchoolNameId",
+    school_name::text as "school_name!",
     location as "location?: serde_json::Value",
     email::text as "email!",
     description,
@@ -547,7 +508,7 @@ where account_id = $1
         Some(record) => {
             let school = School {
                 id: record.id,
-                school_name: get_school_name(pool, &record.name).await?.unwrap(),
+                school_name: record.school_name,
                 location: record.location,
                 email: record.email,
                 description: record.description,
@@ -610,7 +571,7 @@ pub async fn get_school_account_by_id(
         r#"
 select
     school_id as "id!: SchoolId",
-    school_name_id as "name!: SchoolNameId",
+    school_name::text as "school_name!",
     location as "location?: serde_json::Value",
     email::text as "email!",
     description,
@@ -632,7 +593,64 @@ where school_id = $1
         Some(record) => {
             let school = School {
                 id: record.id,
-                school_name: get_school_name(pool, &record.name).await?.unwrap(),
+                school_name: record.school_name,
+                location: record.location,
+                email: record.email,
+                description: record.description,
+                profile_image: record.profile_image,
+                website: record.website,
+                organization_type: record.organization_type,
+                account_id: record.account_id,
+                created_at: record.created_at,
+                updated_at: record.updated_at,
+            };
+
+            Ok(Some(school))
+        }
+        None => Ok(None),
+    }
+}
+
+#[instrument(skip(pool))]
+pub async fn get_admin_school_account_by_id(
+    pool: &PgPool,
+    school_id: &SchoolId,
+) -> sqlx::Result<Option<AdminSchool>> {
+    let record = sqlx::query!(
+        // language=SQL
+        r#"
+select
+    school_id as "id!: SchoolId",
+    school_name::text as "school_name!",
+    internal_school_name_id as "internal_school_name_id?: SchoolNameId",
+    verified as "verified!",
+    location as "location?: serde_json::Value",
+    email::text as "email!",
+    description,
+    profile_image_id as "profile_image?: ImageId",
+    website,
+    organization_type,
+    account_id as "account_id!: AccountId",
+    created_at,
+    updated_at
+from school
+where school_id = $1
+"#,
+        school_id as &SchoolId
+    )
+    .fetch_optional(pool)
+    .await?;
+
+    match record {
+        Some(record) => {
+            let school = AdminSchool {
+                id: record.id,
+                school_name: record.school_name,
+                internal_school_name: match record.internal_school_name_id {
+                    Some(id) => get_school_name(pool, &id).await?,
+                    None => None,
+                },
+                verified: record.verified,
                 location: record.location,
                 email: record.email,
                 description: record.description,
@@ -660,8 +678,7 @@ pub async fn get_school_name(
         r#"
 select
     school_name_id as "id!: SchoolNameId",
-    name::text as "name!",
-    verified
+    name::text as "name!"
 from school_name
 where school_name_id = $1
 "#,
@@ -674,16 +691,17 @@ where school_name_id = $1
 #[instrument(skip(pool))]
 pub async fn find_school_names_with_schools(
     pool: &PgPool,
-    params: &SearchSchoolNamesParams,
-) -> sqlx::Result<Vec<(SchoolName, Option<School>)>> {
+    params: &SearchSchoolsParams,
+) -> sqlx::Result<Vec<AdminSchool>> {
     let rows = sqlx::query!(
         // language=SQL
         r#"
 select
-    school_name_id as "id!: SchoolNameId",
-    school_name.name::text as "school_name!",
-    school_name.verified as "verified!",
-    school_id as "school_id?: SchoolId",
+    school_id as "school_id!: SchoolId",
+    school_name::text as "school_name!",
+    school_name_id as "internal_school_name_id?: SchoolNameId",
+    school_name.name::text as "internal_school_name?",
+    verified as "verified!",
     location as "location?: serde_json::Value",
     email::text as "email?",
     description,
@@ -693,8 +711,8 @@ select
     account_id as "account_id?: AccountId",
     school.created_at as "created_at?",
     school.updated_at
-from school_name
-left join school using (school_name_id)
+from school
+left join school_name on school.internal_school_name_id = school_name.school_name_id
 where
     (
         (not $1::bool is null and (verified = $1::bool))
@@ -718,27 +736,23 @@ offset $4
 
     Ok(rows
         .into_iter()
-        .map(|record| {
-            let school_name = SchoolName {
-                id: record.id,
-                name: record.school_name,
-                verified: record.verified,
-            };
-
-            let school = record.school_id.map(|school_id| School {
-                id: school_id,
-                school_name: school_name.clone(),
-                location: record.location,
-                email: record.email.unwrap(),
-                description: record.description,
-                profile_image: record.profile_image,
-                website: record.website,
-                organization_type: record.organization_type,
-                account_id: record.account_id.unwrap(),
-                created_at: record.created_at.unwrap(),
-                updated_at: record.updated_at,
-            });
-            (school_name, school)
+        .map(|record| AdminSchool {
+            id: record.school_id,
+            school_name: record.school_name,
+            internal_school_name: record.internal_school_name_id.map(|id| SchoolName {
+                id,
+                name: record.internal_school_name.unwrap(),
+            }),
+            verified: record.verified,
+            location: record.location,
+            email: record.email.unwrap(),
+            description: record.description,
+            profile_image: record.profile_image,
+            website: record.website,
+            organization_type: record.organization_type,
+            account_id: record.account_id.unwrap(),
+            created_at: record.created_at.unwrap(),
+            updated_at: record.updated_at,
         })
         .collect())
 }
@@ -746,21 +760,21 @@ offset $4
 #[instrument(skip(pool))]
 pub async fn find_school_names_with_schools_count(
     pool: &PgPool,
-    params: &SearchSchoolNamesParams,
+    params: &SearchSchoolsParams,
 ) -> sqlx::Result<ItemCount> {
     let rows = sqlx::query_scalar!(
         // language=SQL
         r#"
 select
     count(*) as "total_schools!"
-from school_name
+from school
 where
     (
         (not $1::bool is null and (verified = $1::bool))
         or $1::bool is null
     )
     and (
-        (not $2::text is null and (school_name.name like ('%' || $2::text || '%')::citext))
+        (not $2::text is null and (school_name like ('%' || $2::text || '%')::citext))
         or $2::text is null
     )
 "#,
@@ -774,15 +788,11 @@ where
 }
 
 #[instrument(skip(pool))]
-pub async fn verify_school_name(
-    pool: &PgPool,
-    school_name_id: SchoolNameId,
-    verified: bool,
-) -> sqlx::Result<()> {
+pub async fn verify_school(pool: &PgPool, school_id: SchoolId, verified: bool) -> sqlx::Result<()> {
     sqlx::query!(
         // language=SQL
-        r#"update school_name set verified = $2 where school_name_id = $1"#,
-        school_name_id as SchoolNameId,
+        r#"update school set verified = $2 where school_id = $1"#,
+        school_id as SchoolId,
         verified,
     )
     .execute(pool)

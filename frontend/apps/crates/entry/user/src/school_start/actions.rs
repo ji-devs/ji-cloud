@@ -1,7 +1,7 @@
 use dominator::{clone, routing::go_to_url};
 use shared::{
     api::endpoints,
-    domain::billing::{CreateSchoolAccountPath, CreateSchoolAccountRequest, SchoolNameRequest},
+    domain::billing::{CreateSchoolAccountPath, CreateSchoolAccountRequest},
     domain::user::GetProfilePath,
 };
 use utils::{
@@ -25,7 +25,7 @@ impl SchoolStart {
 
         state.loader.load(clone!(state => async move {
             let req = CreateSchoolAccountRequest {
-                name: SchoolNameRequest::Value(state.name.get_cloned().into()),
+                name: state.name.get_cloned(),
                 location: state.location.get_cloned(),
                 email: user.email,
                 description: Default::default(),

@@ -46,6 +46,7 @@ export class _ extends LitElement {
     @property({ attribute: false })
     headers: string[] = [
         "Name",
+        "Internal Name",
         "Verified",
     ];
 

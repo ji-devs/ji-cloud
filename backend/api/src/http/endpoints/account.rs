@@ -1,18 +1,19 @@
 use crate::db;
 use crate::domain::{user_authorization, UserAuthorization};
-use crate::extractor::TokenUser;
+use crate::extractor::{ScopeAdmin, TokenUser, TokenUserWithScope};
 use actix_web::web::{Data, Json, Path, ServiceConfig};
 use actix_web::HttpResponse;
 use futures::try_join;
 use shared::api::endpoints::account::{
-    DeleteSchoolAccount, GetIndividualAccount, GetSchoolAccount, GetSchoolNames,
-    UpdateSchoolAccount, UpdateSchoolName,
+    DeleteSchoolAccount, GetIndividualAccount, GetSchoolAccount, UpdateSchoolAccount,
+    UpdateSchoolName,
 };
+use shared::api::endpoints::admin::GetAdminSchoolAccount;
 use shared::api::{endpoints::account::CreateSchoolAccount, ApiEndpoint, PathParts};
+use shared::domain::admin::GetAdminSchoolAccountResponse;
 use shared::domain::billing::{
     AccountIfAuthorized, CreateSchoolAccountRequest, GetSchoolAccountResponse,
-    IndividualAccountResponse, SchoolId, SchoolNameRequest, SchoolNameValue,
-    UpdateSchoolAccountRequest,
+    IndividualAccountResponse, SchoolId, SchoolNameId, SchoolNameValue, UpdateSchoolAccountRequest,
 };
 use shared::error::{AccountError, IntoAnyhow};
 use sqlx::PgPool;
@@ -39,42 +40,9 @@ async fn create_school_account(
 
     let req: CreateSchoolAccountRequest = req.into_inner();
 
-    let school_name_id = match req.name.clone() {
-        SchoolNameRequest::Value(new_name) => {
-            // If the user is creating a school with a new school name that we don't already
-            // know about, then check whether that name already exists
-            if db::account::check_school_name_exists(db.as_ref(), new_name.as_ref())
-                .await
-                .into_anyhow()?
-            {
-                // Otherwise, return an error to the client
-                return Err(AccountError::SchoolNameExists(new_name));
-            }
-
-            // If it doesnt exist, then add the name
-            db::account::add_school_name(db.as_ref(), new_name, false)
-                .await
-                .into_anyhow()?
-        }
-        SchoolNameRequest::Id(id) => {
-            // If they are creating a school with an existing school name, then check that
-            // another school doesn't already exist that uses the same name.
-            if db::account::check_school_exists(db.as_ref(), &id)
-                .await
-                .into_anyhow()?
-            {
-                // If one exists, return an error to the client.
-                return Err(AccountError::SchoolExists(id));
-            }
-
-            id
-        }
-    };
-    // If no school exists, then create the school with school name ID. and using the
-    // currently logged in user as the admin and their email as the schools contact email.
     Ok((
         Json(
-            db::account::create_school_account(db.as_ref(), auth.user_id(), &school_name_id, req)
+            db::account::create_school_account(db.as_ref(), auth.user_id(), req)
                 .await
                 .into_anyhow()?,
         ),
@@ -103,7 +71,7 @@ async fn update_school_account(
 
     let req: UpdateSchoolAccountRequest = req.into_inner();
 
-    db::account::update_school_account(db.as_ref(), &school_id, req.into())
+    db::account::update_school_account(db.as_ref(), &school_id, req)
         .await
         .into_anyhow()?;
 
@@ -112,55 +80,31 @@ async fn update_school_account(
 
 #[instrument(skip_all)]
 async fn update_school_name(
-    auth: TokenUser,
+    _auth: TokenUserWithScope<ScopeAdmin>,
     db: Data<PgPool>,
-    path: Path<SchoolId>,
+    path: Path<SchoolNameId>,
     req: Json<<UpdateSchoolName as ApiEndpoint>::Req>,
 ) -> Result<HttpResponse, <UpdateSchoolName as ApiEndpoint>::Err> {
-    let user_id = auth.user_id();
-    let school_id = path.into_inner();
+    let school_name_id = path.into_inner();
 
     let new_name: SchoolNameValue = req.into_inner();
 
-    let school = db::account::get_school_account_by_id(db.as_ref(), &school_id)
-        .await
-        .into_anyhow()?
-        .ok_or(AccountError::NotFound("School not found".into()))?;
-
-    let authorization = user_authorization(db.as_ref(), &user_id, &school.account_id).await?;
-    authorization.test_authorized(true)?;
-
-    if db::account::check_renamed_school_name_exists(db.as_ref(), new_name.as_ref(), &school_id)
-        .await
-        .into_anyhow()?
+    if db::account::check_renamed_school_name_exists(
+        db.as_ref(),
+        new_name.as_ref(),
+        &school_name_id,
+    )
+    .await
+    .into_anyhow()?
     {
         return Err(AccountError::SchoolNameExists(new_name));
     }
 
-    // If the user is a system administrator then the verified flag is automatically set to true.
-    // Otherwise it's false for all other users.
-    db::account::update_school_name(
-        db.as_ref(),
-        &school.school_name.id,
-        new_name,
-        authorization.is_system_administrator(),
-    )
-    .await
-    .into_anyhow()?;
+    db::account::update_school_name(db.as_ref(), &school_name_id, new_name)
+        .await
+        .into_anyhow()?;
 
     Ok(HttpResponse::Ok().finish())
-}
-
-#[instrument(skip_all)]
-async fn get_school_names(
-    _auth: TokenUser,
-    db: Data<PgPool>,
-) -> Result<Json<<GetSchoolNames as ApiEndpoint>::Res>, <GetSchoolNames as ApiEndpoint>::Err> {
-    Ok(Json(
-        db::account::get_verified_school_names(db.as_ref())
-            .await
-            .into_anyhow()?,
-    ))
 }
 
 async fn get_school_account(
@@ -194,6 +138,39 @@ async fn get_school_account(
     )?;
 
     Ok(Json(GetSchoolAccountResponse {
+        school,
+        account,
+        users,
+    }))
+}
+
+async fn get_admin_school_account(
+    _auth: TokenUserWithScope<ScopeAdmin>,
+    db: Data<PgPool>,
+    path: Path<SchoolId>,
+) -> Result<
+    Json<<GetAdminSchoolAccount as ApiEndpoint>::Res>,
+    <GetAdminSchoolAccount as ApiEndpoint>::Err,
+> {
+    let school_id = path.into_inner();
+
+    let school = db::account::get_admin_school_account_by_id(db.as_ref(), &school_id)
+        .await
+        .into_anyhow()?
+        .ok_or(AccountError::NotFound("School not found".into()))?;
+
+    let (account, users) = try_join!(
+        async {
+            Ok(
+                db::account::get_account_by_id(db.as_ref(), &school.account_id)
+                    .await?
+                    .ok_or(anyhow::anyhow!("School {} account is missing", school.id))?,
+            )
+        },
+        db::account::get_account_users_by_account_id(db.as_ref(), &school.account_id),
+    )?;
+
+    Ok(Json(GetAdminSchoolAccountResponse {
         school,
         account,
         users,
@@ -289,12 +266,14 @@ pub fn configure(cfg: &mut ServiceConfig) {
             .to(create_school_account),
     )
     .route(
-        <GetSchoolNames as ApiEndpoint>::Path::PATH,
-        GetSchoolNames::METHOD.route().to(get_school_names),
-    )
-    .route(
         <GetSchoolAccount as ApiEndpoint>::Path::PATH,
         GetSchoolAccount::METHOD.route().to(get_school_account),
+    )
+    .route(
+        <GetAdminSchoolAccount as ApiEndpoint>::Path::PATH,
+        GetAdminSchoolAccount::METHOD
+            .route()
+            .to(get_admin_school_account),
     )
     .route(
         <UpdateSchoolAccount as ApiEndpoint>::Path::PATH,

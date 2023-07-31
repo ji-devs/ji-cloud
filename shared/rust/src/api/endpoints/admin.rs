@@ -1,9 +1,10 @@
 use super::ApiEndpoint;
 use crate::domain::admin::{
-    AdminSchoolNamesPath, AdminVerifySchoolNamePath, ImportSchoolNamesPath, InviteSchoolUsersPath,
-    InviteSchoolUsersRequest, InviteSchoolUsersResponse, SearchSchoolNamesParams,
-    SearchSchoolNamesResponse, VerifySchoolNameRequest,
+    AdminSchoolAccountPath, AdminSchoolsPath, AdminVerifySchoolPath, GetAdminSchoolAccountResponse,
+    ImportSchoolNamesPath, InviteSchoolUsersPath, InviteSchoolUsersRequest,
+    InviteSchoolUsersResponse, SearchSchoolsParams, SearchSchoolsResponse, VerifySchoolRequest,
 };
+use crate::error::AccountError;
 use crate::{
     api::Method,
     domain::{
@@ -45,20 +46,20 @@ impl ApiEndpoint for CreateUpdateSubscriptionPlans {
 }
 
 /// List school names
-pub struct SearchSchoolNames;
-impl ApiEndpoint for SearchSchoolNames {
-    type Path = AdminSchoolNamesPath;
-    type Req = SearchSchoolNamesParams;
-    type Res = SearchSchoolNamesResponse;
+pub struct SearchSchools;
+impl ApiEndpoint for SearchSchools {
+    type Path = AdminSchoolsPath;
+    type Req = SearchSchoolsParams;
+    type Res = SearchSchoolsResponse;
     type Err = EmptyError;
     const METHOD: Method = Method::Get;
 }
 
 /// Update a school names verification flag
-pub struct VerifySchoolName;
-impl ApiEndpoint for VerifySchoolName {
-    type Path = AdminVerifySchoolNamePath;
-    type Req = VerifySchoolNameRequest;
+pub struct VerifySchool;
+impl ApiEndpoint for VerifySchool {
+    type Path = AdminVerifySchoolPath;
+    type Req = VerifySchoolRequest;
     type Res = ();
     type Err = EmptyError;
     const METHOD: Method = Method::Patch;
@@ -82,4 +83,14 @@ impl ApiEndpoint for InviteUsers {
     type Res = InviteSchoolUsersResponse;
     type Err = EmptyError;
     const METHOD: Method = Method::Post;
+}
+
+/// Get a school account for administration
+pub struct GetAdminSchoolAccount;
+impl ApiEndpoint for GetAdminSchoolAccount {
+    type Path = AdminSchoolAccountPath;
+    type Req = ();
+    type Res = GetAdminSchoolAccountResponse;
+    type Err = AccountError;
+    const METHOD: Method = Method::Get;
 }

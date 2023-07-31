@@ -2,8 +2,7 @@ use super::state::*;
 use crate::schools::VerifiedFilter;
 use dominator::{clone, html, Dom};
 use futures_signals::{map_ref, signal::SignalExt, signal_vec::SignalVecExt};
-use shared::domain::admin::SchoolNameUsageResponse;
-use shared::domain::Page;
+use shared::domain::{billing::AdminSchool, Page};
 use std::rc::Rc;
 use utils::{events, prelude::*, routes::AdminSchoolsRoute};
 use wasm_bindgen::JsValue;
@@ -166,37 +165,35 @@ impl SchoolTable {
                     }))
                 }))
             }))
-            .children_signal_vec(state.schools.signal_vec_cloned().map(clone!(state => move |school: Rc<SchoolNameUsageResponse>| {
-                let school_name_id = school.school_name.id;
+            .children_signal_vec(state.schools.signal_vec_cloned().map(clone!(state => move |school: Rc<AdminSchool>| {
                 html!("admin-table-line", {
-                    .apply(clone!(state, school => move |dom| {
-                        match school.school {
-                            Some(_) => {
-                                dom.child(html!("a", {
+                    .child(html!("a", {
+                        .prop("dir", "auto")
+                        .text(&school.school_name)
+                        .event(clone!(state, school => move |_: events::Click| {
+                            let route = AdminSchoolsRoute::School(school.id);
+                            state.parent.navigate_to(route);
+                        }))
+                    }))
+                    .apply(clone!(school => move |dom| {
+                        match school.internal_school_name.as_ref() {
+                            Some(school_name) => {
+                                dom.child(html!("div", {
                                     .prop("dir", "auto")
-                                    .text(&school.school_name.name)
-                                    .event(clone!(state => move |_: events::Click| {
-                                        if let Some(school) = &school.school {
-                                            let route = AdminSchoolsRoute::School(school.id);
-                                            state.parent.navigate_to(route);
-                                        }
-                                    }))
+                                    .text(&school_name.name)
                                 }))
                             },
                             None => {
-                                dom.child(html!("span", {
-                                    .prop("dir", "auto")
-                                    .text(&school.school_name.name)
-                                }))
+                                dom.child(html!("div"))
                             }
                         }
                     }))
                     .child(html!("input-checkbox", {
-                        .prop("checked", school.school_name.verified)
-                        .prop("disabled", school.school_name.verified)
-                        .event(clone!(state, school_name_id => move |evt:events::CustomToggle| {
-                            if !school.school_name.verified {
-                                state.set_verified(school_name_id, evt.value());
+                        .prop("checked", school.verified)
+                        .prop("disabled", school.verified)
+                        .event(clone!(state, school => move |evt:events::CustomToggle| {
+                            if !school.verified {
+                                state.set_verified(school.id, evt.value());
                             }
                         }))
                     }))

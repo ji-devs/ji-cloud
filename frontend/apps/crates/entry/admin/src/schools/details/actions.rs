@@ -1,11 +1,10 @@
 use crate::schools::details::state::{CurrentAction, SchoolDetails};
 use dominator::clone;
 use shared::api::endpoints;
-use shared::domain::admin::{InviteSchoolUsersRequest, VerifySchoolNameRequest};
-use shared::domain::{
-    admin::{AdminVerifySchoolNamePath, InviteSchoolUsersPath},
-    billing::SchoolAccountPath,
+use shared::domain::admin::{
+    AdminSchoolAccountPath, InviteSchoolUsersRequest, VerifySchoolRequest,
 };
+use shared::domain::admin::{AdminVerifySchoolPath, InviteSchoolUsersPath};
 use std::rc::Rc;
 use utils::prelude::ApiEndpointExt;
 use utils::routes::AdminSchoolsRoute;
@@ -14,8 +13,8 @@ impl SchoolDetails {
     pub fn load_data(self: &Rc<Self>) {
         let state = Rc::clone(self);
         state.parent.loader.load(clone!(state => async move {
-            match endpoints::account::GetSchoolAccount::api_with_auth(
-                SchoolAccountPath(state.school_id),
+            match endpoints::admin::GetAdminSchoolAccount::api_with_auth(
+                AdminSchoolAccountPath(state.school_id),
                 None,
             )
             .await
@@ -56,8 +55,8 @@ impl SchoolDetails {
 
         if let Some(school) = state.school.get_cloned() {
             state.parent.loader.load(clone!(state => async move {
-            match endpoints::admin::VerifySchoolName::api_with_auth(AdminVerifySchoolNamePath(), Some(VerifySchoolNameRequest {
-                school_name_id: school.school_name.id,
+            match endpoints::admin::VerifySchool::api_with_auth(AdminVerifySchoolPath(), Some(VerifySchoolRequest {
+                school_id: school.id,
                 verified: true,
             })).await {
                 Err(error) => {

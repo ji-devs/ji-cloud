@@ -384,6 +384,122 @@
     },
     "query": "select count(*) - 1 as \"max_index!\" from course_data_unit where course_data_id = $1"
   },
+  "0b5105f6625d1690d5b9a7b5a32cacaed8de76fc4b62cc6e1d2f8e989d54b3ad": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: UserId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "username",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "given_name",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "family_name",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "email!",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "language_emails",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "created_at!",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "badge?: UserBadge",
+          "ordinal": 7,
+          "type_info": "Int2"
+        },
+        {
+          "name": "organization",
+          "ordinal": 8,
+          "type_info": "Text"
+        },
+        {
+          "name": "location",
+          "ordinal": 9,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "plan_type?: PlanType",
+          "ordinal": 10,
+          "type_info": "Int2"
+        },
+        {
+          "name": "subscription_status?: SubscriptionStatus",
+          "ordinal": 11,
+          "type_info": "Int2"
+        },
+        {
+          "name": "is_trial?",
+          "ordinal": 12,
+          "type_info": "Bool"
+        },
+        {
+          "name": "current_period_end?: DateTime<Utc>",
+          "ordinal": 13,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "amount_due_in_cents?: AmountInCents",
+          "ordinal": 14,
+          "type_info": "Int8"
+        },
+        {
+          "name": "is_admin?",
+          "ordinal": 15,
+          "type_info": "Bool"
+        },
+        {
+          "name": "school_name?",
+          "ordinal": 16,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        null,
+        false,
+        false,
+        null,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      }
+    },
+    "query": "\nwith account_cte as (\n    select\n        user_account.user_id,\n        subscription_plan.plan_type,\n        subscription.status,\n        subscription.current_period_end,\n        subscription.is_trial,\n        subscription.amount_due,\n        user_account.admin,\n        school.school_name\n    from user_account\n    inner join account using (account_id)\n    left join (\n        select\n            subscription.account_id,\n            status,\n            amount_due,\n            subscription_plan_id,\n            current_period_end,\n            is_trial\n        from subscription\n        join (\n            select\n                distinct on (account_id)\n                account_id, subscription_id\n            from subscription\n            order by account_id, created_at desc\n        ) as recent_subscription using (subscription_id)\n    ) as subscription using (account_id)\n    left join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\n    left join school using (account_id)\n)\nselect  \"user\".id                 as \"id!: UserId\",\n        username,\n        given_name,\n        family_name,\n        user_email.email::text as \"email!\",\n        language_emails,\n        user_email.created_at  as \"created_at!\",\n        (select case when badge <> 10 then badge else null end)                  as \"badge?: UserBadge\",\n        organization,\n        location,\n        account_cte.plan_type as \"plan_type?: PlanType\",\n        account_cte.status as \"subscription_status?: SubscriptionStatus\",\n        account_cte.is_trial as \"is_trial?\",\n        account_cte.current_period_end as \"current_period_end?: DateTime<Utc>\",\n        account_cte.amount_due as \"amount_due_in_cents?: AmountInCents\",\n        account_cte.admin as \"is_admin?\",\n        account_cte.school_name::text as \"school_name?\"\nfrom \"user\"\nleft join account_cte on \"user\".id = account_cte.user_id\ninner join user_profile on \"user\".id = user_profile.user_id\ninner join user_email on user_email.user_id = \"user\".id\ninner join unnest($1::uuid[])\nwith ordinality t(id, ord) using (id)\n"
+  },
   "0b806e26d1df6f374e4a0bb40fb4135c666b7bcc1a14b924af53687679106d77": {
     "describe": {
       "columns": [],
@@ -880,26 +996,6 @@
     },
     "query": "update user_audio_upload set uploaded_at = now(), processing_result = null where audio_id = $1"
   },
-  "14874f07db89a6edf7d6088fe4a671471751e7166d43a9ce458ad646d697da07": {
-    "describe": {
-      "columns": [
-        {
-          "name": "exists!",
-          "ordinal": 0,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "select exists(select 1 from school where school_name_id = $1) as \"exists!\""
-  },
   "14f012bfa5f6e21f23b17bc3d4a56b40dcffe39be966cd8b6af3aba87631968a": {
     "describe": {
       "columns": [
@@ -969,125 +1065,6 @@
       }
     },
     "query": "\nselect id as \"id: ResourceTypeId\", display_name, created_at, updated_at from \"resource_type\"\norder by index\n"
-  },
-  "169c76ec5bd6eb880ee08d95bc74655d5e685f9136f157677aa664446dc77e0e": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: UserId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "username",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "given_name",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "family_name",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "email!",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "language_emails",
-          "ordinal": 5,
-          "type_info": "Text"
-        },
-        {
-          "name": "created_at!",
-          "ordinal": 6,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "badge?: UserBadge",
-          "ordinal": 7,
-          "type_info": "Int2"
-        },
-        {
-          "name": "organization",
-          "ordinal": 8,
-          "type_info": "Text"
-        },
-        {
-          "name": "location",
-          "ordinal": 9,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "plan_type?: PlanType",
-          "ordinal": 10,
-          "type_info": "Int2"
-        },
-        {
-          "name": "subscription_status?: SubscriptionStatus",
-          "ordinal": 11,
-          "type_info": "Int2"
-        },
-        {
-          "name": "current_period_end?: DateTime<Utc>",
-          "ordinal": 12,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "is_trial?",
-          "ordinal": 13,
-          "type_info": "Bool"
-        },
-        {
-          "name": "amount_due_in_cents?: AmountInCents",
-          "ordinal": 14,
-          "type_info": "Int8"
-        },
-        {
-          "name": "is_admin?",
-          "ordinal": 15,
-          "type_info": "Bool"
-        },
-        {
-          "name": "school_name?",
-          "ordinal": 16,
-          "type_info": "Text"
-        }
-      ],
-      "nullable": [
-        null,
-        false,
-        false,
-        false,
-        null,
-        false,
-        false,
-        null,
-        true,
-        true,
-        false,
-        false,
-        false,
-        false,
-        true,
-        false,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int8",
-          "Int8",
-          "Int2Array"
-        ]
-      }
-    },
-    "query": "\nwith cte as (\n    select (array_agg(user_profile.user_id))[1]\n    from user_profile\n        inner join \"user\" on \"user\".id = user_profile.user_id\n        inner join user_email on user_profile.user_id = user_email.user_id\n    where (user_profile.user_id = $1 or $1 is null)\n      and (user_profile.badge = any($4) or $4 = array[]::smallint[])\n    group by \"user\".created_at\n    order by \"user\".created_at desc\n),\ncte1 as (\n    select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n   , ord) order by ord\n),\naccount_cte as (\n    select\n        user_account.user_id,\n        subscription_plan.plan_type,\n        subscription.status,\n        subscription.current_period_end,\n        subscription.amount_due,\n        subscription.is_trial,\n        user_account.admin,\n        school_name.name\n    from user_account\n    inner join account using (account_id)\n    left join (\n        select\n            subscription.account_id,\n            status,\n            amount_due,\n            subscription_plan_id,\n            current_period_end,\n            is_trial\n        from subscription\n        join (\n            select\n                distinct on (account_id)\n                account_id, subscription_id\n            from subscription\n            order by account_id, created_at desc\n        ) as recent_subscription using (subscription_id)\n    ) as subscription using (account_id)\n    left join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\n    left join school using (account_id)\n    left join school_name on school.school_name_id = school_name.school_name_id\n)\nselect  cte1.id                 as \"id!: UserId\",\n        username,\n        given_name,\n        family_name,\n        user_email.email::text as \"email!\",\n        language_emails,\n        user_email.created_at  as \"created_at!\",\n        (select case when badge <> 10 then badge else null end) as \"badge?: UserBadge\",\n        organization,\n        location,\n        account_cte.plan_type as \"plan_type?: PlanType\",\n        account_cte.status as \"subscription_status?: SubscriptionStatus\",\n        account_cte.current_period_end as \"current_period_end?: DateTime<Utc>\",\n        account_cte.is_trial as \"is_trial?\",\n        account_cte.amount_due as \"amount_due_in_cents?: AmountInCents\",\n        account_cte.admin as \"is_admin?\",\n        account_cte.name::text as \"school_name?\"\nfrom cte1\n        left join account_cte on cte1.id = account_cte.user_id\n        inner join user_profile on cte1.id = user_profile.user_id\n        inner join user_email on cte1.id = user_email.user_id\norder by ord asc\nlimit $3\noffset $2\n"
   },
   "16b8e7596de9c8c57e8a50d4b6788e6d7874603ce815762fae2380223a4ddfc0": {
     "describe": {
@@ -2265,27 +2242,6 @@
     },
     "query": "\n     select up.user_id                                  as \"id!\",\n            username                                 as \"username!\",\n            given_name || ' '::text || family_name   as \"creator_name!\",\n            (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n            (select languages_spoken from user_profile where user_profile.user_id = \"user\".id and languages_spoken_public is true)  as \"languages_spoken?: Vec<String>\",\n            (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n            (select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\",\n            (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?: String\",\n            (select array(select circle.id\n                from circle_member bm\n                inner join circle on bm.id = circle.id\n                where bm.user_id = \"user\".id\n            )) as \"circles!\"\n    from user_profile \"up\"\n    inner join \"user\" on \"user\".id = up.user_id\n    inner join public_user on public_user.user_id = up.user_id\n    where (public_user.last_synced_at is null or\n          (up.updated_at is not null and public_user.last_synced_at < up.updated_at))\n    limit 100 for no key update skip locked;\n       "
   },
-  "23307aa6d384c434c13fa6b6572ff0e774a348c80a2100ef9e533e55eeb2c9d7": {
-    "describe": {
-      "columns": [
-        {
-          "name": "school_name_id!: SchoolNameId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Bool"
-        ]
-      }
-    },
-    "query": "\ninsert into school_name (name, verified)\nvalues ($1::text::citext, $2)\nreturning school_name_id as \"school_name_id!: SchoolNameId\"\n"
-  },
   "23a8521d00447ec2e9a085665eb0ac2ee6b39b4e06a4e490c0b3ab5f6299f96c": {
     "describe": {
       "columns": [
@@ -3282,6 +3238,26 @@
     },
     "query": "select account_id as \"account_id: AccountId\" from school where school_id = $1"
   },
+  "3841152baf6bc0ccd3c5674bab88ea3f0853e99399e76b1e5d30e51d8d8736f3": {
+    "describe": {
+      "columns": [
+        {
+          "name": "school_name_id!: SchoolNameId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\ninsert into school_name (name)\nvalues ($1::text::citext)\nreturning school_name_id as \"school_name_id!: SchoolNameId\"\n"
+  },
   "38f4583733b6c9997f177207df1454333810b9c7de7d7993b9b20f9b1a6efaf6": {
     "describe": {
       "columns": [
@@ -3797,6 +3773,33 @@
       }
     },
     "query": "\nselect exists (select 1 from \"user\" where id = $1) as \"check_from!\"\n        "
+  },
+  "3a836f536f36f9f30d90952f34c03da86dd78c890c461146a1f30e4e9c8937f4": {
+    "describe": {
+      "columns": [
+        {
+          "name": "school_id!: SchoolId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Uuid",
+          "Text",
+          "Jsonb",
+          "Text",
+          "Text",
+          "Text",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\ninsert into school\n    (school_name, account_id, email, location, description, website, organization_type, profile_image_id)\nvalues\n    ($1::text::citext, $2, $3::text::citext, $4, $5, $6, $7, $8)\nreturning school_id as \"school_id!: SchoolId\"\n"
   },
   "3ad66986079ea2df21f1a6af0c50510d362a19addcf3bc0f62b8f3948ea14cf8": {
     "describe": {
@@ -4329,6 +4332,125 @@
       }
     },
     "query": "\ninsert into jig_data_module (\"index\", jig_data_id, kind, is_complete, contents)\nselect \"index\", $2 as \"jig_id\", kind, is_complete, contents\nfrom jig_data_module\nwhere jig_data_id = $1\n        "
+  },
+  "416b3e8bdf78127c50efb06c72b8df2246256a253bd7952778020bcaa686fcf0": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: UserId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "username",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "given_name",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "family_name",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "email!",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "language_emails",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "created_at!",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "badge?: UserBadge",
+          "ordinal": 7,
+          "type_info": "Int2"
+        },
+        {
+          "name": "organization",
+          "ordinal": 8,
+          "type_info": "Text"
+        },
+        {
+          "name": "location",
+          "ordinal": 9,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "plan_type?: PlanType",
+          "ordinal": 10,
+          "type_info": "Int2"
+        },
+        {
+          "name": "subscription_status?: SubscriptionStatus",
+          "ordinal": 11,
+          "type_info": "Int2"
+        },
+        {
+          "name": "current_period_end?: DateTime<Utc>",
+          "ordinal": 12,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "is_trial?",
+          "ordinal": 13,
+          "type_info": "Bool"
+        },
+        {
+          "name": "amount_due_in_cents?: AmountInCents",
+          "ordinal": 14,
+          "type_info": "Int8"
+        },
+        {
+          "name": "is_admin?",
+          "ordinal": 15,
+          "type_info": "Bool"
+        },
+        {
+          "name": "school_name?",
+          "ordinal": 16,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        null,
+        false,
+        false,
+        false,
+        null,
+        false,
+        false,
+        null,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int8",
+          "Int8",
+          "Int2Array"
+        ]
+      }
+    },
+    "query": "\nwith cte as (\n    select (array_agg(user_profile.user_id))[1]\n    from user_profile\n        inner join \"user\" on \"user\".id = user_profile.user_id\n        inner join user_email on user_profile.user_id = user_email.user_id\n    where (user_profile.user_id = $1 or $1 is null)\n      and (user_profile.badge = any($4) or $4 = array[]::smallint[])\n    group by \"user\".created_at\n    order by \"user\".created_at desc\n),\ncte1 as (\n    select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n   , ord) order by ord\n),\naccount_cte as (\n    select\n        user_account.user_id,\n        subscription_plan.plan_type,\n        subscription.status,\n        subscription.current_period_end,\n        subscription.amount_due,\n        subscription.is_trial,\n        user_account.admin,\n        school.school_name\n    from user_account\n    inner join account using (account_id)\n    left join (\n        select\n            subscription.account_id,\n            status,\n            amount_due,\n            subscription_plan_id,\n            current_period_end,\n            is_trial\n        from subscription\n        join (\n            select\n                distinct on (account_id)\n                account_id, subscription_id\n            from subscription\n            order by account_id, created_at desc\n        ) as recent_subscription using (subscription_id)\n    ) as subscription using (account_id)\n    left join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\n    left join school using (account_id)\n)\nselect  cte1.id                 as \"id!: UserId\",\n        username,\n        given_name,\n        family_name,\n        user_email.email::text as \"email!\",\n        language_emails,\n        user_email.created_at  as \"created_at!\",\n        (select case when badge <> 10 then badge else null end) as \"badge?: UserBadge\",\n        organization,\n        location,\n        account_cte.plan_type as \"plan_type?: PlanType\",\n        account_cte.status as \"subscription_status?: SubscriptionStatus\",\n        account_cte.current_period_end as \"current_period_end?: DateTime<Utc>\",\n        account_cte.is_trial as \"is_trial?\",\n        account_cte.amount_due as \"amount_due_in_cents?: AmountInCents\",\n        account_cte.admin as \"is_admin?\",\n        account_cte.school_name::text as \"school_name?\"\nfrom cte1\n        left join account_cte on cte1.id = account_cte.user_id\n        inner join user_profile on cte1.id = user_profile.user_id\n        inner join user_email on cte1.id = user_email.user_id\norder by ord asc\nlimit $3\noffset $2\n"
   },
   "422a1de63f939133e80b36a64ecb1bece887bac87023707fee599f6e63f131d3": {
     "describe": {
@@ -5303,86 +5425,6 @@
     },
     "query": "\nselect author_id    \"author_id: UserId\",\n       published_at  as \"published_at?\"\nfrom resource\nwhere id = $1\n    "
   },
-  "4da342b750d6e83378148ab97f88ce799bffc4adafdfb19935281816a7b1327a": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: SchoolId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "name!: SchoolNameId",
-          "ordinal": 1,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "location?: serde_json::Value",
-          "ordinal": 2,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "email!",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "description",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "profile_image?: ImageId",
-          "ordinal": 5,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "website",
-          "ordinal": 6,
-          "type_info": "Text"
-        },
-        {
-          "name": "organization_type",
-          "ordinal": 7,
-          "type_info": "Text"
-        },
-        {
-          "name": "account_id!: AccountId",
-          "ordinal": 8,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "created_at",
-          "ordinal": 9,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at",
-          "ordinal": 10,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        true,
-        null,
-        true,
-        true,
-        true,
-        true,
-        false,
-        false,
-        true
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect\n    school_id as \"id!: SchoolId\",\n    school_name_id as \"name!: SchoolNameId\",\n    location as \"location?: serde_json::Value\",\n    email::text as \"email!\",\n    description,\n    profile_image_id as \"profile_image?: ImageId\",\n    website,\n    organization_type,\n    account_id as \"account_id!: AccountId\",\n    created_at,\n    updated_at\nfrom school\nwhere school_id = $1\n"
-  },
   "4da84f765be4de8af75314d6e1912c42adad868e0db6011eda70acc0c4e78a2f": {
     "describe": {
       "columns": [
@@ -5594,6 +5636,86 @@
       }
     },
     "query": "delete from animation_metadata where id = $1 returning kind as \"kind: AnimationKind\""
+  },
+  "516ec4e33a581613db7c947d4a62c916bf3be7c5363f41daccae3de06e8849a5": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: SchoolId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "school_name!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "location?: serde_json::Value",
+          "ordinal": 2,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "email!",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "description",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "profile_image?: ImageId",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "website",
+          "ordinal": 6,
+          "type_info": "Text"
+        },
+        {
+          "name": "organization_type",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "account_id!: AccountId",
+          "ordinal": 8,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 10,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        null,
+        true,
+        null,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect\n    school_id as \"id!: SchoolId\",\n    school_name::text as \"school_name!\",\n    location as \"location?: serde_json::Value\",\n    email::text as \"email!\",\n    description,\n    profile_image_id as \"profile_image?: ImageId\",\n    website,\n    organization_type,\n    account_id as \"account_id!: AccountId\",\n    created_at,\n    updated_at\nfrom school\nwhere school_id = $1\n"
   },
   "51a40f41372d3ac245973b6c148c56e71684c771e64465cf5c188241d4416d4a": {
     "describe": {
@@ -6111,27 +6233,6 @@
       }
     },
     "query": "\nupdate resource_data\nset draft_or_live = $2\nwhere id = $1\n            "
-  },
-  "5c1a115b0d19fbd9cf70491dbf05e47ce8af063817b55567e0f3733b432c364c": {
-    "describe": {
-      "columns": [
-        {
-          "name": "total_schools!",
-          "ordinal": 0,
-          "type_info": "Int8"
-        }
-      ],
-      "nullable": [
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Bool",
-          "Text"
-        ]
-      }
-    },
-    "query": "\nselect\n    count(*) as \"total_schools!\"\nfrom school_name\nwhere\n    (\n        (not $1::bool is null and (verified = $1::bool))\n        or $1::bool is null\n    )\n    and (\n        (not $2::text is null and (school_name.name like ('%' || $2::text || '%')::citext))\n        or $2::text is null\n    )\n"
   },
   "5c74fc8320e9a7a78b6ac4fc29214b03fade67d4023300f5ec44f258167df11c": {
     "describe": {
@@ -7830,6 +7931,98 @@
     },
     "query": "\nselect course.id                               as \"id!: CourseId\",\n       creator_id                               as \"creator_id?: UserId\",\n       author_id                                as \"author_id?: UserId\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id) as \"author_name\",\n       live_id                                  as \"live_id!\",\n       draft_id                                 as \"draft_id!\",\n       published_at,\n       likes                                    as \"likes!\",\n       plays                                    as \"plays!\",\n       live_up_to_date                          as \"live_up_to_date!\",\n       rating                                   as \"rating?: CourseRating\",\n       blocked                                  as \"blocked!\",\n       curated                                  as \"curated!\",\n       is_premium                               as \"premium!\"\nfrom course\ninner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\ninner join course_admin_data \"admin\" on admin.course_id = course.id\norder by ord asc\n    "
   },
+  "74b7fecc1f3492b521314c03a90d4f77563de26d85ffa94a7c821c2d11cd7525": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: SchoolId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "school_name!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "internal_school_name_id?: SchoolNameId",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "verified!",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "location?: serde_json::Value",
+          "ordinal": 4,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "email!",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "description",
+          "ordinal": 6,
+          "type_info": "Text"
+        },
+        {
+          "name": "profile_image?: ImageId",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "website",
+          "ordinal": 8,
+          "type_info": "Text"
+        },
+        {
+          "name": "organization_type",
+          "ordinal": 9,
+          "type_info": "Text"
+        },
+        {
+          "name": "account_id!: AccountId",
+          "ordinal": 10,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 11,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 12,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        null,
+        true,
+        true,
+        true,
+        null,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect\n    school_id as \"id!: SchoolId\",\n    school_name::text as \"school_name!\",\n    internal_school_name_id as \"internal_school_name_id?: SchoolNameId\",\n    verified as \"verified!\",\n    location as \"location?: serde_json::Value\",\n    email::text as \"email!\",\n    description,\n    profile_image_id as \"profile_image?: ImageId\",\n    website,\n    organization_type,\n    account_id as \"account_id!: AccountId\",\n    created_at,\n    updated_at\nfrom school\nwhere school_id = $1\n"
+  },
   "74fbb4de26eb4eca3d53fa73b828c6e9d8d6c49f0be6242d6c886f4753a0ad85": {
     "describe": {
       "columns": [
@@ -8762,122 +8955,6 @@
     },
     "query": "update jig set live_id = $1, published_at = now() where id = $2"
   },
-  "88d4579a4ddef195712ac196e75e5ab0194ebb4a77034565a3053ba443855018": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: UserId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "username",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "given_name",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "family_name",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "email!",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "language_emails",
-          "ordinal": 5,
-          "type_info": "Text"
-        },
-        {
-          "name": "created_at!",
-          "ordinal": 6,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "badge?: UserBadge",
-          "ordinal": 7,
-          "type_info": "Int2"
-        },
-        {
-          "name": "organization",
-          "ordinal": 8,
-          "type_info": "Text"
-        },
-        {
-          "name": "location",
-          "ordinal": 9,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "plan_type?: PlanType",
-          "ordinal": 10,
-          "type_info": "Int2"
-        },
-        {
-          "name": "subscription_status?: SubscriptionStatus",
-          "ordinal": 11,
-          "type_info": "Int2"
-        },
-        {
-          "name": "is_trial?",
-          "ordinal": 12,
-          "type_info": "Bool"
-        },
-        {
-          "name": "current_period_end?: DateTime<Utc>",
-          "ordinal": 13,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "amount_due_in_cents?: AmountInCents",
-          "ordinal": 14,
-          "type_info": "Int8"
-        },
-        {
-          "name": "is_admin?",
-          "ordinal": 15,
-          "type_info": "Bool"
-        },
-        {
-          "name": "school_name?",
-          "ordinal": 16,
-          "type_info": "Text"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        null,
-        false,
-        false,
-        null,
-        true,
-        true,
-        false,
-        false,
-        false,
-        false,
-        true,
-        false,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "UuidArray"
-        ]
-      }
-    },
-    "query": "\nwith account_cte as (\n    select\n        user_account.user_id,\n        subscription_plan.plan_type,\n        subscription.status,\n        subscription.current_period_end,\n        subscription.is_trial,\n        subscription.amount_due,\n        user_account.admin,\n        school_name.name\n    from user_account\n    inner join account using (account_id)\n    left join (\n        select\n            subscription.account_id,\n            status,\n            amount_due,\n            subscription_plan_id,\n            current_period_end,\n            is_trial\n        from subscription\n        join (\n            select\n                distinct on (account_id)\n                account_id, subscription_id\n            from subscription\n            order by account_id, created_at desc\n        ) as recent_subscription using (subscription_id)\n    ) as subscription using (account_id)\n    left join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\n    left join school using (account_id)\n    left join school_name on school.school_name_id = school_name.school_name_id\n)\nselect  \"user\".id                 as \"id!: UserId\",\n        username,\n        given_name,\n        family_name,\n        user_email.email::text as \"email!\",\n        language_emails,\n        user_email.created_at  as \"created_at!\",\n        (select case when badge <> 10 then badge else null end)                  as \"badge?: UserBadge\",\n        organization,\n        location,\n        account_cte.plan_type as \"plan_type?: PlanType\",\n        account_cte.status as \"subscription_status?: SubscriptionStatus\",\n        account_cte.is_trial as \"is_trial?\",\n        account_cte.current_period_end as \"current_period_end?: DateTime<Utc>\",\n        account_cte.amount_due as \"amount_due_in_cents?: AmountInCents\",\n        account_cte.admin as \"is_admin?\",\n        account_cte.name::text as \"school_name?\"\nfrom \"user\"\nleft join account_cte on \"user\".id = account_cte.user_id\ninner join user_profile on \"user\".id = user_profile.user_id\ninner join user_email on user_email.user_id = \"user\".id\ninner join unnest($1::uuid[])\nwith ordinality t(id, ord) using (id)\n"
-  },
   "88f0b8dffce417087a9ca7732ca5d41b13d686ab6388d7fa26a7b62e68ae613e": {
     "describe": {
       "columns": [],
@@ -9316,19 +9393,6 @@
       }
     },
     "query": "\nselect media_id,\n       kind as \"kind: MediaKind\"\nfrom web_media_library_url\ninner join web_media_library on id = media_id\nwhere media_url = $1"
-  },
-  "8e4fca2315dd5ebe2e8d4189a5efb8951d2824577d2d864d55e40aebca67e775": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Bool"
-        ]
-      }
-    },
-    "query": "update school_name set verified = $2 where school_name_id = $1"
   },
   "8e91b63b58e15b8c898573ffd729ea87968e8d2efa24ee4d855ac357c193087b": {
     "describe": {
@@ -9908,85 +9972,26 @@
     },
     "query": "\n    insert into resource_report(resource_id, report_type, reporter_id)\n    values ($1, $2, $3)\n    returning id as \"id!: ReportId\"\n            "
   },
-  "971f66394a0aceb254f52e65269558a61af8362b8119c59c15f5e9d82fa6aed7": {
+  "96a6b53e541b07d05e109c47e1de17ea1c6a55899d98697f8d51d64c7d16170a": {
     "describe": {
       "columns": [
         {
-          "name": "id!: SchoolId",
+          "name": "exists!",
           "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "name!: SchoolNameId",
-          "ordinal": 1,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "location?: serde_json::Value",
-          "ordinal": 2,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "email!",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "description",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "profile_image?: ImageId",
-          "ordinal": 5,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "website",
-          "ordinal": 6,
-          "type_info": "Text"
-        },
-        {
-          "name": "organization_type",
-          "ordinal": 7,
-          "type_info": "Text"
-        },
-        {
-          "name": "account_id!: AccountId",
-          "ordinal": 8,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "created_at",
-          "ordinal": 9,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at",
-          "ordinal": 10,
-          "type_info": "Timestamptz"
+          "type_info": "Bool"
         }
       ],
       "nullable": [
-        false,
-        false,
-        true,
-        null,
-        true,
-        true,
-        true,
-        true,
-        false,
-        false,
-        true
+        null
       ],
       "parameters": {
         "Left": [
+          "Text",
           "Uuid"
         ]
       }
     },
-    "query": "\nselect\n    school_id as \"id!: SchoolId\",\n    school_name_id as \"name!: SchoolNameId\",\n    location as \"location?: serde_json::Value\",\n    email::text as \"email!\",\n    description,\n    profile_image_id as \"profile_image?: ImageId\",\n    website,\n    organization_type,\n    account_id as \"account_id!: AccountId\",\n    created_at,\n    updated_at\nfrom school\nwhere account_id = $1\n"
+    "query": "\nselect exists(\n    select 1\n    from school_name\n    where\n        citext_eq(name, $1::text::citext)\n        and (school_name_id is null or school_name_id != $2)\n) as \"exists!\"\n"
   },
   "974e49b8fa518e9402ae2494147cd25953503851952b4ba97d635a2aeb5bd729": {
     "describe": {
@@ -11342,33 +11347,6 @@
     },
     "query": "\ninsert into jig_data\n(display_name, created_at, updated_at, language, last_synced_at, description, theme, audio_background,\n audio_feedback_negative, audio_feedback_positive, direction, display_score, drag_assist, track_assessments, privacy_level, other_keywords, translated_keywords, translated_description)\nselect display_name,\n       created_at,\n       updated_at,\n       language,\n       last_synced_at,\n       description,\n       theme,\n       audio_background,\n       audio_feedback_negative,\n       audio_feedback_positive,\n       direction,\n       display_score,\n       drag_assist,\n       track_assessments,\n       privacy_level,\n       other_keywords,\n       translated_keywords,\n       translated_description::jsonb\nfrom jig_data\nwhere id = $1\nreturning id\n        "
   },
-  "abe1970d7338a9ae697662a24a8f5ace0e64473edd7f378b7bdbdfc859590499": {
-    "describe": {
-      "columns": [
-        {
-          "name": "school_id!: SchoolId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid",
-          "Text",
-          "Jsonb",
-          "Text",
-          "Text",
-          "Text",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\ninsert into school\n    (school_name_id, account_id, email, location, description, website, organization_type, profile_image_id)\nvalues\n    ($1, $2, $3::text::citext, $4, $5, $6, $7, $8)\nreturning school_id as \"school_id!: SchoolId\"\n"
-  },
   "abe8fdba2626df204b680c636918cef5fa26f18f628d7bced58edacdb26e0b63": {
     "describe": {
       "columns": [
@@ -11762,36 +11740,6 @@
     },
     "query": "\nupdate user_profile\nset username                = coalesce($2, username),\n    given_name              = coalesce($3, given_name),\n    family_name             = coalesce($4, family_name),\n    language_app            = coalesce($5, language_app),\n    language_emails         = coalesce($6, language_emails),\n    timezone                = coalesce($7, timezone),\n    opt_into_edu_resources  = coalesce($8, opt_into_edu_resources),\n    persona_public          = coalesce($9, persona_public),\n    organization_public     = coalesce($10, organization_public),\n    location_public         = coalesce($11, location_public),\n    languages_spoken_public = coalesce($12, languages_spoken_public),\n    bio                     = coalesce($13, bio),\n    bio_public              = coalesce($14, bio_public),\n    updated_at              = coalesce(now(), updated_at)\nwhere user_id = $1\n  and (($2::text is not null and $2 is distinct from username) or\n       ($3::text is not null and $3 is distinct from given_name) or\n       ($4::text is not null and $4 is distinct from family_name) or\n       ($5::text is not null and $5 is distinct from language_app) or\n       ($6::text is not null and $6 is distinct from language_emails) or\n       ($7::text is not null and $7 is distinct from timezone) or\n       ($8::bool is not null and $8 is distinct from opt_into_edu_resources) or\n       ($9::bool is not null and $9 is distinct from persona_public) or\n       ($10::bool is not null and $10 is distinct from organization_public) or\n       ($11::bool is not null and $11 is distinct from location_public) or\n       ($12::bool is not null and $12 is distinct from languages_spoken_public) or\n       ($13::text is not null and $13 is distinct from bio) or\n       ($14::bool is not null and $14 is distinct from bio_public)\n    )\n    "
   },
-  "afa08df4c6807e3ba4ff6fb6e6814206e246e5749dee5d8c58c9b9b4bc6dd559": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: SchoolNameId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "name!",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "verified",
-          "ordinal": 2,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        false,
-        null,
-        false
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "\nselect\n    school_name_id as \"id!: SchoolNameId\",\n    name::text as \"name!\",\n    verified\nfrom school_name\nwhere verified = true\n"
-  },
   "afc0c3da7ee162b519656cd59196275505ff487acfdd9af9e7340358be94308d": {
     "describe": {
       "columns": [],
@@ -11804,38 +11752,6 @@
       }
     },
     "query": "\nupdate user_profile\nset organization = $2,\n    updated_at = now()\nwhere user_id = $1 and organization is distinct from $2"
-  },
-  "b0bfc855f6a2676e60a5f816af6607df0da1dc16860641e709978494b711bb0c": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: SchoolNameId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "name!",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "verified",
-          "ordinal": 2,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        false,
-        null,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect\n    school_name_id as \"id!: SchoolNameId\",\n    name::text as \"name!\",\n    verified\nfrom school_name\nwhere school_name_id = $1\n"
   },
   "b112cb6d91c1a044dc07e04f50d8a9529160e5d8f410dd23bf2b0b5004111342": {
     "describe": {
@@ -12075,6 +11991,19 @@
       }
     },
     "query": "update resource set live_id = $1, published_at = now() where id = $2"
+  },
+  "b4f23076e4319c68fc63f9f3631cbd1ed2dea9ec6eda03b606719391cfa98cb9": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Bool"
+        ]
+      }
+    },
+    "query": "update school set verified = $2 where school_id = $1"
   },
   "b4f3858831e1685ac7bf663ebddc340a804437258fce9803fd079c084b38e470": {
     "describe": {
@@ -12356,6 +12285,107 @@
     },
     "query": "\nselect draft_id from jig where jig.id = $1\n"
   },
+  "bb127749d588634e8bff9388fdf9b75c71f69b2e327ab8f582746bc7d22890ca": {
+    "describe": {
+      "columns": [
+        {
+          "name": "school_id!: SchoolId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "school_name!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "internal_school_name_id?: SchoolNameId",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "internal_school_name?",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "verified!",
+          "ordinal": 4,
+          "type_info": "Bool"
+        },
+        {
+          "name": "location?: serde_json::Value",
+          "ordinal": 5,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "email?",
+          "ordinal": 6,
+          "type_info": "Text"
+        },
+        {
+          "name": "description",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "profile_image?: ImageId",
+          "ordinal": 8,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "website",
+          "ordinal": 9,
+          "type_info": "Text"
+        },
+        {
+          "name": "organization_type",
+          "ordinal": 10,
+          "type_info": "Text"
+        },
+        {
+          "name": "account_id?: AccountId",
+          "ordinal": 11,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at?",
+          "ordinal": 12,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 13,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        null,
+        false,
+        null,
+        true,
+        true,
+        null,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Bool",
+          "Text",
+          "Int8",
+          "Int8"
+        ]
+      }
+    },
+    "query": "\nselect\n    school_id as \"school_id!: SchoolId\",\n    school_name::text as \"school_name!\",\n    school_name_id as \"internal_school_name_id?: SchoolNameId\",\n    school_name.name::text as \"internal_school_name?\",\n    verified as \"verified!\",\n    location as \"location?: serde_json::Value\",\n    email::text as \"email?\",\n    description,\n    profile_image_id as \"profile_image?: ImageId\",\n    website,\n    organization_type,\n    account_id as \"account_id?: AccountId\",\n    school.created_at as \"created_at?\",\n    school.updated_at\nfrom school\nleft join school_name on school.internal_school_name_id = school_name.school_name_id\nwhere\n    (\n        (not $1::bool is null and (verified = $1::bool))\n        or $1::bool is null\n    )\n    and (\n        (not $2::text is null and (school_name.name like ('%' || $2::text || '%')::citext))\n        or $2::text is null\n    )\norder by school_name.name asc\nlimit $3\noffset $4\n"
+  },
   "bb4dfa1f6500b1004a0165718cf4c67cb5518fd374f30740a27fe094f73b9dc2": {
     "describe": {
       "columns": [
@@ -12630,6 +12660,27 @@
     },
     "query": "\nupdate category\nset updated_at = now(),\n    index = index + 1\nwhere index >= $1 and index < $2 and parent_id is not distinct from $3\n                "
   },
+  "c13dce0be8c38ccf3078315b58c7e0700ef47868a0014424f36a05786cf4aa12": {
+    "describe": {
+      "columns": [
+        {
+          "name": "total_schools!",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Bool",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nselect\n    count(*) as \"total_schools!\"\nfrom school\nwhere\n    (\n        (not $1::bool is null and (verified = $1::bool))\n        or $1::bool is null\n    )\n    and (\n        (not $2::text is null and (school_name like ('%' || $2::text || '%')::citext))\n        or $2::text is null\n    )\n"
+  },
   "c211fee6bb763f9b0139652fddc88ae42d57d807ef7a35d4d96db1544ebbe0b0": {
     "describe": {
       "columns": [],
@@ -12723,6 +12774,19 @@
       }
     },
     "query": "\n        select count(user_id)  as \"count!: i64\"\n        from user_follow\n        where follower_id = $1\n            "
+  },
+  "c7c3476f7178dffb88724706ed1916ee5810812fbc75101ad3a961d4ad36cea6": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nupdate school_name\nset\n    name = $2::text::citext\nwhere school_name_id = $1\n"
   },
   "c832b96167ee47673a382ca586fb5c2c67f777cb9e7a15c3e545afa7a0baca3d": {
     "describe": {
@@ -12937,6 +13001,86 @@
       }
     },
     "query": "\nupdate user_font\n    set name = $3\n    where user_id = $1\n    and index = $2\n        "
+  },
+  "cbcf244ef319b8d169db4e5cf64707064b7e2578103844a91c213c6b36ece2f4": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: SchoolId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "school_name!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "location?: serde_json::Value",
+          "ordinal": 2,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "email!",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "description",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "profile_image?: ImageId",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "website",
+          "ordinal": 6,
+          "type_info": "Text"
+        },
+        {
+          "name": "organization_type",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "account_id!: AccountId",
+          "ordinal": 8,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 10,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        null,
+        true,
+        null,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect\n    school_id as \"id!: SchoolId\",\n    school_name::text as \"school_name!\",\n    location as \"location?: serde_json::Value\",\n    email::text as \"email!\",\n    description,\n    profile_image_id as \"profile_image?: ImageId\",\n    website,\n    organization_type,\n    account_id as \"account_id!: AccountId\",\n    created_at,\n    updated_at\nfrom school\nwhere account_id = $1\n"
   },
   "cbf72977b86cfd79cc5b3577cad8ce2b11394b783608e0f7d947e271bc1d2663": {
     "describe": {
@@ -13505,20 +13649,6 @@
       }
     },
     "query": "\nselect jdm.id          as \"id!: ModuleId\",\n       contents    as \"body!\",\n       created_at  as \"created_at!\",\n       updated_at  as \"updated_at!\",\n       kind        as \"kind!: ModuleKind\",\n       is_complete as \"is_complete!\"\nfrom resource_data_module \"jdm\"\ninner join resource on resource.live_id = jdm.resource_data_id \nwhere jdm.id is not distinct from $1 \n"
-  },
-  "d5c026267da896af0c0c7293c998721739470366af61ea52be42a80d7ab2512b": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Bool"
-        ]
-      }
-    },
-    "query": "\nupdate school_name\nset\n    name = $2::text::citext,\n    verified = $3\nwhere school_name_id = $1\n"
   },
   "d5f7bcda61b8abb751cc560960d08dbc327b476eb3b9ee8b7e8acb627833fbce": {
     "describe": {
@@ -14346,27 +14476,6 @@
     },
     "query": "\nselect\n    user_profile.user_id as \"id: UserId\",\n    username,\n    user_email.email::text as \"email!\",\n    given_name,\n    family_name,\n    profile_image_id       as \"profile_image?: ImageId\",\n    (select case when exists(select * from user_auth_google where user_id = $1) = true then 1 else 0 end)     as \"is_oauth!: bool\",\n    languages_spoken         as \"languages_spoken!: Vec<String>\",\n    language_app,\n    language_emails,\n    bio,\n    (select case when badge <> 10 then badge else null end) as \"badge?: UserBadge\",\n    location_public,\n    languages_spoken_public,\n    persona_public,\n    bio_public,\n    organization_public,\n    opt_into_edu_resources,\n    over_18,\n    timezone,\n    user_profile.created_at,\n    user_profile.updated_at,\n    organization,\n    persona                as \"persona!: Vec<String>\",\n    location,\n    array(select scope from user_scope where user_scope.user_id = \"user\".id) as \"scopes!: Vec<i16>\",\n    array(select subject_id from user_subject where user_subject.user_id = \"user\".id) as \"subjects!: Vec<Uuid>\",\n    array(select affiliation_id from user_affiliation where user_affiliation.user_id = \"user\".id) as \"affiliations!: Vec<Uuid>\",\n    array(select age_range_id from user_age_range where user_age_range.user_id = \"user\".id) as \"age_ranges!: Vec<Uuid>\",\n    array(select circle.id\n        from circle_member bm\n        inner join circle on bm.id = circle.id\n        where bm.user_id = \"user\".id or circle.creator_id = \"user\".id\n    ) as \"circles!: Vec<Uuid>\"\nfrom \"user\"\n    inner join user_profile on \"user\".id = user_profile.user_id\n    inner join user_email using(user_id)\nwhere id = $1"
   },
-  "e5407d7d6c0e2581f67595c4d454d0571f57d21bfce3f36e4108b8f2a1677c45": {
-    "describe": {
-      "columns": [
-        {
-          "name": "exists!",
-          "ordinal": 0,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect exists(\n    select 1\n    from school_name\n    left join school using (school_name_id)\n    where\n        citext_eq(name, $1::text::citext)\n        and (school_id is null or school_id != $2)\n) as \"exists!\"\n"
-  },
   "e559b6406c6bdff868261e264cf2c2935faec9438b7e7c00c1b1b547b51a8286": {
     "describe": {
       "columns": [
@@ -14607,101 +14716,6 @@
       }
     },
     "query": "\n        with cte as (\n            select (array_agg(course.id))[1]\n            from course_data \"cd\"\n                  inner join course on (draft_id = cd.id or (live_id = cd.id and cd.last_synced_at is not null and published_at is not null))\n                  left join course_admin_data \"admin\" on admin.course_id = course.id\n                  left join course_data_resource \"resource\" on cd.id = resource.course_data_id\n            where (author_id = $1 or $1 is null)\n                and (cd.draft_or_live = $2 or $2 is null)\n                and (blocked = $5 or $5 is null)\n                and (cd.privacy_level = any($3) or $3 = array[]::smallint[])\n                and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n            group by coalesce(updated_at, created_at)\n        )\n        select count(*) as \"count!\" from unnest(array(select cte.array_agg from cte)) with ordinality t(id, ord)\n"
-  },
-  "e954f7defa584c68864ea49acdc45c0d48e5f00176fe1c525537e906ff34adf4": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: SchoolNameId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "school_name!",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "verified!",
-          "ordinal": 2,
-          "type_info": "Bool"
-        },
-        {
-          "name": "school_id?: SchoolId",
-          "ordinal": 3,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "location?: serde_json::Value",
-          "ordinal": 4,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "email?",
-          "ordinal": 5,
-          "type_info": "Text"
-        },
-        {
-          "name": "description",
-          "ordinal": 6,
-          "type_info": "Text"
-        },
-        {
-          "name": "profile_image?: ImageId",
-          "ordinal": 7,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "website",
-          "ordinal": 8,
-          "type_info": "Text"
-        },
-        {
-          "name": "organization_type",
-          "ordinal": 9,
-          "type_info": "Text"
-        },
-        {
-          "name": "account_id?: AccountId",
-          "ordinal": 10,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "created_at?",
-          "ordinal": 11,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at",
-          "ordinal": 12,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        null,
-        false,
-        false,
-        true,
-        null,
-        true,
-        true,
-        true,
-        true,
-        false,
-        false,
-        true
-      ],
-      "parameters": {
-        "Left": [
-          "Bool",
-          "Text",
-          "Int8",
-          "Int8"
-        ]
-      }
-    },
-    "query": "\nselect\n    school_name_id as \"id!: SchoolNameId\",\n    school_name.name::text as \"school_name!\",\n    school_name.verified as \"verified!\",\n    school_id as \"school_id?: SchoolId\",\n    location as \"location?: serde_json::Value\",\n    email::text as \"email?\",\n    description,\n    profile_image_id as \"profile_image?: ImageId\",\n    website,\n    organization_type,\n    account_id as \"account_id?: AccountId\",\n    school.created_at as \"created_at?\",\n    school.updated_at\nfrom school_name\nleft join school using (school_name_id)\nwhere\n    (\n        (not $1::bool is null and (verified = $1::bool))\n        or $1::bool is null\n    )\n    and (\n        (not $2::text is null and (school_name.name like ('%' || $2::text || '%')::citext))\n        or $2::text is null\n    )\norder by school_name.name asc\nlimit $3\noffset $4\n"
   },
   "e9f633a72fa4fad7e52f4dd94aa9c6d1c2fd6b3f256fd21248297f254a5fbb79": {
     "describe": {
@@ -15397,6 +15411,32 @@
       }
     },
     "query": "\nupdate resource_data\nset description = $2,\n    translated_description = '{}',\n    updated_at = now()\nwhere id = $1 and $2 is distinct from description"
+  },
+  "f5f0b20887efda26fbcbd6f34d25a5accdf1c5540e388154bae3d6c261ce048a": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: SchoolNameId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name!",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect\n    school_name_id as \"id!: SchoolNameId\",\n    name::text as \"name!\"\nfrom school_name\nwhere school_name_id = $1\n"
   },
   "f61ec8402e7de26b770073be29eee23dd893751db1fe71f55def28f880b32e3a": {
     "describe": {
