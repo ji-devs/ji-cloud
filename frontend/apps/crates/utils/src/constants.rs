@@ -1,0 +1,2 @@
+pub const INDIVIDUAL_FREE_TRIAL_DAYS: u32 = 7;
+pub const SCHOOL_FREE_TRIAL_DAYS: u32 = 14;

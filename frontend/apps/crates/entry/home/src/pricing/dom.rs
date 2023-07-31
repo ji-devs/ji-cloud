@@ -1,5 +1,6 @@
 use awsm_web::loaders::fetch::fetch_url;
 use components::{page_footer, page_header::PageHeader};
+use const_format::formatcp;
 use dominator::{clone, html, Dom};
 use futures_signals::{
     map_ref,
@@ -9,6 +10,7 @@ use js_sys::Date;
 use shared::domain::billing::PlanType;
 use std::rc::Rc;
 use utils::{
+    constants::{INDIVIDUAL_FREE_TRIAL_DAYS, SCHOOL_FREE_TRIAL_DAYS},
     events, on_click_go_to_url,
     routes::{HomePlanRoute, HomePricingRoute, HomeRoute, Route, UserRoute},
     unwrap::UnwrapJiExt,
@@ -155,7 +157,7 @@ impl Pricing {
                             Route::User(UserRoute::Subscribe1(plan, promo_code.clone())).to_string()
                         }
                     })
-                    .text("Start 7-day trial")
+                    .text(formatcp!("Start {}-day trial", INDIVIDUAL_FREE_TRIAL_DAYS))
                 }))
                 .child(html!("button-rect", {
                     .prop("slot", "pro-action")
@@ -171,7 +173,7 @@ impl Pricing {
                             Route::User(UserRoute::Subscribe1(plan, promo_code.clone())).to_string()
                         }
                     })
-                    .text("Start 7-day trial")
+                    .text(formatcp!("Start {}-day trial", INDIVIDUAL_FREE_TRIAL_DAYS))
                 }))
                 .children(&mut [
                     // html!("button-rect", {
@@ -232,7 +234,7 @@ impl Pricing {
                         .prop("slot", "start-button")
                         .prop("kind", "filled")
                         .prop("color", "blue")
-                        .text("Start 14-day trial")
+                        .text(formatcp!("Start {}-day trial", SCHOOL_FREE_TRIAL_DAYS))
                         .prop_signal("href", map_ref! {
                             let selected_index = selected_index.signal(),
                             let promo_code = state.school_promo_code_signal() => {

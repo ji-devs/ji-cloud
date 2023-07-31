@@ -42,6 +42,7 @@ chrono = { workspace = true, features = ["serde"] }
 chrono-tz = { workspace = true, features = ["serde"] }
 strum = { workspace = true }
 strum_macros = { workspace = true }
+const_format = { workspace = true }
 
 [features]
 default = ["wee_alloc"]

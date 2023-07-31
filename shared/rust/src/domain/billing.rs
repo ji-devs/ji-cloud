@@ -539,7 +539,7 @@ impl PlanType {
             | Self::SchoolLevel2
             | Self::SchoolLevel3
             | Self::SchoolLevel4
-            | Self::SchoolUnlimited => "School annual plan",
+            | Self::SchoolUnlimited => "School plan",
         }
     }
 

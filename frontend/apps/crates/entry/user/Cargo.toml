@@ -44,6 +44,7 @@ zxcvbn = { workspace = true }
 gloo-utils = { workspace = true }
 strum = { workspace = true }
 strum_macros = { workspace = true }
+const_format = { workspace = true }
 
 [features]
 default = ["wee_alloc"]
