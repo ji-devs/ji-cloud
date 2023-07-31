@@ -2,27 +2,20 @@ use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::billing::{PaymentMethodType, PaymentNetwork, PlanType};
 use std::rc::Rc;
-use utils::{
-    events,
-    prelude::{get_plan_type, get_user_mutable},
-    unwrap::UnwrapJiExt,
-};
+use utils::{events, prelude::plan_type_signal};
 
 use crate::settings::state::{PlanSectionInfo, SettingsPage};
 
 const STR_RENEWS_ON: &str = "Renews on";
 const STR_EXPIRES_ON: &str = "Expires on";
 
-#[derive(Clone, Copy, strum_macros::EnumIs)]
+#[derive(Clone, Copy, Debug, strum_macros::EnumIs)]
 enum PaymentFrequency {
     Annually,
     Monthly,
 }
-fn plan_payment_frequency() -> Option<PaymentFrequency> {
-    let user = get_user_mutable();
-    let user = user.lock_ref();
-    let plan_type = user.as_ref()?.account_summary.as_ref()?.plan_type?;
-    Some(match plan_type {
+fn plan_payment_frequency(plan_type: PlanType) -> PaymentFrequency {
+    match plan_type {
         PlanType::IndividualBasicMonthly | PlanType::IndividualProMonthly => {
             PaymentFrequency::Monthly
         }
@@ -33,23 +26,31 @@ fn plan_payment_frequency() -> Option<PaymentFrequency> {
         | PlanType::SchoolLevel3
         | PlanType::SchoolLevel4
         | PlanType::SchoolUnlimited => PaymentFrequency::Annually,
-    })
+    }
 }
 
 impl SettingsPage {
     pub(super) fn render_plan_section(self: &Rc<Self>, plan_info: &PlanSectionInfo) -> Vec<Dom> {
         let state = self;
-        let plan_type = get_plan_type().unwrap_ji();
-        let payment_frequency = plan_payment_frequency().unwrap_ji();
         let auto_renew = plan_info.auto_renew.read_only();
-        let mut output = vec![
+        let price = plan_info.price;
+        vec![
             html!("p", {
                 .prop("slot", "plan-type")
-                .text(plan_type.display_name())
+                .text_signal(plan_type_signal().map(|plan| {
+                    plan.map(|plan| {
+                        plan.display_name()
+                    }).unwrap_or_default()
+                }))
             }),
             html!("p", {
                 .prop("slot", "plan-price")
-                .text(&price_string(plan_info.price, payment_frequency))
+                .text_signal(plan_type_signal().map(move |plan_type| {
+                    plan_type.map(|plan_type| {
+                        let frequency = plan_payment_frequency(plan_type);
+                        price_string(price, frequency)
+                    }).unwrap_or_default()
+                }))
             }),
             html!("p", {
                 .prop("slot", "plan-renews-on")
@@ -78,19 +79,27 @@ impl SettingsPage {
                 }))
             }),
             state.render_payment_method(&plan_info.payment_method_type),
-        ];
-        if payment_frequency.is_monthly() {
-            output.push(html!("button-rect", {
+            html!("div", {
                 .prop("slot", "change-to-annual")
-                .prop("type", "filled")
-                .prop("color", "blue")
-                .text("Get 2 months FREE by switching to yearly")
-                .event(clone!(state => move|_ :events::Click| {
-                    state.change_to_annual_billing();
-                }))
-            }))
-        }
-        output
+                .child_signal(plan_type_signal().map(clone!(state => move |plan_type| {
+                    let frequency = plan_payment_frequency(plan_type?);
+                    match frequency {
+                        PaymentFrequency::Monthly => {
+                            Some(html!("button-rect", {
+                                .prop("slot", "change-to-annual")
+                                .prop("type", "filled")
+                                .prop("color", "blue")
+                                .text("Get 2 months FREE by switching to yearly")
+                                .event(clone!(state => move|_ :events::Click| {
+                                    state.change_to_annual_billing();
+                                }))
+                            }))
+                        },
+                        PaymentFrequency::Annually => None,
+                    }
+                })))
+            }),
+        ]
     }
 
     fn render_payment_method(self: &Rc<Self>, payment_method_type: &PaymentMethodType) -> Dom {
@@ -133,8 +142,8 @@ fn payment_method_type_icon(method_type: &PaymentMethodType) -> &'static str {
 }
 fn price_string(price: u32, frequency: PaymentFrequency) -> String {
     let frequency = match frequency {
-        PaymentFrequency::Annually => "per month",
-        PaymentFrequency::Monthly => "per year",
+        PaymentFrequency::Annually => "per year",
+        PaymentFrequency::Monthly => "per month",
     };
     let price = price as f32 / 100.0;
     format!("${price:.2} - {frequency}")

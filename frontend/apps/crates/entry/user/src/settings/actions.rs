@@ -9,8 +9,9 @@ use shared::{
     domain::{
         billing::{
             Account, AccountIfAuthorized, CancellationStatus, GetSchoolAccountResponse,
-            IndividualAccountPath, IndividualAccountResponse, SchoolAccountPath,
+            IndividualAccountPath, IndividualAccountResponse, PlanType, SchoolAccountPath,
             SubscriptionCancellationStatusRequest, UpdateSubscriptionCancellationPath,
+            UpgradeSubscriptionPlanPath, UpgradeSubscriptionPlanRequest,
         },
         meta::GetMetadataPath,
         user::{GetProfilePath, PatchProfilePath, ResetPasswordPath, ResetPasswordRequest},
@@ -19,7 +20,7 @@ use shared::{
 use wasm_bindgen_futures::spawn_local;
 
 use super::state::{IndividualOrSchool, PlanSectionInfo, ResetPasswordStatus, SettingsPage};
-use utils::{prelude::*, toasts, unwrap::UnwrapJiExt};
+use utils::{bail_on_err, prelude::*, unwrap::UnwrapJiExt};
 
 impl SettingsPage {
     pub fn send_reset_password(self: &Rc<Self>) {
@@ -131,8 +132,39 @@ impl SettingsPage {
     }
 
     pub fn change_to_annual_billing(self: &Rc<Self>) {
-        toasts::error("Not yet implemented.");
-        // TODO:
+        let state = self;
+        state.loader.load(async move {
+            let new_plan_type = match get_plan_type() {
+                Some(PlanType::IndividualBasicMonthly) => PlanType::IndividualBasicAnnually,
+                Some(PlanType::IndividualProMonthly) => PlanType::IndividualProAnnually,
+                _ => unreachable!(),
+            };
+
+            let req = UpgradeSubscriptionPlanRequest {
+                plan_type: new_plan_type.clone(),
+                promotion_code: None,
+            };
+
+            let res = endpoints::billing::UpgradeSubscriptionPlan::api_with_auth(
+                UpgradeSubscriptionPlanPath(),
+                Some(req),
+            )
+            .await
+            .toast_on_err();
+            let _ = bail_on_err!(res);
+
+            get_user_mutable().replace_with(clone!(new_plan_type => move |user| {
+                let mut user = user.clone();
+                if let Some(user) = &mut user {
+                    if let Some(account_summary) = &mut user.account_summary {
+                        if let Some(plan_type) = &mut account_summary.plan_type {
+                            *plan_type = new_plan_type;
+                        }
+                    }
+                }
+                user
+            }));
+        });
     }
 
     pub fn save_profile(self: &Rc<Self>) {

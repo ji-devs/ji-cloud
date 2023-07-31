@@ -1,5 +1,5 @@
 use crate::{fetch::*, unwrap::UnwrapJiExt};
-use futures_signals::signal::Mutable;
+use futures_signals::signal::{Mutable, Signal};
 use once_cell::sync::OnceCell;
 use shared::{
     api::endpoints::user::Profile,
@@ -60,6 +60,13 @@ pub fn get_plan_type() -> Option<PlanType> {
         .as_ref()?
         .plan_type?;
     Some(plan)
+}
+
+pub fn plan_type_signal() -> impl Signal<Item = Option<PlanType>> {
+    get_user_mutable().signal_ref(|user| -> Option<PlanType> {
+        let plan = user.as_ref()?.account_summary.as_ref()?.plan_type?;
+        Some(plan)
+    })
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
