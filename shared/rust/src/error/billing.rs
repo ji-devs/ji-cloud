@@ -66,6 +66,12 @@ impl From<StripeError> for BillingError {
     }
 }
 
+impl From<ServiceError> for BillingError {
+    fn from(err: ServiceError) -> Self {
+        Self::Service(err)
+    }
+}
+
 impl From<anyhow::Error> for BillingError {
     fn from(e: anyhow::Error) -> Self {
         Self::InternalServerError(e.into())
@@ -88,11 +94,5 @@ impl ResponseError for BillingError {
 
     fn error_response(&self) -> HttpResponse<BoxBody> {
         HttpResponse::build(self.status_code()).json(self)
-    }
-}
-
-impl From<ServiceError> for BillingError {
-    fn from(err: ServiceError) -> Self {
-        Self::Service(err)
     }
 }

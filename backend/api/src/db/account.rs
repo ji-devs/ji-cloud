@@ -213,21 +213,23 @@ pub async fn update_school_account(
     school_id: &SchoolId,
     update: UpdateSchoolAccountRequest,
 ) -> sqlx::Result<()> {
-    // Create the school record
+    // Update the school record
     sqlx::query_scalar!(
         // language=SQL
         r#"
 update school
     set
         email = coalesce($2::text::citext, email),
-        location = case when $3 then $4 else location end,
-        description = case when $5 then $6 else description end,
-        profile_image_id = case when $7 then $8 else profile_image_id end,
-        website = case when $9 then $10 else website end,
-        organization_type = case when $11 then $12 else organization_type end
+        school_name = coalesce($3::text::citext, email),
+        location = case when $4 then $5 else location end,
+        description = case when $6 then $7 else description end,
+        profile_image_id = case when $8 then $9 else profile_image_id end,
+        website = case when $10 then $11 else website end,
+        organization_type = case when $12 then $13 else organization_type end
 where school_id = $1
 "#,
         school_id as &SchoolId,
+        update.school_name.into_option(),
         update.email.into_option(),
         update.location.is_change(),
         update.location.into_option(),

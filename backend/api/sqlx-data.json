@@ -287,6 +287,30 @@
     },
     "query": "\nupdate jig\nset author_id = $1,\n    creator_id = $1\nwhere (creator_id = $2 or author_id = $2)\nand id = any($3)\nreturning live_id\n        "
   },
+  "0875a088bd02c00c8350d2a82c22388a919a4b224904075736368b8211ef8e7a": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text",
+          "Bool",
+          "Jsonb",
+          "Bool",
+          "Text",
+          "Bool",
+          "Uuid",
+          "Bool",
+          "Text",
+          "Bool",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nupdate school\n    set\n        email = coalesce($2::text::citext, email),\n        school_name = coalesce($3::text::citext, email),\n        location = case when $4 then $5 else location end,\n        description = case when $6 then $7 else description end,\n        profile_image_id = case when $8 then $9 else profile_image_id end,\n        website = case when $10 then $11 else website end,\n        organization_type = case when $12 then $13 else organization_type end\nwhere school_id = $1\n"
+  },
   "089181a3a2d32d0eacc5e0c0e0aeff11b4590f88f3422f1a825996a812d13486": {
     "describe": {
       "columns": [
@@ -15676,29 +15700,6 @@
       }
     },
     "query": "\nselect exists (\n    select 1 from user_scope where user_id = $1 and scope = any($2)\n) or (\n    exists (select 1 from user_scope where user_id = $1 and scope = $3) and\n    not exists (select 1 from circle where id = $4 and circle.creator_id <> $1)\n) as \"authed!\"\n"
-  },
-  "fc0f59cf1b8df9ed1d7bbbf3562245dbb03836c0fab9640accc889ff4000f710": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Bool",
-          "Jsonb",
-          "Bool",
-          "Text",
-          "Bool",
-          "Uuid",
-          "Bool",
-          "Text",
-          "Bool",
-          "Text"
-        ]
-      }
-    },
-    "query": "\nupdate school\n    set\n        email = coalesce($2::text::citext, email),\n        location = case when $3 then $4 else location end,\n        description = case when $5 then $6 else description end,\n        profile_image_id = case when $7 then $8 else profile_image_id end,\n        website = case when $9 then $10 else website end,\n        organization_type = case when $11 then $12 else organization_type end\nwhere school_id = $1\n"
   },
   "fc6bfe176017b10253bc42ecb9f96f0533953b10ea0ad57299f99a3a17bc6721": {
     "describe": {

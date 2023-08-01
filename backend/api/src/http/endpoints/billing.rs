@@ -36,6 +36,7 @@ use stripe::{
 use tracing::instrument;
 
 use crate::domain::user_authorization;
+use crate::stripe::create_stripe_client;
 use crate::{db, extractor::TokenUser};
 
 async fn retrieve_promotion_code_id(
@@ -415,16 +416,6 @@ async fn create_setup_intent(
         ),
         http::StatusCode::CREATED,
     ))
-}
-
-#[instrument(skip_all)]
-fn create_stripe_client(settings: &RuntimeSettings) -> Result<Client, BillingError> {
-    let secret = settings
-        .stripe_secret_key
-        .as_ref()
-        .ok_or(ServiceError::DisabledService(ServiceKindError::Stripe))?;
-
-    Ok(Client::new(secret))
 }
 
 /// Get the user accounts customer ID. If they don't have one yet, then we create one here.

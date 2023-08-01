@@ -1,9 +1,12 @@
 use crate::db;
 use crate::domain::{user_authorization, UserAuthorization};
 use crate::extractor::{ScopeAdmin, TokenUser, TokenUserWithScope};
+use crate::stripe::create_stripe_client;
 use actix_web::web::{Data, Json, Path, ServiceConfig};
 use actix_web::HttpResponse;
+use anyhow::anyhow;
 use futures::try_join;
+use ji_core::settings::RuntimeSettings;
 use shared::api::endpoints::account::{
     DeleteSchoolAccount, GetIndividualAccount, GetSchoolAccount, UpdateSchoolAccount,
 };
@@ -14,6 +17,7 @@ use shared::domain::billing::{
     AccountIfAuthorized, CreateSchoolAccountRequest, GetSchoolAccountResponse,
     IndividualAccountResponse, SchoolId, SchoolNameId, SchoolNameValue, UpdateSchoolAccountRequest,
 };
+use shared::domain::UpdateNonNullable;
 use shared::error::{AccountError, IntoAnyhow};
 use sqlx::PgPool;
 use tracing::instrument;
@@ -53,6 +57,7 @@ async fn create_school_account(
 async fn update_school_account(
     auth: TokenUser,
     db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
     path: Path<SchoolId>,
     req: Json<<UpdateSchoolAccount as ApiEndpoint>::Req>,
 ) -> Result<HttpResponse, <UpdateSchoolAccount as ApiEndpoint>::Err> {
@@ -69,6 +74,35 @@ async fn update_school_account(
         .test_authorized(true)?;
 
     let req: UpdateSchoolAccountRequest = req.into_inner();
+
+    let mut should_update_stripe = false;
+    let mut update_customer = stripe::UpdateCustomer::default();
+
+    if let UpdateNonNullable::Change(email) = &req.email {
+        should_update_stripe = true;
+        update_customer.email = Some(email.as_ref());
+    }
+
+    if let UpdateNonNullable::Change(school_name) = &req.school_name {
+        should_update_stripe = true;
+        update_customer.name = Some(school_name.as_ref());
+    }
+
+    if should_update_stripe {
+        let client = create_stripe_client(&settings)?;
+        let account_id = db::account::get_account_id_by_school_id(db.as_ref(), &school_id)
+            .await?
+            .ok_or(anyhow!("Missing account for school {school_id}"))?;
+
+        let account = db::account::get_account_by_id(db.as_ref(), &account_id)
+            .await?
+            .ok_or(anyhow!("Missing account {account_id}"))?;
+
+        let stripe_customer_id =
+            stripe::CustomerId::from(account.stripe_customer_id.unwrap().clone());
+
+        stripe::Customer::update(&client, &stripe_customer_id, update_customer).await?;
+    }
 
     db::account::update_school_account(db.as_ref(), &school_id, req)
         .await
