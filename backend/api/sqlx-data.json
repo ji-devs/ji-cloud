@@ -10347,6 +10347,30 @@
     },
     "query": "\nselect exists (\n    select 1\n    from jig_like\n    where\n        jig_id = $1\n        and user_id = $2\n) as \"exists!\"\n    "
   },
+  "9dc33431675342494dd797271a1544a4128a8eb6b4a142de5f533b326811743d": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: SchoolNameId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name!",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\nselect\n    school_name_id as \"id!: SchoolNameId\",\n    name::text as \"name!\"\nfrom school_name\n"
+  },
   "9e0df70165968be7b982a6f1964daab57e2d65d634115cabe4187f3d6f386a9f": {
     "describe": {
       "columns": [

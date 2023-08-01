@@ -2,8 +2,10 @@ use super::ApiEndpoint;
 use crate::domain::admin::{
     AdminSchoolAccountPath, AdminSchoolsPath, AdminVerifySchoolPath, GetAdminSchoolAccountResponse,
     ImportSchoolNamesPath, InviteSchoolUsersPath, InviteSchoolUsersRequest,
-    InviteSchoolUsersResponse, SearchSchoolsParams, SearchSchoolsResponse, VerifySchoolRequest,
+    InviteSchoolUsersResponse, SchoolNamesPath, SearchSchoolsParams, SearchSchoolsResponse,
+    UpdateSchoolNamePath, VerifySchoolRequest,
 };
+use crate::domain::billing::{SchoolName, SchoolNameValue};
 use crate::error::AccountError;
 use crate::{
     api::Method,
@@ -93,4 +95,24 @@ impl ApiEndpoint for GetAdminSchoolAccount {
     type Res = GetAdminSchoolAccountResponse;
     type Err = AccountError;
     const METHOD: Method = Method::Get;
+}
+
+/// Get a list of imported school names
+pub struct GetSchoolNames;
+impl ApiEndpoint for GetSchoolNames {
+    type Path = SchoolNamesPath;
+    type Req = ();
+    type Res = Vec<SchoolName>;
+    type Err = AccountError;
+    const METHOD: Method = Method::Get;
+}
+
+/// Update a school name
+pub struct UpdateSchoolName;
+impl ApiEndpoint for UpdateSchoolName {
+    type Path = UpdateSchoolNamePath;
+    type Req = SchoolNameValue;
+    type Res = ();
+    type Err = AccountError;
+    const METHOD: Method = Method::Patch;
 }

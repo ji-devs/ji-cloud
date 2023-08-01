@@ -995,8 +995,6 @@ wrap_uuid! {
     pub struct SchoolNameId
 }
 
-make_path_parts!(SchoolNamePath => "/v1/school-name");
-
 /// A known school name
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SchoolName {
@@ -1132,8 +1130,6 @@ pub struct UpdateSchoolAccountRequest {
     #[serde(default, skip_serializing_if = "UpdateNullable::is_keep")]
     pub organization_type: UpdateNullable<String>,
 }
-
-make_path_parts!(UpdateSchoolNamePath => "/v1/school-names/{}" => SchoolNameId);
 
 make_path_parts!(IndividualAccountPath => "/v1/user/me/account");
 

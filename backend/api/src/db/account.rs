@@ -688,8 +688,23 @@ where school_name_id = $1
     .await
 }
 
+pub async fn get_school_names(pool: &PgPool) -> sqlx::Result<Vec<SchoolName>> {
+    sqlx::query_as!(
+        SchoolName,
+        // language=SQL
+        r#"
+select
+    school_name_id as "id!: SchoolNameId",
+    name::text as "name!"
+from school_name
+"#,
+    )
+    .fetch_all(pool)
+    .await
+}
+
 #[instrument(skip(pool))]
-pub async fn find_school_names_with_schools(
+pub async fn find_schools(
     pool: &PgPool,
     params: &SearchSchoolsParams,
 ) -> sqlx::Result<Vec<AdminSchool>> {
@@ -758,7 +773,7 @@ offset $4
 }
 
 #[instrument(skip(pool))]
-pub async fn find_school_names_with_schools_count(
+pub async fn find_schools_count(
     pool: &PgPool,
     params: &SearchSchoolsParams,
 ) -> sqlx::Result<ItemCount> {
