@@ -2,8 +2,8 @@ use super::ApiEndpoint;
 use crate::api::Method;
 use crate::domain::billing::{
     CreateSchoolAccountPath, CreateSchoolAccountRequest, GetSchoolAccountResponse,
-    IndividualAccountPath, IndividualAccountResponse, SchoolAccountPath, SchoolId, SchoolNameValue,
-    UpdateSchoolAccountRequest, UpdateSchoolNamePath,
+    IndividualAccountPath, IndividualAccountResponse, SchoolAccountPath, SchoolId,
+    UpdateSchoolAccountRequest,
 };
 use crate::error::AccountError;
 
@@ -35,16 +35,6 @@ impl ApiEndpoint for UpdateSchoolAccount {
     type Res = ();
     type Err = AccountError;
     const METHOD: Method = Method::Put;
-}
-
-/// Update a school name
-pub struct UpdateSchoolName;
-impl ApiEndpoint for UpdateSchoolName {
-    type Path = UpdateSchoolNamePath;
-    type Req = SchoolNameValue;
-    type Res = ();
-    type Err = AccountError;
-    const METHOD: Method = Method::Patch;
 }
 
 /// Delete a school account

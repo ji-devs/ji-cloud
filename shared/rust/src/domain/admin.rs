@@ -1,6 +1,6 @@
 //! Types for admin routes.
 use crate::api::endpoints::PathPart;
-use crate::domain::billing::{Account, AccountUser, AdminSchool};
+use crate::domain::billing::{Account, AccountUser, AdminSchool, SchoolNameId};
 use crate::domain::{billing::SchoolId, ItemCount, Page, PageLimit};
 use chrono::Utc;
 use macros::make_path_parts;
@@ -154,3 +154,7 @@ pub enum InviteFailedReason {
     #[strum(serialize = "Not found")]
     UserNotFound,
 }
+
+make_path_parts!(SchoolNamesPath => "/v1/admin/school-names");
+
+make_path_parts!(UpdateSchoolNamePath => "/v1/admin/school-names/{}" => SchoolNameId);

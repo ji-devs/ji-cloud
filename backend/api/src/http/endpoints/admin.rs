@@ -10,7 +10,9 @@ use futures::try_join;
 use ji_core::settings::RuntimeSettings;
 use serde::ser::Serialize;
 use serde_derive::Deserialize;
-use shared::api::endpoints::admin::{ImportSchoolNames, InviteUsers, SearchSchools, VerifySchool};
+use shared::api::endpoints::admin::{
+    GetSchoolNames, ImportSchoolNames, InviteUsers, SearchSchools, VerifySchool,
+};
 use shared::domain::admin::{
     InviteFailedReason, InviteSchoolUserFailure, InviteSchoolUsersResponse, SearchSchoolsResponse,
 };
@@ -25,6 +27,7 @@ use shared::{
         session::NewSessionResponse,
         user::UserId,
     },
+    error::IntoAnyhow,
 };
 use sqlx::PgPool;
 
@@ -152,21 +155,21 @@ async fn create_or_update_subscription_plans(
     Ok(HttpResponse::Created().finish())
 }
 
-async fn search_school_names(
+async fn search_schools(
     _auth: TokenUserWithScope<ScopeAdmin>,
     db: Data<PgPool>,
     Query(search): Query<<SearchSchools as ApiEndpoint>::Req>,
 ) -> Result<(Json<<SearchSchools as ApiEndpoint>::Res>, http::StatusCode), error::Server> {
     let (schools, schools_count) = try_join!(
-        db::account::find_school_names_with_schools(db.as_ref(), &search),
-        db::account::find_school_names_with_schools_count(db.as_ref(), &search)
+        db::account::find_schools(db.as_ref(), &search),
+        db::account::find_schools_count(db.as_ref(), &search)
     )?;
 
     let schools = schools.into_iter().map(From::from).collect();
 
     Ok((
         Json(SearchSchoolsResponse {
-            schools: schools,
+            schools,
             pages: schools_count.paged(search.page_limit),
             total_schools_count: schools_count,
         }),
@@ -297,6 +300,23 @@ async fn invite_school_users(
     ))
 }
 
+async fn get_school_names(
+    _auth: TokenUserWithScope<ScopeAdmin>,
+    db: Data<PgPool>,
+) -> Result<
+    (Json<<GetSchoolNames as ApiEndpoint>::Res>, http::StatusCode),
+    <GetSchoolNames as ApiEndpoint>::Err,
+> {
+    Ok((
+        Json(
+            db::account::get_school_names(db.as_ref())
+                .await
+                .into_anyhow()?,
+        ),
+        http::StatusCode::OK,
+    ))
+}
+
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
         <admin::Impersonate as ApiEndpoint>::Path::PATH,
@@ -314,7 +334,7 @@ pub fn configure(cfg: &mut ServiceConfig) {
     )
     .route(
         <SearchSchools as ApiEndpoint>::Path::PATH,
-        admin::SearchSchools::METHOD.route().to(search_school_names),
+        admin::SearchSchools::METHOD.route().to(search_schools),
     )
     .route(
         <ImportSchoolNames as ApiEndpoint>::Path::PATH,
@@ -327,5 +347,9 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <InviteUsers as ApiEndpoint>::Path::PATH,
         InviteUsers::METHOD.route().to(invite_school_users),
+    )
+    .route(
+        <GetSchoolNames as ApiEndpoint>::Path::PATH,
+        GetSchoolNames::METHOD.route().to(get_school_names),
     );
 }

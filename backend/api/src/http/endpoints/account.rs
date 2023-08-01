@@ -6,9 +6,8 @@ use actix_web::HttpResponse;
 use futures::try_join;
 use shared::api::endpoints::account::{
     DeleteSchoolAccount, GetIndividualAccount, GetSchoolAccount, UpdateSchoolAccount,
-    UpdateSchoolName,
 };
-use shared::api::endpoints::admin::GetAdminSchoolAccount;
+use shared::api::endpoints::admin::{GetAdminSchoolAccount, UpdateSchoolName};
 use shared::api::{endpoints::account::CreateSchoolAccount, ApiEndpoint, PathParts};
 use shared::domain::admin::GetAdminSchoolAccountResponse;
 use shared::domain::billing::{
