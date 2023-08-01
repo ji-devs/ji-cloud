@@ -1042,7 +1042,7 @@ pub enum SchoolNameRequest {
     Id(SchoolNameId),
 }
 
-make_path_parts!(CreateSchoolAccountPath => "/v1/school");
+make_path_parts!(CreateSchoolAccountPath => "/v1/schools");
 
 /// Request to create a new school account
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -1079,7 +1079,7 @@ pub struct CreateSchoolAccountRequest {
     pub organization_type: Option<String>,
 }
 
-make_path_parts!(SchoolAccountPath => "/v1/school/{}" => SchoolId);
+make_path_parts!(SchoolAccountPath => "/v1/schools/{}" => SchoolId);
 
 /// Request to create a new school account
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -1109,6 +1109,10 @@ pub struct UpdateSchoolAccountRequest {
     /// The school's email address
     #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
     pub email: UpdateNonNullable<String>,
+
+    /// The school's name
+    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+    pub school_name: UpdateNonNullable<String>,
 
     /// The school's location
     #[serde(default, skip_serializing_if = "UpdateNullable::is_keep")]
