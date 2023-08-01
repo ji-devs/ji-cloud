@@ -28,10 +28,10 @@ use sqlx::PgPool;
 use std::borrow::Borrow;
 use std::str::FromStr;
 use stripe::{
-    Client, CreateCustomer, CreateSubscription as CreateStripeSubscription,
-    CreateSubscriptionItems, Customer, CustomerInvoiceSettings, EventObject, EventType, List,
-    ListPromotionCodes, PromotionCode, PromotionCodeId, SetupIntent, SetupIntentId, UpdateCustomer,
-    UpdateSubscription, Webhook,
+    generated::billing::subscription::SubscriptionProrationBehavior, Client, CreateCustomer,
+    CreateSubscription as CreateStripeSubscription, CreateSubscriptionItems, Customer,
+    CustomerInvoiceSettings, EventObject, EventType, List, ListPromotionCodes, PromotionCode,
+    PromotionCodeId, SetupIntent, SetupIntentId, UpdateCustomer, UpdateSubscription, Webhook,
 };
 use tracing::instrument;
 
@@ -351,6 +351,7 @@ async fn upgrade_subscription_plan(
             ..Default::default()
         }]),
         promotion_code: retrieve_promotion_code_id(&client, &req.promotion_code).await?,
+        proration_behavior: Some(SubscriptionProrationBehavior::AlwaysInvoice),
         ..Default::default()
     };
 
