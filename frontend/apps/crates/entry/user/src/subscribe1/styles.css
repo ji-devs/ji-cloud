@@ -36,6 +36,29 @@ h2 {
         grid-template-columns: 1fr 1fr;
     }
 }
+.promo label {
+    margin-bottom: 0.25rem;
+    font-size: 15px;
+    display: block;
+}
+.promo input {
+    padding: 16px;
+    background-color: #f1f1f1;
+    border-radius: 12px;
+    transition: box-shadow 0.15s ease, color 0.15s ease;
+    appearance: none;
+    border: 0;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+}
+.promo input:focus {
+    box-shadow: 0 0 0 3px hsla(211, 100%, 50%, 25%), 0 0 0 1px hsla(211, 100%, 50%, 50%);
+    outline: 0;
+}
 button-rect {
     justify-self: end;
 }

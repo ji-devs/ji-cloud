@@ -10,7 +10,7 @@ use utils::{
     constants::{INDIVIDUAL_FREE_TRIAL_DAYS, SCHOOL_FREE_TRIAL_DAYS},
     dialog, events, gap, icon,
 };
-use web_sys::{HtmlElement, ShadowRoot};
+use web_sys::{HtmlElement, HtmlInputElement, ShadowRoot};
 
 impl Component<Subscribe1> for Rc<Subscribe1> {
     fn styles() -> &'static str {
@@ -73,6 +73,25 @@ impl Component<Subscribe1> for Rc<Subscribe1> {
                     .text("Payment method")
                 }))
                 .child(html!("slot"))
+                .child(html!("div", {
+                    .class("promo")
+                    .child(html!("label", {
+                        .text("Promo code")
+                    }))
+                    .child(html!("input" => HtmlInputElement, {
+                        .with_node!(elem => {
+                            .prop_signal("value", state.promo.signal_cloned().map(|promo| promo.unwrap_or_default()))
+                            .event(clone!(state => move |_: events::Input| {
+                                let v = elem.value();
+                                let v = match v.trim().is_empty() {
+                                    true => None,
+                                    false => Some(v),
+                                };
+                                state.promo.set(v);
+                            }))
+                        })
+                    }))
+                }))
                 .child(gap!(48))
                 .child_signal(state.stripe_client_secret.signal_cloned().map(
                     clone!(state => move |secret| {

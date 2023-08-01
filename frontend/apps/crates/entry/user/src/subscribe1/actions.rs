@@ -31,7 +31,7 @@ impl Subscribe1 {
             let redirect_url = format!(
                 "{}{}",
                 SETTINGS.get().unwrap_ji().remote_target.pages_url(),
-                Route::User(UserRoute::Subscribe2(state.plan_type, None, state.promo.clone())).to_string()
+                Route::User(UserRoute::Subscribe2(state.plan_type, None, state.promo.get_cloned())).to_string()
             );
             stripe.unwrap_ji().submit(&redirect_url).await;
         }));

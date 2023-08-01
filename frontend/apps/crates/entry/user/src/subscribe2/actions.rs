@@ -4,9 +4,10 @@ use shared::{
     domain::billing::{CreateSubscriptionPath, CreateSubscriptionRequest},
 };
 use utils::{
+    bail_on_err,
+    error_ext::ErrorExt,
     prelude::{get_school_id, ApiEndpointExt},
     routes::{Route, UserRoute},
-    unwrap::UnwrapJiExt,
 };
 use wasm_bindgen_futures::spawn_local;
 
@@ -24,7 +25,8 @@ impl Subscribe2 {
                     .and_then(|params| params.setup_intent.clone()),
                 promotion_code: state.promo.clone(),
             };
-            endpoints::billing::CreateSubscription::api_with_auth(CreateSubscriptionPath(), Some(req)).await.unwrap_ji();
+            let res = endpoints::billing::CreateSubscription::api_with_auth(CreateSubscriptionPath(), Some(req)).await.toast_on_err();
+            let _ = bail_on_err!(res);
             go_to_url(&get_next_page_url());
         }));
     }

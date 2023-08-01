@@ -10,7 +10,7 @@ pub struct Subscribe1 {
     pub loader: AsyncLoader,
     pub stripe_client_secret: Mutable<Option<String>>,
     pub(super) stripe: RefCell<Option<Stripe>>,
-    pub promo: Option<String>,
+    pub promo: Mutable<Option<String>>,
     pub pay_with_check: Mutable<bool>,
 }
 impl Subscribe1 {
@@ -20,7 +20,7 @@ impl Subscribe1 {
             loader: AsyncLoader::new(),
             stripe_client_secret: Mutable::new(None),
             stripe: RefCell::new(None),
-            promo,
+            promo: Mutable::new(promo),
             pay_with_check: Mutable::new(false),
         })
     }

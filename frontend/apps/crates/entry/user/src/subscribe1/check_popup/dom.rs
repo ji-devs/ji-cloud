@@ -51,7 +51,7 @@ impl Component<CheckPopup> for Rc<CheckPopup> {
                         .prop("color", "blue")
                         .text("Start free trial")
                         .event(clone!(state => move |_: events::Click| {
-                            Route::User(UserRoute::Subscribe2(state.subscribe_1_state.plan_type, None, state.subscribe_1_state.promo.clone())).go_to();
+                            Route::User(UserRoute::Subscribe2(state.subscribe_1_state.plan_type, None, state.subscribe_1_state.promo.get_cloned())).go_to();
                         }))
                     }))
                 })
