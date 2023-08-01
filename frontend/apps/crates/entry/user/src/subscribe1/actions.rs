@@ -26,14 +26,16 @@ impl Subscribe1 {
 
     pub fn submit(self: &Rc<Self>) {
         let state = self;
-        let stripe = state.stripe.take();
         state.loader.load(clone!(state => async move {
             let redirect_url = format!(
                 "{}{}",
                 SETTINGS.get().unwrap_ji().remote_target.pages_url(),
                 Route::User(UserRoute::Subscribe2(state.plan_type, None, state.promo.get_cloned())).to_string()
             );
-            stripe.unwrap_ji().submit(&redirect_url).await;
+
+            let stripe = state.stripe.borrow();
+            let stripe = stripe.as_ref().unwrap_ji();
+            stripe.submit(&redirect_url).await;
         }));
     }
 }

@@ -72,7 +72,7 @@ impl Stripe {
         }
     }
 
-    pub async fn submit(self, redirect_url: &str) {
+    pub async fn submit(&self, redirect_url: &str) {
         let options = js_object!({
             "confirmParams": {
                 "return_url": redirect_url,
@@ -82,7 +82,7 @@ impl Stripe {
         Reflect::set(
             &options,
             &JsValue::from_str("elements"),
-            &self.elements.into(),
+            &(&self.elements).into(),
         )
         .unwrap_ji();
         self.js_stripe.confirmSetup(options).await;
