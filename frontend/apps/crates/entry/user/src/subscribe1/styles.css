@@ -27,13 +27,6 @@ h2 {
     font-weight: bold;
     color: var(--dark-blue-4);
 }
-hr {
-    border: 0;
-    background-color: var(--light-gray-2);
-    width: 100%;
-    height: 1px;
-    margin: 16px 0;
-}
 .inputs {
     display: grid;
     gap: 24px;
@@ -45,4 +38,9 @@ hr {
 }
 button-rect {
     justify-self: end;
+}
+.actions {
+    display: flex;
+    gap: 24px;
+    justify-content: end;
 }

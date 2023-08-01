@@ -11,6 +11,7 @@ pub struct Subscribe1 {
     pub stripe_client_secret: Mutable<Option<String>>,
     pub(super) stripe: RefCell<Option<Stripe>>,
     pub promo: Option<String>,
+    pub pay_with_check: Mutable<bool>,
 }
 impl Subscribe1 {
     pub fn new(plan_type: PlanType, promo: Option<String>) -> Rc<Self> {
@@ -20,6 +21,7 @@ impl Subscribe1 {
             stripe_client_secret: Mutable::new(None),
             stripe: RefCell::new(None),
             promo,
+            pay_with_check: Mutable::new(false),
         })
     }
 }

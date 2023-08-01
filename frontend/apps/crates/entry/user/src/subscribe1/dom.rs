@@ -1,4 +1,4 @@
-use super::stripe::Stripe;
+use super::{check_popup::CheckPopup, stripe::Stripe};
 
 use super::state::Subscribe1;
 use dominator::{clone, html, with_node, DomBuilder};
@@ -8,7 +8,7 @@ use std::rc::Rc;
 use utils::{
     component::Component,
     constants::{INDIVIDUAL_FREE_TRIAL_DAYS, SCHOOL_FREE_TRIAL_DAYS},
-    events, gap, icon,
+    dialog, events, gap, icon,
 };
 use web_sys::{HtmlElement, ShadowRoot};
 
@@ -72,25 +72,41 @@ impl Component<Subscribe1> for Rc<Subscribe1> {
                 .child(html!("h2", {
                     .text("Payment method")
                 }))
-                .child(html!("hr"))
-                .child(html!("h2", {
-                    .text("Request other payment method")
-                }))
                 .child(html!("slot"))
                 .child(gap!(48))
                 .child_signal(state.stripe_client_secret.signal_cloned().map(
                     clone!(state => move |secret| {
                         secret.map(|_| {
-                            html!("button-rect", {
-                                .prop("size", "large")
-                                .text("Start free trial")
-                                .event(clone!(state => move |_: events::Click| {
-                                    state.submit();
+                            html!("div", {
+                                .class("actions")
+                                .child(html!("button-rect", {
+                                    .prop("kind", "text")
+                                    .prop("color", "red")
+                                    .text("Request other payment method")
+                                    .event(clone!(state => move |_: events::Click| {
+                                        state.pay_with_check.set(true);
+                                    }))
+                                }))
+                                .child(html!("button-rect", {
+                                    .prop("kind", "filled")
+                                    .prop("color", "red")
+                                    .prop("size", "large")
+                                    .text("Start free trial")
+                                    .event(clone!(state => move |_: events::Click| {
+                                        state.submit();
+                                    }))
                                 }))
                             })
                         })
                     }),
                 ))
+                .child_signal(state.pay_with_check.signal_cloned().map(clone!(state => move |pay_with_check| {
+                    pay_with_check.then(|| {
+                        dialog!{
+                            .child(CheckPopup::new(&state).render())
+                        }
+                    })
+                })))
             }))
         }))
     }

@@ -1,0 +1,31 @@
+main {
+    padding-top: 72px;
+    padding-bottom: 40px;
+    padding-inline: 52px;
+    text-align: center;
+}
+fa-button {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    display: grid;
+    width: 30px;
+    height: 30px;
+}
+h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--dark-blue-5);
+}
+h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: normal;
+    color: var(--dark-gray-6);
+}
+.actions {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+}

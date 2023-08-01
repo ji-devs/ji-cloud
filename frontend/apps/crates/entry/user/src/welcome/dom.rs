@@ -26,7 +26,7 @@ fn get_email_link() -> String {
 impl Welcome {
     pub fn render(self: &Rc<Self>) -> Dom {
         let plan = get_plan_type();
-        let plan_str = plan.map(|plan| plan.as_str()).unwrap_or("Family");
+        let plan_str = plan.map(|plan| plan.display_name()).unwrap_or("Family");
         let is_school = get_school_id().is_some();
         html!("page-register-complete", {
             .prop("plan", plan_str)
