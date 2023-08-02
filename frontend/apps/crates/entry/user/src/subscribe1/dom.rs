@@ -98,14 +98,17 @@ impl Component<Subscribe1> for Rc<Subscribe1> {
                         secret.map(|_| {
                             html!("div", {
                                 .class("actions")
-                                .child(html!("button-rect", {
-                                    .prop("kind", "text")
-                                    .prop("color", "red")
-                                    .text("Request other payment method")
-                                    .event(clone!(state => move |_: events::Click| {
-                                        state.pay_with_check.set(true);
+                                .apply_if(state.plan_type.is_school_plan(), |dom| {
+                                    dom.child(html!("button-rect", {
+                                        .prop("kind", "text")
+                                        .prop("color", "red")
+                                        .text("Request other payment method")
+                                        .event(clone!(state => move |_: events::Click| {
+                                            state.pay_with_check.set(true);
+                                            state.plan_type;
+                                        }))
                                     }))
-                                }))
+                                })
                                 .child(html!("button-rect", {
                                     .prop("kind", "filled")
                                     .prop("color", "red")
