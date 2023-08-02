@@ -42,6 +42,12 @@ impl CustomerId {
     }
 }
 
+impl fmt::Display for CustomerId {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
 /// Stripe payment method ID
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct StripePaymentMethodId(String);

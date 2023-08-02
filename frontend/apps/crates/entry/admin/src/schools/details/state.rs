@@ -1,10 +1,11 @@
 use crate::schools::Schools;
-use futures_signals::signal::Mutable;
+use futures_signals::map_ref;
+use futures_signals::signal::{Mutable, Signal};
 use futures_signals::signal_vec::MutableVec;
 use serde_json::Value;
 use shared::domain::admin::InviteSchoolUserFailure;
 use shared::domain::billing::{
-    AccountUser, AdminSchool, SchoolId, SchoolName, UpdateSchoolAccountRequest,
+    Account, AccountUser, AdminSchool, SchoolId, SchoolName, UpdateSchoolAccountRequest,
 };
 use shared::domain::image::ImageId;
 use std::rc::Rc;
@@ -15,6 +16,7 @@ pub struct SchoolDetails {
     pub parent: Rc<Schools>,
     pub school_id: SchoolId,
     pub school: Mutable<Option<EditableAdminSchool>>,
+    pub account: Mutable<Option<Account>>,
     pub users: MutableVec<Rc<AccountUser>>,
     pub current_action: Mutable<CurrentAction>,
     pub errored_users: Mutable<Vec<String>>,
@@ -26,6 +28,7 @@ impl SchoolDetails {
             parent,
             school_id,
             school: Mutable::new(None),
+            account: Mutable::new(None),
             users: MutableVec::new(),
             current_action: Mutable::new(CurrentAction::Viewing),
             errored_users: Mutable::new(vec![]),
@@ -53,6 +56,23 @@ pub struct EditableAdminSchool {
     pub profile_image: EditableField<Nullable<ImageId>>,
     pub website: EditableField<Nullable<String>>,
     pub organization_type: EditableField<Nullable<String>>,
+}
+
+impl EditableAdminSchool {
+    pub fn changed_signal(&self) -> impl Signal<Item = bool> {
+        map_ref! {
+            let school_name = self.school_name.changed_signal(),
+            let email = self.email.changed_signal(),
+            let location = self.location.changed_signal(),
+            let description = self.description.changed_signal(),
+            let profile_image = self.profile_image.changed_signal(),
+            let website = self.website.changed_signal(),
+            let organization_type = self.organization_type.changed_signal()
+            => {
+                *school_name || *email || *location || *description || *profile_image || *website || *organization_type
+            }
+        }
+    }
 }
 
 impl From<AdminSchool> for EditableAdminSchool {
