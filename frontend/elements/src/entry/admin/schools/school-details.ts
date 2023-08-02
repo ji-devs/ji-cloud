@@ -62,6 +62,9 @@ export class _ extends LitElement {
                 <slot name="inputs"></slot>
             </div>
             <div class="input-container">
+                <slot name="account"></slot>
+            </div>
+            <div class="input-container">
                 <slot name="users"></slot>
             </div>
             <slot name="loader"></slot>

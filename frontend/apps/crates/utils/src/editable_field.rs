@@ -48,6 +48,17 @@ impl<T: Clone> EditableField<NonNullable<T>> {
         self.inner.value.set(value.clone());
         self.inner.update.set(UpdateNonNullable::Change(value));
     }
+
+    pub fn changed(&self) -> bool {
+        let update = self.inner.update.get_cloned();
+        !matches!(update, UpdateNonNullable::Keep)
+    }
+
+    pub fn changed_signal(&self) -> impl Signal<Item = bool> {
+        self.inner
+            .update
+            .signal_ref(|update| !matches!(update, UpdateNonNullable::Keep))
+    }
 }
 
 impl<T> From<Option<T>> for EditableField<Nullable<T>> {
@@ -87,5 +98,16 @@ impl<T: Clone> EditableField<Nullable<T>> {
                 self.inner.update.set(UpdateNullable::Unset);
             }
         }
+    }
+
+    pub fn changed(&self) -> bool {
+        let update = self.inner.update.get_cloned();
+        !matches!(update, UpdateNullable::Keep)
+    }
+
+    pub fn changed_signal(&self) -> impl Signal<Item = bool> {
+        self.inner
+            .update
+            .signal_ref(|update| !matches!(update, UpdateNullable::Keep))
     }
 }

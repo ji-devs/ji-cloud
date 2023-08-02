@@ -5,6 +5,7 @@ use shared::domain::admin::{
     AdminSchoolAccountPath, InviteSchoolUsersRequest, VerifySchoolRequest,
 };
 use shared::domain::admin::{AdminVerifySchoolPath, InviteSchoolUsersPath};
+use shared::domain::billing::SchoolAccountPath;
 use std::rc::Rc;
 use utils::prelude::ApiEndpointExt;
 use utils::routes::AdminSchoolsRoute;
@@ -22,6 +23,7 @@ impl SchoolDetails {
                 Err(_) => todo!(),
                 Ok(school_account) => {
                     state.school.set(Some(school_account.school.into()));
+                    state.account.set(Some(school_account.account));
                     state.users.lock_mut()
                         .replace_cloned(school_account.users.into_iter().map(|user| Rc::new(user))
                         .collect());
@@ -55,16 +57,31 @@ impl SchoolDetails {
 
         if let Some(school) = state.school.get_cloned() {
             state.parent.loader.load(clone!(state => async move {
-            match endpoints::admin::VerifySchool::api_with_auth(AdminVerifySchoolPath(), Some(VerifySchoolRequest {
-                school_id: school.id,
-                verified: true,
-            })).await {
-                Err(error) => {
-                    log::error!("Error: {error:?}");
-                },
-                Ok(_) => state.parent.navigate_to(AdminSchoolsRoute::Table),
-            }
-        }));
+                match endpoints::admin::VerifySchool::api_with_auth(AdminVerifySchoolPath(), Some(VerifySchoolRequest {
+                    school_id: school.id,
+                    verified: true,
+                })).await {
+                    Err(error) => {
+                        log::error!("Error: {error:?}");
+                    },
+                    Ok(_) => state.parent.navigate_to(AdminSchoolsRoute::Table),
+                }
+            }));
+        }
+    }
+
+    pub fn save_school(self: &Rc<Self>) {
+        let state = Rc::clone(self);
+
+        if let Some(school) = state.school.get_cloned() {
+            state.parent.loader.load(clone!(state => async move {
+                match endpoints::account::UpdateSchoolAccount::api_with_auth(SchoolAccountPath(school.id), Some(school.into())).await {
+                    Err(error) => {
+                        log::error!("Error: {error:?}");
+                    },
+                    Ok(_) => state.parent.navigate_to(AdminSchoolsRoute::Table),
+                }
+            }));
         }
     }
 }
