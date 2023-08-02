@@ -287,30 +287,6 @@
     },
     "query": "\nupdate jig\nset author_id = $1,\n    creator_id = $1\nwhere (creator_id = $2 or author_id = $2)\nand id = any($3)\nreturning live_id\n        "
   },
-  "0875a088bd02c00c8350d2a82c22388a919a4b224904075736368b8211ef8e7a": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Text",
-          "Bool",
-          "Jsonb",
-          "Bool",
-          "Text",
-          "Bool",
-          "Uuid",
-          "Bool",
-          "Text",
-          "Bool",
-          "Text"
-        ]
-      }
-    },
-    "query": "\nupdate school\n    set\n        email = coalesce($2::text::citext, email),\n        school_name = coalesce($3::text::citext, email),\n        location = case when $4 then $5 else location end,\n        description = case when $6 then $7 else description end,\n        profile_image_id = case when $8 then $9 else profile_image_id end,\n        website = case when $10 then $11 else website end,\n        organization_type = case when $12 then $13 else organization_type end\nwhere school_id = $1\n"
-  },
   "089181a3a2d32d0eacc5e0c0e0aeff11b4590f88f3422f1a825996a812d13486": {
     "describe": {
       "columns": [
@@ -7505,6 +7481,30 @@
       }
     },
     "query": "\nupdate playlist_data_module\nset\n    index = case when index = $2 then $3 else index - 1 end,\n    updated_at = now()\nwhere playlist_data_id = $1 and index between $2 and $3\n"
+  },
+  "6e8cc4ed631ca294f2ca5d868e9c508c92f2d617cd2add2fc58ff8e53492dbda": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text",
+          "Bool",
+          "Jsonb",
+          "Bool",
+          "Text",
+          "Bool",
+          "Uuid",
+          "Bool",
+          "Text",
+          "Bool",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nupdate school\n    set\n        email = coalesce($2::text::citext, email),\n        school_name = coalesce($3::text::citext, school_name),\n        location = case when $4 then $5 else location end,\n        description = case when $6 then $7 else description end,\n        profile_image_id = case when $8 then $9 else profile_image_id end,\n        website = case when $10 then $11 else website end,\n        organization_type = case when $12 then $13 else organization_type end\nwhere school_id = $1\n"
   },
   "6ea38ea0c905f9d7aa943145a64b10e5d0cdc86d8f365dfdac9a8c45bba8e67c": {
     "describe": {
