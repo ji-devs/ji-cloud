@@ -53,13 +53,6 @@ jobs:
         run: echo "value=\"[${{needs.prepare.outputs.branch}} - backend/media]\"" >> $GITHUB_OUTPUT
         id: extract_label
 
-      - name: Notify slack
-        uses: pullreminders/slack-action@master
-        with:
-          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.value}} starting...\"}'
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-
       - id: 'auth'
         uses: 'google-github-actions/auth@v1'
         with:
@@ -77,11 +70,3 @@ jobs:
 
       - name: build and deploy
         run: cargo make ${{ env.ENVIRONMENT }}-api-media-watch
-
-      - name: Notify slack of all status
-        uses: pullreminders/slack-action@master
-        with:
-          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.value}} ${{job.status}}\"}'
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-        if: always()

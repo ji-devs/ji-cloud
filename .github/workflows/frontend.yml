@@ -84,13 +84,6 @@ jobs:
         run: echo "value=\"[${{needs.prepare.outputs.branch}} - module/${{ matrix.app }} - app]\"" >> $GITHUB_OUTPUT
         id: extract_label
 
-      - name: Notify slack
-        uses: pullreminders/slack-action@master
-        with:
-          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.value}} starting...\"}'
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-
       - uses: dtolnay/rust-toolchain@master
         with:
 #          toolchain: nightly
@@ -130,14 +123,6 @@ jobs:
         # run: gsutil -m rsync -d -r frontend/apps/dist/${{ matrix.app }}/js gs://${{ env.STORAGE_BUCKET }}/${{ matrix.app }}/js
         run: gsutil -m cp -Z -r frontend/apps/dist/${{ matrix.app }}/js gs://${{ env.STORAGE_BUCKET }}/${{ matrix.app }}
 
-      - name: Notify slack of all status
-        uses: pullreminders/slack-action@master
-        with:
-          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.value}} ${{job.status}}\"}'
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-        if: always()
-
   build-module:
     needs: [prepare]
     name: "[${{ needs.prepare.outputs.branch }}] Build - Module (${{matrix.app}}, ${{matrix.mode}})"
@@ -170,13 +155,6 @@ jobs:
         shell: bash
         run: echo "value=\"[${{needs.prepare.outputs.branch}} - module/${{ matrix.app }}/${{ matrix.mode }} - app]\"" >> $GITHUB_OUTPUT
         id: extract_label
-
-      - name: Notify slack
-        uses: pullreminders/slack-action@master
-        with:
-          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.value}} starting...\"}'
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - uses: dtolnay/rust-toolchain@master
         with:
@@ -216,14 +194,6 @@ jobs:
       - name: deploy to google cloud
         run: gsutil -m rsync -d -r frontend/apps/dist/module/${{ matrix.app }}/${{ matrix.mode }}/js gs://${{ env.STORAGE_BUCKET }}/module/${{ matrix.app }}/${{ matrix.mode }}/js
 
-      - name: Notify slack of all status
-        uses: pullreminders/slack-action@master
-        with:
-          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.value}} ${{job.status}}\"}'
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-        if: always()
-
   copy-static:
     needs: [prepare]
     name: "[${{ needs.prepare.outputs.branch }}] Copy static files"
@@ -253,13 +223,6 @@ jobs:
         run: echo "value=\"[${{needs.prepare.outputs.branch}} - copy-static]\"" >> $GITHUB_OUTPUT
         id: extract_label
 
-      - name: Notify slack
-        uses: pullreminders/slack-action@master
-        with:
-          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.value}} starting...\"}'
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-
       - id: 'auth'
         uses: 'google-github-actions/auth@v1'
         with:
@@ -270,14 +233,6 @@ jobs:
 
       - name: deploy to google cloud
         run: gsutil -m rsync -d -r frontend/apps/static gs://${{ env.STORAGE_BUCKET }}/static
-
-      - name: Notify slack of all status
-        uses: pullreminders/slack-action@master
-        with:
-          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.value}} ${{job.status}}\"}'
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-        if: always()
 
   test:
     needs: [prepare]
@@ -290,13 +245,6 @@ jobs:
         shell: bash
         run: echo "value=\"[${{needs.prepare.outputs.branch}} - test - elements]\"" >> $GITHUB_OUTPUT
         id: extract_label
-
-      - name: Notify slack
-        uses: pullreminders/slack-action@master
-        with:
-          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.value}} starting...\"}'
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: install node
         uses: actions/setup-node@v3
@@ -314,14 +262,6 @@ jobs:
         working-directory: "./frontend/elements"
         env:
           FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
-
-      - name: Notify slack of all status
-        uses: pullreminders/slack-action@master
-        with:
-          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.value}} ${{job.status}}\"}'
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-        if: always()
 
   build-module-elements:
     runs-on: ubuntu-latest
@@ -354,13 +294,6 @@ jobs:
         run: echo "value=\"[${{needs.prepare.outputs.branch}} - module/${{ matrix.app }}/${{ matrix.mode }} - elements]\"" >> $GITHUB_OUTPUT
         id: extract_label
 
-      - name: Notify slack
-        uses: pullreminders/slack-action@master
-        with:
-          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.value}} starting...\"}'
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-
       - name: install node
         uses: actions/setup-node@v3
         with:
@@ -389,14 +322,6 @@ jobs:
 
       - name: deploy to google cloud
         run: gsutil -m rsync -d -r frontend/elements/dist/module/${{ matrix.app }}/${{ matrix.mode }} gs://${{ env.STORAGE_BUCKET }}/module/${{ matrix.app }}/${{ matrix.mode }}/elements
-
-      - name: Notify slack of all status
-        uses: pullreminders/slack-action@master
-        with:
-          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.value}} ${{job.status}}\"}'
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-        if: always()
 
   build-entry-elements:
     needs: [prepare, test]
@@ -428,13 +353,6 @@ jobs:
         run: echo "value=\"[${{needs.prepare.outputs.branch}} - module/${{ matrix.app }} - elements]\"" >> $GITHUB_OUTPUT
         id: extract_label
 
-      - name: Notify slack
-        uses: pullreminders/slack-action@master
-        with:
-          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.value}} starting...\"}'
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-
       - name: install node
         uses: actions/setup-node@v3
         with:
@@ -463,11 +381,3 @@ jobs:
 
       - name: deploy to google cloud
         run: gsutil -m rsync -d -r frontend/elements/dist/${{ matrix.app }} gs://${{ env.STORAGE_BUCKET }}/${{ matrix.app }}/elements
-
-      - name: Notify slack of all status
-        uses: pullreminders/slack-action@master
-        with:
-          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.value}} ${{job.status}}\"}'
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-        if: always()

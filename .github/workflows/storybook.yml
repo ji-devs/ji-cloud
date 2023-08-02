@@ -55,13 +55,6 @@ jobs:
         run: echo "value=\"[${{needs.prepare.outputs.branch}} - storybook]\"" >> $GITHUB_OUTPUT
         id: extract_label
 
-      - name: Notify slack
-        uses: pullreminders/slack-action@master
-        with:
-          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.value}} starting...\"}'
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-
       - name: install node
         uses: actions/setup-node@v3
         with:
@@ -102,11 +95,3 @@ jobs:
           args: deploy --project ${{ env.PROJECT }} --only hosting:${{ env.HOSTING }}
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-
-      - name: Notify slack of all status
-        uses: pullreminders/slack-action@master
-        with:
-          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.value}} ${{job.status}}\"}'
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-        if: always()
