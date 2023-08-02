@@ -537,10 +537,10 @@ impl PlanType {
     #[must_use]
     pub const fn display_name(&self) -> &'static str {
         match self {
-            Self::IndividualBasicMonthly => "Basic - Monthly plan",
-            Self::IndividualBasicAnnually => "Basic - Annually plan",
-            Self::IndividualProMonthly => "Pro - Monthly plan",
-            Self::IndividualProAnnually => "Pro - Annually plan",
+            Self::IndividualBasicMonthly => "Basic monthly plan",
+            Self::IndividualBasicAnnually => "Basic annual plan",
+            Self::IndividualProMonthly => "Pro monthly plan",
+            Self::IndividualProAnnually => "Pro annual plan",
             Self::SchoolLevel1
             | Self::SchoolLevel2
             | Self::SchoolLevel3
