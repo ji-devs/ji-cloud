@@ -229,8 +229,8 @@ update school
 where school_id = $1
 "#,
         school_id as &SchoolId,
-        update.school_name.into_option(),
         update.email.into_option(),
+        update.school_name.into_option(),
         update.location.is_change(),
         update.location.into_option(),
         update.description.is_change(),
