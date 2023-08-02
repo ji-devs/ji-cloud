@@ -220,7 +220,7 @@ pub async fn update_school_account(
 update school
     set
         email = coalesce($2::text::citext, email),
-        school_name = coalesce($3::text::citext, email),
+        school_name = coalesce($3::text::citext, school_name),
         location = case when $4 then $5 else location end,
         description = case when $6 then $7 else description end,
         profile_image_id = case when $8 then $9 else profile_image_id end,
