@@ -52,14 +52,6 @@ impl SchoolDetails {
                         .prop("slot", "inputs")
                         .children(&mut [
                             html!("input-wrapper", {
-                                .prop("label", "School name")
-                                .child(html!("input", {
-                                    .prop("type", "text")
-                                    .prop("disabled", true)
-                                    .prop("value", school.school_name)
-                                }))
-                            }),
-                            html!("input-wrapper", {
                                 .prop("label", "Internal School name")
                                 .child(html!("input", {
                                     .prop("type", "text")
@@ -71,18 +63,29 @@ impl SchoolDetails {
                                 }))
                             }),
                             html!("input-wrapper", {
+                                .prop("label", "School name")
+                                .child(html!("input", {
+                                    .prop("type", "text")
+                                    .prop("disabled", true)
+                                    .prop_signal("value", school.school_name.signal())
+                                }))
+                            }),
+                            html!("input-wrapper", {
                                 .prop("label", "Contact email")
                                 .child(html!("input", {
                                     .prop("type", "text")
                                     .prop("disabled", true)
-                                    .prop("value", school.email)
+                                    .prop_signal("value", school.email.signal())
                                 }))
                             }),
                             html!("input-wrapper", {
                                 .prop("label", "Description")
                                 .child(html!("textarea", {
                                     .prop("disabled", true)
-                                    .prop("value", school.description.unwrap_or_default())
+                                    .prop_signal(
+                                        "value",
+                                        school.description.signal().map(|value| value.unwrap_or_default())
+                                    )
                                 }))
                             }),
                             html!("input-wrapper", {
@@ -90,7 +93,10 @@ impl SchoolDetails {
                                 .child(html!("input", {
                                     .prop("type", "text")
                                     .prop("disabled", true)
-                                    .prop("value", school.website.unwrap_or_default())
+                                    .prop_signal(
+                                        "value",
+                                        school.website.signal().map(|value| value.unwrap_or_default())
+                                    )
                                 }))
                             }),
                             html!("input-wrapper", {
@@ -98,7 +104,10 @@ impl SchoolDetails {
                                 .child(html!("input", {
                                     .prop("type", "text")
                                     .prop("disabled", true)
-                                    .prop("value", school.organization_type.unwrap_or_default())
+                                    .prop_signal(
+                                        "value",
+                                        school.organization_type.signal().map(|value| value.unwrap_or_default())
+                                    )
                                 }))
                             }),
                         ])

@@ -260,19 +260,14 @@ impl<T> UpdateNullable<T> {
 ///
 /// Requires `#[serde(default, skip_serializing_if = "Update::is_keep")]` to be applied to
 /// fields which use this type.
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, Default)]
 #[serde(untagged)]
 pub enum UpdateNonNullable<T> {
     /// Use the current value stored in the database. Equivalent of `undefined` in JS.
+    #[default]
     Keep,
     /// Use the given value.
     Change(T),
-}
-
-impl<T> Default for UpdateNonNullable<T> {
-    fn default() -> Self {
-        Self::Keep
-    }
 }
 
 impl<'de, T> Deserialize<'de> for UpdateNonNullable<T>

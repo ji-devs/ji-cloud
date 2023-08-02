@@ -11,6 +11,7 @@ pub mod component;
 pub mod constants;
 pub mod drag;
 pub mod editable_asset;
+pub mod editable_field;
 pub mod env;
 pub mod error_ext;
 pub mod events;
