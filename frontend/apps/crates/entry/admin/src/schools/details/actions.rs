@@ -21,7 +21,7 @@ impl SchoolDetails {
             {
                 Err(_) => todo!(),
                 Ok(school_account) => {
-                    state.school.set(Some(school_account.school));
+                    state.school.set(Some(school_account.school.into()));
                     state.users.lock_mut()
                         .replace_cloned(school_account.users.into_iter().map(|user| Rc::new(user))
                         .collect());
