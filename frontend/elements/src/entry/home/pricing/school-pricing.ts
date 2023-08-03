@@ -45,7 +45,7 @@ export class _ extends LitElement {
             .options {
                 grid-column: 1;
                 grid-row: 1;
-                z-index: 2;
+                z-index: 1;
                 font-size: 12px;
                 text-align: center;
                 color: var(--dark-gray-3);
