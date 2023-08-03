@@ -22,17 +22,6 @@ impl SchoolDetails {
                             .prop("slot", "loader")
                             .prop_signal("visible", state.parent.loader.is_loading())
                         }))
-                        .apply_if(!school.verified, clone!(state => move |dom| {
-                            dom.child(html!("button-rect", {
-                                .prop("slot", "back")
-                                .prop("kind", "filled")
-                                .prop("color", "blue")
-                                .text("Verify school")
-                                .event(clone!(state => move |_: events::Click| {
-                                    state.set_verified();
-                                }))
-                            }))
-                        }))
                         .child(html!("div", {
                             .prop("slot", "buttons")
                             .child(html!("button-rect", {
@@ -41,6 +30,15 @@ impl SchoolDetails {
                                 .text("Cancel")
                                 .event(clone!(state => move |_: events::Click| {
                                     state.parent.navigate_to(AdminSchoolsRoute::Table);
+                                }))
+                            }))
+                            .child(html!("button-rect", {
+                                .prop("kind", "outline")
+                                .prop("color", "blue")
+                                .prop("disabled", school.verified)
+                                .text("Verify school")
+                                .event(clone!(state => move |_: events::Click| {
+                                    state.set_verified();
                                 }))
                             }))
                             .child(html!("button-rect", {

@@ -5,7 +5,9 @@ use macros::make_path_parts;
 use serde::{Deserialize, Serialize, Serializer};
 use std::convert::TryFrom;
 
-use crate::domain::billing::{AmountInCents, PlanType, SubscriptionStatus, UserAccountSummary};
+use crate::domain::billing::{
+    AmountInCents, PlanType, SchoolId, SubscriptionStatus, UserAccountSummary,
+};
 use crate::{
     api::endpoints::PathPart,
     domain::{
@@ -342,6 +344,10 @@ pub struct UserResponse {
     /// Whether the user is an admin of the account
     #[serde(default)]
     pub is_admin: Option<bool>,
+
+    /// The school name associated with the users account
+    #[serde(default)]
+    pub school_id: Option<SchoolId>,
 
     /// The school name associated with the users account
     #[serde(default)]

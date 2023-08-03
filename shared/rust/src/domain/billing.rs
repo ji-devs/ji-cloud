@@ -632,19 +632,26 @@ impl PlanType {
     /// check if is individual plan
     #[must_use]
     pub const fn is_individual_plan(&self) -> bool {
-        match self {
-            Self::IndividualBasicMonthly | Self::IndividualBasicAnnually | Self::IndividualProMonthly | Self::IndividualProAnnually => true,
-            Self::SchoolLevel1 | Self::SchoolLevel2 | Self::SchoolLevel3 | Self::SchoolLevel4 | Self::SchoolUnlimited => false,
-        }
+        matches!(
+            self,
+            Self::IndividualBasicMonthly
+                | Self::IndividualBasicAnnually
+                | Self::IndividualProMonthly
+                | Self::IndividualProAnnually
+        )
     }
 
     /// check if is school plan
     #[must_use]
     pub const fn is_school_plan(&self) -> bool {
-        match self {
-            Self::IndividualBasicMonthly | Self::IndividualBasicAnnually | Self::IndividualProMonthly | Self::IndividualProAnnually => false,
-            Self::SchoolLevel1 | Self::SchoolLevel2 | Self::SchoolLevel3 | Self::SchoolLevel4 | Self::SchoolUnlimited => true,
-        }
+        matches!(
+            self,
+            Self::SchoolLevel1
+                | Self::SchoolLevel2
+                | Self::SchoolLevel3
+                | Self::SchoolLevel4
+                | Self::SchoolUnlimited
+        )
     }
 }
 

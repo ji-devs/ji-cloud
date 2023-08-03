@@ -23,6 +23,7 @@ expression: body
       "currentPeriodEnd": null,
       "amountDueInCents": null,
       "isAdmin": null,
+      "schoolId": null,
       "schoolName": null
     }
   ],
