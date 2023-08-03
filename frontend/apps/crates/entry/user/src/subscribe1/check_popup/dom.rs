@@ -8,6 +8,8 @@ use utils::{
 };
 use web_sys::ShadowRoot;
 
+const CHECK_DISCOUNT: &str = "manual";
+
 impl Component<CheckPopup> for Rc<CheckPopup> {
     fn styles() -> &'static str {
         include_str!("./styles.css")
@@ -51,7 +53,7 @@ impl Component<CheckPopup> for Rc<CheckPopup> {
                         .prop("color", "blue")
                         .text("Start free trial")
                         .event(clone!(state => move |_: events::Click| {
-                            Route::User(UserRoute::Subscribe2(state.subscribe_1_state.plan_type, None, state.subscribe_1_state.promo.get_cloned())).go_to();
+                            Route::User(UserRoute::Subscribe2(state.subscribe_1_state.plan_type, None, Some(String::from(CHECK_DISCOUNT)))).go_to();
                         }))
                     }))
                 })
