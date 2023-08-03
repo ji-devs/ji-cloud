@@ -19,11 +19,15 @@ use utils::{
 use super::Pricing;
 use super::Variables;
 
-const PLAN_PRICE_MONTHLY_BASIC: u32 = 23_99;
-const PLAN_PRICE_ANNUAL_BASIC: u32 = 239_99;
+const PLAN_PRICE_MONTHLY_BASIC: u32 = 17_99;
+const PLAN_PRICE_ANNUAL_BASIC: u32 = 180_00;
 const PLAN_PRICE_MONTHLY_PRO: u32 = 29_99;
-const PLAN_PRICE_ANNUAL_PRO: u32 = 299_99;
-const PLAN_PRICE_SCHOOL: u32 = 1_500_00;
+const PLAN_PRICE_ANNUAL_PRO: u32 = 300_00;
+const PLAN_PRICE_SCHOOL_1: u32 = 1_250_00;
+const PLAN_PRICE_SCHOOL_2: u32 = 1_500_00;
+const PLAN_PRICE_SCHOOL_3: u32 = 1_750_00;
+const PLAN_PRICE_SCHOOL_4: u32 = 2_000_00;
+const PLAN_PRICE_SCHOOL_UNLIMITED: u32 = 2_250_00;
 
 impl Pricing {
     pub fn render(self: &Rc<Self>) -> Dom {
@@ -223,9 +227,16 @@ impl Pricing {
                     .prop_signal("message", state.variables.signal_ref(|v| v.bubble_message.clone()))
                 }))
                 .child(html!("pricing-school-pricing", {
-                    .prop("plan_price", PLAN_PRICE_SCHOOL)
-                    .prop_signal("discount_percentage", state.variables.signal_ref(|v| v.discount_percentage_school))
+                    // .prop("plan_price", PLAN_PRICE_SCHOOL)
+                    .prop_signal("plan_price", selected_index.signal().map(|i| match i {
+                        SchoolPlan::Level1 => PLAN_PRICE_SCHOOL_1,
+                        SchoolPlan::Level2 => PLAN_PRICE_SCHOOL_2,
+                        SchoolPlan::Level3 => PLAN_PRICE_SCHOOL_3,
+                        SchoolPlan::Level4 => PLAN_PRICE_SCHOOL_4,
+                        SchoolPlan::Unlimited => PLAN_PRICE_SCHOOL_UNLIMITED,
+                    }))
                     .prop_signal("selectedIndex", selected_index.signal().map(|i| -> u8 {i.into()}))
+                    .prop_signal("discount_percentage", state.variables.signal_ref(|v| v.discount_percentage_school))
                     .event(clone!(selected_index => move |e: events::CustomNumber| {
                         let index = e.number().unwrap_ji() as u8;
                         selected_index.set(index.try_into().unwrap_ji());
