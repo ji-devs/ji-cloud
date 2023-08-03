@@ -102,7 +102,7 @@ impl Component<Subscribe1> for Rc<Subscribe1> {
                                     dom.child(html!("button-rect", {
                                         .prop("kind", "text")
                                         .prop("color", "red")
-                                        .text("Request other payment method")
+                                        .text("Pay another way")
                                         .event(clone!(state => move |_: events::Click| {
                                             state.pay_with_check.set(true);
                                             state.plan_type;

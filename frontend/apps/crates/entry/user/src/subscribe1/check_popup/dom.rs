@@ -33,7 +33,7 @@ impl Component<CheckPopup> for Rc<CheckPopup> {
                 }),
                 gap!(8),
                 html!("h3", {
-                    .text("Your trial will start now, We will contact you soon to set up the payment.")
+                    .text("Start trial now and we will contact you to set up payment.")
                 }),
                 gap!(66),
                 html!("div", {
