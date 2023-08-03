@@ -169,10 +169,20 @@ impl UsersTable {
                         html!("span", {
                             .text(&user.current_period_end)
                         }),
-                        html!("span", {
-                            .text(&user.school_account)
-                        }),
                     ])
+                    .apply(clone!(user => move |dom| {
+                        match user.school_id {
+                            Some(school_id) => {
+                                dom.child(html!("a", {
+                                    .attr("href", &format!("/admin/schools/{school_id}"))
+                                    .text(&user.school_account)
+                                }))
+                            },
+                            None => {
+                                dom.child(html!("span"))
+                            }
+                        }
+                    }))
                 })
             })))
         })

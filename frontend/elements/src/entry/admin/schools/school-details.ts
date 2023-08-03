@@ -32,6 +32,9 @@ export class _ extends LitElement {
                 border: solid 2px #e6f0ff;
                 overflow: auto;
             }
+            h2 {
+                margin-top: 0;
+            }
             ::slotted([slot="inputs"]) {
                 display: flex;
                 flex-direction: column;
@@ -59,12 +62,15 @@ export class _ extends LitElement {
                 </div>
             </div>
             <div class="input-container">
+                <h2>School</h2>
                 <slot name="inputs"></slot>
             </div>
             <div class="input-container">
+                <h2>Account</h2>
                 <slot name="account"></slot>
             </div>
             <div class="input-container">
+                <h2>Members</h2>
                 <slot name="users"></slot>
             </div>
             <slot name="loader"></slot>

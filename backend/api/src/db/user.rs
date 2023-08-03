@@ -1,7 +1,7 @@
 use crate::error::Username::Taken;
 use chrono::{DateTime, Utc};
 use chrono_tz::Tz;
-use shared::domain::billing::{AmountInCents, PlanType, SubscriptionStatus};
+use shared::domain::billing::{AmountInCents, PlanType, SchoolId, SubscriptionStatus};
 use shared::domain::{
     admin::DateFilterType,
     circle::CircleId,
@@ -175,6 +175,7 @@ account_cte as (
         subscription.amount_due,
         subscription.is_trial,
         user_account.admin,
+        school.school_id,
         school.school_name
     from user_account
     inner join account using (account_id)
@@ -214,6 +215,7 @@ select  cte1.id                 as "id!: UserId",
         account_cte.is_trial as "is_trial?",
         account_cte.amount_due as "amount_due_in_cents?: AmountInCents",
         account_cte.admin as "is_admin?",
+        account_cte.school_id as "school_id?: SchoolId",
         account_cte.school_name::text as "school_name?"
 from cte1
         left join account_cte on cte1.id = account_cte.user_id
@@ -256,6 +258,7 @@ offset $2
                 current_period_end: user_row.current_period_end,
                 amount_due_in_cents: user_row.amount_due_in_cents,
                 is_admin: user_row.is_admin,
+                school_id: user_row.school_id,
                 school_name: user_row.school_name,
             }
         })
@@ -281,6 +284,7 @@ with account_cte as (
         subscription.is_trial,
         subscription.amount_due,
         user_account.admin,
+        school.school_id,
         school.school_name
     from user_account
     inner join account using (account_id)
@@ -320,6 +324,7 @@ select  "user".id                 as "id!: UserId",
         account_cte.current_period_end as "current_period_end?: DateTime<Utc>",
         account_cte.amount_due as "amount_due_in_cents?: AmountInCents",
         account_cte.admin as "is_admin?",
+        account_cte.school_id as "school_id?: SchoolId",
         account_cte.school_name::text as "school_name?"
 from "user"
 left join account_cte on "user".id = account_cte.user_id
@@ -357,6 +362,7 @@ with ordinality t(id, ord) using (id)
                 current_period_end: row.current_period_end,
                 amount_due_in_cents: row.amount_due_in_cents,
                 is_admin: row.is_admin,
+                school_id: row.school_id,
                 school_name: row.school_name,
             }
         })
