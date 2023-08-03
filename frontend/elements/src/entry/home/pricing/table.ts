@@ -522,7 +522,7 @@ export class _ extends LitElement {
                             `
                         })}
                     </div>
-                    <!-- <div class="row end-row blue">
+                    <div class="row end-row blue">
                         <div class="cell cell-header">Access courses for professional development</div>
                         ${cells(this.kind, {
                             schools: html`
@@ -530,12 +530,12 @@ export class _ extends LitElement {
                             `,
                             individuals: html`
                                 <div class="cell"><fa-icon icon="fa-solid fa-dash"></fa-icon></div>
-                                <div class="cell"><fa-icon icon="fa-solid fa-dash"></fa-icon></div>
+                                <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
                                 <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
                             `
                         })}
-                    </div> -->
-                    <div class="row end-row blue">
+                    </div>
+                    <!-- <div class="row end-row blue">
                         <div class="cell cell-header">Create courses for professional development</div>
                         ${cells(this.kind, {
                             schools: html`
@@ -547,7 +547,7 @@ export class _ extends LitElement {
                                 <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
                             `
                         })}
-                    </div>
+                    </div> -->
                     ${ this.kind === "schools" ? html`
                         <div class="row end-row blue school-only-row">
                             <div class="cell cell-header">School community page for all your staff creations!</div>
