@@ -195,7 +195,7 @@ impl Pricing {
                         .prop("kind", "text")
                         .prop("color", "blue")
                         .text("Learn more")
-                        .on_click_go_to_url!(Route::Home(HomeRoute::Plan(HomePlanRoute::Basic)))
+                        .on_click_go_to_url!(Route::Home(HomeRoute::Plan(HomePlanRoute::Pro)))
                     }),
                 ])
             }),
