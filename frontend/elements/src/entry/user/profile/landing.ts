@@ -229,7 +229,8 @@ export class _ extends LitElement {
                 }
                 ::slotted([slot=plan-type]),
                 ::slotted([slot=plan-price]),
-                ::slotted([slot=plan-renews-on]) {
+                ::slotted([slot=plan-renews-on]),
+                ::slotted([slot=plan-renewal-label]) {
                     font-size: 14px;
                     font-weight: 500;
                     color: var(--dark-gray-6);
