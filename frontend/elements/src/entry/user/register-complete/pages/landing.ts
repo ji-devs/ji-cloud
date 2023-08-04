@@ -1,9 +1,5 @@
-import { mediaUi, MEDIA_UI } from "@utils/path";
+import { mediaUi } from "@utils/path";
 import { LitElement, html, css, customElement, property, unsafeCSS } from "lit-element";
-
-const STR_TITLE = "Welcome to the Jigzi family!";
-const STR_SUB = "You can now create, play, and share your content.";
-const STR_SUBSUB = "We are here to help.";
 
 const backgroundImage = mediaUi("entry/user/register-complete/background.webp");
 
@@ -25,7 +21,7 @@ export class _ extends LitElement {
                     background-position: center center;
                 }
                 .content {
-                    width: 628px;
+                    width: 710px;
                     max-width: 95vw;
                     border-radius: 32px;
                     box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
@@ -37,28 +33,38 @@ export class _ extends LitElement {
                     text-align: left;
                     margin-bottom: 56px;
                 }
-                h1 {
+                ::slotted(h1) {
                     font-size: 32px;
                     font-weight: 900;
                     color: #5662a3;
+                }
+                ::slotted(h2) {
+                    font-size: 16px;
+                    color: rgb(74, 74, 74);
+                    font-weight: 500;
+                }
+                .actions {
+                    display: flex;
+                    gap: 24px;
+                }
+                ::slotted(p) {
+                    font-size: 14px;
+                    color: var(--dark-gray-6);
                 }
             `,
         ];
     }
 
-    @property()
-    plan: string = "";
-
     render() {
         return html`
             <div class="content">
                 <div class="title">
-                    <h1>${STR_TITLE}</h1>
-                    <h4>${this.plan}</h4>
-                    <title-ji color="black">${STR_SUB}</title-ji>
-                    <title-ji color="black">${STR_SUBSUB}</title-ji>
+                    <slot name="headings"></slot>
                 </div>
-                <slot name="actions"></slot>
+                <div class="actions">
+                    <slot name="actions"></slot>
+                </div>
+                <slot name="help"></slot>
             </div>
         `;
     }

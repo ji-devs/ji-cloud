@@ -274,6 +274,11 @@ pub struct UserProfile {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account_summary: Option<UserAccountSummary>,
+
+    /// The schools name if user is part of school, otherwise same as organization.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub school_or_organization: Option<String>,
 }
 
 /// User Response (used for Admin).

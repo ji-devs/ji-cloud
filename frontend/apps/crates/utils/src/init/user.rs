@@ -69,6 +69,11 @@ pub fn plan_type_signal() -> impl Signal<Item = Option<PlanType>> {
     })
 }
 
+pub fn get_user_email() -> Option<String> {
+    let email = get_user_mutable().lock_ref().as_ref()?.email.clone();
+    Some(email)
+}
+
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum PlanTier {
     Pro,

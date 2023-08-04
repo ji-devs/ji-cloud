@@ -13,10 +13,6 @@ pub const STR_PASSWORD_LABEL: &str = "Password *";
 pub const STR_PASSWORD_FORGOTTEN: &str = "Forgot your password?";
 
 pub mod register {
-    pub mod complete {
-        pub const STR_SUBMIT: &str = "Go to Jigzi";
-    }
-
     pub mod step_1 {
         pub const STR_FIRSTNAME_LABEL: &str = "First name *";
         pub const STR_LASTNAME_LABEL: &str = "Last name *";
