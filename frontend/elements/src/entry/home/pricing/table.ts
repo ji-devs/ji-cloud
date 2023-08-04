@@ -308,7 +308,6 @@ export class _ extends LitElement {
                             <h6 class="plan-price-original">${regular_price_pro ? price(regular_price_pro) : nothing}</h6>
                             <h3 class="plan-price">${price(current_price_pro)}</h3>
                             <p class="frequency">${this.frequency_display()}</p>
-
                             ${ price_by_month_pro ? html`
                                 <p class="monthly-price">${price(price_by_month_pro)} / month</p>
                             ` : nothing }
@@ -637,7 +636,7 @@ export class _ extends LitElement {
                 </div>
                 <p class="custom-subscription">
                     Can’t find a subscription that fits your needs?
-                    <button-rect kind="text" color="blue">Contact us</button-rect>
+                    <button-rect kind="text" color="blue" href="/home/help">Contact us</button-rect>
                 </p>
             </div>
         `;
