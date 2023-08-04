@@ -208,53 +208,51 @@ impl Pricing {
         let state = self;
         let selected_index: Mutable<SchoolPlan> = Mutable::new(SchoolPlan::Level3);
 
-        vec![
-            html!("pricing-table", {
-                .prop("kind", "schools")
-                .child(html!("div", {
-                    .prop("slot", "school-head")
-                    .child(html!("pricing-message", {
-                        .prop_signal("color", state.variables.signal_ref(|v| v.bubble_color.clone()))
-                        .prop_signal("title", state.variables.signal_ref(|v| v.bubble_title.clone()))
-                        .prop_signal("message", state.variables.signal_ref(|v| v.bubble_message.clone()))
+        vec![html!("pricing-table", {
+            .prop("kind", "schools")
+            .child(html!("div", {
+                .prop("slot", "school-head")
+                .child(html!("pricing-message", {
+                    .prop_signal("color", state.variables.signal_ref(|v| v.bubble_color.clone()))
+                    .prop_signal("title", state.variables.signal_ref(|v| v.bubble_title.clone()))
+                    .prop_signal("message", state.variables.signal_ref(|v| v.bubble_message.clone()))
+                }))
+                .child(html!("pricing-school-pricing", {
+                    .prop_signal("plan_price", selected_index.signal().map(|i| match i {
+                        SchoolPlan::Level1 => PLAN_PRICE_SCHOOL_1,
+                        SchoolPlan::Level2 => PLAN_PRICE_SCHOOL_2,
+                        SchoolPlan::Level3 => PLAN_PRICE_SCHOOL_3,
+                        SchoolPlan::Level4 => PLAN_PRICE_SCHOOL_4,
+                        SchoolPlan::Unlimited => PLAN_PRICE_SCHOOL_UNLIMITED,
                     }))
-                    .child(html!("pricing-school-pricing", {
-                        .prop_signal("plan_price", selected_index.signal().map(|i| match i {
-                            SchoolPlan::Level1 => PLAN_PRICE_SCHOOL_1,
-                            SchoolPlan::Level2 => PLAN_PRICE_SCHOOL_2,
-                            SchoolPlan::Level3 => PLAN_PRICE_SCHOOL_3,
-                            SchoolPlan::Level4 => PLAN_PRICE_SCHOOL_4,
-                            SchoolPlan::Unlimited => PLAN_PRICE_SCHOOL_UNLIMITED,
-                        }))
-                        .prop_signal("selectedIndex", selected_index.signal().map(|i| -> u8 {i.into()}))
-                        .prop_signal("discount_percentage", state.variables.signal_ref(|v| v.discount_percentage_school))
-                        .event(clone!(selected_index => move |e: events::CustomNumber| {
-                            let index = e.number().unwrap_ji() as u8;
-                            selected_index.set(index.try_into().unwrap_ji());
-                        }))
-                        .child(html!("button-rect", {
-                            .prop("slot", "start-button")
-                            .prop("kind", "filled")
-                            .prop("color", "blue")
-                            .text(formatcp!("Start {}-day trial", SCHOOL_FREE_TRIAL_DAYS))
-                            .prop_signal("href", map_ref! {
-                                let selected_index = selected_index.signal(),
-                                let promo_code = state.school_promo_code_signal() => {
-                                    Route::User(UserRoute::SchoolStart((*selected_index).into(), promo_code.clone())).to_string()
-                                }
-                            })
-                        }))
+                    .prop_signal("selectedIndex", selected_index.signal().map(|i| -> u8 {i.into()}))
+                    .prop_signal("discount_percentage", state.variables.signal_ref(|v| v.discount_percentage_school))
+                    .event(clone!(selected_index => move |e: events::CustomNumber| {
+                        let index = e.number().unwrap_ji() as u8;
+                        selected_index.set(index.try_into().unwrap_ji());
+                    }))
+                    .child(html!("button-rect", {
+                        .prop("slot", "start-button")
+                        .prop("kind", "filled")
+                        .prop("color", "blue")
+                        .text(formatcp!("Start {}-day trial", SCHOOL_FREE_TRIAL_DAYS))
+                        .prop_signal("href", map_ref! {
+                            let selected_index = selected_index.signal(),
+                            let promo_code = state.school_promo_code_signal() => {
+                                Route::User(UserRoute::SchoolStart((*selected_index).into(), promo_code.clone())).to_string()
+                            }
+                        })
                     }))
                 }))
-                .child(html!("button-rect", {
-                    .prop("slot", "learn-more-school")
-                    .prop("kind", "text")
-                    .prop("color", "blue")
-                    .text("Learn more")
-                    .on_click_go_to_url!(Route::Home(HomeRoute::Plan(HomePlanRoute::School)))
-                }))
-            }),
-        ]
+            }))
+            .child(html!("button-rect", {
+                .prop("slot", "learn-more-school")
+                .prop("kind", "text")
+                .prop("color", "blue")
+                .text("Learn more")
+                .on_click_go_to_url!(Route::Home(HomeRoute::Plan(HomePlanRoute::School)))
+            }))
+        })]
     }
 
     fn pro_promo_code_signal(self: &Rc<Self>) -> impl Signal<Item = Option<String>> {
