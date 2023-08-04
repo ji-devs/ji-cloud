@@ -107,7 +107,7 @@ impl Pricing {
         let frequency = Mutable::new(Frequency::Monthly);
         vec![
             html!("pricing-toggle", {
-                .prop_signal("value", frequency.signal().map(|f| -> &str {f.into()}))
+                .prop_signal("value", frequency.signal().map(|f| -> &str {(&f).into()}))
                 .event(clone!(frequency => move |e: events::CustomString| {
                     let value: &str = &e.value();
                     frequency.set(value.try_into().unwrap_ji());
@@ -115,6 +115,7 @@ impl Pricing {
             }),
             html!("pricing-table", {
                 .prop("kind", "individuals")
+                .prop_signal("frequency", frequency.signal().map(|frequency| frequency.as_str()))
                 .prop_signal("plan_price_basic", frequency.signal().map(|frequency| match frequency {
                     Frequency::Annually => PLAN_PRICE_ANNUAL_BASIC,
                     Frequency::Monthly => PLAN_PRICE_MONTHLY_BASIC,
@@ -125,10 +126,6 @@ impl Pricing {
                 }))
                 .prop_signal("discount_percentage_basic", state.variables.signal_ref(|v| v.discount_percentage_basic))
                 .prop_signal("discount_percentage_pro", state.variables.signal_ref(|v| v.discount_percentage_pro))
-                .prop_signal("frequency", frequency.signal().map(|frequency| match frequency {
-                    Frequency::Annually => "Annually",
-                    Frequency::Monthly => "Monthly",
-                }))
                 .child(html!("pricing-message", {
                     .prop("slot", "pricing-message")
                     .prop_signal("color", state.variables.signal_ref(|v| v.bubble_color.clone()))
@@ -302,6 +299,12 @@ enum Frequency {
     Monthly,
 }
 
+impl Frequency {
+    fn as_str(&self) -> &'static str {
+        self.into()
+    }
+}
+
 impl TryFrom<&str> for Frequency {
     type Error = ();
 
@@ -314,8 +317,8 @@ impl TryFrom<&str> for Frequency {
     }
 }
 
-impl From<Frequency> for &str {
-    fn from(value: Frequency) -> Self {
+impl From<&Frequency> for &str {
+    fn from(value: &Frequency) -> Self {
         match value {
             Frequency::Annually => "annually",
             Frequency::Monthly => "monthly",

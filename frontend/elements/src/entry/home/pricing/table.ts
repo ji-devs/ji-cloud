@@ -2,6 +2,9 @@ import { LitElement, html, css, customElement, property, TemplateResult } from "
 import { nothing } from "lit-html";
 
 export type Kind = 'individuals' | 'schools';
+export type Frequency = 'annually' | 'monthly';
+
+const TWELFTH = (10 / 12) * 10;
 
 @customElement("pricing-table")
 export class _ extends LitElement {
@@ -156,7 +159,7 @@ export class _ extends LitElement {
             }
             .individuals-desktop-price .cell:not(.message) {
                 align-content: space-between;
-                grid-template-rows: 30px 16px 38px 16px 50px;
+                grid-template-rows: 30px 16px 38px 16px 16px 40px;
                 height: 212px;
                 width: 100%;
                 box-sizing: border-box;
@@ -209,9 +212,15 @@ export class _ extends LitElement {
                 font-weight: 400;
                 grid-row: 4;
             }
+            .individuals-desktop-price .monthly-price {
+                margin: 0;
+                font-size: 13px;
+                font-weight: 600;
+                grid-row: 5;
+            }
             .individuals-desktop-price ::slotted(*) {
                 align-self: end;
-                grid-row: 5;
+                grid-row: 6;
                 justify-self: center;
             }
             .custom-subscription, table {
@@ -228,7 +237,7 @@ export class _ extends LitElement {
     kind: Kind = "individuals";
 
     @property({ reflect: true })
-    frequency?: string;
+    frequency: Frequency = "annually";
 
     @property({ type: Number, reflect: true })
     plan_price_pro?: number;
@@ -242,7 +251,24 @@ export class _ extends LitElement {
     @property({ type: Number, reflect: true })
     discount_percentage_basic?: number;
 
+    private frequency_display(): string {
+        if(this.frequency === "monthly") {
+            return "Monthly";
+        } else if (this.frequency === "annually") {
+            return "Annually";
+        } else {
+            return "";
+        }
+    }
+
     render() {
+        const regular_price_basic = this.discount_percentage_basic ? this.plan_price_basic : undefined;
+        const regular_price_pro = this.discount_percentage_pro ? this.plan_price_pro : undefined;
+        const current_price_basic = this.discount_percentage_basic ? reduce_by_percentage(this.plan_price_basic, this.discount_percentage_basic) : this.plan_price_basic;
+        const current_price_pro = this.discount_percentage_pro ? reduce_by_percentage(this.plan_price_pro, this.discount_percentage_pro) : this.plan_price_pro;
+        const price_by_month_basic = this.frequency === "annually" ? percentage_of(current_price_basic, TWELFTH) : undefined;
+        const price_by_month_pro = this.frequency === "annually" ? percentage_of(current_price_pro, TWELFTH) : undefined;
+
         return html`
             <div class="table-wrapper">
                 <div class="table">
@@ -264,11 +290,12 @@ export class _ extends LitElement {
                                     <span class="discount-percentage">-${this.discount_percentage_basic}%</span>
                                 ` : nothing}
                             </div>
-                            <h6 class="plan-price-original">${this.discount_percentage_basic ? price(this.plan_price_basic) : nothing}</h6>
-                            <h3 class="plan-price">${price(
-                                this.discount_percentage_basic ? percentage(this.plan_price_basic, this.discount_percentage_basic) : this.plan_price_basic
-                            )}</h3>
-                            <p class="frequency">${this.frequency}</p>
+                            <h6 class="plan-price-original">${regular_price_basic ? price(regular_price_basic) : nothing}</h6>
+                            <h3 class="plan-price">${price(current_price_basic)}</h3>
+                            <p class="frequency">${this.frequency_display()}</p>
+                            ${ price_by_month_basic ? html`
+                                <p class="monthly-price">${price(price_by_month_basic)} / month</p>
+                            ` : nothing }
                             <slot name="basic-action"></slot>
                         </div>
                         <div class="cell">
@@ -278,11 +305,13 @@ export class _ extends LitElement {
                                     <span class="discount-percentage">-${this.discount_percentage_pro}%</span>
                                 ` : nothing}
                             </div>
-                            <h6 class="plan-price-original">${this.discount_percentage_pro ? price(this.plan_price_pro) : nothing}</h6>
-                            <h3 class="plan-price">${price(
-                                this.discount_percentage_pro ? percentage(this.plan_price_pro, this.discount_percentage_pro) : this.plan_price_pro
-                            )}</h3>
-                            <p class="frequency">${this.frequency}</p>
+                            <h6 class="plan-price-original">${regular_price_pro ? price(regular_price_pro) : nothing}</h6>
+                            <h3 class="plan-price">${price(current_price_pro)}</h3>
+                            <p class="frequency">${this.frequency_display()}</p>
+
+                            ${ price_by_month_pro ? html`
+                                <p class="monthly-price">${price(price_by_month_pro)} / month</p>
+                            ` : nothing }
                             <slot name="pro-action"></slot>
                         </div>
                     </div>
@@ -630,8 +659,14 @@ export function price(price: number | undefined): string {
     return formatter.format(price / 100);
 }
 
-export function percentage(num?: number, percentage?: number): number | undefined {
+export function reduce_by_percentage(num?: number, percentage?: number): number | undefined {
     if(num === undefined || percentage === undefined)
         return;
     return num - ( num * percentage / 100);
+}
+
+function percentage_of(num?: number, percentage?: number): number | undefined {
+    if(num === undefined || percentage === undefined)
+        return;
+    return num * percentage / 100;
 }

@@ -1,5 +1,5 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
-import { percentage, price } from "./table";
+import { reduce_by_percentage, price } from "./table";
 import { nothing } from "lit-html";
 
 @customElement("pricing-school-pricing")
@@ -177,7 +177,7 @@ export class _ extends LitElement {
             </div>
             <div class="price-line">
                 <div class="price">${price(
-                    this.discount_percentage ? percentage(this.plan_price, this.discount_percentage) : this.plan_price
+                    this.discount_percentage ? reduce_by_percentage(this.plan_price, this.discount_percentage) : this.plan_price
                 )}</div>
                 ${this.discount_percentage ? html`
                     <div class="discount-wrapper">
