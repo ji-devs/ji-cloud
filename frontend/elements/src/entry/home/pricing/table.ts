@@ -14,6 +14,21 @@ export class _ extends LitElement {
                 display: grid;
                 place-content: center;
             }
+            ::slotted([slot=school-head]) {
+                display: grid;
+                gap: 30px;
+                grid-template-columns: auto;
+                padding: 30px;
+                justify-items: center;
+            }
+            @media (min-width: 1024px) {
+                ::slotted([slot=school-head]) {
+                    grid-template-columns: auto auto;
+                    padding: 0;
+                    align-items: end;
+                    justify-content: space-around;
+                }
+            }
             .table {
                 border-collapse: collapse;
                 font-weight: 400px;
@@ -271,6 +286,7 @@ export class _ extends LitElement {
 
         return html`
             <div class="table-wrapper">
+                <slot name="school-head"></slot>
                 <div class="table">
                     <div class="row begin-row end-row white individuals-desktop-price">
                         <div class="cell message">
