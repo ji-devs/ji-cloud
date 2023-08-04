@@ -29,6 +29,10 @@ export class _ extends LitElement {
                 align-items: center;
                 cursor: pointer;
             }
+            /* This hides the caret in Safari */
+            summary::-webkit-details-marker {
+                display: none;
+            }
             details summary fa-icon {
                 text-align: center;
                 rotate: 0deg;
