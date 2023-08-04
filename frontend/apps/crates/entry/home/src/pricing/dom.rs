@@ -86,7 +86,7 @@ impl Pricing {
                 }
             })).to_signal_vec())
             .child(html!("pricing-faq", {
-
+                .prop("id", "faq")
             }))
             .child(html!("button-rect", {
                 .prop("kind", "outline")
@@ -96,6 +96,7 @@ impl Pricing {
                 .style("background-color", "#ffffff")
                 .style("z-index", "10000")
                 .style("bottom", "16px")
+                .prop("href", "#faq")
                 .text("Questions?")
             }))
             .child(page_footer::dom::render(None))
