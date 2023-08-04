@@ -236,10 +236,12 @@ impl TryFrom<(Account, IndividualOrSchool)> for PlanSectionInfo {
         (account, individual_or_school): (Account, IndividualOrSchool),
     ) -> Result<Self, Self::Error> {
         let subscription = account.subscription.ok_or(())?;
-        let payment_method = account.payment_method.ok_or(())?;
+        let payment_method_type = account
+            .payment_method
+            .map(|method| method.payment_method_type);
         Ok(Self {
             auto_renew: Mutable::new(subscription.auto_renew),
-            payment_method_type: payment_method.payment_method_type,
+            payment_method_type,
             price: 0,
             current_period_end: subscription.current_period_end,
             individual_or_school,

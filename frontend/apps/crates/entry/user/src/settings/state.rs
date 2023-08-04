@@ -129,7 +129,7 @@ impl SettingsPageUser {
 #[derive(Clone)]
 pub(super) struct PlanSectionInfo {
     pub auto_renew: Mutable<bool>,
-    pub payment_method_type: PaymentMethodType,
+    pub payment_method_type: Option<PaymentMethodType>,
     pub price: u32,
     pub current_period_end: DateTime<Utc>,
     pub individual_or_school: IndividualOrSchool,

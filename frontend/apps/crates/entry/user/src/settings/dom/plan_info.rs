@@ -102,22 +102,37 @@ impl SettingsPage {
         ]
     }
 
-    fn render_payment_method(self: &Rc<Self>, payment_method_type: &PaymentMethodType) -> Dom {
+    fn render_payment_method(
+        self: &Rc<Self>,
+        payment_method_type: &Option<PaymentMethodType>,
+    ) -> Dom {
         html!("div", {
             .prop("slot", "plan-payment-method")
-            .child(html!("img-ui", {
-                .style("height", "22px")
-                .prop("path", payment_method_type_icon(&payment_method_type))
-            }))
-            .apply(|mut dom| {
-                if let PaymentMethodType::Card(card) = &payment_method_type {
-                    dom = dom.child(html!("span", {
-                        .text("••••")
-                        .text(&card.last4.to_string())
-                    }));
+            .apply(|dom| {
+                match payment_method_type {
+                    None => {
+                        dom.child(html!("span", {
+                            .text("-")
+                        }))
+                    },
+                    Some(payment_method_type) => {
+                        dom.child(html!("img-ui", {
+                            .style("height", "22px")
+                            .prop("path", payment_method_type_icon(&payment_method_type))
+                        }))
+                        .apply(|mut dom| {
+                            if let PaymentMethodType::Card(card) = &payment_method_type {
+                                dom = dom.child(html!("span", {
+                                    .text("••••")
+                                    .text(&card.last4.to_string())
+                                }));
+                            }
+                            dom
+                        })
+                    },
                 }
-                dom
             })
+
         })
     }
 }
