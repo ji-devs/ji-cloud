@@ -66,7 +66,7 @@ pub enum PageLinks {
     Content,
     Create,
     Community,
-    Classroom,
+    // Classroom,
     About,
 }
 
@@ -77,7 +77,7 @@ impl PageLinks {
             Self::Content => "content",
             Self::Create => "create",
             Self::Community => "community",
-            Self::Classroom => "classroom",
+            // Self::Classroom => "classroom",
             Self::About => "about",
         }
     }
@@ -87,7 +87,7 @@ impl PageLinks {
             Self::Content => Route::Home(HomeRoute::Search(None)).to_string(),
             Self::Create => Route::Asset(AssetRoute::Studio).to_string(),
             Self::Community => Route::Community(CommunityRoute::Landing).to_string(),
-            Self::Classroom => "javascript:alert(\"Coming soon\")".to_string(),
+            // Self::Classroom => "javascript:alert(\"Coming soon\")".to_string(),
             Self::About => "https://www.jewishinteractive.org/ji-about-us".to_string(),
         }
     }
@@ -97,7 +97,7 @@ impl PageLinks {
             Self::Content => TARGET_SELF,
             Self::Create => TARGET_SELF,
             Self::Community => TARGET_SELF,
-            Self::Classroom => TARGET_SELF,
+            // Self::Classroom => TARGET_SELF,
             Self::About => TARGET_BLANK,
         }
     }
