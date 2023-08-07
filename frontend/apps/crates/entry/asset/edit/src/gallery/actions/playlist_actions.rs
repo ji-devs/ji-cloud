@@ -3,11 +3,9 @@ use shared::{
     api::endpoints::{self},
     domain::{
         asset::{Asset, DraftOrLive, UserOrMe},
-        module::{ModuleBody, ModuleCreatePath, ModuleCreateRequest, ModuleKind},
         playlist::{
-            PlaylistBrowsePath, PlaylistBrowseQuery, PlaylistClonePath, PlaylistCreatePath,
-            PlaylistCreateRequest, PlaylistDeletePath, PlaylistGetDraftPath, PlaylistId,
-            PlaylistSearchPath, PlaylistSearchQuery,
+            PlaylistBrowsePath, PlaylistBrowseQuery, PlaylistClonePath, PlaylistDeletePath,
+            PlaylistGetDraftPath, PlaylistId, PlaylistSearchPath, PlaylistSearchQuery,
         },
     },
     error::IntoAnyhow,
@@ -57,41 +55,6 @@ pub async fn search_playlists(q: String, is_published: Option<bool>) -> Result<V
                 .collect()
         })
         .map_err(|_| ())
-}
-
-pub async fn create_playlist() {
-    let req = PlaylistCreateRequest {
-        ..Default::default()
-    };
-
-    match endpoints::playlist::Create::api_with_auth(PlaylistCreatePath(), Some(req)).await {
-        Ok(resp) => {
-            add_cover(&resp.id).await;
-            let url = Route::Asset(AssetRoute::Edit(AssetEditRoute::Playlist(
-                resp.id,
-                PlaylistEditRoute::Landing,
-            )))
-            .to_string();
-            dominator::routing::go_to_url(&url);
-        }
-        Err(_) => todo!(""),
-    }
-}
-
-async fn add_cover(playlist_id: &PlaylistId) {
-    let req = ModuleCreateRequest {
-        body: ModuleBody::new(ModuleKind::ResourceCover),
-        parent_id: (*playlist_id).into(),
-    };
-
-    // let path = endpoints::module::Create::PATH.replace("{id}", &jig_id.0.to_string());
-
-    match endpoints::module::Create::api_with_auth(ModuleCreatePath(), Some(req)).await {
-        Ok(_) => {}
-        Err(_) => {
-            todo!()
-        }
-    }
 }
 
 pub async fn copy_playlist(playlist_id: PlaylistId) -> Result<Asset, ()> {

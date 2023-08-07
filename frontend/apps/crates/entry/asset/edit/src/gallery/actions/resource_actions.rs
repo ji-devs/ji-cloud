@@ -4,11 +4,9 @@ use shared::{
     api::endpoints::{self},
     domain::{
         asset::{Asset, DraftOrLive, UserOrMe},
-        module::{ModuleBody, ModuleCreatePath, ModuleCreateRequest, ModuleKind},
         resource::{
-            ResourceBrowsePath, ResourceBrowseQuery, ResourceClonePath, ResourceCreatePath,
-            ResourceCreateRequest, ResourceDeletePath, ResourceGetDraftPath, ResourceId,
-            ResourceSearchPath, ResourceSearchQuery,
+            ResourceBrowsePath, ResourceBrowseQuery, ResourceClonePath, ResourceDeletePath,
+            ResourceGetDraftPath, ResourceId, ResourceSearchPath, ResourceSearchQuery,
         },
     },
     error::IntoAnyhow,
@@ -58,46 +56,6 @@ pub async fn search_resources(q: String, is_published: Option<bool>) -> Result<V
                 .collect()
         })
         .map_err(|_| ())
-}
-
-pub async fn create_resource() {
-    let req = ResourceCreateRequest::default();
-
-    match endpoints::resource::Create::api_with_auth(ResourceCreatePath(), Some(req)).await {
-        Ok(resp) => {
-            add_cover(&resp.id).await;
-            let url = Route::Asset(AssetRoute::Edit(AssetEditRoute::Resource(
-                resp.id,
-                ResourceEditRoute::Landing,
-            )))
-            .to_string();
-            dominator::routing::go_to_url(&url);
-        }
-        Err(_) => todo!(""),
-    }
-}
-
-async fn add_cover(resource_id: &ResourceId) {
-    let req = ModuleCreateRequest {
-        body: ModuleBody::new(ModuleKind::ResourceCover),
-        parent_id: (*resource_id).into(),
-    };
-
-    // let path = endpoints::module::Create::PATH.replace("{id}", &resource_id.0.to_string());
-
-    match endpoints::module::Create::api_with_auth(
-        // endpoints::module::Create::PATH,
-        // endpoints::module::Create::METHOD,
-        ModuleCreatePath(),
-        Some(req),
-    )
-    .await
-    {
-        Ok(_) => {}
-        Err(_) => {
-            todo!()
-        }
-    }
 }
 
 pub async fn copy_resource(resource_id: ResourceId) -> Result<Asset, ()> {

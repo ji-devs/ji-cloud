@@ -4,8 +4,8 @@ use shared::{
     domain::{
         asset::{Asset, DraftOrLive, UserOrMe},
         jig::{
-            JigBrowsePath, JigBrowseQuery, JigClonePath, JigCreatePath, JigCreateRequest,
-            JigDeletePath, JigGetDraftPath, JigId, JigSearchPath, JigSearchQuery,
+            JigBrowsePath, JigBrowseQuery, JigClonePath, JigDeletePath, JigGetDraftPath, JigId,
+            JigSearchPath, JigSearchQuery,
         },
     },
     error::IntoAnyhow,
@@ -46,22 +46,6 @@ pub async fn search_jigs(q: String, is_published: Option<bool>) -> Result<Vec<As
         .await
         .map(|resp| resp.jigs.into_iter().map(|jig| jig.into()).collect())
         .map_err(|_| ())
-}
-
-pub async fn create_jig() {
-    let req = JigCreateRequest::default();
-
-    match endpoints::jig::Create::api_with_auth(JigCreatePath(), Some(req)).await {
-        Ok(resp) => {
-            let url = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
-                resp.id,
-                JigEditRoute::Landing,
-            )))
-            .to_string();
-            dominator::routing::go_to_url(&url);
-        }
-        Err(_) => todo!(""),
-    }
 }
 
 pub async fn copy_jig(jig_id: JigId) -> Result<Asset, ()> {

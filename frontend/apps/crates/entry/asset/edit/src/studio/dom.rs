@@ -1,8 +1,9 @@
 use components::page_header::{PageHeader, PageHeaderConfig, PageLinks};
 use dominator::{events, html, on_click_go_to_url, Dom};
-use utils::routes::{AssetRoute, HomeRoute, Route};
-
-use super::actions;
+use utils::{
+    asset,
+    routes::{AssetRoute, HomeRoute, Route},
+};
 
 pub fn render_studio() -> Dom {
     html!("asset-edit-studio", {
@@ -18,7 +19,7 @@ pub fn render_studio() -> Dom {
                 .prop("kind", "filled")
                 .prop("size", "regular")
                 .event(|_: events::Click| {
-                    actions::create_jig();
+                    asset::create_jig();
                 })
                 .text("Create a JIG")
             }),
@@ -38,7 +39,7 @@ pub fn render_studio() -> Dom {
                 .prop("kind", "filled")
                 .prop("size", "regular")
                 .event(|_: events::Click| {
-                    actions::create_playlist();
+                    asset::create_playlist();
                 })
                 .text("Create a Playlist")
             }),
@@ -58,7 +59,7 @@ pub fn render_studio() -> Dom {
                 .prop("kind", "filled")
                 .prop("size", "regular")
                 .event(|_: events::Click| {
-                    actions::create_resource();
+                    asset::create_resource();
                 })
                 .text("Add a Resource")
             }),
@@ -78,7 +79,7 @@ pub fn render_studio() -> Dom {
                 .prop("kind", "filled")
                 .prop("size", "regular")
                 .event(|_: events::Click| {
-                    actions::create_course();
+                    asset::create_course();
                 })
                 .text("Create a Course")
             }),

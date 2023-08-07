@@ -2,7 +2,9 @@ use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::asset::AssetType;
 use utils::{
-    asset::{AssetPlayerOptions, CoursePlayerOptions, JigPlayerOptions, PlaylistPlayerOptions},
+    asset::{
+        self, AssetPlayerOptions, CoursePlayerOptions, JigPlayerOptions, PlaylistPlayerOptions,
+    },
     events,
     routes::{AssetRoute, Route},
 };
@@ -57,9 +59,9 @@ impl PostPublish {
                 .prop("slot", "actions")
                 .prop("kind", "new")
                 .prop("assetDisplayName", asset_display_name)
-                .event(clone!(state => move |_: events::Click| {
-                    state.create_jig();
-                }))
+                .event(move |_: events::Click| {
+                    asset::create_jig();
+                })
             }),
             html!("post-publish-action", {
                 .prop("kind", "play")
@@ -74,16 +76,15 @@ impl PostPublish {
     }
 
     fn render_resource_actions(self: &Rc<Self>) -> Vec<Dom> {
-        let state = self;
         let asset_display_name = AssetType::Resource.display_name();
         vec![
             html!("post-publish-action", {
                 .prop("slot", "actions")
                 .prop("kind", "new")
                 .prop("assetDisplayName", asset_display_name)
-                .event(clone!(state => move |_: events::Click| {
-                    state.create_resource();
-                }))
+                .event(move |_: events::Click| {
+                    asset::create_resource();
+                })
             }),
             html!("post-publish-action", {
                 .prop("kind", "view-others")
@@ -111,9 +112,9 @@ impl PostPublish {
                 .prop("slot", "actions")
                 .prop("kind", "new")
                 .prop("assetDisplayName", asset_display_name)
-                .event(clone!(state => move |_: events::Click| {
-                    state.create_playlist();
-                }))
+                .event(move |_: events::Click| {
+                    asset::create_playlist();
+                })
             }),
             html!("post-publish-action", {
                 .prop("kind", "play")
@@ -142,9 +143,9 @@ impl PostPublish {
                 .prop("slot", "actions")
                 .prop("kind", "new")
                 .prop("assetDisplayName", asset_display_name)
-                .event(clone!(state => move |_: events::Click| {
-                    state.create_course();
-                }))
+                .event(move |_: events::Click| {
+                    asset::create_course();
+                })
             }),
             html!("post-publish-action", {
                 .prop("kind", "play")
