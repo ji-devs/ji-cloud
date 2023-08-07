@@ -475,7 +475,7 @@ export class _ extends LitElement {
                             `
                         })}
                     </div> -->
-                    <div class="row begin-row white">
+                    <!-- <div class="row begin-row white">
                         <div class="cell cell-header"><h4>ClassMate<span class="coming-soon">Coming Soon</span></h4></div>
                         ${cells(this.kind, {
                             schools: html`
@@ -526,8 +526,8 @@ export class _ extends LitElement {
                                 <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
                             `
                         })}
-                    </div>
-                    <div class="row begin-row blue">
+                    </div> -->
+                    <div class="row begin-row white">
                         <div class="cell cell-header"><h4>Community</h4></div>
                         ${cells(this.kind, {
                             schools: html`
@@ -540,7 +540,7 @@ export class _ extends LitElement {
                             `
                         })}
                     </div>
-                    <div class="row end-row blue">
+                    <div class="row end-row white">
                         <div class="cell cell-header">A community profile page displaying your Jigzi creations</div>
                         ${cells(this.kind, {
                             schools: html`
@@ -553,7 +553,7 @@ export class _ extends LitElement {
                             `
                         })}
                     </div>
-                    <div class="row end-row blue">
+                    <div class="row end-row white">
                         <div class="cell cell-header">Follow favorite creators & join circles to build your personal community</div>
                         ${cells(this.kind, {
                             schools: html`
@@ -566,7 +566,7 @@ export class _ extends LitElement {
                             `
                         })}
                     </div>
-                    <div class="row end-row blue">
+                    <div class="row end-row white">
                         <div class="cell cell-header">Access courses for professional development</div>
                         ${cells(this.kind, {
                             schools: html`
@@ -579,7 +579,7 @@ export class _ extends LitElement {
                             `
                         })}
                     </div>
-                    <!-- <div class="row end-row blue">
+                    <!-- <div class="row end-row white">
                         <div class="cell cell-header">Create courses for professional development</div>
                         ${cells(this.kind, {
                             schools: html`
@@ -592,16 +592,16 @@ export class _ extends LitElement {
                             `
                         })}
                     </div> -->
-                    ${ this.kind === "schools" ? html`
-                        <div class="row end-row blue school-only-row">
+                    <!-- ${ this.kind === "schools" ? html`
+                        <div class="row end-row white school-only-row">
                             <div class="cell cell-header">School community page for all your staff creations!</div>
                             <div class="cell">
                                 <fa-icon icon="fa-solid fa-check"></fa-icon>
                                 <span class="school-only-label">Just for Schools!</span>
                             </div>
                         </div>
-                    ` : nothing }
-                    <div class="row begin-row white">
+                    ` : nothing } -->
+                    <div class="row begin-row blue">
                         <div class="cell cell-header"><h4>Support</h4></div>
                         ${cells(this.kind, {
                             schools: html`
@@ -614,7 +614,7 @@ export class _ extends LitElement {
                             `
                         })}
                     </div>
-                    <div class="row white">
+                    <div class="row blue">
                         <div class="cell cell-header">Jigzi tutorials & webinars</div>
                         ${cells(this.kind, {
                             schools: html`
@@ -627,7 +627,7 @@ export class _ extends LitElement {
                             `
                         })}
                     </div>
-                    <div class="row end-row white">
+                    <div class="row end-row blue">
                         <div class="cell cell-header">Account support</div>
                         ${cells(this.kind, {
                             schools: html`
@@ -641,7 +641,7 @@ export class _ extends LitElement {
                         })}
                     </div>
                     ${ this.kind === "schools" ? html`
-                        <div class="row end-row white school-only-row">
+                        <div class="row end-row blue school-only-row">
                             <div class="cell cell-header">Professional platform training by Jigzi experts</div>
                             <div class="cell">
                                 <fa-icon icon="fa-solid fa-check"></fa-icon>
