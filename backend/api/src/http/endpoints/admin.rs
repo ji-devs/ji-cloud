@@ -11,12 +11,16 @@ use ji_core::settings::RuntimeSettings;
 use serde::ser::Serialize;
 use serde_derive::Deserialize;
 use shared::api::endpoints::admin::{
-    GetSchoolNames, ImportSchoolNames, InviteUsers, SearchSchools, VerifySchool,
+    CreateSchoolName, GetSchoolNames, ImportSchoolNames, InviteUsers, SearchSchools,
+    SetInternalSchoolName, UpdateSchoolName, VerifySchool,
 };
 use shared::domain::admin::{
     InviteFailedReason, InviteSchoolUserFailure, InviteSchoolUsersResponse, SearchSchoolsResponse,
 };
-use shared::domain::billing::{SchoolId, UpdateSubscriptionPlansRequest};
+use shared::domain::billing::{
+    SchoolId, SchoolNameId, SchoolNameValue, UpdateSubscriptionPlansRequest,
+};
+use shared::error::AccountError;
 use shared::{
     api::{
         endpoints::admin::{self, CreateUpdateSubscriptionPlans},
@@ -30,6 +34,7 @@ use shared::{
     error::IntoAnyhow,
 };
 use sqlx::PgPool;
+use tracing::instrument;
 
 use crate::{
     db, error,
@@ -222,12 +227,83 @@ async fn import_school_names(
     Ok((Json(exists), http::StatusCode::OK))
 }
 
+#[instrument(skip_all)]
+async fn update_school_name(
+    _auth: TokenUserWithScope<ScopeAdmin>,
+    db: Data<PgPool>,
+    path: Path<SchoolNameId>,
+    req: Json<<UpdateSchoolName as ApiEndpoint>::Req>,
+) -> Result<HttpResponse, <UpdateSchoolName as ApiEndpoint>::Err> {
+    let school_name_id = path.into_inner();
+
+    let new_name: SchoolNameValue = req.into_inner();
+
+    if db::account::check_renamed_school_name_exists(
+        db.as_ref(),
+        new_name.as_ref(),
+        &school_name_id,
+    )
+    .await
+    .into_anyhow()?
+    {
+        return Err(AccountError::SchoolNameExists(new_name));
+    }
+
+    db::account::update_school_name(db.as_ref(), &school_name_id, new_name)
+        .await
+        .into_anyhow()?;
+
+    Ok(HttpResponse::Ok().finish())
+}
+
+#[instrument(skip_all)]
+async fn create_school_name(
+    _auth: TokenUserWithScope<ScopeAdmin>,
+    db: Data<PgPool>,
+    req: Json<<CreateSchoolName as ApiEndpoint>::Req>,
+) -> Result<
+    (
+        Json<<CreateSchoolName as ApiEndpoint>::Res>,
+        http::StatusCode,
+    ),
+    <CreateSchoolName as ApiEndpoint>::Err,
+> {
+    let school_name: SchoolNameValue = req.into_inner();
+
+    if db::account::check_school_name_exists(db.as_ref(), school_name.as_ref())
+        .await
+        .into_anyhow()?
+    {
+        return Err(AccountError::SchoolNameExists(school_name));
+    }
+
+    let school_name_id = db::account::add_school_name(db.as_ref(), school_name.into())
+        .await
+        .into_anyhow()?;
+
+    Ok((Json(school_name_id), http::StatusCode::OK))
+}
+
 async fn verify_school(
     _auth: TokenUserWithScope<ScopeAdmin>,
     db: Data<PgPool>,
     Json(data): Json<<VerifySchool as ApiEndpoint>::Req>,
 ) -> Result<HttpResponse, error::Server> {
     db::account::verify_school(db.as_ref(), data.school_id, data.verified).await?;
+
+    Ok(HttpResponse::Ok().finish())
+}
+
+async fn set_internal_school_name(
+    _auth: TokenUserWithScope<ScopeAdmin>,
+    db: Data<PgPool>,
+    path: Path<SchoolId>,
+    Json(school_name_id): Json<<SetInternalSchoolName as ApiEndpoint>::Req>,
+) -> Result<HttpResponse, <SetInternalSchoolName as ApiEndpoint>::Err> {
+    let school_id = path.into_inner();
+    db::account::set_internal_school_name(db.as_ref(), school_id, school_name_id)
+        .await
+        .into_anyhow()?;
 
     Ok(HttpResponse::Ok().finish())
 }
@@ -309,7 +385,7 @@ async fn get_school_names(
 > {
     Ok((
         Json(
-            db::account::get_school_names(db.as_ref())
+            db::account::get_unused_school_names(db.as_ref())
                 .await
                 .into_anyhow()?,
         ),
@@ -341,8 +417,22 @@ pub fn configure(cfg: &mut ServiceConfig) {
         ImportSchoolNames::METHOD.route().to(import_school_names),
     )
     .route(
+        <UpdateSchoolName as ApiEndpoint>::Path::PATH,
+        UpdateSchoolName::METHOD.route().to(update_school_name),
+    )
+    .route(
+        <CreateSchoolName as ApiEndpoint>::Path::PATH,
+        CreateSchoolName::METHOD.route().to(create_school_name),
+    )
+    .route(
         <VerifySchool as ApiEndpoint>::Path::PATH,
         VerifySchool::METHOD.route().to(verify_school),
+    )
+    .route(
+        <SetInternalSchoolName as ApiEndpoint>::Path::PATH,
+        SetInternalSchoolName::METHOD
+            .route()
+            .to(set_internal_school_name),
     )
     .route(
         <InviteUsers as ApiEndpoint>::Path::PATH,

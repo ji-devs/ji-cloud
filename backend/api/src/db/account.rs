@@ -289,6 +289,7 @@ select
     user_account.admin as "is_admin!",
     user_account.verified as "verified!",
     school.school_id as "school_id?: SchoolId",
+    school.school_name::text as "school_name?",
     case
         when subscription.amount_due > 0 then true
         else false
@@ -690,15 +691,18 @@ where school_name_id = $1
     .await
 }
 
-pub async fn get_school_names(pool: &PgPool) -> sqlx::Result<Vec<SchoolName>> {
+pub async fn get_unused_school_names(pool: &PgPool) -> sqlx::Result<Vec<SchoolName>> {
     sqlx::query_as!(
         SchoolName,
         // language=SQL
         r#"
 select
-    school_name_id as "id!: SchoolNameId",
-    name::text as "name!"
+    school_name.school_name_id as "id!: SchoolNameId",
+    school_name.name::text as "name!"
 from school_name
+left join school on school_name.school_name_id = school.internal_school_name_id
+where
+    school.school_id is null
 "#,
     )
     .fetch_all(pool)
@@ -811,6 +815,24 @@ pub async fn verify_school(pool: &PgPool, school_id: SchoolId, verified: bool) -
         r#"update school set verified = $2 where school_id = $1"#,
         school_id as SchoolId,
         verified,
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
+}
+
+#[instrument(skip(pool))]
+pub async fn set_internal_school_name(
+    pool: &PgPool,
+    school_id: SchoolId,
+    school_name_id: SchoolNameId,
+) -> sqlx::Result<()> {
+    sqlx::query!(
+        // language=SQL
+        r#"update school set internal_school_name_id = $2 where school_id = $1"#,
+        school_id as SchoolId,
+        school_name_id as SchoolNameId,
     )
     .execute(pool)
     .await?;

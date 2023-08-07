@@ -887,6 +887,8 @@ pub struct Account {
 pub struct UserAccountSummary {
     /// ID of the school if this is a School account
     pub school_id: Option<SchoolId>,
+    /// Name of the school if this is a School account
+    pub school_name: Option<String>,
     /// The type of plan the user's account is subscribed to
     pub plan_type: Option<PlanType>,
     /// Status of the accounts subscription, if any
@@ -1040,8 +1042,8 @@ pub struct SchoolName {
 #[serde(transparent)]
 pub struct SchoolNameValue(String);
 
-impl std::fmt::Display for SchoolNameValue {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+impl fmt::Display for SchoolNameValue {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.0)
     }
 }

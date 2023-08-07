@@ -10,12 +10,12 @@ use ji_core::settings::RuntimeSettings;
 use shared::api::endpoints::account::{
     DeleteSchoolAccount, GetIndividualAccount, GetSchoolAccount, UpdateSchoolAccount,
 };
-use shared::api::endpoints::admin::{GetAdminSchoolAccount, UpdateSchoolName};
+use shared::api::endpoints::admin::GetAdminSchoolAccount;
 use shared::api::{endpoints::account::CreateSchoolAccount, ApiEndpoint, PathParts};
 use shared::domain::admin::GetAdminSchoolAccountResponse;
 use shared::domain::billing::{
     AccountIfAuthorized, CreateSchoolAccountRequest, GetSchoolAccountResponse,
-    IndividualAccountResponse, SchoolId, SchoolNameId, SchoolNameValue, UpdateSchoolAccountRequest,
+    IndividualAccountResponse, SchoolId, UpdateSchoolAccountRequest,
 };
 use shared::domain::UpdateNonNullable;
 use shared::error::{AccountError, IntoAnyhow};
@@ -105,35 +105,6 @@ async fn update_school_account(
     }
 
     db::account::update_school_account(db.as_ref(), &school_id, req)
-        .await
-        .into_anyhow()?;
-
-    Ok(HttpResponse::Ok().finish())
-}
-
-#[instrument(skip_all)]
-async fn update_school_name(
-    _auth: TokenUserWithScope<ScopeAdmin>,
-    db: Data<PgPool>,
-    path: Path<SchoolNameId>,
-    req: Json<<UpdateSchoolName as ApiEndpoint>::Req>,
-) -> Result<HttpResponse, <UpdateSchoolName as ApiEndpoint>::Err> {
-    let school_name_id = path.into_inner();
-
-    let new_name: SchoolNameValue = req.into_inner();
-
-    if db::account::check_renamed_school_name_exists(
-        db.as_ref(),
-        new_name.as_ref(),
-        &school_name_id,
-    )
-    .await
-    .into_anyhow()?
-    {
-        return Err(AccountError::SchoolNameExists(new_name));
-    }
-
-    db::account::update_school_name(db.as_ref(), &school_name_id, new_name)
         .await
         .into_anyhow()?;
 
@@ -313,10 +284,6 @@ pub fn configure(cfg: &mut ServiceConfig) {
         UpdateSchoolAccount::METHOD
             .route()
             .to(update_school_account),
-    )
-    .route(
-        <UpdateSchoolName as ApiEndpoint>::Path::PATH,
-        UpdateSchoolName::METHOD.route().to(update_school_name),
     )
     .route(
         <DeleteSchoolAccount as ApiEndpoint>::Path::PATH,

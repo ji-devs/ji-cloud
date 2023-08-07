@@ -1,3 +1,4 @@
+use crate::schools::details::school_name::state::SchoolNameState;
 use crate::schools::details::state::{CurrentAction, SchoolDetails};
 use dominator::{clone, html, Dom};
 use futures_signals::signal::Mutable;
@@ -18,39 +19,83 @@ impl SchoolDetails {
             .child_signal(state.school.signal_cloned().map(clone!(state => move |school| {
                 school.map(|school| {
                     html!("admin-school-details", {
+                        .prop_signal("editing_name", state.editing_name.signal_ref(|editing| editing.is_some()))
                         .child(html!("window-loader-block", {
                             .prop("slot", "loader")
                             .prop_signal("visible", state.parent.loader.is_loading())
                         }))
-                        .child(html!("div", {
-                            .prop("slot", "buttons")
-                            .child(html!("button-rect", {
-                                .prop("kind", "text")
-                                .prop("color", "blue")
-                                .text("Cancel")
-                                .event(clone!(state => move |_: events::Click| {
-                                    state.parent.navigate_to(AdminSchoolsRoute::Table);
-                                }))
-                            }))
-                            .child(html!("button-rect", {
-                                .prop("kind", "outline")
-                                .prop("color", "blue")
-                                .prop("disabled", school.verified)
-                                .text("Verify school")
-                                .event(clone!(state => move |_: events::Click| {
-                                    state.set_verified();
-                                }))
-                            }))
-                            .child(html!("button-rect", {
-                                .prop("kind", "filled")
-                                .prop("color", "blue")
-                                .prop_signal("disabled", school.changed_signal().map(|changed| !changed))
-                                .text("Save school")
-                                .event(clone!(state => move |_: events::Click| {
-                                    state.save_school();
-                                }))
+                        .child_signal(state.editing_name.signal_cloned().map(clone!(state, school => move |editing| {
+                            match editing {
+                                Some(editing) => {
+                                    Some(html!("div", {
+                                        .prop("slot", "buttons")
+                                        .child(html!("button-rect", {
+                                            .prop("kind", "text")
+                                            .prop("color", "blue")
+                                            .text("Cancel")
+                                            .event(clone!(state => move |_: events::Click| {
+                                                state.editing_name.set(None);
+                                            }))
+                                        }))
+                                        .child(html!("button-rect", {
+                                            .prop("kind", "filled")
+                                            .prop("color", "blue")
+                                            .prop_signal("disabled", editing.changed_signal().map(|changed| !changed))
+                                            .text("Save internal name")
+                                            .event(move |_: events::Click| {
+                                                match editing.new_name.get() {
+                                                    Some(_) => editing.create_school_name(),
+                                                    None => editing.update_school_name(),
+                                                }
+                                            })
 
-                            }))
+                                        }))
+                                    }))
+                                },
+                                None => {
+                                    Some(html!("div", {
+                                        .prop("slot", "buttons")
+                                        .child(html!("button-rect", {
+                                            .prop("kind", "text")
+                                            .prop("color", "blue")
+                                            .text("Cancel")
+                                            .event(clone!(state => move |_: events::Click| {
+                                                state.parent.navigate_to(AdminSchoolsRoute::Table);
+                                            }))
+                                        }))
+                                        .child(html!("button-rect", {
+                                            .prop("kind", "outline")
+                                            .prop("color", "blue")
+                                            .prop("disabled", school.verified)
+                                            .text("Verify school")
+                                            .event(clone!(state => move |_: events::Click| {
+                                                state.set_verified();
+                                            }))
+                                        }))
+                                        .child(html!("button-rect", {
+                                            .prop("kind", "outline")
+                                            .prop("color", "blue")
+                                            .text("Change internal name")
+                                            .event(clone!(state, school => move |_evt: events::Click| {
+                                                state.editing_name.set(Some(SchoolNameState::new(state.clone(), school.internal_school_name.clone())));
+                                            }))
+                                        }))
+                                        .child(html!("button-rect", {
+                                            .prop("kind", "filled")
+                                            .prop("color", "blue")
+                                            .prop_signal("disabled", school.changed_signal().map(|changed| !changed))
+                                            .text("Save school")
+                                            .event(clone!(state => move |_: events::Click| {
+                                                state.save_school();
+                                            }))
+
+                                        }))
+                                    }))
+                                }
+                            }
+                        })))
+                        .child_signal(state.editing_name.signal_cloned().map(|editing| {
+                            editing.map(|editing| editing.render("internal".into()))
                         }))
                         .child(html!("empty-fragment", {
                             .prop("slot", "inputs")

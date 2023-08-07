@@ -158,3 +158,5 @@ pub enum InviteFailedReason {
 make_path_parts!(SchoolNamesPath => "/v1/admin/school-names");
 
 make_path_parts!(UpdateSchoolNamePath => "/v1/admin/school-names/{}" => SchoolNameId);
+
+make_path_parts!(SetInternalSchoolNamePath => "/v1/admin/schools/{}/school-name" => SchoolId);

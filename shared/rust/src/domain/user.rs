@@ -274,11 +274,16 @@ pub struct UserProfile {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account_summary: Option<UserAccountSummary>,
+}
 
-    /// The schools name if user is part of school, otherwise same as organization.
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub school_or_organization: Option<String>,
+impl UserProfile {
+    /// Returns the school or organization associated with this user if any.
+    pub fn school_or_organization(&self) -> Option<&str> {
+        self.account_summary
+            .as_ref()
+            .and_then(|summary| summary.school_name.as_deref())
+            .or(self.organization.as_deref())
+    }
 }
 
 /// User Response (used for Admin).

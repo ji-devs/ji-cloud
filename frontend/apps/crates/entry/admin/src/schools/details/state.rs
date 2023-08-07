@@ -1,3 +1,4 @@
+use crate::schools::details::school_name::state::SchoolNameState;
 use crate::schools::Schools;
 use futures_signals::map_ref;
 use futures_signals::signal::{Mutable, Signal};
@@ -20,6 +21,7 @@ pub struct SchoolDetails {
     pub users: MutableVec<Rc<AccountUser>>,
     pub current_action: Mutable<CurrentAction>,
     pub errored_users: Mutable<Vec<String>>,
+    pub editing_name: Mutable<Option<Rc<SchoolNameState>>>,
 }
 
 impl SchoolDetails {
@@ -32,6 +34,7 @@ impl SchoolDetails {
             users: MutableVec::new(),
             current_action: Mutable::new(CurrentAction::Viewing),
             errored_users: Mutable::new(vec![]),
+            editing_name: Mutable::new(None),
         })
     }
 }
