@@ -18,6 +18,15 @@ pub struct Nullable<T> {
     value: Mutable<Option<T>>,
 }
 
+impl<T> Default for Nullable<T> {
+    fn default() -> Self {
+        Self {
+            update: Default::default(),
+            value: Default::default(),
+        }
+    }
+}
+
 impl<T> From<T> for EditableField<NonNullable<T>> {
     fn from(value: T) -> Self {
         Self {
@@ -65,8 +74,19 @@ impl<T> From<Option<T>> for EditableField<Nullable<T>> {
     fn from(value: Option<T>) -> Self {
         Self {
             inner: Nullable {
-                update: Mutable::default(),
                 value: Mutable::new(value),
+                ..Default::default()
+            },
+        }
+    }
+}
+
+impl<T> Default for EditableField<Nullable<T>> {
+    fn default() -> Self {
+        Self {
+            inner: Nullable {
+                update: Mutable::default(),
+                value: Mutable::new(None),
             },
         }
     }

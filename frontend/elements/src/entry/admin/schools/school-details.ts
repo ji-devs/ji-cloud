@@ -1,4 +1,5 @@
-import { LitElement, html, css, customElement } from "lit-element";
+import {LitElement, html, css, customElement, property} from "lit-element";
+import {nothing} from "lit-html";
 
 @customElement("admin-school-details")
 export class _ extends LitElement {
@@ -50,6 +51,9 @@ export class _ extends LitElement {
         `
     ];
 
+    @property()
+    editing_name: boolean = false;
+
     render() {
         return html`
             <div class="heading">
@@ -61,18 +65,26 @@ export class _ extends LitElement {
                     <slot name="buttons"></slot>
                 </div>
             </div>
-            <div class="input-container">
-                <h2>School</h2>
-                <slot name="inputs"></slot>
-            </div>
-            <div class="input-container">
-                <h2>Account</h2>
-                <slot name="account"></slot>
-            </div>
-            <div class="input-container">
-                <h2>Members</h2>
-                <slot name="users"></slot>
-            </div>
+            ${this.editing_name
+                ? html`
+                    <div class="input-container">
+                        <slot name="internal"></slot>
+                    </div>
+                `
+                : html`
+                    <div class="input-container">
+                        <h2>School</h2>
+                        <slot name="inputs"></slot>
+                    </div>
+                    <div class="input-container">
+                        <h2>Account</h2>
+                        <slot name="account"></slot>
+                    </div>
+                    <div class="input-container">
+                        <h2>Members</h2>
+                        <slot name="users"></slot>
+                    </div>
+                `}
             <slot name="loader"></slot>
         `;
     }

@@ -16,7 +16,7 @@ fn get_add_teacher_form_link() -> String {
     let user = user.as_ref();
     let user = user.unwrap_ji();
 
-    let name_of_school = user.school_or_organization.clone().unwrap_or_default();
+    let name_of_school = user.school_or_organization().clone().unwrap_or_default();
     let email = user.email.clone();
     let first_name = user.given_name.clone();
     let last_name = user.family_name.clone();

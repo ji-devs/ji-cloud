@@ -3,9 +3,9 @@ use crate::domain::admin::{
     AdminSchoolAccountPath, AdminSchoolsPath, AdminVerifySchoolPath, GetAdminSchoolAccountResponse,
     ImportSchoolNamesPath, InviteSchoolUsersPath, InviteSchoolUsersRequest,
     InviteSchoolUsersResponse, SchoolNamesPath, SearchSchoolsParams, SearchSchoolsResponse,
-    UpdateSchoolNamePath, VerifySchoolRequest,
+    SetInternalSchoolNamePath, UpdateSchoolNamePath, VerifySchoolRequest,
 };
-use crate::domain::billing::{SchoolName, SchoolNameValue};
+use crate::domain::billing::{SchoolName, SchoolNameId, SchoolNameValue};
 use crate::error::AccountError;
 use crate::{
     api::Method,
@@ -112,6 +112,25 @@ pub struct UpdateSchoolName;
 impl ApiEndpoint for UpdateSchoolName {
     type Path = UpdateSchoolNamePath;
     type Req = SchoolNameValue;
+    type Res = ();
+    type Err = AccountError;
+    const METHOD: Method = Method::Patch;
+}
+
+/// Create a school name
+pub struct CreateSchoolName;
+impl ApiEndpoint for CreateSchoolName {
+    type Path = SchoolNamesPath;
+    type Req = SchoolNameValue;
+    type Res = SchoolNameId;
+    type Err = AccountError;
+    const METHOD: Method = Method::Post;
+}
+/// Set a school name for a school
+pub struct SetInternalSchoolName;
+impl ApiEndpoint for SetInternalSchoolName {
+    type Path = SetInternalSchoolNamePath;
+    type Req = SchoolNameId;
     type Res = ();
     type Err = AccountError;
     const METHOD: Method = Method::Patch;
