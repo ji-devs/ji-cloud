@@ -7,7 +7,10 @@ use strum::IntoEnumIterator;
 use utils::{
     events,
     init::analytics,
-    routes::{AdminRoute, AssetRoute, CommunityMembersRoute, CommunityRoute, Route, UserRoute},
+    routes::{
+        AdminRoute, AssetRoute, CommunityMembersRoute, CommunityRoute, HomePricingRoute, HomeRoute,
+        Route, UserRoute,
+    },
     unwrap::UnwrapJiExt,
 };
 use wasm_bindgen::JsValue;
@@ -16,13 +19,11 @@ use crate::page_header::state::{LoggedInState, PageLinks};
 
 use super::{actions, PageHeader};
 
-const DONATE_LINK: &str = "https://www.jewishinteractive.org/donate/";
-
 const STR_SIGN_UP: &str = "Sign up";
 const STR_LOGIN: &str = "Login";
 const STR_LOGOUT: &str = "Logout";
 const STR_ADMIN: &str = "Admin";
-const STR_DONATE: &str = "Donate";
+const STR_PRICING: &str = "Plans";
 
 const STR_ACCOUNT: &str = "Account";
 const STR_PROFILE: &str = "Profile";
@@ -64,11 +65,12 @@ impl PageHeader {
                 .prop("color", "green")
                 .prop("size", "regular")
                 .prop("bold", true)
-                .prop("href", DONATE_LINK)
-                .prop("target", "_blank")
-                .text(STR_DONATE)
+                .prop("href", Route::Home(HomeRoute::Pricing(HomePricingRoute::Individual)).to_string())
+                // .prop("href", DONATE_LINK)
+                // .prop("target", "_blank")
+                .text(STR_PRICING)
                 .event(move |_evt: events::Click| {
-                    analytics::event("Donate Click", None);
+                    analytics::event("Pricing Click", None);
                 })
             }))
             .child(html!("div", {
