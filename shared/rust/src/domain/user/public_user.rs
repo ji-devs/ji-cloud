@@ -77,25 +77,22 @@ pub struct PublicUser {
 
     /// Number of Jigs
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub jig_count: Option<u64>,
+    pub jig_count: u64,
 
     /// Number of Resources
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub resource_count: Option<u64>,
+    pub resource_count: u64,
 
     /// Number of Courses
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub course_count: Option<u64>,
+    pub course_count: u64,
 
     /// Number of playlists
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub playlist_count: Option<u64>,
+    pub playlist_count: u64,
 
     /// Total number of assets
+    #[serde(default)]
     pub total_asset_count: u64,
 }
 

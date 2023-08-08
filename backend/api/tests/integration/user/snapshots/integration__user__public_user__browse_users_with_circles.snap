@@ -16,6 +16,10 @@ expression: body
       "circles": [
         "829606d0-f185-11ec-b9e4-5fadfd7252f6"
       ],
+      "jigCount": 0,
+      "resourceCount": 0,
+      "courseCount": 0,
+      "playlistCount": 0,
       "totalAssetCount": 0
     },
     {
@@ -31,6 +35,10 @@ expression: body
         "829606d0-f185-11ec-b9e4-5fadfd7252f6",
         "a3126bec-f185-11ec-b9e4-5fa4e257b5a1"
       ],
+      "jigCount": 0,
+      "resourceCount": 0,
+      "courseCount": 0,
+      "playlistCount": 0,
       "totalAssetCount": 0
     }
   ],

@@ -17,6 +17,9 @@ expression: body
       ],
       "organization": "test1 org",
       "circles": [],
+      "jigCount": 0,
+      "resourceCount": 0,
+      "courseCount": 0,
       "playlistCount": 1,
       "totalAssetCount": 1
     }
