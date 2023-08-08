@@ -33,5 +33,10 @@ expression: body
   "updated_at": "[timestamptz]",
   "persona": [
     "persona"
-  ]
+  ],
+  "jig_count": 0,
+  "resource_count": 0,
+  "course_count": 0,
+  "playlist_count": 0,
+  "total_asset_count": 0
 }

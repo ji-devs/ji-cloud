@@ -29,5 +29,10 @@ expression: body
     "Admin"
   ],
   "created_at": "2020-08-08T00:11:21Z",
-  "organization": "test org"
+  "organization": "test org",
+  "jig_count": 0,
+  "resource_count": 0,
+  "course_count": 0,
+  "playlist_count": 0,
+  "total_asset_count": 0
 }

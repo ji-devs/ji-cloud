@@ -267,6 +267,26 @@ pub struct UserProfile {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub location: Option<serde_json::Value>,
 
+    /// Number of Jigs
+    #[serde(default)]
+    pub jig_count: u64,
+
+    /// Number of Resources
+    #[serde(default)]
+    pub resource_count: u64,
+
+    /// Number of Courses
+    #[serde(default)]
+    pub course_count: u64,
+
+    /// Number of playlists
+    #[serde(default)]
+    pub playlist_count: u64,
+
+    /// Total number of assets
+    #[serde(default)]
+    pub total_asset_count: u64,
+
     /// The user's account summary, if available.
     ///
     /// Note: This is not set when fetching a user profile. It must be explicitly set using a
