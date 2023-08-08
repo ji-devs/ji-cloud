@@ -279,11 +279,11 @@ fn user_to_public_user(user: UserProfile) -> PublicUser {
         persona: Some(user.persona),
         country_short: location.as_ref().map(|location| location.code.clone()),
         country_long: location.as_ref().map(|location| location.name.clone()),
-        jig_count: 0,
-        resource_count: 0,
-        course_count: 0,
-        playlist_count: 0,
-        total_asset_count: 0, // TODO: bad idea
+        jig_count: user.jig_count,
+        resource_count: user.resource_count,
+        course_count: user.course_count,
+        playlist_count: user.playlist_count,
+        total_asset_count: user.total_asset_count,
         following: false,
     }
 }

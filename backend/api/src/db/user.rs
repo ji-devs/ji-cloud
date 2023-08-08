@@ -72,6 +72,11 @@ select
     organization,
     persona                as "persona!: Vec<String>",
     location,
+    jig_count      as "jig_count!",
+    resource_count      as "resource_count!",
+    course_count      as "course_count!",
+    playlist_count      as "playlist_count!",
+    total_asset_count      as "total_asset_count!",
     array(select scope from user_scope where user_scope.user_id = "user".id) as "scopes!: Vec<i16>",
     array(select subject_id from user_subject where user_subject.user_id = "user".id) as "subjects!: Vec<Uuid>",
     array(select affiliation_id from user_affiliation where user_affiliation.user_id = "user".id) as "affiliations!: Vec<Uuid>",
@@ -84,6 +89,7 @@ select
 from "user"
     inner join user_profile on "user".id = user_profile.user_id
     inner join user_email using(user_id)
+    inner join user_asset_data "uad" on "user".id = uad.user_id
 where id = $1"#,
         id.0
     )
@@ -129,6 +135,11 @@ where id = $1"#,
         organization: row.organization,
         persona: row.persona,
         location: row.location,
+        jig_count: row.jig_count as u64,
+        resource_count: row.resource_count as u64,
+        course_count: row.course_count as u64,
+        playlist_count: row.playlist_count as u64,
+        total_asset_count: row.total_asset_count as u64,
         subjects: row.subjects.into_iter().map(SubjectId).collect(),
         age_ranges: row.age_ranges.into_iter().map(AgeRangeId).collect(),
         affiliations: row.affiliations.into_iter().map(AffiliationId).collect(),
