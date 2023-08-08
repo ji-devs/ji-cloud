@@ -2519,132 +2519,6 @@
     },
     "query": "\nselect published_at  as \"published_at?\"\nfrom resource\nwhere id = $1\n    "
   },
-  "2acea425a73391dcd34a9ea2542197210ade65cc96948344c22d8c7e6071752b": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: UserId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "username!",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "given_name!",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "family_name!",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "profile_image?: ImageId",
-          "ordinal": 4,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "badge?: UserBadge",
-          "ordinal": 5,
-          "type_info": "Int2"
-        },
-        {
-          "name": "languages_spoken?: Vec<String>",
-          "ordinal": 6,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "organization?",
-          "ordinal": 7,
-          "type_info": "Text"
-        },
-        {
-          "name": "persona?: Vec<String>",
-          "ordinal": 8,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "location?",
-          "ordinal": 9,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "bio?",
-          "ordinal": 10,
-          "type_info": "Text"
-        },
-        {
-          "name": "jig_count?",
-          "ordinal": 11,
-          "type_info": "Int4"
-        },
-        {
-          "name": "resource_count?",
-          "ordinal": 12,
-          "type_info": "Int4"
-        },
-        {
-          "name": "course_count?",
-          "ordinal": 13,
-          "type_info": "Int4"
-        },
-        {
-          "name": "playlist_count?",
-          "ordinal": 14,
-          "type_info": "Int4"
-        },
-        {
-          "name": "total_asset_count!",
-          "ordinal": 15,
-          "type_info": "Int4"
-        },
-        {
-          "name": "circles!: Vec<CircleId>",
-          "ordinal": 16,
-          "type_info": "UuidArray"
-        },
-        {
-          "name": "following!",
-          "ordinal": 17,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        true,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        false,
-        null,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "UuidArray",
-          "Int4",
-          "Int4",
-          "Int4",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\n        with cte1 as (\n            select (array_agg(public_user.user_id))[1]\n            from public_user\n            left join user_asset_data \"uad\" on public_user.user_id = uad.user_id\n            inner join \"user\" on public_user.user_id = \"user\".id \n            left join circle_member \"cm\" on cm.user_id = public_user.user_id\n            where cm.id = any($1) or $1 = array[]::uuid[]\n            group by \"user\".created_at, total_asset_count\n            order by case when $4 = 0 then total_asset_count\n                else extract(epoch from \"user\".created_at)\n            end desc        \n        ),\n        cte2 as (\n            select * from unnest(array(select cte1.array_agg from cte1)) with ordinality t(id\n           , ord) order by ord\n        )\n        select  user_profile.user_id                as \"id!: UserId\",\n                username               as \"username!\",\n                given_name             as \"given_name!\",\n                family_name            as \"family_name!\",\n                profile_image_id       as \"profile_image?: ImageId\",\n                (select case when badge <> 10 then badge else null end)       as \"badge?: UserBadge\",\n                (select languages_spoken from user_profile where user_profile.user_id = \"user\".id and languages_spoken_public is true)      as \"languages_spoken?: Vec<String>\",\n                (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n                (select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\",\n                (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n                (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n                (select (CASE WHEN jig_count > 0 THEN jig_count else null end))      as \"jig_count?\",\n                (select (CASE WHEN resource_count > 0 THEN resource_count else null end))      as \"resource_count?\",\n                (select (CASE WHEN course_count > 0 THEN course_count else null end))      as \"course_count?\",\n                (select (CASE WHEN playlist_count > 0 THEN playlist_count else null end))      as \"playlist_count?\",\n                total_asset_count      as \"total_asset_count!\",\n                (select array(select circle.id\n                    from circle_member bm\n                    inner join circle on bm.id = circle.id\n                    where bm.user_id = \"user\".id\n                )) as \"circles!: Vec<CircleId>\",\n                exists(select 1 from user_follow where follower_id = $5 and user_id = \"user\".id) as \"following!\"\n        from cte2\n        inner join user_profile on cte2.id = user_profile.user_id\n        inner join user_asset_data \"uad\" on cte2.id = uad.user_id  \n        inner join \"user\" on cte2.id = \"user\".id\n        where ord > (1 * $2 * $3)\n        order by ord\n        limit $3\n            "
-  },
   "2b32e4926bf4dcdc900286fdd2288c8a40455c17ccbe00580816af5dcf525d4e": {
     "describe": {
       "columns": [
@@ -2789,6 +2663,131 @@
       }
     },
     "query": "\nselect exists (\n    select 1 from user_scope where user_id = $1 and scope = any($2)\n) or (\n    exists (select 1 from user_scope where user_id = $1 and scope = $3) and\n    not exists (select 1 from playlist where playlist.id = $4 and playlist.author_id <> $1)\n) as \"authed!\"\n"
+  },
+  "2c7ff929be80aec362bc21f36a21e2eec175d1e681c96d9e50248639a03a11d6": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: UserId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "username!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "given_name!",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "family_name!",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "profile_image?: ImageId",
+          "ordinal": 4,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "badge?: UserBadge",
+          "ordinal": 5,
+          "type_info": "Int2"
+        },
+        {
+          "name": "languages_spoken?: Vec<String>",
+          "ordinal": 6,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "organization?",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "persona?: Vec<String>",
+          "ordinal": 8,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "location?",
+          "ordinal": 9,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "bio?",
+          "ordinal": 10,
+          "type_info": "Text"
+        },
+        {
+          "name": "jig_count!",
+          "ordinal": 11,
+          "type_info": "Int8"
+        },
+        {
+          "name": "resource_count!",
+          "ordinal": 12,
+          "type_info": "Int8"
+        },
+        {
+          "name": "course_count!",
+          "ordinal": 13,
+          "type_info": "Int8"
+        },
+        {
+          "name": "playlist_count!",
+          "ordinal": 14,
+          "type_info": "Int8"
+        },
+        {
+          "name": "total_asset_count!",
+          "ordinal": 15,
+          "type_info": "Int8"
+        },
+        {
+          "name": "circles!: Vec<CircleId>",
+          "ordinal": 16,
+          "type_info": "UuidArray"
+        },
+        {
+          "name": "following!",
+          "ordinal": 17,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int4",
+          "Int4",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        with follower as (\n            select (array_agg(follower_id))[1]\n            from user_follow\n            where user_id = $1\n            group by followed_at\n            order by followed_at desc\n        ),\n        cte as (\n            select * from unnest(array(select follower.array_agg from follower)) with ordinality t(id, ord) order by ord\n        )\n        select  \"user\".id         as \"id!: UserId\",\n                username               as \"username!\",\n                given_name             as \"given_name!\",\n                family_name            as \"family_name!\",\n                profile_image_id       as \"profile_image?: ImageId\",\n                (select case when badge <> 10 then badge else null end)                  as \"badge?: UserBadge\",\n                (select languages_spoken from user_profile where user_profile.user_id = \"user\".id and languages_spoken_public is true)      as \"languages_spoken?: Vec<String>\",\n                (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n                (select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\",\n                (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n                (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n                (select count(*) from jig where jig.author_id = \"user\".id and jig.published_at is not null)      as \"jig_count!\",\n                (select count(*) from resource where resource.author_id = \"user\".id and resource.published_at is not null)      as \"resource_count!\",\n                (select count(*) from course where course.author_id = \"user\".id and course.published_at is not null)      as \"course_count!\",\n                (select count(*) from playlist where playlist.author_id = \"user\".id and playlist.published_at is not null)      as \"playlist_count!\",\n                ((select count(*) from jig where jig.author_id = \"user\".id and jig.published_at is not null) +\n                (select count(*) from resource where resource.author_id = \"user\".id and resource.published_at is not null) +\n                (select count(*) from course where course.author_id = \"user\".id and course.published_at is not null) +\n                (select count(*) from playlist where playlist.author_id = \"user\".id and playlist.published_at is not null))      as \"total_asset_count!\",\n                (select array(select circle.id\n                    from circle_member bm\n                    left join circle on bm.id = circle.id\n                    where bm.user_id = \"user\".id or circle.creator_id = \"user\".id\n                )) as \"circles!: Vec<CircleId>\",\n                exists(select 1 from user_follow where follower_id = $4 and user_id = \"user\".id) as \"following!\"\n        from cte\n        inner join user_profile on cte.id = user_profile.user_id\n        inner join \"user\" on (cte.id = \"user\".id)\n        where ord > (1 * $2 * $3)\n        limit $3;\n            "
   },
   "2c9269da9de0d178512713b7fc2789ad3472cc1dcea22eecd5fb941415d37bc4": {
     "describe": {
@@ -4371,6 +4370,131 @@
     },
     "query": "\n        with cte as (\n            select array_agg(rd.id)\n            from resource_data \"rd\"\n                  inner join resource on (draft_id = rd.id or (live_id = rd.id and rd.last_synced_at is not null and published_at is not null))\n                  left join resource_admin_data \"admin\" on admin.resource_id = resource.id\n                  left join resource_data_resource \"rdr\" on rd.id = rdr.resource_data_id\n            where (rd.draft_or_live = $1 or $1 is null)\n                and (author_id = $2 or $2 is null)\n                and (blocked = $3 or $3 is null)\n                and (rd.privacy_level = any($4) or $4 = array[]::smallint[])\n                and (rdr.resource_type_id = any($5) or $5 = array[]::uuid[])\n            group by updated_at, created_at, resource.published_at, admin.resource_id, resource_id\n        )\n            select count(*) as \"count!\" from unnest(array((select cte.array_agg[1] from cte))) with ordinality t(id\n           , ord)\n        "
   },
+  "3cf8878efefa1041564ec8bc5e9fe4b14382a4a209bd06d4ff535d7290260c25": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: UserId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "username!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "given_name!",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "family_name!",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "profile_image?: ImageId",
+          "ordinal": 4,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "badge?: UserBadge",
+          "ordinal": 5,
+          "type_info": "Int2"
+        },
+        {
+          "name": "languages_spoken?: Vec<String>",
+          "ordinal": 6,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "organization?",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "persona?: Vec<String>",
+          "ordinal": 8,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "location?",
+          "ordinal": 9,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "bio?",
+          "ordinal": 10,
+          "type_info": "Text"
+        },
+        {
+          "name": "jig_count!",
+          "ordinal": 11,
+          "type_info": "Int8"
+        },
+        {
+          "name": "resource_count!",
+          "ordinal": 12,
+          "type_info": "Int8"
+        },
+        {
+          "name": "course_count!",
+          "ordinal": 13,
+          "type_info": "Int8"
+        },
+        {
+          "name": "playlist_count!",
+          "ordinal": 14,
+          "type_info": "Int8"
+        },
+        {
+          "name": "total_asset_count!",
+          "ordinal": 15,
+          "type_info": "Int8"
+        },
+        {
+          "name": "circles!: Vec<CircleId>",
+          "ordinal": 16,
+          "type_info": "UuidArray"
+        },
+        {
+          "name": "following!",
+          "ordinal": 17,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int4",
+          "Int4",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        with following as (\n            select (array_agg(user_id))[1]\n            from user_follow\n            where follower_id = $1\n            group by followed_at\n            order by followed_at desc\n        ),\n        cte as (\n            select * from unnest(array(select following.array_agg from following)) with ordinality t(id, ord) order by ord\n        )\n        select  \"user\".id                     as \"id!: UserId\",\n                username               as \"username!\",\n                given_name             as \"given_name!\",\n                family_name            as \"family_name!\",\n                profile_image_id       as \"profile_image?: ImageId\",\n                (select case when badge <> 10 then badge else null end)           as \"badge?: UserBadge\",\n                (select languages_spoken from user_profile where user_profile.user_id = \"user\".id and languages_spoken_public is true)      as \"languages_spoken?: Vec<String>\",\n                (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n                (select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\",\n                (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n                (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n                (select count(*) from jig where jig.author_id = \"user\".id and jig.published_at is not null)      as \"jig_count!\",\n                (select count(*) from resource where resource.author_id = \"user\".id and resource.published_at is not null)      as \"resource_count!\",\n                (select count(*) from course where course.author_id = \"user\".id and course.published_at is not null)      as \"course_count!\",\n                (select count(*) from playlist where playlist.author_id = \"user\".id and playlist.published_at is not null)      as \"playlist_count!\",\n                ((select count(*) from jig where jig.author_id = \"user\".id and jig.published_at is not null) +\n                (select count(*) from resource where resource.author_id = \"user\".id and resource.published_at is not null) +\n                (select count(*) from course where course.author_id = \"user\".id and course.published_at is not null) +\n                (select count(*) from playlist where playlist.author_id = \"user\".id and playlist.published_at is not null))      as \"total_asset_count!\",\n                array(select circle.id\n                    from circle_member bm\n                    left join circle on bm.id = circle.id\n                    where bm.user_id = \"user\".id or circle.creator_id = \"user\".id\n                ) as \"circles!: Vec<CircleId>\",\n                exists(select 1 from user_follow where follower_id = $4 and user_id = \"user\".id) as \"following!\"\n            from cte\n            inner join user_profile on cte.id = user_profile.user_id\n            inner join \"user\" on (cte.id = \"user\".id)\n            where ord > (1 * $2 * $3)\n            limit $3;\n            "
+  },
   "3cfa772cac043b6accabfde5a1fd872956182b08d67b5a9ab2e35a6bb95405b3": {
     "describe": {
       "columns": [],
@@ -5482,131 +5606,6 @@
     },
     "query": "\n    insert into resource_report(resource_id, report_type)\n    values ($1, $2)\n    returning id as \"id!: ReportId\"\n            "
   },
-  "4e10b5c87af229182dc8fb65a320a5b6e1cee416cd5a0905635bdeae3a754194": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: UserId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "username!",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "given_name!",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "family_name!",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "profile_image?: ImageId",
-          "ordinal": 4,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "badge?: UserBadge",
-          "ordinal": 5,
-          "type_info": "Int2"
-        },
-        {
-          "name": "languages_spoken?: Vec<String>",
-          "ordinal": 6,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "organization?",
-          "ordinal": 7,
-          "type_info": "Text"
-        },
-        {
-          "name": "persona?: Vec<String>",
-          "ordinal": 8,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "location?",
-          "ordinal": 9,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "bio?",
-          "ordinal": 10,
-          "type_info": "Text"
-        },
-        {
-          "name": "jig_count?",
-          "ordinal": 11,
-          "type_info": "Int8"
-        },
-        {
-          "name": "resource_count?",
-          "ordinal": 12,
-          "type_info": "Int8"
-        },
-        {
-          "name": "course_count?",
-          "ordinal": 13,
-          "type_info": "Int8"
-        },
-        {
-          "name": "playlist_count?",
-          "ordinal": 14,
-          "type_info": "Int8"
-        },
-        {
-          "name": "total_asset_count!",
-          "ordinal": 15,
-          "type_info": "Int8"
-        },
-        {
-          "name": "circles!: Vec<CircleId>",
-          "ordinal": 16,
-          "type_info": "UuidArray"
-        },
-        {
-          "name": "following!",
-          "ordinal": 17,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        true,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int4",
-          "Int4",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\n        with follower as (\n            select (array_agg(follower_id))[1]\n            from user_follow\n            where user_id = $1\n            group by followed_at\n            order by followed_at desc\n        ),\n        cte as (\n            select * from unnest(array(select follower.array_agg from follower)) with ordinality t(id, ord) order by ord\n        )\n        select  \"user\".id         as \"id!: UserId\",\n                username               as \"username!\",\n                given_name             as \"given_name!\",\n                family_name            as \"family_name!\",\n                profile_image_id       as \"profile_image?: ImageId\",\n                (select case when badge <> 10 then badge else null end)                  as \"badge?: UserBadge\",\n                (select languages_spoken from user_profile where user_profile.user_id = \"user\".id and languages_spoken_public is true)      as \"languages_spoken?: Vec<String>\",\n                (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n                (select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\",\n                (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n                (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n                (select (case when count(*) > 0 THEN count(*) else null end) from jig where jig.author_id = \"user\".id and jig.published_at is not null)      as \"jig_count?\",\n                (select (case when count(*) > 0 THEN count(*) else null end) from resource where resource.author_id = \"user\".id and resource.published_at is not null)      as \"resource_count?\",\n                (select (case when count(*) > 0 THEN count(*) else null end) from course where course.author_id = \"user\".id and course.published_at is not null)      as \"course_count?\",\n                (select (case when count(*) > 0 THEN count(*) else null end) from playlist where playlist.author_id = \"user\".id and playlist.published_at is not null)      as \"playlist_count?\",\n                ((select count(*) from jig where jig.author_id = \"user\".id and jig.published_at is not null) + \n                (select count(*) from resource where resource.author_id = \"user\".id and resource.published_at is not null) + \n                (select count(*) from course where course.author_id = \"user\".id and course.published_at is not null) + \n                (select count(*) from playlist where playlist.author_id = \"user\".id and playlist.published_at is not null))      as \"total_asset_count!\",\n                (select array(select circle.id\n                    from circle_member bm\n                    left join circle on bm.id = circle.id\n                    where bm.user_id = \"user\".id or circle.creator_id = \"user\".id\n                )) as \"circles!: Vec<CircleId>\",\n                exists(select 1 from user_follow where follower_id = $4 and user_id = \"user\".id) as \"following!\"\n        from cte\n        inner join user_profile on cte.id = user_profile.user_id\n        inner join \"user\" on (cte.id = \"user\".id)\n        where ord > (1 * $2 * $3)\n        limit $3;\n            "
-  },
   "4e39ede2fa760d6ea636ace5bcc8b0848ff8f8d2b480eb937e463ce0e45963fa": {
     "describe": {
       "columns": [
@@ -5821,26 +5820,6 @@
       }
     },
     "query": "\nupdate jig_admin_data\nset\n    rating = coalesce($2, rating),\n    blocked = coalesce($3, blocked),\n    curated = coalesce($4, curated),\n    is_premium = coalesce($5, is_premium)\nwhere jig_id = $1\n"
-  },
-  "5486fe6499a2253171fa11aaa873fe04f3136bd0f50e203ec4961bd1cff1d76e": {
-    "describe": {
-      "columns": [
-        {
-          "name": "count!",
-          "ordinal": 0,
-          "type_info": "Int8"
-        }
-      ],
-      "nullable": [
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "UuidArray"
-        ]
-      }
-    },
-    "query": "\n        with cte as (\n            select (array_agg(up.user_id))[1]\n            from user_profile \"up\"\n            inner join \"user\" on up.user_id = \"user\".id \n            left join circle_member \"cm\" on cm.user_id = up.user_id\n            where cm.id = any($1) or $1 = array[]::uuid[]\n            group by \"user\".created_at\n        )\n            select count(*) as \"count!\" from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n           , ord)        \n        "
   },
   "54bd0fd9b43e386d322274148c5ed9b47efb8479f32da5b1cacff2f7ce55c397": {
     "describe": {
@@ -6837,6 +6816,129 @@
       }
     },
     "query": "\nselect exists(select 1 from user_image_library where user_id = $1 and id = $2) as \"exists!\"\n    "
+  },
+  "62c22549dcae2bed528e47fcaed23ebc682ec7c245456c3f0e4514a3cabf2345": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: UserId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "username!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "given_name!",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "family_name!",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "profile_image?: ImageId",
+          "ordinal": 4,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "badge?: UserBadge",
+          "ordinal": 5,
+          "type_info": "Int2"
+        },
+        {
+          "name": "languages_spoken?: Vec<String>",
+          "ordinal": 6,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "organization?",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "persona?: Vec<String>",
+          "ordinal": 8,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "location?",
+          "ordinal": 9,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "bio?",
+          "ordinal": 10,
+          "type_info": "Text"
+        },
+        {
+          "name": "jig_count!",
+          "ordinal": 11,
+          "type_info": "Int8"
+        },
+        {
+          "name": "resource_count!",
+          "ordinal": 12,
+          "type_info": "Int8"
+        },
+        {
+          "name": "course_count!",
+          "ordinal": 13,
+          "type_info": "Int8"
+        },
+        {
+          "name": "playlist_count!",
+          "ordinal": 14,
+          "type_info": "Int8"
+        },
+        {
+          "name": "total_asset_count!",
+          "ordinal": 15,
+          "type_info": "Int8"
+        },
+        {
+          "name": "circles!: Vec<CircleId>",
+          "ordinal": 16,
+          "type_info": "UuidArray"
+        },
+        {
+          "name": "following!",
+          "ordinal": 17,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n    select  user_id as \"id!: UserId\",\n            username   as \"username!\",\n            given_name  as \"given_name!\",\n            family_name as \"family_name!\",\n            profile_image_id       as \"profile_image?: ImageId\",\n            (select case when badge <> 10 then badge else null end) as \"badge?: UserBadge\",\n            (select languages_spoken from user_profile where user_profile.user_id = \"user\".id and languages_spoken_public is true)      as \"languages_spoken?: Vec<String>\",\n            (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n            (select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\",\n            (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n            (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n            (select count(*) from jig where jig.author_id = \"user\".id and jig.published_at is not null)      as \"jig_count!\",\n            (select count(*) from resource where resource.author_id = \"user\".id and resource.published_at is not null)      as \"resource_count!\",\n            (select count(*) from course where course.author_id = \"user\".id and course.published_at is not null)      as \"course_count!\",\n            (select count(*) from playlist where playlist.author_id = \"user\".id and playlist.published_at is not null)      as \"playlist_count!\",\n            ((select count(*) from jig where jig.author_id = \"user\".id and jig.published_at is not null) +\n            (select count(*) from resource where resource.author_id = \"user\".id and resource.published_at is not null) +\n            (select count(*) from course where course.author_id = \"user\".id and course.published_at is not null) +\n            (select count(*) from playlist where playlist.author_id = \"user\".id and playlist.published_at is not null))      as \"total_asset_count!\",\n            array(select circle.id\n                from circle_member bm\n                inner join circle on bm.id = circle.id\n                where bm.user_id = \"user\".id\n            ) as \"circles!: Vec<CircleId>\",\n            exists(select 1 from user_follow where follower_id = $2 and user_id = \"user\".id) as \"following!\"\n        from \"user\"\n        inner join user_profile on \"user\".id = user_profile.user_id\n        where id = $1\n        "
   },
   "62d96e4b30f7828cbc7255b3be93f16aa1a868bd5a9780ae80079dbbfe858694": {
     "describe": {
@@ -8714,6 +8816,132 @@
     },
     "query": "select id as \"id: AudioId\" from user_audio_library where id = $1"
   },
+  "8366fe130c5df01bf931e2a768b9a9668b882c120319f38a690972a477863c35": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: UserId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "username!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "given_name!",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "family_name!",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "profile_image?: ImageId",
+          "ordinal": 4,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "badge?: UserBadge",
+          "ordinal": 5,
+          "type_info": "Int2"
+        },
+        {
+          "name": "languages_spoken?: Vec<String>",
+          "ordinal": 6,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "organization?",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "persona?: Vec<String>",
+          "ordinal": 8,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "location?",
+          "ordinal": 9,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "bio?",
+          "ordinal": 10,
+          "type_info": "Text"
+        },
+        {
+          "name": "jig_count!",
+          "ordinal": 11,
+          "type_info": "Int4"
+        },
+        {
+          "name": "resource_count!",
+          "ordinal": 12,
+          "type_info": "Int4"
+        },
+        {
+          "name": "course_count!",
+          "ordinal": 13,
+          "type_info": "Int4"
+        },
+        {
+          "name": "playlist_count!",
+          "ordinal": 14,
+          "type_info": "Int4"
+        },
+        {
+          "name": "total_asset_count!",
+          "ordinal": 15,
+          "type_info": "Int4"
+        },
+        {
+          "name": "circles!: Vec<CircleId>",
+          "ordinal": 16,
+          "type_info": "UuidArray"
+        },
+        {
+          "name": "following!",
+          "ordinal": 17,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        false,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray",
+          "Int4",
+          "Int4",
+          "Int4",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        with cte1 as (\n            select (array_agg(public_user.user_id))[1]\n            from public_user\n            left join user_asset_data \"uad\" on public_user.user_id = uad.user_id\n            inner join \"user\" on public_user.user_id = \"user\".id\n            left join circle_member \"cm\" on cm.user_id = public_user.user_id\n            where cm.id = any($1) or $1 = array[]::uuid[]\n            group by \"user\".created_at, total_asset_count\n            order by case when $4 = 0 then total_asset_count\n                else extract(epoch from \"user\".created_at)\n            end desc\n        ),\n        cte2 as (\n            select * from unnest(array(select cte1.array_agg from cte1)) with ordinality t(id\n           , ord) order by ord\n        )\n        select  user_profile.user_id                as \"id!: UserId\",\n                username               as \"username!\",\n                given_name             as \"given_name!\",\n                family_name            as \"family_name!\",\n                profile_image_id       as \"profile_image?: ImageId\",\n                (select case when badge <> 10 then badge else null end)       as \"badge?: UserBadge\",\n                (select languages_spoken from user_profile where user_profile.user_id = \"user\".id and languages_spoken_public is true)      as \"languages_spoken?: Vec<String>\",\n                (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n                (select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\",\n                (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n                (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n                (select (CASE WHEN jig_count > 0 THEN jig_count else 0 end))      as \"jig_count!\",\n                (select (CASE WHEN resource_count > 0 THEN resource_count else 0 end))      as \"resource_count!\",\n                (select (CASE WHEN course_count > 0 THEN course_count else 0 end))      as \"course_count!\",\n                (select (CASE WHEN playlist_count > 0 THEN playlist_count else 0 end))      as \"playlist_count!\",\n                total_asset_count      as \"total_asset_count!\",\n                (select array(select circle.id\n                    from circle_member bm\n                    inner join circle on bm.id = circle.id\n                    where bm.user_id = \"user\".id\n                )) as \"circles!: Vec<CircleId>\",\n                exists(select 1 from user_follow where follower_id = $5 and user_id = \"user\".id) as \"following!\"\n        from cte2\n        inner join user_profile on cte2.id = user_profile.user_id\n        inner join user_asset_data \"uad\" on cte2.id = uad.user_id\n        inner join \"user\" on cte2.id = \"user\".id\n        where ord > (1 * $2 * $3)\n        order by ord\n        limit $3\n            "
+  },
   "838aa3fb65358ab6a6f47c354379c4cc104b8331dbd98a387a7e5f78a9ed6c9d": {
     "describe": {
       "columns": [
@@ -9077,129 +9305,6 @@
     },
     "query": "\nselect id,\n       hash,\n       kind as \"kind: MediaKind\"\nfrom web_media_library\nwhere hash = $1\nfor update\n"
   },
-  "8a04e83e54312077a3d52409cc2c5a359867ab52f68139c4b09ce7b9de82667f": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: UserId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "username!",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "given_name!",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "family_name!",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "profile_image?: ImageId",
-          "ordinal": 4,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "badge?: UserBadge",
-          "ordinal": 5,
-          "type_info": "Int2"
-        },
-        {
-          "name": "languages_spoken?: Vec<String>",
-          "ordinal": 6,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "organization?",
-          "ordinal": 7,
-          "type_info": "Text"
-        },
-        {
-          "name": "persona?: Vec<String>",
-          "ordinal": 8,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "location?",
-          "ordinal": 9,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "bio?",
-          "ordinal": 10,
-          "type_info": "Text"
-        },
-        {
-          "name": "jig_count?",
-          "ordinal": 11,
-          "type_info": "Int8"
-        },
-        {
-          "name": "resource_count?",
-          "ordinal": 12,
-          "type_info": "Int8"
-        },
-        {
-          "name": "course_count?",
-          "ordinal": 13,
-          "type_info": "Int8"
-        },
-        {
-          "name": "playlist_count?",
-          "ordinal": 14,
-          "type_info": "Int8"
-        },
-        {
-          "name": "total_asset_count!",
-          "ordinal": 15,
-          "type_info": "Int8"
-        },
-        {
-          "name": "circles!: Vec<CircleId>",
-          "ordinal": 16,
-          "type_info": "UuidArray"
-        },
-        {
-          "name": "following!",
-          "ordinal": 17,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        true,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "UuidArray",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\n        select  user_id                as \"id!: UserId\",\n                username               as \"username!\",\n                given_name             as \"given_name!\",\n                family_name            as \"family_name!\",\n                profile_image_id       as \"profile_image?: ImageId\",\n                (select case when badge <> 10 then badge else null end)       as \"badge?: UserBadge\",\n                (select languages_spoken from user_profile where user_profile.user_id = \"user\".id and languages_spoken_public is true)      as \"languages_spoken?: Vec<String>\",\n                (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n                (select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\",\n                (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n                (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n                (select (case when count(*) > 0 THEN count(*) else null end) from jig where jig.author_id = \"user\".id and jig.published_at is not null)      as \"jig_count?\",\n                (select (case when count(*) > 0 THEN count(*) else null end) from resource where resource.author_id = \"user\".id and resource.published_at is not null)      as \"resource_count?\",\n                (select (case when count(*) > 0 THEN count(*) else null end) from course where course.author_id = \"user\".id and course.published_at is not null)      as \"course_count?\",\n                (select (case when count(*) > 0 THEN count(*) else null end) from playlist where playlist.author_id = \"user\".id and playlist.published_at is not null)      as \"playlist_count?\",\n                ((select count(*) from jig where jig.author_id = \"user\".id and jig.published_at is not null) + \n                (select count(*) from resource where resource.author_id = \"user\".id and resource.published_at is not null) + \n                (select count(*) from course where course.author_id = \"user\".id and course.published_at is not null) + \n                (select count(*) from playlist where playlist.author_id = \"user\".id and playlist.published_at is not null))      as \"total_asset_count!\",\n                (select array(select circle.id\n                    from circle_member bm\n                    inner join circle on bm.id = circle.id\n                    where bm.user_id = \"user\".id\n                )) as \"circles!: Vec<CircleId>\",\n                exists(select 1 from user_follow where follower_id = $2 and user_id = \"user\".id) as \"following!\"\n            from \"user\"\n            inner join user_profile on \"user\".id = user_profile.user_id\n            inner join unnest($1::uuid[])\n            with ordinality t(id, ord) using (id)\n"
-  },
   "8a19cbc88aee2108154de1e8e7844cf6e405ba7674c34467cc7e7dce18004ab7": {
     "describe": {
       "columns": [
@@ -9259,6 +9364,129 @@
       }
     },
     "query": "\ndelete\nfrom resource_data_module\nwhere resource_data_id = $1 and resource_data_module.id is not distinct from $2\nreturning index\n"
+  },
+  "8b8bacdc73f131201e404e74fd961c9b30aa4e5a16236c30c3764524cf89ae54": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: UserId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "username!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "given_name!",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "family_name!",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "profile_image?: ImageId",
+          "ordinal": 4,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "badge?: UserBadge",
+          "ordinal": 5,
+          "type_info": "Int2"
+        },
+        {
+          "name": "languages_spoken?: Vec<String>",
+          "ordinal": 6,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "organization?",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "persona?: Vec<String>",
+          "ordinal": 8,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "location?",
+          "ordinal": 9,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "bio?",
+          "ordinal": 10,
+          "type_info": "Text"
+        },
+        {
+          "name": "jig_count!",
+          "ordinal": 11,
+          "type_info": "Int8"
+        },
+        {
+          "name": "resource_count!",
+          "ordinal": 12,
+          "type_info": "Int8"
+        },
+        {
+          "name": "course_count!",
+          "ordinal": 13,
+          "type_info": "Int8"
+        },
+        {
+          "name": "playlist_count!",
+          "ordinal": 14,
+          "type_info": "Int8"
+        },
+        {
+          "name": "total_asset_count!",
+          "ordinal": 15,
+          "type_info": "Int8"
+        },
+        {
+          "name": "circles!: Vec<CircleId>",
+          "ordinal": 16,
+          "type_info": "UuidArray"
+        },
+        {
+          "name": "following!",
+          "ordinal": 17,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        select  user_id                as \"id!: UserId\",\n                username               as \"username!\",\n                given_name             as \"given_name!\",\n                family_name            as \"family_name!\",\n                profile_image_id       as \"profile_image?: ImageId\",\n                (select case when badge <> 10 then badge else null end)       as \"badge?: UserBadge\",\n                (select languages_spoken from user_profile where user_profile.user_id = \"user\".id and languages_spoken_public is true)      as \"languages_spoken?: Vec<String>\",\n                (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n                (select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\",\n                (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n                (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n                (select count(*) from jig where jig.author_id = \"user\".id and jig.published_at is not null)      as \"jig_count!\",\n                (select count(*) from resource where resource.author_id = \"user\".id and resource.published_at is not null)      as \"resource_count!\",\n                (select count(*) from course where course.author_id = \"user\".id and course.published_at is not null)      as \"course_count!\",\n                (select count(*) from playlist where playlist.author_id = \"user\".id and playlist.published_at is not null)      as \"playlist_count!\",\n                ((select count(*) from jig where jig.author_id = \"user\".id and jig.published_at is not null) +\n                (select count(*) from resource where resource.author_id = \"user\".id and resource.published_at is not null) +\n                (select count(*) from course where course.author_id = \"user\".id and course.published_at is not null) +\n                (select count(*) from playlist where playlist.author_id = \"user\".id and playlist.published_at is not null))      as \"total_asset_count!\",\n                (select array(select circle.id\n                    from circle_member bm\n                    inner join circle on bm.id = circle.id\n                    where bm.user_id = \"user\".id\n                )) as \"circles!: Vec<CircleId>\",\n                exists(select 1 from user_follow where follower_id = $2 and user_id = \"user\".id) as \"following!\"\n            from \"user\"\n            inner join user_profile on \"user\".id = user_profile.user_id\n            inner join unnest($1::uuid[])\n            with ordinality t(id, ord) using (id)\n"
   },
   "8c211ea244871599cdc7856fbfa8f27374b1db6ce383f9e2eb9cfc0b4204bc84": {
     "describe": {
@@ -12633,6 +12861,26 @@
     },
     "query": "\nselect id            as \"circle_id: CircleId\",\n       display_name,\n       description,\n       image         as \"image!: ImageId\",\n       member_count,\n       creator_id    as \"creator_id: UserId\",\n       created_at,\n       updated_at,\n       exists(select 1 from circle_member where user_id = $2 and circle.id = circle_member.id) as \"joined!\"\nfrom circle\nwhere id = $1\n"
   },
+  "bde557ec585cccdb2638a28aaa0c6a4082559653fb0e27712d2dd8344c4a44d6": {
+    "describe": {
+      "columns": [
+        {
+          "name": "count!",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      }
+    },
+    "query": "\n        with cte as (\n            select (array_agg(up.user_id))[1]\n            from user_profile \"up\"\n            inner join \"user\" on up.user_id = \"user\".id\n            left join circle_member \"cm\" on cm.user_id = up.user_id\n            where cm.id = any($1) or $1 = array[]::uuid[]\n            group by \"user\".created_at\n        )\n            select count(*) as \"count!\" from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n           , ord)\n        "
+  },
   "bdfa6658d04ff049c61a416af645025bdd798b50d837f21ebd79ff76f71899e5": {
     "describe": {
       "columns": [],
@@ -13328,129 +13576,6 @@
       }
     },
     "query": "delete from locale_entry where id = $1"
-  },
-  "ce666695f8cb28460ff926c65e99e31be8aebaf8b0422ee71b04d925b8cde278": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: UserId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "username!",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "given_name!",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "family_name!",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "profile_image?: ImageId",
-          "ordinal": 4,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "badge?: UserBadge",
-          "ordinal": 5,
-          "type_info": "Int2"
-        },
-        {
-          "name": "languages_spoken?: Vec<String>",
-          "ordinal": 6,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "organization?",
-          "ordinal": 7,
-          "type_info": "Text"
-        },
-        {
-          "name": "persona?: Vec<String>",
-          "ordinal": 8,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "location?",
-          "ordinal": 9,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "bio?",
-          "ordinal": 10,
-          "type_info": "Text"
-        },
-        {
-          "name": "jig_count?",
-          "ordinal": 11,
-          "type_info": "Int8"
-        },
-        {
-          "name": "resource_count?",
-          "ordinal": 12,
-          "type_info": "Int8"
-        },
-        {
-          "name": "course_count?",
-          "ordinal": 13,
-          "type_info": "Int8"
-        },
-        {
-          "name": "playlist_count?",
-          "ordinal": 14,
-          "type_info": "Int8"
-        },
-        {
-          "name": "total_asset_count!",
-          "ordinal": 15,
-          "type_info": "Int8"
-        },
-        {
-          "name": "circles!: Vec<CircleId>",
-          "ordinal": 16,
-          "type_info": "UuidArray"
-        },
-        {
-          "name": "following!",
-          "ordinal": 17,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        true,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\n    select  user_id as \"id!: UserId\",\n            username   as \"username!\",\n            given_name  as \"given_name!\",\n            family_name as \"family_name!\",\n            profile_image_id       as \"profile_image?: ImageId\",\n            (select case when badge <> 10 then badge else null end) as \"badge?: UserBadge\",\n            (select languages_spoken from user_profile where user_profile.user_id = \"user\".id and languages_spoken_public is true)      as \"languages_spoken?: Vec<String>\",\n            (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n            (select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\",\n            (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n            (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n            (select (CASE WHEN count(*) > 0 THEN count(*) else null end) from jig where jig.author_id = \"user\".id and jig.published_at is not null)      as \"jig_count?\",\n            (select (CASE WHEN count(*) > 0 THEN count(*) else null end) from resource where resource.author_id = \"user\".id and resource.published_at is not null)      as \"resource_count?\",\n            (select (CASE WHEN count(*) > 0 THEN count(*) else null end) from course where course.author_id = \"user\".id and course.published_at is not null)      as \"course_count?\",\n            (select (CASE WHEN count(*) > 0 THEN count(*) else null end) from playlist where playlist.author_id = \"user\".id and playlist.published_at is not null)      as \"playlist_count?\",\n            ((select count(*) from jig where jig.author_id = \"user\".id and jig.published_at is not null) + \n            (select count(*) from resource where resource.author_id = \"user\".id and resource.published_at is not null) + \n            (select count(*) from course where course.author_id = \"user\".id and course.published_at is not null) + \n            (select count(*) from playlist where playlist.author_id = \"user\".id and playlist.published_at is not null))      as \"total_asset_count!\",\n            array(select circle.id\n                from circle_member bm\n                inner join circle on bm.id = circle.id\n                where bm.user_id = \"user\".id\n            ) as \"circles!: Vec<CircleId>\",\n            exists(select 1 from user_follow where follower_id = $2 and user_id = \"user\".id) as \"following!\"\n        from \"user\"\n        inner join user_profile on \"user\".id = user_profile.user_id\n        where id = $1\n        "
   },
   "ceee83d2943409d2f3a3e5a70b7ae3d423d39cf2b15af44565c6f4100abcfc31": {
     "describe": {
@@ -14554,131 +14679,6 @@
       }
     },
     "query": "\nselect\n    user_profile.user_id as \"id: UserId\",\n    username,\n    user_email.email::text as \"email!\",\n    given_name,\n    family_name,\n    profile_image_id       as \"profile_image?: ImageId\",\n    (select case when exists(select * from user_auth_google where user_id = $1) = true then 1 else 0 end)     as \"is_oauth!: bool\",\n    languages_spoken         as \"languages_spoken!: Vec<String>\",\n    language_app,\n    language_emails,\n    bio,\n    (select case when badge <> 10 then badge else null end) as \"badge?: UserBadge\",\n    location_public,\n    languages_spoken_public,\n    persona_public,\n    bio_public,\n    organization_public,\n    opt_into_edu_resources,\n    over_18,\n    timezone,\n    user_profile.created_at,\n    user_profile.updated_at,\n    organization,\n    persona                as \"persona!: Vec<String>\",\n    location,\n    array(select scope from user_scope where user_scope.user_id = \"user\".id) as \"scopes!: Vec<i16>\",\n    array(select subject_id from user_subject where user_subject.user_id = \"user\".id) as \"subjects!: Vec<Uuid>\",\n    array(select affiliation_id from user_affiliation where user_affiliation.user_id = \"user\".id) as \"affiliations!: Vec<Uuid>\",\n    array(select age_range_id from user_age_range where user_age_range.user_id = \"user\".id) as \"age_ranges!: Vec<Uuid>\",\n    array(select circle.id\n        from circle_member bm\n        inner join circle on bm.id = circle.id\n        where bm.user_id = \"user\".id or circle.creator_id = \"user\".id\n    ) as \"circles!: Vec<Uuid>\"\nfrom \"user\"\n    inner join user_profile on \"user\".id = user_profile.user_id\n    inner join user_email using(user_id)\nwhere id = $1"
-  },
-  "e559b6406c6bdff868261e264cf2c2935faec9438b7e7c00c1b1b547b51a8286": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: UserId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "username!",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "given_name!",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "family_name!",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "profile_image?: ImageId",
-          "ordinal": 4,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "badge?: UserBadge",
-          "ordinal": 5,
-          "type_info": "Int2"
-        },
-        {
-          "name": "languages_spoken?: Vec<String>",
-          "ordinal": 6,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "organization?",
-          "ordinal": 7,
-          "type_info": "Text"
-        },
-        {
-          "name": "persona?: Vec<String>",
-          "ordinal": 8,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "location?",
-          "ordinal": 9,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "bio?",
-          "ordinal": 10,
-          "type_info": "Text"
-        },
-        {
-          "name": "jig_count?",
-          "ordinal": 11,
-          "type_info": "Int8"
-        },
-        {
-          "name": "resource_count?",
-          "ordinal": 12,
-          "type_info": "Int8"
-        },
-        {
-          "name": "course_count?",
-          "ordinal": 13,
-          "type_info": "Int8"
-        },
-        {
-          "name": "playlist_count?",
-          "ordinal": 14,
-          "type_info": "Int8"
-        },
-        {
-          "name": "total_asset_count!",
-          "ordinal": 15,
-          "type_info": "Int8"
-        },
-        {
-          "name": "circles!: Vec<CircleId>",
-          "ordinal": 16,
-          "type_info": "UuidArray"
-        },
-        {
-          "name": "following!",
-          "ordinal": 17,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        true,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int4",
-          "Int4",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\n        with following as (\n            select (array_agg(user_id))[1]\n            from user_follow\n            where follower_id = $1\n            group by followed_at\n            order by followed_at desc\n        ),\n        cte as (\n            select * from unnest(array(select following.array_agg from following)) with ordinality t(id, ord) order by ord\n        )\n        select  \"user\".id                     as \"id!: UserId\",\n                username               as \"username!\",\n                given_name             as \"given_name!\",\n                family_name            as \"family_name!\",\n                profile_image_id       as \"profile_image?: ImageId\",\n                (select case when badge <> 10 then badge else null end)           as \"badge?: UserBadge\",\n                (select languages_spoken from user_profile where user_profile.user_id = \"user\".id and languages_spoken_public is true)      as \"languages_spoken?: Vec<String>\",\n                (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n                (select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\",\n                (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n                (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n                (select (case when count(*) > 0 THEN count(*) else null end) from jig where jig.author_id = \"user\".id and jig.published_at is not null)      as \"jig_count?\",\n                (select (case when count(*) > 0 THEN count(*) else null end) from resource where resource.author_id = \"user\".id and resource.published_at is not null)      as \"resource_count?\",\n                (select (case when count(*) > 0 THEN count(*) else null end) from course where course.author_id = \"user\".id and course.published_at is not null)      as \"course_count?\",\n                (select (case when count(*) > 0 THEN count(*) else null end) from playlist where playlist.author_id = \"user\".id and playlist.published_at is not null)      as \"playlist_count?\",\n                ((select count(*) from jig where jig.author_id = \"user\".id and jig.published_at is not null) + \n                (select count(*) from resource where resource.author_id = \"user\".id and resource.published_at is not null) + \n                (select count(*) from course where course.author_id = \"user\".id and course.published_at is not null) + \n                (select count(*) from playlist where playlist.author_id = \"user\".id and playlist.published_at is not null))      as \"total_asset_count!\",\n                array(select circle.id\n                    from circle_member bm\n                    left join circle on bm.id = circle.id\n                    where bm.user_id = \"user\".id or circle.creator_id = \"user\".id\n                ) as \"circles!: Vec<CircleId>\",\n                exists(select 1 from user_follow where follower_id = $4 and user_id = \"user\".id) as \"following!\"\n            from cte\n            inner join user_profile on cte.id = user_profile.user_id\n            inner join \"user\" on (cte.id = \"user\".id)\n            where ord > (1 * $2 * $3)\n            limit $3;\n            "
   },
   "e57b7c587be57d904c82ee82ea48df2b8e02a38dd1a4c1c7fee015385d66d155": {
     "describe": {
