@@ -2665,5 +2665,386 @@
             "fontFamilyLetteringLeft": 0,
             "fontFamilyLetteringRight": 1
         }
+    },
+    "jewish-stories": {
+        "id": "jewish-stories",
+        "premium": true,
+        "label": {
+            "en": "Jewish Stories"
+        },
+        "fontFamilies": [
+            "'Bellefair-Regular', 'Merienda-Regular'",
+            "'Shesek FM Regular', 'Caveat - Medium'"
+        ],
+        "colors": ["#8B483E", "#FEECBF","#392300"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 50,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 40,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "lag-ba-omer": {
+        "id": "lag-ba-omer",
+        "premium": true,
+        "label": {
+            "en": "Lag Ba'Omer"
+        },
+        "fontFamilies": [
+            "'Bellefair-Regular', 'Merienda-Regular'",
+            "'Shesek FM Regular', 'Caveat - Medium'"
+        ],
+        "colors": ["#E3471A", "#F9DD67","#FFC400"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 50,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 40,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "garden-of-eden": {
+        "id": "garden-of-eden",
+        "premium": true,
+        "label": {
+            "en": "Garden of Eden"
+        },
+        "fontFamilies": [
+            "'Bellefair-Regular', 'Merienda-Regular'",
+            "'Shesek FM Regular', 'Caveat - Medium'"
+        ],
+        "colors": ["#125D0A", "#F9C546","#FFFFFF"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 50,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 40,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "noahs-ark": {
+        "id": "noahs-ark",
+        "label": {
+            "en": "Noah's Ark"
+        },
+        "fontFamilies": [
+            "'Bellefair-Regular', 'Merienda-Regular'",
+            "'Shesek FM Regular', 'Caveat - Medium'"
+        ],
+        "colors": ["#558344", "#FFFFFF","#001B7B"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 50,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 40,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "number-games": {
+        "id": "number-games",
+        "label": {
+            "en": "Number Games"
+        },
+        "fontFamilies": [
+            "'VarelaRound-Heb', 'Itim-Regular'",
+            "'Shesek FM Regular', 'Caveat - Medium'"
+        ],
+        "colors": ["#043279", "#C1E392","#043279"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 50,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 40,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "silly-monsters": {
+        "id": "silly-monsters",
+        "label": {
+            "en": "Silly Monsters"
+        },
+        "fontFamilies": [
+            "'VarelaRound-Heb', 'OpenSans-Regular'",
+            "'Shesek FM Regular', 'Caveat - Medium'"
+        ],
+        "colors": ["#13878D", "#FFEAF1","#612998"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 50,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 40,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "wonder-lab": {
+        "id": "wonder-lab",
+        "label": {
+            "en": "Wonder Lab"
+        },
+        "fontFamilies": [
+            "'VarelaRound-Heb', 'OpenSans-Regular'",
+            "'Shesek FM Regular', 'Caveat - Medium'"
+        ],
+        "colors": ["#2d0653", "#FDE1A2","#FFFFFF"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 50,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 40,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "dino-games": {
+        "id": "dino-games",
+        "label": {
+            "en": "Dino Games"
+        },
+        "fontFamilies": [
+            "'VarelaRound-Heb', 'OpenSans-Regular'",
+            "'Shesek FM Regular', 'Caveat - Medium'"
+        ],
+        "colors": ["#5A3309", "#FED831","#007713"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 50,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 40,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "back-to-school-youth": {
+        "id": "back-to-school-youth",
+        "label": {
+            "en": "Back to School"
+        },
+        "fontFamilies": [
+            "'VarelaRound-Heb', 'OpenSans-Regular'",
+            "'Shesek FM Regular', 'Caveat - Medium'"
+        ],
+        "colors": ["#097159", "#FED44A","#1E40B8"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 50,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 40,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
     }
 }
