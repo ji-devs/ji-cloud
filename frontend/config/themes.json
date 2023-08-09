@@ -2872,7 +2872,7 @@
         },
         "cards": {
             "fontColor": 0,
-            "borderColor": 0,
+            "borderColor": 1,
             "fillColor": 1,
             "fontFamily": 0,
             "fontFamilyLetteringLeft": 0,
@@ -2888,7 +2888,7 @@
             "'VarelaRound-Heb', 'OpenSans-Regular'",
             "'Shesek FM Regular', 'Caveat - Medium'"
         ],
-        "colors": ["#13878D", "#FFEAF1","#612998"],
+        "colors": ["#73042a", "#FFEAF1","#612998"],
         "textEditor": {
             "h1": {
                 "fontFamily": 0,
@@ -2956,7 +2956,7 @@
         },
         "cards": {
             "fontColor": 0,
-            "borderColor": 0,
+            "borderColor": 1,
             "fillColor": 1,
             "fontFamily": 0,
             "fontFamilyLetteringLeft": 0,
@@ -3014,7 +3014,7 @@
             "'VarelaRound-Heb', 'OpenSans-Regular'",
             "'Shesek FM Regular', 'Caveat - Medium'"
         ],
-        "colors": ["#097159", "#FED44A","#1E40B8"],
+        "colors": ["#572041", "#FED44A","#1E40B8"],
         "textEditor": {
             "h1": {
                 "fontFamily": 0,
