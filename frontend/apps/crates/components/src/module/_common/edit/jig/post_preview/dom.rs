@@ -63,7 +63,7 @@ impl PostPreview {
                                     if !paywall::can_print() {
                                         paywall::dialog_limit("
                                             Looking to print content?
-                                            Upgrade now for UNLIMITED JIGs and resources.
+                                            Upgrade now for UNLIMITED printing options.
                                         ");
                                         return;
                                     }
@@ -86,7 +86,7 @@ impl PostPreview {
                                     if !paywall::can_print() {
                                         paywall::dialog_limit("
                                             Looking to print content?
-                                            Upgrade now for UNLIMITED JIGs and resources.
+                                            Upgrade now for UNLIMITED printing options.
                                         ");
                                         return;
                                     }

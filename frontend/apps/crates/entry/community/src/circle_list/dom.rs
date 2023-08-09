@@ -38,8 +38,8 @@ impl Component<CirclesList> for Rc<CirclesList> {
                 .event(clone!(state => move |_: events::Click| {
                     if !paywall::can_create_circle() {
                         paywall::dialog_limit("
-                            Looking to create a Circle?
-                            Upgrade now for UNLIMITED JIGs and resources.
+                            Looking to create a circle?
+                            Upgrade now for UNLIMITED community features.
                         ");
                         return;
                     }

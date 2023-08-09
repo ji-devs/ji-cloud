@@ -335,7 +335,12 @@ pub fn create_jig() {
         .map(|user| user.jig_count)
         .unwrap_or_default();
     if !paywall::can_create_jig(total_existing) {
-        paywall_popup();
+        paywall::dialog_limit(
+            "
+                Looking to create more than 5 JIGs?
+                Upgrade now for UNLIMITED access to Jigzi Studio.
+            ",
+        );
         return;
     }
     spawn_local(async move {
@@ -359,7 +364,12 @@ pub fn create_resource() {
         .map(|user| user.resource_count)
         .unwrap_or_default();
     if !paywall::can_create_jig(total_existing) {
-        paywall_popup();
+        paywall::dialog_limit(
+            "
+                Looking to add your own resources?
+                Upgrade now for UNLIMITED access to Jigzi Studio.
+            ",
+        );
         return;
     }
     spawn_local(async move {
@@ -384,7 +394,12 @@ pub fn create_playlist() {
         .map(|user| user.playlist_count)
         .unwrap_or_default();
     if !paywall::can_create_jig(total_existing) {
-        paywall_popup();
+        paywall::dialog_limit(
+            "
+                Looking to create a playlist?
+                Upgrade now for UNLIMITED access to Jigzi Studio.
+            ",
+        );
         return;
     }
     spawn_local(async move {
@@ -409,7 +424,12 @@ pub fn create_course() {
         .map(|user| user.course_count)
         .unwrap_or_default();
     if !paywall::can_create_jig(total_existing) {
-        paywall_popup();
+        paywall::dialog_limit(
+            "
+                Looking to create a course?
+                Upgrade now for UNLIMITED access to Jigzi Studio.
+            ",
+        );
         return;
     }
     spawn_local(async move {
@@ -425,15 +445,6 @@ pub fn create_course() {
         .into();
         dominator::routing::go_to_url(&url);
     });
-}
-
-fn paywall_popup() {
-    paywall::dialog_limit(
-        "
-            Looking to create more than 5 JIGs?
-            Upgrade now for UNLIMITED access to Jigzi Studio.
-        ",
-    )
 }
 
 async fn add_playlist_or_resource_cover(asset_id: AssetId) {
