@@ -327,14 +327,17 @@ export class _ extends LitElement {
                 <div class="name">${this.name}</div>
                 <div class="email-address">${this.email}</div>
                 <nav>
-                    <a @click="${this.scrollToSection}" href="#basic-info"
-                        >${STR_BASIC_INFO}</a
-                    >
-                    <a
-                        @click="${this.scrollToSection}"
-                        href="#jigzi-filters"
-                        >${STR_JIGZI_FILTERS}</a
-                    >
+                    <a @click="${this.scrollToSection}" href="#basic-info">
+                        ${STR_BASIC_INFO}
+                    </a>
+                    <a @click="${this.scrollToSection}" href="#jigzi-filters">
+                        ${STR_JIGZI_FILTERS}
+                    </a>
+                    ${ this.showPlan ? html`
+                        <a @click="${this.scrollToSection}" href="#plan">
+                            ${this.planSectionTitle}
+                        </a>
+                    ` : nothing }
                 </nav>
             </aside>
             <main @scroll="${this.recalculateActive}">
