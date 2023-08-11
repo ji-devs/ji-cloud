@@ -62,7 +62,7 @@ export class _ extends LitElement {
             <input
                 id="input"
                 type="checkbox"
-                disabled="${this.disabled}"
+                ?disabled="${this.disabled}"
                 ?checked="${this.enabled}"
                 @change="${this.toggle}"
             />
