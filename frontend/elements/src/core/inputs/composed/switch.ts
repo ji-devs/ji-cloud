@@ -43,6 +43,9 @@ export class _ extends LitElement {
     @property({ type: Boolean })
     enabled: boolean = false;
 
+    @property({ type: Boolean })
+    disabled: boolean = false;
+
     private toggle() {
         this.enabled = !this.enabled;
         this.dispatchEvent(
@@ -59,6 +62,7 @@ export class _ extends LitElement {
             <input
                 id="input"
                 type="checkbox"
+                disabled="${this.disabled}"
                 ?checked="${this.enabled}"
                 @change="${this.toggle}"
             />

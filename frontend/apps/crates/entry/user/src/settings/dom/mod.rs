@@ -269,6 +269,9 @@ impl SettingsPage {
                 })
             })))
             .prop_signal("showPlan", state.plan_info.signal_ref(|plan| plan.is_some()))
+            .prop_signal("isTrial", state.plan_info.signal_ref(|plan| {
+                plan.as_ref().map_or(false, |plan| plan.is_trial)
+            }))
             .prop_signal("planSectionTitle", state.plan_info.signal_ref(|plan| {
                 plan.as_ref().map(|plan| {
                     match plan.individual_or_school {

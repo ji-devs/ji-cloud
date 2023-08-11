@@ -423,6 +423,43 @@ impl ItemCount {
     }
 }
 
+/// Representation of a percentage
+#[derive(Debug, Default, Copy, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+pub struct Percent(f64);
+
+impl Display for Percent {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}%", self.0 * 100.0)
+    }
+}
+
+impl From<f64> for Percent {
+    fn from(value: f64) -> Self {
+        Self(value)
+    }
+}
+
+impl From<Percent> for f64 {
+    fn from(value: Percent) -> Self {
+        value.0
+    }
+}
+
+#[cfg(feature = "backend")]
+impl From<sqlx::types::BigDecimal> for Percent {
+    fn from(value: sqlx::types::BigDecimal) -> Self {
+        use bigdecimal::ToPrimitive;
+        Self(value.to_f64().unwrap_or_default())
+    }
+}
+
+#[cfg(feature = "backend")]
+impl From<Percent> for sqlx::types::BigDecimal {
+    fn from(value: Percent) -> Self {
+        Self::try_from(value.0).ok().unwrap_or_default()
+    }
+}
+
 // use actix_web::{
 //     http::{header::IntoHeaderPair, StatusCode},
 //     HttpRequest, HttpResponse,

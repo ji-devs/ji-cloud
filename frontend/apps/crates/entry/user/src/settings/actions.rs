@@ -75,7 +75,8 @@ impl SettingsPage {
                 self.plan_info.set(
                     (resp, IndividualOrSchool::School(school_id))
                         .try_into()
-                        .ok(),
+                        .ok()
+                        .map(|info| Rc::new(info)),
                 );
             }
             Some(IndividualOrSchool::Individual) => {
@@ -87,8 +88,12 @@ impl SettingsPage {
                 .toast_on_err()
                 .unwrap_ji();
 
-                self.plan_info
-                    .set((resp, IndividualOrSchool::Individual).try_into().ok());
+                self.plan_info.set(
+                    (resp, IndividualOrSchool::Individual)
+                        .try_into()
+                        .ok()
+                        .map(|info| Rc::new(info)),
+                );
             }
             None => {}
         }
@@ -241,8 +246,11 @@ impl TryFrom<(Account, IndividualOrSchool)> for PlanSectionInfo {
             .map(|method| method.payment_method_type);
         Ok(Self {
             auto_renew: Mutable::new(subscription.auto_renew),
+            status: subscription.status,
+            is_trial: subscription.is_trial,
             payment_method_type,
-            price: 0,
+            price: subscription.price,
+            coupon: subscription.applied_coupon,
             current_period_end: subscription.current_period_end,
             individual_or_school,
         })

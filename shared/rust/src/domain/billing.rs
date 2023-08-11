@@ -4,7 +4,7 @@ use chrono::{DateTime, Utc};
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::fmt::{self, Debug, Formatter};
+use std::fmt::{self, Debug, Display, Formatter};
 use strum_macros::{Display, EnumString};
 
 use serde_json::Value;
@@ -12,7 +12,7 @@ use serde_json::Value;
 use crate::api::endpoints::PathPart;
 use crate::domain::image::ImageId;
 use crate::domain::user::UserProfile;
-use crate::domain::{UpdateNonNullable, UpdateNullable};
+use crate::domain::{Percent, UpdateNonNullable, UpdateNullable};
 
 /// Stripe customer ID
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -257,7 +257,7 @@ pub enum BillingInterval {
 }
 
 /// Status of a subscription
-#[derive(Debug, Display, Serialize, Deserialize, Clone)]
+#[derive(Copy, Debug, Display, Serialize, Deserialize, Clone)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[repr(i16)]
 pub enum SubscriptionStatus {
@@ -344,6 +344,10 @@ pub struct Subscription {
     pub latest_invoice_id: Option<StripeInvoiceId>,
     /// Amount due if any
     pub amount_due_in_cents: Option<AmountInCents>,
+    /// Price of the subscription
+    pub price: AmountInCents,
+    /// A coupon which may have been applied to the subscription
+    pub applied_coupon: Option<AppliedCoupon>,
     /// When the subscription was originally created.
     pub created_at: DateTime<Utc>,
     /// When the subscription was last updated.
@@ -352,8 +356,23 @@ pub struct Subscription {
     pub updated_at: Option<DateTime<Utc>>,
 }
 
+/// Details of a coupon applied to a subscription
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct AppliedCoupon {
+    /// Name of the coupon applied when the subscription was created
+    pub coupon_name: String,
+    /// If a coupon was applied, this would indicate the discount percent
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub coupon_percent: Option<Percent>,
+    /// Date the coupon is valid from on this subscription
+    pub coupon_from: DateTime<Utc>,
+    /// Date this coupon is valid until on this subscription
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub coupon_to: Option<DateTime<Utc>>,
+}
+
 /// Data used to create a new subscription record
-#[derive(Debug, Serialize, Deserialize, Clone, sqlx::Type)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[cfg(feature = "backend")]
 pub struct CreateSubscriptionRecord {
     /// The Stripe subscription ID
@@ -371,6 +390,8 @@ pub struct CreateSubscriptionRecord {
     pub latest_invoice_id: Option<StripeInvoiceId>,
     /// Amount due if any
     pub amount_due_in_cents: Option<AmountInCents>,
+    /// Price of the subscription without any discounts applied
+    pub price: AmountInCents,
 }
 
 /// Data used to update a new subscription record
@@ -393,20 +414,40 @@ pub struct UpdateSubscriptionRecord {
     /// Whether the subscription is in a trial period
     #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
     pub is_trial: UpdateNonNullable<bool>,
+    /// Price of the subscription without any discounts applied
+    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+    pub price: UpdateNonNullable<AmountInCents>,
+    /// Name of the coupon applied when the subscription was created
+    #[serde(default, skip_serializing_if = "UpdateNullable::is_keep")]
+    pub coupon_name: UpdateNullable<String>,
+    /// If a coupon was applied, this would indicate the discount percent
+    #[serde(default, skip_serializing_if = "UpdateNullable::is_keep")]
+    pub coupon_percent: UpdateNullable<Percent>,
+    /// Date the coupon is valid from on this subscription
+    #[serde(default, skip_serializing_if = "UpdateNullable::is_keep")]
+    pub coupon_from: UpdateNullable<DateTime<Utc>>,
+    /// Date this coupon is valid until on this subscription
+    #[serde(default, skip_serializing_if = "UpdateNullable::is_keep")]
+    pub coupon_to: UpdateNullable<DateTime<Utc>>,
 }
 
 #[cfg(feature = "backend")]
 impl UpdateSubscriptionRecord {
     /// Create a new instance with just the stripe subscription ID set
     #[must_use]
-    pub const fn new(stripe_subscription_id: StripeSubscriptionId) -> Self {
+    pub fn new(stripe_subscription_id: StripeSubscriptionId) -> Self {
         Self {
             stripe_subscription_id,
-            subscription_plan_id: UpdateNonNullable::Keep,
-            status: UpdateNonNullable::Keep,
-            current_period_end: UpdateNonNullable::Keep,
-            latest_invoice_id: UpdateNonNullable::Keep,
-            is_trial: UpdateNonNullable::Keep,
+            subscription_plan_id: Default::default(),
+            status: Default::default(),
+            current_period_end: Default::default(),
+            latest_invoice_id: Default::default(),
+            is_trial: Default::default(),
+            price: Default::default(),
+            coupon_name: Default::default(),
+            coupon_percent: Default::default(),
+            coupon_from: Default::default(),
+            coupon_to: Default::default(),
         }
     }
 }
@@ -423,6 +464,58 @@ impl TryFrom<stripe::Subscription> for UpdateSubscriptionRecord {
             .as_ref()
             .map(|invoice| StripeInvoiceId::from(&invoice.id()))
             .into();
+
+        let price = AmountInCents::from(
+            value
+                .items
+                .data
+                .get(0)
+                .map(|item| item.clone())
+                .ok_or(anyhow::anyhow!("Missing plan data"))?
+                .plan
+                .ok_or(anyhow::anyhow!("Missing stripe subscription plan"))?
+                .amount
+                .ok_or(anyhow::anyhow!("Missing subscription plan amount"))?,
+        );
+
+        let (coupon_name, coupon_percent, coupon_from, coupon_to) = value.discount.map_or_else(
+            || {
+                Ok((
+                    Default::default(),
+                    Default::default(),
+                    Default::default(),
+                    Default::default(),
+                ))
+            },
+            |discount| -> Result<_, Self::Error> {
+                let start_time = Some(
+                    Utc.timestamp_opt(discount.start, 0)
+                        .latest()
+                        .ok_or(anyhow::anyhow!("Invalid timestamp"))?,
+                );
+
+                let end_time = match discount.end {
+                    Some(end) => Some(
+                        Utc.timestamp_opt(end, 0)
+                            .latest()
+                            .ok_or(anyhow::anyhow!("Invalid timestamp"))?,
+                    ),
+                    None => None,
+                };
+
+                Ok((
+                    UpdateNullable::from(discount.coupon.name.map(|name| name.to_uppercase())),
+                    UpdateNullable::from(
+                        discount
+                            .coupon
+                            .percent_off
+                            .map(|percent| Percent::from(percent / 100.0)),
+                    ),
+                    UpdateNullable::from(start_time),
+                    UpdateNullable::from(end_time),
+                ))
+            },
+        )?;
 
         Ok(Self {
             stripe_subscription_id: value.id.into(),
@@ -445,6 +538,11 @@ impl TryFrom<stripe::Subscription> for UpdateSubscriptionRecord {
                     .ok_or(anyhow::anyhow!("Invalid timestamp"))?,
             ),
             latest_invoice_id,
+            price: UpdateNonNullable::Change(price),
+            coupon_name,
+            coupon_percent,
+            coupon_from,
+            coupon_to,
         })
     }
 }
@@ -537,15 +635,15 @@ impl PlanType {
     #[must_use]
     pub const fn display_name(&self) -> &'static str {
         match self {
-            Self::IndividualBasicMonthly => "Basic monthly plan",
-            Self::IndividualBasicAnnually => "Basic annual plan",
-            Self::IndividualProMonthly => "Pro monthly plan",
-            Self::IndividualProAnnually => "Pro annual plan",
-            Self::SchoolLevel1
-            | Self::SchoolLevel2
-            | Self::SchoolLevel3
-            | Self::SchoolLevel4
-            | Self::SchoolUnlimited => "School plan",
+            Self::IndividualBasicMonthly => "Individual - Basic monthly",
+            Self::IndividualBasicAnnually => "Individual - Basic annual",
+            Self::IndividualProMonthly => "Individual - Pro monthly",
+            Self::IndividualProAnnually => "Individual - Pro annual",
+            Self::SchoolLevel1 => "School - Up to 4 teachers",
+            Self::SchoolLevel2 => "School - Up to 10 teachers",
+            Self::SchoolLevel3 => "School - Up to 20 teachers",
+            Self::SchoolLevel4 => "School - Up to 30 teachers",
+            Self::SchoolUnlimited => "School - More than 30 teachers",
         }
     }
 
@@ -718,7 +816,7 @@ impl From<SubscriptionType> for AccountType {
 pub struct InvoiceNumber(String);
 
 /// Represents an amount in cents
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type), sqlx(transparent))]
 pub struct AmountInCents(i64);
 
@@ -731,6 +829,18 @@ impl AmountInCents {
     /// Returns a copy of the inner value
     pub fn inner(&self) -> i64 {
         self.0
+    }
+}
+
+impl From<i64> for AmountInCents {
+    fn from(value: i64) -> Self {
+        Self(value)
+    }
+}
+
+impl Display for AmountInCents {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{:.2}", self.0 as f64 / 100.)
     }
 }
 

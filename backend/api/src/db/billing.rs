@@ -1,9 +1,11 @@
 use chrono::{DateTime, Utc};
 use shared::domain::billing::{
-    AccountId, AmountInCents, CreateSubscriptionRecord, PlanId, PlanType, StripeInvoiceId,
-    StripePriceId, StripeSubscriptionId, Subscription, SubscriptionId, SubscriptionPlan,
-    SubscriptionStatus, UpdateSubscriptionRecord,
+    AccountId, AmountInCents, AppliedCoupon, CreateSubscriptionRecord, PlanId, PlanType,
+    StripeInvoiceId, StripePriceId, StripeSubscriptionId, Subscription, SubscriptionId,
+    SubscriptionPlan, SubscriptionStatus, UpdateSubscriptionRecord,
 };
+use shared::domain::Percent;
+use sqlx::types::BigDecimal;
 use sqlx::PgPool;
 use tracing::{instrument, Instrument};
 
@@ -100,10 +102,11 @@ insert into subscription
         current_period_end,
         account_id,
         latest_invoice_id,
-        amount_due
+        amount_due,
+        price
     )
 values
-    ($1, $2, $3, $4, $5, $6, $7)
+    ($1, $2, $3, $4, $5, $6, $7, $8)
 returning subscription_id as "id!: SubscriptionId"
 "#,
         subscription.stripe_subscription_id as StripeSubscriptionId,
@@ -115,6 +118,7 @@ returning subscription_id as "id!: SubscriptionId"
             .latest_invoice_id
             .map(|invoice_id| invoice_id.inner()),
         subscription.amount_due_in_cents.map(|due| due.inner()),
+        subscription.price.inner(),
     )
     .fetch_one(pool)
     .await
@@ -136,7 +140,12 @@ set
     current_period_end = coalesce($4, current_period_end),
     updated_at = now(),
     latest_invoice_id = case when $5 then $6 else latest_invoice_id end,
-    is_trial = $7
+    is_trial = coalesce($7, is_trial),
+    price = coalesce($8, price),
+    coupon_name = case when $9 then $10 else coupon_name end,
+    coupon_percent = case when $11 then $12 else coupon_percent end,
+    coupon_from = case when $13 then $14 else coupon_from end,
+    coupon_to = case when $15 then $16 else coupon_to end
 where stripe_subscription_id = $1
 "#,
         subscription.stripe_subscription_id as StripeSubscriptionId,
@@ -152,6 +161,18 @@ where stripe_subscription_id = $1
             .into_option()
             .map(|invoice_id| invoice_id.inner()),
         subscription.is_trial.into_option(),
+        subscription.price.into_option().map(|price| price.inner()),
+        subscription.coupon_name.is_change(),
+        subscription.coupon_name.into_option(),
+        subscription.coupon_percent.is_change(),
+        subscription
+            .coupon_percent
+            .into_option()
+            .map(BigDecimal::from),
+        subscription.coupon_from.is_change(),
+        subscription.coupon_from.into_option(),
+        subscription.coupon_to.is_change(),
+        subscription.coupon_to.into_option(),
     )
     .execute(pool)
     .await?;
@@ -200,6 +221,11 @@ select
     account_id as "account_id!: AccountId",
     latest_invoice_id as "latest_invoice_id?: StripeInvoiceId",
     amount_due as "amount_due_in_cents?: AmountInCents",
+    price as "price!: AmountInCents",
+    coupon_name as "coupon_name?",
+    coupon_from as "coupon_from!: DateTime<Utc>",
+    coupon_to as "coupon_to?: DateTime<Utc>",
+    coupon_percent as "coupon_percent?",
     subscription.created_at as "created_at!: DateTime<Utc>",
     subscription.updated_at as "updated_at?: DateTime<Utc>"
 from subscription
@@ -211,19 +237,30 @@ where subscription_id = $1
     .fetch_optional(pool)
     .await?;
 
-    let subscription = row.map(|row| Subscription {
-        subscription_id: row.subscription_id,
-        stripe_subscription_id: row.stripe_subscription_id,
-        subscription_plan_type: row.subscription_plan_type,
-        auto_renew: row.status.is_active(),
-        status: row.status,
-        is_trial: row.is_trial,
-        current_period_end: row.current_period_end,
-        account_id: row.account_id,
-        latest_invoice_id: row.latest_invoice_id,
-        amount_due_in_cents: row.amount_due_in_cents,
-        created_at: row.created_at,
-        updated_at: row.updated_at,
+    let subscription = row.map(|row| {
+        let applied_coupon = row.coupon_name.map(|coupon_name| AppliedCoupon {
+            coupon_name,
+            coupon_percent: row.coupon_percent.map(Percent::from),
+            coupon_from: row.coupon_from,
+            coupon_to: row.coupon_to,
+        });
+
+        Subscription {
+            subscription_id: row.subscription_id,
+            stripe_subscription_id: row.stripe_subscription_id,
+            subscription_plan_type: row.subscription_plan_type,
+            auto_renew: row.status.is_active(),
+            status: row.status,
+            is_trial: row.is_trial,
+            current_period_end: row.current_period_end,
+            account_id: row.account_id,
+            latest_invoice_id: row.latest_invoice_id,
+            amount_due_in_cents: row.amount_due_in_cents,
+            price: row.price,
+            applied_coupon,
+            created_at: row.created_at,
+            updated_at: row.updated_at,
+        }
     });
 
     Ok(subscription)
@@ -247,6 +284,11 @@ select
     account_id as "account_id!: AccountId",
     latest_invoice_id as "latest_invoice_id?: StripeInvoiceId",
     amount_due as "amount_due_in_cents?: AmountInCents",
+    price as "price!: AmountInCents",
+    coupon_name as "coupon_name?",
+    coupon_from as "coupon_from!: DateTime<Utc>",
+    coupon_to as "coupon_to?: DateTime<Utc>",
+    coupon_percent as "coupon_percent?",
     subscription.created_at as "created_at!: DateTime<Utc>",
     subscription.updated_at as "updated_at?: DateTime<Utc>"
 from subscription
@@ -260,19 +302,30 @@ limit 1
     .fetch_optional(pool)
     .await?;
 
-    let subscription = row.map(|row| Subscription {
-        subscription_id: row.subscription_id,
-        stripe_subscription_id: row.stripe_subscription_id,
-        subscription_plan_type: row.subscription_plan_type,
-        auto_renew: row.status.is_active(),
-        status: row.status,
-        is_trial: row.is_trial,
-        current_period_end: row.current_period_end,
-        account_id: row.account_id,
-        latest_invoice_id: row.latest_invoice_id,
-        amount_due_in_cents: row.amount_due_in_cents,
-        created_at: row.created_at,
-        updated_at: row.updated_at,
+    let subscription = row.map(|row| {
+        let applied_coupon = row.coupon_name.map(|coupon_name| AppliedCoupon {
+            coupon_name,
+            coupon_percent: row.coupon_percent.map(Percent::from),
+            coupon_from: row.coupon_from,
+            coupon_to: row.coupon_to,
+        });
+
+        Subscription {
+            subscription_id: row.subscription_id,
+            stripe_subscription_id: row.stripe_subscription_id,
+            subscription_plan_type: row.subscription_plan_type,
+            auto_renew: row.status.is_active(),
+            status: row.status,
+            is_trial: row.is_trial,
+            current_period_end: row.current_period_end,
+            account_id: row.account_id,
+            latest_invoice_id: row.latest_invoice_id,
+            amount_due_in_cents: row.amount_due_in_cents,
+            price: row.price,
+            applied_coupon,
+            created_at: row.created_at,
+            updated_at: row.updated_at,
+        }
     });
 
     Ok(subscription)
