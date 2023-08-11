@@ -61,27 +61,27 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
     html!("main-card", {
         .child_signal(state.confirm_action.signal_cloned().map(clone!(state => move |confirm_action| {
             confirm_action.map(|confirm_action| html!("empty-fragment", {
-                    // The empty-fragment is required so that we can render the overly inside
-                    // a signal, but adding the fragment upsets the layout of the cards because of
-                    // their positioning. Setting it's display to none resolves the layout.
-                    .style("display", "none")
-                    .apply(OverlayHandle::lifecycle(clone!(state => move || {
-                        let confirm_action = confirm_action.clone();
-                        html!("modal-confirm", {
-                            .prop("dangerous", true)
-                            .prop("title", confirm_action.title)
-                            .prop("content", confirm_action.content)
-                            .prop("cancel_text", confirm_action.cancel)
-                            .prop("confirm_text", confirm_action.confirm)
-                            .prop("confirmIcon", "core/menus/delete-white.svg")
-                            .event(clone!(state => move |_evt: events::CustomCancel| state.confirm_action.set(None)))
-                            .event(clone!(state => move |_evt: events::CustomConfirm| {
-                                state.confirm_action.set(None);
-                                (confirm_action.handler)();
-                            }))
-                        })
-                    })))
-                }))
+                // The empty-fragment is required so that we can render the overly inside
+                // a signal, but adding the fragment upsets the layout of the cards because of
+                // their positioning. Setting it's display to none resolves the layout.
+                .style("display", "none")
+                .apply(OverlayHandle::lifecycle(clone!(state => move || {
+                    let confirm_action = confirm_action.clone();
+                    html!("modal-confirm", {
+                        .prop("dangerous", true)
+                        .prop("title", confirm_action.title)
+                        .prop("content", confirm_action.content)
+                        .prop("cancel_text", confirm_action.cancel)
+                        .prop("confirm_text", confirm_action.confirm)
+                        .prop("confirmIcon", "core/menus/delete-white.svg")
+                        .event(clone!(state => move |_evt: events::CustomCancel| state.confirm_action.set(None)))
+                        .event(clone!(state => move |_evt: events::CustomConfirm| {
+                            state.confirm_action.set(None);
+                            (confirm_action.handler)();
+                        }))
+                    })
+                })))
+            }))
         })))
         .prop("slot", state.side.as_str_id())
         .prop("side", state.side.as_str_id())
@@ -328,8 +328,8 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
                                 Some(image) => {
                                     html!("img-ji", {
                                         // would like to get rid if the styles here
-                                        .style("height", "148px")
-                                        .style("width", "148px")
+                                        .style("height", "124px")
+                                        .style("width", "124px")
                                         .style("object-fit", "contain")
                                         .prop("size", "full")
                                         .prop("id", image.id.0.to_string())
