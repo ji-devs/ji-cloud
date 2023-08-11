@@ -223,7 +223,7 @@ select
     amount_due as "amount_due_in_cents?: AmountInCents",
     price as "price!: AmountInCents",
     coupon_name as "coupon_name?",
-    coupon_from as "coupon_from!: DateTime<Utc>",
+    coupon_from as "coupon_from?: DateTime<Utc>",
     coupon_to as "coupon_to?: DateTime<Utc>",
     coupon_percent as "coupon_percent?",
     subscription.created_at as "created_at!: DateTime<Utc>",
@@ -241,7 +241,7 @@ where subscription_id = $1
         let applied_coupon = row.coupon_name.map(|coupon_name| AppliedCoupon {
             coupon_name,
             coupon_percent: row.coupon_percent.map(Percent::from),
-            coupon_from: row.coupon_from,
+            coupon_from: row.coupon_from.unwrap(),
             coupon_to: row.coupon_to,
         });
 
@@ -286,7 +286,7 @@ select
     amount_due as "amount_due_in_cents?: AmountInCents",
     price as "price!: AmountInCents",
     coupon_name as "coupon_name?",
-    coupon_from as "coupon_from!: DateTime<Utc>",
+    coupon_from as "coupon_from?: DateTime<Utc>",
     coupon_to as "coupon_to?: DateTime<Utc>",
     coupon_percent as "coupon_percent?",
     subscription.created_at as "created_at!: DateTime<Utc>",
@@ -306,7 +306,7 @@ limit 1
         let applied_coupon = row.coupon_name.map(|coupon_name| AppliedCoupon {
             coupon_name,
             coupon_percent: row.coupon_percent.map(Percent::from),
-            coupon_from: row.coupon_from,
+            coupon_from: row.coupon_from.unwrap(),
             coupon_to: row.coupon_to,
         });
 
