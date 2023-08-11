@@ -202,6 +202,19 @@ async fn create_subscription(
         None => None,
     };
 
+    let price = AmountInCents::from(
+        stripe_subscription
+            .items
+            .data
+            .get(0)
+            .map(|item| item.clone())
+            .ok_or(anyhow!("Missing plan data"))?
+            .plan
+            .ok_or(anyhow!("Missing stripe subscription plan"))?
+            .amount
+            .ok_or(anyhow!("Missing subscription plan amount"))?,
+    );
+
     // Create subscription in database
     let subscription = CreateSubscriptionRecord {
         stripe_subscription_id,
@@ -214,6 +227,7 @@ async fn create_subscription(
         account_id: account.account_id,
         latest_invoice_id,
         amount_due_in_cents,
+        price,
     };
 
     db::billing::create_subscription(db.as_ref(), subscription)

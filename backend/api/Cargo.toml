@@ -60,6 +60,7 @@ quote = "1.0.18"
 hashfn = "0.2.0"
 csv = "1.1.6"
 async-stripe = { version = "0.22.2", features = ["runtime-tokio-hyper-rustls"] }
+bigdecimal = "0.4.0"
 
 # project deps
 ji_core = { path = "../ji_core", features = ["db"] }
@@ -87,6 +88,7 @@ features = [
   "chrono",
   "offline",
   "migrate",
+  "bigdecimal",
 ]
 version = "0.6.3"
 

@@ -1,11 +1,15 @@
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
-use shared::domain::billing::{PaymentMethodType, PaymentNetwork, PlanType};
+use shared::domain::billing::{
+    AmountInCents, AppliedCoupon, PaymentMethodType, PaymentNetwork, PlanType,
+};
 use std::rc::Rc;
 use utils::{events, prelude::plan_type_signal};
 
 use crate::settings::state::{PlanSectionInfo, SettingsPage};
 
+const STR_EXPIRED_ON: &str = "Expired on";
+const STR_TRIAL_ENDS_ON: &str = "Trial ends on";
 const STR_RENEWS_ON: &str = "Renews on";
 const STR_EXPIRES_ON: &str = "Expires on";
 
@@ -30,10 +34,13 @@ fn plan_payment_frequency(plan_type: PlanType) -> PaymentFrequency {
 }
 
 impl SettingsPage {
-    pub(super) fn render_plan_section(self: &Rc<Self>, plan_info: &PlanSectionInfo) -> Vec<Dom> {
+    pub(super) fn render_plan_section(
+        self: &Rc<Self>,
+        plan_info: &Rc<PlanSectionInfo>,
+    ) -> Vec<Dom> {
         let state = self;
         let auto_renew = plan_info.auto_renew.read_only();
-        let price = plan_info.price;
+
         vec![
             html!("p", {
                 .prop("slot", "plan-type")
@@ -45,12 +52,12 @@ impl SettingsPage {
             }),
             html!("p", {
                 .prop("slot", "plan-price")
-                .text_signal(plan_type_signal().map(move |plan_type| {
+                .text_signal(plan_type_signal().map(clone!(plan_info => move |plan_type| {
                     plan_type.map(|plan_type| {
                         let frequency = plan_payment_frequency(plan_type);
-                        price_string(price, frequency)
+                        price_string(&plan_info.price, &plan_info.coupon, frequency)
                     }).unwrap_or_default()
-                }))
+                })))
             }),
             html!("p", {
                 .prop("slot", "plan-renews-on")
@@ -58,17 +65,34 @@ impl SettingsPage {
             }),
             html!("p", {
                 .prop("slot", "plan-renewal-label")
-                .text_signal(auto_renew.signal().map(|auto_renew| match auto_renew {
-                    true => STR_RENEWS_ON,
-                    false => STR_EXPIRES_ON,
-                }))
+                .text_signal(auto_renew.signal().map(clone!(plan_info => move |auto_renew| {
+                    if plan_info.is_trial {
+                        STR_TRIAL_ENDS_ON
+                    } else if !plan_info.status.is_valid() {
+                        STR_EXPIRED_ON
+                    } else {
+                        match auto_renew {
+                            true => STR_RENEWS_ON,
+                            false => STR_EXPIRES_ON,
+                        }
+                    }
+                })))
             }),
             html!("div", {
                 .prop("slot", "plan-auto-renew")
                 .child(html!("input-switch", {
-                    .prop_signal("enabled", auto_renew.signal())
-                    .event(clone!(state, auto_renew => move|_ :events::CustomToggle| {
-                        state.set_auto_renew(!auto_renew.get());
+                    .prop("disabled", !plan_info.status.is_valid())
+                    .prop_signal("enabled", auto_renew.signal().map(clone!(plan_info => move |auto_renew| {
+                        if !plan_info.status.is_valid() {
+                            false
+                        } else {
+                            auto_renew
+                        }
+                    })))
+                    .event(clone!(state, plan_info, auto_renew => move|_ :events::CustomToggle| {
+                        if plan_info.status.is_valid() {
+                            state.set_auto_renew(!auto_renew.get());
+                        }
                     }))
                 }))
                 .child(html!("span", {
@@ -155,11 +179,39 @@ fn payment_method_type_icon(method_type: &PaymentMethodType) -> &'static str {
         PaymentMethodType::Other => "payment-method/??.svg",
     }
 }
-fn price_string(price: u32, frequency: PaymentFrequency) -> String {
+fn price_string(
+    price: &AmountInCents,
+    coupon: &Option<AppliedCoupon>,
+    frequency: PaymentFrequency,
+) -> String {
     let frequency = match frequency {
-        PaymentFrequency::Annually => "per year",
-        PaymentFrequency::Monthly => "per month",
+        PaymentFrequency::Annually => "pa",
+        PaymentFrequency::Monthly => "pm",
     };
-    let price = price as f32 / 100.0;
-    format!("${price:.2} - {frequency}")
+
+    let discounted = AmountInCents::from(
+        coupon
+            .as_ref()
+            .and_then(|coupon| coupon.coupon_percent)
+            .map_or(price.inner() as f64, |percent| {
+                let price = price.inner() as f64;
+                price - (price * f64::from(percent))
+            }) as i64,
+    );
+
+    let coupon = coupon
+        .as_ref()
+        .map(|coupon| {
+            let applied_to = coupon
+                .coupon_to
+                .map(|to| format!(" until {}", to.date_naive().to_string()))
+                .unwrap_or_default();
+            format!(
+                " ({} off with {}{applied_to})",
+                coupon.coupon_percent.unwrap_or_default(),
+                coupon.coupon_name
+            )
+        })
+        .unwrap_or_default();
+    format!("${discounted}{frequency}{coupon}")
 }

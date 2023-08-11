@@ -3,6 +3,7 @@ use std::rc::Rc;
 use chrono::{DateTime, Utc};
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::{signal::Mutable, signal_vec::MutableVec};
+use shared::domain::billing::{AmountInCents, AppliedCoupon, SubscriptionStatus};
 use shared::domain::{
     billing::{PaymentMethodType, SchoolId},
     image::ImageId,
@@ -16,7 +17,7 @@ pub struct SettingsPage {
     pub reset_password_status: Mutable<ResetPasswordStatus>,
     pub loader: AsyncLoader,
     pub metadata: Mutable<Option<MetadataResponse>>,
-    pub(super) plan_info: Mutable<Option<PlanSectionInfo>>,
+    pub(super) plan_info: Mutable<Option<Rc<PlanSectionInfo>>>,
 }
 
 impl SettingsPage {
@@ -129,8 +130,11 @@ impl SettingsPageUser {
 #[derive(Clone)]
 pub(super) struct PlanSectionInfo {
     pub auto_renew: Mutable<bool>,
+    pub status: SubscriptionStatus,
+    pub is_trial: bool,
     pub payment_method_type: Option<PaymentMethodType>,
-    pub price: u32,
+    pub price: AmountInCents,
+    pub coupon: Option<AppliedCoupon>,
     pub current_period_end: DateTime<Utc>,
     pub individual_or_school: IndividualOrSchool,
 }

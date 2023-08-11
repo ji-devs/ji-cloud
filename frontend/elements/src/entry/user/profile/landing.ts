@@ -189,6 +189,10 @@ export class _ extends LitElement {
                     .value {
                         grid-column: 2;
                     }
+                    #plan .value::slotted(*),
+                    #plan .value {
+                        grid-column: 2 / span 2;
+                    }
                     .edit-button::slotted(*) {
                         grid-column: 3;
                     }

@@ -1336,86 +1336,6 @@
     },
     "query": "\nupdate jig_curation_data\nset categories = $2\nwhere jig_id = $1 and $2 is distinct from categories\n            "
   },
-  "184cb9258ccc1f1c12ec5627373acc6de2b0c265d107e95f633f8d7353678a64": {
-    "describe": {
-      "columns": [
-        {
-          "name": "subscription_id!: SubscriptionId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "stripe_subscription_id!: StripeSubscriptionId",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "subscription_plan_type!: PlanType",
-          "ordinal": 2,
-          "type_info": "Int2"
-        },
-        {
-          "name": "is_trial",
-          "ordinal": 3,
-          "type_info": "Bool"
-        },
-        {
-          "name": "status!: SubscriptionStatus",
-          "ordinal": 4,
-          "type_info": "Int2"
-        },
-        {
-          "name": "current_period_end!: DateTime<Utc>",
-          "ordinal": 5,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "account_id!: AccountId",
-          "ordinal": 6,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "latest_invoice_id?: StripeInvoiceId",
-          "ordinal": 7,
-          "type_info": "Text"
-        },
-        {
-          "name": "amount_due_in_cents?: AmountInCents",
-          "ordinal": 8,
-          "type_info": "Int8"
-        },
-        {
-          "name": "created_at!: DateTime<Utc>",
-          "ordinal": 9,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at?: DateTime<Utc>",
-          "ordinal": 10,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        true,
-        false,
-        true
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect\n    subscription_id as \"subscription_id!: SubscriptionId\",\n    stripe_subscription_id as \"stripe_subscription_id!: StripeSubscriptionId\",\n    subscription_plan.plan_type as \"subscription_plan_type!: PlanType\",\n    is_trial,\n    status as \"status!: SubscriptionStatus\",\n    current_period_end as \"current_period_end!: DateTime<Utc>\",\n    account_id as \"account_id!: AccountId\",\n    latest_invoice_id as \"latest_invoice_id?: StripeInvoiceId\",\n    amount_due as \"amount_due_in_cents?: AmountInCents\",\n    subscription.created_at as \"created_at!: DateTime<Utc>\",\n    subscription.updated_at as \"updated_at?: DateTime<Utc>\"\nfrom subscription\ninner join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\nwhere subscription_id = $1\n"
-  },
   "186b601e5471ff005bb0c6e1ddeb8321d6e3d7dbf05f77ff8db9f962baec9710": {
     "describe": {
       "columns": [
@@ -3079,32 +2999,6 @@
     },
     "query": "\nupdate jig_data\nset language         = coalesce($2, language),\n    theme            = coalesce($3, theme),\n    updated_at = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from language) or\n       ($3::smallint is not null and $3 is distinct from theme))\n"
   },
-  "346d12533244b1e5e900804d38745af0aa3e1136469a9328c03e8429452c54e2": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: SubscriptionId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Uuid",
-          "Int2",
-          "Timestamptz",
-          "Uuid",
-          "Text",
-          "Int8"
-        ]
-      }
-    },
-    "query": "\ninsert into subscription\n    (\n        stripe_subscription_id,\n        subscription_plan_id,\n        status,\n        current_period_end,\n        account_id,\n        latest_invoice_id,\n        amount_due\n    )\nvalues\n    ($1, $2, $3, $4, $5, $6, $7)\nreturning subscription_id as \"id!: SubscriptionId\"\n"
-  },
   "34b1dd32f76952aba5206b08017300b1a6bc63f329481d1fc5858d0a87fad235": {
     "describe": {
       "columns": [],
@@ -3117,6 +3011,33 @@
       }
     },
     "query": "\n    update resource_curation_data\n    set affiliations = $2\n    where resource_id = $1 and $2 is distinct from affiliations\n                "
+  },
+  "354efe9ea705cda595830f09d4640485ba06d16430389192a75f3b153f39d7f5": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Uuid",
+          "Int2",
+          "Timestamptz",
+          "Bool",
+          "Text",
+          "Bool",
+          "Int8",
+          "Bool",
+          "Text",
+          "Bool",
+          "Numeric",
+          "Bool",
+          "Timestamptz",
+          "Bool",
+          "Timestamptz"
+        ]
+      }
+    },
+    "query": "\nupdate subscription\nset\n    subscription_plan_id = coalesce($2, subscription_plan_id),\n    status = coalesce($3, status),\n    current_period_end = coalesce($4, current_period_end),\n    updated_at = now(),\n    latest_invoice_id = case when $5 then $6 else latest_invoice_id end,\n    is_trial = coalesce($7, is_trial),\n    price = coalesce($8, price),\n    coupon_name = case when $9 then $10 else coupon_name end,\n    coupon_percent = case when $11 then $12 else coupon_percent end,\n    coupon_from = case when $13 then $14 else coupon_from end,\n    coupon_to = case when $15 then $16 else coupon_to end\nwhere stripe_subscription_id = $1\n"
   },
   "355368af31f9c974cfebab6c9048d7980072218ba9ece8dc073ec245dd75e8e5": {
     "describe": {
@@ -9453,24 +9374,6 @@
     },
     "query": "\n        insert into jig_player_session_instance (session_index, ip_address, user_agent)\n        values ($1, $2, $3)\n        returning id as \"id: Uuid\"\n        "
   },
-  "893a4b6ab8be25393dd24791688e015cb1e0da22ada7c402f8e03525b82e92f7": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Uuid",
-          "Int2",
-          "Timestamptz",
-          "Bool",
-          "Text",
-          "Bool"
-        ]
-      }
-    },
-    "query": "\nupdate subscription\nset\n    subscription_plan_id = coalesce($2, subscription_plan_id),\n    status = coalesce($3, status),\n    current_period_end = coalesce($4, current_period_end),\n    updated_at = now(),\n    latest_invoice_id = case when $5 then $6 else latest_invoice_id end,\n    is_trial = $7\nwhere stripe_subscription_id = $1\n"
-  },
   "8948c9978692762a9d96fec41c4ca1b53f90eb2a6027e12d9e1e2a9c17626814": {
     "describe": {
       "columns": [],
@@ -10106,6 +10009,116 @@
     },
     "query": "\nselect playlist.id,\n       display_name                                                                                                 as \"name\",\n       language                                                                                                     as \"language!\",\n       description                                                                                                  as \"description!\",\n       translated_description                                                                                       as \"translated_description!: Json<HashMap<String, String>>\",\n       translated_name                                                                                              as \"translated_name!: Json<HashMap<String, String>>\",\n       array((select affiliation_id\n              from playlist_data_affiliation\n              where playlist_data_id = playlist_data.id))                                                                     as \"affiliations!\",\n       array((select affiliation.display_name\n              from affiliation\n                       inner join playlist_data_affiliation on affiliation.id = playlist_data_affiliation.affiliation_id\n              where playlist_data_affiliation.playlist_data_id = playlist_data.id))                                                as \"affiliation_names!\",\n        array((select resource_type_id\n                from playlist_data_resource\n                where playlist_data_id = playlist_data.id))                                                                     as \"resource_types!\",\n        array((select resource_type.display_name\n              from resource_type\n                        inner join playlist_data_resource on resource_type.id = playlist_data_resource.resource_type_id\n             where playlist_data_resource.playlist_data_id = playlist_data.id))                                         as \"resource_type_names!\",\n       array((select age_range_id\n              from playlist_data_age_range\n              where playlist_data_id = playlist_data.id))                                                                     as \"age_ranges!\",\n       array((select age_range.display_name\n              from age_range\n                       inner join playlist_data_age_range on age_range.id = playlist_data_age_range.age_range_id\n              where playlist_data_age_range.playlist_data_id = playlist_data.id))                                                  as \"age_range_names!\",\n       array((select category_id\n              from playlist_data_category\n              where playlist_data_id = playlist_data.id))                                                                     as \"categories!\",\n       array((select name\n              from category\n                       inner join playlist_data_category on category.id = playlist_data_category.category_id\n              where playlist_data_category.playlist_data_id = playlist_data.id))                                                   as \"category_names!\",\n        array(\n           (select jig_id\n            from playlist_data_jig\n            where playlist_data_jig.playlist_data_id = playlist_data.id)\n       )                                                                                                            as \"items!\",\n       privacy_level                                                                                                as \"privacy_level!: PrivacyLevel\",\n       author_id                                                                                                    as \"author_id\",\n       other_keywords                                                                                               as \"other_keywords!\",\n       translated_keywords                                                                                          as \"translated_keywords!\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = playlist.author_id)                                                       as \"author_name\",\n        likes                                                                                                       as \"likes!\",\n        plays                                                                                                       as \"plays!\",\n        published_at                                                                                                as \"published_at\"\nfrom playlist\n         inner join playlist_data on live_id = playlist_data.id\nwhere (last_synced_at is null and published_at is not null)\n    or (updated_at is not null and last_synced_at < updated_at)\n    or (published_at < now() is true and last_synced_at < published_at)\nlimit 100 for no key update skip locked;\n     "
   },
+  "918027e4a2479ca57b02ace7ee905dcce2b95e290730851cc42a8f56e3d65415": {
+    "describe": {
+      "columns": [
+        {
+          "name": "subscription_id!: SubscriptionId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "stripe_subscription_id!: StripeSubscriptionId",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "subscription_plan_type!: PlanType",
+          "ordinal": 2,
+          "type_info": "Int2"
+        },
+        {
+          "name": "is_trial",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "status!: SubscriptionStatus",
+          "ordinal": 4,
+          "type_info": "Int2"
+        },
+        {
+          "name": "current_period_end!: DateTime<Utc>",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "account_id!: AccountId",
+          "ordinal": 6,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "latest_invoice_id?: StripeInvoiceId",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "amount_due_in_cents?: AmountInCents",
+          "ordinal": 8,
+          "type_info": "Int8"
+        },
+        {
+          "name": "price!: AmountInCents",
+          "ordinal": 9,
+          "type_info": "Int8"
+        },
+        {
+          "name": "coupon_name?",
+          "ordinal": 10,
+          "type_info": "Text"
+        },
+        {
+          "name": "coupon_from!: DateTime<Utc>",
+          "ordinal": 11,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "coupon_to?: DateTime<Utc>",
+          "ordinal": 12,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "coupon_percent?",
+          "ordinal": 13,
+          "type_info": "Numeric"
+        },
+        {
+          "name": "created_at!: DateTime<Utc>",
+          "ordinal": 14,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at?: DateTime<Utc>",
+          "ordinal": 15,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true,
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect\n    subscription_id as \"subscription_id!: SubscriptionId\",\n    stripe_subscription_id as \"stripe_subscription_id!: StripeSubscriptionId\",\n    subscription_plan.plan_type as \"subscription_plan_type!: PlanType\",\n    is_trial,\n    status as \"status!: SubscriptionStatus\",\n    current_period_end as \"current_period_end!: DateTime<Utc>\",\n    account_id as \"account_id!: AccountId\",\n    latest_invoice_id as \"latest_invoice_id?: StripeInvoiceId\",\n    amount_due as \"amount_due_in_cents?: AmountInCents\",\n    price as \"price!: AmountInCents\",\n    coupon_name as \"coupon_name?\",\n    coupon_from as \"coupon_from!: DateTime<Utc>\",\n    coupon_to as \"coupon_to?: DateTime<Utc>\",\n    coupon_percent as \"coupon_percent?\",\n    subscription.created_at as \"created_at!: DateTime<Utc>\",\n    subscription.updated_at as \"updated_at?: DateTime<Utc>\"\nfrom subscription\ninner join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\nwhere account_id = $1\norder by subscription.created_at desc\nlimit 1\n"
+  },
   "919b222454362d32275ccbe3582b3ac0e743b64d930d8c52c1170340834f3b76": {
     "describe": {
       "columns": [],
@@ -10576,43 +10589,7 @@
     },
     "query": "\nselect jdm.id      as \"id!: ModuleId\",\n       contents    as \"body!\",\n       created_at  as \"created_at!\",\n       updated_at  as \"updated_at!\",\n       kind        as \"kind!: ModuleKind\",\n       is_complete as \"is_complete!\"\nfrom jig_data_module \"jdm\"\ninner join jig on jig.draft_id = jdm.jig_data_id \nwhere jdm.id is not distinct from $1 \n"
   },
-  "9a280ed5b2d646c563937e8cee1bae592f8d46322edf1769a7c89670088ac3d8": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\n insert into course_data_module (\"index\", course_data_id, kind, is_complete, contents)\n select \"index\", $2 as \"course_id\", kind, is_complete, contents\n from course_data_module\n where course_data_id = $1\n            "
-  },
-  "9b23b8bffa20014d6e11cc9e5b6ebae981c9c32804ee3550f6731daff43883cf": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: JigId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid",
-          "Uuid",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\ninsert into jig (creator_id, author_id, parents, live_id, draft_id)\nselect creator_id, $2, array_append(parents, $1), $3, $4\nfrom jig\nwhere id = $1\nreturning id as \"id!: JigId\"\n"
-  },
-  "9b4a063a93c1aa5e3a71cf1fadf668f33a6a2ea70f6b3d6eaf45c80f45e0d31b": {
+  "9a0d7bcc3ec1943d8f2e6005cceb9934de334e5158c072e6dc032b87dba051a8": {
     "describe": {
       "columns": [
         {
@@ -10661,13 +10638,38 @@
           "type_info": "Int8"
         },
         {
-          "name": "created_at!: DateTime<Utc>",
+          "name": "price!: AmountInCents",
           "ordinal": 9,
+          "type_info": "Int8"
+        },
+        {
+          "name": "coupon_name?",
+          "ordinal": 10,
+          "type_info": "Text"
+        },
+        {
+          "name": "coupon_from!: DateTime<Utc>",
+          "ordinal": 11,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "coupon_to?: DateTime<Utc>",
+          "ordinal": 12,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "coupon_percent?",
+          "ordinal": 13,
+          "type_info": "Numeric"
+        },
+        {
+          "name": "created_at!: DateTime<Utc>",
+          "ordinal": 14,
           "type_info": "Timestamptz"
         },
         {
           "name": "updated_at?: DateTime<Utc>",
-          "ordinal": 10,
+          "ordinal": 15,
           "type_info": "Timestamptz"
         }
       ],
@@ -10682,6 +10684,11 @@
         true,
         true,
         false,
+        true,
+        true,
+        true,
+        true,
+        false,
         true
       ],
       "parameters": {
@@ -10690,7 +10697,43 @@
         ]
       }
     },
-    "query": "\nselect\n    subscription_id as \"subscription_id!: SubscriptionId\",\n    stripe_subscription_id as \"stripe_subscription_id!: StripeSubscriptionId\",\n    subscription_plan.plan_type as \"subscription_plan_type!: PlanType\",\n    is_trial,\n    status as \"status!: SubscriptionStatus\",\n    current_period_end as \"current_period_end!: DateTime<Utc>\",\n    account_id as \"account_id!: AccountId\",\n    latest_invoice_id as \"latest_invoice_id?: StripeInvoiceId\",\n    amount_due as \"amount_due_in_cents?: AmountInCents\",\n    subscription.created_at as \"created_at!: DateTime<Utc>\",\n    subscription.updated_at as \"updated_at?: DateTime<Utc>\"\nfrom subscription\ninner join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\nwhere account_id = $1\norder by subscription.created_at desc\nlimit 1\n"
+    "query": "\nselect\n    subscription_id as \"subscription_id!: SubscriptionId\",\n    stripe_subscription_id as \"stripe_subscription_id!: StripeSubscriptionId\",\n    subscription_plan.plan_type as \"subscription_plan_type!: PlanType\",\n    is_trial,\n    status as \"status!: SubscriptionStatus\",\n    current_period_end as \"current_period_end!: DateTime<Utc>\",\n    account_id as \"account_id!: AccountId\",\n    latest_invoice_id as \"latest_invoice_id?: StripeInvoiceId\",\n    amount_due as \"amount_due_in_cents?: AmountInCents\",\n    price as \"price!: AmountInCents\",\n    coupon_name as \"coupon_name?\",\n    coupon_from as \"coupon_from!: DateTime<Utc>\",\n    coupon_to as \"coupon_to?: DateTime<Utc>\",\n    coupon_percent as \"coupon_percent?\",\n    subscription.created_at as \"created_at!: DateTime<Utc>\",\n    subscription.updated_at as \"updated_at?: DateTime<Utc>\"\nfrom subscription\ninner join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\nwhere subscription_id = $1\n"
+  },
+  "9a280ed5b2d646c563937e8cee1bae592f8d46322edf1769a7c89670088ac3d8": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n insert into course_data_module (\"index\", course_data_id, kind, is_complete, contents)\n select \"index\", $2 as \"course_id\", kind, is_complete, contents\n from course_data_module\n where course_data_id = $1\n            "
+  },
+  "9b23b8bffa20014d6e11cc9e5b6ebae981c9c32804ee3550f6731daff43883cf": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: JigId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\ninsert into jig (creator_id, author_id, parents, live_id, draft_id)\nselect creator_id, $2, array_append(parents, $1), $3, $4\nfrom jig\nwhere id = $1\nreturning id as \"id!: JigId\"\n"
   },
   "9b861485e86da04aaa69d4863da15659c65606df112805e833c162510b8aad6d": {
     "describe": {
@@ -13292,6 +13335,33 @@
       }
     },
     "query": "\nupdate jig_data\nset audio_background = $2,\nupdated_at = now()\nwhere id = $1 and $2 is distinct from audio_background\n            "
+  },
+  "c354ca4ae08ff61ab7ad77a15f91676e79bfb81fba301b66ef10892479d9bb8f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: SubscriptionId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Uuid",
+          "Int2",
+          "Timestamptz",
+          "Uuid",
+          "Text",
+          "Int8",
+          "Int8"
+        ]
+      }
+    },
+    "query": "\ninsert into subscription\n    (\n        stripe_subscription_id,\n        subscription_plan_id,\n        status,\n        current_period_end,\n        account_id,\n        latest_invoice_id,\n        amount_due,\n        price\n    )\nvalues\n    ($1, $2, $3, $4, $5, $6, $7, $8)\nreturning subscription_id as \"id!: SubscriptionId\"\n"
   },
   "c56be98e44e9e3b3a764796441393998484aa2c1a91dd6fca10b918a5c08848e": {
     "describe": {
