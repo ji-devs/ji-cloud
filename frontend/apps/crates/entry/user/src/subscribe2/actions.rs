@@ -1,12 +1,15 @@
 use dominator::{clone, routing::go_to_url};
 use shared::{
     api::endpoints,
-    domain::billing::{CreateSubscriptionPath, CreateSubscriptionRequest},
+    domain::{
+        billing::{CreateSubscriptionPath, CreateSubscriptionRequest},
+        user::GetProfilePath,
+    },
 };
 use utils::{
     bail_on_err,
     error_ext::ErrorExt,
-    prelude::{get_school_id, ApiEndpointExt},
+    prelude::{get_school_id, get_user_mutable, ApiEndpointExt},
     routes::{Route, UserRoute},
 };
 use wasm_bindgen_futures::spawn_local;
@@ -27,6 +30,12 @@ impl Subscribe2 {
             };
             let res = endpoints::billing::CreateSubscription::api_with_auth(CreateSubscriptionPath(), Some(req)).await.toast_on_err();
             let _ = bail_on_err!(res);
+
+            // Update current user state - UserProfile should include a plan now.
+            let res = endpoints::user::Profile::api_with_auth(GetProfilePath(), None).await.toast_on_err();
+            let user = bail_on_err!(res);
+            get_user_mutable().set(Some(user));
+
             go_to_url(&get_next_page_url());
         }));
     }
