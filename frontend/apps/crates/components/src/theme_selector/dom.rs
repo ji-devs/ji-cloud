@@ -36,7 +36,7 @@ fn render(
                 .prop_signal("selected", state.selected_signal(theme_id))
                 .event(clone!(state => move |_evt:events::Click| {
                     if !paywall::can_use_theme(theme_id.map_theme(|theme| theme).premium) {
-                        paywall::dialog_play("
+                        paywall::dialog_image_theme("
                             Looking to access our premium themes and images?
                             Upgrade now for UNLIMITED premium assets.
                         ");

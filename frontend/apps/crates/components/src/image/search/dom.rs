@@ -155,7 +155,7 @@ fn render_image(state: Rc<State>, image: PremiumableImage, slot: &str) -> Dom {
         .prop("premium", image.is_premium)
         .event(clone!(state, image => move |_: events::Click| {
             if !paywall::can_use_image(image.is_premium) {
-                paywall::dialog_limit("
+                paywall::dialog_image_theme("
                     Looking to access our premium themes and images?
                     Upgrade now for UNLIMITED premium assets.
                 ");
@@ -165,7 +165,7 @@ fn render_image(state: Rc<State>, image: PremiumableImage, slot: &str) -> Dom {
         }))
         .event(clone!(image => move |evt: events::DragStart| {
             if !paywall::can_use_image(image.is_premium) {
-                paywall::dialog_limit("
+                paywall::dialog_image_theme("
                     Looking to access our premium themes and images?
                     Upgrade now for UNLIMITED premium assets.
                 ");
