@@ -184,11 +184,6 @@ fn price_string(
     coupon: &Option<AppliedCoupon>,
     frequency: PaymentFrequency,
 ) -> String {
-    let frequency = match frequency {
-        PaymentFrequency::Annually => "pa",
-        PaymentFrequency::Monthly => "pm",
-    };
-
     let discounted = AmountInCents::from(
         coupon
             .as_ref()
@@ -198,6 +193,11 @@ fn price_string(
                 price - (price * f64::from(percent))
             }) as i64,
     );
+
+    let frequency = match frequency {
+        PaymentFrequency::Annually => " per year",
+        PaymentFrequency::Monthly => " per month",
+    };
 
     let coupon = coupon
         .as_ref()
