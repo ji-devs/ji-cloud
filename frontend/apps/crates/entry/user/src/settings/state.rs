@@ -18,6 +18,7 @@ pub struct SettingsPage {
     pub loader: AsyncLoader,
     pub metadata: Mutable<Option<MetadataResponse>>,
     pub(super) plan_info: Mutable<Option<Rc<PlanSectionInfo>>>,
+    pub portal_link: Mutable<Option<String>>,
 }
 
 impl SettingsPage {
@@ -29,6 +30,7 @@ impl SettingsPage {
             loader: AsyncLoader::new(),
             metadata: Mutable::new(None),
             plan_info: Default::default(),
+            portal_link: Default::default(),
         })
     }
 }

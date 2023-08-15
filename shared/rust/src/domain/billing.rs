@@ -1320,3 +1320,5 @@ pub struct UpgradeSubscriptionPlanRequest {
 }
 
 make_path_parts!(UpgradeSubscriptionPlanPath => "/v1/billing/subscription/upgrade");
+
+make_path_parts!(CreateCustomerPortalLinkPath => "/v1/billing/customer-portal");
