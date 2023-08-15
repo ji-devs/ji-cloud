@@ -405,6 +405,7 @@ export class _ extends LitElement {
                     ${ this.showPlan ? html`
                         <section id="plan">
                             <h2>${this.planSectionTitle}</h2>
+                            <slot name="portal-link"></slot>
                             <label class="tags-label">
                                 <span class="key">${STR_PLAN}</span>
                                 <div class="value">

@@ -4,6 +4,7 @@ use dominator::clone;
 use futures::join;
 use futures_signals::signal::Mutable;
 use gloo_timers::future::TimeoutFuture;
+use shared::domain::billing::CreateCustomerPortalLinkPath;
 use shared::{
     api::endpoints::{self, meta, user},
     domain::{
@@ -181,6 +182,19 @@ impl SettingsPage {
             if let Err(_err) = res {
                 todo!()
             }
+        }));
+    }
+
+    pub fn load_portal_link(self: &Rc<Self>) {
+        let state = self;
+        state.loader.load(clone!(state => async move {
+            let session_url = endpoints::billing::CreateCustomerPortalLink::api_with_auth(
+                CreateCustomerPortalLinkPath(),
+                None,
+            ).await.toast_on_err();
+            let session_url: String = bail_on_err!(session_url);
+
+            state.portal_link.set(Some(session_url));
         }));
     }
 }

@@ -6,7 +6,8 @@ use anyhow::anyhow;
 use chrono::{TimeZone, Utc};
 use ji_core::settings::RuntimeSettings;
 use shared::api::endpoints::billing::{
-    CreateSetupIntent, UpdateSubscriptionCancellation, UpgradeSubscriptionPlan,
+    CreateCustomerPortalLink, CreateSetupIntent, UpdateSubscriptionCancellation,
+    UpgradeSubscriptionPlan,
 };
 use shared::domain::billing::{
     Account, AccountType, AmountInCents, CancellationStatus, CreateSubscriptionRecord,
@@ -22,6 +23,7 @@ use shared::{
         billing::{CreateSubscriptionResponse, CustomerId, PaymentMethod, SubscriptionPlan},
         user::UserProfile,
     },
+    error,
     error::{IntoAnyhow, ServiceError, ServiceKindError},
 };
 use sqlx::PgPool;
@@ -432,6 +434,37 @@ async fn create_setup_intent(
     ))
 }
 
+#[instrument(skip_all)]
+async fn create_customer_portal_link(
+    auth: TokenUser,
+    db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
+) -> Result<
+    (
+        Json<<CreateCustomerPortalLink as ApiEndpoint>::Res>,
+        http::StatusCode,
+    ),
+    <CreateCustomerPortalLink as ApiEndpoint>::Err,
+> {
+    let user_id = auth.user_id();
+
+    let account = db::account::get_account_by_user_id(db.as_ref(), &user_id)
+        .await?
+        .ok_or(error::BillingError::NotFound("Account not found".into()))?;
+
+    let customer_id = match account.stripe_customer_id {
+        Some(customer_id) => customer_id,
+        None => return Err(error::BillingError::Forbidden),
+    };
+
+    let create_session = stripe::CreateBillingPortalSession::new(customer_id.into());
+
+    let client = create_stripe_client(&settings)?;
+    let session = stripe::BillingPortalSession::create(&client, create_session).await?;
+
+    Ok((Json(session.url), http::StatusCode::CREATED))
+}
+
 /// Get the user accounts customer ID. If they don't have one yet, then we create one here.
 #[instrument(skip_all)]
 async fn get_or_create_customer(
@@ -682,6 +715,12 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <CreateSetupIntent as ApiEndpoint>::Path::PATH,
         CreateSetupIntent::METHOD.route().to(create_setup_intent),
+    )
+    .route(
+        <CreateCustomerPortalLink as ApiEndpoint>::Path::PATH,
+        CreateCustomerPortalLink::METHOD
+            .route()
+            .to(create_customer_portal_link),
     )
     .route("/v1/stripe-webhook", Method::Post.route().to(webhook));
 }

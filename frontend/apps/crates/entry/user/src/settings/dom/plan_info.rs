@@ -41,7 +41,21 @@ impl SettingsPage {
         let state = self;
         let auto_renew = plan_info.auto_renew.read_only();
 
+        self.load_portal_link();
+
         vec![
+            html!("div", {
+                .prop("slot", "portal-link")
+                .child_signal(self.portal_link.signal_cloned().map(|link| {
+                    link.as_ref().map(|link| {
+                        html!("button-rect", {
+                            .prop("href", link)
+                            .prop("target", "_blank")
+                            .text("Customer portal")
+                        })
+                    })
+                }))
+            }),
             html!("p", {
                 .prop("slot", "plan-type")
                 .text_signal(plan_type_signal().map(|plan| {

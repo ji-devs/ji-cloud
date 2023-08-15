@@ -1,8 +1,8 @@
 use super::ApiEndpoint;
 use crate::domain::billing::{
-    CreateSetupIntentPath, CreateSetupIntentRequest, SubscriptionCancellationStatusRequest,
-    UpdateSubscriptionCancellationPath, UpgradeSubscriptionPlanPath,
-    UpgradeSubscriptionPlanRequest,
+    CreateCustomerPortalLinkPath, CreateSetupIntentPath, CreateSetupIntentRequest,
+    SubscriptionCancellationStatusRequest, UpdateSubscriptionCancellationPath,
+    UpgradeSubscriptionPlanPath, UpgradeSubscriptionPlanRequest,
 };
 use crate::error::BillingError;
 use crate::{
@@ -50,4 +50,14 @@ impl ApiEndpoint for CreateSetupIntent {
     type Res = String;
     type Err = BillingError;
     const METHOD: Method = Method::Post;
+}
+
+/// Generate a link for a customer to view their Stripe customer portal
+pub struct CreateCustomerPortalLink;
+impl ApiEndpoint for CreateCustomerPortalLink {
+    type Path = CreateCustomerPortalLinkPath;
+    type Req = ();
+    type Res = String;
+    type Err = BillingError;
+    const METHOD: Method = Method::Get;
 }
