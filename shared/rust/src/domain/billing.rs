@@ -1,13 +1,14 @@
 //! Types for billing
 
-use chrono::{DateTime, Utc};
+use crate::{DateTime, Utc};
 use macros::make_path_parts;
-use serde::{Deserialize, Serialize};
+use mymacros::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt::{self, Debug, Formatter};
+use std::str::FromStr;
 use strum_macros::{Display, EnumString};
 
-use serde_json::Value;
+use miniserde::json::Value;
 
 use crate::api::endpoints::PathPart;
 use crate::domain::image::ImageId;
@@ -58,7 +59,7 @@ impl fmt::Display for Last4 {
 
 /// Payment network associated with a [Card]
 #[derive(Debug, Serialize, Deserialize, Clone, EnumString)]
-#[serde(rename_all = "kebab-case")]
+// #[serde(rename_all = "kebab-case")]
 #[strum(serialize_all = "lowercase")]
 pub enum PaymentNetwork {
     /// Visa
@@ -342,7 +343,7 @@ pub struct Subscription {
     pub created_at: DateTime<Utc>,
     /// When the subscription was last updated.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub updated_at: Option<DateTime<Utc>>,
 }
 
@@ -376,16 +377,16 @@ pub struct UpdateSubscriptionRecord {
     /// The subscription plan ID
     pub subscription_plan_id: UpdateNonNullable<PlanId>,
     /// The subscription status
-    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+   //  #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
     pub status: UpdateNonNullable<SubscriptionStatus>,
     /// When the subscriptions current period ends/expires
-    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+   //  #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
     pub current_period_end: UpdateNonNullable<DateTime<Utc>>,
     /// ID of the latest unpaid invoice generated for this subscription
-    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+   //  #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
     pub latest_invoice_id: UpdateNonNullable<StripeInvoiceId>,
     /// Whether the subscription is in a trial period
-    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+   //  #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
     pub is_trial: UpdateNonNullable<bool>,
 }
 
@@ -469,7 +470,7 @@ pub enum SubscriptionType {
 #[derive(
     Debug, Display, Serialize, Deserialize, Clone, Copy, Eq, Ord, PartialOrd, PartialEq, Hash,
 )]
-#[serde(rename_all = "kebab-case")]
+// #[serde(rename_all = "kebab-case")]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[repr(i16)]
 pub enum PlanType {
@@ -500,6 +501,13 @@ pub enum PlanType {
     /// School Unlimited
     #[strum(serialize = "School - 30+")]
     SchoolUnlimited = 8,
+}
+impl FromStr for PlanType {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        todo!()
+    }
 }
 
 const ACCOUNT_LIMIT_L1: i64 = 4;
@@ -830,21 +838,21 @@ pub struct Account {
     pub account_type: AccountType,
     /// The customer ID on stripe
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub stripe_customer_id: Option<CustomerId>,
     /// Stripe payment method, if any
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub payment_method: Option<PaymentMethod>,
     /// _Current_ subscription if any
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub subscription: Option<Subscription>,
     /// When the account was created.
     pub created_at: DateTime<Utc>,
     /// When the account was last updated.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub updated_at: Option<DateTime<Utc>>,
 }
 
@@ -885,7 +893,7 @@ pub struct School {
 
     /// The school's location
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub location: Option<Value>,
 
     /// The school's email address
@@ -893,22 +901,22 @@ pub struct School {
 
     /// Description for school
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 
     /// ID to the school's profile image in the user image library.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub profile_image: Option<ImageId>,
 
     /// Website for the school
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub website: Option<String>,
 
     /// Organization type
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub organization_type: Option<String>,
 
     /// The school's account ID
@@ -919,7 +927,7 @@ pub struct School {
 
     /// When the school was last updated.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub updated_at: Option<DateTime<Utc>>,
 }
 
@@ -940,7 +948,7 @@ pub struct AdminSchool {
 
     /// The school's location
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub location: Option<Value>,
 
     /// The school's email address
@@ -948,22 +956,22 @@ pub struct AdminSchool {
 
     /// Description for school
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 
     /// ID to the school's profile image in the user image library.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub profile_image: Option<ImageId>,
 
     /// Website for the school
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub website: Option<String>,
 
     /// Organization type
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub organization_type: Option<String>,
 
     /// The school's account ID
@@ -974,7 +982,7 @@ pub struct AdminSchool {
 
     /// When the school was last updated.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub updated_at: Option<DateTime<Utc>>,
 }
 
@@ -1055,27 +1063,27 @@ pub struct CreateSchoolAccountRequest {
 
     /// School location
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub location: Option<Value>,
 
     /// Description for school
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 
     /// ID to the school's profile image in the user image library.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub profile_image: Option<ImageId>,
 
     /// Website for the school
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub website: Option<String>,
 
     /// Organization type
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub organization_type: Option<String>,
 }
 
@@ -1107,31 +1115,31 @@ pub enum AccountIfAuthorized {
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct UpdateSchoolAccountRequest {
     /// The school's email address
-    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+   //  #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
     pub email: UpdateNonNullable<String>,
 
     /// The school's name
-    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+   //  #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
     pub school_name: UpdateNonNullable<String>,
 
     /// The school's location
-    #[serde(default, skip_serializing_if = "UpdateNullable::is_keep")]
+   //  #[serde(default, skip_serializing_if = "UpdateNullable::is_keep")]
     pub location: UpdateNullable<Value>,
 
     /// Description for school
-    #[serde(default, skip_serializing_if = "UpdateNullable::is_keep")]
+   //  #[serde(default, skip_serializing_if = "UpdateNullable::is_keep")]
     pub description: UpdateNullable<String>,
 
     /// ID to the school's profile image in the user image library.
-    #[serde(default, skip_serializing_if = "UpdateNullable::is_keep")]
+   //  #[serde(default, skip_serializing_if = "UpdateNullable::is_keep")]
     pub profile_image: UpdateNullable<ImageId>,
 
     /// Website for the school
-    #[serde(default, skip_serializing_if = "UpdateNullable::is_keep")]
+   //  #[serde(default, skip_serializing_if = "UpdateNullable::is_keep")]
     pub website: UpdateNullable<String>,
 
     /// Organization type
-    #[serde(default, skip_serializing_if = "UpdateNullable::is_keep")]
+   //  #[serde(default, skip_serializing_if = "UpdateNullable::is_keep")]
     pub organization_type: UpdateNullable<String>,
 }
 
@@ -1146,7 +1154,7 @@ pub struct IndividualAccountResponse {
 
 /// Set a subscriptions cancellation status
 #[derive(Debug, Serialize, Deserialize, Clone)]
-#[serde(rename_all = "kebab-case")]
+// #[serde(rename_all = "kebab-case")]
 pub enum CancellationStatus {
     /// Cancel a subscription at the period end
     #[serde(rename = "period-end")]
@@ -1172,7 +1180,7 @@ pub struct UpgradeSubscriptionPlanRequest {
     pub plan_type: PlanType,
     /// Promotion code
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub promotion_code: Option<String>,
 }
 

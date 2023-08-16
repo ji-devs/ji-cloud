@@ -37,6 +37,7 @@ unicode-segmentation = { workspace = true }
 rand = { workspace = true }
 thiserror = { workspace = true }
 web-sys = { workspace = true }
+mymacros = { workspace = true }
 awsm_web = { workspace = true }
 anyhow = { workspace = true }
 gloo-timers = { workspace = true }

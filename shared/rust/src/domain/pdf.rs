@@ -1,7 +1,7 @@
 //! Types for Pdf files.
 
-use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
+use crate::{DateTime, Utc};
+use mymacros::{Deserialize, Serialize};
 
 use crate::api::endpoints::PathPart;
 
@@ -9,7 +9,7 @@ use crate::api::endpoints::PathPart;
 pub mod user {
     use crate::api::endpoints::PathPart;
     use macros::make_path_parts;
-    use serde::{Deserialize, Serialize};
+    use mymacros::{Deserialize, Serialize};
 
     use super::PdfId;
 

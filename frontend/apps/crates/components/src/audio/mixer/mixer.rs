@@ -423,29 +423,29 @@ impl AudioSettings {
         // there could potentially be a case where the the audio was reset for a jig with audio effects
         // and then calling reset_from_jig again would not reset to the defaults.
 
-        self.positive = {
-            if !jig.audio_effects.feedback_positive.is_empty() {
-                jig.audio_effects
-                    .feedback_positive
-                    .clone()
-                    .into_iter()
-                    .collect()
-            } else {
-                AudioFeedbackPositive::default_options()
-            }
-        };
+        // self.positive = {
+        //     if !jig.audio_effects.feedback_positive.is_empty() {
+        //         jig.audio_effects
+        //             .feedback_positive
+        //             .clone()
+        //             .into_iter()
+        //             .collect()
+        //     } else {
+        //         AudioFeedbackPositive::default_options()
+        //     }
+        // };
 
-        self.negative = {
-            if !jig.audio_effects.feedback_negative.is_empty() {
-                jig.audio_effects
-                    .feedback_negative
-                    .clone()
-                    .into_iter()
-                    .collect()
-            } else {
-                AudioFeedbackNegative::default_options()
-            }
-        };
+        // self.negative = {
+        //     if !jig.audio_effects.feedback_negative.is_empty() {
+        //         jig.audio_effects
+        //             .feedback_negative
+        //             .clone()
+        //             .into_iter()
+        //             .collect()
+        //     } else {
+        //         AudioFeedbackNegative::default_options()
+        //     }
+        // };
     }
 }
 

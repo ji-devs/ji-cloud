@@ -1,9 +1,9 @@
 //! Types for Resource short codes for sharing
-use chrono::{DateTime, Utc};
+use crate::{DateTime, Utc};
 use macros::make_path_parts;
-use serde::{Deserialize, Serialize};
+use mymacros::{Deserialize, Serialize};
 use strum_macros::EnumIter;
-use uuid::Uuid;
+use crate::Uuid;
 
 use crate::api::endpoints::PathPart;
 
@@ -19,7 +19,7 @@ make_path_parts!(GetResourceReportPath => "/v1/resource/{}/report/{}" => Resourc
 /// Resource report details
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct ResourceReport {
     /// Id of report
     pub id: ReportId,
@@ -31,15 +31,15 @@ pub struct ResourceReport {
     pub report_type: ResourceReportType,
 
     /// Optional id of reporter
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub reporter_id: Option<Uuid>,
 
     /// Optional name for reporter
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub reporter_name: Option<String>,
 
     /// Optional email of reporter
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub reporter_email: Option<String>,
 
     /// When report was submitted
@@ -50,7 +50,7 @@ make_path_parts!(CreateResourceReportPath => "/v1/resource/{}/report" => Resourc
 
 /// Request for reporting a resource
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct CreateResourceReport {
     /// Description of the resource.
     pub report_type: ResourceReportType,
@@ -58,7 +58,7 @@ pub struct CreateResourceReport {
 
 /// Request for reporting a resource
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct ResourceReportEmail {
     /// Display name of the resource.
     pub display_name: String,
@@ -79,7 +79,7 @@ pub struct ResourceReportEmail {
 /// Type of report
 #[derive(Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Debug, EnumIter)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 #[repr(i16)]
 pub enum ResourceReportType {
     #[allow(missing_docs)]
@@ -111,11 +111,14 @@ impl ResourceReportType {
 
     #[allow(missing_docs)]
     pub fn to_value_str(&self) -> String {
-        serde_json::to_string(&self).unwrap()
+        // serde_json::to_string(&self).unwrap()
+        miniserde::json::to_string(&self)
     }
 
     #[allow(missing_docs)]
     pub fn from_value_str(s: &str) -> Self {
-        serde_json::from_str(s).unwrap()
+        // serde_json::from_str(s).unwrap()
+        miniserde::json::from_str(s).unwrap()
+
     }
 }

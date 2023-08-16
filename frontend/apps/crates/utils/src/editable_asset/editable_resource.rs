@@ -2,7 +2,7 @@ use std::collections::HashSet;
 use std::iter::FromIterator;
 use std::rc::Rc;
 
-use chrono::{DateTime, Utc};
+use shared::{DateTime, Utc};
 use futures_signals::signal::{Mutable, Signal};
 use futures_signals::signal_vec::{MutableVec, SignalVecExt};
 use shared::api::endpoints;
@@ -143,7 +143,7 @@ impl EditableResource {
         Self {
             id: self.id,
             cover: Mutable::new(self.cover.get_cloned()),
-            published_at: Mutable::new(self.published_at.get()),
+            published_at: Mutable::new(self.published_at.get_cloned()),
             display_name: Mutable::new(self.display_name.get_cloned()),
             description: Mutable::new(self.description.get_cloned()),
             age_ranges: Mutable::new(self.age_ranges.get_cloned()),
@@ -161,7 +161,7 @@ impl EditableResource {
             likes: Mutable::new(self.likes.get()),
             views: Mutable::new(self.views.get()),
             author_name: self.author_name.clone(),
-            created_at: self.created_at,
+            created_at: self.created_at.clone(),
         }
     }
 

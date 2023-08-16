@@ -23,6 +23,7 @@ wasm-bindgen = { workspace = true }
 js-sys = { workspace = true }
 rand = { workspace = true }
 web-sys = { workspace = true }
+mymacros = { workspace = true }
 wasm-bindgen-futures = { workspace = true }
 dominator = { workspace = true }
 futures-signals = { workspace = true }

@@ -144,18 +144,18 @@ impl TransformExt for Transform {
         let mut t = self.clone();
         t.set_scale_identity();
         t.set_translation_identity();
-        t.rotation.0 = super::quat::invert(&t.rotation.0);
+        t.rotation.0 = super::quat::invert(&t.rotation.0).to_vec();
         t.to_mat4().as_matrix_string()
     }
 
     fn set_scale_identity(&mut self) {
-        self.scale.0 = [1.0, 1.0, 1.0];
+        self.scale.0 = [1.0, 1.0, 1.0].to_vec();
     }
     fn set_translation_identity(&mut self) {
-        self.translation.0 = [0.0, 0.0, 0.0];
+        self.translation.0 = [0.0, 0.0, 0.0].to_vec();
     }
     fn set_rotation_identity(&mut self) {
-        self.rotation.0 = [0.0, 0.0, 0.0, 1.0];
+        self.rotation.0 = [0.0, 0.0, 0.0, 1.0].to_vec();
     }
 
     fn rotate_z(&mut self, mut rad: f64) {

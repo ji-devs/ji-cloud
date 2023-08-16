@@ -1,7 +1,7 @@
 //! Types for Resource short codes for sharing
-use chrono::{DateTime, Utc};
+use crate::{DateTime, Utc};
 use macros::make_path_parts;
-use serde::{Deserialize, Serialize};
+use mymacros::{Deserialize, Serialize};
 
 use crate::api::endpoints::PathPart;
 
@@ -16,7 +16,7 @@ make_path_parts!(ResourceCurationPath => "/v1/resource/{}/curation" => ResourceI
 
 /// Curation data for Resources
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct ResourceCurationData {
     /// Resource ID for curation
     pub resource_id: ResourceId,
@@ -39,7 +39,7 @@ pub struct ResourceCurationData {
 /// Authorization:
 /// Admin
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct ResourceCurationFieldsDone {
     /// Display name of Resource
     pub display_name: bool,
@@ -80,7 +80,7 @@ impl Default for ResourceCurationFieldsDone {
 /// Status of Curation
 #[derive(Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 #[repr(i16)]
 pub enum ResourceCurationStatus {
     /// Resources first curation
@@ -106,46 +106,46 @@ make_path_parts!(ResourceCurationUpdatePath => "/v1/resource/{}/curation" => Res
 
 /// Curation data for ResourceS
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct ResourceCurationUpdateRequest {
     /// Display name of Resource
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub display_name: Option<bool>,
 
     /// Language of Resource
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub language: Option<bool>,
 
     /// Categories of Resource
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub categories: Option<bool>,
 
     /// Descriptions of Resource
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<bool>,
 
     /// Age ranges of Resource
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub age_ranges: Option<bool>,
 
     /// Affiliations of Resource
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub affiliations: Option<bool>,
 
     /// Addtional resources of Resource
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub additional_resources: Option<bool>,
 
     /// Curation status of Resource
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub curation_status: Option<ResourceCurationStatus>,
 }
 
@@ -154,7 +154,7 @@ make_path_parts!(ResourceCurationCommentCreatePath => "/v1/resource/{}/curation/
 /// Curation data for ResourceS
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct ResourceCurationComment {
     /// Comment ID
     pub id: CommentId,
@@ -174,7 +174,7 @@ pub struct ResourceCurationComment {
 
 /// Request to comment on Resource
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct ResourceCurationCommentRequest {
     /// Display name of Resource
     pub value: String,
@@ -184,7 +184,7 @@ make_path_parts!(ResourceCurationCommentGetPath => "/v1/resource/{}/curation/com
 
 /// Curation data for ResourceS
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct ResourceCurationCommentResponse {
     /// ID of comment
     pub id: CommentId,

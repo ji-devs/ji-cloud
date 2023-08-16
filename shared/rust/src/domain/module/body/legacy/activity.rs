@@ -1,9 +1,9 @@
 use crate::domain::module::body::_groups::design::{TraceShape, YoutubeUrl};
-use serde::{Deserialize, Serialize};
-use serde_with::skip_serializing_none;
+use mymacros::{Deserialize, Serialize};
+// use serde_with::skip_serializing_none;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "snake_case")]
+// #[serde(rename_all = "snake_case")]
 pub enum Activity {
     AskQuestions(AskQuestions),
     SaySomething(SaySomething),
@@ -26,7 +26,7 @@ pub struct QuestionItem {
     pub hotspot: Hotspot,
 }
 
-#[skip_serializing_none]
+// #[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SaySomething {
     pub advance_trigger: AdvanceTrigger,
@@ -36,7 +36,7 @@ pub struct SaySomething {
     pub advance_index: Option<usize>,
 }
 
-#[skip_serializing_none]
+// #[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Soundboard {
     pub audio_filename: Option<String>,
@@ -49,7 +49,7 @@ pub struct Soundboard {
     pub items: Vec<SoundboardItem>,
 }
 
-#[skip_serializing_none]
+// #[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SoundboardItem {
     pub audio_filename: Option<String>,
@@ -58,21 +58,31 @@ pub struct SoundboardItem {
     pub hotspot: Hotspot,
 }
 
-#[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug, Clone)]
+// #[skip_serializing_none]
+#[derive(Debug, Clone)]
 pub struct Video {
     pub transform_matrix: Option<[f64; 16]>,
     pub src: VideoSource,
     pub range: Option<(f64, f64)>,
 }
+impl miniserde::Deserialize for Video {
+    fn begin(out: &mut Option<Self>) -> &mut dyn miniserde::de::Visitor {
+        todo!()
+    }
+}
+impl miniserde::Serialize for Video {
+    fn begin(&self) -> miniserde::ser::Fragment<'_> {
+        todo!()
+    }
+}
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "snake_case")]
+// #[serde(rename_all = "snake_case")]
 pub enum VideoSource {
     Youtube(YoutubeUrl),
     Direct(String),
 }
 
-#[skip_serializing_none]
+// #[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Puzzle {
     pub audio_filename: Option<String>,
@@ -86,20 +96,20 @@ pub struct Puzzle {
     pub items: Vec<PuzzleItem>,
 }
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-#[serde(rename_all = "snake_case")]
+// #[serde(rename_all = "snake_case")]
 pub enum PuzzleTheme {
     Regular,
     Extrude,
 }
 
-#[skip_serializing_none]
+// #[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PuzzleItem {
     pub audio_filename: Option<String>,
     pub hotspot: Hotspot,
 }
 
-#[skip_serializing_none]
+// #[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TalkType {
     pub audio_filename: Option<String>,
@@ -108,7 +118,7 @@ pub struct TalkType {
     pub items: Vec<TalkTypeItem>,
 }
 
-#[skip_serializing_none]
+// #[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TalkTypeItem {
     pub texts: Option<Vec<String>>,
@@ -118,7 +128,7 @@ pub struct TalkTypeItem {
     pub hotspot: Hotspot,
 }
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "snake_case")]
+// #[serde(rename_all = "snake_case")]
 pub enum TalkTypeAnswerKind {
     Text,
     Audio,
@@ -126,15 +136,25 @@ pub enum TalkTypeAnswerKind {
 
 ////////// used in multiple activities
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-#[serde(rename_all = "snake_case")]
+// #[serde(rename_all = "snake_case")]
 pub enum AdvanceTrigger {
     AudioEnd,
     Tap,
 }
 
-#[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug, Clone)]
+// #[skip_serializing_none]
+#[derive(Debug, Clone)]
 pub struct Hotspot {
     pub shape: TraceShape,
     pub transform_matrix: Option<[f64; 16]>,
+}
+impl miniserde::Deserialize for Hotspot {
+    fn begin(out: &mut Option<Self>) -> &mut dyn miniserde::de::Visitor {
+        todo!()
+    }
+}
+impl miniserde::Serialize for Hotspot {
+    fn begin(&self) -> miniserde::ser::Fragment<'_> {
+        todo!()
+    }
 }

@@ -1,8 +1,8 @@
 //! Types for Jig short codes for sharing
-use chrono::{DateTime, Utc};
+use crate::{DateTime, Utc};
 use macros::make_path_parts;
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
+use mymacros::{Deserialize, Serialize};
+use crate::Uuid;
 
 use crate::api::endpoints::PathPart;
 
@@ -17,7 +17,7 @@ make_path_parts!(JigCurationPath => "/v1/jig/{}/curation" => JigId);
 
 /// Curation data for JIGS
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct JigCurationData {
     /// Jig ID for curation
     pub jig_id: JigId,
@@ -40,7 +40,7 @@ pub struct JigCurationData {
 /// Authorization:
 /// Admin
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct JigCurationFieldsDone {
     /// Display name of JIG
     pub display_name: bool,
@@ -81,7 +81,7 @@ impl Default for JigCurationFieldsDone {
 /// Status of Curation
 #[derive(Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 #[repr(i16)]
 pub enum JigCurationStatus {
     /// JIGs first curation
@@ -107,51 +107,51 @@ make_path_parts!(JigCurationUpdatePath => "/v1/jig/{}/curation" => JigId);
 
 /// Curation data for JIGS
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct JigCurationUpdateRequest {
     /// Display name of JIG
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub display_name: Option<bool>,
 
     /// Language of JIG
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub language: Option<bool>,
 
     /// Goals of JIG
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub goals: Option<bool>,
 
     /// Categories of JIG
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub categories: Option<bool>,
 
     /// Descriptions of JIG
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<bool>,
 
     /// Age ranges of JIG
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub age_ranges: Option<bool>,
 
     /// Affiliations of JIG
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub affiliations: Option<bool>,
 
     /// Addtional resources of JIG
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub additional_resources: Option<bool>,
 
     /// Curation status of Jig
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub curation_status: Option<JigCurationStatus>,
 }
 
@@ -159,7 +159,7 @@ make_path_parts!(JigCurationCommentCreatePath => "/v1/jig/{}/curation/comment" =
 
 /// Curation data for JIGS
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct JigCurationComment {
     /// Comment ID
     pub id: CommentId,
@@ -179,7 +179,7 @@ pub struct JigCurationComment {
 
 /// Request to comment on Jig
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct JigCurationCommentRequest {
     /// Display name of JIG
     pub value: String,
@@ -189,7 +189,7 @@ make_path_parts!(JigCurationCommentGetPath => "/v1/jig/{}/curation/comment/{}" =
 
 /// Curation data for JIGS
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct JigCurationCommentResponse {
     /// ID of comment
     pub id: CommentId,

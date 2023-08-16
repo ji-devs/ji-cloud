@@ -2,14 +2,14 @@
 use crate::api::endpoints::PathPart;
 use crate::domain::billing::{Account, AccountUser, AdminSchool, SchoolNameId};
 use crate::domain::{billing::SchoolId, ItemCount, Page, PageLimit};
-use chrono::Utc;
+use crate::Utc;
 use macros::make_path_parts;
-use serde::{Deserialize, Serialize};
+use mymacros::{Deserialize, Serialize};
 use strum_macros::{Display, EnumIter};
 
 /// Type of data export to perform
 #[derive(Display, EnumIter, Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
-#[serde(rename_all = "lowercase")]
+// #[serde(rename_all = "lowercase")]
 pub enum ExportType {
     /// Export user profiles
     #[strum(serialize = "User profiles")]
@@ -31,14 +31,14 @@ pub struct ExportDataRequest {
     ///
     pub date_filter_type: DateFilterType,
     /// Optionally the date to export data from
-    pub from_date: Option<chrono::DateTime<Utc>>,
+    pub from_date: Option<crate::DateTime<Utc>>,
     /// Optionally the date to export data to
-    pub to_date: Option<chrono::DateTime<Utc>>,
+    pub to_date: Option<crate::DateTime<Utc>>,
 }
 
 /// Type of filter to apply for the date ranges
 #[derive(Display, EnumIter, Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
-#[serde(rename_all = "lowercase")]
+// #[serde(rename_all = "lowercase")]
 pub enum DateFilterType {
     /// Only filter on new records
     #[strum(serialize = "Only new records")]
@@ -63,10 +63,10 @@ make_path_parts!(AdminSchoolsPath => "/v1/admin/schools");
 #[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct SearchSchoolsParams {
     /// String to search school names by
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub q: Option<String>,
     /// If `Some` then whether to filter by verified or unverified, otherwise return all schools
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub verified: Option<bool>,
     /// Current page of results
     #[serde(default)]

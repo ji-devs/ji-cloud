@@ -11,9 +11,9 @@ use super::{
     meta::{AffiliationId, AgeRangeId, ImageStyleId, ImageTagIndex},
     Publish,
 };
-use chrono::{DateTime, Utc};
+use crate::{DateTime, Utc};
 use macros::make_path_parts;
-use serde::{Deserialize, Serialize};
+use mymacros::{Deserialize, Serialize};
 #[cfg(feature = "backend")]
 use sqlx::{postgres::PgRow, types::Json};
 use std::collections::HashMap;
@@ -21,7 +21,7 @@ use std::collections::HashMap;
 make_path_parts!(ImageGetPath => "/v1/image/{}" => ImageId);
 
 /// Represents different sizes of images
-#[derive(Serialize, Deserialize, Copy, Clone, Debug)]
+#[derive(Serialize, Deserialize, serde::Deserialize, serde::Serialize, Copy, Clone, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[repr(i16)]
 pub enum ImageSize {
@@ -132,8 +132,8 @@ pub struct ImageUpdateRequest {
     /// Otherwise set it to the given [`Publish`].
     ///
     /// [`Publish`]: struct.Publish.html
-    #[serde(deserialize_with = "super::deserialize_optional_field")]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(deserialize_with = "super::deserialize_optional_field")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub publish_at: Option<Option<Publish>>,
 
@@ -164,8 +164,8 @@ make_path_parts!(ImageSearchPath => "/v1/image");
 ///
 /// * `kind` field must match the case as represented in the returned json body (`PascalCase`?).
 /// * Vector fields, such as `age_ranges` should be given as a comma separated vector (CSV).
-#[derive(Serialize, Deserialize, Clone, Debug, Default)]
-#[serde(rename_all = "camelCase")]
+#[derive(Serialize, Deserialize, serde::Deserialize, serde::Serialize, Clone, Debug, Default)]
+// #[serde(rename_all = "camelCase")]
 pub struct ImageSearchQuery {
     /// The query string.
     #[serde(default)]
@@ -173,47 +173,47 @@ pub struct ImageSearchQuery {
 
     /// Optionally filter by `kind`
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub size: Option<ImageSize>,
 
     /// The page number of the images to get.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub page: Option<u32>,
 
     /// Optionally filter by `image_styles`
     #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_uuids")]
-    #[serde(deserialize_with = "super::from_csv")]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    //#[serde(serialize_with = "super::csv_encode_uuids")]
+    // #[serde(deserialize_with = "super::from_csv")]
+    // #[serde(skip_serializing_if = "Vec::is_empty")]
     pub styles: Vec<ImageStyleId>,
 
     /// Optionally filter by `age_ranges`
     #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_uuids")]
-    #[serde(deserialize_with = "super::from_csv")]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    //#[serde(serialize_with = "super::csv_encode_uuids")]
+    // #[serde(deserialize_with = "super::from_csv")]
+    // #[serde(skip_serializing_if = "Vec::is_empty")]
     pub age_ranges: Vec<AgeRangeId>,
 
     /// Optionally filter by `affiliations`
     #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_uuids")]
-    #[serde(deserialize_with = "super::from_csv")]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    //#[serde(serialize_with = "super::csv_encode_uuids")]
+    // #[serde(deserialize_with = "super::from_csv")]
+    // #[serde(skip_serializing_if = "Vec::is_empty")]
     pub affiliations: Vec<AffiliationId>,
 
     /// Optionally filter by `categories`
     #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_uuids")]
-    #[serde(deserialize_with = "super::from_csv")]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    //#[serde(serialize_with = "super::csv_encode_uuids")]
+    // #[serde(deserialize_with = "super::from_csv")]
+    // #[serde(skip_serializing_if = "Vec::is_empty")]
     pub categories: Vec<CategoryId>,
 
     /// Optionally filter by `tags`
     #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_i16_indices")]
-    #[serde(deserialize_with = "super::from_csv")]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    //#[serde(serialize_with = "super::csv_encode_i16_indices")]
+    // #[serde(deserialize_with = "super::from_csv")]
+    // #[serde(skip_serializing_if = "Vec::is_empty")]
     pub tags: Vec<ImageTagIndex>,
 
     /// Optionally order by `tags`, given in decreasing priority.
@@ -255,24 +255,24 @@ pub struct ImageSearchQuery {
     /// | 4         | basketball | sports       | 1     | `0b_0001`                     |
     /// | 5         | wallet     | [no tags]    | 0     | `0b_0000`                     |
     #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_i16_indices")]
-    #[serde(deserialize_with = "super::from_csv")]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    //#[serde(serialize_with = "super::csv_encode_i16_indices")]
+    // #[serde(deserialize_with = "super::from_csv")]
+    // #[serde(skip_serializing_if = "Vec::is_empty")]
     pub tags_priority: Vec<ImageTagIndex>,
 
     /// Optionally filter by `is_premium`
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub is_premium: Option<bool>,
 
     /// Optionally filter by `is_published`
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub is_published: Option<bool>,
 
     /// The limit of results per page.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub page_limit: Option<u32>,
 }
 
@@ -293,32 +293,32 @@ make_path_parts!(ImageBrowsePath => "/v1/image/browse");
 
 /// Query for [`Browse`](crate::api::endpoints::image::Browse).
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct ImageBrowseQuery {
     /// Optionally filter by `is_published`
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub is_published: Option<bool>,
 
     /// Optionally filter by `size`
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub size: Option<ImageSize>,
 
     /// The page number of the images to get.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub page: Option<u32>,
 
     /// The limit of results per page.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub page_limit: Option<u32>,
 }
 
 /// Response for [`Browse`](crate::api::endpoints::image::Browse).
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct ImageBrowseResponse {
     /// the images returned.
     pub images: Vec<ImageResponse>,

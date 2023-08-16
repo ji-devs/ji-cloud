@@ -39,8 +39,8 @@ impl JigSettings {
     }
     fn get_audio_effects(&self) -> AudioEffects {
         AudioEffects {
-            feedback_positive: self.jig.feedback_positive.get_cloned(),
-            feedback_negative: self.jig.feedback_negative.get_cloned(),
+            // feedback_positive: self.jig.feedback_positive.get_cloned(),
+            // feedback_negative: self.jig.feedback_negative.get_cloned(),
         }
     }
 }

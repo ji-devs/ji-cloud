@@ -1,5 +1,6 @@
 use crate::{keyboard::KeyEvent, unwrap::UnwrapJiExt};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
+// use mymacros::{Deserialize, Serialize};
 use shared::domain::{
     jig::player::{ModuleConfig, Seconds},
     module::{
@@ -105,8 +106,11 @@ impl_iframe_msg_ext!(IframeInit);
 impl_iframe_msg_ext!(IframeAction);
 
 /// Init is used for bootstrapping and passing initial loaded data
-#[derive(Serialize, Deserialize, Debug)]
-pub struct IframeInit<T> {
+#[derive(Serialize, Deserialize, mymacros::Serialize, mymacros::Deserialize, Debug)]
+pub struct IframeInit<T>
+// where
+//     T: DeserializeOwned + Serialize + miniserde::Deserialize + miniserde::Serialize
+{
     pub data: T,
 }
 
@@ -138,12 +142,14 @@ impl<T: Serialize> From<IframeInit<T>> for JsValue {
 impl<T: Serialize> From<&IframeInit<T>> for JsValue {
     fn from(msg: &IframeInit<T>) -> Self {
         serde_wasm_bindgen::to_value(msg).unwrap_ji()
+        // todo!()
     }
 }
 
 impl<T: DeserializeOwned> From<JsValue> for IframeInit<T> {
     fn from(msg: JsValue) -> Self {
         serde_wasm_bindgen::from_value(msg).unwrap_ji()
+        // todo!()
     }
 }
 
@@ -186,7 +192,7 @@ impl<T: DeserializeOwned> From<JsValue> for IframeAction<T> {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, mymacros::Serialize, mymacros::Deserialize, Serialize, Deserialize)]
 pub enum JigToModulePlayerMessage {
     TimerDone,
     // remove play and pause? might need for video
@@ -201,7 +207,7 @@ pub enum JigToModulePlayerMessage {
     ModuleAssistDone(ModuleAssistType),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, mymacros::Serialize, mymacros::Deserialize, Serialize, Deserialize)]
 pub enum ModuleToJigPlayerMessage {
     AddPoints(u32),
     Start(ModuleConfig),
@@ -219,7 +225,7 @@ pub enum ModuleToJigPlayerMessage {
     ModuleAssist(Option<(ModuleAssist, ModuleAssistType)>),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, mymacros::Serialize, mymacros::Deserialize, Serialize, Deserialize)]
 pub enum ModuleToJigEditorMessage {
     AppendModule(LiteModule),
     Next,
@@ -227,12 +233,12 @@ pub enum ModuleToJigEditorMessage {
     Complete(ModuleId, bool),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, mymacros::Serialize, mymacros::Deserialize, Serialize, Deserialize)]
 pub enum ModuleToAssetEditorMessage {
     Publish,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, mymacros::Serialize, mymacros::Deserialize, Serialize, Deserialize)]
 pub enum AssetPlayerToPlayerPopup {
     Close,
     // used for playlist player to hide close button when jig is playing since the jig has it's own button

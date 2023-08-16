@@ -7,7 +7,9 @@ pub struct Country {
 impl Country {
     pub fn from_google_location(location: &Option<serde_json::Value>) -> Option<Country> {
         let a = location.as_ref()?.as_str()?;
+        // let a = miniserde::json::to_string(location.as_ref()?);
         let b: serde_json::Value = serde_json::from_str(a).ok()?;
+        // let b: miniserde::json::Value = miniserde::json::from_str(a);
 
         // j.place.address_components.find(c => c.types.includes("country")).short_name
         let address_components = b.get("place")?.get("address_components")?.as_array()?;

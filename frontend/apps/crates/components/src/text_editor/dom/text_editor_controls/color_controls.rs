@@ -6,7 +6,7 @@ use crate::{
 use dominator::{class, clone, html, pseudo, Dom};
 use futures_signals::signal::Mutable;
 use futures_signals::signal::SignalExt;
-use rgb::RGBA8;
+use shared::RGBA8;
 use std::rc::Rc;
 use utils::{colors::*, prelude::*};
 

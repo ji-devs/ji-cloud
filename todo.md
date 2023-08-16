@@ -1,0 +1,4 @@
+- [ ] impl misiserdo for HashSet
+- [ ] impl From and Into DateTime and Utc
+- [ ] check if custom Utc is even needed
+- [ ] resolve all the todo! macro calls

@@ -2,7 +2,7 @@ use dominator::clone;
 use futures::future::ready;
 use futures_signals::signal::{Mutable, ReadOnlyMutable, SignalExt};
 use futures_signals::signal_vec::MutableVec;
-use rgb::RGBA8;
+use shared::RGBA8;
 use std::rc::Rc;
 use utils::{colors::*, prelude::*};
 use wasm_bindgen_futures::spawn_local;

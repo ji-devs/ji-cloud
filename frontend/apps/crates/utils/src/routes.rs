@@ -20,7 +20,7 @@ use std::{
     fmt::{Debug, Display},
     str::FromStr,
 };
-use uuid::Uuid;
+use shared::Uuid;
 use wasm_bindgen::prelude::*;
 use web_sys::Url;
 
@@ -763,7 +763,7 @@ impl Route {
             | ["module", kind, "edit", asset_type, "debug", "debug"] => {
                 let asset_id = AssetType::try_from(*asset_type)
                     .unwrap_ji()
-                    .to_asset_id(Uuid::from_u128(0));
+                    .to_asset_id(Uuid(uuid::Uuid::from_u128(0)));
                 Self::Module(ModuleRoute::Edit(
                     ModuleKind::from_str(kind).expect_ji("unknown module kind!"),
                     asset_id,
@@ -784,7 +784,7 @@ impl Route {
             | ["module", kind, "play", asset_type, "debug", "debug"] => {
                 let asset_id = AssetType::try_from(*asset_type)
                     .unwrap_ji()
-                    .to_asset_id(Uuid::from_u128(0));
+                    .to_asset_id(Uuid(uuid::Uuid::from_u128(0)));
                 Self::Module(ModuleRoute::Play(
                     ModuleKind::from_str(kind).expect_ji("unknown module kind!"),
                     asset_id,

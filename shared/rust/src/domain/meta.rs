@@ -1,8 +1,8 @@
 //! Types for metadata.
 
-use chrono::{DateTime, Utc};
+use crate::{DateTime, Utc};
 use macros::make_path_parts;
-use serde::{Deserialize, Serialize};
+use mymacros::{Deserialize, Serialize};
 
 use crate::api::endpoints::PathPart;
 
@@ -50,7 +50,7 @@ wrap_uuid! {
 ///
 /// This is used instead of UUIDs for image tags as they aren't created dynamically and
 /// a simple and consistent way to identify them is desired.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Hash)]
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, serde::Deserialize, serde::Serialize, Debug, Hash)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct ImageTagIndex(pub i16);
@@ -303,7 +303,7 @@ impl From<&GoogleAddressComponent> for String {
 
 /// Representation of common Google Address Types
 #[derive(Clone, Serialize, Eq, PartialEq, Deserialize, Debug)]
-#[serde(rename_all = "snake_case")]
+// #[serde(rename_all = "snake_case")]
 pub enum GoogleAddressType {
     /// Indicates an incorporated city or town political entity
     Locality,

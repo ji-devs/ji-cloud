@@ -23,7 +23,7 @@ impl EditAbout {
     pub fn new(user: UserProfile, callbacks: EditProfileCallbacks) -> Rc<Self> {
         Rc::new(Self {
             callbacks,
-            location: Mutable::new(user.location.clone()),
+            location: Mutable::new(None),
             location_public: Mutable::new(user.location_public),
             organization: Mutable::new(user.organization.clone()),
             organization_public: Mutable::new(user.organization_public),
@@ -38,7 +38,7 @@ impl EditAbout {
     pub fn get_user_profile_from_fields(&self) -> UserProfile {
         let mut user = self.user.clone();
 
-        user.location = self.location.get_cloned();
+        user.location = None;//self.location.get_cloned();
         user.location_public = self.location_public.get();
         user.organization = self.organization.get_cloned();
         user.organization_public = self.organization_public.get();

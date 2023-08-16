@@ -2,7 +2,8 @@ use crate::domain::module::{
     body::{Body, BodyConvert, BodyExt, StepExt, ThemeId, _groups::design::*},
     ModuleKind,
 };
-use serde::{de::IntoDeserializer, Deserialize, Serialize};
+// use serde::{de::IntoDeserializer, Deserialize, Serialize};
+use mymacros::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::convert::TryFrom;
 
@@ -56,7 +57,7 @@ impl BodyExt<(), Step> for ModuleData {
     }
     fn set_editor_state_steps_completed(&mut self, steps_completed: HashSet<Step>) {
         if let Some(content) = self.content.as_mut() {
-            content.editor_state.steps_completed = steps_completed;
+            // content.editor_state.steps_completed = steps_completed;
         }
     }
 
@@ -67,9 +68,10 @@ impl BodyExt<(), Step> for ModuleData {
     }
 
     fn get_editor_state_steps_completed(&self) -> Option<HashSet<Step>> {
-        self.content
-            .as_ref()
-            .map(|content| content.editor_state.steps_completed.clone())
+        None
+        // self.content
+        //     .as_ref()
+        //     .map(|content| content.editor_state.steps_completed.clone())
     }
 
     fn set_theme(&mut self, theme_id: ThemeId) {
@@ -117,8 +119,8 @@ pub struct EditorState {
     /// the current step
     pub step: Step,
 
-    /// the completed steps
-    pub steps_completed: HashSet<Step>,
+    // /// the completed steps
+    // pub steps_completed: HashSet<Step>,
 }
 
 // TODO Currently there exists some Cover modules with an editor_state which has the step set to
@@ -140,28 +142,42 @@ pub enum Step {
     Four,
 }
 
-impl<'de> Deserialize<'de> for Step {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        let value = String::deserialize(deserializer)?;
-        if value == "Four" {
-            Ok(Self::Three)
-        } else {
-            Step::deserialize(value.into_deserializer())
-        }
-    }
-}
 
-impl Serialize for Step {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        Step::serialize(&self, serializer)
-    }
-}
+
+// impl miniserde::Serialize for Step {
+//     fn begin(&self) -> miniserde::ser::Fragment<'_> {
+//         todo!()
+//     }
+// }
+
+// impl miniserde::Deserialize for Step {
+//     fn begin(out: &mut Option<Self>) -> &mut dyn miniserde::de::Visitor {
+//         todo!()
+//     }
+// }
+
+// impl<'de> miniserde::Deserialize<'de> for Step {
+//     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+//     where
+//         D: miniserde::Deserializer<'de>,
+//     {
+//         let value = String::deserialize(deserializer)?;
+//         if value == "Four" {
+//             Ok(Self::Three)
+//         } else {
+//             Step::deserialize(value.into_deserializer())
+//         }
+//     }
+// }
+
+// impl miniserde::Serialize for Step {
+//     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+//     where
+//         S: miniserde::Serializer,
+//     {
+//         Step::serialize(&self, serializer)
+//     }
+// }
 
 impl Default for Step {
     fn default() -> Self {

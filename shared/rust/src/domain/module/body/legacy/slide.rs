@@ -1,9 +1,9 @@
 pub use super::*;
-use serde::{Deserialize, Serialize};
+use mymacros::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
 /// The body for [`Legacy`](crate::domain::module::ModuleKind::Legacy) modules.
-#[skip_serializing_none]
+// #[skip_serializing_none]
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 pub struct Slide {
     /// Full Image

@@ -1,7 +1,7 @@
 //! types for searching
 
 use macros::make_path_parts;
-use serde::{Deserialize, Serialize};
+use mymacros::{Deserialize, Serialize};
 use strum_macros::EnumIter;
 
 make_path_parts!(CreateSearchKeyPath => "/v1/search/key");
@@ -18,20 +18,20 @@ make_path_parts!(WebImageSearchPath => "/v1/search/web/image");
 
 /// Search for images via the given query string.
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct WebImageSearchQuery {
     /// The query string.
     #[serde(default)]
     pub q: String,
 
     /// Image type string
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub image_type: Option<ImageType>,
 }
 
 /// Represents different types of images
 #[derive(Serialize, Deserialize, Copy, Clone, Debug, PartialEq, EnumIter)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub enum ImageType {
     /// Animated Gif Images
     Clipart = 0,
@@ -64,9 +64,9 @@ impl ImageType {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct WebImageSearchItem {
     /// A URL to the thumbnail of the image.
-    pub thumbnail_url: url::Url,
+    pub thumbnail_url: crate::Url,
     /// A URL to the original image.
-    pub url: url::Url,
+    pub url: crate::Url,
 }
 
 /// Response for successful search.

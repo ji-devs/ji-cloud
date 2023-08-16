@@ -3,9 +3,9 @@
 use crate::api::endpoints::PathPart;
 
 use super::{meta::AnimationStyleId, Publish};
-use chrono::{DateTime, Utc};
+use crate::{DateTime, Utc};
 use macros::make_path_parts;
-use serde::{Deserialize, Serialize};
+use mymacros::{Deserialize, Serialize};
 #[cfg(feature = "backend")]
 use sqlx::postgres::PgRow;
 

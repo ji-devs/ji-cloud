@@ -24,6 +24,7 @@ console_error_panic_hook = { workspace = true, optional = true }
 wasm-bindgen = { workspace = true, }
 js-sys = { workspace = true }
 web-sys = { workspace = true }
+mymacros = { workspace = true }
 wasm-bindgen-futures = { workspace = true }
 htmlescape = { workspace = true }
 dominator = { workspace = true }

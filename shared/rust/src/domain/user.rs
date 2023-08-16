@@ -1,9 +1,11 @@
 //! Types for users.
 
-use chrono::{DateTime, NaiveDate, Utc};
+use crate::{DateTime, Utc, NaiveDate};
+// use chrono::;
 use macros::make_path_parts;
-use serde::{Deserialize, Serialize, Serializer};
-use std::convert::TryFrom;
+// use serde::{Deserialize, Serialize, Serializer};
+use mymacros::{Deserialize, Serialize};
+// use std::convert::TryFrom;
 
 use crate::domain::billing::{AmountInCents, PlanType, SubscriptionStatus, UserAccountSummary};
 use crate::{
@@ -84,11 +86,11 @@ make_path_parts!(UserLookupPath => "/v1/user/lookup");
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct UserLookupQuery {
     /// The user ID we're filtering by.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<UserId>,
 
     /// The name we're filtering by.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
 }
 
@@ -118,7 +120,7 @@ pub struct ResetEmailResponse {
 /// user badge
 #[derive(Debug, Serialize, Deserialize, Clone, Copy)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 #[repr(i16)]
 pub enum UserBadge {
     /// Master teacher
@@ -189,7 +191,7 @@ pub struct UserProfile {
     pub over_18: bool,
 
     /// The user's timezone.
-    pub timezone: chrono_tz::Tz,
+    pub timezone: crate::Tz,
 
     /// Bio for User
     pub bio: String,
@@ -219,12 +221,12 @@ pub struct UserProfile {
 
     /// User associated Circles
     #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    // #[serde(skip_serializing_if = "Vec::is_empty")]
     pub circles: Vec<CircleId>,
 
     /// The scopes associated with the user.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    // #[serde(skip_serializing_if = "Vec::is_empty")]
     pub scopes: Vec<UserScope>,
 
     /// When the user was created.
@@ -232,51 +234,51 @@ pub struct UserProfile {
 
     /// When the user was last updated.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub updated_at: Option<DateTime<Utc>>,
 
     /// The organization that the user belongs to.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub organization: Option<String>,
 
     /// The persona of the user
     #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    // #[serde(skip_serializing_if = "Vec::is_empty")]
     pub persona: Vec<String>,
 
     /// The user's taught subjects.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    // #[serde(skip_serializing_if = "Vec::is_empty")]
     pub subjects: Vec<SubjectId>,
 
     /// The user's age-ranges.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    // #[serde(skip_serializing_if = "Vec::is_empty")]
     pub age_ranges: Vec<AgeRangeId>,
 
     /// The user's affiliations.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    // #[serde(skip_serializing_if = "Vec::is_empty")]
     pub affiliations: Vec<AffiliationId>,
 
     /// The user's location
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub location: Option<serde_json::Value>,
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    pub location: Option<miniserde::json::Value>,
 
     /// The user's account summary, if available.
     ///
     /// Note: This is not set when fetching a user profile. It must be explicitly set using a
     /// function such as [`db::account::get_user_account_summary()`]
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub account_summary: Option<UserAccountSummary>,
 }
 
 /// User Response (used for Admin).
 #[derive(Debug, Serialize, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct UserResponse {
     /// The user's id.
     pub id: UserId,
@@ -369,7 +371,7 @@ pub struct UserProfileExport {
     pub language_emails: String,
     /// The user's preferred language.
     #[serde(default)]
-    #[serde(serialize_with = "serialize_list")]
+    //#[serde(serialize_with = "serialize_list")]
     pub languages_spoken: Vec<String>,
     /// When the user was created.
     pub created_at: DateTime<Utc>,
@@ -381,19 +383,19 @@ pub struct UserProfileExport {
     pub organization: Option<String>,
     /// The persona of the user
     #[serde(default)]
-    #[serde(serialize_with = "serialize_list")]
+    //#[serde(serialize_with = "serialize_list")]
     pub persona: Vec<String>,
     /// The user's taught subjects.
     #[serde(default)]
-    #[serde(serialize_with = "serialize_list")]
+    //#[serde(serialize_with = "serialize_list")]
     pub subjects: Vec<String>,
     /// The user's age-ranges.
     #[serde(default)]
-    #[serde(serialize_with = "serialize_list")]
+    //#[serde(serialize_with = "serialize_list")]
     pub age_ranges: Vec<String>,
     /// The user's affiliations.
     #[serde(default)]
-    #[serde(serialize_with = "serialize_list")]
+    //#[serde(serialize_with = "serialize_list")]
     pub affiliations: Vec<String>,
     /// The user's city
     #[serde(default)]
@@ -405,17 +407,18 @@ pub struct UserProfileExport {
     pub opt_into_edu_resources: bool,
 }
 
-fn serialize_list<S, T>(list: &Vec<T>, serializer: S) -> Result<S::Ok, S::Error>
-where
-    S: Serializer,
-    T: Serialize,
-{
-    list.iter()
-        .map(|v| serde_json::to_string(v).unwrap())
-        .collect::<Vec<String>>()
-        .join(", ")
-        .serialize(serializer)
-}
+// fn serialize_list<S, T>(list: &Vec<T>, serializer: S) -> Result<S::Ok, S::Error>
+// where
+//     // S: miniserde::Serializer,
+//     T: miniserde::Serialize,
+// {
+//     // list.iter()
+//     //     .map(|v| serde_json::to_string(v).unwrap())
+//     //     .collect::<Vec<String>>()
+//     //     .join(", ")
+//     //     .serialize(serializer)
+//     todo!()
+// }
 
 impl UserProfile {
     /// Returns the display name for UI purposes
@@ -430,7 +433,7 @@ make_path_parts!(VerifyEmailPath => "/v1/user/verify-email");
 
 /// Request for [`VerifyEmail`](crate::api::endpoints::user::VerifyEmail)
 #[derive(Debug, Serialize, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub enum VerifyEmailRequest {
     /// Attempt to verify the email
     Verify {
@@ -452,7 +455,7 @@ make_path_parts!(VerifyResetEmailPath => "/v1/user/verify-reset-email");
 #[serde(untagged)]
 pub enum VerifyResetEmailRequest {
     /// Attempt to verify the email
-    #[serde(rename_all = "camelCase")]
+    // #[serde(rename_all = "camelCase")]
     Verify {
         /// paseto token
         paseto_token: String,
@@ -462,7 +465,7 @@ pub enum VerifyResetEmailRequest {
     },
 
     /// Resend a confirmation link if a verification is in progress
-    #[serde(rename_all = "camelCase")]
+    // #[serde(rename_all = "camelCase")]
     Resend {
         /// paseto token
         paseto_token: String,
@@ -490,7 +493,7 @@ pub struct CreateProfileRequest {
 
     /// URL to the user's profile image. The API server uploads and processes the image so that the
     /// profile image is stored in Cloud Storage in the user image library.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub profile_image_url: Option<String>,
 
     /// The user's preferred application language.
@@ -503,7 +506,7 @@ pub struct CreateProfileRequest {
     pub languages_spoken: Vec<String>,
 
     /// the timezone that the user uses.
-    pub timezone: chrono_tz::Tz,
+    pub timezone: crate::Tz,
 
     // todo: does this have something to do with emails?
     /// Does the user want educational resources sent to them?
@@ -511,33 +514,33 @@ pub struct CreateProfileRequest {
 
     /// The organization that the user belongs to.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub organization: Option<String>,
 
     /// The persona of the user
     #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    // #[serde(skip_serializing_if = "Vec::is_empty")]
     pub persona: Vec<String>,
 
     /// The user's taught subjects.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    // #[serde(skip_serializing_if = "Vec::is_empty")]
     pub subjects: Vec<SubjectId>,
 
     /// The user's age-ranges.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    // #[serde(skip_serializing_if = "Vec::is_empty")]
     pub age_ranges: Vec<AgeRangeId>,
 
     /// The user's affiliations.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    // #[serde(skip_serializing_if = "Vec::is_empty")]
     pub affiliations: Vec<AffiliationId>,
 
     /// The user's location
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub location: Option<serde_json::Value>,
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    pub location: Option<miniserde::json::Value>,
 }
 
 make_path_parts!(GetProfilePath => "/v1/user/me/profile");
@@ -551,112 +554,112 @@ pub struct PatchProfileRequest {
     ///
     /// This must be unique.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub username: Option<String>,
 
     /// The user's given name / "first name".
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub given_name: Option<String>,
 
     /// The user's family name / "last name".
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub family_name: Option<String>,
 
     /// ID to the user's profile image in the user image library.
     #[serde(default)]
-    #[serde(deserialize_with = "super::deserialize_optional_field")]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(deserialize_with = "super::deserialize_optional_field")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub profile_image: Option<Option<ImageId>>,
 
     /// The user's bio
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub bio: Option<String>,
 
     /// the language the user prefers the application to be in.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub language_app: Option<String>,
 
     /// the language the user prefers emails to be in.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub language_emails: Option<String>,
 
     /// the languages the user prefers.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub languages_spoken: Option<Vec<String>>,
 
     /// the timezone that the user uses.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub timezone: Option<chrono_tz::Tz>,
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    pub timezone: Option<crate::Tz>,
 
     /// Does the user want educational resources sent to them?
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub opt_into_edu_resources: Option<bool>,
 
     /// Publicize Users organization
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub organization_public: Option<bool>,
 
     /// Publicize user persona
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub persona_public: Option<bool>,
 
     /// Publicize user lanuage
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub languages_spoken_public: Option<bool>,
 
     /// Publicize user location
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub location_public: Option<bool>,
 
     /// Publicize user bio
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub bio_public: Option<bool>,
 
     /// The organization that the user belongs to.
     ///
     /// Field is updated if `Some(_)` with the inner contents.
     #[serde(default)]
-    #[serde(deserialize_with = "super::deserialize_optional_field")]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(deserialize_with = "super::deserialize_optional_field")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub organization: Option<Option<String>>,
 
     /// The persona of the user.
     ///
     /// Field is updated if `Some(_)` with the inner contents.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub persona: Option<Vec<String>>,
 
     /// The user's taught subjects.
     ///
     /// If `Some`, replace the existing `SubjectId`s with this.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub subjects: Option<Vec<SubjectId>>,
 
     /// The user's age-ranges.
     ///
     /// If `Some`, replace the existing `AgeRangeId`s with this.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub age_ranges: Option<Vec<AgeRangeId>>,
 
     /// The user's affiliations.
     ///
     /// If `Some`, replace the existing `AffiliationId`s with this.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub affiliations: Option<Vec<AffiliationId>>,
 
     /// The user's location.
@@ -664,9 +667,9 @@ pub struct PatchProfileRequest {
     /// * If `Some(None)`, sets the location to `None`,
     /// * If `Some(Some(_))`, updates the user location to `Some(_)`.
     #[serde(default)]
-    #[serde(deserialize_with = "super::deserialize_optional_field")]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub location: Option<Option<serde_json::Value>>,
+    // #[serde(deserialize_with = "super::deserialize_optional_field")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    pub location: Option<Option<miniserde::json::Value>>,
 }
 
 make_path_parts!(PatchProfileAdminDataPath => "/v1/user/me/profile/{}/admin-data" => UserId);
@@ -676,8 +679,8 @@ make_path_parts!(PatchProfileAdminDataPath => "/v1/user/me/profile/{}/admin-data
 pub struct PatchProfileAdminDataRequest {
     /// Users badge
     #[serde(default)]
-    #[serde(deserialize_with = "super::deserialize_optional_field")]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(deserialize_with = "super::deserialize_optional_field")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub badge: Option<Option<UserBadge>>,
 }
 
@@ -706,7 +709,7 @@ make_path_parts!(ChangePasswordPath => "/v1/user/me/password");
 
 /// Request for [`ChangePassword`](crate::api::endpoints::user::ChangePassword)
 #[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub enum ChangePasswordRequest {
     /// Change the email
     Change {
@@ -734,7 +737,7 @@ make_path_parts!(UserColorUpdatePath => "/v1/user/me/color/{}" => i32);
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UserColorValueRequest {
     /// the color to add/change to.
-    pub color: rgb::RGBA8,
+    pub color: crate::RGBA8,
 }
 
 make_path_parts!(UserColorGetPath => "/v1/user/me/color");
@@ -743,7 +746,7 @@ make_path_parts!(UserColorGetPath => "/v1/user/me/color");
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UserColorResponse {
     /// The user's colors.
-    pub colors: Vec<rgb::RGBA8>,
+    pub colors: Vec<crate::RGBA8>,
 }
 
 // i32 is color index
@@ -783,33 +786,33 @@ make_path_parts!(UserFontDeletePath => "/v1/user/me/font/{}" => i32);
 
 /// Query for [`Browse`](crate::api::endpoints::user::Browse).
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct UserBrowseQuery {
     /// filter User by Id.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub user_id: Option<UserId>,
 
     /// The page number of the Users to get.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub page: Option<u32>,
 
     /// The hits per page to be returned
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub page_limit: Option<u32>,
 
     /// Optional filter for user badges
     #[serde(default)]
-    #[serde(deserialize_with = "super::from_csv")]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    // #[serde(deserialize_with = "super::from_csv")]
+    // #[serde(skip_serializing_if = "Vec::is_empty")]
     pub badge: Vec<UserBadge>,
 }
 
 /// Response for [`Browse`](crate::api::endpoints::user::Browse).
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct UserBrowseResponse {
     /// the users returned.
     pub users: Vec<UserResponse>,
@@ -831,32 +834,32 @@ make_path_parts!(UserBrowsePath => "/v1/user/browse");
 
 /// Query for [`Search`](crate::api::endpoints::user::Search).
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct UserSearchQuery {
     /// The query string.
     #[serde(default)]
-    #[serde(skip_serializing_if = "String::is_empty")]
+    // #[serde(skip_serializing_if = "String::is_empty")]
     pub q: String,
 
     /// The query string.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub user_id: Option<UserId>,
 
     /// The page number of the Users to get.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub page: Option<u32>,
 
     /// The hits per page to be returned
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub page_limit: Option<u32>,
 }
 
 /// Response for [`Search`](crate::api::endpoints::user::Search).
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct UserSearchResponse {
     /// the users returned.
     pub users: Vec<UserResponse>,

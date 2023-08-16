@@ -37,12 +37,16 @@ gloo = { workspace = true }
 console_error_panic_hook = { workspace = true }
 wasm-logger = { workspace = true, optional = true }
 web-sys = { workspace = true }
+mymacros = { workspace = true }
 awsm_web = { workspace = true }
 anyhow = { workspace = true }
 rgb = { workspace = true }
 lazy_static = { workspace = true }
 unicode-segmentation = { workspace = true }
 const_format = { workspace = true }
+miniserde = { workspace = true }
+miniserde-enum = { workspace = true }
+miniserde-derive-enum = { workspace = true }
 
 [features]
 debug_log = []

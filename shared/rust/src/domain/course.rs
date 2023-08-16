@@ -1,8 +1,8 @@
 //! Types for Courses.
 use crate::domain::UpdateNonNullable;
-use chrono::{DateTime, Utc};
+use crate::{DateTime, Utc};
 use macros::make_path_parts;
-use serde::{Deserialize, Serialize};
+use mymacros::{Deserialize, Serialize};
 use std::collections::HashMap;
 use strum_macros::Display;
 
@@ -31,7 +31,7 @@ make_path_parts!(CourseCreatePath => "/v1/course");
 ///
 /// This creates the draft and live [Course Data](Course Data) copies with the requested info.
 #[derive(Serialize, Deserialize, Debug, Default)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct CourseCreateRequest {
     /// The Course's name.
     #[serde(default)]
@@ -48,14 +48,14 @@ pub struct CourseCreateRequest {
     pub language: String,
 
     /// The Course's categories.
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    // #[serde(skip_serializing_if = "Vec::is_empty")]
     #[serde(default)]
     pub categories: Vec<CategoryId>,
 }
 
 /// The over-the-wire representation of a Course's data. This can either be the live copy or the draft copy.
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct CourseData {
     /// Whether the Course data is the live copy or the draft.
     pub draft_or_live: DraftOrLive,
@@ -106,7 +106,7 @@ pub struct CourseData {
 /// Admin rating for a course
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, Eq, PartialEq)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 #[repr(i16)]
 pub enum CourseRating {
     #[allow(missing_docs)]
@@ -132,7 +132,7 @@ impl TryFrom<u8> for CourseRating {
 
 /// These fields can be edited by admin and can be viewed by everyone
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct CourseAdminData {
     /// Rating for jig, weighted for jig search
     #[serde(default)]
@@ -150,7 +150,7 @@ pub struct CourseAdminData {
 
 /// The response returned when a request for `GET`ing a Course is successful.
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct CourseResponse {
     /// The ID of the Course.
     pub id: CourseId,
@@ -193,52 +193,52 @@ make_path_parts!(CourseClonePath => "/v1/course/{}/clone" => CourseId);
 
 /// Request for updating a Course's draft data.
 #[derive(Serialize, Deserialize, Debug, Default)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct CourseUpdateDraftDataRequest {
     /// The Course's name.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub display_name: Option<String>,
 
     /// The current author
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub author_id: Option<UserId>,
 
     /// Description of the Course.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub description: Option<String>,
 
     /// Estimated User Duration of the Course.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub duration: Option<u32>,
 
     /// The language the Course uses.
     ///
     /// NOTE: in the format `en`, `eng`, `en-US`, `eng-US` or `eng-USA`. To be replaced with a struct that enforces this.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub language: Option<String>,
 
     /// Privacy level for the Course.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub privacy_level: Option<PrivacyLevel>,
 
     /// Additional keywords for searches
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub other_keywords: Option<String>,
 
     /// The Course's categories.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub categories: Option<Vec<CategoryId>>,
 
     /// The Course's units.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub units: Option<Vec<CourseUnitId>>,
 }
@@ -249,60 +249,60 @@ make_path_parts!(CourseBrowsePath => "/v1/course/browse");
 
 /// Query for [`Browse`](crate::api::endpoints::course::Browse).
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct CourseBrowseQuery {
     /// Optionally filter by `is_published`
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub is_published: Option<bool>,
 
     /// Optionally filter by author id.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub author_id: Option<UserOrMe>,
 
     /// The page number of the Courses to get.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub page: Option<u32>,
 
     /// Optionally browse by draft or live.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub draft_or_live: Option<DraftOrLive>,
 
     /// Optionally filter Course by their privacy level
     #[serde(default)]
-    #[serde(deserialize_with = "super::from_csv")]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    // #[serde(deserialize_with = "super::from_csv")]
+    // #[serde(skip_serializing_if = "Vec::is_empty")]
     pub privacy_level: Vec<PrivacyLevel>,
 
     /// Optionally filter courses by blocked status
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub blocked: Option<bool>,
 
     /// The hits per page to be returned
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub page_limit: Option<u32>,
 
     /// Optionally filter by `additional resources`
     #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_uuids")]
-    #[serde(deserialize_with = "super::from_csv")]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    //#[serde(serialize_with = "super::csv_encode_uuids")]
+    // #[serde(deserialize_with = "super::from_csv")]
+    // #[serde(skip_serializing_if = "Vec::is_empty")]
     pub resource_types: Vec<ResourceTypeId>,
 
     /// Order by sort
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub order_by: Option<OrderBy>,
 }
 
 /// Response for [`Browse`](crate::api::endpoints::course::Browse).
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct CourseBrowseResponse {
     /// the Courses returned.
     pub courses: Vec<CourseResponse>,
@@ -318,82 +318,82 @@ make_path_parts!(CourseSearchPath => "/v1/course");
 
 /// Search for Courses via the given query string.
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct CourseSearchQuery {
     /// The query string.
     #[serde(default)]
-    #[serde(skip_serializing_if = "String::is_empty")]
+    // #[serde(skip_serializing_if = "String::is_empty")]
     pub q: String,
 
     /// The page number of the Courses to get.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub page: Option<u32>,
 
     /// Optionally filter by `language`
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub language: Option<String>,
 
     /// Optionally filter by `is_published`. This means that the Course's `publish_at < now()`.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub is_published: Option<bool>,
 
     /// Optionally filter by author's id
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub author_id: Option<UserOrMe>,
 
     /// Optionally filter by the author's name
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub author_name: Option<String>,
 
     /// Optionally search for Courses using keywords
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub other_keywords: Option<String>,
 
     /// Optionally search for Courses using translated keyword
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub translated_keywords: Option<String>,
 
     /// Optionally search for Courses by privacy level
     #[serde(default)]
-    #[serde(deserialize_with = "super::from_csv")]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    // #[serde(deserialize_with = "super::from_csv")]
+    // #[serde(skip_serializing_if = "Vec::is_empty")]
     pub privacy_level: Vec<PrivacyLevel>,
 
     /// Optionally search for blocked or non-blocked courses
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub blocked: Option<bool>,
 
     /// The hits per page to be returned
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub page_limit: Option<u32>,
 
     /// Optionally filter by `additional resources`
     #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_uuids")]
-    #[serde(deserialize_with = "super::from_csv")]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    //#[serde(serialize_with = "super::csv_encode_uuids")]
+    // #[serde(deserialize_with = "super::from_csv")]
+    // #[serde(skip_serializing_if = "Vec::is_empty")]
     pub resource_types: Vec<ResourceTypeId>,
 
     /// Optionally filter by `categories`
     #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_uuids")]
-    #[serde(deserialize_with = "super::from_csv")]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    //#[serde(serialize_with = "super::csv_encode_uuids")]
+    // #[serde(deserialize_with = "super::from_csv")]
+    // #[serde(skip_serializing_if = "Vec::is_empty")]
     pub categories: Vec<CategoryId>,
 }
 
 /// Response for successful search.
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct CourseSearchResponse {
     /// the Courses returned.
     pub courses: Vec<CourseResponse>,
@@ -412,7 +412,7 @@ make_path_parts!(CoursePlayPath => "/v1/course/{}/play" => CourseId);
 /// Sort browse results
 #[derive(Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Debug, Display)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 #[repr(i16)]
 pub enum OrderBy {
     /// Order Course by play count
@@ -424,21 +424,21 @@ make_path_parts!(CourseAdminDataUpdatePath => "/v1/course/{}/admin" => CourseId)
 
 /// These fields can be edited by admin and can be viewed by everyone
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct CourseUpdateAdminDataRequest {
     /// Rating for jig, weighted for jig search
-    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+   //  #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
     pub rating: UpdateNonNullable<CourseRating>,
 
     /// if true does not appear in search
-    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+   //  #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
     pub blocked: UpdateNonNullable<bool>,
 
     /// Indicates jig has been curated by admin
-    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+   //  #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
     pub curated: UpdateNonNullable<bool>,
 
     /// Indicates jig is premium content
-    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+   //  #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
     pub premium: UpdateNonNullable<bool>,
 }

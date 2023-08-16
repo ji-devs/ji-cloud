@@ -1,5 +1,5 @@
 use crate::error::TransientError;
-use serde::{Deserialize, Serialize};
+use mymacros::{Deserialize, Serialize};
 use strum_macros::Display;
 use thiserror::Error;
 
@@ -9,13 +9,13 @@ use actix_web::{body::BoxBody, HttpResponse, ResponseError};
 #[allow(missing_docs)]
 #[derive(Debug, Error, Serialize, Deserialize)]
 pub enum ServiceError {
-    #[cfg_attr(feature = "backend", error(transparent))]
-    #[cfg_attr(not(feature = "backend"), error("Internal server error"))]
-    InternalServerError(
-        #[serde(skip)]
-        #[from]
-        TransientError<anyhow::Error>,
-    ),
+    // #[cfg_attr(feature = "backend", error(transparent))]
+    // #[cfg_attr(not(feature = "backend"), error("Internal server error"))]
+    // InternalServerError(
+    //     #[serde(skip)]
+    //     #[from]
+    //     TransientError<anyhow::Error>,
+    // ),
     #[error("{0}")]
     DisabledService(ServiceKindError),
     #[error("Forbidden")]
@@ -28,7 +28,7 @@ pub enum ServiceError {
 impl ResponseError for ServiceError {
     fn status_code(&self) -> http::StatusCode {
         match self {
-            Self::InternalServerError { .. } => http::StatusCode::INTERNAL_SERVER_ERROR,
+            // Self::InternalServerError { .. } => http::StatusCode::INTERNAL_SERVER_ERROR,
             Self::DisabledService(_) => http::StatusCode::NOT_IMPLEMENTED,
             Self::Forbidden => http::StatusCode::FORBIDDEN,
             Self::ResourceNotFound => http::StatusCode::NOT_FOUND,
@@ -40,11 +40,12 @@ impl ResponseError for ServiceError {
     }
 }
 
-impl From<anyhow::Error> for ServiceError {
-    fn from(e: anyhow::Error) -> Self {
-        Self::InternalServerError(e.into())
-    }
-}
+// #[cfg(feature = "backend")]
+// impl From<anyhow::Error> for ServiceError {
+//     fn from(e: anyhow::Error) -> Self {
+//         Self::InternalServerError(e.into())
+//     }
+// }
 
 #[allow(missing_docs)]
 #[derive(Debug, Copy, Clone, Display, Serialize, Deserialize)]

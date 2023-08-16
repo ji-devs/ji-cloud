@@ -2,7 +2,7 @@
 
 use crate::api::endpoints::PathPart;
 use macros::make_path_parts;
-use serde::{Deserialize, Serialize};
+use mymacros::{Deserialize, Serialize};
 
 use super::{ImageId, ImageSize};
 
@@ -26,7 +26,7 @@ make_path_parts!(UserImageListPath => "/v1/user/me/image");
 pub struct UserImageListQuery {
     /// Optionally filter by image kind. If included it will only return results of the corresponding
     /// kinds listed.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub kind: Option<ImageSize>,
 }
 

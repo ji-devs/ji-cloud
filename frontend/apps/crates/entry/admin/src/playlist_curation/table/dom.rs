@@ -196,7 +196,7 @@ impl PlaylistTable {
                             }))
                         }),
                         html!("span", {
-                            .text_signal(playlist.published_at.signal().map(|published_at| {
+                            .text_signal(playlist.published_at.signal_cloned().map(|published_at| {
                                 match published_at {
                                     Some(published_at) => published_at.format("%b %e, %Y").to_string(),
                                     None => "".to_string()

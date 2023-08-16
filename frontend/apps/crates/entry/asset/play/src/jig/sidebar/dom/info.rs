@@ -75,7 +75,7 @@ fn render_jig_info(state: Rc<State>, jig: &JigResponse) -> Dom {
         .prop("target", "_BLANK")
         .prop("href",  Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(jig.author_id.unwrap_ji()))).to_string())
         .prop("publishedAt", {
-            match jig.published_at {
+            match jig.published_at.clone() {
                 Some(publish_at) => published_at_string(publish_at, false),
                 None => String::new(),
             }

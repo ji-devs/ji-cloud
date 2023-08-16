@@ -1,5 +1,5 @@
 use crate::unwrap::UnwrapJiExt;
-use rgb::RGBA8;
+use shared::{RGBA8, RGBA};
 
 pub fn hex_to_rgba8(hex: &str) -> RGBA8 {
     let r = u8::from_str_radix(&hex[1..=2], 16).expect_ji("Invalid color");
@@ -11,12 +11,12 @@ pub fn hex_to_rgba8(hex: &str) -> RGBA8 {
         0xFF
     };
 
-    RGBA8::new(r, g, b, a)
+    RGBA(rgb::RGBA8::new(r, g, b, a))
 }
 
 pub fn rgba8_to_hex(rgba8: &RGBA8) -> String {
     format!(
         "#{:02X}{:02X}{:02X}{:02X}",
-        rgba8.r, rgba8.g, rgba8.b, rgba8.a
+        rgba8.0.r, rgba8.0.g, rgba8.0.b, rgba8.0.a
     )
 }

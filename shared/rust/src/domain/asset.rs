@@ -8,11 +8,11 @@ use std::{
 };
 
 use anyhow::anyhow;
-use chrono::{DateTime, Utc};
+use crate::{DateTime, Utc};
 // use dyn_clone::DynClone;
-use serde::{Deserialize, Serialize};
+use mymacros::{Deserialize, Serialize};
 use strum_macros::Display;
-use uuid::Uuid;
+use crate::Uuid;
 
 use crate::{
     api::endpoints::PathPart,
@@ -35,7 +35,7 @@ use super::{
 
 /// AssetType
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Display)]
-#[serde(rename_all = "kebab-case")]
+// #[serde(rename_all = "kebab-case")]
 #[strum(serialize_all = "kebab-case")]
 pub enum AssetType {
     /// JIG
@@ -156,7 +156,7 @@ impl PathPart for AssetType {
 
 /// AssetId
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub enum AssetId {
     /// JIG ID
     JigId(JigId),
@@ -266,7 +266,7 @@ impl AssetId {
 
 /// Asset
 #[derive(Clone, Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub enum Asset {
     /// JIG ID associated with the module.
     Jig(JigResponse),
@@ -376,10 +376,10 @@ impl Asset {
     /// get id
     pub fn published_at(&self) -> Option<DateTime<Utc>> {
         match self {
-            Self::Jig(jig) => jig.published_at,
-            Self::Playlist(playlist) => playlist.published_at,
-            Self::Resource(resource) => resource.published_at,
-            Self::Course(course) => course.published_at,
+            Self::Jig(jig) => jig.published_at.clone(),
+            Self::Playlist(playlist) => playlist.published_at.clone(),
+            Self::Resource(resource) => resource.published_at.clone(),
+            Self::Course(course) => course.published_at.clone(),
         }
     }
 
@@ -587,7 +587,7 @@ impl Asset {
 // dyn_clone::clone_trait_object!(Asset);
 
 /// Special parameter for allowing implicit `me` as a user.
-#[derive(Clone, Eq, PartialEq, Debug)]
+#[derive(Clone, Eq, PartialEq, Debug, mymacros::Serialize, mymacros::Deserialize)]
 pub enum UserOrMe {
     /// We should use the user found in the session auth.
     Me,
@@ -596,54 +596,54 @@ pub enum UserOrMe {
     User(Uuid),
 }
 
-impl serde::Serialize for UserOrMe {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        match self {
-            UserOrMe::Me => serializer.serialize_str("me"),
-            UserOrMe::User(id) => serializer.collect_str(&id),
-        }
-    }
-}
+// impl serde::Serialize for UserOrMe {
+//     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+//     where
+//         S: serde::Serializer,
+//     {
+//         match self {
+//             UserOrMe::Me => serializer.serialize_str("me"),
+//             UserOrMe::User(id) => serializer.collect_str(&id),
+//         }
+//     }
+// }
 
-impl<'de> serde::Deserialize<'de> for UserOrMe {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        struct Visitor;
+// impl<'de> serde::Deserialize<'de> for UserOrMe {
+//     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+//     where
+//         D: serde::Deserializer<'de>,
+//     {
+//         struct Visitor;
 
-        impl<'de> serde::de::Visitor<'de> for Visitor {
-            type Value = UserOrMe;
+//         impl<'de> serde::de::Visitor<'de> for Visitor {
+//             type Value = UserOrMe;
 
-            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-                formatter.write_str("`me` or `<uuid>`")
-            }
+//             fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+//                 formatter.write_str("`me` or `<uuid>`")
+//             }
 
-            fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
-            where
-                E: serde::de::Error,
-            {
-                if value == "me" {
-                    Ok(UserOrMe::Me)
-                } else {
-                    Uuid::from_str(value)
-                        .map(UserOrMe::User)
-                        .map_err(|e| E::custom(format!("failed to parse id: {}", e)))
-                }
-            }
-        }
+//             fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+//             where
+//                 E: serde::de::Error,
+//             {
+//                 if value == "me" {
+//                     Ok(UserOrMe::Me)
+//                 } else {
+//                     Uuid::from_str(value)
+//                         .map(UserOrMe::User)
+//                         .map_err(|e| E::custom(format!("failed to parse id: {}", e)))
+//                 }
+//             }
+//         }
 
-        deserializer.deserialize_str(Visitor)
-    }
-}
+//         deserializer.deserialize_str(Visitor)
+//     }
+// }
 
 /// Sort browse results by timestamp
 #[derive(Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Debug, Display)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 #[repr(i16)]
 pub enum OrderBy {
     /// Order Asset results by timestamp created_at
@@ -658,7 +658,7 @@ pub enum OrderBy {
 /// Access level for the jig.
 #[derive(Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 #[repr(i16)]
 pub enum PrivacyLevel {
     /// Publicly available and indexed. Can be shared with others.
@@ -702,9 +702,9 @@ impl Default for PrivacyLevel {
 }
 
 /// Whether the data is draft or live.
-#[derive(Serialize, Deserialize, Clone, Copy, Debug)]
+#[derive(Serialize, Deserialize, serde::Deserialize, serde::Serialize, Clone, Copy, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 #[repr(i16)]
 pub enum DraftOrLive {
     /// Represents a draft copy

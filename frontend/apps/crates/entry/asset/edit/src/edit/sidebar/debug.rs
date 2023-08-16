@@ -28,7 +28,7 @@ pub fn get_jig() -> JigResponse {
         live_up_to_date: false,
         is_liked: false,
         jig_data: JigData {
-            created_at: chrono::offset::Utc::now(),
+            created_at: shared::Utc::now(),
             draft_or_live: DraftOrLive::Draft,
             display_name: "hello world".to_string(),
             //TODO - delete me: https://github.com/ji-devs/ji-cloud/issues/835

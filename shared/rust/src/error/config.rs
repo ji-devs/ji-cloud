@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use mymacros::{Deserialize, Serialize};
 use std::fmt::Debug;
 use thiserror::Error;
 
@@ -24,6 +24,7 @@ pub enum ConfigError {
         #[serde(skip)]
         #[from]
         source: TransientError<JsonPayloadError>,
+        a: bool,
     },
     #[cfg_attr(feature = "backend", error(transparent))]
     #[cfg_attr(not(feature = "backend"), error("Invalid query"))]
@@ -32,6 +33,7 @@ pub enum ConfigError {
         #[serde(skip)]
         #[from]
         source: TransientError<QueryPayloadError>,
+        a: bool,
     },
     #[cfg_attr(feature = "backend", error(transparent))]
     #[cfg_attr(not(feature = "backend"), error("Invalid path parameters"))]
@@ -40,6 +42,7 @@ pub enum ConfigError {
         #[serde(skip)]
         #[from]
         source: TransientError<PathError>,
+        a: bool,
     },
 }
 

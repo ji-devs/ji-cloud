@@ -83,7 +83,7 @@ impl ApiEndpoint for Update {
 ///
 /// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
 /// * [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
-/// * [`BadRequest`](http::StatusCode::BAD_REQUEST) if the given `id` is not a [`Uuid`](uuid::Uuid) or the request is missing/invalid.
+/// * [`BadRequest`](http::StatusCode::BAD_REQUEST) if the given `id` is not a [`Uuid`](crate::Uuid) or the request is missing/invalid.
 /// * [`NotFound`](http::StatusCode::NOT_FOUND) if the image tag does not exist.
 pub struct Delete;
 

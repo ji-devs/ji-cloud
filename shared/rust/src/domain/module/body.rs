@@ -3,7 +3,8 @@ use crate::{
     domain::{audio::AudioId, image::ImageId},
     media::MediaLibrary,
 };
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+// use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use mymacros::{Deserialize, Serialize};
 use std::{collections::HashSet, convert::TryFrom, fmt::Debug, hash::Hash};
 use strum_macros::{EnumIter, IntoStaticStr};
 
@@ -51,7 +52,7 @@ pub mod _groups;
 
 /// Body kinds for Modules.
 #[derive(Clone, Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 pub enum Body {
     /// Module is a memory game, and has a memory game's body.
@@ -159,7 +160,8 @@ impl Body {
 /// Extension trait for interop
 /// impl on inner body data
 pub trait BodyExt<Mode: ModeExt, Step: StepExt>:
-    BodyConvert + TryFrom<Body> + Serialize + DeserializeOwned + Clone + Debug
+    // BodyConvert + TryFrom<Body> + Serialize + DeserializeOwned + Clone + Debug
+    BodyConvert + TryFrom<Body> + miniserde::Serialize + miniserde::Deserialize + Clone + Debug
 {
     /// get choose mode list. By default it's the full list
     /// but that can be overridden to re-order or hide some modes
@@ -380,8 +382,8 @@ where
     /// the current step
     pub step: STEP,
 
-    /// the completed steps
-    pub steps_completed: HashSet<STEP>,
+    // /// the completed steps
+    // pub steps_completed: HashSet<STEP>,
 }
 
 /// This extension trait makes it possible to keep the Step
@@ -427,7 +429,7 @@ impl StepExt for () {
     }
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, Eq, PartialEq)]
+#[derive(Clone, Serialize, Deserialize, serde::Deserialize, serde::Serialize, Debug, Eq, PartialEq)]
 /// Audio
 pub struct Audio {
     /// The Audio Id
@@ -437,7 +439,7 @@ pub struct Audio {
 }
 
 /// Module-specific assistance during play.
-#[derive(Clone, Default, Serialize, Deserialize, Debug)]
+#[derive(Clone, Default, Serialize, Deserialize, serde::Deserialize, serde::Serialize, Debug)]
 pub struct ModuleAssist {
     /// Text displayed in banner
     pub text: Option<String>,
@@ -477,7 +479,7 @@ impl ModuleAssist {
 
 /// Type of assistance to be shown. This is only set during play and should never be
 /// persisted to the database.
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, serde::Serialize, serde::Deserialize, Debug)]
 pub enum ModuleAssistType {
     /// Instructions to be shown when an activity starts
     Instructions,
@@ -508,12 +510,12 @@ impl ModuleAssistType {
 /// Background
 pub enum Background {
     /// Color
-    Color(Option<rgb::RGBA8>),
+    Color(Option<crate::RGBA8>),
     /// Any other image
     Image(Image),
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Clone, Serialize, Deserialize, serde::Deserialize, serde::Serialize, Debug, PartialEq)]
 /// Images need id and lib
 pub struct Image {
     /// The Image Id
@@ -524,11 +526,12 @@ pub struct Image {
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq)]
 /// Vector of 2 floats
-pub struct Vec2(pub [f64; 2]);
+// pub struct Vec2(pub [f64; 2]);
+pub struct Vec2(pub Vec<f64>);
 
 impl From<(f64, f64)> for Vec2 {
     fn from((x, y): (f64, f64)) -> Self {
-        Self([x, y])
+        Self(vec![x, y])
     }
 }
 
@@ -540,11 +543,12 @@ impl From<Vec2> for (f64, f64) {
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq)]
 /// Vector of 3 floats
-pub struct Vec3(pub [f64; 3]);
+// pub struct Vec3(pub [f64; 3]);
+pub struct Vec3(pub Vec<f64>);
 
 impl From<(f64, f64, f64)> for Vec3 {
     fn from((x, y, z): (f64, f64, f64)) -> Self {
-        Self([x, y, z])
+        Self(vec![x, y, z])
     }
 }
 
@@ -556,11 +560,12 @@ impl From<Vec3> for (f64, f64, f64) {
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq)]
 /// Vector of 4 floats, also used as a Quaternion
-pub struct Vec4(pub [f64; 4]);
+// pub struct Vec4(pub [f64; 4]);
+pub struct Vec4(pub Vec<f64>);
 
 impl From<(f64, f64, f64, f64)> for Vec4 {
     fn from((x, y, z, w): (f64, f64, f64, f64)) -> Self {
-        Self([x, y, z, w])
+        Self(vec![x, y, z, w])
     }
 }
 
@@ -587,10 +592,10 @@ impl Transform {
     /// Create a new Transform
     pub fn identity() -> Self {
         Self {
-            translation: Vec3([0.0, 0.0, 0.0]),
-            rotation: Vec4([0.0, 0.0, 0.0, 1.0]),
-            scale: Vec3([1.0, 1.0, 1.0]),
-            origin: Vec3([0.0, 0.0, 0.0]),
+            translation: Vec3(vec![0.0, 0.0, 0.0]),
+            rotation: Vec4(vec![0.0, 0.0, 0.0, 1.0]),
+            scale: Vec3(vec![1.0, 1.0, 1.0]),
+            origin: Vec3(vec![0.0, 0.0, 0.0]),
         }
     }
 }

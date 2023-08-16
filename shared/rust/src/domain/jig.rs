@@ -8,8 +8,8 @@ pub use report::{JigReport, ReportId};
 pub mod player;
 pub use player::{JigPlayerSettings, TextDirection};
 
-use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
+use crate::{DateTime, Utc};
+use mymacros::{Deserialize, Serialize};
 use std::{
     collections::{HashMap, HashSet},
     convert::TryFrom,
@@ -38,45 +38,45 @@ make_path_parts!(JigCreatePath => "/v1/jig");
 ///
 /// This creates the draft and live [JigData](JigData) copies with the requested info.
 #[derive(Serialize, Deserialize, Debug, Default)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct JigCreateRequest {
     /// The JIG's name.
-    #[serde(default)]
+    // #[serde(default)]
     pub display_name: String,
 
     /// This JIG's age ranges.
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    #[serde(default)]
+    // // #[serde(skip_serializing_if = "Vec::is_empty")]
+    // #[serde(default)]
     pub age_ranges: Vec<AgeRangeId>,
 
     /// This jig's affiliations.
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    #[serde(default)]
+    // // #[serde(skip_serializing_if = "Vec::is_empty")]
+    // #[serde(default)]
     pub affiliations: Vec<AffiliationId>,
 
     /// The language the jig uses.
     ///
     /// NOTE: in the format `en`, `eng`, `en-US`, `eng-US` or `eng-USA`. To be replaced with a struct that enforces this.
-    #[serde(default)]
+    // #[serde(default)]
     pub language: String,
 
     /// The jig's categories.
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    #[serde(default)]
+    // // #[serde(skip_serializing_if = "Vec::is_empty")]
+    // #[serde(default)]
     pub categories: Vec<CategoryId>,
 
     /// Description of the jig. Defaults to empty string.
-    #[serde(default)]
+    // #[serde(default)]
     pub description: String,
 
     /// Default player settings for this jig.
-    #[serde(default)]
+    // #[serde(default)]
     pub default_player_settings: JigPlayerSettings,
 }
 
 /// The over-the-wire representation of a JIG's data. This can either be the live copy or the draft copy.
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct JigData {
     /// When the JIG was first created.
     pub created_at: DateTime<Utc>,
@@ -140,16 +140,16 @@ pub struct JigData {
     pub translated_keywords: String,
 
     /// translated descriptions
-    #[serde(default)]
+    // #[serde(default)]
     pub translated_description: HashMap<String, String>,
 }
 
 /// These fields can be edited by admin and can be viewed by everyone
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct JigAdminData {
     /// Rating for jig, weighted for jig search
-    #[serde(default)]
+    // #[serde(default)]
     pub rating: Option<JigRating>,
 
     /// if true does not appear in search
@@ -164,28 +164,28 @@ pub struct JigAdminData {
 
 /// These fields can be edited by admin and can be viewed by everyone
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct JigUpdateAdminDataRequest {
     /// Rating for jig, weighted for jig search
-    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+   //  #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
     pub rating: UpdateNonNullable<JigRating>,
 
     /// if true does not appear in search
-    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+   //  #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
     pub blocked: UpdateNonNullable<bool>,
 
     /// Indicates jig has been curated by admin
-    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+   //  #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
     pub curated: UpdateNonNullable<bool>,
 
     /// Indicates jig is premium content
-    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+   //  #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
     pub premium: UpdateNonNullable<bool>,
 }
 
 /// Transfer Jig from one user to another.
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct JigAdminTransferRequest {
     /// User Id to Transfer over from
     pub from: UserId,
@@ -202,7 +202,7 @@ make_path_parts!(JigTransferAdminPath => "/v1/jig/admin/transfer");
 /// Admin rating for Jig
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, Eq, PartialEq)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 #[repr(i16)]
 pub enum JigRating {
     #[allow(missing_docs)]
@@ -212,6 +212,25 @@ pub enum JigRating {
     #[allow(missing_docs)]
     Three = 3,
 }
+
+
+
+
+
+// /// Admin rating for Jig
+// #[derive(miniserde_enum::Serialize_enum, miniserde_enum::Deserialize_enum)]
+// pub enum JigRating2 {
+//     ///fdsa
+//     One,
+//     ///fdsa
+//     Two,
+//     ///fdsa
+//     Three,
+// }
+
+
+
+
 
 impl TryFrom<u8> for JigRating {
     type Error = ();
@@ -229,7 +248,7 @@ impl TryFrom<u8> for JigRating {
 /// Audio for background music
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, Eq, PartialEq)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 #[repr(i16)]
 pub enum AudioBackground {
     #[allow(missing_docs)]
@@ -329,19 +348,19 @@ impl AudioBackground {
 
 /// Audio Effects
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct AudioEffects {
-    /// Positive audio feedback
-    pub feedback_positive: HashSet<AudioFeedbackPositive>,
+    // /// Positive audio feedback
+    // pub feedback_positive: HashSet<AudioFeedbackPositive>,
 
-    /// Negative audio feedback
-    pub feedback_negative: HashSet<AudioFeedbackNegative>,
+    // /// Negative audio feedback
+    // pub feedback_negative: HashSet<AudioFeedbackNegative>,
 }
 
 /// Negative Audio Feedback
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 #[repr(i16)]
 pub enum AudioFeedbackNegative {
     #[allow(missing_docs)]
@@ -397,7 +416,7 @@ impl AudioFeedbackNegative {
 /// Positive Audio Feedback
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 #[repr(i16)]
 pub enum AudioFeedbackPositive {
     #[allow(missing_docs)]
@@ -452,7 +471,7 @@ impl AudioFeedbackPositive {
 
 /// The response returned when a request for `GET`ing a jig is successful.
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct JigResponse {
     /// The ID of the JIG.
     pub id: JigId,
@@ -496,74 +515,74 @@ make_path_parts!(JigUpdateDraftDataPath => "/v1/jig/{}" => JigId);
 
 /// Request for updating a JIG's draft data.
 #[derive(Serialize, Deserialize, Debug, Default)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct JigUpdateDraftDataRequest {
     /// The JIG's name.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
+    // // #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(default)]
     pub display_name: Option<String>,
 
     /// The language the jig uses.
     ///
     /// NOTE: in the format `en`, `eng`, `en-US`, `eng-US` or `eng-USA`. To be replaced with a struct that enforces this.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
+    // // #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(default)]
     pub language: Option<String>,
 
     /// The jig's categories.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
+    // // #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(default)]
     pub categories: Option<Vec<CategoryId>>,
 
     /// The jig's age ranges.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
+    // // #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(default)]
     pub age_ranges: Option<Vec<AgeRangeId>>,
 
     /// The jig's affiliations.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
+    // // #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(default)]
     pub affiliations: Option<Vec<AffiliationId>>,
 
     /// The current author
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
+    // // #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(default)]
     pub author_id: Option<UserId>,
 
     /// Description of the jig.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
+    // // #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(default)]
     pub description: Option<String>,
 
     /// Default player settings for this jig.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
+    // // #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(default)]
     pub default_player_settings: Option<JigPlayerSettings>,
 
     /// Theme for this jig, identified by `[ThemeId](module::body::ThemeId)`.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
+    // // #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(default)]
     pub theme: Option<ThemeId>,
 
     /// Background audio
-    #[serde(deserialize_with = "super::deserialize_optional_field")]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
+    // #[serde(deserialize_with = "super::deserialize_optional_field")]
+    // // #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(default)]
     pub audio_background: Option<Option<AudioBackground>>,
 
     /// Audio effects
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
+    // // #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(default)]
     pub audio_effects: Option<AudioEffects>,
 
     /// Privacy level for the jig.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
+    // // #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(default)]
     pub privacy_level: Option<PrivacyLevel>,
 
     /// Additional keywords for searches
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
+    // // #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(default)]
     pub other_keywords: Option<String>,
 }
 
@@ -573,60 +592,60 @@ make_path_parts!(JigBrowsePath => "/v1/jig/browse");
 
 /// Query for [`Browse`](crate::api::endpoints::jig::Browse).
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct JigBrowseQuery {
     /// Optionally filter by `is_published`
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(default)]
+    // // #[serde(skip_serializing_if = "Option::is_none")]
     pub is_published: Option<bool>,
 
     /// Optionally filter by author id.
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(default)]
+    // // #[serde(skip_serializing_if = "Option::is_none")]
     pub author_id: Option<UserOrMe>,
 
     /// The page number of the jigs to get.
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(default)]
+    // // #[serde(skip_serializing_if = "Option::is_none")]
     pub page: Option<u32>,
 
     /// Optionally browse by draft or live.
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(default)]
+    // // #[serde(skip_serializing_if = "Option::is_none")]
     pub draft_or_live: Option<DraftOrLive>,
 
     /// Optionally filter jig by their privacy level
-    #[serde(default)]
-    #[serde(deserialize_with = "super::from_csv")]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    // #[serde(default)]
+    // #[serde(deserialize_with = "super::from_csv")]
+    // // #[serde(skip_serializing_if = "Vec::is_empty")]
     pub privacy_level: Vec<PrivacyLevel>,
 
     /// Optionally filter jig by blocked status
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(default)]
+    // // #[serde(skip_serializing_if = "Option::is_none")]
     pub blocked: Option<bool>,
 
     /// The hits per page to be returned
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(default)]
+    // // #[serde(skip_serializing_if = "Option::is_none")]
     pub page_limit: Option<u32>,
 
     /// Optionally filter by `additional resources`
-    #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_uuids")]
-    #[serde(deserialize_with = "super::from_csv")]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    // #[serde(default)]
+    //#[serde(serialize_with = "super::csv_encode_uuids")]
+    // #[serde(deserialize_with = "super::from_csv")]
+    // // #[serde(skip_serializing_if = "Vec::is_empty")]
     pub resource_types: Vec<ResourceTypeId>,
 
     /// The hits per page to be returned
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(default)]
+    // // #[serde(skip_serializing_if = "Option::is_none")]
     pub order_by: Option<OrderBy>,
 }
 
 /// Response for [`Browse`](crate::api::endpoints::jig::Browse).
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct JigBrowseResponse {
     /// the jigs returned.
     pub jigs: Vec<JigResponse>,
@@ -642,105 +661,105 @@ make_path_parts!(JigSearchPath => "/v1/jig");
 
 /// Search for jigs via the given query string.
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct JigSearchQuery {
     /// The query string.
-    #[serde(default)]
-    #[serde(skip_serializing_if = "String::is_empty")]
+    // #[serde(default)]
+    // // #[serde(skip_serializing_if = "String::is_empty")]
     pub q: String,
 
     /// The page number of the jigs to get.
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(default)]
+    // // #[serde(skip_serializing_if = "Option::is_none")]
     pub page: Option<u32>,
 
     /// Optionally filter by `language`
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(default)]
+    // // #[serde(skip_serializing_if = "Option::is_none")]
     pub language: Option<String>,
 
     /// Optionally filter by `age_ranges`
     ///
     /// Note: Currently does nothing
-    #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_uuids")]
-    #[serde(deserialize_with = "super::from_csv")]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    // #[serde(default)]
+    //#[serde(serialize_with = "super::csv_encode_uuids")]
+    // #[serde(deserialize_with = "super::from_csv")]
+    // // #[serde(skip_serializing_if = "Vec::is_empty")]
     pub age_ranges: Vec<AgeRangeId>,
 
     /// Optionally filter by `affiliations`
     ///
     /// Note: Currently does nothing
-    #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_uuids")]
-    #[serde(deserialize_with = "super::from_csv")]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    // #[serde(default)]
+    //#[serde(serialize_with = "super::csv_encode_uuids")]
+    // #[serde(deserialize_with = "super::from_csv")]
+    // // #[serde(skip_serializing_if = "Vec::is_empty")]
     pub affiliations: Vec<AffiliationId>,
 
     /// Optionally filter by `additional resources`
-    #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_uuids")]
-    #[serde(deserialize_with = "super::from_csv")]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    // #[serde(default)]
+    //#[serde(serialize_with = "super::csv_encode_uuids")]
+    // #[serde(deserialize_with = "super::from_csv")]
+    // // #[serde(skip_serializing_if = "Vec::is_empty")]
     pub resource_types: Vec<ResourceTypeId>,
 
     /// Optionally filter by `categories`
-    #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_uuids")]
-    #[serde(deserialize_with = "super::from_csv")]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    // #[serde(default)]
+    //#[serde(serialize_with = "super::csv_encode_uuids")]
+    // #[serde(deserialize_with = "super::from_csv")]
+    // // #[serde(skip_serializing_if = "Vec::is_empty")]
     pub categories: Vec<CategoryId>,
 
     /// Optionally filter by `is_published`. This means that the jig's `publish_at < now()`.
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(default)]
+    // // #[serde(skip_serializing_if = "Option::is_none")]
     pub is_published: Option<bool>,
 
     /// Optionally filter by author's id
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(default)]
+    // // #[serde(skip_serializing_if = "Option::is_none")]
     pub author_id: Option<UserOrMe>,
 
     /// Optionally filter by the author's name
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(default)]
+    // // #[serde(skip_serializing_if = "Option::is_none")]
     pub author_name: Option<String>,
 
     /// Optionally search for jigs using keywords
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(default)]
+    // // #[serde(skip_serializing_if = "Option::is_none")]
     pub other_keywords: Option<String>,
 
     /// Optionally search for jigs using translated keyword
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(default)]
+    // // #[serde(skip_serializing_if = "Option::is_none")]
     pub translated_keywords: Option<String>,
 
     /// Optionally search for jigs by privacy level
-    #[serde(default)]
-    #[serde(deserialize_with = "super::from_csv")]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    // #[serde(default)]
+    // #[serde(deserialize_with = "super::from_csv")]
+    // // #[serde(skip_serializing_if = "Vec::is_empty")]
     pub privacy_level: Vec<PrivacyLevel>,
 
     /// Optionally search for blocked or non-blocked jigs
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(default)]
+    // // #[serde(skip_serializing_if = "Option::is_none")]
     pub blocked: Option<bool>,
 
     /// The hits per page to be returned
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(default)]
+    // // #[serde(skip_serializing_if = "Option::is_none")]
     pub page_limit: Option<u32>,
 
     /// Optionally filter JIGs based off of existence of rating
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(default)]
+    // // #[serde(skip_serializing_if = "Option::is_none")]
     pub is_rated: Option<bool>,
 }
 
 /// Response for successful search.
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct JigSearchResponse {
     /// the jigs returned.
     pub jigs: Vec<JigResponse>,
@@ -754,7 +773,7 @@ pub struct JigSearchResponse {
 
 /// Response for successfully finding the draft of a jig.
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct JigIdResponse {
     /// The ID of the jig
     pub id: JigId,
@@ -772,7 +791,7 @@ make_path_parts!(JigCountPath => "/v1/jig/count");
 
 /// Response for total count of public and published jig.
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct JigCountResponse {
     /// Total number of public and published jigs.
     pub total_count: u64,
@@ -797,7 +816,7 @@ make_path_parts!(JigAdminDataUpdatePath => "/v1/jig/{}/admin" => JigId);
 
 /// Response list of Playlists that JIG is associated with.
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct GetJigPlaylistsResponse {
     /// the jigs returned.
     pub playlists: Vec<PlaylistResponse>,

@@ -7,7 +7,7 @@ use std::{
     str::FromStr,
 };
 
-use uuid::Uuid;
+use crate::Uuid;
 
 /// Hack to deserialize an Optional [`Option<T>`]
 ///

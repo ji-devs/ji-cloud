@@ -1,9 +1,9 @@
 //! Types for categories.
 
-use chrono::{DateTime, Utc};
+use crate::{DateTime, Utc};
 use macros::make_path_parts;
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
+use mymacros::{Deserialize, Serialize};
+use crate::Uuid;
 
 use crate::{api::endpoints::PathPart, domain::user::UserScope};
 
@@ -35,7 +35,7 @@ pub struct Category {
 
     /// The category's children, if any.
     #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    // #[serde(skip_serializing_if = "Vec::is_empty")]
     pub children: Vec<Category>,
 
     /// When the category was initially created.
@@ -105,8 +105,8 @@ pub struct GetCategoryRequest {
     // the backend _could_ transmute the `CategoryId`s into `Uuid`s, but that's `unsafe`.
     /// The exact ids to be included in the response.
     #[serde(default)]
-    #[serde(serialize_with = "super::csv_encode_uuids")]
-    #[serde(deserialize_with = "super::from_csv")]
+    //#[serde(serialize_with = "super::csv_encode_uuids")]
+    // #[serde(deserialize_with = "super::from_csv")]
     pub ids: Vec<Uuid>,
 
     /// Which direction to follow the tree.
@@ -145,8 +145,8 @@ pub struct UpdateCategoryRequest {
     /// Specifically, if [`None`], don't update.
     /// If `Some(None)`, set the parent to [`None`].
     /// Otherwise set it to the given [`CategoryId`].
-    #[serde(deserialize_with = "super::deserialize_optional_field")]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(deserialize_with = "super::deserialize_optional_field")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub parent_id: Option<Option<CategoryId>>,
 
@@ -157,7 +157,7 @@ pub struct UpdateCategoryRequest {
     pub index: Option<u16>,
 
     /// If [`Some`] add a user scope
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub user_scopes: Option<Vec<UserScope>>,
 }
 

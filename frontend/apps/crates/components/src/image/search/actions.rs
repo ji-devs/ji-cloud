@@ -30,7 +30,7 @@ use shared::{
     media::MediaLibrary,
 };
 use std::rc::Rc;
-use url::Url;
+use shared::Url;
 use utils::prelude::*;
 use web_sys::File;
 

@@ -5,7 +5,7 @@ use crate::{
     domain::{asset::AssetId, audio::AudioId, image::ImageId, meta::ResourceTypeId, pdf::PdfId},
 };
 use macros::make_path_parts;
-use serde::{Deserialize, Serialize};
+use mymacros::{Deserialize, Serialize};
 
 wrap_uuid! {
     /// Wrapper type around [`Uuid`](Uuid), represents the ID of an additional resource.
@@ -13,7 +13,7 @@ wrap_uuid! {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 /// Over-the-wire representation of a JIG or Playlist additional resource.
 pub struct AdditionalResource {
     /// The additional resources's ID.
@@ -26,7 +26,7 @@ pub struct AdditionalResource {
     pub resource_type_id: ResourceTypeId,
 
     /// Content of additional resource
-    #[serde(flatten)]
+    // #[serde(flatten)]
     pub resource_content: ResourceContent,
 }
 
@@ -36,7 +36,7 @@ make_path_parts!(CreateAssetResourcePath => "/v1/additional-resource/draft");
 ///
 /// [`additional_resource::Create`](crate::api::endpoints::additional_resource::Create)
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct AdditionalResourceCreateRequest {
     /// Asset Id (JIG or Playlist) for additional resource
     #[serde(flatten)]
@@ -59,26 +59,26 @@ make_path_parts!(UpdateAssetResourcePath => "/v1/additional-resource/{}" => Addi
 ///
 /// [`additional_resource::Update`](crate::api::endpoints::additional_resource::Update)
 #[derive(Serialize, Deserialize, Debug, Default)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct AdditionalResourceUpdateRequest {
     /// Asset Id (JIG or Playlist) for additional resource
     #[serde(flatten)]
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub asset_id: Option<AssetId>,
 
     /// resource display name
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub display_name: Option<String>,
 
     /// Type of additional  resource
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub resource_type_id: Option<ResourceTypeId>,
 
     /// Kind of additional resource
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     #[serde(flatten)]
     pub resource_content: Option<ResourceContent>,
@@ -94,25 +94,37 @@ make_path_parts!(DeleteAssetResourcePath => "/v1/additional-resource/{}/draft" =
 ///
 /// [`additional_resource::GetLive`](crate::api::endpoints::additional_resource::GetLive)
 #[derive(Serialize, Deserialize, Debug, Default)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct AssetIdResource {
     /// Asset Id (JIG or Playlist) for additional resource
     #[serde(flatten)]
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     pub asset_id: Option<AssetId>,
 }
 
 /// Value of additional resource
 #[derive(Deserialize, Serialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
+// // #[serde(rename_all = "camelCase")]
 pub enum ResourceContent {
     /// Additional resource kind: image
     ImageId(ImageId),
     /// Additional resource kind: audioFile
     AudioId(AudioId),
     /// Additional resource kind: link
-    Link(url::Url),
+    Link(crate::Url),
     /// Additional resource kind: pdf
     PdfId(PdfId),
 }
+
+// impl miniserde::Deserialize for ResourceContent {
+//     fn begin(out: &mut Option<Self>) -> &mut dyn miniserde::de::Visitor {
+//         todo!()
+//     }
+// }
+
+// impl miniserde::Serialize for ResourceContent {
+//     fn begin(&self) -> miniserde::ser::Fragment<'_> {
+//         todo!()
+//     }
+// }

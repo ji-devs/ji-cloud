@@ -1,4 +1,4 @@
-use rgb::RGBA8;
+use shared::RGBA8;
 use shared::{
     api::endpoints,
     domain::user::{

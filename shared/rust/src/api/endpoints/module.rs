@@ -73,7 +73,7 @@ impl ApiEndpoint for Create {
 ///
 /// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
 /// * [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
-/// * [`BadRequest`](http::StatusCode::BAD_REQUEST) if the given `id` is not a [`Uuid`](uuid::Uuid) or the request is missing/invalid.
+/// * [`BadRequest`](http::StatusCode::BAD_REQUEST) if the given `id` is not a [`Uuid`](crate::Uuid) or the request is missing/invalid.
 /// * [`NotFound`](http::StatusCode::NOT_FOUND) if the jig or module does not exist.
 pub struct Update;
 impl ApiEndpoint for Update {
@@ -94,7 +94,7 @@ impl ApiEndpoint for Update {
 /// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
 /// * [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
 /// * [`NotFound`](http::StatusCode::NOT_FOUND) if the jig or module does not exist.
-/// * [`BadRequest`](http::StatusCode::BAD_REQUEST) if the given `id` is not a [`Uuid`](uuid::Uuid).
+/// * [`BadRequest`](http::StatusCode::BAD_REQUEST) if the given `id` is not a [`Uuid`](crate::Uuid).
 pub struct Delete;
 impl ApiEndpoint for Delete {
     type Path = ModuleDeletePath;

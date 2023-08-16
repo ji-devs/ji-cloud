@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use mymacros::{Deserialize, Serialize};
 
 /// Default limit for attempts a student can make on an answer before a trace
 /// is highlighted.

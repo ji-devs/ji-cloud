@@ -54,7 +54,7 @@ impl SettingsPage {
             }),
             html!("p", {
                 .prop("slot", "plan-renews-on")
-                .text(&plan_info.current_period_end.format("%h %e, %Y").to_string())
+                .text(&plan_info.current_period_end.0.format("%h %e, %Y").to_string())
             }),
             html!("p", {
                 .prop("slot", "plan-renewal-label")

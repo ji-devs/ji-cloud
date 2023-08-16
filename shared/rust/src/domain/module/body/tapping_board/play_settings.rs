@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use mymacros::{Deserialize, Serialize};
 
 /// Play settings
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]

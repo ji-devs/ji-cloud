@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use shared::domain::module::body::Image;
-use url::Url;
+use shared::Url;
 use utils::unwrap::UnwrapJiExt;
 
 use super::actions;

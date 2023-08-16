@@ -222,7 +222,8 @@ where
 
                     let msg:IframeInit<RawData> = IframeInit::new(data);
                     if let Some(window) = elem.content_window() {
-                        let _ = window.post_message(&msg.into(), &url);
+                        // let _ = window.post_message(&msg.into(), &url);
+                        todo!()
                     } else {
                         log::info!("unable to get window for sending iframe msg!");
                     }

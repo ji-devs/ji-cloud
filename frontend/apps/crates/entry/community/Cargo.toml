@@ -22,6 +22,7 @@ console_error_panic_hook = { workspace = true, optional = true }
 wasm-bindgen = { workspace = true }
 js-sys = { workspace = true }
 web-sys = { workspace = true }
+mymacros = { workspace = true }
 once_cell = { workspace = true }
 uuid = { workspace = true, features = ["serde", "wasm-bindgen"] }
 wasm-bindgen-futures = { workspace = true }

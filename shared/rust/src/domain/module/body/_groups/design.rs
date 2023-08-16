@@ -1,6 +1,6 @@
 use crate::domain::module::body::{Audio, Background, Image, ModuleAssist, ThemeId, Transform};
 use derive_setters::Setters;
-use serde::{Deserialize, Serialize};
+use mymacros::{Deserialize, Serialize};
 
 /// Default text for `Text`
 pub const DEFAULT_TEXT_VALUE: &str = "Shalom שָׁלוֹם";
@@ -53,13 +53,13 @@ pub struct Backgrounds {
 /// Stickers are things that can be rendered and transforme
 pub enum Sticker {
     /// Sprites
-    #[serde(alias = "sprite")]
+    // #[serde(alias = "sprite")]
     Sprite(Sprite),
     /// Text
-    #[serde(alias = "text")]
+    // #[serde(alias = "text")]
     Text(Text),
     /// Embed
-    #[serde(alias = "embed")]
+    // #[serde(alias = "embed")]
     Embed(Embed),
 }
 
@@ -132,7 +132,7 @@ pub struct Sprite {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
-#[serde(rename_all = "snake_case")]
+// #[serde(rename_all = "snake_case")]
 /// Sprite Effects
 pub enum SpriteEffect {
     /// Remove White
@@ -164,7 +164,7 @@ pub enum DoneAction {
 /// Host of embed
 pub enum EmbedHost {
     /// YouTube
-    #[serde(alias = "youtube")]
+    // #[serde(alias = "youtube")]
     Youtube(YoutubeEmbed),
 
     /// Vimeo
@@ -450,13 +450,13 @@ pub struct Trace {
 /// Trace kind
 pub enum TraceKind {
     /// Wrong (red color)
-    #[serde(alias = "wrong")]
+    // #[serde(alias = "wrong")]
     Wrong,
     /// Correct (green color)
-    #[serde(alias = "correct")]
+    // #[serde(alias = "correct")]
     Correct,
     /// Regular (blue color)
-    #[serde(alias = "regular")]
+    // #[serde(alias = "regular")]
     Regular,
 }
 
@@ -470,23 +470,23 @@ impl AsRef<Trace> for Trace {
 /// Trace shape
 pub enum TraceShape {
     /// width and height
-    #[serde(alias = "rect")]
+    // #[serde(alias = "rect")]
     Rect(f64, f64),
     /// radius
-    #[serde(alias = "ellipse")]
+    // #[serde(alias = "ellipse")]
     Ellipse(f64, f64),
     /// points
-    #[serde(alias = "path")]
+    // #[serde(alias = "path")]
     Path(Vec<(f64, f64)>),
     /// explicit path commands
     /// corresponds to SVG spec: https://svgwg.org/svg2-draft/paths.html#TheDProperty
     /// the second parameter indicates whether it's absolute (true) or relative (false)
-    #[serde(alias = "pathCommands")]
+    // #[serde(alias = "pathCommands")]
     PathCommands(Vec<(PathCommand, bool)>),
 }
 
 #[allow(missing_docs)]
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum PathCommand {
     /// https://svgwg.org/svg2-draft/paths.html#PathDataMovetoCommands
     MoveTo(f64, f64),
@@ -508,4 +508,16 @@ pub enum PathCommand {
     SmoothQuadCurveTo(f64, f64),
     /// https://svgwg.org/svg2-draft/paths.html#PathDataEllipticalArcCommands
     ArcTo(f64, f64, f64, f64, f64, f64, f64),
+}
+
+impl miniserde::Deserialize for PathCommand {
+    fn begin(out: &mut Option<Self>) -> &mut dyn miniserde::de::Visitor {
+        todo!()
+    }
+}
+
+impl miniserde::Serialize for PathCommand {
+    fn begin(&self) -> miniserde::ser::Fragment<'_> {
+        todo!()
+    }
 }

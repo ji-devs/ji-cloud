@@ -2,7 +2,7 @@ use std::collections::HashSet;
 use std::iter::FromIterator;
 use std::rc::Rc;
 
-use chrono::{DateTime, Utc};
+use shared::{DateTime, Utc};
 use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::MutableVec;
 use shared::api::endpoints;
@@ -119,7 +119,7 @@ impl EditablePlaylist {
             id: self.id,
             cover: Mutable::new(self.cover.get_cloned()),
             items: MutableVec::new_with_values(self.items.lock_ref().to_vec()),
-            published_at: Mutable::new(self.published_at.get()),
+            published_at: Mutable::new(self.published_at.get_cloned()),
             display_name: Mutable::new(self.display_name.get_cloned()),
             description: Mutable::new(self.description.get_cloned()),
             age_ranges: Mutable::new(self.age_ranges.get_cloned()),

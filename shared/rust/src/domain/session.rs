@@ -5,7 +5,7 @@ use std::fmt;
 use super::user::UserId;
 use crate::api::endpoints::PathPart;
 use macros::make_path_parts;
-use serde::{Deserialize, Serialize};
+use mymacros::{Deserialize, Serialize};
 
 /// The query key for
 pub const AUTH_QUERY_NAME: &str = "access_token";
@@ -38,7 +38,7 @@ make_path_parts!(CreateSessionPath => "/v1/session");
 /// 3. As a cookie, `X-AUTH=<token>`. This token will also be authenticated against the CSRF-prevention
 /// header.
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub enum CreateSessionResponse {
     /// A new session was successfully created and the user may use the api as normal.
     Login(NewSessionResponse),
@@ -74,15 +74,15 @@ pub enum CreateSessionResponse {
         #[serde(flatten)]
         response: NewSessionResponse,
         /// Oauth profile
-        #[serde(skip_serializing_if = "Option::is_none")]
+        // #[serde(skip_serializing_if = "Option::is_none")]
         oauth_profile: Option<OAuthUserProfile>,
     },
 }
 
 /// User's profile info fetched from the OAuth service. Returned as part of the identity claims
 /// to be used as defaults for populating a `PutProfile` request.
-#[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
+#[derive(Serialize, Deserialize, serde::Deserialize, serde::Serialize, Debug, Clone)]
+// #[serde(rename_all = "camelCase")]
 pub struct OAuthUserProfile {
     /// The user's email
     pub email: String,
@@ -112,7 +112,7 @@ pub struct OAuthUserProfile {
 ///
 /// Note: This response *also* includes a cookie.
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct NewSessionResponse {
     /// A transparent CSRF token to use for this Session.
     pub csrf: String,
@@ -120,7 +120,7 @@ pub struct NewSessionResponse {
 
 /// Which URL to use for OAuth callback.
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub enum OAuthUrlKind {
     /// Get OAuth Url for login
     Login,
@@ -138,7 +138,7 @@ impl PathPart for OAuthUrlKind {
 
 /// Which *service* to use for OAuth Url generation.
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 pub enum GetOAuthUrlServiceKind {
     /// Google OAuth v2
@@ -154,7 +154,7 @@ impl PathPart for GetOAuthUrlServiceKind {
 
 /// OAuth provider for emails
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub enum OAuthProvider {
     /// Google OAuth v2
     Google,
@@ -173,7 +173,7 @@ make_path_parts!(GetOAuthPath => "/v1/session/oauth/url/{}/{}" => GetOAuthUrlSer
 
 /// Response for what URL to use for OAuth callback.
 #[derive(Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct GetOAuthUrlResponse {
     ///  URL to use for OAuth callback
     pub url: String,
@@ -183,7 +183,7 @@ make_path_parts!(CreateSessionOAuthPath => "/v1/session/oauth");
 
 /// Request for Creating a Session / signing in via oauth.
 #[derive(Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 pub enum CreateSessionOAuthRequest {
     /// OAuth with google

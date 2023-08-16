@@ -1,5 +1,5 @@
 pub use super::*;
-use serde::{Deserialize, Serialize};
+use mymacros::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
@@ -11,11 +11,11 @@ pub struct Design {
     pub stickers: Vec<Sticker>,
 }
 
-#[skip_serializing_none]
+// #[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Sticker {
     pub filename: String,
-    pub transform_matrix: [f64; 16],
+    // pub transform_matrix: [f64; 16],
     /// hide and hide_toggle are mapped from the top sections
     /// in "Houdini": HideOnTap, ShowOnTap, and ToggleOnTap
     /// start out hidden
@@ -38,7 +38,7 @@ pub struct Sticker {
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
-#[serde(rename_all = "snake_case")]
+// #[serde(rename_all = "snake_case")]
 pub enum StickerKind {
     Background,
     Animation,
@@ -47,7 +47,7 @@ pub enum StickerKind {
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone, Copy)]
-#[serde(rename_all = "snake_case")]
+// #[serde(rename_all = "snake_case")]
 pub enum HideToggle {
     /// only let the toggle fire once
     Once,

@@ -1,7 +1,7 @@
 use crate::domain::billing::{SchoolNameId, SchoolNameValue};
 use crate::error::billing::BillingError;
 use crate::error::{ServiceError, TransientError};
-use serde::{Deserialize, Serialize};
+use mymacros::{Deserialize, Serialize};
 use thiserror::Error;
 
 #[cfg(feature = "backend")]
@@ -12,13 +12,13 @@ use stripe::StripeError;
 #[allow(missing_docs)]
 #[derive(Debug, Error, Serialize, Deserialize)]
 pub enum AccountError {
-    #[cfg_attr(feature = "backend", error(transparent))]
-    #[cfg_attr(not(feature = "backend"), error("Internal server error"))]
-    InternalServerError(
-        #[serde(skip)]
-        #[from]
-        TransientError<anyhow::Error>,
-    ),
+    // #[cfg_attr(feature = "backend", error(transparent))]
+    // #[cfg_attr(not(feature = "backend"), error("Internal server error"))]
+    // InternalServerError(
+    //     #[serde(skip)]
+    //     #[from]
+    //     TransientError<anyhow::Error>,
+    // ),
     #[error(transparent)]
     Service(ServiceError),
     #[cfg_attr(feature = "backend", error(transparent))]
@@ -58,23 +58,27 @@ impl From<AccountError> for BillingError {
     fn from(value: AccountError) -> Self {
         match value {
             AccountError::Forbidden => Self::Forbidden,
-            AccountError::InternalServerError(error) => Self::InternalServerError(error),
-            error => TransientError::from(anyhow::Error::from(error)).into(),
+            // AccountError::InternalServerError(error) => Self::InternalServerError(error),
+            // error => TransientError::from(anyhow::Error::from(error)).into(),
+            _ => todo!()
         }
     }
 }
 
-impl From<anyhow::Error> for AccountError {
-    fn from(e: anyhow::Error) -> Self {
-        Self::InternalServerError(e.into())
-    }
-}
+// impl From<anyhow::Error> for AccountError {
+//     fn from(e: anyhow::Error) -> Self {
+//         Self::InternalServerError(e.into())
+//     }
+// }
 
 #[cfg(feature = "backend")]
 impl ResponseError for AccountError {
     fn status_code(&self) -> http::StatusCode {
         match self {
-            Self::InternalServerError { .. } | Self::Stripe { .. } => {
+            // Self::InternalServerError { .. } | Self::Stripe { .. } => {
+            //     http::StatusCode::INTERNAL_SERVER_ERROR
+            // }
+            Self::Stripe { .. } => {
                 http::StatusCode::INTERNAL_SERVER_ERROR
             }
             Self::Service(service) => service.status_code(),

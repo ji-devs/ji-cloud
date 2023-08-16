@@ -2,7 +2,7 @@ use crate::color_select::actions::get_user_colors;
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use futures_signals::signal_vec::SignalVecExt;
-use rgb::RGBA8;
+use shared::RGBA8;
 use std::rc::Rc;
 use utils::{colors::*, prelude::*};
 

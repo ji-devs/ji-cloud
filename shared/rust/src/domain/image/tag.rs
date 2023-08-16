@@ -1,7 +1,7 @@
 //! Types to manage image tags.
 
 use macros::make_path_parts;
-use serde::{Deserialize, Serialize};
+use mymacros::{Deserialize, Serialize};
 
 use crate::{api::endpoints::PathPart, domain::meta::ImageTagIndex};
 

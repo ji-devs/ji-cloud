@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use shared::{DateTime, Utc};
 use std::rc::Rc;
 
 use futures_signals::signal::Mutable;

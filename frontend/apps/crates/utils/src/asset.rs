@@ -1,5 +1,5 @@
-use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
+use shared::{DateTime, Utc};
+use mymacros::{Deserialize, Serialize};
 
 use shared::{
     domain::{
@@ -163,7 +163,7 @@ pub fn published_at_string(time: DateTime<Utc>, short: bool) -> String {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, serde::Serialize, serde::Deserialize, Clone, Debug)]
 pub struct JigPlayerOptions {
     #[serde(default)]
     pub direction: TextDirection,
@@ -214,7 +214,7 @@ impl From<JigPlayerSettings> for JigPlayerOptions {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[derive(Serialize, Deserialize, serde::Serialize, serde::Deserialize, Clone, Debug, Default)]
 pub struct PlaylistPlayerOptions {
     #[serde(default)]
     pub draft_or_live: DraftOrLive,
@@ -223,7 +223,7 @@ pub struct PlaylistPlayerOptions {
     pub is_student: bool,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[derive(Serialize, Deserialize, serde::Serialize, serde::Deserialize, Clone, Debug, Default)]
 pub struct CoursePlayerOptions {
     #[serde(default)]
     pub draft_or_live: DraftOrLive,
@@ -232,7 +232,7 @@ pub struct CoursePlayerOptions {
     pub is_student: bool,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, serde::Serialize, serde::Deserialize, Clone, Debug)]
 pub enum AssetPlayerOptions {
     Jig(JigPlayerOptions),
     Playlist(PlaylistPlayerOptions),

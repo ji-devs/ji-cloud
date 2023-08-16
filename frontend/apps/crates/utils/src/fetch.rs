@@ -12,8 +12,9 @@ use std::{
     future, result,
 };
 
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+// use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use shared::api::{method::Method, PathParts};
+use miniserde::{Deserialize, Serialize};
 
 use crate::{
     env::env_var,
@@ -41,7 +42,10 @@ pub type IsAborted = bool;
 
 const DESERIALIZE_OK: &str = "couldn't deserialize ok in fetch";
 
-#[derive(Debug, Serialize, Deserialize)]
+// use miniserde_derive_enum::{Serialize_enum, Deserialize_enum};
+
+
+#[derive(Debug)]
 pub enum FetchError<T: Debug + Display> {
     Connection,
     Parse,
@@ -63,13 +67,46 @@ impl<T> Error for FetchError<T> where T: Debug + Display {}
 
 pub type ApiResult<T, E> = Result<T, FetchError<E>>;
 
+
+impl<T: Debug + Display> miniserde::Deserialize for FetchError<T> {
+    fn begin(out: &mut Option<Self>) -> &mut dyn miniserde::de::Visitor {
+        todo!()
+    }
+}
+
+impl<T: Debug + Display> miniserde::Serialize for FetchError<T> {
+    fn begin(&self) -> miniserde::ser::Fragment<'_> {
+        todo!()
+    }
+}
+// pub trait ApiEndpoint {
+//     /// The path type for this endpoint.
+//     type Path: PathParts;
+
+//     /// The request type for this endpoint.
+//     type Req: Serialize + miniserde::Serialize;
+
+//     /// The response type for this endpoint.
+//     type Res: DeserializeOwned + Serialize + 'static + miniserde::Serialize + miniserde::Deserialize;
+
+//     /// The (inner) error type for this endpoint.
+//     type Err: DeserializeOwned + Serialize + Error + 'static + miniserde::Serialize + miniserde::Deserialize;
+
+//     /// The method used to make a request to the endpoint.
+//     const METHOD: Method;
+// }
+
 // extension trait to make calling the API very convenient
 #[async_trait(?Send)]
 pub trait ApiEndpointExt {
     type Path: PathParts;
-    type Req: Serialize;
-    type Res: DeserializeOwned + Serialize + 'static;
-    type Err: DeserializeOwned + Serialize + Error + 'static;
+    // type Req: Serialize + miniserde::Serialize;
+    // type Res: Deserialize + Serialize + 'static + miniserde::Serialize + miniserde::Deserialize;
+    // type Err: Deserialize + Serialize + Error + 'static + miniserde::Serialize + miniserde::Deserialize;
+
+    type Req: Serialize + Serialize;
+    type Res: Deserialize + Serialize + 'static;
+    type Err: Deserialize + Serialize + Error + 'static;
 
     // const EXTPATH: &'static str;
     const EXT_METHOD: Method;
@@ -115,6 +152,8 @@ pub trait ApiEndpointExt {
             Self::api_with_token_status_abortable(&token, abort_controller, path, data).await
         } else {
             let csrf = load_csrf_token().unwrap_or_default();
+            let data = Some(miniserde::json::to_string(&data));
+
 
             let (url, data) = api_get_query(&path.get_filled(), Self::EXT_METHOD, data);
 
@@ -165,6 +204,8 @@ pub trait ApiEndpointExt {
         path: Self::Path,
         data: Option<Self::Req>,
     ) -> (ApiResult<Self::Res, Self::Err>, u16) {
+        let data = Some(miniserde::json::to_string(&data));
+
         let (url, data) = api_get_query(&path.get_filled(), Self::EXT_METHOD, data);
 
         let res = fetch_with_data(&url, Self::EXT_METHOD.as_str(), false, data)
@@ -211,6 +252,8 @@ pub trait ApiEndpointExt {
         data: Option<Self::Req>,
     ) -> Result<(ApiResult<Self::Res, Self::Err>, u16), IsAborted> {
         let bearer = format!("Bearer {}", token);
+
+        let data = Some(miniserde::json::to_string(&data));
 
         let (url, data) = api_get_query(&path.get_filled(), Self::EXT_METHOD, data);
 
@@ -263,6 +306,8 @@ pub trait ApiEndpointExt {
         path: Self::Path,
         data: Option<Self::Req>,
     ) -> (ApiResult<Self::Res, Self::Err>, u16) {
+        let data = Some(miniserde::json::to_string(&data));
+
         let (url, data) = api_get_query(&path.get_filled(), Self::EXT_METHOD, data);
 
         let res = fetch_with_data(&url, Self::EXT_METHOD.as_str(), true, data)
@@ -307,6 +352,7 @@ pub trait ApiEndpointExt {
         let credentials = format!("{}:{}", user_id, password);
         let token = base64::encode(credentials.as_bytes());
         let basic = format!("Basic {}", token);
+        let data = Some(miniserde::json::to_string(&data));
 
         let (url, data) = api_get_query(&path.get_filled(), Self::EXT_METHOD, data);
 
@@ -339,7 +385,7 @@ pub trait ApiEndpointExt {
     /// Similar to awsm_web::loaders::fetch::Response::json_from_str, but treats an empty string as valid input for `()`
     async fn res_to_json<T>(res: Response) -> Result<T, FetchError<Self::Err>>
     where
-        T: DeserializeOwned + 'static,
+        T: Deserialize + 'static,
     {
         let mut text = res.text().await.map_err(|_| FetchError::Parse)?;
         if TypeId::of::<T>() == TypeId::of::<()>() {
@@ -347,10 +393,14 @@ pub trait ApiEndpointExt {
                 text = String::from("null");
             }
         }
-        serde_json::from_str(&text).map_err(|e| {
+        miniserde::json::from_str(&text).map_err(|e| {
             log::info!("Parsing error: {e}");
             FetchError::Parse
         })
+        // serde_json::from_str(&text).map_err(|e| {
+        //     log::info!("Parsing error: {e}");
+        //     FetchError::Parse
+        // })
     }
 }
 
@@ -367,6 +417,8 @@ where
 
     Err(err)
 }
+
+
 
 // impl the extension for all endpoints
 impl<T: ApiEndpoint> ApiEndpointExt for T {
@@ -462,7 +514,7 @@ pub async fn api_upload_file_status(
 // Helper functions
 /////////////////////////////////////////////////////////
 
-fn api_get_query<T: Serialize>(
+fn api_get_query<T: serde::Serialize>(
     endpoint: &str,
     method: Method,
     data: Option<T>,

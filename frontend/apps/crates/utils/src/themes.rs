@@ -1,6 +1,6 @@
 use crate::unwrap::UnwrapJiExt;
 use once_cell::sync::Lazy;
-use rgb::RGBA8;
+use shared::{RGBA8, RGBA};
 use serde::{
     de::{self, Deserializer},
     Deserialize,
@@ -177,7 +177,7 @@ where
                 let r = ((value & 0xFF0000) >> 16) as u8;
                 let g = ((value & 0x00FF00) >> 8) as u8;
                 let b = (value & 0x0000FF) as u8;
-                out.push(RGBA8::new(r, g, b, 255));
+                out.push(RGBA(rgb::RGBA::new(r, g, b, 255)));
             }
 
             Ok(out)

@@ -2,7 +2,7 @@ use std::collections::HashSet;
 use std::iter::FromIterator;
 use std::rc::Rc;
 
-use chrono::{DateTime, Utc};
+use shared::{DateTime, Utc};
 use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::MutableVec;
 use shared::api::endpoints;
@@ -78,8 +78,10 @@ impl From<JigResponse> for EditableJig {
             published_at: Mutable::new(jig.published_at),
             theme: Mutable::new(jig.jig_data.theme),
             audio_background: Mutable::new(jig.jig_data.audio_background),
-            feedback_positive: Mutable::new(jig.jig_data.audio_effects.feedback_positive),
-            feedback_negative: Mutable::new(jig.jig_data.audio_effects.feedback_negative),
+            // feedback_positive: Mutable::new(jig.jig_data.audio_effects.feedback_positive),
+            // feedback_negative: Mutable::new(jig.jig_data.audio_effects.feedback_negative),
+            feedback_positive: Default::default(),
+            feedback_negative: Default::default(),
             direction: Mutable::new(jig.jig_data.default_player_settings.direction),
             display_score: Mutable::new(jig.jig_data.default_player_settings.display_score),
             track_assessments: Mutable::new(jig.jig_data.default_player_settings.track_assessments),
@@ -151,10 +153,10 @@ impl EditableJig {
         self.published_at.set(jig.published_at);
         self.theme.set(jig.jig_data.theme);
         self.audio_background.set(jig.jig_data.audio_background);
-        self.feedback_positive
-            .set(jig.jig_data.audio_effects.feedback_positive);
-        self.feedback_negative
-            .set(jig.jig_data.audio_effects.feedback_negative);
+        // self.feedback_positive
+        //     .set(jig.jig_data.audio_effects.feedback_positive);
+        // self.feedback_negative
+        //     .set(jig.jig_data.audio_effects.feedback_negative);
         self.direction
             .set(jig.jig_data.default_player_settings.direction);
         self.display_score
@@ -176,7 +178,7 @@ impl EditableJig {
             id: self.id,
             cover: Mutable::new(self.cover.get_cloned()),
             modules: MutableVec::new_with_values(self.modules.lock_ref().to_vec()),
-            published_at: Mutable::new(self.published_at.get()),
+            published_at: Mutable::new(self.published_at.get_cloned()),
             display_name: Mutable::new(self.display_name.get_cloned()),
             description: Mutable::new(self.description.get_cloned()),
             age_ranges: Mutable::new(self.age_ranges.get_cloned()),
@@ -202,7 +204,7 @@ impl EditableJig {
             likes: Mutable::new(self.likes.get()),
             plays: Mutable::new(self.plays.get()),
             author_name: self.author_name.clone(),
-            created_at: self.created_at,
+            created_at: self.created_at.clone(),
         }
     }
 
@@ -219,8 +221,8 @@ impl EditableJig {
             theme: Some(self.theme.get()),
             audio_background: Some(self.audio_background.get()),
             audio_effects: Some(AudioEffects {
-                feedback_positive: self.feedback_positive.get_cloned(),
-                feedback_negative: self.feedback_negative.get_cloned(),
+                // feedback_positive: self.feedback_positive.get_cloned(),
+                // feedback_negative: self.feedback_negative.get_cloned(),
             }),
             default_player_settings: Some(JigPlayerSettings {
                 direction: self.direction.get(),

@@ -9,7 +9,7 @@ use crate::domain::module::{
     body::{Body, BodyConvert, BodyExt, ThemeId},
     ModuleKind,
 };
-use serde::{Deserialize, Serialize};
+use mymacros::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::convert::TryFrom;
 

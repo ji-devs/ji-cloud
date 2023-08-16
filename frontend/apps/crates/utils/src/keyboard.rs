@@ -7,7 +7,7 @@ pub const MOVE_MULTIPLIER: f64 = 10.0;
 pub const MOVE_AMOUNT_PX: f64 = 1.0;
 
 /// Map of keyboard keys used to perform various actions in the system.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, mymacros::Serialize, mymacros::Deserialize)]
 #[non_exhaustive]
 pub enum Key {
     ArrowLeft,
@@ -19,7 +19,7 @@ pub enum Key {
     Other(String),
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, mymacros::Serialize, mymacros::Deserialize)]
 pub struct KeyEvent {
     pub is_osx: bool,
     pub shift: bool,

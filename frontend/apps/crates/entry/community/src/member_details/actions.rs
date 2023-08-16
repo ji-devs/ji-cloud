@@ -264,7 +264,7 @@ impl MemberDetails {
 }
 
 fn user_to_public_user(user: UserProfile) -> PublicUser {
-    let location = Country::from_google_location(&user.location);
+    let location = Country::from_google_location(&None);
     PublicUser {
         id: user.id,
         username: user.username,

@@ -4,12 +4,12 @@ use std::collections::BTreeMap;
 
 use crate::api::endpoints::PathPart;
 use macros::make_path_parts;
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
+use mymacros::{Deserialize, Serialize};
+use crate::Uuid;
 
 /// A bundle of [`Entry`]s
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct Bundle {
     /// The bundle's id
     pub id: Uuid,
@@ -20,7 +20,7 @@ pub struct Bundle {
 
 /// What kind of item an [`Entry`] is.
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct ItemKind {
     /// The item kind's id
     pub id: Uuid,
@@ -31,7 +31,7 @@ pub struct ItemKind {
 
 /// The status of a given [`Entry`]
 #[derive(Serialize, Deserialize, Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[repr(i16)]
 pub enum EntryStatus {
@@ -49,7 +49,7 @@ pub enum EntryStatus {
 // todo: an entry into the what?
 /// An entry into the ?
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct Entry {
     /// This entry's id
     pub id: u32,
@@ -92,7 +92,7 @@ make_path_parts!(CreateEntryPath => "/v1/locale/entry");
 
 /// Request for creating an entry.
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct CreateEntryRequest {
     /// This entry's parent [`Bundle`]'s id
     pub bundle_id: Uuid,
@@ -130,7 +130,7 @@ pub struct CreateEntryRequest {
 
 /// Response for successful creation of an entry.
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct CreateEntryResponse {
     /// The newly created [`Entry`]'s id.
     pub id: u32,
@@ -138,7 +138,7 @@ pub struct CreateEntryResponse {
 
 /// Group by modifier for listing entries
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 pub enum ListEntryGroupBy {
     /// No grouping, just return a plain list
@@ -170,27 +170,27 @@ make_path_parts!(ListEntryPath => "/v1/locale/entry");
 
 /// Query for listing [`entries`](Entry)
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct ListEntryQuery {
     /// The [`Bundle`]s to filter to (empty means "all")
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    // #[serde(skip_serializing_if = "Vec::is_empty")]
     #[serde(default)]
-    #[serde(
-        serialize_with = "crate::domain::csv_encode_uuids",
-        deserialize_with = "crate::domain::from_csv"
-    )]
+    // #[serde(
+    //     serialize_with = "crate::domain::csv_encode_uuids",
+    //     deserialize_with = "crate::domain::from_csv"
+    // )]
     pub bundles: Vec<Uuid>,
 
     /// Whether the response should be returned as
     /// [`Bundles`](ListEntryResponse::Bundles) or [`List`](ListEntryResponse::List)
-    #[serde(skip_serializing_if = "ListEntryGroupBy::is_none")]
+    // #[serde(skip_serializing_if = "ListEntryGroupBy::is_none")]
     #[serde(default)]
     pub group_by: ListEntryGroupBy,
 }
 
 /// Response for listing entries
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub enum ListEntryResponse {
     /// Entries grouped by [`Bundle`]
     Bundles(BTreeMap<Uuid, Vec<Entry>>),
@@ -204,7 +204,7 @@ make_path_parts!(GetEntryPath => "/v1/locale/entry/{}" => u32);
 
 /// Response for getting a individual entry.
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct GetEntryResponse {
     /// The requested entry.
     pub entry: Entry,
@@ -215,63 +215,63 @@ make_path_parts!(UpdateEntryPath => "/v1/locale/entry/{}" => u32);
 
 /// Request for updating an [`Entry`]
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct UpdateEntryRequest {
     /// This entry's parent [`Bundle`]'s id
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub bundle_id: Option<Uuid>,
 
     /// The section this entry belongs in
-    #[serde(deserialize_with = "super::deserialize_optional_field")]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(deserialize_with = "super::deserialize_optional_field")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub section: Option<Option<String>>,
 
     /// This entry's [`ItemKind`]'s id.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub item_kind_id: Option<Uuid>,
 
     /// The English version of this entry.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub english: Option<String>,
 
     /// The hebrew version of this entry.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub hebrew: Option<String>,
 
     /// This entry's current status.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub status: Option<EntryStatus>,
 
     /// A reference url in zeplin
-    #[serde(deserialize_with = "super::deserialize_optional_field")]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(deserialize_with = "super::deserialize_optional_field")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub zeplin_reference: Option<Option<String>>,
 
     /// This entry's comments
-    #[serde(deserialize_with = "super::deserialize_optional_field")]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(deserialize_with = "super::deserialize_optional_field")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub comments: Option<Option<String>>,
 
     /// If the entry is in the app.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub in_app: Option<bool>,
 
     /// If the entry is in an element.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub in_element: Option<bool>,
 
     /// If the entry is in mock.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub in_mock: Option<bool>,
 }
@@ -283,7 +283,7 @@ make_path_parts!(ListBundlePath => "/v1/locale/bundle");
 
 /// Response for listing bundles
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct ListBundleResponse {
     /// A list of bundles
     pub bundles: Vec<Bundle>,
@@ -293,7 +293,7 @@ make_path_parts!(ListItemKindPath => "/v1/locale/item-kind");
 
 /// Response for listing item kinds
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub struct ListItemKindResponse {
     /// A list of item kinds
     pub item_kinds: Vec<ItemKind>,

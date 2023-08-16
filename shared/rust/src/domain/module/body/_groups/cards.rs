@@ -6,7 +6,8 @@ use crate::{
     config,
     domain::module::body::{Audio, Background, Image, ModeExt, ModuleAssist, StepExt, ThemeId},
 };
-use serde::{de, Deserialize, Serialize};
+// use serde::{de, Deserialize, Serialize};
+use miniserde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fmt;
 use unicode_segmentation::UnicodeSegmentation;
@@ -21,7 +22,7 @@ pub struct BaseContent {
     pub instructions: ModuleAssist,
 
     /// The feedback for the module.
-    #[serde(default)]
+    // #[serde(default)]
     pub feedback: ModuleAssist,
 
     /// The mode the module uses.
@@ -42,7 +43,13 @@ impl BaseContent {
     pub fn new(mode: Mode) -> Self {
         Self {
             mode,
-            ..Self::default()
+            editor_state: Default::default(),
+            instructions: Default::default(),
+            feedback: Default::default(),
+            pairs: Default::default(),
+            theme: Default::default(),
+            background: Default::default(),
+            // ..Self::default()
         }
     }
 
@@ -59,16 +66,16 @@ pub struct EditorState {
     /// the current step
     pub step: Step,
 
-    /// the completed steps
-    pub steps_completed: HashSet<Step>,
+    // /// the completed steps
+    // pub steps_completed: HashSet<Step>,
 }
 
 /// A pair of cards
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, mymacros::Serialize, mymacros::Deserialize, Debug)]
 pub struct CardPair(pub Card, pub Card);
 
 /// Data for individual cards
-#[derive(Clone, Serialize, Debug)]
+#[derive(Clone, mymacros::Serialize, Debug)]
 pub struct Card {
     /// Recorded audio associated with the card
     pub audio: Option<Audio>,
@@ -116,88 +123,100 @@ pub fn get_longest_card_text_length<'c>(cards: impl Iterator<Item = &'c Card>) -
 //
 // TODO Create a content migration to migrate all existing JIGs with card game modules so that
 // their card data matches the new Card struct and delete this Deserialize implementation.
-impl<'de> de::Deserialize<'de> for Card {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: de::Deserializer<'de>,
-    {
-        #[derive(Debug, Deserialize)]
-        #[serde(field_identifier)]
-        enum CardField {
-            #[serde(rename = "audio")]
-            Audio,
-            #[serde(rename = "card_content")]
-            CardContent,
-            #[serde(rename = "Text")]
-            Text,
-            #[serde(rename = "Image")]
-            Image,
-        }
-
-        struct CardVisitor;
-
-        impl<'de> de::Visitor<'de> for CardVisitor {
-            type Value = Card;
-
-            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-                formatter.write_str("A CardContent or Card map")
-            }
-
-            fn visit_map<M>(self, mut access: M) -> Result<Self::Value, M::Error>
-            where
-                M: de::MapAccess<'de>,
-            {
-                let mut audio: Option<Option<Audio>> = None;
-                let mut card_content: Option<CardContent> = None;
-
-                while let Some(key) = access.next_key()? {
-                    match key {
-                        CardField::Text => {
-                            if card_content.is_some() {
-                                return Err(de::Error::duplicate_field("card_content"));
-                            }
-                            card_content = Some(CardContent::Text(access.next_value()?));
-                            break;
-                        }
-                        CardField::Image => {
-                            if card_content.is_some() {
-                                return Err(de::Error::duplicate_field("card_content"));
-                            }
-                            card_content = Some(CardContent::Image(access.next_value()?));
-                            break;
-                        }
-                        CardField::Audio => {
-                            if audio.is_some() {
-                                return Err(de::Error::duplicate_field("audio"));
-                            }
-                            audio = Some(access.next_value()?);
-                        }
-                        CardField::CardContent => {
-                            if card_content.is_some() {
-                                return Err(de::Error::duplicate_field("card_content"));
-                            }
-                            card_content = Some(access.next_value()?);
-                        }
-                    }
-                }
-
-                let audio = audio.map_or(None, |audio| audio);
-                let card_content =
-                    card_content.ok_or_else(|| de::Error::missing_field("card_content"))?;
-
-                Ok(Card {
-                    audio,
-                    card_content,
-                })
-            }
-        }
-
-        deserializer.deserialize_map(CardVisitor)
+impl miniserde::Deserialize for Card {
+    fn begin(out: &mut Option<Self>) -> &mut dyn miniserde::de::Visitor {
+        todo!()
     }
 }
 
+// impl miniserde::Serialize for PathCommand {
+//     fn begin(&self) -> miniserde::ser::Fragment<'_> {
+//         todo!()
+//     }
+// }
+
+// impl<'de> de::Deserialize<'de> for Card {
+//     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+//     where
+//         D: de::Deserializer<'de>,
+//     {
+//         #[derive(Debug, Deserialize)]
+//         #[serde(field_identifier)]
+//         enum CardField {
+//             #[serde(rename = "audio")]
+//             Audio,
+//             #[serde(rename = "card_content")]
+//             CardContent,
+//             #[serde(rename = "Text")]
+//             Text,
+//             #[serde(rename = "Image")]
+//             Image,
+//         }
+
+//         struct CardVisitor;
+
+//         impl<'de> de::Visitor<'de> for CardVisitor {
+//             type Value = Card;
+
+//             fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+//                 formatter.write_str("A CardContent or Card map")
+//             }
+
+//             fn visit_map<M>(self, mut access: M) -> Result<Self::Value, M::Error>
+//             where
+//                 M: de::MapAccess<'de>,
+//             {
+//                 let mut audio: Option<Option<Audio>> = None;
+//                 let mut card_content: Option<CardContent> = None;
+
+//                 while let Some(key) = access.next_key()? {
+//                     match key {
+//                         CardField::Text => {
+//                             if card_content.is_some() {
+//                                 return Err(de::Error::duplicate_field("card_content"));
+//                             }
+//                             card_content = Some(CardContent::Text(access.next_value()?));
+//                             break;
+//                         }
+//                         CardField::Image => {
+//                             if card_content.is_some() {
+//                                 return Err(de::Error::duplicate_field("card_content"));
+//                             }
+//                             card_content = Some(CardContent::Image(access.next_value()?));
+//                             break;
+//                         }
+//                         CardField::Audio => {
+//                             if audio.is_some() {
+//                                 return Err(de::Error::duplicate_field("audio"));
+//                             }
+//                             audio = Some(access.next_value()?);
+//                         }
+//                         CardField::CardContent => {
+//                             if card_content.is_some() {
+//                                 return Err(de::Error::duplicate_field("card_content"));
+//                             }
+//                             card_content = Some(access.next_value()?);
+//                         }
+//                     }
+//                 }
+
+//                 let audio = audio.map_or(None, |audio| audio);
+//                 let card_content =
+//                     card_content.ok_or_else(|| de::Error::missing_field("card_content"))?;
+
+//                 Ok(Card {
+//                     audio,
+//                     card_content,
+//                 })
+//             }
+//         }
+
+//         deserializer.deserialize_map(CardVisitor)
+//     }
+// }
+
 /// The content of a card
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, mymacros::Serialize, mymacros::Deserialize, Debug)]
 pub enum CardContent {
     // todo(@dakom): document this
     #[allow(missing_docs)]

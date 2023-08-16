@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use chrono::{DateTime, Utc};
+use shared::{DateTime, Utc};
 use futures_signals::signal::Mutable;
 use shared::domain::image::{ImageResponse, ImageUpdatePath, ImageUpdateRequest};
 use shared::domain::meta::{ImageStyleId, ImageTagIndex};

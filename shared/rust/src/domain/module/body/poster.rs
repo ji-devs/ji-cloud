@@ -2,7 +2,7 @@ use crate::domain::module::{
     body::{Body, BodyConvert, BodyExt, ModeExt, StepExt, ThemeId, _groups::design::*},
     ModuleKind,
 };
-use serde::{Deserialize, Serialize};
+use mymacros::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::convert::TryFrom;
 
@@ -56,7 +56,7 @@ impl BodyExt<Mode, Step> for ModuleData {
     }
     fn set_editor_state_steps_completed(&mut self, steps_completed: HashSet<Step>) {
         if let Some(content) = self.content.as_mut() {
-            content.editor_state.steps_completed = steps_completed;
+            // content.editor_state.steps_completed = steps_completed;
         }
     }
 
@@ -67,9 +67,10 @@ impl BodyExt<Mode, Step> for ModuleData {
     }
 
     fn get_editor_state_steps_completed(&self) -> Option<HashSet<Step>> {
-        self.content
-            .as_ref()
-            .map(|content| content.editor_state.steps_completed.clone())
+        // self.content
+        //     .as_ref()
+        //     .map(|content| content.editor_state.steps_completed.clone())
+        None
     }
 
     fn set_theme(&mut self, theme_id: ThemeId) {
@@ -119,8 +120,8 @@ pub struct EditorState {
     /// the current step
     pub step: Step,
 
-    /// the completed steps
-    pub steps_completed: HashSet<Step>,
+    // /// the completed steps
+    // pub steps_completed: HashSet<Step>,
 }
 
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq, Hash)]

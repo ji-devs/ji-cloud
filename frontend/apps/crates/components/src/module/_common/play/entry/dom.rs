@@ -111,13 +111,13 @@ where
 {
     html!("empty-fragment", {
         .global_event(clone!(on_raw => move |evt:dominator_helpers::events::Message| {
-            if let Ok(msg) = evt.try_serde_data::<IframeInit<RawData>>() {
-                log::info!("got iframe data!");
-                //on_raw was stashed from the original State::new()
-                on_raw(msg.data);
-            } else {
-                log::info!("hmmm got other iframe message...");
-            }
+            // if let Ok(msg) = evt.try_serde_data::<IframeInit<RawData>>() {
+            //     log::info!("got iframe data!");
+            //     //on_raw was stashed from the original State::new()
+            //     on_raw(msg.data);
+            // } else {
+            //     log::info!("hmmm got other iframe message...");
+            // }
         }))
         .after_inserted(|_elem| {
             //On mount - send an empty IframeInit message to let the *parent* know we're ready

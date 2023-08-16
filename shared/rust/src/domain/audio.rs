@@ -2,15 +2,15 @@
 
 use super::meta::AudioStyleId;
 use crate::api::endpoints::PathPart;
-use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
+use crate::{DateTime, Utc};
+use mymacros::{Deserialize, Serialize};
 #[cfg(feature = "backend")]
 use sqlx::postgres::PgRow;
 
 /// Types for user audio library.
 pub mod user {
     use macros::make_path_parts;
-    use serde::{Deserialize, Serialize};
+    use mymacros::{Deserialize, Serialize};
 
     use super::AudioId;
     use crate::api::endpoints::PathPart;

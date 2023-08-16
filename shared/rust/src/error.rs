@@ -11,7 +11,7 @@ use std::fmt::{self, Debug, Display, Formatter};
 #[cfg(feature = "backend")]
 use actix_web::{body::BoxBody, HttpResponse, ResponseError};
 
-use serde::{Deserialize, Serialize};
+use mymacros::{Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::domain::meta::MetaKind;
@@ -31,7 +31,7 @@ pub struct EmptyError {}
 #[derive(Serialize, Deserialize, Debug)]
 pub struct MetadataNotFound {
     /// The (Optional) id of the item.
-    pub id: Option<uuid::Uuid>,
+    pub id: Option<crate::Uuid>,
     /// The (Optional) index of the item.
     pub index: Option<i16>,
     /// The item's kind.
@@ -69,8 +69,11 @@ where
 
 /// Useful for serializing errors that don't implement Serialize, or errors where we don't want the
 /// error details to be transported to the client.
-#[derive(Debug, Error)]
-pub enum TransientError<T: Debug + Display> {
+#[derive(Debug, Error, mymacros::Serialize, mymacros::Deserialize)]
+pub enum TransientError<T>
+where
+    T: Debug + Display
+{
     /// The actual error
     #[error("API error {0}")]
     Error(T),

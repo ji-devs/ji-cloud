@@ -5,7 +5,7 @@ mod editable_resource;
 
 use std::{collections::HashSet, rc::Rc};
 
-use chrono::{DateTime, Utc};
+use shared::{DateTime, Utc};
 pub use editable_course::EditableCourse;
 pub use editable_jig::EditableJig;
 pub use editable_playlist::EditablePlaylist;

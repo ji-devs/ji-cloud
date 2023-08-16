@@ -54,7 +54,7 @@ impl UnitValueView {
                     self.render_active_audio(audio_id)
                 }
                 shared::domain::course::unit::CourseUnitValue::Link(url) => {
-                    self.render_active_link(url)
+                    self.render_active_link(url.0)
                 }
                 shared::domain::course::unit::CourseUnitValue::PdfId(pdf_id) => {
                     self.render_active_pdf(pdf_id)

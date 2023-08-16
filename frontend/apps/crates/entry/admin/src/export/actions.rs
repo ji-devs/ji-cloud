@@ -1,4 +1,5 @@
-use chrono::{DateTime, TimeZone, Utc};
+use chrono::TimeZone;
+use shared::{DateTime, Utc};
 use futures_signals::signal::Mutable;
 use utils::unwrap::UnwrapJiExt;
 use wasm_bindgen::JsValue;
@@ -13,7 +14,8 @@ impl Export {
             "%Y-%m-%dT%H:%M:%S%Z",
         );
         if let Ok(datetime) = datetime {
-            date.set(Some(datetime));
+            todo!();
+            // date.set(Some(datetime));
         }
     }
 }

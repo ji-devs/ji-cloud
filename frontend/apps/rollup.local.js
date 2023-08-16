@@ -60,13 +60,22 @@ export default [
             sourcemap: true,
         },
         plugins: [
+            // rust({
+            //     serverPath: `/${APP_NAME}/js/`,
+            //     // serverPath: `/js/`,
+            //     debug: true,
+            //     watchPatterns,
+            //     // wasmBindgenArgs: ["--reference-types"],
+            //     cargoArgs: ["--features", "local quiet"],
+            //     watch: true,
+            // }),
+
             rust({
-                serverPath: `/${APP_NAME}/js/`,
-                // serverPath: `/js/`,
-                debug: true,
+                serverPath: "/js/",
+                debug: false,
                 watchPatterns,
-                // wasmBindgenArgs: ["--reference-types"],
-                cargoArgs: ["--features", "local quiet"],
+                // cargoArgs: ["--features", "release", "-Z", "build-std=std,panic_abort", "-Z", "build-std-features=panic_immediate_abort"],
+                cargoArgs: ["--features", "release"],
                 watch: true,
             }),
 

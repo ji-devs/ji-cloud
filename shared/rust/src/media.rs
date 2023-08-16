@@ -1,13 +1,13 @@
 //! Mostly contains functions for getting the `key`/url of media stored in s3.
 
 use crate::domain::{animation::AnimationKind, audio::AudioKind};
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
+use mymacros::{Deserialize, Serialize};
+use crate::Uuid;
 
 /// Media Kinds
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 #[serde(tag = "media_kind")]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 pub enum MediaGroupKind {
     /// Media is audio
     Audio,
@@ -49,7 +49,7 @@ pub enum PngImageFile {
 }
 
 /// Media Libraries
-#[derive(Debug, Copy, Clone, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize, serde::Deserialize, serde::Serialize, Eq, PartialEq)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[repr(i16)]
 pub enum MediaLibrary {

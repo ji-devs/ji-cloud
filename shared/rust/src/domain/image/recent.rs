@@ -4,10 +4,10 @@
 use super::ImageId;
 use crate::api::endpoints::PathPart;
 use crate::media::MediaLibrary;
-use chrono::{DateTime, Utc};
+use crate::{DateTime, Utc};
 use macros::make_path_parts;
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
+use mymacros::{Deserialize, Serialize};
+use crate::Uuid;
 
 make_path_parts!(UserRecentImageListPath => "/v1/user/me/recent/image");
 
