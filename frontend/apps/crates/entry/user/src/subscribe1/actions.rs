@@ -4,6 +4,8 @@ use shared::{
     domain::billing::{CreateSetupIntentPath, CreateSetupIntentRequest},
 };
 use utils::{
+    bail_on_err,
+    error_ext::ErrorExt,
     prelude::{ApiEndpointExt, SETTINGS},
     routes::{Route, UserRoute},
     unwrap::UnwrapJiExt,
@@ -19,7 +21,8 @@ impl Subscribe1 {
             let req = CreateSetupIntentRequest {
                 plan_type: state.plan_type,
             };
-            let res = endpoints::billing::CreateSetupIntent::api_with_auth(CreateSetupIntentPath(), Some(req)).await.unwrap_ji();
+            let res = endpoints::billing::CreateSetupIntent::api_with_auth(CreateSetupIntentPath(), Some(req)).await.toast_on_err();
+            let res = bail_on_err!(res);
             state.stripe_client_secret.set(Some(res));
         }));
     }
