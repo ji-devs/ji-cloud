@@ -50,7 +50,7 @@ export class _ extends LitElement {
         "Name",
         "Description",
         // "Translated description",
-        // "Is premium",
+        "Is premium",
         // "Size",
         // "Publish at",
         "Styles",
@@ -58,6 +58,7 @@ export class _ extends LitElement {
         "Age ranges",
         "Affiliations",
         "Categories",
+        // "Actions",
         // "Created at",
         // "Updated at",
     ];

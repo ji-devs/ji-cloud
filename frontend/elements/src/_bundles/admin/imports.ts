@@ -59,3 +59,5 @@ import "@elements/core/images/composed/module-screenshot";
 import "@elements/core/modals/confirm";
 import "@elements/core/player-popup/player-popup";
 import "@elements/core/rating";
+import "@elements/core/menu/kebab";
+import "@elements/core/menu/menu-line";

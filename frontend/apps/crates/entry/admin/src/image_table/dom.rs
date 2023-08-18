@@ -1,7 +1,7 @@
 use crate::image_table::mass_editing::MassEditing;
 
 use super::{editable_image::EditableImage, state::*};
-use dominator::{clone, html, Dom, DomBuilder};
+use dominator::{clone, html, with_node, Dom, DomBuilder};
 use futures_signals::{
     map_ref,
     signal::{from_future, Signal, SignalExt},
@@ -23,7 +23,7 @@ use utils::{
         get_image_tags,
     },
 };
-use web_sys::{HtmlDialogElement, ShadowRoot};
+use web_sys::{HtmlDialogElement, HtmlTextAreaElement, ShadowRoot};
 
 impl Component<ImageTable> for Rc<ImageTable> {
     fn styles() -> &'static str {
@@ -165,8 +165,28 @@ impl Component<ImageTable> for Rc<ImageTable> {
                             //     state.navigate_to(route);
                             // }))
                         }),
+                        html!("textarea" => HtmlTextAreaElement, {
+                            .with_node!(elem => {
+                                .style("font-family", "inherit")
+                                .text_signal(image.description.signal_cloned())
+                                .event(clone!(state, image => move |_: events::Input| {
+                                    image.description.set(elem.value());
+                                    state.loader.load(clone!(image => async move {
+                                        image.save().await;
+                                    }));
+                                }))
+                            })
+                        }),
                         html!("span", {
-                            .text_signal(image.description.signal_cloned())
+                            .child(html!("input-checkbox", {
+                                .prop_signal("checked", image.is_premium.signal())
+                                .event(clone!(state, image => move |evt: events::CustomToggle| {
+                                    image.is_premium.set(evt.value());
+                                    state.loader.load(clone!(image => async move {
+                                        image.save().await;
+                                    }));
+                                }))
+                            }))
                         }),
                         html!("span", {
                             .children_signal_vec(image.styles.signal_cloned().map(clone!(state => move |styles_hash| {
@@ -213,6 +233,11 @@ impl Component<ImageTable> for Rc<ImageTable> {
                                 }).collect()
                             })).to_signal_vec())
                         }),
+                        // html!("span", {
+                        //     .child(html!("menu-kebab", {
+                        //         .style("align-self", "start")
+                        //     }))
+                        // }),
                     ])
                 })
             })))
