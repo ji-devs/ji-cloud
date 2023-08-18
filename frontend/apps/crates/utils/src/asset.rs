@@ -272,6 +272,24 @@ impl AssetPlayerOptions {
             AssetId::ResourceId(_) => unimplemented!(),
         }
     }
+
+    pub fn default_from_id_draft(asset_id: &AssetId) -> Self {
+        match asset_id {
+            AssetId::JigId(_) => Self::Jig(JigPlayerOptions {
+                draft_or_live: DraftOrLive::Draft,
+                ..Default::default()
+            }),
+            AssetId::PlaylistId(_) => Self::Playlist(PlaylistPlayerOptions {
+                draft_or_live: DraftOrLive::Draft,
+                ..Default::default()
+            }),
+            AssetId::CourseId(_) => Self::Course(CoursePlayerOptions {
+                draft_or_live: DraftOrLive::Draft,
+                ..Default::default()
+            }),
+            AssetId::ResourceId(_) => unimplemented!(),
+        }
+    }
 }
 
 impl From<JigPlayerOptions> for AssetPlayerOptions {

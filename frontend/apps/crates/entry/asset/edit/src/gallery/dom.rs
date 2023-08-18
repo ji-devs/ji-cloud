@@ -276,7 +276,7 @@ impl Gallery {
                         asset_id,
                         None,
                         None,
-                        AssetPlayerOptions::default_from_id(&asset_id),
+                        AssetPlayerOptions::default_from_id_draft(&asset_id),
                         PreviewPopupCallbacks {
                             close: Box::new(clone!(state => move|| {
                                 state.play_asset.set(None);
