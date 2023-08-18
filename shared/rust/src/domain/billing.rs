@@ -611,7 +611,7 @@ const ACCOUNT_LIMIT_L2: i64 = 10;
 const ACCOUNT_LIMIT_L3: i64 = 20;
 const ACCOUNT_LIMIT_L4: i64 = 30;
 
-const INDIVIDUAL_TRIAL_PERIOD: i64 = 7;
+const INDIVIDUAL_TRIAL_PERIOD: i64 = 3;
 const SCHOOL_TRIAL_PERIOD: i64 = 7;
 
 impl PlanType {
