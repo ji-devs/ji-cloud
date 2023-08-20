@@ -45,10 +45,17 @@ pub struct Stripe {
     elements: StripeElements,
 }
 
+cfg_if::cfg_if! {
+    if #[cfg(feature = "release")] {
+        const PUBLISHABLE_KEY: &str = "pk_live_lJqRutp8QHyjasfedIVi3GrE";
+    } else {
+        const PUBLISHABLE_KEY: &str = "pk_test_cSUzMZSsUmmgzHRXPNEq5YOm";
+    }
+}
+
 impl Stripe {
     pub async fn new(el: HtmlElement, client_secret: String) -> Self {
-        let publishable_key = "pk_test_cSUzMZSsUmmgzHRXPNEq5YOm";
-        let js_stripe: JsStripe = loadStripe(publishable_key).await.into();
+        let js_stripe: JsStripe = loadStripe(PUBLISHABLE_KEY).await.into();
         let elements = js_stripe.elements(js_object!({
             "clientSecret": client_secret,
             "appearance": {
