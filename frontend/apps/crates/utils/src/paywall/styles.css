@@ -1,0 +1,26 @@
+.dialog {
+    padding-block: 72px 45px;
+    padding-inline: 16px;
+    box-sizing: border-box;
+    display: grid;
+    width: 700px;
+    max-width: 90vw;
+}
+img-ui {
+    max-width: 100%;
+    display: grid;
+    place-content: center;
+}
+p {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--dark-blue-5);
+    text-align: center;
+}
+.actions {
+    display: grid;
+    grid-template-columns: auto auto;
+    justify-content: center;
+    gap: 24px;
+}

@@ -1,6 +1,9 @@
+use dominator::DomBuilder;
 use gloo::utils::document;
+use web_sys::{HtmlElement, ShadowRoot};
 
 use crate::{
+    component::Component,
     dialog, events, gap,
     routes::{HomePricingRoute, HomeRoute, Route},
     unwrap::UnwrapJiExt,
@@ -18,61 +21,71 @@ pub fn dialog_image_theme(msg: &str) {
     show_dialog(msg, "paywall-popups/illustration-image-theme.webp", true)
 }
 
-fn show_dialog(msg: &str, img: &str, show_no_thanks: bool) {
-    let id = js_sys::Math::random().to_string();
-    dominator::append_dom(
-        &document().body().unwrap_ji(),
-        dialog! {
-            .prop("id", &id)
-            .style("padding-block", "72px 45px")
-            .style("padding-inline", "16px")
-            .style("display", "grid")
-            .style("width", "700px")
-            .style("max-width", "90vw")
-            .children(&mut [
-                html!("img-ui", {
-                    .style("height", "190px")
-                    .style("display", "grid")
-                    .style("place-content", "center")
-                    .prop("path", img)
-                }),
-                gap!(40),
-                html!("div", {
-                    .children(msg.lines().map(|line| {
-                        html!("p", {
-                            .style("margin", "0")
-                            .style("font-size", "18px")
-                            .style("font-weight", "500")
-                            .style("color", "var(--dark-blue-5)")
-                            .style("text-align", "center")
-                            .text(line.trim())
-                        })
-                    }))
-                }),
-                gap!(75),
-                html!("div", {
-                    .style("display", "grid")
-                    .style("grid-template-columns", "auto auto")
-                    .style("justify-content", "center")
-                    .style("gap", "24px")
-                    .apply_if(show_no_thanks, |dom| {
-                        dom.child(html!("button-rect", {
-                            .prop("kind", "text")
-                            .prop("color", "blue")
-                            .text("No, thanks")
-                            .event(move |_: events::Click| {
-                                document().get_element_by_id(&id).unwrap_ji().remove();
+struct PaywallDialog {
+    el_id: String,
+    msg: String,
+    img: String,
+    show_no_thanks: bool,
+}
+impl Component<PaywallDialog> for PaywallDialog {
+    fn styles() -> &'static str {
+        include_str!("./styles.css")
+    }
+
+    fn apply_on_host(&self, host: DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
+        host.prop("id", &self.el_id)
+    }
+
+    fn dom(&self, dom: DomBuilder<ShadowRoot>) -> DomBuilder<ShadowRoot> {
+        let el_id = self.el_id.clone();
+        dom
+            .child(dialog! {
+                .child(html!("div", {
+                    .class("dialog")
+                    .children(&mut [
+                        html!("img-ui", {
+                            .prop("path", &self.img)
+                        }),
+                        gap!(40),
+                        html!("div", {
+                            .children(self.msg.lines().map(|line| {
+                                html!("p", {
+                                    .text(line.trim())
+                                })
+                            }))
+                        }),
+                        gap!(75),
+                        html!("div", {
+                            .class("actions")
+                            .apply_if(self.show_no_thanks, |dom| {
+                                dom.child(html!("button-rect", {
+                                    .prop("kind", "text")
+                                    .prop("color", "blue")
+                                    .text("No, thanks")
+                                    .event(move |_: events::Click| {
+                                        document().get_element_by_id(&el_id).unwrap_ji().remove();
+                                    })
+                                }))
                             })
-                        }))
-                    })
-                    .child(html!("button-rect", {
-                        .prop("kind", "filled")
-                        .prop("color", "blue")
-                        .prop("href", Route::Home(HomeRoute::Pricing(HomePricingRoute::Individual)).to_string())
-                        .text("See our plans")
-                    }))
-                })
-            ])
-        },
-    );
+                            .child(html!("button-rect", {
+                                .prop("kind", "filled")
+                                .prop("color", "blue")
+                                .prop("href", Route::Home(HomeRoute::Pricing(HomePricingRoute::Individual)).to_string())
+                                .text("See our plans")
+                            }))
+                        })
+                    ])
+                }))
+            })
+    }
+}
+
+fn show_dialog(msg: &str, img: &str, show_no_thanks: bool) {
+    let paywall_dialog = PaywallDialog {
+        el_id: js_sys::Math::random().to_string(),
+        msg: msg.to_owned(),
+        img: img.to_owned(),
+        show_no_thanks,
+    };
+    dominator::append_dom(&document().body().unwrap_ji(), paywall_dialog.render());
 }
