@@ -59,51 +59,51 @@ export class _ extends LitElement {
             <details>
                 <summary>
                     <fa-icon icon="fa-regular fa-angle-right"></fa-icon>
-                    What happens when the trial for a subscription expires?
+                    What happens when the free trial for a subscription expires?
                 </summary>
-                <p>When the subscription’s trial period expires, your paid subscription will begin immediately. You will get a reminder by email 24 hours before your free trial is due to expire and you can cancel at any time. To do this, go to My subscription in the top-right account menu then click Change Plan.</p>
+                <p>When the subscription’s trial period expires, your paid subscription will begin immediately. You will get a reminder by email 24 hours before your free trial is due to expire. If you wish to cancel at any time during your trial period, go to Account in the top-right menu then, scroll down to My current plan, click on the pink Customer portal button and then you will have an option to Cancel Plan which will cancel your plan at the end of the free trial and you will not be charged.</p>
+            </details>
+            <details>
+                <summary>
+                    <fa-icon icon="fa-regular fa-angle-right"></fa-icon>
+                    Can I cancel my paid subscription anytime?
+                </summary>
+                <p>After the free trial period has ended, you can downgrade to our free plan at any time and no further payments will be taken. To do this go to Account in the top-right menu, scroll down to My current plan, and click on the Auto renew slider to switch off the monthly Auto renew function. You will still have full access to your subscription until the end of the billing period. You can also click the pink Customer portal button, where you can cancel your plan.</p>
             </details>
             <details>
                 <summary>
                     <fa-icon icon="fa-regular fa-angle-right"></fa-icon>
                     When will payments be taken?
                 </summary>
-                <p>When the subscription’s trial period expires, your paid subscription will begin immediately. You will get a reminder by email 24 hours before your free trial is due to expire and you can cancel at any time. To do this, go to My subscription in the top-right account menu then click Change Plan.</p>
+                <p>The first payment is taken at the end of your free trial period and then recurring payments on the same day each month thereafter. You will get a reminder by email 24 hours before your monthly renewal.</p>
+            </details>
+            <details>
+                <summary>
+                    <fa-icon icon="fa-regular fa-angle-right"></fa-icon>
+                    How can I change my payment card details?
+                </summary>
+                <p>If a payment has already been made, we cannot refund and recharge this payment. However, if you would like to change payment methods for any upcoming charges, go to Account in the top-right account menu, scroll down to My current plan and then click the pink Customer portal button. There you can change your payment method.</p>
             </details>
             <details>
                 <summary>
                     <fa-icon icon="fa-regular fa-angle-right"></fa-icon>
                     Can I switch subscriptions later on?
                 </summary>
-                <p>When the subscription’s trial period expires, your paid subscription will begin immediately. You will get a reminder by email 24 hours before your free trial is due to expire and you can cancel at any time. To do this, go to My subscription in the top-right account menu then click Change Plan.</p>
+                <p>Yes, but you need to contact us by emailing info@jigzi.org. </p>
             </details>
             <details>
                 <summary>
                     <fa-icon icon="fa-regular fa-angle-right"></fa-icon>
-                    Is there a contract? or can I cancel anytime?
+                    If I cancel, can I resume a subscription later?
                 </summary>
-                <p>When the subscription’s trial period expires, your paid subscription will begin immediately. You will get a reminder by email 24 hours before your free trial is due to expire and you can cancel at any time. To do this, go to My subscription in the top-right account menu then click Change Plan.</p>
+                <p>Yes, your JIGs, playlists, & resources, will remain in our cloud system and you'll still be able to use all of the features included in your FREE account. When you decide to return and renew a paid subscription, you will regain full access to premium content and tools provided in the paid plan.</p>
             </details>
             <details>
                 <summary>
                     <fa-icon icon="fa-regular fa-angle-right"></fa-icon>
-                    Can I get an invoice?
+                    What happens to my JIGs, playlists, resources, and courses if I downgrade to a FREE account?
                 </summary>
-                <p>When the subscription’s trial period expires, your paid subscription will begin immediately. You will get a reminder by email 24 hours before your free trial is due to expire and you can cancel at any time. To do this, go to My subscription in the top-right account menu then click Change Plan.</p>
-            </details>
-            <details>
-                <summary>
-                    <fa-icon icon="fa-regular fa-angle-right"></fa-icon>
-                    How can I change my credit card or payment method?
-                </summary>
-                <p>When the subscription’s trial period expires, your paid subscription will begin immediately. You will get a reminder by email 24 hours before your free trial is due to expire and you can cancel at any time. To do this, go to My subscription in the top-right account menu then click Change Plan.</p>
-            </details>
-            <details>
-                <summary>
-                    <fa-icon icon="fa-regular fa-angle-right"></fa-icon>
-                    Can I switch between monthly and annual subscriptions?
-                </summary>
-                <p>When the subscription’s trial period expires, your paid subscription will begin immediately. You will get a reminder by email 24 hours before your free trial is due to expire and you can cancel at any time. To do this, go to My subscription in the top-right account menu then click Change Plan.</p>
+                <p>Anything you have created and published will continue to work as before. You will still be able to edit, play, and share your creations, however, you will no longer be able to create playlists, resources, or courses, and if you have already created 5 JIGs you will not be able to create new ones.</p>
             </details>
         `;
     }

@@ -86,20 +86,20 @@ impl Pricing {
                 }
             })).to_signal_vec())
             // TODO: enable once faq texts are updates
-            // .child(html!("pricing-faq", {
-            //     .prop("id", "faq")
-            // }))
-            // .child(html!("button-rect", {
-            //     .prop("kind", "outline")
-            //     .prop("color", "blue")
-            //     .style("position", "fixed")
-            //     .style("right", "16px")
-            //     .style("background-color", "#ffffff")
-            //     .style("z-index", "10000")
-            //     .style("bottom", "16px")
-            //     .prop("href", "#faq")
-            //     .text("Questions?")
-            // }))
+            .child(html!("pricing-faq", {
+                .prop("id", "faq")
+            }))
+            .child(html!("button-rect", {
+                .prop("kind", "outline")
+                .prop("color", "blue")
+                .style("position", "fixed")
+                .style("right", "16px")
+                .style("background-color", "#ffffff")
+                .style("z-index", "10000")
+                .style("bottom", "16px")
+                .prop("href", "#faq")
+                .text("Questions?")
+            }))
             .child(page_footer::dom::render(None))
         })
     }
