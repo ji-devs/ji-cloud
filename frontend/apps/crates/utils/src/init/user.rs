@@ -1,6 +1,7 @@
 use crate::{fetch::*, unwrap::UnwrapJiExt};
 use futures_signals::signal::{Mutable, Signal};
 use once_cell::sync::OnceCell;
+use shared::domain::billing::PlanTier;
 use shared::{
     api::endpoints::user::Profile,
     domain::{
@@ -74,27 +75,9 @@ pub fn get_user_email() -> Option<String> {
     Some(email)
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub enum PlanTier {
-    Pro,
-    Basic,
-    Free,
-}
-
 pub fn get_plan_tier() -> PlanTier {
     match get_plan_type() {
-        Some(
-            PlanType::IndividualProMonthly
-            | PlanType::IndividualProAnnually
-            | PlanType::SchoolLevel1
-            | PlanType::SchoolLevel2
-            | PlanType::SchoolLevel3
-            | PlanType::SchoolLevel4
-            | PlanType::SchoolUnlimited,
-        ) => PlanTier::Pro,
-        Some(PlanType::IndividualBasicMonthly | PlanType::IndividualBasicAnnually) => {
-            PlanTier::Basic
-        }
+        Some(plan_type) => plan_type.plan_tier(),
         None => PlanTier::Free,
     }
 }

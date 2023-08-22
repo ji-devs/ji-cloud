@@ -569,6 +569,19 @@ pub enum SubscriptionType {
     School = 1,
 }
 
+/// Subscription plan tier
+#[derive(Debug, Display, Serialize, Deserialize, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[repr(i16)]
+pub enum PlanTier {
+    /// Free tier
+    Free = 0,
+    /// Basic tier
+    Basic = 1,
+    /// Pro tier
+    Pro = 2,
+}
+
 /// Possible individual subscription plans
 #[derive(
     Debug, Display, Serialize, Deserialize, Clone, Copy, Eq, Ord, PartialOrd, PartialEq, Hash,
@@ -750,6 +763,21 @@ impl PlanType {
                 | Self::SchoolLevel4
                 | Self::SchoolUnlimited
         )
+    }
+
+    /// The tier this plan type is associated with
+    #[must_use]
+    pub const fn plan_tier(&self) -> PlanTier {
+        match self {
+            PlanType::IndividualProMonthly
+            | PlanType::IndividualProAnnually
+            | PlanType::SchoolLevel1
+            | PlanType::SchoolLevel2
+            | PlanType::SchoolLevel3
+            | PlanType::SchoolLevel4
+            | PlanType::SchoolUnlimited => PlanTier::Pro,
+            PlanType::IndividualBasicMonthly | PlanType::IndividualBasicAnnually => PlanTier::Basic,
+        }
     }
 }
 

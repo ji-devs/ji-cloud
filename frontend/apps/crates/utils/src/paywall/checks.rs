@@ -1,4 +1,5 @@
-use crate::prelude::{get_plan_tier, PlanTier};
+use crate::prelude::get_plan_tier;
+use shared::domain::billing::PlanTier;
 
 pub fn can_create_jig(total_existing: u64) -> bool {
     match get_plan_tier() {
