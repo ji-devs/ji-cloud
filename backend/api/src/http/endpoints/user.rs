@@ -878,8 +878,17 @@ async fn get_profile(
 
     match db::user::get_profile(db.as_ref(), &user_id).await? {
         Some(mut profile) => {
-            let account_summary =
-                db::account::get_user_account_summary(db.as_ref(), &user_id).await?;
+            let account_summary = match db::account::get_user_account_summary(db.as_ref(), &user_id)
+                .await?
+            {
+                Some(summary) => Some(summary),
+                None => {
+                    // Create a default user account if the summary is empty
+                    db::account::create_default_individual_account(db.as_ref(), &user_id).await?;
+                    db::account::get_user_account_summary(db.as_ref(), &user_id).await?
+                }
+            };
+
             profile.account_summary = account_summary;
             Ok(Json(profile))
         }

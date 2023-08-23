@@ -10,11 +10,11 @@ use ji_core::settings::RuntimeSettings;
 use shared::api::endpoints::account::{
     DeleteSchoolAccount, GetIndividualAccount, GetSchoolAccount, UpdateSchoolAccount,
 };
-use shared::api::endpoints::admin::GetAdminSchoolAccount;
+use shared::api::endpoints::admin::{GetAdminSchoolAccount, SetAccountTierOverride};
 use shared::api::{endpoints::account::CreateSchoolAccount, ApiEndpoint, PathParts};
 use shared::domain::admin::GetAdminSchoolAccountResponse;
 use shared::domain::billing::{
-    AccountIfAuthorized, CreateSchoolAccountRequest, GetSchoolAccountResponse,
+    AccountId, AccountIfAuthorized, CreateSchoolAccountRequest, GetSchoolAccountResponse,
     IndividualAccountResponse, SchoolId, UpdateSchoolAccountRequest,
 };
 use shared::domain::UpdateNonNullable;
@@ -181,6 +181,22 @@ async fn get_admin_school_account(
     }))
 }
 
+async fn set_account_tier_override(
+    _auth: TokenUserWithScope<ScopeAdmin>,
+    db: Data<PgPool>,
+    path: Path<AccountId>,
+    req: Json<<SetAccountTierOverride as ApiEndpoint>::Req>,
+) -> Result<HttpResponse, <SetAccountTierOverride as ApiEndpoint>::Err> {
+    let account_id = path.into_inner();
+    let tier_override = req.into_inner();
+
+    db::account::set_account_tier_override(db.as_ref(), &account_id, tier_override)
+        .await
+        .into_anyhow()?;
+
+    Ok(HttpResponse::Ok().finish())
+}
+
 async fn delete_school_account(
     auth: TokenUser,
     db: Data<PgPool>,
@@ -278,6 +294,12 @@ pub fn configure(cfg: &mut ServiceConfig) {
         GetAdminSchoolAccount::METHOD
             .route()
             .to(get_admin_school_account),
+    )
+    .route(
+        <SetAccountTierOverride as ApiEndpoint>::Path::PATH,
+        SetAccountTierOverride::METHOD
+            .route()
+            .to(set_account_tier_override),
     )
     .route(
         <UpdateSchoolAccount as ApiEndpoint>::Path::PATH,

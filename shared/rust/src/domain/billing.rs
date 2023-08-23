@@ -570,11 +570,12 @@ pub enum SubscriptionType {
 }
 
 /// Subscription plan tier
-#[derive(Debug, Display, Serialize, Deserialize, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Default, Display, Serialize, Deserialize, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[repr(i16)]
 pub enum PlanTier {
     /// Free tier
+    #[default]
     Free = 0,
     /// Basic tier
     Basic = 1,
@@ -1029,6 +1030,8 @@ pub struct UserAccountSummary {
     pub school_name: Option<String>,
     /// The type of plan the user's account is subscribed to
     pub plan_type: Option<PlanType>,
+    /// The plan tier
+    pub plan_tier: PlanTier,
     /// Status of the accounts subscription, if any
     pub subscription_status: Option<SubscriptionStatus>,
     /// Whether this user is an admin. For non School accounts, this user will

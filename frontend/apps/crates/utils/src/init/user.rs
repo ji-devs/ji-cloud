@@ -76,8 +76,10 @@ pub fn get_user_email() -> Option<String> {
 }
 
 pub fn get_plan_tier() -> PlanTier {
-    match get_plan_type() {
-        Some(plan_type) => plan_type.plan_tier(),
-        None => PlanTier::Free,
-    }
+    get_user_mutable()
+        .lock_ref()
+        .as_ref()
+        .and_then(|user| user.account_summary.as_ref())
+        .map(|summary| summary.plan_tier)
+        .unwrap_or_default()
 }
