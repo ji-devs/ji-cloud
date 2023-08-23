@@ -38,5 +38,15 @@ expression: body
   "resource_count": 0,
   "course_count": 0,
   "playlist_count": 0,
-  "total_asset_count": 0
+  "total_asset_count": 0,
+  "account_summary": {
+    "school_id": null,
+    "school_name": null,
+    "plan_type": null,
+    "plan_tier": "Free",
+    "subscription_status": null,
+    "is_admin": true,
+    "overdue": false,
+    "verified": true
+  }
 }

@@ -12173,62 +12173,6 @@
     },
     "query": "\n        update user_asset_data\n        set playlist_count = playlist_count + 1,\n        total_asset_count = total_asset_count + 1\n        from playlist\n        where author_id = user_id and\n              published_at is null and\n              id = $1"
   },
-  "b120a6c2b6055b96a909895d534f7a68e64c5e085e658eee06bb60739485be7a": {
-    "describe": {
-      "columns": [
-        {
-          "name": "plan_type?: PlanType",
-          "ordinal": 0,
-          "type_info": "Int2"
-        },
-        {
-          "name": "subscription_status?: SubscriptionStatus",
-          "ordinal": 1,
-          "type_info": "Int2"
-        },
-        {
-          "name": "is_admin!",
-          "ordinal": 2,
-          "type_info": "Bool"
-        },
-        {
-          "name": "verified!",
-          "ordinal": 3,
-          "type_info": "Bool"
-        },
-        {
-          "name": "school_id?: SchoolId",
-          "ordinal": 4,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "school_name?",
-          "ordinal": 5,
-          "type_info": "Text"
-        },
-        {
-          "name": "overdue!",
-          "ordinal": 6,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        null,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect\n    subscription_plan.plan_type as \"plan_type?: PlanType\",\n    subscription.status as \"subscription_status?: SubscriptionStatus\",\n    user_account.admin as \"is_admin!\",\n    user_account.verified as \"verified!\",\n    school.school_id as \"school_id?: SchoolId\",\n    school.school_name::text as \"school_name?\",\n    case\n        when subscription.amount_due > 0 then true\n        else false\n    end as \"overdue!\"\nfrom user_account\ninner join account using (account_id)\nleft join school using (account_id)\nleft join (\n    select subscription.account_id, status, amount_due, subscription_plan_id\n    from subscription\n    join (\n        select\n            distinct on (account_id)\n            account_id, subscription_id\n        from subscription\n        order by account_id, created_at desc\n    ) as recent_subscription using (subscription_id)\n) as subscription using (account_id)\nleft join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\nwhere user_account.user_id = $1\n"
-  },
   "b1513ce8a836f80987c480701be8ab9dbc124d8a4556503a4ad2dc77b1ae50d2": {
     "describe": {
       "columns": [
@@ -12663,6 +12607,20 @@
       }
     },
     "query": "\nupdate course_data\nset other_keywords = $2,\n    translated_keywords = (case when ($3::text is not null) then $3::text else (translated_keywords) end),\n    updated_at = now()\nwhere id = $1 and $2 is distinct from other_keywords"
+  },
+  "b8882d211b07177c5a7379d55b3589de1b11dcaf6f85acbb94536365716215a7": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Bool",
+          "Int2"
+        ]
+      }
+    },
+    "query": "\nupdate account\nset\n    tier_override = case when $2 then $3 else tier_override end\nwhere account_id = $1\n"
   },
   "b8f36ca19ecaaea69115abb13d49495874b0fa3f43fff871e4a2e4077d1c1005": {
     "describe": {
@@ -14051,6 +14009,68 @@
       }
     },
     "query": "\nupdate jig_data_additional_resource\nset resource_content = $3\nwhere jig_data_id = $1 and id = $2\n            "
+  },
+  "d81afb58fcb8be7594cdc354e461aa8a66fab25497151e5588c9d8b4d3ee1664": {
+    "describe": {
+      "columns": [
+        {
+          "name": "plan_type?: PlanType",
+          "ordinal": 0,
+          "type_info": "Int2"
+        },
+        {
+          "name": "subscription_status?: SubscriptionStatus",
+          "ordinal": 1,
+          "type_info": "Int2"
+        },
+        {
+          "name": "is_admin!",
+          "ordinal": 2,
+          "type_info": "Bool"
+        },
+        {
+          "name": "verified!",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "school_id?: SchoolId",
+          "ordinal": 4,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "school_name?",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "overdue!",
+          "ordinal": 6,
+          "type_info": "Bool"
+        },
+        {
+          "name": "tier_override?: PlanTier",
+          "ordinal": 7,
+          "type_info": "Int2"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        null,
+        null,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect\n    subscription_plan.plan_type as \"plan_type?: PlanType\",\n    subscription.status as \"subscription_status?: SubscriptionStatus\",\n    user_account.admin as \"is_admin!\",\n    user_account.verified as \"verified!\",\n    school.school_id as \"school_id?: SchoolId\",\n    school.school_name::text as \"school_name?\",\n    case\n        when subscription.amount_due > 0 then true\n        else false\n    end as \"overdue!\",\n    tier_override as \"tier_override?: PlanTier\"\nfrom user_account\ninner join account using (account_id)\nleft join school using (account_id)\nleft join (\n    select subscription.account_id, status, amount_due, subscription_plan_id\n    from subscription\n    join (\n        select\n            distinct on (account_id)\n            account_id, subscription_id\n        from subscription\n        order by account_id, created_at desc\n    ) as recent_subscription using (subscription_id)\n) as subscription using (account_id)\nleft join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\nwhere user_account.user_id = $1\n"
   },
   "d858f011cc789f16deeef69ada3ff99c22a5677d6ce467c7eae56a7b1a3c3ad3": {
     "describe": {

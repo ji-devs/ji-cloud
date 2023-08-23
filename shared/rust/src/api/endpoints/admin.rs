@@ -3,9 +3,11 @@ use crate::domain::admin::{
     AdminSchoolAccountPath, AdminSchoolsPath, AdminVerifySchoolPath, GetAdminSchoolAccountResponse,
     ImportSchoolNamesPath, InviteSchoolUsersPath, InviteSchoolUsersRequest,
     InviteSchoolUsersResponse, SchoolNamesPath, SearchSchoolsParams, SearchSchoolsResponse,
-    SetInternalSchoolNamePath, UpdateSchoolNamePath, VerifySchoolRequest,
+    SetAccountTierOverridePath, SetInternalSchoolNamePath, UpdateSchoolNamePath,
+    VerifySchoolRequest,
 };
-use crate::domain::billing::{SchoolName, SchoolNameId, SchoolNameValue};
+use crate::domain::billing::{PlanTier, SchoolName, SchoolNameId, SchoolNameValue};
+use crate::domain::UpdateNullable;
 use crate::error::AccountError;
 use crate::{
     api::Method,
@@ -95,6 +97,16 @@ impl ApiEndpoint for GetAdminSchoolAccount {
     type Res = GetAdminSchoolAccountResponse;
     type Err = AccountError;
     const METHOD: Method = Method::Get;
+}
+
+/// Set an accounts plan tier override
+pub struct SetAccountTierOverride;
+impl ApiEndpoint for SetAccountTierOverride {
+    type Path = SetAccountTierOverridePath;
+    type Req = UpdateNullable<PlanTier>;
+    type Res = ();
+    type Err = AccountError;
+    const METHOD: Method = Method::Patch;
 }
 
 /// Get a list of imported school names

@@ -2,12 +2,12 @@ use crate::db;
 use shared::domain::admin::SearchSchoolsParams;
 use shared::domain::billing::{
     Account, AccountId, AccountType, AccountUser, AdminSchool, CreateSchoolAccountRequest,
-    CustomerId, PaymentMethod, PlanType, School, SchoolId, SchoolName, SchoolNameId,
+    CustomerId, PaymentMethod, PlanTier, PlanType, School, SchoolId, SchoolName, SchoolNameId,
     SchoolNameValue, SubscriptionStatus, UpdateSchoolAccountRequest, UserAccountSummary,
 };
 use shared::domain::image::ImageId;
 use shared::domain::user::UserId;
-use shared::domain::ItemCount;
+use shared::domain::{ItemCount, UpdateNullable};
 use sqlx::{Executor, PgPool, Postgres};
 use tracing::{instrument, Instrument};
 
@@ -279,8 +279,7 @@ pub async fn get_user_account_summary(
     pool: &PgPool,
     user_id: &UserId,
 ) -> sqlx::Result<Option<UserAccountSummary>> {
-    sqlx::query_as!(
-        UserAccountSummary,
+    let record = sqlx::query!(
         // language=SQL
         r#"
 select
@@ -293,7 +292,8 @@ select
     case
         when subscription.amount_due > 0 then true
         else false
-    end as "overdue!"
+    end as "overdue!",
+    tier_override as "tier_override?: PlanTier"
 from user_account
 inner join account using (account_id)
 left join school using (account_id)
@@ -314,7 +314,25 @@ where user_account.user_id = $1
         user_id as &UserId,
     )
     .fetch_optional(pool)
-    .await
+    .await?;
+
+    let summary = record.map(|record| UserAccountSummary {
+        school_id: record.school_id,
+        school_name: record.school_name,
+        plan_type: record.plan_type,
+        plan_tier: record
+            .tier_override
+            .unwrap_or_else(|| match record.plan_type {
+                Some(plan_type) => plan_type.plan_tier(),
+                None => PlanTier::Free,
+            }),
+        subscription_status: record.subscription_status,
+        is_admin: record.is_admin,
+        overdue: record.overdue,
+        verified: record.verified,
+    });
+
+    Ok(summary)
 }
 
 #[instrument(skip(pool))]
@@ -867,4 +885,28 @@ pub async fn user_account_membership(
             AccountMember::User
         }
     }))
+}
+
+#[instrument(skip(pool))]
+pub async fn set_account_tier_override(
+    pool: &PgPool,
+    account_id: &AccountId,
+    tier_override: UpdateNullable<PlanTier>,
+) -> sqlx::Result<()> {
+    sqlx::query!(
+        // language=SQL
+        r#"
+update account
+set
+    tier_override = case when $2 then $3 else tier_override end
+where account_id = $1
+"#,
+        account_id as &AccountId,
+        !tier_override.is_keep(),
+        tier_override.into_option() as Option<PlanTier>,
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
 }
