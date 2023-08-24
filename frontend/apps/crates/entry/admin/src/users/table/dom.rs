@@ -3,8 +3,9 @@ use crate::users::editable_user::EditableUser;
 use super::state::*;
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::{map_ref, signal::SignalExt, signal_vec::SignalVecExt};
+use shared::domain::billing::PlanTier;
 use shared::domain::user::UserBadge;
-use std::rc::Rc;
+use std::{rc::Rc, str::FromStr};
 use utils::{events, routes::AdminUsersRoute, unwrap::UnwrapJiExt};
 use web_sys::HtmlSelectElement;
 
@@ -91,6 +92,7 @@ impl UsersTable {
             }))
             .children_signal_vec(state.users_state.users.signal_vec_cloned().map(clone!(state => move |user: Rc<EditableUser>| {
                 let user_id = user.id;
+                let tier_override = user.tier_override.map_or("".to_string(), |tier| tier.to_string());
                 html!("admin-table-line", {
                     .children(&mut [
                         html!("span", {
@@ -182,6 +184,38 @@ impl UsersTable {
                                 dom.child(html!("span"))
                             }
                         }
+                    }))
+                    .child(html!("label", {
+                        .child(html!("select" => HtmlSelectElement, {
+                            .with_node!(select => {
+                                .children(&mut [
+                                    html!("option", {
+                                        .prop("value", "")
+                                        .prop("selected", &tier_override == "")
+                                    }),
+                                    html!("option", {
+                                        .text(&PlanTier::Basic.to_string())
+                                        .prop("value", PlanTier::Basic.as_ref())
+                                        .prop("selected", &tier_override == PlanTier::Basic.as_ref())
+                                    }),
+                                    html!("option", {
+                                        .text(&PlanTier::Pro.to_string())
+                                        .prop("value", PlanTier::Pro.as_ref())
+                                        .prop("selected", &tier_override == PlanTier::Pro.as_ref())
+                                    }),
+                                ])
+                                .event(clone!(state, user, select => move |_: events::Change| {
+                                    let value: String = select.value();
+                                    let value = if value.is_empty() {
+                                        None
+                                    } else {
+                                        Some(PlanTier::from_str(&value).unwrap_ji())
+                                    };
+
+                                    state.set_tier_override(&user, value);
+                                }))
+                            })
+                        }))
                     }))
                 })
             })))

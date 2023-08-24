@@ -1,7 +1,9 @@
 use crate::error::Username::Taken;
 use chrono::{DateTime, Utc};
 use chrono_tz::Tz;
-use shared::domain::billing::{AmountInCents, PlanType, SchoolId, SubscriptionStatus};
+use shared::domain::billing::{
+    AccountId, AmountInCents, PlanTier, PlanType, SchoolId, SubscriptionStatus,
+};
 use shared::domain::{
     admin::DateFilterType,
     circle::CircleId,
@@ -187,7 +189,9 @@ account_cte as (
         subscription.is_trial,
         user_account.admin,
         school.school_id,
-        school.school_name
+        school.school_name,
+        account.account_id,
+        account.tier_override
     from user_account
     inner join account using (account_id)
     left join (
@@ -227,7 +231,9 @@ select  cte1.id                 as "id!: UserId",
         account_cte.amount_due as "amount_due_in_cents?: AmountInCents",
         account_cte.admin as "is_admin?",
         account_cte.school_id as "school_id?: SchoolId",
-        account_cte.school_name::text as "school_name?"
+        account_cte.school_name::text as "school_name?",
+        account_cte.account_id as "account_id?: AccountId",
+        account_cte.tier_override as "tier_override?: PlanTier"
 from cte1
         left join account_cte on cte1.id = account_cte.user_id
         inner join user_profile on cte1.id = user_profile.user_id
@@ -271,6 +277,8 @@ offset $2
                 is_admin: user_row.is_admin,
                 school_id: user_row.school_id,
                 school_name: user_row.school_name,
+                tier_override: user_row.tier_override,
+                account_id: user_row.account_id,
             }
         })
         .collect();
@@ -296,7 +304,9 @@ with account_cte as (
         subscription.amount_due,
         user_account.admin,
         school.school_id,
-        school.school_name
+        school.school_name,
+        account.account_id,
+        account.tier_override
     from user_account
     inner join account using (account_id)
     left join (
@@ -336,7 +346,9 @@ select  "user".id                 as "id!: UserId",
         account_cte.amount_due as "amount_due_in_cents?: AmountInCents",
         account_cte.admin as "is_admin?",
         account_cte.school_id as "school_id?: SchoolId",
-        account_cte.school_name::text as "school_name?"
+        account_cte.school_name::text as "school_name?",
+        account_cte.account_id as "account_id?: AccountId",
+        account_cte.tier_override as "tier_override?: PlanTier"
 from "user"
 left join account_cte on "user".id = account_cte.user_id
 inner join user_profile on "user".id = user_profile.user_id
@@ -375,6 +387,8 @@ with ordinality t(id, ord) using (id)
                 is_admin: row.is_admin,
                 school_id: row.school_id,
                 school_name: row.school_name,
+                tier_override: row.tier_override,
+                account_id: row.account_id,
             }
         })
         .collect();
