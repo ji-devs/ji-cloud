@@ -122,7 +122,7 @@ export class EditorBackbone {
             Transforms.setNodes(
                 this._editor,
                 { [key]: value },
-                { match: (n) => Editor.isBlock(this._editor, n) }
+                // { match: (n) => Editor.isBlock(this._editor, n) }
             );
         } else if (keyType === "leaf") {
             Transforms.setNodes(

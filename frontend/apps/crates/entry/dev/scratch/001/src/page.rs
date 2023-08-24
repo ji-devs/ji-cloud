@@ -16,6 +16,7 @@ use components::{
         callbacks::Callbacks as ImageSearchCallbacks,
         state::{ImageSearchKind, ImageSearchOptions},
     },
+    overlay::container::OverlayContainer,
     text_editor::{self, TextEditor},
 };
 
@@ -25,7 +26,14 @@ pub struct Page {}
 
 impl Page {
     pub fn render() -> Dom {
-        render_image_search()
+        html!("div", {
+            .child(html!("wysiwyg-base", {
+                .style("border", "solid 1px")
+                .style("width", "100px")
+            }))
+            // .child(render_text())
+            // .child(OverlayContainer::new().render(None))
+        })
     }
 }
 

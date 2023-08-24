@@ -7,6 +7,7 @@ import {
     PropertyValues,
     css,
     state,
+    TemplateResult,
 } from "lit-element";
 import React, { useMemo } from "react";
 import ReactDOM from "react-dom";
@@ -100,7 +101,8 @@ export class _ extends LitElement {
         //
         // Note: This is different from calling reFocus which uses the _blurSelection property.
         (
-            this.shadowRoot!.querySelector(
+            // TODO: this.shadowRoot!.querySelector(
+            this.querySelector(
                 "[contenteditable=true]"
             ) as HTMLElement
         ).focus();
@@ -113,15 +115,19 @@ export class _ extends LitElement {
     }
 
     createRenderRoot() {
+        // TODO: re-enable shadow-dom once slate bug is fixed https://github.com/ianstormtaylor/slate/issues/5144 (make sure to test on all browsers, mobile and desktop)
         // hebrew keyboard only works when delegatesFocus is true
-        return this.attachShadow({ mode: "open", delegatesFocus: true });
+        //return this.attachShadow({ mode: "open", delegatesFocus: true });
+        return this
     }
 
     render() {
         return html`
+            ${tempBaseStyles()}
             ${getRootStyles(this.value)}
-
-            <div id="editorRoot"></div>
+            <div style=${this.style.cssText}>
+                <div id="editorRoot"></div>
+            </div>
         `;
     }
 
@@ -157,7 +163,8 @@ export class _ extends LitElement {
         const selection = window.getSelection()!;
         const range = document.createRange();
         range.selectNodeContents(
-            this.shadowRoot!.querySelector("[contenteditable=true]")!
+            this.querySelector("[contenteditable=true]")!
+            // TODO: this.shadowRoot!.querySelector("[contenteditable=true]")!
         );
         selection.removeAllRanges();
         selection.addRange(range);
@@ -309,7 +316,8 @@ export class _ extends LitElement {
     private reFocus() {
         if (this._blurSelection) {
             (
-                this.shadowRoot!.querySelector(
+                // TODO: this.shadowRoot!.querySelector(
+                this.querySelector(
                     "[contenteditable=true]"
                 ) as HTMLElement
             ).focus();
@@ -349,4 +357,13 @@ export class _ extends LitElement {
         }
         return this.closestPassShadow(node.parentNode, selector);
     }
+}
+
+// TODO: get rid of this once shadow dom is enabled
+function tempBaseStyles(): TemplateResult {
+    return html`
+        <style>
+            ${baseStyles.cssText}
+        </style>
+    `;
 }

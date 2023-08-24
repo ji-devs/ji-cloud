@@ -46,7 +46,7 @@ export class EditorComponent extends React.Component<Props, State> {
     public render(): ReactElement {
         return React.createElement(Slate, {
             editor: this.props.backbone.editor,
-            value: this.state.value,
+            initialValue: this.state.value,
             onChange: (e: any) => this.onChange(e),
             children: [
                 React.createElement(Editable, {

@@ -18,6 +18,8 @@
         "firebase": "^9.6.1",
         "mixpanel-browser": "^2.45.0",
         "rollup": "^2.61.1",
+        "slate": "^0.94.1",
+        "slate-react": "^0.98.1",
         "vmsg": "^0.4.0"
     },
     "devDependencies": {
