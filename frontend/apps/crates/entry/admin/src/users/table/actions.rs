@@ -1,6 +1,9 @@
 use std::rc::Rc;
 
 use dominator::clone;
+use shared::domain::admin::SetAccountTierOverridePath;
+use shared::domain::billing::PlanTier;
+use shared::domain::UpdateNullable;
 use shared::{
     api::endpoints,
     domain::user::{PatchProfileAdminDataPath, PatchProfileAdminDataRequest},
@@ -40,5 +43,20 @@ impl UsersTable {
                 .await
                 .unwrap_ji();
         }))
+    }
+
+    pub fn set_tier_override(self: &Rc<Self>, user: &Rc<EditableUser>, tier: Option<PlanTier>) {
+        if let Some(account_id) = user.account_id {
+            self.loader.load(async move {
+                let req = UpdateNullable::from(tier);
+
+                endpoints::admin::SetAccountTierOverride::api_with_auth(
+                    SetAccountTierOverridePath(account_id),
+                    Some(req),
+                )
+                .await
+                .unwrap_ji();
+            })
+        }
     }
 }

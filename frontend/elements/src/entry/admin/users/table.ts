@@ -59,6 +59,7 @@ export class _ extends LitElement {
         "Subscription",
         "Period End",
         "School Account",
+        "Tier Override",
     ];
 
     render() {

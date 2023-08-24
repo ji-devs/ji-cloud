@@ -44,6 +44,7 @@ expression: body
     "school_name": null,
     "plan_type": null,
     "plan_tier": "Free",
+    "overridden": false,
     "subscription_status": null,
     "is_admin": true,
     "overdue": false,

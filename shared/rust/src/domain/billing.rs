@@ -5,7 +5,7 @@ use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt::{self, Debug, Display, Formatter};
-use strum_macros::{Display, EnumString};
+use strum_macros::{AsRefStr, Display, EnumString};
 
 use serde_json::Value;
 
@@ -570,7 +570,19 @@ pub enum SubscriptionType {
 }
 
 /// Subscription plan tier
-#[derive(Debug, Default, Display, Serialize, Deserialize, Clone, Copy, PartialEq, Eq)]
+#[derive(
+    Debug,
+    Default,
+    Display,
+    EnumString,
+    AsRefStr,
+    Serialize,
+    Deserialize,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[repr(i16)]
 pub enum PlanTier {
@@ -1032,6 +1044,8 @@ pub struct UserAccountSummary {
     pub plan_type: Option<PlanType>,
     /// The plan tier
     pub plan_tier: PlanTier,
+    /// Whether the tier has been overridden
+    pub overridden: bool,
     /// Status of the accounts subscription, if any
     pub subscription_status: Option<SubscriptionStatus>,
     /// Whether this user is an admin. For non School accounts, this user will

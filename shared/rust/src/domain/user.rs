@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize, Serializer};
 use std::convert::TryFrom;
 
 use crate::domain::billing::{
-    AmountInCents, PlanType, SchoolId, SubscriptionStatus, UserAccountSummary,
+    AccountId, AmountInCents, PlanTier, PlanType, SchoolId, SubscriptionStatus, UserAccountSummary,
 };
 use crate::{
     api::endpoints::PathPart,
@@ -382,6 +382,14 @@ pub struct UserResponse {
     /// The school name associated with the users account
     #[serde(default)]
     pub school_name: Option<String>,
+
+    /// The account id for the user
+    #[serde(default)]
+    pub account_id: Option<AccountId>,
+
+    /// Plan tier override
+    #[serde(default)]
+    pub tier_override: Option<PlanTier>,
 }
 
 /// A user's profile export representation.

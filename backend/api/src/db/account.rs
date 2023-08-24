@@ -326,6 +326,7 @@ where user_account.user_id = $1
                 Some(plan_type) => plan_type.plan_tier(),
                 None => PlanTier::Free,
             }),
+        overridden: record.tier_override.is_some(),
         subscription_status: record.subscription_status,
         is_admin: record.is_admin,
         overdue: record.overdue,
