@@ -44,6 +44,7 @@
     },
     "winter-snow": {
         "id": "winter-snow",
+        "premium": true,
         "label": {
             "en": "Winter Wonder"
         },
@@ -87,6 +88,7 @@
     },
     "watermelon-summer": {
         "id": "watermelon-summer",
+        "premium": true,
         "label": {
             "en": "Watermelon"
         },
@@ -129,6 +131,7 @@
     },
     "shabbat-shalom": {
         "id": "shabbat-shalom",
+        "premium": true,
         "label": {
             "en": "Shabbat Shalom"
         },
@@ -214,6 +217,7 @@
     },
     "purim": {
         "id": "purim",
+        "premium": true,
         "label": {
             "en": "Happy Purim"
         },
@@ -298,6 +302,7 @@
     },
     "my-notebook": {
         "id": "my-notebook",
+        "premium": true,
         "label": {
             "en": "My Notebook"
         },
@@ -341,6 +346,7 @@
     },
     "lovely-spring": {
         "id": "lovely-spring",
+        "premium": true,
         "label": {
             "en": "Lemon Mint"
         },
@@ -383,6 +389,7 @@
     },
     "lost-in-space": {
         "id": "lost-in-space",
+        "premium": true,
         "label": {
             "en": "Starstruck"
         },
@@ -426,6 +433,7 @@
     },
     "comix": {
         "id": "comix",
+        "premium": true,
         "label": {
             "en": "Comic Book"
         },
@@ -596,6 +604,7 @@
     },
     "illuminating-hanukkah": {
         "id": "illuminating-hanukkah",
+        "premium": true,
         "label": {
             "en": "My Menorah"
         },
@@ -901,6 +910,7 @@
     },
     "abstract": {
         "id": "abstract",
+        "premium": true,
         "label": {
             "en": "3D Purple"
         },
@@ -943,6 +953,7 @@
     },
     "apple-with-honey": {
         "id": "apple-with-honey",
+        "premium": true,
         "label": {
             "en": "Apples & honey"
         },
@@ -985,6 +996,7 @@
     },
     "autumn": {
         "id": "autumn",
+        "premium": true,
         "label": {
             "en": "Autumn Leaves"
         },
@@ -1070,6 +1082,7 @@
     },
     "camping": {
         "id": "camping",
+        "premium": true,
         "label": {
             "en": "Campfire Stories"
         },
@@ -1112,6 +1125,7 @@
     },
     "chanukah": {
         "id": "chanukah",
+        "premium": true,
         "label": {
             "en": "Chanukah"
         },
@@ -1154,6 +1168,7 @@
     },
     "chanukah-lights": {
         "id": "chanukah-lights",
+        "premium": true,
         "label": {
             "en": "Festival of Lights"
         },
@@ -1238,6 +1253,7 @@
     },
     "graffiti": {
         "id": "graffiti",
+        "premium": true,
         "label": {
             "en": "Graffiti"
         },
@@ -1280,6 +1296,7 @@
     },
     "happy-birthday": {
         "id": "happy-birthday",
+        "premium": true,
         "label": {
             "en": "Happy Birthday"
         },
@@ -1322,6 +1339,7 @@
     },
     "ice-age": {
         "id": "ice-age",
+        "premium": true,
         "label": {
             "en": "Ice Age"
         },
@@ -1365,6 +1383,7 @@
     },
     "israel": {
         "id": "israel",
+        "premium": true,
         "label": {
             "en": "Yom Ha'Atzmaut"
         },
@@ -1449,6 +1468,7 @@
     },
     "jerusalem-wall": {
         "id": "jerusalem-wall",
+        "premium": true,
         "label": {
             "en": "Western Wall"
         },
@@ -1533,6 +1553,7 @@
     },
     "our-planet": {
         "id": "our-planet",
+        "premium": true,
         "label": {
             "en": "Go Green"
         },
@@ -1575,6 +1596,7 @@
     },
     "passover-matza": {
         "id": "passover-matza",
+        "premium": true,
         "label": {
             "en": "Matzah & Maror"
         },
@@ -1617,6 +1639,7 @@
     },
     "passover-seder": {
         "id": "passover-seder",
+        "premium": true,
         "label": {
             "en": "Passover Seder"
         },
@@ -1659,6 +1682,7 @@
     },
     "pomegranate": {
         "id": "pomegranate",
+        "premium": true,
         "label": {
             "en": "Happy New Year"
         },
@@ -1701,6 +1725,7 @@
     },
     "purim-feast": {
         "id": "purim-feast",
+        "premium": true,
         "label": {
             "en": "Carnival"
         },
@@ -1743,6 +1768,7 @@
     },
     "purim-sweets": {
         "id": "purim-sweets",
+        "premium": true,
         "label": {
             "en": "Treats & Sweets"
         },
@@ -1785,6 +1811,7 @@
     },
     "shavuot-dishes": {
         "id": "shavuot-dishes",
+        "premium": true,
         "label": {
             "en": "Dairy Delights"
         },
@@ -1827,6 +1854,7 @@
     },
     "shavuot-fields": {
         "id": "shavuot-fields",
+        "premium": true,
         "label": {
             "en": "Shavuot"
         },
@@ -1869,6 +1897,7 @@
     },
     "space": {
         "id": "space",
+        "premium": true,
         "label": {
             "en": "Space Explorer"
         },
@@ -1912,6 +1941,7 @@
     },
     "spring": {
         "id": "spring",
+        "premium": true,
         "label": {
             "en": "Springtime"
         },
@@ -1954,6 +1984,7 @@
     },
     "sukkot": {
         "id": "sukkot",
+        "premium": true,
         "label": {
             "en": "Sukkot"
         },
@@ -1996,6 +2027,7 @@
     },
     "summer-pool": {
         "id": "summer-pool",
+        "premium": true,
         "label": {
             "en": "Flip Flop Summer"
         },
@@ -2038,6 +2070,7 @@
     },
     "surreal": {
         "id": "surreal",
+        "premium": true,
         "label": {
             "en": "Cloud 9"
         },
@@ -2080,6 +2113,7 @@
     },
     "theater": {
         "id": "theater",
+        "premium": true,
         "label": {
             "en": "Drama Theater"
         },
@@ -2122,6 +2156,7 @@
     },
     "travel": {
         "id": "travel",
+        "premium": true,
         "label": {
             "en": "Go Travel"
         },
@@ -2332,6 +2367,7 @@
     },
     "nature": {
         "id": "nature",
+        "premium": true,
         "label": {
             "en": "Discover Nature"
         },
@@ -2416,6 +2452,7 @@
     },
     "sport": {
         "id": "sport",
+        "premium": true,
         "label": {
             "en": "Sports Game"
         },
@@ -2458,6 +2495,7 @@
     },
     "valentine_s-day": {
         "id": "valentine_s-day",
+        "premium": true,
         "label": {
             "en": "Origami Hearts"
         },
@@ -2500,6 +2538,7 @@
     },
     "rosh-hashana": {
         "id": "rosh-hashana",
+        "premium": true,
         "label": {
             "en": "Rosh Hashana"
         },
@@ -2881,6 +2920,7 @@
     },
     "silly-monsters": {
         "id": "silly-monsters",
+        "premium": true,
         "label": {
             "en": "Silly Monsters"
         },
@@ -2965,6 +3005,7 @@
     },
     "dino-games": {
         "id": "dino-games",
+        "premium": true,
         "label": {
             "en": "Dino Games"
         },
