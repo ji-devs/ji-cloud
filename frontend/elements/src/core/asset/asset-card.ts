@@ -142,13 +142,26 @@ export class _ extends LitElement {
                     column-gap: 18px;
                     font-size: 13px;
                     font-weight: 500;
+                    border-bottom-left-radius: 20px;
+                    border-bottom-right-radius: 20px;
                 }
                 .bottom-indicator ::slotted([slot=bottom-indicator]) {
                     color: var(--dark-gray-5);
                     text-decoration: none;
                 }
-                .bottom-indicator ::slotted([slot=bottom-indicator]:hover) {
+                /* .bottom-indicator ::slotted([slot=bottom-indicator]:hover) {
                     color: var(--main-blue);
+                } */
+                /* TODO remove the following rule once the share button is moved from bottom-indicator to the menu */
+                .bottom-indicator ::slotted([slot=bottom-indicator].share) {
+                    aspect-ratio: 1 / 1;
+                    display: inline-grid;
+                    place-content: center;
+                    width: 30px;
+                    border-radius: 50%;
+                }
+                .bottom-indicator ::slotted([slot=bottom-indicator].share:hover) {
+                    background-color: #00000020;
                 }
                 .premium {
                     display: flex;

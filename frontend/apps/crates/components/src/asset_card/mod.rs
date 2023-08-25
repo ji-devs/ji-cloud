@@ -1,13 +1,15 @@
 use std::rc::Rc;
 
-use dominator::{html, Dom};
+use dominator::{html, Dom, EventOptions};
 use futures_signals::signal::{from_future, SignalExt};
 use shared::domain::asset::{Asset, DraftOrLive, PrivacyLevel};
 use utils::ages::AgeRangeVecExt;
+use utils::events;
 use utils::metadata::{get_age_ranges, get_resource_types};
 use utils::routes::{CommunityMembersRoute, CommunityRoute, Route};
 
 use crate::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
+use crate::share_asset::ShareAsset;
 
 #[derive(Clone, Default)]
 pub struct AssetCardConfig<'a> {
@@ -165,7 +167,22 @@ pub fn render_asset_card(asset: &Asset, config: AssetCardConfig) -> Dom {
                         }));
                     };
 
-                    dom
+                    dom.child(html!("div", {
+                        .prop("slot", "bottom-indicator")
+                        .class("share")
+                        .child(
+                            ShareAsset::new(asset.clone()).render(
+                                html!("fa-button", {
+                                    .prop("slot", "bottom-indicator")
+                                    .prop("icon", "fa-regular fa-share-nodes")
+                                }),
+                                None
+                            )
+                        )
+                        .event_with_options(&EventOptions::preventable(), |e: events::Click| {
+                            e.prevent_default();
+                        })
+                    }))
                 },
             }
         })
