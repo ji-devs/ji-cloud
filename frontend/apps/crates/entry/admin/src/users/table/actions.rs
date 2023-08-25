@@ -46,17 +46,15 @@ impl UsersTable {
     }
 
     pub fn set_tier_override(self: &Rc<Self>, user: &Rc<EditableUser>, tier: Option<PlanTier>) {
-        if let Some(account_id) = user.account_id {
-            self.loader.load(async move {
-                let req = UpdateNullable::from(tier);
+        self.loader.load(clone!(user => async move {
+            let req = UpdateNullable::from(tier);
 
-                endpoints::admin::SetAccountTierOverride::api_with_auth(
-                    SetAccountTierOverridePath(account_id),
-                    Some(req),
-                )
-                .await
-                .unwrap_ji();
-            })
-        }
+            endpoints::admin::SetAccountTierOverride::api_with_auth(
+                SetAccountTierOverridePath(user.id),
+                Some(req),
+            )
+            .await
+            .unwrap_ji();
+        }))
     }
 }

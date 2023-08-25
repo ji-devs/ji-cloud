@@ -13290,6 +13290,74 @@
     },
     "query": "\nselect resource_data.id,\n       description\nfrom resource_data\ninner join resource on live_id = resource_data.id\nwhere description <> '' and translated_description = '{}'\nand published_at is not null\nand description_translate_status is null\norder by coalesce(updated_at, created_at) desc\nlimit 10 for no key update skip locked;\n "
   },
+  "c978e3bffc02cc9dd83133c5450945d5a990812997883e37099c4206f9d97030": {
+    "describe": {
+      "columns": [
+        {
+          "name": "plan_type?: PlanType",
+          "ordinal": 0,
+          "type_info": "Int2"
+        },
+        {
+          "name": "subscription_status?: SubscriptionStatus",
+          "ordinal": 1,
+          "type_info": "Int2"
+        },
+        {
+          "name": "is_admin!",
+          "ordinal": 2,
+          "type_info": "Bool"
+        },
+        {
+          "name": "verified!",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "school_id?: SchoolId",
+          "ordinal": 4,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "school_name?",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "overdue!",
+          "ordinal": 6,
+          "type_info": "Bool"
+        },
+        {
+          "name": "account_id?: AccountId",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "tier_override?: PlanTier",
+          "ordinal": 8,
+          "type_info": "Int2"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        null,
+        null,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect\n    subscription_plan.plan_type as \"plan_type?: PlanType\",\n    subscription.status as \"subscription_status?: SubscriptionStatus\",\n    user_account.admin as \"is_admin!\",\n    user_account.verified as \"verified!\",\n    school.school_id as \"school_id?: SchoolId\",\n    school.school_name::text as \"school_name?\",\n    case\n        when subscription.amount_due > 0 then true\n        else false\n    end as \"overdue!\",\n    account.account_id as \"account_id?: AccountId\",\n    tier_override as \"tier_override?: PlanTier\"\nfrom user_account\ninner join account using (account_id)\nleft join school using (account_id)\nleft join (\n    select subscription.account_id, status, amount_due, subscription_plan_id\n    from subscription\n    join (\n        select\n            distinct on (account_id)\n            account_id, subscription_id\n        from subscription\n        order by account_id, created_at desc\n    ) as recent_subscription using (subscription_id)\n) as subscription using (account_id)\nleft join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\nwhere user_account.user_id = $1\n"
+  },
   "c9871e12739d5ae1acd8e3026e00ed927a54f717d5e5cd12f78456b99a7aa23b": {
     "describe": {
       "columns": [],
@@ -13896,68 +13964,6 @@
       }
     },
     "query": "\nupdate jig_data_additional_resource\nset resource_content = $3\nwhere jig_data_id = $1 and id = $2\n            "
-  },
-  "d81afb58fcb8be7594cdc354e461aa8a66fab25497151e5588c9d8b4d3ee1664": {
-    "describe": {
-      "columns": [
-        {
-          "name": "plan_type?: PlanType",
-          "ordinal": 0,
-          "type_info": "Int2"
-        },
-        {
-          "name": "subscription_status?: SubscriptionStatus",
-          "ordinal": 1,
-          "type_info": "Int2"
-        },
-        {
-          "name": "is_admin!",
-          "ordinal": 2,
-          "type_info": "Bool"
-        },
-        {
-          "name": "verified!",
-          "ordinal": 3,
-          "type_info": "Bool"
-        },
-        {
-          "name": "school_id?: SchoolId",
-          "ordinal": 4,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "school_name?",
-          "ordinal": 5,
-          "type_info": "Text"
-        },
-        {
-          "name": "overdue!",
-          "ordinal": 6,
-          "type_info": "Bool"
-        },
-        {
-          "name": "tier_override?: PlanTier",
-          "ordinal": 7,
-          "type_info": "Int2"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        null,
-        null,
-        true
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect\n    subscription_plan.plan_type as \"plan_type?: PlanType\",\n    subscription.status as \"subscription_status?: SubscriptionStatus\",\n    user_account.admin as \"is_admin!\",\n    user_account.verified as \"verified!\",\n    school.school_id as \"school_id?: SchoolId\",\n    school.school_name::text as \"school_name?\",\n    case\n        when subscription.amount_due > 0 then true\n        else false\n    end as \"overdue!\",\n    tier_override as \"tier_override?: PlanTier\"\nfrom user_account\ninner join account using (account_id)\nleft join school using (account_id)\nleft join (\n    select subscription.account_id, status, amount_due, subscription_plan_id\n    from subscription\n    join (\n        select\n            distinct on (account_id)\n            account_id, subscription_id\n        from subscription\n        order by account_id, created_at desc\n    ) as recent_subscription using (subscription_id)\n) as subscription using (account_id)\nleft join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\nwhere user_account.user_id = $1\n"
   },
   "d858f011cc789f16deeef69ada3ff99c22a5677d6ce467c7eae56a7b1a3c3ad3": {
     "describe": {

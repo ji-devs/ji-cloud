@@ -14,9 +14,10 @@ use shared::api::endpoints::admin::{GetAdminSchoolAccount, SetAccountTierOverrid
 use shared::api::{endpoints::account::CreateSchoolAccount, ApiEndpoint, PathParts};
 use shared::domain::admin::GetAdminSchoolAccountResponse;
 use shared::domain::billing::{
-    AccountId, AccountIfAuthorized, CreateSchoolAccountRequest, GetSchoolAccountResponse,
-    IndividualAccountResponse, SchoolId, UpdateSchoolAccountRequest,
+    AccountIfAuthorized, CreateSchoolAccountRequest, GetSchoolAccountResponse,
+    IndividualAccountResponse, SchoolId, UpdateSchoolAccountRequest, UserAccountSummary,
 };
+use shared::domain::user::UserId;
 use shared::domain::UpdateNonNullable;
 use shared::error::{AccountError, IntoAnyhow};
 use sqlx::PgPool;
@@ -184,11 +185,36 @@ async fn get_admin_school_account(
 async fn set_account_tier_override(
     _auth: TokenUserWithScope<ScopeAdmin>,
     db: Data<PgPool>,
-    path: Path<AccountId>,
+    path: Path<UserId>,
     req: Json<<SetAccountTierOverride as ApiEndpoint>::Req>,
 ) -> Result<HttpResponse, <SetAccountTierOverride as ApiEndpoint>::Err> {
-    let account_id = path.into_inner();
+    let user_id = path.into_inner();
     let tier_override = req.into_inner();
+
+    let account_summary: UserAccountSummary =
+        match db::account::get_user_account_summary(db.as_ref(), &user_id)
+            .await
+            .into_anyhow()?
+        {
+            Some(summary) => summary,
+            None => {
+                // Create a default user account if the summary is empty
+                db::account::create_default_individual_account(db.as_ref(), &user_id)
+                    .await
+                    .into_anyhow()?;
+                db::account::get_user_account_summary(db.as_ref(), &user_id)
+                    .await
+                    .into_anyhow()?
+                    .ok_or(anyhow::anyhow!(
+                        "User {} account summary is missing",
+                        user_id
+                    ))?
+            }
+        };
+
+    let account_id = account_summary
+        .account_id
+        .ok_or(anyhow::anyhow!("Missing account_id"))?;
 
     db::account::set_account_tier_override(db.as_ref(), &account_id, tier_override)
         .await
