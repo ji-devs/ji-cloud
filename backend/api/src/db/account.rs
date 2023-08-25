@@ -293,6 +293,7 @@ select
         when subscription.amount_due > 0 then true
         else false
     end as "overdue!",
+    account.account_id as "account_id?: AccountId",
     tier_override as "tier_override?: PlanTier"
 from user_account
 inner join account using (account_id)
@@ -317,6 +318,7 @@ where user_account.user_id = $1
     .await?;
 
     let summary = record.map(|record| UserAccountSummary {
+        account_id: record.account_id,
         school_id: record.school_id,
         school_name: record.school_name,
         plan_type: record.plan_type,

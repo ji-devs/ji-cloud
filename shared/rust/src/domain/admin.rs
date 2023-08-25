@@ -1,10 +1,8 @@
 //! Types for admin routes.
 use crate::api::endpoints::PathPart;
 use crate::domain::billing::{Account, AccountUser, AdminSchool, SchoolNameId};
-use crate::domain::{
-    billing::{AccountId, SchoolId},
-    ItemCount, Page, PageLimit,
-};
+use crate::domain::user::UserId;
+use crate::domain::{billing::SchoolId, ItemCount, Page, PageLimit};
 use chrono::Utc;
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
@@ -164,4 +162,4 @@ make_path_parts!(UpdateSchoolNamePath => "/v1/admin/school-names/{}" => SchoolNa
 
 make_path_parts!(SetInternalSchoolNamePath => "/v1/admin/schools/{}/school-name" => SchoolId);
 
-make_path_parts!(SetAccountTierOverridePath => "/v1/admin/accounts/{}/tier-override" => AccountId);
+make_path_parts!(SetAccountTierOverridePath => "/v1/admin/users/{}/tier-override" => UserId);

@@ -1036,6 +1036,8 @@ pub struct Account {
 /// `None` for a free account, or `Pro`.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UserAccountSummary {
+    /// Account ID
+    pub account_id: Option<AccountId>,
     /// ID of the school if this is a School account
     pub school_id: Option<SchoolId>,
     /// Name of the school if this is a School account
