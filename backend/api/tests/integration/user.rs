@@ -32,7 +32,7 @@ async fn get_profile(port: u16) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(format!("{}", name), body);
+    insta::assert_json_snapshot!(format!("{}", name), body, {".**.account_id" => "[account_id]"});
 
     Ok(())
 }
@@ -88,7 +88,7 @@ async fn patch_profile(port: u16) -> anyhow::Result<()> {
 
     insta::assert_json_snapshot!(
     format!("{}", name),
-    body, { ".updated_at" => "[timestamptz]" });
+    body, { ".updated_at" => "[timestamptz]", ".**.account_id" => "[account_id]" });
 
     Ok(())
 }

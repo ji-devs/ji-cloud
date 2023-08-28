@@ -40,7 +40,7 @@ expression: body
   "playlist_count": 0,
   "total_asset_count": 0,
   "account_summary": {
-    "account_id": "ce8e21de-4356-11ee-9fab-2ff49ed9874d",
+    "account_id": "[account_id]",
     "school_id": null,
     "school_name": null,
     "plan_type": null,
