@@ -151,12 +151,12 @@ impl DebugSettings {
             } else {
                 RawData { content: None }
             }),
-            step: Some(Step::Two),
+            step: Some(Step::Three),
             draw_kind: None,
             skip_save: true,
             skip_load_jig: true,
             step_1_tab: Some(MenuTabKind::Image),
-            step_2_tab: Some(MenuTabKind::Select),
+            step_2_tab: Some(MenuTabKind::Trace),
             step_4_tab: Some(MenuTabKind::PlaySettings),
         }
     }

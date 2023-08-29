@@ -94,15 +94,18 @@ impl MainSelect {
 
                         click_area: Some(clone!(state, index, item => move |dom:DomBuilder<HtmlElement>| {
                             dom
-                                .event(clone!(state, index, item => move |evt:events::MouseDown| {
+                                .style("touch-action", "none")
+                                .event(clone!(state, index, item => move |evt:events::PointerDown| {
                                     state.base.set_drag_item_selected(index);
                                     item.start_drag(evt.x() as i32, evt.y() as i32);
                                 }))
-                                .global_event(clone!(item => move |evt:events::MouseUp| {
+                                .global_event(clone!(item => move |evt:events::PointerUp| {
                                     item.try_end_drag(evt.x() as i32, evt.y() as i32);
-
                                 }))
-                                .global_event(clone!(item => move |evt:events::MouseMove| {
+                                .global_event(clone!(item => move |evt:events::PointerCancel| {
+                                    item.try_end_drag(evt.x() as i32, evt.y() as i32);
+                                }))
+                                .global_event(clone!(item => move |evt:events::PointerMove| {
                                     item.try_move_drag(evt.x() as i32, evt.y() as i32);
                                 }))
                         })),

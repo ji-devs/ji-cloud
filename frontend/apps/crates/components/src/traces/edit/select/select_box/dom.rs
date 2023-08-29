@@ -142,13 +142,14 @@ impl EditSelectTrace {
                                     //handle movement
                                     click_area: Some(clone!(parent, select_box => move |dom:DomBuilder<HtmlElement>| {
                                         dom
-                                            .event(clone!(select_box => move |evt:events::MouseDown| {
+                                            .style("touch-action", "none")
+                                            .event(clone!(select_box => move |evt:events::PointerDown| {
                                                 select_box.start_drag(evt.x() as i32, evt.y() as i32);
                                             }))
-                                            .global_event(clone!(select_box => move |evt:events::MouseMove| {
+                                            .global_event(clone!(select_box => move |evt:events::PointerMove| {
                                                 select_box.try_move_drag(evt.x() as i32, evt.y() as i32);
                                             }))
-                                            .global_event(clone!(parent, select_box => move |evt:events::MouseUp| {
+                                            .global_event(clone!(parent, select_box => move |evt:events::PointerUp| {
                                                 if let Some(transform) = select_box.try_end_drag(evt.x() as i32, evt.y() as i32) {
                                                     if let Some(index) = index {
                                                         parent.change_transform(index, transform);

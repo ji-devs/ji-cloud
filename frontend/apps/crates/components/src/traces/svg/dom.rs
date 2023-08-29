@@ -156,6 +156,7 @@ where
         .attr_signal("height", resize_info_signal().map(|info| {
             format!("{}px", info.height)
         }))
+        .prop("style", "touch-action:none")
         .child(svg!("rect", {
             .attr("mask", "url(#maskPath)")
             .attr("x", "0")
@@ -167,7 +168,7 @@ where
                 format!("{}px", info.height)
             }))
             .class(&*BG_FILL_CLASS)
-            .event(clone!(on_mouse_down => move |evt:events::MouseDown| {
+            .event(clone!(on_mouse_down => move |evt:events::PointerDown| {
                 on_mouse_down(evt.x() as i32, evt.y() as i32);
             }))
         }))
@@ -189,11 +190,13 @@ where
             }))
         }))
         .children_signal_vec(children_draw)
-
-        .global_event(clone!(on_mouse_up => move |evt:events::MouseUp| {
+        .global_event(clone!(on_mouse_up => move |evt:events::PointerUp| {
             on_mouse_up(evt.x() as i32, evt.y() as i32);
         }))
-        .global_event(clone!(on_mouse_move => move |evt:events::MouseMove| {
+        .global_event(clone!(on_mouse_up => move |evt:events::PointerCancel| {
+            on_mouse_up(evt.x() as i32, evt.y() as i32);
+        }))
+        .global_event(clone!(on_mouse_move => move |evt:events::PointerMove| {
             on_mouse_move(evt.x() as i32, evt.y() as i32);
         }))
     })
@@ -220,14 +223,17 @@ where
             format!("{}px", info.height)
         }))
         .children_signal_vec(children)
-        .event(clone!(on_mouse_down => move |evt:events::MouseDown| {
+        .event(clone!(on_mouse_down => move |evt:events::PointerDown| {
             on_mouse_down(evt.x() as i32, evt.y() as i32);
         }))
 
-        .global_event(clone!(on_mouse_up => move |evt:events::MouseUp| {
+        .global_event(clone!(on_mouse_up => move |evt:events::PointerUp| {
             on_mouse_up(evt.x() as i32, evt.y() as i32);
         }))
-        .global_event(clone!(on_mouse_move => move |evt:events::MouseMove| {
+        .global_event(clone!(on_mouse_up => move |evt:events::PointerCancel| {
+            on_mouse_up(evt.x() as i32, evt.y() as i32);
+        }))
+        .global_event(clone!(on_mouse_move => move |evt:events::PointerMove| {
             on_mouse_move(evt.x() as i32, evt.y() as i32);
         }))
     })
