@@ -19,17 +19,19 @@ enum PaymentFrequency {
     Monthly,
 }
 fn plan_payment_frequency(plan_type: PlanType) -> PaymentFrequency {
+    #[allow(clippy::match_same_arms)]
     match plan_type {
         PlanType::IndividualBasicMonthly | PlanType::IndividualProMonthly => {
             PaymentFrequency::Monthly
         }
-        PlanType::IndividualBasicAnnually
-        | PlanType::IndividualProAnnually
-        | PlanType::SchoolLevel1
+        PlanType::SchoolLevel1
         | PlanType::SchoolLevel2
         | PlanType::SchoolLevel3
         | PlanType::SchoolLevel4
-        | PlanType::SchoolUnlimited => PaymentFrequency::Annually,
+        | PlanType::SchoolUnlimited => PaymentFrequency::Monthly,
+        PlanType::IndividualBasicAnnually | PlanType::IndividualProAnnually => {
+            PaymentFrequency::Annually
+        }
     }
 }
 

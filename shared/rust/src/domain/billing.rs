@@ -719,8 +719,16 @@ impl PlanType {
     /// Billing interval for the current plan
     #[must_use]
     pub const fn billing_interval(&self) -> BillingInterval {
+        #[allow(clippy::match_same_arms)]
         match self {
             Self::IndividualBasicMonthly | Self::IndividualProMonthly => BillingInterval::Monthly,
+            // School subscriptions are monthly for now. Keeping this branch separate so that it's
+            // easier to remove in the future.
+            Self::SchoolLevel1
+            | Self::SchoolLevel2
+            | Self::SchoolLevel3
+            | Self::SchoolLevel4
+            | Self::SchoolUnlimited => BillingInterval::Monthly,
             _ => BillingInterval::Annually,
         }
     }
