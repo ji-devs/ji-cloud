@@ -15,6 +15,7 @@ use futures_signals::signal::SignalExt;
 use itertools::Itertools;
 use shared::domain::{asset::Asset, user::public_user::PublicUser};
 use utils::{
+    asset::ResourceContentExt,
     component::Component,
     dialog, events,
     languages::Language,
@@ -22,7 +23,7 @@ use utils::{
     unwrap::UnwrapJiExt,
 };
 use wasm_bindgen::{JsCast, JsValue};
-use web_sys::{HtmlElement, ScrollBehavior, ScrollIntoViewOptions, ShadowRoot};
+use web_sys::{window, HtmlElement, ScrollBehavior, ScrollIntoViewOptions, ShadowRoot};
 
 const STR_FOLLOWING: &str = "Following";
 const STR_FOLLOW: &str = "Follow";
@@ -394,6 +395,8 @@ impl MemberDetails {
     fn render_asset(self: &Rc<Self>, asset: Asset) -> Dom {
         let state = self;
         let asset_id = asset.id();
+        let is_resource = asset.is_resource();
+        let additional_resource_0 = asset.additional_resources().first().cloned();
         render_asset_card(
             &asset,
             AssetCardConfig {
@@ -402,14 +405,27 @@ impl MemberDetails {
                 menu: Some(Rc::new(clone!(state => move || {
                     html!("menu-kebab", {
                         .prop("slot", "menu")
-                        .children(&mut [
-                            html!("menu-line", {
+                        .apply_if(!is_resource, |dom| {
+                            dom.child(html!("menu-line", {
                                 .prop("icon", "play")
                                 .event(clone!(state => move |_: events::Click| {
                                     state.play_asset.set(Some(asset_id));
                                 }))
-                            })
-                        ])
+                            }))
+                        })
+                        .apply_if(is_resource, clone!(additional_resource_0 => move |dom| {
+                            dom.child(html!("menu-line", {
+                                .prop("icon", "view")
+                                .event(clone!(additional_resource_0 => move |_: events::Click| {
+                                    if let Some(resource) = &additional_resource_0 {
+                                        let _ = window()
+                                            .unwrap_ji()
+                                            .open_with_url(&resource.resource_content.get_link())
+                                            .unwrap_ji();
+                                    }
+                                }))
+                            }))
+                        }))
                     })
                 }))),
                 ..Default::default()
