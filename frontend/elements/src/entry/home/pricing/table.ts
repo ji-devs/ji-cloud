@@ -158,19 +158,21 @@ export class _ extends LitElement {
                 border: solid 1px #149647;
                 padding: 3px 8px;
             }
-            .individuals-desktop-price {
-                display: none;
-            }
-            @media (min-width: 1024px) {
-                :host([kind=individuals]) .individuals-desktop-price {
-                    display: contents;
-                }
+            :host([kind=individuals]) .individuals-desktop-price {
+                display: contents;
             }
             .individuals-desktop-price .cell {
                 color: var(--dark-gray-6);
+                padding-inline: 6px;
             }
             .individuals-desktop-price .cell.message {
                 padding-bottom: 0;
+                display: none;
+            }
+            @media (min-width: 1024px) {
+                .individuals-desktop-price .cell.message {
+                    display: block;
+                }
             }
             .individuals-desktop-price .cell:not(.message) {
                 align-content: space-between;
@@ -198,28 +200,45 @@ export class _ extends LitElement {
             }
             .individuals-desktop-price .plan-name-line .plan-name {
                 margin: 0;
-                font-size: 16px;
                 line-height: 1em;
                 font-weight: 700;
                 grid-column: 2;
+                font-size: 14px;
+            }
+            @media (min-width: 1024px) {
+                .individuals-desktop-price .plan-name-line .plan-name {
+                    font-size: 16px;
+                }
             }
             .individuals-desktop-price .plan-name-line .discount-percentage {
-                width: 60px;
-                height: 30px;
                 border-radius: 4px;
                 background-color: var(--dark-green-1);
-                font-size: 16px;
                 font-weight: bold;
                 color: #ffffff;
                 display: inline-grid;
                 place-content: center;
+                font-size: 12px;
+                width: 40px;
+                height: 20px;
+            }
+            @media (min-width: 1024px) {
+                .individuals-desktop-price .plan-name-line .discount-percentage {
+                    font-size: 16px;
+                    width: 60px;
+                    height: 30px;
+                }
             }
             .individuals-desktop-price .plan-price {
                 margin: 0;
-                font-size: 38px;
                 line-height: 1em;
                 font-weight: 700;
                 grid-row: 3;
+                font-size: 24px;
+            }
+            @media (min-width: 1024px) {
+                .individuals-desktop-price .plan-price {
+                    font-size: 38px;
+                }
             }
             .individuals-desktop-price .frequency {
                 margin: 0;

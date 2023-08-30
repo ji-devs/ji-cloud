@@ -6,6 +6,7 @@ use futures_signals::{
     map_ref,
     signal::{Mutable, Signal, SignalExt},
 };
+use gloo::utils::window;
 use js_sys::Date;
 use shared::domain::billing::PlanType;
 use std::rc::Rc;
@@ -107,6 +108,7 @@ impl Pricing {
     fn render_individual(self: &Rc<Self>) -> Vec<Dom> {
         let state = self;
         let frequency = Mutable::new(Frequency::Monthly);
+        let screen_size = Mutable::new(get_current_screen_size());
         vec![
             html!("pricing-toggle", {
                 .prop_signal("value", frequency.signal().map(|f| -> &str {(&f).into()}))
@@ -116,6 +118,9 @@ impl Pricing {
                 }))
             }),
             html!("pricing-table", {
+                .global_event(clone!(screen_size => move |_: events::Resize| {
+                    screen_size.set(get_current_screen_size())
+                }))
                 .prop("kind", "individuals")
                 .prop_signal("frequency", frequency.signal().map(|frequency| frequency.as_str()))
                 .prop_signal("plan_price_basic", frequency.signal().map(|frequency| match frequency {
@@ -160,7 +165,12 @@ impl Pricing {
                             Route::User(UserRoute::Subscribe1(plan, promo_code.clone())).to_string()
                         }
                     })
-                    .text(formatcp!("Start {}-day trial", INDIVIDUAL_FREE_TRIAL_DAYS))
+                    .text_signal(screen_size.signal().map(|size| {
+                        match size {
+                            ScreenSize::Mobile => "Start trial".to_owned(),
+                            ScreenSize::Desktop => formatcp!("Start {}-day trial", INDIVIDUAL_FREE_TRIAL_DAYS).to_owned(),
+                        }
+                    }))
                 }))
                 .child(html!("button-rect", {
                     .prop("slot", "pro-action")
@@ -176,7 +186,12 @@ impl Pricing {
                             Route::User(UserRoute::Subscribe1(plan, promo_code.clone())).to_string()
                         }
                     })
-                    .text(formatcp!("Start {}-day trial", INDIVIDUAL_FREE_TRIAL_DAYS))
+                    .text_signal(screen_size.signal().map(move|size| {
+                        match size {
+                            ScreenSize::Mobile => "Start trial".to_owned(),
+                            ScreenSize::Desktop => formatcp!("Start {}-day trial", INDIVIDUAL_FREE_TRIAL_DAYS).to_owned(),
+                        }
+                    }))
                 }))
                 .children(&mut [
                     // html!("button-rect", {
@@ -363,4 +378,23 @@ impl From<SchoolPlan> for PlanType {
             SchoolPlan::Unlimited => PlanType::SchoolUnlimited,
         }
     }
+}
+
+#[derive(Clone, Copy)]
+enum ScreenSize {
+    Mobile,
+    Desktop,
+}
+impl From<f64> for ScreenSize {
+    fn from(inner_width: f64) -> Self {
+        if inner_width >= 1024.0 {
+            Self::Desktop
+        } else {
+            Self::Mobile
+        }
+    }
+}
+fn get_current_screen_size() -> ScreenSize {
+    let inner_width = window().inner_width().unwrap_ji().as_f64().unwrap_ji();
+    inner_width.into()
 }

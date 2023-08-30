@@ -23,7 +23,7 @@ export class _ extends LitElement {
             summary {
                 font-size: 18px;
                 color: var(--dark-gray-6);
-                height: 64px;
+                min-height: 64px;
                 display: grid;
                 grid-template-columns: 64px 1fr;
                 align-items: center;
