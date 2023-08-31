@@ -291,7 +291,7 @@ async fn load_jig(state: Rc<JigPlayer>) {
 
         match jig {
             Ok(jig) => {
-                if !paywall::can_play_jig(jig.admin_data.premium) {
+                if !state.player_options.is_student && !paywall::can_play_jig(jig.admin_data.premium) {
                     paywall::dialog_play("
                         Looking to access our premium content?
                         Upgrade now for UNLIMITED JIGs and resources.
