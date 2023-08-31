@@ -638,7 +638,7 @@ const ACCOUNT_LIMIT_L3: i64 = 20;
 const ACCOUNT_LIMIT_L4: i64 = 30;
 
 const INDIVIDUAL_TRIAL_PERIOD: i64 = 3;
-const SCHOOL_TRIAL_PERIOD: i64 = 7;
+const SCHOOL_TRIAL_PERIOD: i64 = 5;
 
 impl PlanType {
     /// Represents the plan type as a `str`
