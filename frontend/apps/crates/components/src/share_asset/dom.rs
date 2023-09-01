@@ -3,9 +3,9 @@ use std::rc::Rc;
 use dominator::{clone, html, with_node, Dom, EventOptions};
 use futures_signals::signal::SignalExt;
 use js_sys::encode_uri_component;
-use shared::config::JIG_PLAYER_SESSION_VALID_DURATION_SECS;
+use shared::{config::JIG_PLAYER_SESSION_VALID_DURATION_SECS, domain::asset::Asset};
 use utils::{
-    clipboard, events,
+    clipboard, events, paywall,
     prelude::SETTINGS,
     routes::{KidsRoute, Route},
     unwrap::UnwrapJiExt,
@@ -85,6 +85,24 @@ impl ShareAsset {
         })
     }
 
+    fn can_play(self: &Rc<Self>) -> bool {
+        let can_play = match &self.asset {
+            Asset::Jig(jig) => paywall::can_play_jig(jig.admin_data.premium),
+            Asset::Playlist(playlist) => paywall::can_play_playlist(playlist.admin_data.premium),
+            Asset::Resource(resource) => paywall::can_play_resource(resource.admin_data.premium),
+            Asset::Course(_) => paywall::can_play_course(),
+        };
+        if !can_play {
+            paywall::dialog_limit(
+                "
+                Wanting to share our premium content?
+                Upgrade now for UNLIMITED sharing options.
+            ",
+            );
+        }
+        can_play
+    }
+
     fn render_share_main(self: &Rc<Self>) -> Dom {
         fn share_to(base: &str, url: &str) {
             if let Some(window) = window() {
@@ -101,6 +119,9 @@ impl ShareAsset {
                     .prop("kind", "students")
                     .text(STR_STUDENTS_LABEL)
                     .event(clone!(state => move |_: events::Click| {
+                        if !state.can_play() {
+                            return;
+                        }
                         state.active_popup.set(Some(ActivePopup::ShareStudents));
                     }))
                 }))
@@ -109,6 +130,9 @@ impl ShareAsset {
                 .prop("kind", "google-classroom")
                 .text(STR_CLASSROOM)
                 .event(clone!(state => move |_: events::Click| {
+                    if !state.can_play() {
+                        return;
+                    }
                     share_to("https://classroom.google.com/share?url=", &state.asset_link(true));
                 }))
             }))
@@ -116,6 +140,9 @@ impl ShareAsset {
                 .prop("kind", "ms-teams")
                 .text(STR_MS_TEAMS)
                 .event(clone!(state => move |_: events::Click| {
+                    if !state.can_play() {
+                        return;
+                    }
                     share_to("https://teams.microsoft.com/share?href=", &state.asset_link(true));
                 }))
             }))
@@ -124,6 +151,9 @@ impl ShareAsset {
                     .prop("kind", "embed")
                     .text(&format!("{STR_EMBED_LABEL}{}", state.asset_type_name()))
                     .event(clone!(state => move |_: events::Click| {
+                        if !state.can_play() {
+                            return;
+                        }
                         state.active_popup.set(Some(ActivePopup::ShareEmbed));
                     }))
                 }))
