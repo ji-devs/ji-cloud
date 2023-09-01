@@ -191,16 +191,24 @@ export class _ extends LitElement {
         input.dispatchEvent(new Event("change"));
     };
 
+    // TODO: enable this one and remove the other one once we bring back shadow root to wysiwyg base
+    // private deepActiveElementOrWysiwyg() {
+    //     let a = document.activeElement;
+    //     while (
+    //         a &&
+    //         !a.matches("wysiwyg-base") &&
+    //         a.shadowRoot &&
+    //         a.shadowRoot.activeElement
+    //     ) {
+    //         a = a.shadowRoot.activeElement;
+    //     }
+    //     return a;
+    // }
     private deepActiveElementOrWysiwyg() {
         let a = document.activeElement;
-        while (
-            a &&
-            !a.matches("wysiwyg-base") &&
-            a.shadowRoot &&
-            a.shadowRoot.activeElement
-        ) {
-            a = a.shadowRoot.activeElement;
-        }
+        let wysiwyg = a?.closest("wysiwyg-base");
+        if(wysiwyg)
+            return wysiwyg;
         return a;
     }
 
