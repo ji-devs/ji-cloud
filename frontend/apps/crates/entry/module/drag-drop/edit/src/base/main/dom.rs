@@ -21,6 +21,7 @@ impl DomRenderable for Main {
             .style("width", "100%")
             .style("height", "100%")
             .style("overflow", "hidden")
+            .style("touch-action", "none")
             .child(html!("img-ui", {
                 .prop("path", "jig/play/design-grid-jig.svg")
                 .style("height", "100%")
