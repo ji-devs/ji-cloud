@@ -107,7 +107,7 @@ export class _ extends LitElement {
                 display: inline-grid;
                 place-content: center;
             }
-            .annually {
+            .monthly {
                 font-size: 13px;
                 color: var(--dark-gray-6);
                 margin-bottom: 12px;
@@ -150,7 +150,7 @@ export class _ extends LitElement {
                 <div class="options">
                     <label>
                         <span class="label-top">up to</span>
-                        <span class="count">4</span>
+                        <span class="count">5</span>
                         <input name="count" type="radio" @change=${() => this.onChange(0)}>
                     </label>
                     <label>
@@ -160,17 +160,17 @@ export class _ extends LitElement {
                     </label>
                     <label>
                         <span class="label-top">up to</span>
-                        <span class="count">20</span>
+                        <span class="count">15</span>
                         <input name="count" type="radio" @change=${() => this.onChange(2)}>
                     </label>
                     <label>
                         <span class="label-top">up to</span>
-                        <span class="count">30</span>
+                        <span class="count">20</span>
                         <input name="count" type="radio" @change=${() => this.onChange(3)}>
                     </label>
                     <label>
                         <span class="label-top">More than</span>
-                        <span class="count">30+</span>
+                        <span class="count">20+</span>
                         <input name="count" type="radio" @change=${() => this.onChange(4)}>
                     </label>
                 </div>
@@ -186,7 +186,7 @@ export class _ extends LitElement {
                     </div>
                 ` : nothing }
             </div>
-            <div class="annually">Annually</div>
+            <div class="monthly">Monthly</div>
             <slot name="start-button"></slot>
         `;
     }

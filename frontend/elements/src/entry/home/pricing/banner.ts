@@ -48,11 +48,11 @@ export class _ extends LitElement {
     render() {
         return html`
             <h1>Jigzi plans</h1>
-            <!-- <div class="tabs">
+            <div class="tabs">
                 <slot name="individual"></slot>
                 <slot name="school"></slot>
                 <slot name="tab"></slot>
-            </div> -->
+            </div>
         `;
     }
 }

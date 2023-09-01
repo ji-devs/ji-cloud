@@ -18,7 +18,7 @@ export class _ extends LitElement {
                 display: grid;
                 gap: 30px;
                 grid-template-columns: auto;
-                padding: 30px;
+                padding: 22px;
                 justify-items: center;
             }
             @media (min-width: 1024px) {
@@ -157,6 +157,9 @@ export class _ extends LitElement {
                 border-radius: 12px;
                 border: solid 1px #149647;
                 padding: 3px 8px;
+            }
+            .individuals-desktop-price {
+                display: none;
             }
             :host([kind=individuals]) .individuals-desktop-price {
                 display: contents;
@@ -659,7 +662,7 @@ export class _ extends LitElement {
                             `
                         })}
                     </div>
-                    ${ this.kind === "schools" ? html`
+                    <!-- ${ this.kind === "schools" ? html`
                         <div class="row end-row blue school-only-row">
                             <div class="cell cell-header">Professional platform training by Jigzi experts</div>
                             <div class="cell">
@@ -667,7 +670,7 @@ export class _ extends LitElement {
                                 <span class="school-only-label">Just for Schools!</span>
                             </div>
                         </div>
-                    ` : nothing }
+                    ` : nothing } -->
                 </div>
                 <p class="custom-subscription">
                     Can’t find a subscription that fits your needs?
