@@ -107,7 +107,7 @@ export class _ extends LitElement {
     // prettier-ignore
     private renderElement(element: EditorElement) {
         const styles = getElementStyles(element) as StyleInfo;
-        return html`<p style=${styleMap(styles)}>${element.children.map((leaf) => {
+        return html`<p style=${styleMap(styles)} dir="auto">${element.children.map((leaf) => {
             return this.renderLeaf(leaf);
         })}</p>`;
     }
@@ -115,7 +115,7 @@ export class _ extends LitElement {
     // prettier-ignore
     private renderLeaf(leaf: EditorText) {
         const styles = getLeafStyles(leaf) as StyleInfo;
-        return html`<span style=${styleMap(styles)} type="${ifDefined(leaf.element)}" dir="auto">${leaf.text === "" ? html`<br />` : leaf.text}</span>`;
+        return html`<span style=${styleMap(styles)} type="${ifDefined(leaf.element)}">${leaf.text === "" ? html`<br />` : leaf.text}</span>`;
     }
 
     // prettier-ignore

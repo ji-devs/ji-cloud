@@ -58,11 +58,6 @@ export function getLeafStyles(text: EditorText): CSSProperties {
     if (text.font) styles.fontFamily = text.font;
     if (text.weight) styles.fontWeight = text.weight;
 
-    // TODO: this needs to be removed! It breaks the whole point of leaf nodes.
-    // was added in https://github.com/ji-devs/ji-cloud/pull/3789
-    styles.display = "inline-block";
-    styles.width = "100%";
-
     return styles;
 }
 
