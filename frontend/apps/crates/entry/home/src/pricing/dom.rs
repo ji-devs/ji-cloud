@@ -8,7 +8,10 @@ use futures_signals::{
 };
 use gloo::utils::window;
 use js_sys::Date;
-use shared::domain::billing::PlanType;
+use shared::domain::billing::{
+    PlanType, PLAN_SCHOOL_LEVEL_1_TEACHER_COUNT, PLAN_SCHOOL_LEVEL_2_TEACHER_COUNT,
+    PLAN_SCHOOL_LEVEL_3_TEACHER_COUNT, PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT,
+};
 use std::rc::Rc;
 use utils::{
     constants::{INDIVIDUAL_FREE_TRIAL_DAYS, SCHOOL_FREE_TRIAL_DAYS},
@@ -234,6 +237,10 @@ impl Pricing {
                     .prop_signal("message", state.variables.signal_ref(|v| v.bubble_message.clone()))
                 }))
                 .child(html!("pricing-school-pricing", {
+                    .prop("school_level_1_max", PLAN_SCHOOL_LEVEL_1_TEACHER_COUNT)
+                    .prop("school_level_2_max", PLAN_SCHOOL_LEVEL_2_TEACHER_COUNT)
+                    .prop("school_level_3_max", PLAN_SCHOOL_LEVEL_3_TEACHER_COUNT)
+                    .prop("school_level_4_max", PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT)
                     .prop_signal("plan_price", selected_index.signal().map(|i| match i {
                         SchoolPlan::Level1 => PLAN_PRICE_SCHOOL_1,
                         SchoolPlan::Level2 => PLAN_PRICE_SCHOOL_2,

@@ -124,6 +124,18 @@ export class _ extends LitElement {
     @property({ type: Number, reflect: true })
     discount_percentage?: number;
 
+    @property({ type: Number })
+    school_level_1_max?: number;
+
+    @property({ type: Number })
+    school_level_2_max?: number;
+
+    @property({ type: Number })
+    school_level_3_max?: number;
+
+    @property({ type: Number })
+    school_level_4_max?: number;
+
     private onChange(index: number) {
         this.dispatchEvent(new CustomEvent("custom-number", {
             detail: {
@@ -150,27 +162,27 @@ export class _ extends LitElement {
                 <div class="options">
                     <label>
                         <span class="label-top">up to</span>
-                        <span class="count">5</span>
+                        <span class="count">${this.school_level_1_max}</span>
                         <input name="count" type="radio" @change=${() => this.onChange(0)}>
                     </label>
                     <label>
                         <span class="label-top">up to</span>
-                        <span class="count">10</span>
+                        <span class="count">${this.school_level_2_max}</span>
                         <input name="count" type="radio" @change=${() => this.onChange(1)}>
                     </label>
                     <label>
                         <span class="label-top">up to</span>
-                        <span class="count">15</span>
+                        <span class="count">${this.school_level_3_max}</span>
                         <input name="count" type="radio" @change=${() => this.onChange(2)}>
                     </label>
                     <label>
                         <span class="label-top">up to</span>
-                        <span class="count">20</span>
+                        <span class="count">${this.school_level_4_max}</span>
                         <input name="count" type="radio" @change=${() => this.onChange(3)}>
                     </label>
                     <label>
                         <span class="label-top">More than</span>
-                        <span class="count">20+</span>
+                        <span class="count">${this.school_level_4_max}+</span>
                         <input name="count" type="radio" @change=${() => this.onChange(4)}>
                     </label>
                 </div>

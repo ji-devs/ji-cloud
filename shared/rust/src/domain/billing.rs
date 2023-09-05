@@ -7,6 +7,7 @@ use std::collections::HashMap;
 use std::fmt::{self, Debug, Display, Formatter};
 use strum_macros::{AsRefStr, Display, EnumString};
 
+use const_format::formatcp;
 use serde_json::Value;
 
 use crate::api::endpoints::PathPart;
@@ -595,41 +596,56 @@ pub enum PlanTier {
     Pro = 2,
 }
 
+/// Level 1 max teacher count
+pub const PLAN_SCHOOL_LEVEL_1_TEACHER_COUNT: i16 = 5;
+/// Level 2 max teacher count
+pub const PLAN_SCHOOL_LEVEL_2_TEACHER_COUNT: i16 = 10;
+/// Level 3 max teacher count
+pub const PLAN_SCHOOL_LEVEL_3_TEACHER_COUNT: i16 = 15;
+/// Level 4 max teacher count
+pub const PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT: i16 = 20;
+
 /// Possible individual subscription plans
-#[derive(
-    Debug, Display, Serialize, Deserialize, Clone, Copy, Eq, Ord, PartialOrd, PartialEq, Hash,
-)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, Eq, Ord, PartialOrd, PartialEq, Hash)]
 #[serde(rename_all = "kebab-case")]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[repr(i16)]
 pub enum PlanType {
     /// Basic level, monthly
-    #[strum(serialize = "Individual Basic Monthly")]
     IndividualBasicMonthly = 0,
     /// Basic level, annually
-    #[strum(serialize = "Individual Basic Annual")]
     IndividualBasicAnnually = 1,
     /// Pro level, monthly
-    #[strum(serialize = "Individual Pro Monthly")]
     IndividualProMonthly = 2,
     /// Pro level, annually
-    #[strum(serialize = "Individual Pro Annual")]
     IndividualProAnnually = 3,
     /// School Level 1
-    #[strum(serialize = "School - Up to 4")]
     SchoolLevel1 = 4,
     /// School Level 2
-    #[strum(serialize = "School - Up to 10")]
     SchoolLevel2 = 5,
     /// School Level 3
-    #[strum(serialize = "School - Up to 20")]
     SchoolLevel3 = 6,
     /// School Level 4
-    #[strum(serialize = "School - Up to 30")]
     SchoolLevel4 = 7,
     /// School Unlimited
-    #[strum(serialize = "School - 30+")]
     SchoolUnlimited = 8,
+}
+
+impl Display for PlanType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            Self::IndividualBasicMonthly => "Individual Basic Monthly",
+            Self::IndividualBasicAnnually => "Individual Basic Annual",
+            Self::IndividualProMonthly => "Individual Pro Monthly",
+            Self::IndividualProAnnually => "Individual Pro Annual",
+            Self::SchoolLevel1 => formatcp!("School - Up to {}", PLAN_SCHOOL_LEVEL_1_TEACHER_COUNT),
+            Self::SchoolLevel2 => formatcp!("School - Up to {}", PLAN_SCHOOL_LEVEL_2_TEACHER_COUNT),
+            Self::SchoolLevel3 => formatcp!("School - Up to {}", PLAN_SCHOOL_LEVEL_3_TEACHER_COUNT),
+            Self::SchoolLevel4 => formatcp!("School - Up to {}", PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT),
+            Self::SchoolUnlimited => formatcp!("School - {}+", PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT),
+        };
+        write!(f, "{}", s)
+    }
 }
 
 const ACCOUNT_LIMIT_L1: i64 = 4;
@@ -665,11 +681,26 @@ impl PlanType {
             Self::IndividualBasicAnnually => "Individual - Basic annual",
             Self::IndividualProMonthly => "Individual - Pro monthly",
             Self::IndividualProAnnually => "Individual - Pro annual",
-            Self::SchoolLevel1 => "School - Up to 4 teachers",
-            Self::SchoolLevel2 => "School - Up to 10 teachers",
-            Self::SchoolLevel3 => "School - Up to 20 teachers",
-            Self::SchoolLevel4 => "School - Up to 30 teachers",
-            Self::SchoolUnlimited => "School - More than 30 teachers",
+            Self::SchoolLevel1 => formatcp!(
+                "School - Up to {} teachers",
+                PLAN_SCHOOL_LEVEL_1_TEACHER_COUNT
+            ),
+            Self::SchoolLevel2 => formatcp!(
+                "School - Up to {} teachers",
+                PLAN_SCHOOL_LEVEL_2_TEACHER_COUNT
+            ),
+            Self::SchoolLevel3 => formatcp!(
+                "School - Up to {} teachers",
+                PLAN_SCHOOL_LEVEL_3_TEACHER_COUNT
+            ),
+            Self::SchoolLevel4 => formatcp!(
+                "School - Up to {} teachers",
+                PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT
+            ),
+            Self::SchoolUnlimited => formatcp!(
+                "School - More than {} teachers",
+                PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT
+            ),
         }
     }
 
