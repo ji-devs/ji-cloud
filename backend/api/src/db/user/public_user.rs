@@ -92,11 +92,13 @@ pub async fn browse_users(
     page_limit: u64,
     circles: Vec<CircleId>,
     order_by: Option<OrderBy>,
+    badge: Vec<UserBadge>,
     token: Option<UserId>,
 ) -> anyhow::Result<Vec<PublicUser>> {
     let mut txn = pool.begin().await?;
 
     let circle_ids = filters_for_ids_or(&circles[..]);
+    let badges: Vec<i16> = badge.iter().map(|x| *x as i16).collect();
 
     let user_data = sqlx::query!(
         r#"
@@ -105,8 +107,10 @@ pub async fn browse_users(
             from public_user
             left join user_asset_data "uad" on public_user.user_id = uad.user_id
             inner join "user" on public_user.user_id = "user".id
+            inner join "user_profile" on public_user.user_id = "user_profile".user_id
             left join circle_member "cm" on cm.user_id = public_user.user_id
-            where cm.id = any($1) or $1 = array[]::uuid[]
+            where (cm.id = any($1) or $1 = array[]::uuid[])
+                and (user_profile.badge = any($6) or $6 = array[]::smallint[])
             group by "user".created_at, total_asset_count
             order by case when $4 = 0 then total_asset_count
                 else extract(epoch from "user".created_at)
@@ -150,7 +154,8 @@ pub async fn browse_users(
             page as i32,
             page_limit as i32,
             order_by.map(|it| it as i32),
-            token.map(|id| id.0)
+            token.map(|id| id.0),
+            &badges[..],
         )
             .fetch_all(&mut txn)
             .await?;
@@ -683,8 +688,13 @@ pub async fn browse_following(
     Ok(res)
 }
 
-pub async fn total_user_count(db: &PgPool, circles: Vec<CircleId>) -> anyhow::Result<u64> {
+pub async fn total_user_count(
+    db: &PgPool,
+    circles: Vec<CircleId>,
+    badge: Vec<UserBadge>,
+) -> anyhow::Result<u64> {
     let circle_ids = filters_for_ids_or(&circles[..]);
+    let badges: Vec<i16> = badge.iter().map(|x| *x as i16).collect();
 
     let user = sqlx::query!(
         r#"
@@ -693,13 +703,15 @@ pub async fn total_user_count(db: &PgPool, circles: Vec<CircleId>) -> anyhow::Re
             from user_profile "up"
             inner join "user" on up.user_id = "user".id
             left join circle_member "cm" on cm.user_id = up.user_id
-            where cm.id = any($1) or $1 = array[]::uuid[]
+            where (cm.id = any($1) or $1 = array[]::uuid[])
+                and (up.badge = any($2) or $2 = array[]::smallint[])
             group by "user".created_at
         )
             select count(*) as "count!" from unnest(array(select cte.array_agg from cte)) with ordinality t(id
            , ord)
         "#,
-        &circle_ids[..]
+        &circle_ids[..],
+        &badges[..],
     )
     .fetch_one(db)
     .await?;

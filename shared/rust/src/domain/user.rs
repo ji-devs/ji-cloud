@@ -4,6 +4,7 @@ use chrono::{DateTime, NaiveDate, Utc};
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize, Serializer};
 use std::convert::TryFrom;
+use strum_macros::Display;
 
 use crate::domain::billing::{
     AccountId, AmountInCents, PlanTier, PlanType, SchoolId, SubscriptionStatus, UserAccountSummary,
@@ -118,9 +119,10 @@ pub struct ResetEmailResponse {
 }
 
 /// user badge
-#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
+#[derive(Debug, Display, Serialize, Deserialize, Clone, Copy)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[serde(rename_all = "camelCase")]
+#[strum(serialize_all = "camelCase")]
 #[repr(i16)]
 pub enum UserBadge {
     /// Master teacher

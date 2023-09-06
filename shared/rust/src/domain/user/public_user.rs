@@ -4,7 +4,7 @@ use crate::{
     api::endpoints::PathPart,
     domain::{
         additional_resource::AdditionalResource, asset::UserOrMe, circle::CircleId,
-        csv_encode_uuids, from_csv, image::ImageId, user::UserId,
+        csv_encode_uuids, from_csv, image::ImageId, to_csv, user::UserId,
     },
 };
 use macros::make_path_parts;
@@ -121,6 +121,14 @@ pub struct UserBrowseQuery {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub order_by: Option<OrderBy>,
+
+    /// Optional filter for user badges
+    ///
+    #[serde(default)]
+    #[serde(serialize_with = "to_csv")]
+    #[serde(deserialize_with = "from_csv")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub badge: Vec<UserBadge>,
 }
 
 /// A lite profile for other Users to view

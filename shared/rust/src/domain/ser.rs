@@ -1,6 +1,7 @@
 //! Serialization helpers
 
 use serde::de::{DeserializeOwned, Visitor};
+use std::fmt::Display;
 use std::{
     fmt::{self, Write},
     marker::PhantomData,
@@ -126,6 +127,20 @@ impl<'de, T: DeserializeOwned> serde::de::Visitor<'de> for CSVVecVisitor<T> {
             .unwrap_or_else(|| Ok(Vec::new()))
             .map_err(|e| E::custom(format!("could not deserialize sequence value: {:?}", e)))
     }
+}
+
+/// Stringify a list
+pub fn to_csv<T: Display, S>(values: &[T], serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: serde::Serializer,
+{
+    let out = values
+        .iter()
+        .map(std::string::ToString::to_string)
+        .collect::<Vec<String>>()
+        .join(",");
+
+    serializer.serialize_str(&out)
 }
 
 // // I think this is commented out to avoid repeated writer re-allocations? the csv_encode_* functions

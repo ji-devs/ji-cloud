@@ -112,7 +112,7 @@ pub mod auth {
 }
 
 use chrono::Utc;
-use ser::{csv_encode_i16_indices, csv_encode_uuids, deserialize_optional_field, from_csv};
+use ser::{csv_encode_i16_indices, csv_encode_uuids, deserialize_optional_field, from_csv, to_csv};
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 use uuid::Uuid;

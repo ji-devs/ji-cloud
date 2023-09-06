@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use dominator::clone;
 use futures::join;
+use shared::domain::user::UserBadge;
 use shared::{
     api::endpoints,
     domain::{
@@ -32,6 +33,7 @@ impl CommunityLanding {
         let req = UserBrowseQuery {
             page_limit: Some(10),
             order_by: Some(public_user::OrderBy::AssetCount),
+            badge: vec![UserBadge::NoBadge, UserBadge::MasterTeacher],
             ..Default::default()
         };
 

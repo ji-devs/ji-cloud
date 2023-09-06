@@ -108,14 +108,18 @@ pub async fn browse(
     let browse_future = db::user::public_user::browse_users(
         &db,
         query.page.unwrap_or(0),
-        page_limit as u64,
-        query.circles.to_owned(),
+        u64::from(page_limit),
+        query.circles.clone(),
         query.order_by,
+        query.badge.clone(),
         token_user,
     );
 
-    let total_count_future =
-        db::user::public_user::total_user_count(db.as_ref(), query.circles.to_owned());
+    let total_count_future = db::user::public_user::total_user_count(
+        db.as_ref(),
+        query.circles.to_owned(),
+        query.badge.to_owned(),
+    );
 
     let (users, total_user_count) = try_join!(browse_future, total_count_future,)?;
 
