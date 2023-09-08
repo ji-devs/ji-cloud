@@ -64,6 +64,8 @@ export class _ extends LitElement {
                 :host(:hover) .wrapper, :host([flipped]) .wrapper {
                 /* .wrapper, :host([flipped]) .wrapper { */
                     transform: rotateY(180deg);
+                    /* Safari wont register clicks (on share and like buttons, so left side) if rotated >= 180deg. Don't know why. Remove once Safari is fixed */
+                    transform: rotateY(179deg);
                 }
                 ::slotted([slot=front]) {
                     z-index: 2;
