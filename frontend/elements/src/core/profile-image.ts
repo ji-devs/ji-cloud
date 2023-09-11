@@ -37,6 +37,7 @@ export class _ extends LitElement {
                 .badge {
                     align-self: end;
                     justify-self: end;
+                    z-index: 1;
                 }
             `,
         ];
