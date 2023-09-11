@@ -419,6 +419,19 @@ export class _ extends LitElement {
                             `
                         })}
                     </div>
+                    <div class="row end-row white">
+                        <div class="cell cell-header">Share content with students/children </div>
+                        ${cells(this.kind, {
+                            schools: html`
+                                <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
+                            `,
+                            individuals: html`
+                                <div class="cell"><fa-icon icon="fa-solid fa-dash"></fa-icon></div>
+                                <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
+                                <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
+                            `
+                        })}
+                    </div>
                     <div class="row begin-row blue">
                         <div class="cell cell-header"><h4>Creation</h4></div>
                         ${cells(this.kind, {
