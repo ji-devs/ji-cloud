@@ -812,6 +812,8 @@ select exists(select 1 from user_profile where user_id = $1 for update) as "exis
     }
 
     if let Some(badge) = req.badge {
+        let badge = badge.unwrap_or(UserBadge::NoBadge);
+
         sqlx::query!(
             //language=SQL
             r#"
@@ -822,7 +824,7 @@ where user_id = $1
 and ($2 is distinct from badge)
         "#,
             user_id.0,
-            badge.map(|b| b as i16),
+            badge as i16,
         )
         .execute(&mut txn)
         .instrument(tracing::info_span!("update user_profile"))
