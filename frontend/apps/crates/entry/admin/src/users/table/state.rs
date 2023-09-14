@@ -1,4 +1,5 @@
 use dominator_helpers::futures::AsyncLoader;
+use futures_signals::signal::Mutable;
 use futures_signals::{map_ref, signal::Signal};
 use std::rc::Rc;
 
@@ -6,6 +7,7 @@ use crate::users::{FetchMode, Users};
 
 pub struct UsersTable {
     pub loader: AsyncLoader,
+    pub search_query: Mutable<String>,
     pub users_state: Rc<Users>,
 }
 
@@ -13,6 +15,7 @@ impl UsersTable {
     pub fn new(users_state: Rc<Users>) -> Rc<Self> {
         Rc::new(Self {
             loader: AsyncLoader::new(),
+            search_query: Mutable::new("".into()),
             users_state,
         })
     }

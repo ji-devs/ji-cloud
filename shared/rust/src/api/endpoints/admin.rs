@@ -1,12 +1,13 @@
 use super::ApiEndpoint;
 use crate::domain::admin::{
-    AdminSchoolAccountPath, AdminSchoolsPath, AdminVerifySchoolPath, GetAdminSchoolAccountResponse,
-    ImportSchoolNamesPath, InviteSchoolUsersPath, InviteSchoolUsersRequest,
-    InviteSchoolUsersResponse, SchoolNamesPath, SearchSchoolsParams, SearchSchoolsResponse,
-    SetAccountTierOverridePath, SetInternalSchoolNamePath, UpdateSchoolNamePath,
-    VerifySchoolRequest,
+    AdminSchoolAccountPath, AdminSchoolsPath, AdminVerifySchoolPath, DeleteUserAccountPath,
+    GetAdminSchoolAccountResponse, ImportSchoolNamesPath, InviteSchoolUsersPath,
+    InviteSchoolUsersRequest, InviteSchoolUsersResponse, RemoveUserFromSchoolPath, SchoolNamesPath,
+    SearchSchoolsParams, SearchSchoolsResponse, SetAccountTierOverridePath,
+    SetInternalSchoolNamePath, UpdateSchoolNamePath, VerifySchoolRequest,
 };
 use crate::domain::billing::{PlanTier, SchoolName, SchoolNameId, SchoolNameValue};
+use crate::domain::user::UserId;
 use crate::domain::UpdateNullable;
 use crate::error::AccountError;
 use crate::{
@@ -146,4 +147,24 @@ impl ApiEndpoint for SetInternalSchoolName {
     type Res = ();
     type Err = AccountError;
     const METHOD: Method = Method::Patch;
+}
+
+/// Delete a user account
+pub struct DeleteUserAccount;
+impl ApiEndpoint for DeleteUserAccount {
+    type Path = DeleteUserAccountPath;
+    type Req = ();
+    type Res = ();
+    type Err = AccountError;
+    const METHOD: Method = Method::Delete;
+}
+
+/// Set a school name for a school
+pub struct RemoveUserFromSchool;
+impl ApiEndpoint for RemoveUserFromSchool {
+    type Path = RemoveUserFromSchoolPath;
+    type Req = UserId;
+    type Res = ();
+    type Err = AccountError;
+    const METHOD: Method = Method::Post;
 }

@@ -1,14 +1,14 @@
 use std::rc::Rc;
 
 use dominator::clone;
-use shared::domain::admin::SetAccountTierOverridePath;
+use shared::domain::admin::{DeleteUserAccountPath, SetAccountTierOverridePath};
 use shared::domain::billing::PlanTier;
 use shared::domain::UpdateNullable;
 use shared::{
     api::endpoints,
     domain::user::{PatchProfileAdminDataPath, PatchProfileAdminDataRequest},
 };
-use utils::{prelude::ApiEndpointExt, unwrap::UnwrapJiExt};
+use utils::{error_ext::ErrorExt, prelude::ApiEndpointExt, unwrap::UnwrapJiExt};
 
 use crate::users::{EditableUser, FetchMode};
 
@@ -21,6 +21,7 @@ impl UsersTable {
         if query.is_empty() {
             *fetch_mode = FetchMode::Browse;
         } else {
+            state.search_query.set(query.clone());
             *fetch_mode = FetchMode::Search(query);
         }
 
@@ -55,6 +56,19 @@ impl UsersTable {
             )
             .await
             .unwrap_ji();
+        }))
+    }
+
+    pub fn delete_user_account(self: &Rc<Self>, user: &Rc<EditableUser>) {
+        let state = self;
+        self.loader.load(clone!(state, user => async move {
+            let _ = endpoints::admin::DeleteUserAccount::api_with_auth(
+                DeleteUserAccountPath(user.id),
+                None
+            ).await
+            .toast_on_err();
+
+            state.search_users(state.search_query.get_cloned());
         }))
     }
 }

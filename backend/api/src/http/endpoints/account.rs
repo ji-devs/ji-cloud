@@ -15,7 +15,8 @@ use shared::api::{endpoints::account::CreateSchoolAccount, ApiEndpoint, PathPart
 use shared::domain::admin::GetAdminSchoolAccountResponse;
 use shared::domain::billing::{
     AccountIfAuthorized, CreateSchoolAccountRequest, GetSchoolAccountResponse,
-    IndividualAccountResponse, SchoolId, UpdateSchoolAccountRequest, UserAccountSummary,
+    IndividualAccountResponse, SchoolId, SubscriptionStatus, UpdateSchoolAccountRequest,
+    UserAccountSummary,
 };
 use shared::domain::user::UserId;
 use shared::domain::UpdateNonNullable;
@@ -35,11 +36,32 @@ async fn create_school_account(
     ),
     <CreateSchoolAccount as ApiEndpoint>::Err,
 > {
-    if db::account::check_user_has_account(db.as_ref(), auth.user_id())
+    let user_id = auth.user_id();
+    if db::account::check_user_has_account(db.as_ref(), user_id)
         .await
         .into_anyhow()?
     {
-        return Err(AccountError::UserHasAccount);
+        if let Some(account_summary) = db::account::get_user_account_summary(db.as_ref(), &user_id)
+            .await
+            .into_anyhow()?
+        {
+            if account_summary.school_id.is_some() {
+                return Err(AccountError::UserHasAccount);
+            }
+
+            // If they are an individual account with now subscription or an expired subscription,
+            // then they can create a school subscription.
+            match account_summary.subscription_status {
+                Some(SubscriptionStatus::Expired) | None => {
+                    // If they have an account with an expired subscription or no subscription,
+                    // then delete that account so that they can be added to a school account.
+                    db::account::delete_account_for_user(db.as_ref(), &user_id).await?;
+                }
+                _ => return Err(AccountError::UserHasAccount),
+            }
+        } else {
+            return Err(AccountError::UserHasAccount);
+        }
     }
 
     let req: CreateSchoolAccountRequest = req.into_inner();

@@ -39,6 +39,8 @@ pub enum AccountError {
     NotFound(String),
     #[error("Forbidden")]
     Forbidden,
+    #[error("{0}")]
+    BadRequest(String),
 }
 
 #[cfg(feature = "backend")]
