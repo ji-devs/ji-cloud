@@ -163,3 +163,7 @@ make_path_parts!(UpdateSchoolNamePath => "/v1/admin/school-names/{}" => SchoolNa
 make_path_parts!(SetInternalSchoolNamePath => "/v1/admin/schools/{}/school-name" => SchoolId);
 
 make_path_parts!(SetAccountTierOverridePath => "/v1/admin/users/{}/tier-override" => UserId);
+
+make_path_parts!(DeleteUserAccountPath => "/v1/admin/users/{}/account" => UserId);
+
+make_path_parts!(RemoveUserFromSchoolPath => "/v1/admin/schools/{}/users" => SchoolId);

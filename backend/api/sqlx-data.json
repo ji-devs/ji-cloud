@@ -3797,6 +3797,26 @@
     },
     "query": "\ninsert into user_recent_image (user_id, image_id, media_library)\nvalues ($1, $2, $3)\nON CONFLICT (user_id, image_id) DO UPDATE\n  SET user_id = $1,\n    image_id = $2,\n    media_library = $3,\n    last_used = now()\nreturning image_id as \"id: ImageId\", media_library as \"library: MediaLibrary\", last_used as \"last_used: DateTime<Utc>\";\n        "
   },
+  "3bea20ae9282c9059fb9f297019cd6dcecceb530be96950ba117d92b604ad720": {
+    "describe": {
+      "columns": [
+        {
+          "name": "account_id!: AccountId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "select account_id as \"account_id!: AccountId\" from school where school_id = $1"
+  },
   "3c1025c0e5077f8551901ecf90a36391a3e6e6b43d0046290ce9c6ec12e03236": {
     "describe": {
       "columns": [
@@ -5333,6 +5353,18 @@
       }
     },
     "query": "\nupdate playlist_data\nset updated_at = now()\nfrom playlist\nwhere playlist.live_id = $1\n            "
+  },
+  "4f882aa72e117a693fe317791312f7f5e398c721edab619adb9cd92088e43f0a": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "delete from subscription where account_id = $1;"
   },
   "4fb49fe4ad3204755e0a09d701e36d421c6a6696509bd37c238b1a835e022d7b": {
     "describe": {
@@ -7340,6 +7372,26 @@
       }
     },
     "query": "\nselect resource_id                               as \"resource_id!: ResourceId\",\n       display_name,\n       language,\n       categories,\n       description,\n       age_ranges,\n       affiliations,\n       additional_resources,\n       curation_status                          as \"curation_status!: ResourceCurationStatus\",\n       array(\n            select row (rcc.id, rcc.resource_id, comment, created_at, author_id)\n            from resource_curation_comment  \"rcc\"\n            where rcd.resource_id = rcc.resource_id\n            order by created_at desc\n       )                                         as \"comments!: Vec<(ResourceCurationComment)>\",\n       array(\n           select row (rr.id, rr.resource_id, report_type, reporter_id, created_at,      \n                        (\n                        select given_name || ' '::text || family_name\n                        from user_profile\n                        where user_profile.user_id = reporter_id\n                        ),\n                        (\n                            select email::text\n                            from user_email\n                            where user_email.user_id = reporter_id\n                        )                                                                       \n            )\n           from resource_report \"rr\"\n           where rcd.resource_id = rr.resource_id\n           order by created_at desc\n       )                                                    as \"reports!: Vec<(ResourceReport)>\"\nfrom resource_curation_data \"rcd\"\nwhere resource_id = $1\n"
+  },
+  "6c3af344563498342d13ca98d3edab62b050a094c0f02d59f15fd136a6c6c024": {
+    "describe": {
+      "columns": [
+        {
+          "name": "account_id!: AccountId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "select account_id as \"account_id!: AccountId\" from user_account where user_id = $1"
   },
   "6cd2ae3f3a7df867e81bc9018b79dd4e1d64f4729ba071f42a70651492b89a8c": {
     "describe": {
@@ -10309,6 +10361,19 @@
     },
     "query": "delete from user_image_library where user_id = $1 and id = $2"
   },
+  "98a1accd7a52a884a6a42ef255d75422752cb6449fcb381949d90fa09eb53eba": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "delete from user_account where account_id = $1 and user_id = $2;"
+  },
   "98ca253af396be495aa7764cb4328e0760d0e0d3b6c970f5277b9b9885b68d98": {
     "describe": {
       "columns": [],
@@ -11164,6 +11229,18 @@
       }
     },
     "query": "\ninsert into jig_data_module (jig_data_id, kind, contents, index, is_complete)\nvalues ($1, $2, $3, (select count(*) from jig_data_module where jig_data_id = $1), $4)\nreturning id, \"index\"\n"
+  },
+  "a706f1848aef0772c4b8ebefc53d9d6e2045580a8fc3fdaee1fa2fc87b564614": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "delete from account where account_id = $1;"
   },
   "a7597f668f530133865fe74a396da14ff51dcb53fc0537df95964ae98649ce1d": {
     "describe": {
@@ -12207,6 +12284,18 @@
     },
     "query": "update global_animation_upload set processed_at = now(), processing_result = true where animation_id = $1"
   },
+  "b514fa6df789975af088fb72130c9b5b9bb1da02a5e9dba04e49849682d675a1": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "delete from school where account_id = $1;"
+  },
   "b571c608c4dd64c7c244942fec79d4de205bcc8e057ffd6c42c3a16a066252aa": {
     "describe": {
       "columns": [],
@@ -12757,6 +12846,18 @@
       }
     },
     "query": "\nselect id            as \"circle_id: CircleId\",\n       display_name,\n       description,\n       image         as \"image!: ImageId\",\n       member_count,\n       creator_id    as \"creator_id: UserId\",\n       created_at,\n       updated_at,\n       exists(select 1 from circle_member where user_id = $2 and circle.id = circle_member.id) as \"joined!\"\nfrom circle\nwhere id = $1\n"
+  },
+  "bd9bbcaf05eef191fc3d2f6e0331609bc5f034dd22e71b32f9604d70a54b88a5": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "delete from user_account where account_id = $1;"
   },
   "bdfa6658d04ff049c61a416af645025bdd798b50d837f21ebd79ff76f71899e5": {
     "describe": {

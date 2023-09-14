@@ -217,6 +217,16 @@ impl UsersTable {
                             })
                         }))
                     }))
+                    .child(html!("label", {
+                        .apply_if(user.account_id.is_some(), clone!(state, user => move |dom| {
+                            dom.child(html!("button", {
+                                .text("Clear Account")
+                                .event(clone!(state => move |_: events::Click| {
+                                    state.delete_user_account(&user)
+                                }))
+                            }))
+                        }))
+                    }))
                 })
             })))
         })

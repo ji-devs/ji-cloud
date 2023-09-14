@@ -1,4 +1,6 @@
 use crate::db;
+use anyhow::anyhow;
+use futures::future::join_all;
 use shared::domain::admin::SearchSchoolsParams;
 use shared::domain::billing::{
     Account, AccountId, AccountType, AccountUser, AdminSchool, CreateSchoolAccountRequest,
@@ -910,6 +912,79 @@ where account_id = $1
     )
     .execute(pool)
     .await?;
+
+    Ok(())
+}
+
+#[instrument(skip(pool))]
+pub async fn delete_account_for_user(pool: &PgPool, user_id: &UserId) -> anyhow::Result<()> {
+    let account_id = sqlx::query_scalar!(
+        // language=SQL
+        r#"select account_id as "account_id!: AccountId" from user_account where user_id = $1"#,
+        user_id as &UserId,
+    )
+    .fetch_optional(pool)
+    .await?;
+
+    let Some(account_id) = account_id else {
+        return Err(anyhow!("Could not find user"));
+    };
+
+    let delete_queries = vec![
+        sqlx::query!(
+            r#"delete from subscription where account_id = $1;"#,
+            account_id as AccountId,
+        ),
+        sqlx::query!(
+            r#"delete from user_account where account_id = $1;"#,
+            account_id as AccountId,
+        ),
+        sqlx::query!(
+            r#"delete from school where account_id = $1;"#,
+            account_id as AccountId,
+        ),
+        sqlx::query!(
+            r#"delete from account where account_id = $1;"#,
+            account_id as AccountId,
+        ),
+    ];
+
+    join_all(
+        delete_queries
+            .into_iter()
+            .map(|q| q.execute(pool))
+            .collect::<Vec<_>>(),
+    )
+    .await
+    .into_iter()
+    .collect::<Result<Vec<_>, _>>()?;
+
+    Ok(())
+}
+
+#[instrument(skip(pool))]
+pub async fn delete_user_from_school(
+    pool: &PgPool,
+    school_id: &SchoolId,
+    user_id: &UserId,
+) -> sqlx::Result<()> {
+    let account_id = sqlx::query_scalar!(
+        // language=SQL
+        r#"select account_id as "account_id!: AccountId" from school where school_id = $1"#,
+        school_id as &SchoolId,
+    )
+    .fetch_optional(pool)
+    .await?;
+
+    if let Some(account_id) = account_id {
+        sqlx::query!(
+            r#"delete from user_account where account_id = $1 and user_id = $2;"#,
+            account_id as AccountId,
+            user_id as &UserId,
+        )
+        .execute(pool)
+        .await?;
+    }
 
     Ok(())
 }

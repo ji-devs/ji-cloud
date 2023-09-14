@@ -11,14 +11,14 @@ use ji_core::settings::RuntimeSettings;
 use serde::ser::Serialize;
 use serde_derive::Deserialize;
 use shared::api::endpoints::admin::{
-    CreateSchoolName, GetSchoolNames, ImportSchoolNames, InviteUsers, SearchSchools,
-    SetInternalSchoolName, UpdateSchoolName, VerifySchool,
+    CreateSchoolName, DeleteUserAccount, GetSchoolNames, ImportSchoolNames, InviteUsers,
+    RemoveUserFromSchool, SearchSchools, SetInternalSchoolName, UpdateSchoolName, VerifySchool,
 };
 use shared::domain::admin::{
     InviteFailedReason, InviteSchoolUserFailure, InviteSchoolUsersResponse, SearchSchoolsResponse,
 };
 use shared::domain::billing::{
-    SchoolId, SchoolNameId, SchoolNameValue, UpdateSubscriptionPlansRequest,
+    SchoolId, SchoolNameId, SchoolNameValue, SubscriptionStatus, UpdateSubscriptionPlansRequest,
 };
 use shared::error::AccountError;
 use shared::{
@@ -320,7 +320,17 @@ async fn invite_school_user(
             {
                 match account_summary.school_id {
                     Some(_) => Err(InviteFailedReason::AssociatedWithSchool),
-                    None => Err(InviteFailedReason::HasIndividualAccount),
+                    None => {
+                        match account_summary.subscription_status {
+                            Some(SubscriptionStatus::Expired) | None => {
+                                // If they have an account with an expired subscription or no subscription,
+                                // then delete that account so that they can be added to a school account.
+                                db::account::delete_account_for_user(pool, &user_id).await?;
+                                Ok(user_id)
+                            }
+                            _ => Err(InviteFailedReason::HasIndividualAccount),
+                        }
+                    }
                 }
             } else {
                 Ok(user_id)
@@ -332,7 +342,7 @@ async fn invite_school_user(
     match user_id {
         Err(reason) => return Ok(Some(InviteSchoolUserFailure { email, reason })),
         Ok(user_id) => {
-            let school = db::account::get_school_account_by_id(pool, &school_id)
+            let school = db::account::get_school_account_by_id(pool, school_id)
                 .await?
                 .ok_or(anyhow!("School not found"))?;
             db::account::associate_user_with_account(
@@ -393,6 +403,57 @@ async fn get_school_names(
     ))
 }
 
+async fn delete_user_account(
+    _auth: TokenUserWithScope<ScopeAdmin>,
+    db: Data<PgPool>,
+    user_id: Path<UserId>,
+) -> Result<HttpResponse, <DeleteUserAccount as ApiEndpoint>::Err> {
+    let user_id: UserId = user_id.into_inner();
+
+    if let Some(account_summary) = db::account::get_user_account_summary(db.as_ref(), &user_id)
+        .await
+        .into_anyhow()?
+    {
+        match account_summary.subscription_status {
+            Some(SubscriptionStatus::Expired) | None => {
+                // Individual account users are always admin.
+                // If they are an admin and...
+                if account_summary.is_admin {
+                    // If they have an account with an expired subscription or no subscription,
+                    // then delete that account so that they can be added to a school account.
+                    db::account::delete_account_for_user(db.as_ref(), &user_id).await?;
+                    Ok(())
+                } else {
+                    Err(AccountError::BadRequest("User is not an admin".into()))
+                }
+            }
+            _ => Err(AccountError::BadRequest(
+                "User has an active subscription".into(),
+            )),
+        }
+    } else {
+        Ok(())
+    }?;
+
+    Ok(HttpResponse::Ok().finish())
+}
+
+async fn remove_user_from_school(
+    _auth: TokenUserWithScope<ScopeAdmin>,
+    db: Data<PgPool>,
+    school_id: Path<SchoolId>,
+    req: Json<<RemoveUserFromSchool as ApiEndpoint>::Req>,
+) -> Result<HttpResponse, <DeleteUserAccount as ApiEndpoint>::Err> {
+    let school_id = school_id.into_inner();
+    let user_id: UserId = req.into_inner();
+
+    db::account::delete_user_from_school(db.as_ref(), &school_id, &user_id)
+        .await
+        .into_anyhow()?;
+
+    Ok(HttpResponse::Ok().finish())
+}
+
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
         <admin::Impersonate as ApiEndpoint>::Path::PATH,
@@ -441,5 +502,15 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <GetSchoolNames as ApiEndpoint>::Path::PATH,
         GetSchoolNames::METHOD.route().to(get_school_names),
+    )
+    .route(
+        <DeleteUserAccount as ApiEndpoint>::Path::PATH,
+        DeleteUserAccount::METHOD.route().to(delete_user_account),
+    )
+    .route(
+        <RemoveUserFromSchool as ApiEndpoint>::Path::PATH,
+        RemoveUserFromSchool::METHOD
+            .route()
+            .to(remove_user_from_school),
     );
 }

@@ -17,7 +17,7 @@ impl SchoolDetails {
 
         html!("empty-fragment", {
             .child_signal(state.school.signal_cloned().map(clone!(state => move |school| {
-                school.map(|school| {
+                school.map(clone!(state => move |school| {
                     html!("admin-school-details", {
                         .prop_signal("editing_name", state.editing_name.signal_ref(|editing| editing.is_some()))
                         .child(html!("window-loader-block", {
@@ -340,16 +340,14 @@ impl SchoolDetails {
                                             html!("div", {
                                                 .style("display", "flex")
                                                 .style("flex-direction", "row")
-                                                .text("TODO: Actions")
-                                                // .children(&mut [
-                                                //     html!("button", {
-                                                //         .text("Remove")
-                                                //         .prop("disabled", "true")
-                                                //         .event(clone!(state => move |_: events::Click| {
-                                                //             todo!()
-                                                //         }))
-                                                //     })
-                                                // ])
+                                                .children(&mut [
+                                                    html!("button", {
+                                                        .text("Remove")
+                                                        .event(clone!(state, user => move |_: events::Click| {
+                                                            state.remove_user_from_school(user.user.id);
+                                                        }))
+                                                    })
+                                                ])
                                             }),
                                         ])
                                     })
@@ -357,7 +355,7 @@ impl SchoolDetails {
                             })
                         ])
                     })
-                })
+                }))
             })))
         })
     }
