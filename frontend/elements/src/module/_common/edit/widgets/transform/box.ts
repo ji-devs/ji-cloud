@@ -113,6 +113,9 @@ export class TransformBox extends LitElement {
     }
 
     firstUpdated(_changedProperties: any) {
+        // without this, Safari-IOS doesn't register double-clicks on the svg inside this element.
+        // it's a weird issue with a weird fix.
+        this.addEventListener("dblclick", () => {})
         this.tabIndex = 0;
         this.updateMenuButtonLocation();
     }
