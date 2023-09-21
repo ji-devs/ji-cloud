@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use dominator::{clone, html, with_node, Dom, EventOptions};
-use futures_signals::signal::SignalExt;
+use futures_signals::signal::{Mutable, SignalExt};
 use js_sys::encode_uri_component;
 use shared::{config::JIG_PLAYER_SESSION_VALID_DURATION_SECS, domain::asset::Asset};
 use utils::{
@@ -111,9 +111,31 @@ impl ShareAsset {
             }
         }
 
+        // TODO: temporary until we have student-codes for playlists
+        let temp_playlist_link_copied = Mutable::new(false);
+
         let state = self;
         html!("share-jig-main", {
             .prop("slot", "overlay")
+            // TODO: temporary until we have student-codes for playlists
+            .apply_if(state.asset.is_playlist(), |dom| {
+                dom.child(html!("share-jig-option", {
+                    .prop("kind", "students")
+                    .text_signal(temp_playlist_link_copied.signal().map(clone!(state => move |copied| {
+                        match copied {
+                            false => STR_STUDENTS_LABEL.to_owned(),
+                            true => format!("{}{STR_COPIED_LABEL}", state.asset_type_name()),
+                        }
+                    })))
+                    .event(clone!(state => move |_: events::Click| {
+                        if !state.can_play() {
+                            return;
+                        }
+                        clipboard::write_text(&state.asset_link(true));
+                        ShareAsset::set_copied_mutable(temp_playlist_link_copied.clone());
+                    }))
+                }))
+            })
             .apply_if(state.asset.is_jig(), |dom| {
                 dom.child(html!("share-jig-option", {
                     .prop("kind", "students")
