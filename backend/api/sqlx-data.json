@@ -5647,6 +5647,19 @@
     },
     "query": "\nupdate playlist_data_module\nset\n    index = case when index = $2 then $3 else index + 1 end,\n    updated_at = now()\nwhere playlist_data_id = $1 and index between $3 and $2\n"
   },
+  "56b90b780e11276da16019dd74424c3f8b14f671623f76a21cc733708a987c35": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nwith new_data as (\n    select count(*) as jig_count, author_id from jig where published_at IS NOT NULL and author_id = $1 or author_id = $2 GROUP BY author_id\n)\nupdate user_asset_data\n    set jig_count = new_data.jig_count,\n        total_asset_count = new_data.jig_count + playlist_count + resource_count\nfrom new_data\nwhere user_asset_data.user_id = new_data.author_id;\n        "
+  },
   "57693aa7ccdb79cbaa9b0d32177b781785ab822732c8e156740692a8d160cc53": {
     "describe": {
       "columns": [],
