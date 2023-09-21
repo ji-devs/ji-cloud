@@ -34,6 +34,14 @@ export class _ extends LitElement {
                         padding: 0;
                     }
                 }
+                .top-bar .logo {
+                    height: 14px;
+                }
+                @media (min-width: 1024px) {
+                    .top-bar .logo {
+                        height: 28px;
+                    }
+                }
                 ::slotted([slot=thumbnail]) {
                     max-height: 50vh;
                     aspect-ratio: 16 / 9;
@@ -151,6 +159,9 @@ export class _ extends LitElement {
     render() {
         return html`
             <div class="playlist-info-side">
+                <a href="/" target="top">
+                    <img-ui class="logo" path="jig/play/logo.svg"></img-ui>
+                </a>
                 <slot name="thumbnail"></slot>
                 <h2 class="name" dir="auto">${this.name}</h2>
                 <div class="count-lang-author">
