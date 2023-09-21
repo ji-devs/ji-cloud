@@ -1450,6 +1450,23 @@ returning live_id
     .fetch_all(&mut txn)
     .await?;
 
+    sqlx::query!(
+        r#"
+with new_data as (
+    select count(*) as jig_count, author_id from jig where published_at IS NOT NULL and author_id = $1 or author_id = $2 GROUP BY author_id
+)
+update user_asset_data
+    set jig_count = new_data.jig_count,
+        total_asset_count = new_data.jig_count + playlist_count + resource_count
+from new_data
+where user_asset_data.user_id = new_data.author_id;
+        "#,
+        to.0,
+        from.0
+    )
+    .execute(&mut txn)
+    .await?;
+
     let live_ids: Vec<_> = ids.into_iter().map(|record| record.live_id).collect();
 
     if live_ids.is_empty() {
