@@ -1,7 +1,7 @@
-use actix_files::NamedFile;
 use actix_web::{
+    http::header::ContentType,
     web::{Data, Json, Path, Query, ServiceConfig},
-    HttpRequest, HttpResponse,
+    HttpResponse,
 };
 use anyhow::anyhow;
 use chrono::{Duration, Utc};
@@ -26,11 +26,7 @@ use shared::{
         endpoints::admin::{self, CreateUpdateSubscriptionPlans},
         ApiEndpoint, PathParts,
     },
-    domain::{
-        admin::{ExportDataRequest, ExportType},
-        session::NewSessionResponse,
-        user::UserId,
-    },
+    domain::{session::NewSessionResponse, user::UserId},
     error::IntoAnyhow,
 };
 use sqlx::PgPool;
@@ -82,56 +78,42 @@ async fn impersonate(
         .json(NewSessionResponse { csrf }))
 }
 
-async fn export_data_by_type(
-    db: &PgPool,
-    query: ExportDataRequest,
-) -> Result<Vec<impl Serialize>, error::Server> {
-    let data = match query.export_type {
-        ExportType::Profiles => {
-            db::user::user_profiles_by_date_range(
-                &db,
-                query.date_filter_type,
-                query.from_date,
-                query.to_date,
-            )
-            .await?
-        }
-    };
+async fn export_user_data(
+    _auth: TokenUserNoCsrfWithScope<ScopeAdmin>,
+    db: Data<PgPool>,
+    query: Query<<admin::AdminUserExport as ApiEndpoint>::Req>,
+) -> actix_web::Result<HttpResponse, error::Server> {
+    let data =
+        db::user::user_export(&db, &query.date_filter_type, query.from_date, query.to_date).await?;
 
-    Ok(data)
+    create_csv_response(data)
 }
 
-async fn export_data(
+async fn export_jig_data(
     _auth: TokenUserNoCsrfWithScope<ScopeAdmin>,
-    req: HttpRequest,
     db: Data<PgPool>,
-    query: Query<<admin::ExportData as ApiEndpoint>::Req>,
 ) -> actix_web::Result<HttpResponse, error::Server> {
-    let filename = {
-        let mut file_parts = vec!["jigzi".to_string()];
-        file_parts.push(format!("{}_export", query.export_type).to_lowercase());
+    let data = db::jig::jigs_export(&db).await?;
 
-        if let Some(date) = query.from_date {
-            file_parts.push(format!("{}", date.format("%Y-%m-%d")));
-        }
+    create_csv_response(data)
+}
 
-        if let Some(date) = query.to_date {
-            file_parts.push(format!("{}", date.format("%Y-%m-%d")));
-        }
+async fn export_playlist_data(
+    _auth: TokenUserNoCsrfWithScope<ScopeAdmin>,
+    db: Data<PgPool>,
+) -> actix_web::Result<HttpResponse, error::Server> {
+    let data = db::playlist::playlists_export(&db).await?;
 
-        let mut filename = std::env::temp_dir();
-        filename.push(format!("{}.csv", file_parts.join("_")));
-        filename
-    };
+    create_csv_response(data)
+}
 
-    let data = export_data_by_type(&db, query.into_inner()).await?;
-
-    let file = std::fs::File::create(&filename)?;
-
+fn create_csv_response(
+    data: Vec<impl Serialize>,
+) -> actix_web::Result<HttpResponse, error::Server> {
     let mut writer = csv::WriterBuilder::new()
         .delimiter(b'\t')
         .quote_style(csv::QuoteStyle::Necessary)
-        .from_writer(file);
+        .from_writer(vec![]);
 
     for profile in data.iter() {
         writer.serialize(&profile)?;
@@ -139,11 +121,11 @@ async fn export_data(
 
     writer.flush()?;
 
-    let file = NamedFile::from_file(std::fs::File::open(&filename)?, &filename)?;
+    let data = String::from_utf8(writer.into_inner()?)?;
 
-    std::fs::remove_file(&filename)?;
-
-    Ok(file.into_response(&req))
+    Ok(HttpResponse::Ok()
+        .content_type(ContentType(mime::TEXT_CSV_UTF_8))
+        .body(data))
 }
 
 async fn create_or_update_subscription_plans(
@@ -460,8 +442,18 @@ pub fn configure(cfg: &mut ServiceConfig) {
         admin::Impersonate::METHOD.route().to(impersonate),
     )
     .route(
-        <admin::ExportData as ApiEndpoint>::Path::PATH,
-        admin::ExportData::METHOD.route().to(export_data),
+        <admin::AdminUserExport as ApiEndpoint>::Path::PATH,
+        admin::AdminUserExport::METHOD.route().to(export_user_data),
+    )
+    .route(
+        <admin::AdminJigExport as ApiEndpoint>::Path::PATH,
+        admin::AdminJigExport::METHOD.route().to(export_jig_data),
+    )
+    .route(
+        <admin::AdminPlaylistExport as ApiEndpoint>::Path::PATH,
+        admin::AdminPlaylistExport::METHOD
+            .route()
+            .to(export_playlist_data),
     )
     .route(
         <CreateUpdateSubscriptionPlans as ApiEndpoint>::Path::PATH,

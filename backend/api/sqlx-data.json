@@ -7026,6 +7026,116 @@
     },
     "query": "\n    insert into jig_report(jig_id, report_type)\n    values ($1, $2)\n    returning id as \"id!: ReportId\"\n            "
   },
+  "688ca554263ad9bee35f1fe5d4c99682f7d47c847249d304422858b265bce880": {
+    "describe": {
+      "columns": [
+        {
+          "name": "playlist_id: PlaylistId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "privacy_level: PrivacyLevel",
+          "ordinal": 1,
+          "type_info": "Int2"
+        },
+        {
+          "name": "creator_id?: UserId",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_id?: UserId",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_name",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "published_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "likes",
+          "ordinal": 7,
+          "type_info": "Int8"
+        },
+        {
+          "name": "plays",
+          "ordinal": 8,
+          "type_info": "Int8"
+        },
+        {
+          "name": "display_name!",
+          "ordinal": 9,
+          "type_info": "Text"
+        },
+        {
+          "name": "language!",
+          "ordinal": 10,
+          "type_info": "Text"
+        },
+        {
+          "name": "description!",
+          "ordinal": 11,
+          "type_info": "Text"
+        },
+        {
+          "name": "rating!: Option<PlaylistRating>",
+          "ordinal": 12,
+          "type_info": "Int2"
+        },
+        {
+          "name": "blocked!",
+          "ordinal": 13,
+          "type_info": "Bool"
+        },
+        {
+          "name": "curated!",
+          "ordinal": 14,
+          "type_info": "Bool"
+        },
+        {
+          "name": "premium!",
+          "ordinal": 15,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        true,
+        null,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Int2"
+        ]
+      }
+    },
+    "query": "\n        with cte as (\n            select array_agg(pd.id)\n            from playlist_data \"pd\"\n                  inner join playlist on (draft_id = pd.id or (live_id = pd.id and pd.last_synced_at is not null and published_at is not null))\n                  left join playlist_admin_data \"admin\" on admin.playlist_id = playlist.id\n            where (pd.draft_or_live = $1)\n            group by updated_at, created_at, playlist.published_at, admin.playlist_id\n        ),\n        cte1 as (\n            select * from unnest(array((select cte.array_agg[1] from cte))) with ordinality t(id\n           , ord) order by ord\n        )\n        select playlist.id                                      as \"playlist_id: PlaylistId\",\n            privacy_level                                       as \"privacy_level: PrivacyLevel\",\n            creator_id                                          as \"creator_id?: UserId\",\n            author_id                                           as \"author_id?: UserId\",\n            (select given_name || ' '::text || family_name\n                from user_profile\n             where user_profile.user_id = author_id)            as \"author_name\",\n            created_at,\n            published_at,\n            likes,\n            plays,\n            display_name                                        as \"display_name!\",\n            language                                            as \"language!\",\n            description                                         as \"description!\",\n            rating                                              as \"rating!: Option<PlaylistRating>\",\n            blocked                                             as \"blocked!\",\n            curated                                             as \"curated!\",\n            is_premium                                          as \"premium!\"\n        from cte1\n        inner join playlist_data on cte1.id = playlist_data.id\n        inner join playlist on (\n            playlist_data.id = playlist.draft_id\n            or (\n                playlist_data.id = playlist.live_id\n                and last_synced_at is not null\n                and playlist.published_at is not null\n            )\n        )\n        left join playlist_admin_data \"admin\" on admin.playlist_id = playlist.id\n        "
+  },
   "68a6cedcf31dbac17f23ec2cf4cdead5973b0bf72e32708d64e680ecc2997f6b": {
     "describe": {
       "columns": [
@@ -7483,6 +7593,122 @@
       }
     },
     "query": "\n                select exists(select 1 from user_profile where user_id = $1 for update) as \"exists!\"\n                    "
+  },
+  "70116ce8741e86ae6a9f6baa5c5ab8d5e34cf60a0c2f1c810da0cc90f2dd22c0": {
+    "describe": {
+      "columns": [
+        {
+          "name": "jig_id: JigId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "privacy_level: PrivacyLevel",
+          "ordinal": 1,
+          "type_info": "Int2"
+        },
+        {
+          "name": "creator_id?: UserId",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_id?: UserId",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_name",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "published_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "liked_count",
+          "ordinal": 7,
+          "type_info": "Int8"
+        },
+        {
+          "name": "is_liked!",
+          "ordinal": 8,
+          "type_info": "Bool"
+        },
+        {
+          "name": "play_count!",
+          "ordinal": 9,
+          "type_info": "Int8"
+        },
+        {
+          "name": "display_name!",
+          "ordinal": 10,
+          "type_info": "Text"
+        },
+        {
+          "name": "language!",
+          "ordinal": 11,
+          "type_info": "Text"
+        },
+        {
+          "name": "description!",
+          "ordinal": 12,
+          "type_info": "Text"
+        },
+        {
+          "name": "rating!: Option<JigRating>",
+          "ordinal": 13,
+          "type_info": "Int2"
+        },
+        {
+          "name": "blocked!",
+          "ordinal": 14,
+          "type_info": "Bool"
+        },
+        {
+          "name": "curated!",
+          "ordinal": 15,
+          "type_info": "Bool"
+        },
+        {
+          "name": "premium!",
+          "ordinal": 16,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        true,
+        null,
+        false,
+        true,
+        false,
+        null,
+        null,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Int2"
+        ]
+      }
+    },
+    "query": "\n        with cte as (\n            select array_agg(jd.id)\n            from jig_data \"jd\"\n                  inner join jig on (draft_id = jd.id or (live_id = jd.id and jd.last_synced_at is not null and published_at is not null))\n                  left join jig_admin_data \"admin\" on admin.jig_id = jig.id\n                  left join jig_data_additional_resource \"resource\" on jd.id = resource.jig_data_id\n            where (jd.draft_or_live = $1)\n            group by updated_at, created_at, jig.published_at, admin.jig_id\n        ),\n        cte1 as (\n            select * from unnest(array((select cte.array_agg[1] from cte))) with ordinality t(id\n           , ord) order by ord\n        )\n        select jig.id                                           as \"jig_id: JigId\",\n            privacy_level                                       as \"privacy_level: PrivacyLevel\",\n            creator_id                                          as \"creator_id?: UserId\",\n            author_id                                           as \"author_id?: UserId\",\n            (select given_name || ' '::text || family_name\n                from user_profile\n             where user_profile.user_id = author_id)            as \"author_name\",\n            created_at,\n            published_at,\n            liked_count,\n            exists(select 1 from jig_like where jig_id = jig.id) as \"is_liked!\",\n            (\n                 select play_count\n                 from jig_play_count\n                 where jig_play_count.jig_id = jig.id\n            )                                                   as \"play_count!\",\n    \n            display_name                                        as \"display_name!\",\n            language                                            as \"language!\",\n            description                                         as \"description!\",\n            rating                                              as \"rating!: Option<JigRating>\",\n            blocked                                             as \"blocked!\",\n            curated                                             as \"curated!\",\n            is_premium                                          as \"premium!\"\n        from cte1\n        inner join jig_data on cte1.id = jig_data.id\n        inner join jig on (\n            jig_data.id = jig.draft_id\n            or (\n                jig_data.id = jig.live_id\n                and last_synced_at is not null\n                and jig.published_at is not null\n            )\n        )\n        left join jig_admin_data \"admin\" on admin.jig_id = jig.id\n        "
   },
   "701de512b57a7bb90c579f09319277ac921dff5152c1fb8a2bc1d8bc0548504a": {
     "describe": {

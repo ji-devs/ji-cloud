@@ -398,9 +398,9 @@ with ordinality t(id, ord) using (id)
     Ok(v)
 }
 
-pub async fn user_profiles_by_date_range(
+pub async fn user_export(
     db: &sqlx::PgPool,
-    date_filter_type: DateFilterType,
+    date_filter_type: &DateFilterType,
     from_date: Option<DateTime<Utc>>,
     to_date: Option<DateTime<Utc>>,
 ) -> anyhow::Result<Vec<UserProfileExport>> {

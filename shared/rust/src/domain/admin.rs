@@ -8,27 +8,10 @@ use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 use strum_macros::{Display, EnumIter};
 
-/// Type of data export to perform
-#[derive(Display, EnumIter, Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
-#[serde(rename_all = "lowercase")]
-pub enum ExportType {
-    /// Export user profiles
-    #[strum(serialize = "User profiles")]
-    Profiles,
-}
-
-impl Default for ExportType {
-    fn default() -> Self {
-        Self::Profiles
-    }
-}
-
-make_path_parts!(ExportDataPath => "/v1/admin/export");
+make_path_parts!(AdminUserExportPath => "/v1/admin/export/users");
 /// Request to export data
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct ExportDataRequest {
-    /// The type of data to export
-    pub export_type: ExportType,
+pub struct AdminUserExportRequest {
     ///
     pub date_filter_type: DateFilterType,
     /// Optionally the date to export data from
@@ -36,6 +19,10 @@ pub struct ExportDataRequest {
     /// Optionally the date to export data to
     pub to_date: Option<chrono::DateTime<Utc>>,
 }
+
+make_path_parts!(AdminJigExportPath => "/v1/admin/export/jigs");
+
+make_path_parts!(AdminPlaylistExportPath => "/v1/admin/export/playlists");
 
 /// Type of filter to apply for the date ranges
 #[derive(Display, EnumIter, Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]

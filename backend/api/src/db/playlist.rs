@@ -1,7 +1,9 @@
 use crate::translate::translate_text;
 use anyhow::Context;
 use serde_json::value::Value;
-use shared::domain::playlist::{PlaylistAdminData, PlaylistRating, PlaylistUpdateAdminDataRequest};
+use shared::domain::playlist::{
+    AdminPlaylistExport, PlaylistAdminData, PlaylistRating, PlaylistUpdateAdminDataRequest,
+};
 use shared::domain::{
     additional_resource::{AdditionalResource, AdditionalResourceId as AddId, ResourceContent},
     asset::{DraftOrLive, PrivacyLevel},
@@ -1292,4 +1294,77 @@ where playlist.live_id = $1
     txn.commit().await?;
 
     Ok(())
+}
+
+pub async fn playlists_export(db: &sqlx::PgPool) -> anyhow::Result<Vec<AdminPlaylistExport>> {
+    let rows = sqlx::query!(
+        //language=SQL
+        r#"
+        with cte as (
+            select array_agg(pd.id)
+            from playlist_data "pd"
+                  inner join playlist on (draft_id = pd.id or (live_id = pd.id and pd.last_synced_at is not null and published_at is not null))
+                  left join playlist_admin_data "admin" on admin.playlist_id = playlist.id
+            where (pd.draft_or_live = $1)
+            group by updated_at, created_at, playlist.published_at, admin.playlist_id
+        ),
+        cte1 as (
+            select * from unnest(array((select cte.array_agg[1] from cte))) with ordinality t(id
+           , ord) order by ord
+        )
+        select playlist.id                                      as "playlist_id: PlaylistId",
+            privacy_level                                       as "privacy_level: PrivacyLevel",
+            creator_id                                          as "creator_id?: UserId",
+            author_id                                           as "author_id?: UserId",
+            (select given_name || ' '::text || family_name
+                from user_profile
+             where user_profile.user_id = author_id)            as "author_name",
+            created_at,
+            published_at,
+            likes,
+            plays,
+            display_name                                        as "display_name!",
+            language                                            as "language!",
+            description                                         as "description!",
+            rating                                              as "rating!: Option<PlaylistRating>",
+            blocked                                             as "blocked!",
+            curated                                             as "curated!",
+            is_premium                                          as "premium!"
+        from cte1
+        inner join playlist_data on cte1.id = playlist_data.id
+        inner join playlist on (
+            playlist_data.id = playlist.draft_id
+            or (
+                playlist_data.id = playlist.live_id
+                and last_synced_at is not null
+                and playlist.published_at is not null
+            )
+        )
+        left join playlist_admin_data "admin" on admin.playlist_id = playlist.id
+        "#,
+        DraftOrLive::Live as i16
+    )
+        .fetch_all(db)
+        .instrument(tracing::info_span!("query jig_data for export"))
+        .await?;
+
+    Ok(rows
+        .into_iter()
+        .map(|row| AdminPlaylistExport {
+            id: row.playlist_id,
+            description: row.description,
+            display_name: row.display_name,
+            premium: row.premium,
+            blocked: row.blocked,
+            author_id: row.author_id,
+            author_name: row.author_name,
+            likes: row.likes,
+            plays: row.plays,
+            rating: row.rating,
+            privacy_level: row.privacy_level,
+            created_at: row.created_at,
+            published_at: row.published_at,
+            language: row.language,
+        })
+        .collect())
 }

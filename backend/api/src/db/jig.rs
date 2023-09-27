@@ -1,7 +1,7 @@
 use crate::translate::translate_text;
 use anyhow::Context;
 use serde_json::value::Value;
-use shared::domain::jig::JigUpdateAdminDataRequest;
+use shared::domain::jig::{AdminJigExport, JigUpdateAdminDataRequest};
 use shared::domain::playlist::{PlaylistAdminData, PlaylistRating};
 use shared::domain::{
     additional_resource::{AdditionalResource, AdditionalResourceId as AddId, ResourceContent},
@@ -1827,4 +1827,84 @@ where id = $1
     .await?;
 
     Ok(())
+}
+
+pub async fn jigs_export(db: &sqlx::PgPool) -> anyhow::Result<Vec<AdminJigExport>> {
+    let rows = sqlx::query!(
+        //language=SQL
+        r#"
+        with cte as (
+            select array_agg(jd.id)
+            from jig_data "jd"
+                  inner join jig on (draft_id = jd.id or (live_id = jd.id and jd.last_synced_at is not null and published_at is not null))
+                  left join jig_admin_data "admin" on admin.jig_id = jig.id
+                  left join jig_data_additional_resource "resource" on jd.id = resource.jig_data_id
+            where (jd.draft_or_live = $1)
+            group by updated_at, created_at, jig.published_at, admin.jig_id
+        ),
+        cte1 as (
+            select * from unnest(array((select cte.array_agg[1] from cte))) with ordinality t(id
+           , ord) order by ord
+        )
+        select jig.id                                           as "jig_id: JigId",
+            privacy_level                                       as "privacy_level: PrivacyLevel",
+            creator_id                                          as "creator_id?: UserId",
+            author_id                                           as "author_id?: UserId",
+            (select given_name || ' '::text || family_name
+                from user_profile
+             where user_profile.user_id = author_id)            as "author_name",
+            created_at,
+            published_at,
+            liked_count,
+            exists(select 1 from jig_like where jig_id = jig.id) as "is_liked!",
+            (
+                 select play_count
+                 from jig_play_count
+                 where jig_play_count.jig_id = jig.id
+            )                                                   as "play_count!",
+    
+            display_name                                        as "display_name!",
+            language                                            as "language!",
+            description                                         as "description!",
+            rating                                              as "rating!: Option<JigRating>",
+            blocked                                             as "blocked!",
+            curated                                             as "curated!",
+            is_premium                                          as "premium!"
+        from cte1
+        inner join jig_data on cte1.id = jig_data.id
+        inner join jig on (
+            jig_data.id = jig.draft_id
+            or (
+                jig_data.id = jig.live_id
+                and last_synced_at is not null
+                and jig.published_at is not null
+            )
+        )
+        left join jig_admin_data "admin" on admin.jig_id = jig.id
+        "#,
+        DraftOrLive::Live as i16
+    )
+        .fetch_all(db)
+        .instrument(tracing::info_span!("query jig_data for export"))
+        .await?;
+
+    Ok(rows
+        .into_iter()
+        .map(|row| AdminJigExport {
+            id: row.jig_id,
+            description: row.description,
+            display_name: row.display_name,
+            premium: row.premium,
+            blocked: row.blocked,
+            author_id: row.author_id,
+            author_name: row.author_name,
+            likes: row.liked_count,
+            plays: row.play_count,
+            rating: row.rating,
+            privacy_level: row.privacy_level,
+            created_at: row.created_at,
+            published_at: row.published_at,
+            language: row.language,
+        })
+        .collect())
 }

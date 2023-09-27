@@ -1890,6 +1890,7 @@ dependencies = [
  "listenfd",
  "log",
  "macros",
+ "mime",
  "mp3-metadata",
  "once_cell",
  "openssl",

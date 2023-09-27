@@ -13,7 +13,10 @@ use crate::error::AccountError;
 use crate::{
     api::Method,
     domain::{
-        admin::{ExportDataPath, ExportDataRequest},
+        admin::{
+            AdminJigExportPath, AdminPlaylistExportPath, AdminUserExportPath,
+            AdminUserExportRequest,
+        },
         billing::{SubscriptionPlanPath, UpdateSubscriptionPlansRequest},
         session::{ImpersonatePath, NewSessionResponse},
     },
@@ -30,11 +33,31 @@ impl ApiEndpoint for Impersonate {
     const METHOD: Method = Method::Post;
 }
 
-/// Export data
-pub struct ExportData;
-impl ApiEndpoint for ExportData {
-    type Path = ExportDataPath;
-    type Req = ExportDataRequest;
+/// Export user data
+pub struct AdminUserExport;
+impl ApiEndpoint for AdminUserExport {
+    type Path = AdminUserExportPath;
+    type Req = AdminUserExportRequest;
+    type Res = ();
+    type Err = EmptyError;
+    const METHOD: Method = Method::Get;
+}
+
+/// Export jig data
+pub struct AdminJigExport;
+impl ApiEndpoint for AdminJigExport {
+    type Path = AdminJigExportPath;
+    type Req = ();
+    type Res = ();
+    type Err = EmptyError;
+    const METHOD: Method = Method::Get;
+}
+
+/// Export playlist data
+pub struct AdminPlaylistExport;
+impl ApiEndpoint for AdminPlaylistExport {
+    type Path = AdminPlaylistExportPath;
+    type Req = ();
     type Res = ();
     type Err = EmptyError;
     const METHOD: Method = Method::Get;

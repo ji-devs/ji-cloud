@@ -472,3 +472,36 @@ make_path_parts!(PlaylistLikedPath => "/v1/playlist/{}/like" => PlaylistId);
 make_path_parts!(PlaylistViewPath => "/v1/playlist/{}/view" => PlaylistId);
 
 make_path_parts!(PlaylistAdminDataUpdatePath => "/v1/playlist/{}/admin" => PlaylistId);
+
+/// A playlists export representation.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct AdminPlaylistExport {
+    /// playlist ID
+    pub id: PlaylistId,
+    /// Description of the playlist.
+    pub description: String,
+    /// The playlist's name.
+    pub display_name: String,
+    /// Whether the resource is a premium resource
+    pub premium: bool,
+    /// if true does not appear in search
+    pub blocked: bool,
+    /// The current author
+    pub author_id: Option<UserId>,
+    /// The author's name, as "{given_name} {family_name}".
+    pub author_name: Option<String>,
+    /// Number of likes on playlist
+    pub likes: i64,
+    /// Number of plays playlist
+    pub plays: i64,
+    /// Rating for playlist, weighted for playlist search
+    pub rating: Option<PlaylistRating>,
+    /// The privacy level on the playlist.
+    pub privacy_level: PrivacyLevel,
+    /// When the playlist was first created.
+    pub created_at: DateTime<Utc>,
+    /// When (if at all) the playlist has published a draft to live.
+    pub published_at: Option<DateTime<Utc>>,
+    /// The language the playlist uses.
+    pub language: String,
+}

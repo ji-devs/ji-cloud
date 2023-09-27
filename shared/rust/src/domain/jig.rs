@@ -804,3 +804,36 @@ pub struct GetJigPlaylistsResponse {
 }
 
 macros::make_path_parts!(GetJigPlaylistsPath => "/v1/jig/{}/playlists" => JigId);
+
+/// A jigs export representation.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct AdminJigExport {
+    /// JIG ID
+    pub id: JigId,
+    /// Description of the jig.
+    pub description: String,
+    /// The JIG's name.
+    pub display_name: String,
+    /// Whether the resource is a premium resource
+    pub premium: bool,
+    /// if true does not appear in search
+    pub blocked: bool,
+    /// The current author
+    pub author_id: Option<UserId>,
+    /// The author's name, as "{given_name} {family_name}".
+    pub author_name: Option<String>,
+    /// Number of likes on Jig
+    pub likes: i64,
+    /// Number of plays Jig
+    pub plays: i64,
+    /// Rating for jig, weighted for jig search
+    pub rating: Option<JigRating>,
+    /// The privacy level on the JIG.
+    pub privacy_level: PrivacyLevel,
+    /// When the JIG was first created.
+    pub created_at: DateTime<Utc>,
+    /// When (if at all) the JIG has published a draft to live.
+    pub published_at: Option<DateTime<Utc>>,
+    /// The language the jig uses.
+    pub language: String,
+}
