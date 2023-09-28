@@ -1,40 +1,21 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
-import { classMap } from "lit-html/directives/class-map";
 import "@elements/core/buttons/icon";
+import "@elements/core/overlays/anchored-overlay";
 
 @customElement("menu-kebab")
 export class _ extends LitElement {
     static get styles() {
         return [
             css`
-                :host > section {
-                    width: 32px;
-                    height: 32px;
-                }
                 .menu-container {
-                    display: none;
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    border-radius: 8px;
-                    -webkit-backdrop-filter: blur(30px);
-                    backdrop-filter: blur(30px);
-                    box-shadow: 0 3px 16px 0 rgba(0, 0, 0, 0.2);
-                    background-color: var(--white);
                     padding: 14px;
-                    z-index: 1;
                 }
-                .menu-container.visible {
-                    display: block;
-                }
-
                 .menu {
                     display: flex;
                     flex-direction: column;
                     grid-gap: 10px;
                 }
-
-                #button {
+                button-icon {
                     width: 30px;
                     height: 30px;
                 }
@@ -129,28 +110,6 @@ export class _ extends LitElement {
         }
     }
 
-    getMenuContainerStyle() {
-        if (this.positioningEnabled) {
-            const { buttonRef, visible, offsetVertical, offsetHorizontal } = this;
-
-            if (buttonRef == null || !visible) {
-                return "display: none;";
-            }
-
-            const domRect = buttonRef.getBoundingClientRect();
-
-            //using the `right` measurement breaks in storybook for some reason
-            //maybe it's a race condition to measuring after paint
-            //but anyway, we know the exact size of the button
-            const { top, left } = domRect;
-            return `top: ${top + offsetVertical}px; left: ${
-                left + offsetHorizontal
-            }px`;
-        } else {
-            return "display: none;";
-        }
-    }
-
     private toggleVisible() {
         this.visible = !this.visible;
         const event = this.visible ? "open" : "close";
@@ -158,34 +117,28 @@ export class _ extends LitElement {
     }
 
     render() {
-        const { visible } = this;
-
-        const menuContainerClasses = classMap({
-            ["menu-container"]: true,
-            visible,
-        });
-
-        const menuButtonIcon = visible
+        const menuButtonIcon = this.visible
             ? "circle-kebab-blue"
             : "circle-kebab-grey";
 
         return html`
-            <section>
+            <anchored-overlay
+                positionX="right-out"
+                positionY="top-in"
+                ?open="${this.visible}"
+                styled
+            >
                 <button-icon
-                    id="button"
                     icon="${menuButtonIcon}"
+                    slot="anchor"
                     @click=${this.toggleVisible}
                 ></button-icon>
-                <div
-                    id="menu-container"
-                    class="${menuContainerClasses}"
-                    style="${this.getMenuContainerStyle()}"
-                >
+                <div slot="overlay" class="menu-container">
                     <div class="menu">
                         <slot></slot>
                     </div>
                 </div>
-            </section>
+            </anchored-overlay>
         `;
     }
 }

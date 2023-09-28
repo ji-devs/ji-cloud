@@ -8,7 +8,6 @@ import {
     query,
     PropertyValues,
 } from "lit-element";
-import { nothing } from "lit-html";
 import { classMap } from "lit-html/directives/class-map";
 
 export type PositionX =
@@ -38,11 +37,15 @@ export class AnchoredOverlay extends LitElement {
                     z-index: 2;
                     overflow: auto;
                     box-sizing: border-box;
+                    display: none;
                 }
                 :host([styled]) .overlay {
                     border-radius: 16px;
                     box-shadow: rgb(0 0 0 / 25%) 0px 3px 16px 0px;
                     background-color: #ffffff;
+                }
+                :host([open]) .overlay {
+                    display: block;
                 }
             `,
         ];
@@ -92,81 +95,59 @@ export class AnchoredOverlay extends LitElement {
     @property({ type: Boolean, reflect: true })
     styled: boolean = false;
 
+    firstUpdated() {
+        const observer = new ResizeObserver(this.reposition);
+        observer.observe(this.overlay);
+        document.addEventListener("scroll", this.reposition);
+    }
+
     updated(propertyValues: PropertyValues) {
         if (propertyValues.has("open")) this.onOpenChange();
     }
 
     private onOpenChange() {
         if (this.open) {
-            this.positionOverlay();
             if (this.scrollClose)
-                document.addEventListener("scroll", this.onScroll);
+                document.addEventListener("scroll", this.reposition);
         } else {
-            document.removeEventListener("scroll", this.onScroll);
+            document.removeEventListener("scroll", this.reposition);
+            this.overlay.style.removeProperty("max-height");
+            this.overlay.style.removeProperty("max-width");
         }
     }
 
-    private onScroll = () => {
-        this.open = false;
-        this.dispatchEvent(new Event("close"));
-    };
-
-    private positionOverlay() {
-        const thisBounds = this.getBoundingClientRect();
+    private reposition = async() => {
         const overlayBounds = this.overlay.getBoundingClientRect();
-
-        let top: number;
-        switch (this.positionY) {
-            case "top-out": {
-                top = thisBounds.top - overlayBounds.height;
-                break;
-            }
-            case "bottom-out": {
-                top = thisBounds.bottom;
-                break;
-            }
-            case "top-in": {
-                top = thisBounds.top;
-                break;
-            }
-            case "bottom-in": {
-                top = thisBounds.bottom - overlayBounds.height;
-                break;
-            }
-            case "center": {
-                const center = thisBounds.height / 2 - overlayBounds.height / 2;
-                top = thisBounds.top + center;
-                break;
-            }
+        const anchorBounds = this.anchor.getBoundingClientRect();
+        const anchorEdgeDistances = new EdgeDistances(anchorBounds);
+        let positionX = this.positionX;
+        let positionY = this.positionY;
+        const xPlaceAt = fits({
+            length: overlayBounds.width,
+            spaceBefore: anchorEdgeDistances.left,
+            spaceAfter: anchorEdgeDistances.right,
+        });
+        if(!isSameX(this.positionX, xPlaceAt.placeAt)){
+            positionX = flipX(positionX);
         }
-        this.overlay.style.setProperty("top", `${top}px`);
-
-        let left: number;
-        switch (this.positionX) {
-            case "left-out":
-                left = thisBounds.left - overlayBounds.width;
-                break;
-            case "right-out":
-                left = thisBounds.right;
-                break;
-            case "left-in":
-                left = thisBounds.left;
-                break;
-            case "right-in":
-                left = thisBounds.right - overlayBounds.width;
-                break;
-            case "center":
-                const center = thisBounds.width / 2 - overlayBounds.width / 2;
-                left = thisBounds.left + center;
-                break;
+        const yPlaceAt = fits({
+            length: overlayBounds.height,
+            spaceBefore: anchorEdgeDistances.top,
+            spaceAfter: anchorEdgeDistances.bottom,
+        });
+        if(!isSameY(this.positionY, yPlaceAt.placeAt)){
+            positionY = flipY(positionY);
         }
-        this.overlay.style.setProperty("left", `${left}px`);
 
-        const maxHeight = window.innerHeight - top;
-        this.overlay.style.setProperty("max-height", `${maxHeight}px`);
-
-        const maxWidth = window.innerWidth - left;
-        this.overlay.style.setProperty("max-width", `${maxWidth}px`);
+        addStyles({
+            positionX,
+            positionY,
+            scrollbar: xPlaceAt.scrollbar || yPlaceAt.scrollbar,
+            anchorBounds,
+            overlayBounds,
+            anchorEdgeDistances: anchorEdgeDistances,
+            overlay: this.overlay,
+        });
     }
 
     render() {
@@ -179,19 +160,177 @@ export class AnchoredOverlay extends LitElement {
             <div part="anchor" class="anchor">
                 <slot name="anchor"></slot>
             </div>
-            ${this.open
-                ? html`
-                      <div part="overlay" class=${overlayClasses}>
-                          <slot name="overlay"></slot>
-                      </div>
-                  `
-                : nothing}
+            <div part="overlay" class=${overlayClasses}>
+                <slot name="overlay"></slot>
+            </div>
         `;
     }
 }
 
-// positioning algo: ??
-// if enough in preferred side: put there
-// // else if enough space other side put there
-// else if put at edge of screen that side
-// if overlay content is a custom element it can't figure out the height/width of the element
+function flipX(pos: PositionX): PositionX {
+    console.log("flipX");
+    if(pos === "left-in")
+        return "right-in";
+    else if(pos === "left-out")
+        return "right-out";
+    else if(pos === "right-in")
+        return "left-in";
+    else if(pos === "right-out")
+        return "left-out";
+    return "center";
+}
+function flipY(pos: PositionY): PositionY {
+    console.log("flipY");
+    if(pos === "top-in")
+        return "bottom-in";
+    else if(pos === "top-out")
+        return "bottom-out";
+    else if(pos === "bottom-in")
+        return "top-in";
+    else if(pos === "bottom-out")
+        return "top-out";
+    return "center";
+}
+
+function isSameX(pos: PositionX, placeAt: PlaceAt): boolean {
+    if (placeAt == "either")
+        return true;
+
+    if (placeAt == "before")
+        return pos === "left-in" || pos === "left-out";
+
+    return pos === "right-in" || pos === "right-out";
+}
+function isSameY(pos: PositionY, placeAt: PlaceAt): boolean {
+    if (placeAt == "either")
+        return true;
+
+    if (placeAt == "before")
+        return pos === "top-in" || pos === "top-out";
+
+    return pos === "bottom-in" || pos === "bottom-out";
+}
+
+
+interface FitsArgs {
+    length: number,
+    spaceBefore: number,
+    spaceAfter: number,
+}
+type PlaceAt = "either" | "before" | "after";
+interface FitsResult {
+    placeAt: PlaceAt;
+    scrollbar: boolean;
+}
+
+function fits(args: FitsArgs): FitsResult {
+    const {length, spaceBefore, spaceAfter} = args;
+    let placeAt: PlaceAt;
+    let scrollbar = false;
+
+    if(length <= spaceBefore && length <= spaceAfter) {
+        placeAt = "either";
+    } else if(length <= spaceBefore) {
+        placeAt = "before";
+    } else if(length <= spaceAfter) {
+        placeAt = "after";
+    } else {
+        scrollbar = true;
+        if(spaceBefore > spaceAfter) {
+            placeAt = "before";
+        } else {
+            placeAt = "after";
+        }
+    }
+    console.log({
+        placeAt,
+        scrollbar
+    });
+
+    return {
+        placeAt,
+        scrollbar
+    }
+}
+
+class EdgeDistances {
+    public left: number;
+    public right: number;
+    public top: number;
+    public bottom: number;
+    constructor(rect: DOMRect) {
+        this.left = rect.left;
+        this.right = innerWidth - rect.right;
+        this.top = rect.top;
+        this.bottom = innerHeight - rect.bottom;
+    }
+}
+
+
+interface AddStylesArgs {
+    positionX: PositionX;
+    positionY: PositionY;
+    scrollbar: boolean;
+    anchorBounds: DOMRect;
+    overlayBounds: DOMRect;
+    anchorEdgeDistances: EdgeDistances;
+    overlay: HTMLElement;
+}
+function addStyles(args: AddStylesArgs) {
+    const { positionX, positionY, anchorBounds, overlayBounds, overlay } = args;
+
+    let top: number;
+    switch (positionY) {
+        case "top-out": {
+            top = anchorBounds.top - overlayBounds.height;
+            break;
+        }
+        case "bottom-out": {
+            top = anchorBounds.bottom;
+            break;
+        }
+        case "top-in": {
+            top = anchorBounds.top;
+            break;
+        }
+        case "bottom-in": {
+            top = anchorBounds.bottom - overlayBounds.height;
+            break;
+        }
+        case "center": {
+            const center = anchorBounds.height / 2 - overlayBounds.height / 2;
+            top = anchorBounds.top + center;
+            break;
+        }
+    }
+    args.overlay.style.setProperty("top", `${top}px`);
+
+    let left: number;
+    switch (positionX) {
+        case "left-out":
+            left = anchorBounds.left - overlayBounds.width;
+            break;
+        case "right-out":
+            left = anchorBounds.right;
+            break;
+        case "left-in":
+            left = anchorBounds.left;
+            break;
+        case "right-in":
+            left = anchorBounds.right - overlayBounds.width;
+            break;
+        case "center":
+            const center = anchorBounds.width / 2 - overlayBounds.width / 2;
+            left = anchorBounds.left + center;
+            break;
+    }
+    args.overlay.style.setProperty("left", `${left}px`);
+
+    if(args.scrollbar){
+        const maxHeight = (positionY === "top-in" || positionY === "top-out") ? args.anchorEdgeDistances.top : args.anchorEdgeDistances.bottom;
+        args.overlay.style.setProperty("max-height", `${maxHeight}px`);
+
+        const maxWidth = window.innerWidth - left;
+        args.overlay.style.setProperty("max-width", `${maxWidth}px`);
+    }
+}
