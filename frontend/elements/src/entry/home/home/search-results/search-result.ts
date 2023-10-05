@@ -67,10 +67,12 @@ export class _ extends LitElement {
                     /* Safari wont register clicks (on share and like buttons, so left side) if rotated >= 180deg. Don't know why. Remove once Safari is fixed */
                     transform: rotateY(179deg);
                 }
-                ::slotted([slot=front]) {
-                    z-index: 2;
+                slot[name=front] {
                     /* safari seems to require backface-visibility here */
                     backface-visibility: hidden;
+                }
+                ::slotted([slot=front]) {
+                    z-index: 2;
                 }
                 .back {
                     width: 100%;
