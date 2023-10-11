@@ -168,7 +168,6 @@ export class AnchoredOverlay extends LitElement {
 }
 
 function flipX(pos: PositionX): PositionX {
-    console.log("flipX");
     if(pos === "left-in")
         return "right-in";
     else if(pos === "left-out")
@@ -180,7 +179,6 @@ function flipX(pos: PositionX): PositionX {
     return "center";
 }
 function flipY(pos: PositionY): PositionY {
-    console.log("flipY");
     if(pos === "top-in")
         return "bottom-in";
     else if(pos === "top-out")
@@ -192,23 +190,25 @@ function flipY(pos: PositionY): PositionY {
     return "center";
 }
 
+
+// left-out and right-in are both overflowing to the left. Same for other cases.
 function isSameX(pos: PositionX, placeAt: PlaceAt): boolean {
-    if (placeAt == "either")
+    if (placeAt === "either")
         return true;
 
-    if (placeAt == "before")
-        return pos === "left-in" || pos === "left-out";
+    if (placeAt === "before")
+        return pos === "left-out" || pos === "right-in";
 
-    return pos === "right-in" || pos === "right-out";
+    return pos === "right-out" || pos === "left-in";
 }
 function isSameY(pos: PositionY, placeAt: PlaceAt): boolean {
-    if (placeAt == "either")
+    if (placeAt === "either")
         return true;
 
-    if (placeAt == "before")
-        return pos === "top-in" || pos === "top-out";
+    if (placeAt === "before")
+        return pos === "top-out" || pos === "bottom-in";
 
-    return pos === "bottom-in" || pos === "bottom-out";
+    return pos === "bottom-out" || pos === "top-in";
 }
 
 
@@ -242,10 +242,6 @@ function fits(args: FitsArgs): FitsResult {
             placeAt = "after";
         }
     }
-    console.log({
-        placeAt,
-        scrollbar
-    });
 
     return {
         placeAt,
