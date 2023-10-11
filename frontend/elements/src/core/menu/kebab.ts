@@ -133,7 +133,7 @@ export class _ extends LitElement {
                     slot="anchor"
                     @click=${this.toggleVisible}
                 ></button-icon>
-                <div slot="overlay" class="menu-container">
+                <div slot="overlay" class="menu-container" id="menu-container">
                     <div class="menu">
                         <slot></slot>
                     </div>
