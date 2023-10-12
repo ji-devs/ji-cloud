@@ -191,7 +191,7 @@ export class _ extends LitElement {
         input.dispatchEvent(new Event("change"));
     };
 
-    // TODO: enable this one and remove the other one once we bring back shadow root to wysiwyg base
+    // TODO: enable this one and remove the other one once we bring back shadow root to wysiwyg-base
     // private deepActiveElementOrWysiwyg() {
     //     let a = document.activeElement;
     //     while (
@@ -209,6 +209,14 @@ export class _ extends LitElement {
         let wysiwyg = a?.closest("wysiwyg-base");
         if(wysiwyg)
             return wysiwyg;
+        while (
+            a &&
+            !a.matches("wysiwyg-base") &&
+            a.shadowRoot &&
+            a.shadowRoot.activeElement
+        ) {
+            a = a.shadowRoot.activeElement;
+        }
         return a;
     }
 
