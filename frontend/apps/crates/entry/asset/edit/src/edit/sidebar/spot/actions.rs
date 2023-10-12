@@ -47,8 +47,6 @@ pub fn add_empty_module_after(state: Rc<SpotState>) {
                 .asset_edit_state
                 .set_route_jig(JigEditRoute::Landing);
         }
-        shared::domain::asset::AssetId::PlaylistId(_) => unreachable!(),
-        shared::domain::asset::AssetId::ResourceId(_) => unreachable!(),
         shared::domain::asset::AssetId::CourseId(_) => {
             state
                 .sidebar
@@ -61,6 +59,10 @@ pub fn add_empty_module_after(state: Rc<SpotState>) {
                 .asset_edit_state
                 .set_route_course(CourseEditRoute::Unit(None));
         }
+        shared::domain::asset::AssetId::PlaylistId(_) => {
+            // No op
+        },
+        shared::domain::asset::AssetId::ResourceId(_) => unreachable!(),
     }
 }
 
