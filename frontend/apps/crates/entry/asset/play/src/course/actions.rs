@@ -45,6 +45,16 @@ impl CoursePlayer {
 
             match course {
                 Ok(course) => {
+                    if !paywall::can_play_course(course.admin_data.premium) {
+                        paywall::dialog_play(
+                            "
+                                Looking to view a premium course?
+                                Upgrade now for UNLIMITED JIGs and resources.
+                            ",
+                        );
+                        return;
+                    }
+
                     if let Some(start_unit_id) = state.start_unit_id {
                         if let Some((index, _)) = course.course_data.units.iter().enumerate().find(|unit| {
                             unit.1.id == start_unit_id

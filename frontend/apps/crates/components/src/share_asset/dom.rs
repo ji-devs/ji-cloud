@@ -90,7 +90,7 @@ impl ShareAsset {
             Asset::Jig(jig) => paywall::can_play_jig(jig.admin_data.premium),
             Asset::Playlist(playlist) => paywall::can_play_playlist(playlist.admin_data.premium),
             Asset::Resource(resource) => paywall::can_play_resource(resource.admin_data.premium),
-            Asset::Course(_) => paywall::can_play_course(),
+            Asset::Course(course) => paywall::can_play_course(course.admin_data.premium),
         };
         if !can_play {
             paywall::dialog_limit(

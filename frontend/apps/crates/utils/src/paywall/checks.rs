@@ -50,11 +50,11 @@ pub fn can_play_resource(is_premium: bool) -> bool {
         PlanTier::Free => !is_premium,
     }
 }
-pub fn can_play_course() -> bool {
+pub fn can_play_course(is_premium: bool) -> bool {
     match get_plan_tier() {
         PlanTier::Pro => true,
         PlanTier::Basic => true,
-        PlanTier::Free => false,
+        PlanTier::Free => !is_premium,
     }
 }
 pub fn can_print() -> bool {
