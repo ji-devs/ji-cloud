@@ -1,103 +1,126 @@
-use std::rc::Rc;
+use std::{cell::RefCell, rc::Rc};
 
 use dominator::{clone, html, Dom};
-use futures_signals::{map_ref, signal::Signal, signal_vec::SignalVecExt};
+use futures_signals::{
+    map_ref,
+    signal::{Signal, SignalExt},
+    signal_vec::SignalVecExt,
+};
 use itertools::Itertools;
 use shared::{
     domain::{circle::Circle, user::public_user::PublicUser},
     media::MediaLibrary,
 };
 use utils::{
+    component::Component,
     events,
     languages::Language,
+    prelude::get_user_id,
     routes::{CommunityCirclesRoute, CommunityMembersRoute, CommunityRoute, Route},
 };
 use wasm_bindgen::JsValue;
+use web_sys::{HtmlElement, ScrollIntoViewOptions};
+
+use crate::{circle_card::CircleCard, member_card::MemberCard};
 
 use super::CommunitySearch;
 
+const STR_WE_FOUND: &str = "We found";
+const STR_AND: &str = "and";
+const STR_FOR: &str = "for";
+const STR_MEMBERS: &str = "Members";
+const STR_CIRCLES: &str = "Circles";
 const STR_SEE_MORE: &str = "See more";
 
-impl CommunitySearch {
-    pub fn render(self: Rc<Self>) -> Dom {
+impl Component<CommunitySearch> for Rc<CommunitySearch> {
+    fn styles() -> &'static str {
+        include_str!("./styles.css")
+    }
+
+    fn dom(
+        &self,
+        dom: dominator::DomBuilder<web_sys::ShadowRoot>,
+    ) -> dominator::DomBuilder<web_sys::ShadowRoot> {
         let state = self;
         state.search();
 
-        html!("community-search-page", {
+        let current_user_id = get_user_id();
+
+        dom.child(html!("h2", {
+            .text(STR_WE_FOUND)
+            .text(" ")
+            .child(html!("a", {
+                .text_signal(state.member_count.signal().map(|c| c.to_string()))
+                .text(" ")
+                .text(STR_MEMBERS)
+                .event(clone!(state => move |_: events::Click| {
+                    state.scroll_into_view(&state.members_el);
+                }))
+            }))
+            .text(" ")
+            .text(STR_AND)
+            .text(" ")
+            .child(html!("a", {
+                .text_signal(state.circle_count.signal().map(|c| c.to_string()))
+                .text(" ")
+                .text(STR_CIRCLES)
+                .event(clone!(state => move |_: events::Click| {
+                    state.scroll_into_view(&state.circles_el);
+                }))
+            }))
+            .text(" ")
+            .text(STR_FOR)
             .prop("query", &state.query.q)
-            .prop_signal("memberCount", state.member_count.signal())
-            .children_signal_vec(state.members.signal_vec_cloned().map(clone!(state => move|member| {
-                state.render_member(&member)
-            })))
-            .child_signal(state.render_see_more_members())
-            .prop_signal("circleCount", state.circle_count.signal())
-            .children_signal_vec(state.circles.signal_vec_cloned().map(clone!(state => move|circle| {
-                state.render_circle(&circle)
-            })))
-            .child_signal(state.render_see_more_circles())
-        })
-    }
-
-    fn render_member(self: &Rc<Self>, member: &PublicUser) -> Dom {
-        html!("community-list-member", {
-            .prop("slot", "members")
-            .prop("name", &format!("{} {}", member.given_name, member.family_name))
-            .apply(|mut dom| {
-                if let Some(country_short) = &member.country_short {
-                    dom = dom.prop("countryCode", country_short);
+        }))
+        .child(html!("section", {
+            .after_inserted(clone!(state => move |el: HtmlElement| {
+                *state.members_el.borrow_mut() = Some(el);
+            }))
+            .child(html!("h4", {
+                .text(STR_MEMBERS)
+                .text(" (")
+                .text_signal(state.member_count.signal().map(|c| c.to_string()))
+                .text(")")
+            }))
+            .children_signal_vec(state.members.signal_vec_cloned().map(move |member| {
+                MemberCard {
+                    member: &member,
+                    admin_tag: false,
+                    menu: None,
+                    current_user_id,
                 }
-                if let Some(country_long) = &member.country_long {
-                    dom = dom.prop("countryName", country_long);
-                }
-                dom
-            })
-            .apply(|mut dom| {
-                if let Some(languages_spoken) = &member.languages_spoken {
-                    if languages_spoken.len() > 0 {
-                        let languages = languages_spoken.iter().map(|l| Language::code_to_display_name(l)).join(", ");
-                        dom = dom.prop("language", languages);
-                    };
-                };
-                dom
-            })
-            .apply(move |dom| utils::on_click_go_to_url!(dom, {
-                Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(member.id)))
+                .render()
             }))
-            .child(html!("profile-image", {
-                .prop("slot", "img")
-                .prop("imageId", {
-                    match &member.profile_image {
-                        Some(image_id) => JsValue::from_str(&image_id.0.to_string()),
-                        None => JsValue::UNDEFINED,
-                    }
-                })
-                .prop("givenName", &member.given_name)
-                .prop("familyName", &member.family_name)
+            .child(html!("div", {
+                .class("see-more-wrapper")
+                .child_signal(state.render_see_more_members())
             }))
-        })
+        }))
+        .child(html!("section", {
+            .after_inserted(clone!(state => move |el: HtmlElement| {
+                *state.circles_el.borrow_mut() = Some(el);
+            }))
+            .child(html!("h4", {
+                .text(STR_CIRCLES)
+                .text(" (")
+                .text_signal(state.circle_count.signal().map(|c| c.to_string()))
+                .text(")")
+            }))
+            .children_signal_vec(state.circles.signal_vec_cloned().map(move |circle| {
+                CircleCard {
+                    circle: &circle,
+                }.render()
+            }))
+            .child(html!("div", {
+                .class("see-more-wrapper")
+                .child_signal(state.render_see_more_circles())
+            }))
+        }))
+        // }))
     }
+}
 
-    fn render_circle(self: &Rc<Self>, circle: &Circle) -> Dom {
-        html!("community-list-circle", {
-            .prop("slot", "circles")
-            .prop("name", &circle.display_name)
-            .prop("memberCount", circle.member_count)
-            .prop("description", &circle.description)
-            .apply(move |dom| utils::on_click_go_to_url!(dom, {
-                Route::Community(CommunityRoute::Circles(CommunityCirclesRoute::Circle(circle.id)))
-            }))
-            .child(html!("img-ji", {
-                .prop("slot", "img")
-                .prop("lib", MediaLibrary::User.to_str())
-                .prop("id", &circle.image.0.to_string())
-            }))
-            .child(html!("community-list-circle-status", {
-                .prop("slot", "status")
-                .prop("status", "")
-            }))
-        })
-    }
-
+impl CommunitySearch {
     fn render_see_more_members(self: &Rc<Self>) -> impl Signal<Item = Option<Dom>> {
         let state = Rc::clone(self);
         map_ref! {
@@ -139,6 +162,14 @@ impl CommunitySearch {
                     None
                 }
             }
+        }
+    }
+
+    fn scroll_into_view(&self, el: &RefCell<Option<HtmlElement>>) {
+        if let Some(el) = &*el.borrow() {
+            el.scroll_into_view_with_scroll_into_view_options(
+                &ScrollIntoViewOptions::new().behavior(web_sys::ScrollBehavior::Smooth),
+            );
         }
     }
 }

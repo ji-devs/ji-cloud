@@ -1,11 +1,12 @@
-use std::rc::Rc;
+use std::{cell::RefCell, rc::Rc};
 
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::{signal::Mutable, signal_vec::MutableVec};
 use shared::domain::{circle::Circle, user::public_user::PublicUser};
 use utils::routes::CommunitySearchQuery;
+use web_sys::HtmlElement;
 
-pub const SEARCH_PAGE_LIMIT: u32 = 5;
+pub const SEARCH_PAGE_LIMIT: u32 = 6;
 
 pub struct CommunitySearch {
     pub members: MutableVec<PublicUser>,
@@ -14,6 +15,8 @@ pub struct CommunitySearch {
     pub circle_count: Mutable<u32>,
     pub loader: AsyncLoader,
     pub query: CommunitySearchQuery,
+    pub members_el: RefCell<Option<HtmlElement>>,
+    pub circles_el: RefCell<Option<HtmlElement>>,
 }
 
 impl CommunitySearch {
@@ -25,6 +28,8 @@ impl CommunitySearch {
             circle_count: Mutable::new(0),
             loader: AsyncLoader::new(),
             query,
+            members_el: Default::default(),
+            circles_el: Default::default(),
         })
     }
 }
