@@ -20,6 +20,7 @@ use utils::{
     dialog, events,
     languages::Language,
     prelude::{get_user_cloned, get_user_id},
+    routes::{HomeRoute, Route, SearchQueryParams},
     unwrap::UnwrapJiExt,
 };
 use wasm_bindgen::{JsCast, JsValue};
@@ -272,6 +273,19 @@ impl MemberDetails {
             .class("creations-section")
             .child(html!("h3", {
                 .text("Jigzi creations")
+                .child(html!("button-rect", {
+                    .prop("kind", "text")
+                    .prop("color", "blue")
+                    .text("All creations")
+                    .prop("href", {
+                        let params = SearchQueryParams {
+                            user_id: Some(state.member_id),
+                            is_rated: Some(false),
+                            ..Default::default()
+                        };
+                        Route::Home(HomeRoute::Search(Some(Box::new(params)))).to_string()
+                    })
+                }))
             }))
             .child_signal(state.jigs.signal_cloned().map(clone!(state => move|jigs| {
                 if matches!(&jigs, Some(jigs) if jigs.is_empty()) {

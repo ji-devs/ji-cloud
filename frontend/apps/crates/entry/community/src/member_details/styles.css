@@ -172,6 +172,11 @@ section h4 {
 .network-section {
     padding-inline: 0;
 }
+.creations-section h3 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
 .creations-section h3,
 .creations-section h4,
 .network-section h3,
