@@ -79,6 +79,9 @@ pub struct SearchQueryParams {
     pub is_rated: Option<bool>,
 
     #[serde(default)]
+    pub user_id: Option<UserId>,
+
+    #[serde(default)]
     #[serde(serialize_with = "shared::domain::ser::csv_encode_uuids")]
     #[serde(deserialize_with = "shared::domain::ser::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]

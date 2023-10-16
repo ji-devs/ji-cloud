@@ -593,7 +593,13 @@ pub enum UserOrMe {
     Me,
 
     /// we should use the provided user.
-    User(Uuid),
+    User(UserId),
+}
+
+impl From<UserId> for UserOrMe {
+    fn from(user_id: UserId) -> Self {
+        UserOrMe::User(user_id)
+    }
 }
 
 impl serde::Serialize for UserOrMe {
@@ -630,7 +636,7 @@ impl<'de> serde::Deserialize<'de> for UserOrMe {
                     Ok(UserOrMe::Me)
                 } else {
                     Uuid::from_str(value)
-                        .map(UserOrMe::User)
+                        .map(|id| UserOrMe::User(UserId(id)))
                         .map_err(|e| E::custom(format!("failed to parse id: {}", e)))
                 }
             }

@@ -61,7 +61,7 @@ pub fn add_empty_module_after(state: Rc<SpotState>) {
         }
         shared::domain::asset::AssetId::PlaylistId(_) => {
             // No op
-        },
+        }
         shared::domain::asset::AssetId::ResourceId(_) => unreachable!(),
     }
 }

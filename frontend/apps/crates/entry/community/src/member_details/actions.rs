@@ -98,7 +98,7 @@ impl MemberDetails {
         let state = self;
 
         let req = JigBrowseQuery {
-            author_id: Some(UserOrMe::User(state.member_id.0)),
+            author_id: Some(UserOrMe::User(state.member_id)),
             draft_or_live: Some(DraftOrLive::Live),
             ..Default::default()
         };
@@ -114,7 +114,7 @@ impl MemberDetails {
         let state = self;
 
         let req = PlaylistBrowseQuery {
-            author_id: Some(UserOrMe::User(state.member_id.0)),
+            author_id: Some(UserOrMe::User(state.member_id)),
             draft_or_live: Some(DraftOrLive::Live),
             ..Default::default()
         };
@@ -130,7 +130,7 @@ impl MemberDetails {
         let state = self;
 
         let req = ResourceBrowseQuery {
-            author_id: Some(UserOrMe::User(state.member_id.0)),
+            author_id: Some(UserOrMe::User(state.member_id)),
             draft_or_live: Some(DraftOrLive::Live),
             ..Default::default()
         };
@@ -146,7 +146,7 @@ impl MemberDetails {
         let state = self;
 
         let req = CourseBrowseQuery {
-            author_id: Some(UserOrMe::User(state.member_id.0)),
+            author_id: Some(UserOrMe::User(state.member_id)),
             draft_or_live: Some(DraftOrLive::Live),
             ..Default::default()
         };

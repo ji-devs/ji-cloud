@@ -1,6 +1,7 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/images/ui";
 import { homeStyles } from "../styles";
+import { nothing } from "lit-html";
 
 export type Mode = "home" | "results";
 
@@ -112,6 +113,9 @@ export class _ extends LitElement {
     @property({ type: Number })
     resultsCount: number = 0;
 
+    @property({ reflect: true })
+    user?: String;
+
     renderSearchSection() {
         if (this.mode === 'home') {
             return html`
@@ -140,6 +144,9 @@ export class _ extends LitElement {
             `;
         } else {
             return html`
+                ${this.user ? html`
+                    <h3>Searching within ${this.user}'s creations</h3>
+                ` : nothing}
                 <div class="center-1">
                     <div class="center-2">
                         <div class="center-3">

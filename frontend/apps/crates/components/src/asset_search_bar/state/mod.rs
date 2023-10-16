@@ -1,8 +1,10 @@
 use std::rc::Rc;
 
 use dominator_helpers::futures::AsyncLoader;
+use futures_signals::signal::Mutable;
 use shared::domain::{
     jig::JigSearchQuery, playlist::PlaylistSearchQuery, resource::ResourceSearchQuery,
+    user::public_user::PublicUser,
 };
 
 mod search_state;
@@ -12,6 +14,7 @@ pub use search_state::SearchSelected;
 pub struct AssetSearchBar {
     pub search_selected: Rc<SearchSelected>,
     pub loader: AsyncLoader,
+    pub selected_user: Mutable<Option<PublicUser>>,
 }
 
 impl AssetSearchBar {
@@ -23,6 +26,7 @@ impl AssetSearchBar {
         Rc::new(Self {
             search_selected: Rc::new(search_selected),
             loader: AsyncLoader::new(),
+            selected_user: Default::default(),
         })
     }
 

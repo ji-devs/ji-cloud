@@ -8,7 +8,7 @@ use shared::domain::{
     meta::{AffiliationId, AgeRangeId},
     playlist::PlaylistSearchQuery,
     resource::ResourceSearchQuery,
-    user::UserProfile,
+    user::{UserId, UserProfile},
 };
 use utils::prelude::*;
 
@@ -20,6 +20,7 @@ pub struct SearchSelected {
     pub language: Mutable<Option<String>>,
     pub query: Mutable<String>,
     pub rated_only: Mutable<bool>,
+    pub user_id: Mutable<Option<UserId>>,
 }
 
 impl Default for SearchSelected {
@@ -31,6 +32,7 @@ impl Default for SearchSelected {
             language: Mutable::new(None),
             query: Mutable::new(String::new()),
             rated_only: Mutable::new(true),
+            user_id: Mutable::new(None),
         }
     }
 }
@@ -51,8 +53,7 @@ impl SearchSelected {
     }
 
     pub fn from_query_params(search: SearchQueryParams) -> Self {
-        log::info!("{:?}", search.is_rated);
-        let s = Self {
+        Self {
             affiliations: Mutable::new(HashSet::from_iter(search.affiliations)),
             categories: Mutable::new(HashSet::from_iter(search.categories)),
             age_ranges: Mutable::new(HashSet::from_iter(search.age_ranges)),
@@ -60,10 +61,8 @@ impl SearchSelected {
             // default is true, so None => true
             rated_only: Mutable::new(search.is_rated.unwrap_or(true)),
             query: Mutable::new(search.q),
-        };
-        log::info!("{:?}", s.rated_only);
-
-        s
+            user_id: Mutable::new(search.user_id),
+        }
     }
 
     pub fn to_query_params(&self) -> SearchQueryParams {
@@ -78,6 +77,7 @@ impl SearchSelected {
             affiliations: self.affiliations.get_cloned().into_iter().collect(),
             categories: self.categories.get_cloned().into_iter().collect(),
             language: self.language.get_cloned(),
+            user_id: self.user_id.get_cloned(),
         }
     }
 
@@ -90,6 +90,7 @@ impl SearchSelected {
             page: Some(0),
             language: self.language.get_cloned(),
             is_rated: self.rated_only.get().then(|| true),
+            author_id: self.user_id.get_cloned().map(|u| u.into()),
             ..Default::default()
         }
     }

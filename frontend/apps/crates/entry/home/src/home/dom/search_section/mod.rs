@@ -13,6 +13,9 @@ pub fn render(state: Rc<Home>, auto_search: bool) -> Dom {
     html!("home-search-section", {
         .prop_signal("mode", state.mode.signal_cloned().map(|mode| mode.to_string()))
         .prop_signal("resultsCount", state.total_assets_count.signal().map(|x| x as f64))
+        .prop_signal("user", state.search_bar.selected_user.signal_ref(|user| {
+            user.as_ref().map(|user| user.given_name.to_string()).unwrap_or_default()
+        }))
         // .child(html!("home-search-section-help", {
         //     .prop("slot", "help")
         // }))

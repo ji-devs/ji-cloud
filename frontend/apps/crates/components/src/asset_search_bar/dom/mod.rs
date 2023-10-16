@@ -28,6 +28,8 @@ impl AssetSearchBar {
     pub fn render_bar(self: &Rc<Self>, on_search: Rc<dyn Fn()>) -> Dom {
         let state = self;
 
+        state.load_data();
+
         html!("form", {
             .prop("slot", "search-bar")
             .event_with_options(&EventOptions::preventable(), clone!(on_search => move |e: events::Submit| {
