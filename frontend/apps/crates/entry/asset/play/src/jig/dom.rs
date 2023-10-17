@@ -164,7 +164,7 @@ impl JigPlayer {
             .apply_if(state.player_options.display_score, clone!(state => move|dom| {
                 dom.child(html!("jig-play-points-indicator", {
                     .prop("slot", "indicators")
-                    .prop_signal("value", state.points.signal())
+                    .prop_signal("value", state.points.signal().map(|p| p * 100))
                 }))
             }))
             .apply_if(document().fullscreen_enabled(), clone!(state => move|dom| {
