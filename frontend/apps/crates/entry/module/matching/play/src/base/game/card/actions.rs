@@ -4,47 +4,58 @@ use std::rc::Rc;
 use utils::{
     math::BoundsF64,
     prelude::{IframeAction, IframeMessageExt, ModuleToJigPlayerMessage},
+    unwrap::UnwrapJiExt,
 };
 use web_sys::HtmlElement;
 
 impl CardDrag {
     pub fn on_release(&self) {
         if let Some(current) = self.game.get_current() {
-            let choice = current.top.iter().find(|choice| choice.is_drag_over());
+            let top = current.top.iter().find(|choice| choice.is_drag_over());
+            // Impossible to be none, you can only drag a bottom.
+            let bottom = current
+                .bottom
+                .iter()
+                .find(|choice| choice.pair_id == self.pair_id)
+                .unwrap_ji();
 
-            let mut found_match = false;
+            // place card
+            match top {
+                Some(top) if top.pair_id == self.pair_id => {
+                    top.phase.set(TopPhase::Landed);
+                    if current.top.iter().all(|choice| choice.is_landed()) {
+                        Game::next(self.game.clone());
+                    }
+                }
+                _ => {
+                    if let Some(target) = current
+                        .bottom
+                        .iter()
+                        .find(|choice| choice.pair_id == self.pair_id)
+                    {
+                        target.phase.set(BottomPhase::Show);
+                    }
+                }
+            };
 
-            if let Some(choice) = choice {
-                if choice.pair_id == self.pair_id {
-                    let points = calculate_point_count(*choice.tried_count.borrow());
+            if let Some(top) = top {
+                if top.pair_id == self.pair_id {
+                    play_random_positive();
+
+                    let points = calculate_point_count(*bottom.tried_count.borrow());
                     let _ = IframeAction::new(ModuleToJigPlayerMessage::AddPoints(points))
                         .try_post_message_to_player();
-                    play_random_positive();
-                    found_match = true;
-                    choice.phase.set(TopPhase::Landed);
                 } else {
-                    choice
+                    play_random_negative();
+
+                    bottom
                         .tried_count
                         .replace_with(|tried_count| *tried_count + 1);
-                    // Only play the negative effect if they've dropped the card over a target. If
-                    // they drop the card over nothing, it could be for something like releasing
-                    // the card to select a new card.
-                    play_random_negative();
                 }
             } else {
-                //empty area
-            }
-
-            if !found_match {
-                if let Some(target) = current
-                    .bottom
-                    .iter()
-                    .find(|choice| choice.pair_id == self.pair_id)
-                {
-                    target.phase.set(BottomPhase::Show);
-                }
-            } else if current.top.iter().all(|choice| choice.is_landed()) {
-                Game::next(self.game.clone());
+                // Only treat as failed if they've dropped the card over a target. If
+                // they drop the card over nothing, it could be for something like releasing
+                // the card to select a new card.
             }
 
             current.drag.set(None);
