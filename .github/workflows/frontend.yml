@@ -34,7 +34,7 @@ jobs:
         id: branch
         run: echo "value=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
 
-  check and test:
+  check-and-test:
     needs: [prepare]
     name: "[${{ needs.prepare.outputs.branch }}] Check"
     runs-on: ubuntu-latest
