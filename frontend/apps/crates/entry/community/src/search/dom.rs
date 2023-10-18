@@ -6,19 +6,7 @@ use futures_signals::{
     signal::{Signal, SignalExt},
     signal_vec::SignalVecExt,
 };
-use itertools::Itertools;
-use shared::{
-    domain::{circle::Circle, user::public_user::PublicUser},
-    media::MediaLibrary,
-};
-use utils::{
-    component::Component,
-    events,
-    languages::Language,
-    prelude::get_user_id,
-    routes::{CommunityCirclesRoute, CommunityMembersRoute, CommunityRoute, Route},
-};
-use wasm_bindgen::JsValue;
+use utils::{component::Component, events, prelude::get_user_id};
 use web_sys::{HtmlElement, ScrollIntoViewOptions};
 
 use crate::{circle_card::CircleCard, member_card::MemberCard};
