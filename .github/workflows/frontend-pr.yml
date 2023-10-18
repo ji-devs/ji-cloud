@@ -33,17 +33,5 @@ jobs:
           components: rustfmt
 
       - run: cargo check --all --manifest-path frontend/apps/Cargo.toml
-  fmt:
-    runs-on: ubuntu-latest
-    env:
-      RUSTFLAGS: -D warnings
-    steps:
-      - uses: actions/checkout@v3
-
-      - uses: dtolnay/rust-toolchain@master
-        with:
-#          toolchain: nightly
-          toolchain: nightly-2023-06-08
-          components: rustfmt
-
       - run: cargo fmt --all --manifest-path frontend/apps/Cargo.toml --check
+      - run: cargo check --all --manifest-path frontend/apps/Cargo.toml

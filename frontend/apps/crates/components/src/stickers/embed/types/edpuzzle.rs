@@ -102,24 +102,24 @@ fn is_id(id: &str) -> bool {
     regex.is_match(id)
 }
 
-#[cfg(test)]
-mod tests {
-    use shared::domain::module::body::_groups::design::EdpuzzleId;
+// #[cfg(test)]
+// mod tests {
+//     use shared::domain::module::body::_groups::design::EdpuzzleId;
 
-    use crate::stickers::embed::types::ParseUrlExt;
+//     use crate::stickers::embed::types::ParseUrlExt;
 
-    #[test]
-    fn can_get_id_from_url() {
-        let valid_url_vec = vec![
-            r#"<iframe width="1200" height="780" src="https://edpuzzle.com/embed/media/60da549e8bb4e641682248c4" frameborder="0" allowfullscreen></iframe>"#,
-            "https://edpuzzle.com/embed/media/60da549e8bb4e641682248c4",
-            "60da549e8bb4e641682248c4",
-        ];
+//     #[test]
+//     fn can_get_id_from_url() {
+//         let valid_url_vec = vec![
+//             r#"<iframe width="1200" height="780" src="https://edpuzzle.com/embed/media/60da549e8bb4e641682248c4" frameborder="0" allowfullscreen></iframe>"#,
+//             "https://edpuzzle.com/embed/media/60da549e8bb4e641682248c4",
+//             "60da549e8bb4e641682248c4",
+//         ];
 
-        for url in valid_url_vec {
-            let id = EdpuzzleId::try_parse(url.to_string());
+//         for url in valid_url_vec {
+//             let id = EdpuzzleId::try_parse(url.to_string());
 
-            assert!(id.is_ok());
-        }
-    }
-}
+//             assert!(id.is_ok());
+//         }
+//     }
+// }

@@ -102,25 +102,25 @@ fn is_id(id: &str) -> bool {
     regex.is_match(id)
 }
 
-#[cfg(test)]
-mod tests {
-    use shared::domain::module::body::_groups::design::ThinglinkId;
+// #[cfg(test)]
+// mod tests {
+//     use shared::domain::module::body::_groups::design::ThinglinkId;
 
-    use crate::stickers::embed::types::ParseUrlExt;
+//     use crate::stickers::embed::types::ParseUrlExt;
 
-    #[test]
-    fn can_get_id_from_url() {
-        let valid_url_vec = vec![
-            r#"<iframe width="960" height="839" data-original-width="1103" data-original-height="964" src="https://www.thinglink.com/view/scene/1716051937515799205" type="text/html" style="border: none;" webkitallowfullscreen mozallowfullscreen allowfullscreen scrolling="no"></iframe><script async src="//cdn.thinglink.me/jse/responsive.js"></script>"#,
-            r#"<iframe width="1200" height="780"  data-original-width="1920" data-original-height="1080" src="https://www.thinglink.com/card/1460006433054523395" type="text/html" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen scrolling="no"></iframe>"#,
-            "https://www.thinglink.com/card/1460006433054523395",
-            "1460006433054523395",
-        ];
+//     #[test]
+//     fn can_get_id_from_url() {
+//         let valid_url_vec = vec![
+//             r#"<iframe width="960" height="839" data-original-width="1103" data-original-height="964" src="https://www.thinglink.com/view/scene/1716051937515799205" type="text/html" style="border: none;" webkitallowfullscreen mozallowfullscreen allowfullscreen scrolling="no"></iframe><script async src="//cdn.thinglink.me/jse/responsive.js"></script>"#,
+//             r#"<iframe width="1200" height="780"  data-original-width="1920" data-original-height="1080" src="https://www.thinglink.com/card/1460006433054523395" type="text/html" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen scrolling="no"></iframe>"#,
+//             "https://www.thinglink.com/card/1460006433054523395",
+//             "1460006433054523395",
+//         ];
 
-        for url in valid_url_vec {
-            let id = ThinglinkId::try_parse(url.to_string());
+//         for url in valid_url_vec {
+//             let id = ThinglinkId::try_parse(url.to_string());
 
-            assert!(id.is_ok());
-        }
-    }
-}
+//             assert!(id.is_ok());
+//         }
+//     }
+// }

@@ -34,7 +34,7 @@ jobs:
         id: branch
         run: echo "value=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
 
-  check:
+  check and test:
     needs: [prepare]
     name: "[${{ needs.prepare.outputs.branch }}] Check"
     runs-on: ubuntu-latest
@@ -51,6 +51,7 @@ jobs:
 
       - run: cargo check --all --manifest-path frontend/apps/Cargo.toml
       - run: cargo fmt --all --manifest-path frontend/apps/Cargo.toml --check
+      - run: cargo test --all --manifest-path frontend/apps/Cargo.toml
 
   build-app:
     needs: [prepare]

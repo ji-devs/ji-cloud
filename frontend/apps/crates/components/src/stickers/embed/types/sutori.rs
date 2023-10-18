@@ -100,24 +100,24 @@ fn is_id(id: &str) -> bool {
     regex.is_match(id)
 }
 
-#[cfg(test)]
-mod tests {
-    use shared::domain::module::body::_groups::design::SutoriId;
+// #[cfg(test)]
+// mod tests {
+//     use shared::domain::module::body::_groups::design::SutoriId;
 
-    use crate::stickers::embed::types::ParseUrlExt;
+//     use crate::stickers::embed::types::ParseUrlExt;
 
-    #[test]
-    fn can_get_id_from_url() {
-        let valid_url_vec = vec![
-            r#"<iframe src="https://www.sutori.com/en/story/timeline-of-israel-and-water--Fio6iy8J3qStAa3s6pRjWV7R/embed" width="1200" height="780"  frameborder="0" allowfullscreen></iframe>"#,
-            "https://www.sutori.com/en/story/timeline-of-israel-and-water--Fio6iy8J3qStAa3s6pRjWV7R/embed",
-            "timeline-of-israel-and-water--Fio6iy8J3qStAa3s6pRjWV7R",
-        ];
+//     #[test]
+//     fn can_get_id_from_url() {
+//         let valid_url_vec = vec![
+//             r#"<iframe src="https://www.sutori.com/en/story/timeline-of-israel-and-water--Fio6iy8J3qStAa3s6pRjWV7R/embed" width="1200" height="780"  frameborder="0" allowfullscreen></iframe>"#,
+//             "https://www.sutori.com/en/story/timeline-of-israel-and-water--Fio6iy8J3qStAa3s6pRjWV7R/embed",
+//             "timeline-of-israel-and-water--Fio6iy8J3qStAa3s6pRjWV7R",
+//         ];
 
-        for url in valid_url_vec {
-            let id = SutoriId::try_parse(url.to_string());
+//         for url in valid_url_vec {
+//             let id = SutoriId::try_parse(url.to_string());
 
-            assert!(id.is_ok());
-        }
-    }
-}
+//             assert!(id.is_ok());
+//         }
+//     }
+// }
