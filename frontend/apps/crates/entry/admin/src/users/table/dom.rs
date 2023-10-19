@@ -118,6 +118,9 @@ impl UsersTable {
                                 })
                             )
                         }),
+                        html!("span", {
+                            .text(&user.login_type.to_string())
+                        }),
                         html!("label", {
                             .child(html!("select" => HtmlSelectElement, {
                                 .with_node!(select => {

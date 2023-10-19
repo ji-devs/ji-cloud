@@ -1,7 +1,7 @@
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::billing::{AccountId, PlanTier, SchoolId};
-use shared::domain::user::{UserBadge, UserId, UserResponse};
+use shared::domain::user::{UserBadge, UserId, UserLoginType, UserResponse};
 
 #[derive(Clone)]
 pub struct EditableUser {
@@ -10,6 +10,7 @@ pub struct EditableUser {
     pub first_name: Mutable<String>,
     pub last_name: Mutable<String>,
     pub email: Mutable<String>,
+    pub login_type: UserLoginType,
     pub signup_date: Mutable<String>,
     pub city: Mutable<String>,
     pub state: Mutable<String>,
@@ -93,6 +94,7 @@ impl From<UserResponse> for EditableUser {
             country: Mutable::new(user.country.unwrap_or_default()),
             email: Mutable::new(user.email),
             badge: Mutable::new(user.badge),
+            login_type: user.login_type,
             subscription,
             current_period_end,
             school_id: user.school_id,

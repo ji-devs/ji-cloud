@@ -4,6 +4,7 @@ use chrono::{DateTime, NaiveDate, Utc};
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize, Serializer};
 use std::convert::TryFrom;
+use std::fmt;
 use strum_macros::Display;
 
 use crate::domain::billing::{
@@ -316,6 +317,15 @@ pub enum UserLoginType {
     Google,
     /// Email
     Email,
+}
+
+impl fmt::Display for UserLoginType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            UserLoginType::Google => write!(f, "Google"),
+            UserLoginType::Email => write!(f, "Email"),
+        }
+    }
 }
 
 /// User Response (used for Admin).

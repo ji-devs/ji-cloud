@@ -49,6 +49,7 @@ export class _ extends LitElement {
         "First Name",
         "Family Name",
         "Email",
+        "Login Type",
         "Badge",
         "Country",
         "State",
