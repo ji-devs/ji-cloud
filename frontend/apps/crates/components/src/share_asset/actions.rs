@@ -20,6 +20,7 @@ impl ShareAsset {
             let req = shared::domain::jig::player::JigPlayerSessionCreateRequest {
                 jig_id: state.asset.unwrap_jig().id,
                 settings: JigPlayerSettings::default(),
+                name: Default::default(),
             };
 
             match jig::player::Create::api_with_auth(JigPlayerSessionCreatePath(), Some(req)).await {

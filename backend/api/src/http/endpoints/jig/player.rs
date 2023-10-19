@@ -24,16 +24,18 @@ pub async fn create(
 
     db::jig::is_logged_in(&*db, user_id).await?;
 
-    let (index, expires_at) = db::jig::player::create(&db, req.jig_id, &req.settings).await?;
+    let (index, expires_at) = db::jig::player::create(&db, user_id, &req).await?;
 
     Ok(HttpResponse::Created().json(JigPlayerSession {
         index,
+        name: req.name,
         settings: req.settings,
         expires_at,
     }))
 }
 
 /// Fetch a jig player session code from it's jig if it exists.
+/// TODO: why does this exist?
 pub async fn list(
     db: Data<PgPool>,
     _claims: TokenUser,

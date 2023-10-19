@@ -1,10 +1,12 @@
 use chrono::{DateTime, Duration, Utc};
 use rand::{rngs::ThreadRng, Rng};
 use shared::config::{JIG_PLAYER_SESSION_CODE_MAX, JIG_PLAYER_SESSION_VALID_DURATION_SECS};
+use shared::domain::jig::player::JigPlayerSessionCreateRequest;
 use shared::domain::jig::{
     player::{JigPlayerSession, JigPlayerSessionIndex, JigPlayerSettings},
     JigId, TextDirection,
 };
+use shared::domain::user::UserId;
 use sqlx::{error::DatabaseError, postgres::PgDatabaseError, PgPool};
 use uuid::Uuid;
 
@@ -15,8 +17,8 @@ use crate::{
 
 pub async fn create(
     db: &PgPool,
-    jig_id: JigId,
-    settings: &JigPlayerSettings,
+    creator_id: UserId,
+    opts: &JigPlayerSessionCreateRequest,
 ) -> Result<(JigPlayerSessionIndex, DateTime<Utc>), error::JigCode> {
     let mut generator = rand::thread_rng();
 
@@ -31,16 +33,18 @@ pub async fn create(
         match sqlx::query!(
             //language=SQL
             r#"
-insert into jig_player_session (jig_id, index, direction, display_score, track_assessments, drag_assist, expires_at)
-values ($1, $2, $3, $4, $5, $6, $7)
+insert into jig_player_session (jig_id, creator_id, name, index, direction, display_score, track_assessments, drag_assist, expires_at)
+values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 
 "#,
-            jig_id.0,
+            opts.jig_id.0,
+            creator_id.0,
+            opts.name,
             index,
-            settings.direction as i16,
-            settings.display_score,
-            settings.track_assessments,
-            settings.drag_assist,
+            opts.settings.direction as i16,
+            opts.settings.display_score,
+            opts.settings.track_assessments,
+            opts.settings.drag_assist,
             expires_at,
         )
         .execute(db)
@@ -94,6 +98,7 @@ select index     as "index!: i32",
        display_score,
        track_assessments,
        drag_assist,
+       name as "name?",
        expires_at as "expires_at: DateTime<Utc>"
 from jig_player_session
 where jig_id = $1
@@ -105,6 +110,7 @@ where jig_id = $1
     .into_iter()
     .map(|it| JigPlayerSession {
         index: JigPlayerSessionIndex(it.index),
+        name: it.name,
         settings: JigPlayerSettings {
             direction: it.direction,
             display_score: it.display_score,

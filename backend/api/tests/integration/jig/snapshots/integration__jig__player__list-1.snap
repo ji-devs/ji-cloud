@@ -6,6 +6,7 @@ expression: body
   "sessions": [
     {
       "index": 1234,
+      "name": null,
       "settings": {
         "direction": "ltr",
         "displayScore": true,
@@ -16,6 +17,7 @@ expression: body
     },
     {
       "index": 1235,
+      "name": null,
       "settings": {
         "direction": "ltr",
         "displayScore": true,

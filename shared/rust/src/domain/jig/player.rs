@@ -86,6 +86,9 @@ pub struct JigPlayerSessionCreateRequest {
     /// ID of the Jig that the session is for
     pub jig_id: JigId,
 
+    /// Display name
+    pub name: Option<String>,
+
     /// Settings for the session
     pub settings: JigPlayerSettings,
 }
@@ -103,6 +106,9 @@ pub struct JigPlayerSessionCreateResponse {
 pub struct JigPlayerSession {
     /// Four-digit code identifying a Jig player session
     pub index: JigPlayerSessionIndex,
+
+    /// Display name.
+    pub name: Option<String>,
 
     /// Settings for the player session.
     pub settings: JigPlayerSettings,
