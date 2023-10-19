@@ -26,7 +26,8 @@ expression: body
       "schoolId": null,
       "schoolName": null,
       "accountId": null,
-      "tierOverride": null
+      "tierOverride": null,
+      "loginType": "Email"
     }
   ],
   "pages": 1,

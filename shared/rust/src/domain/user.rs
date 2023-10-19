@@ -308,6 +308,16 @@ impl UserProfile {
     }
 }
 
+/// Login types
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+pub enum UserLoginType {
+    /// Google
+    Google,
+    /// Email
+    Email,
+}
+
 /// User Response (used for Admin).
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -392,6 +402,9 @@ pub struct UserResponse {
     /// Plan tier override
     #[serde(default)]
     pub tier_override: Option<PlanTier>,
+
+    /// Login type
+    pub login_type: UserLoginType,
 }
 
 /// A user's profile export representation.

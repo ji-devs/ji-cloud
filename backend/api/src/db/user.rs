@@ -4,6 +4,7 @@ use chrono_tz::Tz;
 use shared::domain::billing::{
     AccountId, AmountInCents, PlanTier, PlanType, SchoolId, SubscriptionStatus,
 };
+use shared::domain::user::UserLoginType;
 use shared::domain::{
     admin::DateFilterType,
     circle::CircleId,
@@ -191,7 +192,8 @@ account_cte as (
         school.school_id,
         school.school_name,
         account.account_id,
-        account.tier_override
+        account.tier_override,
+        user_auth_google.google_id as google_auth
     from user_account
     inner join account using (account_id)
     left join (
@@ -213,6 +215,7 @@ account_cte as (
     ) as subscription using (account_id)
     left join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id
     left join school using (account_id)
+    left join public.user_auth_google on user_auth_google.user_id = user_account.user_id
 )
 select  cte1.id                 as "id!: UserId",
         username,
@@ -233,7 +236,8 @@ select  cte1.id                 as "id!: UserId",
         account_cte.school_id as "school_id?: SchoolId",
         account_cte.school_name::text as "school_name?",
         account_cte.account_id as "account_id?: AccountId",
-        account_cte.tier_override as "tier_override?: PlanTier"
+        account_cte.tier_override as "tier_override?: PlanTier",
+        account_cte.google_auth as "google_auth?: String"
 from cte1
         left join account_cte on cte1.id = account_cte.user_id
         inner join user_profile on cte1.id = user_profile.user_id
@@ -279,6 +283,11 @@ offset $2
                 school_name: user_row.school_name,
                 tier_override: user_row.tier_override,
                 account_id: user_row.account_id,
+                login_type: if user_row.google_auth.is_some() {
+                    UserLoginType::Google
+                } else {
+                    UserLoginType::Email
+                },
             }
         })
         .collect();
@@ -306,7 +315,8 @@ with account_cte as (
         school.school_id,
         school.school_name,
         account.account_id,
-        account.tier_override
+        account.tier_override,
+        user_auth_google.google_id as google_auth
     from user_account
     inner join account using (account_id)
     left join (
@@ -328,6 +338,7 @@ with account_cte as (
     ) as subscription using (account_id)
     left join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id
     left join school using (account_id)
+    left join public.user_auth_google on user_auth_google.user_id = user_account.user_id
 )
 select  "user".id                 as "id!: UserId",
         username,
@@ -348,7 +359,8 @@ select  "user".id                 as "id!: UserId",
         account_cte.school_id as "school_id?: SchoolId",
         account_cte.school_name::text as "school_name?",
         account_cte.account_id as "account_id?: AccountId",
-        account_cte.tier_override as "tier_override?: PlanTier"
+        account_cte.tier_override as "tier_override?: PlanTier",
+        account_cte.google_auth as "google_auth?: String"
 from "user"
 left join account_cte on "user".id = account_cte.user_id
 inner join user_profile on "user".id = user_profile.user_id
@@ -389,6 +401,11 @@ with ordinality t(id, ord) using (id)
                 school_name: row.school_name,
                 tier_override: row.tier_override,
                 account_id: row.account_id,
+                login_type: if row.google_auth.is_some() {
+                    UserLoginType::Google
+                } else {
+                    UserLoginType::Email
+                },
             }
         })
         .collect();
