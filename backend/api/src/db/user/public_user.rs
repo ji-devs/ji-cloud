@@ -440,7 +440,7 @@ pub(crate) async fn auth_claims(
     //Check if user is logged in. If not, users cannot use UserOrMe::Me
     let id = if let Some(token) = claims {
         let id = if let Some(user) = user_id {
-            let user_id = match user {
+            match user {
                 UserOrMe::Me => Some(token.0.user_id),
                 UserOrMe::User(id) => {
                     if !sqlx::query!(
@@ -448,7 +448,7 @@ pub(crate) async fn auth_claims(
                         r#"
             select exists(select 1 from user_profile where user_id = $1 for update) as "exists!"
                 "#,
-                        id
+                        id.0
                     )
                     .fetch_one(db)
                     .await?
@@ -461,15 +461,14 @@ pub(crate) async fn auth_claims(
 
                     Some(id)
                 }
-            };
-            user_id.map(|x| UserId(x))
+            }
         } else {
             None
         };
         id
     } else {
         let id = if let Some(user) = user_id {
-            let user = match user {
+            match user {
                 UserOrMe::Me => return Err(error::Auth::Forbidden),
                 UserOrMe::User(id) => {
                     if !sqlx::query!(
@@ -477,7 +476,7 @@ pub(crate) async fn auth_claims(
                         r#"
                 select exists(select 1 from user_profile where user_id = $1 for update) as "exists!"
                     "#,
-                        id
+                        id.0
                     )
                     .fetch_one(db)
                     .await?
@@ -490,8 +489,7 @@ pub(crate) async fn auth_claims(
 
                     Some(id)
                 }
-            };
-            user.map(|x| UserId(x))
+            }
         } else {
             None
         };

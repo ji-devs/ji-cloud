@@ -10,7 +10,6 @@ use shared::domain::{
     user::UserId,
 };
 use sqlx::PgPool;
-use uuid::Uuid;
 
 use crate::error;
 
@@ -234,7 +233,7 @@ pub async fn create_comment(
     pool: &PgPool,
     resource_id: ResourceId,
     value: String,
-    author_id: Uuid,
+    author_id: UserId,
 ) -> anyhow::Result<CommId> {
     // Checks if Audio and Image IDs exists
     sqlx::query!(
@@ -245,7 +244,7 @@ returning id as "id!: CommId"
         "#,
         resource_id.0,
         value,
-        author_id
+        author_id.0
     )
     .fetch_one(pool)
     .await

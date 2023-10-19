@@ -400,9 +400,7 @@ async fn auth_claims(
 
             let (author_id, privacy, blocked) = match author {
                 UserOrMe::Me => (Some(user_id), privacy_level, blocked),
-                UserOrMe::User(id) => {
-                    let user_id = UserId(id);
-
+                UserOrMe::User(user_id) => {
                     if is_admin {
                         (Some(user_id), privacy_level, blocked)
                     } else {
@@ -419,7 +417,7 @@ async fn auth_claims(
     } else {
         let author_id = author_id.map(|it| match it {
             UserOrMe::Me => None,
-            UserOrMe::User(id) => Some(UserId(id)),
+            UserOrMe::User(id) => Some(id),
         });
 
         if let Some(id) = author_id {

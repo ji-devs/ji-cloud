@@ -1,11 +1,14 @@
 use chrono::{DateTime, Utc};
-use shared::domain::jig::{
-    curation::{
-        CommentId, JigCurationComment, JigCurationCommentResponse, JigCurationData,
-        JigCurationFieldsDone, JigCurationStatus,
+use shared::domain::{
+    jig::{
+        curation::{
+            CommentId, JigCurationComment, JigCurationCommentResponse, JigCurationData,
+            JigCurationFieldsDone, JigCurationStatus,
+        },
+        report::JigReport,
+        JigId,
     },
-    report::JigReport,
-    JigId,
+    user::UserId,
 };
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -237,7 +240,7 @@ pub async fn create_comment(
     pool: &PgPool,
     jig_id: JigId,
     value: String,
-    author_id: Uuid,
+    author_id: UserId,
 ) -> anyhow::Result<CommentId> {
     // Checks if Audio and Image IDs exists
     sqlx::query!(
@@ -248,7 +251,7 @@ returning id as "id!: CommentId"
         "#,
         jig_id.0,
         value,
-        author_id
+        author_id.0
     )
     .fetch_one(pool)
     .await

@@ -1615,17 +1615,17 @@ where course_data.id = any (select live_id from course where course.id = any ($1
         Ok(())
     }
 
-    pub async fn delete_public_user(&self, id: Uuid) {
+    pub async fn delete_public_user(&self, id: UserId) {
         if let Err(e) = self.try_delete_public_user(id).await {
             log::warn!(
                 "failed to delete public user with id {} from algolia: {}",
-                id.hyphenated(),
+                id.0.hyphenated(),
                 e
             );
         }
     }
 
-    pub async fn try_delete_public_user(&self, id: Uuid) -> anyhow::Result<()> {
+    pub async fn try_delete_public_user(&self, id: UserId) -> anyhow::Result<()> {
         self.inner
             .delete_object(&self.public_user_index, &id.to_string())
             .await?;
@@ -1666,7 +1666,7 @@ impl SearchKeyStore {
 
     pub fn generate_virtual_key(
         &self,
-        user_id: Option<Uuid>,
+        user_id: Option<UserId>,
         ttl: Option<chrono::Duration>,
     ) -> ApiKey {
         self.frontend_search_parent_key

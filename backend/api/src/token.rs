@@ -4,7 +4,10 @@ use http::StatusCode;
 use paseto::{PasetoBuilder, TimeBackend};
 use rand::Rng;
 use serde_json::json;
-use shared::domain::{session::AUTH_COOKIE_NAME, user::UserScope};
+use shared::domain::{
+    session::AUTH_COOKIE_NAME,
+    user::{UserId, UserScope},
+};
 use sqlx::PgPool;
 use tracing::instrument;
 use uuid::Uuid;
@@ -14,7 +17,7 @@ use crate::error::{self, BasicError};
 const AUTHORIZED_FOOTER: &str = "authorized";
 
 pub struct SessionClaims {
-    pub user_id: Uuid,
+    pub user_id: UserId,
     pub token: String,
 }
 
@@ -132,7 +135,7 @@ where
     }
 
     Ok(SessionClaims {
-        user_id: session_info.user_id,
+        user_id: UserId(session_info.user_id),
         token: claims.sub,
     })
 }

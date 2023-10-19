@@ -277,7 +277,7 @@ async fn auth_claims(
                         r#"
             select exists(select 1 from user_profile where user_id = $1 for update) as "exists!"
                 "#,
-                        id
+                        id.0
                     )
                     .fetch_one(db)
                     .await?
@@ -295,7 +295,7 @@ async fn auth_claims(
         } else {
             None
         };
-        id.map(|x| UserId(x))
+        id.map(|x| x)
     } else {
         let id = if let Some(creator) = creator_id {
             let creator = match creator {
@@ -306,7 +306,7 @@ async fn auth_claims(
                         r#"
                 select exists(select 1 from user_profile where user_id = $1 for update) as "exists!"
                     "#,
-                        id
+                        id.0
                     )
                     .fetch_one(db)
                     .await?
@@ -324,7 +324,7 @@ async fn auth_claims(
         } else {
             None
         };
-        id.map(|x| UserId(x))
+        id.map(|x| x)
     };
 
     Ok(id)

@@ -109,7 +109,7 @@ async fn claims_for_scope(
                 user_id = $1 and
                 (scope = $2 or scope = $3)
         ) as "exists!""#,
-        claims.user_id,
+        claims.user_id.0,
         user_scope as i16,
         UserScope::Admin as i16
     )
@@ -134,7 +134,7 @@ pub struct TokenUser(pub SessionClaims);
 impl TokenUser {
     /// check if jig
     pub fn user_id(&self) -> UserId {
-        UserId(self.0.user_id)
+        self.0.user_id
     }
 }
 

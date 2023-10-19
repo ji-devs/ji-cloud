@@ -456,7 +456,7 @@ async fn create_profile(
 
     let req = req.into_inner();
 
-    let user_id = UserId(signup_user.claims.user_id);
+    let user_id = signup_user.claims.user_id;
 
     let profile_image_id: Option<ImageId> = match req.profile_image_url {
         Some(ref url) => create_user_profile_image(&db, &s3, &url, &user_id)
@@ -681,7 +681,7 @@ fn validate_patch_profile_req(
 
 impl From<TokenUser> for UserId {
     fn from(token: TokenUser) -> Self {
-        Self(token.0.user_id)
+        token.0.user_id
     }
 }
 
@@ -897,7 +897,7 @@ async fn delete(
 ) -> Result<NoContentClearAuth, error::Server> {
     sqlx::query!(
         r#"delete from "user" where id = $1"#,
-        session.claims.user_id
+        session.claims.user_id.0
     )
     .execute(db.as_ref())
     .await?;

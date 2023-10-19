@@ -2,7 +2,6 @@ use chrono::{DateTime, Utc};
 use shared::domain::user::UserId;
 use sqlx::PgConnection;
 use tracing::instrument;
-use uuid::Uuid;
 
 use crate::token::SessionMask;
 
@@ -21,14 +20,14 @@ pub async fn create(
     user_id: UserId,
     valid_until: Option<&DateTime<Utc>>,
     mask: SessionMask,
-    impersonator_id: Option<Uuid>,
+    impersonator_id: Option<UserId>,
 ) -> sqlx::Result<String> {
     let session = generate_session_token();
     sqlx::query!(
         "insert into session (token, user_id, impersonator_id, expires_at, scope_mask) values ($1, $2, $3, $4, $5)",
         &session,
         user_id.0,
-        impersonator_id,
+        impersonator_id.map(|i| i.0),
         valid_until,
         mask.bits()
     )

@@ -5,6 +5,7 @@ use shared::{
     api::{endpoints::resource::report, ApiEndpoint, PathParts},
     domain::{
         resource::{report::ReportId, report::ResourceReportEmail, ResourceId},
+        user::UserId,
         CreateResponse,
     },
 };
@@ -16,7 +17,6 @@ use crate::{
     extractor::{ScopeAdmin, TokenUser, TokenUserWithScope},
     service::{mail, ServiceData},
 };
-use uuid::Uuid;
 
 /// Create a new resource report and send the report email to admin
 async fn create(
@@ -30,7 +30,7 @@ async fn create(
     let resource_id = path.into_inner();
     let req = req.into_inner();
 
-    let user_id: Option<Uuid> = if let Some(user) = claims {
+    let user_id: Option<UserId> = if let Some(user) = claims {
         Some(user.0.user_id)
     } else {
         None

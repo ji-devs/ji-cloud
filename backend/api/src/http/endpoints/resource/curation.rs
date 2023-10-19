@@ -6,7 +6,6 @@ use shared::{
     api::{endpoints::resource::curation, ApiEndpoint, PathParts},
     domain::{
         resource::{curation::CommentId, ResourceId},
-        user::UserId,
         CreateResponse,
     },
 };
@@ -52,7 +51,7 @@ async fn get_curation(
     path: Path<ResourceId>,
 ) -> Result<Json<<curation::GetCuration as ApiEndpoint>::Res>, error::NotFound> {
     let resource_id = path.into_inner();
-    let admin_id = UserId(auth.claims.user_id);
+    let admin_id = auth.claims.user_id;
 
     db::resource::authz(&*db, admin_id, Some(resource_id)).await?;
 
@@ -77,7 +76,7 @@ async fn create_comment(
     error::Auth,
 > {
     let resource_id = path.into_inner();
-    let admin_id = UserId(auth.claims.user_id);
+    let admin_id = auth.claims.user_id;
 
     db::resource::authz(&*db, admin_id, Some(resource_id)).await?;
 

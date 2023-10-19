@@ -1,16 +1,18 @@
 use crate::error;
-use shared::domain::resource::{
-    report::{ReportId, ResourceReport, ResourceReportEmail, ResourceReportType},
-    ResourceId,
+use shared::domain::{
+    resource::{
+        report::{ReportId, ResourceReport, ResourceReportEmail, ResourceReportType},
+        ResourceId,
+    },
+    user::UserId,
 };
 use sqlx::{PgConnection, PgPool};
-use uuid::Uuid;
 
 pub async fn create_report(
     pool: &PgPool,
     resource_id: ResourceId,
     report_type: ResourceReportType,
-    user_id: Option<Uuid>,
+    user_id: Option<UserId>,
 ) -> Result<ReportId, error::ReportError> {
     check_resource(pool, resource_id).await?;
 
@@ -23,7 +25,7 @@ pub async fn create_report(
             "#,
             resource_id.0,
             report_type as i16,
-            user_id
+            user_id.0
         )
         .fetch_one(pool)
         .await
@@ -58,7 +60,7 @@ select id                                   as "id!: ReportId",
        resource_id                               as "resource_id!: ResourceId",    
        report_type                          as "report_type!: ResourceReportType",                  
        created_at,
-       reporter_id                          as "reporter_id?: Uuid",
+       reporter_id                          as "reporter_id?: uuid::Uuid",
        (
             select given_name || ' '::text || family_name
             from user_profile

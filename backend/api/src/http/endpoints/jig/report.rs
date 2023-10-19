@@ -4,6 +4,7 @@ use shared::{
     api::{endpoints::jig::report, ApiEndpoint, PathParts},
     domain::{
         jig::{report::JigReportEmail, report::ReportId, JigId},
+        user::UserId,
         CreateResponse,
     },
 };
@@ -15,7 +16,6 @@ use crate::{
     extractor::{ScopeAdmin, TokenUser, TokenUserWithScope},
     service::{mail, ServiceData},
 };
-use uuid::Uuid;
 
 /// Create a new jig report and send the report to info@jigzi.org
 async fn create(
@@ -29,7 +29,7 @@ async fn create(
     let jig_id = path.into_inner();
     let req = req.into_inner();
 
-    let user_id: Option<Uuid> = if let Some(user) = claims {
+    let user_id: Option<UserId> = if let Some(user) = claims {
         Some(user.0.user_id)
     } else {
         None

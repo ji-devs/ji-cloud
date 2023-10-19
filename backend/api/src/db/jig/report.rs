@@ -1,7 +1,10 @@
 use crate::error;
-use shared::domain::jig::{
-    report::{JigReport, JigReportEmail, JigReportType, ReportId},
-    JigId,
+use shared::domain::{
+    jig::{
+        report::{JigReport, JigReportEmail, JigReportType, ReportId},
+        JigId,
+    },
+    user::UserId,
 };
 use sqlx::{PgConnection, PgPool};
 use uuid::Uuid;
@@ -10,7 +13,7 @@ pub async fn create_report(
     pool: &PgPool,
     jig_id: JigId,
     report_type: JigReportType,
-    user_id: Option<Uuid>,
+    user_id: Option<UserId>,
 ) -> Result<ReportId, error::ReportError> {
     check_jig(pool, jig_id).await?;
 
@@ -23,7 +26,7 @@ pub async fn create_report(
             "#,
             jig_id.0,
             report_type as i16,
-            user_id
+            user_id.0
         )
         .fetch_one(pool)
         .await
