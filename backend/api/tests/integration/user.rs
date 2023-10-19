@@ -5,10 +5,7 @@ use crate::{
 use http::StatusCode;
 use macros::test_service;
 
-use shared::domain::{
-    meta::AffiliationId,
-    user::{PatchProfileRequest, UserBadge},
-};
+use shared::domain::{meta::AffiliationId, user::PatchProfileRequest};
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 mod color;

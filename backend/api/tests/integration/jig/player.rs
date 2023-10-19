@@ -13,34 +13,7 @@ use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
     setup = "setup_service",
     fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
 )]
-async fn list(port: u16) -> anyhow::Result<()> {
-    let name = "list";
-
-    let client = reqwest::Client::new();
-
-    let resp = client
-        .get(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/player",
-            port
-        ))
-        .login()
-        .send()
-        .await?;
-
-    assert_eq!(resp.status(), StatusCode::OK);
-
-    let body: JigPlayerSessionListResponse = resp.json().await?;
-
-    insta::assert_json_snapshot!(format!("{}-1",name), body, { ".**.expires_at" => "[timestamp]" });
-
-    Ok(())
-}
-
-#[test_service(
-    setup = "setup_service",
-    fixtures("Fixture::MetaKinds", "Fixture::User", "Fixture::Jig")
-)]
-async fn create(port: u16) -> anyhow::Result<()> {
+async fn create_and_list(port: u16) -> anyhow::Result<()> {
     let name = "create";
 
     let client = reqwest::Client::new();
@@ -84,10 +57,7 @@ async fn create(port: u16) -> anyhow::Result<()> {
         .error_for_status()?;
 
     let resp = client
-        .get(&format!(
-            "http://0.0.0.0:{}/v1/jig/3a71522a-cd77-11eb-8dc1-af3e35f7c743/player",
-            port
-        ))
+        .get(&format!("http://0.0.0.0:{}/v1/jig/player", port))
         .login()
         .send()
         .await?;

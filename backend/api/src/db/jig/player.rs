@@ -89,7 +89,7 @@ fn generate_random_code(generator: &mut ThreadRng) -> i32 {
     generator.gen_range(0..JIG_PLAYER_SESSION_CODE_MAX)
 }
 
-pub async fn list_sessions(db: &PgPool, jig_id: JigId) -> sqlx::Result<Vec<JigPlayerSession>> {
+pub async fn list_sessions(db: &PgPool, user_id: UserId) -> sqlx::Result<Vec<JigPlayerSession>> {
     let sessions = sqlx::query!(
         //language=SQL
         r#"
@@ -101,9 +101,9 @@ select index     as "index!: i32",
        name as "name?",
        expires_at as "expires_at: DateTime<Utc>"
 from jig_player_session
-where jig_id = $1
+where creator_id = $1
 "#,
-        jig_id.0
+        user_id.0
     )
     .fetch_all(db)
     .await?

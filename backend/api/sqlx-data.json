@@ -2319,6 +2319,62 @@
     },
     "query": "\nselect exists (\n    select 1 from user_scope where user_id = $1 and scope = any($2)\n) or (\n    exists (select 1 from user_scope where user_id = $1 and scope = $3) and\n    not exists (select 1 from playlist where playlist.id = $4 and playlist.author_id <> $1)\n) as \"authed!\"\n"
   },
+  "2bd90d6013184b084c6687b13246b3ae86642b6e43e64760ece97316b247d867": {
+    "describe": {
+      "columns": [
+        {
+          "name": "index!: i32",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "direction: TextDirection",
+          "ordinal": 1,
+          "type_info": "Int2"
+        },
+        {
+          "name": "display_score",
+          "ordinal": 2,
+          "type_info": "Bool"
+        },
+        {
+          "name": "track_assessments",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "drag_assist",
+          "ordinal": 4,
+          "type_info": "Bool"
+        },
+        {
+          "name": "name?",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "expires_at: DateTime<Utc>",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect index     as \"index!: i32\",\n       direction as \"direction: TextDirection\",\n       display_score,\n       track_assessments,\n       drag_assist,\n       name as \"name?\",\n       expires_at as \"expires_at: DateTime<Utc>\"\nfrom jig_player_session\nwhere creator_id = $1\n"
+  },
   "2c4243e343b159e9eeb0b1f4cc8fd843b23bf3cfd0232b70c3594e498f94ada2": {
     "describe": {
       "columns": [
@@ -11181,62 +11237,6 @@
       }
     },
     "query": "\ninsert into category (index, parent_id, name, user_scopes)\nVALUES((select count(*)::int2 from category where parent_id is not distinct from $1), $1, $2, array[]::smallint[])\nreturning index, id"
-  },
-  "a1174df7038bc1f3fbfb40118514f037472eb43ebb4cd2130a00ac644500d062": {
-    "describe": {
-      "columns": [
-        {
-          "name": "index!: i32",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "direction: TextDirection",
-          "ordinal": 1,
-          "type_info": "Int2"
-        },
-        {
-          "name": "display_score",
-          "ordinal": 2,
-          "type_info": "Bool"
-        },
-        {
-          "name": "track_assessments",
-          "ordinal": 3,
-          "type_info": "Bool"
-        },
-        {
-          "name": "drag_assist",
-          "ordinal": 4,
-          "type_info": "Bool"
-        },
-        {
-          "name": "name?",
-          "ordinal": 5,
-          "type_info": "Text"
-        },
-        {
-          "name": "expires_at: DateTime<Utc>",
-          "ordinal": 6,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect index     as \"index!: i32\",\n       direction as \"direction: TextDirection\",\n       display_score,\n       track_assessments,\n       drag_assist,\n       name as \"name?\",\n       expires_at as \"expires_at: DateTime<Utc>\"\nfrom jig_player_session\nwhere jig_id = $1\n"
   },
   "a12553a0b07c167a0fecdcedfe7c0cf6f57f9a5b32ea13474d9ecb64815e8701": {
     "describe": {

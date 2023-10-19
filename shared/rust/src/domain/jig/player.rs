@@ -117,7 +117,7 @@ pub struct JigPlayerSession {
     pub expires_at: DateTime<Utc>,
 }
 
-make_path_parts!(JigPlayerSessionListPath => "/v1/jig/{}/player" => JigPlayerSessionIndex);
+make_path_parts!(JigPlayerSessionListPath => "/v1/jig/player");
 
 /// Lists all jig player sessions associated with a jig
 #[derive(Serialize, Deserialize, Debug)]

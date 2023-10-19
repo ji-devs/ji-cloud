@@ -35,15 +35,13 @@ pub async fn create(
 }
 
 /// Fetch a jig player session code from it's jig if it exists.
-/// TODO: why does this exist?
 pub async fn list(
     db: Data<PgPool>,
-    _claims: TokenUser,
-    path: web::Path<JigId>,
+    claims: TokenUser,
 ) -> Result<Json<<player::List as ApiEndpoint>::Res>, error::JigCode> {
-    let id = path.into_inner();
+    let user_id = claims.user_id();
 
-    let sessions = db::jig::player::list_sessions(&*db, id).await?;
+    let sessions = db::jig::player::list_sessions(&*db, user_id).await?;
 
     Ok(Json(JigPlayerSessionListResponse { sessions }))
 }
