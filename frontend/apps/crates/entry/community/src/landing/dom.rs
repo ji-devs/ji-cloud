@@ -161,27 +161,20 @@ impl Component<CommunityLanding> for Rc<CommunityLanding> {
                             Some(top_courses) => {
                                 top_courses.into_iter().map(clone!(state => move |courses| {
                                     let courses_id = courses.id;
-                                    render_asset_card(
-                                        &courses.clone().into(),
-                                        AssetCardConfig {
-                                            bottom_indicator: AssetCardBottomIndicator::Author,
-                                            dense: true,
-                                            menu: Some(Rc::new(clone!(state => move || {
-                                                html!("menu-kebab", {
-                                                    .prop("slot", "menu")
-                                                    .children(&mut [
-                                                        html!("menu-line", {
-                                                            .prop("icon", "play")
-                                                            .event(clone!(state => move |_: events::Click| {
-                                                                state.play_course.set(Some(courses_id));
-                                                            }))
-                                                        })
-                                                    ])
-                                                })
-                                            }))),
-                                            ..Default::default()
-                                        }
-                                    )
+                                    html!("div", {
+                                        .style("cursor", "pointer")
+                                        .child(render_asset_card(
+                                            &courses.clone().into(),
+                                            AssetCardConfig {
+                                                bottom_indicator: AssetCardBottomIndicator::Author,
+                                                dense: true,
+                                                ..Default::default()
+                                            }
+                                        ))
+                                        .event(clone!(state => move |_: events::Click| {
+                                            state.play_course.set(Some(courses_id));
+                                        }))
+                                    })
                                 })).collect()
                             },
                         }
