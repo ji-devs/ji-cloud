@@ -74,7 +74,8 @@ impl SettingsPage {
                     }))
                     .child(html!("img-ui", {
                         .prop("slot", "icon")
-                        .prop("path", "core/inputs/pencil-blue-darker.svg")
+                        .prop("path", "entry/user/profile/lock-blue.svg")
+                        .style("width", "14px")
                     }))
                 }),
                 html!("input-wrapper", {
