@@ -28,7 +28,6 @@ import "@elements/core/nav/step-nav";
 import "@elements/core/help/jigzi-help";
 import "@elements/core/player-popup/player-popup";
 import "@elements/module/_common/edit/footer";
-import "@elements/module/_common/edit/footer-continue-button";
 import "@elements/module/_common/edit/header";
 import "@elements/module/_groups/cards/_common/main-empty";
 import "@elements/module/_common/edit/preview-header";

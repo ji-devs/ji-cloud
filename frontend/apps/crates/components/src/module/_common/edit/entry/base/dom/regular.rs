@@ -3,7 +3,7 @@ use awsm_web::loaders::fetch::fetch_url;
 use dominator::{clone, html, Dom};
 use futures_signals::{
     map_ref,
-    signal::{Mutable, SignalExt},
+    signal::{Mutable, SignalExt, not},
 };
 use serde::Deserialize;
 use std::{collections::HashMap, rc::Rc};
@@ -13,6 +13,8 @@ use crate::{jigzi_help::JigziHelp, module::_common::edit::header::controller::do
 
 use shared::domain::module::body::{BodyExt, ModeExt, StepExt};
 use utils::prelude::*;
+
+const STR_CONTINUE: &str = "Continue";
 
 pub fn render_main_bg<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
     state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
@@ -228,9 +230,10 @@ where
         })))
         .prop("slot", "footer")
         .child(Footer::render(state.footer.clone()))
-        .child(html!("module-footer-continue-button", {
+        .child(html!("button-rect", {
             .prop("slot", "btn")
-            .prop_signal("enabled", state.base.can_continue_next())
+            .prop_signal("disabled", not(state.base.can_continue_next()))
+            .text(STR_CONTINUE)
             .event(clone!(state => move |_evt: events::Next| {
                 change_to.set(state.step.get().next());
             }))
