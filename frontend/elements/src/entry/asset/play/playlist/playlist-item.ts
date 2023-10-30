@@ -1,4 +1,5 @@
 import { css, customElement, html, LitElement, property } from "lit-element";
+import { nothing } from "lit-html";
 
 @customElement("jig-play-playlist-item")
 export class _ extends LitElement {
@@ -30,10 +31,23 @@ export class _ extends LitElement {
                     color: #fff;
                     border: none;
                 }
+                .thumbnail-wrapper {
+                    display: grid;
+                }
                 ::slotted([slot=thumbnail]) {
                     width: 150px;
                     border-radius: 10px;
                     aspect-ratio: 16 / 9;
+                    grid-column: 1;
+                    grid-row: 1;
+                }
+                .premium-icon {
+                    grid-column: 1;
+                    grid-row: 1;
+                    height: 18px;
+                    z-index: 1;
+                    justify-self: end;
+                    margin: 8px;
                 }
                 .column-3 {
                     display: grid;
@@ -94,8 +108,11 @@ export class _ extends LitElement {
     @property({ type: Boolean, reflect: true })
     done: boolean = false;
 
-    @property()
+    @property({ type: Boolean })
     hideDescription: boolean = false;
+
+    @property({ type: Boolean })
+    premium: boolean = false;
 
     render() {
         const renderDescription = () => {
@@ -118,7 +135,12 @@ export class _ extends LitElement {
             <div class="index">${
                 this.done ? html`<fa-icon icon="fa-solid fa-check"></fa-icon>` : this.index
             }</div>
-            <slot name="thumbnail"></slot>
+            <div class="thumbnail-wrapper">
+                ${ this.premium ? html`
+                    <img-ui class="premium-icon" path="icons/pro-icon.svg" title="Premium JIG"></img-ui>
+                ` : nothing }
+                <slot name="thumbnail"></slot>
+            </div>
             <div class="column-3">
                 <div class="name" dir="auto">${this.name}</div>
                 ${renderDescription()}

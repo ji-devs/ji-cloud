@@ -122,6 +122,7 @@ impl PlaylistPlayer {
             .prop("name", &jig.jig_data.display_name)
             .prop("description", &jig.jig_data.description)
             .prop("index", i + 1)
+            .prop("premium", jig.admin_data.premium)
             .prop_signal("done", state.jigs_done.signal_ref(move |jigs_done| jigs_done.contains(&jig_id)))
             .child(
                 ModuleThumbnail::new(
