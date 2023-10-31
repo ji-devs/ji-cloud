@@ -411,40 +411,33 @@ impl MemberDetails {
         let asset_id = asset.id();
         let is_resource = asset.is_resource();
         let additional_resource_0 = asset.additional_resources().first().cloned();
-        render_asset_card(
-            &asset,
-            AssetCardConfig {
-                bottom_indicator: AssetCardBottomIndicator::Author,
-                dense: true,
-                menu: Some(Rc::new(clone!(state => move || {
-                    html!("menu-kebab", {
-                        .prop("slot", "menu")
-                        .apply_if(!is_resource, |dom| {
-                            dom.child(html!("menu-line", {
-                                .prop("icon", "play")
-                                .event(clone!(state => move |_: events::Click| {
-                                    state.play_asset.set(Some(asset_id));
-                                }))
-                            }))
-                        })
-                        .apply_if(is_resource, clone!(additional_resource_0 => move |dom| {
-                            dom.child(html!("menu-line", {
-                                .prop("icon", "view")
-                                .event(clone!(additional_resource_0 => move |_: events::Click| {
-                                    if let Some(resource) = &additional_resource_0 {
-                                        let _ = window()
-                                            .unwrap_ji()
-                                            .open_with_url(&resource.resource_content.get_link())
-                                            .unwrap_ji();
-                                    }
-                                }))
-                            }))
-                        }))
-                    })
-                }))),
-                ..Default::default()
-            },
-        )
+        html!("div", {
+            .style("cursor", "pointer")
+            .child(render_asset_card(
+                &asset,
+                AssetCardConfig {
+                    bottom_indicator: AssetCardBottomIndicator::Author,
+                    dense: true,
+                    menu: None,
+                    ..Default::default()
+                },
+            ))
+            .apply_if(!is_resource, |dom| {
+                dom.event(clone!(state => move |_: events::Click| {
+                    state.play_asset.set(Some(asset_id));
+                }))
+            })
+            .apply_if(is_resource, clone!(additional_resource_0 => move |dom| {
+                dom.event(clone!(additional_resource_0 => move |_: events::Click| {
+                    if let Some(resource) = &additional_resource_0 {
+                        let _ = window()
+                            .unwrap_ji()
+                            .open_with_url(&resource.resource_content.get_link())
+                            .unwrap_ji();
+                    }
+                }))
+            }))
+        })
     }
 
     fn render_network(self: &Rc<Self>) -> Dom {
