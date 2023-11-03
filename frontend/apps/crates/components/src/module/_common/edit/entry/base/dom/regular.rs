@@ -234,7 +234,7 @@ where
             .prop("slot", "btn")
             .prop_signal("disabled", not(state.base.can_continue_next()))
             .text(STR_CONTINUE)
-            .event(clone!(state => move |_evt: events::Next| {
+            .event(clone!(state => move |_evt: events::Click| {
                 change_to.set(state.step.get().next());
             }))
         }))
