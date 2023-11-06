@@ -20,7 +20,7 @@ fn get_add_teacher_form_link() -> String {
     let email = user.email.clone();
     let first_name = user.given_name.clone();
     let last_name = user.family_name.clone();
-    format!("https://share.hsforms.com/1RKrf2o4eS9CKHolIofEbTA1kii1?name_of_school={name_of_school}&email={email}&firstname={first_name}&lastname={last_name}")
+    format!("https://docs.google.com/forms/d/e/1FAIpQLSeYmxx5Dhe0yS5KuLFfet-VyP7fE3JVxP7xYnvGteTp5bw2CA/viewform?usp=pp_url&entry.751628773={name_of_school}&entry.1836812708={email}&entry.998789064={first_name}&entry.328136787={last_name}")
 }
 const STR_TITLE: &str = "Welcome to your Jigzi ";
 
