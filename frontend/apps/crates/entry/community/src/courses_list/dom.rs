@@ -135,17 +135,19 @@ impl Component<CoursesList> for Rc<CoursesList> {
                 }),
             ])
         }))
-        .child_signal(state.play_course.signal().map(clone!(state => move |play_course| {
-            play_course.map(|course_id| {
-                PlayerPopup::new_default_player_options(
-                    course_id.into(),
-                    PreviewPopupCallbacks {
-                        close: Box::new(clone!(state => move|| {
-                            state.play_course.set(None);
-                        }))
-                    },
-                ).render(None)
-            })
-        })))
+        .child_signal(state.play_course.signal().map(
+            clone!(state => move |play_course| {
+                play_course.map(|course_id| {
+                    PlayerPopup::new_default_player_options(
+                        course_id.into(),
+                        PreviewPopupCallbacks {
+                            close: Box::new(clone!(state => move|| {
+                                state.play_course.set(None);
+                            }))
+                        },
+                    ).render(None)
+                })
+            }),
+        ))
     }
 }

@@ -3,7 +3,7 @@ use awsm_web::loaders::fetch::fetch_url;
 use dominator::{clone, html, Dom};
 use futures_signals::{
     map_ref,
-    signal::{Mutable, SignalExt, not},
+    signal::{not, Mutable, SignalExt},
 };
 use serde::Deserialize;
 use std::{collections::HashMap, rc::Rc};
