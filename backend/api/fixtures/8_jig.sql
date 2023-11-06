@@ -59,10 +59,10 @@ values ('d4cad43c-1dd5-11ec-8426-83d4a42e3ac9', '286b828c-1dd9-11ec-8426-571b03b
         'link test', 'a91aca34-519e-11ec-ab46-175eaaf1ff23', '{ "link": "url://url.url.url/urls/s" }'), -- draft
        ('d4cad4c8-1dd5-11ec-8426-a37eda7ce03f', '286b8390-1dd9-11ec-8426-fbeb80c504d9', 'link test', 'a91aca34-519e-11ec-ab46-175eaaf1ff23', '{ "link": "url://url.url.url/url/s" }');
 
-insert into jig_player_session (index, jig_id, created_at, expires_at, direction, display_score, track_assessments,
+insert into jig_player_session (index, jig_id, created_at, creator_id, expires_at, direction, display_score, track_assessments,
                                 drag_assist)
-values (1234, '0cc084bc-7c83-11eb-9f77-e3218dffb008', now(), now() - interval '5 minutes', 0, true, true, true),
-       (1235, '0cc084bc-7c83-11eb-9f77-e3218dffb008', now(), now() + interval '5 minutes', 0, true, true, true);;
+values (1234, '0cc084bc-7c83-11eb-9f77-e3218dffb008', now(), '1f241e1b-b537-493f-a230-075cb16315be', now() - interval '5 minutes', 0, true, true, true),
+       (1235, '0cc084bc-7c83-11eb-9f77-e3218dffb008', now(), '1f241e1b-b537-493f-a230-075cb16315be', now() + interval '5 minutes', 0, true, true, true);;
 
 insert into jig_play_count (jig_id)
 select id
