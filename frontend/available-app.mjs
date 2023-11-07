@@ -4,6 +4,7 @@ export default [
     "home",
     "kids",
     "community",
+    "classroom",
     "asset/edit",
     "asset/play",
     "module/memory/edit",

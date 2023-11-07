@@ -141,6 +141,45 @@ dependencies = [
 ]
 
 [[package]]
+name = "app-classroom"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "awsm_web 0.32.3",
+ "cfg-if 1.0.0",
+ "chrono",
+ "chrono-tz",
+ "components",
+ "console_error_panic_hook",
+ "const_format",
+ "discard",
+ "dominator",
+ "dominator_helpers",
+ "futures",
+ "futures-signals",
+ "gloo-timers",
+ "gloo-utils",
+ "htmlescape",
+ "js-sys",
+ "log",
+ "once_cell",
+ "serde",
+ "serde-wasm-bindgen 0.4.5",
+ "serde_json",
+ "shared",
+ "strum",
+ "strum_macros",
+ "utils",
+ "uuid",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "wee_alloc",
+ "zxcvbn",
+]
+
+[[package]]
 name = "app-community"
 version = "0.1.0"
 dependencies = [

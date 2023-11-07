@@ -32,6 +32,7 @@ pub enum SpaPage {
     Community,
     Admin,
     Kids,
+    Classroom,
     Asset(ModuleAssetPageKind),
     Module(String, ModuleAssetPageKind),
     Dev(String),
@@ -46,6 +47,7 @@ impl SpaPage {
             Self::Community => Cow::Borrowed("community"),
             Self::Admin => Cow::Borrowed("admin"),
             Self::Kids => Cow::Borrowed("kids"),
+            Self::Classroom => Cow::Borrowed("classroom"),
             Self::Asset(page_kind) => Cow::Owned(format!("asset/{}", page_kind.as_str())),
             Self::Module(kind, page_kind) => {
                 Cow::Owned(format!("module/{}/{}", kind, page_kind.as_str()))
@@ -121,6 +123,12 @@ pub async fn community_template(
 
 pub async fn kids_template(settings: Data<RuntimeSettings>) -> actix_web::Result<HttpResponse> {
     spa_template(&settings, SpaPage::Kids)
+}
+
+pub async fn classroom_template(
+    settings: Data<RuntimeSettings>,
+) -> actix_web::Result<HttpResponse> {
+    spa_template(&settings, SpaPage::Classroom)
 }
 
 pub async fn admin_template(settings: Data<RuntimeSettings>) -> actix_web::Result<HttpResponse> {

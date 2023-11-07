@@ -16,6 +16,11 @@ pub fn configure(config: &mut ServiceConfig) {
     config
         .route("/kids/{path:.*}", web::get().to(spa::kids_template))
         .route("/kids", web::get().to(spa::kids_template))
+        .route(
+            "/classroom/{path:.*}",
+            web::get().to(spa::classroom_template),
+        )
+        .route("/classroom", web::get().to(spa::classroom_template))
         .route("/community", web::get().to(spa::community_template))
         .route(
             "/community/{path:.*}",

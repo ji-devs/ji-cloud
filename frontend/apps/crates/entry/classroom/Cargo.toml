@@ -1,0 +1,55 @@
+[package]
+name = "app-classroom"
+version = "0.1.0"
+description = "App"
+authors = ["David Komer <david.komer@gmail.com>"]
+categories = ["wasm"]
+readme = "README.md"
+license = "MIT"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+utils = {path = "../../utils"}
+components = {path = "../../components"}
+shared = {path = "../../../../../shared/rust", features = ["wasm"]}
+wasm-logger = { workspace = true, optional = true }
+wee_alloc = { workspace = true, optional = true }
+console_error_panic_hook = { workspace = true, optional = true }
+wasm-bindgen = { workspace = true }
+js-sys = { workspace = true }
+web-sys = { workspace = true }
+once_cell = { workspace = true }
+uuid = { workspace = true, features = ["serde", "wasm-bindgen"] }
+wasm-bindgen-futures = { workspace = true }
+htmlescape = { workspace = true }
+dominator = { workspace = true }
+futures-signals = { workspace = true }
+dominator_helpers = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde-wasm-bindgen = { workspace = true }
+serde_json = { workspace = true }
+futures = { workspace = true }
+log = { workspace = true }
+cfg-if = { workspace = true }
+awsm_web = { workspace = true, features = ["dom", "loaders"] }
+discard = { workspace = true }
+gloo-timers = { workspace = true, features = ["futures"] }
+anyhow = { workspace = true }
+chrono = { workspace = true, features = ["serde"] }
+chrono-tz = { workspace = true, features = ["serde"] }
+zxcvbn = { workspace = true }
+gloo-utils = { workspace = true }
+strum = { workspace = true }
+strum_macros = { workspace = true }
+const_format = { workspace = true }
+
+[features]
+default = ["wee_alloc"]
+release = ["utils/release", "components/release"]
+sandbox = ["quiet", "wasm-logger", "console_error_panic_hook", "utils/sandbox"]
+ts_test = []
+quiet = []
+local = ["quiet", "wasm-logger", "console_error_panic_hook", "utils/local", "components/local"]

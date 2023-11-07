@@ -18,6 +18,7 @@ on:
       - 'frontend/apps/crates/entry/user/**'
       - 'frontend/apps/crates/entry/community/**'
       - 'frontend/apps/crates/entry/kids/**'
+      - 'frontend/apps/crates/entry/classroom/**'
       - 'frontend/apps/crates/entry/module/**'
       - 'frontend/ts-utils/**'
       - 'frontend/elements/**'
@@ -60,7 +61,7 @@ jobs:
 
     strategy:
       matrix:
-        app: [admin, home, asset/edit, asset/play, community, user, kids]
+        app: [admin, home, asset/edit, asset/play, community, user, kids, classroom]
     steps:
       - name: "Set environment"
         env:
@@ -331,7 +332,7 @@ jobs:
 
     strategy:
       matrix:
-        app: [admin, home, asset/edit, asset/play, community, user, kids]
+        app: [admin, home, asset/edit, asset/play, community, user, kids, classroom]
     steps:
       - name: "Set environment"
         env:

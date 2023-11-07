@@ -2,6 +2,7 @@ use crate::asset::{CoursePlayerOptions, JigPlayerOptions, PlaylistPlayerOptions}
 use gloo::utils::window;
 use serde::{Deserialize, Serialize};
 use shared::domain::billing::{PlanType, SchoolId};
+use shared::domain::jig::player::JigPlayerSessionIndex;
 use shared::domain::{
     asset::{AssetId, AssetType, DraftOrLive},
     category::CategoryId,
@@ -34,6 +35,7 @@ pub enum Route {
     Community(CommunityRoute),
     User(UserRoute),
     Kids(KidsRoute),
+    Classroom(ClassroomRoute),
     Admin(AdminRoute),
     Home(HomeRoute),
     Asset(AssetRoute),
@@ -174,6 +176,12 @@ pub enum CommunityCirclesRoute {
 #[derive(Debug, Clone)]
 pub enum KidsRoute {
     StudentCode(Option<String>),
+}
+
+#[derive(Debug, Clone)]
+pub enum ClassroomRoute {
+    Codes,
+    CodeSession(JigPlayerSessionIndex),
 }
 
 #[derive(Debug, Clone)]
@@ -433,6 +441,12 @@ impl Route {
             ["home", "plan", "school"] => Self::Home(HomeRoute::Plan(HomePlanRoute::School)),
             ["kids"] => Self::Kids(KidsRoute::StudentCode(None)),
             ["kids", code] => Self::Kids(KidsRoute::StudentCode(Some(code.to_string()))),
+            ["classroom", "codes"] => Self::Classroom(ClassroomRoute::Codes),
+            ["classroom", "codes", code, "sessions"] => {
+                let code = code.parse().unwrap_ji();
+                let code = JigPlayerSessionIndex(code);
+                Self::Classroom(ClassroomRoute::CodeSession(code))
+            }
             ["dev", "showcase", id] => {
                 let page = params_map.get("page").unwrap_or_default();
                 Self::Dev(DevRoute::Showcase(id.to_string(), page))
@@ -844,6 +858,12 @@ impl From<&Route> for String {
                     Some(code) => format!("/kids/{}", code),
                     None => "/kids".to_string(),
                 },
+            },
+            Route::Classroom(route) => match route {
+                ClassroomRoute::Codes => "/classroom/codes".to_string(),
+                ClassroomRoute::CodeSession(code) => {
+                    format!("/classroom/codes/{}/sessions", code.0)
+                }
             },
             Route::Community(route) => match route {
                 CommunityRoute::Landing => "/community".to_string(),

@@ -11,6 +11,7 @@ members = [
     "crates/entry/admin",
     "crates/entry/home",
     "crates/entry/kids",
+    "crates/entry/classroom",
     "crates/entry/asset/edit",
     "crates/entry/asset/play",
     "crates/entry/module/memory/edit",
