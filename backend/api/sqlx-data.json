@@ -3241,19 +3241,6 @@
     },
     "query": "select account_id as \"account_id: AccountId\" from school where school_id = $1"
   },
-  "383426c5f5b15f087e973fb677db679d26d036bf50d8452623f5b88b2310e464": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Json",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\n            UPDATE jig_code_session\n            SET finished_at = current_timestamp, info=$1\n            WHERE id = $2;\n        "
-  },
   "3841152baf6bc0ccd3c5674bab88ea3f0853e99399e76b1e5d30e51d8d8736f3": {
     "describe": {
       "columns": [
@@ -6176,6 +6163,27 @@
       }
     },
     "query": "\nupdate user_image_upload\nset uploaded_at       = now(),\n    processed_at      = now(),\n    processing_result = true\nwhere image_id = $1\n"
+  },
+  "5a306819d915c7a96fd76a2cc84e6ad013926d740a9e543f87cba8edb4d8dbcd": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: Uuid",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n        insert into jig_code_session (code, started_at, ip_address)\n        values ($1, current_timestamp, $2)\n        returning id as \"id: Uuid\"\n        "
   },
   "5a313ec777ef83ffab443c1a2da405969ff1cc04c9252b62df0da4ca22442364": {
     "describe": {
@@ -14880,26 +14888,6 @@
     },
     "query": "\nupdate playlist_data\nset other_keywords = $2,\n    translated_keywords = (case when ($3::text is not null) then $3::text else (translated_keywords) end),\n    updated_at = now()\nwhere id = $1 and $2 is distinct from other_keywords"
   },
-  "e262ccf30ade50a69a580f3a8a16469c6531c0831c7486cbbf9900c8732fa2f8": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id: Uuid",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Int4"
-        ]
-      }
-    },
-    "query": "\n        insert into jig_code_session (code)\n        values ($1)\n        returning id as \"id: Uuid\"\n        "
-  },
   "e2879fa5a3c098c9cbcea806e2d51168ba02e91b8f928a7bc2cd1f7f36872faa": {
     "describe": {
       "columns": [
@@ -14973,6 +14961,20 @@
       }
     },
     "query": "\ndelete\nfrom playlist_data_resource\nwhere playlist_data_id = $1\n   or playlist_data_id = $2\n    and id = $3\n        "
+  },
+  "e3630d0fc72a4799d5a2ac517eb36abae6e2e8393f0b4fbbf698e092ed719271": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Json",
+          "Uuid",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n            UPDATE jig_code_session\n            SET finished_at = current_timestamp, info=$1\n            WHERE id = $2 and ip_address = $3 and finished_at is null;\n        "
   },
   "e3da19bead8e176b5d8f316d19463ffd6c9afeabcef3bf22510c2d2902417213": {
     "describe": {
