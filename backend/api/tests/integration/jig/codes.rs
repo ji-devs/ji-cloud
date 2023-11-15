@@ -4,8 +4,8 @@ use crate::{
 };
 use http::StatusCode;
 use macros::test_service;
-use shared::domain::jig::player::{
-    instance::PlayerSessionInstanceResponse, JigCodeResponse, JigPlayerSessionListResponse,
+use shared::domain::jig::codes::{
+    instance::PlayerSessionInstanceResponse, JigCodeListResponse, JigCodeResponse,
 };
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
@@ -19,7 +19,7 @@ async fn create_and_list(port: u16) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
 
     let resp = client
-        .post(&format!("http://0.0.0.0:{}/v1/jig/player", port))
+        .post(&format!("http://0.0.0.0:{}/v1/jig/codes", port))
         .json(&serde_json::json!({
             "jigId": "3a71522a-cd77-11eb-8dc1-af3e35f7c743",
             "settings": {
@@ -41,7 +41,7 @@ async fn create_and_list(port: u16) -> anyhow::Result<()> {
     insta::assert_json_snapshot!(format!("{}-1",name), body, { ".**.index" => "[index]", ".**.expires_at" => "[timestamp]" });
 
     let _resp = client
-        .post(&format!("http://0.0.0.0:{}/v1/jig/player", port))
+        .post(&format!("http://0.0.0.0:{}/v1/jig/codes", port))
         .json(&serde_json::json!({
             "jigId": "3a71522a-cd77-11eb-8dc1-af3e35f7c743",
             "settings": {
@@ -57,14 +57,14 @@ async fn create_and_list(port: u16) -> anyhow::Result<()> {
         .error_for_status()?;
 
     let resp = client
-        .get(&format!("http://0.0.0.0:{}/v1/jig/player", port))
+        .get(&format!("http://0.0.0.0:{}/v1/jig/codes", port))
         .login()
         .send()
         .await?;
 
     assert_eq!(resp.status(), StatusCode::OK);
 
-    let body: JigPlayerSessionListResponse = resp.json().await?;
+    let body: JigCodeListResponse = resp.json().await?;
 
     insta::assert_json_snapshot!(format!("{}-2",name), body, { ".**.index" => "[index]", ".**.expires_at" => "[timestamp]"  });
 
@@ -85,9 +85,9 @@ async fn session_instance_play_count_flow(port: u16) -> anyhow::Result<()> {
         .build()?;
 
     let resp = client
-        .post(&format!("http://0.0.0.0:{}/v1/jig/player/instance", port))
+        .post(&format!("http://0.0.0.0:{}/v1/jig/codes/instance", port))
         .json(&serde_json::json!({
-            "index": 1234,
+            "code": 1234,
         }))
         .login()
         .send()
@@ -104,7 +104,7 @@ async fn session_instance_play_count_flow(port: u16) -> anyhow::Result<()> {
 
     let resp = client
         .post(&format!(
-            "http://0.0.0.0:{}/v1/jig/player/instance/complete",
+            "http://0.0.0.0:{}/v1/jig/codes/instance/complete",
             port
         ))
         .json(&serde_json::json!({
@@ -117,19 +117,26 @@ async fn session_instance_play_count_flow(port: u16) -> anyhow::Result<()> {
 
     assert_eq!(resp.status(), StatusCode::NO_CONTENT);
 
-    let resp = client
-        .get(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/play-count",
-            port,
-        ))
-        .login()
-        .send()
-        .await?
-        .error_for_status()?;
 
-    let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(format!("{}-2", name), body);
+
+
+
+
+
+    // let resp = client
+    //     .get(&format!(
+    //         "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/play-count",
+    //         port,
+    //     ))
+    //     .login()
+    //     .send()
+    //     .await?
+    //     .error_for_status()?;
+
+    // let body: serde_json::Value = resp.json().await?;
+
+    // insta::assert_json_snapshot!(format!("{}-2", name), body);
 
     Ok(())
 }

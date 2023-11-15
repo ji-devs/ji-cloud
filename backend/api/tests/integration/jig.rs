@@ -10,9 +10,9 @@ use crate::{
 };
 
 mod additional_resource;
+mod codes;
 mod cover;
 mod module;
-mod player;
 
 #[test_service(setup = "setup_service", fixtures("Fixture::User"))]
 async fn create_default(port: u16) -> anyhow::Result<()> {

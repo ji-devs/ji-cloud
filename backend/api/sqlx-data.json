@@ -1732,38 +1732,6 @@
     },
     "query": "\ninsert into course(creator_id, author_id, parents, live_id, draft_id)\nselect creator_id, $2, array_append(parents, $1), $3, $4\nfrom course\nwhere id = $1\nreturning id as \"id!: CourseId\"\n"
   },
-  "1e42e953fa2d327cc392c6c2d4452b88773ab521e72d754f8b08ae44b005ef8f": {
-    "describe": {
-      "columns": [
-        {
-          "name": "ip_address",
-          "ordinal": 0,
-          "type_info": "Text"
-        },
-        {
-          "name": "user_agent",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "jig_id!: JigId",
-          "ordinal": 2,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        true,
-        true,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\ndelete\nfrom jig_player_session_instance\nwhere id = $1\nreturning ip_address, user_agent, (\n    select jig_id\n    from jig_player_session_instance\n             join jig_player_session on session_index = index\n) as \"jig_id!: JigId\"\n        "
-  },
   "1f8df54bb87c543c4a975eb72c8c981ecd033664f68e66a2caff692ac30c14c3": {
     "describe": {
       "columns": [
@@ -5520,6 +5488,26 @@
     },
     "query": "\ninsert into jig_like(jig_id, user_id)\nvalues ($1, $2)\n            "
   },
+  "5069021905b585af157cfc2ce5f58ff6f07d92d98fe23170fc1681907d65a78e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: Uuid",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n        insert into jig_player_session_instance (session_index)\n        values ($1)\n        returning id as \"id: Uuid\"\n        "
+  },
   "50ff48a8d492e560f61066b5217a70876d23552f79fcb6d43dbbcd5331da14ef": {
     "describe": {
       "columns": [
@@ -5747,18 +5735,6 @@
       }
     },
     "query": "\ninsert into user_profile\n    (user_id, username, over_18, given_name, family_name, profile_image_id, language_app, language_emails, languages_spoken, timezone, opt_into_edu_resources, organization, persona, location)\nvalues\n    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)\non conflict (user_id) do update\nset\n    over_18 = $3,\n    given_name = $4,\n    family_name = $5,\n    profile_image_id = $6,\n    language_app = $7,\n    language_emails = $8,\n    languages_spoken = $9,\n    timezone = $10,\n    opt_into_edu_resources = $11,\n    organization = $12,\n    persona = $13,\n    location = $14\n"
-  },
-  "56567f2d09b683dfb6209093ff0ded597cda78b614466626b84956d955eb69c6": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\n        update jig_play_count\n        set play_count = play_count + 1\n        where jig_id = $1\n        "
   },
   "565914a8fc1c1af596e272f153892585c460566614844181566d2a531e0a613a": {
     "describe": {
@@ -7419,26 +7395,6 @@
       }
     },
     "query": "\n        with cte as (\n            select array_agg(pd.id)\n            from playlist_data \"pd\"\n                  inner join playlist on (draft_id = pd.id or (live_id = pd.id and pd.last_synced_at is not null and published_at is not null))\n                  left join playlist_admin_data \"admin\" on admin.playlist_id = playlist.id\n            where (pd.draft_or_live = $1)\n            group by updated_at, created_at, playlist.published_at, admin.playlist_id\n        ),\n        cte1 as (\n            select * from unnest(array((select cte.array_agg[1] from cte))) with ordinality t(id\n           , ord) order by ord\n        )\n        select playlist.id                                      as \"playlist_id: PlaylistId\",\n            privacy_level                                       as \"privacy_level: PrivacyLevel\",\n            creator_id                                          as \"creator_id?: UserId\",\n            author_id                                           as \"author_id?: UserId\",\n            (select given_name || ' '::text || family_name\n                from user_profile\n             where user_profile.user_id = author_id)            as \"author_name\",\n            created_at,\n            published_at,\n            likes,\n            plays,\n            display_name                                        as \"display_name!\",\n            language                                            as \"language!\",\n            description                                         as \"description!\",\n            rating                                              as \"rating!: Option<PlaylistRating>\",\n            blocked                                             as \"blocked!\",\n            curated                                             as \"curated!\",\n            is_premium                                          as \"premium!\"\n        from cte1\n        inner join playlist_data on cte1.id = playlist_data.id\n        inner join playlist on (\n            playlist_data.id = playlist.draft_id\n            or (\n                playlist_data.id = playlist.live_id\n                and last_synced_at is not null\n                and playlist.published_at is not null\n            )\n        )\n        left join playlist_admin_data \"admin\" on admin.playlist_id = playlist.id\n        "
-  },
-  "68a6cedcf31dbac17f23ec2cf4cdead5973b0bf72e32708d64e680ecc2997f6b": {
-    "describe": {
-      "columns": [
-        {
-          "name": "play_count",
-          "ordinal": 0,
-          "type_info": "Int8"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect play_count from jig_play_count\nwhere jig_id = $1;\n            "
   },
   "68b0cdf2330e61ee24a41779cd6a9a2d5d4b6aa32856cb5168bf45afd98d6ccf": {
     "describe": {
@@ -9634,28 +9590,6 @@
       }
     },
     "query": "\nupdate resource_data_module\nset\n    index = case when index = $2 then $3 else index + 1 end,\n    updated_at = now()\nwhere resource_data_id = $1 and index between $3 and $2\n"
-  },
-  "890c3176a91e4028feb349523c366a1ff87072efa205b953476e58a5358b3850": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id: Uuid",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Int4",
-          "Text",
-          "Text"
-        ]
-      }
-    },
-    "query": "\n        insert into jig_player_session_instance (session_index, ip_address, user_agent)\n        values ($1, $2, $3)\n        returning id as \"id: Uuid\"\n        "
   },
   "8948c9978692762a9d96fec41c4ca1b53f90eb2a6027e12d9e1e2a9c17626814": {
     "describe": {
