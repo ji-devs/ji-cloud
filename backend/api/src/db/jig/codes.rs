@@ -125,11 +125,57 @@ where creator_id = $1
 }
 
 pub async fn list_code_sessions(
-    _db: &PgPool,
-    _user_id: UserId,
-    _code: JigCode,
-) -> sqlx::Result<Vec<JigCodeSessionResponse>> {
-    todo!("todo soon");
+    db: &PgPool,
+    user_id: UserId,
+    code: JigCode,
+) -> Result<Vec<JigCodeSessionResponse>, error::JigCode> {
+    // ensure this user's code
+    sqlx::query!(
+        //language=SQL
+        r#"
+            SELECT * FROM public.jig_player_session
+            WHERE creator_id = $1 AND index = $2;
+        "#,
+        user_id.0,
+        code.0
+    )
+    .fetch_one(db)
+    .await?;
+
+    let sessions = sqlx::query!(
+        //language=SQL
+        r#"
+            SELECT
+                id,
+                session_index,
+                players_name,
+                started_at,
+                finished_at,
+                report
+            FROM jig_player_session_instance
+            WHERE session_index = $1 AND finished_at IS NOT NULL
+            ORDER BY started_at;
+        "#,
+        code.0
+    )
+    .fetch_all(db)
+    .await?
+    .into_iter()
+    .map(|it| {
+        Ok(JigCodeSessionResponse {
+            code: JigCode(it.session_index),
+            players_name: it.players_name,
+            started_at: it.started_at.unwrap(),
+            finished_at: it.finished_at,
+            info: match it.report {
+                Some(r) => serde_json::from_value(r)?,
+                None => None,
+            },
+        })
+    })
+    .collect::<Result<Vec<_>, error::JigCode>>()?;
+
+    Ok(sessions)
 }
 
 /// Creates new jig player session for a player
@@ -186,9 +232,24 @@ pub async fn start_session(
 
 /// Completes a jig player session for a player and updates play count
 pub async fn complete_session(
-    _db: &PgPool,
-    _session: JigPlaySession,
-    _instance_id: Uuid,
+    db: &PgPool,
+    session: JigPlaySession,
+    instance_id: Uuid,
 ) -> Result<(), error::JigCode> {
-    todo!("todo soon");
+    // TODO: bring back ip address, and check that it matches.
+    let session = serde_json::to_value(&session)?;
+    sqlx::query!(
+        //language=SQL
+        r#"
+            UPDATE jig_player_session_instance
+            SET finished_at = current_timestamp, report=$1
+            WHERE id = $2;
+        "#,
+        session,
+        instance_id
+    )
+    .execute(db)
+    .await?;
+
+    Ok(())
 }

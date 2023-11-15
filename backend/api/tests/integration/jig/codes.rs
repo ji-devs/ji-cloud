@@ -78,11 +78,7 @@ async fn create_and_list(port: u16) -> anyhow::Result<()> {
 async fn session_instance_play_count_flow(port: u16) -> anyhow::Result<()> {
     let name = "session_instance_play_count_flow";
 
-    let client: reqwest::Client = reqwest::ClientBuilder::new()
-        .user_agent("mocked user agent")
-        .connect_timeout(std::time::Duration::from_secs(5))
-        .timeout(std::time::Duration::from_secs(10))
-        .build()?;
+    let client = reqwest::Client::new();
 
     let resp = client
         .post(&format!("http://0.0.0.0:{}/v1/jig/codes/instance", port))
@@ -109,6 +105,39 @@ async fn session_instance_play_count_flow(port: u16) -> anyhow::Result<()> {
         ))
         .json(&serde_json::json!({
             "token": token,
+            "session": {
+                "modules": [
+                    {
+                        "Matching": {
+                            "module_id": "00000000-0000-0000-0000-000000000000",
+                            "rounds": [
+                                {
+                                    "2": {
+                                        "failed_tries": 3
+                                    },
+                                    "0": {
+                                        "failed_tries": 0
+                                    },
+                                    "3": {
+                                        "failed_tries": 1
+                                    }
+                                },
+                                {
+                                    "1": {
+                                        "failed_tries": 0
+                                    },
+                                    "2": {
+                                        "failed_tries": 0
+                                    },
+                                    "0": {
+                                        "failed_tries": 1
+                                    }
+                                },
+                            ]
+                        }
+                    }
+                ]
+            }
         }))
         .login()
         .send()
@@ -116,27 +145,6 @@ async fn session_instance_play_count_flow(port: u16) -> anyhow::Result<()> {
         .error_for_status()?;
 
     assert_eq!(resp.status(), StatusCode::NO_CONTENT);
-
-
-
-
-
-
-
-
-    // let resp = client
-    //     .get(&format!(
-    //         "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/play-count",
-    //         port,
-    //     ))
-    //     .login()
-    //     .send()
-    //     .await?
-    //     .error_for_status()?;
-
-    // let body: serde_json::Value = resp.json().await?;
-
-    // insta::assert_json_snapshot!(format!("{}-2", name), body);
 
     Ok(())
 }
