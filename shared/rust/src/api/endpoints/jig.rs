@@ -18,8 +18,8 @@ use crate::{
 
 use super::ApiEndpoint;
 
-/// Endpoints for jig player sessions.
-pub mod player;
+/// Endpoints for jig codes.
+pub mod codes;
 
 /// Endpoints for jig curation.
 pub mod curation;

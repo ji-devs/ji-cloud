@@ -1,25 +1,25 @@
 use chrono::{DateTime, Duration, Utc};
 use rand::{rngs::ThreadRng, Rng};
 use shared::config::{JIG_PLAYER_SESSION_CODE_MAX, JIG_PLAYER_SESSION_VALID_DURATION_SECS};
-use shared::domain::jig::player::JigPlayerSessionCreateRequest;
+use shared::domain::jig::codes::{JigCodeSessionResponse, JigPlayerSessionCreateRequest};
 use shared::domain::jig::{
-    player::{JigPlayerSession, JigPlayerSessionIndex, JigPlayerSettings},
-    JigId, TextDirection,
+    codes::{JigCode, JigCodeResponse, JigPlaySession},
+    player::JigPlayerSettings,
+    JigId,
 };
 use shared::domain::user::UserId;
 use sqlx::{error::DatabaseError, postgres::PgDatabaseError, PgPool};
 use uuid::Uuid;
 
-use crate::{
-    error,
-    extractor::{IPAddress, UserAgent},
-};
+use shared::domain::jig::TextDirection;
+
+use crate::error;
 
 pub async fn create(
     db: &PgPool,
     creator_id: UserId,
     opts: &JigPlayerSessionCreateRequest,
-) -> Result<(JigPlayerSessionIndex, DateTime<Utc>), error::JigCode> {
+) -> Result<(JigCode, DateTime<Utc>), error::JigCode> {
     let mut generator = rand::thread_rng();
 
     let mut index = generate_random_code(&mut generator);
@@ -51,7 +51,7 @@ values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         .await
         {
             Ok(_) => { // insert successful
-                return Ok((JigPlayerSessionIndex(index), expires_at));
+                return Ok((JigCode(index), expires_at));
             },
             Err(err) => match err {
                 sqlx::Error::Database(db_err) => {
@@ -89,7 +89,7 @@ fn generate_random_code(generator: &mut ThreadRng) -> i32 {
     generator.gen_range(0..JIG_PLAYER_SESSION_CODE_MAX)
 }
 
-pub async fn list_sessions(db: &PgPool, user_id: UserId) -> sqlx::Result<Vec<JigPlayerSession>> {
+pub async fn list_user_codes(db: &PgPool, user_id: UserId) -> sqlx::Result<Vec<JigCodeResponse>> {
     let sessions = sqlx::query!(
         //language=SQL
         r#"
@@ -108,8 +108,8 @@ where creator_id = $1
     .fetch_all(db)
     .await?
     .into_iter()
-    .map(|it| JigPlayerSession {
-        index: JigPlayerSessionIndex(it.index),
+    .map(|it| JigCodeResponse {
+        index: JigCode(it.index),
         name: it.name,
         settings: JigPlayerSettings {
             direction: it.direction,
@@ -124,12 +124,18 @@ where creator_id = $1
     Ok(sessions)
 }
 
+pub async fn list_code_sessions(
+    _db: &PgPool,
+    _user_id: UserId,
+    _code: JigCode,
+) -> sqlx::Result<Vec<JigCodeSessionResponse>> {
+    todo!("todo soon");
+}
+
 /// Creates new jig player session for a player
-pub async fn create_session_instance(
+pub async fn start_session(
     db: &PgPool,
-    session_index: JigPlayerSessionIndex,
-    ip_address: IPAddress,
-    user_agent: UserAgent,
+    code: JigCode,
 ) -> Result<(JigId, JigPlayerSettings, Uuid), error::JigCode> {
     let mut txn = db.begin().await?;
 
@@ -144,7 +150,7 @@ pub async fn create_session_instance(
         from jig_player_session
         where index=$1
         "#,
-        session_index.0
+        code.0
     )
     .fetch_optional(&mut txn)
     .await?
@@ -154,13 +160,11 @@ pub async fn create_session_instance(
     let instance_id = sqlx::query!(
         //language=SQL
         r#"
-        insert into jig_player_session_instance (session_index, ip_address, user_agent)
-        values ($1, $2, $3)
+        insert into jig_player_session_instance (session_index)
+        values ($1)
         returning id as "id: Uuid"
         "#,
-        session_index.0,
-        ip_address.0,
-        user_agent.0
+        code.0
     )
     .fetch_one(&mut txn)
     .await?
@@ -181,50 +185,10 @@ pub async fn create_session_instance(
 }
 
 /// Completes a jig player session for a player and updates play count
-pub async fn complete_session_instance(
-    db: &PgPool,
-    ip_address: IPAddress,
-    user_agent: UserAgent,
-    instance_id: Uuid,
+pub async fn complete_session(
+    _db: &PgPool,
+    _session: JigPlaySession,
+    _instance_id: Uuid,
 ) -> Result<(), error::JigCode> {
-    let mut txn = db.begin().await?;
-
-    let resp = sqlx::query!(
-        //language=SQL
-        r#"
-delete
-from jig_player_session_instance
-where id = $1
-returning ip_address, user_agent, (
-    select jig_id
-    from jig_player_session_instance
-             join jig_player_session on session_index = index
-) as "jig_id!: JigId"
-        "#,
-        instance_id,
-    )
-    .fetch_optional(&mut txn)
-    .await?
-    .ok_or(error::JigCode::ResourceNotFound)?;
-
-    // FIXME
-    if (resp.user_agent).ne(&user_agent.0) | (resp.ip_address).ne(&ip_address.0) {
-        return Err(error::JigCode::ResourceNotFound);
-    }
-
-    sqlx::query!(
-        //language=SQL
-        r#"
-        update jig_play_count
-        set play_count = play_count + 1
-        where jig_id = $1
-        "#,
-        resp.jig_id.0,
-    )
-    .execute(db)
-    .await?;
-
-    txn.commit().await?;
-
-    Ok(())
+    todo!("todo soon");
 }

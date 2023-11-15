@@ -29,8 +29,8 @@ use crate::{
     service::ServiceData,
 };
 
+mod codes;
 pub mod curation;
-mod player;
 pub mod report;
 
 const DEFAULT_PAGE_LIMIT: u32 = 20;
@@ -637,30 +637,32 @@ pub fn configure(cfg: &mut ServiceConfig) {
             .to(admin_transfer_jigs),
     )
     .route(
-        <jig::player::Create as ApiEndpoint>::Path::PATH,
-        jig::player::Create::METHOD.route().to(player::create),
+        <jig::codes::Create as ApiEndpoint>::Path::PATH,
+        jig::codes::Create::METHOD.route().to(codes::create),
     )
     .route(
-        <jig::player::List as ApiEndpoint>::Path::PATH,
-        jig::player::List::METHOD.route().to(player::list),
-    )
-    .route(
-        <jig::player::instance::Create as ApiEndpoint>::Path::PATH,
-        jig::player::instance::Create::METHOD
+        <jig::codes::JigCodeList as ApiEndpoint>::Path::PATH,
+        jig::codes::JigCodeList::METHOD
             .route()
-            .to(player::instance::create_session_instance),
+            .to(codes::list_user_codes),
     )
     .route(
-        <jig::player::instance::Complete as ApiEndpoint>::Path::PATH,
-        jig::player::instance::Complete::METHOD
+        <jig::codes::JigCodeSessions as ApiEndpoint>::Path::PATH,
+        jig::codes::JigCodeSessions::METHOD
             .route()
-            .to(player::instance::complete_session_instance),
+            .to(codes::list_code_sessions),
     )
     .route(
-        <jig::player::PlayCount as ApiEndpoint>::Path::PATH,
-        jig::player::PlayCount::METHOD
+        <jig::codes::instance::Create as ApiEndpoint>::Path::PATH,
+        jig::codes::instance::Create::METHOD
             .route()
-            .to(player::get_play_count),
+            .to(codes::instance::start_session),
+    )
+    .route(
+        <jig::codes::instance::Complete as ApiEndpoint>::Path::PATH,
+        jig::codes::instance::Complete::METHOD
+            .route()
+            .to(codes::instance::complete_session),
     )
     .route(
         <jig::Count as ApiEndpoint>::Path::PATH,

@@ -3,10 +3,9 @@ use actix_web::{
     HttpResponse,
 };
 use shared::{
-    api::{endpoints::jig::player, ApiEndpoint},
-    domain::jig::{
-        player::{JigPlayCountResponse, JigPlayerSession, JigPlayerSessionListResponse},
-        JigId,
+    api::{endpoints::jig::codes, ApiEndpoint},
+    domain::jig::codes::{
+        JigCode, JigCodeListResponse, JigCodeResponse, JigCodeSessionsListResponse,
     },
 };
 use sqlx::PgPool;
@@ -17,16 +16,16 @@ use crate::{db, error, extractor::TokenUser};
 pub async fn create(
     db: Data<PgPool>,
     claims: TokenUser,
-    req: Json<<player::Create as ApiEndpoint>::Req>,
+    req: Json<<codes::Create as ApiEndpoint>::Req>,
 ) -> Result<HttpResponse, error::JigCode> {
     let req = req.into_inner();
     let user_id = claims.user_id();
 
     db::jig::is_logged_in(&*db, user_id).await?;
 
-    let (index, expires_at) = db::jig::player::create(&db, user_id, &req).await?;
+    let (index, expires_at) = db::jig::codes::create(&db, user_id, &req).await?;
 
-    Ok(HttpResponse::Created().json(JigPlayerSession {
+    Ok(HttpResponse::Created().json(JigCodeResponse {
         index,
         name: req.name,
         settings: req.settings,
@@ -34,26 +33,30 @@ pub async fn create(
     }))
 }
 
-/// Fetch a jig player session code from it's jig if it exists.
-pub async fn list(
+/// Get all jig codes for user.
+pub async fn list_user_codes(
     db: Data<PgPool>,
     claims: TokenUser,
-) -> Result<Json<<player::List as ApiEndpoint>::Res>, error::JigCode> {
+) -> Result<Json<<codes::JigCodeList as ApiEndpoint>::Res>, error::JigCode> {
     let user_id = claims.user_id();
 
-    let sessions = db::jig::player::list_sessions(&*db, user_id).await?;
+    let codes = db::jig::codes::list_user_codes(&*db, user_id).await?;
 
-    Ok(Json(JigPlayerSessionListResponse { sessions }))
+    Ok(Json(JigCodeListResponse { codes }))
 }
 
-/// Post an increase in the number of times a jig was played
-pub async fn get_play_count(
+/// Fetch all sessions for a code.
+pub async fn list_code_sessions(
     db: Data<PgPool>,
-    path: web::Path<JigId>,
-) -> Result<Json<<player::PlayCount as ApiEndpoint>::Res>, error::NotFound> {
-    let play_count = db::jig::get_play_count(&*db, path.into_inner()).await?;
+    claims: TokenUser,
+    path: web::Path<JigCode>,
+) -> Result<Json<<codes::JigCodeSessions as ApiEndpoint>::Res>, error::JigCode> {
+    let code = path.into_inner();
+    let user_id = claims.user_id();
 
-    Ok(Json(JigPlayCountResponse { play_count }))
+    let sessions = db::jig::codes::list_code_sessions(&*db, user_id, code).await?;
+
+    Ok(Json(JigCodeSessionsListResponse { sessions }))
 }
 
 pub mod instance {
@@ -65,37 +68,32 @@ pub mod instance {
     use ji_core::settings::RuntimeSettings;
     use serde::Deserialize;
     use shared::{
-        api::{endpoints::jig::player, ApiEndpoint},
-        domain::jig::player::instance::PlayerSessionInstanceResponse,
+        api::{endpoints::jig::codes, ApiEndpoint},
+        domain::jig::codes::instance::PlayerSessionInstanceResponse,
     };
     use sqlx::PgPool;
 
     use crate::{
         db, error,
-        extractor::{IPAddress, UserAgent},
         token::{create_player_session_instance_token, validate_token},
     };
     use uuid::Uuid;
 
     /// Create a jig player session instance
-    pub async fn create_session_instance(
+    pub async fn start_session(
         settings: Data<RuntimeSettings>,
         db: Data<PgPool>,
-        ip_address: IPAddress,
-        user_agent: UserAgent,
-        req: Json<<player::instance::Create as ApiEndpoint>::Req>,
+        req: Json<<codes::instance::Create as ApiEndpoint>::Req>,
     ) -> Result<
         (
-            Json<<player::instance::Create as ApiEndpoint>::Res>,
+            Json<<codes::instance::Create as ApiEndpoint>::Res>,
             actix_web::http::StatusCode,
         ),
         error::JigCode,
     > {
         let req = req.into_inner();
 
-        let resp =
-            db::jig::player::create_session_instance(&*db, req.index, ip_address, user_agent)
-                .await?;
+        let resp = db::jig::codes::start_session(&*db, req.code).await?;
 
         let token: String = create_player_session_instance_token(
             &settings.token_secret,
@@ -121,12 +119,10 @@ pub mod instance {
     }
 
     /// Create a jig player session for someone who's not the author, if one doesn't already exist
-    pub async fn complete_session_instance(
+    pub async fn complete_session(
         settings: Data<RuntimeSettings>,
         db: Data<PgPool>,
-        ip_address: IPAddress,
-        user_agent: UserAgent,
-        req: Json<<player::instance::Complete as ApiEndpoint>::Req>,
+        req: Json<<codes::instance::Complete as ApiEndpoint>::Req>,
     ) -> Result<HttpResponse, error::JigCode> {
         let req = req.into_inner();
 
@@ -135,8 +131,7 @@ pub mod instance {
 
         let instance_token: InstanceToken = serde_json::from_value(token)?;
 
-        db::jig::player::complete_session_instance(&db, ip_address, user_agent, instance_token.sub)
-            .await?;
+        db::jig::codes::complete_session(&db, req.session, instance_token.sub).await?;
 
         Ok(HttpResponse::NoContent().finish())
     }

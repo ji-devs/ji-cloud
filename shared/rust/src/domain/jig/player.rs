@@ -2,13 +2,7 @@
 
 use std::ops::Deref;
 
-use chrono::{DateTime, Utc};
-use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
-
-use crate::api::endpoints::PathPart;
-
-use super::JigId;
 
 /// Settings for the player session.
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -68,112 +62,6 @@ impl TextDirection {
     /// check if is right to left
     pub fn is_rtl(&self) -> bool {
         self == &Self::RightToLeft
-    }
-}
-
-/// Four-digit code identifying a Jig player session
-#[derive(Serialize, Deserialize, Debug, Copy, Clone, PathPart)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-pub struct JigPlayerSessionIndex(pub i32);
-
-make_path_parts!(JigPlayerSessionCreatePath => "/v1/jig/player");
-
-/// Request to create a player session for a jig.
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-pub struct JigPlayerSessionCreateRequest {
-    /// ID of the Jig that the session is for
-    pub jig_id: JigId,
-
-    /// Display name
-    pub name: Option<String>,
-
-    /// Settings for the session
-    pub settings: JigPlayerSettings,
-}
-
-/// Request to create a player session for a jig.
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-pub struct JigPlayerSessionCreateResponse {
-    /// Four-digit code identifying a Jig player session
-    pub index: JigPlayerSessionIndex,
-}
-
-/// Over-the-wire representation of a jig player session
-#[derive(Serialize, Deserialize, Debug)]
-pub struct JigPlayerSession {
-    /// Four-digit code identifying a Jig player session
-    pub index: JigPlayerSessionIndex,
-
-    /// Display name.
-    pub name: Option<String>,
-
-    /// Settings for the player session.
-    pub settings: JigPlayerSettings,
-
-    /// When the player session expires
-    pub expires_at: DateTime<Utc>,
-}
-
-make_path_parts!(JigPlayerSessionListPath => "/v1/jig/player");
-
-/// Lists all jig player sessions associated with a jig
-#[derive(Serialize, Deserialize, Debug)]
-pub struct JigPlayerSessionListResponse {
-    /// Vector of the jig sessions
-    pub sessions: Vec<JigPlayerSession>,
-}
-
-make_path_parts!(JigPlayCountPath => "/v1/jig/{}/play-count" => JigPlayerSessionIndex);
-
-/// Response for completing a session for a jig play as a player and updating the jig play count
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-pub struct JigPlayCountResponse {
-    /// Number of times a jig was completed
-    pub play_count: i64,
-}
-
-/// Types for Jig session instance endpoints
-pub mod instance {
-    use macros::make_path_parts;
-    use serde::{Deserialize, Serialize};
-
-    use crate::domain::jig::{player::JigPlayerSessionIndex, JigId, JigPlayerSettings};
-
-    make_path_parts!(PlayerSessionInstanceCreatePath => "/v1/jig/player/instance");
-
-    /// Request to create a player (who is not the author) session for a JIG.
-    #[derive(Serialize, Deserialize, Debug)]
-    pub struct PlayerSessionInstanceCreateRequest {
-        /// Four-digit code identifying a JIG player session
-        pub index: JigPlayerSessionIndex,
-    }
-
-    /// Response for successfully creating an instance of a JIG player session. contains the token
-    #[derive(Serialize, Deserialize, Debug)]
-    #[serde(rename_all = "camelCase")]
-    pub struct PlayerSessionInstanceResponse {
-        /// ID of the JIG that the session is for
-        pub jig_id: JigId,
-
-        /// Settings for the player session.
-        pub settings: JigPlayerSettings,
-
-        /// Token that will be passed to confirm a JIG was played all the way through
-        pub token: String,
-    }
-
-    make_path_parts!(PlayerSessionInstanceCompletePath => "/v1/jig/player/instance/complete");
-
-    /// Request to complete a player session for a JIG.
-    #[derive(Serialize, Deserialize, Debug)]
-    #[serde(rename_all = "camelCase")]
-    pub struct PlayerSessionInstanceCompleteRequest {
-        /// Token that will be passed to confirm a JIG was played all the way through
-        pub token: String,
     }
 }
 

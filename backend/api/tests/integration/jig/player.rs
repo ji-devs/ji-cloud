@@ -5,7 +5,7 @@ use crate::{
 use http::StatusCode;
 use macros::test_service;
 use shared::domain::jig::player::{
-    instance::PlayerSessionInstanceResponse, JigPlayerSession, JigPlayerSessionListResponse,
+    instance::PlayerSessionInstanceResponse, JigCodeResponse, JigPlayerSessionListResponse,
 };
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
@@ -36,7 +36,7 @@ async fn create_and_list(port: u16) -> anyhow::Result<()> {
 
     assert_eq!(resp.status(), StatusCode::CREATED);
 
-    let body: JigPlayerSession = resp.json().await?;
+    let body: JigCodeResponse = resp.json().await?;
 
     insta::assert_json_snapshot!(format!("{}-1",name), body, { ".**.index" => "[index]", ".**.expires_at" => "[timestamp]" });
 

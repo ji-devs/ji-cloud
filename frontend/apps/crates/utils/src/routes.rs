@@ -2,7 +2,7 @@ use crate::asset::{CoursePlayerOptions, JigPlayerOptions, PlaylistPlayerOptions}
 use gloo::utils::window;
 use serde::{Deserialize, Serialize};
 use shared::domain::billing::{PlanType, SchoolId};
-use shared::domain::jig::player::JigPlayerSessionIndex;
+use shared::domain::jig::codes::JigCode;
 use shared::domain::{
     asset::{AssetId, AssetType, DraftOrLive},
     category::CategoryId,
@@ -181,7 +181,7 @@ pub enum KidsRoute {
 #[derive(Debug, Clone)]
 pub enum ClassroomRoute {
     Codes,
-    CodeSession(JigPlayerSessionIndex),
+    CodeSession(JigCode),
 }
 
 #[derive(Debug, Clone)]
@@ -444,7 +444,7 @@ impl Route {
             ["classroom", "codes"] => Self::Classroom(ClassroomRoute::Codes),
             ["classroom", "codes", code, "sessions"] => {
                 let code = code.parse().unwrap_ji();
-                let code = JigPlayerSessionIndex(code);
+                let code = JigCode(code);
                 Self::Classroom(ClassroomRoute::CodeSession(code))
             }
             ["dev", "showcase", id] => {
