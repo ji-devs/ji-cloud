@@ -75,7 +75,7 @@ pub mod instance {
 
     use crate::{
         db, error,
-        token::{create_player_session_instance_token, validate_token},
+        token::{create_player_session_instance_token, validate_token}, extractor::IPAddress,
     };
     use uuid::Uuid;
 
@@ -83,6 +83,7 @@ pub mod instance {
     pub async fn start_session(
         settings: Data<RuntimeSettings>,
         db: Data<PgPool>,
+        ip_address: IPAddress,
         req: Json<<codes::instance::Create as ApiEndpoint>::Req>,
     ) -> Result<
         (
@@ -93,7 +94,7 @@ pub mod instance {
     > {
         let req = req.into_inner();
 
-        let resp = db::jig::codes::start_session(&*db, req.code).await?;
+        let resp = db::jig::codes::start_session(&*db, req.code, ip_address).await?;
 
         let token: String = create_player_session_instance_token(
             &settings.token_secret,
@@ -122,6 +123,7 @@ pub mod instance {
     pub async fn complete_session(
         settings: Data<RuntimeSettings>,
         db: Data<PgPool>,
+        ip_address: IPAddress,
         req: Json<<codes::instance::Complete as ApiEndpoint>::Req>,
     ) -> Result<HttpResponse, error::JigCode> {
         let req = req.into_inner();
@@ -131,7 +133,7 @@ pub mod instance {
 
         let instance_token: InstanceToken = serde_json::from_value(token)?;
 
-        db::jig::codes::complete_session(&db, req.session, instance_token.sub).await?;
+        db::jig::codes::complete_session(&db, req.session, instance_token.sub, ip_address).await?;
 
         Ok(HttpResponse::NoContent().finish())
     }

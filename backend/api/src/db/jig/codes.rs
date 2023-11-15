@@ -14,6 +14,7 @@ use uuid::Uuid;
 use shared::domain::jig::TextDirection;
 
 use crate::error;
+use crate::extractor::IPAddress;
 
 pub async fn create(
     db: &PgPool,
@@ -181,6 +182,7 @@ pub async fn list_code_sessions(
 pub async fn start_session(
     db: &PgPool,
     code: JigCode,
+    ip_address: IPAddress,
 ) -> Result<(JigId, JigPlayerSettings, Uuid), error::JigCode> {
     let mut txn = db.begin().await?;
 
@@ -205,11 +207,12 @@ pub async fn start_session(
     let instance_id = sqlx::query!(
         //language=SQL
         r#"
-        insert into jig_code_session (code, started_at)
-        values ($1, current_timestamp)
+        insert into jig_code_session (code, started_at, ip_address)
+        values ($1, current_timestamp, $2)
         returning id as "id: Uuid"
         "#,
-        code.0
+        code.0,
+        ip_address.0,
     )
     .fetch_one(&mut txn)
     .await?
@@ -234,18 +237,19 @@ pub async fn complete_session(
     db: &PgPool,
     session: JigPlaySession,
     instance_id: Uuid,
+    ip_address: IPAddress,
 ) -> Result<(), error::JigCode> {
-    // TODO: bring back ip address, and check that it matches.
     let session = serde_json::to_value(&session)?;
     sqlx::query!(
         //language=SQL
         r#"
             UPDATE jig_code_session
             SET finished_at = current_timestamp, info=$1
-            WHERE id = $2;
+            WHERE id = $2 and ip_address = $3 and finished_at is null;
         "#,
         session,
-        instance_id
+        instance_id,
+        ip_address.0,
     )
     .execute(db)
     .await?;
