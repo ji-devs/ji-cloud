@@ -75,7 +75,8 @@ pub mod instance {
 
     use crate::{
         db, error,
-        token::{create_player_session_instance_token, validate_token}, extractor::IPAddress,
+        extractor::IPAddress,
+        token::{create_player_session_instance_token, validate_token},
     };
     use uuid::Uuid;
 
