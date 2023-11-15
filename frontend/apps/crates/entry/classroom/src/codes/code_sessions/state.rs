@@ -1,13 +1,13 @@
 use std::rc::Rc;
 
-use shared::domain::jig::player::JigPlayerSessionIndex;
+use shared::domain::jig::codes::JigCode;
 
 pub struct CodeSessions {
-    pub code: JigPlayerSessionIndex,
+    pub code: JigCode,
 }
 
 impl CodeSessions {
-    pub fn new(code: JigPlayerSessionIndex) -> Rc<Self> {
+    pub fn new(code: JigCode) -> Rc<Self> {
         Rc::new(Self { code })
     }
 }

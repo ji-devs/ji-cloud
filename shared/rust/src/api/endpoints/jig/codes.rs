@@ -1,13 +1,13 @@
 use crate::{
     api::{ApiEndpoint, Method},
-    domain::jig::player::{
-        JigPlayCountPath, JigPlayCountResponse, JigPlayerSessionCreatePath,
-        JigPlayerSessionCreateRequest, JigPlayerSessionCreateResponse, JigPlayerSessionListPath,
-        JigPlayerSessionListResponse,
+    domain::jig::codes::{
+        JigCodeListPath, JigCodeListResponse, JigCodeSessionsListResponse, JigCodeSessionsPath,
+        JigPlayerSessionCreatePath, JigPlayerSessionCreateRequest, JigPlayerSessionCreateResponse,
     },
     error::EmptyError,
 };
 
+/// TODO: update these docs. Out of date.
 /// Create a player session from a jig. Requestor needs permissions over the jig.
 ///
 /// # Flow
@@ -24,7 +24,7 @@ use crate::{
 ///
 /// The hierarchy here is Jig -> Player Session -> Session Instance, where each arrow is a one-to-many mapping.
 ///
-/// Each level is uniquely identified by `JigId` -> `JigPlayerSessionIndex` -> token.
+/// Each level is uniquely identified by `JigId` -> `JigCode` -> token.
 ///
 /// # Errors
 ///
@@ -49,32 +49,22 @@ impl ApiEndpoint for Create {
     const METHOD: Method = Method::Post;
 }
 
-/// List the player session codes associated with a jig.
-///
-/// # Errors
-///
-/// * [`400 - BadRequest`](http::StatusCode::BAD_REQUEST) if the request is malformed.
-/// * [`401 - Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
-/// * [`403 - Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
-/// * ['404 - NotFound'](http::StatusCode::NOT_FOUND) if the jig does not exist.
-pub struct List;
-impl ApiEndpoint for List {
-    type Path = JigPlayerSessionListPath;
+/// List codes creator by user.
+pub struct JigCodeList;
+impl ApiEndpoint for JigCodeList {
+    type Path = JigCodeListPath;
     type Req = ();
-    type Res = JigPlayerSessionListResponse;
+    type Res = JigCodeListResponse;
     type Err = EmptyError;
     const METHOD: Method = Method::Get;
 }
 
-/// Number of times a JIG has been played.
-///
-/// # Authorization
-/// * None
-pub struct PlayCount;
-impl ApiEndpoint for PlayCount {
-    type Path = JigPlayCountPath;
+/// list sessions of code
+pub struct JigCodeSessions;
+impl ApiEndpoint for JigCodeSessions {
+    type Path = JigCodeSessionsPath;
     type Req = ();
-    type Res = JigPlayCountResponse;
+    type Res = JigCodeSessionsListResponse;
     type Err = EmptyError;
     const METHOD: Method = Method::Get;
 }
@@ -83,7 +73,7 @@ impl ApiEndpoint for PlayCount {
 pub mod instance {
     use crate::{
         api::{ApiEndpoint, Method},
-        domain::jig::player::instance::{
+        domain::jig::codes::instance::{
             PlayerSessionInstanceCompletePath, PlayerSessionInstanceCompleteRequest,
             PlayerSessionInstanceCreatePath, PlayerSessionInstanceCreateRequest,
             PlayerSessionInstanceResponse,

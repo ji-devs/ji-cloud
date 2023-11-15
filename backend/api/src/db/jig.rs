@@ -24,9 +24,9 @@ use uuid::Uuid;
 use crate::error;
 
 pub(crate) mod additional_resource;
+pub(crate) mod codes;
 pub(crate) mod curation;
 pub(crate) mod module;
-pub(crate) mod player;
 pub(crate) mod report;
 
 pub async fn create(
@@ -1284,23 +1284,6 @@ values ($1, 0)
     txn.commit().await?;
 
     Ok(new_jig.id)
-}
-
-pub async fn get_play_count(db: &PgPool, id: JigId) -> Result<i64, error::NotFound> {
-    let play_count = sqlx::query!(
-        // language=SQL
-        r#"
-select play_count from jig_play_count
-where jig_id = $1;
-            "#,
-        id.0,
-    )
-    .fetch_optional(db)
-    .await?
-    .ok_or(error::NotFound::ResourceNotFound)?
-    .play_count;
-
-    Ok(play_count)
 }
 
 pub async fn jig_play(db: &PgPool, id: JigId) -> anyhow::Result<()> {

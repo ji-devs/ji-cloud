@@ -1,0 +1,178 @@
+//! Types for Jig short codes for sharing
+
+use std::collections::HashMap;
+
+use chrono::{DateTime, Utc};
+use macros::make_path_parts;
+use serde::{Deserialize, Serialize};
+
+use crate::{api::endpoints::PathPart, domain::module::ModuleId};
+
+use super::{JigId, JigPlayerSettings};
+
+/// Four-digit code identifying a Jig player session
+#[derive(Serialize, Deserialize, Debug, Copy, Clone, PathPart)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(feature = "backend", sqlx(transparent))]
+pub struct JigCode(pub i32);
+
+make_path_parts!(JigPlayerSessionCreatePath => "/v1/jig/codes");
+
+/// Request to create a player session for a jig.
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct JigPlayerSessionCreateRequest {
+    /// ID of the Jig that the session is for
+    pub jig_id: JigId,
+
+    /// Display name
+    pub name: Option<String>,
+
+    /// Settings for the session
+    pub settings: JigPlayerSettings,
+}
+
+/// Request to create a player session for a jig.
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct JigPlayerSessionCreateResponse {
+    /// Four-digit code identifying a Jig player session
+    pub index: JigCode,
+}
+
+/// Over-the-wire representation of a jig player session
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct JigCodeResponse {
+    /// Four-digit code identifying a Jig player session
+    pub index: JigCode,
+
+    /// Display name.
+    pub name: Option<String>,
+
+    /// Settings for the player session.
+    pub settings: JigPlayerSettings,
+
+    /// When the player session expires
+    pub expires_at: DateTime<Utc>,
+}
+
+make_path_parts!(JigCodeListPath => "/v1/jig/codes");
+
+/// Lists all jig player sessions associated with a jig
+#[derive(Serialize, Deserialize, Debug)]
+pub struct JigCodeListResponse {
+    /// Vector of the jig sessions
+    pub codes: Vec<JigCodeResponse>,
+}
+
+make_path_parts!(JigCodeSessionsPath => "/v1/jig/codes/{}/sessions" => JigCode);
+
+/// Lists all jig player sessions associated with a jig
+#[derive(Serialize, Deserialize, Debug)]
+pub struct JigCodeSessionsListResponse {
+    /// Vector of the jig sessions
+    pub sessions: Vec<JigCodeSessionResponse>,
+}
+
+/// Lists all jig player sessions associated with a jig
+#[derive(Serialize, Deserialize, Debug)]
+pub struct JigCodeSessionResponse {
+    ///
+    pub code: JigCode,
+    ///
+    pub players_name: Option<String>,
+    ///
+    pub started_at: DateTime<Utc>,
+    ///
+    pub finished_at: Option<DateTime<Utc>>,
+    ///
+    pub info: JigPlaySession,
+}
+
+/// Play session
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct JigPlaySession {
+    /// modules
+    pub modules: JigPlaySessionModule,
+}
+
+/// modules
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub enum JigPlaySessionModule {
+    /// Matching
+    Matching(JigPlaySessionMatching),
+}
+
+/// matching module
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct JigPlaySessionMatching {
+    /// related module id
+    pub module_id: ModuleId,
+
+    /// list of rounds for this module
+    pub rounds: Vec<HashMap<usize, JigPlaySessionMatchingCard>>,
+}
+
+impl JigPlaySessionMatching {
+    /// create new from module id
+    pub fn new(module_id: ModuleId) -> Self {
+        Self {
+            module_id,
+            rounds: vec![],
+        }
+    }
+}
+
+///
+#[derive(Clone, Debug, Hash, Serialize, Deserialize)]
+pub struct JigPlaySessionMatchingCard {
+    /// unsuccessful try count
+    pub failed_tries: u16,
+}
+
+/// Types for Jig session instance endpoints
+pub mod instance {
+    use macros::make_path_parts;
+    use serde::{Deserialize, Serialize};
+
+    use crate::domain::jig::{
+        codes::{JigCode, JigPlaySession},
+        JigId, JigPlayerSettings,
+    };
+
+    make_path_parts!(PlayerSessionInstanceCreatePath => "/v1/jig/codes/instance");
+
+    /// Request to create a player (who is not the author) session for a JIG.
+    #[derive(Serialize, Deserialize, Debug)]
+    pub struct PlayerSessionInstanceCreateRequest {
+        /// Four-digit code identifying a JIG player session
+        pub code: JigCode,
+    }
+
+    /// Response for successfully creating an instance of a JIG player session. contains the token
+    #[derive(Serialize, Deserialize, Debug)]
+    #[serde(rename_all = "camelCase")]
+    pub struct PlayerSessionInstanceResponse {
+        /// ID of the JIG that the session is for
+        pub jig_id: JigId,
+
+        /// Settings for the player session.
+        pub settings: JigPlayerSettings,
+
+        /// Token that will be passed to confirm a JIG was played all the way through
+        pub token: String,
+    }
+
+    make_path_parts!(PlayerSessionInstanceCompletePath => "/v1/jig/codes/instance/complete");
+
+    /// Request to complete a player session for a JIG.
+    #[derive(Serialize, Deserialize, Debug)]
+    #[serde(rename_all = "camelCase")]
+    pub struct PlayerSessionInstanceCompleteRequest {
+        /// Token that will be passed to confirm a JIG was played all the way through
+        pub token: String,
+
+        /// session
+        pub session: JigPlaySession,
+    }
+}

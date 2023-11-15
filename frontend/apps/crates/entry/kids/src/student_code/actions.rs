@@ -3,12 +3,12 @@ use std::rc::Rc;
 use dominator::clone;
 use shared::{
     api::endpoints::jig,
-    domain::jig::player::{
+    domain::jig::codes::{
         instance::{
             PlayerSessionInstanceCreatePath, PlayerSessionInstanceCreateRequest,
             PlayerSessionInstanceResponse,
         },
-        JigPlayerSessionIndex,
+        JigCode,
     },
 };
 use utils::prelude::*;
@@ -30,10 +30,10 @@ pub fn submit_code(state: Rc<State>, number: String) {
 
 async fn code_to_jig_id(number: String) -> Result<PlayerSessionInstanceResponse, ()> {
     let number = number.parse::<i32>().map_err(|_| ())?;
-    let index = JigPlayerSessionIndex(number);
-    let req = PlayerSessionInstanceCreateRequest { index };
+    let code = JigCode(number);
+    let req = PlayerSessionInstanceCreateRequest { code };
 
-    let (result, status) = jig::player::instance::Create::api_no_auth_status(
+    let (result, status) = jig::codes::instance::Create::api_no_auth_status(
         PlayerSessionInstanceCreatePath(),
         Some(req),
     )

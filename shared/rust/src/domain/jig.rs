@@ -5,6 +5,8 @@ pub mod report;
 use macros::make_path_parts;
 pub use report::{JigReport, ReportId};
 
+pub mod codes;
+
 pub mod player;
 pub use player::{JigPlayerSettings, TextDirection};
 
