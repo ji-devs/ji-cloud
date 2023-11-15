@@ -86,14 +86,14 @@ pub struct JigCodeSessionResponse {
     ///
     pub finished_at: Option<DateTime<Utc>>,
     ///
-    pub info: JigPlaySession,
+    pub info: Option<JigPlaySession>,
 }
 
 /// Play session
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct JigPlaySession {
     /// modules
-    pub modules: JigPlaySessionModule,
+    pub modules: Vec<JigPlaySessionModule>,
 }
 
 /// modules
