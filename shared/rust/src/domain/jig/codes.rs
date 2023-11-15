@@ -77,15 +77,15 @@ pub struct JigCodeSessionsListResponse {
 /// Lists all jig player sessions associated with a jig
 #[derive(Serialize, Deserialize, Debug)]
 pub struct JigCodeSessionResponse {
-    ///
+    /// code
     pub code: JigCode,
-    ///
+    /// Playing's name
     pub players_name: Option<String>,
-    ///
+    /// star time
     pub started_at: DateTime<Utc>,
-    ///
+    /// end time
     pub finished_at: Option<DateTime<Utc>>,
-    ///
+    /// information about the session
     pub info: Option<JigPlaySession>,
 }
 
