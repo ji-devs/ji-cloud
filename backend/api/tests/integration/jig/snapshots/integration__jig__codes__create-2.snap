@@ -19,6 +19,17 @@ expression: body
       "index": "[index]",
       "name": null,
       "settings": {
+        "direction": "ltr",
+        "displayScore": true,
+        "trackAssessments": true,
+        "dragAssist": true
+      },
+      "expires_at": "[timestamp]"
+    },
+    {
+      "index": "[index]",
+      "name": null,
+      "settings": {
         "direction": "rtl",
         "displayScore": false,
         "trackAssessments": false,
