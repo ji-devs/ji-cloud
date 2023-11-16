@@ -22,25 +22,24 @@ pub async fn create(
 ) -> Result<(JigCode, DateTime<Utc>), error::JigCode> {
     let mut generator = rand::thread_rng();
 
-    let mut index = generate_random_code(&mut generator);
+    let mut code = generate_random_code(&mut generator);
 
     let expires_at = Utc::now() + Duration::seconds(JIG_PLAYER_SESSION_VALID_DURATION_SECS as i64);
 
     // retry as many times as there are possible codes
     // NOTE: this is NOT guaranteed to successfully insert if there
     for _ in 0..JIG_PLAYER_SESSION_CODE_MAX * 2 {
-        log::debug!("Try insert with index {}", index);
         match sqlx::query!(
             //language=SQL
             r#"
-insert into jig_player_session (jig_id, creator_id, name, index, direction, display_score, track_assessments, drag_assist, expires_at)
+insert into jig_code (jig_id, creator_id, name, code, direction, display_score, track_assessments, drag_assist, expires_at)
 values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 
 "#,
             opts.jig_id.0,
             creator_id.0,
             opts.name,
-            index,
+            code,
             opts.settings.direction as i16,
             opts.settings.display_score,
             opts.settings.track_assessments,
@@ -51,13 +50,13 @@ values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         .await
         {
             Ok(_) => { // insert successful
-                return Ok((JigCode(index), expires_at));
+                return Ok((JigCode(code), expires_at));
             },
             Err(err) => match err {
                 sqlx::Error::Database(db_err) => {
                     session_create_error_or_continue(db_err)?;
-                    // did not return error on previous line, retry with new index
-                    index = generate_random_code(&mut generator);
+                    // did not return error on previous line, retry with new code
+                    code = generate_random_code(&mut generator);
                 },
                 err => return Err(anyhow::anyhow!("sqlx error: {:?}", err).into()),
             },
@@ -93,14 +92,14 @@ pub async fn list_user_codes(db: &PgPool, user_id: UserId) -> sqlx::Result<Vec<J
     let sessions = sqlx::query!(
         //language=SQL
         r#"
-select index     as "index!: i32",
+select code     as "code!: i32",
        direction as "direction: TextDirection",
        display_score,
        track_assessments,
        drag_assist,
        name as "name?",
        expires_at as "expires_at: DateTime<Utc>"
-from jig_player_session
+from jig_code
 where creator_id = $1
 "#,
         user_id.0
@@ -109,7 +108,7 @@ where creator_id = $1
     .await?
     .into_iter()
     .map(|it| JigCodeResponse {
-        index: JigCode(it.index),
+        index: JigCode(it.code),
         name: it.name,
         settings: JigPlayerSettings {
             direction: it.direction,
@@ -133,8 +132,8 @@ pub async fn list_code_sessions(
     sqlx::query!(
         //language=SQL
         r#"
-            SELECT * FROM public.jig_player_session
-            WHERE creator_id = $1 AND index = $2;
+            SELECT * FROM jig_code
+            WHERE creator_id = $1 AND code = $2;
         "#,
         user_id.0,
         code.0
@@ -147,13 +146,13 @@ pub async fn list_code_sessions(
         r#"
             SELECT
                 id,
-                session_index,
+                code,
                 players_name,
                 started_at,
                 finished_at,
-                report
-            FROM jig_player_session_instance
-            WHERE session_index = $1 AND finished_at IS NOT NULL
+                info
+            FROM jig_code_session
+            WHERE code = $1 AND finished_at IS NOT NULL
             ORDER BY started_at;
         "#,
         code.0
@@ -163,11 +162,11 @@ pub async fn list_code_sessions(
     .into_iter()
     .map(|it| {
         Ok(JigCodeSessionResponse {
-            code: JigCode(it.session_index),
+            code: JigCode(it.code),
             players_name: it.players_name,
-            started_at: it.started_at.unwrap(),
+            started_at: it.started_at,
             finished_at: it.finished_at,
-            info: match it.report {
+            info: match it.info {
                 Some(r) => serde_json::from_value(r)?,
                 None => None,
             },
@@ -193,8 +192,8 @@ pub async fn start_session(
                display_score, 
                track_assessments, 
                drag_assist
-        from jig_player_session
-        where index=$1
+        from jig_code
+        where code=$1
         "#,
         code.0
     )
@@ -202,12 +201,12 @@ pub async fn start_session(
     .await?
     .ok_or(error::JigCode::ResourceNotFound)?;
 
-    // insert into the jig_player_session_instance table returning the instance_id
+    // insert into the jig_code_session table returning the instance_id
     let instance_id = sqlx::query!(
         //language=SQL
         r#"
-        insert into jig_player_session_instance (session_index)
-        values ($1)
+        insert into jig_code_session (code, started_at)
+        values ($1, current_timestamp)
         returning id as "id: Uuid"
         "#,
         code.0
@@ -241,8 +240,8 @@ pub async fn complete_session(
     sqlx::query!(
         //language=SQL
         r#"
-            UPDATE jig_player_session_instance
-            SET finished_at = current_timestamp, report=$1
+            UPDATE jig_code_session
+            SET finished_at = current_timestamp, info=$1
             WHERE id = $2;
         "#,
         session,

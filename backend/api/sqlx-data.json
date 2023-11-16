@@ -366,6 +366,81 @@
     },
     "query": "select count(*) - 1 as \"max_index!\" from course_data_unit where course_data_id = $1"
   },
+  "0b6dd087db977a429802890f2fe8d890d2ada79aa0eb9106992ee4fa30fec60e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "code",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "jig_id",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "direction",
+          "ordinal": 3,
+          "type_info": "Int2"
+        },
+        {
+          "name": "display_score",
+          "ordinal": 4,
+          "type_info": "Bool"
+        },
+        {
+          "name": "track_assessments",
+          "ordinal": 5,
+          "type_info": "Bool"
+        },
+        {
+          "name": "drag_assist",
+          "ordinal": 6,
+          "type_info": "Bool"
+        },
+        {
+          "name": "expires_at",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "creator_id",
+          "ordinal": 8,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 9,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n            SELECT * FROM jig_code\n            WHERE creator_id = $1 AND code = $2;\n        "
+  },
   "0b806e26d1df6f374e4a0bb40fb4135c666b7bcc1a14b924af53687679106d77": {
     "describe": {
       "columns": [],
@@ -416,6 +491,26 @@
       }
     },
     "query": "\nselect id,  kind as \"kind: AnimationKind\"\nfrom animation_metadata\ninner join global_animation_upload on animation_metadata.id = global_animation_upload.animation_id\nwhere (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)\nfor no key update of global_animation_upload\nfor share of animation_metadata\nskip locked\n"
+  },
+  "0db87424048e78d9c15169e78c37d2c9eee9c12af12b84f0812ea5ee5f534bf8": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Text",
+          "Int4",
+          "Int2",
+          "Bool",
+          "Bool",
+          "Bool",
+          "Timestamptz"
+        ]
+      }
+    },
+    "query": "\ninsert into jig_code (jig_id, creator_id, name, code, direction, display_score, track_assessments, drag_assist, expires_at)\nvalues ($1, $2, $3, $4, $5, $6, $7, $8, $9)\n\n"
   },
   "0e1b634064472c2a561c10537567da0c0972ee53bf78607152231c742a1c3654": {
     "describe": {
@@ -574,6 +669,56 @@
       }
     },
     "query": "\nupdate user_profile\nset badge      = $2,\n    updated_at = now()\nwhere user_id = $1\nand ($2 is distinct from badge)\n        "
+  },
+  "11eb915c9d72698b78f7bc819c97a9583421cd35477c5b860f717a8d0a1937e7": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "code",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "players_name",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "started_at",
+          "ordinal": 3,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "finished_at",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "info",
+          "ordinal": 5,
+          "type_info": "Json"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        true,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n            SELECT\n                id,\n                code,\n                players_name,\n                started_at,\n                finished_at,\n                info\n            FROM jig_code_session\n            WHERE code = $1 AND finished_at IS NOT NULL\n            ORDER BY started_at;\n        "
   },
   "124802b593631b117b5b2e1d2eb43712d579be04d5b218f7c19f382f3fe5dcca": {
     "describe": {
@@ -2287,62 +2432,6 @@
     },
     "query": "\nselect exists (\n    select 1 from user_scope where user_id = $1 and scope = any($2)\n) or (\n    exists (select 1 from user_scope where user_id = $1 and scope = $3) and\n    not exists (select 1 from playlist where playlist.id = $4 and playlist.author_id <> $1)\n) as \"authed!\"\n"
   },
-  "2bd90d6013184b084c6687b13246b3ae86642b6e43e64760ece97316b247d867": {
-    "describe": {
-      "columns": [
-        {
-          "name": "index!: i32",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "direction: TextDirection",
-          "ordinal": 1,
-          "type_info": "Int2"
-        },
-        {
-          "name": "display_score",
-          "ordinal": 2,
-          "type_info": "Bool"
-        },
-        {
-          "name": "track_assessments",
-          "ordinal": 3,
-          "type_info": "Bool"
-        },
-        {
-          "name": "drag_assist",
-          "ordinal": 4,
-          "type_info": "Bool"
-        },
-        {
-          "name": "name?",
-          "ordinal": 5,
-          "type_info": "Text"
-        },
-        {
-          "name": "expires_at: DateTime<Utc>",
-          "ordinal": 6,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect index     as \"index!: i32\",\n       direction as \"direction: TextDirection\",\n       display_score,\n       track_assessments,\n       drag_assist,\n       name as \"name?\",\n       expires_at as \"expires_at: DateTime<Utc>\"\nfrom jig_player_session\nwhere creator_id = $1\n"
-  },
   "2c4243e343b159e9eeb0b1f4cc8fd843b23bf3cfd0232b70c3594e498f94ada2": {
     "describe": {
       "columns": [
@@ -3151,6 +3240,19 @@
       }
     },
     "query": "select account_id as \"account_id: AccountId\" from school where school_id = $1"
+  },
+  "383426c5f5b15f087e973fb677db679d26d036bf50d8452623f5b88b2310e464": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Json",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n            UPDATE jig_code_session\n            SET finished_at = current_timestamp, info=$1\n            WHERE id = $2;\n        "
   },
   "3841152baf6bc0ccd3c5674bab88ea3f0853e99399e76b1e5d30e51d8d8736f3": {
     "describe": {
@@ -4370,6 +4472,50 @@
     },
     "query": "\n        update user_email\n        set email = $3::text\n        where user_id = $1 and email = $2::text\n        "
   },
+  "3f71f677003494a5fbe45f02159d0092d48fa66a958d196eca246a9d91eb3cb8": {
+    "describe": {
+      "columns": [
+        {
+          "name": "jig_id: JigId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "direction: TextDirection",
+          "ordinal": 1,
+          "type_info": "Int2"
+        },
+        {
+          "name": "display_score",
+          "ordinal": 2,
+          "type_info": "Bool"
+        },
+        {
+          "name": "track_assessments",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "drag_assist",
+          "ordinal": 4,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n        select jig_id as \"jig_id: JigId\", \n               direction as \"direction: TextDirection\", \n               display_score, \n               track_assessments, \n               drag_assist\n        from jig_code\n        where code=$1\n        "
+  },
   "3f7ad7f5eb03139f9584aa6928a1b805b4f8908a1df023a12a7cf8cba3d56d26": {
     "describe": {
       "columns": [],
@@ -4761,26 +4907,6 @@
       }
     },
     "query": "\nwith cte as (\n    select array_agg(rd.id)\n    from resource_data \"rd\"\n          inner join resource on (draft_id = rd.id or (live_id = rd.id and rd.last_synced_at is not null and published_at is not null))\n          left join resource_admin_data \"admin\" on admin.resource_id = resource.id\n          left join resource_data_resource \"rdr\" on rd.id = rdr.resource_data_id\n    where (author_id = $1 or $1 is null)\n        and (blocked = $2 or $2 is null)\n        and (rd.privacy_level = any($3) or $3 = array[]::smallint[])\n        and (rdr.resource_type_id = any($4) or $4 = array[]::uuid[])\n        and (draft_or_live = $5 or $5 is null)\n    group by updated_at, created_at, resource.published_at, admin.resource_id\n    order by case when $6 = 0 then created_at\n        when $6 = 1 then published_at\n        else coalesce(updated_at, created_at)\n  end desc, resource_id\n),\ncte1 as (\n    select * from unnest(array((select cte.array_agg[1] from cte))) with ordinality t(id\n   , ord) order by ord\n)\nselect resource.id                                              as \"resource_id: ResourceId\",\n    privacy_level                                       as \"privacy_level: PrivacyLevel\",\n    creator_id                                          as \"creator_id?: UserId\",\n    author_id                                           as \"author_id?: UserId\",\n    (select given_name || ' '::text || family_name\n        from user_profile\n     where user_profile.user_id = author_id)            as \"author_name\",\n    created_at,\n    updated_at,\n    published_at,\n    likes,\n    views,\n    live_up_to_date,\n    exists(select 1 from resource_like where resource_id = resource.id and user_id = $9)                         as \"is_liked!\",\n   display_name                                                                  as \"display_name!\",\n   language                                                                      as \"language!\",\n   description                                                                   as \"description!\",\n   translated_description                                                        as \"translated_description!: Json<HashMap<String,String>>\",\n   draft_or_live                                                                 as \"draft_or_live!: DraftOrLive\",\n   (\n       select row(resource_data_module.id, kind, is_complete)\n       from resource_data_module\n       where resource_data_id = resource_data.id\n    )                                               as \"cover?: (ModuleId, ModuleKind, bool)\",\n   array(select row (category_id)\n         from resource_data_category\n         where resource_data_id = resource_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n   array(select row (affiliation_id)\n         from resource_data_affiliation\n         where resource_data_id = resource_data.id)     as \"affiliations!: Vec<(AffiliationId,)>\",\n   array(select row (age_range_id)\n         from resource_data_age_range\n         where resource_data_id = resource_data.id)     as \"age_ranges!: Vec<(AgeRangeId,)>\",\n   array(\n            select row (rdr.id, rdr.display_name, resource_type_id, resource_content)\n            from resource_data_resource \"rdr\"\n            where rdr.resource_data_id= resource_data.id\n        )                                               as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n   locked                                     as \"locked!\",\n   other_keywords                             as \"other_keywords!\",\n   translated_keywords                        as \"translated_keywords!\",\n   rating                                     as \"rating!: Option<ResourceRating>\",\n   blocked                                    as \"blocked!\",\n   curated                                    as \"curated!\",\n   is_premium                                 as \"premium!\"\nfrom cte1\ninner join resource_data on cte1.id = resource_data.id\ninner join resource on (\n    resource_data.id = resource.draft_id\n    or (\n        resource_data.id = resource.live_id\n        and last_synced_at is not null\n        and resource.published_at is not null\n    )\n)\nleft join resource_admin_data \"admin\" on admin.resource_id = resource.id\nwhere ord > (1 * $7 * $8)\norder by ord asc\nlimit $8\n"
-  },
-  "460b559feadd42c000167990f90764360efb169bee5d776fd8b846d1d4728165": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid",
-          "Text",
-          "Int4",
-          "Int2",
-          "Bool",
-          "Bool",
-          "Bool",
-          "Timestamptz"
-        ]
-      }
-    },
-    "query": "\ninsert into jig_player_session (jig_id, creator_id, name, index, direction, display_score, track_assessments, drag_assist, expires_at)\nvalues ($1, $2, $3, $4, $5, $6, $7, $8, $9)\n\n"
   },
   "46c33b81e5196642a75aa8374f72f013f66a7b798de0b2a5a5f5a2928b1f7d7d": {
     "describe": {
@@ -5487,26 +5613,6 @@
       }
     },
     "query": "\ninsert into jig_like(jig_id, user_id)\nvalues ($1, $2)\n            "
-  },
-  "5069021905b585af157cfc2ce5f58ff6f07d92d98fe23170fc1681907d65a78e": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id: Uuid",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Int4"
-        ]
-      }
-    },
-    "query": "\n        insert into jig_player_session_instance (session_index)\n        values ($1)\n        returning id as \"id: Uuid\"\n        "
   },
   "50ff48a8d492e560f61066b5217a70876d23552f79fcb6d43dbbcd5331da14ef": {
     "describe": {
@@ -8666,6 +8772,62 @@
     },
     "query": "insert into web_media_upload (media_id, uploaded_at) values ($1, now())"
   },
+  "7ab3c06005f25b650ffe321c4056c459bc07afe23e101ab91e913690fc67d49e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "code!: i32",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "direction: TextDirection",
+          "ordinal": 1,
+          "type_info": "Int2"
+        },
+        {
+          "name": "display_score",
+          "ordinal": 2,
+          "type_info": "Bool"
+        },
+        {
+          "name": "track_assessments",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "drag_assist",
+          "ordinal": 4,
+          "type_info": "Bool"
+        },
+        {
+          "name": "name?",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "expires_at: DateTime<Utc>",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect code     as \"code!: i32\",\n       direction as \"direction: TextDirection\",\n       display_score,\n       track_assessments,\n       drag_assist,\n       name as \"name?\",\n       expires_at as \"expires_at: DateTime<Utc>\"\nfrom jig_code\nwhere creator_id = $1\n"
+  },
   "7bd8eff40b8bb4649064764c88f6087f405f0727abb476003a960c379a8e3bc7": {
     "describe": {
       "columns": [],
@@ -8879,50 +9041,6 @@
       }
     },
     "query": "\nupdate jig_data\nset privacy_level = coalesce($2, privacy_level)\nwhere id = $1\n  and $2 is distinct from privacy_level\n    "
-  },
-  "7fc1aef6a00aa47799aa01f4313417b431ea5230c52a4ceddcde7139305310b1": {
-    "describe": {
-      "columns": [
-        {
-          "name": "jig_id: JigId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "direction: TextDirection",
-          "ordinal": 1,
-          "type_info": "Int2"
-        },
-        {
-          "name": "display_score",
-          "ordinal": 2,
-          "type_info": "Bool"
-        },
-        {
-          "name": "track_assessments",
-          "ordinal": 3,
-          "type_info": "Bool"
-        },
-        {
-          "name": "drag_assist",
-          "ordinal": 4,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Int4"
-        ]
-      }
-    },
-    "query": "\n        select jig_id as \"jig_id: JigId\", \n               direction as \"direction: TextDirection\", \n               display_score, \n               track_assessments, \n               drag_assist\n        from jig_player_session\n        where index=$1\n        "
   },
   "8002a58a2dfa494ffa463d70fe62cd1a6ca1a26e64f76cee1ca2a23ac58f802f": {
     "describe": {
@@ -14761,6 +14879,26 @@
       }
     },
     "query": "\nupdate playlist_data\nset other_keywords = $2,\n    translated_keywords = (case when ($3::text is not null) then $3::text else (translated_keywords) end),\n    updated_at = now()\nwhere id = $1 and $2 is distinct from other_keywords"
+  },
+  "e262ccf30ade50a69a580f3a8a16469c6531c0831c7486cbbf9900c8732fa2f8": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: Uuid",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n        insert into jig_code_session (code)\n        values ($1)\n        returning id as \"id: Uuid\"\n        "
   },
   "e2879fa5a3c098c9cbcea806e2d51168ba02e91b8f928a7bc2cd1f7f36872faa": {
     "describe": {
