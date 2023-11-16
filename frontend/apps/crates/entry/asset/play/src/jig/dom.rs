@@ -1,4 +1,4 @@
-use super::{actions, sidebar};
+use super::sidebar;
 use components::audio::mixer::audio_iframe_messenger;
 use components::overlay::handle::OverlayHandle;
 use components::share_asset::ShareAsset;
@@ -41,7 +41,7 @@ enum ShowAssist {
 impl JigPlayer {
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self;
-        actions::load_data(state.clone());
+        state.load_data();
 
         // Timer is not Copy and cannot be deduped, so any change to timer, even if it is the same value
         // will trigger an updated which will cause the instructions popup to show again when it is not
@@ -117,11 +117,11 @@ impl JigPlayer {
             .future(should_show_assist.for_each(clone!(state => move |should_show| {
                 match should_show {
                     Some(ShowAssist::AudioOnly) => {
-                        actions::play_assist_audio(state.clone());
+                        state.play_assist_audio();
                     }
                     Some(ShowAssist::All) => {
                         // Only show, never hide from here. Otherwise we can cause a race condition between Play and Pause.
-                        actions::show_assist(state.clone(), true);
+                        state.show_assist(true);
                     }
                     _ => {
                         // Always drop the audio_handle whenever this signal fires and nothing should be shown/played
@@ -149,7 +149,7 @@ impl JigPlayer {
                 match evt.try_serde_data::<IframeAction<ModuleToJigPlayerMessage>>() {
                     Err(_) => {},
                     Ok(m) => {
-                        actions::on_iframe_message(Rc::clone(&state), m.data)
+                        state.on_iframe_message(m.data)
                     },
                 };
             }))
@@ -196,14 +196,14 @@ impl JigPlayer {
                             .prop("slot", "background")
                             .prop_signal("playing", state.bg_audio_playing.signal())
                             .event(clone!(state => move|_: events::Click| {
-                                actions::toggle_background_audio(Rc::clone(&state));
+                                state.toggle_background_audio();
                             }))
                         }))
                     },
                     _ => None
                 }
             })))
-            .child_signal(active_module_valid_signal(Rc::clone(&state)).map(|valid| {
+            .child_signal(state.active_module_valid_signal().map(|valid| {
                 if !valid {
                     Some(html!("main-empty", {
                         .prop("slot", "message")
@@ -213,12 +213,12 @@ impl JigPlayer {
                     None
                 }
             }))
-            .child_signal(active_module_valid_signal(Rc::clone(&state)).map(clone!(state => move |valid| {
+            .child_signal(state.active_module_valid_signal().map(clone!(state => move |valid| {
                 if valid {
                     Some(html!("iframe" => HtmlIFrameElement, {
                         .prop("allow", "autoplay; fullscreen")
                         .prop("slot", "iframe")
-                        .prop_signal("src", jig_and_active_module_signal(Rc::clone(&state)).map(clone!(state => move|(jig, active_module_index)| {
+                        .prop_signal("src", state.jig_and_active_module_signal().map(clone!(state => move|(jig, active_module_index)| {
                             match (jig, active_module_index) {
                                 (Some(jig), Some(active_module_index)) => {
                                     let active_module = &jig.jig_data.modules.get(active_module_index);
@@ -275,9 +275,9 @@ impl JigPlayer {
                                 if let Some(module_assist) = module_assist {
                                     if ((timer.is_some() || module_assist.always_show) && module_assist.module_assist_type.is_instructions()) || module_assist.text.is_some() {
                                         // If there is a timer or assist is set to always_show, and the type is `Instructions`, or if there is text, show the popup
-                                        actions::show_assist(state.clone(), true);
+                                        state.show_assist(true);
                                     } else if module_assist.audio.is_some() {
-                                        actions::play_assist_audio(state.clone());
+                                        state.play_assist_audio();
                                     }
                                 }
                             }))
@@ -313,7 +313,7 @@ impl JigPlayer {
                                                     .prop("closeable", true)
                                                     .prop("strategy", "track")
                                                     .event(clone!(state => move |_evt: events::Close| {
-                                                        actions::show_assist(state.clone(), false);
+                                                        state.show_assist(false);
                                                     }))
                                                     .apply_if(module_assist.audio.is_some(), clone!(state => move |dom| {
                                                         let hover = Mutable::new(false);
@@ -336,7 +336,7 @@ impl JigPlayer {
                                                             }))
                                                             .text("Repeat")
                                                             .event(clone!(state => move |_evt: events::Click| {
-                                                                actions::play_assist_audio(state.clone());
+                                                                state.play_assist_audio();
                                                             }))
                                                         }))
                                                     }))
@@ -362,7 +362,7 @@ impl JigPlayer {
                                                             }))
                                                             .text("OK")
                                                             .event(clone!(state => move |_evt: events::Click| {
-                                                                actions::show_assist(state.clone(), false);
+                                                                state.show_assist(false);
                                                             }))
                                                         }))
                                                     }))
@@ -391,13 +391,13 @@ impl JigPlayer {
                         }
                     }))
                     .event(clone!(state => move |_:events::Click| {
-                        actions::toggle_paused(&state);
+                        state.toggle_paused();
                     }))
                 }),
                 html!("jig-play-move-button", {
                     .prop("slot", "back")
                     .prop("kind", "back")
-                    .visible_signal(jig_and_active_module_signal(Rc::clone(&state)).map(|(jig, active_module)| {
+                    .visible_signal(state.jig_and_active_module_signal().map(|(jig, active_module)| {
                         // if module already loaded and not first module
                         match (jig, active_module) {
                             (Some(_jig), Some(active_module)) => {
@@ -407,254 +407,257 @@ impl JigPlayer {
                         }
                     }))
                     .event(clone!(state => move |_: events::Click| {
-                        actions::navigate_back_or_handle(Rc::clone(&state));
+                        state.navigate_back_or_handle();
                     }))
                     .global_event(clone!(state => move |e: events::KeyUp| {
-                        actions::navigate_from_keyboard_event(state.clone(), KeyEvent::from(e));
+                        state.navigate_from_keyboard_event(KeyEvent::from(e));
                     }))
                 }),
                 html!("jig-play-progress-bar", {
                     .prop("slot", "progress")
-                    .prop_signal("percent", progress_signal(state.clone()))
+                    .prop_signal("percent", state.progress_signal())
                 }),
                 html!("jig-play-move-button", {
                     .prop("slot", "forward")
                     .prop("kind", "forward")
                     .event(clone!(state => move |_: events::Click| {
-                        actions::navigate_forward_or_handle(Rc::clone(&state));
+                        state.navigate_forward_or_handle();
                     }))
                     .global_event(clone!(state => move |e: events::KeyUp| {
-                        actions::navigate_from_keyboard_event(state.clone(), KeyEvent::from(e));
+                        state.navigate_from_keyboard_event(KeyEvent::from(e));
                     }))
                 }),
             ])
-            .child_signal(render_time_indicator(Rc::clone(&state)))
-            .child_signal(render_done_popup(Rc::clone(&state)))
-            .child_signal(render_time_up_popup(Rc::clone(&state)))
+            .child_signal(state.render_time_indicator())
+            .child_signal(state.render_done_popup())
+            .child_signal(state.render_time_up_popup())
         })
     }
-}
 
-/// Emits `true` if the module doesn't exist in the list of modules or if the jig is `None`.
-/// Otherwise emits the value of the module's `is_complete` field.
-fn active_module_valid_signal(state: Rc<JigPlayer>) -> impl Signal<Item = bool> {
-    jig_and_active_module_signal(state).map(|(jig, active_module_index)| {
-        match (jig, active_module_index) {
-            (Some(jig), Some(active_module_index)) => {
-                match &jig.jig_data.modules.get(active_module_index) {
-                    Some(module) => module.is_complete || matches!(module.kind, ModuleKind::Legacy),
-                    None => true, // Active module isn't in the list
+    /// Emits `true` if the module doesn't exist in the list of modules or if the jig is `None`.
+    /// Otherwise emits the value of the module's `is_complete` field.
+    fn active_module_valid_signal(self: &Rc<Self>) -> impl Signal<Item = bool> {
+        self.jig_and_active_module_signal()
+            .map(|(jig, active_module_index)| {
+                match (jig, active_module_index) {
+                    (Some(jig), Some(active_module_index)) => {
+                        match &jig.jig_data.modules.get(active_module_index) {
+                            Some(module) => {
+                                module.is_complete || matches!(module.kind, ModuleKind::Legacy)
+                            }
+                            None => true, // Active module isn't in the list
+                        }
+                    }
+                    _ => true, // Jig isn't set
                 }
-            }
-            _ => true, // Jig isn't set
-        }
-    })
-}
-
-fn jig_and_active_module_signal(
-    state: Rc<JigPlayer>,
-) -> impl Signal<Item = (Option<JigResponse>, Option<usize>)> {
-    map_ref! {
-        let jig = state.jig.signal_cloned(),
-        let active_module = state.active_module.signal_cloned() => (
-            jig.clone(), *active_module
-        )
+            })
     }
-}
 
-fn ten_sec_signal(state: Rc<JigPlayer>) -> impl Signal<Item = bool> {
-    state
-        .timer
-        .signal_cloned()
-        .map(|timer| {
-            DefaultSignal::new(
-                false,
-                timer.map(|timer| timer.time.signal().map(|time| time == 10)),
+    fn jig_and_active_module_signal(
+        self: &Rc<Self>,
+    ) -> impl Signal<Item = (Option<JigResponse>, Option<usize>)> {
+        map_ref! {
+            let jig = self.jig.signal_cloned(),
+            let active_module = self.active_module.signal_cloned() => (
+                jig.clone(), *active_module
             )
-        })
-        .flatten()
-}
+        }
+    }
 
-fn progress_signal(state: Rc<JigPlayer>) -> impl Signal<Item = u32> {
-    (map_ref! {
-        let active_module = state.active_module.signal(),
-        let jig = state.jig.signal_cloned() =>
-            (*active_module, jig.clone())
-    })
-    .map(move |(active_module_index, jig)| {
-        match jig {
-            None => 0,
-            Some(jig) => {
-                if let Some(active_module_index) = active_module_index {
-                    let len = jig.jig_data.modules.len();
-                    let step_percent = 100f32 / len as f32;
-                    let current_progress = active_module_index as f32 * step_percent;
-                    // TODO: ask corrine if this should be here
-                    let current_progress = current_progress + step_percent;
-                    log::info!("{}", current_progress);
-                    current_progress.round() as u32
-                } else {
-                    0
+    fn ten_sec_signal(self: &Rc<Self>) -> impl Signal<Item = bool> {
+        self.timer
+            .signal_cloned()
+            .map(|timer| {
+                DefaultSignal::new(
+                    false,
+                    timer.map(|timer| timer.time.signal().map(|time| time == 10)),
+                )
+            })
+            .flatten()
+    }
+
+    fn progress_signal(self: &Rc<Self>) -> impl Signal<Item = u32> {
+        (map_ref! {
+            let active_module = self.active_module.signal(),
+            let jig = self.jig.signal_cloned() =>
+                (*active_module, jig.clone())
+        })
+        .map(move |(active_module_index, jig)| {
+            match jig {
+                None => 0,
+                Some(jig) => {
+                    if let Some(active_module_index) = active_module_index {
+                        let len = jig.jig_data.modules.len();
+                        let step_percent = 100f32 / len as f32;
+                        let current_progress = active_module_index as f32 * step_percent;
+                        // TODO: ask corrine if this should be here
+                        let current_progress = current_progress + step_percent;
+                        log::info!("{}", current_progress);
+                        current_progress.round() as u32
+                    } else {
+                        0
+                    }
                 }
             }
-        }
-    })
-}
+        })
+    }
 
-fn render_done_popup(state: Rc<JigPlayer>) -> impl Signal<Item = Option<Dom>> {
-    state.done.signal().map(clone!(state => move |done| {
-        match done {
-            false => None,
-            true => {
-                Some(html!("dialog-overlay", {
-                    .prop("slot", "dialog")
-                    .prop("open", true)
-                    .prop("autoClose", false)
-                    .child(html!("jig-play-done-popup", {
-                        .apply(|mut dom| {
-                            if state.player_options.display_score {
-                                dom = dom.prop_signal("score", state.points.signal());
-                            };
-                            if !state.player_options.track_assessments {
-                                dom = dom.child(
-                                    html!("jig-play-done-action", {
-                                        .prop("slot", "actions")
-                                        .prop("kind", "replay")
-                                        .event(clone!(state => move |_: events::Click| {
-                                            actions::navigate_to_index(
-                                                Rc::clone(&state),
-                                                0
-                                            );
-                                        }))
-                                    })
-                                );
-                            }
-                            if !state.player_options.is_student {
-                                dom = dom.child_signal(state.jig.signal_cloned().map(|jig| {
-                                    jig.map(|jig| {
-                                        ShareAsset::new(jig.into()).render(
-                                            html!("jig-play-done-action", {
-                                                .text("share")
-                                                .prop("kind", "share")
-                                            }),
-                                            Some("actions")
-                                        )
-                                    })
-                                }));
-                            }
-                            if is_iframe() {
-                                dom = dom.child(
-                                    html!("jig-play-done-action", {
-                                        .prop("slot", "actions")
-                                        .prop("kind", "exit")
-                                        .text("exit")
-                                        .event(|_: events::Click| {
-                                            let _ = IframeAction::new(AssetPlayerToPlayerPopup::Close).try_post_message_to_parent();
+    fn render_done_popup(self: &Rc<Self>) -> impl Signal<Item = Option<Dom>> {
+        let state = self;
+        state.done.signal().map(clone!(state => move |done| {
+            match done {
+                false => None,
+                true => {
+                    Some(html!("dialog-overlay", {
+                        .prop("slot", "dialog")
+                        .prop("open", true)
+                        .prop("autoClose", false)
+                        .child(html!("jig-play-done-popup", {
+                            .apply(|mut dom| {
+                                if state.player_options.display_score {
+                                    dom = dom.prop_signal("score", state.points.signal());
+                                };
+                                if !state.player_options.track_assessments {
+                                    dom = dom.child(
+                                        html!("jig-play-done-action", {
+                                            .prop("slot", "actions")
+                                            .prop("kind", "replay")
+                                            .event(clone!(state => move |_: events::Click| {
+                                                state.navigate_to_index(
+                                                    0
+                                                );
+                                            }))
                                         })
-                                    })
-                                );
-                            }
-                            dom
-                        })
-                    }))
-                }))
-            },
-        }
-    }))
-}
-
-fn time_up_signal(state: Rc<JigPlayer>) -> impl Signal<Item = bool> {
-    state
-        .timer
-        .signal_cloned()
-        .map(|timer| {
-            DefaultSignal::new(
-                false,
-                timer.map(|timer| timer.time.signal().map(|time| time == 0)),
-            )
-        })
-        .flatten()
-}
-
-fn render_time_up_popup(state: Rc<JigPlayer>) -> impl Signal<Item = Option<Dom>> {
-    time_up_signal(Rc::clone(&state)).map(clone!(state => move |time_up| {
-        match time_up {
-            false => None,
-            true => {
-                Some(html!("dialog-overlay", {
-                    .prop("slot", "dialog")
-                    .prop("open", true)
-                    .prop("autoClose", false)
-                    .child(html!("jig-play-time-up-popup", {
-                        .apply(|mut dom| {
-                            if !state.player_options.track_assessments {
-                                dom = dom.child(
-                                    html!("jig-play-done-action", {
-                                        .prop("slot", "actions")
-                                        .prop("kind", "replay")
-                                        .event(clone!(state => move |_: events::Click| {
-                                            // Clear the assist so that they don't play/show once the
-                                            // activity is reloaded.
-                                            actions::set_module_assist(state.clone(), None);
-                                            actions::reload_iframe(Rc::clone(&state));
-                                        }))
-                                    })
-                                );
-                            }
-                            dom
-                        })
-                    }))
-                }))
-            }
-        }
-    }))
-}
-
-fn render_time_indicator(state: Rc<JigPlayer>) -> impl Signal<Item = Option<Dom>> {
-    state.timer.signal_cloned().map(clone!(state => move |timer| {
-        match timer {
-            None => None,
-            Some(timer) => {
-                Some(html!("jig-play-timer-indicator" => HtmlElement, {
-                    .prop("slot", "indicators")
-                    .prop_signal("value", timer.time.signal().map(|time| {
-                        let minutes = (time as f32 / 60.0).floor();
-                        let seconds = time % 60;
-                        format!("{}:{:0>2}", minutes, seconds)
-                    }))
-                    .with_node!(elem => {
-                        .future(ten_sec_signal(Rc::clone(&state)).for_each(move |less_than_10_sec| {
-                            if less_than_10_sec {
-                                let buzz_method = Reflect::get(
-                                    &elem,
-                                    &JsValue::from_str("buzz")
-                                )
-                                    .unwrap_ji();
-                                let buzz_method = buzz_method.dyn_ref::<js_sys::Function>().unwrap_ji();
-                                let _ = buzz_method.call0(&elem);
-                            }
-                            async {}
+                                    );
+                                }
+                                if !state.player_options.is_student {
+                                    dom = dom.child_signal(state.jig.signal_cloned().map(|jig| {
+                                        jig.map(|jig| {
+                                            ShareAsset::new(jig.into()).render(
+                                                html!("jig-play-done-action", {
+                                                    .text("share")
+                                                    .prop("kind", "share")
+                                                }),
+                                                Some("actions")
+                                            )
+                                        })
+                                    }));
+                                }
+                                if is_iframe() {
+                                    dom = dom.child(
+                                        html!("jig-play-done-action", {
+                                            .prop("slot", "actions")
+                                            .prop("kind", "exit")
+                                            .text("exit")
+                                            .event(|_: events::Click| {
+                                                let _ = IframeAction::new(AssetPlayerToPlayerPopup::Close).try_post_message_to_parent();
+                                            })
+                                        })
+                                    );
+                                }
+                                dom
+                            })
                         }))
-                    })
-                }))
+                    }))
+                },
             }
-        }
-    }))
+        }))
+    }
+
+    fn time_up_signal(self: &Rc<Self>) -> impl Signal<Item = bool> {
+        self.timer
+            .signal_cloned()
+            .map(|timer| {
+                DefaultSignal::new(
+                    false,
+                    timer.map(|timer| timer.time.signal().map(|time| time == 0)),
+                )
+            })
+            .flatten()
+    }
+
+    fn render_time_up_popup(self: &Rc<Self>) -> impl Signal<Item = Option<Dom>> {
+        let state = self;
+        state.time_up_signal().map(clone!(state => move |time_up| {
+            match time_up {
+                false => None,
+                true => {
+                    Some(html!("dialog-overlay", {
+                        .prop("slot", "dialog")
+                        .prop("open", true)
+                        .prop("autoClose", false)
+                        .child(html!("jig-play-time-up-popup", {
+                            .apply(|mut dom| {
+                                if !state.player_options.track_assessments {
+                                    dom = dom.child(
+                                        html!("jig-play-done-action", {
+                                            .prop("slot", "actions")
+                                            .prop("kind", "replay")
+                                            .event(clone!(state => move |_: events::Click| {
+                                                // Clear the assist so that they don't play/show once the
+                                                // activity is reloaded.
+                                                state.set_module_assist(None);
+                                                state.reload_iframe();
+                                            }))
+                                        })
+                                    );
+                                }
+                                dom
+                            })
+                        }))
+                    }))
+                }
+            }
+        }))
+    }
+
+    fn render_time_indicator(self: &Rc<Self>) -> impl Signal<Item = Option<Dom>> {
+        let state = self;
+        self.timer.signal_cloned().map(clone!(state => move |timer| {
+            match timer {
+                None => None,
+                Some(timer) => {
+                    Some(html!("jig-play-timer-indicator" => HtmlElement, {
+                        .prop("slot", "indicators")
+                        .prop_signal("value", timer.time.signal().map(|time| {
+                            let minutes = (time as f32 / 60.0).floor();
+                            let seconds = time % 60;
+                            format!("{}:{:0>2}", minutes, seconds)
+                        }))
+                        .with_node!(elem => {
+                            .future(state.ten_sec_signal().for_each(move |less_than_10_sec| {
+                                if less_than_10_sec {
+                                    let buzz_method = Reflect::get(
+                                        &elem,
+                                        &JsValue::from_str("buzz")
+                                    )
+                                        .unwrap_ji();
+                                    let buzz_method = buzz_method.dyn_ref::<js_sys::Function>().unwrap_ji();
+                                    let _ = buzz_method.call0(&elem);
+                                }
+                                async {}
+                            }))
+                        })
+                    }))
+                }
+            }
+        }))
+    }
+
+    // fn fullscreen_enabled() -> bool {
+    //     // once webkit drops the prefix, we can just use `document().fullscreen_enabled()`
+
+    //     let webkit_fullscreen_enabled = js_sys::Reflect::get(
+    //         &document(),
+    //         &JsValue::from_str("webkitFullscreenEnabled")
+    //     );
+    //     match webkit_fullscreen_enabled {
+    //         Ok(webkit_fullscreen_enabled) => {
+    //             webkit_fullscreen_enabled.as_bool().unwrap_or_default()
+    //         },
+    //         Err(_) => {
+    //             document().fullscreen_enabled()
+    //         },
+    //     }
+    // }
 }
-
-// fn fullscreen_enabled() -> bool {
-//     // once webkit drops the prefix, we can just use `document().fullscreen_enabled()`
-
-//     let webkit_fullscreen_enabled = js_sys::Reflect::get(
-//         &document(),
-//         &JsValue::from_str("webkitFullscreenEnabled")
-//     );
-//     match webkit_fullscreen_enabled {
-//         Ok(webkit_fullscreen_enabled) => {
-//             webkit_fullscreen_enabled.as_bool().unwrap_or_default()
-//         },
-//         Err(_) => {
-//             document().fullscreen_enabled()
-//         },
-//     }
-// }
