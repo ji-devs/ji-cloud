@@ -68,3 +68,4 @@ export DATABASE_URL=postgres://postgres:password@localhost/
 sqlx migrate run
 cargo test
 ```
+
