@@ -229,7 +229,7 @@ make_path_parts!(ModuleGetLivePath => "/v1/{}/module/live/{}" => AssetType, Modu
 make_path_parts!(ModuleGetDraftPath => "/v1/{}/module/draft/{}" => AssetType, ModuleId);
 
 /// Response for successfully finding a module
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ModuleResponse {
     /// The module we found
     pub module: Module,
