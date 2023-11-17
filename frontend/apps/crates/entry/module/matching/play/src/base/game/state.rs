@@ -1,9 +1,12 @@
 use super::card::state::*;
 use crate::base::state::Base;
 use futures_signals::signal::Mutable;
+use itertools::Itertools;
 use rand::prelude::*;
+use shared::domain::jig::codes::JigPlaySessionMatchingCard;
 use shared::domain::module::body::_groups::cards::Card;
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::atomic::AtomicUsize;
 use utils::prelude::*;
@@ -84,9 +87,14 @@ impl Current {
         used.push(target);
 
         // clone into top/bottom
-        let mut top: Vec<Rc<CardTop>> = others
+        let mut top: Vec<(usize, Rc<CardTop>)> = others
             .iter()
-            .map(|choice| Rc::new(CardChoice::<TopPhase>::new(game.clone(), choice.clone())))
+            .map(|choice| {
+                (
+                    choice.2,
+                    Rc::new(CardChoice::<TopPhase>::new(game.clone(), choice.clone())),
+                )
+            })
             .collect();
 
         let mut bottom: Vec<Rc<CardBottom>> = others
@@ -97,6 +105,24 @@ impl Current {
         //shuffle again so there's some horizontal difference
         top.shuffle(rng);
         bottom.shuffle(rng);
+
+        // build up reports for each cards
+        let round: HashMap<usize, JigPlaySessionMatchingCard> = top
+            .iter()
+            .map(|(i, _)| {
+                (
+                    *i,
+                    JigPlaySessionMatchingCard {
+                        failed_tries: 0,
+                        // succeeded: false,
+                    },
+                )
+            })
+            .collect();
+        game.base.play_report.lock_mut().rounds.push(round);
+
+        // remove index
+        let top = top.into_iter().map(|(_, card)| card).collect_vec();
 
         Rc::new(Self {
             top,

@@ -1,6 +1,9 @@
 use shared::domain::{
     asset::AssetId,
-    jig::player::{ModuleConfig, Seconds},
+    jig::{
+        codes::JigPlaySessionMatching,
+        player::{ModuleConfig, Seconds},
+    },
     module::{
         body::{
             Background, ModuleAssist,
@@ -33,6 +36,7 @@ pub struct Base {
     pub raw_pairs: Vec<CardPair>,
     pub phase: Mutable<Phase>,
     pub module_phase: Mutable<ModulePlayPhase>,
+    pub play_report: Mutable<JigPlaySessionMatching>,
 }
 
 #[derive(Clone)]
@@ -68,6 +72,7 @@ impl Base {
             raw_pairs: content.base.pairs,
             module_phase: init_args.play_phase,
             phase: Mutable::new(Phase::Init),
+            play_report: Mutable::new(JigPlaySessionMatching::new(module_id)),
         });
 
         _self.phase.set(Phase::Playing(Game::new(_self.clone())));

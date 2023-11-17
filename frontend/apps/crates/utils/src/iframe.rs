@@ -1,7 +1,10 @@
 use crate::{keyboard::KeyEvent, unwrap::UnwrapJiExt};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use shared::domain::{
-    jig::player::{ModuleConfig, Seconds},
+    jig::{
+        codes::JigPlaySessionModule,
+        player::{ModuleConfig, Seconds},
+    },
     module::{
         body::{ModuleAssist, ModuleAssistType},
         LiteModule, ModuleId,
@@ -206,6 +209,7 @@ pub enum ModuleToJigPlayerMessage {
     AddPoints(u32),
     Start(ModuleConfig),
     Previous,
+    AddCodeSessionInfo(JigPlaySessionModule),
     Next,
     ResetTimer(Seconds),
     PauseTimer,

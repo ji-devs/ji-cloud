@@ -6,9 +6,10 @@ use std::sync::atomic::Ordering;
 
 use components::module::_common::play::prelude::{BaseExt, ModuleEnding, ModulePlayPhase};
 use rand::prelude::*;
+use shared::domain::jig::codes::JigPlaySessionModule;
 use std::convert::TryInto;
 use std::rc::Rc;
-use utils::prelude::*;
+use utils::{prelude::*, toasts};
 
 impl Game {
     pub fn next(state: Rc<Self>) {
@@ -41,6 +42,14 @@ impl Game {
             if feedback.has_content() {
                 state.base.feedback_signal.set(Some(feedback.clone()));
             } else {
+                let info = state.base.play_report.lock_ref().clone();
+                let info = JigPlaySessionModule::Matching(info);
+                let msg = IframeAction::new(ModuleToJigPlayerMessage::AddCodeSessionInfo(info));
+                if msg.try_post_message_to_player().is_err() {
+                    toasts::error("Error saving progress");
+                    log::info!("Error saving progress");
+                }
+
                 state.base.phase.set(Phase::Ending);
                 state
                     .base

@@ -485,6 +485,9 @@ impl JigPlayer {
                 self.navigation_handler.set(None);
                 self.navigate_back();
             }
+            ModuleToJigPlayerMessage::AddCodeSessionInfo(info) => {
+                self.session_info.borrow_mut().modules.push(info);
+            }
             ModuleToJigPlayerMessage::Next => {
                 self.navigation_handler.set(None);
                 self.navigate_forward();

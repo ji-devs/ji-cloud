@@ -38,6 +38,10 @@ impl CardDrag {
                 }
             };
 
+            let mut report = self.game.base.play_report.lock_mut();
+            let card_report = &mut report.rounds.last_mut().unwrap().get_mut(&self.pair_id);
+            let card_report = card_report.as_mut().unwrap();
+
             if let Some(top) = top {
                 if top.pair_id == self.pair_id {
                     play_random_positive();
@@ -45,12 +49,16 @@ impl CardDrag {
                     let points = calculate_point_count(*bottom.tried_count.borrow());
                     let _ = IframeAction::new(ModuleToJigPlayerMessage::AddPoints(points))
                         .try_post_message_to_player();
+
+                    // card_report.succeeded = true;
                 } else {
                     play_random_negative();
 
                     bottom
                         .tried_count
                         .replace_with(|tried_count| *tried_count + 1);
+
+                    card_report.failed_tries += 1;
                 }
             } else {
                 // Only treat as failed if they've dropped the card over a target. If
