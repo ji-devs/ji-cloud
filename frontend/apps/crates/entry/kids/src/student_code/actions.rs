@@ -13,7 +13,7 @@ use shared::{
 };
 use utils::prelude::*;
 
-use super::state::StudentCode;
+use super::state::{PlayJig, StudentCode};
 
 impl StudentCode {
     pub fn submit_code(self: &Rc<Self>, number: String) {
@@ -27,7 +27,11 @@ impl StudentCode {
                 },
                 Ok(res) => {
                     state.error.set_neq(false);
-                    state.play_jig.set(Some((res.jig_id, res.settings)));
+                    state.play_jig.set(Some(PlayJig {
+                        id: res.jig_id,
+                        settings: res.settings,
+                        token: res.token,
+                    }));
                 },
             }
         }));

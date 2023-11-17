@@ -45,18 +45,19 @@ impl StudentCode {
                 }))
             }))
             .child_signal(state.play_jig.signal_cloned().map(clone!(state => move|play_jig| {
-                play_jig.map(|(jig_id, settings)| {
+                play_jig.map(|play_jig| {
                     let close = clone!(state => move || {
                         state.play_jig.set(None);
                     });
-                    let mut player_options: JigPlayerOptions = settings.into();
+                    let mut player_options: JigPlayerOptions = play_jig.settings.into();
                     player_options.is_student = true;
+                    player_options.play_token = Some(play_jig.token);
                     PlayerPopup::new(
-                        jig_id.into(),
+                        play_jig.id.into(),
                         None,
                         None,
                         player_options.into(),
-                        PreviewPopupCallbacks::new(close)
+                        PreviewPopupCallbacks::new(close),
                     ).render(None)
                 })
             })))

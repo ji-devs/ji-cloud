@@ -198,6 +198,9 @@ pub struct JigPlayerOptions {
 
     #[serde(default)]
     pub draft_or_live: DraftOrLive,
+
+    #[serde(default)]
+    pub play_token: Option<String>,
 }
 
 impl Default for JigPlayerOptions {
@@ -226,6 +229,7 @@ impl From<JigPlayerSettings> for JigPlayerOptions {
             drag_assist: settings.drag_assist,
             is_student: false,
             draft_or_live: DraftOrLive::Live,
+            play_token: None,
         }
     }
 }

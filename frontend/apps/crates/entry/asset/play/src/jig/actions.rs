@@ -17,6 +17,9 @@ use shared::{
         asset::DraftOrLive,
         category::GetCategoryPath,
         jig::{
+            codes::instance::{
+                PlayerSessionInstanceCompletePath, PlayerSessionInstanceCompleteRequest,
+            },
             player::{ModuleConfig, PlayerNavigationHandler, Seconds},
             AudioBackground, JigGetDraftPath, JigGetLivePath, JigLikedPath, JigPlayPath,
             TextDirection,
@@ -29,6 +32,7 @@ use shared::{
     },
 };
 use utils::{
+    bail_on_err,
     iframe::{IframeAction, JigToModulePlayerMessage, ModuleToJigPlayerMessage},
     keyboard::{Key, KeyEvent},
     paywall,
@@ -113,9 +117,24 @@ impl JigPlayer {
 
                     state.navigate_to_index(active_module + 1);
                 } else {
-                    state.done.set(true);
+                    state.finish();
                 }
             }
+        }
+    }
+
+    pub fn finish(self: &Rc<Self>) {
+        let state = self;
+        state.done.set(true);
+        if let Some(token) = state.player_options.play_token.clone() {
+            spawn_local(clone!(state => async move {
+                let req = PlayerSessionInstanceCompleteRequest {
+                    token,
+                    session: state.session_info.borrow().clone(),
+                };
+                let res = endpoints::jig::codes::instance::Complete::api_with_auth(PlayerSessionInstanceCompletePath(), Some(req)).await;
+                let _ = bail_on_err!(res);
+            }));
         }
     }
 

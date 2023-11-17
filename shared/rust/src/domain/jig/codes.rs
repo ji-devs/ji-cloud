@@ -90,7 +90,7 @@ pub struct JigCodeSessionResponse {
 }
 
 /// Play session
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Default)]
 pub struct JigPlaySession {
     /// modules
     pub modules: Vec<JigPlaySessionModule>,

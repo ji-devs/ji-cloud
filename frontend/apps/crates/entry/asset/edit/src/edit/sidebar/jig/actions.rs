@@ -84,6 +84,7 @@ pub fn get_player_settings(settings_state: Rc<SettingsState>) -> JigPlayerOption
         drag_assist,
         is_student: false,
         draft_or_live: DraftOrLive::Draft,
+        play_token: None,
     }
 }
 

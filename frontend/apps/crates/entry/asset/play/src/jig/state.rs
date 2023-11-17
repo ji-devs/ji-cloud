@@ -5,7 +5,7 @@ use components::audio::mixer::AudioHandle;
 use futures_signals::signal::Mutable;
 use shared::domain::{
     category::{Category, CategoryId},
-    jig::{player::PlayerNavigationHandler, JigId, JigResponse},
+    jig::{codes::JigPlaySession, player::PlayerNavigationHandler, JigId, JigResponse},
     meta::ResourceType,
     module::{
         body::{Audio, ModuleAssist, ModuleAssistType},
@@ -50,6 +50,7 @@ pub struct JigPlayer {
     pub module_assist: Mutable<Option<PlayModuleAssist>>,
     pub module_assist_visible: Mutable<bool>,
     pub is_full_screen: Mutable<bool>,
+    pub session_info: RefCell<JigPlaySession>,
 }
 
 impl JigPlayer {
@@ -93,6 +94,7 @@ impl JigPlayer {
             module_assist: Mutable::new(None),
             module_assist_visible: Mutable::new(false),
             is_full_screen: Mutable::new(false),
+            session_info: Default::default(),
         })
     }
 }

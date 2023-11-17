@@ -7,7 +7,7 @@ use shared::domain::jig::{JigId, JigPlayerSettings};
 pub struct StudentCode {
     pub loader: AsyncLoader,
     pub error: Mutable<bool>,
-    pub play_jig: Mutable<Option<(JigId, JigPlayerSettings)>>,
+    pub(super) play_jig: Mutable<Option<PlayJig>>,
 }
 
 impl StudentCode {
@@ -18,4 +18,11 @@ impl StudentCode {
             play_jig: Mutable::new(None),
         })
     }
+}
+
+#[derive(Clone)]
+pub(super) struct PlayJig {
+    pub id: JigId,
+    pub settings: JigPlayerSettings,
+    pub token: String,
 }
