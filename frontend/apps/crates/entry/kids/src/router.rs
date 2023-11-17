@@ -1,7 +1,7 @@
-use super::student_code;
+use crate::student_code::state::StudentCode;
+
 use dominator::{html, Dom};
 use futures_signals::signal::Signal;
-use std::rc::Rc;
 use utils::routes::{KidsRoute, Route};
 
 pub struct Router {}
@@ -18,10 +18,7 @@ impl Router {
             let route = Route::from_url(url);
             match route {
                 Route::Kids(route) => match route {
-                    KidsRoute::StudentCode(code) => Some(student_code::dom::render(
-                        Rc::new(student_code::state::State::new()),
-                        code,
-                    )),
+                    KidsRoute::StudentCode(code) => Some(StudentCode::new().render(code)),
                 },
                 _ => None,
             }
