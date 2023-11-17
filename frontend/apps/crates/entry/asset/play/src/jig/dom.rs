@@ -515,7 +515,7 @@ impl JigPlayer {
                         .child(html!("jig-play-done-popup", {
                             .apply(|mut dom| {
                                 if state.player_options.display_score {
-                                    dom = dom.prop_signal("score", state.points.signal());
+                                    dom = dom.prop_signal("score", state.points.signal().map(|p| p * 100));
                                 };
                                 if !state.player_options.track_assessments {
                                     dom = dom.child(
