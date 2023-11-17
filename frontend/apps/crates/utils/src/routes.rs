@@ -862,7 +862,7 @@ impl From<&Route> for String {
             Route::Classroom(route) => match route {
                 ClassroomRoute::Codes => "/classroom/codes".to_string(),
                 ClassroomRoute::CodeSession(code) => {
-                    format!("/classroom/codes/{}/sessions", code.0)
+                    format!("/classroom/codes/{}/sessions", code.to_string())
                 }
             },
             Route::Community(route) => match route {

@@ -16,6 +16,12 @@ use super::{JigId, JigPlayerSettings};
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct JigCode(pub i32);
 
+impl ToString for JigCode {
+    fn to_string(&self) -> String {
+        format!("{:06}", self.0)
+    }
+}
+
 make_path_parts!(JigPlayerSessionCreatePath => "/v1/jig/codes");
 
 /// Request to create a player session for a jig.

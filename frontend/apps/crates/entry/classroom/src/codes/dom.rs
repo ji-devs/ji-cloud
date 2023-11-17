@@ -24,7 +24,7 @@ impl Component<Codes> for Rc<Codes> {
             .children_signal_vec(state.codes.signal_vec_cloned().map(|code| {
                 link!(Route::Classroom(ClassroomRoute::CodeSession(code.index)), {
                     .class("code-section")
-                    .text(&code.index.0.to_string())
+                    .text(&code.index.to_string())
                 })
             }))
         }))

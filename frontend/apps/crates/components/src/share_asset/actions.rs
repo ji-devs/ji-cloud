@@ -26,8 +26,7 @@ impl ShareAsset {
             match jig::codes::Create::api_with_auth(JigPlayerSessionCreatePath(), Some(req)).await {
                 Err(_) => todo!(),
                 Ok(res) => {
-                    let code = format!("{:04}", res.index.0);
-                    state.student_code.set(Some(code));
+                    state.student_code.set(Some(res.index.to_string()));
                 },
             };
         }));
