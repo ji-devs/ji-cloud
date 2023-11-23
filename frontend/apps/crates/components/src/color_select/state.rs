@@ -34,7 +34,7 @@ static SYSTEM_COLORS: &[&str] = &[
     "#1a1a1aff",
 ];
 
-pub struct State {
+pub struct ColorSelector {
     pub(super) value: Mutable<Option<RGBA8>>,
     pub theme_id: ReadOnlyMutable<ThemeId>,
     pub system_colors: Rc<Vec<RGBA8>>,
@@ -44,14 +44,14 @@ pub struct State {
     pub label: Option<String>,
 }
 
-impl State {
+impl ColorSelector {
     pub fn new(
         theme_id: ReadOnlyMutable<ThemeId>,
         init_value: Option<RGBA8>,
         label: Option<String>,
         on_select: Option<impl Fn(Option<RGBA8>) + 'static>,
-    ) -> Self {
-        Self {
+    ) -> Rc<Self> {
+        Rc::new(Self {
             value: Mutable::new(init_value),
             theme_id,
             system_colors: Rc::new(SYSTEM_COLORS.iter().map(|c| hex_to_rgba8(*c)).collect()),
@@ -59,10 +59,11 @@ impl State {
             user_colors: Rc::new(MutableVec::new()),
             on_select: on_select.map(|f| Box::new(f) as _),
             label,
-        }
+        })
     }
 
-    pub fn handle_theme(state: Rc<State>) {
+    pub fn handle_theme(self: Rc<ColorSelector>) {
+        let state = self;
         spawn_local(
             state
                 .theme_id

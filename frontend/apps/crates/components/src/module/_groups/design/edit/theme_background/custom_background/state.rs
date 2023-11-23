@@ -5,7 +5,7 @@ use std::{marker::PhantomData, rc::Rc};
 
 use crate::{
     backgrounds::actions::Layer,
-    color_select::state::State as ColorPickerState,
+    color_select::ColorSelector,
     image::search::{
         callbacks::Callbacks as ImageSearchCallbacks,
         state::{ImageSearchKind, ImageSearchOptions, State as ImageSearchState},
@@ -28,7 +28,7 @@ where
     pub base: Rc<Base>,
     pub on_close: Box<dyn Fn()>,
     pub colors_open: Mutable<bool>,
-    pub color_state: Rc<ColorPickerState>,
+    pub color_state: Rc<ColorSelector>,
     pub tab: Mutable<Tab>,
     pub tab_kind: Mutable<Option<MenuTabKind>>,
     _step: PhantomData<Step>,
@@ -42,14 +42,14 @@ where
     Base: BaseExt<Step> + DesignExt<Mode> + 'static,
 {
     pub fn new(state: Rc<ThemeBackground<Step, Mode, Base>>, on_close: Box<dyn Fn()>) -> Rc<Self> {
-        let color_state = Rc::new(ColorPickerState::new(
+        let color_state = ColorSelector::new(
             state.base.get_theme().read_only(),
             None,
             Some(String::from(STR_FILL_COLOR)),
             Some(clone!(state => move |color| {
                 state.base.get_backgrounds().set_layer(Layer::One, Some(Background::Color(color)));
             })),
-        ));
+        );
 
         let tab = Mutable::new(Tab::new(state.base.clone(), MenuTabKind::BackgroundImage));
 

@@ -1,7 +1,6 @@
 use std::rc::Rc;
 
 use crate::{
-    color_select::dom::render as render_color_picker,
     image::search::{
         dom::render_with_action as render_image_search_with_action,
         state::State as ImageSearchState,
@@ -125,10 +124,7 @@ where
                                                             state.colors_open.set(false)
                                                         }))
                                                     }),
-                                                    render_color_picker(
-                                                        Rc::clone(&state.color_state),
-                                                        Some("main")
-                                                    )
+                                                    state.color_state.render(Some("main"))
                                                 ])
                                             }))
                                         },

@@ -1,8 +1,5 @@
 use super::super::super::state::TextEditor;
-use crate::{
-    color_select::{self, state::State as ColorPickerState},
-    text_editor::wysiwyg_types::ControlsChange,
-};
+use crate::{color_select::ColorSelector, text_editor::wysiwyg_types::ControlsChange};
 use dominator::{class, clone, html, pseudo, Dom};
 use futures_signals::signal::Mutable;
 use futures_signals::signal::SignalExt;
@@ -12,12 +9,12 @@ use utils::{colors::*, prelude::*};
 
 pub struct ColorState {
     pub select_for: Mutable<Option<ColorSelectFor>>,
-    pub picker: Rc<ColorPickerState>,
+    pub picker: Rc<ColorSelector>,
 }
 
 impl ColorState {
     pub fn new(state: Rc<TextEditor>) -> Self {
-        let picker = Rc::new(ColorPickerState::new(
+        let picker = ColorSelector::new(
             (*state).theme_id.clone(),
             None,
             None,
@@ -34,7 +31,7 @@ impl ColorState {
                     None => {}
                 };
             })),
-        ));
+        );
 
         Self {
             select_for: Mutable::new(None),
@@ -107,7 +104,7 @@ pub fn render(state: Rc<TextEditor>) -> Dom {
                 }),
             ])
         }))
-        .child(color_select::dom::render(color_state.picker.clone(), Some("overlay")))
+        .child(color_state.picker.render(Some("overlay")))
     })
 }
 

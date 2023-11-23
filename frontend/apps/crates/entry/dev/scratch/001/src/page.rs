@@ -10,7 +10,7 @@ use futures_signals::{
 };
 
 use components::{
-    color_select,
+    color_select::ColorSelector,
     image::search::{
         self as image_search,
         callbacks::Callbacks as ImageSearchCallbacks,
@@ -127,13 +127,10 @@ pub fn render_image_search() -> Dom {
 
 pub fn render_color_select() -> Dom {
     let theme_id = Mutable::new(ThemeId::HappyBrush);
-    let state = color_select::state::State::new((*theme_id).clone(), None, None, Some(|_| {}));
+    let state = ColorSelector::new((*theme_id).clone(), None, None, Some(|_| {}));
     html!("div", {
         .style("padding", "30px")
-        .child(color_select::dom::render(
-            Rc::new(state),
-            None
-        ))
+        .child(state.render(None))
     })
 }
 
