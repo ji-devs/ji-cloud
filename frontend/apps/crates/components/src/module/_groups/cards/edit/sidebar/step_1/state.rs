@@ -1,9 +1,6 @@
 use crate::{
     audio::input::AudioInput,
-    image::search::{
-        callbacks::Callbacks as ImageSearchCallbacks,
-        state::{ImageSearchKind, ImageSearchOptions, State as ImageSearchState},
-    },
+    image::search::{ImageSearch, ImageSearchCallbacks, ImageSearchKind, ImageSearchOptions},
     lists::{
         dual::{
             callbacks::Callbacks as DualListCallbacks,
@@ -95,7 +92,7 @@ pub enum Tab {
     /// Dual column list of text
     Dual(Rc<DualListState>),
     /// Image selection
-    Image(Rc<ImageSearchState>),
+    Image(Rc<ImageSearch>),
     /// Audio recording or upload
     Audio,
 }
@@ -113,9 +110,9 @@ impl Tab {
                 };
 
                 let callbacks = ImageSearchCallbacks::new(None::<fn(_)>);
-                let state = ImageSearchState::new(opts, callbacks);
+                let state = ImageSearch::new(opts, callbacks);
 
-                Self::Image(Rc::new(state))
+                Self::Image(state)
             }
             MenuTabKind::Text => Self::Single(Rc::new(make_single_list(state))),
             MenuTabKind::DualList => Self::Dual(Rc::new(make_dual_list(state))),

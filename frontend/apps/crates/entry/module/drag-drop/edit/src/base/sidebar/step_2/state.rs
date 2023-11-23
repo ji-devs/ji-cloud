@@ -1,10 +1,7 @@
 use super::super::state::Sidebar;
 use crate::base::state::Base;
 use components::{
-    image::search::{
-        callbacks::Callbacks as ImageSearchCallbacks,
-        state::{ImageSearchKind, ImageSearchOptions, State as ImageSearchState},
-    },
+    image::search::{ImageSearch, ImageSearchCallbacks, ImageSearchKind, ImageSearchOptions},
     module::_groups::design::edit::design_ext::DesignExt,
     stickers::state::Stickers,
     tabs::MenuTabKind,
@@ -35,7 +32,7 @@ impl Step2 {
 
 #[derive(Clone)]
 pub enum Tab {
-    StickerImage(Rc<ImageSearchState>),
+    StickerImage(Rc<ImageSearch>),
     StickerText,
 }
 
@@ -55,9 +52,9 @@ impl Tab {
                         Stickers::add_sprite(base.stickers.clone(), image);
                     }),
                 ));
-                let state = ImageSearchState::new(opts, callbacks);
+                let state = ImageSearch::new(opts, callbacks);
 
-                Self::StickerImage(Rc::new(state))
+                Self::StickerImage(state)
             }
             MenuTabKind::Text => Self::StickerText,
             _ => unimplemented!("unsupported tab kind!"),

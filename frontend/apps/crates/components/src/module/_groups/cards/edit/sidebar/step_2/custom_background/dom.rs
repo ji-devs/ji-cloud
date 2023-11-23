@@ -1,10 +1,7 @@
 use std::rc::Rc;
 
 use crate::{
-    image::search::{
-        dom::render_with_action as render_image_search_with_action,
-        state::State as ImageSearchState,
-    },
+    image::search::ImageSearch,
     module::_groups::cards::edit::state::{ExtraExt, RawDataExt},
     overlay::handle::OverlayHandle,
 };
@@ -34,7 +31,7 @@ impl<RawData: RawDataExt, E: ExtraExt> CustomBackground<RawData, E> {
         })
     }
 
-    fn render_background_tab_body(self: &Rc<Self>, image_state: Rc<ImageSearchState>) -> Dom {
+    fn render_background_tab_body(self: &Rc<Self>, image_state: Rc<ImageSearch>) -> Dom {
         let state = self;
         let color = clone!(state => move || {
             html!("empty-fragment" => HtmlElement, {
@@ -85,6 +82,6 @@ impl<RawData: RawDataExt, E: ExtraExt> CustomBackground<RawData, E> {
                 })
             })
         });
-        render_image_search_with_action(image_state, None, Some(color))
+        image_state.render_with_action(None, Some(color))
     }
 }

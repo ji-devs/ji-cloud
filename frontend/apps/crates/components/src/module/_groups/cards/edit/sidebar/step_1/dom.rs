@@ -7,7 +7,6 @@ use utils::prelude::*;
 
 use crate::{
     audio::input::{AudioInput, AudioInputCallbacks, AudioInputOptions},
-    image::search::dom::render as render_image_search,
     lists::{dual::dom::render as render_dual_list, single::dom::render as render_single_list},
     module::_groups::cards::{
         edit::{state::*, strings},
@@ -100,7 +99,7 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) ->
                                     }
                                 }
                                 Some(Tab::Image(image)) => {
-                                    Some(render_image_search(image.clone(), None))
+                                    Some(image.render(None))
                                 },
                                 Some(Tab::Audio) => {
                                     let audio_signal = |state: Rc<Step1<RawData, E>>|  map_ref! {

@@ -1,10 +1,7 @@
 use crate::base::{sidebar::state::Sidebar, state::Base};
 use components::{
     audio::input::{AudioInput, AudioInputCallbacks, AudioInputOptions},
-    image::search::{
-        callbacks::Callbacks as ImageSearchCallbacks,
-        state::{ImageSearchKind, ImageSearchOptions, State as ImageSearchState},
-    },
+    image::search::{ImageSearch, ImageSearchCallbacks, ImageSearchKind, ImageSearchOptions},
     module::_groups::design::edit::design_ext::DesignExt,
     stickers::state::Stickers,
     tabs::MenuTabKind,
@@ -43,7 +40,7 @@ impl Step2 {
 #[derive(Clone)]
 pub enum Tab {
     Text, // uses top-level state since it must be toggled from main too
-    Image(Rc<ImageSearchState>),
+    Image(Rc<ImageSearch>),
     Audio(Rc<AudioInput>),
 }
 
@@ -64,9 +61,9 @@ impl Tab {
                         Stickers::add_sprite(base.stickers.clone(), image);
                     }),
                 ));
-                let state = ImageSearchState::new(opts, callbacks);
+                let state = ImageSearch::new(opts, callbacks);
 
-                Self::Image(Rc::new(state))
+                Self::Image(state)
             }
             MenuTabKind::Audio => {
                 let audio = {

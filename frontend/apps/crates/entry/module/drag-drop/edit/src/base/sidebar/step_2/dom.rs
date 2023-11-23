@@ -1,9 +1,6 @@
 use super::state::*;
 use crate::base::sidebar::state::StickerPhase;
-use components::{
-    image::search::dom::render as render_image_search,
-    tabs::{MenuTab, MenuTabKind},
-};
+use components::tabs::{MenuTab, MenuTabKind};
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use std::rc::Rc;
@@ -41,7 +38,7 @@ pub fn render_step_2(state: Rc<Step2>) -> Dom {
                 .child_signal(state.tab.signal_cloned().map(clone!(state => move |tab| {
                     match tab {
                         Tab::StickerImage(state) => {
-                            Some(render_image_search(state, None))
+                            Some(state.render(None))
                         },
                         Tab::StickerText => {
                             Some(state.sidebar.base.text_editor.render_controls())

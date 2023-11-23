@@ -1,8 +1,5 @@
 use super::state::*;
-use components::{
-    image::search::dom::render as render_image_search,
-    tabs::{MenuTab, MenuTabKind},
-};
+use components::tabs::{MenuTab, MenuTabKind};
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use std::rc::Rc;
@@ -24,7 +21,7 @@ pub fn render(state: Rc<Step2>) -> Dom {
                             Some(state.sidebar.base.text_editor.render_controls())
                         },
                         Tab::Image(state) => {
-                            Some(render_image_search(state, None))
+                            Some(state.render(None))
                         },
                     }
                 })))

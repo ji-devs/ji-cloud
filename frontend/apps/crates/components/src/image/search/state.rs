@@ -1,7 +1,7 @@
 use crate::image::tag::ImageTag;
 
 use super::actions::get_styles;
-use super::callbacks::Callbacks;
+use super::callbacks::ImageSearchCallbacks;
 use dominator::clone;
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
@@ -19,7 +19,7 @@ const STR_SELECT_IMAGE: &str = "Select image";
 const STR_SELECT_BACKGROUND: &str = "Select a background";
 const STR_SELECT_OVERLAY: &str = "Search a shape or number";
 
-pub struct State {
+pub struct ImageSearch {
     pub search_mode: Mutable<SearchMode>,
     pub recent_list: MutableVec<Image>,
     pub search: Mutable<Option<String>>,
@@ -31,14 +31,17 @@ pub struct State {
     pub styles: Rc<RefCell<Option<Vec<ImageStyle>>>>,
     pub selected_styles: Rc<RefCell<HashSet<ImageStyleId>>>,
     pub selected_image_type: Mutable<Option<ImageType>>,
-    pub callbacks: Callbacks,
+    pub callbacks: ImageSearchCallbacks,
     pub user: Rc<RefCell<Option<UserProfile>>>,
     pub next_page: RefCell<NextPage>,
     pub recent: bool,
 }
 
-impl State {
-    pub fn new(image_search_options: ImageSearchOptions, callbacks: Callbacks) -> Self {
+impl ImageSearch {
+    pub fn new(
+        image_search_options: ImageSearchOptions,
+        callbacks: ImageSearchCallbacks,
+    ) -> Rc<Self> {
         let styles = Rc::new(RefCell::new(None));
         let selected_styles = HashSet::new();
         let init_loader = AsyncLoader::new();
@@ -55,7 +58,7 @@ impl State {
             ImageSearchKind::Overlay => true, // overlays don't show the checkbox
         });
 
-        Self {
+        Rc::new(Self {
             options: image_search_options,
             search: Mutable::new(Some(String::new())),
             recent_list: MutableVec::new(),
@@ -71,7 +74,7 @@ impl State {
             search_mode: Mutable::new(SearchMode::Sticker(Rc::new(MutableVec::new()))),
             next_page: RefCell::new(NextPage::default()),
             recent,
-        }
+        })
     }
 }
 

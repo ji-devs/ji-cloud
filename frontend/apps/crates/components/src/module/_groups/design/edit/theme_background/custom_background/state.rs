@@ -6,10 +6,7 @@ use std::{marker::PhantomData, rc::Rc};
 use crate::{
     backgrounds::actions::Layer,
     color_select::ColorSelector,
-    image::search::{
-        callbacks::Callbacks as ImageSearchCallbacks,
-        state::{ImageSearchKind, ImageSearchOptions, State as ImageSearchState},
-    },
+    image::search::{ImageSearch, ImageSearchCallbacks, ImageSearchKind, ImageSearchOptions},
     module::{
         _common::edit::entry::prelude::BaseExt,
         _groups::design::edit::{design_ext::DesignExt, theme_background::ThemeBackground},
@@ -68,8 +65,8 @@ where
 
 #[derive(Clone)]
 pub enum Tab {
-    BackgroundImage(Rc<ImageSearchState>),
-    Overlay(Rc<ImageSearchState>),
+    BackgroundImage(Rc<ImageSearch>),
+    Overlay(Rc<ImageSearch>),
 }
 
 impl Tab {
@@ -92,9 +89,9 @@ impl Tab {
                         base.get_backgrounds().set_layer(Layer::One, image.map(|image| Background::Image(image)));
                     }),
                 ));
-                let state = ImageSearchState::new(opts, callbacks);
+                let state = ImageSearch::new(opts, callbacks);
 
-                Self::BackgroundImage(Rc::new(state))
+                Self::BackgroundImage(state)
             }
             MenuTabKind::Overlay => {
                 let opts = ImageSearchOptions {
@@ -107,9 +104,9 @@ impl Tab {
                             base.get_backgrounds().set_layer(Layer::Two, image.map(|image| Background::Image(image)));
                     }),
                 ));
-                let state = ImageSearchState::new(opts, callbacks);
+                let state = ImageSearch::new(opts, callbacks);
 
-                Self::Overlay(Rc::new(state))
+                Self::Overlay(state)
             }
 
             kind => unimplemented!("unsupported tab kind! {:?}", kind),

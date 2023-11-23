@@ -6,8 +6,8 @@ use std::rc::Rc;
 use crate::{
     color_select::ColorSelector,
     image::search::{
-        callbacks::Callbacks as ImageSearchCallbacks,
-        state::{ImageSearchKind, ImageSearchOptions, State as ImageSearchState},
+        ImageSearchCallbacks,
+        {ImageSearch as ImageSearchState, ImageSearchKind, ImageSearchOptions},
     },
     module::_groups::cards::edit::state::{CardsBase, ExtraExt, RawDataExt},
     tabs::MenuTabKind,
@@ -47,7 +47,7 @@ impl<RawData: RawDataExt, E: ExtraExt> CustomBackground<RawData, E> {
         let callbacks = ImageSearchCallbacks::new(Some(clone!(base => move |image: Option<_>| {
             base.set_bg(image.map(|image| Background::Image(image)));
         })));
-        let background_state = Rc::new(ImageSearchState::new(opts, callbacks));
+        let background_state = ImageSearchState::new(opts, callbacks);
 
         Rc::new(Self {
             base,

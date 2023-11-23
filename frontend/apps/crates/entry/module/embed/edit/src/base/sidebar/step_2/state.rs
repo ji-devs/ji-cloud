@@ -1,10 +1,7 @@
 use super::super::state::Sidebar;
 use crate::base::state::Base;
 use components::{
-    image::search::{
-        callbacks::Callbacks as ImageSearchCallbacks,
-        state::{ImageSearchKind, ImageSearchOptions, State as ImageSearchState},
-    },
+    image::search::{ImageSearch, ImageSearchCallbacks, ImageSearchKind, ImageSearchOptions},
     module::_groups::design::edit::design_ext::DesignExt,
     stickers::state::Stickers,
     tabs::MenuTabKind,
@@ -44,7 +41,7 @@ impl Step2 {
 pub enum Tab {
     Embed,
     Text, // uses top-level state since it must be toggled from main too
-    Image(Rc<ImageSearchState>),
+    Image(Rc<ImageSearch>),
 }
 
 impl Tab {
@@ -64,9 +61,9 @@ impl Tab {
                         Stickers::add_sprite(base.stickers.clone(), image);
                     }),
                 ));
-                let state = ImageSearchState::new(opts, callbacks);
+                let state = ImageSearch::new(opts, callbacks);
 
-                Self::Image(Rc::new(state))
+                Self::Image(state)
             }
 
             _ => unimplemented!("unsupported tab kind!"),

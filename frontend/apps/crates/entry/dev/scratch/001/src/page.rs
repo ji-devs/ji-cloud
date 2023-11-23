@@ -11,11 +11,7 @@ use futures_signals::{
 
 use components::{
     color_select::ColorSelector,
-    image::search::{
-        self as image_search,
-        callbacks::Callbacks as ImageSearchCallbacks,
-        state::{ImageSearchKind, ImageSearchOptions},
-    },
+    image::search::{ImageSearch, ImageSearchCallbacks, ImageSearchKind, ImageSearchOptions},
     overlay::container::OverlayContainer,
     text_editor::{self, TextEditor},
 };
@@ -85,11 +81,11 @@ pub fn render_image_search() -> Dom {
     let callbacks = ImageSearchCallbacks::new(Some(|image| {
         log::info!("{:?}", image);
     }));
-    let state = image_search::state::State::new(opts, callbacks);
+    let state = ImageSearch::new(opts, callbacks);
 
     html!("div", {
         .style("padding", "30px")
-        .child(image_search::dom::render(Rc::new(state), None))
+        .child(state.render(None))
     })
 }
 

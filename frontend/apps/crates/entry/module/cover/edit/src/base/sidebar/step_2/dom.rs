@@ -1,7 +1,6 @@
 use super::state::*;
 use components::{
     audio::input::AudioInput,
-    image::search::dom::render as render_image_search,
     tabs::{MenuTab, MenuTabKind},
     // text_editor::dom::render_controls as render_text_editor,
 };
@@ -40,7 +39,7 @@ pub fn render(state: Rc<Step2>) -> Dom {
                             Some(state.sidebar.base.text_editor.render_controls())
                         },
                         Tab::Image(state) => {
-                            Some(render_image_search(state, None))
+                            Some(state.render(None))
                         },
                         Tab::Audio(state) => {
                             Some(AudioInput::render(state, None))

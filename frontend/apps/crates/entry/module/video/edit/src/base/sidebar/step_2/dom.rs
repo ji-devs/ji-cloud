@@ -1,6 +1,5 @@
 use super::state::*;
 use components::{
-    image::search::dom::render as render_image_search,
     module::_groups::design::edit::embed::select::{EmbedSelect, EmbedSelectList},
     tabs::{MenuTab, MenuTabKind},
 };
@@ -68,7 +67,7 @@ pub fn render(state: Rc<Step2>) -> Dom {
                                     Some(state.sidebar.base.text_editor.render_controls())
                                 },
                                 Tab::Image(state) => {
-                                    Some(render_image_search(state, None))
+                                    Some(state.render(None))
                                 },
                             }
                         })))

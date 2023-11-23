@@ -1,10 +1,7 @@
 use std::rc::Rc;
 
 use crate::{
-    image::search::{
-        dom::render_with_action as render_image_search_with_action,
-        state::State as ImageSearchState,
-    },
+    image::search::ImageSearch,
     module::{
         _common::edit::entry::prelude::BaseExt, _groups::design::edit::design_ext::DesignExt,
     },
@@ -85,7 +82,7 @@ where
         )
     }
 
-    fn render_background_tab_body(self: &Rc<Self>, image_state: Rc<ImageSearchState>) -> Dom {
+    fn render_background_tab_body(self: &Rc<Self>, image_state: Rc<ImageSearch>) -> Dom {
         let state = self;
         let color = clone!(state => move || {
             html!("empty-fragment" => HtmlElement, {
@@ -136,10 +133,10 @@ where
                 })
             })
         });
-        render_image_search_with_action(image_state, None, Some(color))
+        image_state.render_with_action(None, Some(color))
     }
 
-    fn render_overlay_tab_body(self: &Rc<Self>, overlay_state: Rc<ImageSearchState>) -> Dom {
+    fn render_overlay_tab_body(self: &Rc<Self>, overlay_state: Rc<ImageSearch>) -> Dom {
         let state = self;
         let delete = clone!(state => move|| {
             html!("button-rect", {
@@ -154,6 +151,6 @@ where
                 }))
             })
         });
-        render_image_search_with_action(overlay_state, None, Some(delete))
+        overlay_state.render_with_action(None, Some(delete))
     }
 }

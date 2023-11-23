@@ -10,7 +10,7 @@ use wasm_bindgen::prelude::*;
 use super::state::*;
 use crate::{
     audio::mixer::AUDIO_MIXER,
-    image::search::types::*,
+    image::search::{ImageDataTransfer, IMAGE_SEARCH_DATA_TRANSFER},
     module::_groups::cards::{
         edit::{config, state::*},
         lookup::{self, Side},
