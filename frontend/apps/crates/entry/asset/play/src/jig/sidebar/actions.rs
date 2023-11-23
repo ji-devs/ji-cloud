@@ -12,30 +12,34 @@ use utils::{prelude::ApiEndpointExt, unwrap::UnwrapJiExt};
 
 use crate::jig::sidebar::state::ReportStatus;
 
-use super::state::State;
+use super::state::Sidebar;
 
-pub fn send_report(state: Rc<State>) {
-    state.player_state.loader.load(clone!(state => async move {
-        let report_type = state.report_type.lock_ref().unwrap_ji();
+impl Sidebar {
+    pub fn send_report(self: &Rc<Self>) {
+        let state = self;
+        state.player_state.loader.load(clone!(state => async move {
+            let report_type = state.report_type.lock_ref().unwrap_ji();
 
-        let response = report::Create::api_with_auth(
-            CreateJigReportPath(state.player_state.jig_id),
-            Some(CreateJigReport {
-                report_type
-        })).await;
-        if let Ok(_res) = response {
-            state.report_status.set(ReportStatus::Sent);
-        }
-    }));
-}
+            let response = report::Create::api_with_auth(
+                CreateJigReportPath(state.player_state.jig_id),
+                Some(CreateJigReport {
+                    report_type
+            })).await;
+            if let Ok(_res) = response {
+                state.report_status.set(ReportStatus::Sent);
+            }
+        }));
+    }
 
-pub fn load_ages(state: Rc<State>) {
-    state.loader.load(clone!(state => async move {
-        match meta::Get::api_no_auth(GetMetadataPath(), None).await {
-            Err(_) => {},
-            Ok(res) => {
-                state.all_ages.set(res.age_ranges);
-            },
-        }
-    }));
+    pub fn load_ages(self: &Rc<Self>) {
+        let state = self;
+        state.loader.load(clone!(state => async move {
+            match meta::Get::api_no_auth(GetMetadataPath(), None).await {
+                Err(_) => {},
+                Ok(res) => {
+                    state.all_ages.set(res.age_ranges);
+                },
+            }
+        }));
+    }
 }

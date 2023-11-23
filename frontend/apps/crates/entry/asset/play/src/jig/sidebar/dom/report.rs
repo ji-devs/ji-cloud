@@ -6,15 +6,12 @@ use shared::domain::jig::report::JigReportType;
 use strum::IntoEnumIterator;
 use web_sys::HtmlSelectElement;
 
-use super::super::{
-    actions,
-    state::{ReportStatus, State},
-};
+use super::super::state::{ReportStatus, Sidebar};
 
 const STR_REPORT: &str = "Report";
 const STR_REPORT_SENT: &str = "Your report has been sent.";
 
-pub fn render(state: Rc<State>) -> impl Signal<Item = Vec<Dom>> {
+pub fn render(state: Rc<Sidebar>) -> impl Signal<Item = Vec<Dom>> {
     state
         .report_status
         .signal_cloned()
@@ -27,7 +24,7 @@ pub fn render(state: Rc<State>) -> impl Signal<Item = Vec<Dom>> {
         }))
 }
 
-fn render_button(state: Rc<State>) -> Dom {
+fn render_button(state: Rc<Sidebar>) -> Dom {
     html!("button-rect", {
         .prop("slot", "report")
         .prop("color", "blue")
@@ -38,11 +35,11 @@ fn render_button(state: Rc<State>) -> Dom {
     })
 }
 
-fn render_default(state: Rc<State>) -> Vec<Dom> {
+fn render_default(state: Rc<Sidebar>) -> Vec<Dom> {
     vec![render_button(state)]
 }
 
-fn render_sent(state: Rc<State>) -> Vec<Dom> {
+fn render_sent(state: Rc<Sidebar>) -> Vec<Dom> {
     vec![
         render_button(state),
         html!("span", {
@@ -52,7 +49,7 @@ fn render_sent(state: Rc<State>) -> Vec<Dom> {
     ]
 }
 
-fn render_active(state: Rc<State>) -> Vec<Dom> {
+fn render_active(state: Rc<Sidebar>) -> Vec<Dom> {
     vec![html!("jig-play-sidebar-report", {
         .prop("slot", "report")
         .children(&mut [
@@ -81,7 +78,7 @@ fn render_active(state: Rc<State>) -> Vec<Dom> {
                 .prop("slot", "button")
                 .text(STR_REPORT)
                 .event(clone!(state => move |_: events::Click| {
-                    actions::send_report(Rc::clone(&state));
+                    state.send_report();
                 }))
             }),
         ])

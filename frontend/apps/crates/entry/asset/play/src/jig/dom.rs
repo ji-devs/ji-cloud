@@ -1,4 +1,4 @@
-use super::sidebar;
+use super::sidebar::Sidebar;
 use components::audio::mixer::audio_iframe_messenger;
 use components::overlay::handle::OverlayHandle;
 use components::share_asset::ShareAsset;
@@ -157,8 +157,7 @@ impl JigPlayer {
                 if state.player_options.is_student {
                     dom
                 } else {
-                    let sidebar_state = Rc::new(sidebar::state::State::new(state.clone()));
-                    dom.child(sidebar::dom::render(sidebar_state))
+                    dom.child(Sidebar::new(&state).render())
                 }
             })
             .apply_if(state.player_options.display_score, clone!(state => move|dom| {

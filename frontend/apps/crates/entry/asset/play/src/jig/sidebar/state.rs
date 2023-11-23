@@ -6,7 +6,7 @@ use shared::domain::{jig::report::JigReportType, meta::AgeRange};
 
 use super::super::state::JigPlayer;
 
-pub struct State {
+pub struct Sidebar {
     pub sidebar_open: Mutable<bool>,
     pub player_state: Rc<JigPlayer>,
     pub info_popup_active: Mutable<bool>,
@@ -16,17 +16,17 @@ pub struct State {
     pub loader: AsyncLoader,
 }
 
-impl State {
-    pub fn new(player_state: Rc<JigPlayer>) -> Self {
-        Self {
+impl Sidebar {
+    pub fn new(player_state: &Rc<JigPlayer>) -> Rc<Self> {
+        Rc::new(Self {
             info_popup_active: Mutable::new(false),
             sidebar_open: Mutable::new(false),
-            player_state,
+            player_state: Rc::clone(player_state),
             report_status: Mutable::new(ReportStatus::Default),
             report_type: Mutable::new(None),
             all_ages: Mutable::new(vec![]),
             loader: AsyncLoader::new(),
-        }
+        })
     }
 }
 

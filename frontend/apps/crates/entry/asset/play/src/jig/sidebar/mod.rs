@@ -1,3 +1,5 @@
-pub mod actions;
-pub mod dom;
-pub mod state;
+mod actions;
+mod dom;
+mod state;
+
+pub use state::*;
