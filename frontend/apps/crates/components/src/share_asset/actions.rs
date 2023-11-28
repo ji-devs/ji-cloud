@@ -19,7 +19,10 @@ impl ShareAsset {
         state.loader.load(clone!(state => async move {
             let req = shared::domain::jig::codes::JigPlayerSessionCreateRequest {
                 jig_id: state.asset.unwrap_jig().id,
-                settings: JigPlayerSettings::default(),
+                settings: JigPlayerSettings {
+                    display_score: true,
+                    ..Default::default()
+                },
                 name: Default::default(),
             };
 
