@@ -44,10 +44,11 @@ export class _ extends LitElement {
                 .premium-icon {
                     grid-column: 1;
                     grid-row: 1;
-                    height: 18px;
+                    height: 22px;
                     z-index: 1;
                     justify-self: end;
-                    margin: 8px;
+                    width: 100%;
+                    translate: 0 -22px;
                 }
                 .column-3 {
                     display: grid;
