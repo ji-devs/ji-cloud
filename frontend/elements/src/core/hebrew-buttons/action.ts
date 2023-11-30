@@ -39,6 +39,12 @@ export class _ extends LitElement {
     @property({ type: Boolean, reflect: true })
     active: boolean = false;
 
+    firstUpdated() {
+        // Required for Safari so that this element becomes focusable and can be used with relatedTarget in <input-textarea-content>.`onBlur`.
+        // See https://stackoverflow.com/a/42764495/5253155
+        this.tabIndex = -1;
+    }
+
     render() {
         return html`
             <button type="button">
