@@ -254,12 +254,9 @@ export class _ extends LitElement {
                 }}
             ></slot>
             <div class="premium">
-                ${this.premium
-                    ? html`<img-ui
-                        path="icons/pro-icon.svg"
-                    ></img-ui>`
-                    : nothing
-                }
+                ${this.premium ? html`
+                    <img-ui path="icons/pro-icon.svg"></img-ui>
+                ` : nothing }
             </div>
             <slot name="image"></slot>
             <div class="middle">

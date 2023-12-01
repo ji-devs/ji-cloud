@@ -72,7 +72,7 @@ export class _ extends LitElement {
                     backface-visibility: hidden;
                 }
                 ::slotted([slot=front]) {
-                    z-index: 2;
+                    z-index: 3;
                 }
                 .back {
                     width: 100%;
@@ -87,7 +87,7 @@ export class _ extends LitElement {
                     display: grid;
                     grid-template-rows: 1fr auto;
                     transform: rotateY(180deg);
-                    z-index: 3;
+                    z-index: 4;
                 }
                 :host([kind=jig]) .back {
                     background-color: var(--light-orange-1);
@@ -247,6 +247,7 @@ export class _ extends LitElement {
                     position: absolute;
                     top: 0%;
                     left: 5%;
+                    /* Safari doesn't flip the card correctly if .jiggling and .premium are on the same z-index */
                     z-index: 1;
                 }
 
@@ -263,6 +264,7 @@ export class _ extends LitElement {
                     width: 100%;
                     top: -26px;
                     pointer-events: none;
+                    z-index: 2;
                 }
 
                 /*
@@ -364,12 +366,9 @@ export class _ extends LitElement {
         return html`
             <div class="wrapper">
                 <div class="premium">
-                    ${this.premium
-                        ? html`<img-ui
-                                path="icons/pro-icon.svg"
-                            ></img-ui>`
-                        : nothing
-                    }
+                    ${this.premium ? html`
+                        <img-ui path="icons/pro-icon.svg"></img-ui>`
+                    : nothing}
                 </div>
                 <img-ui
                     class="jiggling"
