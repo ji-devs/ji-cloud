@@ -3453,7 +3453,6 @@ dependencies = [
  "thiserror",
  "unicode-segmentation",
  "url",
- "use",
  "uuid 1.1.2",
 ]
 
@@ -4165,12 +4164,6 @@ dependencies = [
  "percent-encoding",
  "serde",
 ]
-
-[[package]]
-name = "use"
-version = "0.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "89452352a9cec4cf2d44c40f96d3696e09866e922b1fa28bccfe77b803055e66"
 
 [[package]]
 name = "uuid"
