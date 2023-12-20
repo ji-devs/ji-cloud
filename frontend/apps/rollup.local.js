@@ -97,7 +97,7 @@ export default [
                 dirs: [`dist/`],
                 port: APP_PORT,
                 // enable next line to serve on the network
-                // host: '0.0.0.0',
+                host: '0.0.0.0',
                 extend: fp(async (server) => {
                     server.setNotFoundHandler((req, res) => {
                         const app = get_app_name(req.url);

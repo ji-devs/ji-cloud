@@ -17,6 +17,8 @@ pub const MIN_LIST_WORDS: usize = 2;
 /// Maximum amount of words which should be added to a list for a game.
 pub const MAX_LIST_WORDS: usize = 14;
 
+const LOCALHOST: &str = "localhost";
+
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub enum RemoteTarget {
     Local,
@@ -108,7 +110,7 @@ impl RemoteTarget {
 
     pub fn api_assigned_url(&self) -> String {
         match self {
-            Self::Local => env_var("LOCAL_API_URL").unwrap_or("http://localhost:8080".to_string()),
+            Self::Local => env_var("LOCAL_API_URL").unwrap_or(format!("http://{LOCALHOST}:8080")),
             Self::Sandbox => "https://ji-cloud-api-sandbox-wlv5av7voq-ew.a.run.app".to_string(),
             Self::Release => "https://ji-cloud-api-zkhkelxlzq-ew.a.run.app".to_string(),
         }
@@ -116,7 +118,7 @@ impl RemoteTarget {
 
     pub fn api_url(&self) -> String {
         match self {
-            Self::Local => env_var("LOCAL_API_URL").unwrap_or("http://localhost:8080".to_string()),
+            Self::Local => env_var("LOCAL_API_URL").unwrap_or(format!("http://{LOCALHOST}:8080")),
             Self::Sandbox => "https://api.sandbox.jigzi.org".to_string(),
             Self::Release => "https://api.jigzi.org".to_string(),
         }
@@ -125,7 +127,7 @@ impl RemoteTarget {
     pub fn uploads_url(&self) -> String {
         match self {
             Self::Local => env_var("LOCAL_UPLOADS_URL")
-                .unwrap_or("http://localhost:9000/test-bucket".to_string()),
+                .unwrap_or(format!("http://{LOCALHOST}:9000/test-bucket")),
             Self::Sandbox => "https://uploads.sandbox.jigzi.org".to_string(),
             Self::Release => "https://uploads.jigzi.org".to_string(),
         }
@@ -134,7 +136,7 @@ impl RemoteTarget {
     pub fn media_url(&self) -> String {
         match self {
             Self::Local => {
-                env_var("LOCAL_MEDIA_URL").unwrap_or("http://localhost:4102".to_string())
+                env_var("LOCAL_MEDIA_URL").unwrap_or(format!("http://{LOCALHOST}:4102"))
             }
             Self::Sandbox | Self::Release => "https://media.jigzi.org".to_string(),
         }
@@ -143,7 +145,7 @@ impl RemoteTarget {
     pub fn legacy_url(&self) -> String {
         match self {
             Self::Local => {
-                env_var("LOCAL_LEGACY_URL").unwrap_or("http://localhost:4106".to_string())
+                env_var("LOCAL_LEGACY_URL").unwrap_or(format!("http://{LOCALHOST}:4106"))
                 //"https://legacy.jigzi.org".to_string()
             }
             Self::Sandbox | Self::Release => "https://legacy.jigzi.org".to_string(),
@@ -153,7 +155,7 @@ impl RemoteTarget {
     pub fn pages_url(&self) -> String {
         match self {
             Self::Local => {
-                env_var("LOCAL_FRONTEND_URL").unwrap_or("http://localhost:4104".to_string())
+                env_var("LOCAL_FRONTEND_URL").unwrap_or(format!("http://{LOCALHOST}:4104"))
             }
             Self::Sandbox => "https://sandbox.jigzi.org".to_string(),
             Self::Release => "https://jigzi.org".to_string(),
@@ -162,7 +164,7 @@ impl RemoteTarget {
     pub fn pages_url_iframe(&self) -> String {
         match self {
             Self::Local => {
-                env_var("LOCAL_PAGES_URL_IFRAME").unwrap_or("http://localhost:4105".to_string())
+                env_var("LOCAL_PAGES_URL_IFRAME").unwrap_or(format!("http://{LOCALHOST}:4104"))
             }
             Self::Sandbox => "https://sandbox.jigzi.org".to_string(),
             Self::Release => "https://jigzi.org".to_string(),
@@ -172,7 +174,7 @@ impl RemoteTarget {
     pub fn frontend_url(&self) -> String {
         match self {
             Self::Local => {
-                env_var("LOCAL_FRONTEND_URL").unwrap_or("http://localhost:4104".to_string())
+                env_var("LOCAL_FRONTEND_URL").unwrap_or(format!("http://{LOCALHOST}:4104"))
             }
             Self::Sandbox => "https://frontend.sandbox.jigzi.org".to_string(),
             Self::Release => "https://frontend.jigzi.org".to_string(),
