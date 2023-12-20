@@ -23,9 +23,6 @@ impl CardDrag {
             match top {
                 Some(top) if top.pair_id == self.pair_id => {
                     top.phase.set(TopPhase::Landed);
-                    if current.top.iter().all(|choice| choice.is_landed()) {
-                        Game::next(self.game.clone());
-                    }
                 }
                 _ => {
                     if let Some(target) = current
@@ -64,6 +61,12 @@ impl CardDrag {
                 // Only treat as failed if they've dropped the card over a target. If
                 // they drop the card over nothing, it could be for something like releasing
                 // the card to select a new card.
+            }
+
+            // Game::next needs access to report.
+            drop(report);
+            if current.top.iter().all(|choice| choice.is_landed()) {
+                Game::next(self.game.clone());
             }
 
             current.drag.set(None);
