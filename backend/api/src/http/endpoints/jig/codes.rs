@@ -38,10 +38,12 @@ pub async fn create(
 pub async fn list_user_codes(
     db: Data<PgPool>,
     claims: TokenUser,
+    req: Json<<codes::JigCodeList as ApiEndpoint>::Req>,
 ) -> Result<Json<<codes::JigCodeList as ApiEndpoint>::Res>, error::JigCode> {
     let user_id = claims.user_id();
+    let req = req.into_inner();
 
-    let codes = db::jig::codes::list_user_codes(&*db, user_id).await?;
+    let codes = db::jig::codes::list_user_codes(&*db, user_id, req).await?;
 
     Ok(Json(JigCodeListResponse { codes }))
 }

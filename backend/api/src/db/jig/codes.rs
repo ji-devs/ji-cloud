@@ -1,7 +1,9 @@
 use chrono::{DateTime, Duration, Utc};
 use rand::{rngs::ThreadRng, Rng};
 use shared::config::{JIG_PLAYER_SESSION_CODE_MAX, JIG_PLAYER_SESSION_VALID_DURATION_SECS};
-use shared::domain::jig::codes::{JigCodeSessionResponse, JigPlayerSessionCreateRequest};
+use shared::domain::jig::codes::{
+    JigCodeListRequest, JigCodeSessionResponse, JigPlayerSessionCreateRequest,
+};
 use shared::domain::jig::{
     codes::{JigCode, JigCodeResponse, JigPlaySession},
     player::JigPlayerSettings,
@@ -89,7 +91,11 @@ fn generate_random_code(generator: &mut ThreadRng) -> i32 {
     generator.gen_range(0..JIG_PLAYER_SESSION_CODE_MAX)
 }
 
-pub async fn list_user_codes(db: &PgPool, user_id: UserId) -> sqlx::Result<Vec<JigCodeResponse>> {
+pub async fn list_user_codes(
+    db: &PgPool,
+    user_id: UserId,
+    req: JigCodeListRequest,
+) -> sqlx::Result<Vec<JigCodeResponse>> {
     let sessions = sqlx::query!(
         //language=SQL
         r#"
@@ -102,9 +108,10 @@ select code     as "code!: i32",
        name as "name?",
        expires_at as "expires_at: DateTime<Utc>"
 from jig_code
-where creator_id = $1
+where creator_id = $1 AND (jig_id = $2 or $2 is null)
 "#,
-        user_id.0
+        user_id.0,
+        req.jig_id.map(|j| j.0),
     )
     .fetch_all(db)
     .await?

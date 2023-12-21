@@ -58,6 +58,7 @@ async fn create_and_list(port: u16) -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!("http://0.0.0.0:{}/v1/jig/codes", port))
+        .json(&serde_json::json!({}))
         .login()
         .send()
         .await?;

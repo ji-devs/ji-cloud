@@ -67,6 +67,16 @@ pub struct JigCodeResponse {
 
 make_path_parts!(JigCodeListPath => "/v1/jig/codes");
 
+/// Request for jig code list
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct JigCodeListRequest {
+    /// Jig id
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub jig_id: Option<JigId>,
+}
+
 /// Lists all jig player sessions associated with a jig
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct JigCodeListResponse {

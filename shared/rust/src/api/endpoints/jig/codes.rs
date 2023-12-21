@@ -2,7 +2,7 @@ use crate::{
     api::{ApiEndpoint, Method},
     domain::jig::codes::{
         JigCodeListPath, JigCodeListResponse, JigCodeSessionsListResponse, JigCodeSessionsPath,
-        JigPlayerSessionCreatePath, JigPlayerSessionCreateRequest, JigPlayerSessionCreateResponse,
+        JigPlayerSessionCreatePath, JigPlayerSessionCreateRequest, JigPlayerSessionCreateResponse, JigCodeListRequest,
     },
     error::EmptyError,
 };
@@ -53,7 +53,7 @@ impl ApiEndpoint for Create {
 pub struct JigCodeList;
 impl ApiEndpoint for JigCodeList {
     type Path = JigCodeListPath;
-    type Req = ();
+    type Req = JigCodeListRequest;
     type Res = JigCodeListResponse;
     type Err = EmptyError;
     const METHOD: Method = Method::Get;
