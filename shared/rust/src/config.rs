@@ -135,9 +135,7 @@ impl RemoteTarget {
 
     pub fn media_url(&self) -> String {
         match self {
-            Self::Local => {
-                env_var("LOCAL_MEDIA_URL").unwrap_or(format!("http://{LOCALHOST}:4102"))
-            }
+            Self::Local => env_var("LOCAL_MEDIA_URL").unwrap_or(format!("http://{LOCALHOST}:4102")),
             Self::Sandbox | Self::Release => "https://media.jigzi.org".to_string(),
         }
     }
