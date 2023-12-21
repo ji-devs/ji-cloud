@@ -27,6 +27,7 @@ pub async fn create(
 
     Ok(HttpResponse::Created().json(JigCodeResponse {
         index,
+        jig_id: req.jig_id,
         name: req.name,
         settings: req.settings,
         expires_at,

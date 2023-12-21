@@ -94,6 +94,7 @@ pub async fn list_user_codes(db: &PgPool, user_id: UserId) -> sqlx::Result<Vec<J
         //language=SQL
         r#"
 select code     as "code!: i32",
+       jig_id as "jig_id: JigId",
        direction as "direction: TextDirection",
        display_score,
        track_assessments,
@@ -110,6 +111,7 @@ where creator_id = $1
     .into_iter()
     .map(|it| JigCodeResponse {
         index: JigCode(it.code),
+        jig_id: it.jig_id,
         name: it.name,
         settings: JigPlayerSettings {
             direction: it.direction,

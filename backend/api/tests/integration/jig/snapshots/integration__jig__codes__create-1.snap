@@ -4,6 +4,7 @@ expression: body
 ---
 {
   "index": "[index]",
+  "jig_id": "3a71522a-cd77-11eb-8dc1-af3e35f7c743",
   "name": null,
   "settings": {
     "direction": "rtl",

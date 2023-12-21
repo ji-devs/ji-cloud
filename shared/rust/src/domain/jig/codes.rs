@@ -52,6 +52,9 @@ pub struct JigCodeResponse {
     /// Four-digit code identifying a Jig player session
     pub index: JigCode,
 
+    /// Id of Jig this code is for.
+    pub jig_id: JigId,
+
     /// Display name.
     pub name: Option<String>,
 
