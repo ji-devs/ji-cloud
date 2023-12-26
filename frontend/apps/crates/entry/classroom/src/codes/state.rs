@@ -1,16 +1,13 @@
 use std::rc::Rc;
 
-use futures_signals::signal_vec::MutableVec;
-use shared::domain::jig::codes::JigCodeResponse;
+use utils::routes::ClassroomCodesRoute;
 
 pub struct Codes {
-    pub codes: MutableVec<JigCodeResponse>,
+    pub route: ClassroomCodesRoute,
 }
 
 impl Codes {
-    pub fn new() -> Rc<Self> {
-        Rc::new(Self {
-            codes: Default::default(),
-        })
+    pub fn new(route: ClassroomCodesRoute) -> Rc<Self> {
+        Rc::new(Self { route })
     }
 }

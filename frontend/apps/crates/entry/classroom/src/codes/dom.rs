@@ -1,13 +1,10 @@
 use std::rc::Rc;
 
 use dominator::{html, DomBuilder};
-use futures_signals::signal_vec::SignalVecExt;
-use utils::{component::Component, link, routes::ClassroomRoute};
+use utils::{component::Component, routes::ClassroomCodesRoute};
 use web_sys::ShadowRoot;
 
-use utils::routes::Route;
-
-use super::Codes;
+use super::{jig_code_sessions::CodeSessions, jig_codes::JigCodes, jigs::Jigs, Codes};
 
 impl Component<Codes> for Rc<Codes> {
     fn styles() -> &'static str {
@@ -15,18 +12,12 @@ impl Component<Codes> for Rc<Codes> {
     }
 
     fn dom(&self, dom: DomBuilder<ShadowRoot>) -> DomBuilder<ShadowRoot> {
-        let state = self;
-
-        state.load_data();
-
         dom.child(html!("div", {
-            .prop("slot", "page-header")
-            .children_signal_vec(state.codes.signal_vec_cloned().map(|code| {
-                link!(Route::Classroom(ClassroomRoute::CodeSession(code.index)), {
-                    .class("code-section")
-                    .text(&code.index.to_string())
-                })
-            }))
+            .child(match self.route {
+                ClassroomCodesRoute::Jigs => Jigs::new().render(),
+                ClassroomCodesRoute::JigCodes(jig_id) => JigCodes::new(jig_id).render(),
+                ClassroomCodesRoute::JigCodeSession(jig_id, code) => CodeSessions::new(jig_id, code).render(),
+            })
         }))
     }
 }

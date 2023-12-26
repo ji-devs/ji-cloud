@@ -4,7 +4,7 @@ use utils::{component::Component, routes::*};
 use dominator::{html, Dom};
 use futures_signals::signal::{Signal, SignalExt};
 
-use crate::codes::{code_sessions::CodeSessions, Codes};
+use crate::codes::{jig_code_sessions::CodeSessions, jig_codes::JigCodes, jigs::Jigs};
 
 pub struct Router {}
 
@@ -20,8 +20,13 @@ impl Router {
     fn dom_signal() -> impl Signal<Item = Option<Dom>> {
         Self::signal().map(|route| match route {
             Route::Classroom(route) => Some(match route {
-                ClassroomRoute::Codes => Codes::new().render(),
-                ClassroomRoute::CodeSession(code) => CodeSessions::new(code).render(),
+                ClassroomRoute::Codes(route) => match route {
+                    ClassroomCodesRoute::Jigs => Jigs::new().render(),
+                    ClassroomCodesRoute::JigCodes(jig_id) => JigCodes::new(jig_id).render(),
+                    ClassroomCodesRoute::JigCodeSession(jig_id, code) => {
+                        CodeSessions::new(jig_id, code).render()
+                    }
+                },
             }),
             _ => None,
         })

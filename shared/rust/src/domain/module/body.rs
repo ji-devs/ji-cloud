@@ -1,3 +1,5 @@
+#![allow(missing_docs)]
+
 use super::ModuleKind;
 use crate::{
     domain::{audio::AudioId, image::ImageId},
@@ -50,7 +52,7 @@ pub mod legacy;
 pub mod _groups;
 
 /// Body kinds for Modules.
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug, strum_macros::EnumTryAs)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 pub enum Body {

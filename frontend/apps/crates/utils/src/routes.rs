@@ -180,8 +180,14 @@ pub enum KidsRoute {
 
 #[derive(Debug, Clone)]
 pub enum ClassroomRoute {
-    Codes,
-    CodeSession(JigCode),
+    Codes(ClassroomCodesRoute),
+}
+
+#[derive(Debug, Clone)]
+pub enum ClassroomCodesRoute {
+    Jigs,
+    JigCodes(JigId),
+    JigCodeSession(JigId, JigCode),
 }
 
 #[derive(Debug, Clone)]
@@ -441,11 +447,20 @@ impl Route {
             ["home", "plan", "school"] => Self::Home(HomeRoute::Plan(HomePlanRoute::School)),
             ["kids"] => Self::Kids(KidsRoute::StudentCode(None)),
             ["kids", code] => Self::Kids(KidsRoute::StudentCode(Some(code.to_string()))),
-            ["classroom", "codes"] => Self::Classroom(ClassroomRoute::Codes),
-            ["classroom", "codes", code, "sessions"] => {
+            ["classroom", "codes"] => {
+                Self::Classroom(ClassroomRoute::Codes(ClassroomCodesRoute::Jigs))
+            }
+            ["classroom", "codes", jig_id] => {
+                let jig_id = JigId::from_str(jig_id).unwrap();
+                Self::Classroom(ClassroomRoute::Codes(ClassroomCodesRoute::JigCodes(jig_id)))
+            }
+            ["classroom", "codes", jig_id, code, "sessions"] => {
+                let jig_id = JigId::from_str(jig_id).unwrap();
                 let code = code.parse().unwrap_ji();
                 let code = JigCode(code);
-                Self::Classroom(ClassroomRoute::CodeSession(code))
+                Self::Classroom(ClassroomRoute::Codes(ClassroomCodesRoute::JigCodeSession(
+                    jig_id, code,
+                )))
             }
             ["dev", "showcase", id] => {
                 let page = params_map.get("page").unwrap_or_default();
@@ -860,10 +875,21 @@ impl From<&Route> for String {
                 },
             },
             Route::Classroom(route) => match route {
-                ClassroomRoute::Codes => "/classroom/codes".to_string(),
-                ClassroomRoute::CodeSession(code) => {
-                    format!("/classroom/codes/{}/sessions", code.to_string())
-                }
+                ClassroomRoute::Codes(route) => match route {
+                    ClassroomCodesRoute::Jigs => {
+                        format!("/classroom/codes")
+                    }
+                    ClassroomCodesRoute::JigCodes(jig_id) => {
+                        format!("/classroom/codes/{}", jig_id.to_string())
+                    }
+                    ClassroomCodesRoute::JigCodeSession(jig_id, code) => {
+                        format!(
+                            "/classroom/codes/{}/{}/sessions",
+                            jig_id.to_string(),
+                            code.to_string()
+                        )
+                    }
+                },
             },
             Route::Community(route) => match route {
                 CommunityRoute::Landing => "/community".to_string(),
