@@ -50,7 +50,7 @@ thiserror = "1.0.30"
 futures = "0.3.17"
 itertools = "0.10.1"
 async-trait = "0.1.51"
-serde = { version = "1.0.130", features = ["derive"] }
+serde = { version = "1.0.193", features = ["derive"] }
 serde_repr = "0.1.7"
 base64 = "0.13.0"
 strum = "0.25.0"
