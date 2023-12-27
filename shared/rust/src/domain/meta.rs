@@ -322,5 +322,6 @@ pub enum GoogleAddressType {
     /// Indicates a political entity
     Political,
     /// Any other address type found [here](https://developers.google.com/maps/documentation/geocoding/requests-geocoding#Types)
+    #[serde(untagged)]
     Other(String),
 }
