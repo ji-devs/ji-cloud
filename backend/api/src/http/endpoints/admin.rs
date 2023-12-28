@@ -8,8 +8,7 @@ use chrono::{Duration, Utc};
 use futures::future::join_all;
 use futures::try_join;
 use ji_core::settings::RuntimeSettings;
-use serde::ser::Serialize;
-use serde_derive::Deserialize;
+use serde::{Serialize, Deserialize};
 use shared::api::endpoints::admin::{
     CreateSchoolName, DeleteUserAccount, GetSchoolNames, ImportSchoolNames, InviteUsers,
     RemoveUserFromSchool, SearchSchools, SetInternalSchoolName, UpdateSchoolName, VerifySchool,
