@@ -467,6 +467,9 @@ pub struct UserProfileExport {
     /// The user's city
     #[serde(default)]
     pub city: Option<String>,
+    /// The user's state/province
+    #[serde(default)]
+    pub state: Option<String>,
     /// The user's country
     #[serde(default)]
     pub country: Option<String>,

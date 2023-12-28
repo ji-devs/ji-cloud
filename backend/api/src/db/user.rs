@@ -508,6 +508,11 @@ where
                     .address_component_by_type(GoogleAddressType::Locality)
             });
 
+            let state: Option<&GoogleAddressComponent> = location.as_ref().map_or(None, |l| {
+                l.place
+                    .address_component_by_type(GoogleAddressType::AdministrativeAreaLevel1)
+            });
+
             let country: Option<&GoogleAddressComponent> = location.as_ref().map_or(None, |l| {
                 l.place
                     .address_component_by_type(GoogleAddressType::Country)
@@ -528,6 +533,7 @@ where
                 organization: row.organization,
                 persona: row.persona,
                 city: city.map(|c| c.into()),
+                state: state.map(|s| s.into()),
                 country: country.map(|c| c.into()),
                 subjects: row.subjects,
                 age_ranges: row.age_ranges,
