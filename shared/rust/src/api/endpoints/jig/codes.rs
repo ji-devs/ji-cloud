@@ -1,8 +1,9 @@
 use crate::{
     api::{ApiEndpoint, Method},
     domain::jig::codes::{
-        JigCodeListPath, JigCodeListResponse, JigCodeSessionsListResponse, JigCodeSessionsPath,
-        JigPlayerSessionCreatePath, JigPlayerSessionCreateRequest, JigPlayerSessionCreateResponse, JigCodeListRequest,
+        JigCodeListPath, JigCodeListRequest, JigCodeListResponse, JigCodeSessionsListResponse,
+        JigCodeSessionsPath, JigPlayerSessionCreatePath, JigPlayerSessionCreateRequest,
+        JigPlayerSessionCreateResponse,
     },
     error::EmptyError,
 };
