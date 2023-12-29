@@ -94,7 +94,7 @@ fn generate_random_code(generator: &mut ThreadRng) -> i32 {
 pub async fn list_user_codes(
     db: &PgPool,
     user_id: UserId,
-    req: JigCodeListRequest,
+    query: JigCodeListRequest,
 ) -> sqlx::Result<Vec<JigCodeResponse>> {
     let sessions = sqlx::query!(
         //language=SQL
@@ -111,7 +111,7 @@ from jig_code
 where creator_id = $1 AND (jig_id = $2 or $2 is null)
 "#,
         user_id.0,
-        req.jig_id.map(|j| j.0),
+        query.jig_id.map(|j| j.0),
     )
     .fetch_all(db)
     .await?

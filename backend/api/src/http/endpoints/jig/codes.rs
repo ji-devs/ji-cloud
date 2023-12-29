@@ -1,5 +1,5 @@
 use actix_web::{
-    web::{self, Data, Json},
+    web::{self, Data, Json, Query},
     HttpResponse,
 };
 use shared::{
@@ -38,12 +38,12 @@ pub async fn create(
 pub async fn list_user_codes(
     db: Data<PgPool>,
     claims: TokenUser,
-    req: Json<<codes::JigCodeList as ApiEndpoint>::Req>,
+    query: Option<Query<<codes::JigCodeList as ApiEndpoint>::Req>>,
 ) -> Result<Json<<codes::JigCodeList as ApiEndpoint>::Res>, error::JigCode> {
     let user_id = claims.user_id();
-    let req = req.into_inner();
+    let query = query.map_or_else(Default::default, Query::into_inner);
 
-    let codes = db::jig::codes::list_user_codes(&*db, user_id, req).await?;
+    let codes = db::jig::codes::list_user_codes(&*db, user_id, query).await?;
 
     Ok(Json(JigCodeListResponse { codes }))
 }
