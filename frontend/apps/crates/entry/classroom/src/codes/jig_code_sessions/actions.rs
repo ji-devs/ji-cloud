@@ -1,19 +1,19 @@
 use std::rc::Rc;
 
 use dominator::clone;
-use futures::{future::join_all, join};
+use futures::{future::try_join_all, join};
 use shared::{
     api::endpoints,
     domain::{
         asset::AssetType,
         jig::{codes::JigCodeSessionsPath, JigGetLivePath},
-        module::{ModuleGetLivePath, ModuleId},
+        module::{ModuleGetLivePath, ModuleResponse},
     },
 };
 use utils::{bail_on_err, error_ext::ErrorExt, prelude::ApiEndpointExt};
 use wasm_bindgen_futures::spawn_local;
 
-use super::CodeSessions;
+use super::{CodeSessions, JigWithModules};
 
 impl CodeSessions {
     pub fn load_data(self: &Rc<Self>) {
@@ -31,27 +31,21 @@ impl CodeSessions {
             .await
             .toast_on_err();
         let jig = bail_on_err!(jig);
-
-        join_all(
-            jig.jig_data
-                .modules
-                .iter()
-                .map(|module| self.load_module(module.id))
-                .collect::<Vec<_>>(),
-        )
-        .await;
-        self.jig.set(Some(jig));
-    }
-
-    async fn load_module(self: &Rc<Self>, module_id: ModuleId) {
-        let module = endpoints::module::GetLive::api_with_auth(
-            ModuleGetLivePath(AssetType::Jig, module_id.clone()),
-            None,
-        )
+        let modules = try_join_all(jig.jig_data.modules.iter().map(|module| {
+            endpoints::module::GetLive::api_with_auth(
+                ModuleGetLivePath(AssetType::Jig, module.id.clone()),
+                None,
+            )
+        }))
         .await
         .toast_on_err();
-        let module = bail_on_err!(module);
-        self.modules.borrow_mut().insert(module_id, module);
+        let modules: Vec<ModuleResponse> = bail_on_err!(modules);
+        let modules = modules
+            .into_iter()
+            .map(|module| (module.module.id, module))
+            .collect();
+
+        self.jig.set(Some(JigWithModules { jig, modules }));
     }
 
     async fn load_report(self: &Rc<Self>) {

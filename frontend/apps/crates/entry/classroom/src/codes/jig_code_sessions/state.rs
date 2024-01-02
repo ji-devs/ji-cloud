@@ -1,6 +1,6 @@
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::{collections::HashMap, rc::Rc};
 
-use futures_signals::{signal::Mutable, signal_vec::MutableVec};
+use futures_signals::signal::Mutable;
 use shared::domain::{
     jig::{
         codes::{JigCode, JigCodeSessionResponse},
@@ -10,11 +10,10 @@ use shared::domain::{
 };
 
 pub struct CodeSessions {
-    pub code: JigCode,
-    pub jig_id: JigId,
-    pub jig: Mutable<Option<JigResponse>>,
-    pub modules: RefCell<HashMap<ModuleId, ModuleResponse>>,
-    pub infos: MutableVec<JigCodeSessionResponse>,
+    pub(super) code: JigCode,
+    pub(super) jig_id: JigId,
+    pub(super) jig: Mutable<Option<JigWithModules>>,
+    pub(super) infos: Mutable<Vec<JigCodeSessionResponse>>,
 }
 
 impl CodeSessions {
@@ -23,8 +22,13 @@ impl CodeSessions {
             code,
             jig_id,
             jig: Default::default(),
-            modules: Default::default(),
             infos: Default::default(),
         })
     }
+}
+
+#[derive(Debug, Clone)]
+pub(super) struct JigWithModules {
+    pub jig: JigResponse,
+    pub modules: HashMap<ModuleId, ModuleResponse>,
 }
