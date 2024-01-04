@@ -13,6 +13,7 @@ impl Component<Codes> for Rc<Codes> {
 
     fn dom(&self, dom: DomBuilder<ShadowRoot>) -> DomBuilder<ShadowRoot> {
         dom.child(html!("div", {
+            .class("width-holder")
             .child(match self.route {
                 ClassroomCodesRoute::Jigs => Jigs::new().render(),
                 ClassroomCodesRoute::JigCodes(jig_id) => JigCodes::new(jig_id).render(),

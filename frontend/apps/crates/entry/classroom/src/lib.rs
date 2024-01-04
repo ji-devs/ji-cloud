@@ -5,8 +5,11 @@
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 mod codes;
-mod router;
+mod dom;
+mod state;
 
+use state::Classroom;
+use utils::component::Component;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(start)]
@@ -16,6 +19,5 @@ pub async fn main_js() {
 
     utils::init::init().await;
 
-    let router = router::Router::new();
-    dominator::append_dom(&dominator::get_id("root"), router.render());
+    dominator::append_dom(&dominator::get_id("root"), Classroom::new().render());
 }

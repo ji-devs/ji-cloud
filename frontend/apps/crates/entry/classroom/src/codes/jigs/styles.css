@@ -1,0 +1,10 @@
+.jigs {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 216px);
+    justify-content: center;
+    gap: 32px;
+    padding: 40px 32px;
+}
+.jigs a {
+    text-decoration: none;
+}

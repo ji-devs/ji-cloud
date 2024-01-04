@@ -1,3 +1,4 @@
-.code-section {
-    display: grid;
+.width-holder {
+    max-width: 1400px;
+    margin: auto;
 }
