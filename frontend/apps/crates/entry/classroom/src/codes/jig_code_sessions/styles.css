@@ -1,12 +1,46 @@
-table {
-    border-collapse: collapse;
+:host {
+    padding: 20px 20px;
+    display: grid;
 }
-th, td {
-    border: solid 1px grey;
-    vertical-align: top;
-    height: 24px;
-    text-align: center;
+.table {
+    --module-count: 4;
+    display: grid;
+    grid-template-columns: 40px auto repeat(var(--module-count), 1fr);
+    background-color: #ffffff;
+    border-radius: 8px;
+    --border: solid 1px #00000010;
+    border: var(--border);
+    color: #00000080;
+}
+.header {
+    display: contents;
+}
+.header .cell {
+    padding-inline: 10px;
+    font-size: 12px;
+}
+.session {
+    display: contents;
+}
+.session .cell {
+    min-height: 40px;
     padding: 10px;
+    font-size: 14px;
+}
+.session .cell:not(:first-child) {
+    border-left: var(--border);
+}
+.cell {
+    border-bottom: var(--border);
+    text-align: center;
+    box-sizing: border-box;
+}
+.session fa-icon {
+    display: inline-block;
+    cursor: pointer;
+}
+.session.open fa-icon {
+    rotate: 90deg;
 }
 .round-items {
     display: flex;

@@ -12,11 +12,10 @@ pub fn render_matching(module: &matching::Content, session: &JigPlaySessionMatch
                     .class("wrapper")
                     .child(html!("h4", {
                         .text("Round ")
-                        .text(&i.to_string())
+                        .text(&(i + 1).to_string())
                     }))
                     .child(html!("div", {
                         .class("round-items")
-
                         .children(round.iter().map(|(id, item)| {
                             html!("div", {
                                 .class("round-item")
@@ -67,5 +66,5 @@ pub fn get_matching_count(session: &JigPlaySessionMatching) -> String {
             };
         }
     }
-    format!("{total}/{earned}")
+    format!("{earned}/{total}")
 }

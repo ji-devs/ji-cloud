@@ -25,58 +25,13 @@ impl Component<CodeSessions> for Rc<CodeSessions> {
 
         dom.child_signal(state.module_and_session_signal().map(
             clone!(state => move |jig_and_session| {
-                jig_and_session.map(|(jig, sessions)| {
-                    html!("table", {
-                        .child(html!("tr", {
-                            .child(html!("th"))
-                            .children(jig.jig.jig_data.modules.iter().map(|module| {
-                                html!("th", {
-                                    .text(module.kind.as_str())
-                                })
-                            }).collect::<Vec<_>>())
-                        }))
-                        .children(sessions.into_iter().map(clone!(state => move |session| {
-                            let open = Mutable::new(false);
-                            let sessions = session.info.unwrap().modules.into_iter().map(|module| {
-                                let module_id = match &module {
-                                    JigPlaySessionModule::Matching(module) => module.module_id,
-                                };
-                                (module_id, module)
-                            }).collect::<HashMap<ModuleId, JigPlaySessionModule>>();
-                            html!("tr", {
-                                .child(html!("td", {
-                                    .text_signal(open.signal().map(|open| match open {
-                                        true => "^",
-                                        false => ">",
-                                    }))
-                                    .event(clone!(open => move |_: events::Click| {
-                                        open.replace_with(|open| {
-                                            !*open
-                                        });
-                                    }))
-                                }))
-                                .children(jig.jig.jig_data.modules.iter().map(|module| {
-                                    html!("td", {
-                                        .apply(|dom| {
-                                            let module_id = module.id;
-                                            let module = jig.modules.get(&module_id).unwrap().clone();
-                                            if let Some(session) = sessions.get(&module_id) {
-                                                dom
-                                                    .text(&state.get_count(&session))
-                                                    .child_signal(open.signal().map(clone!(state, session => move |open| {
-                                                        open.then(|| {
-                                                            state.render_session(&module, &session.clone())
-                                                        })
-                                                    })))
-                                            } else {
-                                                dom
-                                            }
-                                        })
-                                    })
-                                }).collect::<Vec<_>>())
-                            })
-                        })))
-                    })
+                Some(match jig_and_session {
+                    None => {
+                        html!("progress")
+                    },
+                    Some((jig, sessions)) => {
+                        state.render_loaded(jig, sessions)
+                    },
                 })
             }),
         ))
@@ -84,6 +39,81 @@ impl Component<CodeSessions> for Rc<CodeSessions> {
 }
 
 impl CodeSessions {
+    fn render_loaded(
+        self: &Rc<Self>,
+        jig: JigWithModules,
+        sessions: Vec<JigCodeSessionResponse>,
+    ) -> Dom {
+        let state = self;
+        html!("div", {
+            .class("table")
+            .child(html!("div", {
+                .class("header")
+                .child(html!("div", {
+                    .class("cell")
+                }))
+                .child(html!("div", {
+                    .class("cell")
+                    .text("Student's Name")
+                }))
+                .children(jig.jig.jig_data.modules.iter().map(|module| {
+                    html!("div", {
+                        .class("cell")
+                        .text(module.kind.as_str())
+                    })
+                }).collect::<Vec<_>>())
+            }))
+            .children(sessions.into_iter().map(clone!(state => move |session| {
+                let open = Mutable::new(false);
+                let sessions = session.info.unwrap().modules.into_iter().map(|module| {
+                    let module_id = match &module {
+                        JigPlaySessionModule::Matching(module) => module.module_id,
+                    };
+                    (module_id, module)
+                }).collect::<HashMap<ModuleId, JigPlaySessionModule>>();
+                html!("div", {
+                    .class("session")
+                    .class_signal("open", open.signal())
+                    .child(html!("div", {
+                        .class("cell")
+                        .child(html!("fa-icon", {
+                            .prop("icon", "fa-regular fa-angle-right")
+                        }))
+                        .event(clone!(open => move |_: events::Click| {
+                            open.replace_with(|open| {
+                                !*open
+                            });
+                        }))
+                    }))
+                    .child(html!("div", {
+                        .class("cell")
+                        .text(&session.players_name.unwrap_or_default())
+                    }))
+                    .children(jig.jig.jig_data.modules.iter().map(|module| {
+                        html!("div", {
+                            .class("cell")
+                            .apply(|dom| {
+                                let module_id = module.id;
+                                let module = jig.modules.get(&module_id).unwrap().clone();
+                                if let Some(session) = sessions.get(&module_id) {
+                                    dom
+                                        .text(&state.get_count(&session))
+                                        .child_signal(open.signal().map(clone!(state, session => move |open| {
+                                            open.then(|| {
+                                                state.render_session(&module, &session.clone())
+                                            })
+                                        })))
+                                } else {
+                                    dom
+                                }
+                            })
+                        })
+                    }).collect::<Vec<_>>())
+                })
+            })))
+        })
+    }
+
     fn render_session(
         self: &Rc<Self>,
         module: &ModuleResponse,
