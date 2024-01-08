@@ -120,7 +120,6 @@ impl SettingsPage {
             }),
             state.render_payment_method(&plan_info.payment_method_type),
             html!("div", {
-                .visible(false)
                 .prop("slot", "change-to-annual")
                 .child_signal(plan_type_signal().map(clone!(state => move |plan_type| {
                     let frequency = plan_payment_frequency(plan_type?);

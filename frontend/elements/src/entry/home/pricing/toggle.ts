@@ -74,7 +74,7 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <!-- <div @click=${() => this.change("monthly")}>Monthly</div>
+            <div @click=${() => this.change("monthly")}>Monthly</div>
             <div class="toggle" @click=${this.toggle}>
                 <div class="track"></div>
                 <div class="dot"></div>
@@ -82,7 +82,7 @@ export class _ extends LitElement {
             <div @click=${() => this.change("annually")}>
                 Annual
                 <span class="annual-tag">Get 2 months FREE!</span>
-            </div> -->
+            </div>
         `;
     }
 }
