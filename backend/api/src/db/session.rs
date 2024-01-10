@@ -24,7 +24,7 @@ pub async fn create(
 ) -> sqlx::Result<String> {
     let session = generate_session_token();
     sqlx::query!(
-        "insert into session (token, user_id, impersonator_id, expires_at, scope_mask) values ($1, $2, $3, $4, $5)",
+        "insert into session (token, user_id, impersonator_id, expires_at, scope_mask, last_used) values ($1, $2, $3, $4, $5, now())",
         &session,
         user_id.0,
         impersonator_id.map(|i| i.0),

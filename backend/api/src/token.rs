@@ -104,23 +104,22 @@ pub async fn check_login_token(
         }
     }
 
-    let mut txn = db.begin().await.map_err(Into::into).map_err(error::ise)?;
-
     let session_info = sqlx::query!(
         r#"
-select user_id
-from session
+update session
+set last_used = now()
 where
     token = $1 and
     expires_at < now() is not true and
     (scope_mask & $2) = $2 and
     (impersonator_id is null or exists(select 1 from user_scope where user_scope.user_id = impersonator_id and user_scope.scope = $3))
+returning user_id
 "#,
         &claims.sub,
         min_mask.bits as i16,
         UserScope::Admin as i16
     )
-    .fetch_optional(&mut txn)
+    .fetch_optional(db)
     .await
     .map_err(anyhow::Error::from)
     .map_err(error::ise)?
@@ -128,7 +127,7 @@ where
 
     if min_mask.intersects(SessionMask::ONE_TIME) {
         sqlx::query!("delete from session where token = $1", &claims.sub)
-            .execute(&mut txn)
+            .execute(db)
             .await
             .map_err(Into::into)
             .map_err(error::ise)?;
