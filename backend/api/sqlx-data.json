@@ -60,6 +60,28 @@
     },
     "query": "\nselect draft_id, live_id from course where id = $1\n"
   },
+  "0290f5bd03aca237290476e581862f5a2083a41a46525ada93620d2893f0a4b9": {
+    "describe": {
+      "columns": [
+        {
+          "name": "user_id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int2",
+          "Int2"
+        ]
+      }
+    },
+    "query": "\nupdate session\nset last_used = now()\nwhere\n    token = $1 and\n    expires_at < now() is not true and\n    (scope_mask & $2) = $2 and\n    (impersonator_id is null or exists(select 1 from user_scope where user_scope.user_id = impersonator_id and user_scope.scope = $3))\nreturning user_id\n"
+  },
   "02c99d434bef7ea8602e6e462c5e93d9a0e11f47771b10b90d9482e79c18cfb0": {
     "describe": {
       "columns": [],
@@ -4615,22 +4637,6 @@
     },
     "query": "\nselect user_id          \"id!: UserId\"\nfrom user_auth_basic\nwhere\n    email = $1::text and\n    not exists(select 1 from user_email where email = $1)\n"
   },
-  "44559bdf72e9071b9dd849039e4ae6ccf90281a3e751b1bd2ff5ecf18132e53e": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Uuid",
-          "Uuid",
-          "Timestamptz",
-          "Int2"
-        ]
-      }
-    },
-    "query": "insert into session (token, user_id, impersonator_id, expires_at, scope_mask) values ($1, $2, $3, $4, $5)"
-  },
   "453c59161e01f8cc14e0060389085398e57a3f0c0a72ae8555f9007a0e0a5779": {
     "describe": {
       "columns": [
@@ -8664,6 +8670,22 @@
     },
     "query": "select user_id from user_auth_google where google_id = $1"
   },
+  "764765f6f2e156b967acae7a9a8746f956235a89a7df8cc4e4427f4c328cd6a5": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Uuid",
+          "Uuid",
+          "Timestamptz",
+          "Int2"
+        ]
+      }
+    },
+    "query": "insert into session (token, user_id, impersonator_id, expires_at, scope_mask, last_used) values ($1, $2, $3, $4, $5, now())"
+  },
   "7687758947cd67921247e6b7295c3b5645af11bd05dac4f804d301ab74bda572": {
     "describe": {
       "columns": [],
@@ -8702,6 +8724,142 @@
       }
     },
     "query": "\nselect draft_id, live_id from playlist where id = $1\n"
+  },
+  "76a7a09cdfc6974b0a7ddc41e7a61dbfc939f4fc995b5c99f06edaf554768350": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: UserId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "username!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "email!",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "given_name!",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "family_name!",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "profile_image?: ImageId",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "language_app!",
+          "ordinal": 6,
+          "type_info": "Text"
+        },
+        {
+          "name": "language_emails!",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "languages_spoken!: Vec<String>",
+          "ordinal": 8,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "created_at!",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 10,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "organization",
+          "ordinal": 11,
+          "type_info": "Text"
+        },
+        {
+          "name": "persona!: Vec<String>",
+          "ordinal": 12,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "last_login?",
+          "ordinal": 13,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "last_action?",
+          "ordinal": 14,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "location",
+          "ordinal": 15,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "opt_into_edu_resources",
+          "ordinal": 16,
+          "type_info": "Bool"
+        },
+        {
+          "name": "subjects!: Vec<String>",
+          "ordinal": 17,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "affiliations!: Vec<String>",
+          "ordinal": 18,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "age_ranges!: Vec<String>",
+          "ordinal": 19,
+          "type_info": "TextArray"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        null,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        false,
+        null,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Timestamptz",
+          "Timestamptz",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nselect distinct on (user_profile.user_id)\n    user_profile.user_id as \"id!: UserId\",\n    username                as \"username!\",\n    user_email.email::text  as \"email!\",\n    given_name              as \"given_name!\",\n    family_name             as \"family_name!\",\n    profile_image_id        as \"profile_image?: ImageId\",\n    language_app            as \"language_app!\",\n    language_emails         as \"language_emails!\",\n    languages_spoken         as \"languages_spoken!: Vec<String>\",\n    user_profile.created_at as \"created_at!\",\n    user_profile.updated_at,\n    organization,\n    persona                 as \"persona!: Vec<String>\",\n    last_login_session.created_at  as \"last_login?\",\n    last_action_session.last_used  as \"last_action?\",\n    location,\n    opt_into_edu_resources,\n    array(\n        select subject.display_name\n        from subject\n        inner join user_subject on subject.subject_id = user_subject.subject_id\n        where user_subject.user_id = \"user\".id\n    ) as \"subjects!: Vec<String>\",\n    array(\n        select affiliation.display_name\n        from affiliation\n        inner join user_affiliation on affiliation.id = user_affiliation.affiliation_id\n        where user_affiliation.user_id = \"user\".id\n    ) as \"affiliations!: Vec<String>\",\n    array(\n        select age_range.display_name\n        from age_range\n        inner join user_age_range on age_range.id = user_age_range.age_range_id\n        where user_age_range.user_id = \"user\".id\n    ) as \"age_ranges!: Vec<String>\"\nfrom \"user\"\n    inner join user_profile on \"user\".id = user_profile.user_id\n    inner join user_email using(user_id)\n    left join session as last_login_session on \"user\".id = last_login_session.user_id\n    left join session as last_action_session on \"user\".id = last_action_session.user_id\nwhere\n    (\n        ($3 = 'either' or $3 = 'onlynew')\n        and (\n            user_profile.created_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end\n            and user_profile.created_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end\n        )\n    )\n    or (\n        ($3 = 'either' or $3 = 'onlyupdated')\n        and (\n            user_profile.updated_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end\n            and user_profile.updated_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end\n        )\n    )\norder by user_profile.user_id, \"user\".created_at, last_login_session.created_at desc, last_action_session.last_used desc nulls last\n"
   },
   "76f5138776b2544741d5bd7a20298dd4309fa398f23fac98b74873899a0f88b3": {
     "describe": {
@@ -11065,28 +11223,6 @@
       }
     },
     "query": "\nwith del_data as (\n    delete from playlist_data\n        where id is not distinct from $1 or id is not distinct from $2)\ndelete\nfrom playlist\nwhere id is not distinct from $3\n\n"
-  },
-  "9f99518316804bde4081b2b71e262da9148de6f4a164b674e4bdd130eb34a2ee": {
-    "describe": {
-      "columns": [
-        {
-          "name": "user_id",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Int2",
-          "Int2"
-        ]
-      }
-    },
-    "query": "\nselect user_id\nfrom session\nwhere\n    token = $1 and\n    expires_at < now() is not true and\n    (scope_mask & $2) = $2 and\n    (impersonator_id is null or exists(select 1 from user_scope where user_scope.user_id = impersonator_id and user_scope.scope = $3))\n"
   },
   "9fc35349eacb6647e398e2756c8229e73c6b7fbef00988de47589866241487db": {
     "describe": {
@@ -15038,130 +15174,6 @@
       }
     },
     "query": "delete from \"user\" where id = $1"
-  },
-  "e507c5682a9424e1b2e0971c135667c3f9fc13894921c9a2690eb05c63f2ade1": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: UserId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "username!",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "email!",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "given_name!",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "family_name!",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "profile_image?: ImageId",
-          "ordinal": 5,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "language_app!",
-          "ordinal": 6,
-          "type_info": "Text"
-        },
-        {
-          "name": "language_emails!",
-          "ordinal": 7,
-          "type_info": "Text"
-        },
-        {
-          "name": "languages_spoken!: Vec<String>",
-          "ordinal": 8,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "created_at!",
-          "ordinal": 9,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at",
-          "ordinal": 10,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "organization",
-          "ordinal": 11,
-          "type_info": "Text"
-        },
-        {
-          "name": "persona!: Vec<String>",
-          "ordinal": 12,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "location",
-          "ordinal": 13,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "opt_into_edu_resources",
-          "ordinal": 14,
-          "type_info": "Bool"
-        },
-        {
-          "name": "subjects!: Vec<String>",
-          "ordinal": 15,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "affiliations!: Vec<String>",
-          "ordinal": 16,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "age_ranges!: Vec<String>",
-          "ordinal": 17,
-          "type_info": "TextArray"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        null,
-        false,
-        false,
-        true,
-        false,
-        false,
-        false,
-        false,
-        true,
-        true,
-        true,
-        true,
-        false,
-        null,
-        null,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Timestamptz",
-          "Timestamptz",
-          "Text"
-        ]
-      }
-    },
-    "query": "\nselect user_id              as \"id!: UserId\",\n    username                as \"username!\",\n    user_email.email::text  as \"email!\",\n    given_name              as \"given_name!\",\n    family_name             as \"family_name!\",\n    profile_image_id        as \"profile_image?: ImageId\",\n    language_app            as \"language_app!\",\n    language_emails         as \"language_emails!\",\n    languages_spoken         as \"languages_spoken!: Vec<String>\",\n    user_profile.created_at as \"created_at!\",\n    user_profile.updated_at,\n    organization,\n    persona                 as \"persona!: Vec<String>\",\n    location,\n    opt_into_edu_resources,\n    array(\n        select subject.display_name\n        from subject\n        inner join user_subject on subject.subject_id = user_subject.subject_id\n        where user_subject.user_id = \"user\".id\n    ) as \"subjects!: Vec<String>\",\n    array(\n        select affiliation.display_name\n        from affiliation\n        inner join user_affiliation on affiliation.id = user_affiliation.affiliation_id\n        where user_affiliation.user_id = \"user\".id\n    ) as \"affiliations!: Vec<String>\",\n    array(\n        select age_range.display_name\n        from age_range\n        inner join user_age_range on age_range.id = user_age_range.age_range_id\n        where user_age_range.user_id = \"user\".id\n    ) as \"age_ranges!: Vec<String>\"\nfrom \"user\"\n    inner join user_profile on \"user\".id = user_profile.user_id\n    inner join user_email using(user_id)\nwhere\n    (\n        ($3 = 'either' or $3 = 'onlynew')\n        and (\n            user_profile.created_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end\n            and user_profile.created_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end\n        )\n    )\n    or (\n        ($3 = 'either' or $3 = 'onlyupdated')\n        and (\n            user_profile.updated_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end\n            and user_profile.updated_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end\n        )\n    )\n"
   },
   "e57b7c587be57d904c82ee82ea48df2b8e02a38dd1a4c1c7fee015385d66d155": {
     "describe": {
