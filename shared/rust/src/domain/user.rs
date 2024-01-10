@@ -432,6 +432,10 @@ pub struct UserProfileExport {
     pub family_name: String,
     /// ID to the user's profile image in the user image library.
     pub profile_image: Option<ImageId>,
+    /// Last time user logged in.
+    pub last_login: Option<DateTime<Utc>>,
+    /// Last time user did an action.
+    pub last_action: Option<DateTime<Utc>>,
     /// The user's preferred application language.
     pub language_app: String,
     /// The user's preferred email language.
