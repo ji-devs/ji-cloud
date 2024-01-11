@@ -5,6 +5,8 @@ use std::{cell::RefCell, rc::Rc};
 
 use super::stripe::Stripe;
 
+pub(super) const CHECK_DISCOUNT: &str = "manual";
+
 pub struct Subscribe1 {
     pub plan_type: PlanType,
     pub loader: AsyncLoader,

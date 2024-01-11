@@ -1,3 +1,5 @@
+use crate::subscribe1::CHECK_DISCOUNT;
+
 use super::state::CheckPopup;
 use dominator::{clone, html, DomBuilder};
 use std::rc::Rc;
@@ -7,8 +9,6 @@ use utils::{
     routes::{Route, UserRoute},
 };
 use web_sys::ShadowRoot;
-
-const CHECK_DISCOUNT: &str = "manual";
 
 impl Component<CheckPopup> for Rc<CheckPopup> {
     fn styles() -> &'static str {

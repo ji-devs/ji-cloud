@@ -1,9 +1,12 @@
+use crate::subscribe1::CHECK_DISCOUNT;
+
 use super::{check_popup::CheckPopup, stripe::Stripe};
 
 use super::state::Subscribe1;
 use dominator::{clone, html, with_node, DomBuilder};
 use futures_signals::signal::SignalExt;
 use std::rc::Rc;
+use utils::routes::{Route, UserRoute};
 use utils::{
     component::Component,
     constants::{INDIVIDUAL_FREE_TRIAL_DAYS, SCHOOL_FREE_TRIAL_DAYS},
@@ -97,17 +100,26 @@ impl Component<Subscribe1> for Rc<Subscribe1> {
                         secret.map(|_| {
                             html!("div", {
                                 .class("actions")
-                                // .apply_if(state.plan_type.is_school_plan(), |dom| {
-                                //     dom.child(html!("button-rect", {
-                                //         .prop("kind", "text")
-                                //         .prop("color", "red")
-                                //         .text("Pay another way")
-                                //         .event(clone!(state => move |_: events::Click| {
-                                //             state.pay_with_check.set(true);
-                                //             state.plan_type;
-                                //         }))
-                                //     }))
-                                // })
+                                .apply_if(state.plan_type.is_school_plan(), |dom| {
+                                    dom
+                                    // .child(html!("button-rect", {
+                                    //     .prop("kind", "text")
+                                    //     .prop("color", "red")
+                                    //     .text("Pay another way")
+                                    //     .event(clone!(state => move |_: events::Click| {
+                                    //         state.pay_with_check.set(true);
+                                    //         state.plan_type;
+                                    //     }))
+                                    // }))
+                                    .child(html!("button-rect", {
+                                        .prop("kind", "text")
+                                        .prop("color", "red")
+                                        .text("Add later")
+                                        .event(clone!(state => move |_: events::Click| {
+                                            Route::User(UserRoute::Subscribe2(state.plan_type, None, Some(String::from(CHECK_DISCOUNT)))).go_to();
+                                        }))
+                                    }))
+                                })
                                 .child(html!("button-rect", {
                                     .prop("kind", "filled")
                                     .prop("color", "red")
