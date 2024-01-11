@@ -31,11 +31,16 @@ impl Welcome {
             Some(PlanType::IndividualBasicMonthly | PlanType::IndividualBasicAnnually) => "Basic!",
             Some(PlanType::IndividualProMonthly | PlanType::IndividualProAnnually) => "Pro!",
             Some(
-                PlanType::SchoolLevel1
-                | PlanType::SchoolLevel2
-                | PlanType::SchoolLevel3
-                | PlanType::SchoolLevel4
-                | PlanType::SchoolUnlimited,
+                PlanType::SchoolLevel1Monthly
+                | PlanType::SchoolLevel2Monthly
+                | PlanType::SchoolLevel3Monthly
+                | PlanType::SchoolLevel4Monthly
+                | PlanType::SchoolUnlimitedMonthly
+                | PlanType::SchoolLevel1Annually
+                | PlanType::SchoolLevel2Annually
+                | PlanType::SchoolLevel3Annually
+                | PlanType::SchoolLevel4Annually
+                | PlanType::SchoolUnlimitedAnnually,
             ) => "School plan!",
         };
         format!("{} {}", STR_TITLE, end)

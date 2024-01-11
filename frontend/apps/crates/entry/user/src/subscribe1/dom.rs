@@ -3,7 +3,6 @@ use super::{check_popup::CheckPopup, stripe::Stripe};
 use super::state::Subscribe1;
 use dominator::{clone, html, with_node, DomBuilder};
 use futures_signals::signal::SignalExt;
-use shared::domain::billing::PlanType;
 use std::rc::Rc;
 use utils::{
     component::Component,
@@ -47,9 +46,9 @@ impl Component<Subscribe1> for Rc<Subscribe1> {
                     .text("Try Jigzi ")
                     .text(state.plan_type.display_name())
                     .text(" FREE for ")
-                    .text(&match state.plan_type {
-                        PlanType::IndividualBasicMonthly | PlanType::IndividualBasicAnnually | PlanType::IndividualProMonthly | PlanType::IndividualProAnnually => INDIVIDUAL_FREE_TRIAL_DAYS,
-                        PlanType::SchoolLevel1 | PlanType::SchoolLevel2 | PlanType::SchoolLevel3 | PlanType::SchoolLevel4 | PlanType::SchoolUnlimited => SCHOOL_FREE_TRIAL_DAYS,
+                    .text(&match state.plan_type.is_individual_plan() {
+                        true => INDIVIDUAL_FREE_TRIAL_DAYS,
+                        false => SCHOOL_FREE_TRIAL_DAYS,
                     }.to_string())
                     .text(" days")
                 }))
@@ -57,9 +56,9 @@ impl Component<Subscribe1> for Rc<Subscribe1> {
                     .class("list-item")
                     .child(icon!("fa-solid fa-check"))
                     .text("Get a ")
-                    .text(&match state.plan_type {
-                        PlanType::IndividualBasicMonthly | PlanType::IndividualBasicAnnually | PlanType::IndividualProMonthly | PlanType::IndividualProAnnually => INDIVIDUAL_FREE_TRIAL_DAYS,
-                        PlanType::SchoolLevel1 | PlanType::SchoolLevel2 | PlanType::SchoolLevel3 | PlanType::SchoolLevel4 | PlanType::SchoolUnlimited => SCHOOL_FREE_TRIAL_DAYS,
+                    .text(&match state.plan_type.is_individual_plan() {
+                        true => INDIVIDUAL_FREE_TRIAL_DAYS,
+                        false => SCHOOL_FREE_TRIAL_DAYS,
                     }.to_string())
                     .text(" day trial, cancel any time.")
                 }))

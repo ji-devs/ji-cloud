@@ -27,11 +27,11 @@ const PLAN_PRICE_MONTHLY_BASIC: u32 = 17_99;
 const PLAN_PRICE_ANNUAL_BASIC: u32 = 180_00;
 const PLAN_PRICE_MONTHLY_PRO: u32 = 29_99;
 const PLAN_PRICE_ANNUAL_PRO: u32 = 300_00;
-const PLAN_PRICE_SCHOOL_1: u32 = 115_00;
-const PLAN_PRICE_SCHOOL_2: u32 = 150_00;
-const PLAN_PRICE_SCHOOL_3: u32 = 200_00;
-const PLAN_PRICE_SCHOOL_4: u32 = 250_00;
-const PLAN_PRICE_SCHOOL_UNLIMITED: u32 = 300_00;
+const PLAN_PRICE_SCHOOL_1: u32 = 1_250_00;
+const PLAN_PRICE_SCHOOL_2: u32 = 1_500_00;
+const PLAN_PRICE_SCHOOL_3: u32 = 1_750_00;
+const PLAN_PRICE_SCHOOL_4: u32 = 2_000_00;
+const PLAN_PRICE_SCHOOL_UNLIMITED: u32 = 2_250_00;
 
 impl Pricing {
     pub fn render(self: &Rc<Self>) -> Dom {
@@ -378,11 +378,11 @@ impl From<SchoolPlan> for u8 {
 impl From<SchoolPlan> for PlanType {
     fn from(value: SchoolPlan) -> Self {
         match value {
-            SchoolPlan::Level1 => PlanType::SchoolLevel1,
-            SchoolPlan::Level2 => PlanType::SchoolLevel2,
-            SchoolPlan::Level3 => PlanType::SchoolLevel3,
-            SchoolPlan::Level4 => PlanType::SchoolLevel4,
-            SchoolPlan::Unlimited => PlanType::SchoolUnlimited,
+            SchoolPlan::Level1 => PlanType::SchoolLevel1Annually,
+            SchoolPlan::Level2 => PlanType::SchoolLevel2Annually,
+            SchoolPlan::Level3 => PlanType::SchoolLevel3Annually,
+            SchoolPlan::Level4 => PlanType::SchoolLevel4Annually,
+            SchoolPlan::Unlimited => PlanType::SchoolUnlimitedAnnually,
         }
     }
 }

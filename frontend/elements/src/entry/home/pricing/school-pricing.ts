@@ -198,7 +198,7 @@ export class _ extends LitElement {
                     </div>
                 ` : nothing }
             </div>
-            <div class="monthly">Monthly</div>
+            <div class="annually">Annually</div>
             <slot name="start-button"></slot>
         `;
     }

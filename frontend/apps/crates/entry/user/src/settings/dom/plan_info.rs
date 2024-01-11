@@ -1,7 +1,7 @@
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::billing::{
-    AmountInCents, AppliedCoupon, PaymentMethodType, PaymentNetwork, PlanType,
+    AmountInCents, AppliedCoupon, BillingInterval, PaymentMethodType, PaymentNetwork,
 };
 use std::rc::Rc;
 use utils::{events, prelude::plan_type_signal};
@@ -12,28 +12,6 @@ const STR_EXPIRED_ON: &str = "Expired on";
 const STR_TRIAL_ENDS_ON: &str = "Trial ends on";
 const STR_RENEWS_ON: &str = "Renews on";
 const STR_EXPIRES_ON: &str = "Expires on";
-
-#[derive(Clone, Copy, Debug, strum_macros::EnumIs)]
-enum PaymentFrequency {
-    Annually,
-    Monthly,
-}
-fn plan_payment_frequency(plan_type: PlanType) -> PaymentFrequency {
-    #[allow(clippy::match_same_arms)]
-    match plan_type {
-        PlanType::IndividualBasicMonthly | PlanType::IndividualProMonthly => {
-            PaymentFrequency::Monthly
-        }
-        PlanType::SchoolLevel1
-        | PlanType::SchoolLevel2
-        | PlanType::SchoolLevel3
-        | PlanType::SchoolLevel4
-        | PlanType::SchoolUnlimited => PaymentFrequency::Monthly,
-        PlanType::IndividualBasicAnnually | PlanType::IndividualProAnnually => {
-            PaymentFrequency::Annually
-        }
-    }
-}
 
 impl SettingsPage {
     pub(super) fn render_plan_section(
@@ -70,7 +48,7 @@ impl SettingsPage {
                 .prop("slot", "plan-price")
                 .text_signal(plan_type_signal().map(clone!(plan_info => move |plan_type| {
                     plan_type.map(|plan_type| {
-                        let frequency = plan_payment_frequency(plan_type);
+                        let frequency = plan_type.billing_interval();
                         price_string(&plan_info.price, &plan_info.coupon, frequency)
                     }).unwrap_or_default()
                 })))
@@ -122,9 +100,9 @@ impl SettingsPage {
             html!("div", {
                 .prop("slot", "change-to-annual")
                 .child_signal(plan_type_signal().map(clone!(state => move |plan_type| {
-                    let frequency = plan_payment_frequency(plan_type?);
+                    let frequency = plan_type?.billing_interval();
                     match frequency {
-                        PaymentFrequency::Monthly => {
+                        BillingInterval::Monthly => {
                             Some(html!("button-rect", {
                                 .prop("slot", "change-to-annual")
                                 .prop("type", "filled")
@@ -135,7 +113,7 @@ impl SettingsPage {
                                 }))
                             }))
                         },
-                        PaymentFrequency::Annually => None,
+                        BillingInterval::Annually => None,
                     }
                 })))
             }),
@@ -198,7 +176,7 @@ fn payment_method_type_icon(method_type: &PaymentMethodType) -> &'static str {
 fn price_string(
     price: &AmountInCents,
     coupon: &Option<AppliedCoupon>,
-    frequency: PaymentFrequency,
+    frequency: BillingInterval,
 ) -> String {
     let discounted = AmountInCents::from(
         coupon
@@ -211,8 +189,8 @@ fn price_string(
     );
 
     let frequency = match frequency {
-        PaymentFrequency::Annually => " per year",
-        PaymentFrequency::Monthly => " per month",
+        BillingInterval::Annually => " per year",
+        BillingInterval::Monthly => " per month",
     };
 
     let coupon = coupon
