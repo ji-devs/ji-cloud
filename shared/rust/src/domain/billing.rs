@@ -619,16 +619,26 @@ pub enum PlanType {
     IndividualProMonthly = 2,
     /// Pro level, annually
     IndividualProAnnually = 3,
-    /// School Level 1
-    SchoolLevel1 = 4,
-    /// School Level 2
-    SchoolLevel2 = 5,
-    /// School Level 3
-    SchoolLevel3 = 6,
-    /// School Level 4
-    SchoolLevel4 = 7,
-    /// School Unlimited
-    SchoolUnlimited = 8,
+    /// School level 1 annually
+    SchoolLevel1Monthly = 4,
+    /// School level 2 annually
+    SchoolLevel2Monthly = 5,
+    /// School level 3 annually
+    SchoolLevel3Monthly = 6,
+    /// School level 4 annually
+    SchoolLevel4Monthly = 7,
+    /// School unlimited annually
+    SchoolUnlimitedMonthly = 8,
+    /// School level 1 monthly
+    SchoolLevel1Annually = 9,
+    /// School level 2 monthly
+    SchoolLevel2Annually = 10,
+    /// School level 3 monthly
+    SchoolLevel3Annually = 11,
+    /// School level 4 monthly
+    SchoolLevel4Annually = 12,
+    /// School unlimited monthly
+    SchoolUnlimitedAnnually = 13,
 }
 
 impl Display for PlanType {
@@ -638,11 +648,40 @@ impl Display for PlanType {
             Self::IndividualBasicAnnually => "Individual Basic Annual",
             Self::IndividualProMonthly => "Individual Pro Monthly",
             Self::IndividualProAnnually => "Individual Pro Annual",
-            Self::SchoolLevel1 => formatcp!("School - Up to {}", PLAN_SCHOOL_LEVEL_1_TEACHER_COUNT),
-            Self::SchoolLevel2 => formatcp!("School - Up to {}", PLAN_SCHOOL_LEVEL_2_TEACHER_COUNT),
-            Self::SchoolLevel3 => formatcp!("School - Up to {}", PLAN_SCHOOL_LEVEL_3_TEACHER_COUNT),
-            Self::SchoolLevel4 => formatcp!("School - Up to {}", PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT),
-            Self::SchoolUnlimited => formatcp!("School - {}+", PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT),
+            Self::SchoolLevel1Monthly => formatcp!(
+                "School - Up to {} Monthly",
+                PLAN_SCHOOL_LEVEL_1_TEACHER_COUNT
+            ),
+            Self::SchoolLevel2Monthly => formatcp!(
+                "School - Up to {} Monthly",
+                PLAN_SCHOOL_LEVEL_2_TEACHER_COUNT
+            ),
+            Self::SchoolLevel3Monthly => formatcp!(
+                "School - Up to {} Monthly",
+                PLAN_SCHOOL_LEVEL_3_TEACHER_COUNT
+            ),
+            Self::SchoolLevel4Monthly => formatcp!(
+                "School - Up to {} Monthly",
+                PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT
+            ),
+            Self::SchoolUnlimitedMonthly => {
+                formatcp!("School - {}+ Monthly", PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT)
+            }
+            Self::SchoolLevel1Annually => {
+                formatcp!("School - Up to {}", PLAN_SCHOOL_LEVEL_1_TEACHER_COUNT)
+            }
+            Self::SchoolLevel2Annually => {
+                formatcp!("School - Up to {}", PLAN_SCHOOL_LEVEL_2_TEACHER_COUNT)
+            }
+            Self::SchoolLevel3Annually => {
+                formatcp!("School - Up to {}", PLAN_SCHOOL_LEVEL_3_TEACHER_COUNT)
+            }
+            Self::SchoolLevel4Annually => {
+                formatcp!("School - Up to {}", PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT)
+            }
+            Self::SchoolUnlimitedAnnually => {
+                formatcp!("School - {}+", PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT)
+            }
         };
         write!(f, "{}", s)
     }
@@ -665,11 +704,16 @@ impl PlanType {
             Self::IndividualBasicAnnually => "individual-basic-annually",
             Self::IndividualProMonthly => "individual-pro-monthly",
             Self::IndividualProAnnually => "individual-pro-annually",
-            Self::SchoolLevel1 => "school-level-1",
-            Self::SchoolLevel2 => "school-level-2",
-            Self::SchoolLevel3 => "school-level-3",
-            Self::SchoolLevel4 => "school-level-4",
-            Self::SchoolUnlimited => "school-unlimited",
+            Self::SchoolLevel1Monthly => "school-level-1-monthly",
+            Self::SchoolLevel2Monthly => "school-level-2-monthly",
+            Self::SchoolLevel3Monthly => "school-level-3-monthly",
+            Self::SchoolLevel4Monthly => "school-level-4-monthly",
+            Self::SchoolUnlimitedMonthly => "school-unlimited-monthly",
+            Self::SchoolLevel1Annually => "school-level-1-annually",
+            Self::SchoolLevel2Annually => "school-level-2-annually",
+            Self::SchoolLevel3Annually => "school-level-3-annually",
+            Self::SchoolLevel4Annually => "school-level-4-annually",
+            Self::SchoolUnlimitedAnnually => "school-unlimited-annually",
         }
     }
 
@@ -681,23 +725,43 @@ impl PlanType {
             Self::IndividualBasicAnnually => "Individual - Basic annual",
             Self::IndividualProMonthly => "Individual - Pro monthly",
             Self::IndividualProAnnually => "Individual - Pro annual",
-            Self::SchoolLevel1 => formatcp!(
+            Self::SchoolLevel1Monthly => formatcp!(
+                "School - Up to {} teachers - Monthly",
+                PLAN_SCHOOL_LEVEL_1_TEACHER_COUNT
+            ),
+            Self::SchoolLevel2Monthly => formatcp!(
+                "School - Up to {} teachers - Monthly",
+                PLAN_SCHOOL_LEVEL_2_TEACHER_COUNT
+            ),
+            Self::SchoolLevel3Monthly => formatcp!(
+                "School - Up to {} teachers - Monthly",
+                PLAN_SCHOOL_LEVEL_3_TEACHER_COUNT
+            ),
+            Self::SchoolLevel4Monthly => formatcp!(
+                "School - Up to {} teachers - Monthly",
+                PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT
+            ),
+            Self::SchoolUnlimitedMonthly => formatcp!(
+                "School - More than {} teachers - Monthly",
+                PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT
+            ),
+            Self::SchoolLevel1Annually => formatcp!(
                 "School - Up to {} teachers",
                 PLAN_SCHOOL_LEVEL_1_TEACHER_COUNT
             ),
-            Self::SchoolLevel2 => formatcp!(
+            Self::SchoolLevel2Annually => formatcp!(
                 "School - Up to {} teachers",
                 PLAN_SCHOOL_LEVEL_2_TEACHER_COUNT
             ),
-            Self::SchoolLevel3 => formatcp!(
+            Self::SchoolLevel3Annually => formatcp!(
                 "School - Up to {} teachers",
                 PLAN_SCHOOL_LEVEL_3_TEACHER_COUNT
             ),
-            Self::SchoolLevel4 => formatcp!(
+            Self::SchoolLevel4Annually => formatcp!(
                 "School - Up to {} teachers",
                 PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT
             ),
-            Self::SchoolUnlimited => formatcp!(
+            Self::SchoolUnlimitedAnnually => formatcp!(
                 "School - More than {} teachers",
                 PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT
             ),
@@ -717,12 +781,23 @@ impl PlanType {
     #[must_use]
     pub const fn account_limit(&self) -> Option<AccountLimit> {
         match self {
-            Self::SchoolLevel1 => Some(AccountLimit(ACCOUNT_LIMIT_L1)),
-            Self::SchoolLevel2 => Some(AccountLimit(ACCOUNT_LIMIT_L2)),
-            Self::SchoolLevel3 => Some(AccountLimit(ACCOUNT_LIMIT_L3)),
-            Self::SchoolLevel4 => Some(AccountLimit(ACCOUNT_LIMIT_L4)),
-            Self::SchoolUnlimited => None,
-            _ => Some(AccountLimit(1)),
+            Self::SchoolLevel1Monthly | Self::SchoolLevel1Annually => {
+                Some(AccountLimit(ACCOUNT_LIMIT_L1))
+            }
+            Self::SchoolLevel2Monthly | Self::SchoolLevel2Annually => {
+                Some(AccountLimit(ACCOUNT_LIMIT_L2))
+            }
+            Self::SchoolLevel3Monthly | Self::SchoolLevel3Annually => {
+                Some(AccountLimit(ACCOUNT_LIMIT_L3))
+            }
+            Self::SchoolLevel4Monthly | Self::SchoolLevel4Annually => {
+                Some(AccountLimit(ACCOUNT_LIMIT_L4))
+            }
+            Self::SchoolUnlimitedMonthly | Self::SchoolUnlimitedAnnually => None,
+            Self::IndividualBasicMonthly
+            | Self::IndividualBasicAnnually
+            | Self::IndividualProMonthly
+            | Self::IndividualProAnnually => Some(AccountLimit(1)),
         }
     }
 
@@ -750,17 +825,21 @@ impl PlanType {
     /// Billing interval for the current plan
     #[must_use]
     pub const fn billing_interval(&self) -> BillingInterval {
-        #[allow(clippy::match_same_arms)]
         match self {
-            Self::IndividualBasicMonthly | Self::IndividualProMonthly => BillingInterval::Monthly,
-            // School subscriptions are monthly for now. Keeping this branch separate so that it's
-            // easier to remove in the future.
-            Self::SchoolLevel1
-            | Self::SchoolLevel2
-            | Self::SchoolLevel3
-            | Self::SchoolLevel4
-            | Self::SchoolUnlimited => BillingInterval::Monthly,
-            _ => BillingInterval::Annually,
+            Self::IndividualBasicMonthly
+            | Self::IndividualProMonthly
+            | Self::SchoolLevel1Monthly
+            | Self::SchoolLevel2Monthly
+            | Self::SchoolLevel3Monthly
+            | Self::SchoolLevel4Monthly
+            | Self::SchoolUnlimitedMonthly => BillingInterval::Monthly,
+            Self::IndividualBasicAnnually
+            | Self::IndividualProAnnually
+            | Self::SchoolLevel1Annually
+            | Self::SchoolLevel2Annually
+            | Self::SchoolLevel3Annually
+            | Self::SchoolLevel4Annually
+            | Self::SchoolUnlimitedAnnually => BillingInterval::Annually,
         }
     }
 
@@ -769,6 +848,7 @@ impl PlanType {
     pub const fn can_upgrade_from(&self, from_type: Self) -> bool {
         // NOTE: Cannot go from any annual plan to a monthly plan.
         match self {
+            Self::IndividualBasicMonthly => false,
             Self::IndividualBasicAnnually | Self::IndividualProMonthly => {
                 matches!(from_type, Self::IndividualBasicMonthly)
             }
@@ -778,17 +858,58 @@ impl PlanType {
                     | Self::IndividualBasicAnnually
                     | Self::IndividualProMonthly
             ),
-            Self::SchoolLevel2 => matches!(from_type, Self::SchoolLevel1),
-            Self::SchoolLevel3 => matches!(from_type, Self::SchoolLevel1 | Self::SchoolLevel2,),
-            Self::SchoolLevel4 => matches!(
+            Self::SchoolLevel1Monthly => false,
+            Self::SchoolLevel2Monthly => matches!(from_type, Self::SchoolLevel1Monthly),
+            Self::SchoolLevel3Monthly => matches!(
                 from_type,
-                Self::SchoolLevel1 | Self::SchoolLevel2 | Self::SchoolLevel3,
+                Self::SchoolLevel1Monthly | Self::SchoolLevel2Monthly,
             ),
-            Self::SchoolUnlimited => matches!(
+            Self::SchoolLevel4Monthly => matches!(
                 from_type,
-                Self::SchoolLevel1 | Self::SchoolLevel2 | Self::SchoolLevel3 | Self::SchoolLevel4,
+                Self::SchoolLevel1Monthly | Self::SchoolLevel2Monthly | Self::SchoolLevel3Monthly,
             ),
-            _ => false,
+            Self::SchoolUnlimitedMonthly => matches!(
+                from_type,
+                Self::SchoolLevel1Monthly
+                    | Self::SchoolLevel2Monthly
+                    | Self::SchoolLevel3Monthly
+                    | Self::SchoolLevel4Monthly,
+            ),
+            Self::SchoolLevel1Annually => matches!(from_type, Self::SchoolLevel1Monthly),
+            Self::SchoolLevel2Annually => matches!(
+                from_type,
+                Self::SchoolLevel1Monthly | Self::SchoolLevel2Monthly | Self::SchoolLevel1Annually
+            ),
+            Self::SchoolLevel3Annually => matches!(
+                from_type,
+                Self::SchoolLevel1Monthly
+                    | Self::SchoolLevel2Monthly
+                    | Self::SchoolLevel3Monthly
+                    | Self::SchoolLevel1Annually
+                    | Self::SchoolLevel2Annually
+            ),
+            Self::SchoolLevel4Annually => matches!(
+                from_type,
+                Self::SchoolLevel1Monthly
+                    | Self::SchoolLevel2Monthly
+                    | Self::SchoolLevel3Monthly
+                    | Self::SchoolLevel4Monthly
+                    | Self::SchoolLevel1Annually
+                    | Self::SchoolLevel2Annually
+                    | Self::SchoolLevel3Annually
+            ),
+            Self::SchoolUnlimitedAnnually => matches!(
+                from_type,
+                Self::SchoolLevel1Monthly
+                    | Self::SchoolLevel2Monthly
+                    | Self::SchoolLevel3Monthly
+                    | Self::SchoolLevel4Monthly
+                    | Self::SchoolUnlimitedMonthly
+                    | Self::SchoolLevel1Annually
+                    | Self::SchoolLevel2Annually
+                    | Self::SchoolLevel3Annually
+                    | Self::SchoolLevel4Annually
+            ),
         }
     }
 
@@ -807,14 +928,22 @@ impl PlanType {
     /// check if is school plan
     #[must_use]
     pub const fn is_school_plan(&self) -> bool {
-        matches!(
-            self,
-            Self::SchoolLevel1
-                | Self::SchoolLevel2
-                | Self::SchoolLevel3
-                | Self::SchoolLevel4
-                | Self::SchoolUnlimited
-        )
+        match self {
+            PlanType::IndividualBasicMonthly
+            | PlanType::IndividualBasicAnnually
+            | PlanType::IndividualProMonthly
+            | PlanType::IndividualProAnnually => false,
+            PlanType::SchoolLevel1Monthly
+            | PlanType::SchoolLevel2Monthly
+            | PlanType::SchoolLevel3Monthly
+            | PlanType::SchoolLevel4Monthly
+            | PlanType::SchoolUnlimitedMonthly
+            | PlanType::SchoolLevel1Annually
+            | PlanType::SchoolLevel2Annually
+            | PlanType::SchoolLevel3Annually
+            | PlanType::SchoolLevel4Annually
+            | PlanType::SchoolUnlimitedAnnually => true,
+        }
     }
 
     /// The tier this plan type is associated with
@@ -823,11 +952,16 @@ impl PlanType {
         match self {
             PlanType::IndividualProMonthly
             | PlanType::IndividualProAnnually
-            | PlanType::SchoolLevel1
-            | PlanType::SchoolLevel2
-            | PlanType::SchoolLevel3
-            | PlanType::SchoolLevel4
-            | PlanType::SchoolUnlimited => PlanTier::Pro,
+            | PlanType::SchoolLevel1Monthly
+            | PlanType::SchoolLevel2Monthly
+            | PlanType::SchoolLevel3Monthly
+            | PlanType::SchoolLevel4Monthly
+            | PlanType::SchoolUnlimitedMonthly
+            | PlanType::SchoolLevel1Annually
+            | PlanType::SchoolLevel2Annually
+            | PlanType::SchoolLevel3Annually
+            | PlanType::SchoolLevel4Annually
+            | PlanType::SchoolUnlimitedAnnually => PlanTier::Pro,
             PlanType::IndividualBasicMonthly | PlanType::IndividualBasicAnnually => PlanTier::Basic,
         }
     }
@@ -842,11 +976,16 @@ impl TryFrom<&str> for PlanType {
             "individual-basic-annually" => Ok(Self::IndividualBasicAnnually),
             "individual-pro-monthly" => Ok(Self::IndividualProMonthly),
             "individual-pro-annually" => Ok(Self::IndividualProAnnually),
-            "school-level-1" => Ok(Self::SchoolLevel1),
-            "school-level-2" => Ok(Self::SchoolLevel2),
-            "school-level-3" => Ok(Self::SchoolLevel3),
-            "school-level-4" => Ok(Self::SchoolLevel4),
-            "school-unlimited" => Ok(Self::SchoolUnlimited),
+            "school-level-1-monthly" => Ok(Self::SchoolLevel1Monthly),
+            "school-level-2-monthly" => Ok(Self::SchoolLevel2Monthly),
+            "school-level-3-monthly" => Ok(Self::SchoolLevel3Monthly),
+            "school-level-4-monthly" => Ok(Self::SchoolLevel4Monthly),
+            "school-unlimited-monthly" => Ok(Self::SchoolUnlimitedMonthly),
+            "school-level-1-annually" => Ok(Self::SchoolLevel1Annually),
+            "school-level-2-annually" => Ok(Self::SchoolLevel2Annually),
+            "school-level-3-annually" => Ok(Self::SchoolLevel3Annually),
+            "school-level-4-annually" => Ok(Self::SchoolLevel4Annually),
+            "school-unlimited-annually" => Ok(Self::SchoolUnlimitedAnnually),
             _ => Err(()),
         }
     }
