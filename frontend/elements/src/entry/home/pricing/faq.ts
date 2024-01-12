@@ -61,21 +61,21 @@ export class _ extends LitElement {
                     <fa-icon icon="fa-regular fa-angle-right"></fa-icon>
                     What happens when the free trial for a subscription expires?
                 </summary>
-                <p>When the subscription’s trial period expires, your paid subscription will begin immediately. You will get a reminder by email 24 hours before your free trial is due to expire. If you wish to cancel at any time during your trial period, go to Account in the top-right menu then, scroll down to My current plan, click on the pink Customer portal button and then you will have an option to Cancel Plan which will cancel your plan at the end of the free trial and you will not be charged.</p>
+                <p>When the subscription’s trial period expires, your paid subscription will begin immediately. You will get a reminder by email 24 hours before your free trial is due to expire (Individual monthly & annual subscriptions). If you wish to cancel at any time during your trial period, go to Account in the top-right menu then, scroll down to My current plan, click on the pink Customer portal button and then you will have an option to Cancel Plan which will cancel your plan at the end of the free trial and you will not be charged. For School subscriptions you will be contacted towards the end of your free trial period with payment options in order to confirm the (annual) subscription.</p>
             </details>
             <details>
                 <summary>
                     <fa-icon icon="fa-regular fa-angle-right"></fa-icon>
                     Can I cancel my paid subscription anytime?
                 </summary>
-                <p>After the free trial period has ended, you can downgrade to our free plan at any time and no further payments will be taken. To do this go to Account in the top-right menu, scroll down to My current plan, and click on the Auto renew slider to switch off the monthly Auto renew function. You will still have full access to your subscription until the end of the billing period. You can also click the pink Customer portal button, where you can cancel your plan.</p>
+                <p>After the free trial period has ended, you can downgrade to our free plan at any time and no further payments will be taken. To do this go to Account in the top-right menu, scroll down to My current plan, and click on the Auto renew slider to switch off the monthly or annual Auto renew function. You will still have full access to your subscription until the end of the billing period. You can also click the pink Customer portal button, where you can cancel your plan.</p>
             </details>
             <details>
                 <summary>
                     <fa-icon icon="fa-regular fa-angle-right"></fa-icon>
                     When will payments be taken?
                 </summary>
-                <p>The first payment is taken at the end of your free trial period and then recurring payments on the same day each month thereafter. You will get a reminder by email 24 hours before your monthly renewal.</p>
+                <p>The first payment is taken at the end of your free trial period and then recurring payments on the same day each month thereafter (monthly subscriptions). You will get a reminder by email 24 hours before your monthly renewal. For annual subscriptions you will be charged once for the year after your trial period has finished. You will get a reminder 30 days before your annual renewal.</p>
             </details>
             <details>
                 <summary>
