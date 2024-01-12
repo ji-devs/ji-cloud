@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use futures_signals::signal::Mutable;
 use gloo::utils::document;
+use serde::{Deserialize, Serialize};
 use shared::{
     api::endpoints,
     domain::{
@@ -12,6 +13,8 @@ use shared::{
     },
 };
 use utils::{
+    init::user::get_plan_tier,
+    js_object, paywall,
     prelude::{is_user_set, ApiEndpointExt},
     storage,
     unwrap::UnwrapJiExt,
@@ -25,7 +28,9 @@ mod playlist_actions;
 mod resource_actions;
 
 const PLAYED_WITHOUT_LOGIN_COUNT_KEY: &'static str = "PLAYED_WITHOUT_LOGIN_COUNT";
+const PLAYED_WITHOUT_TODAY_FREE_KEY: &'static str = "PLAYED_WITHOUT_TODAY_FREE";
 const PLAYED_WITHOUT_LOGIN_ALLOWED: u32 = 5;
+const PLAYED_FREE_ACCOUNT_ALLOWED_DAILY: u32 = 5;
 
 fn get_page_pos() -> i32 {
     document().document_element().unwrap_ji().scroll_top()
@@ -57,11 +62,23 @@ impl SearchResultsSection {
     }
 
     pub fn on_play_asset_click(self: &Rc<Self>, asset_id: AssetId) {
-        if is_user_set() || under_limit() {
-            self.home_state.play_asset.set(Some(asset_id));
-            increased_played_count();
-        } else {
-            self.home_state.play_login_popup_shown.set(true);
+        match play_blocked() {
+            Some(Block::FreeAccountLimit) => {
+                paywall::dialog_limit(&format!(
+                    "
+                    Looking to play more than {} JIGs in one day?
+                    Upgrade now for UNLIMITED daily JIG plays.
+                ",
+                    PLAYED_FREE_ACCOUNT_ALLOWED_DAILY
+                ));
+            }
+            Some(Block::NoAccountLimit) => {
+                self.home_state.play_login_popup_shown.set(true);
+            }
+            None => {
+                self.home_state.play_asset.set(Some(asset_id));
+                increase_played_count();
+            }
         }
     }
 
@@ -130,14 +147,34 @@ impl SearchResultsSection {
     }
 }
 
-fn under_limit() -> bool {
-    get_played_without_login_count() < PLAYED_WITHOUT_LOGIN_ALLOWED
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+enum Block {
+    NoAccountLimit,
+    FreeAccountLimit,
 }
 
-fn increased_played_count() {
-    if !is_user_set() {
-        let count = get_played_without_login_count();
-        set_played_without_login_count(count + 1);
+fn play_blocked() -> Option<Block> {
+    match is_user_set() {
+        true => (get_plan_tier().is_free()
+            && get_free_played_today_count() >= PLAYED_FREE_ACCOUNT_ALLOWED_DAILY)
+            .then(|| Block::FreeAccountLimit),
+        false => (get_played_without_login_count() >= PLAYED_WITHOUT_LOGIN_ALLOWED)
+            .then(|| Block::NoAccountLimit),
+    }
+}
+
+fn increase_played_count() {
+    match is_user_set() {
+        true => {
+            if get_plan_tier().is_free() {
+                let count = get_free_played_today_count();
+                set_free_played_today_count(count + 1);
+            }
+        }
+        false => {
+            let count = get_played_without_login_count();
+            set_played_without_login_count(count + 1);
+        }
     }
 }
 
@@ -154,4 +191,50 @@ fn set_played_without_login_count(count: u32) {
     let _ = storage::get_local_storage()
         .unwrap_ji()
         .set_item(PLAYED_WITHOUT_LOGIN_COUNT_KEY, &count.to_string());
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct PlayedDay {
+    day: String,
+    count: u32,
+}
+
+fn get_free_played_today_count() -> u32 {
+    storage::get_local_storage()
+        .unwrap_ji()
+        .get_item(PLAYED_WITHOUT_TODAY_FREE_KEY)
+        .unwrap_ji()
+        .map(|v| {
+            let v: PlayedDay = serde_json::from_str(&v).unwrap();
+            if v.day == get_todays_date() {
+                v.count
+            } else {
+                0
+            }
+        })
+        .unwrap_or(0)
+}
+
+fn set_free_played_today_count(count: u32) {
+    let val = serde_json::to_string(&PlayedDay {
+        day: get_todays_date(),
+        count,
+    })
+    .unwrap();
+    let _ = storage::get_local_storage()
+        .unwrap_ji()
+        .set_item(PLAYED_WITHOUT_TODAY_FREE_KEY, &val);
+}
+
+fn get_todays_date() -> String {
+    let date: js_sys::Date = js_sys::Date::new_0();
+    date.to_locale_date_string(
+        "sv-SE",
+        &js_object!({
+            "year": "numeric",
+            "month": "2-digit",
+            "day": "2-digit",
+        }),
+    )
+    .into()
 }

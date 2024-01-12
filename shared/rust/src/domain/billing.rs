@@ -5,7 +5,7 @@ use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt::{self, Debug, Display, Formatter};
-use strum_macros::{AsRefStr, Display, EnumString};
+use strum_macros::{AsRefStr, Display, EnumString, EnumIs};
 
 use const_format::formatcp;
 use serde_json::Value;
@@ -576,6 +576,7 @@ pub enum SubscriptionType {
     Default,
     Display,
     EnumString,
+    EnumIs,
     AsRefStr,
     Serialize,
     Deserialize,

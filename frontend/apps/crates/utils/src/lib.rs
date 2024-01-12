@@ -22,6 +22,7 @@ pub mod iframe;
 pub mod image;
 pub mod image_effects;
 pub mod init;
+pub mod js_object;
 pub mod js_wrappers;
 pub mod keyboard;
 pub mod languages;

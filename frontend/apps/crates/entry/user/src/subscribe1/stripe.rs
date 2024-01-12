@@ -1,7 +1,5 @@
-use gloo_utils::format::JsValueSerdeExt;
 use js_sys::Reflect;
-use serde_json::json;
-use utils::unwrap::UnwrapJiExt;
+use utils::{js_object, unwrap::UnwrapJiExt};
 use wasm_bindgen::prelude::*;
 use web_sys::HtmlElement;
 
@@ -31,13 +29,6 @@ extern "C" {
 
     #[wasm_bindgen(method)]
     fn mount(this: &StripePaymentElement, domElement: HtmlElement);
-}
-
-// TODO: move to utils?
-macro_rules! js_object {
-    ($($value:tt)+) => {
-        <wasm_bindgen::JsValue as JsValueSerdeExt>::from_serde(&json!($($value)+)).unwrap_ji()
-    };
 }
 
 pub struct Stripe {
