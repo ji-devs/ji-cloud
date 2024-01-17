@@ -5,7 +5,7 @@ use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt::{self, Debug, Display, Formatter};
-use strum_macros::{AsRefStr, Display, EnumString, EnumIs};
+use strum_macros::{AsRefStr, Display, EnumIs, EnumString};
 
 use const_format::formatcp;
 use serde_json::Value;
@@ -255,6 +255,41 @@ pub enum BillingInterval {
     Monthly = 0,
     /// Subscription is billed yearly
     Annually = 1,
+}
+
+impl BillingInterval {
+    /// str representation
+    pub fn as_str(&self) -> &'static str {
+        self.into()
+    }
+    /// display name
+    pub fn display_name(&self) -> &'static str {
+        match self {
+            BillingInterval::Annually => "Annually",
+            BillingInterval::Monthly => "Monthly",
+        }
+    }
+}
+
+impl TryFrom<&str> for BillingInterval {
+    type Error = ();
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "annually" => Ok(Self::Annually),
+            "monthly" => Ok(Self::Monthly),
+            _ => Err(()),
+        }
+    }
+}
+
+impl From<&BillingInterval> for &str {
+    fn from(value: &BillingInterval) -> Self {
+        match value {
+            BillingInterval::Annually => "annually",
+            BillingInterval::Monthly => "monthly",
+        }
+    }
 }
 
 /// Status of a subscription

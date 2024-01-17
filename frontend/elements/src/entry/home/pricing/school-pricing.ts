@@ -107,7 +107,7 @@ export class _ extends LitElement {
                 display: inline-grid;
                 place-content: center;
             }
-            .monthly {
+            .billing-interval {
                 font-size: 13px;
                 color: var(--dark-gray-6);
                 margin-bottom: 12px;
@@ -135,6 +135,9 @@ export class _ extends LitElement {
 
     @property({ type: Number })
     school_level_4_max?: number;
+
+    @property()
+    billing_interval: string = "";
 
     private onChange(index: number) {
         this.dispatchEvent(new CustomEvent("custom-number", {
@@ -198,7 +201,7 @@ export class _ extends LitElement {
                     </div>
                 ` : nothing }
             </div>
-            <div class="annually">Annually</div>
+            <div class="billing-interval">${this.billing_interval}</div>
             <slot name="start-button"></slot>
         `;
     }

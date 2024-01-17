@@ -59,6 +59,9 @@ export class _ extends LitElement {
     @property({ reflect: true })
     value: Mode = "monthly";
 
+    @property()
+    annual_label: string = "";
+
     toggle() {
         const value = this.value === "annually" ? "monthly" : "annually";
         this.change(value);
@@ -81,7 +84,7 @@ export class _ extends LitElement {
             </div>
             <div @click=${() => this.change("annually")}>
                 Annual
-                <span class="annual-tag">Get 2 months FREE!</span>
+                <span class="annual-tag">${this.annual_label}</span>
             </div>
         `;
     }

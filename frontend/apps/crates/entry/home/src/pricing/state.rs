@@ -2,11 +2,13 @@ use std::rc::Rc;
 
 use futures_signals::signal::Mutable;
 use serde::{Deserialize, Serialize};
+use shared::domain::billing::BillingInterval;
 use utils::routes::HomePricingRoute;
 
 pub struct Pricing {
     pub(super) route: Mutable<HomePricingRoute>,
     pub(super) variables: Mutable<Variables>,
+    pub(super) billing_interval: Mutable<BillingInterval>,
 }
 
 impl Pricing {
@@ -14,6 +16,7 @@ impl Pricing {
         Rc::new(Self {
             route: Mutable::new(route),
             variables: Default::default(),
+            billing_interval: Mutable::new(BillingInterval::Monthly),
         })
     }
 }

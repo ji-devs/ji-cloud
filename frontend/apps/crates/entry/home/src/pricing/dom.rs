@@ -9,8 +9,9 @@ use futures_signals::{
 use gloo::utils::window;
 use js_sys::Date;
 use shared::domain::billing::{
-    PlanType, PLAN_SCHOOL_LEVEL_1_TEACHER_COUNT, PLAN_SCHOOL_LEVEL_2_TEACHER_COUNT,
-    PLAN_SCHOOL_LEVEL_3_TEACHER_COUNT, PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT,
+    BillingInterval, PlanType, PLAN_SCHOOL_LEVEL_1_TEACHER_COUNT,
+    PLAN_SCHOOL_LEVEL_2_TEACHER_COUNT, PLAN_SCHOOL_LEVEL_3_TEACHER_COUNT,
+    PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT,
 };
 use std::rc::Rc;
 use utils::{
@@ -20,18 +21,22 @@ use utils::{
     unwrap::UnwrapJiExt,
 };
 
-use super::Pricing;
-use super::Variables;
+use super::{Pricing, Variables};
 
 const PLAN_PRICE_MONTHLY_BASIC: u32 = 17_99;
 const PLAN_PRICE_ANNUAL_BASIC: u32 = 180_00;
 const PLAN_PRICE_MONTHLY_PRO: u32 = 29_99;
 const PLAN_PRICE_ANNUAL_PRO: u32 = 300_00;
-const PLAN_PRICE_SCHOOL_1: u32 = 1_250_00;
-const PLAN_PRICE_SCHOOL_2: u32 = 1_500_00;
-const PLAN_PRICE_SCHOOL_3: u32 = 1_750_00;
-const PLAN_PRICE_SCHOOL_4: u32 = 2_000_00;
-const PLAN_PRICE_SCHOOL_UNLIMITED: u32 = 2_250_00;
+const PLAN_PRICE_MONTHLY_SCHOOL_1: u32 = 125_00;
+const PLAN_PRICE_ANNUAL_SCHOOL_1: u32 = 1_150_00;
+const PLAN_PRICE_MONTHLY_SCHOOL_2: u32 = 150_00;
+const PLAN_PRICE_ANNUAL_SCHOOL_2: u32 = 1_500_00;
+const PLAN_PRICE_MONTHLY_SCHOOL_3: u32 = 175_00;
+const PLAN_PRICE_ANNUAL_SCHOOL_3: u32 = 1_750_00;
+const PLAN_PRICE_MONTHLY_SCHOOL_4: u32 = 250_00;
+const PLAN_PRICE_ANNUAL_SCHOOL_4: u32 = 2_500_00;
+const PLAN_PRICE_MONTHLY_SCHOOL_UNLIMITED: u32 = 300_00;
+const PLAN_PRICE_ANNUAL_SCHOOL_UNLIMITED: u32 = 3_000_00;
 
 impl Pricing {
     pub fn render(self: &Rc<Self>) -> Dom {
@@ -110,14 +115,14 @@ impl Pricing {
 
     fn render_individual(self: &Rc<Self>) -> Vec<Dom> {
         let state = self;
-        let frequency = Mutable::new(Frequency::Monthly);
         let screen_size = Mutable::new(get_current_screen_size());
         vec![
             html!("pricing-toggle", {
-                .prop_signal("value", frequency.signal().map(|f| -> &str {(&f).into()}))
-                .event(clone!(frequency => move |e: events::CustomString| {
+                .prop("annual_label", "Get 2 months FREE!")
+                .prop_signal("value", state.billing_interval.signal().map(|f| -> &str {(&f).into()}))
+                .event(clone!(state => move |e: events::CustomString| {
                     let value: &str = &e.value();
-                    frequency.set(value.try_into().unwrap_ji());
+                    state.billing_interval.set(value.try_into().unwrap_ji());
                 }))
             }),
             html!("pricing-table", {
@@ -125,14 +130,14 @@ impl Pricing {
                     screen_size.set(get_current_screen_size())
                 }))
                 .prop("kind", "individuals")
-                .prop_signal("frequency", frequency.signal().map(|frequency| frequency.as_str()))
-                .prop_signal("plan_price_basic", frequency.signal().map(|frequency| match frequency {
-                    Frequency::Annually => PLAN_PRICE_ANNUAL_BASIC,
-                    Frequency::Monthly => PLAN_PRICE_MONTHLY_BASIC,
+                .prop_signal("frequency", state.billing_interval.signal().map(|billing_interval| billing_interval.as_str()))
+                .prop_signal("plan_price_basic", state.billing_interval.signal().map(|billing_interval| match billing_interval {
+                    BillingInterval::Annually => PLAN_PRICE_ANNUAL_BASIC,
+                    BillingInterval::Monthly => PLAN_PRICE_MONTHLY_BASIC,
                 }))
-                .prop_signal("plan_price_pro", frequency.signal().map(|frequency| match frequency {
-                    Frequency::Annually => PLAN_PRICE_ANNUAL_PRO,
-                    Frequency::Monthly => PLAN_PRICE_MONTHLY_PRO,
+                .prop_signal("plan_price_pro", state.billing_interval.signal().map(|billing_interval| match billing_interval {
+                    BillingInterval::Annually => PLAN_PRICE_ANNUAL_PRO,
+                    BillingInterval::Monthly => PLAN_PRICE_MONTHLY_PRO,
                 }))
                 .prop_signal("discount_percentage_basic", state.variables.signal_ref(|v| v.discount_percentage_basic))
                 .prop_signal("discount_percentage_pro", state.variables.signal_ref(|v| v.discount_percentage_pro))
@@ -146,8 +151,8 @@ impl Pricing {
                 //     .prop("slot", "free-action")
                 //     .prop("kind", "filled")
                 //     .prop("color", "blue")
-                //     .prop_signal("href", frequency.signal().map(|frequency| {
-                //         let plan = match frequency {
+                //     .prop_signal("href", billing_interval.signal().map(|billing_interval| {
+                //         let plan = match billing_interval {
 
                 //         };
                 //         Route::User(UserRoute::Subscribe(plan)).to_string()
@@ -159,11 +164,11 @@ impl Pricing {
                     .prop("kind", "filled")
                     .prop("color", "blue")
                     .prop_signal("href", map_ref! {
-                        let frequency = frequency.signal(),
+                        let billing_interval = state.billing_interval.signal(),
                         let promo_code = state.basic_promo_code_signal() => {
-                            let plan = match frequency {
-                                Frequency::Annually => PlanType::IndividualBasicAnnually,
-                                Frequency::Monthly => PlanType::IndividualBasicMonthly,
+                            let plan = match billing_interval {
+                                BillingInterval::Annually => PlanType::IndividualBasicAnnually,
+                                BillingInterval::Monthly => PlanType::IndividualBasicMonthly,
                             };
                             Route::User(UserRoute::Subscribe1(plan, promo_code.clone())).to_string()
                         }
@@ -180,11 +185,11 @@ impl Pricing {
                     .prop("kind", "filled")
                     .prop("color", "blue")
                     .prop_signal("href", map_ref! {
-                        let frequency = frequency.signal(),
+                        let billing_interval = state.billing_interval.signal(),
                         let promo_code = state.pro_promo_code_signal() => {
-                            let plan = match frequency {
-                                Frequency::Annually => PlanType::IndividualProAnnually,
-                                Frequency::Monthly => PlanType::IndividualProMonthly,
+                            let plan = match billing_interval {
+                                BillingInterval::Annually => PlanType::IndividualProAnnually,
+                                BillingInterval::Monthly => PlanType::IndividualProMonthly,
                             };
                             Route::User(UserRoute::Subscribe1(plan, promo_code.clone())).to_string()
                         }
@@ -225,57 +230,89 @@ impl Pricing {
 
     fn render_school(self: &Rc<Self>) -> Vec<Dom> {
         let state = self;
-        let selected_index: Mutable<SchoolPlan> = Mutable::new(SchoolPlan::Level3);
+        let selected_index: Mutable<SchoolPlan> = Mutable::new(SchoolPlan::default());
 
-        vec![html!("pricing-table", {
-            .prop("kind", "schools")
-            .child(html!("div", {
-                .prop("slot", "school-head")
-                .child(html!("pricing-message", {
-                    .prop_signal("color", state.variables.signal_ref(|v| v.bubble_color.clone()))
-                    .prop_signal("title", state.variables.signal_ref(|v| v.bubble_title.clone()))
-                    .prop_signal("message", state.variables.signal_ref(|v| v.bubble_message.clone()))
+        vec![
+            html!("pricing-toggle", {
+                .prop_signal("annual_label", selected_index.signal().map(|selected_index| {
+                    match selected_index {
+                        SchoolPlan::Level1 => "Get 1 month FREE!",
+                        _ => "Get 2 months FREE!"
+                    }
                 }))
-                .child(html!("pricing-school-pricing", {
-                    .prop("school_level_1_max", PLAN_SCHOOL_LEVEL_1_TEACHER_COUNT)
-                    .prop("school_level_2_max", PLAN_SCHOOL_LEVEL_2_TEACHER_COUNT)
-                    .prop("school_level_3_max", PLAN_SCHOOL_LEVEL_3_TEACHER_COUNT)
-                    .prop("school_level_4_max", PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT)
-                    .prop_signal("plan_price", selected_index.signal().map(|i| match i {
-                        SchoolPlan::Level1 => PLAN_PRICE_SCHOOL_1,
-                        SchoolPlan::Level2 => PLAN_PRICE_SCHOOL_2,
-                        SchoolPlan::Level3 => PLAN_PRICE_SCHOOL_3,
-                        SchoolPlan::Level4 => PLAN_PRICE_SCHOOL_4,
-                        SchoolPlan::Unlimited => PLAN_PRICE_SCHOOL_UNLIMITED,
+                .prop_signal("value", state.billing_interval.signal().map(|f| -> &str {(&f).into()}))
+                .event(clone!(state => move |e: events::CustomString| {
+                    let value: &str = &e.value();
+                    state.billing_interval.set(value.try_into().unwrap_ji());
+                }))
+            }),
+            html!("pricing-table", {
+                .prop("kind", "schools")
+                .child(html!("div", {
+                    .prop("slot", "school-head")
+                    .child(html!("pricing-message", {
+                        .prop_signal("color", state.variables.signal_ref(|v| v.bubble_color.clone()))
+                        .prop_signal("title", state.variables.signal_ref(|v| v.bubble_title.clone()))
+                        .prop_signal("message", state.variables.signal_ref(|v| v.bubble_message.clone()))
                     }))
-                    .prop_signal("selectedIndex", selected_index.signal().map(|i| -> u8 {i.into()}))
-                    .prop_signal("discount_percentage", state.variables.signal_ref(|v| v.discount_percentage_school))
-                    .event(clone!(selected_index => move |e: events::CustomNumber| {
-                        let index = e.number().unwrap_ji() as u8;
-                        selected_index.set(index.try_into().unwrap_ji());
-                    }))
-                    .child(html!("button-rect", {
-                        .prop("slot", "start-button")
-                        .prop("kind", "filled")
-                        .prop("color", "blue")
-                        .text(formatcp!("Start {}-day trial", SCHOOL_FREE_TRIAL_DAYS))
-                        .prop_signal("href", map_ref! {
+                    .child(html!("pricing-school-pricing", {
+                        .prop_signal("billing_interval", state.billing_interval.signal().map(|billing_interval| billing_interval.display_name()))
+                        .prop("school_level_1_max", PLAN_SCHOOL_LEVEL_1_TEACHER_COUNT)
+                        .prop("school_level_2_max", PLAN_SCHOOL_LEVEL_2_TEACHER_COUNT)
+                        .prop("school_level_3_max", PLAN_SCHOOL_LEVEL_3_TEACHER_COUNT)
+                        .prop("school_level_4_max", PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT)
+                        .prop_signal("plan_price", map_ref! {
                             let selected_index = selected_index.signal(),
-                            let promo_code = state.school_promo_code_signal() => {
-                                Route::User(UserRoute::SchoolStart((*selected_index).into(), promo_code.clone())).to_string()
+                            let billing_interval = state.billing_interval.signal() => move {
+                                match billing_interval {
+                                    BillingInterval::Annually => match selected_index {
+                                        SchoolPlan::Level1 => PLAN_PRICE_ANNUAL_SCHOOL_1,
+                                        SchoolPlan::Level2 => PLAN_PRICE_ANNUAL_SCHOOL_2,
+                                        SchoolPlan::Level3 => PLAN_PRICE_ANNUAL_SCHOOL_3,
+                                        SchoolPlan::Level4 => PLAN_PRICE_ANNUAL_SCHOOL_4,
+                                        SchoolPlan::Unlimited => PLAN_PRICE_ANNUAL_SCHOOL_UNLIMITED,
+                                    },
+                                    BillingInterval::Monthly => match selected_index {
+                                        SchoolPlan::Level1 => PLAN_PRICE_MONTHLY_SCHOOL_1,
+                                        SchoolPlan::Level2 => PLAN_PRICE_MONTHLY_SCHOOL_2,
+                                        SchoolPlan::Level3 => PLAN_PRICE_MONTHLY_SCHOOL_3,
+                                        SchoolPlan::Level4 => PLAN_PRICE_MONTHLY_SCHOOL_4,
+                                        SchoolPlan::Unlimited => PLAN_PRICE_MONTHLY_SCHOOL_UNLIMITED,
+                                    },
+                                }
                             }
                         })
+                        .prop_signal("selectedIndex", selected_index.signal().map(|i| -> u8 {i.into()}))
+                        .prop_signal("discount_percentage", state.variables.signal_ref(|v| v.discount_percentage_school))
+                        .event(clone!(selected_index => move |e: events::CustomNumber| {
+                            let index = e.number().unwrap_ji() as u8;
+                            selected_index.set(index.try_into().unwrap_ji());
+                        }))
+                        .child(html!("button-rect", {
+                            .prop("slot", "start-button")
+                            .prop("kind", "filled")
+                            .prop("color", "blue")
+                            .text(formatcp!("Start {}-day trial", SCHOOL_FREE_TRIAL_DAYS))
+                            .prop_signal("href", map_ref! {
+                                let selected_index = selected_index.signal(),
+                                let billing_interval = state.billing_interval.signal(),
+                                let promo_code = state.school_promo_code_signal() => {
+                                    let plan = selected_index.to_plan_type(*billing_interval);
+                                    Route::User(UserRoute::SchoolStart(plan, promo_code.clone())).to_string()
+                                }
+                            })
+                        }))
                     }))
                 }))
-            }))
-            .child(html!("button-rect", {
-                .prop("slot", "learn-more-school")
-                .prop("kind", "text")
-                .prop("color", "blue")
-                .text("Learn more")
-                .on_click_go_to_url!(Route::Home(HomeRoute::Plan(HomePlanRoute::School)))
-            }))
-        })]
+                .child(html!("button-rect", {
+                    .prop("slot", "learn-more-school")
+                    .prop("kind", "text")
+                    .prop("color", "blue")
+                    .text("Learn more")
+                    .on_click_go_to_url!(Route::Home(HomeRoute::Plan(HomePlanRoute::School)))
+                }))
+            }),
+        ]
     }
 
     fn pro_promo_code_signal(self: &Rc<Self>) -> impl Signal<Item = Option<String>> {
@@ -306,42 +343,10 @@ impl Pricing {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-enum Frequency {
-    Annually,
-    Monthly,
-}
-
-impl Frequency {
-    fn as_str(&self) -> &'static str {
-        self.into()
-    }
-}
-
-impl TryFrom<&str> for Frequency {
-    type Error = ();
-
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        match value {
-            "annually" => Ok(Self::Annually),
-            "monthly" => Ok(Self::Monthly),
-            _ => Err(()),
-        }
-    }
-}
-
-impl From<&Frequency> for &str {
-    fn from(value: &Frequency) -> Self {
-        match value {
-            Frequency::Annually => "annually",
-            Frequency::Monthly => "monthly",
-        }
-    }
-}
-
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Default)]
 enum SchoolPlan {
     Level1,
+    #[default]
     Level2,
     Level3,
     Level4,
@@ -375,14 +380,23 @@ impl From<SchoolPlan> for u8 {
     }
 }
 
-impl From<SchoolPlan> for PlanType {
-    fn from(value: SchoolPlan) -> Self {
-        match value {
-            SchoolPlan::Level1 => PlanType::SchoolLevel1Annually,
-            SchoolPlan::Level2 => PlanType::SchoolLevel2Annually,
-            SchoolPlan::Level3 => PlanType::SchoolLevel3Annually,
-            SchoolPlan::Level4 => PlanType::SchoolLevel4Annually,
-            SchoolPlan::Unlimited => PlanType::SchoolUnlimitedAnnually,
+impl SchoolPlan {
+    pub fn to_plan_type(self, billing_interval: BillingInterval) -> PlanType {
+        match billing_interval {
+            BillingInterval::Annually => match self {
+                Self::Level1 => PlanType::SchoolLevel1Annually,
+                Self::Level2 => PlanType::SchoolLevel2Annually,
+                Self::Level3 => PlanType::SchoolLevel3Annually,
+                Self::Level4 => PlanType::SchoolLevel4Annually,
+                Self::Unlimited => PlanType::SchoolUnlimitedAnnually,
+            },
+            BillingInterval::Monthly => match self {
+                Self::Level1 => PlanType::SchoolLevel1Monthly,
+                Self::Level2 => PlanType::SchoolLevel2Monthly,
+                Self::Level3 => PlanType::SchoolLevel3Monthly,
+                Self::Level4 => PlanType::SchoolLevel4Monthly,
+                Self::Unlimited => PlanType::SchoolUnlimitedMonthly,
+            },
         }
     }
 }
