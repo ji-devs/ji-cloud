@@ -135,7 +135,7 @@ export class _ extends LitElement {
                     <h1>${STR_CREATE_ACCOUNT}</h1>
                     <div class="divider"></div>
                     <div class="actions">
-                        <button-rect href="/user/signup">${STR_SIGNUP}</button-rect>
+                        <button-rect href="/user/register">${STR_SIGNUP}</button-rect>
                         <p>
                             ${STR_ALREADY_HAVE_ACCOUNT}
                             <button-rect kind="text" href="/user/login">${STR_LOGIN}</button-rect>
