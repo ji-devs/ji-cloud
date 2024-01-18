@@ -70,6 +70,7 @@ impl Welcome {
                     .prop("color", "blue")
                     .prop("kind", "filled")
                     .prop("href", get_add_teacher_form_link())
+                    .prop("target", "_blank")
                     .text("Next step...")
                 }))
                 .child(html!("p", {
