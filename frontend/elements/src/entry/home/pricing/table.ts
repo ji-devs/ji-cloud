@@ -400,7 +400,7 @@ export class _ extends LitElement {
                                 <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
                             `,
                             individuals: html`
-                                <div class="cell">FREE content only</div>
+                                <div class="cell">FREE content only<br>(upto 5 Jigs per day)</div>
                                 <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
                                 <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
                             `
