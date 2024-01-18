@@ -73,9 +73,6 @@ export class _ extends LitElement {
 
         return html`
             <auth-page img="entry/user/side/main.webp">
-                <div class="logo">
-                    <img-ui path="core/page-header/logo.svg"></img-ui>
-                </div>
                 <slot name="alert"></slot>
                 <h1>${STR_TITLE}</h1>
                 <div class="inside-wrapper">

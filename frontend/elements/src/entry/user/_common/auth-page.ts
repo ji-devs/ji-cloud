@@ -28,14 +28,29 @@ export class _ extends LitElement {
                 @media (min-width: 1024px) {
                     aside {
                         display: block;
+                        grid-column: 1;
+                        grid-row: 1;
                     }
                 }
-                img-ui {
+                aside img-ui {
                     width: 100%;
                     height: 100%;
                     max-height: 100dvh;
                     object-fit: cover;
                     display: block;
+                }
+                .logo {
+                    grid-column: 1;
+                    grid-row: 1;
+                    margin: 30px;
+                    align-self: start;
+                    justify-self: center;
+                }
+                @media (min-width: 1024px) {
+                    .logo {
+                    justify-self: start;
+                        display: block;
+                    }
                 }
                 .main-wrapper {
                     height: 100%;
@@ -67,6 +82,9 @@ export class _ extends LitElement {
             <aside>
                 <img-ui .path="${this.img}"></img-ui>
             </aside>
+            <a class="logo" href="/">
+                <img-ui path="core/page-header/logo.svg"></img-ui>
+            </a>
             <div class="main-wrapper">
                 <main>
                     <slot></slot>
