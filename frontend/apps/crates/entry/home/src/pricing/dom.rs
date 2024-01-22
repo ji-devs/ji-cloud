@@ -8,35 +8,15 @@ use futures_signals::{
 };
 use gloo::utils::window;
 use js_sys::Date;
-use shared::domain::billing::{
-    BillingInterval, PlanType, PLAN_SCHOOL_LEVEL_1_TEACHER_COUNT,
-    PLAN_SCHOOL_LEVEL_2_TEACHER_COUNT, PLAN_SCHOOL_LEVEL_3_TEACHER_COUNT,
-    PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT,
-};
+use shared::domain::billing::{self, BillingInterval, PlanType};
 use std::rc::Rc;
 use utils::{
-    constants::{INDIVIDUAL_FREE_TRIAL_DAYS, SCHOOL_FREE_TRIAL_DAYS},
     events, on_click_go_to_url,
     routes::{HomePlanRoute, HomePricingRoute, HomeRoute, Route, UserRoute},
     unwrap::UnwrapJiExt,
 };
 
 use super::{Pricing, Variables};
-
-const PLAN_PRICE_MONTHLY_BASIC: u32 = 17_99;
-const PLAN_PRICE_ANNUAL_BASIC: u32 = 180_00;
-const PLAN_PRICE_MONTHLY_PRO: u32 = 29_99;
-const PLAN_PRICE_ANNUAL_PRO: u32 = 300_00;
-const PLAN_PRICE_MONTHLY_SCHOOL_1: u32 = 115_00;
-const PLAN_PRICE_ANNUAL_SCHOOL_1: u32 = 1_250_00;
-const PLAN_PRICE_MONTHLY_SCHOOL_2: u32 = 150_00;
-const PLAN_PRICE_ANNUAL_SCHOOL_2: u32 = 1_500_00;
-const PLAN_PRICE_MONTHLY_SCHOOL_3: u32 = 200_00;
-const PLAN_PRICE_ANNUAL_SCHOOL_3: u32 = 2_000_00;
-const PLAN_PRICE_MONTHLY_SCHOOL_4: u32 = 250_00;
-const PLAN_PRICE_ANNUAL_SCHOOL_4: u32 = 2_500_00;
-const PLAN_PRICE_MONTHLY_SCHOOL_UNLIMITED: u32 = 300_00;
-const PLAN_PRICE_ANNUAL_SCHOOL_UNLIMITED: u32 = 3_000_00;
 
 impl Pricing {
     pub fn render(self: &Rc<Self>) -> Dom {
@@ -132,12 +112,12 @@ impl Pricing {
                 .prop("kind", "individuals")
                 .prop_signal("frequency", state.billing_interval.signal().map(|billing_interval| billing_interval.as_str()))
                 .prop_signal("plan_price_basic", state.billing_interval.signal().map(|billing_interval| match billing_interval {
-                    BillingInterval::Annually => PLAN_PRICE_ANNUAL_BASIC,
-                    BillingInterval::Monthly => PLAN_PRICE_MONTHLY_BASIC,
+                    BillingInterval::Annually => billing::PLAN_PRICE_ANNUAL_BASIC,
+                    BillingInterval::Monthly => billing::PLAN_PRICE_MONTHLY_BASIC,
                 }))
                 .prop_signal("plan_price_pro", state.billing_interval.signal().map(|billing_interval| match billing_interval {
-                    BillingInterval::Annually => PLAN_PRICE_ANNUAL_PRO,
-                    BillingInterval::Monthly => PLAN_PRICE_MONTHLY_PRO,
+                    BillingInterval::Annually => billing::PLAN_PRICE_ANNUAL_PRO,
+                    BillingInterval::Monthly => billing::PLAN_PRICE_MONTHLY_PRO,
                 }))
                 .prop_signal("discount_percentage_basic", state.variables.signal_ref(|v| v.discount_percentage_basic))
                 .prop_signal("discount_percentage_pro", state.variables.signal_ref(|v| v.discount_percentage_pro))
@@ -176,7 +156,7 @@ impl Pricing {
                     .text_signal(screen_size.signal().map(|size| {
                         match size {
                             ScreenSize::Mobile => "Start trial".to_owned(),
-                            ScreenSize::Desktop => formatcp!("Start {}-day trial", INDIVIDUAL_FREE_TRIAL_DAYS).to_owned(),
+                            ScreenSize::Desktop => formatcp!("Start {}-day trial", billing::INDIVIDUAL_TRIAL_PERIOD).to_owned(),
                         }
                     }))
                 }))
@@ -197,7 +177,7 @@ impl Pricing {
                     .text_signal(screen_size.signal().map(move|size| {
                         match size {
                             ScreenSize::Mobile => "Start trial".to_owned(),
-                            ScreenSize::Desktop => formatcp!("Start {}-day trial", INDIVIDUAL_FREE_TRIAL_DAYS).to_owned(),
+                            ScreenSize::Desktop => formatcp!("Start {}-day trial", billing::INDIVIDUAL_TRIAL_PERIOD).to_owned(),
                         }
                     }))
                 }))
@@ -257,27 +237,27 @@ impl Pricing {
                     }))
                     .child(html!("pricing-school-pricing", {
                         .prop_signal("billing_interval", state.billing_interval.signal().map(|billing_interval| billing_interval.display_name()))
-                        .prop("school_level_1_max", PLAN_SCHOOL_LEVEL_1_TEACHER_COUNT)
-                        .prop("school_level_2_max", PLAN_SCHOOL_LEVEL_2_TEACHER_COUNT)
-                        .prop("school_level_3_max", PLAN_SCHOOL_LEVEL_3_TEACHER_COUNT)
-                        .prop("school_level_4_max", PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT)
+                        .prop("school_level_1_max", billing::PLAN_SCHOOL_LEVEL_1_TEACHER_COUNT)
+                        .prop("school_level_2_max", billing::PLAN_SCHOOL_LEVEL_2_TEACHER_COUNT)
+                        .prop("school_level_3_max", billing::PLAN_SCHOOL_LEVEL_3_TEACHER_COUNT)
+                        .prop("school_level_4_max", billing::PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT)
                         .prop_signal("plan_price", map_ref! {
                             let selected_index = selected_index.signal(),
                             let billing_interval = state.billing_interval.signal() => move {
                                 match billing_interval {
                                     BillingInterval::Annually => match selected_index {
-                                        SchoolPlan::Level1 => PLAN_PRICE_ANNUAL_SCHOOL_1,
-                                        SchoolPlan::Level2 => PLAN_PRICE_ANNUAL_SCHOOL_2,
-                                        SchoolPlan::Level3 => PLAN_PRICE_ANNUAL_SCHOOL_3,
-                                        SchoolPlan::Level4 => PLAN_PRICE_ANNUAL_SCHOOL_4,
-                                        SchoolPlan::Unlimited => PLAN_PRICE_ANNUAL_SCHOOL_UNLIMITED,
+                                        SchoolPlan::Level1 => billing::PLAN_PRICE_ANNUAL_SCHOOL_1,
+                                        SchoolPlan::Level2 => billing::PLAN_PRICE_ANNUAL_SCHOOL_2,
+                                        SchoolPlan::Level3 => billing::PLAN_PRICE_ANNUAL_SCHOOL_3,
+                                        SchoolPlan::Level4 => billing::PLAN_PRICE_ANNUAL_SCHOOL_4,
+                                        SchoolPlan::Unlimited => billing::PLAN_PRICE_ANNUAL_SCHOOL_UNLIMITED,
                                     },
                                     BillingInterval::Monthly => match selected_index {
-                                        SchoolPlan::Level1 => PLAN_PRICE_MONTHLY_SCHOOL_1,
-                                        SchoolPlan::Level2 => PLAN_PRICE_MONTHLY_SCHOOL_2,
-                                        SchoolPlan::Level3 => PLAN_PRICE_MONTHLY_SCHOOL_3,
-                                        SchoolPlan::Level4 => PLAN_PRICE_MONTHLY_SCHOOL_4,
-                                        SchoolPlan::Unlimited => PLAN_PRICE_MONTHLY_SCHOOL_UNLIMITED,
+                                        SchoolPlan::Level1 => billing::PLAN_PRICE_MONTHLY_SCHOOL_1,
+                                        SchoolPlan::Level2 => billing::PLAN_PRICE_MONTHLY_SCHOOL_2,
+                                        SchoolPlan::Level3 => billing::PLAN_PRICE_MONTHLY_SCHOOL_3,
+                                        SchoolPlan::Level4 => billing::PLAN_PRICE_MONTHLY_SCHOOL_4,
+                                        SchoolPlan::Unlimited => billing::PLAN_PRICE_MONTHLY_SCHOOL_UNLIMITED,
                                     },
                                 }
                             }
@@ -292,7 +272,7 @@ impl Pricing {
                             .prop("slot", "start-button")
                             .prop("kind", "filled")
                             .prop("color", "blue")
-                            .text(formatcp!("Start {}-day trial", SCHOOL_FREE_TRIAL_DAYS))
+                            .text(formatcp!("Start {}-day trial", billing::SCHOOL_TRIAL_PERIOD))
                             .prop_signal("href", map_ref! {
                                 let selected_index = selected_index.signal(),
                                 let billing_interval = state.billing_interval.signal(),

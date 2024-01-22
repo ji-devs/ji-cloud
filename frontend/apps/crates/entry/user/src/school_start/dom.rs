@@ -2,8 +2,9 @@ use super::state::SchoolStart;
 use const_format::formatcp;
 use dominator::{clone, html, with_node, DomBuilder};
 use futures_signals::signal::SignalExt;
+use shared::domain::billing::SCHOOL_TRIAL_PERIOD;
 use std::rc::Rc;
-use utils::{component::Component, constants::SCHOOL_FREE_TRIAL_DAYS, events, unwrap::UnwrapJiExt};
+use utils::{component::Component, events, unwrap::UnwrapJiExt};
 use web_sys::{HtmlInputElement, ShadowRoot};
 
 impl Component<SchoolStart> for Rc<SchoolStart> {
@@ -24,7 +25,7 @@ impl Component<SchoolStart> for Rc<SchoolStart> {
                 //     .text(state.plan_type.as_str())
                 // })
                 .child(html!("h2", {
-                    .text(formatcp!("Try Jigzi School FREE for {} days", SCHOOL_FREE_TRIAL_DAYS))
+                    .text(formatcp!("Try Jigzi School FREE for {} days", SCHOOL_TRIAL_PERIOD))
                 }))
                 .child(html!("hr"))
                 .child(html!("h2", {

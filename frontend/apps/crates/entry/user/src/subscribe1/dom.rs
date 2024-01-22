@@ -5,13 +5,10 @@ use super::{check_popup::CheckPopup, stripe::Stripe};
 use super::state::Subscribe1;
 use dominator::{clone, html, with_node, DomBuilder};
 use futures_signals::signal::SignalExt;
+use shared::domain::billing::{INDIVIDUAL_TRIAL_PERIOD, SCHOOL_TRIAL_PERIOD};
 use std::rc::Rc;
 use utils::routes::{Route, UserRoute};
-use utils::{
-    component::Component,
-    constants::{INDIVIDUAL_FREE_TRIAL_DAYS, SCHOOL_FREE_TRIAL_DAYS},
-    dialog, events, gap, icon,
-};
+use utils::{component::Component, dialog, events, gap, icon};
 use web_sys::{HtmlElement, HtmlInputElement, ShadowRoot};
 
 impl Component<Subscribe1> for Rc<Subscribe1> {
@@ -50,8 +47,8 @@ impl Component<Subscribe1> for Rc<Subscribe1> {
                     .text(state.plan_type.display_name())
                     .text(" FREE for ")
                     .text(&match state.plan_type.is_individual_plan() {
-                        true => INDIVIDUAL_FREE_TRIAL_DAYS,
-                        false => SCHOOL_FREE_TRIAL_DAYS,
+                        true => INDIVIDUAL_TRIAL_PERIOD,
+                        false => SCHOOL_TRIAL_PERIOD,
                     }.to_string())
                     .text(" days")
                 }))
@@ -60,8 +57,8 @@ impl Component<Subscribe1> for Rc<Subscribe1> {
                     .child(icon!("fa-solid fa-check"))
                     .text("Get a ")
                     .text(&match state.plan_type.is_individual_plan() {
-                        true => INDIVIDUAL_FREE_TRIAL_DAYS,
-                        false => SCHOOL_FREE_TRIAL_DAYS,
+                        true => INDIVIDUAL_TRIAL_PERIOD,
+                        false => SCHOOL_TRIAL_PERIOD,
                     }.to_string())
                     .text(" day trial, cancel any time.")
                 }))

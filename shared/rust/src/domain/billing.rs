@@ -15,6 +15,52 @@ use crate::domain::image::ImageId;
 use crate::domain::user::UserProfile;
 use crate::domain::{Percent, UpdateNonNullable, UpdateNullable};
 
+/// ### Shared billing constants.
+/// (please keep all constants in same place, so that we don't end up duplicates)
+
+/// Level 1 max teacher count
+pub const PLAN_SCHOOL_LEVEL_1_TEACHER_COUNT: i64 = 5;
+/// Level 2 max teacher count
+pub const PLAN_SCHOOL_LEVEL_2_TEACHER_COUNT: i64 = 10;
+/// Level 3 max teacher count
+pub const PLAN_SCHOOL_LEVEL_3_TEACHER_COUNT: i64 = 15;
+/// Level 4 max teacher count
+pub const PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT: i64 = 20;
+
+/// Individual plan trial period in days
+pub const INDIVIDUAL_TRIAL_PERIOD: i64 = 7;
+/// Schools plan trial period in days
+pub const SCHOOL_TRIAL_PERIOD: i64 = 30;
+
+/// Plan price monthly-basic
+pub const PLAN_PRICE_MONTHLY_BASIC: u32 = 17_99;
+/// Plan price annual-basic
+pub const PLAN_PRICE_ANNUAL_BASIC: u32 = 180_00;
+/// Plan price monthly-pro
+pub const PLAN_PRICE_MONTHLY_PRO: u32 = 29_99;
+/// Plan price annual-pro
+pub const PLAN_PRICE_ANNUAL_PRO: u32 = 300_00;
+/// Plan price monthly-school-1
+pub const PLAN_PRICE_MONTHLY_SCHOOL_1: u32 = 115_00;
+/// Plan price annual-school-1
+pub const PLAN_PRICE_ANNUAL_SCHOOL_1: u32 = 1_250_00;
+/// Plan price monthly-school-2
+pub const PLAN_PRICE_MONTHLY_SCHOOL_2: u32 = 150_00;
+/// Plan price annual-school-2
+pub const PLAN_PRICE_ANNUAL_SCHOOL_2: u32 = 1_500_00;
+/// Plan price monthly-school-3
+pub const PLAN_PRICE_MONTHLY_SCHOOL_3: u32 = 200_00;
+/// Plan price annual-school-3
+pub const PLAN_PRICE_ANNUAL_SCHOOL_3: u32 = 2_000_00;
+/// Plan price monthly-school-4
+pub const PLAN_PRICE_MONTHLY_SCHOOL_4: u32 = 250_00;
+/// Plan price annual-school-4
+pub const PLAN_PRICE_ANNUAL_SCHOOL_4: u32 = 2_500_00;
+/// Plan price monthly-school-unlimited
+pub const PLAN_PRICE_MONTHLY_SCHOOL_UNLIMITED: u32 = 300_00;
+/// Plan price annual-school-unlimited
+pub const PLAN_PRICE_ANNUAL_SCHOOL_UNLIMITED: u32 = 3_000_00;
+
 /// Stripe customer ID
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type), sqlx(transparent))]
@@ -632,15 +678,6 @@ pub enum PlanTier {
     Pro = 2,
 }
 
-/// Level 1 max teacher count
-pub const PLAN_SCHOOL_LEVEL_1_TEACHER_COUNT: i16 = 5;
-/// Level 2 max teacher count
-pub const PLAN_SCHOOL_LEVEL_2_TEACHER_COUNT: i16 = 10;
-/// Level 3 max teacher count
-pub const PLAN_SCHOOL_LEVEL_3_TEACHER_COUNT: i16 = 15;
-/// Level 4 max teacher count
-pub const PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT: i16 = 20;
-
 /// Possible individual subscription plans
 #[derive(Debug, Serialize, Deserialize, Clone, Copy, Eq, Ord, PartialOrd, PartialEq, Hash)]
 #[serde(rename_all = "kebab-case")]
@@ -722,14 +759,6 @@ impl Display for PlanType {
         write!(f, "{}", s)
     }
 }
-
-const ACCOUNT_LIMIT_L1: i64 = 4;
-const ACCOUNT_LIMIT_L2: i64 = 10;
-const ACCOUNT_LIMIT_L3: i64 = 20;
-const ACCOUNT_LIMIT_L4: i64 = 30;
-
-const INDIVIDUAL_TRIAL_PERIOD: i64 = 3;
-const SCHOOL_TRIAL_PERIOD: i64 = 5;
 
 impl PlanType {
     /// Represents the plan type as a `str`
@@ -818,16 +847,16 @@ impl PlanType {
     pub const fn account_limit(&self) -> Option<AccountLimit> {
         match self {
             Self::SchoolLevel1Monthly | Self::SchoolLevel1Annually => {
-                Some(AccountLimit(ACCOUNT_LIMIT_L1))
+                Some(AccountLimit(PLAN_SCHOOL_LEVEL_1_TEACHER_COUNT))
             }
             Self::SchoolLevel2Monthly | Self::SchoolLevel2Annually => {
-                Some(AccountLimit(ACCOUNT_LIMIT_L2))
+                Some(AccountLimit(PLAN_SCHOOL_LEVEL_2_TEACHER_COUNT))
             }
             Self::SchoolLevel3Monthly | Self::SchoolLevel3Annually => {
-                Some(AccountLimit(ACCOUNT_LIMIT_L3))
+                Some(AccountLimit(PLAN_SCHOOL_LEVEL_3_TEACHER_COUNT))
             }
             Self::SchoolLevel4Monthly | Self::SchoolLevel4Annually => {
-                Some(AccountLimit(ACCOUNT_LIMIT_L4))
+                Some(AccountLimit(PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT))
             }
             Self::SchoolUnlimitedMonthly | Self::SchoolUnlimitedAnnually => None,
             Self::IndividualBasicMonthly
