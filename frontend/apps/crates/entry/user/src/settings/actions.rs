@@ -18,6 +18,7 @@ use shared::{
         user::{GetProfilePath, PatchProfilePath, ResetPasswordPath, ResetPasswordRequest},
     },
 };
+use utils::toasts;
 use wasm_bindgen_futures::spawn_local;
 
 use super::state::{IndividualOrSchool, PlanSectionInfo, ResetPasswordStatus, SettingsPage};
@@ -139,7 +140,7 @@ impl SettingsPage {
 
     pub fn change_to_annual_billing(self: &Rc<Self>) {
         let state = self;
-        state.loader.load(async move {
+        state.loader.load(clone!(state => async move {
             let new_plan_type = match get_plan_type() {
                 Some(PlanType::IndividualBasicMonthly) => PlanType::IndividualBasicAnnually,
                 Some(PlanType::IndividualProMonthly) => PlanType::IndividualProAnnually,
@@ -164,6 +165,10 @@ impl SettingsPage {
             .toast_on_err();
             let _ = bail_on_err!(res);
 
+            state.load_account().await;
+
+            toasts::success("Plan updated successfully!");
+
             get_user_mutable().replace_with(clone!(new_plan_type => move |user| {
                 let mut user = user.clone();
                 if let Some(user) = &mut user {
@@ -175,7 +180,7 @@ impl SettingsPage {
                 }
                 user
             }));
-        });
+        }));
     }
 
     pub fn save_profile(self: &Rc<Self>) {
