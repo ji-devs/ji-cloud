@@ -143,6 +143,11 @@ impl SettingsPage {
             let new_plan_type = match get_plan_type() {
                 Some(PlanType::IndividualBasicMonthly) => PlanType::IndividualBasicAnnually,
                 Some(PlanType::IndividualProMonthly) => PlanType::IndividualProAnnually,
+                Some(PlanType::SchoolLevel1Monthly) => PlanType::SchoolLevel1Annually,
+                Some(PlanType::SchoolLevel2Monthly) => PlanType::SchoolLevel2Annually,
+                Some(PlanType::SchoolLevel3Monthly) => PlanType::SchoolLevel3Annually,
+                Some(PlanType::SchoolLevel4Monthly) => PlanType::SchoolLevel4Annually,
+                Some(PlanType::SchoolUnlimitedMonthly) => PlanType::SchoolUnlimitedAnnually,
                 _ => unreachable!(),
             };
 
