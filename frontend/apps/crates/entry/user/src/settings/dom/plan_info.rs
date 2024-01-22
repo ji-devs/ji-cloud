@@ -1,7 +1,7 @@
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::billing::{
-    AmountInCents, AppliedCoupon, BillingInterval, PaymentMethodType, PaymentNetwork,
+    AmountInCents, AppliedCoupon, BillingInterval, PaymentMethodType, PaymentNetwork, PlanType,
 };
 use std::rc::Rc;
 use utils::{events, prelude::plan_type_signal};
@@ -107,7 +107,10 @@ impl SettingsPage {
                                 .prop("slot", "change-to-annual")
                                 .prop("type", "filled")
                                 .prop("color", "blue")
-                                .text("Get 2 months FREE by switching to yearly")
+                                .text(match plan_type {
+                                    Some(PlanType::SchoolLevel1Monthly) => "Get 1 month FREE by switching to annual billing",
+                                    _ => "Get 2 months FREE by switching to annual billing"
+                                })
                                 .event(clone!(state => move|_ :events::Click| {
                                     state.change_to_annual_billing();
                                 }))
