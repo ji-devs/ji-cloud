@@ -13,6 +13,8 @@ const STR_TRIAL_ENDS_ON: &str = "Trial ends on";
 const STR_RENEWS_ON: &str = "Renews on";
 const STR_EXPIRES_ON: &str = "Expires on";
 
+const DATE_FORMAT: &str = "%h %e, %Y";
+
 impl SettingsPage {
     pub(super) fn render_plan_section(
         self: &Rc<Self>,
@@ -55,7 +57,7 @@ impl SettingsPage {
             }),
             html!("p", {
                 .prop("slot", "plan-renews-on")
-                .text(&plan_info.current_period_end.format("%h %e, %Y").to_string())
+                .text(&plan_info.current_period_end.format(DATE_FORMAT).to_string())
             }),
             html!("p", {
                 .prop("slot", "plan-renewal-label")
@@ -201,7 +203,7 @@ fn price_string(
         .map(|coupon| {
             let applied_to = coupon
                 .coupon_to
-                .map(|to| format!(" until {}", to.date_naive().to_string()))
+                .map(|to| format!(" until {}", to.date_naive().format(DATE_FORMAT)))
                 .unwrap_or_default();
             format!(
                 " ({} off with {}{applied_to})",
