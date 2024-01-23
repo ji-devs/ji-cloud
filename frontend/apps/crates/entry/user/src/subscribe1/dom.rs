@@ -1,5 +1,3 @@
-use crate::subscribe1::CHECK_DISCOUNT;
-
 use super::{check_popup::CheckPopup, stripe::Stripe};
 
 use super::state::Subscribe1;
@@ -113,7 +111,7 @@ impl Component<Subscribe1> for Rc<Subscribe1> {
                                         .prop("color", "red")
                                         .text("Add later")
                                         .event(clone!(state => move |_: events::Click| {
-                                            Route::User(UserRoute::Subscribe2(state.plan_type, None, Some(String::from(CHECK_DISCOUNT)))).go_to();
+                                            Route::User(UserRoute::Subscribe2(state.plan_type, None, state.promo.get_cloned())).go_to();
                                         }))
                                     }))
                                 })
