@@ -106,6 +106,7 @@ impl SettingsPage {
                     match frequency {
                         BillingInterval::Monthly => {
                             Some(html!("button-rect", {
+                                .visible(false)
                                 .prop("slot", "change-to-annual")
                                 .prop("type", "filled")
                                 .prop("color", "blue")
