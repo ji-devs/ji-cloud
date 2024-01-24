@@ -1061,7 +1061,7 @@ impl PlanType {
             Self::SchoolLevel3Annually => Self::SchoolLevel3Monthly,
             Self::SchoolLevel4Annually => Self::SchoolLevel4Monthly,
             Self::SchoolUnlimitedAnnually => Self::SchoolUnlimitedMonthly,
-            _ => panic!()
+            _ => panic!(),
         }
     }
 
@@ -1075,7 +1075,7 @@ impl PlanType {
             Self::SchoolLevel3Monthly => Self::SchoolLevel3Annually,
             Self::SchoolLevel4Monthly => Self::SchoolLevel4Annually,
             Self::SchoolUnlimitedMonthly => Self::SchoolUnlimitedAnnually,
-            _ => panic!()
+            _ => panic!(),
         }
     }
 }
