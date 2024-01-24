@@ -48,7 +48,7 @@ export class _ extends LitElement {
                 }
                 @media (min-width: 1024px) {
                     .logo {
-                    justify-self: start;
+                        justify-self: start;
                         display: block;
                     }
                 }
