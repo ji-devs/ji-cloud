@@ -6,10 +6,10 @@ use utils::{events, unwrap::UnwrapJiExt};
 use web_sys::HtmlDialogElement;
 
 pub struct Confirm {
-    title: String,
-    message: String,
-    confirm_text: String,
-    cancel_text: String,
+    pub title: String,
+    pub message: String,
+    pub confirm_text: String,
+    pub cancel_text: String,
 }
 
 impl Default for Confirm {

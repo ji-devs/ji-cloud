@@ -1030,6 +1030,54 @@ impl PlanType {
             PlanType::IndividualBasicMonthly | PlanType::IndividualBasicAnnually => PlanTier::Basic,
         }
     }
+
+    /// Price for each plan.
+    pub const fn plan_price(&self) -> u32 {
+        match self {
+            Self::IndividualBasicMonthly => PLAN_PRICE_MONTHLY_BASIC,
+            Self::IndividualBasicAnnually => PLAN_PRICE_ANNUAL_BASIC,
+            Self::IndividualProMonthly => PLAN_PRICE_MONTHLY_PRO,
+            Self::IndividualProAnnually => PLAN_PRICE_ANNUAL_PRO,
+            Self::SchoolLevel1Monthly => PLAN_PRICE_MONTHLY_SCHOOL_1,
+            Self::SchoolLevel1Annually => PLAN_PRICE_ANNUAL_SCHOOL_1,
+            Self::SchoolLevel2Monthly => PLAN_PRICE_MONTHLY_SCHOOL_2,
+            Self::SchoolLevel2Annually => PLAN_PRICE_ANNUAL_SCHOOL_2,
+            Self::SchoolLevel3Monthly => PLAN_PRICE_MONTHLY_SCHOOL_3,
+            Self::SchoolLevel3Annually => PLAN_PRICE_ANNUAL_SCHOOL_3,
+            Self::SchoolLevel4Monthly => PLAN_PRICE_MONTHLY_SCHOOL_4,
+            Self::SchoolLevel4Annually => PLAN_PRICE_ANNUAL_SCHOOL_4,
+            Self::SchoolUnlimitedMonthly => PLAN_PRICE_MONTHLY_SCHOOL_UNLIMITED,
+            Self::SchoolUnlimitedAnnually => PLAN_PRICE_ANNUAL_SCHOOL_UNLIMITED,
+        }
+    }
+
+    /// Monthly version of annual plan.
+    pub const fn annual_to_monthly(&self) -> PlanType {
+        match self {
+            Self::IndividualBasicAnnually => Self::IndividualBasicMonthly,
+            Self::IndividualProAnnually => Self::IndividualProMonthly,
+            Self::SchoolLevel1Annually => Self::SchoolLevel1Monthly,
+            Self::SchoolLevel2Annually => Self::SchoolLevel2Monthly,
+            Self::SchoolLevel3Annually => Self::SchoolLevel3Monthly,
+            Self::SchoolLevel4Annually => Self::SchoolLevel4Monthly,
+            Self::SchoolUnlimitedAnnually => Self::SchoolUnlimitedMonthly,
+            _ => panic!()
+        }
+    }
+
+    /// Annual version of monthly plan.
+    pub const fn monthly_to_annual(&self) -> PlanType {
+        match self {
+            Self::IndividualBasicMonthly => Self::IndividualBasicAnnually,
+            Self::IndividualProMonthly => Self::IndividualProAnnually,
+            Self::SchoolLevel1Monthly => Self::SchoolLevel1Annually,
+            Self::SchoolLevel2Monthly => Self::SchoolLevel2Annually,
+            Self::SchoolLevel3Monthly => Self::SchoolLevel3Annually,
+            Self::SchoolLevel4Monthly => Self::SchoolLevel4Annually,
+            Self::SchoolUnlimitedMonthly => Self::SchoolUnlimitedAnnually,
+            _ => panic!()
+        }
+    }
 }
 
 impl TryFrom<&str> for PlanType {

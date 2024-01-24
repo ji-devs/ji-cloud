@@ -1,10 +1,13 @@
+use components::confirm;
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::billing::{
     AmountInCents, AppliedCoupon, BillingInterval, PaymentMethodType, PaymentNetwork, PlanType,
 };
 use std::rc::Rc;
-use utils::{events, prelude::plan_type_signal};
+use utils::{events, js_object, prelude::plan_type_signal, unwrap::UnwrapJiExt};
+use wasm_bindgen::JsValue;
+use wasm_bindgen_futures::spawn_local;
 
 use crate::settings::state::{PlanSectionInfo, SettingsPage};
 
@@ -106,7 +109,6 @@ impl SettingsPage {
                     match frequency {
                         BillingInterval::Monthly => {
                             Some(html!("button-rect", {
-                                .visible(false)
                                 .prop("slot", "change-to-annual")
                                 .prop("type", "filled")
                                 .prop("color", "blue")
@@ -115,7 +117,21 @@ impl SettingsPage {
                                     _ => "Get 2 months FREE by switching to annual billing"
                                 })
                                 .event(clone!(state => move|_ :events::Click| {
-                                    state.change_to_annual_billing();
+                                    spawn_local(clone!(state => async move {
+                                        let new_price = plan_type.unwrap().monthly_to_annual().plan_price();
+                                        let new_price = number_as_price(new_price);
+                                        let message = format!("You'll be charged {new_price} every year.");
+
+                                        let confirmed = confirm::Confirm {
+                                            title: "Switch to Annual Billing".to_string(),
+                                            message,
+                                            confirm_text: "Confirm".to_string(),
+                                            cancel_text: "Cancel".to_string()
+                                        }.confirm().await;
+                                        if confirmed {
+                                            state.change_to_annual_billing()
+                                        }
+                                    }));
                                 }))
                             }))
                         },
@@ -214,4 +230,22 @@ fn price_string(
         })
         .unwrap_or_default();
     format!("${discounted}{frequency}{coupon}")
+}
+
+/// Move to utils?
+fn number_as_price(cents: u32) -> String {
+    let locales = js_sys::Array::of1(&JsValue::from("en-US"));
+    let options = js_object!({
+        "style": "currency",
+        "currency": "usd",
+    });
+    let options = js_sys::Object::try_from(&options).unwrap();
+    let price = js_sys::Intl::NumberFormat::new(&locales, &options);
+    let cents = JsValue::from_f64(cents as f64 / 100.00);
+    price
+        .format()
+        .call1(&price, &cents)
+        .unwrap_ji()
+        .as_string()
+        .unwrap_ji()
 }

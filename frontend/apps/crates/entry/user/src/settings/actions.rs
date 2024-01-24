@@ -10,7 +10,7 @@ use shared::{
     domain::{
         billing::{
             Account, AccountIfAuthorized, CancellationStatus, GetSchoolAccountResponse,
-            IndividualAccountPath, IndividualAccountResponse, PlanType, SchoolAccountPath,
+            IndividualAccountPath, IndividualAccountResponse, SchoolAccountPath,
             SubscriptionCancellationStatusRequest, UpdateSubscriptionCancellationPath,
             UpgradeSubscriptionPlanPath, UpgradeSubscriptionPlanRequest,
         },
@@ -141,16 +141,7 @@ impl SettingsPage {
     pub fn change_to_annual_billing(self: &Rc<Self>) {
         let state = self;
         state.loader.load(clone!(state => async move {
-            let new_plan_type = match get_plan_type() {
-                Some(PlanType::IndividualBasicMonthly) => PlanType::IndividualBasicAnnually,
-                Some(PlanType::IndividualProMonthly) => PlanType::IndividualProAnnually,
-                Some(PlanType::SchoolLevel1Monthly) => PlanType::SchoolLevel1Annually,
-                Some(PlanType::SchoolLevel2Monthly) => PlanType::SchoolLevel2Annually,
-                Some(PlanType::SchoolLevel3Monthly) => PlanType::SchoolLevel3Annually,
-                Some(PlanType::SchoolLevel4Monthly) => PlanType::SchoolLevel4Annually,
-                Some(PlanType::SchoolUnlimitedMonthly) => PlanType::SchoolUnlimitedAnnually,
-                _ => unreachable!(),
-            };
+            let new_plan_type = get_plan_type().unwrap().monthly_to_annual();
 
             let req = UpgradeSubscriptionPlanRequest {
                 plan_type: new_plan_type.clone(),
