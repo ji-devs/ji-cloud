@@ -10,9 +10,6 @@ export class _ extends LitElement {
                 display: flex;
                 justify-content: center;
                 gap: 10px;
-                font-size: 14px;
-                font-weight: 500;
-                color: var(--dark-gray-6);
                 margin: 20px 0;
             }
             :host > * {
@@ -45,13 +42,22 @@ export class _ extends LitElement {
             :host([value=annually]) .dot {
                 translate: 100%;
             }
-            .annual-tag {
+            .label {
+                font-size: 14px;
+                color: var(--dark-gray-6);
+                background-color: #52525210;
+                padding: 2px 6px;
+                border-radius: 4px;
+            }
+            :host([value=monthly]) .label.monthly,
+            :host([value=annually]) .label.annually {
                 background-color: var(--yellow-4);
+            }
+            .annual-tag {
                 font-size: 13px;
                 font-weight: 600;
                 padding: 0 8px;
                 border-radius: 4px;
-                margin-left: 8px;
             }
         `];
     }
@@ -77,12 +83,12 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <div @click=${() => this.change("monthly")}>Monthly</div>
+            <div class="label monthly" @click=${() => this.change("monthly")}>Monthly</div>
             <div class="toggle" @click=${this.toggle}>
                 <div class="track"></div>
                 <div class="dot"></div>
             </div>
-            <div @click=${() => this.change("annually")}>
+            <div class="label annually" @click=${() => this.change("annually")}>
                 Annual
                 <span class="annual-tag">${this.annual_label}</span>
             </div>
