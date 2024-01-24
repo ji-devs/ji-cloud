@@ -73,6 +73,14 @@ impl Welcome {
                     .prop("target", "_blank")
                     .text("Next step...")
                 }))
+                .child(html!("button-rect", {
+                    .prop("slot", "actions")
+                    .prop("color", "blue")
+                    .prop("kind", "filled")
+                    .prop("href", "/")
+                    .prop("target", "_blank")
+                    .text("Done")
+                }))
                 .child(html!("p", {
                     .prop("slot", "help")
                     .text("Need help? Contact us at: ")
