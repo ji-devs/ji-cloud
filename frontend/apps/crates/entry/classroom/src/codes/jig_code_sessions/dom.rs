@@ -1,9 +1,11 @@
+use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
 use dominator::{clone, events, html, Dom, DomBuilder};
 use futures_signals::{
     map_ref,
     signal::{Mutable, Signal, SignalExt},
 };
 use shared::domain::{
+    asset::DraftOrLive,
     jig::codes::{JigCodeSessionResponse, JigPlaySessionModule},
     module::{ModuleBody, ModuleId, ModuleResponse},
 };
@@ -45,6 +47,7 @@ impl CodeSessions {
         sessions: Vec<JigCodeSessionResponse>,
     ) -> Dom {
         let state = self;
+        let jig_id = jig.jig.id;
         html!("div", {
             .class("table")
             .child(html!("div", {
@@ -60,6 +63,29 @@ impl CodeSessions {
                     html!("div", {
                         .class("cell")
                         .text(module.kind.as_str())
+                    })
+                }).collect::<Vec<_>>())
+            }))
+            .child(html!("div", {
+                .class("thumbnails")
+                .child(html!("div", {
+                    .class("cell")
+                }))
+                .child(html!("div", {
+                    .class("cell")
+                }))
+                .children(jig.jig.jig_data.modules.iter().map(|module| {
+                    html!("div", {
+                        .class("cell")
+                        .child(html!("div", {
+                            .class("thumbnail")
+                            .child(ModuleThumbnail::new(
+                                jig_id.into(),
+                                Some(module.clone()),
+                                ThumbnailFallback::Module,
+                                DraftOrLive::Live
+                            ).render(Some("image")))
+                        }))
                     })
                 }).collect::<Vec<_>>())
             }))

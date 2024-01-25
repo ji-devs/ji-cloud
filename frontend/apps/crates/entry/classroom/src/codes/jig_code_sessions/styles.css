@@ -19,6 +19,19 @@
     padding-inline: 10px;
     font-size: 12px;
 }
+.thumbnails {
+    display: contents;
+}
+.thumbnails .cell {
+    padding: 10px;
+}
+.thumbnails .cell .thumbnail {
+    max-width: 140px;
+    overflow: hidden;
+    margin: auto;
+    box-shadow: 0 0 5px #00000078;
+    border-radius: 14px;
+}
 .session {
     display: contents;
 }
@@ -27,6 +40,7 @@
     padding: 10px;
     font-size: 14px;
 }
+.thumbnails .cell:not(:first-child),
 .session .cell:not(:first-child) {
     border-left: var(--border);
 }
