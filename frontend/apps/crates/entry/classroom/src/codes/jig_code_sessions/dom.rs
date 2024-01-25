@@ -1,5 +1,8 @@
-use components::module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback};
-use dominator::{clone, events, html, Dom, DomBuilder};
+use components::{
+    module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback},
+    player_popup::{PlayerPopup, PreviewPopupCallbacks},
+};
+use dominator::{clone, html, Dom, DomBuilder};
 use futures_signals::{
     map_ref,
     signal::{Mutable, Signal, SignalExt},
@@ -10,7 +13,7 @@ use shared::domain::{
     module::{ModuleBody, ModuleId, ModuleResponse},
 };
 use std::{collections::HashMap, rc::Rc};
-use utils::component::Component;
+use utils::{asset::AssetPlayerOptions, component::Component, events};
 use web_sys::ShadowRoot;
 
 use super::{CodeSessions, JigWithModules};
@@ -25,7 +28,16 @@ impl Component<CodeSessions> for Rc<CodeSessions> {
 
         state.load_data();
 
-        dom.child_signal(state.module_and_session_signal().map(
+        dom.child(html!("button-rect", {
+            .class("preview-button")
+            .prop("color", "blue")
+            .prop("kind", "outline")
+            .text("Preview JIG")
+            .event(clone!(state => move |_: events::Click| {
+                state.preview_open.set(true);
+            }))
+        }))
+        .child_signal(state.module_and_session_signal().map(
             clone!(state => move |jig_and_session| {
                 Some(match jig_and_session {
                     None => {
@@ -37,6 +49,25 @@ impl Component<CodeSessions> for Rc<CodeSessions> {
                 })
             }),
         ))
+        .child_signal(
+            state
+                .preview_open
+                .signal_cloned()
+                .map(clone!(state => move|preview_open| {
+                    preview_open.then(|| {
+                        let close = clone!(state => move || {
+                            state.preview_open.set(false);
+                        });
+                        PlayerPopup::new(
+                            state.jig_id.into(),
+                            None,
+                            None,
+                            AssetPlayerOptions::Jig(Default::default()),
+                            PreviewPopupCallbacks::new(close)
+                        ).render(None)
+                    })
+                })),
+        )
     }
 }
 

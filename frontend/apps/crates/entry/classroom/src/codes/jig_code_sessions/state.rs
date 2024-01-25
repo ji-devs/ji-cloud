@@ -14,6 +14,7 @@ pub struct CodeSessions {
     pub(super) jig_id: JigId,
     pub(super) jig: Mutable<Option<JigWithModules>>,
     pub(super) infos: Mutable<Vec<JigCodeSessionResponse>>,
+    pub(super) preview_open: Mutable<bool>,
 }
 
 impl CodeSessions {
@@ -23,6 +24,7 @@ impl CodeSessions {
             jig_id,
             jig: Default::default(),
             infos: Default::default(),
+            preview_open: Default::default(),
         })
     }
 }
