@@ -120,7 +120,7 @@ impl SettingsPage {
                                     spawn_local(clone!(state => async move {
                                         let new_price = plan_type.unwrap().monthly_to_annual().plan_price();
                                         let new_price = number_as_price(new_price);
-                                        let message = format!("You'll be charged {new_price} every year.");
+                                        let message = format!("You will be charged {new_price} per year. A renewal reminder will be sent 30 days before the end of your subscription.");
 
                                         let confirmed = confirm::Confirm {
                                             title: "Switch to Annual Billing".to_string(),
