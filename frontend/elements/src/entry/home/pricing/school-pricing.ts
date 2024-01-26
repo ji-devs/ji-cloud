@@ -208,7 +208,7 @@ export class _ extends LitElement {
             </div>
             <div class="billing-interval">${this.billing_interval}</div>
             <slot name="start-button"></slot>
-            <div class="no-payment">No payment details required for trial</div>
+            <div class="no-payment">No payment details required</div>
         `;
     }
 }
