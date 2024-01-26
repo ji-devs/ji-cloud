@@ -112,6 +112,11 @@ export class _ extends LitElement {
                 color: var(--dark-gray-6);
                 margin-bottom: 12px;
             }
+            .no-payment {
+                font-size: 12px;
+                font-weight: 500;
+                margin-top: 12px;
+            }
         `];
     }
 
@@ -203,6 +208,7 @@ export class _ extends LitElement {
             </div>
             <div class="billing-interval">${this.billing_interval}</div>
             <slot name="start-button"></slot>
+            <div class="no-payment">No payment details required for trial</div>
         `;
     }
 }
