@@ -427,7 +427,7 @@ pub async fn user_export(
     let rows = sqlx::query!(
         //language=SQL
         r#"
-select distinct on (user_profile.user_id)
+select
     user_profile.user_id as "id!: UserId",
     username                as "username!",
     user_email.email::text  as "email!",
@@ -441,8 +441,20 @@ select distinct on (user_profile.user_id)
     user_profile.updated_at,
     organization,
     persona                 as "persona!: Vec<String>",
-    last_login_session.created_at  as "last_login?",
-    last_action_session.last_used  as "last_action?",
+    (
+        select created_at as "last_login?"
+        from session
+        where session.user_id = "user".id
+        order by created_at desc
+        limit 1
+    ),
+    (
+        select last_used as "last_action?"
+        from session
+        where session.user_id = "user".id
+        order by last_used desc
+        limit 1
+    ),
     location,
     opt_into_edu_resources,
     array(
@@ -466,8 +478,6 @@ select distinct on (user_profile.user_id)
 from "user"
     inner join user_profile on "user".id = user_profile.user_id
     inner join user_email using(user_id)
-    left join session as last_login_session on "user".id = last_login_session.user_id
-    left join session as last_action_session on "user".id = last_action_session.user_id
 where
     (
         ($3 = 'either' or $3 = 'onlynew')
@@ -483,7 +493,6 @@ where
             and user_profile.updated_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end
         )
     )
-order by user_profile.user_id, "user".created_at, last_login_session.created_at desc, last_action_session.last_used desc nulls last
 "#,
         // date_filter_type,
         from_date,
