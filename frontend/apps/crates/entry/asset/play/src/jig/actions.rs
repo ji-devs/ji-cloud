@@ -1,6 +1,7 @@
 use std::{collections::HashMap, rc::Rc};
 
 use super::{
+    restrictions::{self, Restricted},
     state::{can_load_liked_status, JigPlayer, PlayModuleAssist},
     timer::Timer,
 };
@@ -33,7 +34,10 @@ use shared::{
 };
 use utils::{
     bail_on_err,
-    iframe::{IframeAction, JigToModulePlayerMessage, ModuleToJigPlayerMessage},
+    iframe::{
+        AssetPlayerToPlayerPopup, IframeAction, IframeMessageExt, JigToModulePlayerMessage,
+        ModuleToJigPlayerMessage,
+    },
     keyboard::{Key, KeyEvent},
     paywall,
     prelude::{ApiEndpointExt, SETTINGS},
@@ -270,6 +274,21 @@ impl JigPlayer {
 
     pub fn load_data(self: &Rc<Self>) {
         let state = self;
+        if state.player_options.quota {
+            if let Some(restricted) = restrictions::play_restricted() {
+                match restricted {
+                    Restricted::FreeAccountLimit => {
+                        paywall::dialog_play(restrictions::FREE_ACCOUNT_LIMIT_MESSAGE);
+                    }
+                    Restricted::NoAccountLimit => {
+                        self.play_login_popup_shown.set(true);
+                    }
+                }
+                return;
+            }
+            restrictions::increase_played_count();
+        }
+
         state.loader.load(clone!(state => async move {
             state.load_categories().await;
             state.load_resource_types().await;
@@ -548,6 +567,10 @@ impl JigPlayer {
                 self.timer.set(None);
             }
         };
+    }
+
+    pub fn close_player(&self) {
+        let _ = IframeAction::new(AssetPlayerToPlayerPopup::Close).try_post_message_to_parent();
     }
 }
 

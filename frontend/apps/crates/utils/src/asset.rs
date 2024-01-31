@@ -196,6 +196,10 @@ pub struct JigPlayerOptions {
     #[serde(default)]
     pub is_student: bool,
 
+    /// Counts against daily and logged-out quota.
+    #[serde(default)]
+    pub quota: bool,
+
     #[serde(default)]
     pub draft_or_live: DraftOrLive,
 
@@ -228,6 +232,7 @@ impl From<JigPlayerSettings> for JigPlayerOptions {
             track_assessments: settings.track_assessments,
             drag_assist: settings.drag_assist,
             is_student: false,
+            quota: false,
             draft_or_live: DraftOrLive::Live,
             play_token: None,
         }

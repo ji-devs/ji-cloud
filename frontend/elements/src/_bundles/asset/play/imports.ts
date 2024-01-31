@@ -31,6 +31,7 @@ import "@elements/entry/asset/play/jig/sidebar/jig-info";
 import "@elements/entry/asset/play/jig/sidebar/jig-info-category"
 import "@elements/entry/asset/play/jig/sidebar/report";
 import "@elements/entry/asset/play/jig/sidebar/sidebar";
+import "@elements/entry/asset/play/jig/login-before-play";
 import "@elements/core/images/composed/module-screenshot";
 import "@elements/module/_groups/cards/_common/main-empty";
 import "@elements/module/video/youtube-player";

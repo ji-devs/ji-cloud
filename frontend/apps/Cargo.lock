@@ -2108,6 +2108,7 @@ dependencies = [
  "cfg-if 1.0.0",
  "components",
  "console_error_panic_hook",
+ "const_format",
  "discard",
  "dominator",
  "dominator_helpers",

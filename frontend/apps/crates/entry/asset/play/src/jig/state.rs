@@ -51,6 +51,7 @@ pub struct JigPlayer {
     pub module_assist_visible: Mutable<bool>,
     pub is_full_screen: Mutable<bool>,
     pub session_info: RefCell<JigPlaySession>,
+    pub play_login_popup_shown: Mutable<bool>,
 }
 
 impl JigPlayer {
@@ -95,6 +96,7 @@ impl JigPlayer {
             module_assist_visible: Mutable::new(false),
             is_full_screen: Mutable::new(false),
             session_info: Default::default(),
+            play_login_popup_shown: Mutable::new(false),
         })
     }
 }

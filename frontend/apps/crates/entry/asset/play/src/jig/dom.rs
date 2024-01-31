@@ -13,7 +13,6 @@ use shared::domain::{jig::JigResponse, module::ModuleKind};
 use std::collections::HashMap;
 use std::rc::Rc;
 use utils::events;
-use utils::iframe::{AssetPlayerToPlayerPopup, IframeMessageExt};
 use utils::init::analytics;
 use utils::js_wrappers::is_iframe;
 use utils::keyboard::KeyEvent;
@@ -430,6 +429,29 @@ impl JigPlayer {
             .child_signal(state.render_time_indicator())
             .child_signal(state.render_done_popup())
             .child_signal(state.render_time_up_popup())
+            .child_signal(state.play_login_popup_shown.signal().map(move|play_login_popup_shown| {
+                match play_login_popup_shown {
+                    false => None,
+                    true => {
+                        Some(html!("empty-fragment", {
+                            .style("display", "none")
+                            .apply(OverlayHandle::lifecycle(clone!(state => move || {
+                                html!("home-login-before-play", {
+                                    .apply_if(is_iframe(), clone!(state => move |dom| {
+                                        dom.child(html!("fa-button", {
+                                            .prop("slot", "close")
+                                            .prop("icon", "fa-solid fa-xmark")
+                                            .event(clone!(state => move |_: events::Click| {
+                                                state.close_player();
+                                            }))
+                                        }))
+                                    }))
+                                })
+                            })))
+                        }))
+                    },
+                }
+            }))
         })
     }
 
@@ -548,9 +570,9 @@ impl JigPlayer {
                                             .prop("slot", "actions")
                                             .prop("kind", "exit")
                                             .text("exit")
-                                            .event(|_: events::Click| {
-                                                let _ = IframeAction::new(AssetPlayerToPlayerPopup::Close).try_post_message_to_parent();
-                                            })
+                                            .event(clone!(state => move |_: events::Click| {
+                                                state.close_player();
+                                            }))
                                         })
                                     );
                                 }

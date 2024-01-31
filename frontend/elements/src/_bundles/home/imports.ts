@@ -24,7 +24,6 @@ import "@elements/entry/home/home/home-full";
 import "@elements/entry/home/home/search-section/search-section";
 import "@elements/entry/home/home/search-section/search-section-help";
 import "@elements/entry/home/home/search-section/search-section-advanced";
-import "@elements/entry/home/home/login-before-play";
 import "@elements/entry/home/home/quick-search/quick-search";
 import "@elements/entry/home/home/quick-search/quick-search-item";
 import "@elements/entry/home/home/create/home-create";

@@ -255,7 +255,7 @@ impl SearchResultsSection {
                             .prop("iconBeforePath", "search/cards/play.svg")
                             .text("Play")
                             .event(clone!(state => move |_: events::Click| {
-                                state.on_play_asset_click(asset.id());
+                                state.home_state.play_asset.set(Some(asset.id()));
                                 track_action("play", asset.clone());
                             }))
                         }))

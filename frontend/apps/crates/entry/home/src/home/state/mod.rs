@@ -23,7 +23,6 @@ pub struct Home {
     pub parents_testimonials: Vec<Testimonial>,
     pub teachers_testimonials: Vec<Testimonial>,
     pub total_assets_count: Mutable<u64>,
-    pub play_login_popup_shown: Mutable<bool>,
     pub play_asset: Mutable<Option<AssetId>>,
 }
 
@@ -49,7 +48,6 @@ impl Home {
             parents_testimonials: Self::get_parents_testimonials(),
             teachers_testimonials: Self::get_teachers_testimonials(),
             total_assets_count: Mutable::new(0),
-            play_login_popup_shown: Mutable::new(false),
             play_asset: Mutable::new(None),
         }
     }

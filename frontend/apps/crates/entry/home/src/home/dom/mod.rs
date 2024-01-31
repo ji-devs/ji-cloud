@@ -2,10 +2,8 @@ use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 
 use std::rc::Rc;
-use utils::events;
 
 use components::{
-    overlay::handle::OverlayHandle,
     page_footer,
     page_header::{PageHeader, PageHeaderConfig, PageLinks},
     player_popup::{PlayerPopup, PreviewPopupCallbacks},
@@ -57,27 +55,6 @@ impl Home {
                     ).render(None)
                 })
             })))
-            .child_signal(state.play_login_popup_shown.signal().map(move|play_login_popup_shown| {
-                match play_login_popup_shown {
-                    false => None,
-                    true => {
-                        Some(html!("empty-fragment", {
-                            .style("display", "none")
-                            .apply(OverlayHandle::lifecycle(clone!(state => move || {
-                                html!("home-login-before-play", {
-                                    .child(html!("fa-button", {
-                                        .prop("slot", "close")
-                                        .prop("icon", "fa-solid fa-xmark")
-                                        .event(clone!(state => move |_: events::Click| {
-                                            state.play_login_popup_shown.set(false);
-                                        }))
-                                    }))
-                                })
-                            })))
-                        }))
-                    },
-                }
-            }))
         })
     }
 }
