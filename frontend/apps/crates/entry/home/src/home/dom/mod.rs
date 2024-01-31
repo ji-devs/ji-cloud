@@ -49,7 +49,7 @@ impl Home {
                     let close = clone!(state => move || {
                         state.play_asset.set(None);
                     });
-                    PlayerPopup::new_default_player_options(
+                    PlayerPopup::new_default_player_options_with_jig_quota(
                         asset_id,
                         PreviewPopupCallbacks::new(close)
                     ).render(None)

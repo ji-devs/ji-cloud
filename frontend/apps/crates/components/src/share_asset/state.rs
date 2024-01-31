@@ -36,14 +36,14 @@ impl ShareAsset {
     }
 
     pub fn embed_code(&self) -> String {
-        let link = self.asset_link(true);
+        let link = self.asset_link(true, false);
         format!(
             r#"<iframe src="{}" width="960" height="540" allow="autoplay; fullscreen" frameborder="0"></iframe>"#,
             link
         )
     }
 
-    pub(super) fn asset_link(&self, is_student: bool) -> String {
+    pub(super) fn asset_link(&self, is_student: bool, quota: bool) -> String {
         let origin = web_sys::window()
             .unwrap_ji()
             .location()
@@ -56,6 +56,7 @@ impl ShareAsset {
                     None,
                     JigPlayerOptions {
                         is_student,
+                        quota,
                         ..Default::default()
                     },
                 )))

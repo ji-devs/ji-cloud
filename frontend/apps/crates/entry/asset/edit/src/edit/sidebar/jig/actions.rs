@@ -85,6 +85,7 @@ pub fn get_player_settings(settings_state: Rc<SettingsState>) -> JigPlayerOption
         is_student: false,
         draft_or_live: DraftOrLive::Draft,
         play_token: None,
+        quota: false,
     }
 }
 

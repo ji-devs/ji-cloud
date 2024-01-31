@@ -57,4 +57,29 @@ impl PlayerPopup {
             close_button_shown: Mutable::new(true),
         })
     }
+
+    pub fn new_default_player_options_with_jig_quota(
+        asset_id: AssetId,
+        callbacks: PreviewPopupCallbacks,
+    ) -> Rc<Self> {
+        let player_options = match asset_id {
+            AssetId::JigId(_) => JigPlayerOptions {
+                quota: true,
+                ..Default::default()
+            }
+            .into(),
+            AssetId::PlaylistId(_) => PlaylistPlayerOptions::default().into(),
+            AssetId::ResourceId(_) => unreachable!(),
+            AssetId::CourseId(_) => CoursePlayerOptions::default().into(),
+        };
+        Rc::new(Self {
+            asset_id,
+            module_id: None,
+            player_options,
+            unit_id: None,
+            open: Mutable::new(true),
+            callbacks,
+            close_button_shown: Mutable::new(true),
+        })
+    }
 }

@@ -131,7 +131,7 @@ impl ShareAsset {
                         if !state.can_play() {
                             return;
                         }
-                        clipboard::write_text(&state.asset_link(true));
+                        clipboard::write_text(&state.asset_link(true, false));
                         ShareAsset::set_copied_mutable(temp_playlist_link_copied.clone());
                     }))
                 }))
@@ -155,7 +155,7 @@ impl ShareAsset {
                     if !state.can_play() {
                         return;
                     }
-                    share_to("https://classroom.google.com/share?url=", &state.asset_link(true));
+                    share_to("https://classroom.google.com/share?url=", &state.asset_link(true, false));
                 }))
             }))
             .child(html!("share-jig-option", {
@@ -165,7 +165,7 @@ impl ShareAsset {
                     if !state.can_play() {
                         return;
                     }
-                    share_to("https://teams.microsoft.com/share?href=", &state.asset_link(true));
+                    share_to("https://teams.microsoft.com/share?href=", &state.asset_link(true, false));
                 }))
             }))
             .apply_if(!state.asset.is_resource(), |dom| {
@@ -189,7 +189,7 @@ impl ShareAsset {
                     }
                 })))
                 .event(clone!(state => move|_: events::Click| {
-                    clipboard::write_text(&state.asset_link(false));
+                    clipboard::write_text(&state.asset_link(false, true));
                     ShareAsset::set_copied_mutable(state.link_copied.clone());
                 }))
             }))

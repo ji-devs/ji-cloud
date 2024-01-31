@@ -34,6 +34,7 @@ impl PlaylistPlayer {
                     });
                     let options = AssetPlayerOptions::Jig(JigPlayerOptions {
                         is_student: state.player_options.is_student,
+                        quota: true,
                         ..Default::default()
                     });
                     PlayerPopup::new(
