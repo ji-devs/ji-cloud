@@ -12,11 +12,11 @@ use shared::domain::module::body::ModuleAssistType;
 use shared::domain::{jig::JigResponse, module::ModuleKind};
 use std::collections::HashMap;
 use std::rc::Rc;
-use utils::events;
 use utils::init::analytics;
 use utils::js_wrappers::is_iframe;
 use utils::keyboard::KeyEvent;
 use utils::prelude::is_in_iframe;
+use utils::{dialog, events};
 use utils::{
     iframe::{IframeAction, ModuleToJigPlayerMessage},
     prelude::SETTINGS,
@@ -433,22 +433,20 @@ impl JigPlayer {
                 match play_login_popup_shown {
                     false => None,
                     true => {
-                        Some(html!("empty-fragment", {
-                            .style("display", "none")
-                            .apply(OverlayHandle::lifecycle(clone!(state => move || {
-                                html!("home-login-before-play", {
-                                    .apply_if(is_iframe(), clone!(state => move |dom| {
-                                        dom.child(html!("fa-button", {
-                                            .prop("slot", "close")
-                                            .prop("icon", "fa-solid fa-xmark")
-                                            .event(clone!(state => move |_: events::Click| {
-                                                state.close_player();
-                                            }))
+                        Some(dialog! {
+                            .prop("slot", "dialog")
+                            .child(html!("home-login-before-play", {
+                                .apply_if(is_iframe(), clone!(state => move |dom| {
+                                    dom.child(html!("fa-button", {
+                                        .prop("slot", "close")
+                                        .prop("icon", "fa-solid fa-xmark")
+                                        .event(clone!(state => move |_: events::Click| {
+                                            state.close_player();
                                         }))
                                     }))
-                                })
-                            })))
-                        }))
+                                }))
+                            }))
+                        })
                     },
                 }
             }))

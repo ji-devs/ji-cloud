@@ -4,7 +4,7 @@ use web_sys::{HtmlElement, ShadowRoot};
 
 use crate::{
     component::Component,
-    dialog, events, gap,
+    dialog, events,
     routes::{HomePricingRoute, HomeRoute, Route},
     unwrap::UnwrapJiExt,
 };
@@ -46,7 +46,6 @@ impl Component<PaywallDialog> for PaywallDialog {
                         html!("img-ui", {
                             .prop("path", &self.img)
                         }),
-                        gap!(40),
                         html!("div", {
                             .children(self.msg.lines().map(|line| {
                                 html!("p", {
@@ -54,7 +53,6 @@ impl Component<PaywallDialog> for PaywallDialog {
                                 })
                             }))
                         }),
-                        gap!(75),
                         html!("div", {
                             .class("actions")
                             .apply_if(self.show_no_thanks, |dom| {
