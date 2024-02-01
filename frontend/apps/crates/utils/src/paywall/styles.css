@@ -1,26 +1,47 @@
 .dialog {
-    padding-block: 72px 45px;
-    padding-inline: 16px;
     box-sizing: border-box;
     display: grid;
     width: 700px;
     max-width: 90vw;
+    padding-inline: 16px;
+    padding-block: 16px;
+}
+@media (min-width: 1024px) {
+    .dialog {
+        padding-block: 72px 45px;
+    }
 }
 img-ui {
-    max-width: 100%;
-    display: grid;
-    place-content: center;
+    display: none;
+}
+@media (min-width: 1024px) {
+    img-ui {
+        display: grid;
+        place-content: center;
+        max-width: 100%;
+        margin-bottom: 40px;
+    }
 }
 p {
     margin: 0;
-    font-size: 18px;
     font-weight: 500;
     color: var(--dark-blue-5);
     text-align: center;
+    font-size: 14px;
+}
+@media (min-width: 1024px) {
+    p {
+        font-size: 18px;
+    }
 }
 .actions {
-    display: grid;
-    grid-template-columns: auto auto;
+    display: flex;
     justify-content: center;
     gap: 24px;
+    margin-top: 10px;
+}
+@media (min-width: 1024px) {
+    .actions {
+        margin-top: 75px;
+    }
 }
