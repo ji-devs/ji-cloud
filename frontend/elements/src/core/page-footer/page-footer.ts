@@ -226,24 +226,24 @@ export class _ extends LitElement {
                             <h4>${STR_JIGS_TITLE}</h4>
                             <ul>
                                 <li>
-                                    <a href="${searchLink(STR_JIGS_HEBREW)}">${STR_JIGS_HEBREW}</a>
+                                    <a href="${searchLink(STR_JIGS_HEBREW)}" target="_top">${STR_JIGS_HEBREW}</a>
                                 </li>
                                 <li>
                                     <a href="${searchLink(
                         STR_JIGS_JEWISH_HOLIDAYS
-                    )}">${STR_JIGS_JEWISH_HOLIDAYS}</a>
+                    )}" target="_top">${STR_JIGS_JEWISH_HOLIDAYS}</a>
                                 </li>
                                 <li>
-                                    <a href="${searchLink(STR_JIGS_TORAH)}">${STR_JIGS_TORAH}</a>
+                                    <a href="${searchLink(STR_JIGS_TORAH)}" target="_top">${STR_JIGS_TORAH}</a>
                                 </li>
                                 <li>
-                                    <a href="${searchLink(STR_JIGS_J_STEM)}">${STR_JIGS_J_STEM}</a>
+                                    <a href="${searchLink(STR_JIGS_J_STEM)}" target="_top">${STR_JIGS_J_STEM}</a>
                                 </li>
                                 <li>
-                                    <a href="${searchLink(STR_JIGS_ISRAEL)}">${STR_JIGS_ISRAEL}</a>
+                                    <a href="${searchLink(STR_JIGS_ISRAEL)}" target="_top">${STR_JIGS_ISRAEL}</a>
                                 </li>
                                 <li>
-                                    <a href="${searchLink(STR_JIGS_SONGS)}">${STR_JIGS_SONGS}</a>
+                                    <a href="${searchLink(STR_JIGS_SONGS)}" target="_top">${STR_JIGS_SONGS}</a>
                                 </li>
                             </ul>
                         </div>
@@ -251,17 +251,17 @@ export class _ extends LitElement {
                             <h4>${STR_PRODUCT_TITLE}</h4>
                             <ul>
                                 <li>
-                                    <a href="${COMING_SOON_ALERT}">
+                                    <a href="${COMING_SOON_ALERT}" target="_top">
                                         ${STR_PRODUCT_MANAGE_CLASSROOM}
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="/asset/edit/studio">
+                                    <a href="/asset/edit/studio" target="_top">
                                         ${STR_PRODUCT_CREATE_ACTIVITIES}
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="/community">
+                                    <a href="/community" target="_top">
                                         ${STR_PRODUCT_JOIN_COMMUNITY}
                                     </a>
                                 </li>
@@ -275,10 +275,10 @@ export class _ extends LitElement {
                             <h4>${STR_HELP_TITLE}</h4>
                             <ul>
                                 <li>
-                                    <a href="mailto:info@jigzi.org">${STR_HELP_SUPPORT}</a>
+                                    <a href="mailto:info@jigzi.org" target="_top">${STR_HELP_SUPPORT}</a>
                                 </li>
                                 <li>
-                                    <a href="${COMING_SOON_ALERT}">
+                                    <a href="${COMING_SOON_ALERT}" target="_top">
                                         ${STR_HELP_TOUR}
                                     </a>
                                 </li>
@@ -293,7 +293,7 @@ export class _ extends LitElement {
                                     </a>
                                 </li>
                                 <li>
-                                    <a @click="${this.accessibilityClicked}">
+                                    <a @click="${this.accessibilityClicked}" target="_top">
                                         ${STR_HELP_ACCESSIBILITY}
                                     </a>
                                 </li>
@@ -303,35 +303,35 @@ export class _ extends LitElement {
                             <h4>${STR_CONTACT_TITLE}</h4>
                             <dl>
                                 <dd>
-                                    <a href="mailto:${STR_CONTACT_EMAIL}">
+                                    <a href="mailto:${STR_CONTACT_EMAIL}" target="_top">
                                         ${STR_CONTACT_EMAIL}
                                     </a>
                                 </dd>
                                 <dt>${STR_CONTACT_US}</dt>
                                 <dd>
                                     ${STR_CONTACT_TEL}
-                                    <a href="tel:+1 866-601-8000">
+                                    <a href="tel:+1 866-601-8000" target="_top">
                                         +1 (866) 601-8000
                                     </a>
                                 </dd>
                                 <dt>${STR_CONTACT_UK}</dt>
                                 <dd>
                                     ${STR_CONTACT_TEL}
-                                    <a href="tel:+44 (0)79 6641 4417">
+                                    <a href="tel:+44 (0)79 6641 4417" target="_top">
                                         +44 (0)79 6641 4417
                                     </a>
                                 </dd>
                                 <dt>${STR_CONTACT_SOUTH_AFRICA}</dt>
                                 <dd>
                                     ${STR_CONTACT_TEL}
-                                    <a href="tel:+27 (79) 886 5326">
+                                    <a href="tel:+27 (79) 886 5326" target="_top">
                                         +27 (79) 886 5326
                                     </a>
                                 </dd>
                                 <dt>${STR_CONTACT_ISRAEL}</dt>
                                 <dd>
                                     ${STR_CONTACT_TEL}
-                                    <a href="tel: +972 (0) 54-597 9555">
+                                    <a href="tel: +972 (0) 54-597 9555" target="_top">
                                         +972 (0) 54-597 9555
                                     </a>
                                 </dd>
@@ -362,7 +362,7 @@ export class _ extends LitElement {
                             ${STR_ABOUT_TEXT.split("\n").map((text) => {
         return html`<p>${text}</p>`;
         })}
-                            <a href="https://www.jewishinteractive.org/donate/" class="donate-link">
+                            <a href="https://www.jewishinteractive.org/donate/" class="donate-link" target="_top">
                                 <button-rect color="blue" bold>${STR_DONATE}</button-rect>
                             </a>
                         </div>

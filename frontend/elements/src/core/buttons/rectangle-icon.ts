@@ -40,7 +40,7 @@ export class _ extends LitElement {
     href?: string;
 
     @property()
-    target?: string;
+    target: string = "_top";
 
     @property()
     iconBefore?: IconBefore;

@@ -1167,6 +1167,7 @@ macro_rules! link {
 
         dominator::html!("a", {
             .attr("href", &url.to_string())
+            .attr("target", "_top")
             .apply(move |dom| $crate::on_click_go_to_url!(dom, url))
             $($methods)*
         })

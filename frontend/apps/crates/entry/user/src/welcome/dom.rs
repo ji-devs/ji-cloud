@@ -69,6 +69,7 @@ impl Welcome {
                     .prop("slot", "actions")
                     .prop("color", "blue")
                     .prop("kind", "filled")
+
                     .prop("href", get_add_teacher_form_link())
                     .prop("target", "_blank")
                     .text("Next step...")
@@ -77,8 +78,8 @@ impl Welcome {
                     .prop("slot", "actions")
                     .prop("color", "blue")
                     .prop("kind", "filled")
+
                     .prop("href", "/")
-                    .prop("target", "_blank")
                     .text("Done")
                 }))
                 .child(html!("p", {
@@ -87,7 +88,7 @@ impl Welcome {
                     .child(html!("button-rect", {
                         .prop("kind", "text")
                         .prop("color", "blue")
-                        .prop("target", "_BLANK")
+
                         .prop("href", "mailto:schools@jigzi.org")
                         .text("schools@jigzi.org")
                     }))

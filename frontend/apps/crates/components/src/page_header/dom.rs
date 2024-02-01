@@ -156,6 +156,7 @@ fn render_logged_in(state: Rc<PageHeader>, user: &UserProfile) -> Vec<Dom> {
         .child(html!("a", {
             .prop("slot", "user-links")
             .prop("href",  Route::Asset(AssetRoute::JigGallery).to_string())
+            .prop("target", "_top")
             .child(html!("img-ui", {
                 .prop("path", "core/page-header/jig-icon.svg")
             }))
@@ -164,6 +165,7 @@ fn render_logged_in(state: Rc<PageHeader>, user: &UserProfile) -> Vec<Dom> {
         .child(html!("a", {
             .prop("slot", "user-links")
             .prop("href", Route::Asset(AssetRoute::PlaylistGallery).to_string())
+            .prop("target", "_top")
             .child(html!("img-ui", {
                 .prop("path", "core/page-header/nav-icon-assets.svg")
             }))
@@ -172,6 +174,7 @@ fn render_logged_in(state: Rc<PageHeader>, user: &UserProfile) -> Vec<Dom> {
         .child(html!("a", {
             .prop("slot", "user-links")
             .prop("href", Route::Asset(AssetRoute::CourseGallery).to_string())
+            .prop("target", "_top")
             .child(html!("img-ui", {
                 .prop("path", "core/page-header/nav-icon-assets.svg")
             }))
@@ -180,6 +183,7 @@ fn render_logged_in(state: Rc<PageHeader>, user: &UserProfile) -> Vec<Dom> {
         .child(html!("a", {
             .prop("slot", "user-links")
             .prop("href", Route::Asset(AssetRoute::ResourceGallery).to_string())
+            .prop("target", "_top")
             .child(html!("img-ui", {
                 .prop("path", "core/page-header/nav-icon-resource.svg")
             }))
@@ -188,6 +192,7 @@ fn render_logged_in(state: Rc<PageHeader>, user: &UserProfile) -> Vec<Dom> {
         .child(html!("a", {
             .prop("slot", "setting-links")
             .prop("href",  Route::Community(CommunityRoute::Members(CommunityMembersRoute::Member(user.id))).to_string())
+            .prop("target", "_top")
             .child(html!("fa-icon", {
                 .prop("icon", "fa-light fa-user")
             }))
@@ -196,6 +201,7 @@ fn render_logged_in(state: Rc<PageHeader>, user: &UserProfile) -> Vec<Dom> {
         .child(html!("a", {
             .prop("slot", "setting-links")
             .prop("href", Route::User(UserRoute::Settings).to_string())
+            .prop("target", "_top")
             .child(html!("fa-icon", {
                 .prop("icon", "fa-light fa-gear")
             }))
@@ -208,6 +214,7 @@ fn render_logged_in(state: Rc<PageHeader>, user: &UserProfile) -> Vec<Dom> {
                     Some(html!("a", {
                         .prop("slot", "admin")
                         .prop("href", Route::Admin(AdminRoute::Landing).to_string())
+                        .prop("target", "_top")
                         .text(STR_ADMIN)
                     }))
                 }
