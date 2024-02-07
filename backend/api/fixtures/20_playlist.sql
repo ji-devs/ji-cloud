@@ -35,11 +35,11 @@ values ('566ed564-f3ec-11ec-b8ef-93b44835e7e4', '0cc084bc-7c83-11eb-9f77-e3218df
        ('5d02edc0-f3ec-11ec-b8ef-27feb720b1bb', '3a71522a-cd77-11eb-8dc1-af3e35f7c743');
 
 
-insert into playlist_data_module (id,
+insert into playlist_data_module (id, stable_id,
         playlist_data_id, index, kind, is_complete, contents, created_at)
-values ('ce6e6eb0-0ea6-11ed-9785-2712225b9473',
+values ('ce6e6eb0-0ea6-11ed-9785-2712225b9473', 'b44ba94e-c5f7-11ee-86c6-ffbc8396345d',
         '5d02edc0-f3ec-11ec-b8ef-27feb720b1bb', 0, 0, true, '{}', '2021-03-04 00:47:26.134651+00'), -- draft
-       ('1cce16aa-0ea7-11ed-9785-0f0a17e25479',
+       ('1cce16aa-0ea7-11ed-9785-0f0a17e25479', '0fb3d582-c5f7-11ee-95d6-ab330329b0df',
         'e1aa3b64-f3ec-11ec-b8ef-2f4e066962a2', 0, 0, true, '{}', '2021-03-04 00:47:26.134651+00'), -- draft
-       ('266cbba8-0ea7-11ed-9785-0b828c5e915c',
+       ('266cbba8-0ea7-11ed-9785-0b828c5e915c', '0fb3d582-c5f7-11ee-95d6-ab330329b0df',
         'f9d0133a-f3ec-11ec-b8ef-3323861c2ef0', 0, 0, true, '{}', '2021-03-04 00:47:26.134651+00'); -- draft

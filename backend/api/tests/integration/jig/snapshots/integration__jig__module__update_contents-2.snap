@@ -5,6 +5,7 @@ expression: body
 {
   "module": {
     "id": "a6b24a06-1dd7-11ec-8426-635a3a7ea572",
+    "stable_id": "0fb3d582-c5f7-11ee-95d6-ab330329b0df",
     "body": {
       "memoryGame": {
         "content": {

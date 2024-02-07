@@ -32,11 +32,11 @@ values ('f7722350-906b-11ed-b4f6-7f6f12b6b72a', 'e0984370-906c-11ed-b4f6-3f86493
        ('f7722350-906b-11ed-b4f6-7f6f12b6b72a', '09225240-906d-11ed-b4f6-ffc72cfa1509', 'course1 unit 3', 'URL', '2023-01-09 22:36:40.694823 +00:00', '2023-01-09 23:36:40.694823 +00:00', 2, '{"link": "https://jigzi.org/"}');
 
 
-insert into course_data_module (id,
+insert into course_data_module (id, stable_id,
         course_data_id, index, kind, is_complete, contents, created_at)
-values ('3a272c30-906d-11ed-b4f6-1fef9f7412be',
+values ('3a272c30-906d-11ed-b4f6-1fef9f7412be', '4678e5cc-f057-478d-a7ed-044928c8ceb2',
         'f7722350-906b-11ed-b4f6-7f6f12b6b72a', 0, 0, true, '{}', '2021-03-04 00:47:26.134651+00'), -- draft
-       ('3a272de8-906d-11ed-b4f6-8786ac4d1cf6',
+       ('3a272de8-906d-11ed-b4f6-8786ac4d1cf6', '4678e5cc-f057-478d-a7ed-044928c8ceb2',
         '47b3c15c-906c-11ed-b4f6-abb1889c9b40', 0, 0, true, '{}', '2021-03-04 00:47:26.134651+00'), -- draft
-       ('3a272eec-906d-11ed-b4f6-cfd352276766',
+       ('3a272eec-906d-11ed-b4f6-cfd352276766', '4678e5cc-f057-478d-a7ed-044928c8ceb2',
         'be5a7120-906c-11ed-b4f6-7f0ad0c66ee8', 0, 0, true, '{}', '2021-03-04 00:47:26.134651+00'); -- draft
