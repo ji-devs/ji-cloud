@@ -20,6 +20,14 @@ wrap_uuid! {
     pub struct ModuleId
 }
 
+wrap_uuid! {
+    /// Wrapper type around [`Uuid`](Uuid), represents the **unique ID** of a module.
+    ///
+    /// This uniquely identifies a module. There is no other module that shares this ID.
+    #[serde(rename_all = "camelCase")]
+    pub struct StableModuleId
+}
+
 /// Represents the various kinds of data a module can represent.
 #[repr(i16)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
@@ -194,6 +202,9 @@ pub struct LiteModule {
 pub struct Module {
     /// The module's unique ID.
     pub id: ModuleId,
+
+    /// ID that doesn't change when publishing.
+    pub stable_id: StableModuleId,
 
     /// The module's body.
     pub body: ModuleBody,

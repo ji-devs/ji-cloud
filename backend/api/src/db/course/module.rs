@@ -1,7 +1,7 @@
 use anyhow::Context;
 use shared::domain::{
     course::CourseId,
-    module::{Module, ModuleBody, ModuleId, ModuleKind},
+    module::{Module, ModuleBody, ModuleId, ModuleKind, StableModuleId},
 };
 use sqlx::PgPool;
 use std::cmp;
@@ -54,6 +54,7 @@ pub async fn get_live(pool: &PgPool, id: ModuleId) -> anyhow::Result<Option<Modu
         //language=SQL
         r#"
 select cdm.id          as "id!: ModuleId",
+       stable_id   as "stable_id!: StableModuleId",
        contents    as "body!",
        created_at  as "created_at!",
        updated_at  as "updated_at!",
@@ -73,6 +74,7 @@ where cdm.id is not distinct from $1
     match module {
         Some(it) => Ok(Some(Module {
             id: it.id,
+            stable_id: it.stable_id,
             created_at: it.created_at,
             updated_at: it.updated_at,
             body: map_response(it.body, it.kind).context(anyhow::anyhow!(
@@ -91,6 +93,7 @@ pub async fn get_draft(pool: &PgPool, id: ModuleId) -> anyhow::Result<Option<Mod
         //language=SQL
         r#"
 select cdm.id          as "id!: ModuleId",
+       stable_id   as "stable_id!: StableModuleId",
        contents    as "body!",
        created_at  as "created_at!",
        updated_at  as "updated_at!",
@@ -110,6 +113,7 @@ where cdm.id is not distinct from $1
     match module {
         Some(it) => Ok(Some(Module {
             id: it.id,
+            stable_id: it.stable_id,
             created_at: it.created_at,
             updated_at: it.updated_at,
             body: map_response(it.body, it.kind).context(anyhow::anyhow!(

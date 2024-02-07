@@ -262,74 +262,7 @@ pub(super) async fn publish_draft_to_live(
 
     db::jig::authz(&*db, user_id, Some(jig_id)).await?;
 
-    let mut txn = db.begin().await?;
-
-    let (draft_id, live_id) = db::jig::get_draft_and_live_ids(&mut *txn, jig_id)
-        .await
-        .ok_or(error::CloneDraft::ResourceNotFound)?;
-
-    // let draft = db::jig::get_one(&db, jig_id, DraftOrLive::Draft)
-    //     .await?
-    //     .ok_or(error::CloneDraft::ResourceNotFound)?; // Not strictly necessary, we already know the JIG exists.
-
-    // let modules = draft.jig_data.modules;
-    // Check that modules have been configured on the JIG
-    // let has_modules = !modules.is_empty();
-    // Check whether the draft's modules all have content
-    // let modules_valid = modules
-    //     .into_iter()
-    //     .filter(|module| !module.is_complete)
-    //     .collect::<Vec<LiteModule>>()
-    //     .is_empty();
-
-    // If no modules or modules without content, prevent publishing.
-    // NOTE: we temporarily allow publishing jig without content
-    // since curation also uses this endpoint and some jigs have already been published without content
-    // and those jigs have to be curated
-    // if !modules_valid || !has_modules {
-    //     return Err(error::CloneDraft::IncompleteModules);
-    // }
-
-    let new_live_id = db::jig::clone_data(&mut txn, &draft_id, DraftOrLive::Live).await?;
-
-    sqlx::query!(
-        //language=SQL
-        r#"
-        update user_asset_data
-        set jig_count = jig_count + 1,
-        total_asset_count = total_asset_count + 1
-        from jig
-        where author_id = user_id and
-              published_at is null and
-              id = $1"#,
-        jig_id.0
-    )
-    .execute(&mut *txn)
-    .await?;
-
-    sqlx::query!(
-        //language=SQL
-        "update jig set live_id = $1, published_at = now() where id = $2",
-        new_live_id,
-        jig_id.0
-    )
-    .execute(&mut *txn)
-    .await?;
-
-    // should drop all the entries in the metadata tables that FK to the live jig_data row
-    sqlx::query!(
-        //language=SQL
-        r#"
-delete from jig_data where id = $1
-    "#,
-        live_id,
-    )
-    .execute(&mut *txn)
-    .await?;
-
-    log::info!("AOSIJDOAIJSD");
-
-    txn.commit().await?;
+    db::jig::publish_draft_to_live(&*db, jig_id).await?;
 
     Ok(HttpResponse::NoContent().finish())
 }

@@ -2,6 +2,7 @@ use crate::translate::translate_text;
 use anyhow::Context;
 use serde_json::value::Value;
 use shared::domain::jig::{AdminJigExport, JigUpdateAdminDataRequest};
+use shared::domain::module::StableModuleId;
 use shared::domain::playlist::{PlaylistAdminData, PlaylistRating};
 use shared::domain::{
     additional_resource::{AdditionalResource, AdditionalResourceId as AddId, ResourceContent},
@@ -974,6 +975,82 @@ where id = $1
     Ok(())
 }
 
+pub async fn publish_draft_to_live(db: &PgPool, jig_id: JigId) -> Result<(), error::CloneDraft> {
+    let mut txn = db.begin().await?;
+
+    let (draft_id, live_id) = get_draft_and_live_ids(&mut *txn, jig_id)
+        .await
+        .ok_or(error::CloneDraft::ResourceNotFound)?;
+
+    // let draft = db::jig::get_one(&db, jig_id, DraftOrLive::Draft)
+    //     .await?
+    //     .ok_or(error::CloneDraft::ResourceNotFound)?; // Not strictly necessary, we already know the JIG exists.
+
+    // let modules = draft.jig_data.modules;
+    // Check that modules have been configured on the JIG
+    // let has_modules = !modules.is_empty();
+    // Check whether the draft's modules all have content
+    // let modules_valid = modules
+    //     .into_iter()
+    //     .filter(|module| !module.is_complete)
+    //     .collect::<Vec<LiteModule>>()
+    //     .is_empty();
+
+    // If no modules or modules without content, prevent publishing.
+    // NOTE: we temporarily allow publishing jig without content
+    // since curation also uses this endpoint and some jigs have already been published without content
+    // and those jigs have to be curated
+    // if !modules_valid || !has_modules {
+    //     return Err(error::CloneDraft::IncompleteModules);
+    // }
+
+    let new_live_id = clone_data(&mut txn, &draft_id, DraftOrLive::Live, |stable_id| {
+        stable_id
+    })
+    .await?;
+
+    sqlx::query!(
+        //language=SQL
+        r#"
+        update user_asset_data
+        set jig_count = jig_count + 1,
+        total_asset_count = total_asset_count + 1
+        from jig
+        where author_id = user_id and
+              published_at is null and
+              id = $1"#,
+        jig_id.0
+    )
+    .execute(&mut *txn)
+    .await?;
+
+    sqlx::query!(
+        //language=SQL
+        "update jig set live_id = $1, published_at = now() where id = $2",
+        new_live_id,
+        jig_id.0
+    )
+    .execute(&mut *txn)
+    .await?;
+
+    // should drop all the entries in the metadata tables that FK to the live jig_data row
+    sqlx::query!(
+        //language=SQL
+        r#"
+delete from jig_data where id = $1
+    "#,
+        live_id,
+    )
+    .execute(&mut *txn)
+    .await?;
+
+    log::info!("AOSIJDOAIJSD");
+
+    txn.commit().await?;
+
+    Ok(())
+}
+
 pub async fn delete(pool: &PgPool, id: JigId) -> Result<(), error::Delete> {
     let mut txn = pool.begin().await?;
 
@@ -1122,10 +1199,11 @@ select draft_id, live_id from jig where id = $1
 }
 
 /// Clones a copy of the jig data and modules
-pub async fn clone_data(
+async fn clone_data(
     txn: &mut PgConnection,
     from_data_id: &Uuid,
     draft_or_live: DraftOrLive,
+    mut get_stable_module_id: impl FnMut(StableModuleId) -> StableModuleId,
 ) -> Result<Uuid, error::CloneDraft> {
     let new_id = sqlx::query!(
         //language=SQL
@@ -1163,20 +1241,38 @@ returning id
 
     update_draft_or_live(txn, new_id, draft_or_live).await?;
 
-    // copy metadata
-    sqlx::query!(
+    let modules = sqlx::query!(
         //language=SQL
         r#"
-insert into jig_data_module ("index", jig_data_id, kind, is_complete, contents)
-select "index", $2 as "jig_id", kind, is_complete, contents
-from jig_data_module
-where jig_data_id = $1
+            select stable_id, "index", kind, is_complete, contents
+            from jig_data_module
+            where jig_data_id = $1
         "#,
         from_data_id,
-        new_id,
     )
-    .execute(&mut *txn)
+    .fetch_all(&mut *txn)
     .await?;
+
+    for module in modules {
+        let new_stable_id = get_stable_module_id(StableModuleId(module.stable_id));
+        sqlx::query!(
+            //language=SQL
+            r#"
+                insert into jig_data_module
+                (stable_id, index, jig_data_id, kind, is_complete, contents)
+                values
+                ($1, $2, $3, $4, $5, $6)
+            "#,
+            new_stable_id.0,
+            module.index,
+            new_id,
+            module.kind,
+            module.is_complete,
+            module.contents,
+        )
+        .execute(&mut *txn)
+        .await?;
+    }
 
     sqlx::query!(
         //language=SQL
@@ -1250,8 +1346,26 @@ pub async fn clone_jig(
         .await
         .ok_or(error::CloneDraft::ResourceNotFound)?;
 
-    let new_draft_id = clone_data(&mut txn, &draft_id, DraftOrLive::Draft).await?;
-    let new_live_id = clone_data(&mut txn, &live_id, DraftOrLive::Live).await?;
+    let mut stable_id_map = HashMap::new();
+
+    let new_draft_id = clone_data(&mut txn, &draft_id, DraftOrLive::Draft, |old_stable_id| {
+        let new_stable_id: StableModuleId = StableModuleId(Uuid::new_v4());
+        stable_id_map.insert(old_stable_id, new_stable_id);
+        new_stable_id
+    })
+    .await?;
+
+    let new_live_id =
+        clone_data(
+            &mut txn,
+            &live_id,
+            DraftOrLive::Live,
+            |old_stable_id| match stable_id_map.get(&old_stable_id) {
+                Some(old_stable_id) => *old_stable_id,
+                None => StableModuleId(Uuid::new_v4()),
+            },
+        )
+        .await?;
 
     let new_jig = sqlx::query!(
         //language=SQL
