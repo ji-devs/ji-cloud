@@ -284,9 +284,9 @@ impl JigPlayer {
                         self.play_login_popup_shown.set(true);
                     }
                 }
-                return;
+            } else {
+                restrictions::increase_played_count();
             }
-            restrictions::increase_played_count();
         }
 
         state.loader.load(clone!(state => async move {

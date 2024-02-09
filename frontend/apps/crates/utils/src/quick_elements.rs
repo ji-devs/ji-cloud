@@ -15,7 +15,7 @@ macro_rules! dialog {
             .child(html!("style", {
                 .text(r#"
                     dialog::backdrop {
-                        background-color: #d8e7fade;
+                        background-color: #d8e7facc;
                     }
                 "#)
             }))
