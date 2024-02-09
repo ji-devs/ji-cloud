@@ -54,11 +54,10 @@ pub async fn assign_module_to_empty_spot(
         body: ModuleBody::new(module_kind),
     });
 
-    let resp = endpoints::module::Create::api_with_auth(ModuleCreatePath(), req)
+    let module = endpoints::module::Create::api_with_auth(ModuleCreatePath(), req)
         .await
         .unwrap_ji();
 
-    let id = resp.id;
     let index = state.index;
 
     let req = ModuleUpdateRequest {
@@ -69,23 +68,21 @@ pub async fn assign_module_to_empty_spot(
         is_complete: None,
     };
 
-    jig_actions::update_module(&id, req).await.unwrap_ji();
+    jig_actions::update_module(&module.id, req)
+        .await
+        .unwrap_ji();
 
     state.sidebar.collapsed.set(true);
     state
         .sidebar
         .asset_edit_state
-        .set_route_jig(JigEditRoute::Module(id));
+        .set_route_jig(JigEditRoute::Module(module.id));
     Route::push_state(Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
         jig_id,
-        JigEditRoute::Module(id),
+        JigEditRoute::Module(module.id),
     ))));
 
-    Some(SidebarSpot::new_jig_module(Some(LiteModule {
-        id,
-        kind: module_kind,
-        is_complete: false,
-    })))
+    Some(SidebarSpot::new_jig_module(Some(module)))
 }
 
 pub async fn update_module_index(state: Rc<SpotState>, module: &LiteModule, index: u16) {

@@ -6,13 +6,14 @@ use std::collections::HashMap;
 use shared::domain::{
     asset::{DraftOrLive, PrivacyLevel},
     jig::{AudioEffects, JigAdminData, JigData, JigId, JigPlayerSettings, JigRating, JigResponse},
-    module::{LiteModule, ModuleId, ModuleKind},
+    module::{LiteModule, ModuleId, ModuleKind, StableModuleId},
 };
 use utils::themes::ThemeId;
 use uuid::Uuid;
 
 pub fn get_jig() -> JigResponse {
     let module_id = ModuleId::from_u128(0);
+    let stable_module_id = StableModuleId::from_u128(0);
     JigResponse {
         id: JigId::from_u128(0),
         admin_data: JigAdminData {
@@ -35,21 +36,25 @@ pub fn get_jig() -> JigResponse {
             modules: vec![
                 LiteModule {
                     id: module_id,
+                    stable_id: stable_module_id,
                     kind: ModuleKind::Cover,
                     is_complete: true,
                 },
                 LiteModule {
                     id: module_id,
+                    stable_id: stable_module_id,
                     kind: ModuleKind::Memory,
                     is_complete: true,
                 },
                 LiteModule {
                     id: module_id,
+                    stable_id: stable_module_id,
                     kind: ModuleKind::Memory,
                     is_complete: true,
                 },
                 LiteModule {
                     id: module_id,
+                    stable_id: stable_module_id,
                     kind: ModuleKind::TappingBoard,
                     is_complete: true,
                 },

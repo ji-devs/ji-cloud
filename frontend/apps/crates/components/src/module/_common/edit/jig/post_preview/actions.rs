@@ -3,7 +3,7 @@ use shared::{
     api::endpoints::{self},
     domain::module::{
         body::{BodyExt, ModeExt, StepExt},
-        LiteModule, ModuleCreatePath, ModuleCreateRequest, ModuleKind,
+        ModuleCreatePath, ModuleCreateRequest, ModuleKind,
     },
 };
 use utils::{
@@ -61,14 +61,8 @@ impl PostPreview {
             let res = endpoints::module::Create::api_with_auth(ModuleCreatePath(), Some(req)).await;
 
             match res {
-                Ok(res) => {
-                    let module_id = res.id;
-
-                    let module = LiteModule {
-                        id: module_id,
-                        kind: target_kind,
-                        is_complete: raw_data.is_complete(),
-                    };
+                Ok(module) => {
+                    let module_id = module.id;
 
                     let msg = IframeAction::new(ModuleToJigEditorMessage::AppendModule(module));
 

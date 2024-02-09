@@ -7,13 +7,13 @@ use super::super::state::Sidebar;
 use super::settings::JigSettings as SettingsState;
 use dominator::clone;
 use shared::{
-    api::endpoints::{self},
+    api::endpoints,
     domain::{
         asset::{AssetType, DraftOrLive},
         jig::{JigId, JigUpdateDraftDataPath, JigUpdateDraftDataRequest},
         module::{
             LiteModule, ModuleCreatePath, ModuleCreateRequest, ModuleGetDraftPath, ModuleId,
-            ModuleKind, ModuleUpdateRequest, ModuleUploadPath,
+            ModuleKind, ModuleUpdateRequest, ModuleUploadPath, StableModuleId,
         },
     },
     error::IntoAnyhow,
@@ -151,7 +151,7 @@ fn populate_added_module(state: Rc<Sidebar>, module: LiteModule) {
 
 pub fn use_module_as(state: Rc<Sidebar>, target_kind: ModuleKind, source_module_id: ModuleId) {
     state.loader.load(clone!(state => async move {
-        let target_module_id: anyhow::Result<(ModuleId, bool)> = async {
+        let target_module_id: anyhow::Result<(ModuleId, StableModuleId, bool)> = async {
             let asset_type: AssetType = (&state.asset_edit_state.asset_id).into();
             let source_module = endpoints::module::GetDraft::api_with_auth(
                 ModuleGetDraftPath(asset_type, source_module_id.clone()),
@@ -171,16 +171,17 @@ pub fn use_module_as(state: Rc<Sidebar>, target_kind: ModuleKind, source_module_
             )
             .await?;
 
-            Ok((res.id, source_module.is_complete))
+            Ok((res.id, res.stable_id, source_module.is_complete))
         }.await;
 
         match target_module_id {
             Err(_) => {
                 log::error!("request to create module failed!");
             },
-            Ok((target_module_id, is_complete)) => {
+            Ok((target_module_id, target_stable_module_id, is_complete)) => {
                 let lite_module = LiteModule {
                     id: target_module_id,
+                    stable_id: target_stable_module_id,
                     kind: target_kind,
                     is_complete,
                 };
