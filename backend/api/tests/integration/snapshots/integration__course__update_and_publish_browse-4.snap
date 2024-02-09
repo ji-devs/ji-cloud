@@ -26,6 +26,7 @@ expression: body
         "translatedDescription": {},
         "cover": {
           "id": "[id]",
+          "stable_id": "4678e5cc-f057-478d-a7ed-044928c8ceb2",
           "kind": "Cover",
           "is_complete": true
         },
@@ -81,6 +82,7 @@ expression: body
         "translatedDescription": {},
         "cover": {
           "id": "[id]",
+          "stable_id": "4678e5cc-f057-478d-a7ed-044928c8ceb2",
           "kind": "Cover",
           "is_complete": true
         },

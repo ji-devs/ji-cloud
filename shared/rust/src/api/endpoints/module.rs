@@ -1,13 +1,10 @@
 use super::ApiEndpoint;
 use crate::{
     api::Method,
-    domain::{
-        module::{
-            ModuleCreatePath, ModuleCreateRequest, ModuleDeletePath, ModuleDeleteRequest,
-            ModuleGetDraftPath, ModuleGetLivePath, ModuleId, ModuleResponse, ModuleUpdateRequest,
-            ModuleUploadPath,
-        },
-        CreateResponse,
+    domain::module::{
+        LiteModule, ModuleCreatePath, ModuleCreateRequest, ModuleDeletePath, ModuleDeleteRequest,
+        ModuleGetDraftPath, ModuleGetLivePath, ModuleResponse, ModuleUpdateRequest,
+        ModuleUploadPath,
     },
     error::EmptyError,
 };
@@ -59,7 +56,7 @@ pub struct Create;
 impl ApiEndpoint for Create {
     type Path = ModuleCreatePath;
     type Req = ModuleCreateRequest;
-    type Res = CreateResponse<ModuleId>;
+    type Res = LiteModule;
     type Err = EmptyError;
     const METHOD: Method = Method::Post;
 }

@@ -225,11 +225,11 @@ select cte.jig_id                                          as "jig_id: JigId",
         array(select row (unnest(audio_feedback_positive))) as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
         array(select row (unnest(audio_feedback_negative))) as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
         array(
-                select row (jig_data_module.id, kind, is_complete)
+                select row (jig_data_module.id, jig_data_module.stable_id, kind, is_complete)
                 from jig_data_module
                 where jig_data_id = jig_data.id
                 order by "index"
-        )                                               as "modules!: Vec<(ModuleId, ModuleKind, bool)>",
+        )                                               as "modules!: Vec<(ModuleId, StableModuleId, ModuleKind, bool)>",
         array(select row (category_id)
                 from jig_data_category
                 where jig_data_id = cte.draft_or_live_id)     as "categories!: Vec<(CategoryId,)>",
@@ -271,8 +271,9 @@ from jig_data
             modules: row
                 .modules
                 .into_iter()
-                .map(|(id, kind, is_complete)| LiteModule {
+                .map(|(id, stable_id, kind, is_complete)| LiteModule {
                     id,
+                    stable_id,
                     kind,
                     is_complete,
                 })
@@ -404,11 +405,11 @@ select id,
        array(select row (unnest(audio_feedback_positive)))                           as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
        array(select row (unnest(audio_feedback_negative)))                           as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
        array(
-                select row (jig_data_module.id, kind, is_complete)
+                select row (jig_data_module.id, jig_data_module.stable_id, kind, is_complete)
                 from jig_data_module
                 where jig_data_id = jig_data.id
                 order by "index"
-       )                                               as "modules!: Vec<(ModuleId, ModuleKind, bool)>",
+       )                                               as "modules!: Vec<(ModuleId, StableModuleId, ModuleKind, bool)>",
        array(select row (category_id)
              from jig_data_category
              where jig_data_id = jig_data.id)     as "categories!: Vec<(CategoryId,)>",
@@ -459,8 +460,9 @@ order by ord asc
                 modules: jig_data_row
                     .modules
                     .into_iter()
-                    .map(|(id, kind, is_complete)| LiteModule {
+                    .map(|(id, stable_id, kind, is_complete)| LiteModule {
                         id,
+                        stable_id,
                         kind,
                         is_complete,
                     })
@@ -610,11 +612,11 @@ select jig.id                                              as "jig_id: JigId",
    array(select row (unnest(audio_feedback_positive)))                           as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
    array(select row (unnest(audio_feedback_negative)))                           as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
    array(
-           select row (jig_data_module.id, kind, is_complete)
+           select row (jig_data_module.id, jig_data_module.stable_id, kind, is_complete)
            from jig_data_module
            where jig_data_id = jig_data.id
            order by "index"
-    )                                               as "modules!: Vec<(ModuleId, ModuleKind, bool)>",
+    )                                               as "modules!: Vec<(ModuleId, StableModuleId, ModuleKind, bool)>",
    array(select row (category_id)
          from jig_data_category
          where jig_data_id = jig_data.id)     as "categories!: Vec<(CategoryId,)>",
@@ -685,8 +687,9 @@ limit $8
                 modules: jig_data_row
                     .modules
                     .into_iter()
-                    .map(|(id, kind, is_complete)| LiteModule {
+                    .map(|(id, stable_id, kind, is_complete)| LiteModule {
                         id,
+                        stable_id,
                         kind,
                         is_complete,
                     })
@@ -1724,11 +1727,11 @@ select playlist.id                                                              
     curated                                    as "curated!",
     is_premium                                 as "premium!",
     (
-        select row(playlist_data_module.id, kind, is_complete)
+        select row(playlist_data_module.id, playlist_data_module.stable_id, kind, is_complete)
         from playlist_data_module
         where playlist_data_id = playlist_data.id and "index" = 0
         order by "index"
-    )                                                   as "cover?: (ModuleId, ModuleKind, bool)",
+    )                                                   as "cover?: (ModuleId, StableModuleId, ModuleKind, bool)",
     array(select row (category_id)
             from playlist_data_category
             where playlist_data_id = playlist_data.id)     as "categories!: Vec<(CategoryId,)>",
@@ -1783,8 +1786,9 @@ order by coalesce(updated_at, created_at) desc
                 language: playlist_data_row.language,
                 cover: playlist_data_row
                     .cover
-                    .map(|(id, kind, is_complete)| LiteModule {
+                    .map(|(id, stable_id, kind, is_complete)| LiteModule {
                         id,
+                        stable_id,
                         kind,
                         is_complete,
                     }),

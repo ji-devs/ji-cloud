@@ -17,6 +17,7 @@ expression: body
     "displayName": "resource1",
     "cover": {
       "id": "[id]",
+      "stable_id": "[stable_id]",
       "kind": "Cover",
       "is_complete": false
     },

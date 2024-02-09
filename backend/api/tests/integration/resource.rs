@@ -155,6 +155,7 @@ async fn clone(port: u16) -> anyhow::Result<()> {
         format!("{}-1",name),
         body, {
             ".**.id" => "[id]",
+            ".**.stable_id" => "[stable_id]",
             ".**.lastEdited" => "[last_edited]",
             ".**.additionalResources" => "[ids]"
         }
@@ -175,6 +176,7 @@ async fn clone(port: u16) -> anyhow::Result<()> {
         format!("{}-2",name),
         body, {
             ".**.id" => "[id]",
+            ".**.stable_id" => "[stable_id]",
             ".**.lastEdited" => "[last_edited]",
             ".**.additionalResources" => "[ids]"
         }
@@ -557,6 +559,7 @@ async fn update_and_publish(port: u16) -> anyhow::Result<()> {
         format!("{}-4",name),
         body, {
             ".**.id" => "[id]",
+            ".**.stable_id" => "[stable_id]",
             ".**.lastEdited" => "[last_edited]",
             ".**.publishedAt" => "[published_at]",
             ".**.additionalResources" => "[ids]",
@@ -673,6 +676,7 @@ async fn live_up_to_date_flag(port: u16) -> anyhow::Result<()> {
         format!("{}-2",name),
         body, {
             ".**.id" => "[id]",
+            ".**.stable_id" => "[stable_id]",
             ".**.lastEdited" => "[last_edited]",
             ".**.publishedAt" => "[published_at]",
             ".**.additionalResources" => "[ids]"
@@ -761,6 +765,7 @@ async fn update_privacy_level(port: u16) -> anyhow::Result<()> {
         format!("{}-2",name),
         body, {
             ".**.id" => "[id]",
+            ".**.stable_id" => "[stable_id]",
             ".**.lastEdited" => "[last_edited]",
             ".**.publishedAt" => "[published_at]",
             ".**.additionalResources" => "[ids]"
@@ -808,6 +813,7 @@ async fn update_privacy_level(port: u16) -> anyhow::Result<()> {
         format!("{}-3",name),
         body, {
             ".**.id" => "[id]",
+            ".**.stable_id" => "[stable_id]",
             ".**.lastEdited" => "[last_edited]",
             ".**.publishedAt" => "[published_at]",
             ".**.additionalResources" => "[ids]"

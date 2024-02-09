@@ -1,7 +1,7 @@
 use anyhow::Context;
 use shared::domain::{
     course::CourseId,
-    module::{Module, ModuleBody, ModuleId, ModuleKind, StableModuleId},
+    module::{LiteModule, Module, ModuleBody, ModuleId, ModuleKind, StableModuleId},
 };
 use sqlx::PgPool;
 use std::cmp;
@@ -11,7 +11,7 @@ pub async fn create(
     parent: CourseId,
     body: ModuleBody,
     is_complete: bool,
-) -> anyhow::Result<(ModuleId, u16)> {
+) -> anyhow::Result<LiteModule> {
     let (kind, body) = ModuleBody::map_module_contents(&body)?;
 
     let mut txn = pool.begin().await?;
@@ -32,7 +32,7 @@ select draft_id from course where course.id = $1
         r#"
 insert into course_data_module (course_data_id, kind, contents, index, is_complete)
 values ($1, $2, $3, (select count(*) from course_data_module where course_data_id = $1), $4)
-returning id, "index"
+returning id, stable_id, "index"
 "#,
         draft_id,
         kind as i16,
@@ -41,7 +41,12 @@ returning id, "index"
     )
     .fetch_one(&mut txn)
     .await
-    .map(|it| (ModuleId(it.id), it.index as u16))
+    .map(|it| LiteModule {
+        id: ModuleId(it.id),
+        stable_id: StableModuleId(it.stable_id),
+        kind,
+        is_complete,
+    })
     .map_err(Into::into);
 
     txn.commit().await?;

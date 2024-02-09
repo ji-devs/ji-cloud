@@ -7,7 +7,7 @@ use shared::domain::{
     asset::{DraftOrLive, OrderBy, PrivacyLevel},
     category::CategoryId,
     meta::{AffiliationId, AgeRangeId, ResourceTypeId as TypeId},
-    module::{LiteModule, ModuleId, ModuleKind},
+    module::{LiteModule, ModuleId, ModuleKind, StableModuleId},
     resource::{ResourceAdminData, ResourceData, ResourceId, ResourceRating, ResourceResponse},
     user::{UserId, UserScope},
 };
@@ -188,10 +188,10 @@ select cte.resource_id                                          as "resource_id:
         curated,
         is_premium                                           as "premium",
         (
-                select row(resource_data_module.id, kind, is_complete)
+                select row(resource_data_module.id, resource_data_module.stable_id, kind, is_complete)
                 from resource_data_module
                 where resource_data_id = resource_data.id
-        )                                               as "cover?: (ModuleId, ModuleKind, bool)",
+        )                                               as "cover?: (ModuleId, StableModuleId, ModuleKind, bool)",
         array(select row (category_id)
                 from resource_data_category
                 where resource_data_id = cte.draft_or_live_id)     as "categories!: Vec<(CategoryId,)>",
@@ -230,11 +230,14 @@ from resource_data
             draft_or_live,
             display_name: row.display_name,
             language: row.language,
-            cover: row.cover.map(|(id, kind, is_complete)| LiteModule {
-                id,
-                kind,
-                is_complete,
-            }),
+            cover: row
+                .cover
+                .map(|(id, stable_id, kind, is_complete)| LiteModule {
+                    id,
+                    stable_id,
+                    kind,
+                    is_complete,
+                }),
             categories: row.categories.into_iter().map(|(it,)| it).collect(),
             last_edited: row.updated_at,
             description: row.description,
@@ -330,10 +333,10 @@ select id,
        description                                                                   as "description!",
        translated_description                                                        as "translated_description!: Json<HashMap<String,String>>",
        (
-                select row (resource_data_module.id, kind, is_complete)
+                select row (resource_data_module.id, resource_data_module.stable_id, kind, is_complete)
                 from resource_data_module
                 where resource_data_id = resource_data.id
-       )                                                  as "cover?: (ModuleId, ModuleKind, bool)",
+       )                                                  as "cover?: (ModuleId, StableModuleId, ModuleKind, bool)",
        array(select row (category_id)
              from resource_data_category
              where resource_data_id = resource_data.id)     as "categories!: Vec<(CategoryId,)>",
@@ -383,8 +386,9 @@ order by ord asc
                 language: resource_data_row.language,
                 cover: resource_data_row
                     .cover
-                    .map(|(id, kind, is_complete)| LiteModule {
+                    .map(|(id, stable_id, kind, is_complete)| LiteModule {
                         id,
+                        stable_id,
                         kind,
                         is_complete,
                     }),
@@ -501,10 +505,10 @@ select resource.id                                              as "resource_id:
    translated_description                                                        as "translated_description!: Json<HashMap<String,String>>",
    draft_or_live                                                                 as "draft_or_live!: DraftOrLive",
    (
-       select row(resource_data_module.id, kind, is_complete)
+       select row(resource_data_module.id, resource_data_module.stable_id, kind, is_complete)
        from resource_data_module
        where resource_data_id = resource_data.id
-    )                                               as "cover?: (ModuleId, ModuleKind, bool)",
+    )                                               as "cover?: (ModuleId, StableModuleId, ModuleKind, bool)",
    array(select row (category_id)
          from resource_data_category
          where resource_data_id = resource_data.id)     as "categories!: Vec<(CategoryId,)>",
@@ -574,8 +578,9 @@ limit $8
                 language: resource_data_row.language,
                 cover: resource_data_row
                     .cover
-                    .map(|(id, kind, is_complete)| LiteModule {
+                    .map(|(id, stable_id, kind, is_complete)| LiteModule {
                         id,
+                        stable_id,
                         kind,
                         is_complete,
                     }),

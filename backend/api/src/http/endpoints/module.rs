@@ -7,7 +7,6 @@ use shared::{
     domain::{
         asset::{AssetId, AssetType},
         module::{ModuleId, ModuleResponse},
-        CreateResponse,
     },
 };
 use sqlx::PgPool;
@@ -26,10 +25,9 @@ async fn create(
     let is_complete = req.body.is_complete();
     let user_id = auth.user_id();
 
-    let (id, _index) = match req.parent_id {
+    let module = match req.parent_id {
         AssetId::JigId(jig_id) => {
             db::jig::authz(&*db, user_id, Some(jig_id)).await?;
-
             db::jig::module::create(&*db, jig_id, req.body, is_complete).await?
         }
         AssetId::PlaylistId(playlist_id) => {
@@ -46,7 +44,7 @@ async fn create(
         }
     };
 
-    Ok(HttpResponse::Created().json(CreateResponse { id }))
+    Ok(HttpResponse::Created().json(module))
 }
 
 /// Get a Live.

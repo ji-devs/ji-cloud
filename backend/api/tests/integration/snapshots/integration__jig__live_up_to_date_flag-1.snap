@@ -19,6 +19,7 @@ expression: body
     "modules": [
       {
         "id": "56841805-d762-478b-8f07-e263917058b9",
+        "stable_id": "b415f5f6-c5f7-11ee-9569-53a033ff93b8",
         "kind": "Cover",
         "is_complete": true
       }

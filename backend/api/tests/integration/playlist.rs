@@ -343,6 +343,7 @@ async fn playlist_jig_index(port: u16) -> anyhow::Result<()> {
         format!("{}-4",name),
         body, {
             ".**.id" => "[id]",
+            ".**.stable_id" => "[stable_id]",
             ".**.lastEdited" => "[last_edited]",
             ".**.publishedAt" => "[published_at]"
         }
@@ -433,6 +434,7 @@ async fn publish_modules(port: u16) -> anyhow::Result<()> {
         format!("{}-3",name),
         body, {
             ".**.id" => "[id]",
+            ".**.stable_id" => "[stable_id]",
             ".**.lastEdited" => "[last_edited]",
             ".**.publishedAt" => "[published_at]"
         }
@@ -504,6 +506,7 @@ async fn live_up_to_date_flag(port: u16) -> anyhow::Result<()> {
             // Really just need to redact the module ID because it is recreated for the live data,
             // but I couldn't get a selector working correctly... So redacting all IDs.
             ".**.id" => "[id]",
+            ".**.stable_id" => "[stable_id]",
             ".**.lastEdited" => "[last_edited]",
             ".**.publishedAt" => "[published_at]",
         }

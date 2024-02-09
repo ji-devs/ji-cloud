@@ -11,7 +11,7 @@ use shared::domain::{
         CourseData, CourseId, CourseResponse, OrderBy,
     },
     meta::ResourceTypeId as TypeId,
-    module::{LiteModule, ModuleId, ModuleKind},
+    module::{LiteModule, ModuleId, ModuleKind, StableModuleId},
     user::{UserId, UserScope},
 };
 use sqlx::{types::Json, PgConnection, PgPool};
@@ -169,11 +169,11 @@ select cte.course_id                                          as "course_id: Cou
        curated,
        is_premium                                           as "premium",
        (
-            select row(course_data_module.id, kind, is_complete)
+            select row(course_data_module.id, course_data_module.stable_id, kind, is_complete)
             from course_data_module
             where course_data_id = cte.draft_or_live_id and "index" = 0
             order by "index"
-        )                                                   as "cover?: (ModuleId, ModuleKind, bool)",
+        )                                                   as "cover?: (ModuleId, StableModuleId, ModuleKind, bool)",
        array(select row (category_id)
              from course_data_category
              where course_data_id = cte.draft_or_live_id)     as "categories!: Vec<(CategoryId,)>",
@@ -213,11 +213,14 @@ from course_data
             last_edited: row.updated_at,
             description: row.description,
             duration: row.duration.map(|x| x as u32),
-            cover: row.cover.map(|(id, kind, is_complete)| LiteModule {
-                id,
-                kind,
-                is_complete,
-            }),
+            cover: row
+                .cover
+                .map(|(id, stable_id, kind, is_complete)| LiteModule {
+                    id,
+                    stable_id,
+                    kind,
+                    is_complete,
+                }),
             additional_resources: row
                 .additional_resource
                 .into_iter()
@@ -315,11 +318,11 @@ select  id,
         other_keywords                             as "other_keywords!",
         translated_keywords                        as "translated_keywords!",
         (
-            select row(course_data_module.id, kind, is_complete)
+            select row(course_data_module.id, course_data_module.stable_id, kind, is_complete)
             from course_data_module
             where course_data_id = course_data.id and "index" = 0
             order by "index"
-        )                                                   as "cover?: (ModuleId, ModuleKind, bool)",
+        )                                                   as "cover?: (ModuleId, StableModuleId, ModuleKind, bool)",
         array(select row (category_id)
             from course_data_category
             where course_data_id = course_data.id)     as "categories!: Vec<(CategoryId,)>",
@@ -363,8 +366,9 @@ order by ord asc
                 duration: course_data_row.duration.map(|x| x as u32),
                 cover: course_data_row
                     .cover
-                    .map(|(id, kind, is_complete)| LiteModule {
+                    .map(|(id, stable_id, kind, is_complete)| LiteModule {
                         id,
+                        stable_id,
                         kind,
                         is_complete,
                     }),
@@ -483,11 +487,11 @@ select course.id                                                                
     curated                                    as "curated!",
     is_premium                                 as "premium!",
     (
-        select row(course_data_module.id, kind, is_complete)
+        select row(course_data_module.id, course_data_module.stable_id, kind, is_complete)
         from course_data_module
         where course_data_id = course_data.id and "index" = 0
         order by "index"
-    )                                                   as "cover?: (ModuleId, ModuleKind, bool)",
+    )                                                   as "cover?: (ModuleId, StableModuleId, ModuleKind, bool)",
     array(select row (category_id)
             from course_data_category
             where course_data_id = course_data.id)     as "categories!: Vec<(CategoryId,)>",
@@ -546,8 +550,9 @@ limit $6
                 language: course_data_row.language,
                 cover: course_data_row
                     .cover
-                    .map(|(id, kind, is_complete)| LiteModule {
+                    .map(|(id, stable_id, kind, is_complete)| LiteModule {
                         id,
+                        stable_id,
                         kind,
                         is_complete,
                     }),

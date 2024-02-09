@@ -19,6 +19,7 @@ expression: body
     "modules": [
       {
         "id": "[id]",
+        "stable_id": "[stable_id]",
         "kind": "Cover",
         "is_complete": true
       }

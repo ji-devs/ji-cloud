@@ -72,6 +72,7 @@ async fn create_default(port: u16) -> anyhow::Result<()> {
 
     insta::assert_json_snapshot!(format!("{}-1",name), body, {
         ".**.id" => "[id]",
+        ".**.stable_id" => "[stable_id]",
         ".**.created_at" => "[created_at]",
         ".**.updated_at" => "[updated_at]"});
 

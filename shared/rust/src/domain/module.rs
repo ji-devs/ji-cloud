@@ -189,6 +189,9 @@ pub struct LiteModule {
     /// The module's unique ID.
     pub id: ModuleId,
 
+    /// ID that doesn't change when publishing.
+    pub stable_id: StableModuleId,
+
     /// Which kind of module this is.
     pub kind: ModuleKind,
 

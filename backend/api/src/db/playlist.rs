@@ -10,7 +10,7 @@ use shared::domain::{
     category::CategoryId,
     jig::JigId,
     meta::{AffiliationId, AgeRangeId, ResourceTypeId as TypeId},
-    module::{LiteModule, ModuleId, ModuleKind},
+    module::{LiteModule, ModuleId, ModuleKind, StableModuleId},
     playlist::{PlaylistData, PlaylistId, PlaylistResponse},
     user::{UserId, UserScope},
 };
@@ -181,11 +181,11 @@ select cte.playlist_id                                          as "playlist_id:
        is_premium                                           as "premium",
        exists(select 1 from playlist_like where playlist_id = $1 and user_id = $3) as "is_liked!",
        (
-            select row(playlist_data_module.id, kind, is_complete)
+            select row(playlist_data_module.id, playlist_data_module.stable_id, kind, is_complete)
             from playlist_data_module
             where playlist_data_id = cte.draft_or_live_id and "index" = 0
             order by "index"
-        )                                                   as "cover?: (ModuleId, ModuleKind, bool)",
+        )                                                   as "cover?: (ModuleId, StableModuleId, ModuleKind, bool)",
        array(select row (category_id)
              from playlist_data_category
              where playlist_data_id = cte.draft_or_live_id)     as "categories!: Vec<(CategoryId,)>",
@@ -232,11 +232,14 @@ from playlist_data
             categories: row.categories.into_iter().map(|(it,)| it).collect(),
             last_edited: row.updated_at,
             description: row.description,
-            cover: row.cover.map(|(id, kind, is_complete)| LiteModule {
-                id,
-                kind,
-                is_complete,
-            }),
+            cover: row
+                .cover
+                .map(|(id, stable_id, kind, is_complete)| LiteModule {
+                    id,
+                    stable_id,
+                    kind,
+                    is_complete,
+                }),
             age_ranges: row.age_ranges.into_iter().map(|(it,)| it).collect(),
             affiliations: row.affiliations.into_iter().map(|(it,)| it).collect(),
             additional_resources: row
@@ -329,11 +332,11 @@ select  id,
         other_keywords                             as "other_keywords!",
         translated_keywords                        as "translated_keywords!",
         (
-            select row(playlist_data_module.id, kind, is_complete)
+            select row(playlist_data_module.id, playlist_data_module.stable_id, kind, is_complete)
             from playlist_data_module
             where playlist_data_id = playlist_data.id and "index" = 0
             order by "index"
-        )                                                   as "cover?: (ModuleId, ModuleKind, bool)",
+        )                                                   as "cover?: (ModuleId, StableModuleId, ModuleKind, bool)",
         array(select row (category_id)
             from playlist_data_category
             where playlist_data_id = playlist_data.id)     as "categories!: Vec<(CategoryId,)>",
@@ -383,8 +386,9 @@ order by ord asc
                 language: playlist_data_row.language,
                 cover: playlist_data_row
                     .cover
-                    .map(|(id, kind, is_complete)| LiteModule {
+                    .map(|(id, stable_id, kind, is_complete)| LiteModule {
                         id,
+                        stable_id,
                         kind,
                         is_complete,
                     }),
@@ -503,11 +507,11 @@ select playlist.id                                                              
     curated                                    as "curated!",
     is_premium                                 as "premium!",
     (
-        select row(playlist_data_module.id, kind, is_complete)
+        select row(playlist_data_module.id, playlist_data_module.stable_id, kind, is_complete)
         from playlist_data_module
         where playlist_data_id = playlist_data.id and "index" = 0
         order by "index"
-    )                                                   as "cover?: (ModuleId, ModuleKind, bool)",
+    )                                                   as "cover?: (ModuleId, StableModuleId, ModuleKind, bool)",
     array(select row (category_id)
             from playlist_data_category
             where playlist_data_id = playlist_data.id)     as "categories!: Vec<(CategoryId,)>",
@@ -572,8 +576,9 @@ limit $6
                 language: playlist_data_row.language,
                 cover: playlist_data_row
                     .cover
-                    .map(|(id, kind, is_complete)| LiteModule {
+                    .map(|(id, stable_id, kind, is_complete)| LiteModule {
                         id,
+                        stable_id,
                         kind,
                         is_complete,
                     }),

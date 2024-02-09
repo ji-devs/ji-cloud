@@ -19,6 +19,7 @@ expression: body
         "displayName": "resource2",
         "cover": {
           "id": "8fd39a64-151c-11ed-b60c-cf8efe275b73",
+          "stable_id": "461e7d09-5b04-44bc-8920-5c79b3898928",
           "kind": "Cover",
           "is_complete": false
         },
@@ -58,6 +59,7 @@ expression: body
         "displayName": "resource3",
         "cover": {
           "id": "a6b24a88-1dd7-11ec-8426-57525d09b22c",
+          "stable_id": "1f358dc3-b043-45e0-9e03-9b504fb3f683",
           "kind": "Cover",
           "is_complete": false
         },
@@ -97,6 +99,7 @@ expression: body
         "displayName": "resource1",
         "cover": {
           "id": "cfe8fd74-151c-11ed-b60c-6ba2ae5b9011",
+          "stable_id": "4678e5cc-f057-478d-a7ed-044928c8ceb2",
           "kind": "Cover",
           "is_complete": false
         },
