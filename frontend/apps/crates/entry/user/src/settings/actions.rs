@@ -135,6 +135,12 @@ impl SettingsPage {
             };
 
             let _ = endpoints::billing::UpdateSubscriptionCancellation::api_with_auth(UpdateSubscriptionCancellationPath(), Some(req)).await.toast_on_err();
+
+            toasts::notice(if auto_renew {
+                "Auto-renewal enabled"
+            } else {
+                "Auto-renewal disabled"
+            })
         }));
     }
 
@@ -188,15 +194,17 @@ impl SettingsPage {
 
     pub fn load_portal_link(self: &Rc<Self>) {
         let state = self;
-        state.loader.load(clone!(state => async move {
-            let session_url = endpoints::billing::CreateCustomerPortalLink::api_with_auth(
-                CreateCustomerPortalLinkPath(),
-                None,
-            ).await.toast_on_err();
-            let session_url: String = bail_on_err!(session_url);
+        if state.portal_link.lock_ref().is_none() {
+            state.loader.load(clone!(state => async move {
+                let session_url = endpoints::billing::CreateCustomerPortalLink::api_with_auth(
+                    CreateCustomerPortalLinkPath(),
+                    None,
+                ).await.toast_on_err();
+                let session_url: String = bail_on_err!(session_url);
 
-            state.portal_link.set(Some(session_url));
-        }));
+                state.portal_link.set(Some(session_url));
+            }));
+        }
     }
 }
 

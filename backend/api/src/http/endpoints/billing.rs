@@ -34,6 +34,7 @@ use stripe::{
     CreateSubscription as CreateStripeSubscription, CreateSubscriptionItems, Customer,
     CustomerInvoiceSettings, EventObject, EventType, List, ListPromotionCodes, PromotionCode,
     PromotionCodeId, SetupIntent, SetupIntentId, UpdateCustomer, UpdateSubscription, Webhook,
+    WebhookError,
 };
 use tracing::instrument;
 
@@ -642,7 +643,17 @@ async fn webhook(
             }
         },
         Err(error) => {
-            log::warn!("Failed to construct webhook event: {error:#?}");
+            match error {
+                WebhookError::BadParse(serde_error)
+                    if serde_error.to_string().contains("billing_portal.session") =>
+                {
+                    // TODO remove this match once the crate supports the `billing_portal.session` event.
+                    // Don't log this warning.
+                }
+                _ => {
+                    log::warn!("Failed to construct webhook event: {error:#?}");
+                }
+            }
         }
     }
 
