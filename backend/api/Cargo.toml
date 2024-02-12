@@ -58,7 +58,7 @@ uuid = "1.1.2"
 quote = "1.0.18"
 hashfn = "0.2.0"
 csv = "1.1.6"
-async-stripe = { version = "0.22.2", features = ["runtime-tokio-hyper-rustls"] }
+async-stripe = { version = "0.31.0", features = ["runtime-tokio-hyper-rustls"] }
 bigdecimal = "0.4.0"
 mime = "0.3.16"
 
