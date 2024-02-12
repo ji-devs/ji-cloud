@@ -206,12 +206,18 @@ where
                         Rc::new(clone!(init_from_raw, _self => move |raw| {
                             _self.raw_loader.load(clone!(init_from_raw, _self => async move {
 
-                                let (asset_id, module_id, jig) = (
+                                let (asset_id, module_id, asset) = (
                                     _self.opts.asset_id,
                                     _self.opts.module_id,
                                     _self.asset.borrow().as_ref().unwrap_ji().clone()
                                 );
-                                let base = init_from_raw(InitFromRawArgs::new(asset_id, module_id, jig, raw, InitSource::IframeData)).await;
+                                let lite_module = match &asset {
+                                    Asset::Jig(jig) => jig.jig_data.modules.iter().find(|m| m.id == module_id),
+                                    _ => asset.cover(),
+                                }.unwrap_ji();
+                                assert_eq!(lite_module.id, module_id);
+                                let stable_module_id = lite_module.stable_id;
+                                let base = init_from_raw(InitFromRawArgs::new(asset_id, module_id, stable_module_id, asset, raw, InitSource::IframeData)).await;
 
                                 _self.phase.set(Rc::new(InitPhase::Ready(Ready {
                                     base: Rc::clone(&base),
@@ -261,7 +267,13 @@ where
                     _self.opts.module_id,
                     _self.asset.borrow().as_ref().unwrap_ji().clone()
                 );
-                let base = init_from_raw(InitFromRawArgs::new(asset_id, module_id, asset, raw, init_source)).await;
+                let lite_module = match &asset {
+                    Asset::Jig(jig) => jig.jig_data.modules.iter().find(|m| m.id == module_id),
+                    _ => asset.cover(),
+                }.unwrap_ji();
+                assert_eq!(lite_module.id, module_id);
+                let stable_module_id = lite_module.stable_id;
+                let base = init_from_raw(InitFromRawArgs::new(asset_id, module_id, stable_module_id, asset, raw, init_source)).await;
 
                 _self.phase.set(Rc::new(InitPhase::Ready(Ready {
                     base,
@@ -373,6 +385,7 @@ where
 {
     pub asset_id: AssetId,
     pub module_id: ModuleId,
+    pub stable_module_id: StableModuleId,
     pub asset: Asset,
     pub raw: RawData,
     pub source: InitSource,
@@ -390,6 +403,7 @@ where
     pub fn new(
         asset_id: AssetId,
         module_id: ModuleId,
+        stable_module_id: StableModuleId,
         asset: Asset,
         raw: RawData,
         source: InitSource,
@@ -405,6 +419,7 @@ where
         Self {
             asset_id,
             module_id,
+            stable_module_id,
             theme_id,
             asset,
             raw,
