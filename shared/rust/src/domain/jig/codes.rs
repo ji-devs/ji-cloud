@@ -6,7 +6,7 @@ use chrono::{DateTime, Utc};
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 
-use crate::{api::endpoints::PathPart, domain::module::ModuleId};
+use crate::{api::endpoints::PathPart, domain::module::StableModuleId};
 
 use super::{JigId, JigPlayerSettings};
 
@@ -126,7 +126,7 @@ pub enum JigPlaySessionModule {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct JigPlaySessionMatching {
     /// related module id
-    pub module_id: ModuleId,
+    pub stable_module_id: StableModuleId,
 
     /// list of rounds for this module
     pub rounds: Vec<HashMap<usize, JigPlaySessionMatchingCard>>,
@@ -134,9 +134,9 @@ pub struct JigPlaySessionMatching {
 
 impl JigPlaySessionMatching {
     /// create new from module id
-    pub fn new(module_id: ModuleId) -> Self {
+    pub fn new(stable_module_id: StableModuleId) -> Self {
         Self {
-            module_id,
+            stable_module_id,
             rounds: vec![],
         }
     }

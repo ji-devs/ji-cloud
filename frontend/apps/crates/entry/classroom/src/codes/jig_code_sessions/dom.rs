@@ -10,7 +10,7 @@ use futures_signals::{
 use shared::domain::{
     asset::DraftOrLive,
     jig::codes::{JigCodeSessionResponse, JigPlaySessionModule},
-    module::{ModuleBody, ModuleId, ModuleResponse},
+    module::{ModuleBody, ModuleResponse, StableModuleId},
 };
 use std::{collections::HashMap, rc::Rc};
 use utils::{asset::AssetPlayerOptions, component::Component, events};
@@ -123,11 +123,11 @@ impl CodeSessions {
             .children(sessions.into_iter().map(clone!(state => move |session| {
                 let open = Mutable::new(false);
                 let sessions = session.info.unwrap().modules.into_iter().map(|module| {
-                    let module_id = match &module {
-                        JigPlaySessionModule::Matching(module) => module.module_id,
+                    let stable_module_id = match &module {
+                        JigPlaySessionModule::Matching(module) => module.stable_module_id,
                     };
-                    (module_id, module)
-                }).collect::<HashMap<ModuleId, JigPlaySessionModule>>();
+                    (stable_module_id, module)
+                }).collect::<HashMap<StableModuleId, JigPlaySessionModule>>();
                 html!("div", {
                     .class("session")
                     .class_signal("open", open.signal())
@@ -150,9 +150,9 @@ impl CodeSessions {
                         html!("div", {
                             .class("cell")
                             .apply(|dom| {
-                                let module_id = module.id;
-                                let module = jig.modules.get(&module_id).unwrap().clone();
-                                if let Some(session) = sessions.get(&module_id) {
+                                let stable_module_id = module.stable_id;
+                                let module = jig.modules.get(&stable_module_id).unwrap().clone();
+                                if let Some(session) = sessions.get(&stable_module_id) {
                                     dom
                                         .text(&state.get_count(&session))
                                         .child_signal(open.signal().map(clone!(state, session => move |open| {

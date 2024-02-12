@@ -6,7 +6,7 @@ use shared::domain::{
         codes::{JigCode, JigCodeSessionResponse},
         JigId, JigResponse,
     },
-    module::{ModuleId, ModuleResponse},
+    module::{ModuleResponse, StableModuleId},
 };
 
 pub struct CodeSessions {
@@ -32,5 +32,5 @@ impl CodeSessions {
 #[derive(Debug, Clone)]
 pub(super) struct JigWithModules {
     pub jig: JigResponse,
-    pub modules: HashMap<ModuleId, ModuleResponse>,
+    pub modules: HashMap<StableModuleId, ModuleResponse>,
 }

@@ -75,7 +75,7 @@ impl Base {
             raw_pairs: content.base.pairs,
             module_phase: init_args.play_phase,
             phase: Mutable::new(Phase::Init),
-            play_report: Mutable::new(JigPlaySessionMatching::new(module_id)),
+            play_report: Mutable::new(JigPlaySessionMatching::new(stable_module_id)),
         });
 
         _self.phase.set(Phase::Playing(Game::new(_self.clone())));

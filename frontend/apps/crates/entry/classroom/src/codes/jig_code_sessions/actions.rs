@@ -42,7 +42,7 @@ impl CodeSessions {
         let modules: Vec<ModuleResponse> = bail_on_err!(modules);
         let modules = modules
             .into_iter()
-            .map(|module| (module.module.id, module))
+            .map(|module| (module.module.stable_id, module))
             .collect();
 
         self.jig.set(Some(JigWithModules { jig, modules }));
