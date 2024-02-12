@@ -10,7 +10,7 @@ use shared::{
                 memory::{ModuleData as RawData, PlayerSettings},
                 ModuleAssistType,
             },
-            ModuleId,
+            ModuleId, StableModuleId,
         },
     },
 };
@@ -28,6 +28,7 @@ use utils::prelude::*;
 pub struct Base {
     pub asset_id: AssetId,
     pub module_id: ModuleId,
+    pub stable_module_id: StableModuleId,
     pub mode: Mode,
     pub pair_lookup: Vec<usize>,
     pub original_pairs: Vec<RawCardPair>,
@@ -55,6 +56,7 @@ impl Base {
         let InitFromRawArgs {
             asset_id,
             module_id,
+            stable_module_id,
             asset: _,
             raw,
             theme_id,
@@ -127,6 +129,7 @@ impl Base {
         Rc::new(Self {
             asset_id,
             module_id,
+            stable_module_id,
             mode: content.base.mode,
             pair_lookup,
             original_pairs: content.base.pairs,

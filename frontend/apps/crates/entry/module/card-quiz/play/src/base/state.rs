@@ -8,7 +8,7 @@ use shared::domain::{
             card_quiz::{ModuleData as RawData, PlayerSettings},
             ModuleAssistType,
         },
-        ModuleId,
+        ModuleId, StableModuleId,
     },
 };
 
@@ -23,6 +23,7 @@ use super::game::state::Game;
 pub struct Base {
     pub asset_id: AssetId,
     pub module_id: ModuleId,
+    pub stable_module_id: StableModuleId,
     pub mode: Mode,
     pub theme_id: ThemeId,
     pub background: Option<Background>,
@@ -48,6 +49,7 @@ impl Base {
         let InitFromRawArgs {
             asset_id,
             module_id,
+            stable_module_id,
             raw,
             theme_id,
             ..
@@ -58,6 +60,7 @@ impl Base {
         let _self = Rc::new(Self {
             asset_id,
             module_id,
+            stable_module_id,
             mode: content.base.mode,
             theme_id,
             background: content.base.background,

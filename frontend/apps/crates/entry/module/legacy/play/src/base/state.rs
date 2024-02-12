@@ -6,7 +6,7 @@ use super::{
 use awsm_web::loaders::fetch::fetch_url;
 use components::module::_common::play::prelude::*;
 use futures_signals::signal::Mutable;
-use shared::domain::module::body::legacy::activity::Activity;
+use shared::domain::module::{body::legacy::activity::Activity, StableModuleId};
 use shared::domain::{
     asset::{Asset, AssetId},
     module::{
@@ -30,6 +30,7 @@ use web_sys::Worker;
 pub struct Base {
     pub asset_id: AssetId,
     pub module_id: ModuleId,
+    pub stable_module_id: StableModuleId,
     pub asset: Asset,
     pub theme_id: ThemeId,
     pub module_phase: Mutable<ModulePlayPhase>,
@@ -75,6 +76,7 @@ impl Base {
         let InitFromRawArgs {
             asset_id,
             module_id,
+            stable_module_id,
             asset,
             raw,
             theme_id,
@@ -102,6 +104,7 @@ impl Base {
         let _self = Rc::new(Self {
             asset_id,
             module_id,
+            stable_module_id,
             asset,
             theme_id,
             module_phase: init_args.play_phase,

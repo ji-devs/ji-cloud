@@ -8,7 +8,7 @@ use shared::domain::{
             _groups::design::{Backgrounds, Sticker},
             video::{Mode, ModuleData as RawData, Step},
         },
-        ModuleId,
+        ModuleId, StableModuleId,
     },
 };
 use std::rc::Rc;
@@ -17,6 +17,7 @@ use utils::prelude::*;
 pub struct Base {
     pub asset_id: AssetId,
     pub module_id: ModuleId,
+    pub stable_module_id: StableModuleId,
     pub theme_id: ThemeId,
     pub instructions: ModuleAssist,
     pub backgrounds: Backgrounds,
@@ -29,6 +30,7 @@ impl Base {
         let InitFromRawArgs {
             asset_id,
             module_id,
+            stable_module_id,
             raw,
             theme_id,
             ..
@@ -40,6 +42,7 @@ impl Base {
         Rc::new(Self {
             asset_id,
             module_id,
+            stable_module_id,
             theme_id,
             instructions: base_content.instructions,
             backgrounds: base_content.backgrounds,

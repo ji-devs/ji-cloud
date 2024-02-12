@@ -12,7 +12,7 @@ use shared::domain::{
             },
             ModuleAssist, ModuleAssistType,
         },
-        ModuleId,
+        ModuleId, StableModuleId,
     },
 };
 use utils::prelude::*;
@@ -24,6 +24,7 @@ use web_sys::HtmlElement;
 pub struct Base {
     pub asset_id: AssetId,
     pub module_id: ModuleId,
+    pub stable_module_id: StableModuleId,
     pub asset: Asset,
     pub theme_id: ThemeId,
     pub settings: PlaySettings,
@@ -47,6 +48,7 @@ impl Base {
         let InitFromRawArgs {
             asset_id,
             module_id,
+            stable_module_id,
             asset,
             raw,
             theme_id,
@@ -76,6 +78,7 @@ impl Base {
         let base = Rc::new(Self {
             asset_id,
             module_id,
+            stable_module_id,
             asset,
             theme_id,
             settings: content.play_settings,

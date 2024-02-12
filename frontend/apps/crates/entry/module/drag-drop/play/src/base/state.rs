@@ -11,7 +11,7 @@ use shared::domain::{
             },
             ModuleAssistType,
         },
-        ModuleId,
+        ModuleId, StableModuleId,
     },
 };
 use utils::prelude::*;
@@ -22,6 +22,7 @@ use std::rc::Rc;
 pub struct Base {
     pub asset_id: AssetId,
     pub module_id: ModuleId,
+    pub stable_module_id: StableModuleId,
     pub asset: Asset,
     pub theme_id: ThemeId,
     pub instructions: ModuleAssist,
@@ -40,6 +41,7 @@ impl Base {
         let InitFromRawArgs {
             asset_id,
             module_id,
+            stable_module_id,
             asset,
             raw,
             theme_id,
@@ -51,6 +53,7 @@ impl Base {
         Rc::new(Self {
             asset_id,
             module_id,
+            stable_module_id,
             asset,
             theme_id,
             instructions: content.instructions,
