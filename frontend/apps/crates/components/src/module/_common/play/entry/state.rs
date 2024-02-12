@@ -2,20 +2,22 @@ use crate::audio::mixer::AUDIO_MIXER;
 use dominator::{clone, Dom, DomHandle};
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
+use shared::api::endpoints;
 use shared::domain::asset::{Asset, AssetId, AssetType, DraftOrLive, PrivacyLevel};
-use shared::domain::course::CourseGetDraftPath;
+use shared::domain::course::{CourseGetDraftPath, CourseGetLivePath};
 use shared::domain::jig::player::ModuleConfig;
+use shared::domain::jig::{
+    AudioEffects, JigAdminData, JigData, JigId, JigPlayerSettings, JigResponse,
+};
 use shared::domain::module::body::{ModuleAssist, ModuleAssistType};
-use shared::domain::playlist::PlaylistGetDraftPath;
-use shared::domain::resource::ResourceGetDraftPath;
-use shared::{
-    api::endpoints::{self, module::*},
-    domain::{
-        jig::*,
-        module::{
-            body::{BodyExt, ModeExt, StepExt, ThemeId},
-            *,
-        },
+use shared::domain::module::{ModuleBody, ModuleId, StableModuleId};
+use shared::domain::playlist::{PlaylistGetDraftPath, PlaylistGetLivePath};
+use shared::domain::resource::{ResourceGetDraftPath, ResourceGetLivePath};
+use shared::domain::{
+    jig::{JigGetDraftPath, JigGetLivePath},
+    module::{
+        body::{BodyExt, ModeExt, StepExt, ThemeId},
+        ModuleGetDraftPath, ModuleGetLivePath,
     },
 };
 use std::cell::RefCell;
@@ -145,39 +147,76 @@ where
                         plays: 0,
                     }))
                 } else {
-                    let resp = match _self.opts.asset_id {
-                        AssetId::JigId(jig_id) => {
-                            endpoints::jig::GetDraft::api_no_auth(
-                                JigGetDraftPath(jig_id.clone()),
-                                None
-                            )
-                                .await
-                                .map(|jig| Asset::Jig(jig))
+                    let resp = match draft_or_live {
+                        DraftOrLive::Draft => match _self.opts.asset_id {
+                            AssetId::JigId(jig_id) => {
+                                endpoints::jig::GetDraft::api_no_auth(
+                                    JigGetDraftPath(jig_id.clone()),
+                                    None
+                                )
+                                    .await
+                                    .map(|jig| Asset::Jig(jig))
+                            },
+                            AssetId::ResourceId(resource_id) => {
+                                // resources only played for thumbnail generation
+                                endpoints::resource::GetDraft::api_no_auth(
+                                    ResourceGetDraftPath(resource_id),
+                                    None
+                                )
+                                    .await
+                                    .map(|resource| Asset::Resource(resource))
+                            },
+                            AssetId::PlaylistId(playlist_id) => {
+                                endpoints::playlist::GetDraft::api_no_auth(
+                                    PlaylistGetDraftPath(playlist_id.clone()),
+                                    None
+                                )
+                                    .await
+                                    .map(|playlist| Asset::Playlist(playlist))
+                            },
+                            AssetId::CourseId(course_id) => {
+                                endpoints::course::GetDraft::api_no_auth(
+                                    CourseGetDraftPath(course_id.clone()),
+                                    None
+                                )
+                                    .await
+                                    .map(|course| Asset::Course(course))
+                            }
                         },
-                        AssetId::ResourceId(resource_id) => {
-                            // resources only played for thumbnail generation
-                            endpoints::resource::GetDraft::api_no_auth(
-                                ResourceGetDraftPath(resource_id),
-                                None
-                            )
-                                .await
-                                .map(|resource| Asset::Resource(resource))
-                        },
-                        AssetId::PlaylistId(playlist_id) => {
-                            endpoints::playlist::GetDraft::api_no_auth(
-                                PlaylistGetDraftPath(playlist_id.clone()),
-                                None
-                            )
-                                .await
-                                .map(|playlist| Asset::Playlist(playlist))
-                        },
-                        AssetId::CourseId(course_id) => {
-                            endpoints::course::GetDraft::api_no_auth(
-                                CourseGetDraftPath(course_id.clone()),
-                                None
-                            )
-                                .await
-                                .map(|course| Asset::Course(course))
+                        DraftOrLive::Live => match _self.opts.asset_id {
+                            AssetId::JigId(jig_id) => {
+                                endpoints::jig::GetLive::api_no_auth(
+                                    JigGetLivePath(jig_id.clone()),
+                                    None
+                                )
+                                    .await
+                                    .map(|jig| Asset::Jig(jig))
+                            },
+                            AssetId::ResourceId(resource_id) => {
+                                // resources only played for thumbnail generation
+                                endpoints::resource::GetLive::api_no_auth(
+                                    ResourceGetLivePath(resource_id),
+                                    None
+                                )
+                                    .await
+                                    .map(|resource| Asset::Resource(resource))
+                            },
+                            AssetId::PlaylistId(playlist_id) => {
+                                endpoints::playlist::GetLive::api_no_auth(
+                                    PlaylistGetLivePath(playlist_id.clone()),
+                                    None
+                                )
+                                    .await
+                                    .map(|playlist| Asset::Playlist(playlist))
+                            },
+                            AssetId::CourseId(course_id) => {
+                                endpoints::course::GetLive::api_no_auth(
+                                    CourseGetLivePath(course_id.clone()),
+                                    None
+                                )
+                                    .await
+                                    .map(|course| Asset::Course(course))
+                            }
                         }
                     };
 
@@ -235,13 +274,13 @@ where
                 LoadingKind::Remote => {
                     let resp = match draft_or_live {
                         DraftOrLive::Draft => {
-                            GetDraft::api_no_auth(
+                            endpoints::module::GetDraft::api_no_auth(
                                 ModuleGetDraftPath(AssetType::from(&_self.opts.asset_id), _self.opts.module_id.clone()),
                                 None
                             ).await
                         },
                         DraftOrLive::Live => {
-                            GetLive::api_no_auth(
+                            endpoints::module::GetLive::api_no_auth(
                                 ModuleGetLivePath(AssetType::from(&_self.opts.asset_id), _self.opts.module_id.clone()),
                                 None
                             ).await
@@ -267,10 +306,16 @@ where
                     _self.opts.module_id,
                     _self.asset.borrow().as_ref().unwrap_ji().clone()
                 );
+                log::info!("{:#?}", module_id);
+
                 let lite_module = match &asset {
-                    Asset::Jig(jig) => jig.jig_data.modules.iter().find(|m| m.id == module_id),
+                    Asset::Jig(jig) => {
+                        log::info!("{:#?}", jig.jig_data.modules);
+                        jig.jig_data.modules.iter().find(|m| m.id == module_id)
+                    },
                     _ => asset.cover(),
-                }.unwrap_ji();
+                };
+                let lite_module = lite_module.unwrap_ji();
                 assert_eq!(lite_module.id, module_id);
                 let stable_module_id = lite_module.stable_id;
                 let base = init_from_raw(InitFromRawArgs::new(asset_id, module_id, stable_module_id, asset, raw, init_source)).await;
