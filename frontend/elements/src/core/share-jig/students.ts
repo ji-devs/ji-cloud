@@ -12,10 +12,7 @@ import "@elements/core/buttons/rectangle";
 import { nothing } from "lit-html";
 import { classMap } from "lit-html/directives/class-map";
 
-const STR_STUDENTS_HEADER = "Share with Students";
-const STR_STUDENTS_URL_LABEL = "Ask the students to go to:";
-const STR_STUDENTS_CODE_LABEL = "Student code:";
-const STR_STUDENTS_CODE_VALID_UNTIL = "Valid until";
+const STR_CODE_HEADER = "Share with Code";
 
 const formatter = new Intl.DateTimeFormat(undefined, {
     year: "numeric",
@@ -41,14 +38,20 @@ export class _ extends LitElement {
                     padding: 0 32px 32px 32px;
                     display: grid;
                     row-gap: 8px;
-                    width: 420px;
+                    width: 305px;
+                    min-height: 250px;
                 }
                 label {
                     display: grid;
-                    color: var(--main-blue);
+                    font-weight: 14px;
                 }
-                .no-code label {
-                    color: var(--light-blue-4);
+                label strong {
+                    font-weight: 600;
+                }
+                label a {
+                    color: var(--main-blue);
+                    font-weight: 600;
+                    text-decoration: none;
                 }
                 input {
                     background-color: var(--light-blue-2);
@@ -60,9 +63,6 @@ export class _ extends LitElement {
                     border: 0;
                     width: 100%;
                     box-sizing: border-box;
-                }
-                .no-code input {
-                    background-color: var(--light-blue-1);
                 }
                 .field-url .under {
                     display: flex;
@@ -92,7 +92,7 @@ export class _ extends LitElement {
     url: string = "";
 
     @property()
-    code: string = "";
+    code?: string;
 
     @property({ type: Number })
     secondsToExpire?: number;
@@ -125,33 +125,35 @@ export class _ extends LitElement {
             >
                 <slot slot="back" name="back"></slot>
                 <slot slot="close" name="close"></slot>
-                <h3 slot="heading">${STR_STUDENTS_HEADER}</h3>
+                <h3 slot="heading">${STR_CODE_HEADER}</h3>
                 <div slot="body" class="body">
-                    <slot name="gen-code-button"></slot>
-                    <div class="field-url">
-                        <label>
-                            ${STR_STUDENTS_URL_LABEL}
-                            <input readonly value="${this.url}" />
-                        </label>
-                        <div class="under">
-                            <slot name="copy-url"></slot>
+                    ${ !this.code ? html`
+                        <slot name="gen-code-button"></slot>
+                    ` : html`
+                        <div class="field-code">
+                            <label>
+                                <span>Go to <a href="/">Jigzi.org</a> and input this code:</span>
+                                <input readonly value="${this.code}" />
+                            </label>
+                            <div class="under">
+                                <span class="valid-until">
+                                    ${this.secondsToExpire ? html`
+                                        Valid until ${this.exprDateLabel}
+                                    ` : nothing}
+                                </span>
+                                <slot name="copy-code"></slot>
+                            </div>
                         </div>
-                    </div>
-                    <div class="field-code">
-                        <label>
-                            ${STR_STUDENTS_CODE_LABEL}
-                            <input readonly value="${this.code}" />
-                        </label>
-                        <div class="under">
-                            <span class="valid-until">
-                                ${this.secondsToExpire ? html`
-                                    ${STR_STUDENTS_CODE_VALID_UNTIL}
-                                    ${this.exprDateLabel}
-                                ` : nothing}
-                            </span>
-                            <slot name="copy-code"></slot>
+                        <div class="field-url">
+                            <label>
+                                <span><strong>OR</strong> go straight to link:</span>
+                                <input readonly value="${this.url}" />
+                            </label>
+                            <div class="under">
+                                <slot name="copy-url"></slot>
+                            </div>
                         </div>
-                    </div>
+                    ` }
                 </div>
             </popup-body>
         `;

@@ -2,14 +2,19 @@ use std::rc::Rc;
 
 use dominator::{clone, html, with_node, Dom, EventOptions};
 use futures_signals::signal::{Mutable, SignalExt};
-use js_sys::encode_uri_component;
-use shared::{config::JIG_PLAYER_SESSION_VALID_DURATION_SECS, domain::asset::Asset};
+use js_sys::{encode_uri_component, Function, Reflect};
+use serde::{Deserialize, Serialize};
+use shared::{
+    config::JIG_PLAYER_SESSION_VALID_DURATION_SECS,
+    domain::{asset::Asset, jig::TextDirection},
+};
 use utils::{
     clipboard, events, paywall,
     prelude::SETTINGS,
     routes::{KidsRoute, Route},
     unwrap::UnwrapJiExt,
 };
+use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{window, HtmlElement};
 
 use crate::overlay::handle::OverlayHandle;
@@ -17,19 +22,21 @@ use crate::overlay::handle::OverlayHandle;
 use super::state::{ActivePopup, ShareAsset};
 
 const STR_BACK: &str = "Back";
-const STR_STUDENTS_COPY_CODE_LABEL: &str = "Copy code";
-const STR_STUDENTS_COPIED_CODE_LABEL: &str = "Student code copied";
+const STR_CODE_COPY_CODE_LABEL: &str = "Copy code";
+const STR_CODE_COPIED_CODE_LABEL: &str = "Code copied";
 const STR_STUDENTS_COPY_URL_LABEL: &str = "Copy URL";
 const STR_STUDENTS_COPIED_URL_LABEL: &str = "URL copied";
 const STR_EMBED_COPY_CODE_LABEL: &str = "Copy code";
 const STR_EMBED_COPIED_CODE_LABEL: &str = "Embed code copied";
 const STR_CLASSROOM: &str = "Share to Google Classroom";
 const STR_MS_TEAMS: &str = "Share to Microsoft Teams";
-const STR_STUDENTS_LABEL: &str = "Share with students";
+const STR_CODE_LABEL: &str = "Share with code";
 const STR_EMBED_LABEL: &str = "Embed this ";
+const STR_SHARE_LABEL: &str = "Share on social";
 const STR_COPY_LABEL_1: &str = "Copy ";
 const STR_COPY_LABEL_2: &str = " link";
 const STR_COPIED_LABEL: &str = " link copied";
+const STR_DISPLAY_SCORE: &str = "Display score";
 
 impl ShareAsset {
     pub fn render(self: Rc<Self>, anchor: Dom, slot: Option<&str>) -> Dom {
@@ -68,8 +75,8 @@ impl ShareAsset {
                                         Some(ActivePopup::ShareMain) => {
                                             Some(state.render_share_main())
                                         },
-                                        Some(ActivePopup::ShareStudents) => {
-                                            Some(state.render_share_students())
+                                        Some(ActivePopup::ShareCode) => {
+                                            Some(state.render_share_code())
                                         },
                                         Some(ActivePopup::ShareEmbed) => {
                                             Some(state.render_share_embed())
@@ -117,13 +124,37 @@ impl ShareAsset {
         let state = self;
         html!("share-jig-main", {
             .prop("slot", "overlay")
+            .apply_if(state.asset.is_jig(), |dom| {
+                dom.child(html!("input-switch-direction", {
+                    .prop("slot", "settings")
+                    .prop_signal("direction", state.direction.signal().map(|dir| {
+                        match dir {
+                            TextDirection::LeftToRight => "ltr",
+                            TextDirection::RightToLeft => "rtl",
+                        }
+                    }))
+                    .event(clone!(state => move|evt :events::CustomDirection| {
+                        state.direction.set(evt.direction());
+                    }))
+                }))
+                .child(html!("label", {
+                    .prop("slot", "settings")
+                    .child(html!("input-switch", {
+                        .prop_signal("enabled", state.display_score.signal())
+                        .event(clone!(state => move|evt :events::CustomToggle| {
+                            state.display_score.set(evt.value());
+                        }))
+                    }))
+                    .text(STR_DISPLAY_SCORE)
+                }))
+            })
             // TODO: temporary until we have student-codes for playlists
             .apply_if(state.asset.is_playlist(), |dom| {
                 dom.child(html!("share-jig-option", {
                     .prop("kind", "students")
                     .text_signal(temp_playlist_link_copied.signal().map(clone!(state => move |copied| {
                         match copied {
-                            false => STR_STUDENTS_LABEL.to_owned(),
+                            false => STR_CODE_LABEL.to_owned(),
                             true => format!("{}{STR_COPIED_LABEL}", state.asset_type_name()),
                         }
                     })))
@@ -138,17 +169,19 @@ impl ShareAsset {
             })
             .apply_if(state.asset.is_jig(), |dom| {
                 dom.child(html!("share-jig-option", {
-                    .prop("kind", "students")
-                    .text(STR_STUDENTS_LABEL)
+                    .prop("slot", "student")
+                    .prop("kind", "code")
+                    .text(STR_CODE_LABEL)
                     .event(clone!(state => move |_: events::Click| {
                         if !state.can_play() {
                             return;
                         }
-                        state.active_popup.set(Some(ActivePopup::ShareStudents));
+                        state.active_popup.set(Some(ActivePopup::ShareCode));
                     }))
                 }))
             })
             .child(html!("share-jig-option", {
+                .prop("slot", "student")
                 .prop("kind", "google-classroom")
                 .text(STR_CLASSROOM)
                 .event(clone!(state => move |_: events::Click| {
@@ -159,6 +192,7 @@ impl ShareAsset {
                 }))
             }))
             .child(html!("share-jig-option", {
+                .prop("slot", "student")
                 .prop("kind", "ms-teams")
                 .text(STR_MS_TEAMS)
                 .event(clone!(state => move |_: events::Click| {
@@ -168,19 +202,8 @@ impl ShareAsset {
                     share_to("https://teams.microsoft.com/share?href=", &state.asset_link(true, false));
                 }))
             }))
-            .apply_if(!state.asset.is_resource(), |dom| {
-                dom.child(html!("share-jig-option", {
-                    .prop("kind", "embed")
-                    .text(&format!("{STR_EMBED_LABEL}{}", state.asset_type_name()))
-                    .event(clone!(state => move |_: events::Click| {
-                        if !state.can_play() {
-                            return;
-                        }
-                        state.active_popup.set(Some(ActivePopup::ShareEmbed));
-                    }))
-                }))
-            })
             .child(html!("share-jig-option", {
+                .prop("slot", "other")
                 .prop("kind", "copy")
                 .text_signal(state.link_copied.signal().map(clone!(state => move |copied| {
                     match copied {
@@ -193,6 +216,35 @@ impl ShareAsset {
                     ShareAsset::set_copied_mutable(state.link_copied.clone());
                 }))
             }))
+            .apply_if(!state.asset.is_resource(), |dom| {
+                dom.child(html!("share-jig-option", {
+                    .prop("slot", "other")
+                    .prop("kind", "embed")
+                    .text(&format!("{STR_EMBED_LABEL}{}", state.asset_type_name()))
+                    .event(clone!(state => move |_: events::Click| {
+                        if !state.can_play() {
+                            return;
+                        }
+                        state.active_popup.set(Some(ActivePopup::ShareEmbed));
+                    }))
+                }))
+            })
+            .apply_if(has_native_share(), |dom| {
+                dom.child(html!("share-jig-option", {
+                    .prop("slot", "other")
+                    .prop("kind", "share")
+                    .text(&STR_SHARE_LABEL)
+                    .event(clone!(state => move |_: events::Click| {
+                        state.active_popup.set(None);
+                        const STR_AMAZING_JIG: &str = "Found this amazing game on Jigzi!";
+                        native_share(ShareData {
+                            url: state.asset_link(false, true),
+                            text: STR_AMAZING_JIG.to_string(),
+                            title: STR_AMAZING_JIG.to_string(),
+                        });
+                    }))
+                }))
+            })
             .child(html!("fa-button", {
                 .prop("slot", "close")
                 .prop("icon", "fa-light fa-xmark")
@@ -203,16 +255,16 @@ impl ShareAsset {
         })
     }
 
-    fn render_share_students(self: &Rc<Self>) -> Dom {
+    fn render_share_code(self: &Rc<Self>) -> Dom {
         let state = self;
         html!("share-jig-students", {
             .prop("slot", "overlay")
             .prop_signal("url", state.student_code.signal_cloned().map(|student_code| {
                 match student_code {
-                    None => String::new(),
+                    None => None,
                     Some(student_code) => {
-                        let url = SETTINGS.get().unwrap_ji().remote_target.pages_url_iframe();
-                        url + &Route::Kids(KidsRoute::StudentCode(Some(student_code))).to_string()
+                        let url = SETTINGS.get().unwrap_ji().remote_target.pages_url();
+                        Some(url + &Route::Kids(KidsRoute::StudentCode(Some(student_code))).to_string())
                     },
                 }
             }))
@@ -273,7 +325,7 @@ impl ShareAsset {
                     .prop("color", "blue")
                     .prop_signal("disabled", state.student_code.signal_ref(|x| x.is_none()))
                     .text_signal(state.copied_student_code.signal().map(|copied| {
-                        if copied { STR_STUDENTS_COPIED_CODE_LABEL } else { STR_STUDENTS_COPY_CODE_LABEL }
+                        if copied { STR_CODE_COPIED_CODE_LABEL } else { STR_CODE_COPY_CODE_LABEL }
                     }))
                     .event(clone!(state => move|_: events::Click| {
                         let student_code = state.student_code.get_cloned().unwrap_ji();
@@ -301,6 +353,7 @@ impl ShareAsset {
                 }),
                 html!("button-rect", {
                     .prop("slot", "back")
+                    .prop("color", "blue")
                     .prop("kind", "text")
                     .text("< ")
                     .text(STR_BACK)
@@ -311,6 +364,7 @@ impl ShareAsset {
                 html!("div", {
                     .prop("slot", "copy")
                     .child(html!("button-rect", {
+                        .prop("color", "blue")
                         .prop("kind", "text")
                         .text_signal(state.copied_embed.signal().map(|copied| {
                             if copied { STR_EMBED_COPIED_CODE_LABEL } else { STR_EMBED_COPY_CODE_LABEL }
@@ -331,4 +385,25 @@ impl ShareAsset {
             ])
         })
     }
+}
+
+fn has_native_share() -> bool {
+    !Reflect::get(&window().unwrap().navigator(), &JsValue::from_str("share"))
+        .unwrap()
+        .is_undefined()
+}
+
+#[derive(Serialize, Deserialize)]
+struct ShareData {
+    pub url: String,
+    pub text: String,
+    pub title: String,
+}
+
+fn native_share(data: ShareData) {
+    let data = serde_wasm_bindgen::to_value(&data).unwrap_ji();
+    let share = Reflect::get(&window().unwrap().navigator(), &JsValue::from_str("share")).unwrap();
+
+    let share: Function = share.dyn_into().unwrap();
+    share.call1(&share, &data).unwrap();
 }

@@ -46,7 +46,7 @@ impl JigSettings {
                 html!("jig-preview-settings", {
                     .prop("slot", "preview")
                     .children(&mut [
-                        html!("jig-preview-settings-direction", {
+                        html!("input-switch-direction", {
                             .prop_signal("direction", state.jig.direction.signal().map(|dir| {
                                 match dir {
                                     TextDirection::LeftToRight => "ltr",

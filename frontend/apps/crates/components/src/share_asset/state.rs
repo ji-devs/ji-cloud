@@ -3,6 +3,7 @@ use std::rc::Rc;
 use awsm_web::loaders::helpers::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::asset::Asset;
+use shared::domain::jig::TextDirection;
 use utils::asset::{
     CoursePlayerOptions, JigPlayerOptions, PlaylistPlayerOptions, ResourceContentExt,
 };
@@ -19,6 +20,9 @@ pub struct ShareAsset {
     pub link_copied: Mutable<bool>,
     pub copied_student_url: Mutable<bool>,
     pub copied_student_code: Mutable<bool>,
+    // play settings
+    pub direction: Mutable<TextDirection>,
+    pub display_score: Mutable<bool>,
 }
 
 impl ShareAsset {
@@ -32,6 +36,8 @@ impl ShareAsset {
             link_copied: Mutable::new(false),
             copied_student_url: Mutable::new(false),
             copied_student_code: Mutable::new(false),
+            direction: Mutable::new(TextDirection::default()),
+            display_score: Mutable::new(bool::default()),
         })
     }
 
@@ -57,6 +63,8 @@ impl ShareAsset {
                     JigPlayerOptions {
                         is_student,
                         quota,
+                        direction: self.direction.get(),
+                        display_score: self.display_score.get(),
                         ..Default::default()
                     },
                 )))
@@ -112,6 +120,6 @@ impl ShareAsset {
 #[derive(Clone)]
 pub enum ActivePopup {
     ShareMain,
-    ShareStudents,
+    ShareCode,
     ShareEmbed,
 }

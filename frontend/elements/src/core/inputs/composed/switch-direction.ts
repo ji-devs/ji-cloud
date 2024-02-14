@@ -1,5 +1,4 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
-import "@elements/core/popups/popup-body";
 
 export type Direction = "ltr" | "rtl";
 
@@ -12,7 +11,7 @@ const STR_DIRECTION_LABEL: {
     ["rtl"]: "Right to left",
 };
 
-@customElement("jig-preview-settings-direction")
+@customElement("input-switch-direction")
 export class _ extends LitElement {
     static get styles() {
         return [

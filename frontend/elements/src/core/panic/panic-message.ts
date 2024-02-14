@@ -37,6 +37,8 @@ export class _ extends LitElement {
                     font-weight: 700;
                 }
             `,
+
+            
         ];
     }
 

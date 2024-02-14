@@ -1,6 +1,6 @@
 import { argsToAttrs } from "@utils/attributes";
-import "@elements/entry/asset/edit/sidebar/settings/jig-preview-settings-direction";
-import { Direction } from "@elements/entry/jig/edit/sidebar/settings/jig-preview-settings-direction";
+import "@elements/entry/asset/edit/sidebar/settings/input-switch-direction";
+import { Direction } from "@elements/core/inputs/composed/switch-direction";
 
 export default {
     title: "Entry / Jig / Edit / Sidebar / Settings",
@@ -18,9 +18,9 @@ export const PreviewDirection = (props?: Partial<Args>) => {
     props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
-        <jig-preview-settings-direction ${argsToAttrs(
+        <input-switch-direction ${argsToAttrs(
             props
-        )}></jig-preview-settings-direction>
+        )}></input-switch-direction>
     `;
 };
 PreviewDirection.args = DEFAULT_ARGS;

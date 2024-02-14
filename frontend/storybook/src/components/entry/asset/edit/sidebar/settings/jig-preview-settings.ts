@@ -14,7 +14,7 @@ export const JigPreviewSettings = (props?: Partial<Args>) => {
 
     return `
         <jig-preview-settings ${argsToAttrs(props)} slot="preview">
-            <jig-preview-settings-direction></jig-preview-settings-direction>
+            <input-switch-direction></input-switch-direction>
             <label>
                 <input-switch></input-switch>
                 Display score
