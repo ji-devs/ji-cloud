@@ -17,17 +17,22 @@ export class _ extends LitElement {
                     align-items: center;
                     justify-content: center;
                 }
+                div.container {
+                    margin-top: 48rem; // Offset from next button
+                }
                 section {
                     display: flex;
                     gap: 56rem;
                 }
 
+                div.next {
+                    position: relative;
+                    bottom: -48rem;
+                    display: flex;
+                    justify-content: center;
+                }
+
                 ::slotted([slot="next"]) {
-                    position: absolute;
-                    bottom: 38rem;
-                    right: 48rem;
-                    width: 48rem;
-                    height: 48rem;
                     filter: drop-shadow(0 3rem 12rem rgba(0, 0, 0, 0.24));
                 }
             `,
@@ -36,10 +41,14 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <section>
-                <slot></slot>
-                <slot name="next"></slot>
-            </section>
+            <div class="container">
+                <section>
+                    <slot></slot>
+                </section>
+                <div class="next">
+                    <slot name="next"></slot>
+                </div>
+            </div>
         `;
     }
 }
