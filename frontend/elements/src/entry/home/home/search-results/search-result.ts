@@ -64,8 +64,6 @@ export class _ extends LitElement {
                 :host(:hover) .wrapper, :host([flipped]) .wrapper {
                 /* .wrapper, :host([flipped]) .wrapper { */
                     transform: rotateY(180deg);
-                    /* Safari wont register clicks (on share and like buttons, so left side) if rotated >= 180deg. Don't know why. Remove once Safari is fixed */
-                    transform: rotateY(179deg);
                 }
                 slot[name=front] {
                     /* safari seems to require backface-visibility here */
@@ -86,7 +84,7 @@ export class _ extends LitElement {
                     grid-row: 1;
                     display: grid;
                     grid-template-rows: 1fr auto;
-                    transform: rotateY(180deg);
+                    transform: rotateY(180deg)  translateZ(1px);
                     z-index: 4;
                 }
                 :host([kind=jig]) .back {
@@ -253,7 +251,7 @@ export class _ extends LitElement {
 
                 :host(:hover) img-ui.jiggling {
                     animation: jump 1s ease-in-out;
-                    transform: scaleX(-1) translateY(-60px);
+                    transform: scaleX(-1) translateY(-60px) translateZ(1px);
                 }
 
                 .premium {
@@ -265,18 +263,7 @@ export class _ extends LitElement {
                     top: -26px;
                     pointer-events: none;
                     z-index: 2;
-                }
-
-                /*
-                * [Ty] Added to temporarily disable the jiggling on the back of search result
-                * cards
-                */
-                @media not all and (min-resolution:.001dpcm) {
-                    @supports (-webkit-appearance:none) {
-                        img-ui.jiggling {
-                            display: none;
-                        }
-                    }
+                    transform: translateZ(1px);
                 }
             `,
         ];
@@ -366,9 +353,7 @@ export class _ extends LitElement {
         return html`
             <div class="wrapper">
                 <div class="premium">
-                    ${this.premium ? html`
-                        <img-ui path="icons/pro-icon.svg"></img-ui>`
-                    : nothing}
+                    ${this.premium ? html`<img-ui path="icons/pro-icon.svg"></img-ui>` : nothing}
                 </div>
                 <img-ui
                     class="jiggling"
