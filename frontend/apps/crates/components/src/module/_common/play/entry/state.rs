@@ -300,17 +300,14 @@ where
             };
 
             if let Some((raw, init_source, jig_player)) = raw_source_player {
-
                 let (asset_id, module_id, asset) = (
                     _self.opts.asset_id,
                     _self.opts.module_id,
                     _self.asset.borrow().as_ref().unwrap_ji().clone()
                 );
-                log::info!("{:#?}", module_id);
 
                 let lite_module = match &asset {
                     Asset::Jig(jig) => {
-                        log::info!("{:#?}", jig.jig_data.modules);
                         jig.jig_data.modules.iter().find(|m| m.id == module_id)
                     },
                     _ => asset.cover(),

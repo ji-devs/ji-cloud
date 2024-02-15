@@ -25,4 +25,5 @@ pub(super) struct PlayJig {
     pub id: JigId,
     pub settings: JigPlayerSettings,
     pub token: String,
+    pub name: Mutable<Option<String>>,
 }

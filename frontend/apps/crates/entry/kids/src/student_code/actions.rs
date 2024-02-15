@@ -1,6 +1,7 @@
 use std::rc::Rc;
 
 use dominator::clone;
+use futures_signals::signal::Mutable;
 use shared::{
     api::endpoints::jig,
     domain::jig::codes::{
@@ -31,6 +32,7 @@ impl StudentCode {
                         id: res.jig_id,
                         settings: res.settings,
                         token: res.token,
+                        name: Mutable::new(None),
                     }));
                 },
             }

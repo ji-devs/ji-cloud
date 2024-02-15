@@ -86,6 +86,7 @@ pub fn get_player_settings(settings_state: Rc<SettingsState>) -> JigPlayerOption
         draft_or_live: DraftOrLive::Draft,
         play_token: None,
         quota: false,
+        players_name: None,
     }
 }
 

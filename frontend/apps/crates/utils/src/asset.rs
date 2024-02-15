@@ -205,6 +205,9 @@ pub struct JigPlayerOptions {
 
     #[serde(default)]
     pub play_token: Option<String>,
+
+    #[serde(default)]
+    pub players_name: Option<String>,
 }
 
 impl Default for JigPlayerOptions {
@@ -235,6 +238,7 @@ impl From<JigPlayerSettings> for JigPlayerOptions {
             quota: false,
             draft_or_live: DraftOrLive::Live,
             play_token: None,
+            players_name: None,
         }
     }
 }

@@ -135,6 +135,7 @@ impl JigPlayer {
                 let req = PlayerSessionInstanceCompleteRequest {
                     token,
                     session: state.session_info.borrow().clone(),
+                    players_name: state.player_options.players_name.clone(),
                 };
                 let res = endpoints::jig::codes::instance::Complete::api_with_auth(PlayerSessionInstanceCompletePath(), Some(req)).await;
                 let _ = bail_on_err!(res);
