@@ -245,6 +245,7 @@ pub async fn start_session(
 pub async fn complete_session(
     db: &PgPool,
     session: JigPlaySession,
+    players_name: Option<String>,
     instance_id: Uuid,
     ip_address: IPAddress,
 ) -> Result<(), error::JigCode> {
@@ -253,10 +254,11 @@ pub async fn complete_session(
         //language=SQL
         r#"
             UPDATE jig_code_session
-            SET finished_at = current_timestamp, info=$1
-            WHERE id = $2 and ip_address = $3 and finished_at is null;
+            SET finished_at = current_timestamp, info=$1, players_name=$2
+            WHERE id = $3 and ip_address = $4 and finished_at is null;
         "#,
         session,
+        players_name,
         instance_id,
         ip_address.0,
     )

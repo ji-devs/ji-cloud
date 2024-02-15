@@ -193,5 +193,8 @@ pub mod instance {
 
         /// session
         pub session: JigPlaySession,
+
+        /// Playing's name
+        pub players_name: Option<String>,
     }
 }

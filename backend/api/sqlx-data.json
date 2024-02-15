@@ -368,6 +368,21 @@
     },
     "query": "select exists(select 1 from locale_entry where id = $1 for update) as \"exists!\""
   },
+  "0a4377abb5f1eb886ef3eb9c454946088b76e292b5c0b97907ae5cfefd7ffa04": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Json",
+          "Text",
+          "Uuid",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n            UPDATE jig_code_session\n            SET finished_at = current_timestamp, info=$1, players_name=$2\n            WHERE id = $3 and ip_address = $4 and finished_at is null;\n        "
+  },
   "0b196a94e239793ee64662ed09fe41987e6d1b47ac8035f08d2df0a8f414c983": {
     "describe": {
       "columns": [
@@ -14844,20 +14859,6 @@
       }
     },
     "query": "\ndelete\nfrom playlist_data_resource\nwhere playlist_data_id = $1\n   or playlist_data_id = $2\n    and id = $3\n        "
-  },
-  "e3630d0fc72a4799d5a2ac517eb36abae6e2e8393f0b4fbbf698e092ed719271": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Json",
-          "Uuid",
-          "Text"
-        ]
-      }
-    },
-    "query": "\n            UPDATE jig_code_session\n            SET finished_at = current_timestamp, info=$1\n            WHERE id = $2 and ip_address = $3 and finished_at is null;\n        "
   },
   "e3da19bead8e176b5d8f316d19463ffd6c9afeabcef3bf22510c2d2902417213": {
     "describe": {

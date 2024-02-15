@@ -137,7 +137,14 @@ pub mod instance {
 
         let instance_token: InstanceToken = serde_json::from_value(token)?;
 
-        db::jig::codes::complete_session(&db, req.session, instance_token.sub, ip_address).await?;
+        db::jig::codes::complete_session(
+            &db,
+            req.session,
+            req.players_name,
+            instance_token.sub,
+            ip_address,
+        )
+        .await?;
 
         Ok(HttpResponse::NoContent().finish())
     }
