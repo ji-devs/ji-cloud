@@ -15,6 +15,7 @@ pub struct Animation {
     pub side: Side,
 }
 
+#[derive(Clone)]
 pub struct AnimationState {
     pub x: f64,
     pub y: f64,
@@ -23,21 +24,21 @@ pub struct AnimationState {
 }
 
 impl Animation {
-    pub fn new(_base: &Base, element: &HtmlElement, found_index: usize, side: Side) -> Self {
+    pub fn new(_base: &Base, element: &HtmlElement, side: Side) -> Self {
         let animation = MutableAnimation::new(crate::config::TRANISITION_DURATION);
         animation.animate_to(Percentage::new(1.0));
 
         let (orig_x, orig_y) = get_resize_info().get_element_pos_rem(element);
 
-        let mut dest_x = ((found_index % 2) * 280) as f64;
-        let mut dest_y = 100.0 + (((found_index as f64) / 2.0).floor() * 280.0);
+        let mut dest_x = -5.0;
+        let mut dest_y = -25.0;
 
         if side == Side::Right {
-            dest_x += 10.0;
-            dest_y += 10.0;
+            dest_x += 180.0;
+            dest_y += 20.0;
         }
 
-        let dest_scale = 0.5;
+        let dest_scale = 0.65;
 
         Self {
             animation,
