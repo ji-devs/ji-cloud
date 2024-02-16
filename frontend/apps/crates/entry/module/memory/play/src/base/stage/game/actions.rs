@@ -73,9 +73,10 @@ pub fn evaluate(state: Rc<Base>, id_1: usize, id_2: usize) {
         };
 
         if state.pair_lookup[id_1] == id_2 {
-            let mut found_pairs = state.found_pairs.borrow_mut();
+            let mut found_pairs = state.found_pairs.get_cloned();
             let found_pairs_index = found_pairs.len();
             found_pairs.push((id_1, id_2));
+            state.found_pairs.set(found_pairs);
             if let Some(card) = state.cards.iter().find(|c| c.id == id_1) {
                 card.found_index.set(Some(found_pairs_index));
             }

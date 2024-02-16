@@ -22,7 +22,7 @@ use futures_signals::signal::{self, Mutable, ReadOnlyMutable, Signal, SignalExt}
 use gloo_timers::future::TimeoutFuture;
 use rand::prelude::*;
 use std::future::Future;
-use std::{cell::RefCell, rc::Rc};
+use std::rc::Rc;
 use utils::prelude::*;
 
 pub struct Base {
@@ -36,13 +36,14 @@ pub struct Base {
     pub theme_id: ThemeId,
     pub background: Option<Background>,
     pub flip_state: Mutable<FlipState>,
-    pub found_pairs: RefCell<Vec<(usize, usize)>>,
+    pub found_pairs: Mutable<Vec<(usize, usize)>>,
     pub instructions: ModuleAssist,
     /// Feedback to play when the activity ends
     pub feedback: ModuleAssist,
     pub feedback_signal: Mutable<Option<ModuleAssist>>,
     pub settings: PlayerSettings,
     pub module_phase: Mutable<ModulePlayPhase>,
+    pub is_animating: Mutable<usize>,
 }
 
 #[derive(Debug, Clone)]
@@ -137,12 +138,13 @@ impl Base {
             theme_id,
             background: content.base.background,
             flip_state: Mutable::new(FlipState::None),
-            found_pairs: RefCell::new(Vec::new()),
+            found_pairs: Mutable::new(Vec::new()),
             instructions: content.base.instructions,
             feedback: content.base.feedback,
             feedback_signal: Mutable::new(None),
             settings: content.player_settings,
             module_phase: init_args.play_phase,
+            is_animating: Mutable::new(0),
         })
     }
 
