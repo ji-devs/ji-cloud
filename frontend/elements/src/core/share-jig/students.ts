@@ -64,14 +64,11 @@ export class _ extends LitElement {
                     width: 100%;
                     box-sizing: border-box;
                 }
-                .field-url .under {
-                    display: flex;
-                    justify-content: flex-end;
-                    align-items: center;
-                    column-gap: 8px;
-                }
                 .field-code input {
-                    font-size: 48px;
+                    font-size: 32px;
+                    font-weight: 300;
+                    text-align: center;
+                    padding-top: 32px;
                 }
                 .field-code .under {
                     display: flex;
@@ -83,6 +80,29 @@ export class _ extends LitElement {
                 }
                 .field-code ::slotted([slot="copy-code"]) {
                     grid-column: 2;
+                }
+                .field-code .code-illustration {
+                    display: grid;
+                    position: relative;
+                    justify-content: center;
+                }
+                .field-code .code-illustration span {
+                    font-size: 13px;
+                    font-weight: 600;
+                    position: absolute;
+                    top: 100%;
+                    left: 50%;
+                    translate: -50% 0;
+                    background-color: var(--light-blue-4);
+                    border-bottom-left-radius: 12px;
+                    border-bottom-right-radius: 12px;
+                    padding: 2px 6px;
+                }
+                .field-url .under {
+                    display: flex;
+                    justify-content: flex-end;
+                    align-items: center;
+                    column-gap: 8px;
                 }
             `,
         ];
@@ -133,6 +153,10 @@ export class _ extends LitElement {
                         <div class="field-code">
                             <label>
                                 <span>Go to <a href="/">Jigzi.org</a> and input this code:</span>
+                                <div class="code-illustration">
+                                    <img-ui path="core/page-header/kids.svg"></img-ui>
+                                    <span>Student Code</span>
+                                </div>
                                 <input readonly value="${this.code}" />
                             </label>
                             <div class="under">

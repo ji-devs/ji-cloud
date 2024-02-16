@@ -36,7 +36,7 @@ const STR_SHARE_LABEL: &str = "Share on social";
 const STR_COPY_LABEL_1: &str = "Copy ";
 const STR_COPY_LABEL_2: &str = " link";
 const STR_COPIED_LABEL: &str = " link copied";
-const STR_DISPLAY_SCORE: &str = "Display score";
+const STR_DISPLAY_SCORE: &str = "Scoring & Assessment";
 
 impl ShareAsset {
     pub fn render(self: Rc<Self>, anchor: Dom, slot: Option<&str>) -> Dom {
