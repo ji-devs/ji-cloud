@@ -17,7 +17,7 @@ impl Sidebar {
             .prop("kind", "share")
             .prop_signal("active", share_jig.active_popup.signal_cloned().map(|active| active.is_some()))
             .event(clone!(state => move |_: events::Click| {
-                state.track_action("Information Click");
+                state.track_action("Share Click");
             }))
         });
 

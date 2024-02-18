@@ -13,7 +13,7 @@ export class _ extends LitElement {
                 }
                 header {
                     padding: 12px 12px 10px 12px;
-                    height: 80px;
+                    min-height: 80px;
                 }
                 nav {
                     display: flex;

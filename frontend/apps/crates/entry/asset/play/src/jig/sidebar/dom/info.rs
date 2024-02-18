@@ -1,6 +1,7 @@
 use std::rc::Rc;
 
-use dominator::{clone, html, Dom};
+use components::overlay::handle::OverlayHandle;
+use dominator::{clone, html, with_node, Dom};
 use futures_signals::{
     map_ref,
     signal::{Signal, SignalExt},
@@ -17,45 +18,60 @@ use utils::{
     routes::{AssetPlayRoute, AssetRoute, CommunityMembersRoute, CommunityRoute, Route},
     unwrap::UnwrapJiExt,
 };
+use web_sys::HtmlElement;
 
 use super::{super::Sidebar, report};
 
 impl Sidebar {
     pub fn render_info(self: &Rc<Self>) -> Dom {
         let state = self;
-        html!("anchored-overlay", {
-            .prop("positionY", "bottom-out")
-            .prop("positionX", "left-in")
-            .prop("styled", true)
-            .prop("slot", "actions")
-            .prop_signal("open", state.info_open_signal())
-            .event(clone!(state => move |_: events::Close| {
-                state.info_popup_active.set(false);
-            }))
-            .child(html!("jig-play-sidebar-action", {
-                .prop("slot", "anchor")
-                .prop("kind", "info")
-                .prop_signal("active", state.info_open_signal())
-                .event(clone!(state => move |_: events::Click| {
-                    let mut info_popup_active = state.info_popup_active.lock_mut();
-                    *info_popup_active = !*info_popup_active;
-                    state.track_action("Information Click");
+        html!("empty-fragment" => HtmlElement, {
+            .with_node!(elem => {
+                .prop("slot", "actions")
+                .event(clone!(state => move |_: events::Close| {
+                    state.info_popup_active.set(false);
                 }))
-            }))
-            .child_signal({
-                (map_ref!{
-                    let info_popup_active = state.info_popup_active.signal_cloned(),
-                    let jig = state.player_state.jig.signal_cloned() => {
-                        (*info_popup_active, jig.clone())
-                    }
-                }).map(clone!(state => move|(info_popup_active, jig)| {
-                    match (info_popup_active, jig) {
-                        (true, Some(jig)) => {
-                            Some(state.render_jig_info(&jig))
-                        },
-                        _ => None,
-                    }
+                .child(html!("empty-fragment", {
+                    .style("display", "flex")
+                    .event(clone!(state => move |_: events::Click| {
+                        let mut info_popup_active = state.info_popup_active.lock_mut();
+                        *info_popup_active = !*info_popup_active;
+                        state.track_action("Information Click");
+                    }))
+                    .child(html!("jig-play-sidebar-action", {
+                        .prop("kind", "info")
+                        .prop_signal("active", state.info_open_signal())
+                    }))
                 }))
+                .apply(OverlayHandle::lifecycle(
+                    clone!(state => move || {
+                        html!("overlay-content", {
+                            .prop("target", &elem)
+                            .prop("contentAnchor", "oppositeH")
+                            .prop("targetAnchor", "tr")
+                            .event(clone!(state => move |_:events::Close| {
+                                state.info_popup_active.set(false);
+                            }))
+                            .child(html!("empty-fragment", {
+                                .child_signal({
+                                    (map_ref!{
+                                        let info_popup_active = state.info_popup_active.signal_cloned(),
+                                        let jig = state.player_state.jig.signal_cloned() => {
+                                            (*info_popup_active, jig.clone())
+                                        }
+                                    }).map(clone!(state => move|(info_popup_active, jig)| {
+                                        match (info_popup_active, jig) {
+                                            (true, Some(jig)) => {
+                                                Some(state.render_jig_info(&jig))
+                                            },
+                                            _ => None,
+                                        }
+                                    }))
+                                })
+                            }))
+                        })
+                    })
+                ))
             })
         })
     }
@@ -93,9 +109,9 @@ impl Sidebar {
                     .prop("to", range.1)
                 }))
             })))
-            .child(html!("button-empty", {
+            .child(html!("fa-button", {
                 .prop("slot", "close")
-                .text("×")
+                .prop("icon", "fa-light fa-xmark")
                 .event(clone!(state => move |_: events::Click| {
                     state.info_popup_active.set(false);
                 }))

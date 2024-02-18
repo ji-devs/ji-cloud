@@ -17,13 +17,17 @@ export class _ extends LitElement {
                 :host {
                     display: block;
                     width: 400px;
-                    background-color: #ffffff;
                     font-size: 14px;
                 }
                 .body {
-                    padding: 13px 24px;
+                    padding: 0 24px 24px 24px;
                     overflow-y: auto;
                     max-height: 496px;
+                }
+                popup-body {
+                    border-radius: 16px;
+                    box-shadow: rgb(0 0 0 / 25%) 0px 3px 16px 0px;
+                    background-color: #ffffff;
                 }
                 .body section {
                     padding: 20px 0;
@@ -200,7 +204,7 @@ export class _ extends LitElement {
             <popup-body>
                 <slot slot="close" name="close"></slot>
                 <h3 slot="heading">${this.name}</h3>
-                <h4 slot="author-line">                
+                <h4 slot="author-line">
                     <div class="author-published">
                             <a href=${this.href} .target=${this.target}>
                                 <div class="author">
