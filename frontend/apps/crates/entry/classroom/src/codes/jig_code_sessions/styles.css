@@ -8,7 +8,6 @@
     background-color: #ffffff;
 }
 .table {
-    --module-count: 4;
     display: grid;
     grid-template-columns: 40px auto repeat(var(--module-count), 1fr);
     background-color: #ffffff;

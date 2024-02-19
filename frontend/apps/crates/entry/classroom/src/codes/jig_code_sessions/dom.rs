@@ -81,6 +81,7 @@ impl CodeSessions {
         let jig_id = jig.jig.id;
         html!("div", {
             .class("table")
+            .style("--module-count", jig.jig.jig_data.modules.len().to_string())
             .child(html!("div", {
                 .class("header")
                 .child(html!("div", {
