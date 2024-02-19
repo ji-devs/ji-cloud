@@ -125,7 +125,8 @@ impl ShareAsset {
         html!("share-jig-main", {
             .prop("slot", "overlay")
             .apply_if(state.asset.is_jig(), |dom| {
-                dom.child(html!("input-switch-direction", {
+                dom.prop("showSettings", true)
+                .child(html!("input-switch-direction", {
                     .prop("slot", "settings")
                     .prop_signal("direction", state.direction.signal().map(|dir| {
                         match dir {

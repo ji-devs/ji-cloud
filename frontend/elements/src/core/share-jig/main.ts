@@ -2,6 +2,7 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/popups/popup-body";
 import "@elements/core/inputs/composed/switch-direction";
 import "@elements/core/inputs/composed/switch";
+import { nothing } from "lit-html";
 
 const STR_SHARING_OPTIONS = "Sharing Options";
 
@@ -45,15 +46,20 @@ export class _ extends LitElement {
         ];
     }
 
+    @property({ type: Boolean })
+    showSettings = false;
+
     render() {
         return html`
             <popup-body>
                 <slot slot="close" name="close"></slot>
                 <h3 slot="heading">${STR_SHARING_OPTIONS}</h3>
                 <div class="body" slot="body">
-                    <div class="settings">
-                        <slot name="settings"></slot>
-                    </div>
+                    ${ this.showSettings ? html`
+                        <div class="settings">
+                            <slot name="settings"></slot>
+                        </div>
+                    ` : nothing }
                     <div class="options">
                         <slot name="student"></slot>
                         <div class="divider"></div>
