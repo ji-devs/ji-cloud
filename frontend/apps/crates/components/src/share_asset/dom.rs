@@ -403,8 +403,9 @@ struct ShareData {
 
 fn native_share(data: ShareData) {
     let data = serde_wasm_bindgen::to_value(&data).unwrap_ji();
-    let share = Reflect::get(&window().unwrap().navigator(), &JsValue::from_str("share")).unwrap();
+    let navigator = window().unwrap().navigator();
+    let share = Reflect::get(&navigator, &JsValue::from_str("share")).unwrap();
 
     let share: Function = share.dyn_into().unwrap();
-    share.call1(&share, &data).unwrap();
+    share.call1(&navigator, &data).unwrap();
 }
