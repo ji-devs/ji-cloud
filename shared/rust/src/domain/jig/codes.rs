@@ -115,11 +115,59 @@ pub struct JigPlaySession {
     pub modules: Vec<JigPlaySessionModule>,
 }
 
+impl JigPlaySessionModuleGetPointsEarned for JigPlaySession {
+    fn get_points_earned(&self) -> PointsEarned {
+        let mut available = 0;
+        let mut earned = 0;
+        for module in &self.modules {
+            let module_points = module.get_points_earned();
+            available += module_points.available;
+            earned += module_points.earned;
+        }
+        PointsEarned { available, earned }
+    }
+}
+
 /// modules
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum JigPlaySessionModule {
     /// Matching
     Matching(JigPlaySessionMatching),
+}
+
+impl JigPlaySessionModuleGetPointsEarned for JigPlaySessionModule {
+    fn get_points_earned(&self) -> PointsEarned {
+        match self {
+            JigPlaySessionModule::Matching(matching) => matching.get_points_earned(),
+        }
+    }
+}
+
+/// get points earned trait
+pub trait JigPlaySessionModuleGetPointsEarned {
+    /// get points earned method
+    fn get_points_earned(&self) -> PointsEarned;
+}
+
+/// Jig play session module points earned
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct PointsEarned {
+    /// available points to earn
+    pub available: u16,
+    /// points actually earned
+    pub earned: u16,
+}
+impl std::fmt::Display for PointsEarned {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}/{}", self.earned, self.available)
+    }
+}
+impl PointsEarned {
+    /// get percent of points earned
+    pub fn percent(&self) -> u16 {
+        let output = (self.earned as f32 / self.available as f32) * 100.00;
+        output as u16
+    }
 }
 
 /// matching module
@@ -139,6 +187,24 @@ impl JigPlaySessionMatching {
             stable_module_id,
             rounds: vec![],
         }
+    }
+}
+
+impl JigPlaySessionModuleGetPointsEarned for JigPlaySessionMatching {
+    fn get_points_earned(&self) -> PointsEarned {
+        let mut available = 0;
+        let mut earned = 0;
+        for round in &self.rounds {
+            for (_, card) in round {
+                available += 2;
+                earned += match card.failed_tries {
+                    0 => 2,
+                    1 => 1,
+                    _ => 0,
+                };
+            }
+        }
+        PointsEarned { available, earned }
     }
 }
 

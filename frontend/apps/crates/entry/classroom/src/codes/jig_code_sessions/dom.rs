@@ -9,7 +9,9 @@ use futures_signals::{
 };
 use shared::domain::{
     asset::DraftOrLive,
-    jig::codes::{JigCodeSessionResponse, JigPlaySessionModule},
+    jig::codes::{
+        JigCodeSessionResponse, JigPlaySessionModule, JigPlaySessionModuleGetPointsEarned,
+    },
     module::{ModuleBody, ModuleResponse, StableModuleId},
 };
 use std::{collections::HashMap, rc::Rc};
@@ -108,6 +110,10 @@ impl CodeSessions {
                         .text(module.kind.as_str())
                     })
                 }).collect::<Vec<_>>())
+                .child(html!("div", {
+                    .class("cell")
+                    .text("Total")
+                }))
             }))
             .child(html!("div", {
                 .class("thumbnails")
@@ -137,9 +143,13 @@ impl CodeSessions {
                         }))
                     })
                 }).collect::<Vec<_>>())
+                .child(html!("div", {
+                    .class("cell")
+                }))
             }))
             .children(sessions.into_iter().map(clone!(state => move |session| {
                 let open = Mutable::new(false);
+                let total_points_earned = session.info.as_ref().map(|i| i.get_points_earned());
                 let sessions = session.info.unwrap().modules.into_iter().map(|module| {
                     let stable_module_id = match &module {
                         JigPlaySessionModule::Matching(module) => module.stable_module_id,
@@ -186,7 +196,7 @@ impl CodeSessions {
                                 let module = jig.modules.get(&stable_module_id).unwrap().clone();
                                 if let Some(session) = sessions.get(&stable_module_id) {
                                     dom
-                                        .text(&state.get_count(&session))
+                                        .text(&session.get_points_earned().to_string())
                                         .child_signal(open.signal().map(clone!(state, session => move |open| {
                                             open.then(|| {
                                                 state.render_session(&module, &session.clone())
@@ -198,6 +208,16 @@ impl CodeSessions {
                             })
                         })
                     }).collect::<Vec<_>>())
+                    .child(html!("div", {
+                        .class("cell")
+                        .class("total")
+                        .child(html!("span", {
+                            .text(&total_points_earned.as_ref().map(|p| format!("{}%", p.percent())).unwrap_or_default())
+                        }))
+                        .child(html!("span", {
+                            .text(&total_points_earned.map(|p| p.to_string()).unwrap_or_default())
+                        }))
+                    }))
                 })
             })))
         })
@@ -219,14 +239,6 @@ impl CodeSessions {
                 }
             })
         })
-    }
-
-    fn get_count(self: &Rc<Self>, session: &JigPlaySessionModule) -> String {
-        match &session {
-            JigPlaySessionModule::Matching(session) => {
-                super::modules::matching::get_matching_count(&session)
-            }
-        }
     }
 
     fn module_and_session_signal(

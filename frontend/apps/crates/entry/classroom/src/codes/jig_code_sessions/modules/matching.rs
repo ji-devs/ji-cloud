@@ -53,19 +53,3 @@ pub fn render_matching(module: &matching::Content, session: &JigPlaySessionMatch
         )
     })
 }
-
-pub fn get_matching_count(session: &JigPlaySessionMatching) -> String {
-    let mut total = 0;
-    let mut earned = 0;
-    for round in &session.rounds {
-        for (_, card) in round {
-            total += 2;
-            earned += match card.failed_tries {
-                0 => 2,
-                1 => 1,
-                _ => 0,
-            };
-        }
-    }
-    format!("{earned}/{total}")
-}
