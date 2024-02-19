@@ -1,7 +1,13 @@
 use std::rc::Rc;
 
 use dominator::clone;
-use shared::{api::endpoints, domain::jig::JigBrowsePath};
+use shared::{
+    api::endpoints,
+    domain::{
+        asset::DraftOrLive,
+        jig::{JigBrowsePath, JigBrowseQuery},
+    },
+};
 use utils::{bail_on_err, error_ext::ErrorExt, prelude::ApiEndpointExt};
 use wasm_bindgen_futures::spawn_local;
 
@@ -16,7 +22,11 @@ impl Jigs {
     }
 
     async fn load_jigs(self: &Rc<Self>) {
-        let res = endpoints::jig::Browse::api_with_auth(JigBrowsePath(), None)
+        let req = JigBrowseQuery {
+            draft_or_live: Some(DraftOrLive::Live),
+            ..Default::default()
+        };
+        let res = endpoints::jig::Browse::api_with_auth(JigBrowsePath(), Some(req))
             .await
             .toast_on_err();
         let res = bail_on_err!(res);

@@ -120,6 +120,7 @@ impl ApiEndpoint for Publish {
 ///
 /// # Authorization
 /// * One of `Admin`, `AdminAsset`, or `ManageSelfAsset`
+// TODO: Think there should be a BrowseLive and a BrowseDraft endpoint.
 pub struct Browse;
 impl ApiEndpoint for Browse {
     type Req = JigBrowseQuery;
