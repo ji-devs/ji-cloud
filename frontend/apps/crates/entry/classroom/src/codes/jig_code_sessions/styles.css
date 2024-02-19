@@ -8,6 +8,8 @@
     background-color: #ffffff;
 }
 .table {
+    overflow-x: auto;
+    scrollbar-width: thin;
     display: grid;
     grid-template-columns: 40px auto repeat(var(--module-count), 1fr);
     background-color: #ffffff;
@@ -62,6 +64,20 @@
 }
 .round-items {
     display: flex;
-    gap: 30px;
-    justify-content: center;
+    gap: 10px;
+    justify-content: space-evenly;
+}
+.round-item {
+    max-width: 36px;
+    display: grid;
+    grid-template-rows: 36px auto;
+    align-items: center;
+}
+.round-item img-ji {
+    max-height: 36px;
+    max-width: 36px;
+}
+.round-item p {
+    font-size: 12px;
+    white-space: nowrap;
 }

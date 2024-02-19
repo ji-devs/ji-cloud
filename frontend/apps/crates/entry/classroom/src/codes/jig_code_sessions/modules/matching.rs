@@ -27,9 +27,10 @@ pub fn render_matching(module: &matching::Content, session: &JigPlaySessionMatch
                                                     .text(&s)
                                                 }))
                                             },
-                                            CardContent::Image(Some(_i)) => {
+                                            CardContent::Image(Some(image)) => {
                                                 dom.child(html!("img-ji", {
-                                                    // .prop("")
+                                                    .prop("id", image.id.0.to_string())
+                                                    .prop("lib", image.lib.to_str())
                                                 }))
                                             },
                                             CardContent::Image(None) => {
