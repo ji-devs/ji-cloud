@@ -18,6 +18,9 @@ use web_sys::ShadowRoot;
 
 use super::{CodeSessions, JigWithModules};
 
+const DATE_FORMAT: &str = "%h %e, %Y";
+const TIME_FORMAT: &str = "%I:%M %p";
+
 impl Component<CodeSessions> for Rc<CodeSessions> {
     fn styles() -> &'static str {
         include_str!("./styles.css")
@@ -91,6 +94,14 @@ impl CodeSessions {
                     .class("cell")
                     .text("Student's Name")
                 }))
+                .child(html!("div", {
+                    .class("cell")
+                    .text("Started")
+                }))
+                .child(html!("div", {
+                    .class("cell")
+                    .text("Ended")
+                }))
                 .children(jig.jig.jig_data.modules.iter().map(|module| {
                     html!("div", {
                         .class("cell")
@@ -100,6 +111,12 @@ impl CodeSessions {
             }))
             .child(html!("div", {
                 .class("thumbnails")
+                .child(html!("div", {
+                    .class("cell")
+                }))
+                .child(html!("div", {
+                    .class("cell")
+                }))
                 .child(html!("div", {
                     .class("cell")
                 }))
@@ -146,6 +163,20 @@ impl CodeSessions {
                     .child(html!("div", {
                         .class("cell")
                         .text(&session.players_name.unwrap_or_default())
+                    }))
+                    .child(html!("div", {
+                        .class("cell")
+                        .class("time")
+                        .text(&session.started_at.format(DATE_FORMAT).to_string())
+                        .child(html!("br"))
+                        .text(&session.started_at.format(TIME_FORMAT).to_string())
+                    }))
+                    .child(html!("div", {
+                        .class("cell")
+                        .class("time")
+                        .text(&session.finished_at.map(|f| f.format(DATE_FORMAT).to_string()).unwrap_or_default())
+                        .child(html!("br"))
+                        .text(&session.finished_at.map(|f| f.format(TIME_FORMAT).to_string()).unwrap_or_default())
                     }))
                     .children(jig.jig.jig_data.modules.iter().map(|module| {
                         html!("div", {

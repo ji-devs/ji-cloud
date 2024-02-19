@@ -11,7 +11,7 @@
     overflow-x: auto;
     scrollbar-width: thin;
     display: grid;
-    grid-template-columns: 40px auto repeat(var(--module-count), 1fr);
+    grid-template-columns: 40px auto auto auto repeat(var(--module-count), 1fr);
     background-color: #ffffff;
     border-radius: 8px;
     --border: solid 1px #00000010;
@@ -61,6 +61,10 @@
 }
 .session.open fa-icon {
     rotate: 90deg;
+}
+.session .time {
+    font-size: 10px;
+    color: #00000050;
 }
 .round-items {
     display: flex;
