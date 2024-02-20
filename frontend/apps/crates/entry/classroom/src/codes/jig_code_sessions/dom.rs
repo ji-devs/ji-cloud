@@ -150,6 +150,12 @@ impl CodeSessions {
             .children(sessions.into_iter().map(clone!(state => move |session| {
                 let open = Mutable::new(false);
                 let total_points_earned = session.info.as_ref().map(|i| i.get_points_earned());
+                let updated_since = match (&jig.jig.published_at, &session.finished_at) {
+                    (Some(jig_published_at), Some(session_finished_at)) if jig_published_at > session_finished_at => {
+                        true
+                    },
+                    _ => false,
+                };
                 let sessions = session.info.unwrap().modules.into_iter().map(|module| {
                     let stable_module_id = match &module {
                         JigPlaySessionModule::Matching(module) => module.stable_module_id,
@@ -162,6 +168,7 @@ impl CodeSessions {
                     .child(html!("div", {
                         .class("cell")
                         .child(html!("fa-icon", {
+                            .class("open-icon")
                             .prop("icon", "fa-regular fa-angle-right")
                         }))
                         .event(clone!(open => move |_: events::Click| {
@@ -199,7 +206,7 @@ impl CodeSessions {
                                         .text(&session.get_points_earned().to_string())
                                         .child_signal(open.signal().map(clone!(state, session => move |open| {
                                             open.then(|| {
-                                                state.render_session(&module, &session.clone())
+                                                state.render_session(&module, &session.clone(), updated_since)
                                             })
                                         })))
                                 } else {
@@ -227,8 +234,19 @@ impl CodeSessions {
         self: &Rc<Self>,
         module: &ModuleResponse,
         session: &JigPlaySessionModule,
+        updated_since: bool,
     ) -> Dom {
         html!("div", {
+            .apply_if(updated_since, |dom| {
+                dom.child(html!("span", {
+                    .class("updated-since")
+                    .text("Updated since")
+                    .child(html!("fa-icon", {
+                        .prop("icon", "fa-regular fa-circle-info")
+                    }))
+                    .prop("title", "This JIG was updated since this student played it. Some data might have changed since.")
+                }))
+            })
             .apply(|dom| {
                 match (&module.module.body, &session) {
                     (ModuleBody::Matching(module), JigPlaySessionModule::Matching(session)) => {

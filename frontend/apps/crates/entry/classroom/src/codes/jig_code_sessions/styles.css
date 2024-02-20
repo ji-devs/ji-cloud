@@ -58,11 +58,11 @@
     text-align: center;
     box-sizing: border-box;
 }
-.session fa-icon {
+.session .open-icon {
     display: inline-block;
     cursor: pointer;
 }
-.session.open fa-icon {
+.session.open .open-icon {
     rotate: 90deg;
 }
 .session .time {
@@ -75,6 +75,25 @@
     grid-template-columns: auto auto;
     place-content: space-between;
     gap: 16px;
+}
+.updated-since {
+    background-color: #ff000040;
+    border: solid 1px var(--main-red);
+    border-radius: 10px;
+    display: inline-grid;
+    place-content: center;
+    height: 20px;
+    line-height: 20px;
+    font-size: 10px;
+    padding-inline: 10px;
+    grid-template-columns: auto auto;
+    gap: 6px;
+    cursor: help;
+    white-space: nowrap;
+}
+.updated-since fa-icon {
+    font-size: 14px;
+    color: var(--main-red);
 }
 .round-items {
     display: flex;
