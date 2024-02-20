@@ -85,3 +85,10 @@ pub fn can_create_circle() -> bool {
         PlanTier::Free => false,
     }
 }
+pub fn can_create_codes() -> bool {
+    match get_plan_tier() {
+        PlanTier::Pro => true,
+        PlanTier::Basic => true,
+        PlanTier::Free => false,
+    }
+}
