@@ -3,9 +3,11 @@ use dominator_helpers::events::Message;
 use futures_signals::signal::{Mutable, SignalExt};
 use serde::{Deserialize, Serialize};
 use std::rc::Rc;
+use utils::prelude::get_user_id;
 use web_sys::HtmlIFrameElement;
 
 const STR_IFRAME_URL: &str = "https://www.jewishinteractive.org/jigzi-home";
+const STR_IFRAME_LOGGED_IN_URL: &str = "https://www.jewishinteractive.org/jigzi-home-logged-in";
 const INT_IFRAME_PADDING: usize = 30;
 const INT_INITIAL_HEIGHT: usize = 3000;
 
@@ -27,6 +29,12 @@ impl Iframe {
     }
     pub fn render(self: Rc<Self>) -> Dom {
         let state = self;
+
+        let iframe_src = match get_user_id() {
+            Some(_) => STR_IFRAME_LOGGED_IN_URL,
+            None => STR_IFRAME_URL,
+        };
+
         html!("iframe" => HtmlIFrameElement, {
             .style("width", "100%")
             .style("border", "none")
@@ -43,7 +51,7 @@ impl Iframe {
                     }
                 }
             }))
-            .prop("src", STR_IFRAME_URL)
+            .prop("src", iframe_src)
         })
     }
 }
