@@ -9,6 +9,7 @@ use dominator::{clone, html, with_node, Dom};
 use dominator_helpers::events::Message;
 use std::rc::Rc;
 
+use crate::overlay::handle::OverlayHandle;
 use futures_signals::signal::{Mutable, SignalExt};
 use shared::domain::{
     asset::{AssetId, DraftOrLive},
@@ -21,6 +22,7 @@ use utils::{
     asset::{AssetPlayerOptions, JigPlayerOptions},
     prelude::*,
 };
+use web_sys::HtmlElement;
 
 pub fn render_preview_header<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
     module_kind: ModuleKind,
@@ -41,6 +43,23 @@ where
         .prop("slot", "header")
         .prop("moduleKind", module_kind.as_str())
         .child(render_nav(state.clone()))
+        .child(html!("empty-fragment" => HtmlElement, {
+            .with_node!(elem => {
+                .apply(OverlayHandle::lifecycle(move || {
+                    html!("overlay-tooltip-info", {
+                        .prop("marginX", 0)
+                        .prop("marginY", 120)
+                        .prop("target", &elem)
+                        .attr("targetAnchor", "br")
+                        .attr("contentAnchor", "oppositeV")
+                        .prop("body", "To make changes, click back to any step")
+                        .prop("closeable", true)
+                        .prop("strategy", "track")
+                    })
+                }))
+            })
+        }))
+
         .apply_if(!state.asset.is_jig(), clone!(state => move |dom| {
             dom.child(html!("button-rect", {
                 .prop("slot", "btn")
