@@ -4,9 +4,7 @@ use actix_web::{
 };
 use shared::{
     api::{endpoints::jig::codes, ApiEndpoint},
-    domain::jig::codes::{
-        JigCode, JigCodeListResponse, JigCodeResponse, JigCodeSessionsListResponse,
-    },
+    domain::jig::codes::{JigCode, JigCodeListResponse, JigCodeSessionsListResponse},
 };
 use sqlx::PgPool;
 
@@ -23,15 +21,9 @@ pub async fn create(
 
     db::jig::is_logged_in(&*db, user_id).await?;
 
-    let (index, expires_at) = db::jig::codes::create(&db, user_id, &req).await?;
+    let jig_code = db::jig::codes::create(&db, user_id, &req).await?;
 
-    Ok(HttpResponse::Created().json(JigCodeResponse {
-        index,
-        jig_id: req.jig_id,
-        name: req.name,
-        settings: req.settings,
-        expires_at,
-    }))
+    Ok(HttpResponse::Created().json(jig_code))
 }
 
 /// Get all jig codes for user.

@@ -61,7 +61,10 @@ pub struct JigCodeResponse {
     /// Settings for the player session.
     pub settings: JigPlayerSettings,
 
-    /// When the player session expires
+    /// When the code was created
+    pub created_at: DateTime<Utc>,
+
+    /// When the code expires
     pub expires_at: DateTime<Utc>,
 }
 

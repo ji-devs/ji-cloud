@@ -22,7 +22,7 @@ pub async fn create(
     db: &PgPool,
     creator_id: UserId,
     opts: &JigPlayerSessionCreateRequest,
-) -> Result<(JigCode, DateTime<Utc>), error::JigCode> {
+) -> Result<JigCodeResponse, error::JigCode> {
     let mut generator = rand::thread_rng();
 
     let mut code = generate_random_code(&mut generator);
@@ -37,7 +37,7 @@ pub async fn create(
             r#"
 insert into jig_code (jig_id, creator_id, name, code, direction, display_score, track_assessments, drag_assist, expires_at)
 values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-
+returning created_at as "created_at: DateTime<Utc>"
 "#,
             opts.jig_id.0,
             creator_id.0,
@@ -49,11 +49,18 @@ values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
             opts.settings.drag_assist,
             expires_at,
         )
-        .execute(db)
+        .fetch_one(db)
         .await
         {
-            Ok(_) => { // insert successful
-                return Ok((JigCode(code), expires_at));
+            Ok(res) => {
+                return Ok(JigCodeResponse {
+                    index: JigCode(code),
+                    jig_id: opts.jig_id,
+                    name: opts.name.clone(),
+                    settings: opts.settings.clone(),
+                    created_at: res.created_at,
+                    expires_at,
+                })
             },
             Err(err) => match err {
                 sqlx::Error::Database(db_err) => {
@@ -106,6 +113,7 @@ select code     as "code!: i32",
        track_assessments,
        drag_assist,
        name as "name?",
+       created_at as "created_at: DateTime<Utc>",
        expires_at as "expires_at: DateTime<Utc>"
 from jig_code
 where creator_id = $1 AND (jig_id = $2 or $2 is null)
@@ -126,6 +134,7 @@ where creator_id = $1 AND (jig_id = $2 or $2 is null)
             track_assessments: it.track_assessments,
             drag_assist: it.drag_assist,
         },
+        created_at: it.created_at,
         expires_at: it.expires_at,
     })
     .collect();
