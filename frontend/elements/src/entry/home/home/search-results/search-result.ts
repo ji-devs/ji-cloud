@@ -84,7 +84,8 @@ export class _ extends LitElement {
                     grid-row: 1;
                     display: grid;
                     grid-template-rows: 1fr auto;
-                    transform: rotateY(180deg)  translateZ(1px);
+                    /* Set an offset on the z-axis so that the back of the card doesn't overlap and cause issues in Safari browsers */
+                    transform: rotateY(180deg) translateZ(1px);
                     z-index: 4;
                 }
                 :host([kind=jig]) .back {
@@ -251,6 +252,7 @@ export class _ extends LitElement {
 
                 :host(:hover) img-ui.jiggling {
                     animation: jump 1s ease-in-out;
+                    /* Set an offset on the z-axis so that the back of the card doesn't overlap and cause issues in Safari browsers */
                     transform: scaleX(-1) translateY(-60px) translateZ(1px);
                 }
 
@@ -263,6 +265,7 @@ export class _ extends LitElement {
                     top: -26px;
                     pointer-events: none;
                     z-index: 2;
+                    /* Set an offset on the z-axis so that the back of the card doesn't overlap and cause issues in Safari browsers */
                     transform: translateZ(1px);
                 }
             `,

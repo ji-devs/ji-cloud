@@ -21,6 +21,7 @@ export class _ extends LitElement {
                     height: 246px;
                     grid-template-rows: auto 0px 1fr;
                     position: relative;
+                    /* Prevents clickable elements on the front from being clicked when the card is flipped in Chrome */
                     backface-visibility: hidden;
                 }
                 :host([dense]) {
