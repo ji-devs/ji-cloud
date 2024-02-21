@@ -24,6 +24,9 @@ impl DomRenderable for Main {
             .style("touch-action", "none")
             .child(html!("img-ui", {
                 .prop("path", "jig/play/design-grid-jig.svg")
+                .style("position", "absolute")
+                .style("z-index", "100")
+                .style("pointer-events", "none")
                 .style("height", "100%")
                 .style("width", "100%")
             }))
