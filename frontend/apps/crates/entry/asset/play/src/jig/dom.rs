@@ -129,9 +129,8 @@ impl JigPlayer {
                 }
                 async {}
             })))
-            .prop_signal("rtl", state.jig.signal_cloned().map(|jig| {
-                jig.map(|jig| jig.jig_data.default_player_settings.direction.is_rtl())
-            }))
+            // Use state.player_options, not jig.jig_data.default_player_settings
+            .prop("rtl", state.player_options.direction.is_rtl())
             .prop_signal("paused", state.paused.signal())
             .prop_signal("isLegacy", state.jig.signal_ref(|jig| {
                 if let Some(jig) = jig {
