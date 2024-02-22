@@ -160,10 +160,13 @@ impl JigPlayer {
                 }
             })
             .apply_if(state.player_options.scoring, clone!(state => move|dom| {
-                dom.child(html!("jig-play-points-indicator", {
-                    .prop("slot", "indicators")
-                    .prop_signal("value", state.points.signal().map(|p| p * 100))
-                }))
+                dom.child_signal(state.active_module_has_scoring().map(clone!(state => move |has_scoring| {
+                    Some(html!("jig-play-points-indicator", {
+                        .prop("slot", "indicators")
+                        .prop("hidden", !has_scoring)
+                        .prop_signal("value", state.points.signal().map(|p| p * 100))
+                    }))
+                })))
             }))
             .apply_if(document().fullscreen_enabled(), clone!(state => move|dom| {
                 dom.child(html!("jig-play-full-screen", {
@@ -451,6 +454,20 @@ impl JigPlayer {
                 }
             }))
         })
+    }
+
+    fn active_module_has_scoring(&self) -> impl Signal<Item = bool> {
+        map_ref! {
+            let active_module = self.active_module.signal(),
+            let jig = self.jig.signal_cloned() => move {
+                log::info!("active_module_has_scoring: {:?}", active_module);
+                log::info!("active_module_has_scoring: {:?}", jig.as_ref().map(|jig| jig.jig_data.modules.clone()));
+                match (active_module, jig) {
+                    (Some(active_module), Some(jig)) if jig.jig_data.modules[*active_module].kind.has_scoring() => true,
+                    _ => false,
+                }
+            }
+        }
     }
 
     /// Emits `true` if the module doesn't exist in the list of modules or if the jig is `None`.

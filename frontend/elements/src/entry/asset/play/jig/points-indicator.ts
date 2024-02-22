@@ -1,4 +1,4 @@
-import { css, customElement, html, PropertyValues } from "lit-element";
+import { css, customElement, html, property, PropertyValues } from "lit-element";
 import { IndicatorBase } from "./indicator-base";
 
 const ANIMATION_DURATION = 100;
@@ -10,6 +10,13 @@ export class _ extends IndicatorBase {
         return [
             ...super.styles,
             css`
+                :host([hidden]) {
+                    translate: 70%;
+                    transition: translate .3s;
+                }
+                :host([hidden]:hover) {
+                    translate: 0%;
+                }
                 :host(.pop) {
                     animation-name: pop;
                     animation-duration: ${ANIMATION_DURATION}ms;
@@ -32,6 +39,9 @@ export class _ extends IndicatorBase {
             `,
         ];
     }
+
+    @property({ reflect: true, type: Boolean })
+    hidden = false;
 
     updated(changedProperties: PropertyValues) {
         if (changedProperties.has("value")) {

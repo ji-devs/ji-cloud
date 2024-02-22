@@ -108,6 +108,14 @@ impl ModuleKind {
             _ => false,
         }
     }
+
+    /// Whether this ModuleKind has scoring
+    pub fn has_scoring(&self) -> bool {
+        match self {
+            Self::Matching => true,
+            _ => false,
+        }
+    }
 }
 
 impl FromStr for ModuleKind {
