@@ -1,5 +1,5 @@
 import { argsToAttrs } from "@utils/attributes";
-import "@elements/entry/asset/edit/sidebar/settings/input-switch-direction";
+import "@elements/core/inputs/composed/switch-direction";
 import { Direction } from "@elements/core/inputs/composed/switch-direction";
 
 export default {
