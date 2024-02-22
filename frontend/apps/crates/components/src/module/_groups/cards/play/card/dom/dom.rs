@@ -1,5 +1,6 @@
+use crate::audio::mixer::AUDIO_MIXER;
 use crate::module::_groups::cards::lookup::Side;
-use dominator::{html, Dom, DomBuilder};
+use dominator::{clone, html, Dom, DomBuilder};
 use shared::domain::module::body::{
     ModeExt,
     _groups::cards::{Card, Mode},
@@ -14,6 +15,7 @@ pub struct CardOptions<'a> {
     pub back_card: Option<&'a Card>,
     pub flip_on_hover: bool,
     pub flipped: bool,
+    pub play_audio_on_click: bool,
     pub transparent: bool,
     pub hidden: bool,
     pub simple_transform: Option<SimpleTransform>,
@@ -47,6 +49,7 @@ impl<'a> CardOptions<'a> {
             back_card: None,
             flip_on_hover: false,
             flipped: false,
+            play_audio_on_click: false,
             transparent: false,
             hidden: false,
             simple_transform: None,
@@ -80,6 +83,7 @@ where
         back_card,
         flip_on_hover,
         flipped,
+        play_audio_on_click,
         transparent,
         hidden,
         simple_transform,
@@ -137,5 +141,14 @@ where
         .apply_if(mixin.is_some(), |dom| {
             (mixin.unwrap_ji()) (dom)
         })
+        .apply_if(play_audio_on_click, clone!(card => move |dom| {
+            dom.event(clone!(card => move |_evt: events::Click| {
+                if let Some(audio) = &card.audio {
+                    AUDIO_MIXER.with(move |mixer| {
+                        mixer.play_oneshot(audio.into());
+                    });
+                }
+            }))
+        }))
     })
 }
