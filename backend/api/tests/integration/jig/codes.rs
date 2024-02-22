@@ -108,7 +108,7 @@ async fn session_instance_play_count_flow(port: u16) -> anyhow::Result<()> {
                 "modules": [
                     {
                         "Matching": {
-                            "module_id": "00000000-0000-0000-0000-000000000000",
+                            "stable_module_id": "00000000-0000-0000-0000-000000000000",
                             "rounds": [
                                 {
                                     "2": {
@@ -131,7 +131,7 @@ async fn session_instance_play_count_flow(port: u16) -> anyhow::Result<()> {
                                     "0": {
                                         "failed_tries": 1
                                     }
-                                },
+                                }
                             ]
                         }
                     }
