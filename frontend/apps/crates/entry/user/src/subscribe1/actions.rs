@@ -13,18 +13,25 @@ use utils::{
 
 use super::state::*;
 use std::rc::Rc;
+use utils::prelude::get_user_id;
+use utils::window::navigate_to_login;
 
 impl Subscribe1 {
     pub fn start_intent(self: &Rc<Self>) {
         let state = self;
-        state.loader.load(clone!(state => async move {
-            let req = CreateSetupIntentRequest {
-                plan_type: state.plan_type,
-            };
-            let res = endpoints::billing::CreateSetupIntent::api_with_auth(CreateSetupIntentPath(), Some(req)).await.toast_on_err();
-            let res = bail_on_err!(res);
-            state.stripe_client_secret.set(Some(res));
-        }));
+
+        if get_user_id().is_some() {
+            state.loader.load(clone!(state => async move {
+                let req = CreateSetupIntentRequest {
+                    plan_type: state.plan_type,
+                };
+                let res = endpoints::billing::CreateSetupIntent::api_with_auth(CreateSetupIntentPath(), Some(req)).await.toast_on_err();
+                let res = bail_on_err!(res);
+                state.stripe_client_secret.set(Some(res));
+            }));
+        } else {
+            navigate_to_login();
+        }
     }
 
     pub fn submit(self: &Rc<Self>) {

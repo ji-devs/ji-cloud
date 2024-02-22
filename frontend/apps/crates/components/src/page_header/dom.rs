@@ -4,6 +4,7 @@ use dominator::{clone, html, Dom, EventOptions};
 use futures_signals::signal::{Signal, SignalExt};
 use shared::domain::user::{UserProfile, UserScope};
 use strum::IntoEnumIterator;
+use utils::window::navigate_to_login;
 use utils::{
     events,
     init::analytics,
@@ -272,7 +273,7 @@ fn render_logged_out() -> Vec<Dom> {
                 |e: events::Click| {
                     e.prevent_default();
 
-                    actions::navigate_to_login();
+                    navigate_to_login();
                     analytics::event("Header Login Click", None);
                 }
             )
