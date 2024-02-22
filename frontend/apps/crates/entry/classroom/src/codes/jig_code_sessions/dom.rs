@@ -107,7 +107,7 @@ impl CodeSessions {
                 .children(jig.jig.jig_data.modules.iter().map(|module| {
                     html!("div", {
                         .class("cell")
-                        .text(module.kind.as_str())
+                        .text(module.kind.display_name())
                     })
                 }).collect::<Vec<_>>())
                 .child(html!("div", {
