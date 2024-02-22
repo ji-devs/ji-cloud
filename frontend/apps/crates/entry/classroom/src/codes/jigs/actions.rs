@@ -6,7 +6,7 @@ use shared::{
     api::endpoints::{self, jig},
     domain::jig::{
         codes::{JigCodeListPath, JigCodeListRequest},
-        JigGetDraftPath, JigId, JigResponse,
+        JigGetLivePath, JigId, JigResponse,
     },
     error::IntoAnyhow,
 };
@@ -50,7 +50,7 @@ impl Jigs {
 }
 
 async fn load_jig(jig_id: JigId) -> anyhow::Result<JigResponse> {
-    jig::GetDraft::api_with_auth(JigGetDraftPath(jig_id), None)
+    jig::GetLive::api_with_auth(JigGetLivePath(jig_id), None)
         .await
         .into_anyhow()
 }
