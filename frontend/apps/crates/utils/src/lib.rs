@@ -44,3 +44,4 @@ pub mod text;
 pub mod themes;
 pub mod toasts;
 pub mod unwrap;
+pub mod window;
