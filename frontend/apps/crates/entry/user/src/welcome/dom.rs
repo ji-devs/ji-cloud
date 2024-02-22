@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use dominator::{html, Dom};
 use shared::domain::billing::PlanType;
+use utils::prelude::HomePricingRoute;
 use utils::{
     prelude::{get_plan_type, get_school_id, get_user_email, get_user_mutable},
     routes::{AssetRoute, HomeRoute, Route},
@@ -116,6 +117,13 @@ impl Welcome {
                     .prop("kind", "filled")
                     .prop("href", Route::Asset(AssetRoute::Studio).to_string())
                     .text("Start creating")
+                }))
+                .child(html!("button-rect", {
+                    .prop("slot", "actions")
+                    .prop("color", "blue")
+                    .prop("kind", "filled")
+                    .prop("href", Route::Home(HomeRoute::Pricing(HomePricingRoute::default())).to_string())
+                    .text("Upgrade account")
                 }))
             })
         })
