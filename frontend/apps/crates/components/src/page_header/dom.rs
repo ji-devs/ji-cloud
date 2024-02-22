@@ -33,7 +33,7 @@ const STR_MY_JIGS: &str = "My JIGs";
 const STR_MY_PLAYLISTS: &str = "My playlists";
 const STR_MY_COURSES: &str = "My courses";
 const STR_MY_RESOURCES: &str = "My resources";
-const STR_CLASSES: &str = "My Classes";
+const STR_CLASSES: &str = "My classes";
 
 impl PageHeader {
     pub fn render(self: Rc<PageHeader>) -> Dom {
@@ -206,10 +206,10 @@ fn render_logged_in(state: Rc<PageHeader>, user: &UserProfile) -> Vec<Dom> {
             }))
             .text(STR_CLASSES)
             .event_with_options(&EventOptions::preventable(), |e: events::Click| {
-                if paywall::can_create_codes() {
+                if !paywall::can_create_codes() {
                     e.prevent_default();
                     paywall::dialog_limit("
-                        Looking to use out classes functionality?
+                        Looking to use our scoring and tracking functionality?
                         Upgrade now for UNLIMITED sharing options.
                     ");
                 }
