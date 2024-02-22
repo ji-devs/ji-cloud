@@ -36,6 +36,8 @@
 .codes .code:hover .cell {
     color: var(--main-blue);
     text-align: center;
+    display: grid;
+    place-content: center;
 }
 .codes .code:not(:first-child) .cell,
 .codes .header:not(:first-child) .cell {
@@ -44,4 +46,8 @@
 .codes .code .cell:not(:first-child),
 .codes .header .cell:not(:first-child) {
     border-left: var(--border);
+}
+.codes .code .cell.created-at {
+    font-size: 12px;
+    color: gray;
 }

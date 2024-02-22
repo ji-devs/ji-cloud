@@ -12,6 +12,8 @@ use web_sys::ShadowRoot;
 
 use super::JigCodes;
 
+const DATE_FORMAT: &str = "%h %e, %Y %I:%M %p";
+
 impl Component<JigCodes> for Rc<JigCodes> {
     fn styles() -> &'static str {
         include_str!("./styles.css")
@@ -42,6 +44,10 @@ impl Component<JigCodes> for Rc<JigCodes> {
                     }))
                     .child(html!("span", {
                         .class("cell")
+                        .text("Created")
+                    }))
+                    .child(html!("span", {
+                        .class("cell")
                         .text("Settings")
                     }))
                     .child(html!("span", {
@@ -63,6 +69,11 @@ impl Component<JigCodes> for Rc<JigCodes> {
                         .child(html!("span", {
                             .class("cell")
                             .text(&code.index.to_string())
+                        }))
+                        .child(html!("span", {
+                            .class("cell")
+                            .class("created-at")
+                            .text(&code.created_at.format(DATE_FORMAT).to_string())
                         }))
                         .child(html!("span", {
                             .class("cell")
