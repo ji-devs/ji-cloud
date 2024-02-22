@@ -29,6 +29,7 @@ impl Game {
 
                             options.flipped = true;
                             options.slot = Some("target");
+                            options.play_audio_on_click = true;
 
                             children.push(render_card(options));
 
