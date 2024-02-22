@@ -159,7 +159,7 @@ impl JigPlayer {
                     dom.child(Sidebar::new(&state).render())
                 }
             })
-            .apply_if(state.player_options.display_score, clone!(state => move|dom| {
+            .apply_if(state.player_options.scoring, clone!(state => move|dom| {
                 dom.child(html!("jig-play-points-indicator", {
                     .prop("slot", "indicators")
                     .prop_signal("value", state.points.signal().map(|p| p * 100))
@@ -533,7 +533,7 @@ impl JigPlayer {
                         .prop("autoClose", false)
                         .child(html!("jig-play-done-popup", {
                             .apply(|mut dom| {
-                                if state.player_options.display_score {
+                                if state.player_options.scoring {
                                     dom = dom.prop_signal("score", state.points.signal().map(|p| p * 100));
                                 };
                                 if !state.player_options.track_assessments {

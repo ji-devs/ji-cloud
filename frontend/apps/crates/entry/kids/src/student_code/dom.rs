@@ -26,7 +26,7 @@ impl StudentCode {
                         html!("div", {
                             .child_signal(play_jig.name.signal_cloned().map(clone!(state => move |name| {
                                 Some(match name {
-                                    None if play_jig.settings.display_score => {
+                                    None if play_jig.settings.scoring => {
                                         state.render_name_input(play_jig.clone())
                                     },
                                     _ => {

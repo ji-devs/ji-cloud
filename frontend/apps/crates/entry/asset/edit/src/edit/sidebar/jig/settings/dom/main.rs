@@ -12,7 +12,7 @@ use crate::edit::sidebar::jig::settings::{
 
 use super::super::state::JigSettings;
 
-const STR_DISPLAY_SCORE: &str = "Display score";
+const STR_SCORING: &str = "Scoring & Assessment";
 // const STR_ASSESSMENT_MODE: &str = "Assessment mode";
 // const STR_DRAG_ASSIST: &str = "Drag & Drop assist";
 
@@ -60,24 +60,14 @@ impl JigSettings {
                         }),
                         html!("label", {
                             .child(html!("input-switch", {
-                                .prop_signal("enabled", state.jig.display_score.signal())
+                                .prop_signal("enabled", state.jig.scoring.signal())
                                 .event(clone!(state => move|evt :events::CustomToggle| {
-                                    state.jig.display_score.set(evt.value());
+                                    state.jig.scoring.set(evt.value());
                                     update_jig_settings(Rc::clone(&state));
                                 }))
                             }))
-                            .text(STR_DISPLAY_SCORE)
+                            .text(STR_SCORING)
                         }),
-                        // html!("label", {
-                        //     .child(html!("input-switch", {
-                        //         .prop_signal("enabled", state.jig.track_assessments.signal())
-                        //         .event(clone!(state => move|evt :events::CustomToggle| {
-                        //             state.jig.track_assessments.set(evt.value());
-                        //             update_jig_settings(Rc::clone(&state));
-                        //         }))
-                        //     }))
-                        //     .text(STR_ASSESSMENT_MODE)
-                        // }),
                         // html!("label", {
                         //     .child(html!("input-switch", {
                         //         .prop_signal("enabled", state.jig.drag_assist.signal())

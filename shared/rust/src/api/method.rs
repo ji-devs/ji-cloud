@@ -2,7 +2,7 @@
 use actix_web::{web, Route};
 
 /// Represents a http method.
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum Method {
     /// http `DELETE`, used for deleting resources.
     Delete,

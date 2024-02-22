@@ -10,10 +10,10 @@ expression: body
       "name": null,
       "settings": {
         "direction": "ltr",
-        "displayScore": true,
-        "trackAssessments": true,
+        "scoring": true,
         "dragAssist": true
       },
+      "created_at": "[timestamp]",
       "expires_at": "[timestamp]"
     },
     {
@@ -22,10 +22,10 @@ expression: body
       "name": null,
       "settings": {
         "direction": "ltr",
-        "displayScore": true,
-        "trackAssessments": true,
+        "scoring": true,
         "dragAssist": true
       },
+      "created_at": "[timestamp]",
       "expires_at": "[timestamp]"
     },
     {
@@ -34,10 +34,10 @@ expression: body
       "name": null,
       "settings": {
         "direction": "rtl",
-        "displayScore": false,
-        "trackAssessments": false,
+        "scoring": false,
         "dragAssist": false
       },
+      "created_at": "[timestamp]",
       "expires_at": "[timestamp]"
     },
     {
@@ -46,10 +46,10 @@ expression: body
       "name": null,
       "settings": {
         "direction": "rtl",
-        "displayScore": false,
-        "trackAssessments": false,
+        "scoring": true,
         "dragAssist": false
       },
+      "created_at": "[timestamp]",
       "expires_at": "[timestamp]"
     }
   ]

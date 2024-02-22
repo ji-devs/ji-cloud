@@ -24,8 +24,7 @@ async fn create_and_list(port: u16) -> anyhow::Result<()> {
             "jigId": "3a71522a-cd77-11eb-8dc1-af3e35f7c743",
             "settings": {
                 "direction": "rtl",
-                "display_score": false,
-                "track_assessments": false,
+                "scoring": false,
                 "drag_assist": false,
             }
         }))
@@ -38,7 +37,7 @@ async fn create_and_list(port: u16) -> anyhow::Result<()> {
 
     let body: JigCodeResponse = resp.json().await?;
 
-    insta::assert_json_snapshot!(format!("{}-1",name), body, { ".**.index" => "[index]", ".**.expires_at" => "[timestamp]" });
+    insta::assert_json_snapshot!(format!("{}-1",name), body, { ".**.index" => "[index]", ".**.created_at" => "[timestamp]", ".**.expires_at" => "[timestamp]" });
 
     let _resp = client
         .post(&format!("http://0.0.0.0:{}/v1/jig/codes", port))
@@ -46,8 +45,7 @@ async fn create_and_list(port: u16) -> anyhow::Result<()> {
             "jigId": "3a71522a-cd77-11eb-8dc1-af3e35f7c743",
             "settings": {
                 "direction": "rtl",
-                "display_score": true,
-                "track_assessments": false,
+                "scoring": true,
                 "drag_assist": false,
             }
         }))
@@ -67,7 +65,7 @@ async fn create_and_list(port: u16) -> anyhow::Result<()> {
 
     let body: JigCodeListResponse = resp.json().await?;
 
-    insta::assert_json_snapshot!(format!("{}-2",name), body, { ".**.index" => "[index]", ".**.expires_at" => "[timestamp]"  });
+    insta::assert_json_snapshot!(format!("{}-2",name), body, { ".**.index" => "[index]", ".**.created_at" => "[timestamp]", ".**.expires_at" => "[timestamp]" });
 
     Ok(())
 }
@@ -84,7 +82,7 @@ async fn session_instance_play_count_flow(port: u16) -> anyhow::Result<()> {
     let resp = client
         .post(&format!("http://0.0.0.0:{}/v1/jig/codes/instance", port))
         .json(&serde_json::json!({
-            "code": 1234,
+            "code": 123456,
         }))
         .login()
         .send()

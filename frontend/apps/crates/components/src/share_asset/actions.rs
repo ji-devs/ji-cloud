@@ -21,7 +21,7 @@ impl ShareAsset {
                 jig_id: state.asset.unwrap_jig().id,
                 settings: JigPlayerSettings {
                     direction: state.direction.get(),
-                    display_score: state.display_score.get(),
+                    scoring: state.scoring.get(),
                     ..Default::default()
                 },
                 name: Default::default(),

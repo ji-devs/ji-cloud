@@ -185,10 +185,7 @@ pub struct JigPlayerOptions {
     pub direction: TextDirection,
 
     #[serde(default)]
-    pub display_score: bool,
-
-    #[serde(default)]
-    pub track_assessments: bool,
+    pub scoring: bool,
 
     #[serde(default)]
     pub drag_assist: bool,
@@ -220,8 +217,7 @@ impl From<JigPlayerOptions> for JigPlayerSettings {
     fn from(options: JigPlayerOptions) -> Self {
         Self {
             direction: options.direction,
-            display_score: options.display_score,
-            track_assessments: options.track_assessments,
+            scoring: options.scoring,
             drag_assist: options.drag_assist,
         }
     }
@@ -231,8 +227,7 @@ impl From<JigPlayerSettings> for JigPlayerOptions {
     fn from(settings: JigPlayerSettings) -> Self {
         Self {
             direction: settings.direction,
-            display_score: settings.display_score,
-            track_assessments: settings.track_assessments,
+            scoring: settings.scoring,
             drag_assist: settings.drag_assist,
             is_student: false,
             quota: false,

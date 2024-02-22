@@ -8,9 +8,9 @@ expression: body
   "name": null,
   "settings": {
     "direction": "rtl",
-    "displayScore": false,
-    "trackAssessments": false,
+    "scoring": false,
     "dragAssist": false
   },
+  "created_at": "[timestamp]",
   "expires_at": "[timestamp]"
 }

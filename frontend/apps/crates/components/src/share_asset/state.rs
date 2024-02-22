@@ -22,7 +22,7 @@ pub struct ShareAsset {
     pub copied_student_code: Mutable<bool>,
     // play settings
     pub direction: Mutable<TextDirection>,
-    pub display_score: Mutable<bool>,
+    pub scoring: Mutable<bool>,
 }
 
 impl ShareAsset {
@@ -37,7 +37,7 @@ impl ShareAsset {
             copied_student_url: Mutable::new(false),
             copied_student_code: Mutable::new(false),
             direction: Mutable::new(TextDirection::default()),
-            display_score: Mutable::new(bool::default()),
+            scoring: Mutable::new(bool::default()),
         })
     }
 
@@ -64,7 +64,7 @@ impl ShareAsset {
                         is_student,
                         quota,
                         direction: self.direction.get(),
-                        display_score: self.display_score.get(),
+                        scoring: self.scoring.get(),
                         ..Default::default()
                     },
                 )))

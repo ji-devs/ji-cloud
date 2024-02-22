@@ -1,24 +1,24 @@
 insert into jig_data (id, display_name, created_at, updated_at, language, last_synced_at, description, theme,
-                      audio_background, audio_feedback_negative, audio_feedback_positive, direction, privacy_level, display_score,
-                      drag_assist, track_assessments, draft_or_live, translated_description)
+                      audio_background, audio_feedback_negative, audio_feedback_positive, direction, privacy_level, scoring,
+                      drag_assist, draft_or_live, translated_description)
 values ('d4cad43c-1dd5-11ec-8426-83d4a42e3ac9', 'name', '2021-03-04 00:46:26.134651+00', -- live
         '2021-03-04 00:46:26.134651+00', 'en', '2021-03-04 00:46:26.134651+00', 'test description', 0, null,
-        array [0, 1], array [0, 1, 2], 0, 0,  true, true, true, 1, '{}'::jsonb),
+        array [0, 1], array [0, 1, 2], 0, 0,  true, true, 1, '{}'::jsonb),
        ('d4cad4c8-1dd5-11ec-8426-a37eda7ce03f', 'name', '2021-03-04 00:46:26.134651+00', -- draft
         '2021-03-04 00:46:26.134651+00', 'en', '2021-03-04 00:46:26.134651+00', 'test description', 0, null,
-        array [0, 1], array [0, 1, 2], 0, 1, true, true, true, 0, '{}'::jsonb),
+        array [0, 1], array [0, 1, 2], 0, 1, true, true, 0, '{}'::jsonb),
        ('d4cad52c-1dd5-11ec-8426-f7f3e8ceccb2', 'name', '2021-03-04 00:46:26.134651+00', -- live
         '2021-03-04 00:46:26.134651+00', 'en', '2021-03-04 00:46:26.134651+00', 'test description', 0, null,
-        array [0, 1], array [0, 1, 2], 0, 0, true, true, true, 1, '{}'::jsonb),
+        array [0, 1], array [0, 1, 2], 0, 0, true, true, 1, '{}'::jsonb),
        ('38ef2e9c-9d7f-4a96-aed4-164f7f42bf0c', 'name', '2021-03-04 00:46:26.134651+00', -- live
         '2021-03-04 00:46:26.134651+00', 'en', '2021-03-04 00:46:26.134651+00', 'test description', 0, null,
-        array [0, 1], array [0, 1, 2], 0, 0, true, true, true, 1, '{}'::jsonb),
+        array [0, 1], array [0, 1, 2], 0, 0, true, true, 1, '{}'::jsonb),
        ('456f571e-ea27-460e-b065-2bbd77d350ae', 'name', '2021-03-04 00:46:26.134651+00', -- draft
         '2021-03-04 00:46:26.134651+00', 'en', '2021-03-04 00:46:26.134651+00', 'test description', 0, null,
-        array [0, 1], array [0, 1, 2], 0, 1, true, true, true, 0, '{}'::jsonb),
+        array [0, 1], array [0, 1, 2], 0, 1, true, true, 0, '{}'::jsonb),
        ('d4cad586-1dd5-11ec-8426-fbcd3fd01e2a', 'draft name', '2021-03-06 00:46:26.134651+00', -- draft
         '2021-03-06 00:46:26.134651+00', 'he', '2021-03-07 00:46:26.134651+00', 'draft test description', 1, 0,
-        array []::smallint[], array []::smallint[], 1, 1, false, false, false, 0, '{}'::jsonb);
+        array []::smallint[], array []::smallint[], 1, 1, false, false, 0, '{}'::jsonb);
 
 
 insert into jig (id, creator_id, author_id, live_id, draft_id, published_at)
@@ -59,9 +59,9 @@ values ('d4cad43c-1dd5-11ec-8426-83d4a42e3ac9', '286b828c-1dd9-11ec-8426-571b03b
         'link test', 'a91aca34-519e-11ec-ab46-175eaaf1ff23', '{ "link": "url://url.url.url/urls/s" }'), -- draft
        ('d4cad4c8-1dd5-11ec-8426-a37eda7ce03f', '286b8390-1dd9-11ec-8426-fbeb80c504d9', 'link test', 'a91aca34-519e-11ec-ab46-175eaaf1ff23', '{ "link": "url://url.url.url/url/s" }');
 
-insert into jig_code (code, jig_id, created_at, creator_id, expires_at, direction, display_score, track_assessments, drag_assist)
-values (1234, '0cc084bc-7c83-11eb-9f77-e3218dffb008', now(), '1f241e1b-b537-493f-a230-075cb16315be', now() - interval '5 minutes', 0, true, true, true),
-       (1235, '0cc084bc-7c83-11eb-9f77-e3218dffb008', now(), '1f241e1b-b537-493f-a230-075cb16315be', now() + interval '5 minutes', 0, true, true, true);;
+insert into jig_code (code, jig_id, created_at, creator_id, expires_at, direction, scoring, drag_assist)
+values (1234, '0cc084bc-7c83-11eb-9f77-e3218dffb008', now(), '1f241e1b-b537-493f-a230-075cb16315be', now() - interval '5 minutes', 0, true, true),
+       (1235, '0cc084bc-7c83-11eb-9f77-e3218dffb008', now(), '1f241e1b-b537-493f-a230-075cb16315be', now() + interval '5 minutes', 0, true, true);;
 
 insert into jig_play_count (jig_id)
 select id

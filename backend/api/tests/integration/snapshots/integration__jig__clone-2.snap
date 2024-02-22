@@ -25,8 +25,7 @@ expression: body
     "description": "test description",
     "defaultPlayerSettings": {
       "direction": "ltr",
-      "displayScore": true,
-      "trackAssessments": true,
+      "scoring": true,
       "dragAssist": true
     },
     "theme": "Blank",

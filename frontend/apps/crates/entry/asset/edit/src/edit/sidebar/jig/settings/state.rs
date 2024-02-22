@@ -32,8 +32,7 @@ impl JigSettings {
     fn get_player_settings(&self) -> JigPlayerSettings {
         JigPlayerSettings {
             direction: self.jig.direction.get(),
-            display_score: self.jig.display_score.get(),
-            track_assessments: self.jig.track_assessments.get(),
+            scoring: self.jig.scoring.get(),
             drag_assist: self.jig.drag_assist.get(),
         }
     }

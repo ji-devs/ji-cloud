@@ -36,7 +36,7 @@ const STR_SHARE_LABEL: &str = "Share on social";
 const STR_COPY_LABEL_1: &str = "Copy ";
 const STR_COPY_LABEL_2: &str = " link";
 const STR_COPIED_LABEL: &str = " link copied";
-const STR_DISPLAY_SCORE: &str = "Scoring & Assessment";
+const STR_SCORING: &str = "Scoring & Assessment";
 
 impl ShareAsset {
     pub fn render(self: Rc<Self>, anchor: Dom, slot: Option<&str>) -> Dom {
@@ -141,12 +141,12 @@ impl ShareAsset {
                 .child(html!("label", {
                     .prop("slot", "settings")
                     .child(html!("input-switch", {
-                        .prop_signal("enabled", state.display_score.signal())
+                        .prop_signal("enabled", state.scoring.signal())
                         .event(clone!(state => move|evt :events::CustomToggle| {
-                            state.display_score.set(evt.value());
+                            state.scoring.set(evt.value());
                         }))
                     }))
-                    .text(STR_DISPLAY_SCORE)
+                    .text(STR_SCORING)
                 }))
             })
             // TODO: temporary until we have student-codes for playlists

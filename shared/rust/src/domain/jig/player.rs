@@ -11,12 +11,9 @@ pub struct JigPlayerSettings {
     /// Text direction, left-to-right or right-to-left
     #[serde(default)]
     pub direction: TextDirection,
-    /// Whether or not to display the score
+    /// Scoring
     #[serde(default)]
-    pub display_score: bool,
-    /// Whether or not to track assessments
-    #[serde(default)]
-    pub track_assessments: bool,
+    pub scoring: bool,
     /// Whether or not to enable drag assist
     #[serde(default)]
     pub drag_assist: bool,
@@ -26,8 +23,7 @@ impl Default for JigPlayerSettings {
     fn default() -> Self {
         Self {
             direction: TextDirection::default(),
-            display_score: false,
-            track_assessments: false,
+            scoring: false,
             drag_assist: false,
         }
     }

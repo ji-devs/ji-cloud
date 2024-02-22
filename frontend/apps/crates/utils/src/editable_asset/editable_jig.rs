@@ -46,8 +46,7 @@ pub struct EditableJig {
     pub feedback_positive: Mutable<HashSet<AudioFeedbackPositive>>,
     pub feedback_negative: Mutable<HashSet<AudioFeedbackNegative>>,
     pub direction: Mutable<TextDirection>,
-    pub display_score: Mutable<bool>,
-    pub track_assessments: Mutable<bool>,
+    pub scoring: Mutable<bool>,
     pub drag_assist: Mutable<bool>,
     pub other_keywords: Mutable<String>,
     pub rating: Mutable<Option<JigRating>>,
@@ -81,8 +80,7 @@ impl From<JigResponse> for EditableJig {
             feedback_positive: Mutable::new(jig.jig_data.audio_effects.feedback_positive),
             feedback_negative: Mutable::new(jig.jig_data.audio_effects.feedback_negative),
             direction: Mutable::new(jig.jig_data.default_player_settings.direction),
-            display_score: Mutable::new(jig.jig_data.default_player_settings.display_score),
-            track_assessments: Mutable::new(jig.jig_data.default_player_settings.track_assessments),
+            scoring: Mutable::new(jig.jig_data.default_player_settings.scoring),
             drag_assist: Mutable::new(jig.jig_data.default_player_settings.drag_assist),
             other_keywords: Mutable::new(jig.jig_data.other_keywords),
             rating: Mutable::new(jig.admin_data.rating),
@@ -116,8 +114,7 @@ impl From<JigId> for EditableJig {
             feedback_positive: Default::default(),
             feedback_negative: Default::default(),
             direction: Default::default(),
-            display_score: Default::default(),
-            track_assessments: Default::default(),
+            scoring: Default::default(),
             drag_assist: Default::default(),
             other_keywords: Default::default(),
             rating: Default::default(),
@@ -157,10 +154,8 @@ impl EditableJig {
             .set(jig.jig_data.audio_effects.feedback_negative);
         self.direction
             .set(jig.jig_data.default_player_settings.direction);
-        self.display_score
-            .set(jig.jig_data.default_player_settings.display_score);
-        self.track_assessments
-            .set(jig.jig_data.default_player_settings.track_assessments);
+        self.scoring
+            .set(jig.jig_data.default_player_settings.scoring);
         self.drag_assist
             .set(jig.jig_data.default_player_settings.drag_assist);
         self.other_keywords.set(jig.jig_data.other_keywords);
@@ -192,8 +187,7 @@ impl EditableJig {
             feedback_positive: Mutable::new(self.feedback_positive.get_cloned()),
             feedback_negative: Mutable::new(self.feedback_negative.get_cloned()),
             direction: Mutable::new(self.direction.get()),
-            display_score: Mutable::new(self.display_score.get()),
-            track_assessments: Mutable::new(self.track_assessments.get()),
+            scoring: Mutable::new(self.scoring.get()),
             drag_assist: Mutable::new(self.drag_assist.get()),
             other_keywords: Mutable::new(self.other_keywords.get_cloned()),
             rating: Mutable::new(self.rating.get()),
@@ -224,8 +218,7 @@ impl EditableJig {
             }),
             default_player_settings: Some(JigPlayerSettings {
                 direction: self.direction.get(),
-                display_score: self.display_score.get(),
-                track_assessments: self.track_assessments.get(),
+                scoring: self.scoring.get(),
                 drag_assist: self.drag_assist.get(),
             }),
             other_keywords: Some(self.other_keywords.get_cloned()),

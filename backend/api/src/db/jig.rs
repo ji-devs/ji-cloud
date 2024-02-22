@@ -112,16 +112,15 @@ pub async fn create_jig_data(
         // language=SQL
         r#"
 insert into jig_data
-   (display_name, language, description, direction, display_score, track_assessments, drag_assist, draft_or_live)
-values ($1, $2, $3, $4, $5, $6, $7, $8)
+   (display_name, language, description, direction, scoring, drag_assist, draft_or_live)
+values ($1, $2, $3, $4, $5, $6, $7)
 returning id
 "#,
         display_name,
         language,
         description,
         default_player_settings.direction as i16,
-        default_player_settings.display_score,
-        default_player_settings.track_assessments,
+        default_player_settings.scoring,
         default_player_settings.drag_assist,
         draft_or_live as i16,
     )
@@ -206,8 +205,7 @@ select cte.jig_id                                          as "jig_id: JigId",
         description,
         translated_description                              as "translated_description!: Json<HashMap<String, String>>",
         direction                                           as "direction: TextDirection",
-        display_score,
-        track_assessments,
+        scoring,
         drag_assist,
         theme                                               as "theme: ThemeId",
         audio_background                                    as "audio_background: AudioBackground",
@@ -283,8 +281,7 @@ from jig_data
             description: row.description,
             default_player_settings: JigPlayerSettings {
                 direction: row.direction,
-                display_score: row.display_score,
-                track_assessments: row.track_assessments,
+                scoring: row.scoring,
                 drag_assist: row.drag_assist,
             },
             theme: row.theme,
@@ -397,8 +394,7 @@ select id,
        description                                                                   as "description!",
        translated_description                                                        as "translated_description!: Json<HashMap<String,String>>",
        direction                                                                     as "direction!: TextDirection",
-       display_score                                                                 as "display_score!",
-       track_assessments                                                             as "track_assessments!",
+       scoring                                                                       as "scoring!",
        drag_assist                                                                   as "drag_assist!",
        theme                                                                         as "theme!: ThemeId",
        audio_background                                                              as "audio_background!: Option<AudioBackground>",
@@ -476,8 +472,7 @@ order by ord asc
                 description: jig_data_row.description,
                 default_player_settings: JigPlayerSettings {
                     direction: jig_data_row.direction,
-                    display_score: jig_data_row.display_score,
-                    track_assessments: jig_data_row.track_assessments,
+                    scoring: jig_data_row.scoring,
                     drag_assist: jig_data_row.drag_assist,
                 },
                 theme: jig_data_row.theme,
@@ -603,8 +598,7 @@ select jig.id                                              as "jig_id: JigId",
    description                                                                   as "description!",
    translated_description                                                        as "translated_description!: Json<HashMap<String,String>>",
    direction                                                                     as "direction!: TextDirection",
-   display_score                                                                 as "display_score!",
-   track_assessments                                                             as "track_assessments!",
+   scoring                                                                       as "scoring!",
    drag_assist                                                                   as "drag_assist!",
    theme                                                                         as "theme!: ThemeId",
    audio_background                                                              as "audio_background!: Option<AudioBackground>",
@@ -703,8 +697,7 @@ limit $8
                 description: jig_data_row.description,
                 default_player_settings: JigPlayerSettings {
                     direction: jig_data_row.direction,
-                    display_score: jig_data_row.display_score,
-                    track_assessments: jig_data_row.track_assessments,
+                    scoring: jig_data_row.scoring,
                     drag_assist: jig_data_row.drag_assist,
                 },
                 theme: jig_data_row.theme,
@@ -847,20 +840,17 @@ where id = $1 and ($2 <> audio_feedback_positive or $3 <> audio_feedback_negativ
             r#"
 update jig_data
 set direction = $2,
-    display_score = $3,
-    track_assessments = $4,
-    drag_assist = $5,
+    scoring = $3,
+    drag_assist = $4,
     updated_at = now()
 where id = $1 and
     (($2 is distinct from direction) or
-     ($3 is distinct from display_score) or
-     ($4 is distinct from track_assessments) or
-     ($5 is distinct from drag_assist))
+     ($3 is distinct from scoring) or
+     ($4 is distinct from drag_assist))
             "#,
             draft_id,
             settings.direction as i16,
-            settings.display_score,
-            settings.track_assessments,
+            settings.scoring,
             settings.drag_assist,
         )
         .execute(&mut txn)
@@ -1213,7 +1203,7 @@ async fn clone_data(
         r#"
 insert into jig_data
 (display_name, created_at, updated_at, language, last_synced_at, description, theme, audio_background,
- audio_feedback_negative, audio_feedback_positive, direction, display_score, drag_assist, track_assessments, privacy_level, other_keywords, translated_keywords, translated_description)
+ audio_feedback_negative, audio_feedback_positive, direction, scoring, drag_assist, privacy_level, other_keywords, translated_keywords, translated_description)
 select display_name,
        created_at,
        updated_at,
@@ -1225,9 +1215,8 @@ select display_name,
        audio_feedback_negative,
        audio_feedback_positive,
        direction,
-       display_score,
+       scoring,
        drag_assist,
-       track_assessments,
        privacy_level,
        other_keywords,
        translated_keywords,

@@ -46,11 +46,7 @@ impl Component<JigCodes> for Rc<JigCodes> {
                     }))
                     .child(html!("span", {
                         .class("cell")
-                        .text("Display score")
-                    }))
-                    .child(html!("span", {
-                        .class("cell")
-                        .text("Track assessments")
+                        .text("Scoring & Assessment")
                     }))
                     .child(html!("span", {
                         .class("cell")
@@ -98,18 +94,7 @@ impl Component<JigCodes> for Rc<JigCodes> {
                         .child(html!("span", {
                             .class("cell")
                             .apply(|dom| {
-                                match code.settings.display_score {
-                                    true => dom.child(html!("fa-icon", {
-                                        .prop("icon", "fa-solid fa-check")
-                                    })),
-                                    false => dom,
-                                }
-                            })
-                        }))
-                        .child(html!("span", {
-                            .class("cell")
-                            .apply(|dom| {
-                                match code.settings.track_assessments {
+                                match code.settings.scoring {
                                     true => dom.child(html!("fa-icon", {
                                         .prop("icon", "fa-solid fa-check")
                                     })),

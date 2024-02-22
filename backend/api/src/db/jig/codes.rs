@@ -35,8 +35,8 @@ pub async fn create(
         match sqlx::query!(
             //language=SQL
             r#"
-insert into jig_code (jig_id, creator_id, name, code, direction, display_score, track_assessments, drag_assist, expires_at)
-values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+insert into jig_code (jig_id, creator_id, name, code, direction, scoring, drag_assist, expires_at)
+values ($1, $2, $3, $4, $5, $6, $7, $8)
 returning created_at as "created_at: DateTime<Utc>"
 "#,
             opts.jig_id.0,
@@ -44,8 +44,7 @@ returning created_at as "created_at: DateTime<Utc>"
             opts.name,
             code,
             opts.settings.direction as i16,
-            opts.settings.display_score,
-            opts.settings.track_assessments,
+            opts.settings.scoring,
             opts.settings.drag_assist,
             expires_at,
         )
@@ -61,13 +60,13 @@ returning created_at as "created_at: DateTime<Utc>"
                     created_at: res.created_at,
                     expires_at,
                 })
-            },
+            }
             Err(err) => match err {
                 sqlx::Error::Database(db_err) => {
                     session_create_error_or_continue(db_err)?;
                     // did not return error on previous line, retry with new code
                     code = generate_random_code(&mut generator);
-                },
+                }
                 err => return Err(anyhow::anyhow!("sqlx error: {:?}", err).into()),
             },
         }
@@ -109,8 +108,7 @@ pub async fn list_user_codes(
 select code     as "code!: i32",
        jig_id as "jig_id: JigId",
        direction as "direction: TextDirection",
-       display_score,
-       track_assessments,
+       scoring,
        drag_assist,
        name as "name?",
        created_at as "created_at: DateTime<Utc>",
@@ -130,8 +128,7 @@ where creator_id = $1 AND (jig_id = $2 or $2 is null)
         name: it.name,
         settings: JigPlayerSettings {
             direction: it.direction,
-            display_score: it.display_score,
-            track_assessments: it.track_assessments,
+            scoring: it.scoring,
             drag_assist: it.drag_assist,
         },
         created_at: it.created_at,
@@ -209,8 +206,7 @@ pub async fn start_session(
         r#"
         select jig_id as "jig_id: JigId", 
                direction as "direction: TextDirection", 
-               display_score, 
-               track_assessments, 
+               scoring,
                drag_assist
         from jig_code
         where code=$1
@@ -242,8 +238,7 @@ pub async fn start_session(
         session_info.jig_id,
         JigPlayerSettings {
             direction: session_info.direction,
-            display_score: session_info.display_score,
-            track_assessments: session_info.track_assessments,
+            scoring: session_info.scoring,
             drag_assist: session_info.drag_assist,
         },
         instance_id,
