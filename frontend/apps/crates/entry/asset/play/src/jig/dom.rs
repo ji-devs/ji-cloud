@@ -536,7 +536,7 @@ impl JigPlayer {
                                 if state.player_options.scoring {
                                     dom = dom.prop_signal("score", state.points.signal().map(|p| p * 100));
                                 };
-                                if !state.player_options.track_assessments {
+                                if !state.player_options.scoring {
                                     dom = dom.child(
                                         html!("jig-play-done-action", {
                                             .prop("slot", "actions")
@@ -607,7 +607,7 @@ impl JigPlayer {
                         .prop("autoClose", false)
                         .child(html!("jig-play-time-up-popup", {
                             .apply(|mut dom| {
-                                if !state.player_options.track_assessments {
+                                if !state.player_options.scoring {
                                     dom = dom.child(
                                         html!("jig-play-done-action", {
                                             .prop("slot", "actions")
