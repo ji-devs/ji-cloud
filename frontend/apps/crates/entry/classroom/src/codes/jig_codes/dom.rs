@@ -34,10 +34,10 @@ impl Component<JigCodes> for Rc<JigCodes> {
                 .class("codes")
                 .child(html!("div", {
                     .class("header")
-                    .child(html!("span", {
-                        .class("cell")
-                        .text("Name")
-                    }))
+                    // .child(html!("span", {
+                    //     .class("cell")
+                    //     .text("Name")
+                    // }))
                     .child(html!("span", {
                         .class("cell")
                         .text("Code")
@@ -54,18 +54,18 @@ impl Component<JigCodes> for Rc<JigCodes> {
                         .class("cell")
                         .text("Scoring & Assessment")
                     }))
-                    .child(html!("span", {
-                        .class("cell")
-                        .text("Drag assist")
-                    }))
+                    // .child(html!("span", {
+                    //     .class("cell")
+                    //     .text("Drag assist")
+                    // }))
                 }))
                 .children_signal_vec(state.codes.signal_vec_cloned().map(clone!(state => move |code| {
                     link!(Route::Classroom(ClassroomRoute::Codes(ClassroomCodesRoute::JigCodeSession(state.jig_id, code.index))), {
                         .class("code")
-                        .child(html!("span", {
-                            .class("cell")
-                            .text(&code.name.unwrap_or_default())
-                        }))
+                        // .child(html!("span", {
+                        //     .class("cell")
+                        //     .text(&code.name.unwrap_or_default())
+                        // }))
                         .child(html!("span", {
                             .class("cell")
                             .text(&code.index.to_string())
@@ -113,17 +113,17 @@ impl Component<JigCodes> for Rc<JigCodes> {
                                 }
                             })
                         }))
-                        .child(html!("span", {
-                            .class("cell")
-                            .apply(|dom| {
-                                match code.settings.drag_assist {
-                                    true => dom.child(html!("fa-icon", {
-                                        .prop("icon", "fa-solid fa-check")
-                                    })),
-                                    false => dom,
-                                }
-                            })
-                        }))
+                        // .child(html!("span", {
+                        //     .class("cell")
+                        //     .apply(|dom| {
+                        //         match code.settings.drag_assist {
+                        //             true => dom.child(html!("fa-icon", {
+                        //                 .prop("icon", "fa-solid fa-check")
+                        //             })),
+                        //             false => dom,
+                        //         }
+                        //     })
+                        // }))
                     })
                 })))
             }))
