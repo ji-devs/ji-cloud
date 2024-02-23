@@ -6,7 +6,26 @@
     display: grid;
     gap: 10px;
 }
-.preview-button {
+header {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+header .back-button {
+    place-self: start;
+}
+header .code {
+    margin: 0;
+    grid-row: 2;
+}
+header .jig-name {
+    margin: 0;
+    grid-row: 2;
+}
+header .preview-button {
+    grid-row: 2;
     justify-self: start;
     background-color: #ffffff;
 }

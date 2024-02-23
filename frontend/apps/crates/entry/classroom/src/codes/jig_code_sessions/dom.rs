@@ -15,7 +15,12 @@ use shared::domain::{
     module::{ModuleBody, ModuleResponse, StableModuleId},
 };
 use std::{collections::HashMap, rc::Rc};
-use utils::{asset::AssetPlayerOptions, component::Component, events};
+use utils::{
+    asset::AssetPlayerOptions,
+    component::Component,
+    events, on_click_go_to_url,
+    routes::{ClassroomCodesRoute, ClassroomRoute, Route},
+};
 use web_sys::ShadowRoot;
 
 use super::{CodeSessions, JigWithModules};
@@ -33,13 +38,37 @@ impl Component<CodeSessions> for Rc<CodeSessions> {
 
         state.load_data();
 
-        dom.child(html!("button-rect", {
-            .class("preview-button")
-            .prop("color", "blue")
-            .prop("kind", "outline")
-            .text("Preview JIG")
-            .event(clone!(state => move |_: events::Click| {
-                state.preview_open.set(true);
+        dom.child(html!("header", {
+            .child(html!("button-rect", {
+                .class("back-button")
+                .prop("kind", "text")
+                .prop("color", "blue")
+                .apply(move |dom| on_click_go_to_url!(dom, {
+                    Route::Classroom(ClassroomRoute::Codes(ClassroomCodesRoute::JigCodes(state.jig_id)))
+                }))
+                .child(html!("fa-icon", {
+                   .prop("icon", "fa-regular fa-chevron-left")
+                }))
+                .text("back")
+            }))
+            .child(html!("h2", {
+                .class("code")
+                .text(&state.code.to_string())
+            }))
+            .child(html!("h3", {
+                .class("jig-name")
+                .text_signal(state.jig.signal_ref(|jig| {
+                    jig.as_ref().map(|jig| jig.jig.jig_data.display_name.clone()).unwrap_or_default()
+                }))
+            }))
+            .child(html!("button-rect", {
+                .class("preview-button")
+                .prop("color", "blue")
+                .prop("kind", "outline")
+                .text("Preview JIG")
+                .event(clone!(state => move |_: events::Click| {
+                    state.preview_open.set(true);
+                }))
             }))
         }))
         .child_signal(state.module_and_session_signal().map(
