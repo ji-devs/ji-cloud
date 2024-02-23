@@ -455,6 +455,17 @@ select
         order by last_used desc
         limit 1
     ),
+    (
+        select count(*) as liked_jig_count
+        from jig_like
+        where user_id = "user".id
+    ),
+    (
+        select count(*) as published_jigs_count
+        from jig
+        where published_at is not null
+        and author_id = "user".id
+    ),
     location,
     opt_into_edu_resources,
     array(
@@ -556,6 +567,8 @@ where
                 age_ranges: row.age_ranges,
                 affiliations: row.affiliations,
                 opt_into_edu_resources: row.opt_into_edu_resources,
+                liked_jig_count: row.liked_jig_count.unwrap_or_default(),
+                published_jigs_count: row.published_jigs_count.unwrap_or_default(),
             }
         })
         .collect())
