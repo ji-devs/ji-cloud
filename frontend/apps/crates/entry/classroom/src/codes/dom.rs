@@ -13,6 +13,9 @@ impl Component<Codes> for Rc<Codes> {
 
     fn dom(&self, dom: DomBuilder<ShadowRoot>) -> DomBuilder<ShadowRoot> {
         dom.child(html!("div", {
+            .child(html!("h1", {
+                .text("My classes")
+            }))
             .class("width-holder")
             .child(match self.route {
                 ClassroomCodesRoute::Jigs => Jigs::new().render(),

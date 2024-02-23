@@ -1,3 +1,14 @@
+h1 {
+    height: 86px;
+    background-color: var(--light-blue-6);
+    margin: 0;
+    display: grid;
+    align-items: center;
+    padding-inline: 40px;
+    font-size: 29px;
+    font-weight: 900;
+    color: var(--main-yellow);
+}
 .width-holder {
     max-width: 1400px;
     margin: auto;
