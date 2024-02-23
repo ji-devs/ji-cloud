@@ -10641,6 +10641,154 @@
     },
     "query": "\nselect jdm.id      as \"id!: ModuleId\",\n       stable_id   as \"stable_id!: StableModuleId\",\n       contents    as \"body!\",\n       created_at  as \"created_at!\",\n       updated_at  as \"updated_at!\",\n       kind        as \"kind!: ModuleKind\",\n       is_complete as \"is_complete!\"\nfrom jig_data_module \"jdm\"\ninner join jig on jig.draft_id = jdm.jig_data_id \nwhere jdm.id is not distinct from $1 \n"
   },
+  "9efc298857e10ac1dbf8a7c93bccdb35b54524a9315ee494f88694ea101ea540": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: UserId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "username!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "email!",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "given_name!",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "family_name!",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "profile_image?: ImageId",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "language_app!",
+          "ordinal": 6,
+          "type_info": "Text"
+        },
+        {
+          "name": "language_emails!",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "languages_spoken!: Vec<String>",
+          "ordinal": 8,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "created_at!",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 10,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "organization",
+          "ordinal": 11,
+          "type_info": "Text"
+        },
+        {
+          "name": "persona!: Vec<String>",
+          "ordinal": 12,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "last_login?",
+          "ordinal": 13,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "last_action?",
+          "ordinal": 14,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "liked_jig_count",
+          "ordinal": 15,
+          "type_info": "Int8"
+        },
+        {
+          "name": "published_jigs_count",
+          "ordinal": 16,
+          "type_info": "Int8"
+        },
+        {
+          "name": "location",
+          "ordinal": 17,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "opt_into_edu_resources",
+          "ordinal": 18,
+          "type_info": "Bool"
+        },
+        {
+          "name": "subjects!: Vec<String>",
+          "ordinal": 19,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "affiliations!: Vec<String>",
+          "ordinal": 20,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "age_ranges!: Vec<String>",
+          "ordinal": 21,
+          "type_info": "TextArray"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        null,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        null,
+        null,
+        null,
+        null,
+        true,
+        false,
+        null,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Timestamptz",
+          "Timestamptz",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nselect\n    user_profile.user_id as \"id!: UserId\",\n    username                as \"username!\",\n    user_email.email::text  as \"email!\",\n    given_name              as \"given_name!\",\n    family_name             as \"family_name!\",\n    profile_image_id        as \"profile_image?: ImageId\",\n    language_app            as \"language_app!\",\n    language_emails         as \"language_emails!\",\n    languages_spoken         as \"languages_spoken!: Vec<String>\",\n    user_profile.created_at as \"created_at!\",\n    user_profile.updated_at,\n    organization,\n    persona                 as \"persona!: Vec<String>\",\n    (\n        select created_at as \"last_login?\"\n        from session\n        where session.user_id = \"user\".id\n        order by created_at desc\n        limit 1\n    ),\n    (\n        select last_used as \"last_action?\"\n        from session\n        where session.user_id = \"user\".id\n        order by last_used desc\n        limit 1\n    ),\n    (\n        select count(*) as liked_jig_count\n        from jig_like\n        where user_id = \"user\".id\n    ),\n    (\n        select count(*) as published_jigs_count\n        from jig\n        where published_at is not null\n        and author_id = \"user\".id\n    ),\n    location,\n    opt_into_edu_resources,\n    array(\n        select subject.display_name\n        from subject\n        inner join user_subject on subject.subject_id = user_subject.subject_id\n        where user_subject.user_id = \"user\".id\n    ) as \"subjects!: Vec<String>\",\n    array(\n        select affiliation.display_name\n        from affiliation\n        inner join user_affiliation on affiliation.id = user_affiliation.affiliation_id\n        where user_affiliation.user_id = \"user\".id\n    ) as \"affiliations!: Vec<String>\",\n    array(\n        select age_range.display_name\n        from age_range\n        inner join user_age_range on age_range.id = user_age_range.age_range_id\n        where user_age_range.user_id = \"user\".id\n    ) as \"age_ranges!: Vec<String>\"\nfrom \"user\"\n    inner join user_profile on \"user\".id = user_profile.user_id\n    inner join user_email using(user_id)\nwhere\n    (\n        ($3 = 'either' or $3 = 'onlynew')\n        and (\n            user_profile.created_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end\n            and user_profile.created_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end\n        )\n    )\n    or (\n        ($3 = 'either' or $3 = 'onlyupdated')\n        and (\n            user_profile.updated_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end\n            and user_profile.updated_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end\n        )\n    )\n"
+  },
   "9f6642b7205866f10e69f564f8005e63ba0bb2bf5b88e6cb33c34f21120f6135": {
     "describe": {
       "columns": [],
@@ -15968,142 +16116,6 @@
       }
     },
     "query": "\nselect cdm.id          as \"id!: ModuleId\",\n       stable_id   as \"stable_id!: StableModuleId\",\n       contents    as \"body!\",\n       created_at  as \"created_at!\",\n       updated_at  as \"updated_at!\",\n       kind        as \"kind!: ModuleKind\",\n       is_complete as \"is_complete!\"\nfrom playlist_data_module \"cdm\"\ninner join playlist on playlist.draft_id = cdm.playlist_data_id\nwhere cdm.id is not distinct from $1\n"
-  },
-  "f7ff7b53f5e5b40d1fbd3aede3d1b30d4710ffeeef8ae70aadc5d058fc6418c5": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: UserId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "username!",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "email!",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "given_name!",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "family_name!",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "profile_image?: ImageId",
-          "ordinal": 5,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "language_app!",
-          "ordinal": 6,
-          "type_info": "Text"
-        },
-        {
-          "name": "language_emails!",
-          "ordinal": 7,
-          "type_info": "Text"
-        },
-        {
-          "name": "languages_spoken!: Vec<String>",
-          "ordinal": 8,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "created_at!",
-          "ordinal": 9,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at",
-          "ordinal": 10,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "organization",
-          "ordinal": 11,
-          "type_info": "Text"
-        },
-        {
-          "name": "persona!: Vec<String>",
-          "ordinal": 12,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "last_login?",
-          "ordinal": 13,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "last_action?",
-          "ordinal": 14,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "location",
-          "ordinal": 15,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "opt_into_edu_resources",
-          "ordinal": 16,
-          "type_info": "Bool"
-        },
-        {
-          "name": "subjects!: Vec<String>",
-          "ordinal": 17,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "affiliations!: Vec<String>",
-          "ordinal": 18,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "age_ranges!: Vec<String>",
-          "ordinal": 19,
-          "type_info": "TextArray"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        null,
-        false,
-        false,
-        true,
-        false,
-        false,
-        false,
-        false,
-        true,
-        true,
-        true,
-        null,
-        null,
-        true,
-        false,
-        null,
-        null,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Timestamptz",
-          "Timestamptz",
-          "Text"
-        ]
-      }
-    },
-    "query": "\nselect\n    user_profile.user_id as \"id!: UserId\",\n    username                as \"username!\",\n    user_email.email::text  as \"email!\",\n    given_name              as \"given_name!\",\n    family_name             as \"family_name!\",\n    profile_image_id        as \"profile_image?: ImageId\",\n    language_app            as \"language_app!\",\n    language_emails         as \"language_emails!\",\n    languages_spoken         as \"languages_spoken!: Vec<String>\",\n    user_profile.created_at as \"created_at!\",\n    user_profile.updated_at,\n    organization,\n    persona                 as \"persona!: Vec<String>\",\n    (\n        select created_at as \"last_login?\"\n        from session\n        where session.user_id = \"user\".id\n        order by created_at desc\n        limit 1\n    ),\n    (\n        select last_used as \"last_action?\"\n        from session\n        where session.user_id = \"user\".id\n        order by last_used desc\n        limit 1\n    ),\n    location,\n    opt_into_edu_resources,\n    array(\n        select subject.display_name\n        from subject\n        inner join user_subject on subject.subject_id = user_subject.subject_id\n        where user_subject.user_id = \"user\".id\n    ) as \"subjects!: Vec<String>\",\n    array(\n        select affiliation.display_name\n        from affiliation\n        inner join user_affiliation on affiliation.id = user_affiliation.affiliation_id\n        where user_affiliation.user_id = \"user\".id\n    ) as \"affiliations!: Vec<String>\",\n    array(\n        select age_range.display_name\n        from age_range\n        inner join user_age_range on age_range.id = user_age_range.age_range_id\n        where user_age_range.user_id = \"user\".id\n    ) as \"age_ranges!: Vec<String>\"\nfrom \"user\"\n    inner join user_profile on \"user\".id = user_profile.user_id\n    inner join user_email using(user_id)\nwhere\n    (\n        ($3 = 'either' or $3 = 'onlynew')\n        and (\n            user_profile.created_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end\n            and user_profile.created_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end\n        )\n    )\n    or (\n        ($3 = 'either' or $3 = 'onlyupdated')\n        and (\n            user_profile.updated_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end\n            and user_profile.updated_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end\n        )\n    )\n"
   },
   "f86660cf9313cc91d286566bc5f1f07182388bfe2e9efb52ba540e0e952597de": {
     "describe": {
