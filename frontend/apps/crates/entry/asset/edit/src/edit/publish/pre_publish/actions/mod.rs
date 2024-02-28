@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::{collections::HashMap, rc::Rc};
 
 use dominator::clone;
@@ -92,9 +93,9 @@ impl PrePublish {
     // used to show tooltip, can probably be combined with `is_ready_to_publish` somehow
     fn form_invalid(self: &Rc<Self>) -> bool {
         self.asset.display_name().lock_ref().is_empty()
+            || self.asset.age_ranges().lock_ref().is_empty()
         // || self.jig.description.lock_ref().is_empty()
         // || self.jig.language.lock_ref().is_empty()
-        // || self.jig.age_ranges.lock_ref().is_empty()
         // || self.jig.categories.lock_ref().is_empty()
     }
 
@@ -187,8 +188,7 @@ fn set_default_values(asset: &EditableAsset, meta: &MetadataResponse) {
             .collect();
         asset.affiliations().replace(available_affiliations);
 
-        let available_ages = meta.age_ranges.iter().map(|age| age.id).collect();
-        asset.age_ranges().replace(available_ages);
+        asset.age_ranges().replace(HashSet::new());
     }
 
     asset.privacy_level().replace(PrivacyLevel::default());
