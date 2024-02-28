@@ -11,7 +11,6 @@ use super::super::state::PrePublish;
 
 const STR_AGE_LABEL: &str = "Age range";
 const STR_AGE_PLACEHOLDER: &str = "Select one or more";
-const STR_ALL_AGES: &str = "All ages";
 
 impl PrePublish {
     pub fn render_ages(self: Rc<Self>) -> Dom {
@@ -22,30 +21,16 @@ impl PrePublish {
             .prop("placeholder", STR_AGE_PLACEHOLDER)
             .prop("multiple", true)
             .prop_signal("value", age_value_signal(state.clone()))
-            // .prop_signal("error", {
-            //     (map_ref! {
-            //         let submission_tried = state.submission_tried.signal(),
-            //         let value = state.jig.age_ranges.signal_cloned()
-            //             => (*submission_tried, value.clone())
-            //     })
-            //         .map(|(submission_tried, value)| {
-            //             submission_tried && value.is_empty()
-            //         })
-            // })
-            .child(html!("input-select-option", {
-                .text(STR_ALL_AGES)
-                .prop_signal("selected", state.asset.age_ranges().signal_cloned().map(|age_ranges| {
-                    age_ranges.is_empty()
-                }))
-                .event(clone!(state => move |_: events::CustomSelectedChange| {
-                    state
-                        .asset
-                        .age_ranges()
-                        .lock_mut()
-                        .clear();
-                    state.save_draft();
-                }))
-            }))
+            .prop_signal("error", {
+                (map_ref! {
+                    let submission_tried = state.submission_tried.signal(),
+                    let value = state.asset.age_ranges().signal_cloned()
+                        => (*submission_tried, value.clone())
+                })
+                    .map(|(submission_tried, value)| {
+                        submission_tried && value.is_empty()
+                    })
+            })
             .children_signal_vec(state.ages.signal_cloned().map(clone!(state => move |ages| {
                 ages.iter().map(|age| {
                     render_age(age, state.clone())
