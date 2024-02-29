@@ -1,4 +1,5 @@
 use dominator::{clone, html, Dom};
+use futures_signals::map_ref;
 use futures_signals::signal::{Signal, SignalExt};
 use std::rc::Rc;
 use utils::{events, languages::Language};
@@ -16,16 +17,16 @@ impl PrePublish {
             .prop("label", STR_LANGUAGE_LABEL)
             .prop("placeholder", STR_LANGUAGE_PLACEHOLDER)
             .prop_signal("value", language_value_signal(state.clone()))
-            // .prop_signal("error", {
-            //     (map_ref! {
-            //         let submission_tried = state.submission_tried.signal(),
-            //         let value = state.jig.language.signal_cloned()
-            //             => (*submission_tried, value.clone())
-            //     })
-            //         .map(|(submission_tried, value)| {
-            //             submission_tried && value.is_empty()
-            //         })
-            // })
+            .prop_signal("error", {
+                (map_ref! {
+                    let submission_tried = state.submission_tried.signal(),
+                    let value = state.asset.language().signal_cloned()
+                        => (*submission_tried, value.clone())
+                })
+                    .map(|(submission_tried, value)| {
+                        submission_tried && value.is_empty()
+                    })
+            })
             .children(state.languages.iter().map(clone!(state => move |language| {
                 render_language(language, state.clone())
             })))
