@@ -1,7 +1,11 @@
 use std::rc::Rc;
 
 use dominator::{html, DomBuilder};
-use utils::{component::Component, routes::ClassroomCodesRoute};
+use utils::{
+    component::Component,
+    link,
+    routes::{ClassroomCodesRoute, ClassroomRoute, Route},
+};
 use web_sys::ShadowRoot;
 
 use super::{jig_code_sessions::CodeSessions, jig_codes::JigCodes, jigs::Jigs, Codes};
@@ -13,7 +17,9 @@ impl Component<Codes> for Rc<Codes> {
 
     fn dom(&self, dom: DomBuilder<ShadowRoot>) -> DomBuilder<ShadowRoot> {
         dom.child(html!("h1", {
-            .text("My classes")
+            .child(link!(Route::Classroom(ClassroomRoute::Codes(ClassroomCodesRoute::Jigs)), {
+                .text("My classes")
+            }))
         }))
         .child(html!("div", {
             .class("width-holder")

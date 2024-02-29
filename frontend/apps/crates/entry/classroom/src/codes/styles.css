@@ -4,10 +4,14 @@ h1 {
     margin: 0;
     display: grid;
     align-items: center;
+    justify-content: start;
     padding-inline: 40px;
     font-size: 29px;
     font-weight: 900;
+}
+h1 a {
     color: var(--main-yellow);
+    text-decoration: none;
 }
 .width-holder {
     max-width: 1400px;
