@@ -94,8 +94,8 @@ impl PrePublish {
     fn form_invalid(self: &Rc<Self>) -> bool {
         self.asset.display_name().lock_ref().is_empty()
             || self.asset.age_ranges().lock_ref().is_empty()
+            || self.asset.language().lock_ref().is_empty()
         // || self.jig.description.lock_ref().is_empty()
-        // || self.jig.language.lock_ref().is_empty()
         // || self.jig.categories.lock_ref().is_empty()
     }
 
