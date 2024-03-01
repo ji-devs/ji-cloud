@@ -38,18 +38,18 @@ impl Game {
                 state.base.settings.n_rounds
             );
         } else {
+            let info = state.base.play_report.lock_ref().clone();
+            let info = JigPlaySessionModule::Matching(info);
+            let msg = IframeAction::new(ModuleToJigPlayerMessage::AddCodeSessionInfo(info));
+            if msg.try_post_message_to_player().is_err() {
+                toasts::error("Error saving progress");
+                log::info!("Error saving progress");
+            }
+
             let feedback = &state.base.feedback;
             if feedback.has_content() {
                 state.base.feedback_signal.set(Some(feedback.clone()));
             } else {
-                let info = state.base.play_report.lock_ref().clone();
-                let info = JigPlaySessionModule::Matching(info);
-                let msg = IframeAction::new(ModuleToJigPlayerMessage::AddCodeSessionInfo(info));
-                if msg.try_post_message_to_player().is_err() {
-                    toasts::error("Error saving progress");
-                    log::info!("Error saving progress");
-                }
-
                 state.base.phase.set(Phase::Ending);
                 state
                     .base
