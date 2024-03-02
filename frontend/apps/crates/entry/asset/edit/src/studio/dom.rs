@@ -33,6 +33,10 @@ pub fn render_studio() -> Dom {
                 }))
                 .text("My JIGs")
             }),
+            html!("p", {
+                .prop("slot", "jig-instruction")
+                .text("JIGs are a great way to engage your students by making your lessons interactive. Choose activities, input your content, and share with your students.")
+            }),
             html!("button-rect", {
                 .prop("slot", "playlist-create")
                 .prop("color", "red")
@@ -52,6 +56,10 @@ pub fn render_studio() -> Dom {
                     Route::Asset(AssetRoute::PlaylistGallery).to_string()
                 }))
                 .text("My Playlists")
+            }),
+            html!("p", {
+                .prop("slot", "playlist-instruction")
+                .text("Link multiple JIGs in a playlist, so you can guide your students on a learning path of subject material you want them to master.")
             }),
             html!("button-rect", {
                 .prop("slot", "resource-create")
@@ -73,6 +81,10 @@ pub fn render_studio() -> Dom {
                 }))
                 .text("My Resources")
             }),
+            html!("p", {
+                .prop("slot", "resource-instruction")
+                .text("Upload all things not JIG here. Lesson plans, worksheets, off-screen activities, game instructions, photos, videos or even website links.")
+            }),
             html!("button-rect", {
                 .prop("slot", "course-create")
                 .prop("color", "red")
@@ -93,11 +105,16 @@ pub fn render_studio() -> Dom {
                 }))
                 .text("My Courses")
             }),
+            html!("p", {
+                .prop("slot", "course-instruction")
+                .text("Upload videos and add other resources to create a course for older students in our content section or professional development in our community.")
+            }),
             html!("button-rect", {
                 .prop("slot", "help")
                 .prop("kind", "outline")
                 .prop("size", "regular")
                 .prop("color", "white")
+                .style("margin-left", "12rem")
                 .prop("href", Route::Home(HomeRoute::Help).to_string())
                 .text("Help")
             }),

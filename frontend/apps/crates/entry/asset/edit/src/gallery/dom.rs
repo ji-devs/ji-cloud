@@ -111,7 +111,7 @@ impl Gallery {
                         .child(html!("fa-icon", {
                             .prop("icon", "fa-regular fa-chevron-left")
                         }))
-                        .text("Back to creator menu")
+                        .text("Back to Jigzi Studio")
                     }))
                     .child(html!("asset-gallery-create", {
                         .prop("slot", "create-asset")

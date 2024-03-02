@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import { ifDefined } from "lit-html/directives/if-defined";
 
-export type Color = "red" | "blue" | "green" | "grey";
+export type Color = "red" | "blue" | "green" | "grey" | "white";
 export type Kind = "filled" | "text" | "outline";
 export type Size = "regular" | "large";
 
@@ -50,6 +50,12 @@ export class _ extends LitElement {
                 }
                 :host([color="grey"]:hover) {
                     --color: var(--dark-gray-4); /*my own color*/
+                }
+                :host([color="white"]) {
+                    --color: var(--white);
+                }
+                :host([color="white"]:hover) {
+                    --color: var(--white);
                 }
 
                 :host([disabled]) {
