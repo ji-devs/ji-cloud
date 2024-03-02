@@ -62,6 +62,13 @@ export class _ extends LitElement {
                     max-width: 100%;
                     max-height: 180px;
                 }
+                ::slotted([slot="jig-instruction"]),
+                ::slotted([slot="playlist-instruction"]),
+                ::slotted([slot="resource-instruction"]),
+                ::slotted([slot="course-instruction"]) {
+                    text-align: center;
+                    color: var(--dark-blue-8);
+                }
             `,
         ];
     }
@@ -81,21 +88,25 @@ export class _ extends LitElement {
                         <img-ui path="entry/jig/gallery/jig-icon.webp"></img-ui>
                         <slot name="jig-create"></slot>
                         <slot name="jig-gallery"></slot>
+                        <slot name="jig-instruction"></slot>
                     </div>
                     <div class="gallery-link">
                         <img-ui path="entry/jig/gallery/playlist-icon.webp"></img-ui>
                         <slot name="playlist-create"></slot>
                         <slot name="playlist-gallery"></slot>
+                        <slot name="playlist-instruction"></slot>
                     </div>
                     <div class="gallery-link">
                         <img-ui path="entry/jig/gallery/resource-icon.webp"></img-ui>
                         <slot name="resource-create"></slot>
                         <slot name="resource-gallery"></slot>
+                        <slot name="resource-instruction"></slot>
                     </div>
                     <!-- <div class="gallery-link">
                         <img-ui path="entry/jig/gallery/course-icon.webp"></img-ui>
                         <slot name="course-create"></slot>
                         <slot name="course-gallery"></slot>
+                        <slot name="course-instruction"></slot>
                     </div> -->
                 </div>
 
