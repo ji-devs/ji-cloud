@@ -26,8 +26,6 @@ const STR_LOGIN: &str = "Login";
 const STR_LOGOUT: &str = "Logout";
 const STR_ADMIN: &str = "Admin";
 const STR_PRICING: &str = "Plans";
-const STR_UPGRADE: &str = "Upgrade";
-
 const STR_ACCOUNT: &str = "Account";
 const STR_PROFILE: &str = "Profile";
 const STR_MY_JIGS: &str = "My JIGs";
@@ -67,17 +65,12 @@ impl PageHeader {
             .child(html!("button-rect", {
                 .prop("slot", "donate")
                 .prop("color", "green")
-                .prop("size", "regular")
+                .prop("size", "large")
                 .prop("bold", true)
                 .prop("href", Route::Home(HomeRoute::Pricing(HomePricingRoute::Individual)).to_string())
                 // .prop("href", DONATE_LINK)
                 // .prop("target", "_blank")
-                .text_signal(state.logged_in.signal_ref(|logged_in| {
-                    match logged_in {
-                        LoggedInState::LoggedIn(_) => STR_UPGRADE,
-                        LoggedInState::LoggedOut | LoggedInState::Loading => STR_PRICING
-                    }
-                }))
+                .text(STR_PRICING)
                 .event(move |_evt: events::Click| {
                     analytics::event("Pricing Click", None);
                 })
