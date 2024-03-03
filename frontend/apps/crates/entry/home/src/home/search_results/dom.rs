@@ -1,5 +1,6 @@
+use crate::home::actions::search;
 use crate::home::search_results::search_results_section::SearchResultsSection;
-use dominator::{html, Dom};
+use dominator::{clone, html, Dom};
 use futures_signals::{map_ref, signal::SignalExt};
 use std::rc::Rc;
 
@@ -36,6 +37,9 @@ impl SearchResults {
             .prop_signal("playlistCount", state.playlists.total.signal())
             .prop_signal("resourceCount", state.resources.total.signal())
             .prop("query", &state.query)
+            .child(state.jigs.home_state.search_bar.render_rated_toggle(Rc::new(clone!(state => move || {
+                search(&state.jigs.home_state)
+            })), Some("rated")))
             .child_signal(search_results_signal(Rc::clone(&state.jigs)))
             .child_signal(search_results_signal(Rc::clone(&state.playlists)))
             .child_signal(search_results_signal(Rc::clone(&state.resources)))

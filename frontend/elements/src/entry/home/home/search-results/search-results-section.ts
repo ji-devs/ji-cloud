@@ -58,11 +58,6 @@ export class _ extends LitElement {
                     font-size: .6em;
                     font-weight: 500;
                 }
-                .rated {
-                    margin: 0 auto;
-                    width: 100%;
-                    max-width: 512px;
-                }
                 .results {
                     /* display: flex;
                     flex-wrap: wrap; */
@@ -138,9 +133,6 @@ export class _ extends LitElement {
                     </h2>
                 </div>
                 <slot name="sort"></slot>
-            </div>
-            <div class="rated">
-                <slot name="rated"></slot>
             </div>
             <div class="results">
                 <slot name="results"></slot>
