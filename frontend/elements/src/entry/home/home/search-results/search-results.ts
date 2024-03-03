@@ -44,6 +44,11 @@ export class _ extends LitElement {
                     justify-content: center;
                     margin-top: 50px;
                 }
+                .rated {
+                    margin: 0 auto;
+                    width: 100%;
+                    max-width: 512px;
+                }
             `,
         ];
     }
@@ -125,7 +130,8 @@ export class _ extends LitElement {
                 ${
                     this.query.trim() !== "" ? html`
                         ${STR_FOR}
-                        <span class="query">${this.query}</span>
+                        <span class="query">${this.query}</span>.
+                        Try selecting <strong>All</strong> instead of <strong>Top Rated</strong>
                     ` : nothing
                 }
             </h1>
@@ -147,6 +153,9 @@ export class _ extends LitElement {
                     : this.renderNoResultsFound()
             }
             <div class="main">
+                <div class="rated">
+                    <slot name="rated"></slot>
+                </div>
                 <slot name="sections"></slot>
             </div>
             <div class="algolia">

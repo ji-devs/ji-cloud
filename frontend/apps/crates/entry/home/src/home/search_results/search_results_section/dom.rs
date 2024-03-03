@@ -29,8 +29,6 @@ use utils::{
     },
 };
 
-use crate::home::actions::search;
-
 use super::state::SearchResultsSection;
 
 const STR_LOAD_MORE: &str = "See more";
@@ -46,11 +44,6 @@ impl SearchResultsSection {
             .prop("slot", "sections")
             .prop("kind", state.asset_type.as_str())
             .prop_signal("resultsCount", state.total.signal())
-            .apply_if(self.asset_type.is_jig(), |dom| {
-                dom.child(state.home_state.search_bar.render_rated_toggle(Rc::new(clone!(state => move || {
-                    search(&state.home_state)
-                })), Some("rated")))
-            })
             .children_signal_vec(state.list.signal_vec_cloned().map(clone!(state => move |jig| {
                 state.render_result(jig)
             })))
