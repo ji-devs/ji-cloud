@@ -555,6 +555,18 @@ impl Manager {
         let requests: Vec<_> = sqlx::query!(
             //language=SQL
             r#"
+with recursive categories_cte(id, name, parent_id, depth, full_name) as (
+    select
+        c.id, c.name, c.parent_id, 1::int as depth, c.name::text as full_name
+    from category as c
+    where c.parent_id is null
+    union all
+    select
+        c.id, c.name, c.parent_id, cte.depth + 1 as depth,
+        (cte.full_name || '/' || c.name)
+    from categories_cte as cte, category as c
+    where c.parent_id = cte.id
+)
 select jig.id,
        display_name                                                                                                 as "name",
        language                                                                                                     as "language!",
@@ -585,9 +597,9 @@ select jig.id,
        array((select category_id
               from jig_data_category
               where jig_data_id = jig_data.id))                                                                     as "categories!",
-       array((select name
-              from category
-                       inner join jig_data_category on category.id = jig_data_category.category_id
+       array((select full_name
+              from categories_cte
+              join jig_data_category on categories_cte.id = jig_data_category.category_id
               where jig_data_category.jig_data_id = jig_data.id))                                                   as "category_names!",
        privacy_level                                                                                                as "privacy_level!: PrivacyLevel",
        author_id                                                                                                    as "author_id",
@@ -718,6 +730,18 @@ where jig_data.id = any (select live_id from jig where jig.id = any ($1))
         let requests: Vec<_> = sqlx::query!(
             //language=SQL
             r#"
+with recursive categories_cte(id, name, parent_id, depth, full_name) as (
+    select
+        c.id, c.name, c.parent_id, 1::int as depth, c.name::text as full_name
+    from category as c
+    where c.parent_id is null
+    union all
+    select
+        c.id, c.name, c.parent_id, cte.depth + 1 as depth,
+        (cte.full_name || '/' || c.name)
+    from categories_cte as cte, category as c
+    where c.parent_id = cte.id
+)
 select resource.id,
        display_name                                                                                                 as "name",
        language                                                                                                     as "language!",
@@ -748,10 +772,10 @@ select resource.id,
        array((select category_id
               from resource_data_category
               where resource_data_id = resource_data.id))                                                                     as "categories!",
-       array((select name
-              from category
-                       inner join resource_data_category on category.id = resource_data_category.category_id
-              where resource_data_category.resource_data_id = resource_data.id))                                                   as "category_names!",
+       array((select full_name
+              from categories_cte
+              join resource_data_category on categories_cte.id = resource_data_category.category_id
+              where resource_data_category.resource_data_id = resource_data.id))                                    as "category_names!",
        privacy_level                                                                                                as "privacy_level!: PrivacyLevel",
        author_id                                                                                                    as "author_id",
        locked                                                                                                       as "locked!",
@@ -888,6 +912,18 @@ where resource_data.id = any (select live_id from resource where resource.id = a
         let requests: Vec<_> = sqlx::query!(
             //language=SQL
             r#"
+with recursive categories_cte(id, name, parent_id, depth, full_name) as (
+    select
+        c.id, c.name, c.parent_id, 1::int as depth, c.name::text as full_name
+    from category as c
+    where c.parent_id is null
+    union all
+    select
+        c.id, c.name, c.parent_id, cte.depth + 1 as depth,
+        (cte.full_name || '/' || c.name)
+    from categories_cte as cte, category as c
+    where c.parent_id = cte.id
+)
 select id,
        name,
        size                                                                                     as "size!: ImageSize",
@@ -910,9 +946,9 @@ select id,
                        inner join image_age_range on age_range.id = image_age_range.age_range_id
               where image_age_range.image_id = image_metadata.id))                              as "age_range_names!",
        array((select category_id from image_category where image_id = image_metadata.id))       as "categories!",
-       array((select name
-              from category
-                       inner join image_category on category.id = image_category.category_id
+       array((select full_name
+              from categories_cte
+              join image_category on categories_cte.id = image_category.category_id
               where image_category.image_id = image_metadata.id))                               as "category_names!",
        array((select index
               from image_tag
@@ -1019,6 +1055,18 @@ limit 100 for no key update skip locked;
         let requests: Vec<_> = sqlx::query!(
             //language=SQL
             r#"
+with recursive categories_cte(id, name, parent_id, depth, full_name) as (
+    select
+        c.id, c.name, c.parent_id, 1::int as depth, c.name::text as full_name
+    from category as c
+    where c.parent_id is null
+    union all
+    select
+        c.id, c.name, c.parent_id, cte.depth + 1 as depth,
+        (cte.full_name || '/' || c.name)
+    from categories_cte as cte, category as c
+    where c.parent_id = cte.id
+)
 select playlist.id,
        display_name                                                                                                 as "name",
        language                                                                                                     as "language!",
@@ -1049,10 +1097,10 @@ select playlist.id,
        array((select category_id
               from playlist_data_category
               where playlist_data_id = playlist_data.id))                                                                     as "categories!",
-       array((select name
-              from category
-                       inner join playlist_data_category on category.id = playlist_data_category.category_id
-              where playlist_data_category.playlist_data_id = playlist_data.id))                                                   as "category_names!",
+       array((select full_name
+              from categories_cte
+              join playlist_data_category on categories_cte.id = playlist_data_category.category_id
+              where playlist_data_category.playlist_data_id = playlist_data.id))                                    as "category_names!",
         array(
            (select jig_id
             from playlist_data_jig
@@ -1398,6 +1446,18 @@ limit 100 for no key update skip locked;
         let requests: Vec<_> = sqlx::query!(
             //language=SQL
             r#"
+with recursive categories_cte(id, name, parent_id, depth, full_name) as (
+    select
+        c.id, c.name, c.parent_id, 1::int as depth, c.name::text as full_name
+    from category as c
+    where c.parent_id is null
+    union all
+    select
+        c.id, c.name, c.parent_id, cte.depth + 1 as depth,
+        (cte.full_name || '/' || c.name)
+    from categories_cte as cte, category as c
+    where c.parent_id = cte.id
+)
 select course.id,
        display_name                                                                                                 as "name",
        language                                                                                                     as "language!",
@@ -1414,9 +1474,9 @@ select course.id,
        array((select category_id
               from course_data_category
               where course_data_id = course_data.id))                                                               as "categories!",
-       array((select name
-              from category
-                       inner join course_data_category on category.id = course_data_category.category_id
+       array((select full_name
+              from categories_cte
+              join course_data_category on categories_cte.id = course_data_category.category_id
               where course_data_category.course_data_id = course_data.id))                                          as "category_names!",
         array(
            (select unit_id
