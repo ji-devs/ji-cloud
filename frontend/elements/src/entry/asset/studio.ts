@@ -43,10 +43,13 @@ export class _ extends LitElement {
                 .gallery-links {
                     display: flex;
                     flex-wrap: wrap;
+                    justify-content: center;
                     column-gap: 32px;
                 }
                 .gallery-link {
                     width: 212px;
+                }
+                .gallery-card {
                     height: 304px;
                     display: grid;
                     grid-template-rows: 1fr auto auto;
@@ -58,7 +61,7 @@ export class _ extends LitElement {
                     box-sizing: border-box;
                     border-radius: 16px;
                 }
-                .gallery-link img-ui {
+                .gallery-card img-ui {
                     max-width: 100%;
                     max-height: 180px;
                 }
@@ -85,27 +88,35 @@ export class _ extends LitElement {
 
                 <div class="gallery-links">
                     <div class="gallery-link">
-                        <img-ui path="entry/jig/gallery/jig-icon.webp"></img-ui>
-                        <slot name="jig-create"></slot>
-                        <slot name="jig-gallery"></slot>
+                        <div class="gallery-card">
+                            <img-ui path="entry/jig/gallery/jig-icon.webp"></img-ui>
+                            <slot name="jig-create"></slot>
+                            <slot name="jig-gallery"></slot>
+                        </div>
                         <slot name="jig-instruction"></slot>
                     </div>
                     <div class="gallery-link">
-                        <img-ui path="entry/jig/gallery/playlist-icon.webp"></img-ui>
-                        <slot name="playlist-create"></slot>
-                        <slot name="playlist-gallery"></slot>
+                        <div class="gallery-card">
+                            <img-ui path="entry/jig/gallery/playlist-icon.webp"></img-ui>
+                            <slot name="playlist-create"></slot>
+                            <slot name="playlist-gallery"></slot>
+                        </div>
                         <slot name="playlist-instruction"></slot>
                     </div>
                     <div class="gallery-link">
-                        <img-ui path="entry/jig/gallery/resource-icon.webp"></img-ui>
-                        <slot name="resource-create"></slot>
-                        <slot name="resource-gallery"></slot>
+                        <div class="gallery-card">
+                            <img-ui path="entry/jig/gallery/resource-icon.webp"></img-ui>
+                            <slot name="resource-create"></slot>
+                            <slot name="resource-gallery"></slot>
+                        </div>
                         <slot name="resource-instruction"></slot>
                     </div>
                     <!-- <div class="gallery-link">
-                        <img-ui path="entry/jig/gallery/course-icon.webp"></img-ui>
-                        <slot name="course-create"></slot>
-                        <slot name="course-gallery"></slot>
+                        <div class="gallery-card">
+                            <img-ui path="entry/jig/gallery/course-icon.webp"></img-ui>
+                            <slot name="course-create"></slot>
+                            <slot name="course-gallery"></slot>
+                        </div>
                         <slot name="course-instruction"></slot>
                     </div> -->
                 </div>
