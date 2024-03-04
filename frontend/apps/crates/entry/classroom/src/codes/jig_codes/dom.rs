@@ -5,14 +5,12 @@ use shared::domain::jig::TextDirection;
 use std::rc::Rc;
 use utils::{
     component::Component,
-    link,
+    date_formatters, link,
     routes::{ClassroomCodesRoute, ClassroomRoute, Route},
 };
 use web_sys::ShadowRoot;
 
 use super::JigCodes;
-
-const DATE_FORMAT: &str = "%h %e, %Y %I:%M %p";
 
 impl Component<JigCodes> for Rc<JigCodes> {
     fn styles() -> &'static str {
@@ -73,7 +71,7 @@ impl Component<JigCodes> for Rc<JigCodes> {
                         .child(html!("span", {
                             .class("cell")
                             .class("created-at")
-                            .text(&code.created_at.format(DATE_FORMAT).to_string())
+                            .text(&date_formatters::year_month_day(&code.created_at))
                         }))
                         .child(html!("span", {
                             .class("cell")

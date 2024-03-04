@@ -18,15 +18,12 @@ use std::{collections::HashMap, rc::Rc};
 use utils::{
     asset::AssetPlayerOptions,
     component::Component,
-    events, on_click_go_to_url,
+    date_formatters, events, on_click_go_to_url,
     routes::{ClassroomCodesRoute, ClassroomRoute, Route},
 };
 use web_sys::ShadowRoot;
 
 use super::{CodeSessions, JigWithModules};
-
-const DATE_FORMAT: &str = "%h %e, %Y";
-const TIME_FORMAT: &str = "%I:%M %p";
 
 impl Component<CodeSessions> for Rc<CodeSessions> {
     fn styles() -> &'static str {
@@ -213,16 +210,16 @@ impl CodeSessions {
                     .child(html!("div", {
                         .class("cell")
                         .class("time")
-                        .text(&session.started_at.format(DATE_FORMAT).to_string())
+                        .text(&date_formatters::year_month_day(&session.started_at))
                         .child(html!("br"))
-                        .text(&session.started_at.format(TIME_FORMAT).to_string())
+                        .text(&date_formatters::hour_minute(&session.started_at))
                     }))
                     .child(html!("div", {
                         .class("cell")
                         .class("time")
-                        .text(&session.finished_at.map(|f| f.format(DATE_FORMAT).to_string()).unwrap_or_default())
+                        .text(&session.finished_at.map(|t| date_formatters::year_month_day(&t)).unwrap_or_default())
                         .child(html!("br"))
-                        .text(&session.finished_at.map(|f| f.format(TIME_FORMAT).to_string()).unwrap_or_default())
+                        .text(&session.finished_at.map(|t| date_formatters::hour_minute(&t)).unwrap_or_default())
                     }))
                     .children(jig.jig.jig_data.modules.iter().map(|module| {
                         html!("div", {
