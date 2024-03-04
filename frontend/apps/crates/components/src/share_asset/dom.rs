@@ -136,6 +136,8 @@ impl ShareAsset {
                     }))
                     .event(clone!(state => move|evt :events::CustomDirection| {
                         state.direction.set(evt.direction());
+                        // clear the code
+                        state.student_code.set_neq(None);
                     }))
                 }))
                 .child(html!("label", {
@@ -144,6 +146,8 @@ impl ShareAsset {
                         .prop_signal("enabled", state.scoring.signal())
                         .event(clone!(state => move|evt :events::CustomToggle| {
                             state.scoring.set(evt.value());
+                            // clear the code
+                            state.student_code.set_neq(None);
                         }))
                     }))
                     .text(STR_SCORING)
