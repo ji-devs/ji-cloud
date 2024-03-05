@@ -30,7 +30,7 @@ const STR_ACCOUNT: &str = "Account";
 const STR_PROFILE: &str = "Profile";
 const STR_MY_JIGS: &str = "My JIGs";
 const STR_MY_PLAYLISTS: &str = "My playlists";
-const STR_MY_COURSES: &str = "My courses";
+// const STR_MY_COURSES: &str = "My courses";
 const STR_MY_RESOURCES: &str = "My resources";
 const STR_CLASSES: &str = "My classes";
 
@@ -173,15 +173,15 @@ fn render_logged_in(state: Rc<PageHeader>, user: &UserProfile) -> Vec<Dom> {
             }))
             .text(STR_MY_PLAYLISTS)
         }))
-        .child(html!("a", {
-            .prop("slot", "user-links")
-            .prop("href", Route::Asset(AssetRoute::CourseGallery).to_string())
-            .prop("target", "_top")
-            .child(html!("img-ui", {
-                .prop("path", "core/page-header/nav-icon-course.svg")
-            }))
-            .text(STR_MY_COURSES)
-        }))
+        // .child(html!("a", {
+        //     .prop("slot", "user-links")
+        //     .prop("href", Route::Asset(AssetRoute::CourseGallery).to_string())
+        //     .prop("target", "_top")
+        //     .child(html!("img-ui", {
+        //         .prop("path", "core/page-header/nav-icon-course.svg")
+        //     }))
+        //     .text(STR_MY_COURSES)
+        // }))
         .child(html!("a", {
             .prop("slot", "user-links")
             .prop("href", Route::Asset(AssetRoute::ResourceGallery).to_string())
