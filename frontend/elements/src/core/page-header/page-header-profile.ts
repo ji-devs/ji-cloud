@@ -104,6 +104,7 @@ export class _ extends LitElement {
                 }
                 .overlay .user-links {
                     display: grid;
+                    align-items: center;
                     grid-template-columns: 18px 1fr;
                     column-gap: 10px;
                     row-gap: 14px;
