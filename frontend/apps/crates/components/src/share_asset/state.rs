@@ -27,6 +27,14 @@ pub struct ShareAsset {
 
 impl ShareAsset {
     pub fn new(asset: Asset) -> Rc<Self> {
+        let direction = match &asset {
+            Asset::Jig(jig) => jig.jig_data.default_player_settings.direction,
+            _ => Default::default(),
+        };
+        let scoring = match &asset {
+            Asset::Jig(jig) => jig.jig_data.default_player_settings.scoring,
+            _ => Default::default(),
+        };
         Rc::new(Self {
             asset,
             student_code: Mutable::new(None),
@@ -36,8 +44,8 @@ impl ShareAsset {
             link_copied: Mutable::new(false),
             copied_student_url: Mutable::new(false),
             copied_student_code: Mutable::new(false),
-            direction: Mutable::new(TextDirection::default()),
-            scoring: Mutable::new(bool::default()),
+            direction: Mutable::new(direction),
+            scoring: Mutable::new(scoring),
         })
     }
 
