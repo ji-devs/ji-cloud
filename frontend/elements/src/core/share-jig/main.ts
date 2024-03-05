@@ -29,6 +29,11 @@ export class _ extends LitElement {
                     display: grid;
                     gap: 12px;
                 }
+                .settings p {
+                    margin: 0;
+                    margin-bottom: 10px;
+                    color: var(--dark-gray-5);
+                }
                 .settings ::slotted(label) {
                     display: flex;
                     gap: 8px;
@@ -57,6 +62,7 @@ export class _ extends LitElement {
                 <div class="body" slot="body">
                     ${ this.showSettings ? html`
                         <div class="settings">
+                            <p>Choose JIG settings BEFORE sharing</p>
                             <slot name="settings"></slot>
                         </div>
                     ` : nothing }
