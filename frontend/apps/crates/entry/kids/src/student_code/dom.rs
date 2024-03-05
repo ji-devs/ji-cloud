@@ -106,7 +106,9 @@ impl StudentCode {
                     }))
                     .event(clone!(input => move |_: events::Click| {
                         let value = input.borrow().as_ref().map(|input| input.value()).unwrap_or_default();
-                        name.set(Some(value));
+                        if !value.is_empty() {
+                            name.set(Some(value));
+                        }
                     }))
                 }),
             ])
