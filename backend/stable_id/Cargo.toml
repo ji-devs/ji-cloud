@@ -1,0 +1,32 @@
+[package]
+name = "stable_id"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ji_core = { path = "../ji_core", features = ["db"] }
+ji-cloud-api = { path = "../api" }
+shared = { path = "../../shared/rust" }
+tokio = "1.36.0"
+rayon = "1.9.0"
+futures = "0.3.30"
+# sqlx = { version = "0.6.3", default-features = false, features = [
+#   "postgres",
+#   "runtime-tokio-native-tls",
+# ], optional = true }
+
+[dependencies.sqlx]
+features = [
+  "runtime-tokio-native-tls",
+  "macros",
+  "postgres",
+  "uuid",
+  "json",
+  "chrono",
+  "offline",
+  "migrate",
+  "bigdecimal",
+]
+version = "0.6.3"
