@@ -59,8 +59,13 @@ pub struct JigPlayer {
     pub players_name: Option<String>,
     pub is_student: bool,
     pub quota: bool,
+
+    // saving the original value that was in the url, since they should always take precedence.
+    pub url_direction: Option<TextDirection>,
     pub direction: Mutable<TextDirection>,
+    pub url_scoring: Option<bool>,
     pub scoring: Mutable<bool>,
+    pub url_drag_assist: Option<bool>,
     pub drag_assist: Mutable<bool>,
 }
 
@@ -111,8 +116,11 @@ impl JigPlayer {
             players_name: player_options.players_name,
             is_student: player_options.is_student,
             quota: player_options.quota,
+            url_direction: player_options.direction,
             direction: Mutable::new(player_options.direction.unwrap_or_default()),
+            url_scoring: player_options.scoring,
             scoring: Mutable::new(player_options.scoring.unwrap_or_default()),
+            url_drag_assist: player_options.drag_assist,
             drag_assist: Mutable::new(player_options.drag_assist.unwrap_or_default()),
         })
     }

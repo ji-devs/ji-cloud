@@ -351,9 +351,15 @@ impl JigPlayer {
                             state.active_module.set_neq(Some(index));
                         };
                     }
-                    state.direction.set_neq(jig.jig_data.default_player_settings.direction);
-                    state.scoring.set_neq(jig.jig_data.default_player_settings.scoring);
-                    state.drag_assist.set_neq(jig.jig_data.default_player_settings.drag_assist);
+                    if state.url_direction.is_none() {
+                        state.direction.set_neq(jig.jig_data.default_player_settings.direction);
+                    }
+                    if state.url_scoring.is_none() {
+                        state.scoring.set_neq(jig.jig_data.default_player_settings.scoring);
+                    }
+                    if state.url_scoring.is_none() {
+                        state.drag_assist.set_neq(jig.jig_data.default_player_settings.drag_assist);
+                    }
                     state.jig.set(Some(jig));
                     state.jig_liked.set(Some(jig_liked));
                 },
