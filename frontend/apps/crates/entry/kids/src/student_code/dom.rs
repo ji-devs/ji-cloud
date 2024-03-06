@@ -3,6 +3,7 @@ use std::{cell::RefCell, rc::Rc};
 use components::player_popup::{PlayerPopup, PreviewPopupCallbacks};
 use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
+use shared::domain::asset::DraftOrLive;
 use utils::{asset::JigPlayerOptions, events};
 use web_sys::HtmlInputElement;
 
@@ -120,10 +121,17 @@ impl StudentCode {
         let close = clone!(state => move || {
             state.play_jig.set(None);
         });
-        let mut player_options: JigPlayerOptions = play_jig.settings.into();
-        player_options.is_student = true;
-        player_options.play_token = Some(play_jig.token);
-        player_options.players_name = play_jig.name.get_cloned();
+
+        let player_options = JigPlayerOptions {
+            draft_or_live: DraftOrLive::Live,
+            play_token: Some(play_jig.token),
+            players_name: play_jig.name.get_cloned(),
+            is_student: true,
+            quota: false,
+            direction: Some(play_jig.settings.direction),
+            scoring: Some(play_jig.settings.scoring),
+            drag_assist: Some(play_jig.settings.drag_assist),
+        };
 
         PlayerPopup::new(
             play_jig.id.into(),

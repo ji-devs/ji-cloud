@@ -5,7 +5,7 @@ use std::rc::Rc;
 use web_sys::HtmlInputElement;
 
 use super::super::{actions as sidebar_actions, state::Sidebar as SidebarState};
-use crate::edit::sidebar::{jig::actions::get_player_settings, state::SidebarSetting};
+use crate::edit::sidebar::{jig::actions::get_player_options, state::SidebarSetting};
 use utils::{
     asset::{AssetPlayerOptions, CoursePlayerOptions, PlaylistPlayerOptions},
     prelude::*,
@@ -104,7 +104,7 @@ impl HeaderDom {
                     .event(clone!(sidebar_state, asset_edit_state => move |_: events::Click| {
                         match &sidebar_state.settings {
                             SidebarSetting::Jig(jig) => {
-                                let settings = get_player_settings(Rc::clone(jig));
+                                let settings = get_player_options(Rc::clone(jig));
                                 let settings = AssetPlayerOptions::Jig(settings);
                                 asset_edit_state.play_jig.set(Some(settings));
                             },

@@ -4,8 +4,11 @@ use awsm_web::loaders::helpers::AsyncLoader;
 use components::audio::mixer::AudioHandle;
 use futures_signals::signal::Mutable;
 use shared::domain::{
+    asset::DraftOrLive,
     category::{Category, CategoryId},
-    jig::{codes::JigPlaySession, player::PlayerNavigationHandler, JigId, JigResponse},
+    jig::{
+        codes::JigPlaySession, player::PlayerNavigationHandler, JigId, JigResponse, TextDirection,
+    },
     meta::ResourceType,
     module::{
         body::{Audio, ModuleAssist, ModuleAssistType},
@@ -39,7 +42,6 @@ pub struct JigPlayer {
     pub started: Mutable<bool>,
     pub paused: Mutable<bool>,
     pub done: Mutable<bool>,
-    pub player_options: JigPlayerOptions,
     pub bg_audio_handle: Rc<RefCell<Option<AudioHandle>>>,
     pub bg_audio_playing: Mutable<bool>,
     pub module_assist_audio_handle: Rc<RefCell<Option<AudioHandle>>>,
@@ -52,6 +54,14 @@ pub struct JigPlayer {
     pub is_full_screen: Mutable<bool>,
     pub session_info: RefCell<JigPlaySession>,
     pub play_login_popup_shown: Mutable<bool>,
+    pub draft_or_live: DraftOrLive,
+    pub play_token: Option<String>,
+    pub players_name: Option<String>,
+    pub is_student: bool,
+    pub quota: bool,
+    pub direction: Mutable<TextDirection>,
+    pub scoring: Mutable<bool>,
+    pub drag_assist: Mutable<bool>,
 }
 
 impl JigPlayer {
@@ -84,7 +94,6 @@ impl JigPlayer {
             started: Mutable::new(false),
             paused: Mutable::new(false),
             done: Mutable::new(false),
-            player_options,
             bg_audio_handle: Rc::new(RefCell::new(None)),
             bg_audio_playing: Mutable::new(true),
             module_assist_audio_handle: Rc::new(RefCell::new(None)),
@@ -97,6 +106,14 @@ impl JigPlayer {
             is_full_screen: Mutable::new(false),
             session_info: Default::default(),
             play_login_popup_shown: Mutable::new(false),
+            draft_or_live: player_options.draft_or_live,
+            play_token: player_options.play_token,
+            players_name: player_options.players_name,
+            is_student: player_options.is_student,
+            quota: player_options.quota,
+            direction: Mutable::new(player_options.direction.unwrap_or_default()),
+            scoring: Mutable::new(player_options.scoring.unwrap_or_default()),
+            drag_assist: Mutable::new(player_options.drag_assist.unwrap_or_default()),
         })
     }
 }

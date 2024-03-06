@@ -93,7 +93,7 @@ impl JigPlayer {
                 if let Some(jig) = jig {
                     let mut properties = HashMap::new();
 
-                    if state.player_options.is_student {
+                    if state.is_student {
                         properties.insert("IsStudent", "Yes".to_owned());
                     } else {
                         properties.insert("IsTeacher", "Yes".to_owned());
@@ -130,7 +130,7 @@ impl JigPlayer {
                 async {}
             })))
             // Use state.player_options, not jig.jig_data.default_player_settings
-            .prop("rtl", state.player_options.direction.is_rtl())
+            .prop_signal("rtl", state.direction.signal().map(|d| d.is_rtl()))
             .prop_signal("paused", state.paused.signal())
             .prop_signal("isLegacy", state.jig.signal_ref(|jig| {
                 if let Some(jig) = jig {
@@ -152,21 +152,26 @@ impl JigPlayer {
                 };
             }))
             .apply(|dom| {
-                if state.player_options.is_student {
+                if state.is_student {
                     dom
                 } else {
                     dom.child(Sidebar::new(&state).render())
                 }
             })
-            .apply_if(state.player_options.scoring, clone!(state => move|dom| {
-                dom.child_signal(state.active_module_has_scoring().map(clone!(state => move |has_scoring| {
-                    Some(html!("jig-play-points-indicator", {
+            .child_signal(state.scoring.signal().map(clone!(state => move |scoring| {
+                scoring.then(|| {
+                    html!("div", {
                         .prop("slot", "indicators")
-                        .prop("hidden", !has_scoring)
-                        .prop_signal("value", state.points.signal().map(|p| p * 100))
-                    }))
-                })))
-            }))
+                        .style("display", "contents")
+                        .child_signal(state.active_module_has_scoring().map(clone!(state => move |has_scoring| {
+                            Some(html!("jig-play-points-indicator", {
+                                .prop("hidden", !has_scoring)
+                                .prop_signal("value", state.points.signal().map(|p| p * 100))
+                            }))
+                        })))
+                    })
+                })
+            })))
             .apply_if(document().fullscreen_enabled(), clone!(state => move|dom| {
                 dom.child(html!("jig-play-full-screen", {
                     .prop("slot", "full-screen")
@@ -233,7 +238,7 @@ impl JigPlayer {
                                                 active_module.id
                                             )).into();
 
-                                            if state.player_options.draft_or_live.is_draft() {
+                                            if state.draft_or_live.is_draft() {
                                                 route = format!("{}?draft_or_live=draft", route);
                                             }
 
@@ -549,10 +554,10 @@ impl JigPlayer {
                         .prop("autoClose", false)
                         .child(html!("jig-play-done-popup", {
                             .apply(|mut dom| {
-                                if state.player_options.scoring {
+                                if state.scoring.get() {
                                     dom = dom.prop_signal("score", state.points.signal().map(|p| p * 100));
                                 };
-                                if !state.player_options.scoring {
+                                if !state.scoring.get() {
                                     dom = dom.child(
                                         html!("jig-play-done-action", {
                                             .prop("slot", "actions")
@@ -565,7 +570,7 @@ impl JigPlayer {
                                         })
                                     );
                                 }
-                                if !state.player_options.is_student {
+                                if !state.is_student {
                                     dom = dom.child_signal(state.jig.signal_cloned().map(|jig| {
                                         jig.map(|jig| {
                                             ShareAsset::new(jig.into()).render(
@@ -623,7 +628,7 @@ impl JigPlayer {
                         .prop("autoClose", false)
                         .child(html!("jig-play-time-up-popup", {
                             .apply(|mut dom| {
-                                if !state.player_options.scoring {
+                                if !state.scoring.get() {
                                     dom = dom.child(
                                         html!("jig-play-done-action", {
                                             .prop("slot", "actions")

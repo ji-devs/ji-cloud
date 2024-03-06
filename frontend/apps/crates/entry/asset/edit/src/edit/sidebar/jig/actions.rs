@@ -71,15 +71,15 @@ pub fn duplicate_module(state: Rc<Sidebar>, module_id: &ModuleId) {
 //     )
 // }
 
-pub fn get_player_settings(settings_state: Rc<SettingsState>) -> JigPlayerOptions {
+pub fn get_player_options(settings_state: Rc<SettingsState>) -> JigPlayerOptions {
     let direction = settings_state.jig.direction.get_cloned();
     let scoring = settings_state.jig.scoring.get();
     let drag_assist = settings_state.jig.drag_assist.get();
 
     JigPlayerOptions {
-        direction,
-        scoring,
-        drag_assist,
+        direction: Some(direction),
+        scoring: Some(scoring),
+        drag_assist: Some(drag_assist),
         is_student: false,
         draft_or_live: DraftOrLive::Draft,
         play_token: None,

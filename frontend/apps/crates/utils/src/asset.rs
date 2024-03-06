@@ -10,7 +10,7 @@ use shared::{
         course::{CourseCreatePath, CourseCreateRequest},
         jig::{
             AudioBackground, AudioFeedbackNegative, AudioFeedbackPositive, JigCreatePath,
-            JigCreateRequest, JigPlayerSettings, TextDirection,
+            JigCreateRequest, TextDirection,
         },
         module::{ModuleBody, ModuleCreatePath, ModuleCreateRequest, ModuleKind},
         playlist::{PlaylistCreatePath, PlaylistCreateRequest},
@@ -182,13 +182,13 @@ pub fn published_at_string(time: DateTime<Utc>, short: bool) -> String {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct JigPlayerOptions {
     #[serde(default)]
-    pub direction: TextDirection,
+    pub draft_or_live: DraftOrLive,
 
     #[serde(default)]
-    pub scoring: bool,
+    pub play_token: Option<String>,
 
     #[serde(default)]
-    pub drag_assist: bool,
+    pub players_name: Option<String>,
 
     #[serde(default)]
     pub is_student: bool,
@@ -197,43 +197,28 @@ pub struct JigPlayerOptions {
     #[serde(default)]
     pub quota: bool,
 
+    // From JigPlayerSettings
     #[serde(default)]
-    pub draft_or_live: DraftOrLive,
+    pub direction: Option<TextDirection>,
 
     #[serde(default)]
-    pub play_token: Option<String>,
+    pub scoring: Option<bool>,
 
     #[serde(default)]
-    pub players_name: Option<String>,
+    pub drag_assist: Option<bool>,
 }
 
 impl Default for JigPlayerOptions {
     fn default() -> Self {
-        JigPlayerSettings::default().into()
-    }
-}
-
-impl From<JigPlayerOptions> for JigPlayerSettings {
-    fn from(options: JigPlayerOptions) -> Self {
-        Self {
-            direction: options.direction,
-            scoring: options.scoring,
-            drag_assist: options.drag_assist,
-        }
-    }
-}
-
-impl From<JigPlayerSettings> for JigPlayerOptions {
-    fn from(settings: JigPlayerSettings) -> Self {
-        Self {
-            direction: settings.direction,
-            scoring: settings.scoring,
-            drag_assist: settings.drag_assist,
-            is_student: false,
-            quota: false,
+        JigPlayerOptions {
             draft_or_live: DraftOrLive::Live,
             play_token: None,
             players_name: None,
+            is_student: false,
+            quota: false,
+            direction: None,
+            scoring: None,
+            drag_assist: None,
         }
     }
 }

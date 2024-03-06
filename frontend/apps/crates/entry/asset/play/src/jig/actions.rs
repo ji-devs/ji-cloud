@@ -96,7 +96,7 @@ impl JigPlayer {
                 // - The JIG is not a draft;
                 // - The play hasn't been tracked yet;
                 // - Either TRACK_MODULE_COUNT count of modules have been played or the JIG is done.
-                let should_track = !state.player_options.draft_or_live.is_draft()
+                let should_track = !state.draft_or_live.is_draft()
                     && !*state.play_tracked.borrow()
                     && (*state.played_modules.borrow() + 1 == TRACK_MODULE_COUNT || is_done);
 
@@ -130,12 +130,12 @@ impl JigPlayer {
     pub fn finish(self: &Rc<Self>) {
         let state = self;
         state.done.set(true);
-        if let Some(token) = state.player_options.play_token.clone() {
+        if let Some(token) = state.play_token.clone() {
             spawn_local(clone!(state => async move {
                 let req = PlayerSessionInstanceCompleteRequest {
                     token,
                     session: state.session_info.borrow().clone(),
-                    players_name: state.player_options.players_name.clone(),
+                    players_name: state.players_name.clone(),
                 };
                 let res = endpoints::jig::codes::instance::Complete::api_with_auth(PlayerSessionInstanceCompletePath(), Some(req)).await;
                 let _ = bail_on_err!(res);
@@ -275,7 +275,7 @@ impl JigPlayer {
 
     pub fn load_data(self: &Rc<Self>) {
         let state = self;
-        if state.player_options.quota {
+        if state.quota {
             if let Some(restricted) = restrictions::play_restricted() {
                 match restricted {
                     Restricted::FreeAccountLimit => {
@@ -301,7 +301,7 @@ impl JigPlayer {
     async fn load_jig(self: &Rc<Self>) {
         let state = self;
         state.loader.load(clone!(state => async move {
-            let (jig, jig_liked) = match state.player_options.draft_or_live {
+            let (jig, jig_liked) = match state.draft_or_live {
                 DraftOrLive::Live => {
                     let jig = {
                         jig::GetLive::api_no_auth(JigGetLivePath(state.jig_id), None).await
@@ -335,7 +335,7 @@ impl JigPlayer {
 
             match jig {
                 Ok(jig) => {
-                    if !state.player_options.is_student && !paywall::can_play_jig(jig.admin_data.premium) {
+                    if !state.is_student && !paywall::can_play_jig(jig.admin_data.premium) {
                         paywall::dialog_play("
                             Looking to access our premium content?
                             Upgrade now for UNLIMITED JIGs and resources.
@@ -351,6 +351,9 @@ impl JigPlayer {
                             state.active_module.set_neq(Some(index));
                         };
                     }
+                    state.direction.set_neq(jig.jig_data.default_player_settings.direction);
+                    state.scoring.set_neq(jig.jig_data.default_player_settings.scoring);
+                    state.drag_assist.set_neq(jig.jig_data.default_player_settings.drag_assist);
                     state.jig.set(Some(jig));
                     state.jig_liked.set(Some(jig_liked));
                 },

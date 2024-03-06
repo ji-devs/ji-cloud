@@ -97,7 +97,7 @@ impl Sidebar {
                                             state.player_state.jig_id.into(),
                                             Some(module.clone()),
                                             ThumbnailFallback::Module,
-                                            state.player_state.player_options.draft_or_live
+                                            state.player_state.draft_or_live,
                                         ).render_live(Some("window"))
                                     )
                                 })

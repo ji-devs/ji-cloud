@@ -153,13 +153,13 @@ impl Sidebar {
                             .prop("slot", "playlists")
                             .prop("target", "_BLANK")
                             .prop("title", &playlist.playlist_data.display_name)
-                            .prop("href",  Route::Asset(
-                                                AssetRoute::Play(AssetPlayRoute::Playlist(playlist.id,
-                                                        PlaylistPlayerOptions {
-                                                            draft_or_live: DraftOrLive::Live,
-                                                            is_student: state.player_state.player_options.is_student
-                                                        }))).to_string()
-                                    )
+                            .prop("href",  Route::Asset(AssetRoute::Play(AssetPlayRoute::Playlist(
+                                playlist.id,
+                                PlaylistPlayerOptions {
+                                    draft_or_live: DraftOrLive::Live,
+                                    is_student: state.player_state.is_student
+                                }
+                            ))).to_string())
                             .text(format!(" {}  ", &playlist.playlist_data.display_name).as_str())
                         })
                     }).collect()

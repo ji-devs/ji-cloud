@@ -71,8 +71,8 @@ impl ShareAsset {
                     JigPlayerOptions {
                         is_student,
                         quota,
-                        direction: self.direction.get(),
-                        scoring: self.scoring.get(),
+                        direction: Some(self.direction.get()),
+                        scoring: Some(self.scoring.get()),
                         ..Default::default()
                     },
                 )))
