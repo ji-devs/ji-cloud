@@ -17,9 +17,13 @@ use shared::domain::{
 use std::{collections::HashMap, rc::Rc};
 use utils::{
     asset::AssetPlayerOptions,
+    clipboard,
     component::Component,
-    date_formatters, events, on_click_go_to_url,
-    routes::{ClassroomCodesRoute, ClassroomRoute, Route},
+    date_formatters, events,
+    init::settings::SETTINGS,
+    on_click_go_to_url,
+    routes::{ClassroomCodesRoute, ClassroomRoute, KidsRoute, Route},
+    unwrap::UnwrapJiExt,
 };
 use web_sys::ShadowRoot;
 
@@ -51,6 +55,14 @@ impl Component<CodeSessions> for Rc<CodeSessions> {
             .child(html!("h2", {
                 .class("code")
                 .text(&state.code.to_string())
+                .child(html!("fa-button", {
+                    .class("copy")
+                    .prop("title", "Copy code")
+                    .prop("icon", "fa-regular fa-copy")
+                    .event(clone!(state => move |_: events::Click| {
+                        clipboard::write_text(&state.code.to_string());
+                    }))
+                }))
             }))
             .child(html!("h3", {
                 .class("jig-name")
@@ -67,6 +79,22 @@ impl Component<CodeSessions> for Rc<CodeSessions> {
                     state.preview_open.set(true);
                 }))
             }))
+            .apply(|dom| {
+                dom.child(html!("p", {
+                    .class("code-link")
+                    .text("jigzi.org")
+                    .text(&Route::Kids(KidsRoute::StudentCode(Some(state.code.to_string()))).to_string())
+                    .child(html!("fa-button", {
+                        .class("copy")
+                        .prop("title", "Copy link")
+                        .prop("icon", "fa-regular fa-copy")
+                        .event(clone!(state => move |_: events::Click| {
+                            let url = SETTINGS.get().unwrap_ji().remote_target.pages_url() + &Route::Kids(KidsRoute::StudentCode(Some(state.code.to_string()))).to_string();
+                            clipboard::write_text(&url);
+                        }))
+                    }))
+                }))
+            })
         }))
         .child_signal(state.module_and_session_signal().map(
             clone!(state => move |jig_and_session| {

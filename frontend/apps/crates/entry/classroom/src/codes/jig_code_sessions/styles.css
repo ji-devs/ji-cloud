@@ -11,10 +11,11 @@ header {
     grid-template-columns: auto auto auto;
     justify-content: space-between;
     align-items: center;
-    gap: 16px;
+    gap: 10px;
 }
 header .back-button {
     place-self: start;
+    margin-bottom: 16px;;
 }
 header .code {
     margin: 0;
@@ -28,6 +29,28 @@ header .preview-button {
     grid-row: 2;
     justify-self: start;
     background-color: #ffffff;
+}
+header .code-link {
+    grid-row: 3;
+    grid-column: 1;
+    margin: 0;
+    font-size: 12px;
+}
+header .copy {
+    margin-left: 10px;
+    display: inline-grid;
+    height: 1.6em;
+    width: 1.6em;
+    display: inline-grid;
+    place-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+header .copy:hover {
+    color: var(--main-blue);
+}
+header .copy:active {
+    background-color: rgba(0, 0, 0, 0.1);
 }
 .table {
     overflow-x: auto;
