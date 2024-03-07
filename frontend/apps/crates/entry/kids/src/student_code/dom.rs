@@ -1,8 +1,8 @@
-use std::{cell::RefCell, rc::Rc};
+use std::rc::Rc;
 
 use components::player_popup::{PlayerPopup, PreviewPopupCallbacks};
-use dominator::{clone, html, Dom};
-use futures_signals::signal::SignalExt;
+use dominator::{clone, html, with_node, Dom};
+use futures_signals::signal::{Mutable, SignalExt};
 use shared::domain::asset::DraftOrLive;
 use utils::{asset::JigPlayerOptions, events};
 use web_sys::HtmlInputElement;
@@ -73,16 +73,22 @@ impl StudentCode {
     }
 
     fn render_name_input(self: &Rc<Self>, play_jig: PlayJig) -> Dom {
-        let name = play_jig.name.clone();
-        let input: Rc<RefCell<Option<HtmlInputElement>>> = Rc::new(RefCell::new(None));
+        // name after finish typing
+        let final_name = play_jig.name.clone();
+        // name signal that changes as the user types.
+        let local_name = Mutable::new(String::new());
+
         html!("kids-student-code-name", {
             .children(&mut [
                 html!("input" => HtmlInputElement, {
-                    .prop("slot", "input")
-                    .prop("placeholder", "Type your name")
-                    .after_inserted(clone!(input => move |el| {
-                        *input.borrow_mut() = Some(el);
-                    }))
+                    .with_node!(elem => {
+                        .prop("slot", "input")
+                        .prop("placeholder", "Type your name")
+                        .prop_signal("value", local_name.signal_cloned())
+                        .event(clone!(local_name => move |_: events::Input| {
+                            local_name.set(elem.value());
+                        }))
+                    })
                 }),
                 html!("button", {
                     .prop("slot", "clear")
@@ -91,8 +97,8 @@ impl StudentCode {
                         .style("font-size", "30px")
                     }))
                     .text("Clear")
-                    .event(clone!(input => move |_: events::Click| {
-                        input.borrow().as_ref().map(|input| input.set_value(""));
+                    .event(clone!(local_name => move |_: events::Click| {
+                        local_name.set(String::new())
                     }))
                 }),
                 html!("button-rect", {
@@ -105,10 +111,11 @@ impl StudentCode {
                         .style("color", "var(--main-yellow)")
                         .style("font-size", "20px")
                     }))
-                    .event(clone!(input => move |_: events::Click| {
-                        let value = input.borrow().as_ref().map(|input| input.value()).unwrap_or_default();
-                        if !value.is_empty() {
-                            name.set(Some(value));
+                    .prop_signal("disabled", local_name.signal_ref(|name| name.is_empty()))
+                    .event(clone!(local_name => move |_: events::Click| {
+                        let local_name = local_name.get_cloned();
+                        if !local_name.is_empty() {
+                            final_name.set(Some(local_name));
                         }
                     }))
                 }),
