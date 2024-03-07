@@ -79,22 +79,29 @@ impl Component<CodeSessions> for Rc<CodeSessions> {
                     state.preview_open.set(true);
                 }))
             }))
-            .apply(|dom| {
-                dom.child(html!("p", {
-                    .class("code-link")
-                    .text("jigzi.org")
-                    .text(&Route::Kids(KidsRoute::StudentCode(Some(state.code.to_string()))).to_string())
-                    .child(html!("fa-button", {
-                        .class("copy")
-                        .prop("title", "Copy link")
-                        .prop("icon", "fa-regular fa-copy")
-                        .event(clone!(state => move |_: events::Click| {
-                            let url = SETTINGS.get().unwrap_ji().remote_target.pages_url() + &Route::Kids(KidsRoute::StudentCode(Some(state.code.to_string()))).to_string();
-                            clipboard::write_text(&url);
-                        }))
+            .child(html!("p", {
+                .class("code-link")
+                .text("jigzi.org")
+                .text(&Route::Kids(KidsRoute::StudentCode(Some(state.code.to_string()))).to_string())
+                .child(html!("fa-button", {
+                    .class("copy")
+                    .prop("title", "Copy link")
+                    .prop("icon", "fa-regular fa-copy")
+                    .event(clone!(state => move |_: events::Click| {
+                        let url = SETTINGS.get().unwrap_ji().remote_target.pages_url() + &Route::Kids(KidsRoute::StudentCode(Some(state.code.to_string()))).to_string();
+                        clipboard::write_text(&url);
                     }))
                 }))
-            })
+            }))
+            .child(html!("button-rect", {
+                .class("export-button")
+                .prop("color", "blue")
+                .prop("kind", "text")
+                .text("Export CSV")
+                .event(clone!(state => move |_: events::Click| {
+                    state.export_sessions();
+                }))
+            }))
         }))
         .child_signal(state.module_and_session_signal().map(
             clone!(state => move |jig_and_session| {

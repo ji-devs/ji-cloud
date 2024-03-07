@@ -52,6 +52,10 @@ header .copy:hover {
 header .copy:active {
     background-color: rgba(0, 0, 0, 0.1);
 }
+header .export-button {
+    grid-row: 3;
+    grid-column: 3;
+}
 .table {
     overflow-x: auto;
     scrollbar-width: thin;
