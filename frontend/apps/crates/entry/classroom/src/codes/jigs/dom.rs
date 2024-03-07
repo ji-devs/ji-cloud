@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use components::asset_card::{render_asset_card, AssetCardConfig};
+use components::asset_card::{render_asset_card, AssetCardBottomIndicator, AssetCardConfig};
 use dominator::{html, DomBuilder};
 use futures_signals::signal_vec::SignalVecExt;
 use shared::domain::asset::Asset;
@@ -30,6 +30,7 @@ impl Component<Jigs> for Rc<Jigs> {
                 link!(Route::Classroom(ClassroomRoute::Codes(ClassroomCodesRoute::JigCodes(jig.id))), {
                     .child(render_asset_card(&asset, AssetCardConfig {
                         dense: true,
+                        bottom_indicator: AssetCardBottomIndicator::Author,
                         ..Default::default()
                     }))
                 })
