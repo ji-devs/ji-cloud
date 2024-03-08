@@ -132,7 +132,7 @@ impl ModuleKind {
     /// Whether this ModuleKind has scoring
     pub fn has_scoring(&self) -> bool {
         match self {
-            Self::Matching => true,
+            Self::Matching | Self::CardQuiz => true,
             _ => false,
         }
     }

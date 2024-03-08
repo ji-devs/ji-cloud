@@ -220,6 +220,7 @@ impl CodeSessions {
                 let sessions = session.info.unwrap().modules.into_iter().map(|module| {
                     let stable_module_id = match &module {
                         JigPlaySessionModule::Matching(module) => module.stable_module_id,
+                        JigPlaySessionModule::CardQuiz(module) => module.stable_module_id,
                     };
                     (stable_module_id, module)
                 }).collect::<HashMap<StableModuleId, JigPlaySessionModule>>();

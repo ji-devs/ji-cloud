@@ -13,9 +13,10 @@ use dominator::clone;
 use futures_signals::signal::Mutable;
 use gloo_timers::future::TimeoutFuture;
 use rand::prelude::*;
+use shared::domain::jig::codes::{JigPlaySessionCardQuizRound, JigPlaySessionModule};
 use std::convert::TryInto;
 use std::rc::Rc;
-use utils::prelude::*;
+use utils::{prelude::*, toasts};
 use wasm_bindgen_futures::spawn_local;
 
 impl Game {
@@ -35,10 +36,21 @@ impl Game {
         };
 
         if !has_ended {
-            state.current.set(Some(Current::new(state.clone())));
+            let current = Current::new(state.clone());
+            let current_pair_id = current.target.pair_id;
+            state.current.set(Some(current));
             state
                 .rounds_played
                 .store(rounds_played + 1, Ordering::SeqCst);
+            state
+                .base
+                .play_report
+                .lock_mut()
+                .rounds
+                .push(JigPlaySessionCardQuizRound {
+                    card_index: current_pair_id,
+                    failed_tries: 0,
+                });
             log::info!(
                 "playing round {} of {}",
                 rounds_played + 1,
@@ -46,6 +58,15 @@ impl Game {
             );
         } else {
             let feedback = &state.base.feedback;
+
+            let info = state.base.play_report.lock_ref().clone();
+            let info = JigPlaySessionModule::CardQuiz(info);
+            let msg = IframeAction::new(ModuleToJigPlayerMessage::AddCodeSessionInfo(info));
+            if msg.try_post_message_to_player().is_err() {
+                toasts::error("Error saving progress");
+                log::info!("Error saving progress");
+            }
+
             if feedback.has_content() {
                 state.base.feedback_signal.set(Some(feedback.clone()));
             } else {
@@ -112,6 +133,10 @@ impl Game {
                     }
 
                     phase.set(CurrentPhase::Correct(pair_id));
+                    let points = calculate_point_count(state.base.play_report.lock_mut().rounds.last().unwrap_ji().failed_tries as u32);
+                    let _ = IframeAction::new(ModuleToJigPlayerMessage::AddPoints(points))
+                        .try_post_message_to_player();
+
                     TimeoutFuture::new(crate::config::SUCCESS_TIME).await;
                     Self::next(state);
                 } else {
@@ -134,6 +159,7 @@ impl Game {
                         }))
                     });
                     phase.set(CurrentPhase::Wrong(pair_id));
+                    state.base.play_report.lock_mut().rounds.last_mut().unwrap_ji().failed_tries += 1;
                     // We should be able to safely assume that current is Some(_), but
                     // double-check here anyway because assumptions are bad.
                     if let Some(current) = &*state.current.lock_ref() {
@@ -145,4 +171,10 @@ impl Game {
             }));
         }
     }
+}
+
+fn calculate_point_count(tried_count: u32) -> u32 {
+    // start with 2 point, reduce one point for every try. min points: 0.
+    let base = 2_u32;
+    base.saturating_sub(tried_count)
 }

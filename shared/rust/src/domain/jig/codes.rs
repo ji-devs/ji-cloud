@@ -136,12 +136,15 @@ impl JigPlaySessionModuleGetPointsEarned for JigPlaySession {
 pub enum JigPlaySessionModule {
     /// Matching
     Matching(JigPlaySessionMatching),
+    /// Card quiz
+    CardQuiz(JigPlaySessionCardQuiz),
 }
 
 impl JigPlaySessionModuleGetPointsEarned for JigPlaySessionModule {
     fn get_points_earned(&self) -> PointsEarned {
         match self {
-            JigPlaySessionModule::Matching(matching) => matching.get_points_earned(),
+            JigPlaySessionModule::Matching(module) => module.get_points_earned(),
+            JigPlaySessionModule::CardQuiz(module) => module.get_points_earned(),
         }
     }
 }
@@ -214,6 +217,52 @@ impl JigPlaySessionModuleGetPointsEarned for JigPlaySessionMatching {
 ///
 #[derive(Clone, Debug, Hash, Serialize, Deserialize)]
 pub struct JigPlaySessionMatchingCard {
+    /// unsuccessful try count
+    pub failed_tries: u16,
+}
+
+/// CardQuiz module
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct JigPlaySessionCardQuiz {
+    /// related module id
+    pub stable_module_id: StableModuleId,
+
+    /// list of rounds for this module
+    pub rounds: Vec<JigPlaySessionCardQuizRound>,
+}
+
+impl JigPlaySessionCardQuiz {
+    /// create new from module id
+    pub fn new(stable_module_id: StableModuleId) -> Self {
+        Self {
+            stable_module_id,
+            rounds: Vec::new(),
+        }
+    }
+}
+
+impl JigPlaySessionModuleGetPointsEarned for JigPlaySessionCardQuiz {
+    fn get_points_earned(&self) -> PointsEarned {
+        let mut available = 0;
+        let mut earned = 0;
+        for card in &self.rounds {
+            available += 2;
+            earned += match card.failed_tries {
+                0 => 2,
+                1 => 1,
+                _ => 0,
+            };
+        }
+        PointsEarned { available, earned }
+    }
+}
+
+///
+#[derive(Clone, Debug, Hash, Serialize, Deserialize)]
+pub struct JigPlaySessionCardQuizRound {
+    /// index of card
+    pub card_index: usize,
+
     /// unsuccessful try count
     pub failed_tries: u16,
 }
