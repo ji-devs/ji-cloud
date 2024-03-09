@@ -38,10 +38,12 @@ pub struct EditablePlaylist {
     pub categories: Mutable<HashSet<CategoryId>>,
     pub affiliations: Mutable<HashSet<AffiliationId>>,
     pub additional_resources: Rc<MutableVec<AdditionalResource>>,
+    pub other_keywords: Mutable<String>,
     pub privacy_level: Mutable<PrivacyLevel>,
     pub rating: Mutable<Option<PlaylistRating>>,
     pub blocked: Mutable<bool>,
     pub premium: Mutable<bool>,
+    pub author_name: Option<String>,
 }
 
 impl From<PlaylistResponse> for EditablePlaylist {
@@ -59,11 +61,13 @@ impl From<PlaylistResponse> for EditablePlaylist {
             additional_resources: Rc::new(MutableVec::new_with_values(
                 playlist.playlist_data.additional_resources,
             )),
+            other_keywords: Mutable::new(playlist.playlist_data.other_keywords),
             privacy_level: Mutable::new(playlist.playlist_data.privacy_level),
             rating: Mutable::new(playlist.admin_data.rating),
             blocked: Mutable::new(playlist.admin_data.blocked),
             premium: Mutable::new(playlist.admin_data.premium),
             published_at: Mutable::new(playlist.published_at),
+            author_name: playlist.author_name,
         }
     }
 }
@@ -80,12 +84,14 @@ impl From<PlaylistId> for EditablePlaylist {
             categories: Default::default(),
             affiliations: Default::default(),
             additional_resources: Default::default(),
+            other_keywords: Default::default(),
             privacy_level: Default::default(),
             rating: Default::default(),
             blocked: Default::default(),
             premium: Default::default(),
             published_at: Default::default(),
             items: Default::default(),
+            author_name: Default::default(),
         }
     }
 }
@@ -129,10 +135,12 @@ impl EditablePlaylist {
             additional_resources: Rc::new(MutableVec::new_with_values(
                 self.additional_resources.lock_ref().to_vec(),
             )),
+            other_keywords: Mutable::new(self.other_keywords.get_cloned()),
             privacy_level: Mutable::new(self.privacy_level.get()),
             rating: Mutable::new(self.rating.get()),
             blocked: Mutable::new(self.blocked.get()),
             premium: Mutable::new(self.premium.get()),
+            author_name: self.author_name.clone(),
         }
     }
 
@@ -146,6 +154,7 @@ impl EditablePlaylist {
             categories: Some(self.categories.get_cloned().into_iter().collect()),
             affiliations: Some(self.affiliations.get_cloned().into_iter().collect()),
             privacy_level: Some(self.privacy_level.get()),
+            other_keywords: Some(self.other_keywords.get_cloned()),
             // not updating because it'll override the existing items, need a better solution
             // items: Some(self.items.lock_ref().to_vec()),
             ..Default::default()

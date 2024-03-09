@@ -1,6 +1,8 @@
 use std::rc::Rc;
 
+use crate::playlist_curation::details::state::PlaylistDetails;
 use dominator::{clone, html, Dom};
+use futures_signals::signal::{from_future, SignalExt};
 use utils::routes::AdminPlaylistCurationRoute;
 
 use crate::playlist_curation::table::state::PlaylistTable;
@@ -25,17 +27,17 @@ impl PlaylistCuration {
                             Rc::clone(&state)
                         ).render()
                     },
-                    AdminPlaylistCurationRoute::Playlist(_playlist_id) => {
+                    AdminPlaylistCurationRoute::Playlist(playlist_id) => {
                         html!("empty-fragment", {
-                            // .child_signal(from_future(state.clone().get_playlist(*playlist_id)).map(clone!(state => move|playlist| {
-                            //     playlist.map(|playlist| {
-                            //         PlaylistDetails::new(
-                            //             Rc::clone(&state),
-                            //             playlist.id,
-                            //             playlist
-                            //         ).render()
-                            //     })
-                            // })))
+                            .child_signal(from_future(state.clone().get_playlist(*playlist_id)).map(clone!(state => move|playlist| {
+                                playlist.map(|playlist| {
+                                    PlaylistDetails::new(
+                                        Rc::clone(&state),
+                                        playlist.id,
+                                        playlist
+                                    ).render()
+                                })
+                            })))
                         })
                     },
                 })

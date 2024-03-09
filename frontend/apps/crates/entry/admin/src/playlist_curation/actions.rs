@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use dominator::clone;
 use futures::join;
+use shared::domain::playlist::{PlaylistGetDraftPath, PlaylistId};
 use shared::{
     api::endpoints,
     domain::{
@@ -105,6 +106,33 @@ impl PlaylistCuration {
     pub fn navigate_to(self: &Rc<Self>, route: AdminPlaylistCurationRoute) {
         self.route.set(route.clone());
         Route::Admin(AdminRoute::PlaylistCuration(route)).push_state();
+    }
+
+    pub async fn get_playlist(self: Rc<Self>, playlist_id: PlaylistId) -> Rc<EditablePlaylist> {
+        let jig = self
+            .playlists
+            .lock_ref()
+            .iter()
+            .find(|playlist| playlist.id == playlist_id)
+            .cloned();
+        match jig {
+            Some(playlist) => playlist,
+            None => Rc::new(self.load_playlist(&playlist_id).await),
+        }
+    }
+
+    async fn load_playlist(self: &Rc<Self>, playlist_id: &PlaylistId) -> EditablePlaylist {
+        match endpoints::playlist::GetDraft::api_with_auth(
+            PlaylistGetDraftPath(playlist_id.clone()),
+            None,
+        )
+        .await
+        {
+            Ok(jig) => jig.into(),
+            Err(_) => {
+                todo!()
+            }
+        }
     }
 
     pub fn save_and_publish(self: &Rc<Self>, playlist: &Rc<EditablePlaylist>) {
