@@ -21,21 +21,26 @@ pub fn render_matching(module: &matching::Content, session: &JigPlaySessionMatch
                                 .class("round-item")
                                 .child(html!("div", {
                                     .apply(|dom| {
-                                        match &module.base.pairs[*id].0.card_content {
-                                            CardContent::Text(s) => {
-                                                dom.child(html!("p", {
-                                                    .text(&s)
-                                                }))
+                                        match module.base.pairs.get(*id) {
+                                            Some(pair) => {
+                                                match &pair.0.card_content {
+                                                    CardContent::Text(s) => {
+                                                        dom.child(html!("p", {
+                                                            .text(&s)
+                                                        }))
+                                                    },
+                                                    CardContent::Image(Some(image)) => {
+                                                        dom.child(html!("img-ji", {
+                                                            .prop("id", image.id.0.to_string())
+                                                            .prop("lib", image.lib.to_str())
+                                                        }))
+                                                    },
+                                                    CardContent::Image(None) => {
+                                                        dom
+                                                    }
+                                                }
                                             },
-                                            CardContent::Image(Some(image)) => {
-                                                dom.child(html!("img-ji", {
-                                                    .prop("id", image.id.0.to_string())
-                                                    .prop("lib", image.lib.to_str())
-                                                }))
-                                            },
-                                            CardContent::Image(None) => {
-                                                dom
-                                            }
+                                            None => dom.text("?"),
                                         }
                                     })
                                 }))
