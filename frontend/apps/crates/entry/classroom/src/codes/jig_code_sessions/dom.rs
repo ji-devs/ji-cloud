@@ -315,6 +315,10 @@ impl CodeSessions {
                         dom
                         .child(super::modules::matching::render_matching(&module.content.clone().unwrap(), &session))
                     },
+                    (ModuleBody::CardQuiz(module), JigPlaySessionModule::CardQuiz(session)) => {
+                        dom
+                        .child(super::modules::card_quiz::render_card_quiz(&module.content.clone().unwrap(), &session))
+                    },
                     _ => dom
                 }
             })

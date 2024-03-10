@@ -141,6 +141,9 @@ header .export-button {
     font-size: 14px;
     color: var(--main-red);
 }
+.wrapper h4 {
+    white-space: nowrap;
+}
 .round-items {
     display: flex;
     gap: 10px;
