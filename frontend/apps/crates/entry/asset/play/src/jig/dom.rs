@@ -464,8 +464,6 @@ impl JigPlayer {
         map_ref! {
             let active_module = self.active_module.signal(),
             let jig = self.jig.signal_cloned() => move {
-                log::info!("active_module_has_scoring: {:?}", active_module);
-                log::info!("active_module_has_scoring: {:?}", jig.as_ref().map(|jig| jig.jig_data.modules.clone()));
                 match (active_module, jig) {
                     (Some(active_module), Some(jig)) if jig.jig_data.modules[*active_module].kind.has_scoring() => true,
                     _ => false,

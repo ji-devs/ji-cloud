@@ -138,6 +138,19 @@ pub enum JigPlaySessionModule {
     Matching(JigPlaySessionMatching),
     /// Card quiz
     CardQuiz(JigPlaySessionCardQuiz),
+    /// Drag and drop
+    DragDrop(JigPlaySessionDragDrop),
+}
+
+impl JigPlaySessionModule {
+    /// get stable module id
+    pub fn stable_module_id(&self) -> StableModuleId {
+        match self {
+            Self::Matching(module) => module.stable_module_id,
+            Self::CardQuiz(module) => module.stable_module_id,
+            Self::DragDrop(module) => module.stable_module_id,
+        }
+    }
 }
 
 impl JigPlaySessionModuleGetPointsEarned for JigPlaySessionModule {
@@ -145,6 +158,7 @@ impl JigPlaySessionModuleGetPointsEarned for JigPlaySessionModule {
         match self {
             JigPlaySessionModule::Matching(module) => module.get_points_earned(),
             JigPlaySessionModule::CardQuiz(module) => module.get_points_earned(),
+            JigPlaySessionModule::DragDrop(module) => module.get_points_earned(),
         }
     }
 }
@@ -263,6 +277,49 @@ pub struct JigPlaySessionCardQuizRound {
     /// index of card
     pub card_index: usize,
 
+    /// unsuccessful try count
+    pub failed_tries: u16,
+}
+
+/// Drag and drop module
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct JigPlaySessionDragDrop {
+    /// related module id
+    pub stable_module_id: StableModuleId,
+
+    /// list of rounds for this module
+    pub items: Vec<JigPlaySessionDragDropRound>,
+}
+
+impl JigPlaySessionDragDrop {
+    /// create new from module id
+    pub fn new(stable_module_id: StableModuleId) -> Self {
+        Self {
+            stable_module_id,
+            items: Vec::new(),
+        }
+    }
+}
+
+impl JigPlaySessionModuleGetPointsEarned for JigPlaySessionDragDrop {
+    fn get_points_earned(&self) -> PointsEarned {
+        let mut available = 0;
+        let mut earned = 0;
+        for card in &self.items {
+            available += 2;
+            earned += match card.failed_tries {
+                0 => 2,
+                1 => 1,
+                _ => 0,
+            };
+        }
+        PointsEarned { available, earned }
+    }
+}
+
+///
+#[derive(Clone, Debug, Hash, Serialize, Deserialize)]
+pub struct JigPlaySessionDragDropRound {
     /// unsuccessful try count
     pub failed_tries: u16,
 }

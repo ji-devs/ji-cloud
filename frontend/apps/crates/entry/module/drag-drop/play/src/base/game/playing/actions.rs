@@ -1,8 +1,11 @@
+use std::iter::repeat_with;
 use std::rc::Rc;
 
 use super::state::*;
 use components::module::_common::play::prelude::{BaseExt, ModuleEnding, ModulePlayPhase};
+use shared::domain::jig::codes::{JigPlaySessionDragDropRound, JigPlaySessionModule};
 use shared::domain::module::body::_groups::design::Trace;
+use utils::toasts;
 use utils::{drag::Drag, prelude::*, resize::get_resize_info};
 
 use crate::debug::*;
@@ -34,6 +37,11 @@ impl PlayState {
                 *item.target_index.borrow_mut() = Some(index);
             }
         }
+
+        self.game.base.play_report.lock_mut().items =
+            repeat_with(|| JigPlaySessionDragDropRound { failed_tries: 0 })
+                .take(traces.len())
+                .collect();
     }
 
     pub fn evaluate_all_completed(state: Rc<Self>) -> bool {
@@ -104,6 +112,15 @@ impl PlayState {
                     // Move the item back to it's origin
                     item.move_back_to_origin();
                     item.play_audio_effect(AudioEffect::Wrong);
+                    state
+                        .game
+                        .base
+                        .play_report
+                        .lock_mut()
+                        .items
+                        .get_mut(item_index)
+                        .unwrap_ji()
+                        .failed_tries += 1;
                 }
                 Some((target_transform, index)) => {
                     // If the number of items that can be placed in a trace is just 1, then we snap
@@ -126,6 +143,21 @@ impl PlayState {
                     }
 
                     item.completed.set_neq(true);
+
+                    let points = calculate_point_count(
+                        state
+                            .game
+                            .base
+                            .play_report
+                            .lock_mut()
+                            .items
+                            .get(item_index)
+                            .unwrap_ji()
+                            .failed_tries as u32,
+                    );
+                    let _ = IframeAction::new(ModuleToJigPlayerMessage::AddPoints(points))
+                        .try_post_message_to_player();
+
                     if !Self::evaluate_all_completed(state.clone()) {
                         item.play_audio_effect(AudioEffect::Correct);
                     } else {
@@ -133,6 +165,16 @@ impl PlayState {
                         AUDIO_MIXER.with(|mixer| {
                             let positive_audio: AudioPath<'_> = mixer.get_random_positive().into();
                             mixer.play_oneshot_on_ended(positive_audio, move || {
+                                let info = state.game.base.play_report.lock_ref().clone();
+                                let info = JigPlaySessionModule::DragDrop(info);
+                                let msg = IframeAction::new(
+                                    ModuleToJigPlayerMessage::AddCodeSessionInfo(info),
+                                );
+                                if msg.try_post_message_to_player().is_err() {
+                                    toasts::error("Error saving progress");
+                                    log::info!("Error saving progress");
+                                }
+
                                 // Once the positive feedback effect has played, we can show/play the
                                 // feedback for the activity. If we played this at the same time, it
                                 // we could have two audio clips playing simultaneously which would be
@@ -152,6 +194,12 @@ impl PlayState {
             }
         });
     }
+}
+
+fn calculate_point_count(tried_count: u32) -> u32 {
+    // start with 2 point, reduce one point for every try. min points: 0.
+    let base = 2_u32;
+    base.saturating_sub(tried_count)
 }
 
 pub enum AudioEffect {

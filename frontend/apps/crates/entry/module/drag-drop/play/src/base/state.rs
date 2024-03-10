@@ -1,7 +1,10 @@
 use components::module::_common::play::prelude::*;
 use shared::domain::{
     asset::{Asset, AssetId},
-    jig::player::{ModuleConfig, Seconds},
+    jig::{
+        codes::JigPlaySessionDragDrop,
+        player::{ModuleConfig, Seconds},
+    },
     module::{
         body::{
             ModuleAssist,
@@ -34,6 +37,7 @@ pub struct Base {
     pub item_targets: Vec<TargetTransform>,
     pub target_areas: Vec<TargetArea>,
     pub module_phase: Mutable<ModulePlayPhase>,
+    pub play_report: Mutable<JigPlaySessionDragDrop>,
 }
 
 impl Base {
@@ -65,6 +69,7 @@ impl Base {
             item_targets: content.item_targets,
             target_areas: content.target_areas,
             module_phase: init_args.play_phase,
+            play_report: Mutable::new(JigPlaySessionDragDrop::new(stable_module_id)),
         })
     }
 }
