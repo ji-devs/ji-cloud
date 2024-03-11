@@ -288,7 +288,7 @@ pub struct JigPlaySessionDragDrop {
     pub stable_module_id: StableModuleId,
 
     /// list of rounds for this module
-    pub items: Vec<JigPlaySessionDragDropRound>,
+    pub items: Vec<JigPlaySessionDragDropItem>,
 }
 
 impl JigPlaySessionDragDrop {
@@ -319,7 +319,7 @@ impl JigPlaySessionModuleGetPointsEarned for JigPlaySessionDragDrop {
 
 ///
 #[derive(Clone, Debug, Hash, Serialize, Deserialize)]
-pub struct JigPlaySessionDragDropRound {
+pub struct JigPlaySessionDragDropItem {
     /// unsuccessful try count
     pub failed_tries: u16,
 }

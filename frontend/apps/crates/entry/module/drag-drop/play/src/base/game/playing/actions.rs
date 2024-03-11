@@ -3,7 +3,7 @@ use std::rc::Rc;
 
 use super::state::*;
 use components::module::_common::play::prelude::{BaseExt, ModuleEnding, ModulePlayPhase};
-use shared::domain::jig::codes::{JigPlaySessionDragDropRound, JigPlaySessionModule};
+use shared::domain::jig::codes::{JigPlaySessionDragDropItem, JigPlaySessionModule};
 use shared::domain::module::body::_groups::design::Trace;
 use utils::toasts;
 use utils::{drag::Drag, prelude::*, resize::get_resize_info};
@@ -39,7 +39,7 @@ impl PlayState {
         }
 
         self.game.base.play_report.lock_mut().items =
-            repeat_with(|| JigPlaySessionDragDropRound { failed_tries: 0 })
+            repeat_with(|| JigPlaySessionDragDropItem { failed_tries: 0 })
                 .take(traces.len())
                 .collect();
     }
