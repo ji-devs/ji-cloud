@@ -316,6 +316,10 @@ impl CodeSessions {
                         dom
                         .child(super::modules::card_quiz::render_card_quiz(&module.content.clone().unwrap(), &session))
                     },
+                    (ModuleBody::DragDrop(module), JigPlaySessionModule::DragDrop(session)) => {
+                        dom
+                        .child(super::modules::drag_drop::render_drag_drop(&module.content.clone().unwrap(), &session))
+                    },
                     _ => dom
                 }
             })

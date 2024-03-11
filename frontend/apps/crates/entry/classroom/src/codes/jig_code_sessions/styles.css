@@ -155,11 +155,16 @@ header .export-button {
     grid-template-rows: 36px auto;
     align-items: center;
 }
-.round-item img-ji {
+.item {
+    padding-block: 18px;
+}
+.round-item img-ji,
+.item img-ji {
     max-height: 36px;
     max-width: 36px;
 }
-.round-item p {
+.round-item p,
+.item p {
     font-size: 12px;
     white-space: nowrap;
 }
