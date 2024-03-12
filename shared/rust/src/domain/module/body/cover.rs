@@ -4,7 +4,6 @@ use crate::domain::module::{
 };
 use serde::{de::IntoDeserializer, Deserialize, Serialize};
 use std::collections::HashSet;
-use std::convert::TryFrom;
 
 use super::Audio;
 

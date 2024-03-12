@@ -2,7 +2,6 @@
 
 use std::{
     collections::HashMap,
-    convert::TryFrom,
     fmt::{self, Debug},
     str::FromStr,
 };

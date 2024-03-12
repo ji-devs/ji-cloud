@@ -4,7 +4,6 @@ use crate::domain::module::{
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
-use std::convert::TryFrom;
 
 /// The body for [`CardQuiz`](crate::domain::module::ModuleKind::CardQuiz) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]

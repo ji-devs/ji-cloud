@@ -3,7 +3,6 @@
 use chrono::{DateTime, NaiveDate, Utc};
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize, Serializer};
-use std::convert::TryFrom;
 use std::fmt;
 use strum_macros::Display;
 
@@ -483,6 +482,8 @@ pub struct UserProfileExport {
     pub liked_jig_count: i64,
     /// Number of published jigs
     pub published_jigs_count: i64,
+    // /// Users plan type
+    // pub plan_type: Option<String>
 }
 
 fn serialize_list<S, T>(list: &Vec<T>, serializer: S) -> Result<S::Ok, S::Error>

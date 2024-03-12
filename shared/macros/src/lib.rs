@@ -2,7 +2,7 @@ extern crate proc_macro;
 
 use make_path_parts_proc::PathPartsInput;
 use proc_macro::TokenStream;
-use syn::{self, parse_macro_input, DeriveInput, ExprArray, Lit, MetaList, NestedMeta, Result};
+use syn::{parse_macro_input, DeriveInput, ExprArray, Lit, MetaList, NestedMeta, Result};
 
 mod make_path_parts_proc;
 mod path_part_derive;

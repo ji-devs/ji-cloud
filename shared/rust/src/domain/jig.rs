@@ -12,10 +12,7 @@ pub use player::{JigPlayerSettings, TextDirection};
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use std::{
-    collections::{HashMap, HashSet},
-    convert::TryFrom,
-};
+use std::collections::{HashMap, HashSet};
 
 use super::{
     additional_resource::AdditionalResource,

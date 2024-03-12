@@ -149,7 +149,6 @@ pub mod audit_log {
     use crate::error;
     use chrono::{DateTime, Utc};
     use serde::{Deserialize, Serialize};
-    use std::convert::TryFrom;
 
     #[derive(Serialize, Deserialize, Debug)]
     pub struct Event {

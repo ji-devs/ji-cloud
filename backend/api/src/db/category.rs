@@ -6,7 +6,6 @@ use futures::TryStreamExt;
 use shared::domain::category::{Category, CategoryId};
 use shared::domain::user::UserScope;
 use sqlx::{Executor, PgPool};
-use std::convert::TryFrom;
 use tracing::instrument;
 use uuid::Uuid;
 

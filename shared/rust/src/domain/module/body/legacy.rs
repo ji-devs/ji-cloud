@@ -11,7 +11,6 @@ use crate::domain::module::{
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
-use std::convert::TryFrom;
 
 /// The body for [`Legacy`](crate::domain::module::ModuleKind::Legacy) modules.
 /// This just points to the folder where legacy slides are loaded

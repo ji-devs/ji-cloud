@@ -4,7 +4,6 @@ use crate::domain::module::{
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
-use std::convert::TryFrom;
 
 /// The body for [`Matching`](crate::domain::module::ModuleKind::Matching) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]

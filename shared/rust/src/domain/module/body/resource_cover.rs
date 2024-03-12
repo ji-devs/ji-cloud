@@ -4,7 +4,6 @@ use crate::domain::module::{
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
-use std::convert::TryFrom;
 
 /// The body for [`Cover`](crate::domain::module::ModuleKind::Cover) modules.
 #[derive(Clone, Serialize, Deserialize, Debug)]

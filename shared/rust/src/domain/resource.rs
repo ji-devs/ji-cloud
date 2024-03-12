@@ -2,7 +2,7 @@
 use chrono::{DateTime, Utc};
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, convert::TryFrom};
+use std::collections::HashMap;
 
 pub mod curation;
 
