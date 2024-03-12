@@ -4,9 +4,9 @@ use components::{
     module::_common::play::prelude::{BaseExt, ModuleEnding, ModulePlayPhase},
 };
 use dominator::clone;
-use shared::domain::module::body::_groups::design::TraceKind;
+use shared::domain::{jig::codes::JigPlaySessionModule, module::body::_groups::design::TraceKind};
 use std::rc::Rc;
-use utils::prelude::*;
+use utils::{prelude::*, toasts};
 
 impl PlayState {
     pub fn select(state: Rc<Self>, index: usize) {
@@ -78,6 +78,17 @@ impl PlayState {
     }
 
     pub fn incorrect_choice<F: Fn() + 'static>(self: &Rc<Self>, f: F) {
+        if let Some((index, _)) = &*self.game.base.current_question.lock_ref() {
+            self.game
+                .base
+                .play_report
+                .lock_mut()
+                .items
+                .get_mut(*index)
+                .unwrap_ji()
+                .failed_tries += 1;
+        }
+
         let state = self;
         state
             .incorrect_choice_count
@@ -103,6 +114,23 @@ impl PlayState {
 
     fn correct_choice<F: Fn() + 'static>(self: &Rc<Self>, f: F) {
         let state = self;
+
+        if let Some((index, _)) = &*self.game.base.current_question.lock_ref() {
+            let points = calculate_point_count(
+                state
+                    .game
+                    .base
+                    .play_report
+                    .lock_mut()
+                    .items
+                    .get(*index)
+                    .unwrap_ji()
+                    .failed_tries as u32,
+            );
+            let _ = IframeAction::new(ModuleToJigPlayerMessage::AddPoints(points))
+                .try_post_message_to_player();
+        }
+
         AUDIO_MIXER.with(clone!(state => move |mixer| {
             let audio_path: AudioPath<'_> = mixer.get_random_positive().into();
             *state.selection_audio_handle.borrow_mut() = Some(mixer.play_on_ended(audio_path, false, clone!(state => move || {
@@ -158,6 +186,14 @@ impl PlayState {
                 }
                 // Otherwise, there are no more questions to ask, move on to the next activity, or play the feedback
                 None => {
+                    let info = state.game.base.play_report.lock_ref().clone();
+                    let info = JigPlaySessionModule::FindAnswer(info);
+                    let msg = IframeAction::new(ModuleToJigPlayerMessage::AddCodeSessionInfo(info));
+                    if msg.try_post_message_to_player().is_err() {
+                        toasts::error("Error saving progress");
+                        log::info!("Error saving progress");
+                    }
+
                     let feedback = &state.game.base.feedback;
                     if feedback.has_content() {
                         state.game.base.feedback_signal.set(Some(feedback.clone()));
@@ -171,4 +207,10 @@ impl PlayState {
             }
         }
     }
+}
+
+fn calculate_point_count(tried_count: u32) -> u32 {
+    // start with 2 point, reduce one point for every try. min points: 0.
+    let base = 2_u32;
+    base.saturating_sub(tried_count)
 }

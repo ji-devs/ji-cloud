@@ -140,6 +140,8 @@ pub enum JigPlaySessionModule {
     CardQuiz(JigPlaySessionCardQuiz),
     /// Drag and drop
     DragDrop(JigPlaySessionDragDrop),
+    /// Answer this
+    FindAnswer(JigPlaySessionFindAnswer),
 }
 
 impl JigPlaySessionModule {
@@ -149,6 +151,7 @@ impl JigPlaySessionModule {
             Self::Matching(module) => module.stable_module_id,
             Self::CardQuiz(module) => module.stable_module_id,
             Self::DragDrop(module) => module.stable_module_id,
+            Self::FindAnswer(module) => module.stable_module_id,
         }
     }
 }
@@ -159,6 +162,7 @@ impl JigPlaySessionModuleGetPointsEarned for JigPlaySessionModule {
             JigPlaySessionModule::Matching(module) => module.get_points_earned(),
             JigPlaySessionModule::CardQuiz(module) => module.get_points_earned(),
             JigPlaySessionModule::DragDrop(module) => module.get_points_earned(),
+            JigPlaySessionModule::FindAnswer(module) => module.get_points_earned(),
         }
     }
 }
@@ -320,6 +324,49 @@ impl JigPlaySessionModuleGetPointsEarned for JigPlaySessionDragDrop {
 ///
 #[derive(Clone, Debug, Hash, Serialize, Deserialize)]
 pub struct JigPlaySessionDragDropItem {
+    /// unsuccessful try count
+    pub failed_tries: u16,
+}
+
+/// Drag and drop module
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct JigPlaySessionFindAnswer {
+    /// related module id
+    pub stable_module_id: StableModuleId,
+
+    /// list of rounds for this module
+    pub items: Vec<JigPlaySessionFindAnswerItem>,
+}
+
+impl JigPlaySessionFindAnswer {
+    /// create new from module id
+    pub fn new(stable_module_id: StableModuleId) -> Self {
+        Self {
+            stable_module_id,
+            items: Vec::new(),
+        }
+    }
+}
+
+impl JigPlaySessionModuleGetPointsEarned for JigPlaySessionFindAnswer {
+    fn get_points_earned(&self) -> PointsEarned {
+        let mut available = 0;
+        let mut earned = 0;
+        for card in &self.items {
+            available += 2;
+            earned += match card.failed_tries {
+                0 => 2,
+                1 => 1,
+                _ => 0,
+            };
+        }
+        PointsEarned { available, earned }
+    }
+}
+
+///
+#[derive(Clone, Debug, Hash, Serialize, Deserialize)]
+pub struct JigPlaySessionFindAnswerItem {
     /// unsuccessful try count
     pub failed_tries: u16,
 }

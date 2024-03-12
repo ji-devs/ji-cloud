@@ -3,7 +3,10 @@ use once_cell::sync::OnceCell;
 use rand::prelude::*;
 use shared::domain::{
     asset::{Asset, AssetId},
-    jig::player::{ModuleConfig, PlayerNavigationHandler, Seconds},
+    jig::{
+        codes::{JigPlaySessionFindAnswer, JigPlaySessionFindAnswerItem},
+        player::{ModuleConfig, PlayerNavigationHandler, Seconds},
+    },
     module::{
         body::{
             _groups::design::{Backgrounds, Sticker},
@@ -18,7 +21,7 @@ use shared::domain::{
 use utils::prelude::*;
 
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, iter, rc::Rc};
 use web_sys::HtmlElement;
 
 pub struct Base {
@@ -41,6 +44,7 @@ pub struct Base {
     /// Feedback to play when the activity ends
     pub feedback: ModuleAssist,
     pub feedback_signal: Mutable<Option<ModuleAssist>>,
+    pub play_report: Mutable<JigPlaySessionFindAnswer>,
 }
 
 impl Base {
@@ -75,6 +79,13 @@ impl Base {
             questions.shuffle(&mut rng);
         }
 
+        let play_report = JigPlaySessionFindAnswer {
+            stable_module_id,
+            items: iter::repeat_with(|| JigPlaySessionFindAnswerItem { failed_tries: 0 })
+                .take(questions.len())
+                .collect(),
+        };
+
         let base = Rc::new(Self {
             asset_id,
             module_id,
@@ -92,6 +103,7 @@ impl Base {
             instructions: content.base.instructions.always_show(),
             feedback: content.base.feedback,
             feedback_signal: Mutable::new(None),
+            play_report: Mutable::new(play_report),
         });
 
         *base_ref.borrow_mut() = Some(base.clone());
