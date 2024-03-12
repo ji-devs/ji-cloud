@@ -16,7 +16,7 @@ impl Pricing {
         Rc::new(Self {
             route: Mutable::new(route),
             variables: Default::default(),
-            billing_interval: Mutable::new(BillingInterval::Monthly),
+            billing_interval: Mutable::new(BillingInterval::Annually),
         })
     }
 }
