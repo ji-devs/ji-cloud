@@ -66,7 +66,7 @@ impl CodeSessions {
         self.infos.lock_mut().extend(res.sessions);
     }
 
-    fn generate_cs_string(&self) -> String {
+    fn generate_csv_string(&self) -> String {
         let mut wtr = csv::WriterBuilder::new().from_writer(vec![]);
         if let Some(jig) = self.jig.lock_ref().as_ref() {
             let mut headers = vec!["Student's Name", "Started", "Ended"];
@@ -130,7 +130,7 @@ impl CodeSessions {
     }
 
     pub fn export_sessions(&self) {
-        let data = self.generate_cs_string();
+        let data = self.generate_csv_string();
         download_file(&self.code.to_string(), &data);
     }
 }
