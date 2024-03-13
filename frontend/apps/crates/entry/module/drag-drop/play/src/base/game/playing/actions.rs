@@ -69,7 +69,7 @@ impl PlayState {
         all_completed
     }
 
-    pub fn evaluate(state: Rc<Self>, item_index: usize, item: Rc<InteractiveItem>) {
+    pub fn evaluate(state: Rc<Self>, item_index: usize, interactive_index: usize, item: Rc<InteractiveItem>) {
         spawn_local(async move {
             let mut item_target = None;
 
@@ -112,7 +112,7 @@ impl PlayState {
                         .play_report
                         .lock_mut()
                         .items
-                        .get_mut(item_index)
+                        .get_mut(interactive_index)
                         .unwrap_ji()
                         .failed_tries += 1;
                 }
@@ -145,7 +145,7 @@ impl PlayState {
                             .play_report
                             .lock_mut()
                             .items
-                            .get(item_index)
+                            .get(interactive_index)
                             .unwrap_ji()
                             .failed_tries as u32,
                     );

@@ -56,11 +56,13 @@ impl PlayState {
     }
 }
 
+#[derive(Debug)]
 pub enum PlayItem {
     Static(Sticker),
     Interactive(Rc<InteractiveItem>),
 }
 
+#[derive(Debug)]
 pub struct InteractiveItem {
     pub sticker: Sticker,
     pub completed: Mutable<bool>,

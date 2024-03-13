@@ -57,7 +57,7 @@ impl Base {
         let play_report = JigPlaySessionDragDrop {
             stable_module_id,
             items: iter::repeat_with(|| JigPlaySessionDragDropItem { failed_tries: 0 })
-                .take(content.items.len())
+                .take(content.item_targets.len())
                 .collect(),
         };
 

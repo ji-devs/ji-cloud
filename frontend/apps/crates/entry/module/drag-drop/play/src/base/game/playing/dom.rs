@@ -37,11 +37,13 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                 TracesShowMode::Hidden,
                 TracesShow::on_select_noop()
         )))
-        .children( {
+        .children({
+            // used to get the index in the play_report, since play_report only includes interactive.
+            let mut interactive_index = 0;
             state.items
                 .iter()
                 .enumerate()
-                .map(|(index, item)| {
+                .map(|(item_index, item)| {
                     match item {
                         PlayItem::Static(sticker) => {
                             render_sticker_raw(sticker, theme_id, None)
@@ -76,14 +78,14 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                                         .global_event(clone!(state, item => move |evt:events::PointerUp| {
                                             if evt.is_primary() {
                                                 if item.try_end_drag(evt.x() as i32, evt.y() as i32) {
-                                                    PlayState::evaluate(state.clone(), index, item.clone());
+                                                    PlayState::evaluate(state.clone(), item_index, interactive_index, item.clone());
                                                 }
                                             }
                                         }))
                                         .global_event(clone!(state, item => move |evt:events::PointerCancel| {
                                             if evt.is_primary() {
                                                 if item.try_end_drag(evt.x() as i32, evt.y() as i32) {
-                                                    PlayState::evaluate(state.clone(), index, item.clone());
+                                                    PlayState::evaluate(state.clone(), item_index, interactive_index, item.clone());
                                                 }
                                             }
                                         }))
@@ -92,6 +94,8 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                             );
 
                             let opts = StickerRawRenderOptions::new(&item.sticker, Some(opts));
+
+                            interactive_index += 1;
 
                             render_sticker_raw(&item.sticker, theme_id, Some(opts))
                         }
