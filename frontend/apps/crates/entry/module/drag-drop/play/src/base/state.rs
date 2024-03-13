@@ -2,7 +2,7 @@ use components::module::_common::play::prelude::*;
 use shared::domain::{
     asset::{Asset, AssetId},
     jig::{
-        codes::JigPlaySessionDragDrop,
+        codes::{JigPlaySessionDragDrop, JigPlaySessionDragDropItem},
         player::{ModuleConfig, Seconds},
     },
     module::{
@@ -20,7 +20,7 @@ use shared::domain::{
 use utils::prelude::*;
 
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
-use std::rc::Rc;
+use std::{iter, rc::Rc};
 
 pub struct Base {
     pub asset_id: AssetId,
@@ -54,6 +54,13 @@ impl Base {
 
         let content = raw.content.unwrap_ji();
 
+        let play_report = JigPlaySessionDragDrop {
+            stable_module_id,
+            items: iter::repeat_with(|| JigPlaySessionDragDropItem { failed_tries: 0 })
+                .take(content.items.len())
+                .collect(),
+        };
+
         Rc::new(Self {
             asset_id,
             module_id,
@@ -69,7 +76,7 @@ impl Base {
             item_targets: content.item_targets,
             target_areas: content.target_areas,
             module_phase: init_args.play_phase,
-            play_report: Mutable::new(JigPlaySessionDragDrop::new(stable_module_id)),
+            play_report: Mutable::new(play_report),
         })
     }
 }

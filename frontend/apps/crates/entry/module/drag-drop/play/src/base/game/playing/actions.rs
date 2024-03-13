@@ -1,9 +1,8 @@
-use std::iter::repeat_with;
 use std::rc::Rc;
 
 use super::state::*;
 use components::module::_common::play::prelude::{BaseExt, ModuleEnding, ModulePlayPhase};
-use shared::domain::jig::codes::{JigPlaySessionDragDropItem, JigPlaySessionModule};
+use shared::domain::jig::codes::JigPlaySessionModule;
 use shared::domain::module::body::_groups::design::Trace;
 use utils::toasts;
 use utils::{drag::Drag, prelude::*, resize::get_resize_info};
@@ -37,11 +36,6 @@ impl PlayState {
                 *item.target_index.borrow_mut() = Some(index);
             }
         }
-
-        self.game.base.play_report.lock_mut().items =
-            repeat_with(|| JigPlaySessionDragDropItem { failed_tries: 0 })
-                .take(traces.len())
-                .collect();
     }
 
     pub fn evaluate_all_completed(state: Rc<Self>) -> bool {
