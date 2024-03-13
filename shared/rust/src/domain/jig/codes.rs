@@ -183,7 +183,7 @@ pub struct PointsEarned {
 }
 impl std::fmt::Display for PointsEarned {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} / {}", self.earned, self.available)
+        write!(f, "{}|{}", self.earned, self.available)
     }
 }
 impl PointsEarned {
