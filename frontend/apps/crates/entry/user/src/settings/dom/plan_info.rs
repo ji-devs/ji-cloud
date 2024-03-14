@@ -3,6 +3,7 @@ use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::billing::{
     AmountInCents, AppliedCoupon, BillingInterval, PaymentMethodType, PaymentNetwork, PlanType,
+    SubscriptionTier,
 };
 use std::rc::Rc;
 use utils::{events, js_object, prelude::plan_type_signal, unwrap::UnwrapJiExt};
@@ -109,8 +110,6 @@ impl SettingsPage {
                     match frequency {
                         BillingInterval::Monthly => {
                             Some(html!("button-rect", {
-                                .visible(false)
-                                .prop("slot", "change-to-annual")
                                 .prop("type", "filled")
                                 .prop("color", "blue")
                                 .text(match plan_type {
@@ -119,8 +118,9 @@ impl SettingsPage {
                                 })
                                 .event(clone!(state => move|_ :events::Click| {
                                     spawn_local(clone!(state => async move {
-                                        let new_price = plan_type.unwrap().monthly_to_annual().plan_price();
-                                        let new_price = number_as_price(new_price);
+                                        let plan_type: PlanType = plan_type.unwrap_ji();
+                                        let new_plan_type = plan_type.monthly_to_annual();
+                                        let new_price = number_as_price(new_plan_type.plan_price());
                                         let message = format!("You will be charged {new_price} per year. A renewal reminder will be sent 30 days before the end of your subscription.");
 
                                         let confirmed = confirm::Confirm {
@@ -130,13 +130,49 @@ impl SettingsPage {
                                             cancel_text: "Cancel".to_string()
                                         }.confirm().await;
                                         if confirmed {
-                                            state.change_to_annual_billing()
+                                            state.change_to(new_plan_type)
                                         }
                                     }));
                                 }))
                             }))
                         },
                         BillingInterval::Annually => None,
+                    }
+                })))
+                .child_signal(plan_type_signal().map(clone!(state => move |plan_type| {
+                    let plan_type: PlanType = plan_type?;
+                    let subscription_tier = plan_type.subscription_tier();
+                    match subscription_tier {
+                        SubscriptionTier::Basic => {
+                            let new_plan_type = plan_type.basic_to_pro();
+                            let billing_interval = plan_type.billing_interval();
+                            Some(html!("button-rect", {
+                                .prop("type", "filled")
+                                .prop("color", "blue")
+                                .text(&format!("Switch to Pro {billing_interval}"))
+                                .event(clone!(state => move|_ :events::Click| {
+                                    spawn_local(clone!(state => async move {
+                                        let charge_interval = match billing_interval {
+                                            BillingInterval::Monthly => "month",
+                                            BillingInterval::Annually => "year",
+                                        };
+                                        let new_price = number_as_price(new_plan_type.plan_price());
+                                        let message = format!("You will be charged {new_price} per {charge_interval}. A renewal reminder will be sent 30 days before the end of your subscription.");
+
+                                        let confirmed = confirm::Confirm {
+                                            title: "Switch to the Pro plan".to_string(),
+                                            message,
+                                            confirm_text: "Confirm".to_string(),
+                                            cancel_text: "Cancel".to_string()
+                                        }.confirm().await;
+                                        if confirmed {
+                                            state.change_to(new_plan_type);
+                                        }
+                                    }));
+                                }))
+                            }))
+                        },
+                        SubscriptionTier::Pro => None,
                     }
                 })))
             }),

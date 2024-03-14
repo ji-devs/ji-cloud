@@ -2,13 +2,17 @@ use std::rc::Rc;
 
 use dominator::clone;
 use shared::domain::admin::{DeleteUserAccountPath, SetAccountTierOverridePath};
-use shared::domain::billing::PlanTier;
+use shared::domain::billing::{
+    AdminUpgradeSubscriptionPlanPath, AdminUpgradeSubscriptionPlanRequest, PlanTier, PlanType,
+};
 use shared::domain::UpdateNullable;
 use shared::{
     api::endpoints,
     domain::user::{PatchProfileAdminDataPath, PatchProfileAdminDataRequest},
 };
-use utils::{error_ext::ErrorExt, prelude::ApiEndpointExt, unwrap::UnwrapJiExt};
+use utils::{
+    bail_on_err, error_ext::ErrorExt, prelude::ApiEndpointExt, toasts, unwrap::UnwrapJiExt,
+};
 
 use crate::users::{EditableUser, FetchMode};
 
@@ -46,6 +50,28 @@ impl UsersTable {
         }))
     }
 
+    pub fn upgrade_plan(self: Rc<Self>, user: &Rc<EditableUser>, plan_type: PlanType) {
+        let state = self;
+        state.loader.load(clone!(state, user => async move {
+            let req = AdminUpgradeSubscriptionPlanRequest {
+                plan_type,
+                user_id: user.id,
+            };
+
+            let res = endpoints::billing::AdminUpgradeSubscriptionPlan::api_with_auth(
+                AdminUpgradeSubscriptionPlanPath(),
+                Some(req),
+            )
+                .await
+                .toast_on_err();
+
+            let _ = bail_on_err!(res);
+
+            state.users_state.load_users().await;
+            toasts::success("Plan upgraded");
+        }))
+    }
+
     pub fn set_tier_override(self: &Rc<Self>, user: &Rc<EditableUser>, tier: Option<PlanTier>) {
         self.loader.load(clone!(user => async move {
             let req = UpdateNullable::from(tier);
@@ -56,6 +82,8 @@ impl UsersTable {
             )
             .await
             .unwrap_ji();
+
+            toasts::success("Tier overridden");
         }))
     }
 

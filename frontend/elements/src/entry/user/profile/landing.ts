@@ -143,6 +143,10 @@ export class _ extends LitElement {
                         align-items: center;
                         justify-content: start;
                     }
+
+                    section#plan {
+                        grid-template-columns: minmax(auto, 196px) auto min-content;
+                    }
                 }
                 h2 {
                     font-size: 20px;
@@ -256,6 +260,14 @@ export class _ extends LitElement {
                     margin-top: 16px;
                     grid-column: 1 / -1;
                     justify-self: start;
+                    display: flex;
+                    flex-direction: column;
+                    grid-gap: 12rem;
+                }
+                @media (min-width: 1024px) {
+                    ::slotted([slot=change-to-annual]) {
+                        flex-direction: row;
+                    }
                 }
                 ::slotted(dialog-overlay) {
                     background-color: #00000080;

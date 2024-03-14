@@ -5,14 +5,14 @@ use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt::{self, Debug, Display, Formatter};
-use strum_macros::{AsRefStr, Display, EnumIs, EnumString};
+use strum_macros::{AsRefStr, Display, EnumIs, EnumIter, EnumString};
 
 use const_format::formatcp;
 use serde_json::Value;
 
 use crate::api::endpoints::PathPart;
 use crate::domain::image::ImageId;
-use crate::domain::user::UserProfile;
+use crate::domain::user::{UserId, UserProfile};
 use crate::domain::{Percent, UpdateNonNullable, UpdateNullable};
 
 /// ### Shared billing constants.
@@ -679,7 +679,9 @@ pub enum PlanTier {
 }
 
 /// Possible individual subscription plans
-#[derive(Debug, Serialize, Deserialize, Clone, Copy, Eq, Ord, PartialOrd, PartialEq, Hash)]
+#[derive(
+    Debug, Serialize, Deserialize, Clone, Copy, Eq, Ord, PartialOrd, PartialEq, Hash, EnumIter,
+)]
 #[serde(rename_all = "kebab-case")]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[repr(i16)]
@@ -910,7 +912,7 @@ impl PlanType {
 
     /// Whether it is possible to upgrade from another plan type to self
     #[must_use]
-    pub const fn can_upgrade_from(&self, from_type: Self) -> bool {
+    pub const fn can_upgrade_from(&self, from_type: &Self) -> bool {
         // NOTE: Cannot go from any annual plan to a monthly plan.
         match self {
             Self::IndividualBasicMonthly => false,
@@ -1075,6 +1077,15 @@ impl PlanType {
             Self::SchoolLevel3Monthly => Self::SchoolLevel3Annually,
             Self::SchoolLevel4Monthly => Self::SchoolLevel4Annually,
             Self::SchoolUnlimitedMonthly => Self::SchoolUnlimitedAnnually,
+            _ => panic!(),
+        }
+    }
+
+    /// Pro version of basic plan.
+    pub const fn basic_to_pro(&self) -> PlanType {
+        match self {
+            Self::IndividualBasicMonthly => Self::IndividualProMonthly,
+            Self::IndividualBasicAnnually => Self::IndividualProAnnually,
             _ => panic!(),
         }
     }
@@ -1657,6 +1668,17 @@ pub struct UpgradeSubscriptionPlanRequest {
     pub promotion_code: Option<String>,
 }
 
+/// Request to upgrade a subscription plan
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct AdminUpgradeSubscriptionPlanRequest {
+    /// The plan type to upgrade to
+    pub plan_type: PlanType,
+    /// User ID if the request is being made by an admin
+    pub user_id: UserId,
+}
+
 make_path_parts!(UpgradeSubscriptionPlanPath => "/v1/billing/subscription/upgrade");
+
+make_path_parts!(AdminUpgradeSubscriptionPlanPath => "/v1/admin/billing/subscription/upgrade");
 
 make_path_parts!(CreateCustomerPortalLinkPath => "/v1/billing/customer-portal");

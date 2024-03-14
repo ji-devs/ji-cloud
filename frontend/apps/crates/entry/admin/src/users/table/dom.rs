@@ -1,12 +1,16 @@
 use crate::users::editable_user::EditableUser;
 
 use super::state::*;
+use components::confirm;
 use dominator::{clone, html, with_node, Dom};
+use futures_signals::signal::Mutable;
 use futures_signals::{map_ref, signal::SignalExt, signal_vec::SignalVecExt};
-use shared::domain::billing::PlanTier;
+use shared::domain::billing::{PlanTier, PlanType};
 use shared::domain::user::UserBadge;
 use std::{rc::Rc, str::FromStr};
+use strum::IntoEnumIterator;
 use utils::{events, routes::AdminUsersRoute, unwrap::UnwrapJiExt};
+use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlSelectElement;
 
 impl UsersTable {
@@ -92,7 +96,8 @@ impl UsersTable {
             }))
             .children_signal_vec(state.users_state.users.signal_vec_cloned().map(clone!(state => move |user: Rc<EditableUser>| {
                 let user_id = user.id;
-                let tier_override = user.tier_override.map_or("".to_string(), |tier| tier.to_string());
+                let tier_override_signal = Mutable::new(user.tier_override.map_or("".to_string(), |tier| tier.to_string()));
+                let plan_type_signal = Mutable::new(None::<PlanType>);
                 html!("admin-table-line", {
                     .children(&mut [
                         html!("span", {
@@ -171,6 +176,57 @@ impl UsersTable {
                         html!("span", {
                             .text(&user.subscription)
                         }),
+                    ])
+                    .child(html!("label", {
+                        .apply_if(user.plan_type.is_some(), clone!(state, user, plan_type_signal => move |dom| {
+                            let plan_types = PlanType::iter().filter(|p| {
+                                p.can_upgrade_from(&user.plan_type.unwrap())
+                            }).map(|p| html!("option", {
+                                .text(&p.to_string())
+                                .prop("value", p.as_str())
+                                .prop_signal("selected", plan_type_signal.signal_cloned().map(move |current| match current {
+                                    None => false,
+                                    Some(current) => current == p,
+                                }))
+                            })).collect::<Vec<_>>();
+
+                            if plan_types.is_empty() {
+                                dom
+                            } else {
+                                dom.child(html!("select" => HtmlSelectElement, {
+                                    .with_node!(select => {
+                                        .child(html!("option", {
+                                            .text("")
+                                            .prop("value", "")
+                                            .prop_signal("selected", plan_type_signal.signal_cloned().map(|p| p.is_none()))
+                                        }))
+                                        .children(plan_types)
+                                        .event(clone!(state, user, select, plan_type_signal => move |_: events::Change| {
+                                            let value: String = select.value();
+                                            let new_plan_type = PlanType::try_from(value.as_str()).unwrap_ji();
+                                            plan_type_signal.set(Some(new_plan_type.clone()));
+                                            if !value.trim().is_empty() {
+                                                spawn_local(clone!(state, user, new_plan_type, plan_type_signal => async move {
+                                                    let confirmed = confirm::Confirm {
+                                                        title: "Upgrade plan".to_string(),
+                                                        message: "Are you sure you want to upgrade the plan?".to_string(),
+                                                        confirm_text: "Yes".to_string(),
+                                                        cancel_text: "Cancel".to_string()
+                                                    }.confirm().await;
+                                                    if confirmed {
+                                                        state.upgrade_plan(&user, new_plan_type);
+                                                    } else {
+                                                        plan_type_signal.set(None);
+                                                    }
+                                                }));
+                                            }
+                                        }))
+                                    })
+                                }))
+                            }
+                        }))
+                    }))
+                    .children([
                         html!("span", {
                             .text(&user.current_period_end)
                         }),
@@ -189,36 +245,50 @@ impl UsersTable {
                         }
                     }))
                     .child(html!("label", {
-                        .child(html!("select" => HtmlSelectElement, {
-                            .with_node!(select => {
-                                .children(&mut [
-                                    html!("option", {
-                                        .prop("value", "")
-                                        .prop("selected", &tier_override == "")
-                                    }),
-                                    html!("option", {
-                                        .text(&PlanTier::Basic.to_string())
-                                        .prop("value", PlanTier::Basic.as_ref())
-                                        .prop("selected", &tier_override == PlanTier::Basic.as_ref())
-                                    }),
-                                    html!("option", {
-                                        .text(&PlanTier::Pro.to_string())
-                                        .prop("value", PlanTier::Pro.as_ref())
-                                        .prop("selected", &tier_override == PlanTier::Pro.as_ref())
-                                    }),
-                                ])
-                                .event(clone!(state, user, select => move |_: events::Change| {
-                                    let value: String = select.value();
-                                    let value = if value.is_empty() {
-                                        None
-                                    } else {
-                                        Some(PlanTier::from_str(&value).unwrap_ji())
-                                    };
+                        .child_signal(tier_override_signal.signal_cloned().map(clone!(state, user, tier_override_signal => move |tier_override| {
+                            Some(html!("select" => HtmlSelectElement, {
+                                .with_node!(select => {
+                                    .children(&mut [
+                                        html!("option", {
+                                            .prop("value", "")
+                                            .prop("selected", &tier_override == "")
+                                        }),
+                                        html!("option", {
+                                            .text(&PlanTier::Basic.to_string())
+                                            .prop("value", PlanTier::Basic.as_ref())
+                                            .prop("selected", &tier_override == PlanTier::Basic.as_ref())
+                                        }),
+                                        html!("option", {
+                                            .text(&PlanTier::Pro.to_string())
+                                            .prop("value", PlanTier::Pro.as_ref())
+                                            .prop("selected", &tier_override == PlanTier::Pro.as_ref())
+                                        }),
+                                    ])
+                                    .event(clone!(state, user, select, tier_override_signal => move |_: events::Change| {
+                                        spawn_local(clone!(state, user, select, tier_override_signal => async move {
+                                            let confirmed = confirm::Confirm {
+                                                title: "Override tier".to_string(),
+                                                message: "Are you sure you want to override the plan tier?".to_string(),
+                                                confirm_text: "Yes".to_string(),
+                                                cancel_text: "Cancel".to_string()
+                                            }.confirm().await;
+                                            if confirmed {
+                                                let value: String = select.value();
+                                                let value = if value.is_empty() {
+                                                    None
+                                                } else {
+                                                    Some(PlanTier::from_str(&value).unwrap_ji())
+                                                };
 
-                                    state.set_tier_override(&user, value);
-                                }))
-                            })
-                        }))
+                                                state.set_tier_override(&user, value);
+                                            } else {
+                                                tier_override_signal.set(String::new());
+                                            }
+                                        }));
+                                    }))
+                                })
+                            }))
+                        })))
                     }))
                     .child(html!("label", {
                         .apply_if(user.account_id.is_some(), clone!(state, user => move |dom| {

@@ -6,16 +6,17 @@ use anyhow::anyhow;
 use chrono::{TimeZone, Utc};
 use ji_core::settings::RuntimeSettings;
 use shared::api::endpoints::billing::{
-    CreateCustomerPortalLink, CreateSetupIntent, UpdateSubscriptionCancellation,
-    UpgradeSubscriptionPlan,
+    AdminUpgradeSubscriptionPlan, CreateCustomerPortalLink, CreateSetupIntent,
+    UpdateSubscriptionCancellation, UpgradeSubscriptionPlan,
 };
 use shared::domain::billing::{
-    Account, AccountType, AmountInCents, CancellationStatus, CreateSubscriptionRecord,
+    Account, AccountType, AmountInCents, CancellationStatus, CreateSubscriptionRecord, PlanType,
     StripeInvoiceId, StripeSubscriptionId, SubscriptionStatus, SubscriptionType,
     UpdateSubscriptionRecord,
 };
 use shared::error::BillingError;
 
+use shared::domain::user::UserId;
 use shared::domain::UpdateNonNullable;
 use shared::{
     api::{endpoints::billing::CreateSubscription, ApiEndpoint, Method, PathParts},
@@ -39,6 +40,7 @@ use stripe::{
 use tracing::instrument;
 
 use crate::domain::user_authorization;
+use crate::extractor::{ScopeAdmin, TokenUserWithScope};
 use crate::stripe::create_stripe_client;
 use crate::{db, extractor::TokenUser};
 
@@ -308,14 +310,13 @@ async fn update_subscription_cancel_status(
     Ok(HttpResponse::NoContent().finish())
 }
 
-#[instrument(skip_all)]
-async fn upgrade_subscription_plan(
-    auth: TokenUser,
+async fn upgrade_subscription_plan_internal(
+    user_id: UserId,
+    plan_type: &PlanType,
+    promotion_code: &Option<String>,
     db: Data<PgPool>,
     settings: Data<RuntimeSettings>,
-    req: Json<<UpgradeSubscriptionPlan as ApiEndpoint>::Req>,
-) -> Result<HttpResponse, <UpgradeSubscriptionPlan as ApiEndpoint>::Err> {
-    let user_id = auth.user_id();
+) -> Result<(), BillingError> {
     let account = db::account::get_account_by_user_id(db.as_ref(), &user_id)
         .await?
         .ok_or_else(|| BillingError::NotFound("User does not have an account".into()))?;
@@ -334,14 +335,14 @@ async fn upgrade_subscription_plan(
             })?;
 
     // Fetch the subscription plan details
-    let plan: SubscriptionPlan = db::billing::get_subscription_plan_by_type(&db, req.plan_type)
+    let plan: SubscriptionPlan = db::billing::get_subscription_plan_by_type(&db, plan_type.clone())
         .await
         .into_anyhow()?
-        .ok_or(BillingError::NotFound(format!("Plan {}", req.plan_type)))?;
+        .ok_or(BillingError::NotFound(format!("Plan {}", plan_type)))?;
 
     if !plan
         .plan_type
-        .can_upgrade_from(subscription.subscription_plan_type)
+        .can_upgrade_from(&subscription.subscription_plan_type)
     {
         return Err(BillingError::InvalidUpgradePlanType {
             upgrade_to: plan.plan_type,
@@ -368,7 +369,7 @@ async fn upgrade_subscription_plan(
             price: Some(plan.price_id.into()),
             ..Default::default()
         }]),
-        promotion_code: retrieve_promotion_code_id(&client, &req.promotion_code).await?,
+        promotion_code: retrieve_promotion_code_id(&client, &promotion_code).await?,
         proration_behavior: Some(SubscriptionProrationBehavior::AlwaysInvoice),
         ..Default::default()
     };
@@ -382,6 +383,38 @@ async fn upgrade_subscription_plan(
     db::billing::save_subscription(db.as_ref(), update_record)
         .await
         .into_anyhow()?;
+
+    Ok(())
+}
+
+#[instrument(skip_all)]
+async fn upgrade_subscription_plan(
+    auth: TokenUser,
+    db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
+    req: Json<<UpgradeSubscriptionPlan as ApiEndpoint>::Req>,
+) -> Result<HttpResponse, <UpgradeSubscriptionPlan as ApiEndpoint>::Err> {
+    upgrade_subscription_plan_internal(
+        auth.user_id(),
+        &req.plan_type,
+        &req.promotion_code,
+        db,
+        settings,
+    )
+    .await?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
+#[instrument(skip_all)]
+async fn upgrade_user_subscription_plan(
+    auth: TokenUserWithScope<ScopeAdmin>,
+    db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
+    req: Json<<AdminUpgradeSubscriptionPlan as ApiEndpoint>::Req>,
+) -> Result<HttpResponse, <AdminUpgradeSubscriptionPlan as ApiEndpoint>::Err> {
+    upgrade_subscription_plan_internal(auth.claims.user_id, &req.plan_type, &None, db, settings)
+        .await?;
 
     Ok(HttpResponse::NoContent().finish())
 }
@@ -722,6 +755,12 @@ pub fn configure(cfg: &mut ServiceConfig) {
         UpgradeSubscriptionPlan::METHOD
             .route()
             .to(upgrade_subscription_plan),
+    )
+    .route(
+        <AdminUpgradeSubscriptionPlan as ApiEndpoint>::Path::PATH,
+        AdminUpgradeSubscriptionPlan::METHOD
+            .route()
+            .to(upgrade_user_subscription_plan),
     )
     .route(
         <CreateSetupIntent as ApiEndpoint>::Path::PATH,
