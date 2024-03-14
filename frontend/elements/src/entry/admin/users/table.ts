@@ -58,6 +58,7 @@ export class _ extends LitElement {
         "Signup Date",
         "Language",
         "Subscription",
+        "Subscription Change",
         "Period End",
         "School Account",
         "Tier Override",

@@ -1,5 +1,6 @@
 use super::ApiEndpoint;
 use crate::domain::billing::{
+    AdminUpgradeSubscriptionPlanPath, AdminUpgradeSubscriptionPlanRequest,
     CreateCustomerPortalLinkPath, CreateSetupIntentPath, CreateSetupIntentRequest,
     SubscriptionCancellationStatusRequest, UpdateSubscriptionCancellationPath,
     UpgradeSubscriptionPlanPath, UpgradeSubscriptionPlanRequest,
@@ -37,6 +38,16 @@ pub struct UpgradeSubscriptionPlan;
 impl ApiEndpoint for UpgradeSubscriptionPlan {
     type Path = UpgradeSubscriptionPlanPath;
     type Req = UpgradeSubscriptionPlanRequest;
+    type Res = ();
+    type Err = BillingError;
+    const METHOD: Method = Method::Post;
+}
+
+/// Set the cancellation status of a subscription
+pub struct AdminUpgradeSubscriptionPlan;
+impl ApiEndpoint for AdminUpgradeSubscriptionPlan {
+    type Path = AdminUpgradeSubscriptionPlanPath;
+    type Req = AdminUpgradeSubscriptionPlanRequest;
     type Res = ();
     type Err = BillingError;
     const METHOD: Method = Method::Post;

@@ -4,7 +4,7 @@ use dominator::clone;
 use futures::join;
 use futures_signals::signal::Mutable;
 use gloo_timers::future::TimeoutFuture;
-use shared::domain::billing::CreateCustomerPortalLinkPath;
+use shared::domain::billing::{CreateCustomerPortalLinkPath, PlanType};
 use shared::{
     api::endpoints::{self, meta, user},
     domain::{
@@ -144,11 +144,9 @@ impl SettingsPage {
         }));
     }
 
-    pub fn change_to_annual_billing(self: &Rc<Self>) {
+    pub fn change_to(self: &Rc<Self>, new_plan_type: PlanType) {
         let state = self;
         state.loader.load(clone!(state => async move {
-            let new_plan_type = get_plan_type().unwrap().monthly_to_annual();
-
             let req = UpgradeSubscriptionPlanRequest {
                 plan_type: new_plan_type.clone(),
                 promotion_code: None,

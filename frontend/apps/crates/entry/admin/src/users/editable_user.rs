@@ -1,6 +1,6 @@
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
-use shared::domain::billing::{AccountId, PlanTier, SchoolId};
+use shared::domain::billing::{AccountId, PlanTier, PlanType, SchoolId};
 use shared::domain::user::{UserBadge, UserId, UserLoginType, UserResponse};
 
 #[derive(Clone)]
@@ -19,6 +19,7 @@ pub struct EditableUser {
     pub organization: Mutable<String>,
     pub badge: Mutable<Option<UserBadge>>,
     pub subscription: String,
+    pub plan_type: Option<PlanType>,
     pub current_period_end: String,
     pub school_id: Option<SchoolId>,
     pub account_id: Option<AccountId>,
@@ -81,6 +82,11 @@ impl From<UserResponse> for EditableUser {
             None => Default::default(),
         };
 
+        let plan_type = user.plan_type.and_then(|plan_type| {
+            user.subscription_status
+                .and_then(|status| status.is_active().then(|| plan_type))
+        });
+
         Self {
             id: user.id,
             username: Mutable::new(user.username),
@@ -96,6 +102,7 @@ impl From<UserResponse> for EditableUser {
             badge: Mutable::new(user.badge),
             login_type: user.login_type,
             subscription,
+            plan_type,
             current_period_end,
             school_id: user.school_id,
             account_id: user.account_id,
