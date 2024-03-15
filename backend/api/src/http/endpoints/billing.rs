@@ -408,13 +408,12 @@ async fn upgrade_subscription_plan(
 
 #[instrument(skip_all)]
 async fn upgrade_user_subscription_plan(
-    auth: TokenUserWithScope<ScopeAdmin>,
+    _auth: TokenUserWithScope<ScopeAdmin>,
     db: Data<PgPool>,
     settings: Data<RuntimeSettings>,
     req: Json<<AdminUpgradeSubscriptionPlan as ApiEndpoint>::Req>,
 ) -> Result<HttpResponse, <AdminUpgradeSubscriptionPlan as ApiEndpoint>::Err> {
-    upgrade_subscription_plan_internal(auth.claims.user_id, &req.plan_type, &None, db, settings)
-        .await?;
+    upgrade_subscription_plan_internal(req.user_id, &req.plan_type, &None, db, settings).await?;
 
     Ok(HttpResponse::NoContent().finish())
 }
