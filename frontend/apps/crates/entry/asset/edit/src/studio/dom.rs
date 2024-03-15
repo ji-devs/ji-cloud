@@ -35,7 +35,7 @@ pub fn render_studio() -> Dom {
             }),
             html!("p", {
                 .prop("slot", "jig-instruction")
-                .text("JIGs are a great way to engage your students by making your lessons interactive. Choose activities, input your content, and share with your students.")
+                .text("Create a JIG to make fun & engaging lessons. Choose activities, input content, & share with your students. Then track their progress.")
             }),
             html!("button-rect", {
                 .prop("slot", "playlist-create")
@@ -59,7 +59,7 @@ pub fn render_studio() -> Dom {
             }),
             html!("p", {
                 .prop("slot", "playlist-instruction")
-                .text("Link multiple JIGs in a playlist, so you can guide your students on a learning path of subject material you want them to master.")
+                .text("Create a playlist by linking multiple JIGs to guide your students on an exciting learning path of subject material to master.")
             }),
             html!("button-rect", {
                 .prop("slot", "resource-create")
@@ -83,7 +83,7 @@ pub fn render_studio() -> Dom {
             }),
             html!("p", {
                 .prop("slot", "resource-instruction")
-                .text("Upload all things not JIG here. Lesson plans, worksheets, off-screen activities, game instructions, photos, videos or even website links.")
+                .text("Upload your lesson plans, worksheets, off-screen activities, game ideas, photos, videos or website links for other teachers to use.")
             }),
             html!("button-rect", {
                 .prop("slot", "course-create")
