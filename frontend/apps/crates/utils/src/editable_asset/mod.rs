@@ -157,8 +157,15 @@ impl EditableAsset {
         (&self.id()).into()
     }
 
-    pub fn _is_jig(&self) -> bool {
+    pub fn is_jig(&self) -> bool {
         matches!(self, Self::Jig(_))
+    }
+
+    pub fn as_jig(&self) -> Rc<EditableJig> {
+        match self {
+            EditableAsset::Jig(jig) => jig.clone(),
+            _ => unreachable!(),
+        }
     }
 
     pub fn is_resource(&self) -> bool {

@@ -31,6 +31,9 @@ export class _ extends LitElement {
                     border-radius: 32px;
                     box-shadow: 0 3px 8px 0 rgba(0, 0, 0, 0.08);
                 }
+                .column-1 {
+                    min-width: 295rem;
+                }
                 .width-holder {
                     display: grid;
                     grid-template-rows: auto 1fr auto;
@@ -95,9 +98,8 @@ export class _ extends LitElement {
                     overflow: hidden;
                 }
                 ::slotted([slot="public"]) {
-                    display: grid;
-                    grid-template-columns: auto auto;
-                    place-content: space-between;
+                    display: flex;
+                    column-gap: 18px;
                     margin-top: 24px;
                     padding: 0 16px;
                 }
