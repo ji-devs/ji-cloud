@@ -33,6 +33,7 @@ use components::{
         },
     },
 };
+use shared::domain::jig::TextDirection;
 use std::rc::Rc;
 use utils::editable_asset::EditableAsset;
 
@@ -110,16 +111,6 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
             html!("label", {
                 .with_node!(elem => {
                     .prop("slot", "public")
-                    .text(STR_PUBLIC_LABEL_1)
-                    .text(state.asset_type_name())
-                    .text(STR_PUBLIC_LABEL_2)
-                    .text_signal(state.asset.privacy_level().signal().map(|privacy_level| {
-                        match privacy_level {
-                            PrivacyLevel::Public => STR_PUBLIC_PUBLIC,
-                            PrivacyLevel::Unlisted => STR_PUBLIC_UNLISTED,
-                            PrivacyLevel::Private => STR_PUBLIC_PRIVATE,
-                        }
-                    }))
                     .child(html!("input-switch", {
                         .prop_signal("enabled", state.asset.privacy_level().signal().map(|privacy_level| {
                             privacy_level == PrivacyLevel::Public
@@ -135,6 +126,16 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                             }
                             state.save_draft();
                         }))
+                    }))
+                    .text(STR_PUBLIC_LABEL_1)
+                    .text(state.asset_type_name())
+                    .text(STR_PUBLIC_LABEL_2)
+                    .text_signal(state.asset.privacy_level().signal().map(|privacy_level| {
+                        match privacy_level {
+                            PrivacyLevel::Public => STR_PUBLIC_PUBLIC,
+                            PrivacyLevel::Unlisted => STR_PUBLIC_UNLISTED,
+                            PrivacyLevel::Private => STR_PUBLIC_PRIVATE,
+                        }
                     }))
                     .child_signal(state.show_public_popup.signal_ref(clone!(state => move |show_public_popup| {
                         match show_public_popup {
@@ -162,6 +163,37 @@ fn render_page(state: Rc<PrePublish>) -> Dom {
                     })))
                 })
             }),
+        ])
+        .apply_if(state.asset.is_jig(), clone!(state => move |dom| {
+            let jig = state.asset.as_jig();
+            dom
+                .child(html!("input-switch-direction", {
+                    .prop("slot", "public")
+                    .prop_signal("direction", jig.direction.signal().map(|dir| {
+                        match dir {
+                            TextDirection::LeftToRight => "ltr",
+                            TextDirection::RightToLeft => "rtl",
+                        }
+                    }))
+                    .event(clone!(state, jig => move|evt: events::CustomDirection| {
+                        jig.direction.set(evt.direction());
+                        state.save_draft();
+                    }))
+                }))
+                .child(html!("label", {
+                    .prop("slot", "public")
+                    .child(html!("input-switch", {
+                        .prop_signal("enabled", jig.scoring.signal())
+                        .event(clone!(state, jig => move |evt: events::CustomToggle| {
+                            jig.scoring.set(evt.value());
+                            state.save_draft();
+                        }))
+                    }))
+                    .text("Scoring & Assessment")
+                }))
+
+        }))
+        .children(&mut [
             html!("input-wrapper", {
                 .prop("slot", "name")
                 .prop("label", format!("{}{}",  state.asset_type_name(), STR_NAME_LABEL))
