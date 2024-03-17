@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use components::audio::mixer::{AudioHandle, AUDIO_MIXER};
+use components::audio::mixer::{AudioHandle, AudioPath, AUDIO_MIXER};
 use dominator::{clone, html, with_node, Dom};
 use web_sys::HtmlInputElement;
 
@@ -9,7 +9,7 @@ use crate::edit::sidebar::jig::settings::{
     dom::STR_BACK_TO_SETTINGS,
     state::ActiveSettingsPopup,
 };
-use futures_signals::signal::{Mutable, MutableLockMut, SignalExt};
+use futures_signals::signal::{Mutable, SignalExt};
 use shared::domain::jig::AudioBackground;
 use utils::{asset::JigAudioExt, events};
 
@@ -19,11 +19,8 @@ impl JigSettings {
     pub fn render_background(self: &Rc<Self>) -> Dom {
         let state = self;
 
-        let audio_handles: Vec<Mutable<Option<AudioHandle>>> = AudioBackground::variants()
-            .iter()
-            .map(|_| Mutable::new(None))
-            .collect();
-        let audio_handles = Rc::new(audio_handles);
+        let current_audio_index: Mutable<Option<usize>> = Mutable::new(None);
+        let current_audio_handle: Mutable<Option<AudioHandle>> = Mutable::new(None);
 
         html!("jig-audio-body", {
             .prop("slot", "overlay")
@@ -50,18 +47,12 @@ impl JigSettings {
                 //     .prop("slot", "search")
                 // }),
             ])
-            .children(AudioBackground::variants().iter().enumerate().map(clone!(state, audio_handles => move|(index, option)| {
-                state.background_line(option, Rc::clone(&audio_handles), index)
+            .children(AudioBackground::variants().iter().enumerate().map(clone!(state, current_audio_index, current_audio_handle => move|(index, option)| {
+                state.background_line(option, current_audio_index.clone(), current_audio_handle.clone(), index)
             })).collect::<Vec<Dom>>())
-            .after_removed(clone!(audio_handles => move |_| {
-                for audio_handle in audio_handles.iter() {
-                    match &*audio_handle.lock_ref() {
-                        None => {},
-                        Some(audio_handle) => {
-                            audio_handle.pause();
-                        },
-                    }
-                }
+            .after_removed(clone!(current_audio_index, current_audio_handle => move |_| {
+                current_audio_index.set(None);
+                current_audio_handle.set(None);
             }))
         })
     }
@@ -69,17 +60,21 @@ impl JigSettings {
     fn background_line(
         self: &Rc<Self>,
         option: &AudioBackground,
-        audio_handles: Rc<Vec<Mutable<Option<AudioHandle>>>>,
+        audio_index: Mutable<Option<usize>>,
+        audio_handle: Mutable<Option<AudioHandle>>,
         index: usize,
     ) -> Dom {
         let state = self;
 
-        let audio_handle = &audio_handles[index];
-
         html!("jig-audio-line", {
             .prop("slot", "lines")
             .prop("label", option.display_name())
-            .prop_signal("playing", audio_handle.signal_ref(|x| x.is_some()))
+            .prop_signal("playing", audio_index.signal_ref(move |audio_index| {
+                match audio_index {
+                    Some(audio_index) if *audio_index == index => true,
+                    _ => false,
+                }
+            }))
             .children(&mut [
                 html!("input" => HtmlInputElement, {
                     .with_node!(elem =>{
@@ -102,31 +97,31 @@ impl JigSettings {
                 }),
                 html!("jig-audio-play-pause", {
                     .prop("slot", "play-pause")
-                    .prop_signal("mode", audio_handle.signal_ref(|audio_handle| {
-                        match audio_handle {
-                            Some(_) => "pause",
-                            None => "play",
+                    .prop_signal("mode", audio_index.signal_ref(move |audio_index| {
+                        match audio_index {
+                            Some(audio_index) if *audio_index == index => "pause",
+                            _ => "play",
                         }
                     }))
-                    .event(clone!(option, audio_handles => move |_ :events::Click| {
-                        let on_ended = clone!(audio_handles => move|| {
-                            audio_handles[index].set(None);
+                    .event(clone!(option, audio_index, audio_handle => move |_ :events::Click| {
+                        let on_ended = clone!(audio_index, audio_handle => move|| {
+                            audio_index.set(None);
+                            audio_handle.set(None);
                         });
 
-                        let mut audio_handles = audio_handles.iter().map(|x| x.lock_mut()).collect::<Vec<MutableLockMut<Option<AudioHandle>>>>();
-
-                        match *audio_handles[index] {
-                            Some(_) => *audio_handles[index] = None,
-                            None => {
-                                audio_handles = audio_handles.into_iter().map(|mut o| {
-                                    *o = None;
-                                    o
-                                }).collect();
-
-                                let handle = AUDIO_MIXER.with(move |mixer| mixer.play_on_ended(option.into(), false, on_ended));
-                                *audio_handles[index] = Some(handle);
+                        let current_audio_index = audio_index.get();
+                        match current_audio_index {
+                            Some(current_audio_index) if current_audio_index == index => {
+                                audio_index.set(None);
+                                audio_handle.set(None);
                             },
-                        };
+                            _ => {
+                                let path: AudioPath = option.clone().into();
+                                let handle = AUDIO_MIXER.with(move |mixer| mixer.play_on_ended(path, false, on_ended));
+                                audio_index.set(Some(index));
+                                audio_handle.set(Some(handle));
+                            }
+                        }
                     }))
                 }),
             ])
