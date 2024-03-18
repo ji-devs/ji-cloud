@@ -6,6 +6,7 @@ use crate::domain::module::{
     ModuleKind,
 };
 use serde::{Deserialize, Serialize};
+use strum_macros::EnumIs;
 use std::collections::HashSet;
 
 mod play_settings;
@@ -171,7 +172,7 @@ pub struct TargetTransform {
     pub trace_idx: usize,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug, EnumIs)]
 /// The mode
 pub enum ItemKind {
     /// Just part of the scene

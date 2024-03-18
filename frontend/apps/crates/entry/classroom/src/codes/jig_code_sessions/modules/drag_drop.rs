@@ -11,7 +11,7 @@ use web_sys::window;
 pub fn render_drag_drop(module: &drag_drop::Content, session: &JigPlaySessionDragDrop) -> Dom {
     html!("div", {
         .children(
-            session.items.iter().enumerate().map(|(index, item)| {
+            session.items.iter().map(|(index, item)| {
                 html!("div", {
                     .class("wrapper")
                     .child(
@@ -19,7 +19,7 @@ pub fn render_drag_drop(module: &drag_drop::Content, session: &JigPlaySessionDra
                             .class("item")
                             .child(html!("div", {
                                 .apply(|dom| {
-                                    match &module.items.get(index) {
+                                    match &module.items.get(*index) {
                                         Some(item) => {
                                             match &item.sticker {
                                                 Sticker::Sprite(sprite) => {
@@ -38,7 +38,6 @@ pub fn render_drag_drop(module: &drag_drop::Content, session: &JigPlaySessionDra
                                         },
                                         None => dom.text("?"),
                                     }
-
                                 })
                             }))
                             .child(html!("p", {

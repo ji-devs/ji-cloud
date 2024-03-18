@@ -20,7 +20,7 @@ use shared::domain::{
 use utils::prelude::*;
 
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
-use std::{iter, rc::Rc};
+use std::rc::Rc;
 
 pub struct Base {
     pub asset_id: AssetId,
@@ -56,8 +56,18 @@ impl Base {
 
         let play_report = JigPlaySessionDragDrop {
             stable_module_id,
-            items: iter::repeat_with(|| JigPlaySessionDragDropItem { failed_tries: 0 })
-                .take(content.item_targets.len())
+            items: content
+                .items
+                .iter()
+                .enumerate()
+                .filter_map(|(index, item)| {
+                    if item.kind.is_interactive() {
+                        let value = JigPlaySessionDragDropItem { failed_tries: 0 };
+                        Some((index, value))
+                    } else {
+                        None
+                    }
+                })
                 .collect(),
         };
 

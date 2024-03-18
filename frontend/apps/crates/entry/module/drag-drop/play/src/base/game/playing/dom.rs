@@ -37,71 +37,65 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                 TracesShowMode::Hidden,
                 TracesShow::on_select_noop()
         )))
-        .children({
-            // used to get the index in the play_report, since play_report only includes interactive.
-            let mut interactive_index = 0;
-            state.items
-                .iter()
-                .enumerate()
-                .map(|(item_index, item)| {
-                    match item {
-                        PlayItem::Static(sticker) => {
-                            render_sticker_raw(sticker, theme_id, None)
-                        },
-                        PlayItem::Interactive(item) => {
-                            let mut opts = BaseRawRenderOptions::default();
+        .children(state.items
+            .iter()
+            .enumerate()
+            .map(|(item_index, item)| {
+                match item {
+                    PlayItem::Static(sticker) => {
+                        render_sticker_raw(sticker, theme_id, None)
+                    },
+                    PlayItem::Interactive(item) => {
+                        let mut opts = BaseRawRenderOptions::default();
 
-                            opts.set_size(item.size.clone());
+                        opts.set_size(item.size.clone());
 
-                            opts.set_transform_override(TransformOverride::Always(item.curr_transform.read_only()));
+                        opts.set_transform_override(TransformOverride::Always(item.curr_transform.read_only()));
 
-                            opts.set_mixin(
-                                clone!(state, item, targets_ready => move |dom| {
-                                    apply_methods!(dom, {
-                                        .apply(mixin_sticker_button_signal(item.completed.signal().map(|locked| !locked)))
-                                        .apply(|dom| {
-                                            dom
-                                                .style_signal("display", targets_ready.signal().map(|ready| {
-                                                    if ready { "block" } else { "none" }
-                                                }))
-                                        })
-                                        .event(clone!(item => move |evt:events::PointerDown| {
-                                            if evt.is_primary() {
-                                                item.start_drag(evt.x() as i32, evt.y() as i32);
-                                            }
-                                        }))
-                                        .global_event(clone!(item => move |evt:events::PointerMove| {
-                                            if evt.is_primary() {
-                                                item.try_move_drag(evt.x() as i32, evt.y() as i32);
-                                            }
-                                        }))
-                                        .global_event(clone!(state, item => move |evt:events::PointerUp| {
-                                            if evt.is_primary() {
-                                                if item.try_end_drag(evt.x() as i32, evt.y() as i32) {
-                                                    PlayState::evaluate(state.clone(), item_index, interactive_index, item.clone());
-                                                }
-                                            }
-                                        }))
-                                        .global_event(clone!(state, item => move |evt:events::PointerCancel| {
-                                            if evt.is_primary() {
-                                                if item.try_end_drag(evt.x() as i32, evt.y() as i32) {
-                                                    PlayState::evaluate(state.clone(), item_index, interactive_index, item.clone());
-                                                }
-                                            }
-                                        }))
+                        opts.set_mixin(
+                            clone!(state, item, targets_ready => move |dom| {
+                                apply_methods!(dom, {
+                                    .apply(mixin_sticker_button_signal(item.completed.signal().map(|locked| !locked)))
+                                    .apply(|dom| {
+                                        dom
+                                            .style_signal("display", targets_ready.signal().map(|ready| {
+                                                if ready { "block" } else { "none" }
+                                            }))
                                     })
+                                    .event(clone!(item => move |evt:events::PointerDown| {
+                                        if evt.is_primary() {
+                                            item.start_drag(evt.x() as i32, evt.y() as i32);
+                                        }
+                                    }))
+                                    .global_event(clone!(item => move |evt:events::PointerMove| {
+                                        if evt.is_primary() {
+                                            item.try_move_drag(evt.x() as i32, evt.y() as i32);
+                                        }
+                                    }))
+                                    .global_event(clone!(state, item => move |evt:events::PointerUp| {
+                                        if evt.is_primary() {
+                                            if item.try_end_drag(evt.x() as i32, evt.y() as i32) {
+                                                PlayState::evaluate(state.clone(), item_index, item.clone());
+                                            }
+                                        }
+                                    }))
+                                    .global_event(clone!(state, item => move |evt:events::PointerCancel| {
+                                        if evt.is_primary() {
+                                            if item.try_end_drag(evt.x() as i32, evt.y() as i32) {
+                                                PlayState::evaluate(state.clone(), item_index, item.clone());
+                                            }
+                                        }
+                                    }))
                                 })
-                            );
+                            })
+                        );
 
-                            let opts = StickerRawRenderOptions::new(&item.sticker, Some(opts));
+                        let opts = StickerRawRenderOptions::new(&item.sticker, Some(opts));
 
-                            interactive_index += 1;
-
-                            render_sticker_raw(&item.sticker, theme_id, Some(opts))
-                        }
+                        render_sticker_raw(&item.sticker, theme_id, Some(opts))
                     }
-                })
-                .collect::<Vec<Dom>>()
-        })
+                }
+            })
+            .collect::<Vec<Dom>>())
     })
 }

@@ -291,8 +291,9 @@ pub struct JigPlaySessionDragDrop {
     /// related module id
     pub stable_module_id: StableModuleId,
 
-    /// list of rounds for this module
-    pub items: Vec<JigPlaySessionDragDropItem>,
+    /// list of rounds for this module. key is index in module.items.
+    /// HashMap instead of Vec because not all items in modules.items are interactive.
+    pub items: HashMap<usize, JigPlaySessionDragDropItem>,
 }
 
 impl JigPlaySessionDragDrop {
@@ -300,7 +301,7 @@ impl JigPlaySessionDragDrop {
     pub fn new(stable_module_id: StableModuleId) -> Self {
         Self {
             stable_module_id,
-            items: Vec::new(),
+            items: HashMap::new(),
         }
     }
 }
@@ -309,7 +310,7 @@ impl JigPlaySessionModuleGetPointsEarned for JigPlaySessionDragDrop {
     fn get_points_earned(&self) -> PointsEarned {
         let mut available = 0;
         let mut earned = 0;
-        for card in &self.items {
+        for card in self.items.values() {
             available += 2;
             earned += match card.failed_tries {
                 0 => 2,
