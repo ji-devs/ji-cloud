@@ -35,6 +35,13 @@ fn file_to_object_url(filetype: &str, data: &str) -> String {
 }
 
 pub fn qr_core_file_from_route(route: Route) -> String {
+    let origin = web_sys::window()
+        .unwrap_ji()
+        .location()
+        .origin()
+        .unwrap_ji();
+    let route = format!("{}{}", origin, route.to_string());
+
     let result: String =
         qrcode_generator::to_svg_to_string(route.to_string(), QrCodeEcc::High, 200, None::<&str>)
             .unwrap();
