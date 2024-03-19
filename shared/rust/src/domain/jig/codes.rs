@@ -120,8 +120,8 @@ pub struct JigPlaySession {
 
 impl JigPlaySessionModuleGetPointsEarned for JigPlaySession {
     fn get_points_earned(&self) -> PointsEarned {
-        let mut available = 0;
-        let mut earned = 0;
+        let mut available = 0.0;
+        let mut earned = 0.0;
         for module in &self.modules {
             let module_points = module.get_points_earned();
             available += module_points.available;
@@ -177,9 +177,9 @@ pub trait JigPlaySessionModuleGetPointsEarned {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PointsEarned {
     /// available points to earn
-    pub available: u16,
+    pub available: f32,
     /// points actually earned
-    pub earned: u16,
+    pub earned: f32,
 }
 impl std::fmt::Display for PointsEarned {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -216,15 +216,15 @@ impl JigPlaySessionMatching {
 
 impl JigPlaySessionModuleGetPointsEarned for JigPlaySessionMatching {
     fn get_points_earned(&self) -> PointsEarned {
-        let mut available = 0;
-        let mut earned = 0;
+        let mut available = 0.0;
+        let mut earned = 0.0;
         for round in &self.rounds {
             for (_, card) in round {
-                available += 2;
+                available += 1.0;
                 earned += match card.failed_tries {
-                    0 => 2,
-                    1 => 1,
-                    _ => 0,
+                    0 => 1.0,
+                    1 => 0.5,
+                    _ => 0.0,
                 };
             }
         }
@@ -261,14 +261,14 @@ impl JigPlaySessionCardQuiz {
 
 impl JigPlaySessionModuleGetPointsEarned for JigPlaySessionCardQuiz {
     fn get_points_earned(&self) -> PointsEarned {
-        let mut available = 0;
-        let mut earned = 0;
+        let mut available = 0.0;
+        let mut earned = 0.0;
         for card in &self.rounds {
-            available += 2;
+            available += 1.0;
             earned += match card.failed_tries {
-                0 => 2,
-                1 => 1,
-                _ => 0,
+                0 => 1.0,
+                1 => 0.5,
+                _ => 0.0,
             };
         }
         PointsEarned { available, earned }
@@ -308,14 +308,14 @@ impl JigPlaySessionDragDrop {
 
 impl JigPlaySessionModuleGetPointsEarned for JigPlaySessionDragDrop {
     fn get_points_earned(&self) -> PointsEarned {
-        let mut available = 0;
-        let mut earned = 0;
+        let mut available = 0.0;
+        let mut earned = 0.0;
         for card in self.items.values() {
-            available += 2;
+            available += 1.0;
             earned += match card.failed_tries {
-                0 => 2,
-                1 => 1,
-                _ => 0,
+                0 => 1.0,
+                1 => 0.5,
+                _ => 0.0,
             };
         }
         PointsEarned { available, earned }
@@ -351,14 +351,14 @@ impl JigPlaySessionFindAnswer {
 
 impl JigPlaySessionModuleGetPointsEarned for JigPlaySessionFindAnswer {
     fn get_points_earned(&self) -> PointsEarned {
-        let mut available = 0;
-        let mut earned = 0;
+        let mut available = 0.0;
+        let mut earned = 0.0;
         for card in &self.items {
-            available += 2;
+            available += 1.0;
             earned += match card.failed_tries {
-                0 => 2,
-                1 => 1,
-                _ => 0,
+                0 => 1.0,
+                1 => 0.5,
+                _ => 0.0,
             };
         }
         PointsEarned { available, earned }
