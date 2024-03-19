@@ -59,6 +59,8 @@ pub mod page_header;
 pub mod pdf;
 #[cfg(feature = "player_popup")]
 pub mod player_popup;
+#[cfg(feature = "qr_dialog")]
+pub mod qr_dialog;
 #[cfg(feature = "share_jig")]
 pub mod share_asset;
 #[cfg(feature = "stickers")]

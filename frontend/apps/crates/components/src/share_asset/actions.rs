@@ -9,6 +9,8 @@ use shared::{
 };
 use utils::prelude::*;
 
+use crate::qr_dialog::{QrDialog, QrDialogCallbacks};
+
 use super::state::ShareAsset;
 
 const COPIED_TIMEOUT: u32 = 3_000;
@@ -45,5 +47,23 @@ impl ShareAsset {
             }),
         );
         timeout.forget();
+    }
+
+    pub fn show_qr_code(self: &Rc<Self>) {
+        let state = self;
+        let code = self
+            .student_code
+            .get_cloned()
+            .unwrap_or_default()
+            .to_string();
+        let qr_dialog = QrDialog::new(
+            Route::Kids(KidsRoute::StudentCode(Some(code.clone()))),
+            code,
+            QrDialogCallbacks::new(clone!(state => move || {
+                state.qr_dialog.set(None);
+            })),
+        );
+        self.qr_dialog.set(Some(qr_dialog));
+        self.active_popup.set(None);
     }
 }

@@ -177,6 +177,7 @@ export class _ extends LitElement {
                                 <slot name="copy-url"></slot>
                             </div>
                         </div>
+                        <slot name="qr"></slot>
                     ` }
                 </div>
             </popup-body>

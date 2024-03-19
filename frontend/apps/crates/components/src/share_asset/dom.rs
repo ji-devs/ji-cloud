@@ -9,7 +9,9 @@ use shared::{
     domain::{asset::Asset, jig::TextDirection},
 };
 use utils::{
-    clipboard, events, paywall,
+    clipboard,
+    component::Component,
+    events, paywall,
     prelude::SETTINGS,
     routes::{KidsRoute, Route},
     unwrap::UnwrapJiExt,
@@ -61,7 +63,7 @@ impl ShareAsset {
                     .child(anchor)
                 }))
                 .apply(OverlayHandle::lifecycle(
-                    move || {
+                    clone!(state => move || {
                         html!("overlay-content", {
                             .prop("target", &elem)
                             .prop("contentAnchor", "oppositeH")
@@ -86,9 +88,14 @@ impl ShareAsset {
                                 })))
                             }))
                         })
-                    }
+                    })
                 ))
             })
+            .child_signal(state.qr_dialog.signal_ref(move |qr_dialog| {
+                qr_dialog.as_ref().map(move |qr_dialog| {
+                    qr_dialog.render()
+                })
+            }))
         })
     }
 
@@ -336,6 +343,15 @@ impl ShareAsset {
                         let student_code = state.student_code.get_cloned().unwrap_ji();
                         clipboard::write_text(&student_code);
                         ShareAsset::set_copied_mutable(state.copied_student_code.clone());
+                    }))
+                }),
+                html!("button-rect", {
+                    .prop("slot", "qr")
+                    .prop("color", "blue")
+                    .prop("kind", "text")
+                    .text("Show QR code")
+                    .event(clone!(state => move |_: events::Click| {
+                        state.show_qr_code();
                     }))
                 }),
             ])

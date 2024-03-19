@@ -93,13 +93,25 @@ impl Component<CodeSessions> for Rc<CodeSessions> {
                     }))
                 }))
             }))
-            .child(html!("button-rect", {
-                .class("export-button")
-                .prop("color", "blue")
-                .prop("kind", "text")
-                .text("Export CSV")
-                .event(clone!(state => move |_: events::Click| {
-                    state.export_sessions();
+            .child(html!("div", {
+                .class("export-and-qr")
+                .child(html!("button-rect", {
+                    .class("qr-button")
+                    .prop("color", "blue")
+                    .prop("kind", "text")
+                    .text("Show QR code")
+                    .event(clone!(state => move |_: events::Click| {
+                        state.show_qr_code();
+                    }))
+                }))
+                .child(html!("button-rect", {
+                    .class("export-button")
+                    .prop("color", "blue")
+                    .prop("kind", "text")
+                    .text("Export CSV")
+                    .event(clone!(state => move |_: events::Click| {
+                        state.export_sessions();
+                    }))
                 }))
             }))
         }))
@@ -134,6 +146,11 @@ impl Component<CodeSessions> for Rc<CodeSessions> {
                     })
                 })),
         )
+        .child_signal(state.qr_dialog.signal_ref(move |qr_dialog| {
+            qr_dialog.as_ref().map(move |qr_dialog| {
+                qr_dialog.render()
+            })
+        }))
     }
 }
 

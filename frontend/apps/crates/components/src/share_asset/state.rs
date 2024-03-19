@@ -11,6 +11,8 @@ use utils::routes::{AssetRoute, Route};
 
 use utils::prelude::*;
 
+use crate::qr_dialog::QrDialog;
+
 pub struct ShareAsset {
     pub active_popup: Mutable<Option<ActivePopup>>,
     pub student_code: Mutable<Option<String>>,
@@ -20,6 +22,7 @@ pub struct ShareAsset {
     pub link_copied: Mutable<bool>,
     pub copied_student_url: Mutable<bool>,
     pub copied_student_code: Mutable<bool>,
+    pub qr_dialog: Mutable<Option<Rc<QrDialog>>>,
     // play settings
     pub direction: Mutable<TextDirection>,
     pub scoring: Mutable<bool>,
@@ -44,6 +47,7 @@ impl ShareAsset {
             link_copied: Mutable::new(false),
             copied_student_url: Mutable::new(false),
             copied_student_code: Mutable::new(false),
+            qr_dialog: Mutable::new(None),
             direction: Mutable::new(direction),
             scoring: Mutable::new(scoring),
         })

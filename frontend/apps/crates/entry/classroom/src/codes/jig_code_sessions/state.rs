@@ -1,5 +1,6 @@
 use std::{collections::HashMap, rc::Rc};
 
+use components::qr_dialog::QrDialog;
 use futures_signals::signal::Mutable;
 use shared::domain::{
     jig::{
@@ -15,6 +16,7 @@ pub struct CodeSessions {
     pub(super) jig: Mutable<Option<JigWithModules>>,
     pub(super) infos: Mutable<Vec<JigCodeSessionResponse>>,
     pub(super) preview_open: Mutable<bool>,
+    pub(super) qr_dialog: Mutable<Option<Rc<QrDialog>>>,
 }
 
 impl CodeSessions {
@@ -25,6 +27,7 @@ impl CodeSessions {
             jig: Default::default(),
             infos: Default::default(),
             preview_open: Default::default(),
+            qr_dialog: Default::default(),
         })
     }
 }

@@ -27,7 +27,7 @@ header .jig-name {
 }
 header .preview-button {
     grid-row: 2;
-    justify-self: start;
+    justify-self: end;
     background-color: #ffffff;
 }
 header .code-link {
@@ -52,9 +52,11 @@ header .copy:hover {
 header .copy:active {
     background-color: rgba(0, 0, 0, 0.1);
 }
-header .export-button {
+header .export-and-qr {
     grid-row: 3;
     grid-column: 3;
+    display: flex;
+    gap: 20px;
 }
 .table {
     overflow-x: auto;

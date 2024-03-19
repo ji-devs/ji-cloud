@@ -1,0 +1,16 @@
+.body {
+    display: grid;
+    justify-items: end;
+    gap: 10px;
+    padding: 20px;
+}
+fa-button {
+    color: grey;
+    transition: color 0.2s;
+}
+fa-button:hover {
+    color: #585858;
+}
+.download {
+    font-size: 20px;
+}

@@ -1,5 +1,6 @@
 use std::{collections::HashMap, rc::Rc};
 
+use components::qr_dialog::{QrDialog, QrDialogCallbacks};
 use dominator::clone;
 use futures::{future::try_join_all, join};
 use shared::{
@@ -16,9 +17,14 @@ use shared::{
     },
 };
 use utils::{
-    bail_on_err, date_formatters, error_ext::ErrorExt, prelude::ApiEndpointExt, unwrap::UnwrapJiExt,
+    bail_on_err, date_formatters,
+    error_ext::ErrorExt,
+    js_wrappers::download_url,
+    prelude::ApiEndpointExt,
+    routes::{KidsRoute, Route},
+    unwrap::UnwrapJiExt,
 };
-use wasm_bindgen::{JsCast, JsValue};
+use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
 
 use super::{CodeSessions, JigWithModules};
@@ -61,9 +67,22 @@ impl CodeSessions {
             JigCodeSessionsPath(self.code),
             None,
         )
-        .await;
+        .await
+        .toast_on_err();
         let res = bail_on_err!(res);
         self.infos.lock_mut().extend(res.sessions);
+    }
+
+    pub fn show_qr_code(self: &Rc<Self>) {
+        let state = self;
+        let qr_dialog = QrDialog::new(
+            Route::Kids(KidsRoute::StudentCode(Some(self.code.to_string()))),
+            self.code.to_string(),
+            QrDialogCallbacks::new(clone!(state => move || {
+                state.qr_dialog.set(None);
+            })),
+        );
+        self.qr_dialog.set(Some(qr_dialog));
     }
 
     fn generate_csv_string(&self) -> String {
@@ -131,27 +150,13 @@ impl CodeSessions {
 
     pub fn export_sessions(&self) {
         let data = self.generate_csv_string();
-        download_file(&self.code.to_string(), &data);
-    }
-}
-
-fn download_file(filename: &str, data: &str) {
-    let data = JsValue::from_str(data);
-    let blob = web_sys::Blob::new_with_str_sequence_and_options(
-        &js_sys::Array::from_iter(vec![data]),
-        web_sys::BlobPropertyBag::new().type_("text/csv"),
-    )
-    .unwrap_ji();
-    let url = web_sys::Url::create_object_url_with_blob(&blob).unwrap_ji();
-    let a = web_sys::window()
-        .unwrap_ji()
-        .document()
-        .unwrap_ji()
-        .create_element("a")
-        .unwrap_ji()
-        .dyn_into::<web_sys::HtmlAnchorElement>()
+        let data = JsValue::from_str(&data);
+        let blob = web_sys::Blob::new_with_str_sequence_and_options(
+            &js_sys::Array::from_iter(vec![data]),
+            web_sys::BlobPropertyBag::new().type_("text/csv"),
+        )
         .unwrap_ji();
-    a.set_href(&url);
-    a.set_download(&filename);
-    a.click();
+        let url = web_sys::Url::create_object_url_with_blob(&blob).unwrap_ji();
+        download_url(&self.code.to_string(), &url);
+    }
 }

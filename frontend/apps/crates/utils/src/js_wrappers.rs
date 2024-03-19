@@ -30,3 +30,18 @@ pub fn is_iframe() -> bool {
     let top = window.top().unwrap_ji().unwrap_ji();
     window != top
 }
+
+/// Force a download from a url
+pub fn download_url(filename: &str, url: &str) {
+    let a = web_sys::window()
+        .unwrap_ji()
+        .document()
+        .unwrap_ji()
+        .create_element("a")
+        .unwrap_ji()
+        .dyn_into::<web_sys::HtmlAnchorElement>()
+        .unwrap_ji();
+    a.set_href(&url);
+    a.set_download(&filename);
+    a.click();
+}
