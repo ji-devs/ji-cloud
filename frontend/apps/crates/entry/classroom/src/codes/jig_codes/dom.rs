@@ -46,7 +46,7 @@ impl Component<JigCodes> for Rc<JigCodes> {
                     }))
                     .child(html!("span", {
                         .class("cell")
-                        .text("Settings")
+                        .text("Direction")
                     }))
                     .child(html!("span", {
                         .class("cell")

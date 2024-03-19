@@ -172,7 +172,7 @@ impl CodeSessions {
                 }))
                 .child(html!("div", {
                     .class("cell")
-                    .text("Student's Name")
+                    .text("Student Name")
                 }))
                 .child(html!("div", {
                     .class("cell")
