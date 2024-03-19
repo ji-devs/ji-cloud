@@ -6,8 +6,8 @@ use crate::domain::module::{
     ModuleKind,
 };
 use serde::{Deserialize, Serialize};
-use strum_macros::EnumIs;
 use std::collections::HashSet;
+use strum_macros::EnumIs;
 
 mod play_settings;
 pub use play_settings::*;
