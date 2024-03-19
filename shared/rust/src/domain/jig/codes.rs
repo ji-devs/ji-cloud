@@ -189,7 +189,7 @@ impl std::fmt::Display for PointsEarned {
 impl PointsEarned {
     /// get percent of points earned
     pub fn percent(&self) -> u16 {
-        let output = (self.earned as f32 / self.available as f32) * 100.00;
+        let output = (self.earned / self.available) * 100.00;
         output as u16
     }
 }

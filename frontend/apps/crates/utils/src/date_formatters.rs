@@ -7,7 +7,7 @@ thread_local! {
         intl::date_time_format::DateTimeFormat::new(
             "en-us",
             intl::date_time_format::Options {
-                year: Some(intl::date_time_format::Year::Digit2),
+                year: Some(intl::date_time_format::Year::Numeric),
                 month: Some(intl::date_time_format::Month::Short),
                 day: Some(intl::date_time_format::Day::Numeric),
                 hour: Some(intl::date_time_format::Hour::Numeric),
@@ -19,7 +19,7 @@ thread_local! {
         intl::date_time_format::DateTimeFormat::new(
             "en-us",
             intl::date_time_format::Options {
-                year: Some(intl::date_time_format::Year::Digit2),
+                year: Some(intl::date_time_format::Year::Numeric),
                 month: Some(intl::date_time_format::Month::Short),
                 day: Some(intl::date_time_format::Day::Numeric),
                 ..Default::default()
