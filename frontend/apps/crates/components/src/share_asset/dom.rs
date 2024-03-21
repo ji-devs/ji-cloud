@@ -17,7 +17,7 @@ use utils::{
     unwrap::UnwrapJiExt,
 };
 use wasm_bindgen::{JsCast, JsValue};
-use web_sys::{window, HtmlElement};
+use web_sys::{window, HtmlElement, HtmlInputElement};
 
 use crate::overlay::handle::OverlayHandle;
 
@@ -290,6 +290,16 @@ impl ShareAsset {
                 student_code.map(|_| JIG_PLAYER_SESSION_VALID_DURATION_SECS)
             }))
             .children(&mut [
+                html!("input" => HtmlInputElement, {
+                    .with_node!(elem => {
+                        .prop("placeholder", "Code name")
+                        .prop("slot", "name-input")
+                        .prop_signal("disabled", state.student_code.signal_ref(|x| x.is_some()))
+                        .event(clone!(state => move |_: events::Input| {
+                            state.code_name.set(Some(elem.value()));
+                        }))
+                    })
+                }),
                 html!("share-jig-gen-code-button", {
                     .prop("slot", "gen-code-button")
                     .prop_signal("disabled", state.student_code.signal_ref(|x| x.is_some()))

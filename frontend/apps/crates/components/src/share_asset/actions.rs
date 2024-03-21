@@ -7,7 +7,7 @@ use shared::{
     api::endpoints::jig,
     domain::jig::{codes::JigPlayerSessionCreatePath, JigPlayerSettings},
 };
-use utils::prelude::*;
+use utils::{bail_on_err, prelude::*};
 
 use crate::qr_dialog::{QrDialog, QrDialogCallbacks};
 
@@ -21,20 +21,17 @@ impl ShareAsset {
         state.loader.load(clone!(state => async move {
             let req = shared::domain::jig::codes::JigPlayerSessionCreateRequest {
                 jig_id: state.asset.unwrap_jig().id,
+                name: state.code_name.get_cloned(),
                 settings: JigPlayerSettings {
                     direction: state.direction.get(),
                     scoring: state.scoring.get(),
                     ..Default::default()
                 },
-                name: Default::default(),
             };
 
-            match jig::codes::Create::api_with_auth(JigPlayerSessionCreatePath(), Some(req)).await {
-                Err(_) => todo!(),
-                Ok(res) => {
-                    state.student_code.set(Some(res.index.to_string()));
-                },
-            };
+            let res = jig::codes::Create::api_with_auth(JigPlayerSessionCreatePath(), Some(req)).await.toast_on_err();
+            let res = bail_on_err!(res);
+            state.student_code.set(Some(res.index.to_string()));
         }));
     }
 

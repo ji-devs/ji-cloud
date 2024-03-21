@@ -40,6 +40,14 @@ export class _ extends LitElement {
                     row-gap: 8px;
                     width: 305px;
                     min-height: 250px;
+                    align-content: start;
+                }
+                ::slotted([slot=name-input]) {
+                    border: solid 1px var(--main-blue);
+                    background-color: var(--white);
+                    border-radius: 8px;
+                    font-size: 20px;
+                    padding: 10px;
                 }
                 label {
                     display: grid;
@@ -148,6 +156,7 @@ export class _ extends LitElement {
                 <h3 slot="heading">${STR_CODE_HEADER}</h3>
                 <div slot="body" class="body">
                     ${ !this.code ? html`
+                        <slot name="name-input"></slot>
                         <slot name="gen-code-button"></slot>
                     ` : html`
                         <div class="field-code">
