@@ -35,7 +35,7 @@ pub fn render_studio() -> Dom {
             }),
             html!("p", {
                 .prop("slot", "jig-instruction")
-                .text("Create a JIG to make fun & engaging lessons. Choose activities, input content, & share with your students. Then track their progress.")
+                .text("Create a JIG to make a fun lesson to share with your students and track their progress.")
             }),
             html!("button-rect", {
                 .prop("slot", "playlist-create")
@@ -59,7 +59,7 @@ pub fn render_studio() -> Dom {
             }),
             html!("p", {
                 .prop("slot", "playlist-instruction")
-                .text("Create a playlist by linking multiple JIGs to guide your students on an exciting learning path of subject material to master.")
+                .text("Create a playlist by linking multiple JIGs to guide your students on a learning path.")
             }),
             html!("button-rect", {
                 .prop("slot", "resource-create")
@@ -83,7 +83,7 @@ pub fn render_studio() -> Dom {
             }),
             html!("p", {
                 .prop("slot", "resource-instruction")
-                .text("Upload your lesson plans, worksheets, off-screen activities, game ideas, photos, videos or website links for other teachers to use.")
+                .text("Upload your lesson plans, worksheets, activity ideas, etc. for other teachers to use.")
             }),
             html!("button-rect", {
                 .prop("slot", "course-create")
@@ -95,20 +95,20 @@ pub fn render_studio() -> Dom {
                 })
                 .text("Create a Course")
             }),
-            html!("button-rect", {
-                .prop("slot", "course-gallery")
-                .prop("color", "blue")
-                .prop("kind", "text")
-                .prop("size", "regular")
-                .apply(move |dom| on_click_go_to_url!(dom, {
-                    Route::Asset(AssetRoute::CourseGallery).to_string()
-                }))
-                .text("My Courses")
-            }),
-            html!("p", {
-                .prop("slot", "course-instruction")
-                .text("Upload videos and add other resources to create a course for older students in our content section or professional development in our community.")
-            }),
+            // html!("button-rect", {
+            //     .prop("slot", "course-gallery")
+            //     .prop("color", "blue")
+            //     .prop("kind", "text")
+            //     .prop("size", "regular")
+            //     .apply(move |dom| on_click_go_to_url!(dom, {
+            //         Route::Asset(AssetRoute::CourseGallery).to_string()
+            //     }))
+            //     .text("My Courses")
+            // }),
+            // html!("p", {
+            //     .prop("slot", "course-instruction")
+            //     .text("Upload videos and add other resources to create a course for older students in our content section or professional development in our community.")
+            // }),
             html!("button-rect", {
                 .prop("slot", "help")
                 .prop("kind", "outline")
