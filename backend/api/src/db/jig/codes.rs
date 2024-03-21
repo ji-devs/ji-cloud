@@ -2,7 +2,7 @@ use chrono::{DateTime, Duration, Utc};
 use rand::{rngs::ThreadRng, Rng};
 use shared::config::{JIG_PLAYER_SESSION_CODE_MAX, JIG_PLAYER_SESSION_VALID_DURATION_SECS};
 use shared::domain::jig::codes::{
-    JigCodeListRequest, JigCodeSessionResponse, JigPlayerSessionCreateRequest,
+    JigCodeListRequest, JigCodeSessionResponse, JigCodeUpdateRequest, JigPlayerSessionCreateRequest,
 };
 use shared::domain::jig::{
     codes::{JigCode, JigCodeResponse, JigPlaySession},
@@ -73,6 +73,39 @@ returning created_at as "created_at: DateTime<Utc>"
     }
 
     Err(anyhow::anyhow!("Maximum retries reached for creating a new jig session").into())
+}
+
+pub async fn update(
+    db: &PgPool,
+    code: JigCode,
+    opts: &JigCodeUpdateRequest,
+) -> Result<(), error::JigCode> {
+    let name = opts.name.clone();
+    let direction = opts.settings.as_ref().map(|opts| opts.direction);
+    let scoring = opts.settings.as_ref().map(|opts| opts.scoring);
+    let drag_assist = opts.settings.as_ref().map(|opts| opts.drag_assist);
+
+    sqlx::query!(
+        //language=SQL
+        r#"
+            update jig_code
+            set name = case when $2 then $3 else name end,
+                direction = coalesce($4, direction),
+                scoring = coalesce($5, scoring),
+                drag_assist = coalesce($6, drag_assist)
+            where code = $1
+        "#,
+        code.0,
+        name.is_some(),
+        name.flatten(),
+        direction.map(|d| d as i16),
+        scoring,
+        drag_assist,
+    )
+    .execute(db)
+    .await?;
+
+    Ok(())
 }
 
 fn session_create_error_or_continue(db_err: Box<dyn DatabaseError>) -> Result<(), error::JigCode> {

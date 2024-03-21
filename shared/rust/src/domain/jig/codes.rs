@@ -24,7 +24,7 @@ impl ToString for JigCode {
 
 make_path_parts!(JigPlayerSessionCreatePath => "/v1/jig/codes");
 
-/// Request to create a player session for a jig.
+/// Request to create a jig code.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct JigPlayerSessionCreateRequest {
@@ -38,12 +38,25 @@ pub struct JigPlayerSessionCreateRequest {
     pub settings: JigPlayerSettings,
 }
 
-/// Request to create a player session for a jig.
+/// Response from creating a jig code.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct JigPlayerSessionCreateResponse {
     /// Four-digit code identifying a Jig player session
     pub index: JigCode,
+}
+
+make_path_parts!(JigCodeUpdatePath => "/v1/jig/codes/{}" => JigCode);
+
+/// Request to update a jig code.
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct JigCodeUpdateRequest {
+    /// Display name
+    pub name: Option<Option<String>>,
+
+    /// Settings for the session
+    pub settings: Option<JigPlayerSettings>,
 }
 
 /// Over-the-wire representation of a jig player session

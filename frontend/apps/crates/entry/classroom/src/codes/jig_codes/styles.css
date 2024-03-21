@@ -4,50 +4,77 @@
     gap: 40px;
     justify-items: center;
 }
+.code:not(:first-child) .cell,
+.header:not(:first-child) .cell {
+    border-top: var(--border);
+}
+.cell:not(:first-child),
+.header .cell:not(:first-child) {
+    border-left: var(--border);
+}
 .codes {
     display: grid;
-    grid-template-columns: auto auto auto auto;
+    grid-template-columns: auto auto auto auto auto;
     --border: solid 1px #00000010;
     border: var(--border);
     border-radius: 8px;
     overflow: hidden;
     background-color: #fff;
-}
-.codes .header {
-    display: contents;
-}
-.codes .header .cell {
-    padding: 6px 10px;
-    font-size: 12px;
-}
-.codes .code {
-    text-decoration: none;
-    display: contents;
-}
-.codes .code .cell {
-    padding: 10px;
-}
-.codes .code:hover .cell {
-    background-color: var(--light-blue-1);
-}
-.codes .code .cell,
-.codes .code:active .cell,
-.codes .code:visited .cell,
-.codes .code:hover .cell {
-    color: var(--main-blue);
-    text-align: center;
-    display: grid;
-    place-content: center;
-}
-.codes .code:not(:first-child) .cell,
-.codes .header:not(:first-child) .cell {
-    border-top: var(--border);
-}
-.codes .code .cell:not(:first-child),
-.codes .header .cell:not(:first-child) {
-    border-left: var(--border);
-}
-.codes .code .cell.created-at {
-    font-size: 12px;
-    color: gray;
+
+    .header {
+        display: contents;
+    }
+    .header .cell {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+    .code {
+        text-decoration: none;
+        display: contents;
+
+        &:hover .cell {
+            background-color: var(--light-blue-1);
+        }
+
+        .cell,
+        &:active .cell,
+        &:visited .cell,
+        &:hover .cell {
+            color: var(--main-blue);
+            padding: 10px;
+            text-align: center;
+            display: grid;
+            place-content: center;
+        }
+        .cell {
+            &.name {
+                display: grid;
+                grid-template-columns: 1fr 36px;
+                gap: 5px;
+                
+                input {
+                    border: none;
+                    padding: 0;
+                    color: inherit;
+                    box-sizing: border-box;
+                    background-color: transparent;
+                    cursor: inherit;
+                }
+                input:not(:read-only) {
+                    border: solid black 1px;
+                    color: black;
+                    cursor: text;
+                }
+                .actions {
+                    display: flex;
+                    gap: 5px;
+                    justify-content: end;
+                }
+            }
+            &.created-at {
+                font-size: 12px;
+                color: gray;
+            }
+        }
+    }
 }

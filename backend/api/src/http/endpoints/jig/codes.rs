@@ -26,6 +26,23 @@ pub async fn create(
     Ok(HttpResponse::Created().json(jig_code))
 }
 
+pub async fn update(
+    db: Data<PgPool>,
+    claims: TokenUser,
+    path: web::Path<JigCode>,
+    req: Json<<codes::Update as ApiEndpoint>::Req>,
+) -> Result<HttpResponse, error::JigCode> {
+    let code = path.into_inner();
+    let req = req.into_inner();
+    let user_id = claims.user_id();
+
+    db::jig::is_users_code(&*db, user_id, code).await?;
+
+    db::jig::codes::update(&db, code, &req).await?;
+
+    Ok(HttpResponse::NoContent().into())
+}
+
 /// Get all jig codes for user.
 pub async fn list_user_codes(
     db: Data<PgPool>,

@@ -1,6 +1,7 @@
 use crate::translate::translate_text;
 use anyhow::Context;
 use serde_json::value::Value;
+use shared::domain::jig::codes::JigCode;
 use shared::domain::jig::{AdminJigExport, JigUpdateAdminDataRequest};
 use shared::domain::module::StableModuleId;
 use shared::domain::playlist::{PlaylistAdminData, PlaylistRating};
@@ -1890,6 +1891,29 @@ select exists (
             .authed
         }
     };
+
+    if !authed {
+        return Err(error::Auth::Forbidden);
+    }
+
+    Ok(())
+}
+
+pub async fn is_users_code(db: &PgPool, user_id: UserId, code: JigCode) -> Result<(), error::Auth> {
+    let authed = sqlx::query!(
+        //language=SQL
+        r#"
+            select exists (
+                select 1 from jig_code where creator_id = $1 and code = $2
+            ) as "authed!"
+            
+        "#,
+        user_id.0,
+        code.0
+    )
+    .fetch_one(db)
+    .await?
+    .authed;
 
     if !authed {
         return Err(error::Auth::Forbidden);

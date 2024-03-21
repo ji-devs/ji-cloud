@@ -1130,6 +1130,23 @@
     },
     "query": "select id as \"id: AudioId\" from user_audio_library order by created_at desc"
   },
+  "16f8910b20347fe554aa439d7e678c377d5798bf89a14267614e1d47521bc8b0": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Bool",
+          "Text",
+          "Int2",
+          "Bool",
+          "Bool"
+        ]
+      }
+    },
+    "query": "\n            update jig_code\n            set name = case when $2 then $3 else name end,\n                direction = coalesce($4, direction),\n                scoring = coalesce($5, scoring),\n                drag_assist = coalesce($6, drag_assist)\n            where code = $1\n        "
+  },
   "172c8df92f296df4a816c4c9d77c091c56919f84f54bc1cc1174060aff2d64c6": {
     "describe": {
       "columns": [
@@ -12247,6 +12264,27 @@
       }
     },
     "query": "\nselect author_id    as \"author_id: UserId\",\n       published_at  as \"published_at?\"\nfrom playlist\nwhere id = $1\n    "
+  },
+  "b7d2bcf9ab498de0fa50e3b47d3e5498541bffde1c02345a178747824d0318ad": {
+    "describe": {
+      "columns": [
+        {
+          "name": "authed!",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n            select exists (\n                select 1 from jig_code where creator_id = $1 and code = $2\n            ) as \"authed!\"\n            \n        "
   },
   "b7d83cfd90ef7d1f18b8f070a52bccb1dc58d040a1e012e776c9cd47704efc27": {
     "describe": {

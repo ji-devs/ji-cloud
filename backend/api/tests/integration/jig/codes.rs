@@ -39,6 +39,22 @@ async fn create_and_list(port: u16) -> anyhow::Result<()> {
 
     insta::assert_json_snapshot!(format!("{}-1",name), body, { ".**.index" => "[index]", ".**.created_at" => "[timestamp]", ".**.expires_at" => "[timestamp]" });
 
+    let resp = client
+        .patch(&format!(
+            "http://0.0.0.0:{}/v1/jig/codes/{}",
+            port,
+            body.index.to_string()
+        ))
+        .json(&serde_json::json!({
+            "name": "test-name"
+        }))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::NO_CONTENT);
+
     let _resp = client
         .post(&format!("http://0.0.0.0:{}/v1/jig/codes", port))
         .json(&serde_json::json!({
