@@ -50,9 +50,9 @@ export class _ extends LitElement {
                     width: 212px;
                 }
                 .gallery-card {
-                    height: 304px;
+                    height: 448px;
                     display: grid;
-                    grid-template-rows: 1fr auto auto;
+                    grid-template-rows: 1fr auto auto auto;
                     justify-items: center;
                     row-gap: 16px;
                     background-color: #ffffff;
@@ -70,7 +70,7 @@ export class _ extends LitElement {
                 ::slotted([slot="resource-instruction"]),
                 ::slotted([slot="course-instruction"]) {
                     text-align: center;
-                    color: var(--dark-blue-8);
+                    color: var(--dark-gray-4);
                 }
             `,
         ];
@@ -92,24 +92,24 @@ export class _ extends LitElement {
                             <img-ui path="entry/jig/gallery/jig-icon.webp"></img-ui>
                             <slot name="jig-create"></slot>
                             <slot name="jig-gallery"></slot>
+                            <slot name="jig-instruction"></slot>
                         </div>
-                        <slot name="jig-instruction"></slot>
                     </div>
                     <div class="gallery-link">
                         <div class="gallery-card">
                             <img-ui path="entry/jig/gallery/playlist-icon.webp"></img-ui>
                             <slot name="playlist-create"></slot>
                             <slot name="playlist-gallery"></slot>
+                            <slot name="playlist-instruction"></slot>
                         </div>
-                        <slot name="playlist-instruction"></slot>
                     </div>
                     <div class="gallery-link">
                         <div class="gallery-card">
                             <img-ui path="entry/jig/gallery/resource-icon.webp"></img-ui>
                             <slot name="resource-create"></slot>
                             <slot name="resource-gallery"></slot>
+                            <slot name="resource-instruction"></slot>
                         </div>
-                        <slot name="resource-instruction"></slot>
                     </div>
                     <!-- <div class="gallery-link">
                         <div class="gallery-card">
