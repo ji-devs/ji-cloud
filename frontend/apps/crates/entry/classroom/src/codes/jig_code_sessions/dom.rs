@@ -50,7 +50,7 @@ impl Component<CodeSessions> for Rc<CodeSessions> {
                 .child(html!("fa-icon", {
                    .prop("icon", "fa-regular fa-chevron-left")
                 }))
-                .text("back")
+                .text("Back")
             }))
             .child(html!("h2", {
                 .class("code")
