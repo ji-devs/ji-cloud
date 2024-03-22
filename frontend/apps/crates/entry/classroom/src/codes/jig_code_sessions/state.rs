@@ -4,7 +4,7 @@ use components::qr_dialog::QrDialog;
 use futures_signals::signal::Mutable;
 use shared::domain::{
     jig::{
-        codes::{JigCode, JigCodeSessionResponse},
+        codes::{JigCode, JigCodeResponse, JigCodeSessionResponse},
         JigId, JigResponse,
     },
     module::{ModuleResponse, StableModuleId},
@@ -12,6 +12,7 @@ use shared::domain::{
 
 pub struct CodeSessions {
     pub(super) code: JigCode,
+    pub(super) code_response: Mutable<Option<JigCodeResponse>>,
     pub(super) jig_id: JigId,
     pub(super) jig: Mutable<Option<JigWithModules>>,
     pub(super) infos: Mutable<Vec<JigCodeSessionResponse>>,
@@ -23,6 +24,7 @@ impl CodeSessions {
     pub fn new(jig_id: JigId, code: JigCode) -> Rc<Self> {
         Rc::new(Self {
             code,
+            code_response: Default::default(),
             jig_id,
             jig: Default::default(),
             infos: Default::default(),

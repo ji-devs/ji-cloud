@@ -6,9 +6,7 @@ use futures::join;
 use shared::{
     api::endpoints,
     domain::jig::{
-        codes::{
-            JigCode, JigCodeListPath, JigCodeListRequest, JigCodeUpdatePath, JigCodeUpdateRequest,
-        },
+        codes::{JigCode, JigCodeListPath, JigCodeListRequest, JigCodePath, JigCodeUpdateRequest},
         JigGetLivePath,
     },
 };
@@ -50,10 +48,9 @@ impl JigCodes {
                 name: Some(Some(new_name)),
                 settings: None,
             };
-            let _ =
-                endpoints::jig::codes::Update::api_with_auth(JigCodeUpdatePath(code), Some(req))
-                    .await
-                    .toast_on_err();
+            let _ = endpoints::jig::codes::Update::api_with_auth(JigCodePath(code), Some(req))
+                .await
+                .toast_on_err();
         });
     }
 }

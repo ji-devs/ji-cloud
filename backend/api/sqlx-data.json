@@ -6773,6 +6773,68 @@
     },
     "query": "update global_animation_upload set uploaded_at = now(), processing_result = null where animation_id = $1"
   },
+  "6accac3a867ccf3a5c988181e3dadc39c6b5406e8cb47160d60d3d0303382862": {
+    "describe": {
+      "columns": [
+        {
+          "name": "code!: i32",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "jig_id: JigId",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "direction: TextDirection",
+          "ordinal": 2,
+          "type_info": "Int2"
+        },
+        {
+          "name": "scoring",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "drag_assist",
+          "ordinal": 4,
+          "type_info": "Bool"
+        },
+        {
+          "name": "name?",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "created_at: DateTime<Utc>",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "expires_at: DateTime<Utc>",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n            select code as \"code!: i32\",\n                jig_id as \"jig_id: JigId\",\n                direction as \"direction: TextDirection\",\n                scoring,\n                drag_assist,\n                name as \"name?\",\n                created_at as \"created_at: DateTime<Utc>\",\n                expires_at as \"expires_at: DateTime<Utc>\"\n            from jig_code\n            where code = $1\n        "
+  },
   "6ad4df2298dcd688eb035ff09918b592e3be2dac06b5ffb13012fb166daa814b": {
     "describe": {
       "columns": [

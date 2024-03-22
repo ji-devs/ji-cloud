@@ -48,7 +48,7 @@ pub async fn get_code(
     db: Data<PgPool>,
     claims: TokenUser,
     path: web::Path<JigCode>,
-) -> Result<Json<<codes::JigCode as ApiEndpoint>::Res>, error::JigCode> {
+) -> Result<Json<<codes::GetJigCode as ApiEndpoint>::Res>, error::JigCode> {
     let code = path.into_inner();
     let user_id = claims.user_id();
 

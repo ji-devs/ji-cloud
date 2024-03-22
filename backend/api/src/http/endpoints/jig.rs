@@ -578,8 +578,8 @@ pub fn configure(cfg: &mut ServiceConfig) {
         jig::codes::Update::METHOD.route().to(codes::update),
     )
     .route(
-        <jig::codes::JigCode as ApiEndpoint>::Path::PATH,
-        jig::codes::JigCode::METHOD.route().to(codes::get_code),
+        <jig::codes::GetJigCode as ApiEndpoint>::Path::PATH,
+        jig::codes::GetJigCode::METHOD.route().to(codes::get_code),
     )
     .route(
         <jig::codes::JigCodeList as ApiEndpoint>::Path::PATH,

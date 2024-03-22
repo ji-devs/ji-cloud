@@ -9,7 +9,8 @@ use shared::{
         asset::AssetType,
         jig::{
             codes::{
-                JigCodeSessionsPath, JigPlaySessionModule, JigPlaySessionModuleGetPointsEarned,
+                JigCodePath, JigCodeSessionsPath, JigPlaySessionModule,
+                JigPlaySessionModuleGetPointsEarned,
             },
             JigGetLivePath,
         },
@@ -34,10 +35,20 @@ impl CodeSessions {
         let state = self;
         spawn_local(clone!(state => async move {
             join!(
+                state.load_code(),
                 state.load_jig(),
                 state.load_report(),
             );
         }));
+    }
+
+    async fn load_code(self: &Rc<Self>) {
+        let code_response =
+            endpoints::jig::codes::GetJigCode::api_with_auth(JigCodePath(self.code), None)
+                .await
+                .toast_on_err();
+        let code_response = bail_on_err!(code_response);
+        self.code_response.set(Some(code_response));
     }
 
     async fn load_jig(self: &Rc<Self>) {

@@ -61,8 +61,8 @@ impl ApiEndpoint for Update {
 }
 
 /// List codes creator by user.
-pub struct JigCode;
-impl ApiEndpoint for JigCode {
+pub struct GetJigCode;
+impl ApiEndpoint for GetJigCode {
     type Path = JigCodePath;
     type Req = ();
     type Res = JigCodeResponse;
