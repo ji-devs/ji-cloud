@@ -130,6 +130,42 @@ fn generate_random_code(generator: &mut ThreadRng) -> i32 {
     generator.gen_range(0..JIG_PLAYER_SESSION_CODE_MAX)
 }
 
+pub async fn get_code(db: &PgPool, code: JigCode) -> sqlx::Result<JigCodeResponse> {
+    let row = sqlx::query!(
+        //language=SQL
+        r#"
+            select code as "code!: i32",
+                jig_id as "jig_id: JigId",
+                direction as "direction: TextDirection",
+                scoring,
+                drag_assist,
+                name as "name?",
+                created_at as "created_at: DateTime<Utc>",
+                expires_at as "expires_at: DateTime<Utc>"
+            from jig_code
+            where code = $1
+        "#,
+        code.0,
+    )
+    .fetch_one(db)
+    .await?;
+
+    let response = JigCodeResponse {
+        index: JigCode(row.code),
+        jig_id: row.jig_id,
+        name: row.name,
+        settings: JigPlayerSettings {
+            direction: row.direction,
+            scoring: row.scoring,
+            drag_assist: row.drag_assist,
+        },
+        created_at: row.created_at,
+        expires_at: row.expires_at,
+    };
+
+    Ok(response)
+}
+
 pub async fn list_user_codes(
     db: &PgPool,
     user_id: UserId,

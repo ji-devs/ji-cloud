@@ -3,54 +3,14 @@ source: tests/integration/jig/codes.rs
 expression: body
 ---
 {
-  "codes": [
-    {
-      "index": "[index]",
-      "jig_id": "0cc084bc-7c83-11eb-9f77-e3218dffb008",
-      "name": null,
-      "settings": {
-        "direction": "ltr",
-        "scoring": true,
-        "dragAssist": true
-      },
-      "created_at": "[timestamp]",
-      "expires_at": "[timestamp]"
-    },
-    {
-      "index": "[index]",
-      "jig_id": "0cc084bc-7c83-11eb-9f77-e3218dffb008",
-      "name": null,
-      "settings": {
-        "direction": "ltr",
-        "scoring": true,
-        "dragAssist": true
-      },
-      "created_at": "[timestamp]",
-      "expires_at": "[timestamp]"
-    },
-    {
-      "index": "[index]",
-      "jig_id": "3a71522a-cd77-11eb-8dc1-af3e35f7c743",
-      "name": "test-name",
-      "settings": {
-        "direction": "rtl",
-        "scoring": false,
-        "dragAssist": false
-      },
-      "created_at": "[timestamp]",
-      "expires_at": "[timestamp]"
-    },
-    {
-      "index": "[index]",
-      "jig_id": "3a71522a-cd77-11eb-8dc1-af3e35f7c743",
-      "name": null,
-      "settings": {
-        "direction": "rtl",
-        "scoring": true,
-        "dragAssist": false
-      },
-      "created_at": "[timestamp]",
-      "expires_at": "[timestamp]"
-    }
-  ]
+  "index": "[index]",
+  "jig_id": "3a71522a-cd77-11eb-8dc1-af3e35f7c743",
+  "name": null,
+  "settings": {
+    "direction": "rtl",
+    "scoring": false,
+    "dragAssist": false
+  },
+  "created_at": "[timestamp]",
+  "expires_at": "[timestamp]"
 }

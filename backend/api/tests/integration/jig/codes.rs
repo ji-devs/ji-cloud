@@ -40,6 +40,23 @@ async fn create_and_list(port: u16) -> anyhow::Result<()> {
     insta::assert_json_snapshot!(format!("{}-1",name), body, { ".**.index" => "[index]", ".**.created_at" => "[timestamp]", ".**.expires_at" => "[timestamp]" });
 
     let resp = client
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/jig/codes/{}",
+            port,
+            body.index.to_string()
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    let body: JigCodeResponse = resp.json().await?;
+
+    insta::assert_json_snapshot!(format!("{}-2",name), body, { ".**.index" => "[index]", ".**.created_at" => "[timestamp]", ".**.expires_at" => "[timestamp]" });
+
+    let resp = client
         .patch(&format!(
             "http://0.0.0.0:{}/v1/jig/codes/{}",
             port,
@@ -81,7 +98,7 @@ async fn create_and_list(port: u16) -> anyhow::Result<()> {
 
     let body: JigCodeListResponse = resp.json().await?;
 
-    insta::assert_json_snapshot!(format!("{}-2",name), body, { ".**.index" => "[index]", ".**.created_at" => "[timestamp]", ".**.expires_at" => "[timestamp]" });
+    insta::assert_json_snapshot!(format!("{}-3",name), body, { ".**.index" => "[index]", ".**.created_at" => "[timestamp]", ".**.expires_at" => "[timestamp]" });
 
     Ok(())
 }

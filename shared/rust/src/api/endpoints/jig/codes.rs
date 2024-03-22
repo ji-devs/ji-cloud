@@ -1,9 +1,9 @@
 use crate::{
     api::{ApiEndpoint, Method},
     domain::jig::codes::{
-        JigCodeListPath, JigCodeListRequest, JigCodeListResponse, JigCodeSessionsListResponse,
-        JigCodeSessionsPath, JigCodeUpdatePath, JigCodeUpdateRequest, JigPlayerSessionCreatePath,
-        JigPlayerSessionCreateRequest, JigPlayerSessionCreateResponse,
+        JigCodeListPath, JigCodeListRequest, JigCodeListResponse, JigCodePath, JigCodeResponse,
+        JigCodeSessionsListResponse, JigCodeSessionsPath, JigCodeUpdateRequest,
+        JigPlayerSessionCreatePath, JigPlayerSessionCreateRequest, JigPlayerSessionCreateResponse,
     },
     error::EmptyError,
 };
@@ -53,11 +53,21 @@ impl ApiEndpoint for Create {
 /// update a code
 pub struct Update;
 impl ApiEndpoint for Update {
-    type Path = JigCodeUpdatePath;
+    type Path = JigCodePath;
     type Req = JigCodeUpdateRequest;
     type Res = ();
     type Err = EmptyError;
     const METHOD: Method = Method::Patch;
+}
+
+/// List codes creator by user.
+pub struct JigCode;
+impl ApiEndpoint for JigCode {
+    type Path = JigCodePath;
+    type Req = ();
+    type Res = JigCodeResponse;
+    type Err = EmptyError;
+    const METHOD: Method = Method::Get;
 }
 
 /// List codes creator by user.

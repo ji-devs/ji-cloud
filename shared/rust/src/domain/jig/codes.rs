@@ -46,7 +46,7 @@ pub struct JigPlayerSessionCreateResponse {
     pub index: JigCode,
 }
 
-make_path_parts!(JigCodeUpdatePath => "/v1/jig/codes/{}" => JigCode);
+make_path_parts!(JigCodePath => "/v1/jig/codes/{}" => JigCode);
 
 /// Request to update a jig code.
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
