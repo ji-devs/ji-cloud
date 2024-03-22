@@ -16,6 +16,7 @@ use utils::init::analytics;
 use utils::js_wrappers::is_iframe;
 use utils::keyboard::KeyEvent;
 use utils::prelude::is_in_iframe;
+use utils::routes::HomeRoute;
 use utils::{dialog, events};
 use utils::{
     iframe::{IframeAction, ModuleToJigPlayerMessage},
@@ -581,18 +582,20 @@ impl JigPlayer {
                                         })
                                     }));
                                 }
-                                if is_iframe() {
-                                    dom = dom.child(
-                                        html!("jig-play-done-action", {
-                                            .prop("slot", "actions")
-                                            .prop("kind", "exit")
-                                            .text("exit")
-                                            .event(clone!(state => move |_: events::Click| {
+                                dom = dom.child(
+                                    html!("jig-play-done-action", {
+                                        .prop("slot", "actions")
+                                        .prop("kind", "exit")
+                                        .text("exit")
+                                        .event(clone!(state => move |_: events::Click| {
+                                            if is_iframe() {
                                                 state.close_player();
-                                            }))
-                                        })
-                                    );
-                                }
+                                            } else {
+                                                Route::Home(HomeRoute::Home).redirect();
+                                            }
+                                        }))
+                                    })
+                                );
                                 dom
                             })
                         }))
