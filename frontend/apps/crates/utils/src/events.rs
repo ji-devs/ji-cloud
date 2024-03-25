@@ -64,6 +64,9 @@ macro_rules! make_pointer_event {
             #[inline] pub fn pointer_id(&self) -> i32 { self.event.pointer_id() }
 
             #[inline] pub fn is_primary(&self) -> bool { self.event.is_primary() }
+
+            #[inline] pub fn movement_x(&self) -> i32 { self.event.movement_x() }
+            #[inline] pub fn movement_y(&self) -> i32 { self.event.movement_y() }
         }
     };
 }

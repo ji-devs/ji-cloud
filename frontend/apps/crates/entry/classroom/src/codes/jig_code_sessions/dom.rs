@@ -2,7 +2,7 @@ use components::{
     module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback},
     player_popup::{PlayerPopup, PreviewPopupCallbacks},
 };
-use dominator::{clone, html, Dom, DomBuilder};
+use dominator::{clone, html, with_node, Dom, DomBuilder};
 use futures_signals::{
     map_ref,
     signal::{Mutable, Signal, SignalExt},
@@ -25,7 +25,7 @@ use utils::{
     routes::{ClassroomCodesRoute, ClassroomRoute, KidsRoute, Route},
     unwrap::UnwrapJiExt,
 };
-use web_sys::ShadowRoot;
+use web_sys::{window, HtmlElement, ShadowRoot};
 
 use super::{CodeSessions, JigWithModules};
 
@@ -162,8 +162,31 @@ impl CodeSessions {
     ) -> Dom {
         let state = self;
         let jig_id = jig.jig.id;
-        html!("div", {
+        html!("div" => HtmlElement, {
             .class("table")
+            .with_node!(table_elem => {
+                .apply(|dom| {
+                    // this code enables mouse drag
+                    let is_dragging = Mutable::new(false);
+                    let doc_elem = window().unwrap_ji().document().unwrap_ji().document_element().unwrap_ji();
+                    dom
+                        .event(clone!(is_dragging => move |_: events::PointerDown| {
+                            is_dragging.set(true);
+                        }))
+                        .global_event(clone!(is_dragging => move |_: events::PointerUp| {
+                            is_dragging.set(false);
+                        }))
+                        .global_event(clone!(is_dragging => move |_: events::PointerCancel| {
+                            is_dragging.set(false);
+                        }))
+                        .global_event(clone!(is_dragging => move |e: events::PointerMove| {
+                            if is_dragging.get() {
+                                table_elem.set_scroll_left(table_elem.scroll_left() - e.movement_x());
+                                doc_elem.set_scroll_top(doc_elem.scroll_top() - e.movement_y());
+                            }
+                        }))
+                })
+            })
             .style("--module-count", jig.jig.jig_data.modules.len().to_string())
             .child(html!("div", {
                 .class("header")
