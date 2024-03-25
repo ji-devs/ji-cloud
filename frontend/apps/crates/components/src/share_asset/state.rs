@@ -3,6 +3,7 @@ use std::rc::Rc;
 use awsm_web::loaders::helpers::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::asset::Asset;
+use shared::domain::jig::codes::JigCode;
 use shared::domain::jig::TextDirection;
 use utils::asset::{
     CoursePlayerOptions, JigPlayerOptions, PlaylistPlayerOptions, ResourceContentExt,
@@ -15,7 +16,7 @@ use crate::qr_dialog::QrDialog;
 
 pub struct ShareAsset {
     pub active_popup: Mutable<Option<ActivePopup>>,
-    pub student_code: Mutable<Option<String>>,
+    pub student_code: Mutable<Option<JigCode>>,
     pub loader: AsyncLoader,
     pub asset: Asset,
     pub copied_embed: Mutable<bool>,

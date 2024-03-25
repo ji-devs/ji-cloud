@@ -1,7 +1,11 @@
 use std::rc::Rc;
 
 use qrcode_generator::QrCodeEcc;
-use utils::{routes::Route, unwrap::UnwrapJiExt};
+use shared::domain::jig::codes::JigCode;
+use utils::{
+    routes::{KidsRoute, Route},
+    unwrap::UnwrapJiExt,
+};
 use wasm_bindgen::JsValue;
 
 use super::QrDialogCallbacks;
@@ -20,6 +24,25 @@ impl QrDialog {
             file_label,
             callbacks,
         })
+    }
+
+    pub fn new_jig_code(
+        code: JigCode,
+        jig_name: String,
+        code_name: Option<String>,
+        callbacks: QrDialogCallbacks,
+    ) -> Rc<Self> {
+        let jig_name = jig_name.replace(" ", "-");
+        let code_name = code_name.map(|n| n.replace(" ", "-"));
+        let mut file_label = format!("{}_{}", code.to_string(), jig_name);
+        if let Some(code_name) = code_name {
+            file_label = format!("{}_{}", code_name, file_label);
+        }
+        QrDialog::new(
+            Route::Kids(KidsRoute::StudentCode(Some(code.to_string()))),
+            file_label,
+            callbacks,
+        )
     }
 }
 

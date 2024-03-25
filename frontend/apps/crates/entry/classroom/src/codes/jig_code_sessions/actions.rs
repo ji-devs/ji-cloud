@@ -18,12 +18,8 @@ use shared::{
     },
 };
 use utils::{
-    bail_on_err, date_formatters,
-    error_ext::ErrorExt,
-    js_wrappers::download_url,
-    prelude::ApiEndpointExt,
-    routes::{KidsRoute, Route},
-    unwrap::UnwrapJiExt,
+    bail_on_err, date_formatters, error_ext::ErrorExt, js_wrappers::download_url,
+    prelude::ApiEndpointExt, unwrap::UnwrapJiExt,
 };
 use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
@@ -86,14 +82,25 @@ impl CodeSessions {
 
     pub fn show_qr_code(self: &Rc<Self>) {
         let state = self;
-        let qr_dialog = QrDialog::new(
-            Route::Kids(KidsRoute::StudentCode(Some(self.code.to_string()))),
-            self.code.to_string(),
-            QrDialogCallbacks::new(clone!(state => move || {
-                state.qr_dialog.set(None);
-            })),
-        );
-        self.qr_dialog.set(Some(qr_dialog));
+        if let Some(code_response) = state.code_response.lock_ref().as_ref() {
+            let qr_dialog = QrDialog::new_jig_code(
+                code_response.index,
+                state
+                    .jig
+                    .lock_ref()
+                    .as_ref()
+                    .unwrap()
+                    .jig
+                    .jig_data
+                    .display_name
+                    .clone(),
+                code_response.name.clone(),
+                QrDialogCallbacks::new(clone!(state => move || {
+                    state.qr_dialog.set(None);
+                })),
+            );
+            self.qr_dialog.set(Some(qr_dialog));
+        }
     }
 
     fn generate_csv_string(&self) -> String {

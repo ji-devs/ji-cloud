@@ -31,7 +31,7 @@ impl ShareAsset {
 
             let res = jig::codes::Create::api_with_auth(JigPlayerSessionCreatePath(), Some(req)).await.toast_on_err();
             let res = bail_on_err!(res);
-            state.student_code.set(Some(res.index.to_string()));
+            state.student_code.set(Some(res.index));
         }));
     }
 
@@ -48,14 +48,10 @@ impl ShareAsset {
 
     pub fn show_qr_code(self: &Rc<Self>) {
         let state = self;
-        let code = self
-            .student_code
-            .get_cloned()
-            .unwrap_or_default()
-            .to_string();
-        let qr_dialog = QrDialog::new(
-            Route::Kids(KidsRoute::StudentCode(Some(code.clone()))),
-            code,
+        let qr_dialog = QrDialog::new_jig_code(
+            state.student_code.get().unwrap_ji(),
+            state.asset.unwrap_jig().jig_data.display_name.clone(),
+            state.code_name.get_cloned(),
             QrDialogCallbacks::new(clone!(state => move || {
                 state.qr_dialog.set(None);
             })),

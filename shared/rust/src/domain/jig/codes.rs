@@ -11,7 +11,7 @@ use crate::{api::endpoints::PathPart, domain::module::StableModuleId};
 use super::{JigId, JigPlayerSettings};
 
 /// Four-digit code identifying a Jig player session
-#[derive(Serialize, Deserialize, Debug, Copy, Clone, PathPart)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone, PathPart, PartialEq, Eq)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct JigCode(pub i32);

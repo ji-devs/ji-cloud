@@ -276,14 +276,14 @@ impl ShareAsset {
                     None => None,
                     Some(student_code) => {
                         let url = SETTINGS.get().unwrap_ji().remote_target.pages_url();
-                        Some(url + &Route::Kids(KidsRoute::StudentCode(Some(student_code))).to_string())
+                        Some(url + &Route::Kids(KidsRoute::StudentCode(Some(student_code.to_string()))).to_string())
                     },
                 }
             }))
             .prop_signal("code", state.student_code.signal_cloned().map(|student_code| {
                 match student_code {
                     None => String::new(),
-                    Some(student_code) => student_code,
+                    Some(student_code) => student_code.to_string(),
                 }
             }))
             .prop_signal("secondsToExpire", state.student_code.signal_cloned().map(|student_code| {
@@ -335,7 +335,7 @@ impl ShareAsset {
                     .event(clone!(state => move |_: events::Click| {
                         if let Some(student_code) = &*state.student_code.lock_ref() {
                             let url = SETTINGS.get().unwrap_ji().remote_target.pages_url_iframe();
-                            let url = url + &Route::Kids(KidsRoute::StudentCode(Some(student_code.clone()))).to_string();
+                            let url = url + &Route::Kids(KidsRoute::StudentCode(Some(student_code.to_string()))).to_string();
                             clipboard::write_text(&url);
                             ShareAsset::set_copied_mutable(state.copied_student_url.clone());
                         };
@@ -351,7 +351,7 @@ impl ShareAsset {
                     }))
                     .event(clone!(state => move|_: events::Click| {
                         let student_code = state.student_code.get_cloned().unwrap_ji();
-                        clipboard::write_text(&student_code);
+                        clipboard::write_text(&student_code.to_string());
                         ShareAsset::set_copied_mutable(state.copied_student_code.clone());
                     }))
                 }),
