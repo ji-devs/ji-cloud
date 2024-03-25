@@ -1,5 +1,5 @@
 use components::asset_card::render_asset_card;
-use dominator::{clone, html, DomBuilder, EventOptions};
+use dominator::{clone, html, with_node, DomBuilder, EventOptions};
 use futures_signals::{
     signal::{not, Mutable, SignalExt},
     signal_vec::SignalVecExt,
@@ -11,7 +11,7 @@ use utils::{
     date_formatters, events,
     routes::{ClassroomCodesRoute, ClassroomRoute, Route},
 };
-use web_sys::ShadowRoot;
+use web_sys::{HtmlInputElement, ShadowRoot};
 
 use super::JigCodes;
 
@@ -77,10 +77,15 @@ impl Component<JigCodes> for Rc<JigCodes> {
                         .child(html!("div", {
                             .class("cell")
                             .class("name")
-                            .child(html!("input", {
-                                .prop_signal("readOnly", not(editing.signal()))
-                                .prop_signal("value", name.signal_cloned())
-                                .focused_signal(editing.signal())
+                            .child(html!("input" => HtmlInputElement, {
+                                .with_node!(elem => {
+                                    .prop_signal("readOnly", not(editing.signal()))
+                                    .prop_signal("value", name.signal_cloned())
+                                    .focused_signal(editing.signal())
+                                    .event(clone!(name => move |_: events::Input| {
+                                        name.set(elem.value());
+                                    }))
+                                })
                             }))
                             .child(html!("div", {
                                 .class("actions")
