@@ -70,7 +70,7 @@ export class _ extends LitElement {
 
     private scrollToResults(event: MouseEvent) {
         event.preventDefault();
-        const slot = this.shadowRoot!.querySelector("slot") as HTMLSlotElement;
+        const slot = this.shadowRoot!.querySelector("slot[name=sections]") as HTMLSlotElement;
 
         const target = event.target as HTMLAnchorElement;
         const kind = target.getAttribute("href")!.replace(/^#/, "");
