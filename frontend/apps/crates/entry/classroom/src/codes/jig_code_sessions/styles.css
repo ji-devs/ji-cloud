@@ -158,7 +158,6 @@ header .export-and-qr {
     justify-content: space-evenly;
 }
 .round-item {
-    max-width: 36px;
     display: grid;
     grid-template-rows: 36px auto;
     align-items: center;
