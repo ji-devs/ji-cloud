@@ -184,6 +184,7 @@ select code     as "code!: i32",
        expires_at as "expires_at: DateTime<Utc>"
 from jig_code
 where creator_id = $1 AND (jig_id = $2 or $2 is null)
+order by created_at desc
 "#,
         user_id.0,
         query.jig_id.map(|j| j.0),

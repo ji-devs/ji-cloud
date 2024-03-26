@@ -3335,6 +3335,69 @@
     },
     "query": "select account_id as \"account_id: AccountId\" from school where school_id = $1"
   },
+  "38404a52ecb0d2cd9f60d9ef4ce0d855e9d44736476d93ab352713befdd6ead0": {
+    "describe": {
+      "columns": [
+        {
+          "name": "code!: i32",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "jig_id: JigId",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "direction: TextDirection",
+          "ordinal": 2,
+          "type_info": "Int2"
+        },
+        {
+          "name": "scoring",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "drag_assist",
+          "ordinal": 4,
+          "type_info": "Bool"
+        },
+        {
+          "name": "name?",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "created_at: DateTime<Utc>",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "expires_at: DateTime<Utc>",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect code     as \"code!: i32\",\n       jig_id as \"jig_id: JigId\",\n       direction as \"direction: TextDirection\",\n       scoring,\n       drag_assist,\n       name as \"name?\",\n       created_at as \"created_at: DateTime<Utc>\",\n       expires_at as \"expires_at: DateTime<Utc>\"\nfrom jig_code\nwhere creator_id = $1 AND (jig_id = $2 or $2 is null)\norder by created_at desc\n"
+  },
   "3841152baf6bc0ccd3c5674bab88ea3f0853e99399e76b1e5d30e51d8d8736f3": {
     "describe": {
       "columns": [
@@ -14919,69 +14982,6 @@
       }
     },
     "query": "delete from \"user\" where id = $1"
-  },
-  "e5388018849d0e9835c748c62e73de599a95c5be1c1907f81dd79ff7ae5a3180": {
-    "describe": {
-      "columns": [
-        {
-          "name": "code!: i32",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "jig_id: JigId",
-          "ordinal": 1,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "direction: TextDirection",
-          "ordinal": 2,
-          "type_info": "Int2"
-        },
-        {
-          "name": "scoring",
-          "ordinal": 3,
-          "type_info": "Bool"
-        },
-        {
-          "name": "drag_assist",
-          "ordinal": 4,
-          "type_info": "Bool"
-        },
-        {
-          "name": "name?",
-          "ordinal": 5,
-          "type_info": "Text"
-        },
-        {
-          "name": "created_at: DateTime<Utc>",
-          "ordinal": 6,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "expires_at: DateTime<Utc>",
-          "ordinal": 7,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect code     as \"code!: i32\",\n       jig_id as \"jig_id: JigId\",\n       direction as \"direction: TextDirection\",\n       scoring,\n       drag_assist,\n       name as \"name?\",\n       created_at as \"created_at: DateTime<Utc>\",\n       expires_at as \"expires_at: DateTime<Utc>\"\nfrom jig_code\nwhere creator_id = $1 AND (jig_id = $2 or $2 is null)\n"
   },
   "e57b7c587be57d904c82ee82ea48df2b8e02a38dd1a4c1c7fee015385d66d155": {
     "describe": {
