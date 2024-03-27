@@ -835,6 +835,30 @@ impl PlanType {
         }
     }
 
+    /// Get a user-friendly name
+    #[must_use]
+    pub const fn user_display_name(&self) -> &'static str {
+        match self {
+            Self::IndividualBasicMonthly | Self::IndividualBasicAnnually => "Basic",
+            Self::IndividualProMonthly | Self::IndividualProAnnually => "Pro",
+            Self::SchoolLevel1Monthly | Self::SchoolLevel1Annually => {
+                formatcp!("Up to {} teachers", PLAN_SCHOOL_LEVEL_1_TEACHER_COUNT)
+            }
+            Self::SchoolLevel2Monthly | Self::SchoolLevel2Annually => {
+                formatcp!("Up to {} teachers", PLAN_SCHOOL_LEVEL_2_TEACHER_COUNT)
+            }
+            Self::SchoolLevel3Monthly | Self::SchoolLevel3Annually => {
+                formatcp!("Up to {} teachers", PLAN_SCHOOL_LEVEL_3_TEACHER_COUNT)
+            }
+            Self::SchoolLevel4Monthly | Self::SchoolLevel4Annually => {
+                formatcp!("Up to {} teachers", PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT)
+            }
+            Self::SchoolUnlimitedMonthly | Self::SchoolUnlimitedAnnually => {
+                formatcp!("More than {} teachers", PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT)
+            }
+        }
+    }
+
     /// `SubscriptionTier` of the current plan
     #[must_use]
     pub const fn subscription_tier(&self) -> SubscriptionTier {
@@ -977,6 +1001,51 @@ impl PlanType {
                     | Self::SchoolLevel3Annually
                     | Self::SchoolLevel4Annually
             ),
+        }
+    }
+
+    /// Whether it is possible to upgrade from another plan type to self in the same billing interval
+    #[must_use]
+    pub const fn can_upgrade_from_same_interval(&self, from_type: &Self) -> bool {
+        match self {
+            Self::IndividualProAnnually => matches!(from_type, Self::IndividualBasicAnnually,),
+            Self::SchoolLevel1Monthly => false,
+            Self::SchoolLevel2Monthly => matches!(from_type, Self::SchoolLevel1Monthly),
+            Self::SchoolLevel3Monthly => matches!(
+                from_type,
+                Self::SchoolLevel1Monthly | Self::SchoolLevel2Monthly,
+            ),
+            Self::SchoolLevel4Monthly => matches!(
+                from_type,
+                Self::SchoolLevel1Monthly | Self::SchoolLevel2Monthly | Self::SchoolLevel3Monthly,
+            ),
+            Self::SchoolUnlimitedMonthly => matches!(
+                from_type,
+                Self::SchoolLevel1Monthly
+                    | Self::SchoolLevel2Monthly
+                    | Self::SchoolLevel3Monthly
+                    | Self::SchoolLevel4Monthly,
+            ),
+            Self::SchoolLevel1Annually => false,
+            Self::SchoolLevel2Annually => matches!(from_type, Self::SchoolLevel1Annually),
+            Self::SchoolLevel3Annually => matches!(
+                from_type,
+                Self::SchoolLevel1Annually | Self::SchoolLevel2Annually
+            ),
+            Self::SchoolLevel4Annually => matches!(
+                from_type,
+                Self::SchoolLevel1Annually
+                    | Self::SchoolLevel2Annually
+                    | Self::SchoolLevel3Annually
+            ),
+            Self::SchoolUnlimitedAnnually => matches!(
+                from_type,
+                Self::SchoolLevel1Annually
+                    | Self::SchoolLevel2Annually
+                    | Self::SchoolLevel3Annually
+                    | Self::SchoolLevel4Annually
+            ),
+            _ => false,
         }
     }
 

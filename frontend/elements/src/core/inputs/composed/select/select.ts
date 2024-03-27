@@ -115,7 +115,7 @@ export class _ extends LitElement {
                         ${this.value
                             ? html`<span class="value">${this.value}</span>`
                             : html`<span class="placeholder"
-                                  >${this.placeholder}</span
+                                  >${this.placeholder ? this.placeholder : html`&nbsp;`}</span
                               >`}
                     </div>
                     <img-ui
