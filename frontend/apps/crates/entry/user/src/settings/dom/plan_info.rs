@@ -1,11 +1,12 @@
 use components::confirm;
 use dominator::{clone, html, Dom};
-use futures_signals::signal::SignalExt;
+use futures_signals::signal::{Mutable, SignalExt};
 use shared::domain::billing::{
     AmountInCents, AppliedCoupon, BillingInterval, PaymentMethodType, PaymentNetwork, PlanType,
     SubscriptionTier,
 };
 use std::rc::Rc;
+use strum::IntoEnumIterator;
 use utils::{events, js_object, prelude::plan_type_signal, unwrap::UnwrapJiExt};
 use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
@@ -105,7 +106,7 @@ impl SettingsPage {
             state.render_payment_method(&plan_info.payment_method_type),
             html!("div", {
                 .prop("slot", "change-to-annual")
-                .child_signal(plan_type_signal().map(clone!(state => move |plan_type| {
+                .child_signal(plan_type_signal().map(clone!(state, plan_info => move |plan_type| {
                     let frequency = plan_type?.billing_interval();
                     match frequency {
                         BillingInterval::Monthly => {
@@ -116,11 +117,11 @@ impl SettingsPage {
                                     Some(PlanType::SchoolLevel1Monthly) => "Get 1 month FREE by switching to annual billing",
                                     _ => "Get 2 months FREE by switching to annual billing"
                                 })
-                                .event(clone!(state => move|_ :events::Click| {
-                                    spawn_local(clone!(state => async move {
+                                .event(clone!(state, plan_info => move|_ :events::Click| {
+                                    spawn_local(clone!(state, plan_info => async move {
                                         let plan_type: PlanType = plan_type.unwrap_ji();
                                         let new_plan_type = plan_type.monthly_to_annual();
-                                        let new_price = number_as_price(new_plan_type.plan_price());
+                                        let new_price = discounted_price(new_plan_type, &plan_info);
                                         let message = format!("You will be charged {new_price} per year. A renewal reminder will be sent 30 days before the end of your subscription.");
 
                                         let confirmed = confirm::Confirm {
@@ -139,40 +140,92 @@ impl SettingsPage {
                         BillingInterval::Annually => None,
                     }
                 })))
-                .child_signal(plan_type_signal().map(clone!(state => move |plan_type| {
+                .child_signal(plan_type_signal().map(clone!(state, plan_info => move |plan_type| {
                     let plan_type: PlanType = plan_type?;
                     let subscription_tier = plan_type.subscription_tier();
-                    match subscription_tier {
-                        SubscriptionTier::Basic => {
-                            let new_plan_type = plan_type.basic_to_pro();
-                            let billing_interval = plan_type.billing_interval();
-                            Some(html!("button-rect", {
-                                .prop("type", "filled")
-                                .prop("color", "blue")
-                                .text(&format!("Switch to Pro {billing_interval}"))
-                                .event(clone!(state => move|_ :events::Click| {
-                                    spawn_local(clone!(state => async move {
-                                        let charge_interval = match billing_interval {
-                                            BillingInterval::Monthly => "month",
-                                            BillingInterval::Annually => "year",
-                                        };
-                                        let new_price = number_as_price(new_plan_type.plan_price());
-                                        let message = format!("You will be charged {new_price} per {charge_interval}. A renewal reminder will be sent 30 days before the end of your subscription.");
+                    if plan_type.is_individual_plan() {
+                        match subscription_tier {
+                            SubscriptionTier::Basic => {
+                                let new_plan_type = plan_type.basic_to_pro();
+                                let billing_interval = plan_type.billing_interval();
+                                Some(html!("button-rect", {
+                                    .prop("type", "filled")
+                                    .prop("color", "blue")
+                                    .text(&format!("Switch to Pro {billing_interval}"))
+                                    .event(clone!(state, plan_info => move|_ :events::Click| {
+                                        spawn_local(clone!(state, plan_info => async move {
+                                            let charge_interval = match billing_interval {
+                                                BillingInterval::Monthly => "month",
+                                                BillingInterval::Annually => "year",
+                                            };
+                                            let new_price = discounted_price(new_plan_type, &plan_info);
+                                            let message = format!("You will be charged {new_price} per {charge_interval}. A renewal reminder will be sent 30 days before the end of your subscription.");
 
-                                        let confirmed = confirm::Confirm {
-                                            title: "Switch to the Pro plan".to_string(),
-                                            message,
-                                            confirm_text: "Confirm".to_string(),
-                                            cancel_text: "Cancel".to_string()
-                                        }.confirm().await;
-                                        if confirmed {
-                                            state.change_to(new_plan_type);
-                                        }
-                                    }));
+                                            let confirmed = confirm::Confirm {
+                                                title: "Switch to the Pro plan".to_string(),
+                                                message,
+                                                confirm_text: "Confirm".to_string(),
+                                                cancel_text: "Cancel".to_string()
+                                            }.confirm().await;
+                                            if confirmed {
+                                                state.change_to(new_plan_type);
+                                            }
+                                        }));
+                                    }))
                                 }))
-                            }))
-                        },
-                        SubscriptionTier::Pro => None,
+                            },
+                            SubscriptionTier::Pro => None,
+                        }
+                    } else {
+                        match plan_type {
+                            PlanType::SchoolUnlimitedMonthly | PlanType::SchoolUnlimitedAnnually => None,
+                            _ => {
+                                let plan_type_signal = Mutable::new(None::<PlanType>);
+                                let plan_types = PlanType::iter().filter(|p| {
+                                    p.can_upgrade_from_same_interval(&plan_type)
+                                }).map(|p| html!("input-select-option", {
+                                    .text(p.user_display_name())
+                                    .prop("value", p.as_str())
+                                    .prop_signal("selected", plan_type_signal.signal_cloned().map(move |current| match current {
+                                        None => false,
+                                        Some(current) => current == p,
+                                    }))
+                                    .event(clone!(state, plan_info, plan_type_signal => move |e: events::CustomSelectedChange| {
+                                        if e.selected() {
+                                            plan_type_signal.set(Some(p));
+                                            spawn_local(clone!(state, plan_info, plan_type_signal => async move {
+                                                let billing_interval = plan_type.billing_interval();
+                                                let charge_interval = match billing_interval {
+                                                    BillingInterval::Monthly => "month",
+                                                    BillingInterval::Annually => "year",
+                                                };
+                                                let new_price = discounted_price(p, &plan_info);
+                                                let message = format!("You will be charged {new_price} per {charge_interval}. A renewal reminder will be sent 30 days before the end of your subscription.");
+
+                                                let confirmed = confirm::Confirm {
+                                                    title: format!("Upgrade to {}", p.user_display_name()),
+                                                    message,
+                                                    confirm_text: "Confirm".to_string(),
+                                                    cancel_text: "Cancel".to_string()
+                                                }.confirm().await;
+                                                if confirmed {
+                                                    state.change_to(p);
+                                                } else {
+                                                    plan_type_signal.set(None);
+                                                }
+                                            }));
+                                        }
+                                    }))
+                                })).collect::<Vec<_>>();
+                                Some(html!("input-select", {
+                                    .style("min-width", "200rem")
+                                    .prop("label", "Upgrade to")
+                                    .prop("multiple", false)
+                                    .prop_signal("value", plan_type_signal.signal_cloned().map(|p| p.map_or("", |p| p.user_display_name())))
+                                    .children(plan_types)
+                                }))
+                            }
+                        }
                     }
                 })))
             }),
@@ -267,6 +320,18 @@ fn price_string(
         })
         .unwrap_or_default();
     format!("${discounted}{frequency}{coupon}")
+}
+
+fn discounted_price(plan_type: PlanType, plan_info: &Rc<PlanSectionInfo>) -> String {
+    let discount_percent = match plan_info.coupon {
+        Some(AppliedCoupon { coupon_percent, .. }) => match coupon_percent {
+            Some(percent) => 1.0 - f64::from(percent),
+            None => 1.0,
+        },
+        None => 1.0,
+    };
+    let new_plan_price = (plan_type.plan_price() as f64 * discount_percent) as u32; // This should still be cents
+    number_as_price(new_plan_price)
 }
 
 /// Move to utils?
