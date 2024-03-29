@@ -1,10 +1,10 @@
 use std::rc::Rc;
 
-use futures_signals::signal_vec::MutableVec;
-use shared::domain::jig::JigResponse;
+use futures_signals::signal::Mutable;
+use shared::domain::jig::codes::JigWithCodes;
 
 pub struct Jigs {
-    pub jigs: MutableVec<JigResponse>,
+    pub jigs: Mutable<Option<Vec<JigWithCodes>>>,
 }
 
 impl Jigs {

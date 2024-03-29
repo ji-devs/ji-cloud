@@ -5,6 +5,48 @@
     gap: 32px;
     padding: 40px 32px;
 }
-.jigs a {
+.jig-card {
+    border-radius: 20px;
+    box-shadow: 2px 3px 10px 0 rgba(215, 215, 215, 0.5);
+    overflow: hidden;
+    display: grid;
+    grid-template-rows: auto 1fr;
+}
+.jig-card a {
     text-decoration: none;
+    color: inherit;
+}
+.code-section {
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    background-color: #fff;
+    padding: 10px;
+    color: var(--dark-gray-4);;
+    font-size: 12px;
+}
+.code-section h4 {
+    margin: 0;
+    text-align: center;
+}
+.codes {
+    display: grid;
+    grid-template-columns: 1fr auto;
+}
+.codes .header,
+.codes .code {
+    display: contents;
+}
+.codes .code .cell {
+    padding: 3px;
+}
+.codes .code:hover .cell {
+    background-color: #fae8c9b1;
+}
+a.more-codes {
+    text-align: center;
+    color: var(--dark-blue-1);
+}
+a.more-codes:hover {
+    color: var(--dark-blue-3);
 }

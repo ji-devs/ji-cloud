@@ -16,6 +16,8 @@ pub struct AssetCardConfig<'a> {
     pub bottom_indicator: AssetCardBottomIndicator,
     pub slot: Option<&'a str>,
     pub dense: bool,
+    /// Consumer provides it's own card borders.
+    pub borderless: bool,
     pub menu: Option<Rc<dyn Fn() -> Dom>>,
 }
 
@@ -32,6 +34,7 @@ pub fn render_asset_card(asset: &Asset, config: AssetCardConfig) -> Dom {
     html!("asset-card", {
         .prop("kind", asset.asset_type().as_str())
         .prop("dense", config.dense)
+        .prop("borderless", config.borderless)
         .prop("name", asset.display_name())
         .prop("playedCount", asset.plays())
         .prop("likedCount", asset.likes())

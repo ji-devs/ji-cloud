@@ -14,8 +14,6 @@ export class _ extends LitElement {
             css`
                 :host {
                     display: grid;
-                    border-radius: 20px;
-                    box-shadow: 2px 3px 10px 0 rgba(215, 215, 215, 0.5);
                     background-color: white;
                     width: 280px;
                     height: 246px;
@@ -23,6 +21,10 @@ export class _ extends LitElement {
                     position: relative;
                     /* Prevents clickable elements on the front from being clicked when the card is flipped in Chrome */
                     backface-visibility: hidden;
+                }
+                :host(:not([borderless])) {
+                    border-radius: 20px;
+                    box-shadow: 2px 3px 10px 0 rgba(215, 215, 215, 0.5);
                 }
                 :host([dense]) {
                     width: 216px;
@@ -44,6 +46,8 @@ export class _ extends LitElement {
                     grid-row: 1;
                     grid-column: 1;
                     aspect-ratio: 16 / 9;
+                }
+                :host(:not([borderless])) ::slotted([slot=image]) {
                     border-radius: 20px 20px 0 0;
                 }
                 .middle {
@@ -144,6 +148,8 @@ export class _ extends LitElement {
                     column-gap: 18px;
                     font-size: 13px;
                     font-weight: 500;
+                }
+                :host([showBottomIndicator]:not([borderless])) .bottom-indicator {
                     border-bottom-left-radius: 20px;
                     border-bottom-right-radius: 20px;
                 }
@@ -210,6 +216,9 @@ export class _ extends LitElement {
 
     @property({ type: Boolean })
     premium: boolean = false;
+
+    @property({ type: Boolean, reflect: true })
+    borderless = false;
 
     @property({ type: Boolean, reflect: true })
     private hasMiddleIndicator: boolean = false;
