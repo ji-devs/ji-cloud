@@ -9,7 +9,7 @@ use shared::{
         asset::AssetType,
         jig::{
             codes::{
-                JigCodePath, JigCodeSessionsPath, JigPlaySessionModule,
+                JigCode, JigCodePath, JigCodeSessionsPath, JigPlaySessionModule,
                 JigPlaySessionModuleGetPointsEarned,
             },
             JigGetLivePath,
@@ -175,6 +175,28 @@ impl CodeSessions {
         )
         .unwrap_ji();
         let url = web_sys::Url::create_object_url_with_blob(&blob).unwrap_ji();
-        download_url(&self.code.to_string(), &url);
+        let filename = filename(
+            self.code,
+            self.code_response.lock_ref().as_ref().unwrap().name.clone(),
+            self.jig
+                .lock_ref()
+                .as_ref()
+                .unwrap()
+                .jig
+                .jig_data
+                .display_name
+                .clone(),
+        );
+        download_url(&filename, &url);
     }
+}
+
+fn filename(code: JigCode, code_name: Option<String>, jig_name: String) -> String {
+    let jig_name = jig_name.replace(" ", "-");
+    let code_name = code_name.map(|n| n.replace(" ", "-"));
+    let mut file_label = format!("{}_{}", code.to_string(), jig_name);
+    if let Some(code_name) = code_name {
+        file_label = format!("{}_{}", code_name, file_label);
+    }
+    file_label
 }
