@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{api::endpoints::PathPart, domain::module::StableModuleId};
 
-use super::{JigId, JigPlayerSettings};
+use super::{JigId, JigPlayerSettings, JigResponse};
 
 /// Four-digit code identifying a Jig player session
 #[derive(Serialize, Deserialize, Debug, Copy, Clone, PathPart, PartialEq, Eq)]
@@ -96,7 +96,25 @@ pub struct JigCodeListRequest {
 /// Lists all jig player sessions associated with a jig
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct JigCodeListResponse {
-    /// Vector of the jig sessions
+    /// Vector of the jig codes
+    pub codes: Vec<JigCodeResponse>,
+}
+
+make_path_parts!(JigsWithCodesPath => "/v1/jig/codes/jig-codes");
+
+/// Lists all jig player sessions associated with a jig
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct JigsWithCodesResponse {
+    /// Vector of the jig that have jig codes
+    pub jigs: Vec<JigWithCodes>,
+}
+
+/// Jig with codes
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct JigWithCodes {
+    /// jig
+    pub jig: JigResponse,
+    /// codes
     pub codes: Vec<JigCodeResponse>,
 }
 

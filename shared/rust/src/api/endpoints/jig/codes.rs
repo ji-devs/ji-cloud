@@ -4,6 +4,7 @@ use crate::{
         JigCodeListPath, JigCodeListRequest, JigCodeListResponse, JigCodePath, JigCodeResponse,
         JigCodeSessionsListResponse, JigCodeSessionsPath, JigCodeUpdateRequest,
         JigPlayerSessionCreatePath, JigPlayerSessionCreateRequest, JigPlayerSessionCreateResponse,
+        JigsWithCodesPath, JigsWithCodesResponse,
     },
     error::EmptyError,
 };
@@ -76,6 +77,16 @@ impl ApiEndpoint for JigCodeList {
     type Path = JigCodeListPath;
     type Req = JigCodeListRequest;
     type Res = JigCodeListResponse;
+    type Err = EmptyError;
+    const METHOD: Method = Method::Get;
+}
+
+/// List codes creator by user.
+pub struct JigsWithCodes;
+impl ApiEndpoint for JigsWithCodes {
+    type Path = JigsWithCodesPath;
+    type Req = ();
+    type Res = JigsWithCodesResponse;
     type Err = EmptyError;
     const METHOD: Method = Method::Get;
 }

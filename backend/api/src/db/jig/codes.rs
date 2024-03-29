@@ -1,19 +1,35 @@
 use chrono::{DateTime, Duration, Utc};
+use futures::future::join_all;
 use rand::{rngs::ThreadRng, Rng};
+use serde_json::value::Value;
 use shared::config::{JIG_PLAYER_SESSION_CODE_MAX, JIG_PLAYER_SESSION_VALID_DURATION_SECS};
+use shared::domain::additional_resource::{AdditionalResource, ResourceContent};
+use shared::domain::asset::DraftOrLive;
 use shared::domain::jig::codes::{
-    JigCodeListRequest, JigCodeSessionResponse, JigCodeUpdateRequest, JigPlayerSessionCreateRequest,
+    JigCodeListRequest, JigCodeSessionResponse, JigCodeUpdateRequest,
+    JigPlayerSessionCreateRequest, JigWithCodes,
 };
 use shared::domain::jig::{
     codes::{JigCode, JigCodeResponse, JigPlaySession},
     player::JigPlayerSettings,
     JigId,
 };
+use shared::domain::module::LiteModule;
 use shared::domain::user::UserId;
-use sqlx::{error::DatabaseError, postgres::PgDatabaseError, PgPool};
+use shared::domain::{
+    additional_resource::AdditionalResourceId as AddId,
+    asset::PrivacyLevel,
+    category::CategoryId,
+    jig::{AudioBackground, AudioFeedbackNegative, AudioFeedbackPositive, JigRating},
+    meta::ResourceTypeId as TypeId,
+    meta::{AffiliationId, AgeRangeId},
+    module::{body::ThemeId, ModuleId, ModuleKind, StableModuleId},
+};
+use sqlx::{error::DatabaseError, postgres::PgDatabaseError, types::Json, PgPool};
+use std::collections::HashMap;
 use uuid::Uuid;
 
-use shared::domain::jig::TextDirection;
+use shared::domain::jig::{AudioEffects, JigAdminData, JigData, JigResponse, TextDirection};
 
 use crate::error;
 use crate::extractor::IPAddress;
@@ -171,7 +187,7 @@ pub async fn list_user_codes(
     user_id: UserId,
     query: JigCodeListRequest,
 ) -> sqlx::Result<Vec<JigCodeResponse>> {
-    let sessions = sqlx::query!(
+    let codes = sqlx::query!(
         //language=SQL
         r#"
 select code     as "code!: i32",
@@ -206,7 +222,221 @@ order by created_at desc
     })
     .collect();
 
-    Ok(sessions)
+    Ok(codes)
+}
+
+pub async fn jigs_with_codes(db: &PgPool, user_id: UserId) -> sqlx::Result<Vec<JigWithCodes>> {
+    let jigs = sqlx::query!(
+        //language=SQL
+        r#"
+            with cte as (
+                select id as "jig_id",
+                    creator_id,
+                    author_id,
+                    liked_count,
+                    play_count,
+                    live_up_to_date,
+                    jig.live_id,
+                    published_at,
+                    rating,
+                    blocked,
+                    curated,
+                    is_premium
+                from jig
+                left join jig_play_count on jig_play_count.jig_id = jig.id
+                left join jig_admin_data "admin" on admin.jig_id = jig.id
+            )
+            select
+                cte.jig_id                                         as "jig_id: JigId",
+                display_name,
+                max(jig_code.created_at) as last_code_created_at,
+                cte.creator_id                                     as "creator_id: UserId",
+                cte.author_id                                      as "author_id: UserId",
+                (select given_name || ' '::text || family_name
+                from user_profile
+                where user_profile.user_id = author_id)            as "author_name",
+                jig_data.created_at,
+                jig_data.updated_at,
+                cte.published_at,
+                jig_data.privacy_level                             as "privacy_level!: PrivacyLevel",
+                jig_data.language,
+                jig_data.description,
+                jig_data.translated_description                    as "translated_description!: Json<HashMap<String, String>>",
+                jig_data.direction                                 as "direction: TextDirection",
+                jig_data.scoring,
+                jig_data.drag_assist,
+                jig_data.theme                                     as "theme: ThemeId",
+                jig_data.audio_background                          as "audio_background: AudioBackground",
+                cte.liked_count,
+                cte.play_count,
+                cte.live_up_to_date,
+                exists(select 1 from jig_like where user_id = $1)    as "is_liked!",
+                jig_data.locked,
+                jig_data.other_keywords,
+                jig_data.translated_keywords,
+                cte.rating                                         as "rating?: JigRating",
+                cte.blocked                                        as "blocked",
+                cte.curated,
+                cte.is_premium                                     as "premium",
+                array(select row (unnest(audio_feedback_positive))) as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
+                array(select row (unnest(audio_feedback_negative))) as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
+                array(
+                    select row (jig_data_module.id, jig_data_module.stable_id, kind, is_complete)
+                    from jig_data_module
+                    where jig_data_id = jig_data.id
+                    order by "index"
+                ) as "modules!: Vec<(ModuleId, StableModuleId, ModuleKind, bool)>",
+                array(select row (category_id)
+                    from jig_data_category
+                    where jig_data_id = cte.live_id)     as "categories!: Vec<(CategoryId,)>",
+                array(select row (affiliation_id)
+                    from jig_data_affiliation
+                    where jig_data_id = cte.live_id)     as "affiliations!: Vec<(AffiliationId,)>",
+                array(select row (age_range_id)
+                    from jig_data_age_range
+                    where jig_data_id = cte.live_id)     as "age_ranges!: Vec<(AgeRangeId,)>",
+                array(
+                    select row (jdar.id, jdar.display_name, resource_type_id, resource_content)
+                    from jig_data_additional_resource "jdar"
+                    where jdar.jig_data_id = cte.live_id
+                ) as "additional_resource!: Vec<(AddId, String, TypeId, Value)>"
+            from jig_data
+                inner join cte on cte.live_id = jig_data.id
+                inner join jig_code on cte.jig_id = jig_code.jig_id
+            group by cte.jig_id, display_name, cte.creator_id, cte.author_id, author_id, author_name, updated_at, published_at, privacy_level, language, description, translated_description, theme, audio_background, liked_count, play_count, live_up_to_date, locked, other_keywords, translated_keywords, rating, blocked, curated, premium, audio_feedback_positive, audio_feedback_negative, jig_data.created_at, jig_data.updated_at, jig_data.direction, jig_data.scoring, jig_data.drag_assist, "modules!: Vec<(ModuleId, StableModuleId, ModuleKind, bool)>", "categories!: Vec<(CategoryId,)>", "affiliations!: Vec<(AffiliationId,)>", "age_ranges!: Vec<(AgeRangeId,)>", "additional_resource!: Vec<(AddId, String, TypeId, Value)>"
+            order by last_code_created_at desc
+        "#,
+        user_id.0
+    )
+    .fetch_all(db)
+    .await?
+    .into_iter()
+    .map(|row| {
+        async move {
+            let codes = sqlx::query!(
+                //language=SQL
+                r#"
+                    select code as "code!: i32",
+                        jig_id as "jig_id: JigId",
+                        direction as "direction: TextDirection",
+                        scoring,
+                        drag_assist,
+                        name as "name?",
+                        created_at as "created_at: DateTime<Utc>",
+                        expires_at as "expires_at: DateTime<Utc>"
+                    from jig_code
+                    where jig_id = $1
+                    order by created_at desc
+                "#,
+                row.jig_id.0
+            )
+            .fetch_all(db)
+            .await?
+            .into_iter()
+            .map(|row| {
+                JigCodeResponse {
+                    index: JigCode(row.code),
+                    jig_id: row.jig_id,
+                    name: row.name,
+                    settings: JigPlayerSettings {
+                        direction: row.direction,
+                        scoring: row.scoring,
+                        drag_assist: row.drag_assist,
+                    },
+                    created_at: row.created_at,
+                    expires_at: row.expires_at,
+                }
+            }).collect();
+
+            let jig = JigResponse {
+                id: row.jig_id,
+                published_at: row.published_at,
+                creator_id: row.creator_id,
+                author_id: row.author_id,
+                author_name: row.author_name,
+                likes: row.liked_count,
+                plays: row.play_count,
+                live_up_to_date: row.live_up_to_date,
+                is_liked: row.is_liked,
+                jig_data: JigData {
+                    created_at: row.created_at,
+                    draft_or_live: DraftOrLive::Live,
+                    display_name: row.display_name,
+                    language: row.language,
+                    modules: row
+                        .modules
+                        .into_iter()
+                        .map(|(id, stable_id, kind, is_complete)| LiteModule {
+                            id,
+                            stable_id,
+                            kind,
+                            is_complete,
+                        })
+                        .collect(),
+                    categories: row.categories.into_iter().map(|(it,)| it).collect(),
+                    last_edited: row.updated_at,
+                    description: row.description,
+                    default_player_settings: JigPlayerSettings {
+                        direction: row.direction,
+                        scoring: row.scoring,
+                        drag_assist: row.drag_assist,
+                    },
+                    theme: row.theme,
+                    age_ranges: row.age_ranges.into_iter().map(|(it,)| it).collect(),
+                    affiliations: row.affiliations.into_iter().map(|(it,)| it).collect(),
+                    additional_resources: row
+                        .additional_resource
+                        .into_iter()
+                        .map(
+                            |(id, display_name, resource_type_id, resource_content)| AdditionalResource {
+                                id,
+                                display_name,
+                                resource_type_id,
+                                resource_content: serde_json::from_value::<ResourceContent>(
+                                    resource_content,
+                                )
+                                .unwrap(),
+                            },
+                        )
+                        .collect(),
+                    audio_background: row.audio_background,
+                    audio_effects: AudioEffects {
+                        feedback_positive: row
+                            .audio_feedback_positive
+                            .into_iter()
+                            .map(|(it,)| it)
+                            .collect(),
+                        feedback_negative: row
+                            .audio_feedback_negative
+                            .into_iter()
+                            .map(|(it,)| it)
+                            .collect(),
+                    },
+                    privacy_level: row.privacy_level,
+                    locked: row.locked,
+                    other_keywords: row.other_keywords,
+                    translated_keywords: row.translated_keywords,
+                    translated_description: row.translated_description.0,
+                },
+                admin_data: JigAdminData {
+                    rating: row.rating,
+                    blocked: row.blocked,
+                    curated: row.curated,
+                    premium: row.premium,
+                },
+            };
+
+            Ok(JigWithCodes {
+                jig,
+                codes,
+            })
+        }
+    });
+    let jigs = join_all(jigs)
+        .await
+        .into_iter()
+        .collect::<Result<_, sqlx::Error>>()?;
+    Ok(jigs)
 }
 
 pub async fn list_code_sessions(

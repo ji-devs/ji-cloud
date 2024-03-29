@@ -4,7 +4,9 @@ use actix_web::{
 };
 use shared::{
     api::{endpoints::jig::codes, ApiEndpoint},
-    domain::jig::codes::{JigCode, JigCodeListResponse, JigCodeSessionsListResponse},
+    domain::jig::codes::{
+        JigCode, JigCodeListResponse, JigCodeSessionsListResponse, JigsWithCodesResponse,
+    },
 };
 use sqlx::PgPool;
 
@@ -71,6 +73,18 @@ pub async fn list_user_codes(
     let codes = db::jig::codes::list_user_codes(&*db, user_id, query).await?;
 
     Ok(Json(JigCodeListResponse { codes }))
+}
+
+/// Get all jig codes for user.
+pub async fn jigs_with_codes(
+    db: Data<PgPool>,
+    claims: TokenUser,
+) -> Result<Json<<codes::JigsWithCodes as ApiEndpoint>::Res>, error::JigCode> {
+    let user_id = claims.user_id();
+
+    let jigs = db::jig::codes::jigs_with_codes(&*db, user_id).await?;
+
+    Ok(Json(JigsWithCodesResponse { jigs }))
 }
 
 /// Fetch all sessions for a code.

@@ -6,6 +6,7 @@ use http::StatusCode;
 use macros::test_service;
 use shared::domain::jig::codes::{
     instance::PlayerSessionInstanceResponse, JigCodeListResponse, JigCodeResponse,
+    JigsWithCodesResponse,
 };
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
@@ -99,6 +100,27 @@ async fn create_and_list(port: u16) -> anyhow::Result<()> {
     let body: JigCodeListResponse = resp.json().await?;
 
     insta::assert_json_snapshot!(format!("{}-3",name), body, { ".**.index" => "[index]", ".**.created_at" => "[timestamp]", ".**.expires_at" => "[timestamp]" });
+
+    let resp = client
+        .get(&format!("http://0.0.0.0:{}/v1/jig/codes/jig-codes", port))
+        .json(&serde_json::json!({}))
+        .login()
+        .send()
+        .await?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    let body: JigsWithCodesResponse = resp.json().await?;
+
+    insta::assert_json_snapshot!(format!("{}-4",name), body, {
+        ".**.index" => "[index]",
+        ".**.createdAt" => "[timestamp]",
+        ".**.expiresAt" => "[timestamp]",
+        ".**.lastEdited" => "[timestamp]",
+        ".**.audioEffects" => "",
+        ".**.created_at" => "[timestamp]",
+        ".**.expires_at" => "[timestamp]"
+    });
 
     Ok(())
 }
