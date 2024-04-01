@@ -1,6 +1,6 @@
 //! Types for Jig short codes for sharing
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use chrono::{DateTime, Utc};
 use macros::make_path_parts;
@@ -146,7 +146,11 @@ pub struct JigCodeSessionResponse {
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
 pub struct JigPlaySession {
     /// modules
+    #[serde(default)]
     pub modules: Vec<JigPlaySessionModule>,
+    /// Modules just visited
+    #[serde(default)]
+    pub visited: HashSet<StableModuleId>,
 }
 
 impl JigPlaySessionModuleGetPointsEarned for JigPlaySession {
