@@ -251,6 +251,7 @@ impl CodeSessions {
             .children(sessions.into_iter().map(clone!(state => move |session| {
                 let open = Mutable::new(false);
                 let total_points_earned = session.info.as_ref().map(|i| i.get_points_earned());
+                let visited = session.info.as_ref().map(|i| i.visited.clone()).unwrap_or_default();
                 let updated_since = match (&jig.jig.published_at, &session.finished_at) {
                     (Some(jig_published_at), Some(session_finished_at)) if jig_published_at > session_finished_at => {
                         true
@@ -308,6 +309,13 @@ impl CodeSessions {
                                                 state.render_session(&module, &session.clone(), updated_since)
                                             })
                                         })))
+                                } else if visited.contains(&stable_module_id) {
+                                    dom
+                                        .prop("title", "Visited")
+                                        .child(html!("fa-icon", {
+                                            .class("visited-icon")
+                                            .prop("icon", "fa-solid fa-check")
+                                        }))
                                 } else {
                                     dom
                                 }

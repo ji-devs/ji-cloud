@@ -111,6 +111,9 @@ header .export-and-qr {
     text-align: center;
     box-sizing: border-box;
 }
+.cell .visited-icon {
+    color: var(--main-blue);
+}
 .session .open-icon {
     display: inline-block;
     cursor: pointer;
